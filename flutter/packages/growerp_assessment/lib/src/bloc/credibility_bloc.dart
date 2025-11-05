@@ -49,14 +49,14 @@ class CredibilityBloc extends Bloc<CredibilityEvent, CredibilityState> {
       final restClient = RestClient(await buildDioClient());
 
       final newCredibilityElement = await restClient.createCredibilityInfo(
-        pageId: event.pageId,
+        landingPageId: event.landingPageId,
         creatorBio: event.infoTitle, // Using title as bio for now
         backgroundText: event.infoDescription,
         creatorImageUrl: event.infoIconName, // Using icon as image URL
       );
 
       final updatedElements =
-          List<CredibilityElement>.from(state.credibilityElements)
+          List<CredibilityInfo>.from(state.credibilityElements)
             ..add(newCredibilityElement);
 
       emit(state.copyWith(
@@ -81,17 +81,17 @@ class CredibilityBloc extends Bloc<CredibilityEvent, CredibilityState> {
     try {
       final restClient = RestClient(await buildDioClient());
 
-      final updatedCredibilityElement = await restClient.updateCredibilityInfo(
-        pageId: event.pageId, // Add pageId parameter
-        credibilityId: event.infoId,
-        creatorBio: event.infoTitle, // Using title as bio for now
+      final updatedCredibilityInfo = await restClient.updateCredibilityInfo(
+        landingPageId: event.landingPageId,
+        credibilityInfoId: event.credibilityInfoId,
+        creatorBio: event.infoTitle,
         backgroundText: event.infoDescription,
-        creatorImageUrl: event.infoIconName, // Using icon as image URL
+        creatorImageUrl: event.infoIconName,
       );
 
       final updatedElements = state.credibilityElements.map((element) {
-        if (element.credibilityId == event.infoId) {
-          return updatedCredibilityElement;
+        if ((element.credibilityInfoId ?? '') == event.credibilityInfoId) {
+          return updatedCredibilityInfo;
         }
         return element;
       }).toList();
@@ -119,13 +119,14 @@ class CredibilityBloc extends Bloc<CredibilityEvent, CredibilityState> {
       final restClient = RestClient(await buildDioClient());
 
       await restClient.deleteCredibilityInfo(
-        pageId: event.pageId,
-        credibilityId: event.infoId,
+        landingPageId: event.landingPageId,
+        credibilityInfoId: event.credibilityInfoId,
       );
 
-      final updatedElements = state.credibilityElements
-          .where((element) => element.credibilityId != event.infoId)
-          .toList();
+      final updatedElements = state.credibilityElements.where((element) {
+        final elementId = element.credibilityInfoId ?? '';
+        return elementId != event.credibilityInfoId;
+      }).toList();
 
       emit(state.copyWith(
         status: CredibilityStatus.success,
@@ -158,7 +159,8 @@ class CredibilityBloc extends Bloc<CredibilityEvent, CredibilityState> {
       }
 
       final restClient = RestClient(await buildDioClient());
-      final credibilityId = state.credibilityElements.first.credibilityId ?? '';
+      final credibilityId =
+          state.credibilityElements.first.credibilityInfoId ?? '';
 
       final newStatistic = await restClient.addCredibilityStatistic(
         credibilityId: credibilityId,
@@ -205,11 +207,12 @@ class CredibilityBloc extends Bloc<CredibilityEvent, CredibilityState> {
       final restClient = RestClient(await buildDioClient());
 
       await restClient.removeCredibilityStatistic(
-        statisticId: event.statisticId,
+        credibilityStatisticId: event.credibilityStatisticId,
       );
 
       final updatedStatistics = state.credibilityStatistics
-          .where((stat) => stat['statisticId'] != event.statisticId)
+          .where((stat) =>
+              stat['credibilityStatisticId'] != event.credibilityStatisticId)
           .toList();
 
       emit(state.copyWith(
@@ -230,11 +233,11 @@ class CredibilityBloc extends Bloc<CredibilityEvent, CredibilityState> {
     Emitter<CredibilityState> emit,
   ) async {
     // Reorder credibility elements based on new order
-    final reorderedElements = <CredibilityElement>[];
+    final reorderedElements = <CredibilityInfo>[];
 
     for (final credibilityId in event.newInfoOrder) {
       final element = state.credibilityElements.firstWhere(
-        (element) => element.credibilityId == credibilityId,
+        (element) => (element.credibilityInfoId ?? '') == credibilityId,
       );
       reorderedElements.add(element);
     }

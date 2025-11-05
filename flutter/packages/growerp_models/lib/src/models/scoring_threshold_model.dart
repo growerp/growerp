@@ -6,7 +6,7 @@ part 'scoring_threshold_model.g.dart';
 @JsonSerializable()
 class ScoringThreshold {
   /// System-wide unique identifier
-  final String? thresholdId;
+  final String? scoringThresholdId;
 
   /// Tenant-unique identifier
   final String? pseudoId;
@@ -30,7 +30,7 @@ class ScoringThreshold {
   final DateTime? createdDate;
 
   const ScoringThreshold({
-    this.thresholdId,
+    this.scoringThresholdId,
     this.pseudoId,
     this.assessmentId,
     this.minScore,
@@ -41,7 +41,7 @@ class ScoringThreshold {
   });
 
   ScoringThreshold copyWith({
-    String? thresholdId,
+    String? scoringThresholdId,
     String? pseudoId,
     String? assessmentId,
     double? minScore,
@@ -51,7 +51,7 @@ class ScoringThreshold {
     DateTime? createdDate,
   }) {
     return ScoringThreshold(
-      thresholdId: thresholdId ?? this.thresholdId,
+      scoringThresholdId: scoringThresholdId ?? this.scoringThresholdId,
       pseudoId: pseudoId ?? this.pseudoId,
       assessmentId: assessmentId ?? this.assessmentId,
       minScore: minScore ?? this.minScore,
@@ -68,17 +68,17 @@ class ScoringThreshold {
 
   @override
   String toString() =>
-      'ScoringThreshold(id: $thresholdId, range: $minScore-$maxScore, status: $leadStatus)';
+      'ScoringThreshold(id: $scoringThresholdId, range: $minScore-$maxScore, status: $leadStatus)';
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is ScoringThreshold &&
           runtimeType == other.runtimeType &&
-          thresholdId == other.thresholdId;
+          scoringThresholdId == other.scoringThresholdId;
 
   @override
-  int get hashCode => thresholdId.hashCode;
+  int get hashCode => scoringThresholdId.hashCode;
 }
 
 /// List wrapper for ScoringThreshold objects

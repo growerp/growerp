@@ -24,7 +24,9 @@ import 'package:http/http.dart' as http;
 /// [classificationId] - The application classification ID
 /// [version] - The application version
 Future<void> getBackendUrlOverride(
-    String classificationId, String version) async {
+  String classificationId,
+  String version,
+) async {
   late http.Response response;
   late String backendBaseUrl, backendUrl, databaseUrl, chatUrl, secure;
   try {
@@ -37,8 +39,9 @@ Future<void> getBackendUrlOverride(
         // ignore: empty_catches
       } catch (e) {}
 
-      backendBaseUrl =
-          android == true ? 'http://10.0.2.2:8080' : 'http://localhost:8080';
+      backendBaseUrl = android == true
+          ? 'http://10.0.2.2:8080'
+          : 'http://localhost:8080';
       databaseUrl = 'databaseUrlDebug';
       chatUrl = 'chatUrlDebug';
       secure = '';
@@ -48,15 +51,21 @@ Future<void> getBackendUrlOverride(
       chatUrl = 'chatUrl';
       secure = 's';
     }
-    backendUrl = '$backendBaseUrl/rest/s1/growerp/100/BackendUrl?version='
+    backendUrl =
+        '$backendBaseUrl/rest/s1/growerp/100/BackendUrl?version='
         '$version&applicationId=$classificationId';
     response = await http.get(Uri.parse(backendUrl));
     String? appBackendUrl = jsonDecode(response.body)['backendUrl'];
     if (response.statusCode == 200 && appBackendUrl != null) {
-      GlobalConfiguration().updateValue(databaseUrl,
-          "http$secure://${jsonDecode(response.body)['backendUrl']}");
+      if (appBackendUrl.contains('localhost')) secure = '';
       GlobalConfiguration().updateValue(
-          chatUrl, "ws$secure://${jsonDecode(response.body)['backendUrl']}");
+        databaseUrl,
+        "http$secure://${jsonDecode(response.body)['backendUrl']}",
+      );
+      GlobalConfiguration().updateValue(
+        chatUrl,
+        "ws$secure://${jsonDecode(response.body)['backendUrl']}",
+      );
       GlobalConfiguration().updateValue("test", true);
     }
   } catch (error) {

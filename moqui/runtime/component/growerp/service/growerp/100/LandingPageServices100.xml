@@ -17,52 +17,50 @@ Service definitions for landing page, sections, credibility, and CTA management
   <service verb="get" noun="LandingPage" authenticate="anonymous-view">
     <description>Get landing page by ID (system-wide) or pseudoId (tenant-unique). Public access for display.</description>
     <in-parameters>
-      <parameter name="pageId" type="String" required="true">
+      <parameter name="landingPageId">
+        <description>landing page Id</description>
+      </parameter>
+      <parameter name="pseudoId">
         <description>landing page pseudoId</description>
       </parameter>
-      <parameter name="ownerPartyId" type="String"><!-- currently productstoreId is received instead
-        of ownerPartyId-->
-        <description>Optional owner party ID for public access without authentication</description>
+      <parameter name="ownerPartyId">
+        <description>Optional owner party ID required when providing pseudoId</description>
       </parameter>
     </in-parameters>
     <out-parameters>
       <parameter name="landingPage" type="Map">
-        <description>Landing page object with all fields, sections, credibility, CTA</description>
-        <parameter name="pageId" type="String" />
-        <parameter name="pseudoId" type="String" />
-        <parameter name="title" type="String" />
-        <parameter name="headline" type="String" />
-        <parameter name="description" type="String" />
-        <parameter name="status" type="String" />
+        <description>Landing page object with all fields, sections, credibility</description>
+        <parameter name="landingPageId" />
+        <parameter name="pseudoId" />
+        <parameter name="title" />
+        <parameter name="headline" />
+        <parameter name="description" />
+        <parameter name="status" />
+        <parameter name="ctaActionType" />
+        <parameter name="ctaAssessmentId" />
+        <parameter name="ctaButtonLink" />
         <parameter name="createdDate" type="Timestamp" />
         <parameter name="lastModifiedDate" type="Timestamp" />
         <parameter name="sections" type="List">
           <description>List of page sections</description>
-          <parameter name="sectionId" type="String" />
-          <parameter name="sectionTitle" type="String" />
+          <parameter name="pageSectionId" />
+          <parameter name="sectionTitle" />
           <parameter name="sectionSequence" type="Integer" />
-          <parameter name="sectionText" type="String" />
+          <parameter name="sectionText" />
         </parameter>
         <parameter name="credibility" type="Map">
           <description>Credibility/bio section</description>
-          <parameter name="credibilityId" type="String" />
-          <parameter name="creatorBio" type="String" />
-          <parameter name="backgroundText" type="String" />
-          <parameter name="creatorImageUrl" type="String" />
-        </parameter>
-        <parameter name="cta" type="Map">
-          <description>Primary call-to-action</description>
-          <parameter name="ctaId" type="String" />
-          <parameter name="buttonText" type="String" />
-          <parameter name="estimatedTime" type="String" />
-          <parameter name="cost" type="String" />
+          <parameter name="credibilityInfoId" />
+          <parameter name="creatorBio" />
+          <parameter name="backgroundText" />
+          <parameter name="creatorImageUrl" />
         </parameter>
       </parameter>
     </out-parameters>
     <actions>
       <log
-        message="======1111===Getting landing page for pageId: ${pageId}, ownerPartyId: ${ownerPartyId}" />
-      <if condition="!ownerPartyId">
+        message="======1111===Getting landing page for landingPageId: ${landingPageId}, pseudo: $pseudoId,ownerPartyId: ${ownerPartyId}" />
+      <if condition="!ownerPartyId &amp;&amp; pseudoId">
         <service-call
           name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
           out-map="context" />
@@ -71,49 +69,46 @@ Service definitions for landing page, sections, credibility, and CTA management
       <if condition="!ownerPartyId">
         <return error="true" message="Unable to resolve owner party for landing page request" />
       </if>
-      <!-- Original database logic for other pages -->
-      <log message="=====1=looking for pseudoId $pageId and owner: $ownerPartyId" />
+      <!-- Query for landing page by ID (preferring pseudoId for tenant lookups) -->
+      <log
+        message="Looking for landingPageId: $landingPageId, pseudoId: $pseudoId and owner: $ownerPartyId" />
       <entity-find entity-name="growerp.landing.LandingPage" list="pageList">
-        <econdition field-name="pseudoId" from="pageId" />
-        <econdition field-name="ownerPartyId" from="ownerPartyId" />
+        <!-- Use pseudoId if provided (tenant-unique), otherwise use system-wide landingPageId -->
+        <econdition field-name="pseudoId" from="pseudoId" ignore-if-empty="true" />
+        <econdition field-name="landingPageId" from="landingPageId" ignore-if-empty="true" />
+        <econdition field-name="ownerPartyId" from="ownerPartyId" ignore-if-empty="true" />
       </entity-find>
 
       <if condition="!pageList">
-        <return error="true" message="Landing page not found: ${pageId}" />
+        <return error="true"
+          message="Landing page not found: pseudoId=$pseudoId, landingPageId=$landingPageId, ownerPartyId=$ownerPartyId" />
       </if>
 
       <set field="page" from="pageList[0]" />
 
       <!-- Get sections for this page -->
       <entity-find entity-name="growerp.landing.PageSection" list="sections">
-        <econdition field-name="pageId" from="page.pageId" />
+        <econdition field-name="landingPageId" from="page.landingPageId" />
         <order-by field-name="sectionSequence" />
       </entity-find>
-      <log level="info" message="Found ${sections?.size() ?: 0} sections for page ${page.pageId}" />
+      <log level="info"
+        message="Found ${sections?.size() ?: 0} sections for page ${page.landingPageId}" />
       <iterate list="sections" entry="section">
         <log level="info"
-          message="  - Section: ${section.sectionTitle} (${section.sectionId}, seq=${section.sectionSequence})" />
+          message="  - Section: ${section.sectionTitle} (${section.pageSectionId}, seq=${section.sectionSequence})" />
       </iterate>
 
       <!-- Get credibility info -->
       <entity-find entity-name="growerp.landing.CredibilityInfo" list="credibilityList">
-        <econdition field-name="pageId" from="page.pageId" />
+        <econdition field-name="landingPageId" from="page.landingPageId" />
       </entity-find>
       <set field="credibility" from="credibilityList ? credibilityList[0] : [:]" />
-
-      <!-- Get primary CTA -->
-      <entity-find entity-name="growerp.landing.PrimaryCTA" list="ctaList">
-        <econdition field-name="pageId" from="page.pageId" />
-      </entity-find>
-      <set field="cta"
-        from="ctaList ? ctaList[0] : [buttonText: 'Get Started', estimatedTime: '5 min', cost: 'Free']" />
 
       <!-- Build unified landingPage response with page data + nested dependents -->
       <script>
         Map pageMap = page.getMap()
         pageMap.put('sections', sections ?: [])
         pageMap.put('credibility', credibility ?: [:])
-        pageMap.put('cta', cta ?: [:])
         context.landingPage = pageMap
       </script>
     </actions>
@@ -123,7 +118,9 @@ Service definitions for landing page, sections, credibility, and CTA management
   <service verb="list" noun="LandingPages" authenticate="true">
     <description>List all landing pages for tenant with pagination and optional filtering. Results automatically filtered by authenticated user's company.</description>
     <in-parameters>
-      <parameter name="status" type="String">
+      <parameter name="landingPageId" />
+      <parameter name="pseudoId" />
+      <parameter name="status">
         <description>Optional status filter: ACTIVE, INACTIVE, DRAFT</description>
       </parameter>
       <parameter name="start" type="Integer" default-value="0">
@@ -132,22 +129,21 @@ Service definitions for landing page, sections, credibility, and CTA management
       <parameter name="limit" type="Integer" default-value="20">
         <description>Results per page</description>
       </parameter>
-      <parameter name="search" type="String">
+      <parameter name="search">
         <description>Optional search string for title/headline</description>
       </parameter>
     </in-parameters>
     <out-parameters>
       <parameter name="landingPages" type="List">
         <description>List of landing page objects</description>
-        <parameter name="pageId" type="String" />
-        <parameter name="pseudoId" type="String" />
-        <parameter name="title" type="String" />
-        <parameter name="hookType" type="String" />
-        <parameter name="headline" type="String" />
-        <parameter name="subheading" type="String" />
-        <parameter name="assessmentId" type="String" />
-        <parameter name="privacyPolicyUrl" type="String" />
-        <parameter name="status" type="String" />
+        <parameter name="landingPageId" />
+        <parameter name="pseudoId" />
+        <parameter name="title" />
+        <parameter name="hookType" />
+        <parameter name="headline" />
+        <parameter name="subheading" />
+        <parameter name="privacyPolicyUrl" />
+        <parameter name="status" />
         <parameter name="createdDate" type="Timestamp" />
         <parameter name="lastUpdated" type="Timestamp" />
       </parameter>
@@ -175,6 +171,9 @@ Service definitions for landing page, sections, credibility, and CTA management
         <econdition field-name="ownerPartyId" from="ownerPartyId" />
         <econdition field-name="status" from="status" ignore-if-empty="true" />
         <econdition field-name="title" operator="like" from="search" ignore-if-empty="true" />
+        <econdition field-name="landingPageId" ignore-if-empty="true" />
+        <econdition field-name="pseudoId" ignore-if-empty="true" />
+        <econdition field-name="search" ignore-if-empty="true" />
         <order-by field-name="-lastModifiedDate" />
         <limit-range start="start" size="limit" />
       </entity-find>
@@ -191,13 +190,12 @@ Service definitions for landing page, sections, credibility, and CTA management
       <iterate list="pagesList" entry="page">
         <set field="pageMap"
           from="[
-          pageId: page.pageId,
+          landingPageId: page.landingPageId,
           pseudoId: page.pseudoId,
           title: page.title,
           hookType: page.hookType,
           headline: page.headline,
           subheading: page.subheading,
-          assessmentId: page.assessmentId,
           privacyPolicyUrl: page.privacyPolicyUrl,
           status: page.status,
           createdDate: page.createdDate,
@@ -218,30 +216,36 @@ Service definitions for landing page, sections, credibility, and CTA management
       <parameter name="title" type="String" required="true">
         <description>Landing page title</description>
       </parameter>
-      <parameter name="hookType" type="String">
+      <parameter name="hookType">
         <description>Hook type: frustration, results, custom</description>
       </parameter>
-      <parameter name="headline" type="String">
+      <parameter name="headline">
         <description>Main headline for hero section</description>
       </parameter>
-      <parameter name="subheading" type="String">
+      <parameter name="subheading">
         <description>Optional subheading</description>
       </parameter>
-      <parameter name="assessmentId" type="String">
-        <description>Assessment ID to attach to this page</description>
-      </parameter>
-      <parameter name="privacyPolicyUrl" type="String">
+      <parameter name="privacyPolicyUrl">
         <description>Optional privacy policy link</description>
+      </parameter>
+      <parameter name="ctaActionType">
+        <description>CTA action type: assessment or url</description>
+      </parameter>
+      <parameter name="ctaAssessmentId">
+        <description>Assessment ID for CTA (when actionType is assessment)</description>
+      </parameter>
+      <parameter name="ctaButtonLink">
+        <description>Button URL for CTA (when actionType is url)</description>
       </parameter>
       <parameter name="status" type="String" default-value="DRAFT">
         <description>Status: ACTIVE, INACTIVE, DRAFT</description>
       </parameter>
     </in-parameters>
     <out-parameters>
-      <parameter name="pageId" type="String">
+      <parameter name="landingPageId">
         <description>Created landing page system-wide unique ID</description>
       </parameter>
-      <parameter name="pseudoId" type="String">
+      <parameter name="pseudoId">
         <description>Created landing page tenant-unique ID (user-facing)</description>
       </parameter>
     </out-parameters>
@@ -255,62 +259,66 @@ Service definitions for landing page, sections, credibility, and CTA management
         in-map="[ownerPartyId: ownerPartyId, seqName: 'landingPage']" out-map="context" />
       <set field="pseudoId" from="seqNum" />
 
-      <!-- Generate unique system-wide pageId -->
-      <set field="pageId" from="ec.entity.sequencedIdPrimary('LandingPage', null, null)" />
-
       <!-- Create landing page record -->
       <service-call name="create#LandingPage"
         in-map="[
-        pageId: pageId,
         pseudoId: pseudoId,
         ownerPartyId: ownerPartyId,
         title: title,
         hookType: hookType ?: 'custom',
         headline: headline ?: title,
         subheading: subheading,
-        assessmentId: assessmentId,
         privacyPolicyUrl: privacyPolicyUrl,
+        ctaActionType: ctaActionType,
+        ctaAssessmentId: ctaAssessmentId,
+        ctaButtonLink: ctaButtonLink,
         status: status,
         createdDate: ec.user.nowTimestamp,
         lastModifiedDate: ec.user.nowTimestamp
       ]" />
 
       <log level="info"
-        message="Created landing page: ${pageId} (${pseudoId}) for owner: ${ownerPartyId}" />
+        message="Created landing page: ${landingPageId} (${pseudoId}) for owner: ${ownerPartyId}" />
     </actions>
   </service>
 
   <!-- updateLandingPage: Update existing landing page -->
   <service verb="update" noun="LandingPage" authenticate="true">
-    <description>Update landing page (title, hook, headline, subheading, assessment, status)</description>
+    <description>Update landing page (title, hook, headline, subheading, assessment, CTA fields, status)</description>
     <in-parameters>
-      <parameter name="pageId" type="String" required="true">
+      <parameter name="landingPageId" type="String" required="true">
         <description>Landing page ID to update</description>
       </parameter>
-      <parameter name="title" type="String">
+      <parameter name="title">
         <description>New landing page title</description>
       </parameter>
-      <parameter name="hookType" type="String">
+      <parameter name="hookType">
         <description>New hook type: frustration, results, custom</description>
       </parameter>
-      <parameter name="headline" type="String">
+      <parameter name="headline">
         <description>New main headline</description>
       </parameter>
-      <parameter name="subheading" type="String">
+      <parameter name="subheading">
         <description>New subheading</description>
       </parameter>
-      <parameter name="assessmentId" type="String">
-        <description>New assessment ID</description>
-      </parameter>
-      <parameter name="privacyPolicyUrl" type="String">
+      <parameter name="privacyPolicyUrl">
         <description>New privacy policy URL</description>
       </parameter>
-      <parameter name="status" type="String">
+      <parameter name="ctaActionType">
+        <description>CTA action type: assessment or url</description>
+      </parameter>
+      <parameter name="ctaAssessmentId">
+        <description>Assessment ID for CTA (when actionType is assessment)</description>
+      </parameter>
+      <parameter name="ctaButtonLink">
+        <description>Button URL for CTA (when actionType is url)</description>
+      </parameter>
+      <parameter name="status">
         <description>New status: ACTIVE, INACTIVE, DRAFT</description>
       </parameter>
     </in-parameters>
     <out-parameters>
-      <parameter name="pageId" type="String">
+      <parameter name="landingPageId">
         <description>Updated landing page ID</description>
       </parameter>
     </out-parameters>
@@ -321,7 +329,7 @@ Service definitions for landing page, sections, credibility, and CTA management
 
       <!-- Verify landing page exists and belongs to owner -->
       <entity-find-one entity-name="LandingPage" value-field="existingPage">
-        <field-map field-name="pageId" from="pageId" />
+        <field-map field-name="landingPageId" from="landingPageId" />
         <field-map field-name="ownerPartyId" from="ownerPartyId" />
       </entity-find-one>
 
@@ -332,26 +340,28 @@ Service definitions for landing page, sections, credibility, and CTA management
       <!-- Update landing page with provided fields -->
       <service-call name="update#LandingPage"
         in-map="[
-        pageId: pageId,
+        landingPageId: landingPageId,
         title: title ?: existingPage.title,
         hookType: hookType ?: existingPage.hookType,
         headline: headline ?: existingPage.headline,
         subheading: subheading,
-        assessmentId: assessmentId ?: existingPage.assessmentId,
         privacyPolicyUrl: privacyPolicyUrl,
+        ctaActionType: ctaActionType,
+        ctaAssessmentId: ctaAssessmentId,
+        ctaButtonLink: ctaButtonLink,
         status: status ?: existingPage.status,
         lastModifiedDate: ec.user.nowTimestamp
       ]" />
 
-      <log level="info" message="Updated landing page: ${pageId} for owner: ${ownerPartyId}" />
+      <log level="info" message="Updated landing page: ${landingPageId} for owner: ${ownerPartyId}" />
     </actions>
   </service>
 
   <!-- deleteLandingPage: Delete landing page and cascade -->
   <service verb="delete" noun="LandingPage" authenticate="true">
-    <description>Delete landing page and all related sections, credibility, CTA, and statistics. Owner party ID is automatically determined from authenticated user context.</description>
+    <description>Delete landing page and all related sections, credibility, and statistics. Owner party ID is automatically determined from authenticated user context.</description>
     <in-parameters>
-      <parameter name="pageId" type="String" required="true">
+      <parameter name="landingPageId" type="String" required="true">
         <description>Landing page ID to delete</description>
       </parameter>
     </in-parameters>
@@ -367,7 +377,7 @@ Service definitions for landing page, sections, credibility, and CTA management
 
       <!-- Verify landing page exists and belongs to owner -->
       <entity-find-one entity-name="LandingPage" value-field="existingPage">
-        <field-map field-name="pageId" from="pageId" />
+        <field-map field-name="landingPageId" from="landingPageId" />
         <field-map field-name="ownerPartyId" from="ownerPartyId" />
       </entity-find-one>
 
@@ -380,47 +390,39 @@ Service definitions for landing page, sections, credibility, and CTA management
       <!-- Delete related records in cascade order -->
       <!-- 1. Delete credibility statistics -->
       <entity-find entity-name="CredibilityStatistic" list="statsToDelete">
-        <econdition field-name="pageId" from="pageId" />
+        <econdition field-name="landingPageId" from="landingPageId" />
       </entity-find>
       <iterate list="statsToDelete" entry="stat">
-        <service-call name="delete#CredibilityStatistic" in-map="[statisticId: stat.statisticId]" />
+        <service-call name="delete#CredibilityStatistic"
+          in-map="[credibilityStatisticId: stat.credibilityStatisticId]" />
         <set field="deletedCount" from="deletedCount + 1" />
       </iterate>
 
       <!-- 2. Delete credibility info -->
       <entity-find entity-name="CredibilityInfo" list="credibilityToDelete">
-        <econdition field-name="pageId" from="pageId" />
+        <econdition field-name="landingPageId" from="landingPageId" />
       </entity-find>
       <iterate list="credibilityToDelete" entry="credibility">
         <service-call name="delete#CredibilityInfo"
-          in-map="[credibilityId: credibility.credibilityId]" />
+          in-map="[credibilityInfoId: credibility.credibilityInfoId]" />
         <set field="deletedCount" from="deletedCount + 1" />
       </iterate>
 
       <!-- 3. Delete page sections -->
       <entity-find entity-name="PageSection" list="sectionsToDelete">
-        <econdition field-name="pageId" from="pageId" />
+        <econdition field-name="landingPageId" from="landingPageId" />
       </entity-find>
       <iterate list="sectionsToDelete" entry="section">
-        <service-call name="delete#PageSection" in-map="[sectionId: section.sectionId]" />
+        <service-call name="delete#PageSection" in-map="[pageSectionId: section.pageSectionId]" />
         <set field="deletedCount" from="deletedCount + 1" />
       </iterate>
 
-      <!-- 4. Delete primary CTA -->
-      <entity-find entity-name="PrimaryCTA" list="ctaToDelete">
-        <econdition field-name="pageId" from="pageId" />
-      </entity-find>
-      <iterate list="ctaToDelete" entry="cta">
-        <service-call name="delete#PrimaryCTA" in-map="[ctaId: cta.ctaId]" />
-        <set field="deletedCount" from="deletedCount + 1" />
-      </iterate>
-
-      <!-- 5. Finally delete the landing page itself -->
-      <service-call name="delete#LandingPage" in-map="[pageId: pageId]" />
+      <!-- 4. Finally delete the landing page itself -->
+      <service-call name="delete#LandingPage" in-map="[landingPageId: landingPageId]" />
       <set field="deletedCount" from="deletedCount + 1" />
 
       <log level="info"
-        message="Deleted landing page: ${pageId} and ${deletedCount} related records for owner: ${ownerPartyId}" />
+        message="Deleted landing page: ${landingPageId} and ${deletedCount} related records for owner: ${ownerPartyId}" />
     </actions>
   </service>
 
@@ -428,18 +430,18 @@ Service definitions for landing page, sections, credibility, and CTA management
   <service verb="publish" noun="LandingPage" authenticate="true">
     <description>Publish landing page to make it publicly accessible via pseudoId URL. Owner party ID is automatically determined from authenticated user context.</description>
     <in-parameters>
-      <parameter name="pageId" type="String" required="true">
+      <parameter name="landingPageId" type="String" required="true">
         <description>Landing page ID to publish</description>
       </parameter>
     </in-parameters>
     <out-parameters>
-      <parameter name="pageId" type="String">
+      <parameter name="landingPageId">
         <description>Published landing page ID</description>
       </parameter>
-      <parameter name="pseudoId" type="String">
+      <parameter name="pseudoId">
         <description>Public URL pseudoId for this page</description>
       </parameter>
-      <parameter name="publicUrl" type="String">
+      <parameter name="publicUrl">
         <description>Full public URL where page is accessible</description>
       </parameter>
     </out-parameters>
@@ -450,7 +452,7 @@ Service definitions for landing page, sections, credibility, and CTA management
 
       <!-- Verify landing page exists and belongs to owner -->
       <entity-find-one entity-name="LandingPage" value-field="landingPage">
-        <field-map field-name="pageId" from="pageId" />
+        <field-map field-name="landingPageId" from="landingPageId" />
         <field-map field-name="ownerPartyId" from="ownerPartyId" />
       </entity-find-one>
 
@@ -461,7 +463,7 @@ Service definitions for landing page, sections, credibility, and CTA management
       <!-- Update status to ACTIVE (published) -->
       <service-call name="update#LandingPage"
         in-map="[
-        pageId: pageId,
+        landingPageId: landingPageId,
         status: 'ACTIVE',
         lastModifiedDate: ec.user.nowTimestamp
       ]" />
@@ -471,7 +473,7 @@ Service definitions for landing page, sections, credibility, and CTA management
       <set field="publicUrl" from="'https://app.growerp.com/landing/' + pseudoId" />
 
       <log level="info"
-        message="Published landing page: ${pageId} (${pseudoId}) for owner: ${ownerPartyId}" />
+        message="Published landing page: ${landingPageId} (${pseudoId}) for owner: ${ownerPartyId}" />
     </actions>
   </service>
 
@@ -483,16 +485,16 @@ Service definitions for landing page, sections, credibility, and CTA management
   <service verb="create" noun="PageSection" authenticate="true">
     <description>Create new section on landing page. Owner party ID is automatically determined from authenticated user context.</description>
     <in-parameters>
-      <parameter name="pageId" type="String" required="true">
+      <parameter name="landingPageId" type="String" required="true">
         <description>Landing page ID</description>
       </parameter>
       <parameter name="sectionTitle" type="String" required="true">
         <description>Section title</description>
       </parameter>
-      <parameter name="sectionDescription" type="String">
+      <parameter name="sectionDescription">
         <description>Section content/description</description>
       </parameter>
-      <parameter name="sectionImageUrl" type="String">
+      <parameter name="sectionImageUrl">
         <description>Optional section image URL</description>
       </parameter>
       <parameter name="sectionSequence" type="Integer">
@@ -500,10 +502,10 @@ Service definitions for landing page, sections, credibility, and CTA management
       </parameter>
     </in-parameters>
     <out-parameters>
-      <parameter name="sectionId" type="String">
+      <parameter name="pageSectionId">
         <description>Created section ID</description>
       </parameter>
-      <parameter name="pseudoId" type="String">
+      <parameter name="pseudoId">
         <description>Created section pseudoId</description>
       </parameter>
     </out-parameters>
@@ -514,7 +516,7 @@ Service definitions for landing page, sections, credibility, and CTA management
 
       <!-- Verify landing page exists and belongs to owner -->
       <entity-find-one entity-name="LandingPage" value-field="landingPage">
-        <field-map field-name="pageId" from="pageId" />
+        <field-map field-name="landingPageId" from="landingPageId" />
         <field-map field-name="ownerPartyId" from="ownerPartyId" />
       </entity-find-one>
 
@@ -525,21 +527,21 @@ Service definitions for landing page, sections, credibility, and CTA management
       <!-- Auto-increment sequence if not provided -->
       <if condition="!sectionSequence">
         <entity-find-count entity-name="PageSection" count-field="sectionCount">
-          <econdition field-name="pageId" from="pageId" />
+          <econdition field-name="landingPageId" from="landingPageId" />
         </entity-find-count>
         <set field="sectionSequence" from="sectionCount + 1" />
       </if>
 
       <!-- Generate unique IDs -->
-      <set field="sectionId" from="ec.entity.sequencedIdPrimary('PageSection', null, null)" />
+      <set field="pageSectionId" from="ec.entity.sequencedIdPrimary('PageSection', null, null)" />
       <set field="pseudoId" from="'section_' + System.currentTimeMillis()" />
 
       <!-- Create page section record -->
       <service-call name="create#PageSection"
         in-map="[
-        sectionId: sectionId,
+        pageSectionId: pageSectionId,
         pseudoId: pseudoId,
-        pageId: pageId,
+        landingPageId: landingPageId,
         sectionTitle: sectionTitle,
         sectionDescription: sectionDescription,
         sectionImageUrl: sectionImageUrl,
@@ -547,7 +549,7 @@ Service definitions for landing page, sections, credibility, and CTA management
         createdDate: ec.user.nowTimestamp
       ]" />
 
-      <log level="info" message="Created page section: ${sectionId} for page: ${pageId}" />
+      <log level="info" message="Created page section: ${pageSectionId} for page: ${landingPageId}" />
     </actions>
   </service>
 
@@ -555,16 +557,16 @@ Service definitions for landing page, sections, credibility, and CTA management
   <service verb="update" noun="PageSection" authenticate="true">
     <description>Update page section content and display order. Owner party ID is automatically determined from authenticated user context.</description>
     <in-parameters>
-      <parameter name="sectionId" type="String" required="true">
+      <parameter name="pageSectionId" type="String" required="true">
         <description>Section ID to update</description>
       </parameter>
-      <parameter name="sectionTitle" type="String">
+      <parameter name="sectionTitle">
         <description>New section title</description>
       </parameter>
-      <parameter name="sectionDescription" type="String">
+      <parameter name="sectionDescription">
         <description>New section content</description>
       </parameter>
-      <parameter name="sectionImageUrl" type="String">
+      <parameter name="sectionImageUrl">
         <description>New section image URL</description>
       </parameter>
       <parameter name="sectionSequence" type="Integer">
@@ -572,7 +574,7 @@ Service definitions for landing page, sections, credibility, and CTA management
       </parameter>
     </in-parameters>
     <out-parameters>
-      <parameter name="sectionId" type="String">
+      <parameter name="pageSectionId">
         <description>Updated section ID</description>
       </parameter>
     </out-parameters>
@@ -583,7 +585,7 @@ Service definitions for landing page, sections, credibility, and CTA management
 
       <!-- Verify section exists and belongs to owner's landing page -->
       <entity-find-one entity-name="PageSection" value-field="existingSection">
-        <field-map field-name="sectionId" from="sectionId" />
+        <field-map field-name="pageSectionId" from="pageSectionId" />
       </entity-find-one>
 
       <if condition="!existingSection">
@@ -592,7 +594,7 @@ Service definitions for landing page, sections, credibility, and CTA management
 
       <!-- Verify the section's landing page belongs to owner -->
       <entity-find-one entity-name="LandingPage" value-field="landingPage">
-        <field-map field-name="pageId" from="existingSection.pageId" />
+        <field-map field-name="landingPageId" from="existingSection.landingPageId" />
         <field-map field-name="ownerPartyId" from="ownerPartyId" />
       </entity-find-one>
 
@@ -603,14 +605,14 @@ Service definitions for landing page, sections, credibility, and CTA management
       <!-- Update section with provided fields -->
       <service-call name="update#PageSection"
         in-map="[
-        sectionId: sectionId,
+        pageSectionId: pageSectionId,
         sectionTitle: sectionTitle ?: existingSection.sectionTitle,
         sectionDescription: sectionDescription,
         sectionImageUrl: sectionImageUrl,
         sectionSequence: sectionSequence ?: existingSection.sectionSequence
       ]" />
 
-      <log level="info" message="Updated page section: ${sectionId} for owner: ${ownerPartyId}" />
+      <log level="info" message="Updated page section: ${pageSectionId} for owner: ${ownerPartyId}" />
     </actions>
   </service>
 
@@ -618,7 +620,7 @@ Service definitions for landing page, sections, credibility, and CTA management
   <service verb="delete" noun="PageSection" authenticate="true">
     <description>Delete page section. Owner party ID is automatically determined from authenticated user context.</description>
     <in-parameters>
-      <parameter name="sectionId" type="String" required="true">
+      <parameter name="pageSectionId" type="String" required="true">
         <description>Section ID to delete</description>
       </parameter>
     </in-parameters>
@@ -634,7 +636,7 @@ Service definitions for landing page, sections, credibility, and CTA management
 
       <!-- Verify section exists and belongs to owner's landing page -->
       <entity-find-one entity-name="PageSection" value-field="existingSection">
-        <field-map field-name="sectionId" from="sectionId" />
+        <field-map field-name="pageSectionId" from="pageSectionId" />
       </entity-find-one>
 
       <if condition="!existingSection">
@@ -643,7 +645,7 @@ Service definitions for landing page, sections, credibility, and CTA management
 
       <!-- Verify the section's landing page belongs to owner -->
       <entity-find-one entity-name="LandingPage" value-field="landingPage">
-        <field-map field-name="pageId" from="existingSection.pageId" />
+        <field-map field-name="landingPageId" from="existingSection.landingPageId" />
         <field-map field-name="ownerPartyId" from="ownerPartyId" />
       </entity-find-one>
 
@@ -652,10 +654,10 @@ Service definitions for landing page, sections, credibility, and CTA management
       </if>
 
       <!-- Delete the section -->
-      <service-call name="delete#PageSection" in-map="[sectionId: sectionId]" />
+      <service-call name="delete#PageSection" in-map="[pageSectionId: pageSectionId]" />
       <set field="deletedCount" value="1" type="Integer" />
 
-      <log level="info" message="Deleted page section: ${sectionId} for owner: ${ownerPartyId}" />
+      <log level="info" message="Deleted page section: ${pageSectionId} for owner: ${ownerPartyId}" />
     </actions>
   </service>
 
@@ -663,20 +665,20 @@ Service definitions for landing page, sections, credibility, and CTA management
   <service verb="list" noun="PageSections" authenticate="false">
     <description>List all sections for a landing page, ordered by sequence</description>
     <in-parameters>
-      <parameter name="pageId" type="String" required="true">
+      <parameter name="landingPageId" type="String" required="true">
         <description>Landing page ID</description>
       </parameter>
     </in-parameters>
     <out-parameters>
       <parameter name="sections" type="List">
         <description>List of page sections ordered by sequence</description>
-        <parameter name="sectionId" type="String" />
-        <parameter name="pageId" type="String" />
+        <parameter name="pageSectionId" />
+        <parameter name="landingPageId" />
         <parameter name="sectionSequence" type="Integer" />
-        <parameter name="sectionName" type="String" />
-        <parameter name="sectionText" type="String" />
-        <parameter name="sectionType" type="String" />
-        <parameter name="isActive" type="String" />
+        <parameter name="sectionName" />
+        <parameter name="sectionText" />
+        <parameter name="sectionType" />
+        <parameter name="isActive" />
         <parameter name="createdDate" type="Timestamp" />
       </parameter>
     </out-parameters>
@@ -687,7 +689,7 @@ Service definitions for landing page, sections, credibility, and CTA management
 
       <!-- Find all sections for the landing page -->
       <entity-find entity-name="PageSection" list="sections">
-        <econdition field-name="pageId" from="pageId" />
+        <econdition field-name="landingPageId" from="landingPageId" />
         <order-by field-name="sectionSequence" />
       </entity-find>
     </actions>
@@ -701,24 +703,24 @@ Service definitions for landing page, sections, credibility, and CTA management
   <service verb="create" noun="CredibilityInfo" authenticate="true">
     <description>Create credibility/bio section for landing page. Owner party ID is automatically determined from authenticated user context.</description>
     <in-parameters>
-      <parameter name="pageId" type="String" required="true">
+      <parameter name="landingPageId" type="String" required="true">
         <description>Landing page ID</description>
       </parameter>
       <parameter name="creatorBio" type="String" required="true">
         <description>Creator bio text</description>
       </parameter>
-      <parameter name="backgroundText" type="String">
+      <parameter name="backgroundText">
         <description>Background/experience text</description>
       </parameter>
-      <parameter name="creatorImageUrl" type="String">
+      <parameter name="creatorImageUrl">
         <description>Optional creator image URL</description>
       </parameter>
     </in-parameters>
     <out-parameters>
-      <parameter name="credibilityId" type="String">
+      <parameter name="credibilityInfoId">
         <description>Created credibility ID</description>
       </parameter>
-      <parameter name="pseudoId" type="String">
+      <parameter name="pseudoId">
         <description>Created credibility pseudoId</description>
       </parameter>
     </out-parameters>
@@ -729,7 +731,7 @@ Service definitions for landing page, sections, credibility, and CTA management
 
       <!-- Verify landing page exists and belongs to owner -->
       <entity-find-one entity-name="LandingPage" value-field="landingPage">
-        <field-map field-name="pageId" from="pageId" />
+        <field-map field-name="landingPageId" from="landingPageId" />
         <field-map field-name="ownerPartyId" from="ownerPartyId" />
       </entity-find-one>
 
@@ -739,7 +741,7 @@ Service definitions for landing page, sections, credibility, and CTA management
 
       <!-- Check if credibility info already exists for this page -->
       <entity-find entity-name="CredibilityInfo" list="existingCredibility">
-        <econdition field-name="pageId" from="pageId" />
+        <econdition field-name="landingPageId" from="landingPageId" />
       </entity-find>
 
       <if condition="existingCredibility">
@@ -748,22 +750,24 @@ Service definitions for landing page, sections, credibility, and CTA management
       </if>
 
       <!-- Generate unique IDs -->
-      <set field="credibilityId" from="ec.entity.sequencedIdPrimary('CredibilityInfo', null, null)" />
+      <set field="credibilityInfoId"
+        from="ec.entity.sequencedIdPrimary('CredibilityInfo', null, null)" />
       <set field="pseudoId" from="'cred_' + System.currentTimeMillis()" />
 
       <!-- Create credibility info record -->
       <service-call name="create#CredibilityInfo"
         in-map="[
-        credibilityId: credibilityId,
+        credibilityInfoId: credibilityInfoId,
         pseudoId: pseudoId,
-        pageId: pageId,
+        landingPageId: landingPageId,
         creatorBio: creatorBio,
         backgroundText: backgroundText,
         creatorImageUrl: creatorImageUrl,
         createdDate: ec.user.nowTimestamp
       ]" />
 
-      <log level="info" message="Created credibility info: ${credibilityId} for page: ${pageId}" />
+      <log level="info"
+        message="Created credibility info: ${credibilityInfoId} for page: ${landingPageId}" />
     </actions>
   </service>
 
@@ -771,21 +775,21 @@ Service definitions for landing page, sections, credibility, and CTA management
   <service verb="update" noun="CredibilityInfo" authenticate="true">
     <description>Update credibility/bio section content. Owner party ID is automatically determined from authenticated user context.</description>
     <in-parameters>
-      <parameter name="credibilityId" type="String" required="true">
+      <parameter name="credibilityInfoId" type="String" required="true">
         <description>Credibility ID to update</description>
       </parameter>
-      <parameter name="creatorBio" type="String">
+      <parameter name="creatorBio">
         <description>New creator bio</description>
       </parameter>
-      <parameter name="backgroundText" type="String">
+      <parameter name="backgroundText">
         <description>New background text</description>
       </parameter>
-      <parameter name="creatorImageUrl" type="String">
+      <parameter name="creatorImageUrl">
         <description>New creator image URL</description>
       </parameter>
     </in-parameters>
     <out-parameters>
-      <parameter name="credibilityId" type="String">
+      <parameter name="credibilityInfoId">
         <description>Updated credibility ID</description>
       </parameter>
     </out-parameters>
@@ -796,7 +800,7 @@ Service definitions for landing page, sections, credibility, and CTA management
 
       <!-- Verify credibility info exists and belongs to owner's landing page -->
       <entity-find-one entity-name="CredibilityInfo" value-field="existingCredibility">
-        <field-map field-name="credibilityId" from="credibilityId" />
+        <field-map field-name="credibilityInfoId" from="credibilityInfoId" />
       </entity-find-one>
 
       <if condition="!existingCredibility">
@@ -805,7 +809,7 @@ Service definitions for landing page, sections, credibility, and CTA management
 
       <!-- Verify the credibility's landing page belongs to owner -->
       <entity-find-one entity-name="LandingPage" value-field="landingPage">
-        <field-map field-name="pageId" from="existingCredibility.pageId" />
+        <field-map field-name="landingPageId" from="existingCredibility.landingPageId" />
         <field-map field-name="ownerPartyId" from="ownerPartyId" />
       </entity-find-one>
 
@@ -816,14 +820,14 @@ Service definitions for landing page, sections, credibility, and CTA management
       <!-- Update credibility info with provided fields -->
       <service-call name="update#CredibilityInfo"
         in-map="[
-        credibilityId: credibilityId,
+        credibilityInfoId: credibilityInfoId,
         creatorBio: creatorBio ?: existingCredibility.creatorBio,
         backgroundText: backgroundText,
         creatorImageUrl: creatorImageUrl
       ]" />
 
       <log level="info"
-        message="Updated credibility info: ${credibilityId} for owner: ${ownerPartyId}" />
+        message="Updated credibility info: ${credibilityInfoId} for owner: ${ownerPartyId}" />
     </actions>
   </service>
 
@@ -831,7 +835,7 @@ Service definitions for landing page, sections, credibility, and CTA management
   <service verb="delete" noun="CredibilityInfo" authenticate="true">
     <description>Delete credibility/bio section and all statistics. Owner party ID is automatically determined from authenticated user context.</description>
     <in-parameters>
-      <parameter name="credibilityId" type="String" required="true">
+      <parameter name="credibilityInfoId" type="String" required="true">
         <description>Credibility ID to delete</description>
       </parameter>
     </in-parameters>
@@ -847,7 +851,7 @@ Service definitions for landing page, sections, credibility, and CTA management
 
       <!-- Verify credibility info exists and belongs to owner's landing page -->
       <entity-find-one entity-name="CredibilityInfo" value-field="existingCredibility">
-        <field-map field-name="credibilityId" from="credibilityId" />
+        <field-map field-name="credibilityInfoId" from="credibilityInfoId" />
       </entity-find-one>
 
       <if condition="!existingCredibility">
@@ -856,7 +860,7 @@ Service definitions for landing page, sections, credibility, and CTA management
 
       <!-- Verify the credibility's landing page belongs to owner -->
       <entity-find-one entity-name="LandingPage" value-field="landingPage">
-        <field-map field-name="pageId" from="existingCredibility.pageId" />
+        <field-map field-name="landingPageId" from="existingCredibility.landingPageId" />
         <field-map field-name="ownerPartyId" from="ownerPartyId" />
       </entity-find-one>
 
@@ -868,20 +872,20 @@ Service definitions for landing page, sections, credibility, and CTA management
 
       <!-- Delete all related statistics first -->
       <entity-find entity-name="CredibilityStatistic" list="statisticsToDelete">
-        <econdition field-name="credibilityId" from="credibilityId" />
+        <econdition field-name="credibilityInfoId" from="credibilityInfoId" />
       </entity-find>
       <iterate list="statisticsToDelete" entry="statistic">
         <service-call name="delete#CredibilityStatistic"
-          in-map="[statisticId: statistic.statisticId]" />
+          in-map="[credibilityStatisticId: statistic.credibilityStatisticId]" />
         <set field="deletedCount" from="deletedCount + 1" />
       </iterate>
 
       <!-- Delete the credibility info -->
-      <service-call name="delete#CredibilityInfo" in-map="[credibilityId: credibilityId]" />
+      <service-call name="delete#CredibilityInfo" in-map="[credibilityInfoId: credibilityInfoId]" />
       <set field="deletedCount" from="deletedCount + 1" />
 
       <log level="info"
-        message="Deleted credibility info: ${credibilityId} and ${deletedCount} related records for owner: ${ownerPartyId}" />
+        message="Deleted credibility info: ${credibilityInfoId} and ${deletedCount} related records for owner: ${ownerPartyId}" />
     </actions>
   </service>
 
@@ -893,7 +897,7 @@ Service definitions for landing page, sections, credibility, and CTA management
   <service verb="add" noun="CredibilityStatistic" authenticate="true">
     <description>Add a supporting statistic to credibility section. Owner party ID is automatically determined from authenticated user context.</description>
     <in-parameters>
-      <parameter name="credibilityId" type="String" required="true">
+      <parameter name="credibilityInfoId" type="String" required="true">
         <description>Credibility ID</description>
       </parameter>
       <parameter name="statistic" type="String" required="true">
@@ -901,7 +905,7 @@ Service definitions for landing page, sections, credibility, and CTA management
       </parameter>
     </in-parameters>
     <out-parameters>
-      <parameter name="statisticId" type="String">
+      <parameter name="credibilityStatisticId">
         <description>Created statistic ID</description>
       </parameter>
     </out-parameters>
@@ -912,7 +916,7 @@ Service definitions for landing page, sections, credibility, and CTA management
 
       <!-- Verify credibility info exists and belongs to owner's landing page -->
       <entity-find-one entity-name="CredibilityInfo" value-field="credibilityInfo">
-        <field-map field-name="credibilityId" from="credibilityId" />
+        <field-map field-name="credibilityInfoId" from="credibilityInfoId" />
       </entity-find-one>
 
       <if condition="!credibilityInfo">
@@ -921,7 +925,7 @@ Service definitions for landing page, sections, credibility, and CTA management
 
       <!-- Verify the credibility's landing page belongs to owner -->
       <entity-find-one entity-name="LandingPage" value-field="landingPage">
-        <field-map field-name="pageId" from="credibilityInfo.pageId" />
+        <field-map field-name="landingPageId" from="credibilityInfo.landingPageId" />
         <field-map field-name="ownerPartyId" from="ownerPartyId" />
       </entity-find-one>
 
@@ -930,20 +934,20 @@ Service definitions for landing page, sections, credibility, and CTA management
       </if>
 
       <!-- Generate unique ID -->
-      <set field="statisticId"
+      <set field="credibilityStatisticId"
         from="ec.entity.sequencedIdPrimary('CredibilityStatistic', null, null)" />
 
       <!-- Create statistic record -->
       <service-call name="create#CredibilityStatistic"
         in-map="[
-        statisticId: statisticId,
-        credibilityId: credibilityId,
+        credibilityStatisticId: credibilityStatisticId,
+        credibilityInfoId: credibilityInfoId,
         statistic: statistic,
         createdDate: ec.user.nowTimestamp
       ]" />
 
       <log level="info"
-        message="Added credibility statistic: ${statisticId} for credibility: ${credibilityId}" />
+        message="Added credibility statistic: ${credibilityStatisticId} for credibility: ${credibilityInfoId}" />
     </actions>
   </service>
 
@@ -951,7 +955,7 @@ Service definitions for landing page, sections, credibility, and CTA management
   <service verb="remove" noun="CredibilityStatistic" authenticate="true">
     <description>Remove a credibility statistic. Owner party ID is automatically determined from authenticated user context.</description>
     <in-parameters>
-      <parameter name="statisticId" type="String" required="true">
+      <parameter name="credibilityStatisticId" type="String" required="true">
         <description>Statistic ID to delete</description>
       </parameter>
     </in-parameters>
@@ -967,7 +971,7 @@ Service definitions for landing page, sections, credibility, and CTA management
 
       <!-- Verify statistic exists and belongs to owner's credibility -->
       <entity-find-one entity-name="CredibilityStatistic" value-field="existingStatistic">
-        <field-map field-name="statisticId" from="statisticId" />
+        <field-map field-name="credibilityStatisticId" from="credibilityStatisticId" />
       </entity-find-one>
 
       <if condition="!existingStatistic">
@@ -976,11 +980,11 @@ Service definitions for landing page, sections, credibility, and CTA management
 
       <!-- Verify the statistic's credibility belongs to owner's landing page -->
       <entity-find-one entity-name="CredibilityInfo" value-field="credibilityInfo">
-        <field-map field-name="credibilityId" from="existingStatistic.credibilityId" />
+        <field-map field-name="credibilityInfoId" from="existingStatistic.credibilityInfoId" />
       </entity-find-one>
 
       <entity-find-one entity-name="LandingPage" value-field="landingPage">
-        <field-map field-name="pageId" from="credibilityInfo.pageId" />
+        <field-map field-name="landingPageId" from="credibilityInfo.landingPageId" />
         <field-map field-name="ownerPartyId" from="ownerPartyId" />
       </entity-find-one>
 
@@ -989,152 +993,14 @@ Service definitions for landing page, sections, credibility, and CTA management
       </if>
 
       <!-- Delete the statistic -->
-      <service-call name="delete#CredibilityStatistic" in-map="[statisticId: statisticId]" />
+      <service-call name="delete#CredibilityStatistic"
+        in-map="[credibilityStatisticId: credibilityStatisticId]" />
       <set field="deletedCount" value="1" type="Integer" />
 
       <log level="info"
-        message="Removed credibility statistic: ${statisticId} for owner: ${ownerPartyId}" />
+        message="Removed credibility statistic: ${credibilityStatisticId} for owner: ${ownerPartyId}" />
     </actions>
   </service>
 
   <!-- ============================================ -->
-  <!-- CTA SERVICES (2 services) -->
-  <!-- ============================================ -->
-
-  <!-- createPrimaryCTA: Set primary CTA button -->
-  <service verb="create" noun="PrimaryCTA" authenticate="true">
-    <description>Create primary CTA button configuration for landing page. Owner party ID is automatically determined from authenticated user context.</description>
-    <in-parameters>
-      <parameter name="pageId" type="String" required="true">
-        <description>Landing page ID</description>
-      </parameter>
-      <parameter name="buttonText" type="String" required="true">
-        <description>Button text (e.g., "Start the Assessment")</description>
-      </parameter>
-      <parameter name="estimatedTime" type="String">
-        <description>Estimated time (e.g., "3 minutes")</description>
-      </parameter>
-      <parameter name="cost" type="String">
-        <description>Cost (e.g., "Free")</description>
-      </parameter>
-      <parameter name="valuePromise" type="String">
-        <description>Value promise (e.g., "Get your personalized report")</description>
-      </parameter>
-    </in-parameters>
-    <out-parameters>
-      <parameter name="ctaId" type="String">
-        <description>Created CTA ID</description>
-      </parameter>
-      <parameter name="pseudoId" type="String">
-        <description>Created CTA pseudoId</description>
-      </parameter>
-    </out-parameters>
-    <actions>
-      <!-- Get owner party ID from authenticated user context -->
-      <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
-        out-map="context" />
-
-      <!-- Verify landing page exists and belongs to owner -->
-      <entity-find-one entity-name="LandingPage" value-field="landingPage">
-        <field-map field-name="pageId" from="pageId" />
-        <field-map field-name="ownerPartyId" from="ownerPartyId" />
-      </entity-find-one>
-
-      <if condition="!landingPage">
-        <return error="true" message="Landing page not found or access denied" />
-      </if>
-
-      <!-- Check if CTA already exists for this page -->
-      <entity-find entity-name="PrimaryCTA" list="existingCTA">
-        <econdition field-name="pageId" from="pageId" />
-      </entity-find>
-
-      <if condition="existingCTA">
-        <return error="true" message="Primary CTA already exists for this page. Use update instead." />
-      </if>
-
-      <!-- Generate unique IDs -->
-      <set field="ctaId" from="ec.entity.sequencedIdPrimary('PrimaryCTA', null, null)" />
-      <set field="pseudoId" from="'cta_' + System.currentTimeMillis()" />
-
-      <!-- Create CTA record -->
-      <service-call name="create#PrimaryCTA"
-        in-map="[
-        ctaId: ctaId,
-        pseudoId: pseudoId,
-        pageId: pageId,
-        buttonText: buttonText,
-        estimatedTime: estimatedTime ?: '5 minutes',
-        cost: cost ?: 'Free',
-        valuePromise: valuePromise,
-        createdDate: ec.user.nowTimestamp
-      ]" />
-
-      <log level="info" message="Created primary CTA: ${ctaId} for page: ${pageId}" />
-    </actions>
-  </service>
-
-  <!-- updatePrimaryCTA: Update CTA button -->
-  <service verb="update" noun="PrimaryCTA" authenticate="true">
-    <description>Update primary CTA button configuration. Owner party ID is automatically determined from authenticated user context.</description>
-    <in-parameters>
-      <parameter name="ctaId" type="String" required="true">
-        <description>CTA ID to update</description>
-      </parameter>
-      <parameter name="buttonText" type="String">
-        <description>New button text</description>
-      </parameter>
-      <parameter name="estimatedTime" type="String">
-        <description>New estimated time</description>
-      </parameter>
-      <parameter name="cost" type="String">
-        <description>New cost</description>
-      </parameter>
-      <parameter name="valuePromise" type="String">
-        <description>New value promise</description>
-      </parameter>
-    </in-parameters>
-    <out-parameters>
-      <parameter name="ctaId" type="String">
-        <description>Updated CTA ID</description>
-      </parameter>
-    </out-parameters>
-    <actions>
-      <!-- Get owner party ID from authenticated user context -->
-      <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
-        out-map="context" />
-
-      <!-- Verify CTA exists and belongs to owner's landing page -->
-      <entity-find-one entity-name="PrimaryCTA" value-field="existingCTA">
-        <field-map field-name="ctaId" from="ctaId" />
-      </entity-find-one>
-
-      <if condition="!existingCTA">
-        <return error="true" message="Primary CTA not found" />
-      </if>
-
-      <!-- Verify the CTA's landing page belongs to owner -->
-      <entity-find-one entity-name="LandingPage" value-field="landingPage">
-        <field-map field-name="pageId" from="existingCTA.pageId" />
-        <field-map field-name="ownerPartyId" from="ownerPartyId" />
-      </entity-find-one>
-
-      <if condition="!landingPage">
-        <return error="true" message="Access denied to this primary CTA" />
-      </if>
-
-      <!-- Update CTA with provided fields -->
-      <service-call name="update#PrimaryCTA"
-        in-map="[
-        ctaId: ctaId,
-        buttonText: buttonText ?: existingCTA.buttonText,
-        estimatedTime: estimatedTime ?: existingCTA.estimatedTime,
-        cost: cost ?: existingCTA.cost,
-        valuePromise: valuePromise
-      ]" />
-
-      <log level="info" message="Updated primary CTA: ${ctaId} for owner: ${ownerPartyId}" />
-    </actions>
-  </service>
-
 </services>

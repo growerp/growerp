@@ -27,7 +27,7 @@ this file is loaded for every owner who request demo data.
        ============================================================ -->
 
   <!-- Question 1: Current Situation (Required - Best Practices) -->
-  <growerp.assessment.AssessmentQuestion questionId="QUESTION_CURRENT_SIT_001"
+  <growerp.assessment.AssessmentQuestion assessmentQuestionId="QUESTION_CURRENT_SIT_001"
     pseudoId="q-current-situation"
     assessmentId="ASSESSMENT_BUSI_READINESS_001"
     questionSequence="1"
@@ -38,32 +38,32 @@ this file is loaded for every owner who request demo data.
     createdDate="2025-01-01 00:00:00"
     createdByUserLogin="admin" />
 
-  <growerp.assessment.AssessmentQuestionOption optionId="OPTION_STAGNANT_001"
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="OPTION_STAGNANT_001"
     pseudoId="opt-stagnant"
-    questionId="QUESTION_CURRENT_SIT_001"
+    assessmentQuestionId="QUESTION_CURRENT_SIT_001"
     assessmentId="ASSESSMENT_BUSI_READINESS_001"
     optionSequence="1"
     optionText="Stagnant (No growth or declining)"
     optionScore="20" />
 
-  <growerp.assessment.AssessmentQuestionOption optionId="OPTION_SLOW_GROWTH_001"
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="OPTION_SLOW_GROWTH_001"
     pseudoId="opt-slow-growth"
-    questionId="QUESTION_CURRENT_SIT_001"
+    assessmentQuestionId="QUESTION_CURRENT_SIT_001"
     assessmentId="ASSESSMENT_BUSI_READINESS_001"
     optionSequence="2"
     optionText="Slow Growth (1-10% annually)"
     optionScore="50" />
 
-  <growerp.assessment.AssessmentQuestionOption optionId="OPTION_RAPID_GROWTH_001"
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="OPTION_RAPID_GROWTH_001"
     pseudoId="opt-rapid-growth"
-    questionId="QUESTION_CURRENT_SIT_001"
+    assessmentQuestionId="QUESTION_CURRENT_SIT_001"
     assessmentId="ASSESSMENT_BUSI_READINESS_001"
     optionSequence="3"
     optionText="Rapid Growth (10%+ annually)"
     optionScore="80" />
 
   <!-- Question 2: Desired Outcome (Required - Best Practices) -->
-  <growerp.assessment.AssessmentQuestion questionId="QUESTION_DESIRED_OUT_001"
+  <growerp.assessment.AssessmentQuestion assessmentQuestionId="QUESTION_DESIRED_OUT_001"
     pseudoId="q-desired-outcome"
     assessmentId="ASSESSMENT_BUSI_READINESS_001"
     questionSequence="2"
@@ -74,32 +74,33 @@ this file is loaded for every owner who request demo data.
     createdDate="2025-01-01 00:00:00"
     createdByUserLogin="admin" />
 
-  <growerp.assessment.AssessmentQuestionOption optionId="OPTION_INCREASE_REV_001"
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="OPTION_INCREASE_REV_001"
     pseudoId="opt-increase-revenue"
-    questionId="QUESTION_DESIRED_OUT_001"
+    assessmentQuestionId="QUESTION_DESIRED_OUT_001"
     assessmentId="ASSESSMENT_BUSI_READINESS_001"
     optionSequence="1"
     optionText="Increase revenue"
     optionScore="75" />
 
-  <growerp.assessment.AssessmentQuestionOption optionId="OPTION_IMPROVE_CUST_001"
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="OPTION_IMPROVE_CUST_001"
     pseudoId="opt-improve-customer"
-    questionId="QUESTION_DESIRED_OUT_001"
+    assessmentQuestionId="QUESTION_DESIRED_OUT_001"
     assessmentId="ASSESSMENT_BUSI_READINESS_001"
     optionSequence="2"
     optionText="Improve customer satisfaction"
     optionScore="70" />
 
-  <growerp.assessment.AssessmentQuestionOption optionId="OPTION_STREAMLINE_OPS_001"
+  <growerp.assessment.AssessmentQuestionOption
+    assessmentQuestionOptionId="OPTION_STREAMLINE_OPS_001"
     pseudoId="opt-streamline-ops"
-    questionId="QUESTION_DESIRED_OUT_001"
+    assessmentQuestionId="QUESTION_DESIRED_OUT_001"
     assessmentId="ASSESSMENT_BUSI_READINESS_001"
     optionSequence="3"
     optionText="Streamline operations"
     optionScore="65" />
 
   <!-- Question 3: Biggest Obstacle (Required - Best Practices) -->
-  <growerp.assessment.AssessmentQuestion questionId="QUESTION_OBSTACLE_001"
+  <growerp.assessment.AssessmentQuestion assessmentQuestionId="QUESTION_OBSTACLE_001"
     pseudoId="q-biggest-obstacle"
     assessmentId="ASSESSMENT_BUSI_READINESS_001"
     questionSequence="3"
@@ -110,32 +111,34 @@ this file is loaded for every owner who request demo data.
     createdDate="2025-01-01 00:00:00"
     createdByUserLogin="admin" />
 
-  <growerp.assessment.AssessmentQuestionOption optionId="OPTION_INEFFICIENT_WF_001"
+  <growerp.assessment.AssessmentQuestionOption
+    assessmentQuestionOptionId="OPTION_INEFFICIENT_WF_001"
     pseudoId="opt-inefficient-workflows"
-    questionId="QUESTION_OBSTACLE_001"
+    assessmentQuestionId="QUESTION_OBSTACLE_001"
     assessmentId="ASSESSMENT_BUSI_READINESS_001"
     optionSequence="1"
     optionText="Inefficient workflows"
     optionScore="40" />
 
-  <growerp.assessment.AssessmentQuestionOption optionId="OPTION_LACK_VISIBILITY_001"
+  <growerp.assessment.AssessmentQuestionOption
+    assessmentQuestionOptionId="OPTION_LACK_VISIBILITY_001"
     pseudoId="opt-lack-visibility"
-    questionId="QUESTION_OBSTACLE_001"
+    assessmentQuestionId="QUESTION_OBSTACLE_001"
     assessmentId="ASSESSMENT_BUSI_READINESS_001"
     optionSequence="2"
     optionText="Lack of market visibility"
     optionScore="45" />
 
-  <growerp.assessment.AssessmentQuestionOption optionId="OPTION_OUTDATED_TECH_001"
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="OPTION_OUTDATED_TECH_001"
     pseudoId="opt-outdated-tech"
-    questionId="QUESTION_OBSTACLE_001"
+    assessmentQuestionId="QUESTION_OBSTACLE_001"
     assessmentId="ASSESSMENT_BUSI_READINESS_001"
     optionSequence="3"
     optionText="Outdated technology"
     optionScore="35" />
 
   <!-- Question 4: Solution Preference (Required - Best Practices) -->
-  <growerp.assessment.AssessmentQuestion questionId="QUESTION_SOLUTION_PREF_001"
+  <growerp.assessment.AssessmentQuestion assessmentQuestionId="QUESTION_SOLUTION_PREF_001"
     pseudoId="q-solution-preference"
     assessmentId="ASSESSMENT_BUSI_READINESS_001"
     questionSequence="4"
@@ -146,40 +149,40 @@ this file is loaded for every owner who request demo data.
     createdDate="2025-01-01 00:00:00"
     createdByUserLogin="admin" />
 
-  <growerp.assessment.AssessmentQuestionOption optionId="OPTION_EDUCATION_001"
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="OPTION_EDUCATION_001"
     pseudoId="opt-education-training"
-    questionId="QUESTION_SOLUTION_PREF_001"
+    assessmentQuestionId="QUESTION_SOLUTION_PREF_001"
     assessmentId="ASSESSMENT_BUSI_READINESS_001"
     optionSequence="1"
     optionText="Education/Training"
     optionScore="50" />
 
-  <growerp.assessment.AssessmentQuestionOption optionId="OPTION_CONSULTING_001"
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="OPTION_CONSULTING_001"
     pseudoId="opt-consulting-coaching"
-    questionId="QUESTION_SOLUTION_PREF_001"
+    assessmentQuestionId="QUESTION_SOLUTION_PREF_001"
     assessmentId="ASSESSMENT_BUSI_READINESS_001"
     optionSequence="2"
     optionText="One-to-one consulting/coaching"
     optionScore="70" />
 
-  <growerp.assessment.AssessmentQuestionOption optionId="OPTION_IMPL_SUPPORT_001"
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="OPTION_IMPL_SUPPORT_001"
     pseudoId="opt-implementation-support"
-    questionId="QUESTION_SOLUTION_PREF_001"
+    assessmentQuestionId="QUESTION_SOLUTION_PREF_001"
     assessmentId="ASSESSMENT_BUSI_READINESS_001"
     optionSequence="3"
     optionText="Full implementation support"
     optionScore="85" />
 
-  <growerp.assessment.AssessmentQuestionOption optionId="OPTION_SOFTWARE_REC_001"
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="OPTION_SOFTWARE_REC_001"
     pseudoId="opt-software-recommendation"
-    questionId="QUESTION_SOLUTION_PREF_001"
+    assessmentQuestionId="QUESTION_SOLUTION_PREF_001"
     assessmentId="ASSESSMENT_BUSI_READINESS_001"
     optionSequence="4"
     optionText="Software recommendation"
     optionScore="60" />
 
   <!-- Question 5: Open Box - Open-ended Question (Required - Best Practices) -->
-  <growerp.assessment.AssessmentQuestion questionId="QUESTION_OPEN_BOX_001"
+  <growerp.assessment.AssessmentQuestion assessmentQuestionId="QUESTION_OPEN_BOX_001"
     pseudoId="q-open-box"
     assessmentId="ASSESSMENT_BUSI_READINESS_001"
     questionSequence="5"
@@ -191,7 +194,7 @@ this file is loaded for every owner who request demo data.
     createdByUserLogin="admin" />
 
   <!-- Operational Efficiency Question (Best Practices) -->
-  <growerp.assessment.AssessmentQuestion questionId="QUESTION_OPE_EFF_001"
+  <growerp.assessment.AssessmentQuestion assessmentQuestionId="QUESTION_OPE_EFF_001"
     pseudoId="q-operational-efficiency"
     assessmentId="ASSESSMENT_BUSI_READINESS_001"
     questionSequence="6"
@@ -202,40 +205,40 @@ this file is loaded for every owner who request demo data.
     createdDate="2025-01-01 00:00:00"
     createdByUserLogin="admin" />
 
-  <growerp.assessment.AssessmentQuestionOption optionId="OPTION_OPE_POOR_001"
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="OPTION_OPE_POOR_001"
     pseudoId="opt-operational-poor"
-    questionId="QUESTION_OPE_EFF_001"
+    assessmentQuestionId="QUESTION_OPE_EFF_001"
     assessmentId="ASSESSMENT_BUSI_READINESS_001"
     optionSequence="1"
     optionText="Poor (Manual, error-prone processes)"
     optionScore="15" />
 
-  <growerp.assessment.AssessmentQuestionOption optionId="OPTION_OPE_FAIR_001"
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="OPTION_OPE_FAIR_001"
     pseudoId="opt-operational-fair"
-    questionId="QUESTION_OPE_EFF_001"
+    assessmentQuestionId="QUESTION_OPE_EFF_001"
     assessmentId="ASSESSMENT_BUSI_READINESS_001"
     optionSequence="2"
     optionText="Fair (Some automation, inconsistent results)"
     optionScore="45" />
 
-  <growerp.assessment.AssessmentQuestionOption optionId="OPTION_OPE_GOOD_001"
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="OPTION_OPE_GOOD_001"
     pseudoId="opt-operational-good"
-    questionId="QUESTION_OPE_EFF_001"
+    assessmentQuestionId="QUESTION_OPE_EFF_001"
     assessmentId="ASSESSMENT_BUSI_READINESS_001"
     optionSequence="3"
     optionText="Good (Mostly automated, defined processes)"
     optionScore="70" />
 
-  <growerp.assessment.AssessmentQuestionOption optionId="OPTION_OPE_EXCEL_001"
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="OPTION_OPE_EXCEL_001"
     pseudoId="opt-operational-excellent"
-    questionId="QUESTION_OPE_EFF_001"
+    assessmentQuestionId="QUESTION_OPE_EFF_001"
     assessmentId="ASSESSMENT_BUSI_READINESS_001"
     optionSequence="4"
     optionText="Excellent (Fully optimized, continuous improvement)"
     optionScore="90" />
 
   <!-- Customer Engagement Question (Best Practices) -->
-  <growerp.assessment.AssessmentQuestion questionId="QUESTION_CUST_ENG_001"
+  <growerp.assessment.AssessmentQuestion assessmentQuestionId="QUESTION_CUST_ENG_001"
     pseudoId="q-customer-engagement"
     assessmentId="ASSESSMENT_BUSI_READINESS_001"
     questionSequence="7"
@@ -246,40 +249,41 @@ this file is loaded for every owner who request demo data.
     createdDate="2025-01-01 00:00:00"
     createdByUserLogin="admin" />
 
-  <growerp.assessment.AssessmentQuestionOption optionId="OPTION_CUST_MINIMAL_001"
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="OPTION_CUST_MINIMAL_001"
     pseudoId="opt-customer-minimal"
-    questionId="QUESTION_CUST_ENG_001"
+    assessmentQuestionId="QUESTION_CUST_ENG_001"
     assessmentId="ASSESSMENT_BUSI_READINESS_001"
     optionSequence="1"
     optionText="Minimal (Basic communication only)"
     optionScore="20" />
 
-  <growerp.assessment.AssessmentQuestionOption optionId="OPTION_CUST_STANDARD_001"
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="OPTION_CUST_STANDARD_001"
     pseudoId="opt-customer-standard"
-    questionId="QUESTION_CUST_ENG_001"
+    assessmentQuestionId="QUESTION_CUST_ENG_001"
     assessmentId="ASSESSMENT_BUSI_READINESS_001"
     optionSequence="2"
     optionText="Standard (Regular updates, some personalization)"
     optionScore="55" />
 
-  <growerp.assessment.AssessmentQuestionOption optionId="OPTION_CUST_ADVANCED_001"
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="OPTION_CUST_ADVANCED_001"
     pseudoId="opt-customer-advanced"
-    questionId="QUESTION_CUST_ENG_001"
+    assessmentQuestionId="QUESTION_CUST_ENG_001"
     assessmentId="ASSESSMENT_BUSI_READINESS_001"
     optionSequence="3"
     optionText="Advanced (Personalized, multi-channel, proactive)"
     optionScore="75" />
 
-  <growerp.assessment.AssessmentQuestionOption optionId="OPTION_CUST_EXCEPTIONAL_001"
+  <growerp.assessment.AssessmentQuestionOption
+    assessmentQuestionOptionId="OPTION_CUST_EXCEPTIONAL_001"
     pseudoId="opt-customer-exceptional"
-    questionId="QUESTION_CUST_ENG_001"
+    assessmentQuestionId="QUESTION_CUST_ENG_001"
     assessmentId="ASSESSMENT_BUSI_READINESS_001"
     optionSequence="4"
     optionText="Exceptional (Customer-centric culture, loyalty programs)"
     optionScore="95" />
 
   <!-- Scalable Growth Question (Best Practices) -->
-  <growerp.assessment.AssessmentQuestion questionId="QUESTION_SCALAB_GROW_001"
+  <growerp.assessment.AssessmentQuestion assessmentQuestionId="QUESTION_SCALAB_GROW_001"
     pseudoId="q-scalable-growth"
     assessmentId="ASSESSMENT_BUSI_READINESS_001"
     questionSequence="8"
@@ -290,33 +294,33 @@ this file is loaded for every owner who request demo data.
     createdDate="2025-01-01 00:00:00"
     createdByUserLogin="admin" />
 
-  <growerp.assessment.AssessmentQuestionOption optionId="OPTION_SCAL_LIMITED_001"
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="OPTION_SCAL_LIMITED_001"
     pseudoId="opt-scalable-limited"
-    questionId="QUESTION_SCALAB_GROW_001"
+    assessmentQuestionId="QUESTION_SCALAB_GROW_001"
     assessmentId="ASSESSMENT_BUSI_READINESS_001"
     optionSequence="1"
     optionText="Limited (Breaking at growth points)"
     optionScore="25" />
 
-  <growerp.assessment.AssessmentQuestionOption optionId="OPTION_SCAL_MODERATE_001"
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="OPTION_SCAL_MODERATE_001"
     pseudoId="opt-scalable-moderate"
-    questionId="QUESTION_SCALAB_GROW_001"
+    assessmentQuestionId="QUESTION_SCALAB_GROW_001"
     assessmentId="ASSESSMENT_BUSI_READINESS_001"
     optionSequence="2"
     optionText="Moderate (Can handle 2x growth with adjustments)"
     optionScore="55" />
 
-  <growerp.assessment.AssessmentQuestionOption optionId="OPTION_SCAL_STRONG_001"
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="OPTION_SCAL_STRONG_001"
     pseudoId="opt-scalable-strong"
-    questionId="QUESTION_SCALAB_GROW_001"
+    assessmentQuestionId="QUESTION_SCALAB_GROW_001"
     assessmentId="ASSESSMENT_BUSI_READINESS_001"
     optionSequence="3"
     optionText="Strong (Can handle 5x growth with minimal changes)"
     optionScore="80" />
 
-  <growerp.assessment.AssessmentQuestionOption optionId="OPTION_SCAL_FLEXIBLE_001"
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="OPTION_SCAL_FLEXIBLE_001"
     pseudoId="opt-scalable-flexible"
-    questionId="QUESTION_SCALAB_GROW_001"
+    assessmentQuestionId="QUESTION_SCALAB_GROW_001"
     assessmentId="ASSESSMENT_BUSI_READINESS_001"
     optionSequence="4"
     optionText="Flexible (Can handle 10x+ growth, fully elastic)"
@@ -326,7 +330,7 @@ this file is loaded for every owner who request demo data.
        SCORING THRESHOLDS
        ============================================================ -->
 
-  <growerp.assessment.ScoringThreshold thresholdId="THRESHOLD_CRITICAL_001"
+  <growerp.assessment.ScoringThreshold scoringThresholdId="THRESHOLD_CRITICAL_001"
     pseudoId="threshold-critical"
     assessmentId="ASSESSMENT_BUSI_READINESS_001"
     minScore="0"
@@ -336,7 +340,7 @@ this file is loaded for every owner who request demo data.
     createdDate="2025-01-01 00:00:00"
     createdByUserLogin="admin" />
 
-  <growerp.assessment.ScoringThreshold thresholdId="THRESHOLD_NEEDS_WORK_001"
+  <growerp.assessment.ScoringThreshold scoringThresholdId="THRESHOLD_NEEDS_WORK_001"
     pseudoId="threshold-needs-work"
     assessmentId="ASSESSMENT_BUSI_READINESS_001"
     minScore="250"
@@ -346,7 +350,7 @@ this file is loaded for every owner who request demo data.
     createdDate="2025-01-01 00:00:00"
     createdByUserLogin="admin" />
 
-  <growerp.assessment.ScoringThreshold thresholdId="THRESHOLD_READY_001"
+  <growerp.assessment.ScoringThreshold scoringThresholdId="THRESHOLD_READY_001"
     pseudoId="threshold-ready"
     assessmentId="ASSESSMENT_BUSI_READINESS_001"
     minScore="450"
@@ -361,10 +365,11 @@ this file is loaded for every owner who request demo data.
        ============================================================ -->
 
   <growerp.landing.LandingPage
-    pageId="PAGE_BUSI_READINESS_001"
+    landingPageId="PAGE_BUSI_READINESS_001"
     pseudoId="business-readiness-landing"
     ownerPartyId="DEMO"
-    assessmentId="ASSESSMENT_BUSI_READINESS_001"
+    ctaActionType="assessment"
+    ctaAssessmentId="ASSESSMENT_BUSI_READINESS_001"
     title="Business Readiness Assessment"
     hookType="ResultsHook"
     headline="Are you ready to unlock your business's full potential?"
@@ -380,9 +385,9 @@ this file is loaded for every owner who request demo data.
 
   <!-- Section 1: The Hook -->
   <growerp.landing.PageSection
-    sectionId="SECTION_HOOK_001"
+    pageSectionId="SECTION_HOOK_001"
     pseudoId="section-hook"
-    pageId="PAGE_BUSI_READINESS_001"
+    landingPageId="PAGE_BUSI_READINESS_001"
     sectionSequence="1"
     sectionTitle="The Hook (Results Hook)"
     sectionDescription="Are you ready to unlock your business's full potential? This hook uses a readiness sentence to make you question if you are prepared for the desired outcome."
@@ -390,63 +395,63 @@ this file is loaded for every owner who request demo data.
 
   <!-- Section 2: The Subheading / Call to Action Intro -->
   <growerp.landing.PageSection
-    sectionId="SECTION_SUBHEADING_001"
+    pageSectionId="SECTION_SUBHEADING_001"
     pseudoId="section-subheading"
-    pageId="PAGE_BUSI_READINESS_001"
+    landingPageId="PAGE_BUSI_READINESS_001"
     sectionSequence="2"
     sectionTitle="The Subheading"
     sectionDescription="Answer a few questions to find out why you might be facing challenges and what steps you need to take to guarantee success. This directs people to take the assessment by answering questions to discover readiness level."
     createdDate="2025-01-01 00:00:00" />
 
   <!-- Section 3: Value Proposition -->
-  <growerp.landing.PageSection sectionId="SECTION_VALUE_PROP_001"
+  <growerp.landing.PageSection pageSectionId="SECTION_VALUE_PROP_001"
     pseudoId="section-value-proposition"
-    pageId="PAGE_BUSI_READINESS_001"
+    landingPageId="PAGE_BUSI_READINESS_001"
     sectionSequence="3"
     sectionTitle="The Value Proposition"
     sectionDescription="Take this assessment so that we can measure and improve three key areas essential for successful business transformation. These three areas focus on what users would love to achieve on their way to a better result."
     createdDate="2025-01-01 00:00:00" />
 
   <!-- Section 3a: Foundational Pillar 1 -->
-  <growerp.landing.PageSection sectionId="SECTION_PILLAR_1_001"
+  <growerp.landing.PageSection pageSectionId="SECTION_PILLAR_1_001"
     pseudoId="section-pillar-operational"
-    pageId="PAGE_BUSI_READINESS_001"
+    landingPageId="PAGE_BUSI_READINESS_001"
     sectionSequence="3.1"
     sectionTitle="Foundational Pillar 1: Operational Efficiency"
     sectionDescription="Streamline your business operations, reduce waste, and improve process efficiency. Measure how well your workflows are optimized for maximum productivity."
     createdDate="2025-01-01 00:00:00" />
 
   <!-- Section 3b: Foundational Pillar 2 -->
-  <growerp.landing.PageSection sectionId="SECTION_PILLAR_2_001"
+  <growerp.landing.PageSection pageSectionId="SECTION_PILLAR_2_001"
     pseudoId="section-pillar-engagement"
-    pageId="PAGE_BUSI_READINESS_001"
+    landingPageId="PAGE_BUSI_READINESS_001"
     sectionSequence="3.2"
     sectionTitle="Foundational Pillar 2: Customer Engagement"
     sectionDescription="Build stronger relationships with your customers through personalized communication and exceptional service. Measure your ability to create meaningful customer connections."
     createdDate="2025-01-01 00:00:00" />
 
   <!-- Section 3c: Foundational Pillar 3 -->
-  <growerp.landing.PageSection sectionId="SECTION_PILLAR_3_001"
+  <growerp.landing.PageSection pageSectionId="SECTION_PILLAR_3_001"
     pseudoId="section-pillar-scalable"
-    pageId="PAGE_BUSI_READINESS_001"
+    landingPageId="PAGE_BUSI_READINESS_001"
     sectionSequence="3.3"
     sectionTitle="Foundational Pillar 3: Scalable Growth"
     sectionDescription="Prepare your business infrastructure for exponential growth. Measure your readiness to expand without compromising quality or operational integrity."
     createdDate="2025-01-01 00:00:00" />
 
   <!-- Section 4: Credibility Section -->
-  <growerp.landing.PageSection sectionId="SECTION_CREDIBILITY_001"
+  <growerp.landing.PageSection pageSectionId="SECTION_CREDIBILITY_001"
     pseudoId="section-credibility"
-    pageId="PAGE_BUSI_READINESS_001"
+    landingPageId="PAGE_BUSI_READINESS_001"
     sectionSequence="4"
     sectionTitle="Credibility Section"
     sectionDescription="Build trust by explaining who created this assessment, their background, and the research behind it. This addresses the need for credibility immediately after the value proposition."
     createdDate="2025-01-01 00:00:00" />
 
   <!-- Section 5: CTA Section -->
-  <growerp.landing.PageSection sectionId="SECTION_CTA_001"
+  <growerp.landing.PageSection pageSectionId="SECTION_CTA_001"
     pseudoId="section-cta"
-    pageId="PAGE_BUSI_READINESS_001"
+    landingPageId="PAGE_BUSI_READINESS_001"
     sectionSequence="5"
     sectionTitle="Call to Action Section"
     sectionDescription="The final powerful call-to-action section with clear next steps, time commitment, cost information, and the benefit of immediate recommendations."
@@ -456,9 +461,9 @@ this file is loaded for every owner who request demo data.
        CREDIBILITY INFO: Creator Bio and Background
        ============================================================ -->
 
-  <growerp.landing.CredibilityInfo credibilityId="CREDIBILITY_GENERAL_001"
+  <growerp.landing.CredibilityInfo credibilityInfoId="CREDIBILITY_GENERAL_001"
     pseudoId="credibility-general"
-    pageId="PAGE_BUSI_READINESS_001"
+    landingPageId="PAGE_BUSI_READINESS_001"
     creatorBio="GrowERP is a team specialized in scaling businesses and optimizing systems. We have dedicated ourselves to helping organizations transform their operations and achieve sustainable growth."
     backgroundText="Our background involves two decades of scaling multiple companies and building lead generation systems. We have consulted on over 50 major projects across various industries, working with companies from startups to enterprise-level organizations. Our experience spans multiple sectors including technology, manufacturing, retail, hospitality, and professional services."
     createdDate="2025-01-01 00:00:00" />
@@ -467,45 +472,38 @@ this file is loaded for every owner who request demo data.
        CREDIBILITY STATISTICS: Supporting Data
        ============================================================ -->
 
-  <growerp.landing.CredibilityStatistic statisticId="STAT_STRUGGLE_001"
+  <growerp.landing.CredibilityStatistic credibilityStatisticId="STAT_STRUGGLE_001"
     pseudoId="stat-struggle"
-    credibilityId="CREDIBILITY_GENERAL_001"
+    credibilityInfoId="CREDIBILITY_GENERAL_001"
     statistic="85% of businesses struggle with operational challenges and inefficient workflows during large projects, leading to project delays."
     sequence="1"
     createdDate="2025-01-01 00:00:00" />
 
-  <growerp.landing.CredibilityStatistic statisticId="STAT_SUCCESS_001"
+  <growerp.landing.CredibilityStatistic credibilityStatisticId="STAT_SUCCESS_001"
     pseudoId="stat-success"
-    credibilityId="CREDIBILITY_GENERAL_001"
+    credibilityInfoId="CREDIBILITY_GENERAL_001"
     statistic="Organizations prioritizing operational efficiency and customer engagement are 3X more likely to achieve project ROI and sustainable growth."
     sequence="2"
     createdDate="2025-01-01 00:00:00" />
 
-  <growerp.landing.CredibilityStatistic statisticId="STAT_YEARS_001"
+  <growerp.landing.CredibilityStatistic credibilityStatisticId="STAT_YEARS_001"
     pseudoId="stat-years"
-    credibilityId="CREDIBILITY_GENERAL_001"
+    credibilityInfoId="CREDIBILITY_GENERAL_001"
     statistic="20+ years of combined experience in business transformation, system optimization, and digital innovation across global markets."
     sequence="3"
     createdDate="2025-01-01 00:00:00" />
 
-  <growerp.landing.CredibilityStatistic statisticId="STAT_PROJECTS_001"
+  <growerp.landing.CredibilityStatistic credibilityStatisticId="STAT_PROJECTS_001"
     pseudoId="stat-projects"
-    credibilityId="CREDIBILITY_GENERAL_001"
+    credibilityInfoId="CREDIBILITY_GENERAL_001"
     statistic="50+ major consulting projects completed across diverse industries, with an average client satisfaction rating of 95%."
     sequence="4"
     createdDate="2025-01-01 00:00:00" />
 
   <!-- ============================================================
        PRIMARY CTA: Call-to-Action Button Configuration
+       Note: CTA fields are now directly on the LandingPage entity above
+       (ctaActionType, ctaAssessmentId, ctaButtonLink, ctaButtonText)
        ============================================================ -->
-
-  <growerp.landing.PrimaryCTA ctaId="CTA_PRIMARY_001"
-    pseudoId="cta-primary"
-    pageId="PAGE_BUSI_READINESS_001"
-    buttonText="Start the Readiness Quiz Now!"
-    estimatedTime="3 minutes"
-    cost="Completely free"
-    valuePromise="Get immediate, tailored recommendations on how you can improve your readiness score and unlock your business's full potential."
-    createdDate="2025-01-01 00:00:00" />
 
 </entity-facade-xml>

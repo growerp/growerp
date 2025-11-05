@@ -1,13 +1,41 @@
+/*
+ * This GrowERP software is in the public domain under CC0 1.0 Universal plus a
+ * Grant of Patent License.
+ * 
+ * To the extent possible under law, the author(s) have dedicated all
+ * copyright and related and neighboring rights to this software to the
+ * public domain worldwide. This software is distributed without any
+ * warranty.
+ * 
+ * You should have received a copy of the CC0 Public Domain Dedication
+ * along with this software (see the LICENSE.md file). If not, see
+ * <http://creativecommons.org/publicdomain/zero/1.0/>.
+ */
+
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
+import 'package:responsive_framework/responsive_framework.dart';
+import 'package:dropdown_search/dropdown_search.dart';
+
 import '../bloc/landing_page_bloc.dart';
 import '../bloc/landing_page_event.dart';
 import '../bloc/landing_page_state.dart';
-import 'landing_page_dialog.dart';
-import 'page_section_management_screen.dart';
-import 'credibility_management_screen.dart';
-import 'cta_management_screen.dart';
+import '../bloc/assessment_bloc.dart';
+
+/// Maps backend hookType format to dropdown values
+/// Backend returns formats like 'ResultsHook', 'FrustrationHook'
+/// Dropdown expects: 'frustration', 'results', 'custom'
+String? _normalizeHookType(String? hookType) {
+  if (hookType == null) return null;
+  final lowerType = hookType.toLowerCase();
+  if (lowerType.contains('frustr')) return 'frustration';
+  if (lowerType.contains('result')) return 'results';
+  if (lowerType.contains('custom')) return 'custom';
+  return null;
+}
 
 class LandingPageDetailScreen extends StatefulWidget {
   final LandingPage landingPage;
@@ -18,401 +46,617 @@ class LandingPageDetailScreen extends StatefulWidget {
   });
 
   @override
-  State<LandingPageDetailScreen> createState() =>
-      _LandingPageDetailScreenState();
+  LandingPageDetailScreenState createState() => LandingPageDetailScreenState();
 }
 
-class _LandingPageDetailScreenState extends State<LandingPageDetailScreen> {
+class LandingPageDetailScreenState extends State<LandingPageDetailScreen> {
+  late ScrollController _scrollController;
+  late bool isPhone;
+  late double top;
+  double? right;
+  late bool isVisible;
+
+  // Form controllers
+  late TextEditingController _pseudoIdController;
+  late TextEditingController _titleController;
+  late TextEditingController _headlineController;
+  late TextEditingController _subheadingController;
+  late TextEditingController _privacyPolicyUrlController;
+  late TextEditingController _ctaLinkController;
+  late TextEditingController _assessmentSearchBoxController;
+
+  late String _selectedStatus;
+  late String? _selectedHookType;
+  late String _selectedCtaActionType; // 'assessment' or 'url'
+  late String? _selectedCtaAssessmentId;
+  late LandingPage updatedLandingPage;
   late LandingPageBloc _landingPageBloc;
+  late AssessmentBloc _assessmentBloc;
 
   @override
   void initState() {
     super.initState();
+    _scrollController = ScrollController();
+    top = -100;
+    isVisible = true;
+
+    // Initialize form controllers
+    _pseudoIdController =
+        TextEditingController(text: widget.landingPage.pseudoId ?? '');
+    _titleController = TextEditingController(text: widget.landingPage.title);
+    _headlineController =
+        TextEditingController(text: widget.landingPage.headline ?? '');
+    _subheadingController =
+        TextEditingController(text: widget.landingPage.subheading ?? '');
+    _privacyPolicyUrlController =
+        TextEditingController(text: widget.landingPage.privacyPolicyUrl ?? '');
+    _ctaLinkController =
+        TextEditingController(text: widget.landingPage.ctaButtonLink ?? '');
+    _assessmentSearchBoxController = TextEditingController();
+
+    _selectedStatus = widget.landingPage.status.toUpperCase();
+    _selectedHookType = _normalizeHookType(widget.landingPage.hookType);
+    _selectedCtaActionType = widget.landingPage.ctaActionType ?? 'assessment';
+    _selectedCtaAssessmentId = widget.landingPage.ctaAssessmentId;
+    updatedLandingPage = widget.landingPage;
     _landingPageBloc = context.read<LandingPageBloc>();
+    _assessmentBloc = context.read<AssessmentBloc>();
+
+    // Load assessments if not already loaded
+    if (_assessmentBloc.state.assessments.isEmpty) {
+      _assessmentBloc.add(const AssessmentFetch());
+    }
+
+    _scrollController.addListener(() {
+      if (isVisible &&
+          _scrollController.position.userScrollDirection ==
+              ScrollDirection.reverse) {
+        if (mounted) {
+          setState(() {
+            isVisible = false;
+          });
+        }
+      }
+      if (!isVisible &&
+          _scrollController.position.userScrollDirection ==
+              ScrollDirection.forward) {
+        if (mounted) {
+          setState(() {
+            isVisible = true;
+          });
+        }
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _headlineController.dispose();
+    _subheadingController.dispose();
+    _privacyPolicyUrlController.dispose();
+    _ctaLinkController.dispose();
+    _assessmentSearchBoxController.dispose();
+    _scrollController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<LandingPageBloc, LandingPageState>(
-      listener: (context, state) {
-        if (state.status == LandingPageStatus.success &&
-            state.message != null) {
-          if (state.message!.contains('deleted')) {
-            Navigator.of(context).pop();
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                    'Landing page "${widget.landingPage.title}" deleted successfully'),
-                backgroundColor: Colors.red,
-              ),
-            );
-          } else if (state.message!.contains('updated')) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                    'Landing page "${widget.landingPage.title}" updated successfully'),
-                backgroundColor: Colors.green,
-              ),
-            );
-          }
-        }
-      },
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(widget.landingPage.title),
-          actions: [
-            PopupMenuButton<String>(
-              onSelected: (value) {
-                switch (value) {
-                  case 'edit':
-                    _editLandingPage();
-                    break;
-                  case 'duplicate':
-                    _duplicateLandingPage();
-                    break;
-                  case 'delete':
-                    _deleteLandingPage();
-                    break;
-                }
-              },
-              itemBuilder: (context) => [
-                const PopupMenuItem(
-                  value: 'edit',
-                  child: ListTile(
-                    leading: Icon(Icons.edit),
-                    title: Text('Edit'),
-                  ),
-                ),
-                const PopupMenuItem(
-                  value: 'duplicate',
-                  child: ListTile(
-                    leading: Icon(Icons.copy),
-                    title: Text('Duplicate'),
-                  ),
-                ),
-                const PopupMenuItem(
-                  value: 'delete',
-                  child: ListTile(
-                    leading: Icon(Icons.delete, color: Colors.red),
-                    title: Text('Delete', style: TextStyle(color: Colors.red)),
-                  ),
+    isPhone = ResponsiveBreakpoints.of(context).isMobile;
+    right = right ?? (isPhone ? 20 : 40);
+
+    return Dialog(
+      key: Key('LandingPageDetail${widget.landingPage.pseudoId}'),
+      insetPadding: const EdgeInsets.all(10),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      child: popUp(
+        context: context,
+        title: "Landing Page #${widget.landingPage.pseudoId ?? 'New'}",
+        width: isPhone ? 400 : 900,
+        height: isPhone ? 700 : 600,
+        child: ScaffoldMessenger(
+          child: Scaffold(
+            backgroundColor: Colors.transparent,
+            body: Stack(
+              children: [
+                BlocConsumer<LandingPageBloc, LandingPageState>(
+                  listener: (context, state) {
+                    if (state.status == LandingPageStatus.failure) {
+                      HelperFunctions.showMessage(
+                        context,
+                        state.message ?? 'Error',
+                        Colors.red,
+                      );
+                    }
+                    if (state.status == LandingPageStatus.success) {
+                      Navigator.of(context).pop(
+                        state.selectedLandingPage,
+                      );
+                    }
+                  },
+                  builder: (context, state) {
+                    if (state.status == LandingPageStatus.loading) {
+                      return const LoadingIndicator();
+                    }
+                    return _buildContent();
+                  },
                 ),
               ],
             ),
-          ],
+          ),
         ),
-        body: SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Main Info Card
-              Card(
-                elevation: 4,
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+      ),
+    );
+  }
+
+  Widget _buildContent() {
+    return Form(
+      child: SingleChildScrollView(
+        controller: _scrollController,
+        key: const Key('landingPageDetailListView'),
+        child: Column(
+          children: [
+            const SizedBox(height: 10),
+            InputDecorator(
+              decoration: InputDecoration(
+                labelText: 'Landing Page Information',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(25.0),
+                ),
+              ),
+              child: Column(
+                children: [
+                  Row(
                     children: [
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.web,
-                            size: 32,
-                            color: Theme.of(context).primaryColor,
+                      Expanded(
+                        child: TextFormField(
+                          key: const Key('id'),
+                          decoration: const InputDecoration(labelText: 'ID'),
+                          controller: _pseudoIdController,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'ID is required';
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: DropdownButtonFormField<String>(
+                          key: const Key('status'),
+                          decoration:
+                              const InputDecoration(labelText: 'Status'),
+                          hint: const Text('Select status'),
+                          initialValue: _selectedStatus.toUpperCase(),
+                          items: ['DRAFT', 'ACTIVE', 'INACTIVE', 'PUBLISHED']
+                              .map((item) {
+                            return DropdownMenuItem<String>(
+                              value: item,
+                              child: Text(item),
+                            );
+                          }).toList(),
+                          onChanged: (String? newValue) {
+                            setState(() {
+                              _selectedStatus = newValue ?? 'DRAFT';
+                            });
+                          },
+                          isExpanded: true,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextFormField(
+                          key: const Key('title'),
+                          decoration: const InputDecoration(labelText: 'Title'),
+                          controller: _titleController,
+                          validator: (value) {
+                            if (value!.isEmpty) {
+                              return 'Title is required';
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: DropdownButtonFormField<String?>(
+                          key: const Key('hookType'),
+                          decoration:
+                              const InputDecoration(labelText: 'Hook Type'),
+                          hint: const Text('Select hook type'),
+                          initialValue: _selectedHookType,
+                          items: [
+                            const DropdownMenuItem<String?>(
+                              value: null,
+                              child: Text('None'),
+                            ),
+                            const DropdownMenuItem<String>(
+                              value: 'frustration',
+                              child: Text('Frustration'),
+                            ),
+                            const DropdownMenuItem<String>(
+                              value: 'results',
+                              child: Text('Results'),
+                            ),
+                            const DropdownMenuItem<String>(
+                              value: 'custom',
+                              child: Text('Custom'),
+                            ),
+                          ].toList(),
+                          onChanged: (String? newValue) {
+                            setState(() {
+                              _selectedHookType = newValue;
+                            });
+                          },
+                          isExpanded: true,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextFormField(
+                          key: const Key('headline'),
+                          decoration:
+                              const InputDecoration(labelText: 'Headline'),
+                          controller: _headlineController,
+                          maxLines: 2,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextFormField(
+                          key: const Key('subheading'),
+                          decoration:
+                              const InputDecoration(labelText: 'Subheading'),
+                          controller: _subheadingController,
+                          maxLines: 2,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextFormField(
+                          key: const Key('privacyPolicyUrl'),
+                          decoration: const InputDecoration(
+                              labelText: 'Privacy Policy URL'),
+                          controller: _privacyPolicyUrlController,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 10),
+            InputDecorator(
+              decoration: InputDecoration(
+                labelText: 'Call-to-Action Configuration',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(25.0),
+                ),
+              ),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        flex:
+                            ResponsiveBreakpoints.of(context).isMobile ? 1 : 2,
+                        child: DropdownButtonFormField<String>(
+                          key: const Key('ctaActionType'),
+                          decoration: const InputDecoration(
+                            labelText: 'CTA Action Type',
+                            prefixIcon: Icon(Icons.touch_app),
                           ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  widget.landingPage.title,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .headlineSmall
-                                      ?.copyWith(
-                                        fontWeight: FontWeight.bold,
+                          initialValue: _selectedCtaActionType,
+                          items: const [
+                            DropdownMenuItem<String>(
+                              value: 'assessment',
+                              child: Text('Launch Assessment'),
+                            ),
+                            DropdownMenuItem<String>(
+                              value: 'url',
+                              child: Text('Open URL/Webpage'),
+                            ),
+                          ],
+                          onChanged: (String? newValue) {
+                            setState(() {
+                              _selectedCtaActionType = newValue ?? 'assessment';
+                            });
+                          },
+                          isExpanded: true,
+                        ),
+                      ),
+                      if (!ResponsiveBreakpoints.of(context).isMobile)
+                        const SizedBox(width: 10),
+                      if (!ResponsiveBreakpoints.of(context).isMobile)
+                        Expanded(
+                          flex: 3,
+                          child: _selectedCtaActionType == 'assessment'
+                              ? BlocBuilder<AssessmentBloc, AssessmentState>(
+                                  builder: (context, state) {
+                                    // Find the selected CTA assessment from the list
+                                    Assessment? selectedCtaAssessment;
+                                    if (_selectedCtaAssessmentId != null &&
+                                        state.assessments.isNotEmpty) {
+                                      try {
+                                        selectedCtaAssessment =
+                                            state.assessments.firstWhere(
+                                          (a) =>
+                                              a.assessmentId ==
+                                              _selectedCtaAssessmentId,
+                                        );
+                                      } catch (e) {
+                                        selectedCtaAssessment = null;
+                                      }
+                                    }
+
+                                    return DropdownSearch<Assessment>(
+                                      key: const Key('ctaAssessmentDropdown'),
+                                      selectedItem: selectedCtaAssessment,
+                                      items: state.assessments,
+                                      itemAsString: (Assessment a) =>
+                                          '${a.pseudoId} - ${a.assessmentName}',
+                                      popupProps: PopupProps.menu(
+                                        showSearchBox: true,
+                                        searchFieldProps: const TextFieldProps(
+                                          autofocus: true,
+                                          decoration: InputDecoration(
+                                            labelText: 'Search assessments...',
+                                            prefixIcon: Icon(Icons.search),
+                                          ),
+                                        ),
+                                        menuProps: MenuProps(
+                                          borderRadius:
+                                              BorderRadius.circular(20.0),
+                                        ),
+                                        title: popUp(
+                                          context: context,
+                                          title: 'Select CTA Assessment',
+                                          height: 50,
+                                        ),
+                                        emptyBuilder: (context, searchEntry) =>
+                                            const Center(
+                                          child: Padding(
+                                            padding: EdgeInsets.all(16.0),
+                                            child: Text(
+                                              'No assessments found',
+                                              style:
+                                                  TextStyle(color: Colors.grey),
+                                            ),
+                                          ),
+                                        ),
                                       ),
+                                      dropdownDecoratorProps:
+                                          const DropDownDecoratorProps(
+                                        dropdownSearchDecoration:
+                                            InputDecoration(
+                                          labelText: 'CTA Assessment',
+                                          hintText:
+                                              'Select assessment to launch',
+                                          prefixIcon: Icon(Icons.quiz),
+                                        ),
+                                      ),
+                                      onChanged: (Assessment? newValue) {
+                                        setState(() {
+                                          _selectedCtaAssessmentId =
+                                              newValue?.assessmentId;
+                                        });
+                                      },
+                                    );
+                                  },
+                                )
+                              : TextFormField(
+                                  key: const Key('ctaLink'),
+                                  decoration: const InputDecoration(
+                                    labelText: 'CTA URL',
+                                    hintText: 'https://example.com/page',
+                                    prefixIcon: Icon(Icons.link),
+                                  ),
+                                  controller: _ctaLinkController,
                                 ),
-                                const SizedBox(height: 4),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 8,
-                                    vertical: 4,
+                        ),
+                    ],
+                  ),
+                  if (ResponsiveBreakpoints.of(context).isMobile)
+                    const SizedBox(height: 10),
+                  if (ResponsiveBreakpoints.of(context).isMobile &&
+                      _selectedCtaActionType == 'assessment')
+                    Row(
+                      children: [
+                        Expanded(
+                          child: BlocBuilder<AssessmentBloc, AssessmentState>(
+                            builder: (context, state) {
+                              // Find the selected CTA assessment from the list
+                              Assessment? selectedCtaAssessment;
+                              if (_selectedCtaAssessmentId != null &&
+                                  state.assessments.isNotEmpty) {
+                                try {
+                                  selectedCtaAssessment =
+                                      state.assessments.firstWhere(
+                                    (a) =>
+                                        a.assessmentId ==
+                                        _selectedCtaAssessmentId,
+                                  );
+                                } catch (e) {
+                                  selectedCtaAssessment = null;
+                                }
+                              }
+
+                              return DropdownSearch<Assessment>(
+                                key: const Key('ctaAssessmentDropdown'),
+                                selectedItem: selectedCtaAssessment,
+                                items: state.assessments,
+                                itemAsString: (Assessment a) =>
+                                    '${a.pseudoId} - ${a.assessmentName}',
+                                popupProps: PopupProps.menu(
+                                  showSearchBox: true,
+                                  searchFieldProps: const TextFieldProps(
+                                    autofocus: true,
+                                    decoration: InputDecoration(
+                                      labelText: 'Search assessments...',
+                                      prefixIcon: Icon(Icons.search),
+                                    ),
                                   ),
-                                  decoration: BoxDecoration(
-                                    color: _getStatusColor(
-                                        widget.landingPage.status),
-                                    borderRadius: BorderRadius.circular(12),
+                                  menuProps: MenuProps(
+                                    borderRadius: BorderRadius.circular(20.0),
                                   ),
-                                  child: Text(
-                                    widget.landingPage.status,
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.bold,
+                                  title: popUp(
+                                    context: context,
+                                    title: 'Select CTA Assessment',
+                                    height: 50,
+                                  ),
+                                  emptyBuilder: (context, searchEntry) =>
+                                      const Center(
+                                    child: Padding(
+                                      padding: EdgeInsets.all(16.0),
+                                      child: Text(
+                                        'No assessments found',
+                                        style: TextStyle(color: Colors.grey),
+                                      ),
                                     ),
                                   ),
                                 ),
-                              ],
+                                dropdownDecoratorProps:
+                                    const DropDownDecoratorProps(
+                                  dropdownSearchDecoration: InputDecoration(
+                                    labelText: 'CTA Assessment',
+                                    hintText: 'Select assessment to launch',
+                                    prefixIcon: Icon(Icons.quiz),
+                                  ),
+                                ),
+                                onChanged: (Assessment? newValue) {
+                                  setState(() {
+                                    _selectedCtaAssessmentId =
+                                        newValue?.assessmentId;
+                                  });
+                                },
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  if (ResponsiveBreakpoints.of(context).isMobile &&
+                      _selectedCtaActionType == 'url')
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextFormField(
+                            key: const Key('ctaLink'),
+                            decoration: const InputDecoration(
+                              labelText: 'CTA URL',
+                              hintText: 'https://example.com/page',
+                              prefixIcon: Icon(Icons.link),
                             ),
+                            controller: _ctaLinkController,
                           ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
+                        ),
+                      ],
+                    ),
+                ],
               ),
-              const SizedBox(height: 16),
-
-              // Content Overview Card
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          const Icon(Icons.info_outline),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Content Overview',
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleMedium
-                                ?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      _buildInfoRow('Pseudo ID', widget.landingPage.pseudoId),
-                      _buildInfoRow(
-                          'Headline', widget.landingPage.headline ?? ''),
-                      _buildInfoRow(
-                          'Subheading', widget.landingPage.subheading ?? ''),
-                      _buildInfoRow(
-                          'Hook Type', widget.landingPage.hookType ?? ''),
-                      if (widget.landingPage.createdDate != null)
-                        _buildInfoRow('Created',
-                            _formatDate(widget.landingPage.createdDate!)),
-                      if (widget.landingPage.lastModifiedDate != null)
-                        _buildInfoRow('Last Modified',
-                            _formatDate(widget.landingPage.lastModifiedDate!)),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // Management Actions Card
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          const Icon(Icons.settings),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Management Actions',
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleMedium
-                                ?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      _buildActionTile(
-                        icon: Icons.view_module,
-                        title: 'Manage Page Sections',
-                        subtitle: 'Configure content sections and layout',
-                        onTap: () => _navigateToPageSections(),
-                      ),
-                      const Divider(),
-                      _buildActionTile(
-                        icon: Icons.verified,
-                        title: 'Manage Credibility Elements',
-                        subtitle: 'Configure trust signals and testimonials',
-                        onTap: () => _navigateToCredibility(),
-                      ),
-                      const Divider(),
-                      _buildActionTile(
-                        icon: Icons.call_to_action,
-                        title: 'Manage Call-to-Actions',
-                        subtitle: 'Configure buttons and conversion elements',
-                        onTap: () => _navigateToCTA(),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: _editLandingPage,
-          child: const Icon(Icons.edit),
+            ),
+            const SizedBox(height: 20),
+            _updateButton(),
+            const SizedBox(height: 20),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildInfoRow(String label, String? value) {
-    if (value == null || value.isEmpty) return const SizedBox.shrink();
-
+  Widget _updateButton() {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8.0),
+      padding: ResponsiveBreakpoints.of(context).isMobile
+          ? const EdgeInsets.all(10)
+          : const EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 10),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(
-            width: 120,
-            child: Text(
-              '$label:',
-              style: const TextStyle(
-                fontWeight: FontWeight.w500,
-                color: Colors.grey,
-              ),
-            ),
-          ),
           Expanded(
-            child: Text(
-              value,
-              style: const TextStyle(fontWeight: FontWeight.w400),
+            child: OutlinedButton(
+              key: const Key("landingPageDetailDelete"),
+              style: ButtonStyle(
+                backgroundColor: WidgetStateProperty.all(Colors.red),
+              ),
+              child: const Text('Delete'),
+              onPressed: () async {
+                final confirmed = await showDialog<bool>(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: const Text('Delete Landing Page'),
+                      content: const Text(
+                        'Are you sure you want to delete this landing page?',
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(false),
+                          child: const Text('Cancel'),
+                        ),
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(true),
+                          child: const Text('Delete'),
+                        ),
+                      ],
+                    );
+                  },
+                );
+                if (confirmed == true && mounted) {
+                  _landingPageBloc.add(
+                    LandingPageDelete(widget.landingPage.landingPageId ?? ''),
+                  );
+                }
+              },
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: OutlinedButton(
+              key: const Key("landingPageDetailSave"),
+              child: const Text('Save'),
+              onPressed: () async {
+                updatedLandingPage = widget.landingPage.copyWith(
+                  pseudoId: _pseudoIdController.text,
+                  title: _titleController.text,
+                  headline: _headlineController.text,
+                  subheading: _subheadingController.text,
+                  hookType: _selectedHookType,
+                  status: _selectedStatus,
+                  privacyPolicyUrl: _privacyPolicyUrlController.text,
+                  ctaActionType: _selectedCtaActionType,
+                  ctaAssessmentId: _selectedCtaActionType == 'assessment'
+                      ? _selectedCtaAssessmentId
+                      : null,
+                  ctaButtonLink: _selectedCtaActionType == 'url'
+                      ? _ctaLinkController.text
+                      : null,
+                );
+                _landingPageBloc.add(LandingPageUpdate(updatedLandingPage));
+              },
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildActionTile({
-    required IconData icon,
-    required String title,
-    required String subtitle,
-    required VoidCallback onTap,
-  }) {
-    return ListTile(
-      leading: Icon(icon, color: Theme.of(context).primaryColor),
-      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w500)),
-      subtitle: Text(subtitle),
-      trailing: const Icon(Icons.chevron_right),
-      onTap: onTap,
-    );
-  }
-
-  Color _getStatusColor(String? status) {
-    switch (status?.toUpperCase()) {
-      case 'ACTIVE':
-        return Colors.green;
-      case 'INACTIVE':
-        return Colors.red;
-      case 'DRAFT':
-      default:
-        return Colors.orange;
-    }
-  }
-
-  String _formatDate(DateTime date) {
-    return '${date.day}/${date.month}/${date.year} ${date.hour}:${date.minute.toString().padLeft(2, '0')}';
-  }
-
-  void _editLandingPage() {
-    showDialog(
-      context: context,
-      builder: (context) => BlocProvider.value(
-        value: _landingPageBloc,
-        child: LandingPageDialog(landingPage: widget.landingPage),
-      ),
-    );
-  }
-
-  void _duplicateLandingPage() {
-    // Create a copy without the ID for duplication
-    final duplicatedPage = LandingPage(
-      pageId: '', // Will be assigned by backend
-      pseudoId: '${widget.landingPage.pseudoId}_copy',
-      title: '${widget.landingPage.title} (Copy)',
-      headline: widget.landingPage.headline,
-      subheading: widget.landingPage.subheading,
-      hookType: widget.landingPage.hookType,
-      status: 'DRAFT', // Always start duplicates as draft
-    );
-
-    showDialog(
-      context: context,
-      builder: (context) => BlocProvider.value(
-        value: _landingPageBloc,
-        child: LandingPageDialog(landingPage: duplicatedPage),
-      ),
-    );
-  }
-
-  void _deleteLandingPage() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Delete Landing Page'),
-        content: Text(
-          'Are you sure you want to delete "${widget.landingPage.title}"? This action cannot be undone.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              _landingPageBloc
-                  .add(LandingPageDelete(widget.landingPage.pageId));
-            },
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _navigateToPageSections() {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => PageSectionManagementScreen(
-          pageId: widget.landingPage.pageId,
-          pageTitle: widget.landingPage.title,
-        ),
-      ),
-    );
-  }
-
-  void _navigateToCredibility() {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => CredibilityManagementScreen(
-          pageId: widget.landingPage.pageId,
-          pageTitle: widget.landingPage.title,
-        ),
-      ),
-    );
-  }
-
-  void _navigateToCTA() {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => CTAManagementScreen(
-          pageId: widget.landingPage.pageId,
-          pageTitle: widget.landingPage.title,
-        ),
       ),
     );
   }

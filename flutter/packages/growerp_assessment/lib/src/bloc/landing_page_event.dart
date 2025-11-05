@@ -21,14 +21,19 @@ class LandingPageLoad extends LandingPageEvent {
 }
 
 class LandingPageFetch extends LandingPageEvent {
-  final String pageId;
+  final String? landingPageId;
+  final String? pseudoId;
   final String? ownerPartyId;
 
-  const LandingPageFetch(this.pageId, {this.ownerPartyId});
+  const LandingPageFetch({
+    this.landingPageId,
+    this.pseudoId,
+    this.ownerPartyId,
+  });
 
   @override
   String toString() =>
-      'LandingPageFetch(pageId: $pageId, ownerPartyId: $ownerPartyId)';
+      'LandingPageFetch(landingPageId: $landingPageId, pseudoId: $pseudoId, ownerPartyId: $ownerPartyId)';
 }
 
 class LandingPageCreate extends LandingPageEvent {
@@ -50,12 +55,12 @@ class LandingPageUpdate extends LandingPageEvent {
 }
 
 class LandingPageDelete extends LandingPageEvent {
-  final String pageId;
+  final String landingPageId;
 
-  const LandingPageDelete(this.pageId);
+  const LandingPageDelete(this.landingPageId);
 
   @override
-  String toString() => 'LandingPageDelete(pageId: $pageId)';
+  String toString() => 'LandingPageDelete(landingPageId: $landingPageId)';
 }
 
 class LandingPageClear extends LandingPageEvent {
