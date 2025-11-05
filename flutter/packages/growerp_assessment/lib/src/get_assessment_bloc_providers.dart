@@ -22,9 +22,6 @@ List<BlocProvider> getAssessmentBlocProviders(RestClient restClient,
     BlocProvider<CredibilityBloc>(
       create: (context) => CredibilityBloc(),
     ),
-    BlocProvider<CTABloc>(
-      create: (context) => CTABloc(),
-    ),
   ];
   return blocProviders;
 }

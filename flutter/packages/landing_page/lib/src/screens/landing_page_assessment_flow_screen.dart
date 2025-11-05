@@ -27,13 +27,13 @@ import 'public_landing_page_screen.dart';
 class LandingPageAssessmentFlowScreen extends StatefulWidget {
   const LandingPageAssessmentFlowScreen({
     super.key,
-    required this.pageId,
+    required this.landingPageId,
     this.ownerPartyId,
     this.assessmentId,
     this.startAssessmentFlow = false,
   });
 
-  final String pageId;
+  final String landingPageId;
   final String? ownerPartyId;
   final String? assessmentId;
   final bool startAssessmentFlow;
@@ -53,9 +53,12 @@ class _LandingPageAssessmentFlowScreenState
     super.initState();
     _assessmentId = widget.assessmentId;
 
-    // Load the landing page data
+    // Load the landing page data using pseudoId (tenant-unique identifier)
     context.read<LandingPageBloc>().add(
-      LandingPageFetch(widget.pageId, ownerPartyId: widget.ownerPartyId),
+      LandingPageFetch(
+        pseudoId: widget.landingPageId,
+        ownerPartyId: widget.ownerPartyId,
+      ),
     );
 
     // If direct assessment flow requested, skip landing page and go straight to assessment
@@ -80,13 +83,13 @@ class _LandingPageAssessmentFlowScreenState
     );
   }
 
-  void _onCtaPressed(CallToAction cta) {
-    // Extract assessment ID from landing page if available
+  void _onCtaPressed() {
+    // Extract assessment ID from landing page CTA if available
     final landingPageState = context.read<LandingPageBloc>().state;
     if (landingPageState.status == LandingPageStatus.success &&
-        landingPageState.selectedLandingPage?.assessmentId != null) {
+        landingPageState.selectedLandingPage?.ctaAssessmentId != null) {
       setState(() {
-        _assessmentId = landingPageState.selectedLandingPage!.assessmentId;
+        _assessmentId = landingPageState.selectedLandingPage!.ctaAssessmentId;
       });
       // Navigate to assessment after setState completes
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -128,14 +131,14 @@ class _LandingPageAssessmentFlowScreenState
     return BlocListener<LandingPageBloc, LandingPageState>(
       listener: (context, state) {
         if (state.status == LandingPageStatus.success &&
-            state.selectedLandingPage?.assessmentId != null) {
+            state.selectedLandingPage?.ctaAssessmentId != null) {
           setState(() {
-            _assessmentId = state.selectedLandingPage!.assessmentId;
+            _assessmentId = state.selectedLandingPage!.ctaAssessmentId;
           });
         }
       },
       child: PublicLandingPageScreen(
-        pageId: widget.pageId,
+        landingPageId: widget.landingPageId,
         ownerPartyId: widget.ownerPartyId,
         onCtaPressed: _onCtaPressed,
       ),
@@ -158,48 +161,112 @@ class _LandingPageAssessmentFlowScreenState
   }
 
   Widget _buildResultsStep() {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.check_circle, size: 80, color: Colors.green),
-          const SizedBox(height: 24),
-          Text(
-            'Assessment Complete!',
-            style: Theme.of(
-              context,
-            ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'Thank you for completing the assessment. Your results have been processed and you should receive them shortly.',
-            style: Theme.of(context).textTheme.bodyLarge,
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 32),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              ElevatedButton(
-                onPressed: () => _navigateToPage(0),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.grey[300],
-                  foregroundColor: Colors.black87,
+    return BlocBuilder<AssessmentBloc, AssessmentState>(
+      builder: (context, state) {
+        return Container(
+          padding: const EdgeInsets.all(24),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.check_circle, size: 80, color: Colors.green),
+                const SizedBox(height: 24),
+                Text(
+                  'Assessment Complete!',
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-                child: const Text('Back to Landing Page'),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  // Navigate to detailed results dashboard
-                  Navigator.of(context).pop();
-                },
-                child: const Text('View Detailed Results'),
-              ),
-            ],
+                const SizedBox(height: 16),
+                // Display result summary if available
+                if (state.results.isNotEmpty)
+                  Column(
+                    children: [
+                      Text(
+                        'Your Assessment Results',
+                        style: Theme.of(context).textTheme.headlineSmall
+                            ?.copyWith(fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 16),
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: state.results
+                              .map(
+                                (result) => Padding(
+                                  padding: const EdgeInsets.only(bottom: 8.0),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Score: ${result.score.toStringAsFixed(1)}%',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyLarge
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                      ),
+                                      Text(
+                                        'Status: ${result.leadStatus}',
+                                        style: Theme.of(
+                                          context,
+                                        ).textTheme.bodyMedium,
+                                      ),
+                                      if (result.respondentCompany != null)
+                                        Text(
+                                          'Company: ${result.respondentCompany}',
+                                          style: Theme.of(
+                                            context,
+                                          ).textTheme.bodySmall,
+                                        ),
+                                    ],
+                                  ),
+                                ),
+                              )
+                              .toList(),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                    ],
+                  ),
+                Text(
+                  'Thank you for completing the assessment. Your results have been processed and you should receive them shortly.',
+                  style: Theme.of(context).textTheme.bodyLarge,
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 32),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () => _navigateToPage(0),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.grey[300],
+                        foregroundColor: Colors.black87,
+                      ),
+                      child: const Text('Back to Landing Page'),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        // Navigate to detailed results dashboard
+                        Navigator.of(context).pop();
+                      },
+                      child: const Text('View Detailed Results'),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

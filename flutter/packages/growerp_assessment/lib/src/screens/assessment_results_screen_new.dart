@@ -419,11 +419,11 @@ class AssessmentResultsScreen extends StatelessWidget {
     try {
       final options = state.options[questionId] ?? [];
       final option = options.firstWhere(
-        (o) => o.optionId == optionId,
+        (o) => o.assessmentQuestionOptionId == optionId,
         orElse: () => AssessmentQuestionOption(
-          optionId: optionId,
+          assessmentQuestionOptionId: optionId,
           pseudoId: 'opt_$optionId',
-          questionId: questionId,
+          assessmentQuestionId: questionId,
           assessmentId: '',
           optionSequence: 0,
           optionText: 'Option $optionId',

@@ -6,13 +6,13 @@ part 'assessment_question_option_model.g.dart';
 @JsonSerializable()
 class AssessmentQuestionOption {
   /// System-wide unique identifier
-  final String? optionId;
+  final String? assessmentQuestionOptionId;
 
   /// Tenant-unique identifier
   final String? pseudoId;
 
   /// Question ID this option belongs to
-  final String? questionId;
+  final String? assessmentQuestionId;
 
   /// Assessment ID (for context)
   final String? assessmentId;
@@ -30,9 +30,9 @@ class AssessmentQuestionOption {
   final DateTime? createdDate;
 
   const AssessmentQuestionOption({
-    this.optionId,
+    this.assessmentQuestionOptionId,
     this.pseudoId,
-    this.questionId,
+    this.assessmentQuestionId,
     this.assessmentId,
     this.optionSequence,
     this.optionText,
@@ -41,9 +41,9 @@ class AssessmentQuestionOption {
   });
 
   AssessmentQuestionOption copyWith({
-    String? optionId,
+    String? assessmentQuestionOptionId,
     String? pseudoId,
-    String? questionId,
+    String? assessmentQuestionId,
     String? assessmentId,
     int? optionSequence,
     String? optionText,
@@ -51,9 +51,10 @@ class AssessmentQuestionOption {
     DateTime? createdDate,
   }) {
     return AssessmentQuestionOption(
-      optionId: optionId ?? this.optionId,
+      assessmentQuestionOptionId:
+          assessmentQuestionOptionId ?? this.assessmentQuestionOptionId,
       pseudoId: pseudoId ?? this.pseudoId,
-      questionId: questionId ?? this.questionId,
+      assessmentQuestionId: assessmentQuestionId ?? this.assessmentQuestionId,
       assessmentId: assessmentId ?? this.assessmentId,
       optionSequence: optionSequence ?? this.optionSequence,
       optionText: optionText ?? this.optionText,
@@ -68,17 +69,17 @@ class AssessmentQuestionOption {
 
   @override
   String toString() =>
-      'AssessmentQuestionOption(id: $optionId, text: $optionText, score: $optionScore)';
+      'AssessmentQuestionOption(id: $assessmentQuestionOptionId, text: $optionText, score: $optionScore)';
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is AssessmentQuestionOption &&
           runtimeType == other.runtimeType &&
-          optionId == other.optionId;
+          assessmentQuestionOptionId == other.assessmentQuestionOptionId;
 
   @override
-  int get hashCode => optionId.hashCode;
+  int get hashCode => assessmentQuestionOptionId.hashCode;
 }
 
 /// List wrapper for AssessmentQuestionOption objects

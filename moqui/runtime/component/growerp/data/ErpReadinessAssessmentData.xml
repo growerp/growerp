@@ -8,139 +8,161 @@
         status="Active" createdByUserLogin="admin" />
 
     <!-- Landing Page for ERP Readiness Assessment -->
-    <growerp.landing.LandingPage pageId="ERP_LANDING_PAGE"
+    <growerp.landing.LandingPage landingPageId="ERP_LANDING_PAGE"
         pseudoId="erp-landing-page" ownerPartyId="GROWERP"
-        assessmentId="ERP_READINESS" title="ERP Readiness Assessment"
+        title="ERP Readiness Assessment"
         hookType="ResultsHook"
         headline="Are you ready to run a successful, seamless ERP implementation?"
         subheading="Answer 15 questions to find out why you might be experiencing complexity and what steps you need to take to guarantee ERP success."
+        ctaActionType="assessment"
+        ctaAssessmentId="ERP_READINESS"
         status="Published" privacyPolicyUrl="/privacy" createdByUserLogin="admin" />
 
     <!-- Value Proposition Section -->
-    <growerp.landing.PageSection sectionId="ERP_VP" pseudoId="erp-vp" pageId="ERP_LANDING_PAGE"
+    <growerp.landing.PageSection pageSectionId="ERP_VP" pseudoId="erp-vp"
+        landingPageId="ERP_LANDING_PAGE"
         sectionSequence="1"
         sectionTitle="Measure and Improve Three Key Areas"
         sectionDescription="Take this assessment so that we can measure and improve three key areas essential for successful enterprise transformation: Data Governance &amp; Quality, Process Standardization, and Organizational Change Management." />
 
     <!-- Credibility Section -->
-    <growerp.landing.CredibilityInfo credibilityId="ERP_CRED" pseudoId="erp-cred"
-        pageId="ERP_LANDING_PAGE"
+    <growerp.landing.CredibilityInfo credibilityInfoId="ERP_CRED" pseudoId="erp-cred"
+        landingPageId="ERP_LANDING_PAGE"
         creatorBio="This assessment was created by GrowERP, a team specialized in scaling businesses and optimizing enterprise systems."
         backgroundText="Our background involves two decades of scaling multiple companies and building lead generation systems. We have consulted on over 50 major system migrations across various industries." />
     <growerp.landing.CredibilityStatistic statisticId="ERP_STAT1" pseudoId="erp-stat1"
-        credibilityId="ERP_CRED"
+        credibilityInfoId="ERP_CRED"
         statistic="We leveraged global data showing that 85% of businesses struggle with data integrity during large system implementations, leading to project delays."
         sequence="1" />
     <growerp.landing.CredibilityStatistic statisticId="ERP_STAT2" pseudoId="erp-stat2"
-        credibilityId="ERP_CRED"
+        credibilityInfoId="ERP_CRED"
         statistic="Furthermore, a recent study found that organizations prioritizing change management are 3X more likely to achieve project ROI. This assessment identifies where you stand."
         sequence="2" />
 
-    <!-- Call to Action -->
-    <growerp.landing.PrimaryCTA ctaId="ERP_CTA" pseudoId="erp-cta" pageId="ERP_LANDING_PAGE"
-        buttonText="Start the ERP Readiness Quiz Now!" estimatedTime="3 minutes" cost="Free"
-        valuePromise="Get immediate, tailored recommendations on how you can improve your ERP readiness score." />
-
     <!-- Assessment Questions -->
     <!-- Best Practices Questions (10) - examples -->
-    <growerp.assessment.AssessmentQuestion questionId="ERP_Q1" pseudoId="erp-q1"
+    <growerp.assessment.AssessmentQuestion assessmentQuestionId="ERP_Q1" pseudoId="erp-q1"
         assessmentId="ERP_READINESS" questionSequence="1"
         questionType="MultipleChoice"
         questionText="How would you rate your organization's data cleansing and preparation processes?"
         isRequired="Y" defaultOption="ERP_Q1_O2" />
-    <growerp.assessment.AssessmentQuestionOption optionId="ERP_Q1_O1" pseudoId="erp-q1-o1"
-        questionId="ERP_Q1" assessmentId="ERP_READINESS" optionSequence="1" optionText="Excellent"
+    <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERP_Q1_O1"
+        pseudoId="erp-q1-o1"
+        assessmentQuestionId="ERP_Q1" assessmentId="ERP_READINESS" optionSequence="1"
+        optionText="Excellent"
         optionScore="10" />
-    <growerp.assessment.AssessmentQuestionOption optionId="ERP_Q1_O2" pseudoId="erp-q1-o2"
-        questionId="ERP_Q1" assessmentId="ERP_READINESS" optionSequence="2" optionText="Good"
+    <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERP_Q1_O2"
+        pseudoId="erp-q1-o2"
+        assessmentQuestionId="ERP_Q1" assessmentId="ERP_READINESS" optionSequence="2"
+        optionText="Good"
         optionScore="7" />
-    <growerp.assessment.AssessmentQuestionOption optionId="ERP_Q1_O3" pseudoId="erp-q1-o3"
-        questionId="ERP_Q1" assessmentId="ERP_READINESS" optionSequence="3" optionText="Fair"
+    <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERP_Q1_O3"
+        pseudoId="erp-q1-o3"
+        assessmentQuestionId="ERP_Q1" assessmentId="ERP_READINESS" optionSequence="3"
+        optionText="Fair"
         optionScore="4" />
-    <growerp.assessment.AssessmentQuestionOption optionId="ERP_Q1_O4" pseudoId="erp-q1-o4"
-        questionId="ERP_Q1" assessmentId="ERP_READINESS" optionSequence="4" optionText="Poor"
+    <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERP_Q1_O4"
+        pseudoId="erp-q1-o4"
+        assessmentQuestionId="ERP_Q1" assessmentId="ERP_READINESS" optionSequence="4"
+        optionText="Poor"
         optionScore="1" />
 
-    <growerp.assessment.AssessmentQuestion questionId="ERP_Q2" pseudoId="erp-q2"
+    <growerp.assessment.AssessmentQuestion assessmentQuestionId="ERP_Q2" pseudoId="erp-q2"
         assessmentId="ERP_READINESS" questionSequence="2"
         questionType="MultipleChoice"
         questionText="Is there clear executive sponsorship for the ERP project?"
         isRequired="Y" defaultOption="ERP_Q2_O1" />
-    <growerp.assessment.AssessmentQuestionOption optionId="ERP_Q2_O1" pseudoId="erp-q2-o1"
-        questionId="ERP_Q2" assessmentId="ERP_READINESS" optionSequence="1"
+    <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERP_Q2_O1"
+        pseudoId="erp-q2-o1"
+        assessmentQuestionId="ERP_Q2" assessmentId="ERP_READINESS" optionSequence="1"
         optionText="Yes, fully committed and active." optionScore="10" />
-    <growerp.assessment.AssessmentQuestionOption optionId="ERP_Q2_O2" pseudoId="erp-q2-o2"
-        questionId="ERP_Q2" assessmentId="ERP_READINESS" optionSequence="2"
+    <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERP_Q2_O2"
+        pseudoId="erp-q2-o2"
+        assessmentQuestionId="ERP_Q2" assessmentId="ERP_READINESS" optionSequence="2"
         optionText="Partially, but not consistently." optionScore="5" />
-    <growerp.assessment.AssessmentQuestionOption optionId="ERP_Q2_O3" pseudoId="erp-q2-o3"
-        questionId="ERP_Q2" assessmentId="ERP_READINESS" optionSequence="3"
+    <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERP_Q2_O3"
+        pseudoId="erp-q2-o3"
+        assessmentQuestionId="ERP_Q2" assessmentId="ERP_READINESS" optionSequence="3"
         optionText="No, sponsorship is lacking." optionScore="1" />
 
     <!-- Qualifying Questions (5) -->
-    <growerp.assessment.AssessmentQuestion questionId="ERP_Q11" pseudoId="erp-q11"
+    <growerp.assessment.AssessmentQuestion assessmentQuestionId="ERP_Q11" pseudoId="erp-q11"
         assessmentId="ERP_READINESS" questionSequence="11"
         questionType="MultipleChoice"
         questionText="Which best describes your current system environment?"
         isRequired="Y" defaultOption="ERP_Q11_O2" />
-    <growerp.assessment.AssessmentQuestionOption optionId="ERP_Q11_O1" pseudoId="erp-q11-o1"
-        questionId="ERP_Q11" assessmentId="ERP_READINESS" optionSequence="1"
+    <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERP_Q11_O1"
+        pseudoId="erp-q11-o1"
+        assessmentQuestionId="ERP_Q11" assessmentId="ERP_READINESS" optionSequence="1"
         optionText="Fragmented/Siloed" />
-    <growerp.assessment.AssessmentQuestionOption optionId="ERP_Q11_O2" pseudoId="erp-q11-o2"
-        questionId="ERP_Q11" assessmentId="ERP_READINESS" optionSequence="2"
+    <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERP_Q11_O2"
+        pseudoId="erp-q11-o2"
+        assessmentQuestionId="ERP_Q11" assessmentId="ERP_READINESS" optionSequence="2"
         optionText="Partially Integrated" />
-    <growerp.assessment.AssessmentQuestionOption optionId="ERP_Q11_O3" pseudoId="erp-q11-o3"
-        questionId="ERP_Q11" assessmentId="ERP_READINESS" optionSequence="3"
+    <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERP_Q11_O3"
+        pseudoId="erp-q11-o3"
+        assessmentQuestionId="ERP_Q11" assessmentId="ERP_READINESS" optionSequence="3"
         optionText="Fully Integrated" />
 
-    <growerp.assessment.AssessmentQuestion questionId="ERP_Q12" pseudoId="erp-q12"
+    <growerp.assessment.AssessmentQuestion assessmentQuestionId="ERP_Q12" pseudoId="erp-q12"
         assessmentId="ERP_READINESS" questionSequence="12"
         questionType="MultipleChoice"
         questionText="Which desired outcome would you like to achieve in the next 90 days?"
         isRequired="Y" defaultOption="ERP_Q12_O2" />
-    <growerp.assessment.AssessmentQuestionOption optionId="ERP_Q12_O1" pseudoId="erp-q12-o1"
-        questionId="ERP_Q12" assessmentId="ERP_READINESS" optionSequence="1"
+    <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERP_Q12_O1"
+        pseudoId="erp-q12-o1"
+        assessmentQuestionId="ERP_Q12" assessmentId="ERP_READINESS" optionSequence="1"
         optionText="Reduce reporting cycle time" />
-    <growerp.assessment.AssessmentQuestionOption optionId="ERP_Q12_O2" pseudoId="erp-q12-o2"
-        questionId="ERP_Q12" assessmentId="ERP_READINESS" optionSequence="2"
+    <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERP_Q12_O2"
+        pseudoId="erp-q12-o2"
+        assessmentQuestionId="ERP_Q12" assessmentId="ERP_READINESS" optionSequence="2"
         optionText="Improve inventory accuracy" />
-    <growerp.assessment.AssessmentQuestionOption optionId="ERP_Q12_O3" pseudoId="erp-q12-o3"
-        questionId="ERP_Q12" assessmentId="ERP_READINESS" optionSequence="3"
+    <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERP_Q12_O3"
+        pseudoId="erp-q12-o3"
+        assessmentQuestionId="ERP_Q12" assessmentId="ERP_READINESS" optionSequence="3"
         optionText="Standardize core processes" />
 
-    <growerp.assessment.AssessmentQuestion questionId="ERP_Q13" pseudoId="erp-q13"
+    <growerp.assessment.AssessmentQuestion assessmentQuestionId="ERP_Q13" pseudoId="erp-q13"
         assessmentId="ERP_READINESS" questionSequence="13"
         questionType="MultipleChoice"
         questionText="What is the biggest obstacle stopping you, or what have you tried that hasn't worked?"
         isRequired="Y" defaultOption="ERP_Q13_O2" />
-    <growerp.assessment.AssessmentQuestionOption optionId="ERP_Q13_O1" pseudoId="erp-q13-o1"
-        questionId="ERP_Q13" assessmentId="ERP_READINESS" optionSequence="1"
+    <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERP_Q13_O1"
+        pseudoId="erp-q13-o1"
+        assessmentQuestionId="ERP_Q13" assessmentId="ERP_READINESS" optionSequence="1"
         optionText="Data migration failures" />
-    <growerp.assessment.AssessmentQuestionOption optionId="ERP_Q13_O2" pseudoId="erp-q13-o2"
-        questionId="ERP_Q13" assessmentId="ERP_READINESS" optionSequence="2"
+    <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERP_Q13_O2"
+        pseudoId="erp-q13-o2"
+        assessmentQuestionId="ERP_Q13" assessmentId="ERP_READINESS" optionSequence="2"
         optionText="Lack of user adoption" />
-    <growerp.assessment.AssessmentQuestionOption optionId="ERP_Q13_O3" pseudoId="erp-q13-o3"
-        questionId="ERP_Q13" assessmentId="ERP_READINESS" optionSequence="3"
+    <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERP_Q13_O3"
+        pseudoId="erp-q13-o3"
+        assessmentQuestionId="ERP_Q13" assessmentId="ERP_READINESS" optionSequence="3"
         optionText="Poor vendor selection" />
 
-    <growerp.assessment.AssessmentQuestion questionId="ERP_Q14" pseudoId="erp-q14"
+    <growerp.assessment.AssessmentQuestion assessmentQuestionId="ERP_Q14" pseudoId="erp-q14"
         assessmentId="ERP_READINESS" questionSequence="14"
         questionType="MultipleChoice"
         questionText="Which solution do you think would suit you best?"
         isRequired="Y" defaultOption="ERP_Q14_O2" />
-    <growerp.assessment.AssessmentQuestionOption optionId="ERP_Q14_O1" pseudoId="erp-q14-o1"
-        questionId="ERP_Q14" assessmentId="ERP_READINESS" optionSequence="1"
+    <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERP_Q14_O1"
+        pseudoId="erp-q14-o1"
+        assessmentQuestionId="ERP_Q14" assessmentId="ERP_READINESS" optionSequence="1"
         optionText="Education/Training" />
-    <growerp.assessment.AssessmentQuestionOption optionId="ERP_Q14_O2" pseudoId="erp-q14-o2"
-        questionId="ERP_Q14" assessmentId="ERP_READINESS" optionSequence="2"
+    <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERP_Q14_O2"
+        pseudoId="erp-q14-o2"
+        assessmentQuestionId="ERP_Q14" assessmentId="ERP_READINESS" optionSequence="2"
         optionText="One-to-one consulting/coaching" />
-    <growerp.assessment.AssessmentQuestionOption optionId="ERP_Q14_O3" pseudoId="erp-q14-o3"
-        questionId="ERP_Q14" assessmentId="ERP_READINESS" optionSequence="3"
+    <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERP_Q14_O3"
+        pseudoId="erp-q14-o3"
+        assessmentQuestionId="ERP_Q14" assessmentId="ERP_READINESS" optionSequence="3"
         optionText="Full implementation support" />
-    <growerp.assessment.AssessmentQuestionOption optionId="ERP_Q14_O4" pseudoId="erp-q14-o4"
-        questionId="ERP_Q14" assessmentId="ERP_READINESS" optionSequence="4"
+    <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERP_Q14_O4"
+        pseudoId="erp-q14-o4"
+        assessmentQuestionId="ERP_Q14" assessmentId="ERP_READINESS" optionSequence="4"
         optionText="ERP software recommendation" />
 
-    <growerp.assessment.AssessmentQuestion questionId="ERP_Q15" pseudoId="erp-q15"
+    <growerp.assessment.AssessmentQuestion assessmentQuestionId="ERP_Q15" pseudoId="erp-q15"
         assessmentId="ERP_READINESS" questionSequence="15"
         questionType="OpenText"
         questionText="Is there anything else that you think we need to know about?"

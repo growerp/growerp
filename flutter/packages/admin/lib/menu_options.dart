@@ -20,10 +20,10 @@ import 'package:growerp_catalog/growerp_catalog.dart';
 import 'package:growerp_inventory/growerp_inventory.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 import 'package:growerp_website/growerp_website.dart';
+import 'package:growerp_assessment/growerp_assessment.dart';
 import 'views/admin_db_form.dart' as local;
 import 'package:growerp_user_company/growerp_user_company.dart';
 import 'package:growerp_models/growerp_models.dart';
-import 'package:growerp_assessment/growerp_assessment.dart';
 
 List<MenuOption> getMenuOptions(BuildContext context) => [
   MenuOption(
@@ -99,12 +99,12 @@ List<MenuOption> getMenuOptions(BuildContext context) => [
         icon: const Icon(Icons.question_answer),
       ),
       TabItem(
-        form: const LandingPageListScreen(),
+        form: const LandingPageList(),
         label: 'Landing Pages',
-        icon: const Icon(Icons.language),
+        icon: const Icon(Icons.web),
       ),
       TabItem(
-        form: const AssessmentListScreen(),
+        form: const AssessmentList(),
         label: 'Assessments',
         icon: const Icon(Icons.quiz),
       ),
@@ -304,12 +304,12 @@ List<MenuOption> menuOptions(BuildContext context) => [
         icon: const Icon(Icons.question_answer),
       ),
       TabItem(
-        form: const LandingPageListScreen(),
+        form: const LandingPageList(),
         label: 'Landing Pages',
-        icon: const Icon(Icons.language),
+        icon: const Icon(Icons.web),
       ),
       TabItem(
-        form: const AssessmentListScreen(),
+        form: const AssessmentList(),
         label: 'Assessments',
         icon: const Icon(Icons.quiz),
       ),

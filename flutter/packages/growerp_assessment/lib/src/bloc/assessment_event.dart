@@ -152,14 +152,14 @@ final class AssessmentFetchQuestions extends AssessmentEvent {
 final class AssessmentFetchQuestionOptions extends AssessmentEvent {
   const AssessmentFetchQuestionOptions({
     required this.assessmentId,
-    required this.questionId,
+    required this.assessmentQuestionId,
   });
 
   final String assessmentId;
-  final String questionId;
+  final String assessmentQuestionId;
 
   @override
-  List<Object> get props => [assessmentId, questionId];
+  List<Object> get props => [assessmentId, assessmentQuestionId];
 }
 
 final class AssessmentFetchThresholds extends AssessmentEvent {

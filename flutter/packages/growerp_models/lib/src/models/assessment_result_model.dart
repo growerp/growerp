@@ -6,7 +6,7 @@ part 'assessment_result_model.g.dart';
 @JsonSerializable()
 class AssessmentResult {
   /// System-wide unique identifier
-  final String resultId;
+  final String assessmentResultId;
 
   /// Tenant-unique identifier
   final String pseudoId;
@@ -39,7 +39,7 @@ class AssessmentResult {
   final DateTime? createdDate;
 
   const AssessmentResult({
-    required this.resultId,
+    required this.assessmentResultId,
     required this.pseudoId,
     required this.assessmentId,
     required this.score,
@@ -53,7 +53,7 @@ class AssessmentResult {
   });
 
   AssessmentResult copyWith({
-    String? resultId,
+    String? assessmentResultId,
     String? pseudoId,
     String? assessmentId,
     double? score,
@@ -66,7 +66,7 @@ class AssessmentResult {
     DateTime? createdDate,
   }) {
     return AssessmentResult(
-      resultId: resultId ?? this.resultId,
+      assessmentResultId: assessmentResultId ?? this.assessmentResultId,
       pseudoId: pseudoId ?? this.pseudoId,
       assessmentId: assessmentId ?? this.assessmentId,
       score: score ?? this.score,
@@ -86,17 +86,17 @@ class AssessmentResult {
 
   @override
   String toString() =>
-      'AssessmentResult(id: $resultId, score: $score, status: $leadStatus, respondent: $respondentName)';
+      'AssessmentResult(id: $assessmentResultId, score: $score, status: $leadStatus, respondent: $respondentName)';
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is AssessmentResult &&
           runtimeType == other.runtimeType &&
-          resultId == other.resultId;
+          assessmentResultId == other.assessmentResultId;
 
   @override
-  int get hashCode => resultId.hashCode;
+  int get hashCode => assessmentResultId.hashCode;
 }
 
 /// List wrapper for AssessmentResult objects

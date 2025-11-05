@@ -24,7 +24,7 @@ class StringBoolConverter implements JsonConverter<bool, dynamic> {
 @JsonSerializable()
 class AssessmentQuestion {
   /// System-wide unique identifier
-  final String? questionId;
+  final String? assessmentQuestionId;
 
   /// Tenant-unique identifier
   final String? pseudoId;
@@ -58,7 +58,7 @@ class AssessmentQuestion {
   final List<AssessmentQuestionOption>? options;
 
   const AssessmentQuestion({
-    this.questionId,
+    this.assessmentQuestionId,
     this.pseudoId,
     this.assessmentId,
     this.questionSequence,
@@ -73,7 +73,7 @@ class AssessmentQuestion {
 
   /// Creates a copy with optionally replaced fields
   AssessmentQuestion copyWith({
-    String? questionId,
+    String? assessmentQuestionId,
     String? pseudoId,
     String? assessmentId,
     int? questionSequence,
@@ -86,7 +86,7 @@ class AssessmentQuestion {
     List<AssessmentQuestionOption>? options,
   }) {
     return AssessmentQuestion(
-      questionId: questionId ?? this.questionId,
+      assessmentQuestionId: assessmentQuestionId ?? this.assessmentQuestionId,
       pseudoId: pseudoId ?? this.pseudoId,
       assessmentId: assessmentId ?? this.assessmentId,
       questionSequence: questionSequence ?? this.questionSequence,
@@ -106,17 +106,17 @@ class AssessmentQuestion {
 
   @override
   String toString() =>
-      'AssessmentQuestion(id: $questionId, type: $questionType, seq: $questionSequence)';
+      'AssessmentQuestion(id: $assessmentQuestionId, type: $questionType, seq: $questionSequence)';
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is AssessmentQuestion &&
           runtimeType == other.runtimeType &&
-          questionId == other.questionId;
+          assessmentQuestionId == other.assessmentQuestionId;
 
   @override
-  int get hashCode => questionId.hashCode;
+  int get hashCode => assessmentQuestionId.hashCode;
 }
 
 /// List wrapper for AssessmentQuestion objects

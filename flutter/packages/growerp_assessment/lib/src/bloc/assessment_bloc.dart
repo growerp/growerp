@@ -13,6 +13,7 @@
  */
 
 import 'dart:async';
+import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
@@ -227,9 +228,12 @@ class AssessmentBloc extends Bloc<AssessmentEvent, AssessmentState> {
     try {
       emit(state.copyWith(status: AssessmentStatus.loading));
 
+      // Convert answers Map to JSON string
+      final answersJson = jsonEncode(event.answers);
+
       final result = await restClient.submitAssessment(
         assessmentId: event.assessmentId,
-        answers: event.answers,
+        answers: answersJson,
         respondentName: event.respondentName,
         respondentEmail: event.respondentEmail,
         respondentPhone: event.respondentPhone,
@@ -255,9 +259,12 @@ class AssessmentBloc extends Bloc<AssessmentEvent, AssessmentState> {
     try {
       emit(state.copyWith(status: AssessmentStatus.loading));
 
+      // Convert answers Map to JSON string
+      final answersJson = jsonEncode(event.answers);
+
       final scoreResult = await restClient.calculateAssessmentScore(
         assessmentId: event.assessmentId,
-        answers: event.answers,
+        answers: answersJson,
       );
 
       emit(state.copyWith(
@@ -346,13 +353,13 @@ class AssessmentBloc extends Bloc<AssessmentEvent, AssessmentState> {
 
       final optionsResponse = await restClient.getAssessmentQuestionOptions(
         assessmentId: event.assessmentId,
-        questionId: event.questionId,
+        assessmentQuestionId: event.assessmentQuestionId,
       );
 
       // Update the options map with the new options for this question
       final updatedOptions =
           Map<String, List<AssessmentQuestionOption>>.from(state.options);
-      updatedOptions[event.questionId] = optionsResponse.options;
+      updatedOptions[event.assessmentQuestionId] = optionsResponse.options;
 
       emit(state.copyWith(
         status: AssessmentStatus.success,

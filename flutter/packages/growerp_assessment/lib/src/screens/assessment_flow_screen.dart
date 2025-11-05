@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../bloc/assessment_bloc.dart';
-import 'package:growerp_assessment/growerp_assessment.dart';
+import 'package:growerp_assessment/growerp_assessment.dart'
+    hide AssessmentResultsScreen;
 import 'lead_capture_screen.dart';
-import 'assessment_questions_screen.dart';
-import 'assessment_results_screen_new.dart';
+import 'assessment_results_screen_new.dart' as new_results;
 
 /// Assessment Flow Container
 /// Manages the three-step assessment process and state transitions
@@ -217,7 +216,7 @@ class _AssessmentFlowScreenState extends State<AssessmentFlowScreen> {
             BlocBuilder<AssessmentBloc, AssessmentState>(
               builder: (context, state) {
                 if (state.selectedAssessment != null) {
-                  return AssessmentResultsScreen(
+                  return new_results.AssessmentResultsScreen(
                     assessment: state.selectedAssessment!,
                     answers: _answers
                         .map((key, value) => MapEntry(key, value.toString())),

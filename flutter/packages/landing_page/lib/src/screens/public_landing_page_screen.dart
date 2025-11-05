@@ -19,14 +19,14 @@ import 'package:growerp_assessment/growerp_assessment.dart';
 class PublicLandingPageScreen extends StatefulWidget {
   const PublicLandingPageScreen({
     super.key,
-    required this.pageId,
+    required this.landingPageId,
     this.ownerPartyId,
     this.onCtaPressed,
   });
 
-  final String pageId;
+  final String landingPageId;
   final String? ownerPartyId;
-  final Function(CallToAction)? onCtaPressed;
+  final VoidCallback? onCtaPressed;
 
   @override
   State<PublicLandingPageScreen> createState() =>
@@ -35,24 +35,18 @@ class PublicLandingPageScreen extends StatefulWidget {
 
 class _PublicLandingPageScreenState extends State<PublicLandingPageScreen> {
   @override
-  void initState() {
-    super.initState();
-    _loadLandingPage();
-  }
-
-  @override
   void didUpdateWidget(covariant PublicLandingPageScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.pageId != oldWidget.pageId ||
+    // Reload landing page only if the parameters changed
+    if (widget.landingPageId != oldWidget.landingPageId ||
         widget.ownerPartyId != oldWidget.ownerPartyId) {
-      _loadLandingPage();
+      context.read<LandingPageBloc>().add(
+        LandingPageFetch(
+          pseudoId: widget.landingPageId,
+          ownerPartyId: widget.ownerPartyId,
+        ),
+      );
     }
-  }
-
-  void _loadLandingPage() {
-    context.read<LandingPageBloc>().add(
-      LandingPageFetch(widget.pageId, ownerPartyId: widget.ownerPartyId),
-    );
   }
 
   @override
@@ -91,7 +85,7 @@ class _PublicLandingPageScreenState extends State<PublicLandingPageScreen> {
                     onPressed: () {
                       context.read<LandingPageBloc>().add(
                         LandingPageFetch(
-                          widget.pageId,
+                          pseudoId: widget.landingPageId,
                           ownerPartyId: widget.ownerPartyId,
                         ),
                       );
@@ -139,9 +133,9 @@ class _PublicLandingPageScreenState extends State<PublicLandingPageScreen> {
           ],
 
           // 4. Call to Action
-          if (page.cta != null) ...[
+          if (page.ctaActionType != null) ...[
             const SizedBox(height: 32),
-            _buildCtaSection(context, page.cta!),
+            _buildCtaSection(context, page),
           ],
 
           const SizedBox(height: 32),
@@ -246,7 +240,7 @@ class _PublicLandingPageScreenState extends State<PublicLandingPageScreen> {
 
   Widget _buildCredibilitySection(
     BuildContext context,
-    CredibilityElement credibility,
+    CredibilityInfo credibility,
   ) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 24),
@@ -266,6 +260,7 @@ class _PublicLandingPageScreenState extends State<PublicLandingPageScreen> {
             ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
+          // Main credibility info with image and bio
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -320,12 +315,54 @@ class _PublicLandingPageScreenState extends State<PublicLandingPageScreen> {
               ),
             ],
           ),
+          // Display credibility statistics if available
+          if (credibility.statistics != null &&
+              credibility.statistics!.isNotEmpty) ...[
+            const SizedBox(height: 24),
+            Text(
+              'Key Statistics',
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 16,
+              runSpacing: 12,
+              children: credibility.statistics!.map((stat) {
+                return Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.grey[300]!),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        stat.statistic ?? '',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: Theme.of(context).primaryColor,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                );
+              }).toList(),
+            ),
+          ],
         ],
       ),
     );
   }
 
-  Widget _buildCtaSection(BuildContext context, CallToAction cta) {
+  Widget _buildCtaSection(BuildContext context, LandingPage page) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 24),
       padding: const EdgeInsets.all(24),
@@ -342,23 +379,22 @@ class _PublicLandingPageScreenState extends State<PublicLandingPageScreen> {
       ),
       child: Column(
         children: [
-          if (cta.valuePromise != null && cta.valuePromise!.isNotEmpty)
-            Text(
-              cta.valuePromise!,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-              textAlign: TextAlign.center,
+          Text(
+            'Get personalized recommendations in just 3 minutes - completely free!',
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
             ),
+            textAlign: TextAlign.center,
+          ),
           const SizedBox(height: 24),
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
               onPressed: () {
-                // Use callback if provided, otherwise use default navigation
+                // Use callback if provided
                 if (widget.onCtaPressed != null) {
-                  widget.onCtaPressed!(cta);
+                  widget.onCtaPressed!();
                 }
               },
               style: ElevatedButton.styleFrom(
@@ -369,12 +405,9 @@ class _PublicLandingPageScreenState extends State<PublicLandingPageScreen> {
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),
-              child: Text(
-                cta.buttonText ?? 'Learn More',
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
+              child: const Text(
+                'Start Free Assessment',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
             ),
           ),

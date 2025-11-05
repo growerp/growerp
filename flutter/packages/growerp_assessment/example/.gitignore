@@ -17,8 +17,9 @@ migrate_working_dir/
 .idea/
 
 # The .vscode folder contains launch configuration and tasks you configure in
-# VS Code which you may wish to be committed to version control
-.vscode/
+# VS Code which you may wish to be included in version control, so this line
+# is commented out by default.
+#.vscode/
 
 # Flutter/Dart/Pub related
 **/doc/api/
@@ -44,11 +45,14 @@ app.*.map.json
 **/ios/**/*.pbxuser
 **/ios/**/*.perspectivev3
 **/ios/**/*.xcconfig
-**/ios/**/*.xcworkspace/contents.xcworkspacedata
-**/ios/**/*.xcworkspace/
+**/ios/**/*.xcworkspace
 **/ios/**/.sconsign.dblite
 **/ios/**/.tags*
-**/ios/**/.vscode/
+**/ios/**/.vagrant/
+**/ios/**/DerivedData/
+**/ios/**/Icon?
+**/ios/**/Pods/
+**/ios/**/.symlinks/
 **/ios/**/Flutter/Flutter.framework
 **/ios/**/Flutter/Flutter.podspec
 **/ios/**/Flutter/Generated.xcconfig
@@ -57,53 +61,14 @@ app.*.map.json
 **/ios/**/Flutter/app.zip
 **/ios/**/Flutter/flutter_assets/
 **/ios/**/Flutter/flutter_export_environment.sh
-**/ios/**/Flutter/local.properties
-**/ios/**/Flutter/plugins.json
-**/ios/**/GeneratedPluginRegistrant.h
-**/ios/**/GeneratedPluginRegistrant.m
-**/ios/**/GeneratedPluginRegistrant.swift
-**/ios/**/Runner.xcodeproj/project.xcworkspace/contents.xcworkspacedata
-**/ios/**/Runner.xcworkspace/contents.xcworkspacedata
-**/ios/**/Runner.xcworkspace/
-**/ios/**/xcuser.xcuserdatad/
+**/ios/**/ServiceDefinitions.json
+**/ios/**/Runner/GeneratedPluginRegistrant.*
 
 # macOS
 **/macos/Flutter/GeneratedPluginRegistrant.swift
 
-# Android
-**/android/**/GeneratedPluginRegistrant.java
-**/android/.gradle
-**/android/captures/
-**/android/gradle-wrapper.jar
-**/android/gradle-wrapper.properties
-**/android/gradlew
-**/android/gradlew.bat
-**/android/key.properties
-**/android/local.properties
-**/gradle/
+# Web
+lib/generated_plugin_registrant.dart
 
-# Web platform
-lib/generated_plugins.dart
-
-# Windows
-windows/flutter/generated_plugins.cmake
-windows/flutter/generated_plugins.vcxproj
-windows/flutter/generated_plugins_vcxproj_file_name.txt
-
-# macOS
-macos/Flutter/GeneratedPluginRegistrant.swift
-
-# Linux
-linux/flutter/generated_plugins.cmake
-linux/flutter/generated_plugins_toolchain.cmake
-
-# Coverage
-coverage/
-
-# Melos related
-melos_*.iml
-
-# Generated files
-.dart_tool/
-.packages
-pubspec.lock
+# Exceptions to above rules.
+!/packages/flutter_tools/test/data/dart_dependencies_test/**/.packages

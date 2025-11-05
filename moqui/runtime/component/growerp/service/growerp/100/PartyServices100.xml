@@ -28,11 +28,9 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="name" />
                 <parameter name="email" />
                 <parameter name="role" />
-                <parameter name="email" />
             </parameter>
         </out-parameters>
         <actions>
-            <log message="====get company from host: $hostName" />
             <entity-find entity-name="mantle.product.store.ProductStoreSetting" list="hostNames">
                 <econdition field-name="settingTypeEnumId" value="PsstHostname" />
                 <econdition field-name="settingValue" from="hostName" />
@@ -47,16 +45,16 @@ along with this software (see the LICENSE.md file). If not, see
                     <set field="productStoreId" from="hostNames[0].productStoreId" />
                 </else>
             </if>
-            <log message="=====get productStoreid; $productStoreId" />
             <entity-find entity-name="mantle.product.store.ProductStore" list="stores">
                 <econdition field-name="productStoreId" />
             </entity-find>
             <if condition="stores">
-                <service-call name="growerp.100.PartyServices100.get#Company"
-                    in-map="[companyPartyId: stores[0].organizationPartyId]"
-                    out-map="context" />
+                <entity-find entity-name="growerp.party.OwnerCompany" list="companies">
+                    <econdition field-name="partyId" from="stores[0].organizationPartyId" />
+                </entity-find>
                 <set field="company" from="companies[0]" />
             </if>
+            <log message="====outgoing company: $company" />
         </actions>
     </service>
 
@@ -3686,198 +3684,112 @@ along with this software (see the LICENSE.md file). If not, see
                 </iterate>
             </while>
             <!-- load assessment demo data to be added to a landing page -->
-            <set field="assessmentList" from="[]" />
             <entity-find entity-name="growerp.assessment.Assessment" list="assessments">
                 <econdition field-name="ownerPartyId" value="DEMO" />
             </entity-find>
-            <iterate list="assessments" entry="assessment">
+            <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                in-map="[ownerPartyId: ownerPartyId, seqName: 'assessment']" out-map="context" />
+            <service-call name="create#growerp.assessment.Assessment"
+                in-map="[assessments[0] + 
+                        [assessmentId: null, ownerPartyId: ownerPartyId, pseudoId: seqNum]]"
+                out-map="newAssessment" />
+            <!-- assessment questions -->
+            <entity-find entity-name="growerp.assessment.AssessmentQuestion" list="demoQuestions">
+                <econdition field-name="assessmentId" from="assessments[0].assessmentId" />
+            </entity-find>
+            <iterate list="demoQuestions" entry="demoQuestion">
                 <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
-                    in-map="[ownerPartyId: ownerPartyId, seqName: 'assessment']" out-map="context" />
-                <service-call name="create#growerp.assessment.Assessment"
-                    in-map="[assessment + 
-                    [assessmentId: null, ownerPartyId: ownerPartyId, pseudoId: seqNum,]]"
-                    out-map="newAssessment" />
-                <script>assessmentList.add(newAssessment.assessmentId)</script>
-                <!-- assessment questions-->
-                <entity-find entity-name="growerp.assessment.AssessmentQuestion" list="questions">
-                    <econdition field-name="assessmentId" value="assessment.assessmentId" />
+                    in-map="[ownerPartyId: ownerPartyId, seqName: 'assessmentQuestion']"
+                    out-map="context" />
+                <service-call name="create#growerp.assessment.AssessmentQuestion"
+                    in-map="[demoQuestion + 
+                            [assessmentQuestionId: null, assessmentId: newAssessment.assessmentId, pseudoId: seqNum]]"
+                    out-map="newQuestion" />
+                <!-- assessment question options -->
+                <entity-find entity-name="growerp.assessment.AssessmentQuestionOption"
+                    list="demoOptions">
+                    <econdition field-name="assessmentQuestionId"
+                        from="demoQuestion.assessmentQuestionId" />
                 </entity-find>
-                <iterate list="questions" entry="question">
+                <iterate list="demoOptions" entry="demoOption">
                     <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
-                        in-map="[ownerPartyId: ownerPartyId, seqName: 'assessmentQuestion']"
-                        out-map="newQuestion" />
-                    <set field="question"
-                        from="question + [assessmentId: newAssessment.assessmentId, questionId: null, pseudoId: seqNum]" />
-                    <service-call name="create#growerp.assessment.AssessmentQuestion"
-                        in-map="[assessment + 
-                    [assessmentId: newAssessment.assessmentId, questionid: null, pseudoId: seqNum]]"
-                        out-map="newQuestion" />
-                    <!-- assessment question option -->
-                    <entity-find entity-name="growerp.assessment.AssessmentQuestionOption"
-                        list="options">
-                        <econdition field-name="assessmentId" value="assessment.assessmentId" />
-                    </entity-find>
-                    <iterate list="options" entry="option">
-                        <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
-                            in-map="[ownerPartyId: ownerPartyId, seqName: 'assessmentQuestionOption']"
-                            out-map="context" />
-                        <set field="option"
-                            from="option + [assessmentId: newAssessment.assessmentId, questionId: newQuestion.questionId,
-                                optionId: null, pseudoId: seqNum]" />
-                        <entity-create value-field="option" />
-                    </iterate>
-                </iterate>
-                <!-- scoring treshhold -->
-                <entity-find entity-name="growerp.assessment.ScoringThreshold"
-                    list="thresholds">
-                    <econdition field-name="assessmentId" value="assessment.assessmentId" />
-                </entity-find>
-                <iterate list="thresholds" entry="threshold">
-                    <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
-                        in-map="[ownerPartyId: ownerPartyId, seqName: 'scoringThreshold']"
+                        in-map="[ownerPartyId: ownerPartyId, seqName: 'assessmentQuestionOption']"
                         out-map="context" />
-                    <set field="threshold"
-                        from="threshold + [assessmentId: newAssessment.assessmentId, thresholdId: null, pseudoId: seqNum]" />
-                    <entity-create value-field="threshold" />
-                </iterate>
-                <!-- assessment result -->
-                <entity-find entity-name="growerp.assessment.AssessmentResult" list="results">
-                    <econdition field-name="assessmentId" value="assessment.assessmentId" />
-                </entity-find>
-                <iterate list="results" entry="result">
-                    <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
-                        in-map="[ownerPartyId: ownerPartyId, seqName: 'assessmentResult']"
-                        out-map="context" />
-                    <set field="result"
-                        from="result + [assessmentId: newAssessment.assessmentId, resultId: null, pseudoId: seqNum]" />
-                    <entity-create value-field="result" />
+                    <service-call name="create#growerp.assessment.AssessmentQuestionOption"
+                        in-map="[demoOption + [assessmentQuestionOptionId: null, 
+                                assessmentQuestionId: newQuestion.assessmentQuestionId,
+                                assessmentId: newAssessment.assessmentId, pseudoId: seqNum]]" />
                 </iterate>
             </iterate>
+            <!-- scoring thresholds -->
+            <entity-find entity-name="growerp.assessment.ScoringThreshold"
+                list="demoThresholds">
+                <econdition field-name="assessmentId" from="assessments[0].assessmentId" />
+            </entity-find>
+            <iterate list="demoThresholds" entry="demoThreshold">
+                <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                    in-map="[ownerPartyId: ownerPartyId, seqName: 'scoringThreshold']"
+                    out-map="context" />
+                <service-call name="create#growerp.assessment.ScoringThreshold"
+                    in-map="[demoThreshold + [scoringThresholdId: null, assessmentId: newAssessment.assessmentId, pseudoId: seqNum]]" />
+            </iterate>
+            <!-- assessment results -->
+            <entity-find entity-name="growerp.assessment.AssessmentResult" list="demoResults">
+                <econdition field-name="assessmentId" from="assessments[0].assessmentId" />
+            </entity-find>
+            <iterate list="demoResults" entry="demoResult">
+                <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                    in-map="[ownerPartyId: ownerPartyId, seqName: 'assessmentResult']"
+                    out-map="context" />
+                <service-call name="create#growerp.assessment.AssessmentResult"
+                    in-map="[demoResult + [assessmentResultId: null, assessmentId: newAssessment.assessmentId, pseudoId: seqNum]]" />
+            </iterate>
             <!-- load landing page demo data -->
-            <set field="index" value="0" type="Integer" />
             <entity-find entity-name="growerp.landing.LandingPage" list="landingPages">
                 <econdition field-name="ownerPartyId" value="DEMO" />
             </entity-find>
-            <iterate list="landingPages" entry="landingPage">
-                <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
-                    in-map="[ownerPartyId: ownerPartyId, seqName: 'landingPage']" out-map="context" />
-                <service-call name="create#growerp.landing.LandingPage"
-                    in-map="[landingPage + [assessmentId: assessmentList[index++],
-                        pageId: null, ownerPartyId: ownerPartyId, pseudoId: seqNum]]"
-                    out-map="newPage" />
-                <!-- page sections-->
-                <entity-find entity-name="growerp.landing.PageSection" list="sections">
-                    <econdition field-name="pageId" value="landingPage.pageId" />
-                </entity-find>
-                <iterate list="sections" entry="section">
-                    <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
-                        in-map="[ownerPartyId: ownerPartyId, seqName: 'pageSection']"
-                        out-map="context" />
-                    <service-call name="create#growerp.landing.PageSection"
-                        in-map="[section + [sectionId: null, pageId: newPage.pageId, pseudoId: seqNum]]"
-                        out-map="context" />
-                </iterate>
-                <!-- credibility info-->
-                <entity-find entity-name="growerp.landing.CredibilityInfo" list="credibilities">
-                    <econdition field-name="pageId" value="landingPage.pageId" />
-                </entity-find>
-                <if condition="credibilities">
-                    <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
-                        in-map="[ownerPartyId: ownerPartyId, seqName: 'credibilityInfo']"
-                        out-map="context" />
-                    <service-call name="create#growerp.landing.CredibilityInfo"
-                        in-map="[credibilities[0] + [credibilityId: null, pageId: newPage.pageId,
-                        pseudoId: seqNum]]"
-                        out-map="context" />
-                    <entity-find entity-name="growerp.landing.CredibilityStatistic" list="stats">
-                        <econdition field-name="credibilityId" from="credibilities[0].credibilityId" />
-                    </entity-find>
-                    <iterate list="stats" entry="statistic">
-                        <service-call name="create#growerp.landing.CredibilityStatistic"
-                            in-map="[statistic + [credibilityId: credibilityId, statisticId: null]]"
-                            out-map="context" />
-                    </iterate>
-                </if>
-                <!-- CTA -->
-                <entity-find entity-name="growerp.landing.PrimaryCTA" list="ctas">
-                    <econdition field-name="pageId" value="landingPage.pageId" />
-                </entity-find>
-                <if condition="ctas">
-                    <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
-                        in-map="[ownerPartyId: ownerPartyId, seqName: 'primaryCTA']"
-                        out-map="context" />
-                    <service-call name="create#growerp.landing.PrimaryCTA"
-                        in-map="[ctas[0] + [ctaId: null, pageId: newPage.pageId, pseudoId: seqNum]]"
-                        out-map="context" />
-                </if>
-            </iterate>
-            <!-- load assessment demo data -->
-            <entity-find entity-name="growerp.assessment.Assessment" list="assessments">
-                <econdition field-name="ownerPartyId" value="DEMO" />
+            <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                in-map="[ownerPartyId: ownerPartyId, seqName: 'landingPage']" out-map="context" />
+            <service-call name="create#growerp.landing.LandingPage"
+                in-map="[landingPages[0] + [ctaAssessmentId: newAssessment.assessmentId,
+                        landingPageId: null, ownerPartyId: ownerPartyId, pseudoId: seqNum]]"
+                out-map="newPage" />
+            <!-- page sections-->
+            <entity-find
+                entity-name="growerp.landing.PageSection" list="sections">
+                <econdition field-name="landingPageId" from="newPage.landingPageId" />
             </entity-find>
-            <iterate list="assessments" entry="assessment">
-                <!-- assessment demo data -->
+            <iterate list="sections" entry="section">
                 <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
-                    in-map="[ownerPartyId: ownerPartyId, seqName: 'assessment']" out-map="context" />
-                <service-call name="create#growerp.assessment.Assessment"
-                    in-map="[assessment + 
-                    [assessmentId: null, ownerPartyId: ownerPartyId, pseudoId: seqNum]]"
-                    out-map="newAssessment" />
-                <!-- assessment questions-->
-                <entity-find entity-name="growerp.assessment.AssessmentQuestion" list="questions">
-                    <econdition field-name="assessmentId" value="assessment.assessmentId" />
-                </entity-find>
-                <iterate list="questions" entry="question">
-                    <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
-                        in-map="[ownerPartyId: ownerPartyId, seqName: 'assessmentQuestion']"
-                        out-map="newQuestion" />
-                    <set field="question"
-                        from="question + [assessmentId: newAssessment.assessmentId, questionId: null, pseudoId: seqNum]" />
-                    <service-call name="create#growerp.assessment.AssessmentQuestion"
-                        in-map="[assessment + 
-                    [assessmentId: newAssessment.assessmentId, questionid: null, pseudoId: seqNum]]"
-                        out-map="newQuestion" />
-                    <!-- assessment question option -->
-                    <entity-find entity-name="growerp.assessment.AssessmentQuestionOption"
-                        list="options">
-                        <econdition field-name="assessmentId" value="assessment.assessmentId" />
-                    </entity-find>
-                    <iterate list="options" entry="option">
-                        <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
-                            in-map="[ownerPartyId: ownerPartyId, seqName: 'assessmentQuestionOption']"
-                            out-map="context" />
-                        <set field="option"
-                            from="option + [assessmentId: newAssessment.assessmentId, questionId: newQuestion.questionId,
-                                optionId: null, pseudoId: seqNum]" />
-                        <entity-create value-field="option" />
-                    </iterate>
-                </iterate>
-                <!-- scoring treshhold -->
-                <entity-find entity-name="growerp.assessment.ScoringThreshold"
-                    list="thresholds">
-                    <econdition field-name="assessmentId" value="assessment.assessmentId" />
-                </entity-find>
-                <iterate list="thresholds" entry="threshold">
-                    <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
-                        in-map="[ownerPartyId: ownerPartyId, seqName: 'scoringThreshold']"
-                        out-map="context" />
-                    <set field="threshold"
-                        from="threshold + [assessmentId: newAssessment.assessmentId, thresholdId: null, pseudoId: seqNum]" />
-                    <entity-create value-field="threshold" />
-                </iterate>
-                <!-- assessment result -->
-                <entity-find entity-name="growerp.assessment.AssessmentResult" list="results">
-                    <econdition field-name="assessmentId" value="assessment.assessmentId" />
-                </entity-find>
-                <iterate list="results" entry="result">
-                    <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
-                        in-map="[ownerPartyId: ownerPartyId, seqName: 'assessmentResult']"
-                        out-map="context" />
-                    <set field="result"
-                        from="result + [assessmentId: newAssessment.assessmentId, resultId: null, pseudoId: seqNum]" />
-                    <entity-create value-field="result" />
-                </iterate>
+                    in-map="[ownerPartyId: ownerPartyId, seqName: 'pageSection']"
+                    out-map="context" />
+                <service-call name="create#growerp.landing.PageSection"
+                    in-map="[section + [pageSectionId: null, landingPageId: newPage.landingPageId, pseudoId: seqNum]]"
+                    out-map="context" />
             </iterate>
+            <!-- credibility info-->
+            <entity-find entity-name="growerp.landing.CredibilityInfo" list="credibilities">
+                <econdition field-name="landingPageId" from="newPage.landingPageId" />
+            </entity-find>
+            <if condition="credibilities">
+                <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                    in-map="[ownerPartyId: ownerPartyId, seqName: 'credibilityInfo']"
+                    out-map="context" />
+                <service-call name="create#growerp.landing.CredibilityInfo"
+                    in-map="[credibilities[0] + [credibilityInfoId: null, landingPageId: newPage.landingPageId,
+                        pseudoId: seqNum]]"
+                    out-map="context" />
+                <entity-find entity-name="growerp.landing.CredibilityStatistic" list="stats">
+                    <econdition field-name="credibilityInfoId"
+                        from="credibilities[0].credibilityInfoId" />
+                </entity-find>
+                <iterate list="stats" entry="statistic">
+                    <service-call name="create#growerp.landing.CredibilityStatistic"
+                        in-map="[statistic + [credibilityInfoId: credibilityInfoId, credibilityStatisticId: null]]"
+                        out-map="context" />
+                </iterate>
+            </if>
+            <!-- CTA: Now embedded in LandingPage entity (ctaActionType, ctaAssessmentId, etc.) -->
         </actions>
     </service>
 

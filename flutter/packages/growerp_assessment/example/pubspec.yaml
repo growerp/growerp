@@ -1,30 +1,30 @@
 name: assessment_example
-description: Example application showcasing the growerp_assessment package.
+description: A example project showcasing growerp_assessment package features.
 version: 1.0.0+1
 publish_to: none
 
 environment:
-  sdk: ^3.0.0
-  flutter: ^3.0.0
+  sdk: ^3.9.0
+  flutter: ^3.33.0
 
 dependencies:
   flutter:
     sdk: flutter
-
-  # Local package
   growerp_assessment:
     path: ../
-
-  # Core dependencies from growerp_assessment
-  growerp_core: ^1.9.0
-  growerp_models: ^1.9.0
+  growerp_core:
+    path: ../../growerp_core
+  growerp_models:
+    path: ../../growerp_models
+  global_configuration: ^2.0.0
+  flutter_bloc: ^8.1.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   integration_test:
     sdk: flutter
-  flutter_lints: ^6.0.0
+  flutter_lints: ^3.0.0
 
 flutter:
   uses-material-design: true
@@ -32,5 +32,3 @@ flutter:
 
   assets:
     - assets/cfg/
-    - packages/growerp_core/images/growerp.jpg
-    - packages/growerp_core/images/growerpDark.jpg

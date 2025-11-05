@@ -17,13 +17,13 @@ class CredibilityState extends Equatable {
   });
 
   final CredibilityStatus status;
-  final List<CredibilityElement> credibilityElements;
+  final List<CredibilityInfo> credibilityElements;
   final List<Map<String, dynamic>> credibilityStatistics;
   final String? message;
 
   CredibilityState copyWith({
     CredibilityStatus? status,
-    List<CredibilityElement>? credibilityElements,
+    List<CredibilityInfo>? credibilityElements,
     List<Map<String, dynamic>>? credibilityStatistics,
     String? message,
   }) {

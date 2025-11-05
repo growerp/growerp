@@ -22,11 +22,18 @@ import '../src/screens/landing_page_assessment_flow_screen.dart';
 class ConfigurableLandingPage extends StatefulWidget {
   const ConfigurableLandingPage({
     super.key,
-    this.pageId = 'default',
+    this.landingPageId,
+    this.pseudoId,
     this.ownerPartyId,
   });
 
-  final String pageId;
+  /// System-wide unique identifier for landing page
+  final String? landingPageId;
+
+  /// Tenant-unique identifier for landing page (used in URLs)
+  final String? pseudoId;
+
+  /// Owner party ID for multi-tenancy
   final String? ownerPartyId;
 
   @override
@@ -44,7 +51,8 @@ class _ConfigurableLandingPageState extends State<ConfigurableLandingPage> {
   @override
   void didUpdateWidget(covariant ConfigurableLandingPage oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.pageId != oldWidget.pageId ||
+    if (widget.landingPageId != oldWidget.landingPageId ||
+        widget.pseudoId != oldWidget.pseudoId ||
         widget.ownerPartyId != oldWidget.ownerPartyId) {
       _loadLandingPage();
     }
@@ -52,7 +60,11 @@ class _ConfigurableLandingPageState extends State<ConfigurableLandingPage> {
 
   void _loadLandingPage() {
     context.read<LandingPageBloc>().add(
-      LandingPageFetch(widget.pageId, ownerPartyId: widget.ownerPartyId),
+      LandingPageFetch(
+        landingPageId: widget.landingPageId,
+        pseudoId: widget.pseudoId,
+        ownerPartyId: widget.ownerPartyId,
+      ),
     );
   }
 
@@ -106,7 +118,8 @@ class _ConfigurableLandingPageState extends State<ConfigurableLandingPage> {
             onPressed: () {
               context.read<LandingPageBloc>().add(
                 LandingPageFetch(
-                  widget.pageId,
+                  landingPageId: widget.landingPageId,
+                  pseudoId: widget.pseudoId,
                   ownerPartyId: widget.ownerPartyId,
                 ),
               );
@@ -121,37 +134,33 @@ class _ConfigurableLandingPageState extends State<ConfigurableLandingPage> {
   Widget _buildDefaultContent(BuildContext context) {
     return _GoogleStitchLandingPage(
       landingPage: const LandingPage(
-        pageId: 'default',
+        landingPageId: 'default',
         pseudoId: 'default',
         title: 'Business Assessment',
         status: 'ACTIVE',
         headline: 'Discover Your Business Potential',
         subheading:
             'Answer 15 questions to find out what\'s holding your business back and how to unlock its full potential.',
+        ctaActionType: 'assessment',
         sections: [
           LandingPageSection(
-            sectionId: 'section1',
+            landingPageSectionId: 'section1',
             pseudoId: 'value-props',
             sectionTitle: 'Three Key Areas We Assess',
             sectionDescription:
                 'Our comprehensive assessment evaluates your business across three critical dimensions: Business Strategy & Planning, Operations & Efficiency, and Market Position & Growth.',
           ),
         ],
-        credibility: CredibilityElement(
-          credibilityId: 'cred1',
+        credibility: CredibilityInfo(
+          credibilityInfoId: 'cred1',
           pseudoId: 'testimonial',
           creatorBio: 'Trusted by 1000+ Businesses',
           backgroundText:
               'Our assessment methodology is based on proven business frameworks and has helped over 1,000 businesses identify growth opportunities and overcome challenges.',
         ),
-        cta: CallToAction(
-          ctaId: 'cta1',
-          buttonText: 'Start Free Assessment',
-          valuePromise:
-              'Get personalized recommendations in just 3 minutes - completely free!',
-        ),
       ),
-      pageId: widget.pageId,
+      landingPageId: widget.landingPageId,
+      pseudoId: widget.pseudoId,
       ownerPartyId: widget.ownerPartyId,
       valuePropositions: const [
         'Business Strategy & Planning',
@@ -187,7 +196,8 @@ class _ConfigurableLandingPageState extends State<ConfigurableLandingPage> {
 
     return _GoogleStitchLandingPage(
       landingPage: page,
-      pageId: widget.pageId,
+      landingPageId: widget.landingPageId,
+      pseudoId: widget.pseudoId,
       ownerPartyId: widget.ownerPartyId,
       valuePropositions: valueProps.isNotEmpty ? valueProps : null,
     );
@@ -197,13 +207,15 @@ class _ConfigurableLandingPageState extends State<ConfigurableLandingPage> {
 class _GoogleStitchLandingPage extends StatelessWidget {
   const _GoogleStitchLandingPage({
     required this.landingPage,
-    required this.pageId,
+    this.landingPageId,
+    this.pseudoId = 'default',
     this.ownerPartyId,
     this.valuePropositions,
   });
 
   final LandingPage landingPage;
-  final String pageId;
+  final String? landingPageId;
+  final String? pseudoId;
   final String? ownerPartyId;
   final List<String>? valuePropositions;
 
@@ -234,8 +246,13 @@ class _GoogleStitchLandingPage extends StatelessWidget {
             _buildCredibilitySection(context, isDesktop, isTablet, isMobile),
 
           // CTA Section
-          if (landingPage.cta != null)
-            _buildPrimaryCta(context, landingPage, pageId, ownerPartyId),
+          if (landingPage.ctaActionType != null)
+            _buildPrimaryCta(
+              context,
+              landingPage,
+              landingPageId ?? pseudoId ?? 'default',
+              ownerPartyId,
+            ),
 
           // Footer with Privacy Policy
           _buildFooter(context),
@@ -441,8 +458,13 @@ class _GoogleStitchLandingPage extends StatelessWidget {
         const SizedBox(height: 40),
 
         // Primary CTA Button
-        if (landingPage.cta != null)
-          _buildPrimaryCta(context, landingPage, pageId, ownerPartyId),
+        if (landingPage.ctaActionType != null)
+          _buildPrimaryCta(
+            context,
+            landingPage,
+            landingPageId ?? pseudoId ?? 'default',
+            ownerPartyId,
+          ),
       ],
     );
   }
@@ -450,13 +472,16 @@ class _GoogleStitchLandingPage extends StatelessWidget {
   Widget _buildPrimaryCta(
     BuildContext context,
     LandingPage landingPage,
-    String pageId,
+    String landingPageId,
     String? ownerPartyId,
   ) {
-    if (landingPage.cta == null) {
+    if (landingPage.ctaActionType == null) {
       return const SizedBox.shrink();
     }
-    final cta = landingPage.cta!;
+
+    // Default button text
+    String buttonText = 'Start Free Assessment';
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -481,7 +506,7 @@ class _GoogleStitchLandingPage extends StatelessWidget {
               Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (context) => LandingPageAssessmentFlowScreen(
-                    pageId: pageId,
+                    landingPageId: landingPageId,
                     ownerPartyId: ownerPartyId,
                     assessmentId: null, // Will be loaded from landing page
                     startAssessmentFlow: true,
@@ -502,7 +527,7 @@ class _GoogleStitchLandingPage extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  cta.buttonText ?? 'Learn More',
+                  buttonText,
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -516,38 +541,37 @@ class _GoogleStitchLandingPage extends StatelessWidget {
         ),
         const SizedBox(height: 16),
 
-        // CTA Details
-        if (cta.valuePromise != null && cta.valuePromise!.isNotEmpty)
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.check_circle,
-                color: Color.fromARGB(
-                  (0.8 * 255).toInt(),
-                  ((Colors.white.r * 255.0).round() & 0xff),
-                  ((Colors.white.g * 255.0).round() & 0xff),
-                  ((Colors.white.b * 255.0).round() & 0xff),
-                ),
-                size: 16,
+        // Simple text message for CTA
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.check_circle,
+              color: Color.fromARGB(
+                (0.8 * 255).toInt(),
+                ((Colors.white.r * 255.0).round() & 0xff),
+                ((Colors.white.g * 255.0).round() & 0xff),
+                ((Colors.white.b * 255.0).round() & 0xff),
               ),
-              const SizedBox(width: 8),
-              Flexible(
-                child: Text(
-                  cta.valuePromise!,
-                  style: TextStyle(
-                    color: Color.fromARGB(
-                      (0.8 * 255).toInt(),
-                      ((Colors.white.r * 255.0).round() & 0xff),
-                      ((Colors.white.g * 255.0).round() & 0xff),
-                      ((Colors.white.b * 255.0).round() & 0xff),
-                    ),
-                    fontSize: 14,
+              size: 16,
+            ),
+            const SizedBox(width: 8),
+            Flexible(
+              child: Text(
+                'Get personalized recommendations in just 3 minutes - completely free!',
+                style: TextStyle(
+                  color: Color.fromARGB(
+                    (0.8 * 255).toInt(),
+                    ((Colors.white.r * 255.0).round() & 0xff),
+                    ((Colors.white.g * 255.0).round() & 0xff),
+                    ((Colors.white.b * 255.0).round() & 0xff),
                   ),
+                  fontSize: 14,
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
+        ),
       ],
     );
   }

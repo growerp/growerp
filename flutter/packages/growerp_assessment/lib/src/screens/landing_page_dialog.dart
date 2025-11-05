@@ -1,414 +1,390 @@
+/*
+ * This GrowERP software is in the public domain under CC0 1.0 Universal plus a
+ * Grant of Patent License.
+ * 
+ * To the extent possible under law, the author(s) have dedicated all
+ * copyright and related and neighboring rights to this software to the
+ * public domain worldwide. This software is distributed without any
+ * warranty.
+ * 
+ * You should have received a copy of the CC0 Public Domain Dedication
+ * along with this software (see the LICENSE.md file). If not, see
+ * <http://creativecommons.org/publicdomain/zero/1.0/>.
+ */
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
+import 'package:responsive_framework/responsive_framework.dart';
+
 import '../bloc/landing_page_bloc.dart';
 import '../bloc/landing_page_event.dart';
 import '../bloc/landing_page_state.dart';
-import '../bloc/assessment_bloc.dart';
-import 'page_section_management_screen.dart';
-import 'credibility_management_screen.dart';
-import 'cta_management_screen.dart';
 
-class LandingPageDialog extends StatefulWidget {
-  final LandingPage? landingPage;
-
-  const LandingPageDialog({
-    super.key,
-    this.landingPage,
-  });
-
-  @override
-  State<LandingPageDialog> createState() => _LandingPageDialogState();
+/// Maps backend hookType format to dropdown values
+/// Backend returns formats like 'ResultsHook', 'FrustrationHook'
+/// Dropdown expects: 'frustration', 'results', 'custom'
+String? _normalizeHookType(String? hookType) {
+  if (hookType == null) return null;
+  final lowerType = hookType.toLowerCase();
+  if (lowerType.contains('frustr')) return 'frustration';
+  if (lowerType.contains('result')) return 'results';
+  if (lowerType.contains('custom')) return 'custom';
+  return null;
 }
 
-class _LandingPageDialogState extends State<LandingPageDialog> {
-  final _formKey = GlobalKey<FormState>();
+class LandingPageDialog extends StatefulWidget {
+  final LandingPage landingPage;
+  const LandingPageDialog({Key? key, required this.landingPage})
+      : super(key: key);
+
+  @override
+  LandingPageDialogState createState() => LandingPageDialogState();
+}
+
+class LandingPageDialogState extends State<LandingPageDialog> {
+  late final GlobalKey<FormState> _landingPageFormKey;
   final _titleController = TextEditingController();
-  final _pseudoIdController = TextEditingController();
   final _headlineController = TextEditingController();
   final _subheadingController = TextEditingController();
+  final _privacyPolicyUrlController = TextEditingController();
 
-  String _selectedStatus = 'DRAFT';
-  String? _selectedHookType;
-  String? _selectedAssessmentId;
+  late String _selectedStatus;
+  late String? _selectedHookType;
+  late LandingPage updatedLandingPage;
+  late LandingPageBloc _landingPageBloc;
+  late bool isPhone;
+  late double bottom;
+  double? right;
+  late double top;
 
-  final List<String> _statusOptions = ['DRAFT', 'ACTIVE', 'INACTIVE'];
-  final List<String> _hookTypeOptions = [
-    'problem',
-    'opportunity',
-    'results',
-    'frustration',
-    'aspiration',
-    'curiosity'
-  ];
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
-    if (widget.landingPage != null) {
-      _populateFields(widget.landingPage!);
-    }
-  }
+    _landingPageFormKey = GlobalKey<FormState>();
 
-  void _populateFields(LandingPage landingPage) {
-    _titleController.text = landingPage.title;
-    _pseudoIdController.text = landingPage.pseudoId;
-    _headlineController.text = landingPage.headline ?? '';
-    _subheadingController.text = landingPage.subheading ?? '';
-    _selectedStatus = landingPage.status;
-    _selectedHookType = landingPage.hookType;
-    _selectedAssessmentId = landingPage.assessmentId;
+    if (widget.landingPage.landingPageId != null) {
+      _titleController.text = widget.landingPage.title;
+      _headlineController.text = widget.landingPage.headline ?? '';
+      _subheadingController.text = widget.landingPage.subheading ?? '';
+      _privacyPolicyUrlController.text =
+          widget.landingPage.privacyPolicyUrl ?? '';
+    }
+
+    _selectedStatus = widget.landingPage.status;
+    _selectedHookType = _normalizeHookType(widget.landingPage.hookType);
+    updatedLandingPage = widget.landingPage;
+    _landingPageBloc = context.read<LandingPageBloc>();
+    top = -100;
   }
 
   @override
   void dispose() {
     _titleController.dispose();
-    _pseudoIdController.dispose();
     _headlineController.dispose();
     _subheadingController.dispose();
+    _privacyPolicyUrlController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final isEditing =
-        widget.landingPage != null && widget.landingPage!.pageId.isNotEmpty;
+    isPhone = ResponsiveBreakpoints.of(context).isMobile;
+    right = right ?? (isPhone ? 20 : 40);
+
+    final String title = widget.landingPage.pseudoId ?? 'New Landing Page';
 
     return Dialog(
-      child: Container(
-        width: MediaQuery.of(context).size.width * 0.9,
-        height: MediaQuery.of(context).size.height * 0.9,
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          children: [
-            // Header
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      key: const Key('LandingPageDialog'),
+      insetPadding: const EdgeInsets.all(10),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      child: popUp(
+        context: context,
+        title: title,
+        width: isPhone ? 400 : 900,
+        height: isPhone ? 700 : 600,
+        child: ScaffoldMessenger(
+          child: Scaffold(
+            backgroundColor: Colors.transparent,
+            floatingActionButton: isPhone ? null : _updateButton(),
+            floatingActionButtonLocation:
+                FloatingActionButtonLocation.centerFloat,
+            body: Stack(
               children: [
-                Text(
-                  isEditing ? 'Edit Landing Page' : 'Create Landing Page',
-                  style: Theme.of(context).textTheme.headlineSmall,
-                ),
-                IconButton(
-                  icon: const Icon(Icons.close),
-                  onPressed: () => Navigator.of(context).pop(),
-                ),
-              ],
-            ),
-            const Divider(),
-            // Form
-            Expanded(
-              child: Form(
-                key: _formKey,
-                child: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Basic Information
-                      Text(
-                        'Basic Information',
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                      const SizedBox(height: 16),
-                      TextFormField(
-                        controller: _titleController,
-                        decoration: const InputDecoration(
-                          labelText: 'Page Title *',
-                          hintText: 'Enter the page title',
-                          border: OutlineInputBorder(),
-                        ),
-                        validator: (value) {
-                          if (value == null || value.trim().isEmpty) {
-                            return 'Please enter a page title';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 16),
-                      TextFormField(
-                        controller: _pseudoIdController,
-                        decoration: const InputDecoration(
-                          labelText: 'Page ID *',
-                          hintText:
-                              'URL-friendly identifier (e.g., business-assessment)',
-                          border: OutlineInputBorder(),
-                        ),
-                        validator: (value) {
-                          if (value == null || value.trim().isEmpty) {
-                            return 'Please enter a page ID';
-                          }
-                          if (!RegExp(r'^[a-z0-9-_]+$').hasMatch(value)) {
-                            return 'Page ID can only contain lowercase letters, numbers, hyphens, and underscores';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 16),
-                      DropdownButtonFormField<String>(
-                        initialValue: _selectedStatus,
-                        decoration: const InputDecoration(
-                          labelText: 'Status *',
-                          border: OutlineInputBorder(),
-                        ),
-                        items: _statusOptions.map((status) {
-                          return DropdownMenuItem(
-                            value: status,
-                            child: Text(status),
-                          );
-                        }).toList(),
-                        onChanged: (value) {
-                          setState(() {
-                            _selectedStatus = value!;
-                          });
-                        },
-                      ),
-                      const SizedBox(height: 24),
-
-                      // Content Section
-                      Text(
-                        'Content',
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                      const SizedBox(height: 16),
-                      TextFormField(
-                        controller: _headlineController,
-                        decoration: const InputDecoration(
-                          labelText: 'Headline *',
-                          hintText: 'Main attention-grabbing headline',
-                          border: OutlineInputBorder(),
-                        ),
-                        validator: (value) {
-                          if (value == null || value.trim().isEmpty) {
-                            return 'Please enter a headline';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 16),
-                      TextFormField(
-                        controller: _subheadingController,
-                        decoration: const InputDecoration(
-                          labelText: 'Subheading',
-                          hintText: 'Supporting text under the headline',
-                          border: OutlineInputBorder(),
-                        ),
-                        maxLines: 2,
-                      ),
-                      const SizedBox(height: 16),
-                      DropdownButtonFormField<String>(
-                        initialValue: _selectedHookType,
-                        decoration: const InputDecoration(
-                          labelText: 'Hook Type',
-                          border: OutlineInputBorder(),
-                        ),
-                        items: [
-                          const DropdownMenuItem<String>(
-                            value: null,
-                            child: Text('Select hook type'),
-                          ),
-                          ..._hookTypeOptions.map((hookType) {
-                            return DropdownMenuItem(
-                              value: hookType,
-                              child: Text(hookType.toUpperCase()),
-                            );
-                          }),
-                        ],
-                        onChanged: (value) {
-                          setState(() {
-                            _selectedHookType = value;
-                          });
-                        },
-                      ),
-                      const SizedBox(height: 16),
-                      BlocBuilder<AssessmentBloc, AssessmentState>(
-                        builder: (context, state) {
-                          // Ensure the selected assessment ID is valid or null
-                          final validAssessmentIds = state.assessments
-                              .map((a) => a.assessmentId)
-                              .toSet();
-                          final selectedValue = _selectedAssessmentId != null &&
-                                  validAssessmentIds
-                                      .contains(_selectedAssessmentId)
-                              ? _selectedAssessmentId
-                              : null;
-
-                          return DropdownButtonFormField<String?>(
-                            isExpanded: true,
-                            initialValue: selectedValue,
-                            decoration: const InputDecoration(
-                              labelText: 'Associated Assessment',
-                              hintText:
-                                  'Select an assessment to link to this page',
-                              border: OutlineInputBorder(),
-                            ),
-                            items: [
-                              const DropdownMenuItem<String?>(
-                                value: null,
-                                child: Text('None'),
-                              ),
-                              ...state.assessments.map((assessment) {
-                                return DropdownMenuItem<String?>(
-                                  value: assessment.assessmentId,
-                                  child: Text(assessment.assessmentName),
-                                );
-                              }),
-                            ],
-                            onChanged: (value) {
-                              setState(() {
-                                _selectedAssessmentId = value;
-                              });
-                            },
-                          );
-                        },
-                      ),
-                      const SizedBox(height: 24),
-
-                      // Component Management Section (only for existing pages)
-                      if (isEditing && widget.landingPage != null) ...[
-                        Text(
-                          'Page Components',
-                          style: Theme.of(context).textTheme.titleMedium,
-                        ),
-                        const SizedBox(height: 16),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: OutlinedButton.icon(
-                                onPressed: () => _navigateToSectionManagement(),
-                                icon: const Icon(Icons.view_module),
-                                label: const Text('Manage Sections'),
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: OutlinedButton.icon(
-                                onPressed: () =>
-                                    _navigateToCredibilityManagement(),
-                                icon: const Icon(Icons.verified_user),
-                                label: const Text('Credibility'),
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: OutlinedButton.icon(
-                                onPressed: () => _navigateToCTAManagement(),
-                                icon: const Icon(Icons.touch_app),
-                                label: const Text('Call-to-Action'),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            const Divider(),
-            // Actions
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('Cancel'),
-                ),
-                const SizedBox(width: 16),
                 BlocConsumer<LandingPageBloc, LandingPageState>(
                   listener: (context, state) {
-                    if (state.status == LandingPageStatus.success &&
-                        state.message != null) {
-                      Navigator.of(context).pop();
+                    if (state.status == LandingPageStatus.failure) {
+                      HelperFunctions.showMessage(
+                        context,
+                        state.message ?? 'Error',
+                        Colors.red,
+                      );
+                    }
+                    if (state.status == LandingPageStatus.success) {
+                      Navigator.of(context).pop(state.selectedLandingPage);
                     }
                   },
                   builder: (context, state) {
-                    return ElevatedButton(
-                      onPressed: state.status == LandingPageStatus.loading
-                          ? null
-                          : _saveLandingPage,
-                      child: state.status == LandingPageStatus.loading
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : Text(isEditing ? 'Update' : 'Create'),
-                    );
+                    if (state.status == LandingPageStatus.loading) {
+                      return const LoadingIndicator();
+                    }
+                    return _showForm();
                   },
+                ),
+                Positioned(
+                  right: right,
+                  top: top,
+                  child: GestureDetector(
+                    onPanUpdate: (details) {
+                      setState(() {
+                        top += details.delta.dy;
+                        right = right! - details.delta.dx;
+                      });
+                    },
+                    child: Column(
+                      children: [
+                        FloatingActionButton(
+                          key: const Key("delete"),
+                          heroTag: "landingPageDelete",
+                          backgroundColor: Colors.red,
+                          onPressed: widget.landingPage.landingPageId == null
+                              ? null
+                              : () {
+                                  showDialog(
+                                    barrierDismissible: true,
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return Dialog(
+                                        child: popUp(
+                                          context: context,
+                                          title: 'Delete landing page?',
+                                          child: Column(
+                                            children: [
+                                              const Text(
+                                                'Are you sure you want to delete this landing page?',
+                                              ),
+                                              const SizedBox(height: 20),
+                                              Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.end,
+                                                children: [
+                                                  TextButton(
+                                                    onPressed: () =>
+                                                        Navigator.pop(
+                                                      context,
+                                                    ),
+                                                    child: const Text('Cancel'),
+                                                  ),
+                                                  TextButton(
+                                                    onPressed: () {
+                                                      _landingPageBloc.add(
+                                                        LandingPageDelete(
+                                                          widget.landingPage
+                                                                  .landingPageId ??
+                                                              '',
+                                                        ),
+                                                      );
+                                                      Navigator.pop(context);
+                                                    },
+                                                    child: const Text('Delete'),
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  );
+                                },
+                          child: const Icon(Icons.delete_forever),
+                        ),
+                        const SizedBox(height: 10),
+                      ],
+                    ),
+                  ),
                 ),
               ],
             ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _showForm() {
+    return SingleChildScrollView(
+      controller: _scrollController,
+      child: Form(
+        key: _landingPageFormKey,
+        child: Column(
+          children: [
+            _landingPageForm(),
+            if (isPhone) const SizedBox(height: 20),
+            if (isPhone) _updateButton(),
           ],
         ),
       ),
     );
   }
 
-  void _saveLandingPage() {
-    if (!_formKey.currentState!.validate()) {
-      return;
-    }
-
-    final landingPage = LandingPage(
-      pageId: widget.landingPage?.pageId ?? '',
-      pseudoId: _pseudoIdController.text.trim(),
-      title: _titleController.text.trim(),
-      headline: _headlineController.text.trim().isEmpty
-          ? null
-          : _headlineController.text.trim(),
-      hookType: _selectedHookType,
-      subheading: _subheadingController.text.trim().isEmpty
-          ? null
-          : _subheadingController.text.trim(),
-      status: _selectedStatus,
-      assessmentId: _selectedAssessmentId,
+  Widget _landingPageForm() {
+    return Column(
+      children: [
+        InputDecorator(
+          decoration: InputDecoration(
+            labelText: 'Landing Page Information',
+            border:
+                OutlineInputBorder(borderRadius: BorderRadius.circular(25.0)),
+          ),
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      key: const Key('id'),
+                      decoration: const InputDecoration(
+                        labelText: 'ID',
+                      ),
+                      controller: _titleController,
+                      enabled: widget.landingPage.landingPageId == null,
+                      validator: (value) {
+                        if (value!.isEmpty) {
+                          return 'Title is required';
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: DropdownButtonFormField<String>(
+                      key: const Key('status'),
+                      decoration: const InputDecoration(labelText: 'Status'),
+                      hint: const Text('Select status'),
+                      initialValue: _selectedStatus.toUpperCase(),
+                      items: ['DRAFT', 'ACTIVE', 'INACTIVE'].map((item) {
+                        return DropdownMenuItem<String>(
+                          value: item,
+                          child: Text(item),
+                        );
+                      }).toList(),
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          _selectedStatus = newValue ?? 'DRAFT';
+                        });
+                      },
+                      isExpanded: true,
+                    ),
+                  ),
+                ],
+              ),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      key: const Key('headline'),
+                      decoration: const InputDecoration(labelText: 'Headline'),
+                      controller: _headlineController,
+                      maxLines: 2,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: DropdownButtonFormField<String?>(
+                      key: const Key('hookType'),
+                      decoration: const InputDecoration(labelText: 'Hook Type'),
+                      hint: const Text('Select hook type'),
+                      initialValue: _selectedHookType,
+                      items: [
+                        const DropdownMenuItem<String?>(
+                          value: null,
+                          child: Text('None'),
+                        ),
+                        const DropdownMenuItem<String>(
+                          value: 'frustration',
+                          child: Text('Frustration'),
+                        ),
+                        const DropdownMenuItem<String>(
+                          value: 'results',
+                          child: Text('Results'),
+                        ),
+                        const DropdownMenuItem<String>(
+                          value: 'custom',
+                          child: Text('Custom'),
+                        ),
+                      ].toList(),
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          _selectedHookType = newValue;
+                        });
+                      },
+                      isExpanded: true,
+                    ),
+                  ),
+                ],
+              ),
+              TextFormField(
+                key: const Key('subheading'),
+                decoration: const InputDecoration(labelText: 'Subheading'),
+                controller: _subheadingController,
+                maxLines: 2,
+              ),
+              TextFormField(
+                key: const Key('privacyPolicyUrl'),
+                decoration: const InputDecoration(
+                  labelText: 'Privacy Policy URL',
+                ),
+                controller: _privacyPolicyUrlController,
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 20),
+      ],
     );
-
-    final landingPageBloc = context.read<LandingPageBloc>();
-
-    if (widget.landingPage != null && widget.landingPage!.pageId.isNotEmpty) {
-      landingPageBloc.add(LandingPageUpdate(landingPage));
-    } else {
-      landingPageBloc.add(LandingPageCreate(landingPage));
-    }
   }
 
-  void _navigateToSectionManagement() {
-    if (widget.landingPage != null) {
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (context) => PageSectionManagementScreen(
-            pageId: widget.landingPage!.pageId,
-            pageTitle: widget.landingPage!.title,
-          ),
-        ),
-      );
-    }
-  }
+  Widget _updateButton() {
+    return Column(
+      children: [
+        SizedBox(
+          width: 300,
+          child: ElevatedButton(
+            key: const Key('update'),
+            onPressed: () {
+              if (_landingPageFormKey.currentState!.validate()) {
+                updatedLandingPage = widget.landingPage.copyWith(
+                  title: _titleController.text,
+                  headline: _headlineController.text,
+                  subheading: _subheadingController.text,
+                  hookType: _selectedHookType,
+                  status: _selectedStatus,
+                  privacyPolicyUrl: _privacyPolicyUrlController.text,
+                );
 
-  void _navigateToCredibilityManagement() {
-    if (widget.landingPage != null) {
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (context) => CredibilityManagementScreen(
-            pageId: widget.landingPage!.pageId,
-            pageTitle: widget.landingPage!.title,
+                if (widget.landingPage.landingPageId == null) {
+                  _landingPageBloc.add(
+                    LandingPageCreate(updatedLandingPage),
+                  );
+                } else {
+                  _landingPageBloc.add(
+                    LandingPageUpdate(updatedLandingPage),
+                  );
+                }
+              }
+            },
+            child: Text(
+              widget.landingPage.landingPageId == null ? 'Create' : 'Update',
+            ),
           ),
         ),
-      );
-    }
-  }
-
-  void _navigateToCTAManagement() {
-    if (widget.landingPage != null) {
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (context) => CTAManagementScreen(
-            pageId: widget.landingPage!.pageId,
-            pageTitle: widget.landingPage!.title,
-          ),
-        ),
-      );
-    }
+      ],
+    );
   }
 }

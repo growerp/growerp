@@ -19,6 +19,7 @@ class LandingPageBloc extends Bloc<LandingPageEvent, LandingPageState> {
     on<LandingPageClear>(_onLandingPageClear);
   }
 
+  // get a single or a list of landingpages
   Future<void> _onLandingPageLoad(
     LandingPageLoad event,
     Emitter<LandingPageState> emit,
@@ -61,6 +62,7 @@ class LandingPageBloc extends Bloc<LandingPageEvent, LandingPageState> {
     }
   }
 
+  // Fetch a single landing page by ID/pseudoId and related data
   Future<void> _onLandingPageFetch(
     LandingPageFetch event,
     Emitter<LandingPageState> emit,
@@ -68,7 +70,8 @@ class LandingPageBloc extends Bloc<LandingPageEvent, LandingPageState> {
     emit(state.copyWith(status: LandingPageStatus.loading));
     try {
       final landingPage = await restClient.getLandingPage(
-        pageId: event.pageId,
+        landingPageId: event.landingPageId,
+        pseudoId: event.pseudoId,
         ownerPartyId: event.ownerPartyId,
       );
       emit(state.copyWith(
@@ -95,7 +98,6 @@ class LandingPageBloc extends Bloc<LandingPageEvent, LandingPageState> {
         headline: event.landingPage.headline,
         subheading: event.landingPage.subheading,
         hookType: event.landingPage.hookType,
-        assessmentId: event.landingPage.assessmentId,
         status: event.landingPage.status,
       );
 
@@ -124,17 +126,17 @@ class LandingPageBloc extends Bloc<LandingPageEvent, LandingPageState> {
       emit(state.copyWith(status: LandingPageStatus.loading));
 
       final updatedLandingPage = await restClient.updateLandingPage(
-        pageId: event.landingPage.pageId,
+        landingPageId: event.landingPage.landingPageId ?? '',
         title: event.landingPage.title,
         headline: event.landingPage.headline,
         subheading: event.landingPage.subheading,
         hookType: event.landingPage.hookType,
-        assessmentId: event.landingPage.assessmentId,
         status: event.landingPage.status,
       );
 
       final updatedLandingPages = state.landingPages
-          .map<LandingPage>((page) => page.pageId == updatedLandingPage.pageId
+          .map<LandingPage>((page) => (page.landingPageId ?? '') ==
+                  (updatedLandingPage.landingPageId ?? '')
               ? updatedLandingPage
               : page)
           .toList();
@@ -160,10 +162,10 @@ class LandingPageBloc extends Bloc<LandingPageEvent, LandingPageState> {
     try {
       emit(state.copyWith(status: LandingPageStatus.loading));
 
-      await restClient.deleteLandingPage(pageId: event.pageId);
+      await restClient.deleteLandingPage(landingPageId: event.landingPageId);
 
       final updatedLandingPages = state.landingPages
-          .where((page) => page.pageId != event.pageId)
+          .where((page) => (page.landingPageId ?? '') != event.landingPageId)
           .toList();
 
       emit(state.copyWith(

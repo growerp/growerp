@@ -3,23 +3,23 @@ abstract class PageSectionEvent {
 }
 
 class PageSectionLoad extends PageSectionEvent {
-  final String pageId;
+  final String landingPageId;
 
-  const PageSectionLoad(this.pageId);
+  const PageSectionLoad(this.landingPageId);
 
   @override
-  String toString() => 'PageSectionLoad(pageId: $pageId)';
+  String toString() => 'PageSectionLoad(landingPageId: $landingPageId)';
 }
 
 class PageSectionCreate extends PageSectionEvent {
-  final String pageId;
+  final String landingPageId;
   final String sectionTitle;
   final String? sectionDescription;
   final String? sectionImageUrl;
   final int? sectionSequence;
 
   const PageSectionCreate({
-    required this.pageId,
+    required this.landingPageId,
     required this.sectionTitle,
     this.sectionDescription,
     this.sectionImageUrl,
@@ -28,18 +28,18 @@ class PageSectionCreate extends PageSectionEvent {
 
   @override
   String toString() =>
-      'PageSectionCreate(pageId: $pageId, sectionTitle: $sectionTitle)';
+      'PageSectionCreate(landingPageId: $landingPageId, sectionTitle: $sectionTitle)';
 }
 
 class PageSectionUpdate extends PageSectionEvent {
-  final String sectionId;
+  final String pageSectionId;
   final String? sectionTitle;
   final String? sectionDescription;
   final String? sectionImageUrl;
   final int? sectionSequence;
 
   const PageSectionUpdate({
-    required this.sectionId,
+    required this.pageSectionId,
     this.sectionTitle,
     this.sectionDescription,
     this.sectionImageUrl,
@@ -47,16 +47,16 @@ class PageSectionUpdate extends PageSectionEvent {
   });
 
   @override
-  String toString() => 'PageSectionUpdate(sectionId: $sectionId)';
+  String toString() => 'PageSectionUpdate(pageSectionId: $pageSectionId)';
 }
 
 class PageSectionDelete extends PageSectionEvent {
-  final String sectionId;
+  final String pageSectionId;
 
-  const PageSectionDelete(this.sectionId);
+  const PageSectionDelete(this.pageSectionId);
 
   @override
-  String toString() => 'PageSectionDelete(sectionId: $sectionId)';
+  String toString() => 'PageSectionDelete(pageSectionId: $pageSectionId)';
 }
 
 class PageSectionClear extends PageSectionEvent {

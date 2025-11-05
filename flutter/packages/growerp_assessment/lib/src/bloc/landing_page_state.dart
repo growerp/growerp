@@ -7,7 +7,7 @@ class LandingPageState {
   final List<LandingPage> landingPages;
   final LandingPage? selectedLandingPage;
   final List<AssessmentQuestion>? questions;
-  final List<CredibilityElement>? credibility;
+  final List<CredibilityInfo>? credibility;
   final String? message;
   final bool hasReachedMax;
   final int start;
@@ -32,7 +32,7 @@ class LandingPageState {
     List<LandingPage>? landingPages,
     LandingPage? selectedLandingPage,
     List<AssessmentQuestion>? questions,
-    List<CredibilityElement>? credibility,
+    List<CredibilityInfo>? credibility,
     String? message,
     bool? hasReachedMax,
     int? start,

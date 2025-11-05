@@ -17,13 +17,13 @@ Service definitions for assessment management and completion
     <service verb="get" noun="Assessment" authenticate="false">
         <description>Get single assessment by ID or pseudoId with all questions, options, and thresholds. Anonymous users can view assessments.</description>
         <in-parameters>
-            <parameter name="assessmentId" type="String">
+            <parameter name="assessmentId">
                 <description>System-wide unique assessment ID</description>
             </parameter>
-            <parameter name="pseudoId" type="String">
+            <parameter name="pseudoId">
                 <description>Tenant-unique assessment pseudoId</description>
             </parameter>
-            <parameter name="ownerPartyId" type="String">
+            <parameter name="ownerPartyId">
                 <description>Owner party ID for multi-tenant isolation (optional for anonymous access)</description>
             </parameter>
         </in-parameters>
@@ -31,58 +31,58 @@ Service definitions for assessment management and completion
             <parameter name="assessment" type="Map">
                 <description>Assessment object with nested questions, options, and thresholds</description>
                 <auto-parameters entity-name="growerp.assessment.Assessment" include="all" />
-                <parameter name="assessmentId" type="String" />
-                <parameter name="pseudoId" type="String" />
-                <parameter name="assessmentName" type="String" />
-                <parameter name="description" type="String" />
-                <parameter name="status" type="String" />
+                <parameter name="assessmentId" />
+                <parameter name="pseudoId" />
+                <parameter name="assessmentName" />
+                <parameter name="description" />
+                <parameter name="status" />
                 <parameter name="createdDate" type="Timestamp" />
-                <parameter name="createdByUserLogin" type="String" />
+                <parameter name="createdByUserLogin" />
                 <parameter name="lastModifiedDate" type="Timestamp" />
-                <parameter name="lastModifiedByUserLogin" type="String" />
+                <parameter name="lastModifiedByUserLogin" />
                 <parameter name="questions" type="List">
                     <description>List of assessment questions with nested options</description>
-                    <parameter name="questionId" type="String" />
-                    <parameter name="pseudoId" type="String" />
-                    <parameter name="assessmentId" type="String" />
+                    <parameter name="assessmentQuestionId" />
+                    <parameter name="pseudoId" />
+                    <parameter name="assessmentId" />
                     <parameter name="questionSequence" type="Integer" />
-                    <parameter name="questionType" type="String" />
-                    <parameter name="questionText" type="String" />
-                    <parameter name="questionDescription" type="String" />
-                    <parameter name="isRequired" type="String" />
-                    <parameter name="defaultOption" type="String" />
-                    <parameter name="defaultValue" type="String" />
+                    <parameter name="questionType" />
+                    <parameter name="questionText" />
+                    <parameter name="questionDescription" />
+                    <parameter name="isRequired" />
+                    <parameter name="defaultOption" />
+                    <parameter name="defaultValue" />
                     <parameter name="createdDate" type="Timestamp" />
-                    <parameter name="createdByUserLogin" type="String" />
+                    <parameter name="createdByUserLogin" />
                     <parameter name="options" type="List">
                         <description>List of answer options for this question</description>
-                        <parameter name="optionId" type="String" />
-                        <parameter name="pseudoId" type="String" />
-                        <parameter name="questionId" type="String" />
-                        <parameter name="assessmentId" type="String" />
+                        <parameter name="assessmentQuestionOptionId" />
+                        <parameter name="pseudoId" />
+                        <parameter name="assessmentQuestionId" />
+                        <parameter name="assessmentId" />
                         <parameter name="optionSequence" type="Integer" />
-                        <parameter name="optionText" type="String" />
+                        <parameter name="optionText" />
                         <parameter name="optionScore" type="BigDecimal" />
                         <parameter name="createdDate" type="Timestamp" />
                     </parameter>
                 </parameter>
                 <parameter name="thresholds" type="List">
                     <description>List of scoring thresholds</description>
-                    <parameter name="thresholdId" type="String" />
-                    <parameter name="pseudoId" type="String" />
-                    <parameter name="assessmentId" type="String" />
+                    <parameter name="scoringThresholdId" />
+                    <parameter name="pseudoId" />
+                    <parameter name="assessmentId" />
                     <parameter name="minScore" type="BigDecimal" />
                     <parameter name="maxScore" type="BigDecimal" />
-                    <parameter name="leadStatus" type="String" />
-                    <parameter name="description" type="String" />
+                    <parameter name="leadStatus" />
+                    <parameter name="description" />
                     <parameter name="createdDate" type="Timestamp" />
-                    <parameter name="createdByUserLogin" type="String" />
+                    <parameter name="createdByUserLogin" />
                 </parameter>
             </parameter>
         </out-parameters>
         <actions>
             <log
-                message="=========get assessment serv owner: ${ownerPartyId} asses: ${assessmentId ?: pseudoId}" />
+                message="=========get assessment serv owner: ${ownerPartyId} asses: ${assessmentId} pseudo: ${pseudoId}" />
             <!-- For anonymous access, ownerPartyId must be provided as parameter -->
             <!-- For authenticated access, get it from user context -->
             <if condition="!ownerPartyId">
@@ -103,7 +103,7 @@ Service definitions for assessment management and completion
             <entity-find entity-name="growerp.assessment.AssessmentComplete" list="completeData">
                 <econdition field-name="ownerPartyId" from="ownerPartyId" ignore-if-empty="true" />
                 <econdition field-name="assessmentId" from="assessmentId" ignore-if-empty="true" />
-                <econdition field-name="assessmentPseudoId" from="pseudoId" ignore-if-empty="true" />
+                <econdition field-name="pseudoId" from="pseudoId" ignore-if-empty="true" />
                 <order-by field-name="questionSequence" />
                 <order-by field-name="optionSequence" />
             </entity-find>
@@ -134,15 +134,15 @@ Service definitions for assessment management and completion
                 
                 // Build questions with options and thresholds
                 def questionsMap = [:]
-                def optionsMap = [:] // Map to deduplicate options by optionId
+                def optionsMap = [:] // Map to deduplicate options by assessmentQuestionOptionId
                 def thresholdsMap = [:]
                 
                 completeData.each { row ->
                     // Process question if present
-                    if (row.questionId) {
-                        if (!questionsMap.containsKey(row.questionId)) {
-                            questionsMap[row.questionId] = [
-                                questionId: row.questionId,
+                    if (row.assessmentQuestionId) {
+                        if (!questionsMap.containsKey(row.assessmentQuestionId)) {
+                            questionsMap[row.assessmentQuestionId] = [
+                                assessmentQuestionId: row.assessmentQuestionId,
                                 pseudoId: row.questionPseudoId,
                                 assessmentId: row.assessmentId,
                                 questionSequence: row.questionSequence,
@@ -158,29 +158,29 @@ Service definitions for assessment management and completion
                             ]
                         }
                         
-                        // Add option to question if present - deduplicate by optionId
-                        if (row.optionId) {
-                            def optionKey = row.questionId + ':' + row.optionId
+                        // Add option to question if present - deduplicate by assessmentQuestionOptionId
+                        if (row.assessmentQuestionOptionId) {
+                            def optionKey = row.assessmentQuestionId + ':' + row.assessmentQuestionOptionId
                             if (!optionsMap.containsKey(optionKey)) {
                                 optionsMap[optionKey] = [
-                                    optionId: row.optionId,
+                                    assessmentQuestionOptionId: row.assessmentQuestionOptionId,
                                     pseudoId: row.optionPseudoId,
-                                    questionId: row.questionId,
+                                    assessmentQuestionId: row.assessmentQuestionId,
                                     assessmentId: row.assessmentId,
                                     optionSequence: row.optionSequence,
                                     optionText: row.optionText,
                                     optionScore: row.optionScore,
                                     createdDate: row.optionCreatedDate
                                 ]
-                                questionsMap[row.questionId].options.add(optionsMap[optionKey])
+                                questionsMap[row.assessmentQuestionId].options.add(optionsMap[optionKey])
                             }
                         }
                     }
                     
-                    // Process threshold if present (deduplicate by thresholdId)
-                    if (row.thresholdId && !thresholdsMap.containsKey(row.thresholdId)) {
-                        thresholdsMap[row.thresholdId] = [
-                            thresholdId: row.thresholdId,
+                    // Process threshold if present (deduplicate by scoringThresholdId)
+                    if (row.scoringThresholdId && !thresholdsMap.containsKey(row.scoringThresholdId)) {
+                        thresholdsMap[row.scoringThresholdId] = [
+                            scoringThresholdId: row.scoringThresholdId,
                             pseudoId: row.thresholdPseudoId,
                             assessmentId: row.assessmentId,
                             minScore: row.minScore,
@@ -222,13 +222,13 @@ Service definitions for assessment management and completion
             For full nested data (taking assessments), use get#Assessment instead.
         </description>
         <in-parameters>
-            <parameter name="assessmentId" type="String">
+            <parameter name="assessmentId">
                 <description>Optional: Get specific assessment by system-wide ID (basic info only)</description>
             </parameter>
-            <parameter name="pseudoId" type="String">
+            <parameter name="pseudoId">
                 <description>Optional: Get specific assessment by tenant-unique pseudoId (basic info only)</description>
             </parameter>
-            <parameter name="status" type="String">
+            <parameter name="status">
                 <description>Optional status filter: ACTIVE, INACTIVE, DRAFT</description>
             </parameter>
             <parameter name="pageNumber" type="Integer" default-value="1">
@@ -241,15 +241,15 @@ Service definitions for assessment management and completion
         <out-parameters>
             <parameter name="assessments" type="List">
                 <description>List of assessment objects (basic info only, no nested questions/options/thresholds)</description>
-                <parameter name="assessmentId" type="String" />
-                <parameter name="pseudoId" type="String" />
-                <parameter name="assessmentName" type="String" />
-                <parameter name="description" type="String" />
-                <parameter name="status" type="String" />
+                <parameter name="assessmentId" />
+                <parameter name="pseudoId" />
+                <parameter name="assessmentName" />
+                <parameter name="description" />
+                <parameter name="status" />
                 <parameter name="createdDate" type="Timestamp" />
-                <parameter name="createdByUserLogin" type="String" />
+                <parameter name="createdByUserLogin" />
                 <parameter name="lastModifiedDate" type="Timestamp" />
-                <parameter name="lastModifiedByUserLogin" type="String" />
+                <parameter name="lastModifiedByUserLogin" />
             </parameter>
             <parameter name="totalCount" type="Integer">
                 <description>Total number of assessments matching filter</description>
@@ -317,7 +317,7 @@ Service definitions for assessment management and completion
             <parameter name="assessmentName" type="String" required="true">
                 <description>Name of the assessment</description>
             </parameter>
-            <parameter name="description" type="String">
+            <parameter name="description">
                 <description>Description or instructions for the assessment</description>
             </parameter>
             <parameter name="status" type="String" default-value="ACTIVE">
@@ -325,16 +325,16 @@ Service definitions for assessment management and completion
             </parameter>
         </in-parameters>
         <out-parameters>
-            <parameter name="assessmentId" type="String" />
-            <parameter name="pseudoId" type="String" />
-            <parameter name="ownerPartyId" type="String" />
-            <parameter name="assessmentName" type="String" />
-            <parameter name="description" type="String" />
-            <parameter name="status" type="String" />
+            <parameter name="assessmentId" />
+            <parameter name="pseudoId" />
+            <parameter name="ownerPartyId" />
+            <parameter name="assessmentName" />
+            <parameter name="description" />
+            <parameter name="status" />
             <parameter name="createdDate" type="Long" />
-            <parameter name="createdByUserLogin" type="String" />
+            <parameter name="createdByUserLogin" />
             <parameter name="lastModifiedDate" type="Long" />
-            <parameter name="lastModifiedByUserLogin" type="String" />
+            <parameter name="lastModifiedByUserLogin" />
             <parameter name="lastUpdatedStamp" type="Long" />
         </out-parameters>
         <actions>
@@ -391,18 +391,18 @@ Service definitions for assessment management and completion
             <parameter name="assessmentId" type="String" required="true">
                 <description>Assessment ID to update</description>
             </parameter>
-            <parameter name="assessmentName" type="String">
+            <parameter name="assessmentName">
                 <description>New assessment name</description>
             </parameter>
-            <parameter name="description" type="String">
+            <parameter name="description">
                 <description>New assessment description</description>
             </parameter>
-            <parameter name="status" type="String">
+            <parameter name="status">
                 <description>New status: ACTIVE, INACTIVE, DRAFT</description>
             </parameter>
         </in-parameters>
         <out-parameters>
-            <parameter name="assessmentId" type="String">
+            <parameter name="assessmentId">
                 <description>Updated assessment ID</description>
             </parameter>
         </out-parameters>
@@ -530,24 +530,24 @@ Service definitions for assessment management and completion
             <parameter name="respondentEmail" type="String" required="true">
                 <description>Lead email from step 1</description>
             </parameter>
-            <parameter name="respondentPhone" type="String">
+            <parameter name="respondentPhone">
                 <description>Lead phone from step 1</description>
             </parameter>
-            <parameter name="respondentCompany" type="String">
+            <parameter name="respondentCompany">
                 <description>Lead company from step 1</description>
             </parameter>
         </in-parameters>
         <out-parameters>
-            <parameter name="resultId" type="String">
+            <parameter name="resultId">
                 <description>Created assessment result ID</description>
             </parameter>
-            <parameter name="pseudoId" type="String">
+            <parameter name="pseudoId">
                 <description>Created result tenant-unique ID</description>
             </parameter>
             <parameter name="score" type="BigDecimal">
                 <description>Calculated score from answers</description>
             </parameter>
-            <parameter name="leadStatus" type="String">
+            <parameter name="leadStatus">
                 <description>Determined lead status: Cold, Warm, Hot</description>
             </parameter>
         </out-parameters>
@@ -639,12 +639,13 @@ Service definitions for assessment management and completion
             <set field="totalScore" type="BigDecimal" from="0" />
 
             <!-- Get all question options and calculate score -->
-            <iterate list="answers" entry="answerEntry" key="questionId">
-                <set field="optionId" from="answerEntry" />
+            <iterate list="answers" entry="answerEntry" key="assessmentQuestionId">
+                <set field="assessmentQuestionOptionId" from="answerEntry" />
                 <entity-find-one entity-name="growerp.assessment.AssessmentQuestionOption"
                     value-field="option">
-                    <field-map field-name="optionId" from="optionId" />
-                    <field-map field-name="questionId" from="questionId" />
+                    <field-map field-name="assessmentQuestionOptionId"
+                        from="assessmentQuestionOptionId" />
+                    <field-map field-name="assessmentQuestionId" from="assessmentQuestionId" />
                     <field-map field-name="assessmentId" from="assessmentId" />
                 </entity-find-one>
 
@@ -668,15 +669,15 @@ Service definitions for assessment management and completion
         <out-parameters>
             <parameter name="thresholds" type="List">
                 <description>List of thresholds with minScore, maxScore, leadStatus</description>
-                <parameter name="thresholdId" type="String" />
-                <parameter name="pseudoId" type="String" />
-                <parameter name="assessmentId" type="String" />
+                <parameter name="thresholdId" />
+                <parameter name="pseudoId" />
+                <parameter name="assessmentId" />
                 <parameter name="minScore" type="BigDecimal" />
                 <parameter name="maxScore" type="BigDecimal" />
-                <parameter name="leadStatus" type="String" />
-                <parameter name="description" type="String" />
+                <parameter name="leadStatus" />
+                <parameter name="description" />
                 <parameter name="createdDate" type="Timestamp" />
-                <parameter name="createdByUserLogin" type="String" />
+                <parameter name="createdByUserLogin" />
             </parameter>
         </out-parameters>
         <actions>
@@ -715,15 +716,15 @@ Service definitions for assessment management and completion
         <out-parameters>
             <parameter name="thresholds" type="List">
                 <description>List of thresholds for the assessment</description>
-                <parameter name="thresholdId" type="String" />
-                <parameter name="pseudoId" type="String" />
-                <parameter name="assessmentId" type="String" />
+                <parameter name="thresholdId" />
+                <parameter name="pseudoId" />
+                <parameter name="assessmentId" />
                 <parameter name="minScore" type="BigDecimal" />
                 <parameter name="maxScore" type="BigDecimal" />
-                <parameter name="leadStatus" type="String" />
-                <parameter name="description" type="String" />
+                <parameter name="leadStatus" />
+                <parameter name="description" />
                 <parameter name="createdDate" type="Timestamp" />
-                <parameter name="createdByUserLogin" type="String" />
+                <parameter name="createdByUserLogin" />
             </parameter>
         </out-parameters>
         <actions>
@@ -748,7 +749,7 @@ Service definitions for assessment management and completion
             <parameter name="interpretation" type="String" required="true" />
         </in-parameters>
         <out-parameters>
-            <parameter name="thresholdId" type="String" />
+            <parameter name="scoringThresholdId" />
         </out-parameters>
         <actions>
             <service-call out-map="context"
@@ -758,19 +759,17 @@ Service definitions for assessment management and completion
                 in-map="[ownerPartyId: ownerPartyId, seqName: 'ScoringThreshold']"
                 out-map="context" />
             <set field="pseudoId" from="seqNum" />
-            <set field="thresholdId" from="seqNum" />
 
             <service-call name="create#growerp.assessment.ScoringThreshold" out-map="thresholdOut">
-                <field-map field-name="thresholdId" from="thresholdId" />
                 <field-map field-name="assessmentId" from="assessmentId" />
                 <field-map field-name="pseudoId" from="pseudoId" />
                 <field-map field-name="minScore" from="minScore" />
                 <field-map field-name="maxScore" from="maxScore" />
-                <field-map field-name="interpretation" from="interpretation" />
+                <field-map field-name="leadStatus" from="interpretation" />
                 <field-map field-name="createdDate" from="ec.user.nowTimestamp" />
             </service-call>
 
-            <set field="thresholdId" from="thresholdOut.thresholdId" />
+            <set field="scoringThresholdId" from="thresholdOut.scoringThresholdId" />
         </actions>
     </service>
 
@@ -778,13 +777,13 @@ Service definitions for assessment management and completion
     <service verb="update" noun="Threshold" authenticate="true">
         <description>Update existing threshold</description>
         <in-parameters>
-            <parameter name="thresholdId" type="String" required="true" />
+            <parameter name="scoringThresholdId" type="String" required="true" />
             <parameter name="minScore" type="BigDecimal" />
             <parameter name="maxScore" type="BigDecimal" />
-            <parameter name="interpretation" type="String" />
+            <parameter name="leadStatus" />
         </in-parameters>
         <out-parameters>
-            <parameter name="thresholdId" type="String" />
+            <parameter name="scoringThresholdId" />
         </out-parameters>
         <actions>
             <service-call out-map="context"
@@ -792,22 +791,22 @@ Service definitions for assessment management and completion
 
             <!-- Verify threshold exists -->
             <entity-find entity-name="growerp.assessment.ScoringThreshold" list="thresholdList">
-                <econdition field-name="thresholdId" from="thresholdId" />
+                <econdition field-name="scoringThresholdId" from="scoringThresholdId" />
             </entity-find>
 
             <if condition="!thresholdList">
                 <return error="true" message="Threshold not found" />
             </if>
 
-            <set field="updateMap" from="[thresholdId: thresholdId]" />
+            <set field="updateMap" from="[scoringThresholdId: scoringThresholdId]" />
             <if condition="minScore">
                 <set field="updateMap.minScore" from="minScore" />
             </if>
             <if condition="maxScore">
                 <set field="updateMap.maxScore" from="maxScore" />
             </if>
-            <if condition="interpretation">
-                <set field="updateMap.interpretation" from="interpretation" />
+            <if condition="leadStatus">
+                <set field="updateMap.leadStatus" from="leadStatus" />
             </if>
 
             <service-call name="update#growerp.assessment.ScoringThreshold" in-map="updateMap" />
@@ -818,7 +817,7 @@ Service definitions for assessment management and completion
     <service verb="delete" noun="Threshold" authenticate="true">
         <description>Delete threshold</description>
         <in-parameters>
-            <parameter name="thresholdId" type="String" required="true" />
+            <parameter name="scoringThresholdId" type="String" required="true" />
         </in-parameters>
         <out-parameters>
             <parameter name="deleted" type="Boolean" />
@@ -829,7 +828,7 @@ Service definitions for assessment management and completion
 
             <!-- Verify threshold exists -->
             <entity-find entity-name="growerp.assessment.ScoringThreshold" list="thresholdList">
-                <econdition field-name="thresholdId" from="thresholdId" />
+                <econdition field-name="scoringThresholdId" from="scoringThresholdId" />
             </entity-find>
 
             <if condition="!thresholdList">
@@ -849,12 +848,12 @@ Service definitions for assessment management and completion
             <parameter name="assessmentId" type="String" required="true" />
             <parameter name="thresholds" type="List" required="true">
                 <description>List of thresholds to create or update</description>
-                <parameter name="thresholdId" type="String" />
-                <parameter name="pseudoId" type="String" />
+                <parameter name="thresholdId" />
+                <parameter name="pseudoId" />
                 <parameter name="minScore" type="BigDecimal" />
                 <parameter name="maxScore" type="BigDecimal" />
-                <parameter name="leadStatus" type="String" />
-                <parameter name="description" type="String" />
+                <parameter name="leadStatus" />
+                <parameter name="description" />
             </parameter>
         </in-parameters>
         <out-parameters>
@@ -866,7 +865,7 @@ Service definitions for assessment management and completion
 
             <set field="updatedCount" from="0" />
             <iterate list="thresholds" entry="threshold">
-                <if condition="threshold.thresholdId">
+                <if condition="threshold.scoringThresholdId">
                     <!-- Update existing threshold -->
                     <service-call name="update#growerp.assessment.ScoringThreshold"
                         in-map="threshold" />
@@ -875,7 +874,6 @@ Service definitions for assessment management and completion
                         <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
                             in-map="[ownerPartyId: ownerPartyId, seqName: 'ScoringThreshold']"
                             out-map="thresholdIdOut" />
-                        <set field="threshold.thresholdId" from="thresholdIdOut.seqNum" />
                         <set field="threshold.pseudoId" from="thresholdIdOut.seqNum" />
                         <set field="threshold.assessmentId" from="assessmentId" />
                         <set field="threshold.createdDate" from="ec.user.nowTimestamp" />
@@ -901,26 +899,26 @@ Service definitions for assessment management and completion
         <out-parameters>
             <parameter name="questions" type="List">
                 <description>List of questions with nested options</description>
-                <parameter name="questionId" type="String" />
-                <parameter name="pseudoId" type="String" />
-                <parameter name="assessmentId" type="String" />
+                <parameter name="assessmentQuestionId" />
+                <parameter name="pseudoId" />
+                <parameter name="assessmentId" />
                 <parameter name="questionSequence" type="Integer" />
-                <parameter name="questionType" type="String" />
-                <parameter name="questionText" type="String" />
-                <parameter name="questionDescription" type="String" />
-                <parameter name="isRequired" type="String" />
-                <parameter name="defaultOption" type="String" />
-                <parameter name="defaultValue" type="String" />
+                <parameter name="questionType" />
+                <parameter name="questionText" />
+                <parameter name="questionDescription" />
+                <parameter name="isRequired" />
+                <parameter name="defaultOption" />
+                <parameter name="defaultValue" />
                 <parameter name="createdDate" type="Timestamp" />
-                <parameter name="createdByUserLogin" type="String" />
+                <parameter name="createdByUserLogin" />
                 <parameter name="options" type="List">
                     <description>List of answer options for this question</description>
-                    <parameter name="optionId" type="String" />
-                    <parameter name="pseudoId" type="String" />
-                    <parameter name="questionId" type="String" />
-                    <parameter name="assessmentId" type="String" />
+                    <parameter name="assessmentQuestionOptionId" />
+                    <parameter name="pseudoId" />
+                    <parameter name="assessmentQuestionId" />
+                    <parameter name="assessmentId" />
                     <parameter name="optionSequence" type="Integer" />
-                    <parameter name="optionText" type="String" />
+                    <parameter name="optionText" />
                     <parameter name="optionScore" type="BigDecimal" />
                     <parameter name="createdDate" type="Timestamp" />
                 </parameter>
@@ -979,7 +977,7 @@ Service definitions for assessment management and completion
             <parameter name="assessmentId" type="String" required="true">
                 <description>Assessment ID - required for list context</description>
             </parameter>
-            <parameter name="questionId" type="String">
+            <parameter name="questionId">
                 <description>Question ID - optional, when provided returns single question</description>
             </parameter>
             <parameter name="start" type="Integer" default="0">
@@ -992,33 +990,33 @@ Service definitions for assessment management and completion
         <out-parameters>
             <parameter name="question" type="Map">
                 <description>Single question object (when questionId provided)</description>
-                <parameter name="questionId" type="String" />
-                <parameter name="pseudoId" type="String" />
-                <parameter name="assessmentId" type="String" />
+                <parameter name="questionId" />
+                <parameter name="pseudoId" />
+                <parameter name="assessmentId" />
                 <parameter name="questionSequence" type="Integer" />
-                <parameter name="questionType" type="String" />
-                <parameter name="questionText" type="String" />
-                <parameter name="questionDescription" type="String" />
-                <parameter name="isRequired" type="String" />
-                <parameter name="defaultOption" type="String" />
-                <parameter name="defaultValue" type="String" />
+                <parameter name="questionType" />
+                <parameter name="questionText" />
+                <parameter name="questionDescription" />
+                <parameter name="isRequired" />
+                <parameter name="defaultOption" />
+                <parameter name="defaultValue" />
                 <parameter name="createdDate" type="Timestamp" />
-                <parameter name="createdByUserLogin" type="String" />
+                <parameter name="createdByUserLogin" />
             </parameter>
             <parameter name="questions" type="List">
                 <description>List of questions (when no questionId provided)</description>
-                <parameter name="questionId" type="String" />
-                <parameter name="pseudoId" type="String" />
-                <parameter name="assessmentId" type="String" />
+                <parameter name="questionId" />
+                <parameter name="pseudoId" />
+                <parameter name="assessmentId" />
                 <parameter name="questionSequence" type="Integer" />
-                <parameter name="questionType" type="String" />
-                <parameter name="questionText" type="String" />
-                <parameter name="questionDescription" type="String" />
-                <parameter name="isRequired" type="String" />
-                <parameter name="defaultOption" type="String" />
-                <parameter name="defaultValue" type="String" />
+                <parameter name="questionType" />
+                <parameter name="questionText" />
+                <parameter name="questionDescription" />
+                <parameter name="isRequired" />
+                <parameter name="defaultOption" />
+                <parameter name="defaultValue" />
                 <parameter name="createdDate" type="Timestamp" />
-                <parameter name="createdByUserLogin" type="String" />
+                <parameter name="createdByUserLogin" />
             </parameter>
             <parameter name="questionCount" type="Long">
                 <description>Total count of questions for this assessment</description>
@@ -1069,7 +1067,7 @@ Service definitions for assessment management and completion
             <parameter name="isRequired" type="String" default-value="Y" />
         </in-parameters>
         <out-parameters>
-            <parameter name="questionId" type="String" />
+            <parameter name="questionId" />
         </out-parameters>
         <actions>
             <!-- Validate required fields -->
@@ -1108,13 +1106,13 @@ Service definitions for assessment management and completion
         <in-parameters>
             <parameter name="assessmentId" type="String" required="true" />
             <parameter name="questionId" type="String" required="true" />
-            <parameter name="questionText" type="String" />
-            <parameter name="questionType" type="String" />
+            <parameter name="questionText" />
+            <parameter name="questionType" />
             <parameter name="questionSequence" type="Integer" />
-            <parameter name="isRequired" type="String" />
+            <parameter name="isRequired" />
         </in-parameters>
         <out-parameters>
-            <parameter name="questionId" type="String" />
+            <parameter name="questionId" />
         </out-parameters>
         <actions>
             <service-call out-map="context"
@@ -1204,12 +1202,12 @@ Service definitions for assessment management and completion
         <out-parameters>
             <parameter name="options" type="List">
                 <description>List of options for the question</description>
-                <parameter name="optionId" type="String" />
-                <parameter name="pseudoId" type="String" />
-                <parameter name="questionId" type="String" />
-                <parameter name="assessmentId" type="String" />
+                <parameter name="optionId" />
+                <parameter name="pseudoId" />
+                <parameter name="questionId" />
+                <parameter name="assessmentId" />
                 <parameter name="optionSequence" type="Integer" />
-                <parameter name="optionText" type="String" />
+                <parameter name="optionText" />
                 <parameter name="optionScore" type="BigDecimal" />
                 <parameter name="createdDate" type="Timestamp" />
             </parameter>
@@ -1237,7 +1235,7 @@ Service definitions for assessment management and completion
             <parameter name="questionId" type="String" required="true">
                 <description>Question ID - required for context</description>
             </parameter>
-            <parameter name="optionId" type="String">
+            <parameter name="optionId">
                 <description>Option ID - optional, when provided returns single option</description>
             </parameter>
             <parameter name="start" type="Integer" default="0">
@@ -1250,23 +1248,23 @@ Service definitions for assessment management and completion
         <out-parameters>
             <parameter name="option" type="Map">
                 <description>Single option object (when optionId provided)</description>
-                <parameter name="optionId" type="String" />
-                <parameter name="pseudoId" type="String" />
-                <parameter name="questionId" type="String" />
-                <parameter name="assessmentId" type="String" />
+                <parameter name="optionId" />
+                <parameter name="pseudoId" />
+                <parameter name="questionId" />
+                <parameter name="assessmentId" />
                 <parameter name="optionSequence" type="Integer" />
-                <parameter name="optionText" type="String" />
+                <parameter name="optionText" />
                 <parameter name="optionScore" type="BigDecimal" />
                 <parameter name="createdDate" type="Timestamp" />
             </parameter>
             <parameter name="options" type="List">
                 <description>List of options (when no optionId provided)</description>
-                <parameter name="optionId" type="String" />
-                <parameter name="pseudoId" type="String" />
-                <parameter name="questionId" type="String" />
-                <parameter name="assessmentId" type="String" />
+                <parameter name="optionId" />
+                <parameter name="pseudoId" />
+                <parameter name="questionId" />
+                <parameter name="assessmentId" />
                 <parameter name="optionSequence" type="Integer" />
-                <parameter name="optionText" type="String" />
+                <parameter name="optionText" />
                 <parameter name="optionScore" type="BigDecimal" />
                 <parameter name="createdDate" type="Timestamp" />
             </parameter>
@@ -1320,7 +1318,7 @@ Service definitions for assessment management and completion
             <parameter name="optionSequence" type="Integer" />
         </in-parameters>
         <out-parameters>
-            <parameter name="optionId" type="String" />
+            <parameter name="optionId" />
         </out-parameters>
         <actions>
             <service-call out-map="context"
@@ -1355,12 +1353,12 @@ Service definitions for assessment management and completion
             <parameter name="assessmentId" type="String" required="true" />
             <parameter name="questionId" type="String" required="true" />
             <parameter name="optionId" type="String" required="true" />
-            <parameter name="optionText" type="String" />
+            <parameter name="optionText" />
             <parameter name="optionScore" type="BigDecimal" />
             <parameter name="optionSequence" type="Integer" />
         </in-parameters>
         <out-parameters>
-            <parameter name="optionId" type="String" />
+            <parameter name="optionId" />
         </out-parameters>
         <actions>
             <service-call out-map="context"
@@ -1440,16 +1438,16 @@ Service definitions for assessment management and completion
         <out-parameters>
             <parameter name="result" type="Map">
                 <description>Assessment result object</description>
-                <parameter name="resultId" type="String" />
-                <parameter name="pseudoId" type="String" />
-                <parameter name="assessmentId" type="String" />
+                <parameter name="resultId" />
+                <parameter name="pseudoId" />
+                <parameter name="assessmentId" />
                 <parameter name="score" type="BigDecimal" />
-                <parameter name="leadStatus" type="String" />
-                <parameter name="respondentName" type="String" />
-                <parameter name="respondentEmail" type="String" />
-                <parameter name="respondentPhone" type="String" />
-                <parameter name="respondentCompany" type="String" />
-                <parameter name="answersData" type="String" />
+                <parameter name="leadStatus" />
+                <parameter name="respondentName" />
+                <parameter name="respondentEmail" />
+                <parameter name="respondentPhone" />
+                <parameter name="respondentCompany" />
+                <parameter name="answersData" />
                 <parameter name="createdDate" type="Timestamp" />
             </parameter>
         </out-parameters>
@@ -1472,21 +1470,21 @@ Service definitions for assessment management and completion
         <description>Get all results for an assessment</description>
         <in-parameters>
             <parameter name="assessmentId" type="String" required="true" />
-            <parameter name="userPartyId" type="String" />
+            <parameter name="userPartyId" />
         </in-parameters>
         <out-parameters>
             <parameter name="results" type="List">
                 <description>List of assessment results</description>
-                <parameter name="resultId" type="String" />
-                <parameter name="pseudoId" type="String" />
-                <parameter name="assessmentId" type="String" />
+                <parameter name="resultId" />
+                <parameter name="pseudoId" />
+                <parameter name="assessmentId" />
                 <parameter name="score" type="BigDecimal" />
-                <parameter name="leadStatus" type="String" />
-                <parameter name="respondentName" type="String" />
-                <parameter name="respondentEmail" type="String" />
-                <parameter name="respondentPhone" type="String" />
-                <parameter name="respondentCompany" type="String" />
-                <parameter name="answersData" type="String" />
+                <parameter name="leadStatus" />
+                <parameter name="respondentName" />
+                <parameter name="respondentEmail" />
+                <parameter name="respondentPhone" />
+                <parameter name="respondentCompany" />
+                <parameter name="answersData" />
                 <parameter name="createdDate" type="Timestamp" />
             </parameter>
         </out-parameters>
@@ -1521,16 +1519,16 @@ Service definitions for assessment management and completion
         <out-parameters>
             <parameter name="results" type="List">
                 <description>List of all assessment results</description>
-                <parameter name="resultId" type="String" />
-                <parameter name="pseudoId" type="String" />
-                <parameter name="assessmentId" type="String" />
+                <parameter name="resultId" />
+                <parameter name="pseudoId" />
+                <parameter name="assessmentId" />
                 <parameter name="score" type="BigDecimal" />
-                <parameter name="leadStatus" type="String" />
-                <parameter name="respondentName" type="String" />
-                <parameter name="respondentEmail" type="String" />
-                <parameter name="respondentPhone" type="String" />
-                <parameter name="respondentCompany" type="String" />
-                <parameter name="answersData" type="String" />
+                <parameter name="leadStatus" />
+                <parameter name="respondentName" />
+                <parameter name="respondentEmail" />
+                <parameter name="respondentPhone" />
+                <parameter name="respondentCompany" />
+                <parameter name="answersData" />
                 <parameter name="createdDate" type="Timestamp" />
             </parameter>
             <parameter name="resultCount" type="Integer" />
@@ -1568,17 +1566,17 @@ Service definitions for assessment management and completion
         <description>Create assessment result (allows anonymous users)</description>
         <in-parameters>
             <parameter name="assessmentId" type="String" required="true" />
-            <parameter name="userPartyId" type="String" />
+            <parameter name="userPartyId" />
             <parameter name="responses" type="List" required="true">
                 <description>List of question responses</description>
-                <parameter name="questionId" type="String" />
-                <parameter name="optionId" type="String" />
+                <parameter name="questionId" />
+                <parameter name="optionId" />
             </parameter>
         </in-parameters>
         <out-parameters>
-            <parameter name="resultId" type="String" />
+            <parameter name="resultId" />
             <parameter name="score" type="BigDecimal" />
-            <parameter name="interpretation" type="String" />
+            <parameter name="interpretation" />
         </out-parameters>
         <actions>
             <!-- Don't require user/owner lookup for anonymous submissions -->
@@ -1601,11 +1599,11 @@ Service definitions for assessment management and completion
         <in-parameters>
             <parameter name="resultId" type="String" required="true" />
             <parameter name="score" type="BigDecimal" />
-            <parameter name="interpretation" type="String" />
-            <parameter name="responses" type="String" />
+            <parameter name="interpretation" />
+            <parameter name="responses" />
         </in-parameters>
         <out-parameters>
-            <parameter name="resultId" type="String" />
+            <parameter name="resultId" />
         </out-parameters>
         <actions>
             <service-call out-map="context"
@@ -1673,23 +1671,23 @@ Service definitions for assessment management and completion
             <parameter name="limit" type="Integer" default="100">
                 <description>Maximum number of results</description>
             </parameter>
-            <parameter name="status" type="String">
+            <parameter name="status">
                 <description>Optional filter by status</description>
             </parameter>
         </in-parameters>
         <out-parameters>
             <parameter name="assessmentResults" type="List">
                 <description>List of all assessment results</description>
-                <parameter name="resultId" type="String" />
-                <parameter name="pseudoId" type="String" />
-                <parameter name="assessmentId" type="String" />
+                <parameter name="resultId" />
+                <parameter name="pseudoId" />
+                <parameter name="assessmentId" />
                 <parameter name="score" type="BigDecimal" />
-                <parameter name="leadStatus" type="String" />
-                <parameter name="respondentName" type="String" />
-                <parameter name="respondentEmail" type="String" />
-                <parameter name="respondentPhone" type="String" />
-                <parameter name="respondentCompany" type="String" />
-                <parameter name="answersData" type="String" />
+                <parameter name="leadStatus" />
+                <parameter name="respondentName" />
+                <parameter name="respondentEmail" />
+                <parameter name="respondentPhone" />
+                <parameter name="respondentCompany" />
+                <parameter name="answersData" />
                 <parameter name="createdDate" type="Timestamp" />
             </parameter>
             <parameter name="assessmentResultCount" type="Long">

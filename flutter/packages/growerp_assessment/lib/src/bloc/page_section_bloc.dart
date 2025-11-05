@@ -23,15 +23,16 @@ class PageSectionBloc extends Bloc<PageSectionEvent, PageSectionState> {
     try {
       emit(state.copyWith(
         status: PageSectionStatus.loading,
-        pageId: event.pageId,
+        pageId: event.landingPageId,
       ));
 
-      final sections = await restClient.getPageSections(pageId: event.pageId);
+      final sections =
+          await restClient.getPageSections(landingPageId: event.landingPageId);
 
       emit(state.copyWith(
         status: PageSectionStatus.success,
         sections: sections,
-        pageId: event.pageId,
+        pageId: event.landingPageId,
       ));
     } catch (error) {
       emit(state.copyWith(
@@ -49,7 +50,7 @@ class PageSectionBloc extends Bloc<PageSectionEvent, PageSectionState> {
       emit(state.copyWith(status: PageSectionStatus.loading));
 
       final newSection = await restClient.createPageSection(
-        pageId: event.pageId,
+        landingPageId: event.landingPageId,
         sectionTitle: event.sectionTitle,
         sectionDescription: event.sectionDescription,
         sectionImageUrl: event.sectionImageUrl,
@@ -83,8 +84,8 @@ class PageSectionBloc extends Bloc<PageSectionEvent, PageSectionState> {
       emit(state.copyWith(status: PageSectionStatus.loading));
 
       final updatedSection = await restClient.updatePageSection(
-        pageId: state.pageId!,
-        sectionId: event.sectionId,
+        landingPageId: state.pageId!,
+        pageSectionId: event.pageSectionId,
         sectionTitle: event.sectionTitle,
         sectionDescription: event.sectionDescription,
         sectionImageUrl: event.sectionImageUrl,
@@ -92,7 +93,8 @@ class PageSectionBloc extends Bloc<PageSectionEvent, PageSectionState> {
       );
 
       final updatedSections = state.sections
-          .map((section) => section.sectionId == updatedSection.sectionId
+          .map((section) => section.landingPageSectionId ==
+                  updatedSection.landingPageSectionId
               ? updatedSection
               : section)
           .toList()
@@ -121,12 +123,13 @@ class PageSectionBloc extends Bloc<PageSectionEvent, PageSectionState> {
       emit(state.copyWith(status: PageSectionStatus.loading));
 
       await restClient.deletePageSection(
-        pageId: state.pageId!,
-        sectionId: event.sectionId,
+        landingPageId: state.pageId!,
+        pageSectionId: event.pageSectionId,
       );
 
       final updatedSections = state.sections
-          .where((section) => section.sectionId != event.sectionId)
+          .where(
+              (section) => section.landingPageSectionId != event.pageSectionId)
           .toList();
 
       emit(state.copyWith(

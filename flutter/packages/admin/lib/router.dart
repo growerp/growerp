@@ -19,7 +19,6 @@ import 'package:flutter/material.dart';
 import 'package:growerp_catalog/growerp_catalog.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 import 'package:growerp_user_company/growerp_user_company.dart';
-import 'package:growerp_assessment/growerp_assessment.dart';
 import 'acct_menu_options.dart';
 import 'menu_options.dart';
 import 'package:growerp_models/growerp_models.dart';
@@ -178,26 +177,6 @@ Route<dynamic> generateRoute(RouteSettings settings) {
           tabIndex: 6,
         ),
       );
-    case '/assessment/detail':
-      return MaterialPageRoute(
-        settings: settings,
-        builder: (context) => AssessmentDetailScreen(
-          assessment: settings.arguments as Assessment,
-        ),
-      );
-    case '/assessment/form':
-      return MaterialPageRoute(
-        settings: settings,
-        builder: (context) =>
-            AssessmentFormScreen(assessment: settings.arguments as Assessment?),
-      );
-    case '/assessment/result':
-      return MaterialPageRoute(
-        settings: settings,
-        builder: (context) => AssessmentResultDetailScreen(
-          result: settings.arguments as AssessmentResult,
-        ),
-      );
     case '/landing-page':
       return MaterialPageRoute(
         settings: settings,
@@ -205,13 +184,6 @@ Route<dynamic> generateRoute(RouteSettings settings) {
           menuList: getMenuOptions(context),
           menuIndex: 2,
           tabIndex: 5,
-        ),
-      );
-    case '/landing-page/detail':
-      return MaterialPageRoute(
-        settings: settings,
-        builder: (context) => LandingPageDetailScreen(
-          landingPage: settings.arguments as LandingPage,
         ),
       );
     default:

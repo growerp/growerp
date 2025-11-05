@@ -14,281 +14,312 @@
     status="Active" createdByUserLogin="admin" />
 
   <!-- Landing Page Definition -->
-  <growerp.landing.LandingPage pageId="ERP_LANDING_PAGE" pseudoId="erp-landing-page"
-    ownerPartyId="GROWERP" assessmentId="ERP_READINESS_ASSESSMENT"
+  <growerp.landing.LandingPage landingPageId="ERP_LANDING_PAGE" pseudoId="erp-landing-page"
+    ownerPartyId="GROWERP"
     title="ERP Readiness Assessment" hookType="ResultsHook"
-    headline="Are Your Outdated Systems and Inefficient Workflows Costing You Time and Money?"
+    headline="Stop now managing spreadsheets and start managing your business in a central application?"
     subheading="Answer a few questions about your current processes, and we'll provide a free, personalized report on why you're facing challenges and how a modular ERP can guarantee your success—without the typical headaches of a multi-year, over-budget project."
+    ctaActionType="assessment"
+    ctaAssessmentId="ERP_READINESS_ASSESSMENT"
     status="Published" privacyPolicyUrl="/privacy" createdByUserLogin="admin" />
 
   <!-- Value Proposition Section -->
   <growerp.landing.PageSection
-    sectionId="ERP_VP_SECTION" pseudoId="erp-vp-section"
-    pageId="ERP_LANDING_PAGE" sectionSequence="1"
+    pageSectionId="ERP_VP_SECTION" pseudoId="erp-vp-section"
+    landingPageId="ERP_LANDING_PAGE" sectionSequence="1"
     sectionTitle="Rapid Deployment: Modular, Open-Source Architecture"
     sectionDescription="Discover how our modular, open-source architecture enables a full implementation in just 1-3 months for a fixed fee. This is up to 50% faster than traditional application development." />
 
-  <growerp.landing.PageSection sectionId="ERP_COST_SECTION" pseudoId="erp-cost-section"
-    pageId="ERP_LANDING_PAGE" sectionSequence="2"
+  <growerp.landing.PageSection pageSectionId="ERP_COST_SECTION" pseudoId="erp-cost-section"
+    landingPageId="ERP_LANDING_PAGE" sectionSequence="2"
     sectionTitle="Cost Efficiency: Open-Source Advantage"
     sectionDescription="See how our open-source model—with no licensing fees—can reduce your Total Cost of Ownership by up to 60%." />
 
-  <growerp.landing.PageSection sectionId="ERP_SCALABILITY_SECTION"
+  <growerp.landing.PageSection pageSectionId="ERP_SCALABILITY_SECTION"
     pseudoId="erp-scalability-section"
-    pageId="ERP_LANDING_PAGE" sectionSequence="3"
+    landingPageId="ERP_LANDING_PAGE" sectionSequence="3"
     sectionTitle="Future-Proof Scalability: Building Block Approach"
     sectionDescription="Understand how a modular system (from inventory and accounting to industry-specific tools) allows you to use only what you need and add new building blocks as you grow." />
 
   <!-- Credibility Section -->
-  <growerp.landing.CredibilityInfo credibilityId="ERP_CRED_INFO" pseudoId="erp-cred-info"
-    pageId="ERP_LANDING_PAGE"
+  <growerp.landing.CredibilityInfo credibilityInfoId="ERP_CRED_INFO" pseudoId="erp-cred-info"
+    landingPageId="ERP_LANDING_PAGE"
     creatorBio="This assessment is built by the creators of GrowERP, a modern, open-source, multi-platform ERP. We designed it specifically to be extensible and adaptable, from small businesses to large enterprises."
     backgroundText="Our platform is built on a powerful and modern Flutter (frontend) and Moqui (backend) tech stack, and it's already used to power diverse applications for: Complete Admin &amp; Business Management, Hotel &amp; Hospitality, and Freelancer &amp; Project Management. This assessment uses our experience to benchmark your business against high-efficiency standards and provides a clear roadmap for your specific needs." />
 
-  <growerp.landing.CredibilityStatistic statisticId="ERP_STAT_1" pseudoId="erp-stat-1"
-    credibilityId="ERP_CRED_INFO"
+  <growerp.landing.CredibilityStatistic
+    credibilityStatisticId="ERP_STAT_1" pseudoId="erp-stat-1"
+    credibilityInfoId="ERP_CRED_INFO"
     statistic="Organizations using modern, integrated ERP systems see an average 40% reduction in manual data entry and operational costs."
     sequence="1" />
 
-  <growerp.landing.CredibilityStatistic statisticId="ERP_STAT_2" pseudoId="erp-stat-2"
-    credibilityId="ERP_CRED_INFO"
+  <growerp.landing.CredibilityStatistic
+    credibilityStatisticId="ERP_STAT_2" pseudoId="erp-stat-2"
+    credibilityInfoId="ERP_CRED_INFO"
     statistic="Businesses implementing a modular ERP approach report 60% faster time-to-value compared to traditional monolithic systems."
     sequence="2" />
-
-  <!-- Call to Action -->
-  <growerp.landing.PrimaryCTA ctaId="ERP_CTA_BUTTON" pseudoId="erp-cta-button"
-    pageId="ERP_LANDING_PAGE"
-    buttonText="Start Your Fixed-Fee ERP Assessment Now!"
-    estimatedTime="3 minutes" cost="Free"
-    valuePromise="Get an immediate, tailored report on your ERP Readiness Score, key bottlenecks in your current processes, and actionable steps to prepare for a rapid, fixed-fee implementation." />
 
   <!-- Current Operations Questions (6 questions) -->
 
   <!-- Question 1: How do you currently manage core business operations? -->
-  <growerp.assessment.AssessmentQuestion questionId="ERP_Q1" pseudoId="erp-q1"
+  <growerp.assessment.AssessmentQuestion assessmentQuestionId="ERP_Q1" pseudoId="erp-q1"
     assessmentId="ERP_READINESS_ASSESSMENT" questionSequence="1"
     questionType="MultipleChoice"
     questionText="How do you currently manage your core business operations (like inventory, orders, and accounting)?"
     isRequired="Y" />
 
-  <growerp.assessment.AssessmentQuestionOption optionId="ERP_Q1_OA" pseudoId="erp-q1-oa"
-    questionId="ERP_Q1" assessmentId="ERP_READINESS_ASSESSMENT"
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERP_Q1_OA"
+    pseudoId="erp-q1-oa"
+    assessmentQuestionId="ERP_Q1" assessmentId="ERP_READINESS_ASSESSMENT"
     optionSequence="1" optionText="Mostly with spreadsheets, email, and manual documents."
     optionScore="1" />
 
-  <growerp.assessment.AssessmentQuestionOption optionId="ERP_Q1_OB" pseudoId="erp-q1-ob"
-    questionId="ERP_Q1" assessmentId="ERP_READINESS_ASSESSMENT"
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERP_Q1_OB"
+    pseudoId="erp-q1-ob"
+    assessmentQuestionId="ERP_Q1" assessmentId="ERP_READINESS_ASSESSMENT"
     optionSequence="2"
     optionText="We use basic, separate tools (e.g., QuickBooks, Shopify) but they don't talk to each other."
     optionScore="4" />
 
-  <growerp.assessment.AssessmentQuestionOption optionId="ERP_Q1_OC" pseudoId="erp-q1-oc"
-    questionId="ERP_Q1" assessmentId="ERP_READINESS_ASSESSMENT"
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERP_Q1_OC"
+    pseudoId="erp-q1-oc"
+    assessmentQuestionId="ERP_Q1" assessmentId="ERP_READINESS_ASSESSMENT"
     optionSequence="3" optionText="We use multiple disconnected apps and software." optionScore="6" />
 
-  <growerp.assessment.AssessmentQuestionOption optionId="ERP_Q1_OD" pseudoId="erp-q1-od"
-    questionId="ERP_Q1" assessmentId="ERP_READINESS_ASSESSMENT"
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERP_Q1_OD"
+    pseudoId="erp-q1-od"
+    assessmentQuestionId="ERP_Q1" assessmentId="ERP_READINESS_ASSESSMENT"
     optionSequence="4"
     optionText="We have an old, on-premise ERP system that is hard to use and update."
     optionScore="8" />
 
   <!-- Question 2: Manual data entry time per week -->
-  <growerp.assessment.AssessmentQuestion questionId="ERP_Q2" pseudoId="erp-q2"
+  <growerp.assessment.AssessmentQuestion assessmentQuestionId="ERP_Q2" pseudoId="erp-q2"
     assessmentId="ERP_READINESS_ASSESSMENT" questionSequence="2"
     questionType="MultipleChoice"
     questionText="How much time does your team spend each week on manual data entry or fixing errors between different systems?"
     isRequired="Y" />
 
-  <growerp.assessment.AssessmentQuestionOption optionId="ERP_Q2_OA" pseudoId="erp-q2-oa"
-    questionId="ERP_Q2" assessmentId="ERP_READINESS_ASSESSMENT"
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERP_Q2_OA"
+    pseudoId="erp-q2-oa"
+    assessmentQuestionId="ERP_Q2" assessmentId="ERP_READINESS_ASSESSMENT"
     optionSequence="1" optionText="15+ hours (It's a major part of our workload)." optionScore="10" />
 
-  <growerp.assessment.AssessmentQuestionOption optionId="ERP_Q2_OB" pseudoId="erp-q2-ob"
-    questionId="ERP_Q2" assessmentId="ERP_READINESS_ASSESSMENT"
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERP_Q2_OB"
+    pseudoId="erp-q2-ob"
+    assessmentQuestionId="ERP_Q2" assessmentId="ERP_READINESS_ASSESSMENT"
     optionSequence="2" optionText="5-15 hours (It's a noticeable problem)." optionScore="7" />
 
-  <growerp.assessment.AssessmentQuestionOption optionId="ERP_Q2_OC" pseudoId="erp-q2-oc"
-    questionId="ERP_Q2" assessmentId="ERP_READINESS_ASSESSMENT"
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERP_Q2_OC"
+    pseudoId="erp-q2-oc"
+    assessmentQuestionId="ERP_Q2" assessmentId="ERP_READINESS_ASSESSMENT"
     optionSequence="3" optionText="1-5 hours (It's a minor annoyance)." optionScore="4" />
 
-  <growerp.assessment.AssessmentQuestionOption optionId="ERP_Q2_OD" pseudoId="erp-q2-od"
-    questionId="ERP_Q2" assessmentId="ERP_READINESS_ASSESSMENT"
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERP_Q2_OD"
+    pseudoId="erp-q2-od"
+    assessmentQuestionId="ERP_Q2" assessmentId="ERP_READINESS_ASSESSMENT"
     optionSequence="4" optionText="Almost none (Our systems are well-integrated)." optionScore="1" />
 
   <!-- Question 3: Real-time business visibility -->
-  <growerp.assessment.AssessmentQuestion questionId="ERP_Q3" pseudoId="erp-q3"
+  <growerp.assessment.AssessmentQuestion assessmentQuestionId="ERP_Q3" pseudoId="erp-q3"
     assessmentId="ERP_READINESS_ASSESSMENT" questionSequence="3"
     questionType="MultipleChoice"
     questionText="How easy is it for you to get a single, accurate, real-time view of your business (e.g., sales data, inventory levels, and financials)?"
     isRequired="Y" />
 
-  <growerp.assessment.AssessmentQuestionOption optionId="ERP_Q3_OA" pseudoId="erp-q3-oa"
-    questionId="ERP_Q3" assessmentId="ERP_READINESS_ASSESSMENT"
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERP_Q3_OA"
+    pseudoId="erp-q3-oa"
+    assessmentQuestionId="ERP_Q3" assessmentId="ERP_READINESS_ASSESSMENT"
     optionSequence="1" optionText="It's impossible. We have to guess." optionScore="10" />
 
-  <growerp.assessment.AssessmentQuestionOption optionId="ERP_Q3_OB" pseudoId="erp-q3-ob"
-    questionId="ERP_Q3" assessmentId="ERP_READINESS_ASSESSMENT"
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERP_Q3_OB"
+    pseudoId="erp-q3-ob"
+    assessmentQuestionId="ERP_Q3" assessmentId="ERP_READINESS_ASSESSMENT"
     optionSequence="2" optionText="It takes days to manually compile a report." optionScore="7" />
 
-  <growerp.assessment.AssessmentQuestionOption optionId="ERP_Q3_OC" pseudoId="erp-q3-oc"
-    questionId="ERP_Q3" assessmentId="ERP_READINESS_ASSESSMENT"
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERP_Q3_OC"
+    pseudoId="erp-q3-oc"
+    assessmentQuestionId="ERP_Q3" assessmentId="ERP_READINESS_ASSESSMENT"
     optionSequence="3" optionText="It takes a few hours." optionScore="4" />
 
-  <growerp.assessment.AssessmentQuestionOption optionId="ERP_Q3_OD" pseudoId="erp-q3-od"
-    questionId="ERP_Q3" assessmentId="ERP_READINESS_ASSESSMENT"
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERP_Q3_OD"
+    pseudoId="erp-q3-od"
+    assessmentQuestionId="ERP_Q3" assessmentId="ERP_READINESS_ASSESSMENT"
     optionSequence="4" optionText="We have real-time dashboards." optionScore="1" />
 
   <!-- Question 4: Biggest system limitation -->
-  <growerp.assessment.AssessmentQuestion questionId="ERP_Q4" pseudoId="erp-q4"
+  <growerp.assessment.AssessmentQuestion assessmentQuestionId="ERP_Q4" pseudoId="erp-q4"
     assessmentId="ERP_READINESS_ASSESSMENT" questionSequence="4"
     questionType="MultipleChoice"
     questionText="What is the biggest limitation of your current system?"
     isRequired="Y" />
 
-  <growerp.assessment.AssessmentQuestionOption optionId="ERP_Q4_OA" pseudoId="erp-q4-oa"
-    questionId="ERP_Q4" assessmentId="ERP_READINESS_ASSESSMENT"
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERP_Q4_OA"
+    pseudoId="erp-q4-oa"
+    assessmentQuestionId="ERP_Q4" assessmentId="ERP_READINESS_ASSESSMENT"
     optionSequence="1" optionText="It's too slow and inefficient (too much manual work)."
     optionScore="9" />
 
-  <growerp.assessment.AssessmentQuestionOption optionId="ERP_Q4_OB" pseudoId="erp-q4-ob"
-    questionId="ERP_Q4" assessmentId="ERP_READINESS_ASSESSMENT"
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERP_Q4_OB"
+    pseudoId="erp-q4-ob"
+    assessmentQuestionId="ERP_Q4" assessmentId="ERP_READINESS_ASSESSMENT"
     optionSequence="2" optionText="It's too rigid (we can't customize it to our needs)."
     optionScore="8" />
 
-  <growerp.assessment.AssessmentQuestionOption optionId="ERP_Q4_OC" pseudoId="erp-q4-oc"
-    questionId="ERP_Q4" assessmentId="ERP_READINESS_ASSESSMENT"
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERP_Q4_OC"
+    pseudoId="erp-q4-oc"
+    assessmentQuestionId="ERP_Q4" assessmentId="ERP_READINESS_ASSESSMENT"
     optionSequence="3" optionText="It's too expensive (high subscription or licensing fees)."
     optionScore="7" />
 
-  <growerp.assessment.AssessmentQuestionOption optionId="ERP_Q4_OD" pseudoId="erp-q4-od"
-    questionId="ERP_Q4" assessmentId="ERP_READINESS_ASSESSMENT"
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERP_Q4_OD"
+    pseudoId="erp-q4-od"
+    assessmentQuestionId="ERP_Q4" assessmentId="ERP_READINESS_ASSESSMENT"
     optionSequence="4" optionText="It's outdated (no mobile access, poor integrations)."
     optionScore="8" />
 
   <!-- Question 5: Critical business modules (Multi-select) -->
-  <growerp.assessment.AssessmentQuestion questionId="ERP_Q5" pseudoId="erp-q5"
+  <growerp.assessment.AssessmentQuestion assessmentQuestionId="ERP_Q5" pseudoId="erp-q5"
     assessmentId="ERP_READINESS_ASSESSMENT" questionSequence="5"
     questionType="MultiSelect"
     questionText="Which of these core modules are most critical for your business?" isRequired="Y" />
 
-  <growerp.assessment.AssessmentQuestionOption optionId="ERP_Q5_O1" pseudoId="erp-q5-o1"
-    questionId="ERP_Q5" assessmentId="ERP_READINESS_ASSESSMENT"
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERP_Q5_O1"
+    pseudoId="erp-q5-o1"
+    assessmentQuestionId="ERP_Q5" assessmentId="ERP_READINESS_ASSESSMENT"
     optionSequence="1" optionText="Product Catalog &amp; Inventory" optionScore="2" />
 
-  <growerp.assessment.AssessmentQuestionOption optionId="ERP_Q5_O2" pseudoId="erp-q5-o2"
-    questionId="ERP_Q5" assessmentId="ERP_READINESS_ASSESSMENT"
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERP_Q5_O2"
+    pseudoId="erp-q5-o2"
+    assessmentQuestionId="ERP_Q5" assessmentId="ERP_READINESS_ASSESSMENT"
     optionSequence="2" optionText="Order Processing &amp; Accounting" optionScore="2" />
 
-  <growerp.assessment.AssessmentQuestionOption optionId="ERP_Q5_O3" pseudoId="erp-q5-o3"
-    questionId="ERP_Q5" assessmentId="ERP_READINESS_ASSESSMENT"
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERP_Q5_O3"
+    pseudoId="erp-q5-o3"
+    assessmentQuestionId="ERP_Q5" assessmentId="ERP_READINESS_ASSESSMENT"
     optionSequence="3" optionText="User &amp; Company Management" optionScore="1" />
 
-  <growerp.assessment.AssessmentQuestionOption optionId="ERP_Q5_O4" pseudoId="erp-q5-o4"
-    questionId="ERP_Q5" assessmentId="ERP_READINESS_ASSESSMENT"
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERP_Q5_O4"
+    pseudoId="erp-q5-o4"
+    assessmentQuestionId="ERP_Q5" assessmentId="ERP_READINESS_ASSESSMENT"
     optionSequence="4" optionText="Website &amp; E-commerce" optionScore="2" />
 
-  <growerp.assessment.AssessmentQuestionOption optionId="ERP_Q5_O5" pseudoId="erp-q5-o5"
-    questionId="ERP_Q5" assessmentId="ERP_READINESS_ASSESSMENT"
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERP_Q5_O5"
+    pseudoId="erp-q5-o5"
+    assessmentQuestionId="ERP_Q5" assessmentId="ERP_READINESS_ASSESSMENT"
     optionSequence="5" optionText="Project Management (for Freelance/Services)" optionScore="2" />
 
-  <growerp.assessment.AssessmentQuestionOption optionId="ERP_Q5_O6" pseudoId="erp-q5-o6"
-    questionId="ERP_Q5" assessmentId="ERP_READINESS_ASSESSMENT"
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERP_Q5_O6"
+    pseudoId="erp-q5-o6"
+    assessmentQuestionId="ERP_Q5" assessmentId="ERP_READINESS_ASSESSMENT"
     optionSequence="6" optionText="Reservations (for Hotel/Hospitality)" optionScore="2" />
 
   <!-- Question 6: Timeline alignment -->
-  <growerp.assessment.AssessmentQuestion questionId="ERP_Q6" pseudoId="erp-q6"
+  <growerp.assessment.AssessmentQuestion assessmentQuestionId="ERP_Q6" pseudoId="erp-q6"
     assessmentId="ERP_READINESS_ASSESSMENT" questionSequence="6"
     questionType="MultipleChoice"
     questionText="Our fixed-fee implementation gets you fully operational in 1-3 months. How does this timeline align with your goals?"
     isRequired="Y" />
 
-  <growerp.assessment.AssessmentQuestionOption optionId="ERP_Q6_OA" pseudoId="erp-q6-oa"
-    questionId="ERP_Q6" assessmentId="ERP_READINESS_ASSESSMENT"
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERP_Q6_OA"
+    pseudoId="erp-q6-oa"
+    assessmentQuestionId="ERP_Q6" assessmentId="ERP_READINESS_ASSESSMENT"
     optionSequence="1" optionText="We needed this yesterday; we're ready to start immediately."
     optionScore="10" />
 
-  <growerp.assessment.AssessmentQuestionOption optionId="ERP_Q6_OB" pseudoId="erp-q6-ob"
-    questionId="ERP_Q6" assessmentId="ERP_READINESS_ASSESSMENT"
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERP_Q6_OB"
+    pseudoId="erp-q6-ob"
+    assessmentQuestionId="ERP_Q6" assessmentId="ERP_READINESS_ASSESSMENT"
     optionSequence="2" optionText="This timeline is ideal for our current plan." optionScore="9" />
 
-  <growerp.assessment.AssessmentQuestionOption optionId="ERP_Q6_OC" pseudoId="erp-q6-oc"
-    questionId="ERP_Q6" assessmentId="ERP_READINESS_ASSESSMENT"
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERP_Q6_OC"
+    pseudoId="erp-q6-oc"
+    assessmentQuestionId="ERP_Q6" assessmentId="ERP_READINESS_ASSESSMENT"
     optionSequence="3" optionText="We are planning a change in the next 3-6 months." optionScore="6" />
 
-  <growerp.assessment.AssessmentQuestionOption optionId="ERP_Q6_OD" pseudoId="erp-q6-od"
-    questionId="ERP_Q6" assessmentId="ERP_READINESS_ASSESSMENT"
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERP_Q6_OD"
+    pseudoId="erp-q6-od"
+    assessmentQuestionId="ERP_Q6" assessmentId="ERP_READINESS_ASSESSMENT"
     optionSequence="4" optionText="We are just in the early research phase." optionScore="3" />
 
   <!-- Qualifying Questions (The "Big Three") -->
 
   <!-- Question 7: Current Situation -->
-  <growerp.assessment.AssessmentQuestion questionId="ERP_Q7" pseudoId="erp-q7"
+  <growerp.assessment.AssessmentQuestion assessmentQuestionId="ERP_Q7" pseudoId="erp-q7"
     assessmentId="ERP_READINESS_ASSESSMENT" questionSequence="7"
     questionType="MultipleChoice"
     questionText="(Current Situation) Which statement best describes your company?"
     isRequired="Y" />
 
-  <growerp.assessment.AssessmentQuestionOption optionId="ERP_Q7_OA" pseudoId="erp-q7-oa"
-    questionId="ERP_Q7" assessmentId="ERP_READINESS_ASSESSMENT"
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERP_Q7_OA"
+    pseudoId="erp-q7-oa"
+    assessmentQuestionId="ERP_Q7" assessmentId="ERP_READINESS_ASSESSMENT"
     optionSequence="1"
     optionText="We're growing fast, but our processes are chaotic and holding us back."
     optionScore="0" />
 
-  <growerp.assessment.AssessmentQuestionOption optionId="ERP_Q7_OB" pseudoId="erp-q7-ob"
-    questionId="ERP_Q7" assessmentId="ERP_READINESS_ASSESSMENT"
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERP_Q7_OB"
+    pseudoId="erp-q7-ob"
+    assessmentQuestionId="ERP_Q7" assessmentId="ERP_READINESS_ASSESSMENT"
     optionSequence="2"
     optionText="We're stable, but our inefficient systems are costing us too much time and money."
     optionScore="0" />
 
-  <growerp.assessment.AssessmentQuestionOption optionId="ERP_Q7_OC" pseudoId="erp-q7-oc"
-    questionId="ERP_Q7" assessmentId="ERP_READINESS_ASSESSMENT"
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERP_Q7_OC"
+    pseudoId="erp-q7-oc"
+    assessmentQuestionId="ERP_Q7" assessmentId="ERP_READINESS_ASSESSMENT"
     optionSequence="3"
     optionText="We're just starting and need to build a solid, scalable foundation from day one."
     optionScore="0" />
 
-  <growerp.assessment.AssessmentQuestionOption optionId="ERP_Q7_OD" pseudoId="erp-q7-od"
-    questionId="ERP_Q7" assessmentId="ERP_READINESS_ASSESSMENT"
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERP_Q7_OD"
+    pseudoId="erp-q7-od"
+    assessmentQuestionId="ERP_Q7" assessmentId="ERP_READINESS_ASSESSMENT"
     optionSequence="4"
     optionText="We have an old system that we need to replace with something modern and flexible."
     optionScore="0" />
 
   <!-- Question 8: Desired Outcome -->
-  <growerp.assessment.AssessmentQuestion questionId="ERP_Q8" pseudoId="erp-q8"
+  <growerp.assessment.AssessmentQuestion assessmentQuestionId="ERP_Q8" pseudoId="erp-q8"
     assessmentId="ERP_READINESS_ASSESSMENT" questionSequence="8"
     questionType="MultipleChoice"
     questionText="(Desired Outcome) What is the #1 outcome you must achieve with a new system?"
     isRequired="Y" />
 
-  <growerp.assessment.AssessmentQuestionOption optionId="ERP_Q8_OA" pseudoId="erp-q8-oa"
-    questionId="ERP_Q8" assessmentId="ERP_READINESS_ASSESSMENT"
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERP_Q8_OA"
+    pseudoId="erp-q8-oa"
+    assessmentQuestionId="ERP_Q8" assessmentId="ERP_READINESS_ASSESSMENT"
     optionSequence="1" optionText="Reduce manual data entry and eliminate costly errors."
     optionScore="0" />
 
-  <growerp.assessment.AssessmentQuestionOption optionId="ERP_Q8_OB" pseudoId="erp-q8-ob"
-    questionId="ERP_Q8" assessmentId="ERP_READINESS_ASSESSMENT"
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERP_Q8_OB"
+    pseudoId="erp-q8-ob"
+    assessmentQuestionId="ERP_Q8" assessmentId="ERP_READINESS_ASSESSMENT"
     optionSequence="2" optionText="Get a single 'source of truth' for all business data."
     optionScore="0" />
 
-  <growerp.assessment.AssessmentQuestionOption optionId="ERP_Q8_OC" pseudoId="erp-q8-oc"
-    questionId="ERP_Q8" assessmentId="ERP_READINESS_ASSESSMENT"
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERP_Q8_OC"
+    pseudoId="erp-q8-oc"
+    assessmentQuestionId="ERP_Q8" assessmentId="ERP_READINESS_ASSESSMENT"
     optionSequence="3" optionText="Manage inventory, orders, and financials all in one place."
     optionScore="0" />
 
-  <growerp.assessment.AssessmentQuestionOption optionId="ERP_Q8_OD" pseudoId="erp-q8-od"
-    questionId="ERP_Q8" assessmentId="ERP_READINESS_ASSESSMENT"
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERP_Q8_OD"
+    pseudoId="erp-q8-od"
+    assessmentQuestionId="ERP_Q8" assessmentId="ERP_READINESS_ASSESSMENT"
     optionSequence="4"
     optionText="Stop paying high licensing fees for a system that doesn't fit our needs."
     optionScore="0" />
 
   <!-- Question 9: Open-ended question -->
-  <growerp.assessment.AssessmentQuestion questionId="ERP_Q9" pseudoId="erp-q9"
+  <growerp.assessment.AssessmentQuestion assessmentQuestionId="ERP_Q9" pseudoId="erp-q9"
     assessmentId="ERP_READINESS_ASSESSMENT" questionSequence="9"
     questionType="OpenText"
     questionText="(Open-Ended) Is there anything else we should know about your specific requirements or biggest challenge?"
     isRequired="N" />
 
   <!-- Scoring Thresholds -->
-  <growerp.assessment.ScoringThreshold thresholdId="ERP_THRESHOLD_HIGH"
+  <growerp.assessment.ScoringThreshold scoringThresholdId="ERP_THRESHOLD_HIGH"
     pseudoId="erp-threshold-high"
     assessmentId="ERP_READINESS_ASSESSMENT"
     minScore="80" maxScore="100"
@@ -296,7 +327,7 @@
     description="High Score (80-100%): You are an ideal candidate for a rapid implementation. Your operations are suffering from significant manual work and data silos. You would see an immediate ROI from a modern, integrated system."
     createdByUserLogin="admin" />
 
-  <growerp.assessment.ScoringThreshold thresholdId="ERP_THRESHOLD_MEDIUM"
+  <growerp.assessment.ScoringThreshold scoringThresholdId="ERP_THRESHOLD_MEDIUM"
     pseudoId="erp-threshold-medium"
     assessmentId="ERP_READINESS_ASSESSMENT"
     minScore="50" maxScore="79"
@@ -304,7 +335,8 @@
     description="Medium Score (50-79%): You are on the right track but facing key bottlenecks. You have some systems in place, but they are disconnected. A modular ERP would allow you to replace the most painful parts first."
     createdByUserLogin="admin" />
 
-  <growerp.assessment.ScoringThreshold thresholdId="ERP_THRESHOLD_LOW" pseudoId="erp-threshold-low"
+  <growerp.assessment.ScoringThreshold scoringThresholdId="ERP_THRESHOLD_LOW"
+    pseudoId="erp-threshold-low"
     assessmentId="ERP_READINESS_ASSESSMENT"
     minScore="0" maxScore="49"
     leadStatus="Low"

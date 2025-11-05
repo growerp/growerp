@@ -725,7 +725,7 @@ abstract class RestClient {
   @POST("rest/s1/growerp/100/Assessment/submit")
   Future<AssessmentResult> submitAssessment({
     @Field() required String assessmentId,
-    @Field() required Map<String, dynamic> answers,
+    @Field('answersData') required String answers,
     @Field() required String respondentName,
     @Field() required String respondentEmail,
     @Field() String? respondentPhone,
@@ -772,12 +772,11 @@ abstract class RestClient {
     @Field() required String assessmentId,
     @Field() required String questionId,
   });
-
   // Assessment Question Option endpoints
   @GET("rest/s1/growerp/100/Assessment/Question/Option")
   Future<AssessmentQuestionOptions> getAssessmentQuestionOptions({
     @Query('assessmentId') required String assessmentId,
-    @Query('questionId') required String questionId,
+    @Query('questionId') required String assessmentQuestionId,
     @Query('start') int? start,
     @Query('limit') int? limit,
   });
@@ -823,7 +822,7 @@ abstract class RestClient {
   @POST("rest/s1/growerp/100/Assessment/calculateScore")
   Future<AssessmentScoreResponse> calculateAssessmentScore({
     @Field() required String assessmentId,
-    @Field() required Map<String, dynamic> answers,
+    @Field('answersData') required String answers,
   });
 
   // Assessment Result endpoints
@@ -851,7 +850,7 @@ abstract class RestClient {
   // Landing Page endpoints
   @GET("rest/s1/growerp/100/LandingPage")
   Future<LandingPages> getLandingPages({
-    @Query('pageId') String? pageId,
+    @Query('landingPageId') String? landingPageId,
     @Query('pseudoId') String? pseudoId,
     @Query('start') int? start,
     @Query('limit') int? limit,
@@ -862,7 +861,8 @@ abstract class RestClient {
   // Public landing page endpoint (anonymous access)
   @GET("rest/s1/growerp/100/LandingPagePublic")
   Future<LandingPage> getLandingPage({
-    @Query('pageId') required String pageId,
+    @Query('landingPageId') String? landingPageId,
+    @Query('pseudoId') String? pseudoId,
     @Query('ownerPartyId') String? ownerPartyId,
   });
 
@@ -877,9 +877,9 @@ abstract class RestClient {
     @Field() String status = 'DRAFT',
   });
 
-  @PATCH("rest/s1/growerp/100/LandingPage/{pageId}")
+  @PATCH("rest/s1/growerp/100/LandingPage/{landingPageId}")
   Future<LandingPage> updateLandingPage({
-    @Path() required String pageId,
+    @Path() required String landingPageId,
     @Field() String? title,
     @Field() String? hookType,
     @Field() String? headline,
@@ -889,73 +889,81 @@ abstract class RestClient {
     @Field() String? status,
   });
 
-  @DELETE("rest/s1/growerp/100/LandingPage/{pageId}")
-  Future<void> deleteLandingPage({@Path() required String pageId});
+  @DELETE("rest/s1/growerp/100/LandingPage/{landingPageId}")
+  Future<void> deleteLandingPage({@Path() required String landingPageId});
 
-  @POST("rest/s1/growerp/100/LandingPage/{pageId}/publish")
-  Future<LandingPage> publishLandingPage({@Path() required String pageId});
+  @POST("rest/s1/growerp/100/LandingPage/{landingPageId}/publish")
+  Future<LandingPage> publishLandingPage({
+    @Path() required String landingPageId,
+  });
 
   // ============================================
   // PAGE SECTION ENDPOINTS
   // ============================================
 
-  @GET("rest/s1/growerp/100/LandingPage/{pageId}/Section")
+  @GET("rest/s1/growerp/100/LandingPage/{landingPageId}/Section")
   Future<List<LandingPageSection>> getPageSections({
-    @Path() required String pageId,
+    @Path() required String landingPageId,
   });
 
-  @POST("rest/s1/growerp/100/LandingPage/{pageId}/Section")
+  @POST("rest/s1/growerp/100/LandingPage/{landingPageId}/Section")
   Future<LandingPageSection> createPageSection({
-    @Path() required String pageId,
+    @Path() required String landingPageId,
     @Field() required String sectionTitle,
     @Field() String? sectionDescription,
     @Field() String? sectionImageUrl,
     @Field() int? sectionSequence,
   });
 
-  @PATCH("rest/s1/growerp/100/LandingPage/{pageId}/Section/{sectionId}")
+  @PATCH(
+    "rest/s1/growerp/100/LandingPage/{landingPageId}/Section/{pageSectionId}",
+  )
   Future<LandingPageSection> updatePageSection({
-    @Path() required String pageId,
-    @Path() required String sectionId,
+    @Path() required String landingPageId,
+    @Path() required String pageSectionId,
     @Field() String? sectionTitle,
     @Field() String? sectionDescription,
     @Field() String? sectionImageUrl,
     @Field() int? sectionSequence,
   });
 
-  @DELETE("rest/s1/growerp/100/LandingPage/{pageId}/Section/{sectionId}")
+  @DELETE(
+    "rest/s1/growerp/100/LandingPage/{landingPageId}/Section/{pageSectionId}",
+  )
   Future<void> deletePageSection({
-    @Path() required String pageId,
-    @Path() required String sectionId,
+    @Path() required String landingPageId,
+    @Path() required String pageSectionId,
   });
 
   // ============================================
   // CREDIBILITY INFO ENDPOINTS (Nested under LandingPage)
   // ============================================
 
-  @POST("rest/s1/growerp/100/LandingPage/{pageId}/Credibility")
-  Future<CredibilityElement> createCredibilityInfo({
-    @Path() required String pageId,
+  @POST("rest/s1/growerp/100/LandingPage/{landingPageId}/Credibility")
+  Future<CredibilityInfo> createCredibilityInfo({
+    @Path() required String landingPageId,
     @Field() required String creatorBio,
     @Field() String? backgroundText,
     @Field() String? creatorImageUrl,
   });
 
-  @PATCH("rest/s1/growerp/100/LandingPage/{pageId}/Credibility/{credibilityId}")
-  Future<CredibilityElement> updateCredibilityInfo({
-    @Path() required String pageId,
-    @Path() required String credibilityId,
+  @PATCH(
+    "rest/s1/growerp/100/LandingPage/{landingPageId}/Credibility/{credibilityInfoId}",
+  )
+  Future<CredibilityInfo> updateCredibilityInfo({
+    @Path() required String landingPageId,
+    @Path() required String credibilityInfoId,
     @Field() String? creatorBio,
     @Field() String? backgroundText,
     @Field() String? creatorImageUrl,
   });
 
   @DELETE(
-    "rest/s1/growerp/100/LandingPage/{pageId}/Credibility/{credibilityId}",
+    "rest/s1/growerp/100/LandingPage/{landingPageId}/Credibility/{credibilityInfoId}",
   )
   Future<void> deleteCredibilityInfo({
-    @Path() required String pageId,
-    @Path() required String credibilityId,
+    @Path() required String landingPageId,
+    @Path() required String credibilityInfoId,
   });
 
   // ============================================
@@ -973,31 +981,10 @@ abstract class RestClient {
     @Field() required String statistic,
   });
 
-  @DELETE("rest/s1/growerp/100/CredibilityStatistic/{statisticId}")
+  @DELETE("rest/s1/growerp/100/CredibilityStatistic/{credibilityStatisticId}")
   Future<void> removeCredibilityStatistic({
-    @Path() required String statisticId,
+    @Path() required String credibilityStatisticId,
   });
 
   // ============================================
-  // PRIMARY CTA ENDPOINTS (Nested under LandingPage)
-  // ============================================
-
-  @POST("rest/s1/growerp/100/LandingPage/{pageId}/CallToAction")
-  Future<CallToAction> createPrimaryCTA({
-    @Path() required String pageId,
-    @Field() required String buttonText,
-    @Field() String? estimatedTime,
-    @Field() String? cost,
-    @Field() String? valuePromise,
-  });
-
-  @PATCH("rest/s1/growerp/100/LandingPage/{pageId}/CallToAction/{ctaId}")
-  Future<CallToAction> updatePrimaryCTA({
-    @Path() required String pageId,
-    @Path() required String ctaId,
-    @Field() String? buttonText,
-    @Field() String? estimatedTime,
-    @Field() String? cost,
-    @Field() String? valuePromise,
-  });
 }

@@ -221,7 +221,8 @@ class _AssessmentQuestionsScreenState extends State<AssessmentQuestionsScreen> {
   }
 
   Widget _buildOpenTextInput(AssessmentQuestion question) {
-    final currentAnswer = _answers[question.questionId] as String? ?? '';
+    final currentAnswer =
+        _answers[question.assessmentQuestionId] as String? ?? '';
 
     return Column(
       children: [
@@ -240,7 +241,7 @@ class _AssessmentQuestionsScreenState extends State<AssessmentQuestionsScreen> {
             ),
             onChanged: (value) {
               setState(() {
-                _answers[question.questionId ?? ''] = value;
+                _answers[question.assessmentQuestionId ?? ''] = value;
               });
             },
           ),
@@ -260,7 +261,7 @@ class _AssessmentQuestionsScreenState extends State<AssessmentQuestionsScreen> {
     // Options are already nested in the question from backend response
     // Backend handles deduplication by optionId and sorts by optionSequence
     final options = question.options ?? [];
-    final selectedOptionId = _answers[question.questionId];
+    final selectedOptionId = _answers[question.assessmentQuestionId];
 
     if (options.isEmpty) {
       return Center(
@@ -286,13 +287,14 @@ class _AssessmentQuestionsScreenState extends State<AssessmentQuestionsScreen> {
       separatorBuilder: (context, index) => const SizedBox(height: 12),
       itemBuilder: (context, index) {
         final option = options[index];
-        final isSelected = selectedOptionId == option.optionId;
+        final isSelected =
+            selectedOptionId == option.assessmentQuestionOptionId;
 
         return _buildOptionTile(
           option: option,
           isSelected: isSelected,
-          onTap: () =>
-              _answerQuestion(question.questionId ?? '', option.optionId ?? ''),
+          onTap: () => _answerQuestion(question.assessmentQuestionId ?? '',
+              option.assessmentQuestionOptionId ?? ''),
         );
       },
     );

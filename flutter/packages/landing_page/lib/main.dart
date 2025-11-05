@@ -41,32 +41,31 @@ Future main() async {
   Bloc.observer = AppBlocObserver();
   RestClient restClient = RestClient(await buildDioClient());
 
-  debugPrint("=====Uri.base: ${Uri.base}");
-
   // this part is only executing on the web
   Company? company;
   final uri = Uri.base;
+  debugPrint("=====Uri.base: ${Uri.base} host: ${uri.host}");
   try {
     company = await restClient.getCompanyFromHost(uri.host);
   } on DioException catch (e) {
     debugPrint("getting hostname error: ${await getDioError(e)}");
   }
 
-  debugPrint("=====company owner: ${company?.ownerPartyId}");
-
-  // Resolve route parameters from URL and company data
   final query = uri.queryParameters;
-  String pageId = query['pageId'] ?? '100000';
-  String? ownerPartyId = company?.ownerPartyId ?? '100002';
+  String? landingPageId = query['landingPageId'];
+  String pseudoId = query['pseudoId'] ?? query['pageId'] ?? 'erp-landing-page';
+  String? ownerPartyId = company?.ownerPartyId ?? 'GROWERP';
 
-  debugPrint('=== landing page: $pageId');
+  debugPrint('=== landing page landingPageId: $landingPageId');
+  debugPrint('=== landing page pseudoId: $pseudoId');
   debugPrint('=== ownerPartyId: $ownerPartyId');
 
   runApp(
     PublicLandingPageApp(
       restClient: restClient,
       classificationId: classificationId,
-      initialPageId: pageId,
+      landingPageId: landingPageId,
+      pseudoId: pseudoId,
       ownerPartyId: ownerPartyId,
     ),
   );
@@ -86,13 +85,15 @@ class PublicLandingPageApp extends StatelessWidget {
     super.key,
     required this.restClient,
     required this.classificationId,
-    required this.initialPageId,
+    this.pseudoId,
+    this.landingPageId,
     this.ownerPartyId,
   });
 
   final RestClient restClient;
   final String classificationId;
-  final String initialPageId;
+  final String? pseudoId;
+  final String? landingPageId;
   final String? ownerPartyId;
 
   @override
@@ -111,12 +112,13 @@ class PublicLandingPageApp extends StatelessWidget {
         ],
         supportedLocales: CoreLocalizations.supportedLocales,
         home: ConfigurableLandingPage(
-          pageId: initialPageId,
+          pseudoId: pseudoId ?? '',
+          landingPageId: landingPageId,
           ownerPartyId: ownerPartyId,
         ),
         routes: {
           '/assessment': (context) => LandingPageAssessmentFlowScreen(
-            pageId: initialPageId,
+            landingPageId: landingPageId ?? '',
             ownerPartyId: ownerPartyId,
             startAssessmentFlow: true,
           ),
