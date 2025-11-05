@@ -180,13 +180,14 @@ class QuestionBloc extends Bloc<QuestionEvent, QuestionState> {
         }
       }
 
-      final questionWithOptions = updatedQuestion.copyWith(options: finalOptions);
+      final questionWithOptions =
+          updatedQuestion.copyWith(options: finalOptions);
 
       final updatedQuestions = state.questions
-          .map((question) =>
-              question.assessmentQuestionId == updatedQuestion.assessmentQuestionId
-                  ? questionWithOptions
-                  : question)
+          .map((question) => question.assessmentQuestionId ==
+                  updatedQuestion.assessmentQuestionId
+              ? questionWithOptions
+              : question)
           .toList()
         ..sort((a, b) =>
             (a.questionSequence ?? 0).compareTo(b.questionSequence ?? 0));
@@ -218,7 +219,8 @@ class QuestionBloc extends Bloc<QuestionEvent, QuestionState> {
       );
 
       final updatedQuestions = state.questions
-          .where((question) => question.assessmentQuestionId != event.questionId)
+          .where(
+              (question) => question.assessmentQuestionId != event.questionId)
           .toList();
 
       emit(state.copyWith(
