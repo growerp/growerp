@@ -24,6 +24,7 @@ export 'src/bloc/assessment_bloc.dart';
 export 'src/bloc/landing_page_bloc.dart';
 export 'src/bloc/landing_page_event.dart';
 export 'src/bloc/landing_page_state.dart';
+export 'src/bloc/landing_page_generation_bloc.dart';
 export 'src/bloc/page_section_bloc.dart';
 export 'src/bloc/page_section_event.dart';
 export 'src/bloc/page_section_state.dart';
@@ -37,6 +38,7 @@ export 'src/bloc/question_state.dart';
 export 'src/get_assessment_bloc_providers.dart';
 
 export 'src/screens/screens.dart';
+export 'src/screens/generate_landing_page_dialog.dart';
 
 // Integration test helpers and test data
 export 'src/test_data.dart';

@@ -898,6 +898,20 @@ abstract class RestClient {
   });
 
   // ============================================
+  // AI LANDING PAGE GENERATION ENDPOINTS
+  // ============================================
+
+  @POST("rest/s1/growerp/100/LandingPage/generateWithAI")
+  @FormUrlEncoded()
+  Future<LandingPageGenerationResponse> generateLandingPageWithAI({
+    @Field() required String businessDescription,
+    @Field() String? targetAudience,
+    @Field() String? industry,
+    @Field() String tone = 'professional',
+    @Field() int numSections = 5,
+  });
+
+  // ============================================
   // PAGE SECTION ENDPOINTS
   // ============================================
 

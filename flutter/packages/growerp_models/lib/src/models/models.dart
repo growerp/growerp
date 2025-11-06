@@ -59,3 +59,4 @@ export 'assessment_questions_response_model.dart';
 export 'assessment_question_options_response_model.dart';
 export 'scoring_threshold_model.dart';
 export 'landing_page_model.dart' hide NullableTimestampConverter;
+export 'landing_page_generation_response_model.dart';

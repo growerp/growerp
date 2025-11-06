@@ -19,8 +19,26 @@ Future<String> getDioError(dynamic e) async {
           if (decoded['errors'] != null &&
               decoded['errors'].toString().isNotEmpty) {
             errorMessage = decoded['errors'].toString();
-            // Clean up the message by removing extra whitespace and formatting
-            errorMessage = errorMessage.replaceAll('\\n', '\n').trim();
+
+            // Try to extract the inner error message from nested JSON errors
+            // Example: "Failed to generate: { "error": { "message": "Model overloaded" } }"
+            try {
+              // Check if the error contains nested JSON
+              final RegExp jsonPattern = RegExp(
+                r'\{[^}]*"message"\s*:\s*"([^"]+)"',
+              );
+              final match = jsonPattern.firstMatch(errorMessage);
+              if (match != null && match.group(1) != null) {
+                // Extract just the meaningful message
+                errorMessage = match.group(1)!;
+              } else {
+                // Clean up the message by removing extra whitespace and formatting
+                errorMessage = errorMessage.replaceAll('\\n', '\n').trim();
+              }
+            } catch (_) {
+              // If parsing fails, just clean up the original message
+              errorMessage = errorMessage.replaceAll('\\n', '\n').trim();
+            }
 
             // Return only the clean error message without technical prefixes
             returnMessage = errorMessage;
