@@ -37,3 +37,8 @@ export 'src/bloc/question_state.dart';
 export 'src/get_assessment_bloc_providers.dart';
 
 export 'src/screens/screens.dart';
+
+// Integration test helpers and test data
+export 'src/test_data.dart';
+export 'src/landing_page/integration_test/landing_page_test.dart';
+export 'src/assessment/integration_test/assessment_test.dart';

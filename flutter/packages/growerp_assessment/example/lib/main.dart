@@ -39,7 +39,7 @@ Future main() async {
       notificationClient: notificationClient,
       title: 'GrowERP Assessment & Landing Page Management',
       router: generateRoute,
-      menuOptions: (context) => menuOptions(context),
+      menuOptions: (context) => testMenuOptions,
       extraDelegates: const [],
       extraBlocProviders: getExampleBlocProviders(restClient, classificationId),
     ),
@@ -53,8 +53,8 @@ List<BlocProvider> getExampleBlocProviders(
   return [...getAssessmentBlocProviders(restClient, classificationId)];
 }
 
-// Menu definition
-List<MenuOption> menuOptions(BuildContext context) => [
+// Test menu options (simplified for integration tests)
+List<MenuOption> testMenuOptions = [
   MenuOption(
     image: 'packages/growerp_core/images/dashBoardGrey.png',
     selectedImage: 'packages/growerp_core/images/dashBoard.png',
@@ -81,6 +81,9 @@ List<MenuOption> menuOptions(BuildContext context) => [
   ),
 ];
 
+// Menu definition (for compatibility)
+List<MenuOption> menuOptions(BuildContext context) => testMenuOptions;
+
 // Routing
 Route<dynamic> generateRoute(RouteSettings settings) {
   debugPrint(
@@ -91,17 +94,17 @@ Route<dynamic> generateRoute(RouteSettings settings) {
   switch (settings.name) {
     case '/':
       return MaterialPageRoute(
-        builder: (context) => const HomeForm(menuOptions: menuOptions),
+        builder: (context) => HomeForm(menuOptions: (c) => testMenuOptions),
       );
     case '/landingPages':
       return MaterialPageRoute(
         builder: (context) =>
-            DisplayMenuOption(menuList: menuOptions(context), menuIndex: 1),
+            DisplayMenuOption(menuList: testMenuOptions, menuIndex: 1),
       );
     case '/assessments':
       return MaterialPageRoute(
         builder: (context) =>
-            DisplayMenuOption(menuList: menuOptions(context), menuIndex: 2),
+            DisplayMenuOption(menuList: testMenuOptions, menuIndex: 2),
       );
     default:
       return MaterialPageRoute(
@@ -121,15 +124,14 @@ class MainMenu extends StatelessWidget {
     return BlocBuilder<AuthBloc, AuthState>(
       builder: (context, state) {
         if (state.status == AuthStatus.authenticated) {
-          final options = menuOptions(context);
           return DashBoardForm(
             dashboardItems: [
-              makeDashboardItem('dbLandingPages', context, options[1], [
+              makeDashboardItem('dbLandingPages', context, testMenuOptions[1], [
                 'Landing Pages',
                 'Create and manage landing pages',
                 'Configure hooks and CTAs',
               ]),
-              makeDashboardItem('dbAssessments', context, options[2], [
+              makeDashboardItem('dbAssessments', context, testMenuOptions[2], [
                 'Assessments',
                 'Create and manage assessments',
                 'Define questions and scoring',

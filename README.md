@@ -48,6 +48,7 @@ growerp install
 
 - **[🔗 Data Models Guide](./docs/basic_explanation_of_the_frontend_REST_Backend_data_models.md)** - Frontend-backend data model integration
 - **[🤖 AI Integration (MCP Server)](./moqui/runtime/component/mcp/docs/README.md)** - Model Context Protocol server for AI business automation
+- **[🤖 Gemini AI Communication](./GEMINI_COMMUNICATION_GUIDE.md)** - Invoice scanning and AI-powered data extraction with Google Gemini
 - **[💳 Stripe Payment Processing](./docs/Stripe_Payment_Processing_Documentation.md)** - Complete payment integration guide
 - **[🌐 WebSocket Notifications](./docs/WebSocket_Notification_System.md)** - Real-time notification system
 - **[🕐 Timezone Management](./docs/GrowERP_Timezone_Management_Guide.md)** - Handle timezone differences between client and server
