@@ -23,6 +23,7 @@ import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
 import '../bloc/landing_page_bloc.dart';
 import '../bloc/landing_page_event.dart';
 import '../bloc/landing_page_state.dart';
+import 'generate_landing_page_dialog.dart';
 import 'landing_page_detail_screen.dart';
 import 'landing_page_list_table_def.dart';
 
@@ -54,6 +55,7 @@ class LandingPageListState extends State<LandingPageList> {
   late double bottom;
   double? right;
   double currentScroll = 0;
+  late AuthBloc _authBloc;
 
   @override
   void initState() {
@@ -61,6 +63,7 @@ class LandingPageListState extends State<LandingPageList> {
     _scrollController.addListener(_onScroll);
     _landingPageBloc = context.read<LandingPageBloc>()
       ..add(const LandingPageLoad());
+    _authBloc = context.read<AuthBloc>();
     bottom = 50;
   }
 
@@ -260,6 +263,52 @@ class LandingPageListState extends State<LandingPageList> {
                           },
                           tooltip: 'Add new landing page',
                           child: const Icon(Icons.add),
+                        ),
+                        const SizedBox(height: 10),
+                        FloatingActionButton(
+                          key: const Key("generateAILandingPage"),
+                          heroTag: "landingPageBtn3",
+                          onPressed: () async {
+                            // Get ownerPartyId from the stored auth bloc
+                            final authState = _authBloc.state;
+
+                            if (authState.status != AuthStatus.authenticated) {
+                              if (mounted) {
+                                HelperFunctions.showMessage(
+                                  context,
+                                  'Error: Authentication required. Please log in.',
+                                  Colors.red,
+                                );
+                              }
+                              return;
+                            }
+
+                            if (!mounted) return;
+                            await showDialog(
+                              barrierDismissible: false,
+                              context: context,
+                              builder: (BuildContext dialogContext) {
+                                return GenerateLandingPageDialog(
+                                  onSuccess: (landingPage) {
+                                    // Refresh the list
+                                    _landingPageBloc
+                                        .add(const LandingPageLoad());
+
+                                    // Show success message
+                                    if (mounted) {
+                                      HelperFunctions.showMessage(
+                                        context,
+                                        'Landing page "${landingPage.title}" created successfully!',
+                                        Colors.green,
+                                      );
+                                    }
+                                  },
+                                );
+                              },
+                            );
+                          },
+                          tooltip: 'Generate Landing Page with AI',
+                          child: const Icon(Icons.auto_awesome),
                         ),
                         const SizedBox(height: 10),
                       ],

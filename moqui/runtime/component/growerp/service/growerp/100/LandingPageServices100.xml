@@ -1096,4 +1096,43 @@ Service definitions for landing page, sections, credibility, and CTA management
   </service>
 
   <!-- ============================================ -->
+
+  <!-- ============================================ -->
+  <!-- AI LANDING PAGE GENERATION SERVICES -->
+  <!-- ============================================ -->
+
+  <!-- generateLandingPageWithAI: Generate landing page with Gemini AI -->
+  <service verb="generate" noun="LandingPageWithAI" authenticate="true">
+    <description>Generate landing page content using Gemini AI and create directly in database</description>
+    <in-parameters>
+      <parameter name="businessDescription" type="String" required="true">
+        <description>Description of the business (20-500 characters)</description>
+      </parameter>
+      <parameter name="targetAudience" type="String">
+        <description>Target audience for the landing page (optional)</description>
+      </parameter>
+      <parameter name="industry" type="String">
+        <description>Industry or market segment (optional, auto-detected if not provided)</description>
+      </parameter>
+      <parameter name="tone" type="String" default="professional">
+        <description>Tone of content: professional|casual|inspirational</description>
+      </parameter>
+      <parameter name="numSections" type="Integer" default="5">
+        <description>Number of page sections to generate (3-7)</description>
+      </parameter>
+    </in-parameters>
+    <out-parameters>
+      <parameter name="landingPage" type="Map">
+        <description>Created landing page object with all sections</description>
+      </parameter>
+      <parameter name="sectionsCreated" type="Integer">
+        <description>Number of sections created</description>
+      </parameter>
+    </out-parameters>
+    <actions>
+      <script location="component://growerp/service/generateLandingPageWithAI.groovy" />
+    </actions>
+  </service>
+
+  <!-- ============================================ -->
 </services>
