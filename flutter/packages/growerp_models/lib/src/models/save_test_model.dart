@@ -46,6 +46,8 @@ abstract class SaveTest with _$SaveTest {
     @Default([]) List<ItemType> itemTypes,
     @Default([]) List<PaymentType> paymentTypes,
     @Default([]) List<Subscription> subscriptions,
+    @Default([]) List<LandingPage> landingPages,
+    @Default([]) List<Assessment> assessments,
   }) = _SaveTest;
   SaveTest._();
 
