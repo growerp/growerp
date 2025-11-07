@@ -205,6 +205,17 @@ Service definitions for assessment management and completion
                 assessment.thresholds = thresholdsMap.values().sort { it.minScore }
                 
                 context.assessment = assessment
+                
+                // Debug logging
+                ec.logger.warn("=== Assessment ${assessment.assessmentId} complete structure ===")
+                ec.logger.warn("Assessment name: ${assessment.assessmentName}")
+                ec.logger.warn("Questions count: ${assessment.questions?.size()}")
+                ec.logger.warn("Thresholds count: ${assessment.thresholds?.size()}")
+                if (assessment.questions) {
+                    assessment.questions.each { q ->
+                        ec.logger.warn("  Question ${q.questionSequence}: ${q.questionText?.take(50)} (${q.options?.size()} options)")
+                    }
+                }
             ]]></script>
 
             <log level="info"
