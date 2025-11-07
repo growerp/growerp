@@ -52,7 +52,7 @@ List<LandingPage> landingPages = [
 /// Assessment test data
 List<Assessment> assessments = [
   const Assessment(
-    assessmentId: 'ASSESSMENT_BUSI_READINESS_001',
+    assessmentId: 'ASMT_BUSI_READ_001',
     pseudoId: 'business-readiness-assessment',
     assessmentName: 'Business Readiness Assessment',
     description:
@@ -111,7 +111,7 @@ List<LandingPage> updatedLandingPages = [
 /// Updated assessments for testing
 List<Assessment> updatedAssessments = [
   const Assessment(
-    assessmentId: 'ASSESSMENT_BUSI_READINESS_001',
+    assessmentId: 'ASMT_BUSI_READ_001',
     pseudoId: 'business-readiness-assessment',
     assessmentName: 'Updated Business Readiness Assessment',
     description:

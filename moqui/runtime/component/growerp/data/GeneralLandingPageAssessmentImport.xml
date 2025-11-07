@@ -13,7 +13,7 @@ this file is loaded for every owner who request demo data.
   <!-- ============================================================
        ASSESSMENT: Business Readiness Assessment
        ============================================================ -->
-  <growerp.assessment.Assessment assessmentId="ASSESSMENT_BUSI_READINESS_001"
+  <growerp.assessment.Assessment assessmentId="ASMT_BUSI_READ_001"
     pseudoId="business-readiness-assessment"
     ownerPartyId="DEMO"
     assessmentName="Business Readiness Assessment"
@@ -29,7 +29,7 @@ this file is loaded for every owner who request demo data.
   <!-- Question 1: Current Situation (Required - Best Practices) -->
   <growerp.assessment.AssessmentQuestion assessmentQuestionId="QUESTION_CURRENT_SIT_001"
     pseudoId="q-current-situation"
-    assessmentId="ASSESSMENT_BUSI_READINESS_001"
+    assessmentId="ASMT_BUSI_READ_001"
     questionSequence="1"
     questionType="MultipleChoice"
     questionText="Which best describes your current situation?"
@@ -41,7 +41,7 @@ this file is loaded for every owner who request demo data.
   <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="OPTION_STAGNANT_001"
     pseudoId="opt-stagnant"
     assessmentQuestionId="QUESTION_CURRENT_SIT_001"
-    assessmentId="ASSESSMENT_BUSI_READINESS_001"
+    assessmentId="ASMT_BUSI_READ_001"
     optionSequence="1"
     optionText="Stagnant (No growth or declining)"
     optionScore="20" />
@@ -49,7 +49,7 @@ this file is loaded for every owner who request demo data.
   <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="OPTION_SLOW_GROWTH_001"
     pseudoId="opt-slow-growth"
     assessmentQuestionId="QUESTION_CURRENT_SIT_001"
-    assessmentId="ASSESSMENT_BUSI_READINESS_001"
+    assessmentId="ASMT_BUSI_READ_001"
     optionSequence="2"
     optionText="Slow Growth (1-10% annually)"
     optionScore="50" />
@@ -57,7 +57,7 @@ this file is loaded for every owner who request demo data.
   <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="OPTION_RAPID_GROWTH_001"
     pseudoId="opt-rapid-growth"
     assessmentQuestionId="QUESTION_CURRENT_SIT_001"
-    assessmentId="ASSESSMENT_BUSI_READINESS_001"
+    assessmentId="ASMT_BUSI_READ_001"
     optionSequence="3"
     optionText="Rapid Growth (10%+ annually)"
     optionScore="80" />
@@ -65,7 +65,7 @@ this file is loaded for every owner who request demo data.
   <!-- Question 2: Desired Outcome (Required - Best Practices) -->
   <growerp.assessment.AssessmentQuestion assessmentQuestionId="QUESTION_DESIRED_OUT_001"
     pseudoId="q-desired-outcome"
-    assessmentId="ASSESSMENT_BUSI_READINESS_001"
+    assessmentId="ASMT_BUSI_READ_001"
     questionSequence="2"
     questionType="MultipleChoice"
     questionText="Which desired outcome would you like to achieve in the next 90 days?"
@@ -77,7 +77,7 @@ this file is loaded for every owner who request demo data.
   <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="OPTION_INCREASE_REV_001"
     pseudoId="opt-increase-revenue"
     assessmentQuestionId="QUESTION_DESIRED_OUT_001"
-    assessmentId="ASSESSMENT_BUSI_READINESS_001"
+    assessmentId="ASMT_BUSI_READ_001"
     optionSequence="1"
     optionText="Increase revenue"
     optionScore="75" />
@@ -85,7 +85,7 @@ this file is loaded for every owner who request demo data.
   <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="OPTION_IMPROVE_CUST_001"
     pseudoId="opt-improve-customer"
     assessmentQuestionId="QUESTION_DESIRED_OUT_001"
-    assessmentId="ASSESSMENT_BUSI_READINESS_001"
+    assessmentId="ASMT_BUSI_READ_001"
     optionSequence="2"
     optionText="Improve customer satisfaction"
     optionScore="70" />
@@ -94,7 +94,7 @@ this file is loaded for every owner who request demo data.
     assessmentQuestionOptionId="OPTION_STREAMLINE_OPS_001"
     pseudoId="opt-streamline-ops"
     assessmentQuestionId="QUESTION_DESIRED_OUT_001"
-    assessmentId="ASSESSMENT_BUSI_READINESS_001"
+    assessmentId="ASMT_BUSI_READ_001"
     optionSequence="3"
     optionText="Streamline operations"
     optionScore="65" />
@@ -102,7 +102,7 @@ this file is loaded for every owner who request demo data.
   <!-- Question 3: Biggest Obstacle (Required - Best Practices) -->
   <growerp.assessment.AssessmentQuestion assessmentQuestionId="QUESTION_OBSTACLE_001"
     pseudoId="q-biggest-obstacle"
-    assessmentId="ASSESSMENT_BUSI_READINESS_001"
+    assessmentId="ASMT_BUSI_READ_001"
     questionSequence="3"
     questionType="MultipleChoice"
     questionText="What is the biggest obstacle stopping you, or what have you tried that hasn't worked?"
@@ -115,7 +115,7 @@ this file is loaded for every owner who request demo data.
     assessmentQuestionOptionId="OPTION_INEFFICIENT_WF_001"
     pseudoId="opt-inefficient-workflows"
     assessmentQuestionId="QUESTION_OBSTACLE_001"
-    assessmentId="ASSESSMENT_BUSI_READINESS_001"
+    assessmentId="ASMT_BUSI_READ_001"
     optionSequence="1"
     optionText="Inefficient workflows"
     optionScore="40" />
@@ -124,7 +124,7 @@ this file is loaded for every owner who request demo data.
     assessmentQuestionOptionId="OPTION_LACK_VISIBILITY_001"
     pseudoId="opt-lack-visibility"
     assessmentQuestionId="QUESTION_OBSTACLE_001"
-    assessmentId="ASSESSMENT_BUSI_READINESS_001"
+    assessmentId="ASMT_BUSI_READ_001"
     optionSequence="2"
     optionText="Lack of market visibility"
     optionScore="45" />
@@ -132,7 +132,7 @@ this file is loaded for every owner who request demo data.
   <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="OPTION_OUTDATED_TECH_001"
     pseudoId="opt-outdated-tech"
     assessmentQuestionId="QUESTION_OBSTACLE_001"
-    assessmentId="ASSESSMENT_BUSI_READINESS_001"
+    assessmentId="ASMT_BUSI_READ_001"
     optionSequence="3"
     optionText="Outdated technology"
     optionScore="35" />
@@ -140,7 +140,7 @@ this file is loaded for every owner who request demo data.
   <!-- Question 4: Solution Preference (Required - Best Practices) -->
   <growerp.assessment.AssessmentQuestion assessmentQuestionId="QUESTION_SOLUTION_PREF_001"
     pseudoId="q-solution-preference"
-    assessmentId="ASSESSMENT_BUSI_READINESS_001"
+    assessmentId="ASMT_BUSI_READ_001"
     questionSequence="4"
     questionType="MultipleChoice"
     questionText="Which solution do you think would suit you best?"
@@ -152,7 +152,7 @@ this file is loaded for every owner who request demo data.
   <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="OPTION_EDUCATION_001"
     pseudoId="opt-education-training"
     assessmentQuestionId="QUESTION_SOLUTION_PREF_001"
-    assessmentId="ASSESSMENT_BUSI_READINESS_001"
+    assessmentId="ASMT_BUSI_READ_001"
     optionSequence="1"
     optionText="Education/Training"
     optionScore="50" />
@@ -160,7 +160,7 @@ this file is loaded for every owner who request demo data.
   <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="OPTION_CONSULTING_001"
     pseudoId="opt-consulting-coaching"
     assessmentQuestionId="QUESTION_SOLUTION_PREF_001"
-    assessmentId="ASSESSMENT_BUSI_READINESS_001"
+    assessmentId="ASMT_BUSI_READ_001"
     optionSequence="2"
     optionText="One-to-one consulting/coaching"
     optionScore="70" />
@@ -168,7 +168,7 @@ this file is loaded for every owner who request demo data.
   <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="OPTION_IMPL_SUPPORT_001"
     pseudoId="opt-implementation-support"
     assessmentQuestionId="QUESTION_SOLUTION_PREF_001"
-    assessmentId="ASSESSMENT_BUSI_READINESS_001"
+    assessmentId="ASMT_BUSI_READ_001"
     optionSequence="3"
     optionText="Full implementation support"
     optionScore="85" />
@@ -176,7 +176,7 @@ this file is loaded for every owner who request demo data.
   <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="OPTION_SOFTWARE_REC_001"
     pseudoId="opt-software-recommendation"
     assessmentQuestionId="QUESTION_SOLUTION_PREF_001"
-    assessmentId="ASSESSMENT_BUSI_READINESS_001"
+    assessmentId="ASMT_BUSI_READ_001"
     optionSequence="4"
     optionText="Software recommendation"
     optionScore="60" />
@@ -184,7 +184,7 @@ this file is loaded for every owner who request demo data.
   <!-- Question 5: Open Box - Open-ended Question (Required - Best Practices) -->
   <growerp.assessment.AssessmentQuestion assessmentQuestionId="QUESTION_OPEN_BOX_001"
     pseudoId="q-open-box"
-    assessmentId="ASSESSMENT_BUSI_READINESS_001"
+    assessmentId="ASMT_BUSI_READ_001"
     questionSequence="5"
     questionType="Text"
     questionText="Is there anything else that you think we need to know about?"
@@ -196,7 +196,7 @@ this file is loaded for every owner who request demo data.
   <!-- Operational Efficiency Question (Best Practices) -->
   <growerp.assessment.AssessmentQuestion assessmentQuestionId="QUESTION_OPE_EFF_001"
     pseudoId="q-operational-efficiency"
-    assessmentId="ASSESSMENT_BUSI_READINESS_001"
+    assessmentId="ASMT_BUSI_READ_001"
     questionSequence="6"
     questionType="MultipleChoice"
     questionText="How would you rate your operational efficiency?"
@@ -208,7 +208,7 @@ this file is loaded for every owner who request demo data.
   <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="OPTION_OPE_POOR_001"
     pseudoId="opt-operational-poor"
     assessmentQuestionId="QUESTION_OPE_EFF_001"
-    assessmentId="ASSESSMENT_BUSI_READINESS_001"
+    assessmentId="ASMT_BUSI_READ_001"
     optionSequence="1"
     optionText="Poor (Manual, error-prone processes)"
     optionScore="15" />
@@ -216,7 +216,7 @@ this file is loaded for every owner who request demo data.
   <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="OPTION_OPE_FAIR_001"
     pseudoId="opt-operational-fair"
     assessmentQuestionId="QUESTION_OPE_EFF_001"
-    assessmentId="ASSESSMENT_BUSI_READINESS_001"
+    assessmentId="ASMT_BUSI_READ_001"
     optionSequence="2"
     optionText="Fair (Some automation, inconsistent results)"
     optionScore="45" />
@@ -224,7 +224,7 @@ this file is loaded for every owner who request demo data.
   <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="OPTION_OPE_GOOD_001"
     pseudoId="opt-operational-good"
     assessmentQuestionId="QUESTION_OPE_EFF_001"
-    assessmentId="ASSESSMENT_BUSI_READINESS_001"
+    assessmentId="ASMT_BUSI_READ_001"
     optionSequence="3"
     optionText="Good (Mostly automated, defined processes)"
     optionScore="70" />
@@ -232,7 +232,7 @@ this file is loaded for every owner who request demo data.
   <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="OPTION_OPE_EXCEL_001"
     pseudoId="opt-operational-excellent"
     assessmentQuestionId="QUESTION_OPE_EFF_001"
-    assessmentId="ASSESSMENT_BUSI_READINESS_001"
+    assessmentId="ASMT_BUSI_READ_001"
     optionSequence="4"
     optionText="Excellent (Fully optimized, continuous improvement)"
     optionScore="90" />
@@ -240,7 +240,7 @@ this file is loaded for every owner who request demo data.
   <!-- Customer Engagement Question (Best Practices) -->
   <growerp.assessment.AssessmentQuestion assessmentQuestionId="QUESTION_CUST_ENG_001"
     pseudoId="q-customer-engagement"
-    assessmentId="ASSESSMENT_BUSI_READINESS_001"
+    assessmentId="ASMT_BUSI_READ_001"
     questionSequence="7"
     questionType="MultipleChoice"
     questionText="How effectively do you engage with your customers?"
@@ -252,7 +252,7 @@ this file is loaded for every owner who request demo data.
   <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="OPTION_CUST_MINIMAL_001"
     pseudoId="opt-customer-minimal"
     assessmentQuestionId="QUESTION_CUST_ENG_001"
-    assessmentId="ASSESSMENT_BUSI_READINESS_001"
+    assessmentId="ASMT_BUSI_READ_001"
     optionSequence="1"
     optionText="Minimal (Basic communication only)"
     optionScore="20" />
@@ -260,7 +260,7 @@ this file is loaded for every owner who request demo data.
   <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="OPTION_CUST_STANDARD_001"
     pseudoId="opt-customer-standard"
     assessmentQuestionId="QUESTION_CUST_ENG_001"
-    assessmentId="ASSESSMENT_BUSI_READINESS_001"
+    assessmentId="ASMT_BUSI_READ_001"
     optionSequence="2"
     optionText="Standard (Regular updates, some personalization)"
     optionScore="55" />
@@ -268,7 +268,7 @@ this file is loaded for every owner who request demo data.
   <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="OPTION_CUST_ADVANCED_001"
     pseudoId="opt-customer-advanced"
     assessmentQuestionId="QUESTION_CUST_ENG_001"
-    assessmentId="ASSESSMENT_BUSI_READINESS_001"
+    assessmentId="ASMT_BUSI_READ_001"
     optionSequence="3"
     optionText="Advanced (Personalized, multi-channel, proactive)"
     optionScore="75" />
@@ -277,7 +277,7 @@ this file is loaded for every owner who request demo data.
     assessmentQuestionOptionId="OPTION_CUST_EXCEPTIONAL_001"
     pseudoId="opt-customer-exceptional"
     assessmentQuestionId="QUESTION_CUST_ENG_001"
-    assessmentId="ASSESSMENT_BUSI_READINESS_001"
+    assessmentId="ASMT_BUSI_READ_001"
     optionSequence="4"
     optionText="Exceptional (Customer-centric culture, loyalty programs)"
     optionScore="95" />
@@ -285,7 +285,7 @@ this file is loaded for every owner who request demo data.
   <!-- Scalable Growth Question (Best Practices) -->
   <growerp.assessment.AssessmentQuestion assessmentQuestionId="QUESTION_SCALAB_GROW_001"
     pseudoId="q-scalable-growth"
-    assessmentId="ASSESSMENT_BUSI_READINESS_001"
+    assessmentId="ASMT_BUSI_READ_001"
     questionSequence="8"
     questionType="MultipleChoice"
     questionText="Is your business infrastructure scalable?"
@@ -297,7 +297,7 @@ this file is loaded for every owner who request demo data.
   <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="OPTION_SCAL_LIMITED_001"
     pseudoId="opt-scalable-limited"
     assessmentQuestionId="QUESTION_SCALAB_GROW_001"
-    assessmentId="ASSESSMENT_BUSI_READINESS_001"
+    assessmentId="ASMT_BUSI_READ_001"
     optionSequence="1"
     optionText="Limited (Breaking at growth points)"
     optionScore="25" />
@@ -305,7 +305,7 @@ this file is loaded for every owner who request demo data.
   <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="OPTION_SCAL_MODERATE_001"
     pseudoId="opt-scalable-moderate"
     assessmentQuestionId="QUESTION_SCALAB_GROW_001"
-    assessmentId="ASSESSMENT_BUSI_READINESS_001"
+    assessmentId="ASMT_BUSI_READ_001"
     optionSequence="2"
     optionText="Moderate (Can handle 2x growth with adjustments)"
     optionScore="55" />
@@ -313,7 +313,7 @@ this file is loaded for every owner who request demo data.
   <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="OPTION_SCAL_STRONG_001"
     pseudoId="opt-scalable-strong"
     assessmentQuestionId="QUESTION_SCALAB_GROW_001"
-    assessmentId="ASSESSMENT_BUSI_READINESS_001"
+    assessmentId="ASMT_BUSI_READ_001"
     optionSequence="3"
     optionText="Strong (Can handle 5x growth with minimal changes)"
     optionScore="80" />
@@ -321,7 +321,7 @@ this file is loaded for every owner who request demo data.
   <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="OPTION_SCAL_FLEXIBLE_001"
     pseudoId="opt-scalable-flexible"
     assessmentQuestionId="QUESTION_SCALAB_GROW_001"
-    assessmentId="ASSESSMENT_BUSI_READINESS_001"
+    assessmentId="ASMT_BUSI_READ_001"
     optionSequence="4"
     optionText="Flexible (Can handle 10x+ growth, fully elastic)"
     optionScore="100" />
@@ -332,7 +332,7 @@ this file is loaded for every owner who request demo data.
 
   <growerp.assessment.ScoringThreshold scoringThresholdId="THRESHOLD_CRITICAL_001"
     pseudoId="threshold-critical"
-    assessmentId="ASSESSMENT_BUSI_READINESS_001"
+    assessmentId="ASMT_BUSI_READ_001"
     minScore="0"
     maxScore="250"
     leadStatus="Critical"
@@ -342,7 +342,7 @@ this file is loaded for every owner who request demo data.
 
   <growerp.assessment.ScoringThreshold scoringThresholdId="THRESHOLD_NEEDS_WORK_001"
     pseudoId="threshold-needs-work"
-    assessmentId="ASSESSMENT_BUSI_READINESS_001"
+    assessmentId="ASMT_BUSI_READ_001"
     minScore="250"
     maxScore="450"
     leadStatus="NeedsWork"
@@ -352,7 +352,7 @@ this file is loaded for every owner who request demo data.
 
   <growerp.assessment.ScoringThreshold scoringThresholdId="THRESHOLD_READY_001"
     pseudoId="threshold-ready"
-    assessmentId="ASSESSMENT_BUSI_READINESS_001"
+    assessmentId="ASMT_BUSI_READ_001"
     minScore="450"
     maxScore="600"
     leadStatus="Ready"
@@ -369,7 +369,7 @@ this file is loaded for every owner who request demo data.
     pseudoId="business-readiness-landing"
     ownerPartyId="DEMO"
     ctaActionType="assessment"
-    ctaAssessmentId="ASSESSMENT_BUSI_READINESS_001"
+    ctaAssessmentId="ASMT_BUSI_READ_001"
     title="Business Readiness Assessment"
     hookType="ResultsHook"
     headline="Are you ready to unlock your business's full potential?"

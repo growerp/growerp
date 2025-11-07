@@ -1,5 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'assessment_question_option_model.dart';
+import 'assessment_model.dart' show NullableTimestampConverter;
 
 part 'assessment_question_model.g.dart';
 
@@ -48,7 +49,8 @@ class AssessmentQuestion {
   @StringBoolConverter()
   final bool? isRequired;
 
-  /// Timestamp when created
+  /// Timestamp when created (Unix timestamp in milliseconds)
+  @NullableTimestampConverter()
   final DateTime? createdDate;
 
   /// Username who created this question

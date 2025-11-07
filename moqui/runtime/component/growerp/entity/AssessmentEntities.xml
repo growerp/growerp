@@ -35,7 +35,7 @@ Dual-ID strategy: entityNameId (system-wide) + pseudoId (tenant-unique)
     <entity entity-name="AssessmentQuestion" package="growerp.assessment" cache="true">
         <field name="assessmentQuestionId" type="id" is-pk="true" />
         <field name="pseudoId" type="id" />
-        <field name="assessmentId" type="id" is-pk="true" />
+        <field name="assessmentId" type="id" />
         <field name="questionSequence" type="number-integer" />
         <field name="questionType" type="text-short" />
         <field name="questionText" type="text-long" />
@@ -59,8 +59,8 @@ Dual-ID strategy: entityNameId (system-wide) + pseudoId (tenant-unique)
     <entity entity-name="AssessmentQuestionOption" package="growerp.assessment" cache="true">
         <field name="assessmentQuestionOptionId" type="id" is-pk="true" />
         <field name="pseudoId" type="id" />
-        <field name="assessmentQuestionId" type="id" is-pk="true" />
-        <field name="assessmentId" type="id" is-pk="true" />
+        <field name="assessmentQuestionId" type="id" />
+        <field name="assessmentId" type="id" />
         <field name="optionSequence" type="number-integer" />
         <field name="optionText" type="text-medium" />
         <field name="optionScore" type="number-decimal" />
@@ -79,7 +79,7 @@ Dual-ID strategy: entityNameId (system-wide) + pseudoId (tenant-unique)
     <entity entity-name="ScoringThreshold" package="growerp.assessment" cache="true">
         <field name="scoringThresholdId" type="id" is-pk="true" />
         <field name="pseudoId" type="id" />
-        <field name="assessmentId" type="id" is-pk="true" />
+        <field name="assessmentId" type="id" />
         <field name="minScore" type="number-decimal" />
         <field name="maxScore" type="number-decimal" />
         <field name="leadStatus" type="text-short" />
@@ -173,7 +173,7 @@ Dual-ID strategy: entityNameId (system-wide) + pseudoId (tenant-unique)
 
         <!-- Assessment Questions (optional - may have assessments without questions) -->
         <member-entity entity-alias="AQ" entity-name="growerp.assessment.AssessmentQuestion"
-            join-from-alias="ASM">
+            join-from-alias="ASM" join-optional="true">
             <key-map field-name="assessmentId" />
         </member-entity>
 

@@ -1,4 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'assessment_model.dart' show NullableTimestampConverter;
 
 part 'assessment_question_option_model.g.dart';
 
@@ -26,7 +27,8 @@ class AssessmentQuestionOption {
   /// Score value for this option
   final double? optionScore;
 
-  /// Timestamp when created
+  /// Timestamp when created (Unix timestamp in milliseconds)
+  @NullableTimestampConverter()
   final DateTime? createdDate;
 
   const AssessmentQuestionOption({
