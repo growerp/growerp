@@ -167,7 +167,7 @@ Service definitions for landing page, sections, credibility, and CTA management
       </if>
 
       <!-- Build entity find for landing pages -->
-      <entity-find entity-name="growerp.landing.LandingPage" list="pagesList">
+      <entity-find entity-name="growerp.landing.LandingPage" list="pagesList" offset="start" limit="limit">
         <econdition field-name="ownerPartyId" from="ownerPartyId" />
         <econdition field-name="status" from="status" ignore-if-empty="true" />
         <econdition field-name="title" operator="like" from="search" ignore-if-empty="true" />
@@ -175,7 +175,6 @@ Service definitions for landing page, sections, credibility, and CTA management
         <econdition field-name="pseudoId" ignore-if-empty="true" />
         <econdition field-name="search" ignore-if-empty="true" />
         <order-by field-name="-lastModifiedDate" />
-        <limit-range start="start" size="limit" />
       </entity-find>
 
       <!-- Get total count for pagination -->
