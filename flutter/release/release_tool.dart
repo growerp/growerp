@@ -4,7 +4,6 @@
 import 'dart:io';
 import 'dart:convert';
 import 'package:dcli/dcli.dart';
-import 'package:path/path.dart' as path;
 
 /// Script to create a production release for GrowERP
 /// This script:
@@ -202,39 +201,27 @@ Future<Map<String, bool>> getPushConfiguration() async {
       ).toUpperCase() ==
       'Y';
 
-  var pushToGitHub = false;
-  if (pushToDockerHub) {
-    pushToGitHub =
-        ask(
-          'Commit version update to GitHub? (y/N)',
-          defaultValue: config['defaultPushToGitHub'] ? 'Y' : 'N',
-        ).toUpperCase() ==
-        'Y';
-  }
+  // Always push to GitHub when building Docker images
+  // This ensures Docker builds from the repository with versioned code
+  var pushToGitHub = pushToDockerHub;
 
   return {'pushToDockerHub': pushToDockerHub, 'pushToGitHub': pushToGitHub};
 }
 
 Future<String> determineWorkspace(bool pushToGitHub) async {
-  if (!pushToGitHub) {
-    var currentDir = Directory.current.path;
-    print("📁 Using local workspace: $currentDir");
-    return currentDir;
-  }
-
+  // Always use temp directory for release builds to ensure clean state
   var tempDir = config['tempWorkspaceDir'] ?? '/tmp/growerp';
   print("📁 Setting up repository workspace at: $tempDir");
 
   if (exists(tempDir)) {
-    print("   Updating existing repository...");
-    run('git stash', workingDirectory: tempDir);
-    run('git pull', workingDirectory: tempDir);
-  } else {
-    print("   Cloning repository...");
-    var repoUrl =
-        config['repositoryUrl'] ?? 'git@github.com:growerp/growerp.git';
-    run('git clone "$repoUrl"', workingDirectory: path.dirname(tempDir));
+    print("   Cleaning existing repository...");
+    run('rm -rf "$tempDir"');
   }
+
+  print("   Cloning fresh repository...");
+  var repoUrl = config['repositoryUrl'] ?? 'git@github.com:growerp/growerp.git';
+  var branch = config['defaultBranch'] ?? 'master';
+  run('git clone -b $branch "$repoUrl" "$tempDir"');
 
   return tempDir;
 }
@@ -371,13 +358,11 @@ Future<void> executeRelease(
 ) async {
   print("\n🚀 Starting release process...\n");
 
-  var imageIds = <String, String>{};
   var newVersions = <String, String>{};
 
+  // Step 1: Update version files in workspace
+  print("� Step 1: Updating version files in workspace...\n");
   for (var app in selectedApps) {
-    print("📦 Processing $app...");
-
-    // Calculate new version for this app
     var currentVersion = versionInfo['current'][app];
     var buildSuffix = currentVersion.contains('+')
         ? currentVersion.substring(currentVersion.indexOf('+'))
@@ -385,20 +370,33 @@ Future<void> executeRelease(
     var newVersion = "${versionInfo['newBase']}$buildSuffix";
     newVersions[app] = newVersion;
 
-    // Always update version files locally (regardless of git save setting)
-    await updateVersionFile(
-      app,
-      currentVersion,
-      newVersion,
-      Directory.current.path,
+    await updateVersionFile(app, currentVersion, newVersion, workspaceDir);
+  }
+
+  // Step 2: Commit, tag, and push to GitHub
+  if (pushConfig['pushToGitHub'] == true) {
+    print("\n📤 Step 2: Committing and pushing to GitHub...\n");
+    await commitAndTag(
+      selectedApps,
+      newVersions,
+      versionInfo['newBase'],
+      workspaceDir,
     );
 
-    // Also update version files in workspace if different from current directory
-    if (workspaceDir != Directory.current.path) {
-      await updateVersionFile(app, currentVersion, newVersion, workspaceDir);
-    }
+    // Wait a moment for GitHub to process the push
+    print("   Waiting for GitHub to process push...");
+    sleep(3);
+  }
 
-    // Build Docker image with version
+  // Step 3: Build Docker images from repository
+  print("\n🐳 Step 3: Building Docker images from repository...\n");
+  var imageIds = <String, String>{};
+
+  for (var app in selectedApps) {
+    print("📦 Building $app...");
+    var newVersion = newVersions[app]!;
+
+    // Build Docker image - will clone from repository
     var imageId = await buildDockerImage(app, workspaceDir, newVersion);
     imageIds[app] = imageId;
 
@@ -408,16 +406,6 @@ Future<void> executeRelease(
     }
 
     print("✓ $app completed\n");
-  }
-
-  // Commit version changes and create git tag
-  if (pushConfig['pushToGitHub'] == true) {
-    await commitAndTag(
-      selectedApps,
-      newVersions,
-      versionInfo['newBase'],
-      workspaceDir,
-    );
   }
 
   // Display final summary
