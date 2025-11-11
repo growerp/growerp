@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+GrowERP Assessment Flutter App Screen
+Serves the Flutter assessment app and assets
+-->
+<screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-2.1.xsd"
+    standalone="true" require-authentication="anonymous-view">
+
+    <widgets>
+        <render-mode>
+            <text type="html" location="component://PopRestStore/screen/store/assessment/index.html"/>
+        </render-mode>
+    </widgets>
+</screen>

@@ -22,7 +22,6 @@ import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_assessment/growerp_assessment.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
-import 'views/configurable_landing_page.dart';
 import 'src/screens/landing_page_assessment_flow_screen.dart';
 
 Future main() async {
@@ -40,6 +39,8 @@ Future main() async {
 
   Bloc.observer = AppBlocObserver();
   RestClient restClient = RestClient(await buildDioClient());
+  WsClient chatClient = WsClient('chat');
+  WsClient notificationClient = WsClient('notws');
 
   // this part is only executing on the web
   Company? company;
@@ -56,52 +57,81 @@ Future main() async {
   String pseudoId = query['pseudoId'] ?? query['pageId'] ?? 'erp-landing-page';
   String? ownerPartyId = company?.ownerPartyId ?? 'GROWERP';
 
-  debugPrint('=== landing page landingPageId: $landingPageId');
-  debugPrint('=== landing page pseudoId: $pseudoId');
-  debugPrint('=== ownerPartyId: $ownerPartyId');
+  debugPrint('=== assessment app - landingPageId: $landingPageId');
+  debugPrint('=== assessment app - pseudoId: $pseudoId');
+  debugPrint('=== assessment app - ownerPartyId: $ownerPartyId');
 
   runApp(
-    PublicLandingPageApp(
+    AssessmentApp(
       restClient: restClient,
+      chatClient: chatClient,
+      notificationClient: notificationClient,
       classificationId: classificationId,
       landingPageId: landingPageId,
       pseudoId: pseudoId,
       ownerPartyId: ownerPartyId,
+      company: company,
     ),
   );
 }
 
 List<LocalizationsDelegate> delegates = [];
 
-List<BlocProvider> getLandingPageBlocProviders(
+// Get BLoC providers for the assessment app
+List<BlocProvider> getAssessmentAppBlocProviders(
   RestClient restClient,
+  WsClient chatClient,
+  WsClient notificationClient,
   String classificationId,
+  Company? company,
 ) {
-  return [...getAssessmentBlocProviders(restClient, classificationId)];
+  // Combine core BLoCs with assessment-specific BLoCs
+  return [
+    ...getCoreBlocProviders(
+      restClient,
+      chatClient,
+      notificationClient,
+      classificationId,
+      company,
+    ),
+    ...getAssessmentBlocProviders(restClient, classificationId),
+  ];
 }
 
-class PublicLandingPageApp extends StatelessWidget {
-  const PublicLandingPageApp({
+class AssessmentApp extends StatelessWidget {
+  const AssessmentApp({
     super.key,
     required this.restClient,
+    required this.chatClient,
+    required this.notificationClient,
     required this.classificationId,
     this.pseudoId,
     this.landingPageId,
     this.ownerPartyId,
+    this.company,
   });
 
   final RestClient restClient;
+  final WsClient chatClient;
+  final WsClient notificationClient;
   final String classificationId;
   final String? pseudoId;
   final String? landingPageId;
   final String? ownerPartyId;
+  final Company? company;
 
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
-      providers: getLandingPageBlocProviders(restClient, classificationId),
+      providers: getAssessmentAppBlocProviders(
+        restClient,
+        chatClient,
+        notificationClient,
+        classificationId,
+        company,
+      ),
       child: MaterialApp(
-        title: 'GrowERP Landing Page',
+        title: 'GrowERP Assessment',
         theme: ThemeData(primarySwatch: Colors.blue, useMaterial3: true),
         localizationsDelegates: [
           CoreLocalizations.delegate,
@@ -111,18 +141,11 @@ class PublicLandingPageApp extends StatelessWidget {
           GlobalWidgetsLocalizations.delegate,
         ],
         supportedLocales: CoreLocalizations.supportedLocales,
-        home: ConfigurableLandingPage(
-          pseudoId: pseudoId ?? '',
-          landingPageId: landingPageId,
+        home: LandingPageAssessmentFlowScreen(
+          landingPageId: landingPageId ?? '',
           ownerPartyId: ownerPartyId,
+          startAssessmentFlow: true,
         ),
-        routes: {
-          '/assessment': (context) => LandingPageAssessmentFlowScreen(
-            landingPageId: landingPageId ?? '',
-            ownerPartyId: ownerPartyId,
-            startAssessmentFlow: true,
-          ),
-        },
       ),
     );
   }

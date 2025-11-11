@@ -38,14 +38,14 @@ deploy_app() {
             SCREEN_AUTH="anonymous-view"
             BASE_PATH="/admin/"
             ;;
-        landingpage)
-            PACKAGE_DIR="$PROJECT_ROOT/flutter/packages/landing_page"
-            APP_DIR_NAME="landingpage"
-            SCREEN_FILE_NAME="landingpage.xml"
-            SCREEN_COMMENT="GrowERP Public Landing Page Screen"
-            SCREEN_DESCRIPTION="Serves the public landing page Flutter app and assets"
-            SCREEN_AUTH="anonymous-all"
-            BASE_PATH="/landingpage/"
+        assessment)
+            PACKAGE_DIR="$PROJECT_ROOT/flutter/packages/assessment"
+            APP_DIR_NAME="assessment"
+            SCREEN_FILE_NAME="assessmentApp.xml"
+            SCREEN_COMMENT="GrowERP Assessment Flutter App Screen"
+            SCREEN_DESCRIPTION="Serves the Flutter assessment app and assets"
+            SCREEN_AUTH="anonymous-view"
+            BASE_PATH="/assessment/"
             ;;
         *)
             echo -e "${RED}Unknown app: $APP${NC}"
@@ -165,18 +165,18 @@ echo -e "${YELLOW}Deploying Flutter Web Builds to Moqui...${NC}"
 
 case "$APP_NAME" in
     both|all|"")
-        echo -e "${YELLOW}Deploying both admin and landingpage apps${NC}"
+        echo -e "${YELLOW}Deploying admin and assessment apps${NC}"
         deploy_app admin
         ADMIN_RESULT=$?
-        deploy_app landingpage
-        LANDING_RESULT=$?
+        deploy_app assessment
+        ASSESSMENT_RESULT=$?
         
-        if [ $ADMIN_RESULT -ne 0 ] || [ $LANDING_RESULT -ne 0 ]; then
+        if [ $ADMIN_RESULT -ne 0 ] || [ $ASSESSMENT_RESULT -ne 0 ]; then
             echo -e "${RED}✗ One or more deployments failed${NC}"
             exit 1
         fi
         ;;
-    admin|landingpage)
+    admin|assessment)
         deploy_app "$APP_NAME"
         if [ $? -ne 0 ]; then
             exit 1
@@ -184,8 +184,8 @@ case "$APP_NAME" in
         ;;
     *)
         echo -e "${RED}Unknown app: $APP_NAME${NC}"
-        echo -e "${YELLOW}Usage: $0 [admin|landingpage|both|all]${NC}"
-        echo -e "${YELLOW}Default (no args): deploys both apps${NC}"
+        echo -e "${YELLOW}Usage: $0 [admin|assessment|both|all]${NC}"
+        echo -e "${YELLOW}Default (no args): deploys all apps${NC}"
         exit 1
         ;;
 esac

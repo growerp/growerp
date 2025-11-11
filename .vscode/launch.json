@@ -118,10 +118,10 @@
             ]
         },
         {
-            "name": "Landingpage Web (lib/main.dart)",
+            "name": "Assessment Web (lib/main.dart)",
             "type": "dart",
             "request": "launch",
-            "cwd": "flutter/packages/landing_page",
+            "cwd": "flutter/packages/assessment",
             "program": "lib/main.dart",
             "args": [
                 "-d",

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Assessment Flutter Web Application Screen
+Serves the Flutter assessment app from the deployed web files
+Allows iframe embedding with permissive CORS and CSP headers
+-->
+<screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-2.1.xsd"
+    standalone="true" require-authentication="anonymous-view" allow-extra-path="true">
+
+    <pre-actions>
+        <!-- Override Moqui's default restrictive CSP to allow iframe embedding -->
+        <script>
+            ec.web.response.setHeader("X-Frame-Options", "SAMEORIGIN")
+            ec.web.response.setHeader("Content-Security-Policy", "frame-ancestors 'self' http://localhost http://localhost:* http://100000.localhost http://100000.localhost:* https://localhost https://localhost:* https://100000.localhost https://100000.localhost:*")
+            ec.web.response.setHeader("Access-Control-Allow-Origin", "*")
+            
+            // Detect and set correct MIME types for static assets
+            String requestPath = ec.web.request.pathInfo ?: ""
+            if (requestPath.contains(".mjs")) {
+                ec.web.response.setContentType("application/javascript; charset=UTF-8")
+            } else if (requestPath.contains(".wasm")) {
+                ec.web.response.setContentType("application/wasm")
+            } else if (requestPath.contains(".js")) {
+                ec.web.response.setContentType("application/javascript; charset=UTF-8")
+            } else {
+                ec.web.response.setContentType("text/html; charset=UTF-8")
+            }
+        </script>
+    </pre-actions>
+
+    <widgets>
+        <render-mode>
+            <text type="html" location="component://PopRestStore/screen/store/assessment/index.html"/>
+        </render-mode>
+    </widgets>
+</screen>

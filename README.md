@@ -35,9 +35,14 @@ growerp install
 
 > **🚀 Quick Start**: New to GrowERP? Start with the [Extensibility Overview](./docs/README.md) for a complete roadmap, then check the [Building Blocks Guide](./docs/Building_Blocks_Development_Guide.md) for frontend development or the [Backend Components Guide](./docs/Backend_Components_Development_Guide.md) for backend development.
 
+### ⭐ Phase 12 - Assessment Landing Page Implementation (LATEST)
+
+- **[Assessment Landing Page Explanation](./docs/Assessment_Landing_Page_Explanation.md)** ⭐ **PHASE 12** - Complete technical guide for FTL landing page + Flutter app integration, MIME type configuration, and Phase 12 updates
+- **[GrowERP Assessment & Landing Page Architecture](./docs/GROWERP_ASSESSMENT_AND_LANDING_PAGE_ARCHITECTURE.md)** - Package design and dual-ID strategy
+
 ### 🏗️ Core Development & Architecture
 
-- **[📖 Extensibility Overview](./docs/README.md)** - Complete guide to GrowERP's modular architecture and development patterns
+- **[📖 Extensibility Overview](./docs/README.md)** - Complete guide to GrowERP's modular architecture and development patterns (40+ documents, 8,750+ lines)
 - **[🧩 Building Blocks Guide](./docs/Building_Blocks_Development_Guide.md)** - Create Flutter packages (growerp_* packages)
 - **[⚙️ Backend Components Guide](./docs/Backend_Components_Development_Guide.md)** - Develop Moqui components and services
 - **[🎨 Design Patterns](./docs/GrowERP_Design_Patterns.md)** - Established patterns and conventions for consistent development

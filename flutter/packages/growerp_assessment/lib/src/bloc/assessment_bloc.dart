@@ -78,7 +78,7 @@ class AssessmentBloc extends Bloc<AssessmentEvent, AssessmentState> {
 
       emit(state.copyWith(
         status: AssessmentStatus.success,
-        assessments: current..addAll(response.assessments),
+        assessments: response.assessments,
         hasReachedMax: response.assessments.length < event.limit,
         searchString: event.searchString,
       ));

@@ -62,7 +62,7 @@ class LandingPageListState extends State<LandingPageList> {
     super.initState();
     _scrollController.addListener(_onScroll);
     _landingPageBloc = context.read<LandingPageBloc>()
-      ..add(const LandingPageLoad());
+      ..add(const LandingPageLoad(start: 0));
     _authBloc = context.read<AuthBloc>();
     bottom = 50;
   }
@@ -343,7 +343,12 @@ class LandingPageListState extends State<LandingPageList> {
     if (!hasReachedMax &&
         currentScroll > 0 &&
         maxScroll - currentScroll <= _scrollThreshold) {
-      _landingPageBloc.add(LandingPageLoad(search: searchString));
+      _landingPageBloc.add(
+        LandingPageLoad(
+          start: landingPages.length,
+          search: searchString,
+        ),
+      );
     }
   }
 }

@@ -99,6 +99,10 @@ class LandingPageBloc extends Bloc<LandingPageEvent, LandingPageState> {
         subheading: event.landingPage.subheading,
         hookType: event.landingPage.hookType,
         status: event.landingPage.status,
+        privacyPolicyUrl: event.landingPage.privacyPolicyUrl,
+        ctaActionType: event.landingPage.ctaActionType,
+        ctaAssessmentId: event.landingPage.ctaAssessmentId,
+        ctaButtonLink: event.landingPage.ctaButtonLink,
       );
 
       final updatedLandingPages = List<LandingPage>.from(state.landingPages)
@@ -132,6 +136,10 @@ class LandingPageBloc extends Bloc<LandingPageEvent, LandingPageState> {
         subheading: event.landingPage.subheading,
         hookType: event.landingPage.hookType,
         status: event.landingPage.status,
+        privacyPolicyUrl: event.landingPage.privacyPolicyUrl,
+        ctaActionType: event.landingPage.ctaActionType,
+        ctaAssessmentId: event.landingPage.ctaAssessmentId,
+        ctaButtonLink: event.landingPage.ctaButtonLink,
       );
 
       final updatedLandingPages = state.landingPages

@@ -50,7 +50,7 @@ RUN melos build --no-select
 WORKDIR /home/mobiledevops/growerp/flutter/packages/admin
 RUN sed -i 's/version: .*/version: '"${DOCKER_TAG}"'/' pubspec.yaml
 RUN flutter build web --release --wasm
-WORKDIR /home/mobiledevops/growerp/flutter/packages/landing_page
+WORKDIR /home/mobiledevops/growerp/flutter/packages/assessment
 RUN sed -i 's/version: .*/version: '"${DOCKER_TAG}"'/' pubspec.yaml
 RUN flutter build web --release --wasm
 
@@ -70,13 +70,14 @@ WORKDIR /root/growerp/moqui/runtime/component/PopRestStore/screen/store
 # Copy Flutter web build files
 RUN echo -e "Copying Flutter web files..."
 RUN cp -r /root/growerp/flutter/packages/admin/build/web admin
-RUN cp -r /root/growerp/flutter/packages/landing_page/build/web landingpage
+RUN cp -r /root/growerp/flutter/packages/assessment/build/web assessment
 # Fix the base href in index.html to work with path
 RUN echo -e "Fixing base href in index.html..."
 RUN  sed -i 's|<base href="/">|<base href="/admin/">|g' "admin/index.html"
-RUN  sed -i 's|<base href="/">|<base href="/landingpage/">|g' "landingpage/index.html" # Remove service worker registration from index.html (it's registered in root.html.ftl)
+RUN  sed -i 's|<base href="/">|<base href="/assessment/">|g' "assessment/index.html"
+# Remove service worker registration from index.html (it's registered in root.html.ftl)
 RUN perl -i -0pe 's/<script>\s*if \(.serviceWorker. in navigator\).*?<\/script>\s*//gs' "admin/index.html"
-RUN perl -i -0pe 's/<script>\s*if \(.serviceWorker. in navigator\).*?<\/script>\s*//gs' "landingpage/index.html"
+RUN perl -i -0pe 's/<script>\s*if \(.serviceWorker. in navigator\).*?<\/script>\s*//gs' "assessment/index.html"
 
 WORKDIR /root/growerp/moqui
 RUN git clone --depth 1 https://$PAT@github.com/AntWebsystems-Co-Ltd/vueWebsite.git /root/vueWebsite

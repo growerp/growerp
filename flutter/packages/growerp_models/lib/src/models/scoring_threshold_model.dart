@@ -1,4 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'assessment_model.dart' show NullableTimestampConverter;
 
 part 'scoring_threshold_model.g.dart';
 
@@ -27,6 +28,7 @@ class ScoringThreshold {
   final String? description;
 
   /// Timestamp when created
+  @NullableTimestampConverter()
   final DateTime? createdDate;
 
   const ScoringThreshold({

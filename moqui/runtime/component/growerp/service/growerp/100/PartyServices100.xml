@@ -2759,6 +2759,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <return message="Not a valid classificationId: ${classificationId}" />
             </if>
             <if condition="!companyPartyId &amp;&amp; userGroupId == 'GROWERP_M_ADMIN'">
+                <!-- no company and admin user: new company with admin user -->
                 <then>
                     <!--  check if new empty system; if yes: create GrowERP root-->
                     <entity-find entity-name="moqui.entity.SequenceValueItem"
@@ -2772,7 +2773,7 @@ along with this software (see the LICENSE.md file). If not, see
                             out-map="owner" />
                         <set field="ownerPartyId" from="owner.partyId" />
                         <else>
-                            <!-- party already created in growerp setup data-->
+                            <!-- party already created in initial growerp setup data-->
                             <set field="ownerPartyId" value="GROWERP" />
                         </else>
                     </if>
@@ -3690,7 +3691,8 @@ along with this software (see the LICENSE.md file). If not, see
                 in-map="[ownerPartyId: ownerPartyId, seqName: 'assessment']" out-map="context" />
             <service-call name="create#growerp.assessment.Assessment"
                 in-map="[assessments[0] + 
-                        [assessmentId: null, ownerPartyId: ownerPartyId, pseudoId: seqNum]]"
+                        [assessmentId: null, ownerPartyId: ownerPartyId,
+                            companyPartyId: companyPartyId, pseudoId: seqNum]]"
                 out-map="newAssessment" />
             <!-- assessment questions -->
             <entity-find entity-name="growerp.assessment.AssessmentQuestion" list="demoQuestions">
@@ -3751,12 +3753,14 @@ along with this software (see the LICENSE.md file). If not, see
                 in-map="[ownerPartyId: ownerPartyId, seqName: 'landingPage']" out-map="context" />
             <service-call name="create#growerp.landing.LandingPage"
                 in-map="[landingPages[0] + [ctaAssessmentId: newAssessment.assessmentId,
-                        landingPageId: null, ownerPartyId: ownerPartyId, pseudoId: seqNum]]"
+                            landingPageId: null, ownerPartyId: ownerPartyId,
+                            companyPartyId: companyPartyId, pseudoId: seqNum]]"
                 out-map="newPage" />
+            <log message="====landing page created: ${newPage.landingPageId}====" />
             <!-- page sections-->
             <entity-find
                 entity-name="growerp.landing.PageSection" list="sections">
-                <econdition field-name="landingPageId" from="newPage.landingPageId" />
+                <econdition field-name="landingPageId" from="landingPages[0].landingPageId" />
             </entity-find>
             <iterate list="sections" entry="section">
                 <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
@@ -3765,11 +3769,13 @@ along with this software (see the LICENSE.md file). If not, see
                 <service-call name="create#growerp.landing.PageSection"
                     in-map="[section + [pageSectionId: null, landingPageId: newPage.landingPageId, pseudoId: seqNum]]"
                     out-map="context" />
+                <log message="======section created: ${context.pageSectionId}======" />
             </iterate>
             <!-- credibility info-->
             <entity-find entity-name="growerp.landing.CredibilityInfo" list="credibilities">
-                <econdition field-name="landingPageId" from="newPage.landingPageId" />
+                <econdition field-name="landingPageId" from="landingPages[0].landingPageId" />
             </entity-find>
+            <log message="==========credibilities found ${credibilities?.size()}" />
             <if condition="credibilities">
                 <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
                     in-map="[ownerPartyId: ownerPartyId, seqName: 'credibilityInfo']"
@@ -3778,14 +3784,21 @@ along with this software (see the LICENSE.md file). If not, see
                     in-map="[credibilities[0] + [credibilityInfoId: null, landingPageId: newPage.landingPageId,
                         pseudoId: seqNum]]"
                     out-map="context" />
+                <log message="========cred info created: ${credibilityInfoId}" />
                 <entity-find entity-name="growerp.landing.CredibilityStatistic" list="stats">
                     <econdition field-name="credibilityInfoId"
                         from="credibilities[0].credibilityInfoId" />
                 </entity-find>
+                <log message="==========stats found ${stats?.size()}" />
                 <iterate list="stats" entry="statistic">
-                    <service-call name="create#growerp.landing.CredibilityStatistic"
-                        in-map="[statistic + [credibilityInfoId: credibilityInfoId, credibilityStatisticId: null]]"
+                    <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                        in-map="[ownerPartyId: ownerPartyId, seqName: 'credibilityStatistic']"
                         out-map="context" />
+                    <service-call name="create#growerp.landing.CredibilityStatistic"
+                        in-map="[statistic + [credibilityInfoId: credibilityInfoId,
+                                    credibilityStatisticId: null, pseudoId: seqNum]]"
+                        out-map="context" />
+                    <log message="========stat created: ${context.credibilityStatisticId}" />
                 </iterate>
             </if>
             <!-- CTA: Now embedded in LandingPage entity (ctaActionType, ctaAssessmentId, etc.) -->

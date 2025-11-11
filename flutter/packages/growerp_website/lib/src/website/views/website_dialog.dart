@@ -568,14 +568,14 @@ class WebsiteDialogState extends State<WebsiteDialog> {
                   child: OutlinedButton.icon(
                     key: const Key('landingPageLink'),
                     icon: const Icon(Icons.language),
-                    label: const Text('/landingpage'),
+                    label: const Text('/assessmentLanding'),
                     onPressed: () {
-                      final pageId = _landingPageIdController.text.isNotEmpty
+                      final pseudoId = _landingPageIdController.text.isNotEmpty
                           ? _landingPageIdController.text
-                          : 'pseudoId';
+                          : 'erp-landing-page';
                       launchUrl(
                         Uri.parse(
-                          'http://${state.website!.hostName}/landingpage?pageId=$pageId',
+                          'http://${state.website!.hostName}/assessmentLanding?pseudoId=$pseudoId',
                         ),
                       );
                     },

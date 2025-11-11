@@ -872,29 +872,35 @@ abstract class RestClient {
     @Field() String? hookType,
     @Field() String? headline,
     @Field() String? subheading,
-    @Field() String? assessmentId,
     @Field() String? privacyPolicyUrl,
+    @Field() String? ctaActionType,
+    @Field() String? ctaAssessmentId,
+    @Field() String? ctaButtonLink,
     @Field() String status = 'DRAFT',
   });
 
-  @PATCH("rest/s1/growerp/100/LandingPage/{landingPageId}")
+  @PATCH("rest/s1/growerp/100/LandingPage")
   Future<LandingPage> updateLandingPage({
-    @Path() required String landingPageId,
+    @Query('landingPageId') required String landingPageId,
     @Field() String? title,
     @Field() String? hookType,
     @Field() String? headline,
     @Field() String? subheading,
-    @Field() String? assessmentId,
+    @Field() String? ctaActionType,
+    @Field() String? ctaAssessmentId,
+    @Field() String? ctaButtonLink,
     @Field() String? privacyPolicyUrl,
     @Field() String? status,
   });
 
-  @DELETE("rest/s1/growerp/100/LandingPage/{landingPageId}")
-  Future<void> deleteLandingPage({@Path() required String landingPageId});
+  @DELETE("rest/s1/growerp/100/LandingPage")
+  Future<void> deleteLandingPage({
+    @Query('landingPageId') required String landingPageId,
+  });
 
-  @POST("rest/s1/growerp/100/LandingPage/{landingPageId}/publish")
+  @POST("rest/s1/growerp/100/LandingPage/publish")
   Future<LandingPage> publishLandingPage({
-    @Path() required String landingPageId,
+    @Query('landingPageId') required String landingPageId,
   });
 
   // ============================================
@@ -992,9 +998,9 @@ abstract class RestClient {
     @Field() required String statistic,
   });
 
-  @DELETE("rest/s1/growerp/100/CredibilityStatistic/{credibilityStatisticId}")
+  @DELETE("rest/s1/growerp/100/CredibilityStatistic")
   Future<void> removeCredibilityStatistic({
-    @Path() required String credibilityStatisticId,
+    @Query('credibilityStatisticId') required String credibilityStatisticId,
   });
 
   // ============================================

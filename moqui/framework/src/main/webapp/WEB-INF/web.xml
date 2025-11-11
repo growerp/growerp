@@ -21,6 +21,17 @@
         <listener-class>org.apache.commons.fileupload.servlet.FileCleanerCleanup</listener-class>
     </listener>
 
+    <!-- Servlet Filter to fix MIME types for Flutter web assets -->
+    <filter>
+        <filter-name>MimeTypeFilter</filter-name>
+        <filter-class>org.moqui.impl.webapp.MimeTypeFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>MimeTypeFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+        <dispatcher>REQUEST</dispatcher>
+    </filter-mapping>
+
     <session-config>
         <!-- session timeout in minutes; note that this may be overridden with
         webapp.session-config.@timeout in the Moqui Conf XML file -->
@@ -30,4 +41,14 @@
         </cookie-config>
         <tracking-mode>COOKIE</tracking-mode>
     </session-config>
+
+    <!-- MIME type mappings for modern JavaScript modules -->
+    <mime-mapping>
+        <extension>mjs</extension>
+        <mime-type>application/javascript</mime-type>
+    </mime-mapping>
+    <mime-mapping>
+        <extension>wasm</extension>
+        <mime-type>application/wasm</mime-type>
+    </mime-mapping>
 </web-app>

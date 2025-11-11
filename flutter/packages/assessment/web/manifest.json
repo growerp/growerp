@@ -1,6 +1,6 @@
 {
-    "name": "landing_page",
-    "short_name": "landing_page",
+    "name": "assessment",
+    "short_name": "assessment",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

@@ -148,44 +148,41 @@ Unique Index: pseudoId
 
 ### Tier 1: Overview (Quick Start)
 - **00_START_HERE.md** (Visual summary, status badges)
-- **LANDING_PAGE_EXECUTIVE_SUMMARY.md** (For stakeholders)
+- **Assessment_Landing_Page_Explanation.md** (Phase 12 technical guide)
 
 ### Tier 2: Architecture & Planning
 - **GROWERP_ASSESSMENT_AND_LANDING_PAGE_ARCHITECTURE.md** (Package design details)
 - **ARCHITECTURE_UPDATE_SUMMARY.md** (This session's changes)
-- **LANDING_PAGE_IMPLEMENTATION_PLAN.md** (Complete specification)
 
 ### Tier 3: Implementation Guides
-- **LANDING_PAGE_ADMIN_GUIDE.md** (Admin workflows & API reference)
-- **LANDING_PAGE_README.md** (Master reference)
-- **LANDING_PAGE_DOCUMENTATION_INDEX.md** (Navigation guide)
-
-### Tier 4: Verification
-- **LANDING_PAGE_COMPLETION_SUMMARY.md** (Checklist)
+- **GrowERP Extensibility Guide** (Development patterns)
+- **Building Blocks Development Guide** (Package creation)
 
 ### Reading Recommendations
 
 **For Stakeholders:**
 1. 00_START_HERE.md (5 min)
-2. LANDING_PAGE_EXECUTIVE_SUMMARY.md (20 min)
-3. ARCHITECTURE_UPDATE_SUMMARY.md (10 min)
+2. ARCHITECTURE_UPDATE_SUMMARY.md (10 min)
+3. Assessment_Landing_Page_Explanation.md (20 min)
 
 **For Architects:**
 1. GROWERP_ASSESSMENT_AND_LANDING_PAGE_ARCHITECTURE.md (45 min)
-2. LANDING_PAGE_IMPLEMENTATION_PLAN.md (60 min)
-3. LANDING_PAGE_ARCHITECTURE.md (30 min)
+2. Assessment_Landing_Page_Explanation.md (30 min)
+3. GrowERP Extensibility Guide (30 min)
 
 **For Frontend Developers:**
-1. LANDING_PAGE_IMPLEMENTATION_PLAN.md Part 2 (40 min)
+1. Assessment_Landing_Page_Explanation.md (30 min)
 2. GROWERP_ASSESSMENT_AND_LANDING_PAGE_ARCHITECTURE.md (45 min)
+3. Building Blocks Development Guide (30 min)
 
 **For Backend Developers:**
-1. LANDING_PAGE_IMPLEMENTATION_PLAN.md Part 3 (40 min)
-2. LANDING_PAGE_ADMIN_GUIDE.md Part 2 (API reference) (20 min)
+1. Assessment_Landing_Page_Explanation.md (30 min)
+2. Backend Components Development Guide (40 min)
+3. GrowERP Extensibility Guide (20 min)
 
 **For Admin/QA:**
-1. LANDING_PAGE_ADMIN_GUIDE.md Part 1 (30 min)
-2. LANDING_PAGE_README.md (15 min)
+1. Assessment_Landing_Page_Explanation.md (30 min)
+2. GrowERP Extensibility Guide (15 min)
 
 ---
 
@@ -365,24 +362,23 @@ Unique Index: pseudoId
 
 ### Read First (1 hour)
 1. `GROWERP_ASSESSMENT_AND_LANDING_PAGE_ARCHITECTURE.md` - Understand the big picture
-2. `LANDING_PAGE_IMPLEMENTATION_PLAN.md` Part 2 - See what you'll build
-3. `LANDING_PAGE_IMPLEMENTATION_PLAN.md` Part 3 - Understand backend
+2. `Assessment_Landing_Page_Explanation.md` - Phase 12 implementation details
+3. `GrowERP Extensibility Guide` - Understand development patterns
 
 ### Then Start (Phase 1)
 1. Create `growerp_assessment` package structure
 2. Implement models with dual-ID support
-3. Create backend entities (11 entities total)
+3. Create backend entities
 4. Implement backend services (dual-ID queries)
 5. Build frontend BLoCs and services
 6. Create assessment screens
 7. Write comprehensive tests
 
 ### Reference Documents
-- Models: See Part 2 Models section
-- Services: See Part 2 Services section
-- Backend: See Part 3 section
-- Screens: See Part 2 Screens section
-- APIs: See Part 6 (Admin Guide Part 2)
+- Architecture: See GROWERP_ASSESSMENT_AND_LANDING_PAGE_ARCHITECTURE.md
+- Implementation: See Assessment_Landing_Page_Explanation.md
+- Patterns: See GrowERP Extensibility Guide
+- Development: See Building Blocks Development Guide
 
 ---
 
@@ -435,11 +431,11 @@ Unique Index: pseudoId
 **Everything is documented and ready for implementation.**
 
 - ❓ "What's the package hierarchy?" → See GROWERP_ASSESSMENT_AND_LANDING_PAGE_ARCHITECTURE.md
-- ❓ "How do dual IDs work?" → See Part 1.3 in IMPLEMENTATION_PLAN.md
-- ❓ "What's in growerp_assessment?" → See Part 2 Package Structure
-- ❓ "How do I implement this?" → See Part 5 Implementation Phases
-- ❓ "What's the database schema?" → See Part 7 Database Schema
-- ❓ "What are the APIs?" → See LANDING_PAGE_ADMIN_GUIDE.md Part 2
+- ❓ "How does the architecture work?" → See Assessment_Landing_Page_Explanation.md
+- ❓ "What's in growerp_assessment?" → See Building Blocks Development Guide
+- ❓ "How do I implement this?" → See GrowERP Extensibility Guide
+- ❓ "What development patterns apply?" → See GrowERP Design Patterns
+- ❓ "Need code examples?" → See GrowERP Code Templates
 
 ---
 
