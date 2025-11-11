@@ -9,6 +9,7 @@
     assessmentId="ERP_READINESS_ASSESSMENT"
     pseudoId="erp-readiness-assessment"
     ownerPartyId="GROWERP"
+    companyPartyId="100001"
     assessmentName="ERP Readiness Assessment"
     description="Comprehensive assessment to evaluate organizational readiness for ERP implementation, identifying system gaps, business goals, and module requirements."
     status="Active" createdByUserLogin="admin" />
@@ -16,6 +17,7 @@
   <!-- Landing Page Definition -->
   <growerp.landing.LandingPage landingPageId="ERP_LANDING_PAGE" pseudoId="erp-landing-page"
     ownerPartyId="GROWERP"
+    companyPartyId="100001"
     title="ERP Readiness Assessment" hookType="ResultsHook"
     headline="Stop now managing spreadsheets and start managing your business in a central application?"
     subheading="Answer a few questions about your current processes, and we'll provide a free, personalized report on why you're facing challenges and how a modular ERP can guarantee your success—without the typical headaches of a multi-year, over-budget project."

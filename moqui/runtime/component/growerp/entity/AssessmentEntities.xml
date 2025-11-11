@@ -14,6 +14,7 @@ Dual-ID strategy: entityNameId (system-wide) + pseudoId (tenant-unique)
         <field name="assessmentId" type="id" is-pk="true" />
         <field name="pseudoId" type="id" />
         <field name="ownerPartyId" type="id" />
+        <field name="companyPartyId" type="id" />
         <field name="assessmentName" type="text-medium" />
         <field name="description" type="text-long" />
         <field name="status" type="text-short" />

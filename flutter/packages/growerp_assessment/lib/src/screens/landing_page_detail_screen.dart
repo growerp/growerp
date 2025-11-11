@@ -494,8 +494,11 @@ class LandingPageDetailScreenState extends State<LandingPageDetailScreen> {
                                           (a) =>
                                               a.assessmentId ==
                                               _selectedCtaAssessmentId,
+                                          orElse: () => throw Exception(
+                                              'Assessment not found'),
                                         );
                                       } catch (e) {
+                                        // Assessment not found in list
                                         selectedCtaAssessment = null;
                                       }
                                     }
@@ -513,37 +516,43 @@ class LandingPageDetailScreenState extends State<LandingPageDetailScreen> {
                                           decoration: InputDecoration(
                                             labelText: 'Search assessments...',
                                             prefixIcon: Icon(Icons.search),
+                                            isDense: true,
+                                            contentPadding:
+                                                EdgeInsets.symmetric(
+                                              horizontal: 12,
+                                              vertical: 8,
+                                            ),
+                                            border: OutlineInputBorder(
+                                              borderRadius: BorderRadius.all(
+                                                Radius.circular(8),
+                                              ),
+                                            ),
                                           ),
                                         ),
                                         menuProps: MenuProps(
                                           borderRadius:
-                                              BorderRadius.circular(20.0),
-                                        ),
-                                        title: popUp(
-                                          context: context,
-                                          title: 'Select CTA Assessment',
-                                          height: 50,
-                                        ),
-                                        emptyBuilder: (context, searchEntry) =>
-                                            const Center(
-                                          child: Padding(
-                                            padding: EdgeInsets.all(16.0),
-                                            child: Text(
-                                              'No assessments found',
-                                              style:
-                                                  TextStyle(color: Colors.grey),
-                                            ),
-                                          ),
+                                              BorderRadius.circular(8),
+                                          elevation: 8,
                                         ),
                                       ),
                                       dropdownDecoratorProps:
-                                          const DropDownDecoratorProps(
+                                          DropDownDecoratorProps(
                                         dropdownSearchDecoration:
                                             InputDecoration(
                                           labelText: 'CTA Assessment',
                                           hintText:
                                               'Select assessment to launch',
-                                          prefixIcon: Icon(Icons.quiz),
+                                          prefixIcon: const Icon(Icons.quiz),
+                                          border: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(8),
+                                          ),
+                                          isDense: true,
+                                          contentPadding:
+                                              const EdgeInsets.symmetric(
+                                            horizontal: 12,
+                                            vertical: 8,
+                                          ),
                                         ),
                                       ),
                                       onChanged: (Assessment? newValue) {
@@ -557,10 +566,18 @@ class LandingPageDetailScreenState extends State<LandingPageDetailScreen> {
                                 )
                               : TextFormField(
                                   key: const Key('ctaLink'),
-                                  decoration: const InputDecoration(
+                                  decoration: InputDecoration(
                                     labelText: 'CTA URL',
                                     hintText: 'https://example.com/page',
-                                    prefixIcon: Icon(Icons.link),
+                                    prefixIcon: const Icon(Icons.link),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    isDense: true,
+                                    contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 8,
+                                    ),
                                   ),
                                   controller: _ctaLinkController,
                                 ),
@@ -586,6 +603,8 @@ class LandingPageDetailScreenState extends State<LandingPageDetailScreen> {
                                     (a) =>
                                         a.assessmentId ==
                                         _selectedCtaAssessmentId,
+                                    orElse: () =>
+                                        throw Exception('Assessment not found'),
                                   );
                                 } catch (e) {
                                   selectedCtaAssessment = null;

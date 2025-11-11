@@ -23,6 +23,9 @@ Service definitions for landing page, sections, credibility, and CTA management
       <parameter name="pseudoId">
         <description>landing page pseudoId</description>
       </parameter>
+      <parameter name="companyPartyId">
+        <description>Optional company party ID required when providing pseudoId</description>
+      </parameter>
       <parameter name="ownerPartyId">
         <description>Optional owner party ID required when providing pseudoId</description>
       </parameter>
@@ -59,7 +62,7 @@ Service definitions for landing page, sections, credibility, and CTA management
     </out-parameters>
     <actions>
       <log
-        message="======1111===Getting landing page for landingPageId: ${landingPageId}, pseudo: $pseudoId,ownerPartyId: ${ownerPartyId}" />
+        message="======1111===Getting landing page for landingPageId: ${landingPageId}, pseudo: $pseudoId,ownerPartyId: ${ownerPartyId} companyPartyId: ${companyPartyId}====" />
       <if condition="!ownerPartyId &amp;&amp; pseudoId">
         <service-call
           name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
@@ -70,13 +73,14 @@ Service definitions for landing page, sections, credibility, and CTA management
         <return error="true" message="Unable to resolve owner party for landing page request" />
       </if>
       <!-- Query for landing page by ID (preferring pseudoId for tenant lookups) -->
-      <log
-        message="Looking for landingPageId: $landingPageId, pseudoId: $pseudoId and owner: $ownerPartyId" />
+      <!-- Note: companyPartyId is metadata about which company uses this page, NOT a lookup filter -->
       <entity-find entity-name="growerp.landing.LandingPage" list="pageList">
         <!-- Use pseudoId if provided (tenant-unique), otherwise use system-wide landingPageId -->
-        <econdition field-name="pseudoId" from="pseudoId" ignore-if-empty="true" />
-        <econdition field-name="landingPageId" from="landingPageId" ignore-if-empty="true" />
-        <econdition field-name="ownerPartyId" from="ownerPartyId" ignore-if-empty="true" />
+        <econdition field-name="pseudoId" ignore-if-empty="true" />
+        <econdition field-name="companyPartyId" ignore-if-empty="true" />
+        <econdition field-name="pseudoId" ignore-if-empty="true" />
+        <econdition field-name="landingPageId" ignore-if-empty="true" />
+        <econdition field-name="ownerPartyId" />
       </entity-find>
 
       <if condition="!pageList">
@@ -143,6 +147,9 @@ Service definitions for landing page, sections, credibility, and CTA management
         <parameter name="headline" />
         <parameter name="subheading" />
         <parameter name="privacyPolicyUrl" />
+        <parameter name="ctaActionType" />
+        <parameter name="ctaAssessmentId" />
+        <parameter name="ctaButtonLink" />
         <parameter name="status" />
         <parameter name="createdDate" type="Timestamp" />
         <parameter name="lastUpdated" type="Timestamp" />
@@ -167,7 +174,8 @@ Service definitions for landing page, sections, credibility, and CTA management
       </if>
 
       <!-- Build entity find for landing pages -->
-      <entity-find entity-name="growerp.landing.LandingPage" list="pagesList" offset="start" limit="limit">
+      <entity-find entity-name="growerp.landing.LandingPage" list="pagesList" offset="start"
+        limit="limit">
         <econdition field-name="ownerPartyId" from="ownerPartyId" />
         <econdition field-name="status" from="status" ignore-if-empty="true" />
         <econdition field-name="title" operator="like" from="search" ignore-if-empty="true" />
@@ -196,6 +204,9 @@ Service definitions for landing page, sections, credibility, and CTA management
           headline: page.headline,
           subheading: page.subheading,
           privacyPolicyUrl: page.privacyPolicyUrl,
+          ctaActionType: page.ctaActionType,
+          ctaAssessmentId: page.ctaAssessmentId,
+          ctaButtonLink: page.ctaButtonLink,
           status: page.status,
           createdDate: page.createdDate,
           lastUpdated: page.lastModifiedDate

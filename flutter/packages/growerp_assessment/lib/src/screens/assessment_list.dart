@@ -58,7 +58,7 @@ class AssessmentListState extends State<AssessmentList> {
     super.initState();
     _scrollController.addListener(_onScroll);
     _assessmentBloc = context.read<AssessmentBloc>()
-      ..add(const AssessmentFetch());
+      ..add(const AssessmentFetch(refresh: true));
     bottom = 50;
   }
 

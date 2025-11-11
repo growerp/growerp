@@ -1,8 +1,9 @@
-name: landing_page
+name: assessment
 version: 1.10.6+1
 repository: https://github.com/growerp/growerp
 homepage: https://www.growerp.com
 publish_to: none
+description: Assessment app with lead capture (name/email form) before assessment questionnaire. Displays embedded Flutter assessment experience.
 
 environment:
   sdk: ^3.9.0

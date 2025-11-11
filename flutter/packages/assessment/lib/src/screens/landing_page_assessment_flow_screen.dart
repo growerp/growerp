@@ -21,9 +21,8 @@ import 'public_landing_page_screen.dart';
 ///
 /// This screen manages the complete user journey:
 /// 1. Display landing page (optional - skip if startAssessmentFlow=true)
-/// 2. Capture lead information on CTA click
-/// 3. Launch assessment
-/// 4. Show results and next steps
+/// 2. Launch assessment (includes lead capture internally)
+/// 3. Show results and next steps
 class LandingPageAssessmentFlowScreen extends StatefulWidget {
   const LandingPageAssessmentFlowScreen({
     super.key,
@@ -64,7 +63,7 @@ class _LandingPageAssessmentFlowScreenState
     // If direct assessment flow requested, skip landing page and go straight to assessment
     if (widget.startAssessmentFlow) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        _navigateToPage(1);
+        _navigateToPage(1); // Page 1: Assessment
       });
     }
   }
@@ -91,9 +90,11 @@ class _LandingPageAssessmentFlowScreenState
       setState(() {
         _assessmentId = landingPageState.selectedLandingPage!.ctaAssessmentId;
       });
-      // Navigate to assessment after setState completes
+      // Navigate directly to assessment
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        _navigateToPage(1);
+        _navigateToPage(
+          1,
+        ); // Page 1: Assessment (lead capture is inside assessment)
       });
     } else {
       // If assessment ID not available, show error or retry
@@ -117,7 +118,7 @@ class _LandingPageAssessmentFlowScreenState
           // Page 0: Landing Page
           _buildLandingPageStep(),
 
-          // Page 1: Assessment (skipped lead capture - already collected by landing page)
+          // Page 1: Assessment (includes lead capture internally)
           if (_assessmentId != null) _buildAssessmentStep(),
 
           // Page 2: Results & Next Steps
@@ -154,8 +155,8 @@ class _LandingPageAssessmentFlowScreenState
       assessmentId: _assessmentId!,
       ownerPartyId: widget.ownerPartyId,
       onComplete: () {
-        // Navigate to results on assessment completion
-        _navigateToPage(2);
+        // Navigate to results on assessment completion (Page 3: Results)
+        _navigateToPage(3);
       },
     );
   }

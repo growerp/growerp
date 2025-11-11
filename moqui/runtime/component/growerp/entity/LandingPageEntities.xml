@@ -13,6 +13,7 @@ Dual-ID strategy: entityNameId (system-wide) + pseudoId (tenant-unique)
     <field name="landingPageId" type="id" is-pk="true" />
     <field name="pseudoId" type="id" />
     <field name="ownerPartyId" type="id" />
+    <field name="companyPartyId" type="id" />
     <field name="title" type="text-medium" />
     <field name="hookType" type="text-short" />
     <field name="headline" type="text-long" />

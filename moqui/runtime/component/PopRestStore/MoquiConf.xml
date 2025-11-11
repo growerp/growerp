@@ -14,10 +14,18 @@ work. -->
             <!-- website is the path -->
             <subscreens-item name="website" location="component://PopRestStore/screen/website.xml" />
         </screen>
-        <!-- single page for the url /website -->
+        <!-- single page for the url /checkoutOnePage -->
         <screen location="component://webroot/screen/webroot.xml">
-            <!-- website is the path -->
             <subscreens-item name="checkoutOnePage" location="component://PopRestStore/screen/checkoutOnePage.xml" />
+        </screen>
+        <!-- Assessment app - serves index.html and allows Moqui to serve other resources like
+        main.dart.mjs, etc -->
+        <screen location="component://webroot/screen/webroot.xml">
+            <subscreens-item name="assessment" location="component://PopRestStore/screen/assessmentApp.xml" no-sub-path="true"/>
+        </screen>
+        <!-- single page for the url /assessmentLanding -->
+        <screen location="component://webroot/screen/webroot.xml">
+            <subscreens-item name="assessmentLanding" location="component://PopRestStore/screen/assessmentLandingPage.xml" />
         </screen>
     </screen-facade>
 </moqui-conf>

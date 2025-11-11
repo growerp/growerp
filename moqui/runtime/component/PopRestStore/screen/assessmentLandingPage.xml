@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-2.1.xsd"
+    standalone="true" require-authentication="anonymous-view">
+
+    <always-actions>
+        <!-- Get company/owner from hostname similar to checkoutOnePage -->
+        <!-- Handle multi-tenant host format: companyId.localhost (e.g., 100000.localhost) -->
+        <set field="hostName" from="ec.web.getHostName(false) == '10.0.2.2' ? 'localhost' : ec.web.getHostName(false)"/>
+        <log message="===== Raw hostname: $hostName"/>
+
+        <!-- Try to get product store from hostname, fallback to default -->
+        <service-call name="popstore.StoreServices.get#ProductStoreIdFromHostName" in-map="[
+            requestHostName: hostName]" out-map="productStoreIdContext"/>
+        <set field="productStoreId" value="${productStoreIdContext.productStoreId ?: 'POPC_DEFAULT'}"/>
+        <entity-find-one entity-name="mantle.product.store.ProductStore" value-field="productStore"/>
+        <!-- Use company ID from productStore otherwise debug from  owner GrowERP(100001)-->
+        <set field="companyPartyId" from="productStore?.organizationPartyId ?: '100001'"/>
+        <log message="===== Using Company Party ID: $companyPartyId"/>
+        <entity-find-one entity-name="mantle.party.Party" value-field="party">
+            <field-map field-name="partyId" from="companyPartyId"/></entity-find-one>
+        <log message="===== Owner Party ID: ${party.ownerPartyId}"/>
+        <!-- Get query parameters -->
+        <set field="pseudoId" from="ec.web.parameters.pseudoId ?: ec.web.parameters.pseudoId ?: 'erp-landing-page'"/>
+        <set field="landingPageId" from="ec.web.parameters.landingPageId"/>
+
+        <log message="===== Assessment Landing Page: pseudoId=$pseudoId, landingPageId=$landingPageId, ownerPartyId=${party.ownerPartyId} companyPartyId: $companyPartyId"/>
+
+        <!-- Fetch landing page data from backend -->
+        <service-call name="growerp.100.LandingPageServices100.get#LandingPage" 
+            in-map="[pseudoId: pseudoId, landingPageId: landingPageId,
+                    ownerPartyId: party.ownerPartyId, companyPartyId: companyPartyId]" 
+            out-map="landingPageResult"/>
+        
+        <set field="landingPage" from="landingPageResult.landingPage"/>
+        <set field="sections" from="landingPage?.sections ?: []"/>
+        <set field="credibility" from="landingPage?.credibility ?: [:]"/>
+
+        <!-- Determine CTA behavior -->
+        <set field="ctaActionType" from="landingPage?.ctaActionType"/>
+        <set field="ctaAssessmentId" from="landingPage?.ctaAssessmentId"/>
+        <set field="ctaButtonLink" from="landingPage?.ctaButtonLink"/>
+    </always-actions>
+
+    <actions>
+        <log message="===== CTA Action Type: $ctaActionType, Assessment ID: $ctaAssessmentId, Link: $ctaButtonLink"/>
+    </actions>
+
+    <widgets>
+        <section name="assessmentLandingPage" condition="productStoreId != null &amp;&amp; landingPage != null">
+            <widgets>
+                <render-mode>
+                    <text type="html" location="component://PopRestStore/screen/assessmentLandingPage.ftl"></text>
+                </render-mode>
+            </widgets>
+            <fail-widgets>
+                <label text="Landing page not found or invalid product store" />
+                <label text="Product Store: $productStoreId" />
+                <label text="Pseudo ID: $pseudoId" />
+                <label text="Landing Page ID: $landingPageId" />
+            </fail-widgets>
+        </section>
+    </widgets>
+</screen>

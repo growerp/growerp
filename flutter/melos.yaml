@@ -29,7 +29,7 @@ packages:
   - packages/website
   - packages/hotel
   - packages/freelance
-  - packages/landing_page
+  - packages/assessment
   - packages/health
   - packages/support
 
