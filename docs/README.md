@@ -47,6 +47,7 @@ This directory contains comprehensive documentation for extending and developing
 ### 🔧 Technical Guides
 
 - **[Data Model Basic Guide](./basic_explanation_of_the_frontend_REST_Backend_data_models.md)** - Frontend/Backend data models
+- **[Flutter-Moqui REST Backend Interface](./Flutter_Moqui_REST_Backend_Interface.md)** - Complete REST API communication guide with code examples
 - **[Invoice Scan Documentation](./Invoice_Scan_Documentation.md)** - AI-powered invoice processing ⭐ **NEW!**
 - **[Timezone Management Guide](./GrowERP_Timezone_Management_Guide.md)** - Handle timezone differences
 - **[Timezone Quick Reference](./GrowERP_Timezone_Quick_Reference.md)** - Quick timezone guide

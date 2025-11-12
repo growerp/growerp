@@ -83,7 +83,7 @@ RUN cp /root/vueWebsite/AWSSetupAaaWebSiteData.xml runtime/component/growerp/dat
 RUN mkdir runtime/component/growerp/service/growerp/website
 RUN cp /root/vueWebsite/WebSiteRestServices.xml runtime/component/growerp/service/growerp/website
 # Postgresql driver
-RUN curl -L https://jdbc.postgresql.org/download/postgresql-42.7.3.jar -o runtime/lib/postgresql-42.2.9.jar
+RUN curl -L https://jdbc.postgresql.org/download/postgresql-42.7.3.jar -o runtime/lib/postgresql-42.7.3.jar
 # elasticsearch
 # RUN ./gradlew downloadel
 # build Moqui system
