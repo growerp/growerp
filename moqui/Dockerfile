@@ -17,7 +17,6 @@
 FROM growerp/flutter-sdk-image:latest AS build-flutter
 
 ARG BRANCH=master # currently either master or development we need to add existing
-ARG DOCKER_TAG=1.0.0+1
 USER root
 # Install linux dependencies
 RUN apt-get update && \
@@ -48,10 +47,8 @@ RUN melos l10n --no-select
 RUN melos build --no-select
 # build flutter app
 WORKDIR /home/mobiledevops/growerp/flutter/packages/admin
-RUN sed -i 's/version: .*/version: '"${DOCKER_TAG}"'/' pubspec.yaml
 RUN flutter build web --release --wasm
 WORKDIR /home/mobiledevops/growerp/flutter/packages/assessment
-RUN sed -i 's/version: .*/version: '"${DOCKER_TAG}"'/' pubspec.yaml
 RUN flutter build web --release --wasm
 
 #stage 2 -get files and build
@@ -86,7 +83,7 @@ RUN cp /root/vueWebsite/AWSSetupAaaWebSiteData.xml runtime/component/growerp/dat
 RUN mkdir runtime/component/growerp/service/growerp/website
 RUN cp /root/vueWebsite/WebSiteRestServices.xml runtime/component/growerp/service/growerp/website
 # Postgresql driver
-RUN curl -L https://jdbc.postgresql.org/download/postgresql-42.2.9.jar -o runtime/lib/postgresql-42.2.9.jar
+RUN curl -L https://jdbc.postgresql.org/download/postgresql-42.7.3.jar -o runtime/lib/postgresql-42.2.9.jar
 # elasticsearch
 # RUN ./gradlew downloadel
 # build Moqui system

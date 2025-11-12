@@ -272,7 +272,8 @@
             
             <#if ctaActionType?? && ctaActionType == 'assessment' && ctaAssessmentId??>
                 <!-- Assessment CTA - launches Flutter app -->
-                <button class="cta-button" onclick="launchAssessment('${ctaAssessmentId}')">
+                <button id="cta-button" class="cta-button" onclick="launchAssessment('${ctaAssessmentId}')">
+                    <span id="button-loader" style="display: none; width: 16px; height: 16px; border: 2px solid #667eea; border-top-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite; display: inline-block; margin-right: 8px; vertical-align: middle;"></span>
                     Start Free Assessment →
                 </button>
             <#elseif ctaButtonLink??>
@@ -307,6 +308,18 @@
             </section>
         </#list>
     </#if>
+
+    <!-- CTA Button Section (Bottom) -->
+    <section class="section" style="padding: 60px 20px;">
+        <div class="section-content" style="text-align: center;">
+            <#if ctaActionType?? && ctaActionType == 'assessment' && ctaAssessmentId??>
+                <button id="cta-button-bottom" class="cta-button" onclick="launchAssessment('${ctaAssessmentId}')" style="font-size: 16px; padding: 16px 40px;">
+                    <span id="button-loader-bottom" style="display: none; width: 14px; height: 14px; border: 2px solid #667eea; border-top-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite; display: inline-block; margin-right: 8px; vertical-align: middle;"></span>
+                    Start Free Assessment →
+                </button>
+            </#if>
+        </div>
+    </section>
 
     <!-- Credibility Section -->
     <#if credibility?? && credibility.creatorBio??>
@@ -349,6 +362,10 @@
     </div>
 
     <script>
+        // Track assessment loading state
+        let assessmentLoaded = false;
+        let assessmentLoading = false;
+
         // Privacy Policy Modal Functions
         function showPrivacyPolicy() {
             document.getElementById('privacyModal').style.display = 'block';
@@ -380,35 +397,161 @@
                 </#if>
             };
             window.sessionStorage.setItem('assessmentData', JSON.stringify(assessmentData));
-            // Return just the path without query parameters - relative paths will resolve correctly
             return '/assessment/';
         }
 
         // Preload assessment in background iframe
         function preloadAssessment(assessmentId) {
+            if (assessmentLoading || assessmentLoaded) {
+                console.log('Assessment already loaded or loading');
+                return;
+            }
+
+            assessmentLoading = true;
             const iframe = document.getElementById('assessment-iframe');
             const url = getAssessmentUrl(assessmentId);
+            
             console.log('Preloading assessment in background:', url);
+            
+            // Listen for iframe load event
+            iframe.onload = function() {
+                console.log('Assessment iframe HTML loaded');
+                
+                // Check if Flutter app is visible/interactive by polling for Flutter elements
+                // Flutter renders into a specific structure we can detect
+                let checkAttempts = 0;
+                const maxAttempts = 50; // ~10 seconds with 200ms intervals
+                
+                const checkFlutterReady = setInterval(() => {
+                    checkAttempts++;
+                    
+                    try {
+                        // Try to access iframe content
+                        const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                        
+                        // Check if Flutter has rendered interactive content
+                        // Look for Flutter's main container elements that indicate actual rendering is complete
+                        const flutterRoot = iframeDoc.querySelector('[flt-opacity]') || 
+                                          iframeDoc.querySelector('flt-glass-pane') ||
+                                          iframeDoc.querySelector('flt-scene');
+                        
+                        // Only consider it ready if we find actual Flutter elements (not just generic HTML)
+                        if (flutterRoot) {
+                            // Additional safety: check if the element has meaningful content
+                            const elementContent = flutterRoot.textContent || flutterRoot.children.length;
+                            if (elementContent) {
+                                console.log('Flutter app is interactive!');
+                                clearInterval(checkFlutterReady);
+                                assessmentLoaded = true;
+                                assessmentLoading = false;
+                                hideSpinner();
+                                return;
+                            }
+                        }
+                    } catch (e) {
+                        // Might fail due to CORS, but that's ok - means content is loading
+                    }
+                    
+                    // Timeout after max attempts
+                    if (checkAttempts >= maxAttempts) {
+                        console.log('Assessment load timeout - marking as ready anyway');
+                        clearInterval(checkFlutterReady);
+                        assessmentLoaded = true;
+                        assessmentLoading = false;
+                        hideSpinner();
+                    }
+                }, 200); // Check every 200ms
+            };
+
+            // Listen for iframe error
+            iframe.onerror = function() {
+                assessmentLoading = false;
+                console.error('Failed to load assessment iframe');
+                hideSpinner();
+                alert('Failed to load assessment. Please try again.');
+            };
+
             iframe.src = url;
         }
 
-        // Launch Assessment Function - show preloaded assessment
-        function launchAssessment(assessmentId) {
-            console.log('Launching preloaded assessment:', assessmentId);
-            
-            // If iframe isn't loaded yet, load it
-            const iframe = document.getElementById('assessment-iframe');
-            if (!iframe.src) {
-                preloadAssessment(assessmentId);
+        // Helper function to hide spinner
+        function hideSpinner() {
+            const loader = document.getElementById('button-loader');
+            const loaderBottom = document.getElementById('button-loader-bottom');
+            if (loader) {
+                loader.style.display = 'none';
             }
+            if (loaderBottom) {
+                loaderBottom.style.display = 'none';
+            }
+        }
+
+        // Launch Assessment Function - show preloaded or loading assessment
+        function launchAssessment(assessmentId) {
+            console.log('Launching assessment:', assessmentId);
             
-            // Show the hidden container with the preloaded iframe
-            document.getElementById('flutter-assessment-container').style.display = 'block';
+            const loader = document.getElementById('button-loader');
+            const loaderBottom = document.getElementById('button-loader-bottom');
+            const button = document.getElementById('cta-button');
+            const buttonBottom = document.getElementById('cta-button-bottom');
+            
+            // If not loaded and not loading, start preload
+            if (!assessmentLoaded && !assessmentLoading) {
+                preloadAssessment(assessmentId);
+                // Show loading indicator on both buttons
+                if (loader) {
+                    loader.style.display = 'inline-block';
+                }
+                if (loaderBottom) {
+                    loaderBottom.style.display = 'inline-block';
+                }
+                if (button) {
+                    button.disabled = true;
+                }
+                if (buttonBottom) {
+                    buttonBottom.disabled = true;
+                }
+            }
+
+            // If already loaded, show immediately and hide loader
+            if (assessmentLoaded) {
+                if (loader) {
+                    loader.style.display = 'none';
+                }
+                if (loaderBottom) {
+                    loaderBottom.style.display = 'none';
+                }
+                document.getElementById('flutter-assessment-container').style.display = 'block';
+                if (button) {
+                    button.disabled = false;
+                }
+                if (buttonBottom) {
+                    buttonBottom.disabled = false;
+                }
+            }
         }
 
         // Add close button functionality
         function closeAssessment() {
             document.getElementById('flutter-assessment-container').style.display = 'none';
+            const loader = document.getElementById('button-loader');
+            const loaderBottom = document.getElementById('button-loader-bottom');
+            if (loader) {
+                loader.style.display = 'none';
+            }
+            if (loaderBottom) {
+                loaderBottom.style.display = 'none';
+            }
+            const button = document.getElementById('cta-button');
+            const buttonBottom = document.getElementById('cta-button-bottom');
+            if (button) {
+                button.disabled = false;
+            }
+            if (buttonBottom) {
+                buttonBottom.disabled = false;
+            }
+            assessmentLoaded = false;
+            assessmentLoading = false;
         }
 
         // Preload Flutter assessment in background when page loads (if assessment CTA exists)
