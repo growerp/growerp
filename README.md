@@ -52,6 +52,7 @@ growerp install
 ### 🔧 Integration & APIs
 
 - **[🔗 Data Models Guide](./docs/basic_explanation_of_the_frontend_REST_Backend_data_models.md)** - Frontend-backend data model integration
+- **[📡 Flutter-Moqui REST Backend Interface](./docs/Flutter_Moqui_REST_Backend_Interface.md)** - Complete guide to REST API communication with practical code examples
 - **[🤖 AI Integration (MCP Server)](./moqui/runtime/component/mcp/docs/README.md)** - Model Context Protocol server for AI business automation
 - **[🤖 Gemini AI Communication](./GEMINI_COMMUNICATION_GUIDE.md)** - Invoice scanning and AI-powered data extraction with Google Gemini
 - **[✨ AI Landing Page Generation](./docs/AI_GENERATED_LANDING_PAGE_PLAN.md)** - Generate professional landing pages with AI and internet research
