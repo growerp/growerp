@@ -1,30 +1,70 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'assessment_model.dart' show NullableTimestampConverter;
 
 part 'assessment_result_model.g.dart';
+
+/// Enriched answer data with question and option details
+@JsonSerializable()
+class EnrichedAnswer {
+  /// Question ID
+  final String? questionId;
+
+  /// Question text
+  final String? questionText;
+
+  /// Question sequence number
+  final int? questionSequence;
+
+  /// Selected option ID
+  final String? optionId;
+
+  /// Selected option text
+  final String? optionText;
+
+  /// Score for this option
+  final double? optionScore;
+
+  const EnrichedAnswer({
+    this.questionId,
+    this.questionText,
+    this.questionSequence,
+    this.optionId,
+    this.optionText,
+    this.optionScore,
+  });
+
+  factory EnrichedAnswer.fromJson(Map<String, dynamic> json) =>
+      _$EnrichedAnswerFromJson(json);
+  Map<String, dynamic> toJson() => _$EnrichedAnswerToJson(this);
+
+  @override
+  String toString() =>
+      'EnrichedAnswer(Q$questionSequence: $questionText = $optionText)';
+}
 
 /// Assessment result after submission by respondent
 @JsonSerializable()
 class AssessmentResult {
   /// System-wide unique identifier
-  final String assessmentResultId;
+  final String? assessmentResultId;
 
   /// Tenant-unique identifier
-  final String pseudoId;
+  final String? pseudoId;
 
   /// Assessment ID that was submitted
-  final String assessmentId;
+  final String? assessmentId;
 
   /// Final score calculated
-  final double score;
+  final double? score;
 
   /// Resulting lead status/category
-  final String leadStatus;
+  final String? leadStatus;
 
   /// Respondent name
-  final String respondentName;
+  final String? respondentName;
 
   /// Respondent email
-  final String respondentEmail;
+  final String? respondentEmail;
 
   /// Respondent phone number
   final String? respondentPhone;
@@ -32,20 +72,21 @@ class AssessmentResult {
   /// Respondent company name
   final String? respondentCompany;
 
-  /// JSON encoded answers data
-  final String? answersData;
+  /// Enriched answers data with question and option text
+  final List<EnrichedAnswer>? answersData;
 
   /// Timestamp when submitted
+  @NullableTimestampConverter()
   final DateTime? createdDate;
 
   const AssessmentResult({
-    required this.assessmentResultId,
-    required this.pseudoId,
-    required this.assessmentId,
-    required this.score,
-    required this.leadStatus,
-    required this.respondentName,
-    required this.respondentEmail,
+    this.assessmentResultId,
+    this.pseudoId,
+    this.assessmentId,
+    this.score,
+    this.leadStatus,
+    this.respondentName,
+    this.respondentEmail,
     this.respondentPhone,
     this.respondentCompany,
     this.answersData,
@@ -62,7 +103,7 @@ class AssessmentResult {
     String? respondentEmail,
     String? respondentPhone,
     String? respondentCompany,
-    String? answersData,
+    List<EnrichedAnswer>? answersData,
     DateTime? createdDate,
   }) {
     return AssessmentResult(

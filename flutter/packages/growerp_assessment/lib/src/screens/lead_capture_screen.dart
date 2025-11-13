@@ -1,23 +1,39 @@
+/*
+ * This GrowERP software is in the public domain under CC0 1.0 Universal plus a
+ * Grant of Patent License.
+ * 
+ * To the extent possible under law, the author(s) have dedicated all
+ * copyright and related and neighboring rights to this software to the
+ * public domain worldwide. This software is distributed without any
+ * warranty.
+ * 
+ * You should have received a copy of the CC0 Public Domain Dedication
+ * along with this software (see the LICENSE.md file). If not, see
+ * <http://creativecommons.org/publicdomain/zero/1.0/>.
+ */
+
 import 'package:flutter/material.dart';
 
-/// Step 1: Lead Capture Screen
-/// Collects respondent information: name, email, company
+/// Screen to capture lead information (name and email) before assessment
+///
+/// This screen is shown before the assessment to collect user details
+/// that can be stored in the database or used for follow-up
 class LeadCaptureScreen extends StatefulWidget {
-  final String assessmentId;
-  final Function({
-    required String name,
-    required String email,
-    required String company,
-    required String phone,
-  }) onRespondentDataCollected;
-  final VoidCallback onNext;
-
   const LeadCaptureScreen({
-    Key? key,
-    required this.assessmentId,
-    required this.onRespondentDataCollected,
-    required this.onNext,
-  }) : super(key: key);
+    super.key,
+    required this.onSubmit,
+    this.initialName = '',
+    this.initialEmail = '',
+  });
+
+  /// Callback when user submits the form with name and email
+  final Function(String name, String email) onSubmit;
+
+  /// Optional pre-filled name
+  final String initialName;
+
+  /// Optional pre-filled email
+  final String initialEmail;
 
   @override
   State<LeadCaptureScreen> createState() => _LeadCaptureScreenState();
@@ -26,359 +42,203 @@ class LeadCaptureScreen extends StatefulWidget {
 class _LeadCaptureScreenState extends State<LeadCaptureScreen> {
   late TextEditingController _nameController;
   late TextEditingController _emailController;
-  late TextEditingController _companyController;
-  late TextEditingController _phoneController;
-
   final _formKey = GlobalKey<FormState>();
-  bool _isLoading = false;
+  bool _isSubmitting = false;
 
   @override
   void initState() {
     super.initState();
-    _nameController = TextEditingController();
-    _emailController = TextEditingController();
-    _companyController = TextEditingController();
-    _phoneController = TextEditingController();
+    _nameController = TextEditingController(text: widget.initialName);
+    _emailController = TextEditingController(text: widget.initialEmail);
   }
 
   @override
   void dispose() {
     _nameController.dispose();
     _emailController.dispose();
-    _companyController.dispose();
-    _phoneController.dispose();
     super.dispose();
   }
 
-  void _handleNext() {
+  void _submitForm() {
     if (_formKey.currentState!.validate()) {
-      setState(() => _isLoading = true);
+      setState(() {
+        _isSubmitting = true;
+      });
 
-      // Store respondent data
-      widget.onRespondentDataCollected(
-        name: _nameController.text,
-        email: _emailController.text,
-        company: _companyController.text,
-        phone: _phoneController.text,
+      // Call the onSubmit callback with captured data
+      widget.onSubmit(
+        _nameController.text.trim(),
+        _emailController.text.trim(),
       );
 
-      Future.delayed(const Duration(milliseconds: 300), () {
-        if (mounted) {
-          setState(() => _isLoading = false);
-          widget.onNext();
-        }
+      setState(() {
+        _isSubmitting = false;
       });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final isMobile = MediaQuery.of(context).size.width < 600;
-
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Assessment - Step 1: Your Information'),
-        elevation: 0,
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: EdgeInsets.all(isMobile ? 16 : 32),
-          child: Column(
-            children: [
-              // Progress indicator
-              _buildProgressIndicator(),
-              SizedBox(height: isMobile ? 24 : 40),
-
-              // Form
-              _buildForm(context),
-              SizedBox(height: isMobile ? 24 : 40),
-
-              // Navigation buttons
-              _buildNavigationButtons(context),
-            ],
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Colors.blue.shade50, Colors.white],
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildProgressIndicator() {
-    final isMobile = MediaQuery.of(context).size.width < 600;
-
-    if (isMobile) {
-      // Compact mobile layout
-      return Column(
-        children: [
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
+        child: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                _buildCompactStepIndicator(1, true),
-                const Flexible(
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 4),
-                    child: Icon(Icons.chevron_right, size: 16),
+                const SizedBox(height: 40),
+
+                // Header
+                Text(
+                  'Let\'s Get Started',
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+
+                const SizedBox(height: 12),
+
+                // Subtitle
+                Text(
+                  'Please provide your information to begin the assessment',
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyLarge?.copyWith(color: Colors.grey[600]),
+                  textAlign: TextAlign.center,
+                ),
+
+                const SizedBox(height: 48),
+
+                // Form
+                Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      // Name field
+                      TextFormField(
+                        controller: _nameController,
+                        decoration: InputDecoration(
+                          labelText: 'Full Name',
+                          hintText: 'Enter your full name',
+                          prefixIcon: const Icon(Icons.person),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          filled: true,
+                          fillColor: Colors.white,
+                        ),
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Please enter your full name';
+                          }
+                          if (value.trim().length < 2) {
+                            return 'Name must be at least 2 characters';
+                          }
+                          return null;
+                        },
+                        enabled: !_isSubmitting,
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      // Email field
+                      TextFormField(
+                        controller: _emailController,
+                        decoration: InputDecoration(
+                          labelText: 'Email Address',
+                          hintText: 'Enter your email address',
+                          prefixIcon: const Icon(Icons.email),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          filled: true,
+                          fillColor: Colors.white,
+                        ),
+                        keyboardType: TextInputType.emailAddress,
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Please enter your email address';
+                          }
+                          final emailRegex = RegExp(
+                            r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
+                          );
+                          if (!emailRegex.hasMatch(value.trim())) {
+                            return 'Please enter a valid email address';
+                          }
+                          return null;
+                        },
+                        enabled: !_isSubmitting,
+                      ),
+
+                      const SizedBox(height: 32),
+
+                      // Submit button
+                      ElevatedButton(
+                        onPressed: _isSubmitting ? null : _submitForm,
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: _isSubmitting
+                            ? SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    Colors.blue.shade700,
+                                  ),
+                                ),
+                              )
+                            : Text(
+                                'Continue to Assessment',
+                                style: Theme.of(context).textTheme.labelLarge
+                                    ?.copyWith(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                              ),
+                      ),
+                    ],
                   ),
                 ),
-                _buildCompactStepIndicator(2, false),
-                const Flexible(
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 4),
-                    child: Icon(Icons.chevron_right, size: 16),
+
+                const SizedBox(height: 40),
+
+                // Privacy notice
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.shade50,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.blue.shade200),
+                  ),
+                  child: Text(
+                    'Your information is secure and will be used only for this assessment',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Colors.blue.shade700,
+                    ),
+                    textAlign: TextAlign.center,
                   ),
                 ),
-                _buildCompactStepIndicator(3, false),
               ],
             ),
           ),
-          const SizedBox(height: 16),
-          Text(
-            'Step 1 of 3',
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Colors.grey[600],
-                ),
-          ),
-        ],
-      );
-    }
-
-    // Desktop layout
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            _buildStepIndicator(1, true, 'Your\nInfo'),
-            Expanded(
-              child: Container(
-                height: 2,
-                color: Colors.grey[300],
-                margin: const EdgeInsets.symmetric(horizontal: 4),
-              ),
-            ),
-            _buildStepIndicator(2, false, 'Quest-\nions'),
-            Expanded(
-              child: Container(
-                height: 2,
-                color: Colors.grey[300],
-                margin: const EdgeInsets.symmetric(horizontal: 4),
-              ),
-            ),
-            _buildStepIndicator(3, false, 'Results'),
-          ],
-        ),
-        const SizedBox(height: 16),
-        Text(
-          'Step 1 of 3',
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Colors.grey[600],
-              ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildCompactStepIndicator(int step, bool isActive) {
-    return Flexible(
-      child: Container(
-        width: 28,
-        height: 28,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: isActive ? Colors.blue : Colors.grey[300],
-        ),
-        child: Center(
-          child: Text(
-            step.toString(),
-            style: TextStyle(
-              color: isActive ? Colors.white : Colors.grey[600],
-              fontWeight: FontWeight.bold,
-              fontSize: 12,
-            ),
-          ),
         ),
       ),
-    );
-  }
-
-  Widget _buildStepIndicator(int step, bool isActive, String label) {
-    return SizedBox(
-      width: 50,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: isActive ? Colors.blue : Colors.grey[300],
-            ),
-            child: Center(
-              child: Text(
-                step.toString(),
-                style: TextStyle(
-                  color: isActive ? Colors.white : Colors.grey[600],
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            textAlign: TextAlign.center,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: isActive ? Colors.blue : Colors.grey[600],
-                  fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
-                  fontSize: 10,
-                ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildForm(BuildContext context) {
-    return Form(
-      key: _formKey,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Let\'s start with your information',
-            style: Theme.of(context).textTheme.headlineSmall,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Please provide your details to begin the assessment',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.grey[600],
-                ),
-          ),
-          const SizedBox(height: 32),
-
-          // Name field
-          _buildTextField(
-            key: const Key('respondentName'),
-            controller: _nameController,
-            label: 'Full Name *',
-            hint: 'Enter your full name',
-            icon: Icons.person,
-            validator: (value) {
-              if (value?.isEmpty ?? true) {
-                return 'Name is required';
-              }
-              if ((value?.length ?? 0) < 2) {
-                return 'Name must be at least 2 characters';
-              }
-              return null;
-            },
-          ),
-          const SizedBox(height: 16),
-
-          // Email field
-          _buildTextField(
-            key: const Key('respondentEmail'),
-            controller: _emailController,
-            label: 'Email Address *',
-            hint: 'Enter your email address',
-            icon: Icons.email,
-            keyboardType: TextInputType.emailAddress,
-            validator: (value) {
-              if (value?.isEmpty ?? true) {
-                return 'Email is required';
-              }
-              if (!RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
-                  .hasMatch(value!)) {
-                return 'Please enter a valid email';
-              }
-              return null;
-            },
-          ),
-          const SizedBox(height: 16),
-
-          // Company field (optional)
-          _buildTextField(
-            key: const Key('respondentCompany'),
-            controller: _companyController,
-            label: 'Company Name',
-            hint: 'Enter your company name (optional)',
-            icon: Icons.business,
-          ),
-          const SizedBox(height: 16),
-
-          // Phone field (optional)
-          _buildTextField(
-            controller: _phoneController,
-            label: 'Phone Number',
-            hint: 'Enter your phone number (optional)',
-            icon: Icons.phone,
-            keyboardType: TextInputType.phone,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required String label,
-    required String hint,
-    required IconData icon,
-    TextInputType keyboardType = TextInputType.text,
-    String? Function(String?)? validator,
-    Key? key,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: Theme.of(context).textTheme.labelMedium,
-        ),
-        const SizedBox(height: 8),
-        TextFormField(
-          key: key,
-          controller: controller,
-          keyboardType: keyboardType,
-          validator: validator,
-          decoration: InputDecoration(
-            hintText: hint,
-            prefixIcon: Icon(icon),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 12,
-              vertical: 12,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildNavigationButtons(BuildContext context) {
-    return Wrap(
-      spacing: 12,
-      alignment: WrapAlignment.spaceEvenly,
-      children: [
-        OutlinedButton(
-          onPressed: _isLoading ? null : () => Navigator.pop(context),
-          child: const Text('Cancel'),
-        ),
-        ElevatedButton.icon(
-          key: const Key('nextToAssessment'),
-          onPressed: _isLoading ? null : _handleNext,
-          icon: const Icon(Icons.arrow_forward),
-          label: const Text('Next'),
-        ),
-      ],
     );
   }
 }

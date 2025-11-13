@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_assessment/growerp_assessment.dart'
     hide AssessmentResultsScreen;
-import 'lead_capture_screen.dart';
 import 'assessment_results_screen_new.dart' as new_results;
 
 /// Assessment Flow Container
@@ -141,9 +140,15 @@ class _AssessmentFlowScreenState extends State<AssessmentFlowScreen> {
           children: [
             // Step 1: Lead Capture
             LeadCaptureScreen(
-              assessmentId: widget.assessmentId,
-              onRespondentDataCollected: _storeRespondentData,
-              onNext: _moveToNextStep,
+              onSubmit: (name, email) {
+                _storeRespondentData(
+                  name: name,
+                  email: email,
+                  company: '',
+                  phone: '',
+                );
+                _moveToNextStep();
+              },
             ),
 
             // Step 2: Assessment Questions

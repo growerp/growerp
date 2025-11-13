@@ -79,6 +79,14 @@ List<MenuOption> testMenuOptions = [
     userGroups: [UserGroup.admin, UserGroup.employee],
     child: const AssessmentList(),
   ),
+  MenuOption(
+    image: 'packages/growerp_core/images/tasksGrey.png',
+    selectedImage: 'packages/growerp_core/images/tasks.png',
+    title: 'Take Assessment',
+    route: '/takeAssessment',
+    userGroups: [UserGroup.admin, UserGroup.employee],
+    child: const TakeAssessmentMenu(),
+  ),
 ];
 
 // Menu definition (for compatibility)
@@ -105,6 +113,11 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       return MaterialPageRoute(
         builder: (context) =>
             DisplayMenuOption(menuList: testMenuOptions, menuIndex: 2),
+      );
+    case '/takeAssessment':
+      return MaterialPageRoute(
+        builder: (context) =>
+            DisplayMenuOption(menuList: testMenuOptions, menuIndex: 3),
       );
     default:
       return MaterialPageRoute(
@@ -136,10 +149,111 @@ class MainMenu extends StatelessWidget {
                 'Create and manage assessments',
                 'Define questions and scoring',
               ]),
+              makeDashboardItem(
+                'dbTakeAssessment',
+                context,
+                testMenuOptions[3],
+                [
+                  'Take Assessment',
+                  'Experience the assessment flow',
+                  'Test your assessments',
+                ],
+              ),
             ],
           );
         }
         return const LoadingIndicator();
+      },
+    );
+  }
+}
+
+// Take Assessment menu - allows selecting and taking an assessment
+class TakeAssessmentMenu extends StatelessWidget {
+  const TakeAssessmentMenu({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<AssessmentBloc, AssessmentState>(
+      builder: (context, state) {
+        if (state.status == AssessmentStatus.initial) {
+          context.read<AssessmentBloc>().add(
+            const AssessmentFetch(refresh: true),
+          );
+        }
+
+        if (state.status == AssessmentStatus.loading &&
+            state.assessments.isEmpty) {
+          return const Center(child: LoadingIndicator());
+        }
+
+        if (state.assessments.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(
+                  Icons.assessment_outlined,
+                  size: 64,
+                  color: Colors.grey,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'No assessments available',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Create an assessment first in the Assessments menu',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          );
+        }
+
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text('Select an Assessment to Take'),
+            backgroundColor: Colors.transparent,
+          ),
+          body: ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: state.assessments.length,
+            itemBuilder: (context, index) {
+              final assessment = state.assessments[index];
+              return Card(
+                margin: const EdgeInsets.only(bottom: 12),
+                child: ListTile(
+                  leading: const CircleAvatar(child: Icon(Icons.quiz)),
+                  title: Text(
+                    assessment.assessmentName,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  subtitle: Text(
+                    assessment.description ?? 'No description',
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  trailing: const Icon(Icons.arrow_forward_ios),
+                  onTap: () {
+                    // Navigate to the assessment flow
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => LandingPageAssessmentFlowScreen(
+                          landingPageId: assessment.pseudoId,
+                          assessmentId: assessment.assessmentId,
+                          startAssessmentFlow: true,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              );
+            },
+          ),
+        );
       },
     );
   }

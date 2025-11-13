@@ -527,7 +527,7 @@ Service definitions for assessment management and completion
 
     <!-- submitAssessment: Submit completed assessment -->
     <service verb="submit" noun="Assessment" authenticate="false">
-        <description>Submit assessment answers, capture lead info, calculate score, determine status. Public endpoint - no authentication required.</description>
+        <description>Submit assessment answers, capture lead info, calculate score, determine status. Public endpoint - no authentication required. Consolidates score calculation, result creation, and optional user creation.</description>
         <in-parameters>
             <parameter name="assessmentId" type="String" required="true">
                 <description>Assessment ID being submitted</description>
@@ -546,6 +546,9 @@ Service definitions for assessment management and completion
             </parameter>
             <parameter name="respondentCompany">
                 <description>Lead company from step 1</description>
+            </parameter>
+            <parameter name="ownerPartyId" type="String">
+                <description>Optional owner party ID. If not provided, will be retrieved from assessment. Used for anonymous submissions to specify which company owns the lead.</description>
             </parameter>
         </in-parameters>
         <out-parameters>
@@ -584,7 +587,7 @@ Service definitions for assessment management and completion
             </parameter>
         </out-parameters>
         <actions>
-            <!-- Get assessment to verify it exists and get ownerPartyId -->
+            <!-- Get assessment to verify it exists -->
             <entity-find-one entity-name="growerp.assessment.Assessment" value-field="assessment">
                 <field-map field-name="assessmentId" from="assessmentId" />
             </entity-find-one>
@@ -593,78 +596,12 @@ Service definitions for assessment management and completion
                 <return error="true" message="Assessment not found" />
             </if>
 
-            <!-- Calculate score from answers -->
-            <service-call name="growerp.100.AssessmentServices100.calculate#Score"
-                out-map="scoreResult">
-                <field-map field-name="assessmentId" from="assessmentId" />
-                <field-map field-name="answersData" from="answersData" />
-            </service-call>
+            <!-- Use provided ownerPartyId or get from assessment -->
+            <if condition="!ownerPartyId">
+                <set field="ownerPartyId" from="assessment.ownerPartyId" />
+            </if>
 
-            <set field="score" from="scoreResult.score" />
-
-            <!-- Determine lead status from thresholds -->
-            <entity-find entity-name="growerp.assessment.ScoringThreshold" list="thresholds">
-                <econdition field-name="assessmentId" from="assessmentId" />
-                <econdition field-name="minScore" operator="less-equals" from="score" />
-                <econdition field-name="maxScore" operator="greater-equals" from="score" />
-            </entity-find>
-
-            <set field="leadStatus" from="thresholds ? thresholds[0].leadStatus : 'Unknown'" />
-
-            <!-- Generate unique pseudoId for result -->
-            <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
-                in-map="[ownerPartyId: assessment.ownerPartyId, seqName: 'AssessmentResult']"
-                out-map="context" />
-            <set field="pseudoId" from="seqNum" />
-
-            <!-- Capture current timestamp -->
-            <set field="createdDate" from="ec.user.nowTimestamp" />
-
-            <!-- Create assessment result -->
-            <service-call name="create#growerp.assessment.AssessmentResult" out-map="resultOut">
-                <field-map field-name="assessmentId" from="assessmentId" />
-                <field-map field-name="ownerPartyId" from="assessment.ownerPartyId" />
-                <field-map field-name="pseudoId" from="pseudoId" />
-                <field-map field-name="score" from="score" />
-                <field-map field-name="leadStatus" from="leadStatus" />
-                <field-map field-name="respondentName" from="respondentName" />
-                <field-map field-name="respondentEmail" from="respondentEmail" />
-                <field-map field-name="respondentPhone" from="respondentPhone" />
-                <field-map field-name="respondentCompany" from="respondentCompany" />
-                <field-map field-name="answersData" from="answersData" />
-                <field-map field-name="createdDate" from="createdDate" />
-            </service-call>
-
-            <!-- Set output parameters from created result -->
-            <set field="assessmentResultId" from="resultOut.assessmentResultId" />
-        </actions>
-    </service>
-
-    <!-- ============================================ -->
-    <!-- SCORING SERVICES (3 services) -->
-    <!-- ============================================ -->
-
-    <!-- calculateScore: Calculate score from answers -->
-    <service verb="calculate" noun="Score" authenticate="true">
-        <description>Calculate assessment score from submitted answers</description>
-        <in-parameters>
-            <parameter name="assessmentId" type="String" required="true">
-                <description>Assessment ID</description>
-            </parameter>
-            <parameter name="answersData" type="String" required="true">
-                <description>JSON with answers: {questionId: optionId, ...}</description>
-            </parameter>
-        </in-parameters>
-        <out-parameters>
-            <parameter name="score" type="BigDecimal">
-                <description>Calculated total score</description>
-            </parameter>
-        </out-parameters>
-        <actions>
-            <service-call out-map="context"
-                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
-
-            <!-- Parse answers JSON -->
+            <!-- Parse answers JSON to calculate score inline (instead of separate service call) -->
             <script>
                 import groovy.json.JsonSlurper
                 def jsonSlurper = new JsonSlurper()
@@ -691,8 +628,84 @@ Service definitions for assessment management and completion
             </iterate>
 
             <set field="score" from="totalScore" />
+
+            <!-- Determine lead status from thresholds -->
+            <entity-find entity-name="growerp.assessment.ScoringThreshold" list="thresholds">
+                <econdition field-name="assessmentId" from="assessmentId" />
+                <econdition field-name="minScore" operator="less-equals" from="score" />
+                <econdition field-name="maxScore" operator="greater-equals" from="score" />
+            </entity-find>
+
+            <set field="leadStatus" from="thresholds ? thresholds[0].leadStatus : 'Unknown'" />
+
+            <!-- Always create lead user from respondent info -->
+            <script>
+                // Parse name into firstName and lastName
+                def nameParts = respondentName.trim().split(' ')
+                def firstName = nameParts.length > 0 ? nameParts[0] : ''
+                def lastName = nameParts.length > 1 ? nameParts[1..-1].join(' ') : ''
+                context.firstName = firstName
+                context.lastName = lastName
+            </script>
+
+            <!-- Check if user already exists with this email address -->
+            <entity-find entity-name="mantle.party.contact.ContactMech" list="existingContacts">
+                <econdition field-name="infoString" from="respondentEmail" />
+                <econdition field-name="contactMechTypeEnumId" value="CmtEmailAddress" />
+            </entity-find>
+
+            <if condition="!existingContacts">
+                <!-- Create lead user - ignore errors if user creation fails -->
+                <service-call name="growerp.100.PartyServices100.create#User" ignore-error="true">
+                    <field-map field-name="user"
+                        from="[
+                        firstName: firstName,
+                        lastName: lastName,
+                        email: respondentEmail,
+                        telephoneNr: respondentPhone,
+                        role: 'Lead',
+                        userGroupId: 'OTHER'
+                    ]" />
+                    <field-map field-name="ownerPartyId" from="ownerPartyId" />
+                </service-call>
+            </if>
+
+            <!-- Generate unique pseudoId for result -->
+            <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                in-map="[ownerPartyId: ownerPartyId, seqName: 'AssessmentResult']"
+                out-map="context" />
+            <set field="pseudoId" from="seqNum" />
+
+            <!-- Capture current timestamp -->
+            <set field="createdDate" from="ec.user.nowTimestamp" />
+
+            <!-- Create assessment result -->
+            <service-call name="create#growerp.assessment.AssessmentResult" out-map="resultOut">
+                <field-map field-name="assessmentId" from="assessmentId" />
+                <field-map field-name="ownerPartyId" from="ownerPartyId" />
+                <field-map field-name="pseudoId" from="pseudoId" />
+                <field-map field-name="score" from="score" />
+                <field-map field-name="leadStatus" from="leadStatus" />
+                <field-map field-name="respondentName" from="respondentName" />
+                <field-map field-name="respondentEmail" from="respondentEmail" />
+                <field-map field-name="respondentPhone" from="respondentPhone" />
+                <field-map field-name="respondentCompany" from="respondentCompany" />
+                <field-map field-name="answersData" from="answersData" />
+                <field-map field-name="createdDate" from="createdDate" />
+            </service-call>
+
+            <!-- Set output parameters - note that assessmentId, score, leadStatus, etc. 
+                 are already in context from earlier operations, but we need to ensure
+                 all output parameters are explicitly set -->
+            <set field="assessmentResultId" from="resultOut.assessmentResultId" />
+            <!-- pseudoId, assessmentId, score, leadStatus, respondentName, respondentEmail, 
+                 respondentPhone, respondentCompany, answersData, createdDate are already in context -->
         </actions>
     </service>
+
+    <!-- ============================================ -->
+    <!-- SCORING SERVICES -->
+    <!-- ============================================ -->
 
     <!-- getThresholds: Get scoring thresholds -->
     <service verb="get" noun="Thresholds" authenticate="true">
@@ -1564,6 +1577,15 @@ Service definitions for assessment management and completion
                 <parameter name="leadStatus">
                     <description>Lead qualification status (e.g., Cold, Warm, Hot)</description>
                 </parameter>
+                <parameter name="answersData" type="List">
+                    <description>List of answers with question and option text enriched</description>
+                    <parameter name="questionId" />
+                    <parameter name="questionText" />
+                    <parameter name="questionSequence" type="Integer" />
+                    <parameter name="optionId" />
+                    <parameter name="optionText" />
+                    <parameter name="optionScore" type="BigDecimal" />
+                </parameter>
                 <parameter name="createdDate" type="Timestamp">
                     <description>When the assessment was submitted</description>
                 </parameter>
@@ -1573,9 +1595,8 @@ Service definitions for assessment management and completion
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
 
-            <!-- Get results for this assessment with pagination - only summary data, no individual
-            answers -->
-            <entity-find entity-name="growerp.assessment.AssessmentResult" list="results"
+            <!-- Get results for this assessment with pagination -->
+            <entity-find entity-name="growerp.assessment.AssessmentResult" list="rawResults"
                 limit="limit" offset="start">
                 <econdition field-name="assessmentId" from="assessmentId" />
                 <econdition field-name="ownerPartyId" from="ownerPartyId" />
@@ -1587,9 +1608,67 @@ Service definitions for assessment management and completion
                 <select-field field-name="respondentCompany" />
                 <select-field field-name="score" />
                 <select-field field-name="leadStatus" />
+                <select-field field-name="answersData" />
                 <select-field field-name="createdDate" />
                 <order-by field-name="-createdDate" />
             </entity-find>
+
+            <!-- Process each result to enrich answersData with question and option text -->
+            <set field="results" from="[]" />
+            <iterate list="rawResults" entry="result">
+                <set field="enrichedResult"
+                    from="[
+                    assessmentResultId: result.assessmentResultId,
+                    pseudoId: result.pseudoId,
+                    respondentName: result.respondentName,
+                    respondentEmail: result.respondentEmail,
+                    respondentPhone: result.respondentPhone,
+                    respondentCompany: result.respondentCompany,
+                    score: result.score,
+                    leadStatus: result.leadStatus,
+                    createdDate: result.createdDate
+                ]" />
+
+                <!-- Decode and enrich answersData -->
+                <if condition="result.answersData">
+                    <script><![CDATA[
+                        def slurper = new groovy.json.JsonSlurper()
+                        def answersMap = slurper.parseText(result.answersData)
+                        def enrichedAnswers = []
+                        
+                        answersMap.each { questionId, optionId ->
+                            // Get question details
+                            def question = ec.entity.find("growerp.assessment.AssessmentQuestion")
+                                .condition("assessmentQuestionId", questionId)
+                                .one()
+                            
+                            // Get option details
+                            def option = ec.entity.find("growerp.assessment.AssessmentQuestionOption")
+                                .condition("assessmentQuestionOptionId", optionId)
+                                .one()
+                            
+                            enrichedAnswers.add([
+                                questionId: questionId,
+                                questionText: question?.questionText ?: "Question ${questionId}",
+                                questionSequence: question?.questionSequence ?: 0,
+                                optionId: optionId,
+                                optionText: option?.optionText ?: optionId,
+                                optionScore: option?.optionScore ?: 0
+                            ])
+                        }
+                        
+                        // Sort by question sequence
+                        enrichedAnswers.sort { it.questionSequence }
+                        
+                        enrichedResult.answersData = enrichedAnswers
+                    ]]></script>
+                    <else>
+                        <set field="enrichedResult.answersData" from="[]" />
+                    </else>
+                </if>
+
+                <script>results.add(enrichedResult)</script>
+            </iterate>
         </actions>
     </service>
 
@@ -1645,106 +1724,6 @@ Service definitions for assessment management and completion
         </actions>
     </service>
 
-    <!-- createResult: Create assessment result -->
-    <service verb="create" noun="Result" authenticate="false">
-        <description>Create assessment result (allows anonymous users)</description>
-        <in-parameters>
-            <parameter name="assessmentId" type="String" required="true" />
-            <parameter name="userPartyId" />
-            <parameter name="responses" type="List" required="true">
-                <description>List of question responses</description>
-                <parameter name="questionId" />
-                <parameter name="optionId" />
-            </parameter>
-        </in-parameters>
-        <out-parameters>
-            <parameter name="resultId" />
-            <parameter name="score" type="BigDecimal" />
-            <parameter name="interpretation" />
-        </out-parameters>
-        <actions>
-            <!-- Don't require user/owner lookup for anonymous submissions -->
-            <if condition="!userPartyId">
-                <set field="userPartyId" from="ec.user.userAccount.partyId ?: '_NA_'" />
-            </if>
-
-            <service-call name="growerp.100.AssessmentServices100.submit#Assessment"
-                in-map="[assessmentId: assessmentId, responses: responses]" out-map="resultOut" />
-
-            <set field="resultId" from="resultOut.resultId" />
-            <set field="score" from="resultOut.score" />
-            <set field="interpretation" from="resultOut.interpretation" />
-        </actions>
-    </service>
-
-    <!-- updateResult: Update assessment result -->
-    <service verb="update" noun="Result" authenticate="true">
-        <description>Update assessment result</description>
-        <in-parameters>
-            <parameter name="resultId" type="String" required="true" />
-            <parameter name="score" type="BigDecimal" />
-            <parameter name="interpretation" />
-            <parameter name="responses" />
-        </in-parameters>
-        <out-parameters>
-            <parameter name="resultId" />
-        </out-parameters>
-        <actions>
-            <service-call out-map="context"
-                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
-
-            <!-- Verify result exists and user has permission -->
-            <entity-find entity-name="growerp.assessment.AssessmentResult" list="resultList">
-                <econdition field-name="resultId" from="resultId" />
-            </entity-find>
-
-            <if condition="!resultList">
-                <return error="true" message="Assessment result not found" />
-            </if>
-
-            <set field="updateMap" from="[resultId: resultId]" />
-            <if condition="score">
-                <set field="updateMap.score" from="score" />
-            </if>
-            <if condition="interpretation">
-                <set field="updateMap.interpretation" from="interpretation" />
-            </if>
-            <if condition="responses">
-                <set field="updateMap.responses" from="responses" />
-            </if>
-
-            <service-call name="update#growerp.assessment.AssessmentResult" in-map="updateMap" />
-        </actions>
-    </service>
-
-    <!-- deleteResult: Delete assessment result -->
-    <service verb="delete" noun="Result" authenticate="true">
-        <description>Delete assessment result</description>
-        <in-parameters>
-            <parameter name="resultId" type="String" required="true" />
-        </in-parameters>
-        <out-parameters>
-            <parameter name="deleted" type="Boolean" />
-        </out-parameters>
-        <actions>
-            <service-call out-map="context"
-                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
-
-            <!-- Verify result exists -->
-            <entity-find entity-name="growerp.assessment.AssessmentResult" list="resultList">
-                <econdition field-name="resultId" from="resultId" />
-            </entity-find>
-
-            <if condition="!resultList">
-                <return error="true" message="Assessment result not found" />
-            </if>
-
-            <!-- Delete the result -->
-            <entity-delete value-field="resultList[0]" />
-            <set field="deleted" from="true" />
-        </actions>
-    </service>
-
     <!-- getAllAssessmentResults: Get all assessment results across all assessments -->
     <service verb="get" noun="AllAssessmentResults" authenticate="true">
         <description>Get all assessment results across all assessments. Requires authentication.</description>
@@ -1790,7 +1769,7 @@ Service definitions for assessment management and completion
             <entity-find entity-name="growerp.assessment.AssessmentResult" list="assessmentResults"
                 limit="limit" offset="start">
                 <econdition field-name="ownerPartyId" from="ownerPartyId" />
-                <order-by field-name="submittedDate" />
+                <order-by field-name="-createdDate" />
             </entity-find>
             <entity-find-count entity-name="growerp.assessment.AssessmentResult"
                 count-field="assessmentResultCount">

@@ -135,106 +135,68 @@ class _AssessmentLeadsScreenContentState
   }
 
   Widget _buildLeadCard(BuildContext context, AssessmentResult result) {
-    final scoreColor = _getScoreColor(result.score);
+    final scoreColor = _getScoreColor(result.score ?? 0);
 
-    return GestureDetector(
-      onTap: () {
-        _showResultDetails(context, result);
-      },
-      child: Card(
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: InkWell(
+        onTap: () {
+          _showResultDetails(context, result);
+        },
         child: Padding(
           padding: const EdgeInsets.all(12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: Row(
             children: [
-              Row(
-                children: [
-                  Container(
-                    width: 60,
-                    height: 60,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: scoreColor.withAlpha((0.2 * 255).round()),
-                    ),
-                    child: Center(
-                      child: Text(
-                        '${result.score.toStringAsFixed(0)}%',
-                        style: TextStyle(
-                          color: scoreColor,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          result.respondentName,
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          result.respondentEmail,
-                          style: Theme.of(context).textTheme.bodySmall,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ),
-                  ),
-                  Icon(
-                    Icons.arrow_forward_ios,
-                    size: 16,
-                    color: Colors.grey[400],
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: _getStatusColor(result.leadStatus)
-                          .withAlpha((0.2 * 255).round()),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      result.leadStatus,
-                      style: TextStyle(
-                        color: _getStatusColor(result.leadStatus),
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  if (result.respondentCompany != null)
-                    Expanded(
-                      child: Text(
-                        result.respondentCompany!,
-                        style: Theme.of(context).textTheme.bodySmall,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                ],
-              ),
-              if (result.createdDate != null) ...[
-                const SizedBox(height: 8),
-                Text(
-                  _formatDateTime(result.createdDate),
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.grey[600],
-                      ),
+              // Score circle
+              Container(
+                width: 50,
+                height: 50,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: scoreColor.withAlpha((0.2 * 255).round()),
                 ),
-              ],
+                child: Center(
+                  child: Text(
+                    '${result.score?.toStringAsFixed(0) ?? '0'}%',
+                    style: TextStyle(
+                      color: scoreColor,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              // Name and email
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      result.respondentName ?? 'Unknown',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      result.respondentEmail ?? 'No email',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Colors.grey[600],
+                          ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+              // Arrow icon
+              Icon(
+                Icons.chevron_right,
+                color: Colors.grey[400],
+                size: 24,
+              ),
             ],
           ),
         ),
@@ -245,92 +207,21 @@ class _AssessmentLeadsScreenContentState
   void _showResultDetails(BuildContext context, AssessmentResult result) {
     showDialog(
       context: context,
-      barrierDismissible: false,
       builder: (context) => Dialog(
         insetPadding: const EdgeInsets.all(10),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        child: Container(
-          constraints: const BoxConstraints(
-            maxWidth: 500,
-            maxHeight: 600,
-          ),
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Result Details',
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: () => Navigator.of(context).pop(),
-                  ),
-                ],
-              ),
-              const Divider(),
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _detailRow('Name', result.respondentName),
-                      _detailRow('Email', result.respondentEmail),
-                      if (result.respondentPhone != null)
-                        _detailRow('Phone', result.respondentPhone!),
-                      if (result.respondentCompany != null)
-                        _detailRow('Company', result.respondentCompany!),
-                      _detailRow(
-                          'Score', '${result.score.toStringAsFixed(1)}%'),
-                      _detailRow('Status', result.leadStatus),
-                      _detailRow('Result ID', result.pseudoId),
-                      if (result.createdDate != null)
-                        _detailRow(
-                            'Submitted', _formatDateTime(result.createdDate)),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TextButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    child: const Text('Close'),
-                  ),
-                ],
-              ),
-            ],
+        child: popUp(
+          context: context,
+          title: "Lead Details - ${result.respondentName ?? 'Unknown'}",
+          height: 650,
+          width: 500,
+          child: _ResultDetailsContent(
+            result: result,
+            onGetStatusColor: _getStatusColor,
+            onGetScoreColor: _getScoreColor,
+            onFormatDateTime: _formatDateTime,
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _detailRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            label,
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Text(
-              value,
-              textAlign: TextAlign.end,
-              style: const TextStyle(color: Colors.grey),
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -390,6 +281,423 @@ class _AssessmentLeadsScreenState extends State<AssessmentLeadsScreen> {
         child: AssessmentLeadsScreenContent(
           assessmentId: widget.assessmentId,
         ),
+      ),
+    );
+  }
+}
+
+/// Widget to show detailed result information with score badge and expandable sections
+class _ResultDetailsContent extends StatelessWidget {
+  final AssessmentResult result;
+  final Color Function(String) onGetStatusColor;
+  final Color Function(double) onGetScoreColor;
+  final String Function(DateTime?) onFormatDateTime;
+
+  const _ResultDetailsContent({
+    required this.result,
+    required this.onGetStatusColor,
+    required this.onGetScoreColor,
+    required this.onFormatDateTime,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final scoreColor = onGetScoreColor(result.score ?? 0);
+
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Score badge and basic info
+          Row(
+            children: [
+              Container(
+                width: 70,
+                height: 70,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: scoreColor.withAlpha((0.2 * 255).round()),
+                ),
+                child: Center(
+                  child: Text(
+                    '${result.score?.toStringAsFixed(0) ?? '0'}%',
+                    style: TextStyle(
+                      color: scoreColor,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      result.respondentEmail ?? 'No email',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: Colors.grey[700],
+                          ),
+                    ),
+                    const SizedBox(height: 4),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: onGetStatusColor(result.leadStatus ?? 'Unknown')
+                            .withAlpha((0.2 * 255).round()),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        result.leadStatus ?? 'Unknown',
+                        style: TextStyle(
+                          color:
+                              onGetStatusColor(result.leadStatus ?? 'Unknown'),
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+
+          // Contact Information Section
+          _ContactInfoSection(
+            result: result,
+            onGetStatusColor: onGetStatusColor,
+            onFormatDateTime: onFormatDateTime,
+          ),
+          const SizedBox(height: 16),
+
+          // Individual Answers Section
+          if (result.answersData != null && result.answersData!.isNotEmpty)
+            _AnswersDropdownSection(
+              enrichedAnswers: result.answersData!,
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Contact information section in the details dialog
+class _ContactInfoSection extends StatefulWidget {
+  final AssessmentResult result;
+  final Color Function(String) onGetStatusColor;
+  final String Function(DateTime?) onFormatDateTime;
+
+  const _ContactInfoSection({
+    required this.result,
+    required this.onGetStatusColor,
+    required this.onFormatDateTime,
+  });
+
+  @override
+  State<_ContactInfoSection> createState() => _ContactInfoSectionState();
+}
+
+class _ContactInfoSectionState extends State<_ContactInfoSection> {
+  bool _isExpanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey.shade300),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
+        children: [
+          // Header
+          InkWell(
+            onTap: () {
+              setState(() {
+                _isExpanded = !_isExpanded;
+              });
+            },
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade50,
+                borderRadius: BorderRadius.only(
+                  topLeft: const Radius.circular(8),
+                  topRight: const Radius.circular(8),
+                  bottomLeft:
+                      _isExpanded ? Radius.zero : const Radius.circular(8),
+                  bottomRight:
+                      _isExpanded ? Radius.zero : const Radius.circular(8),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.info_outline, color: Colors.grey[700], size: 20),
+                  const SizedBox(width: 12),
+                  Text(
+                    'Contact & Assessment Details',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                  const Spacer(),
+                  Icon(
+                    _isExpanded ? Icons.expand_less : Icons.expand_more,
+                    color: Colors.grey[600],
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // Expanded content
+          if (_isExpanded)
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Status badge
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: widget
+                              .onGetStatusColor(
+                                  widget.result.leadStatus ?? 'Unknown')
+                              .withAlpha((0.2 * 255).round()),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Text(
+                          widget.result.leadStatus ?? 'Unknown',
+                          style: TextStyle(
+                            color: widget.onGetStatusColor(
+                                widget.result.leadStatus ?? 'Unknown'),
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Details
+                  if (widget.result.respondentPhone != null)
+                    _buildDetailRow('Phone', widget.result.respondentPhone!),
+                  if (widget.result.respondentCompany != null)
+                    _buildDetailRow(
+                        'Company', widget.result.respondentCompany!),
+                  _buildDetailRow('Result ID', widget.result.pseudoId ?? 'N/A'),
+                  if (widget.result.createdDate != null)
+                    _buildDetailRow(
+                      'Submitted',
+                      widget.onFormatDateTime(widget.result.createdDate),
+                    ),
+                ],
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDetailRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 100,
+            child: Text(
+              label,
+              style: TextStyle(
+                color: Colors.grey[600],
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Answers dropdown section showing individual questions and answers
+class _AnswersDropdownSection extends StatefulWidget {
+  final List<EnrichedAnswer> enrichedAnswers;
+
+  const _AnswersDropdownSection({
+    required this.enrichedAnswers,
+  });
+
+  @override
+  State<_AnswersDropdownSection> createState() =>
+      _AnswersDropdownSectionState();
+}
+
+class _AnswersDropdownSectionState extends State<_AnswersDropdownSection> {
+  bool _isExpanded = true; // Default expanded
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey.shade300),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
+        children: [
+          // Header
+          InkWell(
+            onTap: () {
+              setState(() {
+                _isExpanded = !_isExpanded;
+              });
+            },
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.blue.shade50,
+                borderRadius: BorderRadius.only(
+                  topLeft: const Radius.circular(8),
+                  topRight: const Radius.circular(8),
+                  bottomLeft:
+                      _isExpanded ? Radius.zero : const Radius.circular(8),
+                  bottomRight:
+                      _isExpanded ? Radius.zero : const Radius.circular(8),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.quiz, color: Colors.blue[700], size: 20),
+                  const SizedBox(width: 12),
+                  Text(
+                    'Individual Answers (${widget.enrichedAnswers.length} questions)',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.blue[900],
+                        ),
+                  ),
+                  const Spacer(),
+                  Icon(
+                    _isExpanded ? Icons.expand_less : Icons.expand_more,
+                    color: Colors.blue[700],
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // Expanded content
+          if (_isExpanded)
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: widget.enrichedAnswers.map((answer) {
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Question number and text on separate lines for better readability
+                        Text(
+                          'Question ${answer.questionSequence ?? 0}',
+                          style: TextStyle(
+                            color: Colors.blue.shade700,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          answer.questionText ?? 'Question',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 15,
+                            color:
+                                Theme.of(context).brightness == Brightness.dark
+                                    ? Colors.white
+                                    : Colors.black87,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+
+                        // Selected answer
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.green.shade50,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: Colors.green.shade200),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.check_circle,
+                                color: Colors.green.shade700,
+                                size: 20,
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Text(
+                                  answer.optionText ?? 'Unknown option',
+                                  style: TextStyle(
+                                    color: Colors.green.shade900,
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: 13,
+                                  ),
+                                ),
+                              ),
+                              if ((answer.optionScore ?? 0) > 0)
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.blue.shade100,
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Text(
+                                    '+${(answer.optionScore ?? 0).toStringAsFixed(0)} pts',
+                                    style: TextStyle(
+                                      color: Colors.blue.shade800,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 11,
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+        ],
       ),
     );
   }

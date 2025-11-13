@@ -88,7 +88,7 @@ class AssessmentSubmit extends AssessmentEvent {
     required this.respondentEmail,
     this.respondentPhone,
     this.respondentCompany,
-    this.createLeadUser = true,
+    this.ownerPartyId,
   });
 
   final String assessmentId;
@@ -97,7 +97,7 @@ class AssessmentSubmit extends AssessmentEvent {
   final String respondentEmail;
   final String? respondentPhone;
   final String? respondentCompany;
-  final bool createLeadUser;
+  final String? ownerPartyId;
 
   @override
   List<Object?> get props => [
@@ -107,21 +107,8 @@ class AssessmentSubmit extends AssessmentEvent {
         respondentEmail,
         respondentPhone,
         respondentCompany,
-        createLeadUser,
+        ownerPartyId,
       ];
-}
-
-class AssessmentCalculateScore extends AssessmentEvent {
-  const AssessmentCalculateScore({
-    required this.assessmentId,
-    required this.answers,
-  });
-
-  final String assessmentId;
-  final Map<String, dynamic> answers;
-
-  @override
-  List<Object?> get props => [assessmentId, answers];
 }
 
 final class AssessmentFetchResults extends AssessmentEvent {

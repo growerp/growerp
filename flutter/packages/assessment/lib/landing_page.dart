@@ -14,6 +14,6 @@
 
 library landing_page;
 
-// Screens
-export 'src/screens/public_landing_page_screen.dart';
-export 'src/screens/landing_page_assessment_flow_screen.dart';
+// Re-export from growerp_assessment package
+export 'package:growerp_assessment/growerp_assessment.dart'
+    show PublicLandingPageScreen, LandingPageAssessmentFlowScreen;
