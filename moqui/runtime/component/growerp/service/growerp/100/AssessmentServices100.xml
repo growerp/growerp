@@ -549,17 +549,38 @@ Service definitions for assessment management and completion
             </parameter>
         </in-parameters>
         <out-parameters>
-            <parameter name="resultId">
+            <parameter name="assessmentResultId">
                 <description>Created assessment result ID</description>
             </parameter>
             <parameter name="pseudoId">
                 <description>Created result tenant-unique ID</description>
+            </parameter>
+            <parameter name="assessmentId">
+                <description>Assessment ID that was submitted</description>
             </parameter>
             <parameter name="score" type="BigDecimal">
                 <description>Calculated score from answers</description>
             </parameter>
             <parameter name="leadStatus">
                 <description>Determined lead status: Cold, Warm, Hot</description>
+            </parameter>
+            <parameter name="respondentName">
+                <description>Respondent name</description>
+            </parameter>
+            <parameter name="respondentEmail">
+                <description>Respondent email</description>
+            </parameter>
+            <parameter name="respondentPhone">
+                <description>Respondent phone number</description>
+            </parameter>
+            <parameter name="respondentCompany">
+                <description>Respondent company name</description>
+            </parameter>
+            <parameter name="answersData">
+                <description>JSON encoded answers data</description>
+            </parameter>
+            <parameter name="createdDate">
+                <description>Timestamp when submitted</description>
             </parameter>
         </out-parameters>
         <actions>
@@ -596,6 +617,9 @@ Service definitions for assessment management and completion
                 out-map="context" />
             <set field="pseudoId" from="seqNum" />
 
+            <!-- Capture current timestamp -->
+            <set field="createdDate" from="ec.user.nowTimestamp" />
+
             <!-- Create assessment result -->
             <service-call name="create#growerp.assessment.AssessmentResult" out-map="resultOut">
                 <field-map field-name="assessmentId" from="assessmentId" />
@@ -608,10 +632,11 @@ Service definitions for assessment management and completion
                 <field-map field-name="respondentPhone" from="respondentPhone" />
                 <field-map field-name="respondentCompany" from="respondentCompany" />
                 <field-map field-name="answersData" from="answersData" />
-                <field-map field-name="createdDate" from="ec.user.nowTimestamp" />
+                <field-map field-name="createdDate" from="createdDate" />
             </service-call>
 
-            <set field="resultId" from="resultOut.resultId" />
+            <!-- Set output parameters from created result -->
+            <set field="assessmentResultId" from="resultOut.assessmentResultId" />
         </actions>
     </service>
 
@@ -1500,47 +1525,71 @@ Service definitions for assessment management and completion
     <!-- RESULT SERVICES -->
     <!-- ============================================ -->
 
-    <!-- getAssessmentResults: Get all results for an assessment -->
+    <!-- getAssessmentResults: Get all results (leads) for an assessment with their total scores -->
     <service verb="get" noun="AssessmentResults" authenticate="true">
-        <description>Get all results for an assessment</description>
+        <description>Get all leads (assessment respondents) for an assessment with their total scores. Returns list of leads with overall score and status, not individual question results.</description>
         <in-parameters>
-            <parameter name="assessmentId" type="String" required="true" />
-            <parameter name="userPartyId" />
+            <parameter name="assessmentId" type="String" required="true">
+                <description>Assessment ID to fetch results for</description>
+            </parameter>
+            <parameter name="start" type="Integer" default="0">
+                <description>Start index for pagination</description>
+            </parameter>
+            <parameter name="limit" type="Integer" default="50">
+                <description>Maximum number of results per page</description>
+            </parameter>
         </in-parameters>
         <out-parameters>
             <parameter name="results" type="List">
-                <description>List of assessment results</description>
-                <parameter name="resultId" />
-                <parameter name="pseudoId" />
-                <parameter name="assessmentId" />
-                <parameter name="score" type="BigDecimal" />
-                <parameter name="leadStatus" />
-                <parameter name="respondentName" />
-                <parameter name="respondentEmail" />
-                <parameter name="respondentPhone" />
-                <parameter name="respondentCompany" />
-                <parameter name="answersData" />
-                <parameter name="createdDate" type="Timestamp" />
+                <description>List of leads with their assessment results (total score and status)</description>
+                <parameter name="assessmentResultId" />
+                <parameter name="pseudoId">
+                    <description>Unique result ID within tenant</description>
+                </parameter>
+                <parameter name="respondentName">
+                    <description>Lead name</description>
+                </parameter>
+                <parameter name="respondentEmail">
+                    <description>Lead email</description>
+                </parameter>
+                <parameter name="respondentPhone">
+                    <description>Lead phone number</description>
+                </parameter>
+                <parameter name="respondentCompany">
+                    <description>Lead company</description>
+                </parameter>
+                <parameter name="score" type="BigDecimal">
+                    <description>Total assessment score (0-100)</description>
+                </parameter>
+                <parameter name="leadStatus">
+                    <description>Lead qualification status (e.g., Cold, Warm, Hot)</description>
+                </parameter>
+                <parameter name="createdDate" type="Timestamp">
+                    <description>When the assessment was submitted</description>
+                </parameter>
             </parameter>
         </out-parameters>
         <actions>
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
 
-            <!-- Get results for this assessment -->
-            <if condition="userPartyId">
-                <entity-find entity-name="growerp.assessment.AssessmentResult" list="results">
-                    <econdition field-name="assessmentId" from="assessmentId" />
-                    <econdition field-name="userPartyId" from="userPartyId" />
-                    <order-by field-name="-submittedDate" />
-                </entity-find>
-                <else>
-                    <entity-find entity-name="growerp.assessment.AssessmentResult" list="results">
-                        <econdition field-name="assessmentId" from="assessmentId" />
-                        <order-by field-name="-submittedDate" />
-                    </entity-find>
-                </else>
-            </if>
+            <!-- Get results for this assessment with pagination - only summary data, no individual
+            answers -->
+            <entity-find entity-name="growerp.assessment.AssessmentResult" list="results"
+                limit="limit" offset="start">
+                <econdition field-name="assessmentId" from="assessmentId" />
+                <econdition field-name="ownerPartyId" from="ownerPartyId" />
+                <select-field field-name="assessmentResultId" />
+                <select-field field-name="pseudoId" />
+                <select-field field-name="respondentName" />
+                <select-field field-name="respondentEmail" />
+                <select-field field-name="respondentPhone" />
+                <select-field field-name="respondentCompany" />
+                <select-field field-name="score" />
+                <select-field field-name="leadStatus" />
+                <select-field field-name="createdDate" />
+                <order-by field-name="-createdDate" />
+            </entity-find>
         </actions>
     </service>
 

@@ -22,6 +22,7 @@ import 'package:responsive_framework/responsive_framework.dart';
 import '../bloc/assessment_bloc.dart';
 import '../bloc/question_bloc.dart';
 import 'question_list.dart';
+import 'assessment_leads_screen.dart';
 
 class AssessmentDetailScreen extends StatefulWidget {
   final Assessment assessment;
@@ -114,15 +115,15 @@ class AssessmentDetailScreenState extends State<AssessmentDetailScreen> {
         title: "Assessment #${widget.assessment.pseudoId}",
         width: isPhone ? 400 : 900,
         height: isPhone ? 700 : 600,
-        child: ScaffoldMessenger(
-          child: Scaffold(
-            backgroundColor: Colors.transparent,
-            floatingActionButton: isPhone ? null : _updateButton(),
-            floatingActionButtonLocation:
-                FloatingActionButtonLocation.centerFloat,
-            body: Stack(
-              children: [
-                BlocConsumer<AssessmentBloc, AssessmentState>(
+        child: Stack(
+          children: [
+            ScaffoldMessenger(
+              child: Scaffold(
+                backgroundColor: Colors.transparent,
+                floatingActionButton: isPhone ? null : _updateButton(),
+                floatingActionButtonLocation:
+                    FloatingActionButtonLocation.centerFloat,
+                body: BlocConsumer<AssessmentBloc, AssessmentState>(
                   listener: (context, state) {
                     if (state.status == AssessmentStatus.failure) {
                       HelperFunctions.showMessage(
@@ -131,7 +132,8 @@ class AssessmentDetailScreenState extends State<AssessmentDetailScreen> {
                         Colors.red,
                       );
                     }
-                    if (state.status == AssessmentStatus.success) {
+                    if (state.status == AssessmentStatus.success &&
+                        state.selectedAssessment != null) {
                       Navigator.of(context).pop(
                         state.selectedAssessment,
                       );
@@ -144,97 +146,138 @@ class AssessmentDetailScreenState extends State<AssessmentDetailScreen> {
                     return _buildContent();
                   },
                 ),
-                Positioned(
-                  right: right,
-                  top: top,
-                  child: GestureDetector(
-                    onPanUpdate: (details) {
-                      setState(() {
-                        top += details.delta.dy;
-                        right = right! - details.delta.dx;
-                      });
-                    },
-                    child: Column(
-                      children: [
-                        FloatingActionButton(
-                          key: const Key("questions"),
-                          tooltip: 'Questions',
-                          heroTag: "questions",
-                          backgroundColor:
-                              widget.assessment.assessmentId == 'unknown'
-                                  ? Colors.grey
-                                  : null,
-                          onPressed: widget.assessment.assessmentId == 'unknown'
-                              ? () {
-                                  HelperFunctions.showMessage(
-                                    context,
-                                    'Please save the assessment first',
-                                    Colors.orange,
-                                  );
-                                }
-                              : () async => await showDialog(
-                                    barrierDismissible: true,
-                                    context: context,
-                                    builder: (BuildContext context) {
-                                      return Dialog(
-                                        child: popUp(
-                                          context: context,
-                                          title: 'Questions',
-                                          height: 600,
-                                          width: 400,
-                                          child: _buildQuestionsPlaceholder(),
-                                        ),
-                                      );
-                                    },
-                                  ),
-                          child: const Icon(Icons.quiz),
-                        ),
-                        const SizedBox(height: 10),
-                        FloatingActionButton(
-                          key: const Key("deleteAssessment"),
-                          tooltip: 'Delete Assessment',
-                          heroTag: "deleteAssessment",
-                          backgroundColor: Colors.red,
-                          onPressed: () async {
-                            final confirmed = await showDialog<bool>(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return AlertDialog(
-                                  title: const Text('Delete Assessment'),
-                                  content: const Text(
-                                    'Are you sure you want to delete this assessment?',
-                                  ),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () =>
-                                          Navigator.of(context).pop(false),
-                                      child: const Text('Cancel'),
-                                    ),
-                                    TextButton(
-                                      onPressed: () =>
-                                          Navigator.of(context).pop(true),
-                                      child: const Text('Delete'),
-                                    ),
-                                  ],
-                                );
-                              },
-                            );
-                            if (confirmed == true && mounted) {
-                              _assessmentBloc.add(
-                                AssessmentDelete(widget.assessment),
+              ),
+            ),
+            Positioned(
+              right: right,
+              top: top,
+              child: GestureDetector(
+                onPanUpdate: (details) {
+                  setState(() {
+                    top += details.delta.dy;
+                    right = right! - details.delta.dx;
+                  });
+                },
+                child: Column(
+                  children: [
+                    FloatingActionButton(
+                      key: const Key("questions"),
+                      tooltip: 'Questions',
+                      heroTag: "questions",
+                      backgroundColor:
+                          widget.assessment.assessmentId == 'unknown'
+                              ? Colors.grey
+                              : null,
+                      onPressed: widget.assessment.assessmentId == 'unknown'
+                          ? () {
+                              HelperFunctions.showMessage(
+                                context,
+                                'Please save the assessment first',
+                                Colors.orange,
                               );
                             }
-                          },
-                          child: const Icon(Icons.delete),
-                        ),
-                        const SizedBox(height: 10),
-                      ],
+                          : () async => await showDialog(
+                                barrierDismissible: true,
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return Dialog(
+                                    child: popUp(
+                                      context: context,
+                                      title: 'Questions',
+                                      height: 600,
+                                      width: 400,
+                                      child: _buildQuestionsPlaceholder(),
+                                    ),
+                                  );
+                                },
+                              ),
+                      child: const Icon(Icons.quiz),
                     ),
-                  ),
+                    const SizedBox(height: 10),
+                    FloatingActionButton(
+                      key: const Key("assessmentLeads"),
+                      tooltip: 'Assessment Leads',
+                      heroTag: "assessmentLeads",
+                      backgroundColor:
+                          widget.assessment.assessmentId == 'unknown'
+                              ? Colors.grey
+                              : null,
+                      onPressed: widget.assessment.assessmentId == 'unknown'
+                          ? () {
+                              HelperFunctions.showMessage(
+                                context,
+                                'Please save the assessment first',
+                                Colors.orange,
+                              );
+                            }
+                          : () async => await showDialog(
+                                barrierDismissible: true,
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return Dialog(
+                                    child: popUp(
+                                      context: context,
+                                      title:
+                                          "Leads - ${widget.assessment.assessmentName}",
+                                      height: 600,
+                                      width: 400,
+                                      child: BlocProvider.value(
+                                        value: _assessmentBloc,
+                                        child: AssessmentLeadsScreenContent(
+                                          assessmentId:
+                                              widget.assessment.assessmentId,
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                      child: const Icon(Icons.groups),
+                    ),
+                    const SizedBox(height: 10),
+                    FloatingActionButton(
+                      key: const Key("deleteAssessment"),
+                      tooltip: 'Delete Assessment',
+                      heroTag: "deleteAssessment",
+                      backgroundColor: Colors.red,
+                      onPressed: () async {
+                        final confirmed = await showDialog<bool>(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: const Text('Delete Assessment'),
+                              content: const Text(
+                                'Are you sure you want to delete this assessment?',
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () =>
+                                      Navigator.of(context).pop(false),
+                                  child: const Text('Cancel'),
+                                ),
+                                TextButton(
+                                  onPressed: () =>
+                                      Navigator.of(context).pop(true),
+                                  child: const Text('Delete'),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                        if (confirmed == true && mounted) {
+                          _assessmentBloc.add(
+                            AssessmentDelete(widget.assessment),
+                          );
+                        }
+                      },
+                      child: const Icon(Icons.delete),
+                    ),
+                    const SizedBox(height: 10),
+                  ],
                 ),
-              ],
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );

@@ -178,10 +178,14 @@ class AssessmentListState extends State<AssessmentList> {
             );
           } else {
             assessments = state.assessments;
-            if (assessments.isNotEmpty) {
+            if (assessments.isNotEmpty && _scrollController.hasClients) {
               Future.delayed(const Duration(milliseconds: 100), () {
                 WidgetsBinding.instance.addPostFrameCallback(
-                  (_) => _scrollController.jumpTo(currentScroll),
+                  (_) {
+                    if (_scrollController.hasClients) {
+                      _scrollController.jumpTo(currentScroll);
+                    }
+                  },
                 );
               });
             }

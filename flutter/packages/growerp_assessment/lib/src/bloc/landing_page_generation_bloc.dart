@@ -13,6 +13,7 @@
  */
 
 import 'package:equatable/equatable.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_models/growerp_models.dart';
 
@@ -50,8 +51,6 @@ class LandingPageGenerationBloc
         progressPercent: 20,
       ));
 
-      print('=== Calling generateLandingPageWithAI...');
-
       // Single API call that generates content and creates landing page
       final result = await restClient.generateLandingPageWithAI(
         businessDescription: event.businessDescription,
@@ -61,22 +60,15 @@ class LandingPageGenerationBloc
         numSections: event.numSections ?? 5,
       );
 
-      print(
-          '=== Generation complete - landingPage: ${result.landingPage?.landingPageId}');
-      print('=== Sections created: ${result.sectionsCreated}');
-
       emit(state.copyWith(
         status: GenerationStatus.success,
         message: 'Landing page created successfully!',
         progressPercent: 100,
         generatedLandingPage: result.landingPage,
       ));
-
-      print(
-          '=== SUCCESS state emitted with landingPage: ${result.landingPage?.landingPageId}');
     } catch (e, stackTrace) {
-      print('=== ERROR in generation: $e');
-      print('=== Stack trace: $stackTrace');
+      debugPrint('=== ERROR in generation: $e');
+      debugPrint('=== Stack trace: $stackTrace');
 
       // Get user-friendly error message
       final errorMessage = await getDioError(e);

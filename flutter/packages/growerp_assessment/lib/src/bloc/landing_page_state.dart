@@ -1,8 +1,9 @@
+import 'package:equatable/equatable.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 enum LandingPageStatus { initial, loading, success, failure }
 
-class LandingPageState {
+class LandingPageState extends Equatable {
   final LandingPageStatus status;
   final List<LandingPage> landingPages;
   final LandingPage? selectedLandingPage;
@@ -57,6 +58,20 @@ class LandingPageState {
   }
 
   @override
+  List<Object?> get props => [
+        status,
+        landingPages,
+        selectedLandingPage,
+        questions,
+        credibility,
+        message,
+        hasReachedMax,
+        start,
+        limit,
+        searchString,
+      ];
+
+  @override
   String toString() {
     return 'LandingPageState('
         'status: $status, '
@@ -70,35 +85,5 @@ class LandingPageState {
         'limit: $limit, '
         'searchString: $searchString'
         ')';
-  }
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    return other is LandingPageState &&
-        other.status == status &&
-        other.landingPages == landingPages &&
-        other.selectedLandingPage == selectedLandingPage &&
-        other.questions == questions &&
-        other.credibility == credibility &&
-        other.message == message &&
-        other.hasReachedMax == hasReachedMax &&
-        other.start == start &&
-        other.limit == limit &&
-        other.searchString == searchString;
-  }
-
-  @override
-  int get hashCode {
-    return status.hashCode ^
-        landingPages.hashCode ^
-        selectedLandingPage.hashCode ^
-        questions.hashCode ^
-        credibility.hashCode ^
-        message.hashCode ^
-        hasReachedMax.hashCode ^
-        start.hashCode ^
-        limit.hashCode ^
-        searchString.hashCode;
   }
 }

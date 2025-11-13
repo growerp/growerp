@@ -60,21 +60,11 @@ class _GenerateLandingPageDialogState extends State<GenerateLandingPageDialog> {
           child: BlocConsumer<LandingPageGenerationBloc,
               LandingPageGenerationState>(
             listener: (context, state) {
-              print('=== Dialog listener - status: ${state.status}');
-              print('=== Dialog listener - message: ${state.message}');
-              print(
-                  '=== Dialog listener - landingPage: ${state.generatedLandingPage?.landingPageId}');
-
               if (state.status == GenerationStatus.success) {
-                print('=== SUCCESS detected in listener');
                 if (state.generatedLandingPage != null) {
-                  print(
-                      '=== Calling onSuccess with landingPage: ${state.generatedLandingPage!.landingPageId}');
                   widget.onSuccess(state.generatedLandingPage!);
-                  print('=== Calling Navigator.pop');
                   Navigator.of(context).pop();
                 } else {
-                  print('=== ERROR: generatedLandingPage is null!');
                   HelperFunctions.showMessage(
                     context,
                     'Error: Landing page was not created properly',
@@ -82,7 +72,6 @@ class _GenerateLandingPageDialogState extends State<GenerateLandingPageDialog> {
                   );
                 }
               } else if (state.status == GenerationStatus.failure) {
-                print('=== FAILURE detected in listener');
                 // Show error message in a snackbar that appears above the dialog
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
@@ -96,8 +85,6 @@ class _GenerateLandingPageDialogState extends State<GenerateLandingPageDialog> {
               }
             },
             builder: (context, state) {
-              print('=== Dialog builder - status: ${state.status}');
-
               // Show progress view only for loading states, not for failure or success
               if (state.status == GenerationStatus.loading ||
                   state.status == GenerationStatus.researchingBusiness ||

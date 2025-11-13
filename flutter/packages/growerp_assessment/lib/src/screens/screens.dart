@@ -1,6 +1,7 @@
 export 'assessment_flow_screen.dart';
 export 'assessment_questions_screen.dart';
 export 'assessment_results_screen.dart';
+export 'assessment_leads_screen.dart';
 export 'assessment_list.dart';
 export 'assessment_detail_screen.dart';
 export 'assessment_list_table_def.dart';
