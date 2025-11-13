@@ -1424,7 +1424,6 @@ along with this software (see the LICENSE.md file). If not, see
         </description>
         <in-parameters>
             <parameter name="user" type="Map" required="true">
-                <parameter name="partyId" />
                 <parameter name="pseudoId" />
                 <parameter name="email" />
                 <parameter name="url" />

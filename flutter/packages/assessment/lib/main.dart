@@ -22,8 +22,6 @@ import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_assessment/growerp_assessment.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
-import 'src/screens/landing_page_assessment_flow_screen.dart';
-
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await GlobalConfiguration().loadFromAsset('app_settings');

@@ -15,7 +15,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_assessment/growerp_assessment.dart';
-import 'public_landing_page_screen.dart';
 
 /// Integrated landing page to assessment flow screen
 ///
@@ -54,11 +53,11 @@ class _LandingPageAssessmentFlowScreenState
 
     // Load the landing page data using pseudoId (tenant-unique identifier)
     context.read<LandingPageBloc>().add(
-      LandingPageFetch(
-        pseudoId: widget.landingPageId,
-        ownerPartyId: widget.ownerPartyId,
-      ),
-    );
+          LandingPageFetch(
+            pseudoId: widget.landingPageId,
+            ownerPartyId: widget.ownerPartyId,
+          ),
+        );
 
     // If direct assessment flow requested, skip landing page and go straight to assessment
     if (widget.startAssessmentFlow) {
@@ -175,8 +174,8 @@ class _LandingPageAssessmentFlowScreenState
                 Text(
                   'Assessment Complete!',
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
                 const SizedBox(height: 16),
                 // Display result summary if available
@@ -185,7 +184,9 @@ class _LandingPageAssessmentFlowScreenState
                     children: [
                       Text(
                         'Your Assessment Results',
-                        style: Theme.of(context).textTheme.headlineSmall
+                        style: Theme.of(context)
+                            .textTheme
+                            .headlineSmall
                             ?.copyWith(fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 16),
@@ -206,7 +207,7 @@ class _LandingPageAssessmentFlowScreenState
                                         CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        'Score: ${result.score.toStringAsFixed(1)}%',
+                                        'Score: ${result.score?.toStringAsFixed(1) ?? '0'}%',
                                         style: Theme.of(context)
                                             .textTheme
                                             .bodyLarge
@@ -215,7 +216,7 @@ class _LandingPageAssessmentFlowScreenState
                                             ),
                                       ),
                                       Text(
-                                        'Status: ${result.leadStatus}',
+                                        'Status: ${result.leadStatus ?? 'Unknown'}',
                                         style: Theme.of(
                                           context,
                                         ).textTheme.bodyMedium,

@@ -730,6 +730,7 @@ abstract class RestClient {
     @Field() required String respondentEmail,
     @Field() String? respondentPhone,
     @Field() String? respondentCompany,
+    @Field() String? ownerPartyId,
   });
 
   // Assessment Question endpoints
@@ -819,12 +820,6 @@ abstract class RestClient {
     @Field() required List<ScoringThreshold> thresholds,
   });
 
-  @POST("rest/s1/growerp/100/Assessment/calculateScore")
-  Future<AssessmentScoreResponse> calculateAssessmentScore({
-    @Field() required String assessmentId,
-    @Field('answersData') required String answers,
-  });
-
   // Assessment Result endpoints
   @GET("rest/s1/growerp/100/Assessment/Results")
   Future<AssessmentResults> getAssessmentResults({
@@ -837,12 +832,6 @@ abstract class RestClient {
   Future<AssessmentResults> getAllAssessmentResults({
     @Query('start') int? start,
     @Query('limit') int? limit,
-  });
-
-  @DELETE("rest/s1/growerp/100/Assessment/Result")
-  Future<void> deleteAssessmentResult({
-    @Field() required String assessmentId,
-    @Field() required String resultId,
   });
 
   // Landing Page endpoints

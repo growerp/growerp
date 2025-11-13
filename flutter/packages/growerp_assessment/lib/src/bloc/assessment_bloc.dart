@@ -15,7 +15,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:dio/dio.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:equatable/equatable.dart';
@@ -45,7 +44,6 @@ class AssessmentBloc extends Bloc<AssessmentEvent, AssessmentState> {
     on<AssessmentUpdate>(_onAssessmentUpdate);
     on<AssessmentDelete>(_onAssessmentDelete);
     on<AssessmentSubmit>(_onAssessmentSubmit);
-    on<AssessmentCalculateScore>(_onAssessmentCalculateScore);
     on<AssessmentFetchResults>(_onAssessmentFetchResults);
     on<AssessmentFetchQuestions>(_onAssessmentFetchQuestions);
     on<AssessmentFetchQuestionOptions>(_onAssessmentFetchQuestionOptions);
@@ -232,6 +230,10 @@ class AssessmentBloc extends Bloc<AssessmentEvent, AssessmentState> {
       // Convert answers Map to JSON string
       final answersJson = jsonEncode(event.answers);
 
+      // Submit assessment - backend now handles everything:
+      // - Score calculation
+      // - Result creation
+      // - Lead user creation (always)
       final result = await restClient.submitAssessment(
         assessmentId: event.assessmentId,
         answers: answersJson,
@@ -239,82 +241,28 @@ class AssessmentBloc extends Bloc<AssessmentEvent, AssessmentState> {
         respondentEmail: event.respondentEmail,
         respondentPhone: event.respondentPhone,
         respondentCompany: event.respondentCompany,
+        ownerPartyId: event.ownerPartyId,
       );
 
-      // Ensure the result includes the answers data that was submitted
-      // In case the backend doesn't return it, we keep the answers locally
-      final completeResult = result.copyWith(
-        answersData: result.answersData ?? answersJson,
-      );
-
-      // Create lead user if requested
-      if (event.createLeadUser) {
-        try {
-          final nameParts = event.respondentName.trim().split(' ');
-          final firstName = nameParts.isNotEmpty ? nameParts[0] : '';
-          final lastName =
-              nameParts.length > 1 ? nameParts.sublist(1).join(' ') : '';
-
-          final leadUser = User(
-            firstName: firstName,
-            lastName: lastName,
-            email: event.respondentEmail,
-            telephoneNr: event.respondentPhone,
-            role: Role.lead,
-            userGroup: UserGroup.other,
-          );
-
-          await restClient.createUser(user: leadUser);
-        } catch (e) {
-          // Log lead creation error but don't fail the assessment submission
-          debugPrint('Error creating lead user: $e');
-        }
-      }
+      // Backend now returns enriched answersData, no need for local fallback
 
       emit(state.copyWith(
         status: AssessmentStatus.success,
-        results: [completeResult, ...state.results],
+        results: [result, ...state.results],
         scoreResult: AssessmentScoreResponse(
-          score: completeResult.score,
-          leadStatus: completeResult.leadStatus,
+          score: result.score ?? 0,
+          leadStatus: result.leadStatus ?? 'Unknown',
           details: {
-            'resultId': completeResult.assessmentResultId,
-            'pseudoId': completeResult.pseudoId,
-            'respondentName': completeResult.respondentName,
-            'respondentEmail': completeResult.respondentEmail,
-            'respondentPhone': completeResult.respondentPhone,
-            'respondentCompany': completeResult.respondentCompany,
-            'answersData': completeResult.answersData,
-            'createdDate': completeResult.createdDate,
+            'resultId': result.assessmentResultId,
+            'pseudoId': result.pseudoId,
+            'respondentName': result.respondentName,
+            'respondentEmail': result.respondentEmail,
+            'respondentPhone': result.respondentPhone,
+            'respondentCompany': result.respondentCompany,
+            'answersData': result.answersData,
+            'createdDate': result.createdDate,
           },
         ),
-      ));
-    } on DioException catch (e) {
-      emit(state.copyWith(
-        status: AssessmentStatus.failure,
-        message: await getDioError(e),
-      ));
-    }
-  }
-
-  Future<void> _onAssessmentCalculateScore(
-    AssessmentCalculateScore event,
-    Emitter<AssessmentState> emit,
-  ) async {
-    try {
-      emit(state.copyWith(status: AssessmentStatus.loading));
-
-      // Convert answers Map to JSON string
-      final answersJson = jsonEncode(event.answers);
-
-      final scoreResult = await restClient.calculateAssessmentScore(
-        assessmentId: event.assessmentId,
-        answers: answersJson,
-      );
-
-      emit(state.copyWith(
-        status: AssessmentStatus.success,
-        scoreResult: scoreResult,
       ));
     } on DioException catch (e) {
       emit(state.copyWith(
