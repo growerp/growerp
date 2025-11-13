@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_models/growerp_models.dart';
+import 'dart:convert';
 import '../bloc/assessment_bloc.dart';
 
 /// Step 3: Assessment Results Screen
@@ -23,7 +24,7 @@ class AssessmentResultsScreen extends StatefulWidget {
 }
 
 class _AssessmentResultsScreenState extends State<AssessmentResultsScreen> {
-  AssessmentScoreResponse? _result;
+  AssessmentResult? _result;
   bool _isLoading = true;
 
   @override
@@ -46,9 +47,10 @@ class _AssessmentResultsScreenState extends State<AssessmentResultsScreen> {
     return BlocListener<AssessmentBloc, AssessmentState>(
       listener: (context, state) {
         if (state.status == AssessmentStatus.success &&
-            state.scoreResult != null) {
+            state.results.isNotEmpty) {
+          // Get the most recent result (first in the list)
           setState(() {
-            _result = state.scoreResult!;
+            _result = state.results.first;
             _isLoading = false;
           });
         } else if (state.status == AssessmentStatus.failure) {
@@ -116,6 +118,12 @@ class _AssessmentResultsScreenState extends State<AssessmentResultsScreen> {
             // Summary
             _buildSummaryCard(context, result),
             SizedBox(height: isMobile ? 24 : 32),
+
+            // Answers (if available)
+            if (result.answersData != null) ...[
+              _buildAnswersCard(context, result),
+              SizedBox(height: isMobile ? 24 : 32),
+            ],
 
             // Actions
             _buildActionButtons(context),
@@ -193,7 +201,7 @@ class _AssessmentResultsScreenState extends State<AssessmentResultsScreen> {
     );
   }
 
-  Widget _buildScoreCard(BuildContext context, AssessmentScoreResponse result) {
+  Widget _buildScoreCard(BuildContext context, AssessmentResult result) {
     final score = result.score;
     final scoreColor = _getScoreColor(score);
 
@@ -205,7 +213,10 @@ class _AssessmentResultsScreenState extends State<AssessmentResultsScreen> {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
           gradient: LinearGradient(
-            colors: [scoreColor.withAlpha((0.2 * 255).round()), scoreColor.withAlpha((0.05 * 255).round())],
+            colors: [
+              scoreColor.withAlpha((0.2 * 255).round()),
+              scoreColor.withAlpha((0.05 * 255).round())
+            ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -242,9 +253,8 @@ class _AssessmentResultsScreenState extends State<AssessmentResultsScreen> {
     );
   }
 
-  Widget _buildStatusCard(
-      BuildContext context, AssessmentScoreResponse result) {
-    final status = result.leadStatus ?? 'Unknown';
+  Widget _buildStatusCard(BuildContext context, AssessmentResult result) {
+    final status = result.leadStatus;
     final statusColor = _getStatusColor(status);
 
     return Card(
@@ -296,8 +306,7 @@ class _AssessmentResultsScreenState extends State<AssessmentResultsScreen> {
     );
   }
 
-  Widget _buildSummaryCard(
-      BuildContext context, AssessmentScoreResponse result) {
+  Widget _buildSummaryCard(BuildContext context, AssessmentResult result) {
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -311,18 +320,86 @@ class _AssessmentResultsScreenState extends State<AssessmentResultsScreen> {
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 16),
-            _buildSummaryRow('Respondent', widget.respondentName),
+            _buildSummaryRow('Respondent', result.respondentName),
             const SizedBox(height: 12),
+            _buildSummaryRow('Email', result.respondentEmail),
+            const SizedBox(height: 12),
+            if (result.respondentPhone != null) ...[
+              _buildSummaryRow('Phone', result.respondentPhone!),
+              const SizedBox(height: 12),
+            ],
+            if (result.respondentCompany != null) ...[
+              _buildSummaryRow('Company', result.respondentCompany!),
+              const SizedBox(height: 12),
+            ],
             _buildSummaryRow(
               'Completed',
-              _formatDateTime(DateTime.now()),
+              _formatDateTime(result.createdDate),
             ),
             const SizedBox(height: 12),
-            _buildSummaryRow('Assessment ID', widget.assessmentId),
+            _buildSummaryRow('Result ID', result.pseudoId),
           ],
         ),
       ),
     );
+  }
+
+  Widget _buildAnswersCard(BuildContext context, AssessmentResult result) {
+    try {
+      final answersData = result.answersData;
+      if (answersData == null) return const SizedBox.shrink();
+
+      final Map<String, dynamic> answers = jsonDecode(answersData);
+
+      return Card(
+        elevation: 2,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Your Answers',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              const SizedBox(height: 16),
+              ...answers.entries.map((entry) {
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          entry.key,
+                          style:
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    color: Colors.grey[600],
+                                  ),
+                        ),
+                      ),
+                      Expanded(
+                        child: Text(
+                          entry.value.toString(),
+                          textAlign: TextAlign.right,
+                          style:
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }),
+            ],
+          ),
+        ),
+      );
+    } catch (e) {
+      return const SizedBox.shrink();
+    }
   }
 
   Widget _buildSummaryRow(String label, String value) {
@@ -380,10 +457,13 @@ class _AssessmentResultsScreenState extends State<AssessmentResultsScreen> {
   Color _getStatusColor(String status) {
     switch (status.toUpperCase()) {
       case 'QUALIFIED':
+      case 'HOT':
         return Colors.green;
       case 'INTERESTED':
+      case 'WARM':
         return Colors.orange;
       case 'NOT_QUALIFIED':
+      case 'COLD':
         return Colors.red;
       default:
         return Colors.grey;
@@ -393,10 +473,13 @@ class _AssessmentResultsScreenState extends State<AssessmentResultsScreen> {
   IconData _getStatusIcon(String status) {
     switch (status.toUpperCase()) {
       case 'QUALIFIED':
+      case 'HOT':
         return Icons.thumb_up;
       case 'INTERESTED':
+      case 'WARM':
         return Icons.info;
       case 'NOT_QUALIFIED':
+      case 'COLD':
         return Icons.thumb_down;
       default:
         return Icons.help;

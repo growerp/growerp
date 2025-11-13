@@ -15,6 +15,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:equatable/equatable.dart';
@@ -49,21 +50,19 @@ class AssessmentBloc extends Bloc<AssessmentEvent, AssessmentState> {
     on<AssessmentFetchQuestions>(_onAssessmentFetchQuestions);
     on<AssessmentFetchQuestionOptions>(_onAssessmentFetchQuestionOptions);
     on<AssessmentFetchThresholds>(_onAssessmentFetchThresholds);
+    on<AssessmentFetchLeads>(_onAssessmentFetchLeads);
   }
 
   Future<void> _onAssessmentFetch(
     AssessmentFetch event,
     Emitter<AssessmentState> emit,
   ) async {
-    List<Assessment> current = [];
     if (state.status == AssessmentStatus.initial ||
         event.refresh ||
         event.searchString.isNotEmpty) {
       start = 0;
-      current = [];
     } else {
       start = state.assessments.length;
-      current = List.of(state.assessments);
     }
 
     try {
@@ -78,7 +77,9 @@ class AssessmentBloc extends Bloc<AssessmentEvent, AssessmentState> {
 
       emit(state.copyWith(
         status: AssessmentStatus.success,
-        assessments: response.assessments,
+        assessments: start == 0
+            ? response.assessments
+            : (List.of(state.assessments)..addAll(response.assessments)),
         hasReachedMax: response.assessments.length < event.limit,
         searchString: event.searchString,
       ));
@@ -240,9 +241,53 @@ class AssessmentBloc extends Bloc<AssessmentEvent, AssessmentState> {
         respondentCompany: event.respondentCompany,
       );
 
+      // Ensure the result includes the answers data that was submitted
+      // In case the backend doesn't return it, we keep the answers locally
+      final completeResult = result.copyWith(
+        answersData: result.answersData ?? answersJson,
+      );
+
+      // Create lead user if requested
+      if (event.createLeadUser) {
+        try {
+          final nameParts = event.respondentName.trim().split(' ');
+          final firstName = nameParts.isNotEmpty ? nameParts[0] : '';
+          final lastName =
+              nameParts.length > 1 ? nameParts.sublist(1).join(' ') : '';
+
+          final leadUser = User(
+            firstName: firstName,
+            lastName: lastName,
+            email: event.respondentEmail,
+            telephoneNr: event.respondentPhone,
+            role: Role.lead,
+            userGroup: UserGroup.other,
+          );
+
+          await restClient.createUser(user: leadUser);
+        } catch (e) {
+          // Log lead creation error but don't fail the assessment submission
+          debugPrint('Error creating lead user: $e');
+        }
+      }
+
       emit(state.copyWith(
         status: AssessmentStatus.success,
-        results: [result, ...state.results],
+        results: [completeResult, ...state.results],
+        scoreResult: AssessmentScoreResponse(
+          score: completeResult.score,
+          leadStatus: completeResult.leadStatus,
+          details: {
+            'resultId': completeResult.assessmentResultId,
+            'pseudoId': completeResult.pseudoId,
+            'respondentName': completeResult.respondentName,
+            'respondentEmail': completeResult.respondentEmail,
+            'respondentPhone': completeResult.respondentPhone,
+            'respondentCompany': completeResult.respondentCompany,
+            'answersData': completeResult.answersData,
+            'createdDate': completeResult.createdDate,
+          },
+        ),
       ));
     } on DioException catch (e) {
       emit(state.copyWith(
@@ -387,6 +432,38 @@ class AssessmentBloc extends Bloc<AssessmentEvent, AssessmentState> {
       emit(state.copyWith(
         status: AssessmentStatus.success,
         thresholds: thresholdsResponse.thresholds,
+      ));
+    } on DioException catch (e) {
+      emit(state.copyWith(
+        status: AssessmentStatus.failure,
+        message: await getDioError(e),
+      ));
+    }
+  }
+
+  Future<void> _onAssessmentFetchLeads(
+    AssessmentFetchLeads event,
+    Emitter<AssessmentState> emit,
+  ) async {
+    List<AssessmentResult> current = [];
+    if (event.refresh) {
+      current = [];
+    } else {
+      current = List.of(state.results);
+    }
+
+    try {
+      emit(state.copyWith(status: AssessmentStatus.loading));
+
+      final response = await restClient.getAssessmentResults(
+        assessmentId: event.assessmentId,
+        start: event.start,
+        limit: event.limit,
+      );
+
+      emit(state.copyWith(
+        status: AssessmentStatus.success,
+        results: current..addAll(response.results),
       ));
     } on DioException catch (e) {
       emit(state.copyWith(

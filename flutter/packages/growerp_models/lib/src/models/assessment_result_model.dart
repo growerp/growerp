@@ -81,7 +81,9 @@ class AssessmentResult {
   }
 
   factory AssessmentResult.fromJson(Map<String, dynamic> json) =>
-      _$AssessmentResultFromJson(json);
+      _$AssessmentResultFromJson(
+        json['result'] ?? json['assessmentResult'] ?? json,
+      );
   Map<String, dynamic> toJson() => _$AssessmentResultToJson(this);
 
   @override

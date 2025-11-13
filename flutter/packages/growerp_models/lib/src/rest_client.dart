@@ -826,13 +826,11 @@ abstract class RestClient {
   });
 
   // Assessment Result endpoints
-  @GET("rest/s1/growerp/100/Assessment/Result")
+  @GET("rest/s1/growerp/100/Assessment/Results")
   Future<AssessmentResults> getAssessmentResults({
     @Query('assessmentId') String? assessmentId,
-    @Query('resultId') String? resultId,
     @Query('start') int? start,
     @Query('limit') int? limit,
-    @Query('statusId') String? statusId,
   });
 
   @GET("rest/s1/growerp/100/AllAssessment/Results")

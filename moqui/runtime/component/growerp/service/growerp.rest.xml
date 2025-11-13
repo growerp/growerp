@@ -391,10 +391,12 @@ along with this software (see the LICENSE.md file). If not, see
                     <service name="growerp.100.AssessmentServices100.calculate#Score" />
                 </method>
             </resource>
-            <resource name="Result" require-authentication="false">
-                <method type="get" require-authentication="false">
-                    <service name="growerp.100.AssessmentServices100.get#Result" />
+            <resource name="Results">
+                <method type="get">
+                    <service name="growerp.100.AssessmentServices100.get#AssessmentResults" />
                 </method>
+            </resource>
+            <resource name="Result" require-authentication="false">
                 <method type="post" require-authentication="false">
                     <service name="growerp.100.AssessmentServices100.create#Result" />
                 </method>

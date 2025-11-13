@@ -88,6 +88,7 @@ class AssessmentSubmit extends AssessmentEvent {
     required this.respondentEmail,
     this.respondentPhone,
     this.respondentCompany,
+    this.createLeadUser = true,
   });
 
   final String assessmentId;
@@ -96,6 +97,7 @@ class AssessmentSubmit extends AssessmentEvent {
   final String respondentEmail;
   final String? respondentPhone;
   final String? respondentCompany;
+  final bool createLeadUser;
 
   @override
   List<Object?> get props => [
@@ -105,6 +107,7 @@ class AssessmentSubmit extends AssessmentEvent {
         respondentEmail,
         respondentPhone,
         respondentCompany,
+        createLeadUser,
       ];
 }
 
@@ -171,4 +174,21 @@ final class AssessmentFetchThresholds extends AssessmentEvent {
 
   @override
   List<Object> get props => [assessmentId];
+}
+
+final class AssessmentFetchLeads extends AssessmentEvent {
+  const AssessmentFetchLeads({
+    required this.assessmentId,
+    this.start = 0,
+    this.limit = 50,
+    this.refresh = false,
+  });
+
+  final String assessmentId;
+  final int start;
+  final int limit;
+  final bool refresh;
+
+  @override
+  List<Object> get props => [assessmentId, start, limit, refresh];
 }
