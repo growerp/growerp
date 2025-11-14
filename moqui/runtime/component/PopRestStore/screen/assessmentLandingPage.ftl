@@ -272,7 +272,7 @@
             
             <#if ctaActionType?? && ctaActionType == 'assessment' && ctaAssessmentId??>
                 <!-- Assessment CTA - launches Flutter app -->
-                <button id="cta-button" class="cta-button" onclick="launchAssessment('${ctaAssessmentId}')">
+                <button id="cta-button" class="cta-button" onclick="launchAssessment('${ctaAssessmentId}')" disabled>
                     <span id="button-loader" style="display: none; width: 16px; height: 16px; border: 2px solid #667eea; border-top-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite; display: inline-block; margin-right: 8px; vertical-align: middle;"></span>
                     Start Free Assessment →
                 </button>
@@ -313,7 +313,7 @@
     <section class="section" style="padding: 60px 20px;">
         <div class="section-content" style="text-align: center;">
             <#if ctaActionType?? && ctaActionType == 'assessment' && ctaAssessmentId??>
-                <button id="cta-button-bottom" class="cta-button" onclick="launchAssessment('${ctaAssessmentId}')" style="font-size: 16px; padding: 16px 40px;">
+                <button id="cta-button-bottom" class="cta-button" onclick="launchAssessment('${ctaAssessmentId}')" style="font-size: 16px; padding: 16px 40px;" disabled>
                     <span id="button-loader-bottom" style="display: none; width: 14px; height: 14px; border: 2px solid #667eea; border-top-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite; display: inline-block; margin-right: 8px; vertical-align: middle;"></span>
                     Start Free Assessment →
                 </button>
@@ -445,6 +445,7 @@
                                 assessmentLoaded = true;
                                 assessmentLoading = false;
                                 hideSpinner();
+                                enableAssessmentButtons();
                                 return;
                             }
                         }
@@ -459,6 +460,7 @@
                         assessmentLoaded = true;
                         assessmentLoading = false;
                         hideSpinner();
+                        enableAssessmentButtons();
                     }
                 }, 200); // Check every 200ms
             };
@@ -472,6 +474,18 @@
             };
 
             iframe.src = url;
+        }
+
+        // Enable assessment buttons
+        function enableAssessmentButtons() {
+            const button = document.getElementById('cta-button');
+            const buttonBottom = document.getElementById('cta-button-bottom');
+            if (button) {
+                button.disabled = false;
+            }
+            if (buttonBottom) {
+                buttonBottom.disabled = false;
+            }
         }
 
         // Helper function to hide spinner
