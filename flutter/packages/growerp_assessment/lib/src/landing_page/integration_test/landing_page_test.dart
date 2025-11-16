@@ -85,7 +85,7 @@ class LandingPageTest {
     for (LandingPage page in test.landingPages) {
       if (page.landingPageId == null || page.landingPageId == 'unknown') {
         // Add new landing page
-        await CommonTest.tapByKey(tester, 'addNew');
+        await CommonTest.tapByKey(tester, 'addNewLandingPage');
       } else {
         // Update existing landing page
         await CommonTest.doNewSearch(tester, searchString: page.pseudoId!);
@@ -95,7 +95,14 @@ class LandingPageTest {
         );
       }
 
-      expect(find.byKey(const Key('LandingPageDialog')), findsOneWidget);
+      // Wait for the detail screen dialog to appear
+      await tester.pumpAndSettle();
+      
+      // Check for the detail screen (key varies based on pseudoId)
+      final expectedKey = page.landingPageId == null || page.landingPageId == 'unknown'
+          ? 'LandingPageDetailnull'
+          : 'LandingPageDetail${page.pseudoId}';
+      expect(find.byKey(Key(expectedKey)), findsOneWidget);
 
       // Enter basic info
       await CommonTest.enterText(tester, 'title', page.title);

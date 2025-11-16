@@ -48,6 +48,7 @@ This directory contains comprehensive documentation for extending and developing
 
 - **[Data Model Basic Guide](./basic_explanation_of_the_frontend_REST_Backend_data_models.md)** - Frontend/Backend data models
 - **[Flutter-Moqui REST Backend Interface](./Flutter_Moqui_REST_Backend_Interface.md)** - Complete REST API communication guide with code examples
+- **[Integration Test Guide](./Integration_Test_Guide.md)** ⭐ **NEW!** - Comprehensive guide to GrowERP's integration testing framework
 - **[Invoice Scan Documentation](./Invoice_Scan_Documentation.md)** - AI-powered invoice processing ⭐ **NEW!**
 - **[Timezone Management Guide](./GrowERP_Timezone_Management_Guide.md)** - Handle timezone differences
 - **[Timezone Quick Reference](./GrowERP_Timezone_Quick_Reference.md)** - Quick timezone guide
@@ -169,10 +170,11 @@ BlocListener<UserBloc, UserState>(
 2. [GrowERP Assessment & Landing Page Architecture](./GROWERP_ASSESSMENT_AND_LANDING_PAGE_ARCHITECTURE.md) (45 min)
 3. [Building Blocks Development Guide](./Building_Blocks_Development_Guide.md)
 4. [GrowERP Design Patterns](./GrowERP_Design_Patterns.md)
-5. [B2C and B2B Party Model Documentation](./B2C_B2B_Party_Model_Documentation.md) ⭐ **NEW!**
-6. [Invoice Scan Documentation](./Invoice_Scan_Documentation.md) ⭐ **NEW!**
-7. [BLoC Message Translation Quick Reference](./QUICK_REFERENCE_BLOC_MESSAGES.md) ⭐ **New Pattern!**
-8. [Timezone Management Guide](./GrowERP_Timezone_Management_Guide.md)
+5. [Integration Test Guide](./Integration_Test_Guide.md) ⭐ **NEW!**
+6. [B2C and B2B Party Model Documentation](./B2C_B2B_Party_Model_Documentation.md) ⭐ **NEW!**
+7. [Invoice Scan Documentation](./Invoice_Scan_Documentation.md) ⭐ **NEW!**
+8. [BLoC Message Translation Quick Reference](./QUICK_REFERENCE_BLOC_MESSAGES.md) ⭐ **New Pattern!**
+9. [Timezone Management Guide](./GrowERP_Timezone_Management_Guide.md)
 
 ### ⚙️ Backend Developers
 **Time:** 80 minutes
@@ -198,6 +200,7 @@ BlocListener<UserBloc, UserState>(
 **Time:** 60 minutes
 1. [Assessment Landing Page Explanation](./Assessment_Landing_Page_Explanation.md) Testing Checklist (30 min) ⭐ **Phase 12**
 2. [GrowERP Assessment & Landing Page Architecture](./GROWERP_ASSESSMENT_AND_LANDING_PAGE_ARCHITECTURE.md) (30 min)
+3. [Integration Test Guide](./Integration_Test_Guide.md) ⭐ **NEW!** - Complete testing framework guide
 
 ### 🤖 AI/ML Developers
 1. [GrowERP AI Development Instructions](./GrowERP_AI_Instructions.md)
@@ -252,6 +255,7 @@ BlocListener<UserBloc, UserState>(
 
 | Need to find | Document | Section |
 |---|---|---|
+| **Integration test framework** | [Integration Test Guide](./Integration_Test_Guide.md) | Complete guide |
 | **Landing page implementation (Phase 12)** | [Assessment Landing Page Explanation](./Assessment_Landing_Page_Explanation.md) | Complete guide |
 | **FTL + Flutter integration** | [Assessment Landing Page Explanation](./Assessment_Landing_Page_Explanation.md) | Architecture, Runtime Behavior |
 | **Assessment app deployment** | [Assessment Landing Page Explanation](./Assessment_Landing_Page_Explanation.md) | Build & Deployment |

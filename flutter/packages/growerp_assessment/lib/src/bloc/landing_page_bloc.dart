@@ -95,6 +95,7 @@ class LandingPageBloc extends Bloc<LandingPageEvent, LandingPageState> {
 
       final newLandingPage = await restClient.createLandingPage(
         title: event.landingPage.title,
+        pseudoId: event.landingPage.pseudoId,
         headline: event.landingPage.headline,
         subheading: event.landingPage.subheading,
         hookType: event.landingPage.hookType,

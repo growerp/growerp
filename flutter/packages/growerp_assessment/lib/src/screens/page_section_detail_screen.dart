@@ -136,6 +136,15 @@ class PageSectionDetailScreenState extends State<PageSectionDetailScreen> {
                           border: OutlineInputBorder(),
                           hintText: 'https://example.com/image.jpg',
                         ),
+                        validator: (value) {
+                          if (value != null && value.isNotEmpty) {
+                            if (!value.startsWith('http://') &&
+                                !value.startsWith('https://')) {
+                              return 'Image URL must start with http:// or https://';
+                            }
+                          }
+                          return null;
+                        },
                       ),
                       const SizedBox(height: 16),
                       TextFormField(

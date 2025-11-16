@@ -16,8 +16,9 @@ import 'package:assessment_example/main.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:integration_test/integration_test.dart';
-import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_assessment/growerp_assessment.dart';
+import 'package:growerp_models/growerp_models.dart';
+import 'package:growerp_assessment/src/test_data.dart' as assessment_data;
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -25,10 +26,6 @@ void main() {
   setUp(() async {
     await GlobalConfiguration().loadFromAsset("app_settings");
   });
-
-  Future<void> selectAssessments(WidgetTester tester) async {
-    await AssessmentTest.selectAssessments(tester);
-  }
 
   testWidgets('''GrowERP assessment test''', (tester) async {
     RestClient restClient = RestClient(await buildDioClient());
@@ -38,32 +35,26 @@ void main() {
       testMenuOptions,
       const [],
       restClient: restClient,
-      blocProviders: getExampleBlocProviders(restClient, 'AppAdmin'),
-      title: 'GrowERP Assessment Test',
+      blocProviders: getExampleBlocProviders(
+        restClient,
+        GlobalConfiguration().get("classificationId"),
+      ),
+      title: 'GrowERP assessment test',
       clear: true,
     );
-
     await CommonTest.createCompanyAndAdmin(tester);
-    await selectAssessments(tester);
-
-    // Test add assessments
-    await AssessmentTest.addAssessments(tester, assessments.sublist(0, 3));
-
-    // Test check assessments
+    await AssessmentTest.selectAssessments(tester);
+    await AssessmentTest.addAssessments(
+      tester,
+      assessment_data.assessments.sublist(0, 3),
+    );
     await AssessmentTest.checkAssessments(tester);
-
-    // Test update assessments
     await AssessmentTest.updateAssessments(
       tester,
-      updatedAssessments.sublist(0, 3),
+      assessment_data.updatedAssessments.sublist(0, 3),
     );
-
-    // Test check updated assessments
     await AssessmentTest.checkAssessments(tester);
-
-    // Test delete assessments
     await AssessmentTest.deleteAssessments(tester);
-
     await CommonTest.logout(tester);
   });
 }

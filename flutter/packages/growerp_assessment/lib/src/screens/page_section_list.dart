@@ -24,10 +24,12 @@ import 'page_section_detail_screen.dart';
 
 class PageSectionList extends StatefulWidget {
   final String landingPageId;
+  final String? landingPagePseudoId;
 
   const PageSectionList({
     super.key,
     required this.landingPageId,
+    this.landingPagePseudoId,
   });
 
   @override
@@ -182,7 +184,6 @@ class PageSectionListState extends State<PageSectionList> {
                           }
                         },
                       ),
-                      const Icon(Icons.drag_handle),
                     ],
                   ),
                   onTap: () async {

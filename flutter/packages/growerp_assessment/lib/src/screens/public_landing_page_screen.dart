@@ -34,6 +34,16 @@ class PublicLandingPageScreen extends StatefulWidget {
 }
 
 class _PublicLandingPageScreenState extends State<PublicLandingPageScreen> {
+  final _firstNameController = TextEditingController();
+  final _emailController = TextEditingController();
+
+  @override
+  void dispose() {
+    _firstNameController.dispose();
+    _emailController.dispose();
+    super.dispose();
+  }
+
   @override
   void didUpdateWidget(covariant PublicLandingPageScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -41,11 +51,11 @@ class _PublicLandingPageScreenState extends State<PublicLandingPageScreen> {
     if (widget.landingPageId != oldWidget.landingPageId ||
         widget.ownerPartyId != oldWidget.ownerPartyId) {
       context.read<LandingPageBloc>().add(
-        LandingPageFetch(
-          pseudoId: widget.landingPageId,
-          ownerPartyId: widget.ownerPartyId,
-        ),
-      );
+            LandingPageFetch(
+              pseudoId: widget.landingPageId,
+              ownerPartyId: widget.ownerPartyId,
+            ),
+          );
     }
   }
 
@@ -84,11 +94,11 @@ class _PublicLandingPageScreenState extends State<PublicLandingPageScreen> {
                   ElevatedButton(
                     onPressed: () {
                       context.read<LandingPageBloc>().add(
-                        LandingPageFetch(
-                          pseudoId: widget.landingPageId,
-                          ownerPartyId: widget.ownerPartyId,
-                        ),
-                      );
+                            LandingPageFetch(
+                              pseudoId: widget.landingPageId,
+                              ownerPartyId: widget.ownerPartyId,
+                            ),
+                          );
                     },
                     child: const Text('Retry'),
                   ),
@@ -305,9 +315,9 @@ class _PublicLandingPageScreenState extends State<PublicLandingPageScreen> {
                       Text(
                         credibility.backgroundText!,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          fontStyle: FontStyle.italic,
-                          color: Colors.grey[600],
-                        ),
+                              fontStyle: FontStyle.italic,
+                              color: Colors.grey[600],
+                            ),
                       ),
                     ],
                   ],
@@ -346,9 +356,9 @@ class _PublicLandingPageScreenState extends State<PublicLandingPageScreen> {
                       Text(
                         stat.statistic ?? '',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: Theme.of(context).primaryColor,
-                        ),
+                              fontWeight: FontWeight.w600,
+                              color: Theme.of(context).primaryColor,
+                            ),
                         textAlign: TextAlign.center,
                       ),
                     ],
@@ -382,9 +392,9 @@ class _PublicLandingPageScreenState extends State<PublicLandingPageScreen> {
           Text(
             'Get personalized recommendations in just 3 minutes - completely free!',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-            ),
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 24),

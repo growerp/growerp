@@ -12,33 +12,49 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import 'package:flutter/material.dart';
+import 'package:assessment_example/main.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:growerp_assessment/growerp_assessment.dart';
+import 'package:growerp_models/growerp_models.dart';
+import 'package:growerp_assessment/src/test_data.dart' as assessment_data;
 
-Future<void> main() async {
+void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   setUp(() async {
     await GlobalConfiguration().loadFromAsset("app_settings");
   });
 
-  testWidgets('''GrowERP assessment landing page list test''', (tester) async {
-    // Create a minimal app for testing
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          appBar: AppBar(title: const Text('Assessment Test')),
-          body: const LandingPageList(),
-        ),
+  testWidgets('''GrowERP landing page test''', (tester) async {
+    RestClient restClient = RestClient(await buildDioClient());
+    await CommonTest.startTestApp(
+      tester,
+      generateRoute,
+      testMenuOptions,
+      const [],
+      restClient: restClient,
+      blocProviders: getExampleBlocProviders(
+        restClient,
+        GlobalConfiguration().get("classificationId"),
       ),
+      title: 'GrowERP landing page test',
+      clear: true,
     );
-
-    await tester.pumpAndSettle();
-
-    // Verify landing page list widgets exist
-    expect(find.byType(LandingPageList), findsOneWidget);
-  }, skip: false);
+    await CommonTest.createCompanyAndAdmin(tester);
+    await LandingPageTest.selectLandingPages(tester);
+    await LandingPageTest.addLandingPages(
+      tester,
+      assessment_data.landingPages.sublist(0, 3),
+    );
+    await LandingPageTest.checkLandingPages(tester);
+    await LandingPageTest.updateLandingPages(
+      tester,
+      assessment_data.updatedLandingPages.sublist(0, 3),
+    );
+    await LandingPageTest.checkLandingPages(tester);
+    await LandingPageTest.deleteLandingPages(tester);
+    await CommonTest.logout(tester);
+  });
 }

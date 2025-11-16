@@ -223,6 +223,9 @@ Service definitions for landing page, sections, credibility, and CTA management
   <service verb="create" noun="LandingPage" authenticate="true">
     <description>Create new landing page within a tenant</description>
     <in-parameters>
+      <parameter name="pseudoId">
+        <description>Created landing page tenant-unique ID (user-facing)</description>
+      </parameter>
       <parameter name="title" type="String" required="true">
         <description>Landing page title</description>
       </parameter>
@@ -260,17 +263,20 @@ Service definitions for landing page, sections, credibility, and CTA management
       </parameter>
     </out-parameters>
     <actions>
+      <log message="=====pseudoId; $pseudoId" />
       <!-- Get owner party ID from authenticated user context -->
       <service-call out-map="context"
         name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
 
-      <!-- Generate unique pseudoId within the tenant -->
-      <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
-        in-map="[ownerPartyId: ownerPartyId, seqName: 'landingPage']" out-map="context" />
-      <set field="pseudoId" from="seqNum" />
+      <if condition="!pseudoId">
+        <!-- Generate unique pseudoId within the tenant only if not provided -->
+        <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+          in-map="[ownerPartyId: ownerPartyId, seqName: 'landingPage']" out-map="context" />
+        <set field="pseudoId" from="seqNum" />
+      </if>
 
       <!-- Create landing page record -->
-      <service-call name="create#LandingPage"
+      <service-call name="create#growerp.landing.LandingPage" out-map="context"
         in-map="[
         pseudoId: pseudoId,
         ownerPartyId: ownerPartyId,
@@ -298,6 +304,9 @@ Service definitions for landing page, sections, credibility, and CTA management
     <in-parameters>
       <parameter name="landingPageId" type="String" required="true">
         <description>Landing page ID to update</description>
+      </parameter>
+      <parameter name="pseudoId">
+        <description>Created landing page tenant-unique ID (user-facing)</description>
       </parameter>
       <parameter name="title">
         <description>New landing page title</description>
@@ -347,10 +356,18 @@ Service definitions for landing page, sections, credibility, and CTA management
         <return error="true" message="Landing page not found or access denied" />
       </if>
 
+      <if condition="!pseudoId">
+        <!-- Generate unique pseudoId within the tenant only if not provided -->
+        <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+          in-map="[ownerPartyId: ownerPartyId, seqName: 'landingPage']" out-map="context" />
+        <set field="pseudoId" from="seqNum" />
+      </if>
+
       <!-- Update landing page with provided fields -->
       <service-call name="update#LandingPage"
         in-map="[
         landingPageId: landingPageId,
+        pseudoId: pseudoId,
         title: title ?: existingPage.title,
         hookType: hookType ?: existingPage.hookType,
         headline: headline ?: existingPage.headline,
@@ -398,37 +415,43 @@ Service definitions for landing page, sections, credibility, and CTA management
       <set field="deletedCount" value="0" type="Integer" />
 
       <!-- Delete related records in cascade order -->
-      <!-- 1. Delete credibility statistics -->
-      <entity-find entity-name="CredibilityStatistic" list="statsToDelete">
+      <!-- 1. First get all credibility info for this landing page -->
+      <entity-find entity-name="growerp.landing.CredibilityInfo" list="credibilityToDelete">
         <econdition field-name="landingPageId" from="landingPageId" />
       </entity-find>
-      <iterate list="statsToDelete" entry="stat">
-        <service-call name="delete#CredibilityStatistic"
-          in-map="[credibilityStatisticId: stat.credibilityStatisticId]" />
-        <set field="deletedCount" from="deletedCount + 1" />
+
+      <!-- 2. Delete credibility statistics for each credibility info -->
+      <iterate list="credibilityToDelete" entry="credibility">
+        <entity-find entity-name="growerp.landing.CredibilityStatistic" list="statsToDelete">
+          <econdition field-name="credibilityInfoId" from="credibility.credibilityInfoId" />
+        </entity-find>
+        <iterate list="statsToDelete" entry="stat">
+          <service-call name="delete#growerp.landing.CredibilityStatistic"
+            in-map="[credibilityStatisticId: stat.credibilityStatisticId]" />
+          <set field="deletedCount" from="deletedCount + 1" />
+        </iterate>
       </iterate>
 
-      <!-- 2. Delete credibility info -->
-      <entity-find entity-name="CredibilityInfo" list="credibilityToDelete">
-        <econdition field-name="landingPageId" from="landingPageId" />
-      </entity-find>
+      <!-- 3. Delete credibility info -->
       <iterate list="credibilityToDelete" entry="credibility">
-        <service-call name="delete#CredibilityInfo"
+        <service-call name="delete#growerp.landing.CredibilityInfo"
           in-map="[credibilityInfoId: credibility.credibilityInfoId]" />
         <set field="deletedCount" from="deletedCount + 1" />
       </iterate>
 
-      <!-- 3. Delete page sections -->
-      <entity-find entity-name="PageSection" list="sectionsToDelete">
+      <!-- 4. Delete page sections -->
+      <entity-find entity-name="growerp.landing.PageSection" list="sectionsToDelete">
         <econdition field-name="landingPageId" from="landingPageId" />
       </entity-find>
       <iterate list="sectionsToDelete" entry="section">
-        <service-call name="delete#PageSection" in-map="[pageSectionId: section.pageSectionId]" />
+        <service-call name="delete#growerp.landing.PageSection"
+          in-map="[pageSectionId: section.pageSectionId]" />
         <set field="deletedCount" from="deletedCount + 1" />
       </iterate>
 
-      <!-- 4. Finally delete the landing page itself -->
-      <service-call name="delete#LandingPage" in-map="[landingPageId: landingPageId]" />
+      <!-- 5. Finally delete the landing page itself -->
+      <service-call name="delete#growerp.landing.LandingPage"
+        in-map="[landingPageId: landingPageId]" />
       <set field="deletedCount" from="deletedCount + 1" />
 
       <log level="info"
@@ -536,18 +559,28 @@ Service definitions for landing page, sections, credibility, and CTA management
 
       <!-- Auto-increment sequence if not provided -->
       <if condition="!sectionSequence">
-        <entity-find-count entity-name="PageSection" count-field="sectionCount">
+        <!-- Find the highest existing sequence number for this landing page -->
+        <entity-find entity-name="growerp.landing.PageSection" list="existingSections">
           <econdition field-name="landingPageId" from="landingPageId" />
-        </entity-find-count>
-        <set field="sectionSequence" from="sectionCount + 1" />
+          <select-field field-name="sectionSequence" />
+          <order-by field-name="-sectionSequence" />
+        </entity-find>
+        <!-- Set to max + 1, or 1 if no sections exist -->
+        <if condition="existingSections">
+          <set field="sectionSequence" from="existingSections[0].sectionSequence + 1" />
+          <else>
+            <set field="sectionSequence" value="1" type="Integer" />
+          </else>
+        </if>
       </if>
 
       <!-- Generate unique IDs -->
-      <set field="pageSectionId" from="ec.entity.sequencedIdPrimary('PageSection', null, null)" />
+      <set field="pageSectionId"
+        from="ec.entity.sequencedIdPrimary('growerp.landing.PageSection', null, null)" />
       <set field="pseudoId" from="'section_' + System.currentTimeMillis()" />
 
       <!-- Create page section record -->
-      <service-call name="create#PageSection"
+      <service-call name="create#growerp.landing.PageSection" out-map="context"
         in-map="[
         pageSectionId: pageSectionId,
         pseudoId: pseudoId,
@@ -584,8 +617,29 @@ Service definitions for landing page, sections, credibility, and CTA management
       </parameter>
     </in-parameters>
     <out-parameters>
+      <parameter name="landingPageSectionId">
+        <description>Updated section ID (alias for pageSectionId)</description>
+      </parameter>
       <parameter name="pageSectionId">
         <description>Updated section ID</description>
+      </parameter>
+      <parameter name="pseudoId">
+        <description>Section pseudoId</description>
+      </parameter>
+      <parameter name="landingPageId">
+        <description>Landing page ID</description>
+      </parameter>
+      <parameter name="sectionTitle">
+        <description>Section title</description>
+      </parameter>
+      <parameter name="sectionDescription">
+        <description>Section description</description>
+      </parameter>
+      <parameter name="sectionImageUrl">
+        <description>Section image URL</description>
+      </parameter>
+      <parameter name="sectionSequence" type="Integer">
+        <description>Section sequence</description>
       </parameter>
     </out-parameters>
     <actions>
@@ -613,7 +667,7 @@ Service definitions for landing page, sections, credibility, and CTA management
       </if>
 
       <!-- Update section with provided fields -->
-      <service-call name="update#PageSection"
+      <service-call name="update#growerp.landing.PageSection" out-map="context"
         in-map="[
         pageSectionId: pageSectionId,
         sectionTitle: sectionTitle ?: existingSection.sectionTitle,
@@ -621,6 +675,18 @@ Service definitions for landing page, sections, credibility, and CTA management
         sectionImageUrl: sectionImageUrl,
         sectionSequence: sectionSequence ?: existingSection.sectionSequence
       ]" />
+
+      <!-- Fetch and return the updated section -->
+      <entity-find-one entity-name="growerp.landing.PageSection" value-field="updatedSection">
+        <field-map field-name="pageSectionId" from="pageSectionId" />
+      </entity-find-one>
+
+      <!-- Build response with landingPageSectionId alias for frontend compatibility -->
+      <script>
+        Map sectionMap = updatedSection.getMap()
+        sectionMap.put('landingPageSectionId', updatedSection.pageSectionId)
+        context.putAll(sectionMap)
+      </script>
 
       <log level="info" message="Updated page section: ${pageSectionId} for owner: ${ownerPartyId}" />
     </actions>
@@ -854,11 +920,11 @@ Service definitions for landing page, sections, credibility, and CTA management
 
       <!-- Generate unique IDs -->
       <set field="credibilityInfoId"
-        from="ec.entity.sequencedIdPrimary('CredibilityInfo', null, null)" />
+        from="ec.entity.sequencedIdPrimary('growerp.landing.CredibilityInfo', null, null)" />
       <set field="pseudoId" from="'cred_' + System.currentTimeMillis()" />
 
       <!-- Create credibility info record -->
-      <service-call name="create#CredibilityInfo"
+      <service-call name="create#growerp.landing.CredibilityInfo" out-map="context"
         in-map="[
         credibilityInfoId: credibilityInfoId,
         pseudoId: pseudoId,
@@ -1038,10 +1104,10 @@ Service definitions for landing page, sections, credibility, and CTA management
 
       <!-- Generate unique ID -->
       <set field="credibilityStatisticId"
-        from="ec.entity.sequencedIdPrimary('CredibilityStatistic', null, null)" />
+        from="ec.entity.sequencedIdPrimary('growerp.landing.CredibilityStatistic', null, null)" />
 
       <!-- Create statistic record -->
-      <service-call name="create#CredibilityStatistic"
+      <service-call name="create#growerp.landing.CredibilityStatistic" out-map="context"
         in-map="[
         credibilityStatisticId: credibilityStatisticId,
         credibilityInfoId: credibilityInfoId,

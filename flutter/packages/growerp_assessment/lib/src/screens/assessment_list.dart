@@ -340,6 +340,7 @@ class SearchAssessmentListState extends State<SearchAssessmentList> {
         child: Column(
           children: [
             TextField(
+              key: const Key('searchField'),
               controller: searchBoxController,
               focusNode: searchFocusNode,
               decoration: InputDecoration(

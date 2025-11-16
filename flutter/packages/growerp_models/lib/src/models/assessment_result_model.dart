@@ -1,7 +1,52 @@
+import 'dart:convert';
 import 'package:json_annotation/json_annotation.dart';
 import 'assessment_model.dart' show NullableTimestampConverter;
 
 part 'assessment_result_model.g.dart';
+
+/// Converter for answersData that can be either a List or a JSON string
+class AnswersDataConverter
+    implements JsonConverter<List<EnrichedAnswer>?, dynamic> {
+  const AnswersDataConverter();
+
+  @override
+  List<EnrichedAnswer>? fromJson(dynamic json) {
+    if (json == null) return null;
+
+    // If it's already a List, process it normally
+    if (json is List) {
+      return json
+          .map((e) => EnrichedAnswer.fromJson(e as Map<String, dynamic>))
+          .toList();
+    }
+
+    // If it's a String, it might be a JSON string - try to decode it
+    if (json is String) {
+      try {
+        // Try to parse as JSON string
+        final decoded = jsonDecode(json);
+        if (decoded is List) {
+          return decoded
+              .map((e) => EnrichedAnswer.fromJson(e as Map<String, dynamic>))
+              .toList();
+        }
+        // If it's a Map (like the error shows), return empty list
+        // The actual answer data is in a different format
+        return null;
+      } catch (e) {
+        // If parsing fails, return null
+        return null;
+      }
+    }
+
+    return null;
+  }
+
+  @override
+  dynamic toJson(List<EnrichedAnswer>? object) {
+    return object?.map((e) => e.toJson()).toList();
+  }
+}
 
 /// Enriched answer data with question and option details
 @JsonSerializable()
@@ -73,6 +118,7 @@ class AssessmentResult {
   final String? respondentCompany;
 
   /// Enriched answers data with question and option text
+  @AnswersDataConverter()
   final List<EnrichedAnswer>? answersData;
 
   /// Timestamp when submitted

@@ -32,3 +32,5 @@ flutter:
 
   assets:
     - assets/cfg/
+    - packages/growerp_core/images/assessment-color.png
+    - packages/growerp_core/images/assessment-grey.png
