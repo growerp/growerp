@@ -80,8 +80,8 @@ List<MenuOption> testMenuOptions = [
     child: const AssessmentList(),
   ),
   MenuOption(
-    image: 'packages/growerp_core/images/tasksGrey.png',
-    selectedImage: 'packages/growerp_core/images/tasks.png',
+    image: 'packages/growerp_core/images/assessment-grey.png',
+    selectedImage: 'packages/growerp_core/images/assessment-color.png',
     title: 'Take Assessment',
     route: '/takeAssessment',
     userGroups: [UserGroup.admin, UserGroup.employee],

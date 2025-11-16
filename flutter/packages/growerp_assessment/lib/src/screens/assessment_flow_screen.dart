@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:growerp_assessment/growerp_assessment.dart'
-    hide AssessmentResultsScreen;
-import 'assessment_results_screen_new.dart' as new_results;
+import 'package:growerp_assessment/growerp_assessment.dart';
 
 /// Assessment Flow Container
 /// Manages the three-step assessment process and state transitions
@@ -140,12 +138,12 @@ class _AssessmentFlowScreenState extends State<AssessmentFlowScreen> {
           children: [
             // Step 1: Lead Capture
             LeadCaptureScreen(
-              onSubmit: (name, email) {
+              onSubmit: (name, email, company, phone) {
                 _storeRespondentData(
                   name: name,
                   email: email,
-                  company: '',
-                  phone: '',
+                  company: company,
+                  phone: phone,
                 );
                 _moveToNextStep();
               },
@@ -221,7 +219,7 @@ class _AssessmentFlowScreenState extends State<AssessmentFlowScreen> {
             BlocBuilder<AssessmentBloc, AssessmentState>(
               builder: (context, state) {
                 if (state.selectedAssessment != null) {
-                  return new_results.AssessmentResultsScreen(
+                  return AssessmentResultsScreen(
                     assessment: state.selectedAssessment!,
                     answers: _answers
                         .map((key, value) => MapEntry(key, value.toString())),

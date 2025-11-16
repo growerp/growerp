@@ -184,7 +184,7 @@ class LandingPageDetailScreenState extends State<LandingPageDetailScreen> {
                     return _buildContent();
                   },
                 ),
-                if (!isPhone)
+                if (!isPhone && widget.landingPage.landingPageId != null)
                   Positioned(
                     right: right,
                     top: top,
@@ -202,33 +202,23 @@ class LandingPageDetailScreenState extends State<LandingPageDetailScreen> {
                             key: const Key("sections"),
                             tooltip: 'Page Sections',
                             heroTag: "pageSections",
-                            backgroundColor:
-                                widget.landingPage.landingPageId == null
-                                    ? Colors.grey
-                                    : null,
-                            onPressed: widget.landingPage.landingPageId == null
-                                ? () {
-                                    HelperFunctions.showMessage(
-                                      context,
-                                      'Please save the landing page first',
-                                      Colors.orange,
-                                    );
-                                  }
-                                : () async => await showDialog(
-                                      barrierDismissible: true,
-                                      context: context,
-                                      builder: (BuildContext context) {
-                                        return Dialog(
-                                          child: popUp(
-                                            context: context,
-                                            title: 'Page Sections',
-                                            height: 600,
-                                            width: 800,
-                                            child: _buildSectionsPlaceholder(),
-                                          ),
-                                        );
-                                      },
-                                    ),
+                            backgroundColor: Colors.green,
+                            onPressed: () async => await showDialog(
+                              barrierDismissible: true,
+                              context: context,
+                              builder: (BuildContext context) {
+                                return Dialog(
+                                  child: popUp(
+                                    context: context,
+                                    title:
+                                        'Page Sections${widget.landingPage.pseudoId != null ? ' #${widget.landingPage.pseudoId}' : ' #New'}',
+                                    height: 600,
+                                    width: 800,
+                                    child: _buildSectionsPlaceholder(),
+                                  ),
+                                );
+                              },
+                            ),
                             child: const Icon(Icons.view_list),
                           ),
                           const SizedBox(height: 10),
@@ -236,34 +226,23 @@ class LandingPageDetailScreenState extends State<LandingPageDetailScreen> {
                             key: const Key("credibility"),
                             tooltip: 'Credibility Info',
                             heroTag: "credibilityInfo",
-                            backgroundColor:
-                                widget.landingPage.landingPageId == null
-                                    ? Colors.grey
-                                    : null,
-                            onPressed: widget.landingPage.landingPageId == null
-                                ? () {
-                                    HelperFunctions.showMessage(
-                                      context,
-                                      'Please save the landing page first',
-                                      Colors.orange,
-                                    );
-                                  }
-                                : () async => await showDialog(
-                                      barrierDismissible: true,
-                                      context: context,
-                                      builder: (BuildContext context) {
-                                        return Dialog(
-                                          child: popUp(
-                                            context: context,
-                                            title: 'Credibility Information',
-                                            height: 600,
-                                            width: 800,
-                                            child:
-                                                _buildCredibilityPlaceholder(),
-                                          ),
-                                        );
-                                      },
-                                    ),
+                            backgroundColor: Colors.green,
+                            onPressed: () async => await showDialog(
+                              barrierDismissible: true,
+                              context: context,
+                              builder: (BuildContext context) {
+                                return Dialog(
+                                  child: popUp(
+                                    context: context,
+                                    title:
+                                        'Credibility Information${widget.landingPage.pseudoId != null ? ' #${widget.landingPage.pseudoId}' : ' #New'}',
+                                    height: 600,
+                                    width: 800,
+                                    child: _buildCredibilityPlaceholder(),
+                                  ),
+                                );
+                              },
+                            ),
                             child: const Icon(Icons.verified_user),
                           ),
                           const SizedBox(height: 10),
@@ -390,6 +369,15 @@ class LandingPageDetailScreenState extends State<LandingPageDetailScreen> {
                           isExpanded: true,
                         ),
                       ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: TextFormField(
+                          key: const Key('privacyPolicyUrl'),
+                          decoration: const InputDecoration(
+                              labelText: 'Privacy Policy URL'),
+                          controller: _privacyPolicyUrlController,
+                        ),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 10),
@@ -416,19 +404,6 @@ class LandingPageDetailScreenState extends State<LandingPageDetailScreen> {
                               const InputDecoration(labelText: 'Subheading'),
                           controller: _subheadingController,
                           maxLines: 2,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: TextFormField(
-                          key: const Key('privacyPolicyUrl'),
-                          decoration: const InputDecoration(
-                              labelText: 'Privacy Policy URL'),
-                          controller: _privacyPolicyUrlController,
                         ),
                       ),
                     ],
@@ -686,8 +661,10 @@ class LandingPageDetailScreenState extends State<LandingPageDetailScreen> {
               ),
             ),
             const SizedBox(height: 20),
-            if (isPhone) _buildMobileActionButtons(),
-            if (isPhone) const SizedBox(height: 20),
+            if (isPhone && widget.landingPage.landingPageId != null)
+              _buildMobileActionButtons(),
+            if (isPhone && widget.landingPage.landingPageId != null)
+              const SizedBox(height: 20),
             _updateButton(),
             const SizedBox(height: 20),
           ],
@@ -744,7 +721,8 @@ class LandingPageDetailScreenState extends State<LandingPageDetailScreen> {
           Expanded(
             child: OutlinedButton(
               key: const Key("landingPageDetailSave"),
-              child: const Text('Save'),
+              child: Text(
+                  widget.landingPage.landingPageId == null ? 'Create' : 'Save'),
               onPressed: () async {
                 updatedLandingPage = widget.landingPage.copyWith(
                   pseudoId: _pseudoIdController.text,
@@ -762,7 +740,14 @@ class LandingPageDetailScreenState extends State<LandingPageDetailScreen> {
                       ? _ctaLinkController.text
                       : null,
                 );
-                _landingPageBloc.add(LandingPageUpdate(updatedLandingPage));
+
+                if (widget.landingPage.landingPageId == null) {
+                  // Create new landing page
+                  _landingPageBloc.add(LandingPageCreate(updatedLandingPage));
+                } else {
+                  // Update existing landing page
+                  _landingPageBloc.add(LandingPageUpdate(updatedLandingPage));
+                }
               },
             ),
           ),
@@ -781,35 +766,22 @@ class LandingPageDetailScreenState extends State<LandingPageDetailScreen> {
               key: const Key("mobileSections"),
               icon: const Icon(Icons.view_list),
               label: const Text('Sections'),
-              style: widget.landingPage.landingPageId == null
-                  ? OutlinedButton.styleFrom(
-                      foregroundColor: Colors.grey,
-                      side: const BorderSide(color: Colors.grey),
-                    )
-                  : null,
-              onPressed: widget.landingPage.landingPageId == null
-                  ? () {
-                      HelperFunctions.showMessage(
-                        context,
-                        'Please save the landing page first',
-                        Colors.orange,
-                      );
-                    }
-                  : () async => await showDialog(
-                        barrierDismissible: true,
-                        context: context,
-                        builder: (BuildContext context) {
-                          return Dialog(
-                            child: popUp(
-                              context: context,
-                              title: 'Page Sections',
-                              height: 600,
-                              width: 400,
-                              child: _buildSectionsPlaceholder(),
-                            ),
-                          );
-                        },
-                      ),
+              onPressed: () async => await showDialog(
+                barrierDismissible: true,
+                context: context,
+                builder: (BuildContext context) {
+                  return Dialog(
+                    child: popUp(
+                      context: context,
+                      title:
+                          'Page Sections${widget.landingPage.pseudoId != null ? ' - ${widget.landingPage.pseudoId}' : ''}',
+                      height: 600,
+                      width: 400,
+                      child: _buildSectionsPlaceholder(),
+                    ),
+                  );
+                },
+              ),
             ),
           ),
           const SizedBox(width: 10),
@@ -818,35 +790,22 @@ class LandingPageDetailScreenState extends State<LandingPageDetailScreen> {
               key: const Key("mobileCredibility"),
               icon: const Icon(Icons.verified_user),
               label: const Text('Credibility'),
-              style: widget.landingPage.landingPageId == null
-                  ? OutlinedButton.styleFrom(
-                      foregroundColor: Colors.grey,
-                      side: const BorderSide(color: Colors.grey),
-                    )
-                  : null,
-              onPressed: widget.landingPage.landingPageId == null
-                  ? () {
-                      HelperFunctions.showMessage(
-                        context,
-                        'Please save the landing page first',
-                        Colors.orange,
-                      );
-                    }
-                  : () async => await showDialog(
-                        barrierDismissible: true,
-                        context: context,
-                        builder: (BuildContext context) {
-                          return Dialog(
-                            child: popUp(
-                              context: context,
-                              title: 'Credibility Info',
-                              height: 600,
-                              width: 400,
-                              child: _buildCredibilityPlaceholder(),
-                            ),
-                          );
-                        },
-                      ),
+              onPressed: () async => await showDialog(
+                barrierDismissible: true,
+                context: context,
+                builder: (BuildContext context) {
+                  return Dialog(
+                    child: popUp(
+                      context: context,
+                      title:
+                          'Credibility Info${widget.landingPage.pseudoId != null ? ' - ${widget.landingPage.pseudoId}' : ''}',
+                      height: 600,
+                      width: 400,
+                      child: _buildCredibilityPlaceholder(),
+                    ),
+                  );
+                },
+              ),
             ),
           ),
         ],
@@ -857,6 +816,7 @@ class LandingPageDetailScreenState extends State<LandingPageDetailScreen> {
   Widget _buildSectionsPlaceholder() {
     return PageSectionList(
       landingPageId: widget.landingPage.landingPageId ?? '',
+      landingPagePseudoId: widget.landingPage.pseudoId,
     );
   }
 

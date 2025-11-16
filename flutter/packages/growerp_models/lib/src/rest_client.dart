@@ -856,6 +856,7 @@ abstract class RestClient {
   @POST("rest/s1/growerp/100/LandingPage")
   Future<LandingPage> createLandingPage({
     @Field() required String title,
+    @Field() String? pseudoId,
     @Field() String? hookType,
     @Field() String? headline,
     @Field() String? subheading,
@@ -924,8 +925,8 @@ abstract class RestClient {
 
   @PATCH("rest/s1/growerp/100/LandingPage/Section")
   Future<LandingPageSection> updatePageSection({
-    @Field() required String landingPageId,
-    @Field() required String pageSectionId,
+    @Query('landingPageId') required String landingPageId,
+    @Query('pageSectionId') required String pageSectionId,
     @Field() String? sectionTitle,
     @Field() String? sectionDescription,
     @Field() String? sectionImageUrl,
@@ -934,8 +935,8 @@ abstract class RestClient {
 
   @DELETE("rest/s1/growerp/100/LandingPage/Section")
   Future<void> deletePageSection({
-    @Field() required String landingPageId,
-    @Field() required String pageSectionId,
+    @Query('landingPageId') required String landingPageId,
+    @Query('pageSectionId') required String pageSectionId,
   });
 
   // ============================================

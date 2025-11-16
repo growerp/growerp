@@ -155,6 +155,8 @@ class LandingPage {
 
   @override
   int get hashCode => landingPageId.hashCode;
+
+  Map<String, dynamic> toJson() => _$LandingPageToJson(this);
 }
 
 /// List wrapper for LandingPage objects

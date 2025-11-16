@@ -1,134 +1,84 @@
+/*
+ * This GrowERP software is in the public domain under CC0 1.0 Universal plus a
+ * Grant of Patent License.
+ * 
+ * To the extent possible under law, the author(s) have dedicated all
+ * copyright and related and neighboring rights to this software to the
+ * public domain worldwide. This software is distributed without any
+ * warranty.
+ * 
+ * You should have received a copy of the CC0 Public Domain Dedication
+ * along with this software (see the LICENSE.md file). If not, see
+ * <http://creativecommons.org/publicdomain/zero/1.0/>.
+ */
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import '../bloc/assessment_bloc.dart';
 
-/// Step 3: Assessment Results Screen
-/// Displays assessment results with score and status
-class AssessmentResultsScreen extends StatefulWidget {
-  final String assessmentId;
-  final String respondentName;
-  final VoidCallback onComplete;
+/// Screen for displaying assessment results after completion
+class AssessmentResultsScreen extends StatelessWidget {
+  final Assessment assessment;
+  final Map<String, String> answers;
 
   const AssessmentResultsScreen({
-    Key? key,
-    required this.assessmentId,
-    required this.respondentName,
-    required this.onComplete,
-  }) : super(key: key);
-
-  @override
-  State<AssessmentResultsScreen> createState() =>
-      _AssessmentResultsScreenState();
-}
-
-class _AssessmentResultsScreenState extends State<AssessmentResultsScreen> {
-  AssessmentResult? _result;
-  bool _isLoading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _waitForResult();
-  }
-
-  void _waitForResult() {
-    // Wait for the AssessmentSubmitted state from BLoC
-    Future.delayed(const Duration(seconds: 1), () {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
-    });
-  }
+    super.key,
+    required this.assessment,
+    required this.answers,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<AssessmentBloc, AssessmentState>(
-      listener: (context, state) {
-        if (state.status == AssessmentStatus.success &&
-            state.results.isNotEmpty) {
-          // Get the most recent result (first in the list)
-          setState(() {
-            _result = state.results.first;
-            _isLoading = false;
-          });
-        } else if (state.status == AssessmentStatus.failure) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Error: ${state.message ?? 'Unknown error'}'),
-              backgroundColor: Colors.red,
+    return BlocBuilder<AssessmentBloc, AssessmentState>(
+      builder: (context, state) {
+        // Use backend-calculated score from scoreResult if available
+        final backendScore = state.scoreResult?.score ?? 0.0;
+
+        // Fallback to local calculation only if backend score is not available
+        final score = backendScore > 0 ? backendScore : _calculateScore(state);
+        final maxScore = _getMaxScore(state);
+        final percentage = maxScore > 0 ? (score / maxScore * 100).round() : 0;
+
+        debugPrint(
+            'Results Screen - Backend score: $backendScore, Local score: ${_calculateScore(state)}, Max: $maxScore, Percentage: $percentage%');
+
+        return Scaffold(
+          body: Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color(0xFF667EEA), // #667eea
+                  Color(0xFF764BA2), // #764ba2
+                ],
+              ),
             ),
-          );
-        }
-      },
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Assessment - Step 3: Results'),
-          elevation: 0,
-        ),
-        body: _isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : _result != null
-                ? _buildResultsView(context)
-                : _buildLoadingState(context),
-      ),
-    );
-  }
-
-  Widget _buildLoadingState(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.hourglass_empty, size: 64, color: Colors.grey[400]),
-          const SizedBox(height: 16),
-          Text(
-            'Processing your assessment...',
-            style: Theme.of(context).textTheme.headlineSmall,
+            child: SafeArea(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(32.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Progress indicator
+                    _buildProgressIndicator(),
+                    const SizedBox(height: 40),
+                    _buildScoreCard(score, maxScore, percentage),
+                    const SizedBox(height: 24),
+                    _buildScoreBreakdown(state),
+                    const SizedBox(height: 24),
+                    _buildAssessmentInfo(),
+                    const SizedBox(height: 24),
+                    _buildActionButtons(context, state),
+                  ],
+                ),
+              ),
+            ),
           ),
-          const SizedBox(height: 32),
-          const CircularProgressIndicator(),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildResultsView(BuildContext context) {
-    final isMobile = MediaQuery.of(context).size.width < 600;
-    final result = _result!;
-
-    return SingleChildScrollView(
-      child: Padding(
-        padding: EdgeInsets.all(isMobile ? 16 : 32),
-        child: Column(
-          children: [
-            // Progress indicator
-            _buildProgressIndicator(),
-            SizedBox(height: isMobile ? 24 : 40),
-
-            // Score card
-            _buildScoreCard(context, result),
-            SizedBox(height: isMobile ? 24 : 32),
-
-            // Status card
-            _buildStatusCard(context, result),
-            SizedBox(height: isMobile ? 24 : 32),
-
-            // Summary
-            _buildSummaryCard(context, result),
-            SizedBox(height: isMobile ? 24 : 32),
-
-            // Answers (if available)
-            if (result.answersData != null) ...[
-              _buildAnswersCard(context, result),
-              SizedBox(height: isMobile ? 24 : 32),
-            ],
-
-            // Actions
-            _buildActionButtons(context),
-          ],
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -141,7 +91,7 @@ class _AssessmentResultsScreenState extends State<AssessmentResultsScreen> {
             Expanded(
               child: Container(
                 height: 2,
-                color: Colors.grey[300],
+                color: Colors.white.withValues(alpha: 0.3),
                 margin: const EdgeInsets.symmetric(horizontal: 8),
               ),
             ),
@@ -149,7 +99,7 @@ class _AssessmentResultsScreenState extends State<AssessmentResultsScreen> {
             Expanded(
               child: Container(
                 height: 2,
-                color: Colors.grey[300],
+                color: Colors.white.withValues(alpha: 0.3),
                 margin: const EdgeInsets.symmetric(horizontal: 8),
               ),
             ),
@@ -159,9 +109,10 @@ class _AssessmentResultsScreenState extends State<AssessmentResultsScreen> {
         const SizedBox(height: 16),
         Text(
           'Step 3 of 3 - Assessment Complete',
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Colors.grey[600],
-              ),
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: 0.9),
+            fontSize: 14,
+          ),
         ),
       ],
     );
@@ -175,46 +126,63 @@ class _AssessmentResultsScreenState extends State<AssessmentResultsScreen> {
           height: 40,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: isActive ? Colors.blue : Colors.grey[300],
+            color:
+                isActive ? Colors.white : Colors.white.withValues(alpha: 0.3),
+            boxShadow: isActive
+                ? [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.2),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    )
+                  ]
+                : null,
           ),
           child: Center(
-            child: Text(
-              step.toString(),
-              style: TextStyle(
-                color: isActive ? Colors.white : Colors.grey[600],
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-              ),
-            ),
+            child: isActive
+                ? const Icon(
+                    Icons.check,
+                    color: Color(0xFF667EEA),
+                    size: 24,
+                  )
+                : Text(
+                    step.toString(),
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.7),
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
           ),
         ),
         const SizedBox(height: 8),
         Text(
           label,
-          style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: isActive ? Colors.blue : Colors.grey[600],
-                fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
-              ),
+          style: TextStyle(
+            color:
+                isActive ? Colors.white : Colors.white.withValues(alpha: 0.7),
+            fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+            fontSize: 12,
+          ),
         ),
       ],
     );
   }
 
-  Widget _buildScoreCard(BuildContext context, AssessmentResult result) {
-    final score = result.score ?? 0;
-    final scoreColor = _getScoreColor(score);
+  Widget _buildScoreCard(double score, double maxScore, int percentage) {
+    Color scoreColor = _getScoreColor(percentage);
 
     return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      elevation: 8,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: Container(
-        padding: const EdgeInsets.all(32),
+        padding: const EdgeInsets.all(40.0),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(20),
           gradient: LinearGradient(
             colors: [
-              scoreColor.withAlpha((0.2 * 255).round()),
-              scoreColor.withAlpha((0.05 * 255).round())
+              Colors.white,
+              scoreColor.withValues(alpha: 0.05),
             ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
@@ -222,27 +190,43 @@ class _AssessmentResultsScreenState extends State<AssessmentResultsScreen> {
         ),
         child: Column(
           children: [
-            Text(
+            Icon(
+              Icons.emoji_events,
+              size: 64,
+              color: scoreColor,
+            ),
+            const SizedBox(height: 16),
+            const Text(
               'Your Score',
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Colors.grey[600],
-                  ),
+              style: TextStyle(
+                color: Color(0xFF4A5568),
+                fontSize: 18,
+              ),
             ),
             const SizedBox(height: 16),
             Text(
-              '${score.toStringAsFixed(1)}%',
-              style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                    color: scoreColor,
-                    fontWeight: FontWeight.bold,
-                  ),
+              '$percentage%',
+              style: TextStyle(
+                color: scoreColor,
+                fontWeight: FontWeight.bold,
+                fontSize: 56,
+              ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 8),
+            Text(
+              '${score.toInt()} / ${maxScore.toInt()} points',
+              style: const TextStyle(
+                color: Color(0xFF718096),
+                fontSize: 16,
+              ),
+            ),
+            const SizedBox(height: 24),
             ClipRRect(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(12),
               child: LinearProgressIndicator(
-                value: score / 100,
-                minHeight: 8,
-                backgroundColor: Colors.grey[300],
+                value: score / maxScore,
+                minHeight: 12,
+                backgroundColor: Colors.grey[200],
                 valueColor: AlwaysStoppedAnimation<Color>(scoreColor),
               ),
             ),
@@ -252,368 +236,544 @@ class _AssessmentResultsScreenState extends State<AssessmentResultsScreen> {
     );
   }
 
-  Widget _buildStatusCard(BuildContext context, AssessmentResult result) {
-    final status = result.leadStatus ?? 'Unknown';
-    final statusColor = _getStatusColor(status);
-
+  Widget _buildAssessmentInfo() {
     return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      elevation: 8,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Row(
-          children: [
-            Container(
-              width: 56,
-              height: 56,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: statusColor.withAlpha((0.2 * 255).round()),
-              ),
-              child: Center(
-                child: Icon(
-                  _getStatusIcon(status),
-                  color: statusColor,
-                  size: 28,
-                ),
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Lead Status',
-                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                          color: Colors.grey[600],
-                        ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    status,
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          color: statusColor,
-                        ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSummaryCard(BuildContext context, AssessmentResult result) {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(32.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
+            const Text(
               'Summary',
-              style: Theme.of(context).textTheme.titleLarge,
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.w700,
+                color: Color(0xFF2D3748),
+              ),
             ),
-            const SizedBox(height: 16),
-            _buildSummaryRow('Respondent', result.respondentName ?? 'Unknown'),
-            const SizedBox(height: 12),
-            _buildSummaryRow('Email', result.respondentEmail ?? 'No email'),
-            const SizedBox(height: 12),
-            if (result.respondentPhone != null) ...[
-              _buildSummaryRow('Phone', result.respondentPhone!),
-              const SizedBox(height: 12),
-            ],
-            if (result.respondentCompany != null) ...[
-              _buildSummaryRow('Company', result.respondentCompany!),
-              const SizedBox(height: 12),
-            ],
-            _buildSummaryRow(
-              'Completed',
-              _formatDateTime(result.createdDate),
-            ),
-            const SizedBox(height: 12),
-            _buildSummaryRow('Result ID', result.pseudoId ?? 'N/A'),
+            const SizedBox(height: 24),
+            _buildInfoRow('Assessment', assessment.assessmentName),
+            if (assessment.description?.isNotEmpty == true)
+              _buildInfoRow('Description', assessment.description!),
+            _buildInfoRow('Completed', _formatDate(DateTime.now())),
+            _buildInfoRow('Questions Answered', '${answers.length}'),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildAnswersCard(BuildContext context, AssessmentResult result) {
-    final answersData = result.answersData;
-    if (answersData == null || answersData.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
-    return _AnswersExpansionCard(
-      enrichedAnswers: answersData,
-    );
-  }
-
-  Widget _buildSummaryRow(String label, String value) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          label,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Colors.grey[600],
-              ),
-        ),
-        Expanded(
-          child: Text(
-            value,
-            textAlign: TextAlign.right,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w500,
-                ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildActionButtons(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
-        OutlinedButton.icon(
-          onPressed: () {
-            // Implement export/share functionality
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Export feature coming soon')),
-            );
-          },
-          icon: const Icon(Icons.share),
-          label: const Text('Share'),
-        ),
-        ElevatedButton.icon(
-          onPressed: widget.onComplete,
-          icon: const Icon(Icons.check_circle),
-          label: const Text('Complete'),
-        ),
-      ],
-    );
-  }
-
-  Color _getScoreColor(double score) {
-    if (score >= 80) return Colors.green;
-    if (score >= 60) return Colors.orange;
-    return Colors.red;
-  }
-
-  Color _getStatusColor(String status) {
-    switch (status.toUpperCase()) {
-      case 'QUALIFIED':
-      case 'HOT':
-        return Colors.green;
-      case 'INTERESTED':
-      case 'WARM':
-        return Colors.orange;
-      case 'NOT_QUALIFIED':
-      case 'COLD':
-        return Colors.red;
-      default:
-        return Colors.grey;
-    }
-  }
-
-  IconData _getStatusIcon(String status) {
-    switch (status.toUpperCase()) {
-      case 'QUALIFIED':
-      case 'HOT':
-        return Icons.thumb_up;
-      case 'INTERESTED':
-      case 'WARM':
-        return Icons.info;
-      case 'NOT_QUALIFIED':
-      case 'COLD':
-        return Icons.thumb_down;
-      default:
-        return Icons.help;
-    }
-  }
-
-  String _formatDateTime(DateTime? dateTime) {
-    if (dateTime == null) return 'Unknown';
-    return '${dateTime.year}-${dateTime.month.toString().padLeft(2, '0')}-${dateTime.day.toString().padLeft(2, '0')} ${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
-  }
-}
-
-/// Expansion card widget to show individual question answers
-class _AnswersExpansionCard extends StatefulWidget {
-  final List<EnrichedAnswer> enrichedAnswers;
-
-  const _AnswersExpansionCard({
-    required this.enrichedAnswers,
-  });
-
-  @override
-  State<_AnswersExpansionCard> createState() => _AnswersExpansionCardState();
-}
-
-class _AnswersExpansionCardState extends State<_AnswersExpansionCard> {
-  bool _isExpanded = true; // Default to expanded on results screen
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Column(
+  Widget _buildInfoRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          InkWell(
-            onTap: () {
-              setState(() {
-                _isExpanded = !_isExpanded;
-              });
-            },
-            child: Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: _isExpanded ? Colors.blue.shade50 : null,
-                borderRadius: BorderRadius.only(
-                  topLeft: const Radius.circular(12),
-                  topRight: const Radius.circular(12),
-                  bottomLeft:
-                      _isExpanded ? Radius.zero : const Radius.circular(12),
-                  bottomRight:
-                      _isExpanded ? Radius.zero : const Radius.circular(12),
-                ),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Your Answers (${widget.enrichedAnswers.length} questions)',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                  ),
-                  Icon(
-                    _isExpanded ? Icons.expand_less : Icons.expand_more,
-                    color: Colors.grey.shade700,
-                  ),
-                ],
+          Text(
+            label,
+            style: const TextStyle(
+              fontWeight: FontWeight.w500,
+              color: Color(0xFF718096),
+              fontSize: 16,
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Text(
+              value,
+              textAlign: TextAlign.right,
+              style: const TextStyle(
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF2D3748),
+                fontSize: 16,
               ),
             ),
           ),
-          if (_isExpanded)
-            Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: widget.enrichedAnswers.map((answer) {
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 20),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildScoreBreakdown(AssessmentState state) {
+    final questions = assessment.questions ?? [];
+
+    return Card(
+      elevation: 8,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      child: Padding(
+        padding: const EdgeInsets.all(32.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF667EEA).withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(
+                    Icons.checklist_rtl,
+                    color: Color(0xFF667EEA),
+                    size: 28,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Score Breakdown',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF2D3748),
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '${answers.length} questions answered',
+                        style: const TextStyle(
+                          color: Color(0xFF718096),
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 28),
+            ...answers.entries.toList().asMap().entries.map((mapEntry) {
+              final index = mapEntry.key;
+              final entry = mapEntry.value;
+              final questionId = entry.key;
+              final optionId = entry.value;
+              final isLast = index == answers.length - 1;
+
+              // Find the question
+              final question = questions.firstWhere(
+                (q) => q.assessmentQuestionId == questionId,
+                orElse: () =>
+                    const AssessmentQuestion(questionText: 'Unknown Question'),
+              );
+
+              // Find the selected option
+              final options = question.options ?? [];
+              final selectedOption = options.firstWhere(
+                (o) => o.assessmentQuestionOptionId == optionId,
+                orElse: () => const AssessmentQuestionOption(
+                    optionText: 'Unknown Option'),
+              );
+
+              final score = selectedOption.optionScore ?? 0;
+
+              // Get max score for this question to calculate color
+              // Try state.options first, then fallback to question options
+              List<AssessmentQuestionOption> questionOptions = [];
+              if (state.options.containsKey(questionId)) {
+                questionOptions = state.options[questionId] ?? [];
+              } else {
+                questionOptions = question.options ?? [];
+              }
+
+              double maxScoreForQuestion = 0.0;
+              for (final opt in questionOptions) {
+                if ((opt.optionScore ?? 0) > maxScoreForQuestion) {
+                  maxScoreForQuestion = opt.optionScore ?? 0;
+                }
+              }
+
+              // Calculate percentage for this question to determine color
+              final questionPercentage = maxScoreForQuestion > 0
+                  ? ((score / maxScoreForQuestion) * 100).toInt()
+                  : 0;
+              final scoreColor = _getScoreColor(questionPercentage);
+              final questionSequence = questions.indexOf(question) + 1;
+              return Column(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF8F9FA),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: const Color(0xFFE2E8F0),
+                        width: 1,
+                      ),
+                    ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        // Question number and text
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Container(
                               width: 32,
                               height: 32,
-                              decoration: BoxDecoration(
-                                color: Colors.blue.shade100,
+                              decoration: const BoxDecoration(
+                                color: Color(0xFF667EEA),
                                 shape: BoxShape.circle,
                               ),
                               child: Center(
                                 child: Text(
-                                  '${answer.questionSequence ?? 0}',
-                                  style: TextStyle(
-                                    color: Colors.blue.shade900,
+                                  '$questionSequence',
+                                  style: const TextStyle(
+                                    color: Colors.white,
                                     fontWeight: FontWeight.bold,
+                                    fontSize: 14,
                                   ),
                                 ),
                               ),
                             ),
                             const SizedBox(width: 12),
                             Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    answer.questionText ?? 'Question',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .bodyLarge
-                                        ?.copyWith(
-                                          fontWeight: FontWeight.w600,
-                                          color: Colors.black87,
-                                        ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Container(
-                                    width: double.infinity,
-                                    padding: const EdgeInsets.all(14),
-                                    decoration: BoxDecoration(
-                                      color: Colors.green.shade50,
-                                      borderRadius: BorderRadius.circular(8),
-                                      border: Border.all(
-                                          color: Colors.green.shade200),
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        Icon(
-                                          Icons.check_circle,
-                                          color: Colors.green.shade700,
-                                          size: 22,
-                                        ),
-                                        const SizedBox(width: 12),
-                                        Expanded(
-                                          child: Text(
-                                            answer.optionText ??
-                                                'Unknown option',
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .bodyMedium
-                                                ?.copyWith(
-                                                  color: Colors.green.shade900,
-                                                  fontWeight: FontWeight.w500,
-                                                ),
-                                          ),
-                                        ),
-                                        if ((answer.optionScore ?? 0) > 0)
-                                          Container(
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 10,
-                                              vertical: 6,
-                                            ),
-                                            decoration: BoxDecoration(
-                                              color: Colors.blue.shade100,
-                                              borderRadius:
-                                                  BorderRadius.circular(16),
-                                            ),
-                                            child: Text(
-                                              '+${(answer.optionScore ?? 0).toStringAsFixed(0)} pts',
-                                              style: TextStyle(
-                                                color: Colors.blue.shade900,
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 12,
-                                              ),
-                                            ),
-                                          ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
+                              child: Text(
+                                question.questionText ?? 'Question',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  color: Color(0xFF2D3748),
+                                  fontSize: 16,
+                                  height: 1.4,
+                                ),
                               ),
                             ),
                           ],
                         ),
+                        const SizedBox(height: 16),
+
+                        // Chosen option with score
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: scoreColor.withValues(alpha: 0.3),
+                              width: 2,
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.check_circle_rounded,
+                                color: scoreColor,
+                                size: 24,
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  selectedOption.optionText ?? 'Unknown option',
+                                  style: const TextStyle(
+                                    color: Color(0xFF2D3748),
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: 15,
+                                  ),
+                                ),
+                              ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 6,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: scoreColor.withValues(alpha: 0.15),
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      score > 0 ? '+' : '',
+                                      style: TextStyle(
+                                        color: scoreColor,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                    Text(
+                                      score.toStringAsFixed(0),
+                                      style: TextStyle(
+                                        color: scoreColor,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 2),
+                                    Text(
+                                      'pts',
+                                      style: TextStyle(
+                                        color: scoreColor,
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ],
                     ),
-                  );
-                }).toList(),
-              ),
+                  ),
+                  if (!isLast) const SizedBox(height: 20),
+                ],
+              );
+            }),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActionButtons(BuildContext context, AssessmentState state) {
+    return Wrap(
+      spacing: 16,
+      runSpacing: 16,
+      alignment: WrapAlignment.center,
+      children: [
+        OutlinedButton(
+          onPressed: () => _shareResults(context),
+          style: OutlinedButton.styleFrom(
+            foregroundColor: Colors.white,
+            side: const BorderSide(color: Colors.white, width: 2),
+            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(30),
             ),
+          ),
+          child: const Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.share, size: 20),
+              SizedBox(width: 8),
+              Text(
+                'Share',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        ),
+        ElevatedButton(
+          onPressed: () => _retakeAssessment(context),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.white,
+            foregroundColor: const Color(0xFF667EEA),
+            padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(30),
+            ),
+            elevation: 8,
+            shadowColor: Colors.black.withValues(alpha: 0.3),
+          ),
+          child: const Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Retake Assessment',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              SizedBox(width: 8),
+              Icon(Icons.refresh, size: 20),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  double _calculateScore(AssessmentState state) {
+    double totalScore = 0;
+    for (final entry in answers.entries) {
+      final questionId = entry.key;
+      final optionId = entry.value;
+      totalScore += _getOptionScore(questionId, optionId, state);
+    }
+    debugPrint('Total score calculated: $totalScore');
+    return totalScore;
+  }
+
+  double _getMaxScore(AssessmentState state) {
+    // Calculate max score from all question options in assessment
+    double maxScore = 0.0;
+
+    // First try to get from state.options
+    if (state.options.isNotEmpty) {
+      for (final questionOptions in state.options.values) {
+        double maxPerQuestion = 0.0;
+        for (final option in questionOptions) {
+          if ((option.optionScore ?? 0) > maxPerQuestion) {
+            maxPerQuestion = option.optionScore ?? 0;
+          }
+        }
+        maxScore += maxPerQuestion;
+      }
+    } else {
+      // Fallback: get from assessment questions directly
+      final questions = assessment.questions ?? [];
+      for (final question in questions) {
+        double maxPerQuestion = 0.0;
+        final options = question.options ?? [];
+        for (final option in options) {
+          if ((option.optionScore ?? 0) > maxPerQuestion) {
+            maxPerQuestion = option.optionScore ?? 0;
+          }
+        }
+        maxScore += maxPerQuestion;
+      }
+    }
+
+    debugPrint(
+        'Max score calculated: $maxScore (from ${state.options.isNotEmpty ? "state" : "assessment"})');
+    return maxScore > 0
+        ? maxScore
+        : (answers.length * 4.0); // Fallback to 4 per question
+  }
+
+  double _getOptionScore(
+      String questionId, String optionId, AssessmentState state) {
+    // Get actual score from backend option data
+    try {
+      // First try from state.options
+      if (state.options.containsKey(questionId)) {
+        final options = state.options[questionId] ?? [];
+        final option = options.firstWhere(
+          (o) => o.assessmentQuestionOptionId == optionId,
+          orElse: () => AssessmentQuestionOption(
+            assessmentQuestionOptionId: optionId,
+            pseudoId: 'opt_$optionId',
+            assessmentQuestionId: questionId,
+            assessmentId: '',
+            optionSequence: 0,
+            optionText: 'Option $optionId',
+            optionScore: 0.0,
+            createdDate: DateTime.now(),
+          ),
+        );
+        final score = option.optionScore ?? 0.0;
+        debugPrint('Score for Q:$questionId O:$optionId = $score (from state)');
+        return score;
+      }
+
+      // Fallback: get from assessment questions directly
+      final questions = assessment.questions ?? [];
+      final question = questions.firstWhere(
+        (q) => q.assessmentQuestionId == questionId,
+        orElse: () => const AssessmentQuestion(questionText: 'Unknown'),
+      );
+
+      final options = question.options ?? [];
+      final option = options.firstWhere(
+        (o) => o.assessmentQuestionOptionId == optionId,
+        orElse: () => AssessmentQuestionOption(
+          assessmentQuestionOptionId: optionId,
+          pseudoId: 'opt_$optionId',
+          assessmentQuestionId: questionId,
+          assessmentId: '',
+          optionSequence: 0,
+          optionText: 'Option $optionId',
+          optionScore: 0.0,
+          createdDate: DateTime.now(),
+        ),
+      );
+      final score = option.optionScore ?? 0.0;
+      debugPrint(
+          'Score for Q:$questionId O:$optionId = $score (from assessment)');
+      return score;
+    } catch (e) {
+      debugPrint('Error getting score for Q:$questionId O:$optionId: $e');
+      return 0.0;
+    }
+  }
+
+  Color _getScoreColor(int percentage) {
+    if (percentage >= 80) return Colors.green;
+    if (percentage >= 60) return Colors.orange;
+    return Colors.red;
+  }
+
+  String _formatDate(DateTime date) {
+    return '${date.day}/${date.month}/${date.year} ${date.hour}:${date.minute.toString().padLeft(2, '0')}';
+  }
+
+  void _retakeAssessment(BuildContext context) {
+    Navigator.of(context).pushReplacementNamed(
+      '/assessment/take',
+      arguments: assessment,
+    );
+  }
+
+  void _shareResults(BuildContext context) {
+    // Show share results options
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Share Assessment Results'),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.email),
+                title: const Text('Email Results'),
+                subtitle: const Text('Send results to email'),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  HelperFunctions.showMessage(
+                    context,
+                    'Email sharing available',
+                    Colors.green,
+                  );
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.link),
+                title: const Text('Copy Link'),
+                subtitle: const Text('Copy results link to clipboard'),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  HelperFunctions.showMessage(
+                    context,
+                    'Link copied to clipboard',
+                    Colors.green,
+                  );
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.download),
+                title: const Text('Download PDF'),
+                subtitle: const Text('Download results as PDF'),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  HelperFunctions.showMessage(
+                    context,
+                    'PDF download available',
+                    Colors.green,
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Close'),
+          ),
         ],
       ),
     );

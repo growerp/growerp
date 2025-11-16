@@ -76,15 +76,31 @@ class _AssessmentQuestionsScreenState extends State<AssessmentQuestionsScreen> {
     final questions = widget.assessment.questions ?? [];
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Assessment - Step 2: Questions'),
-        elevation: 0,
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Color(0xFF667EEA), // #667eea
+              Color(0xFF764BA2), // #764ba2
+            ],
+          ),
+        ),
+        child: SafeArea(
+          child: questions.isEmpty
+              ? const Center(
+                  child: Text(
+                    'No questions available',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                    ),
+                  ),
+                )
+              : _buildQuestionView(context, questions),
+        ),
       ),
-      body: questions.isEmpty
-          ? const Center(
-              child: Text('No questions available'),
-            )
-          : _buildQuestionView(context, questions),
     );
   }
 
@@ -136,7 +152,7 @@ class _AssessmentQuestionsScreenState extends State<AssessmentQuestionsScreen> {
             Expanded(
               child: Container(
                 height: 2,
-                color: Colors.grey[300],
+                color: Colors.white.withValues(alpha: 0.3),
                 margin: const EdgeInsets.symmetric(horizontal: 8),
               ),
             ),
@@ -144,7 +160,7 @@ class _AssessmentQuestionsScreenState extends State<AssessmentQuestionsScreen> {
             Expanded(
               child: Container(
                 height: 2,
-                color: Colors.grey[300],
+                color: Colors.white.withValues(alpha: 0.3),
                 margin: const EdgeInsets.symmetric(horizontal: 8),
               ),
             ),
@@ -155,7 +171,8 @@ class _AssessmentQuestionsScreenState extends State<AssessmentQuestionsScreen> {
         Text(
           'Step 2 of 3 - Question ${_currentQuestionIndex + 1} of ${questions.length}',
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Colors.grey[600],
+                color: Colors.white.withValues(alpha: 0.9),
+                fontSize: 14,
               ),
         ),
       ],
@@ -170,13 +187,25 @@ class _AssessmentQuestionsScreenState extends State<AssessmentQuestionsScreen> {
           height: 40,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: isActive ? Colors.blue : Colors.grey[300],
+            color:
+                isActive ? Colors.white : Colors.white.withValues(alpha: 0.3),
+            boxShadow: isActive
+                ? [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.2),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    )
+                  ]
+                : null,
           ),
           child: Center(
             child: Text(
               step.toString(),
               style: TextStyle(
-                color: isActive ? Colors.white : Colors.grey[600],
+                color: isActive
+                    ? const Color(0xFF667EEA)
+                    : Colors.white.withValues(alpha: 0.7),
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
               ),
@@ -187,7 +216,9 @@ class _AssessmentQuestionsScreenState extends State<AssessmentQuestionsScreen> {
         Text(
           label,
           style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: isActive ? Colors.blue : Colors.grey[600],
+                color: isActive
+                    ? Colors.white
+                    : Colors.white.withValues(alpha: 0.7),
                 fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
               ),
         ),
@@ -197,16 +228,20 @@ class _AssessmentQuestionsScreenState extends State<AssessmentQuestionsScreen> {
 
   Widget _buildQuestionCard(AssessmentQuestion question) {
     return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      elevation: 8,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: Padding(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(32),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               question.questionText ?? 'Untitled Question',
-              style: Theme.of(context).textTheme.headlineSmall,
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xFF2D3748),
+                    fontSize: 24,
+                  ),
             ),
             const SizedBox(height: 24),
             Expanded(
@@ -308,39 +343,63 @@ class _AssessmentQuestionsScreenState extends State<AssessmentQuestionsScreen> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
           border: Border.all(
-            color: isSelected ? Colors.blue : Colors.grey[300]!,
+            color: isSelected ? const Color(0xFF667EEA) : Colors.grey[300]!,
             width: isSelected ? 2 : 1,
           ),
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(12),
           color: isSelected
-              ? Color.fromARGB(
-                  (0.1 * 255).toInt(),
-                  ((Colors.blue.r * 255.0).round() & 0xff),
-                  ((Colors.blue.g * 255.0).round() & 0xff),
-                  ((Colors.blue.b * 255.0).round() & 0xff),
-                )
-              : Colors.transparent,
+              ? const Color(0xFF667EEA).withValues(alpha: 0.1)
+              : Colors.white,
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: const Color(0xFF667EEA).withValues(alpha: 0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  )
+                ]
+              : null,
         ),
-        child: GestureDetector(
-          onTap: onTap,
-          child: Row(
-            children: [
-              Checkbox(
-                value: isSelected,
-                onChanged: (_) => onTap(),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  option.optionText ?? 'Option',
-                  style: Theme.of(context).textTheme.bodyMedium,
+        child: Row(
+          children: [
+            Container(
+              width: 24,
+              height: 24,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color:
+                      isSelected ? const Color(0xFF667EEA) : Colors.grey[400]!,
+                  width: 2,
                 ),
+                color:
+                    isSelected ? const Color(0xFF667EEA) : Colors.transparent,
               ),
-            ],
-          ),
+              child: isSelected
+                  ? const Icon(
+                      Icons.check,
+                      size: 16,
+                      color: Colors.white,
+                    )
+                  : null,
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Text(
+                option.optionText ?? 'Option',
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      fontWeight:
+                          isSelected ? FontWeight.w600 : FontWeight.normal,
+                      color: isSelected
+                          ? const Color(0xFF667EEA)
+                          : const Color(0xFF4A5568),
+                    ),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -351,17 +410,56 @@ class _AssessmentQuestionsScreenState extends State<AssessmentQuestionsScreen> {
     final isLastQuestion = _currentQuestionIndex == questions.length - 1;
 
     return Wrap(
-      spacing: 12,
-      alignment: WrapAlignment.spaceEvenly,
+      spacing: 16,
+      alignment: WrapAlignment.center,
       children: [
         OutlinedButton(
           onPressed: _previousQuestion,
-          child: const Text('Previous'),
+          style: OutlinedButton.styleFrom(
+            foregroundColor: Colors.white,
+            side: const BorderSide(color: Colors.white, width: 2),
+            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(30),
+            ),
+          ),
+          child: const Text(
+            'Previous',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
         ),
-        ElevatedButton.icon(
+        ElevatedButton(
           onPressed: _nextQuestion,
-          icon: Icon(isLastQuestion ? Icons.check : Icons.arrow_forward),
-          label: Text(isLastQuestion ? 'Complete' : 'Next'),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.white,
+            foregroundColor: const Color(0xFF667EEA),
+            padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(30),
+            ),
+            elevation: 8,
+            shadowColor: Colors.black.withValues(alpha: 0.3),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                isLastQuestion ? 'Complete' : 'Next',
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Icon(
+                isLastQuestion ? Icons.check_circle : Icons.arrow_forward,
+                size: 20,
+              ),
+            ],
+          ),
         ),
       ],
     );

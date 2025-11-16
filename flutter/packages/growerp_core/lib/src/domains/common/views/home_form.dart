@@ -88,6 +88,31 @@ class HomeFormState extends State<HomeForm> {
         }
       },
       builder: (context, state) {
+        // Hidden text widgets for integration tests to access API keys
+        // These are needed in both authenticated and certain unAuthenticated states
+        // (e.g., when apiKey is 'paymentFirst', 'moreInfo', etc.)
+        Widget hiddenApiKeyWidgets() {
+          if (!kReleaseMode && state.authenticate?.apiKey != null) {
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  state.authenticate!.apiKey!,
+                  key: const Key('apiKey'),
+                  style: const TextStyle(fontSize: 0),
+                ),
+                if (state.authenticate?.moquiSessionToken != null)
+                  Text(
+                    state.authenticate!.moquiSessionToken!,
+                    key: const Key('moquiSessionToken'),
+                    style: const TextStyle(fontSize: 0),
+                  ),
+              ],
+            );
+          }
+          return const SizedBox.shrink();
+        }
+
         switch (state.status) {
           case AuthStatus.authenticated:
             return Column(
@@ -114,19 +139,7 @@ class HomeFormState extends State<HomeForm> {
                     ],
                   ),
                 ),
-                // hidden text be able to load demo data for testing
-                if (!kReleaseMode)
-                  Text(
-                    state.authenticate?.apiKey ?? '',
-                    key: const Key('apiKey'),
-                    style: const TextStyle(fontSize: 0),
-                  ),
-                if (!kReleaseMode)
-                  Text(
-                    state.authenticate?.moquiSessionToken ?? '',
-                    key: const Key('moquiSessionToken'),
-                    style: const TextStyle(fontSize: 0),
-                  ),
+                hiddenApiKeyWidgets(),
                 appInfo,
               ],
             );
@@ -135,6 +148,7 @@ class HomeFormState extends State<HomeForm> {
             ThemeMode? themeMode = context.read<ThemeBloc>().state.themeMode;
             return Column(
               children: [
+                hiddenApiKeyWidgets(),
                 Expanded(
                   child: ScaffoldMessenger(
                     child: Scaffold(
