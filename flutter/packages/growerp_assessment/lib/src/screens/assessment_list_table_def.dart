@@ -28,7 +28,7 @@ TableData getAssessmentListTableData(Bloc bloc, String classificationId,
       width: isPhone ? 10 : 5,
       value: CircleAvatar(
         child: Text(
-          item.pseudoId.lastChar(3),
+          (item.pseudoId ?? item.assessmentId ?? 'N/A').lastChar(3),
           key: const Key('assessmentItem'),
         ),
       ),
@@ -40,7 +40,8 @@ TableData getAssessmentListTableData(Bloc bloc, String classificationId,
           key: Key('item$index'),
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(item.pseudoId, key: Key('id$index')),
+            Text(item.pseudoId ?? item.assessmentId ?? 'N/A',
+                key: Key('id$index')),
             Text(item.assessmentName.truncate(18), key: Key('name$index')),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
@@ -68,7 +69,7 @@ TableData getAssessmentListTableData(Bloc bloc, String classificationId,
         name: const Text('ID', textAlign: TextAlign.start),
         width: 8,
         value: Text(
-          item.pseudoId,
+          item.pseudoId ?? item.assessmentId ?? 'N/A',
           key: Key('id$index'),
         )));
     rowContent.add(TableRowContent(

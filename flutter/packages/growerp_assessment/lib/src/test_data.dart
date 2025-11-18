@@ -24,27 +24,27 @@ List<LandingPage> landingPages = [
     headline: 'Are you ready to unlock your business\'s full potential?',
     subheading:
         'Answer a few questions to find out why you might be facing challenges and what steps you need to take to guarantee success.',
-    hookType: 'ResultsHook',
-    ctaActionType: 'assessment',
-    status: 'Active',
-    privacyPolicyUrl: 'https://www.growerp.com/privacy',
+    hookType: null,
+    ctaActionType: null,
+    status: 'Draft',
+    privacyPolicyUrl: null,
   ),
   const LandingPage(
     pseudoId: 'test-landing-page-2',
     title: 'Test Landing Page 2',
     headline: 'Transform Your Business Today',
     subheading: 'Discover how our solutions can help you grow',
-    hookType: 'PainPoint',
-    ctaActionType: 'form',
-    status: 'Active',
+    hookType: null,
+    ctaActionType: null,
+    status: 'Draft',
   ),
   const LandingPage(
     pseudoId: 'test-landing-page-3',
     title: 'Test Landing Page 3',
     headline: 'Scale Your Operations Efficiently',
     subheading: 'Learn the best practices for business growth',
-    hookType: 'Benefit',
-    ctaActionType: 'assessment',
+    hookType: null,
+    ctaActionType: null,
     status: 'Draft',
   ),
 ];
@@ -52,7 +52,6 @@ List<LandingPage> landingPages = [
 /// Assessment test data
 List<Assessment> assessments = [
   const Assessment(
-    assessmentId: 'ASMT_BUSI_READ_001',
     pseudoId: 'business-readiness-assessment',
     assessmentName: 'Business Readiness Assessment',
     description:
@@ -60,14 +59,12 @@ List<Assessment> assessments = [
     status: 'Active',
   ),
   const Assessment(
-    assessmentId: 'ASSESSMENT_TEST_002',
     pseudoId: 'test-assessment-2',
     assessmentName: 'Marketing Readiness Assessment',
     description: 'Evaluate your marketing capabilities and strategies',
     status: 'Active',
   ),
   const Assessment(
-    assessmentId: 'ASSESSMENT_TEST_003',
     pseudoId: 'test-assessment-3',
     assessmentName: 'Digital Transformation Assessment',
     description: 'Assess your digital maturity and transformation readiness',
@@ -83,8 +80,8 @@ List<LandingPage> updatedLandingPages = [
     headline: 'Ready to transform your business operations?',
     subheading:
         'Take our comprehensive assessment to identify growth opportunities',
-    hookType: 'ResultsHook',
-    ctaActionType: 'assessment',
+    hookType: null,
+    ctaActionType: 'Launch Assessment',
     status: 'Active',
     privacyPolicyUrl: 'https://www.growerp.com/privacy-updated',
   ),
@@ -93,8 +90,8 @@ List<LandingPage> updatedLandingPages = [
     title: 'Updated Test Landing Page 2',
     headline: 'Revolutionize Your Business Operations',
     subheading: 'New improved solutions for exponential growth',
-    hookType: 'PainPoint',
-    ctaActionType: 'form',
+    hookType: null,
+    ctaActionType: 'Open URL',
     status: 'Active',
   ),
   const LandingPage(
@@ -102,8 +99,8 @@ List<LandingPage> updatedLandingPages = [
     title: 'Updated Test Landing Page 3',
     headline: 'Master Business Scaling Techniques',
     subheading: 'Advanced strategies for sustainable expansion',
-    hookType: 'Benefit',
-    ctaActionType: 'assessment',
+    hookType: null,
+    ctaActionType: 'Launch Assessment',
     status: 'Active',
   ),
 ];
@@ -111,7 +108,6 @@ List<LandingPage> updatedLandingPages = [
 /// Updated assessments for testing
 List<Assessment> updatedAssessments = [
   const Assessment(
-    assessmentId: 'ASMT_BUSI_READ_001',
     pseudoId: 'business-readiness-assessment',
     assessmentName: 'Updated Business Readiness Assessment',
     description:
@@ -119,14 +115,12 @@ List<Assessment> updatedAssessments = [
     status: 'Active',
   ),
   const Assessment(
-    assessmentId: 'ASSESSMENT_TEST_002',
     pseudoId: 'test-assessment-2',
     assessmentName: 'Updated Marketing Readiness Assessment',
     description: 'Enhanced marketing evaluation with new criteria',
     status: 'Active',
   ),
   const Assessment(
-    assessmentId: 'ASSESSMENT_TEST_003',
     pseudoId: 'test-assessment-3',
     assessmentName: 'Updated Digital Transformation Assessment',
     description: 'Comprehensive digital maturity assessment',

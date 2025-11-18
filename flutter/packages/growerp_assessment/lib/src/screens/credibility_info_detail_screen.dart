@@ -96,7 +96,7 @@ class CredibilityInfoDetailScreenState
     });
   }
 
-  void _saveCredibility() {
+  void _saveCredibility() async {
     if (!_formKey.currentState!.validate()) {
       return;
     }
@@ -114,6 +114,7 @@ class CredibilityInfoDetailScreenState
         ),
       );
     } else {
+      // First update the credibility info
       credibilityBloc.add(
         CredibilityInfoUpdate(
           landingPageId: widget.landingPageId,
@@ -124,8 +125,36 @@ class CredibilityInfoDetailScreenState
         ),
       );
 
-      // TODO: Handle statistics create/update/delete
-      // For now, this is a placeholder for statistics management
+      // Then handle NEW statistics only (those without an ID)
+      // Wait a bit for the update to complete before creating statistics
+      await Future.delayed(const Duration(milliseconds: 500));
+
+      for (var stat in _statistics) {
+        final statId = stat['id'];
+        // Only create statistics that don't have an ID yet
+        if (statId == null || statId.toString().isEmpty) {
+          final controller = stat['controller'] as TextEditingController;
+          if (controller.text.isNotEmpty) {
+            // Parse statistic text into label and value (expecting format "label: value")
+            final parts = controller.text.split(':');
+            final statLabel = parts.isNotEmpty ? parts[0].trim() : 'Stat';
+            final statValue = parts.length > 1
+                ? parts.sublist(1).join(':').trim()
+                : controller.text;
+
+            credibilityBloc.add(
+              CredibilityStatisticCreate(
+                landingPageId: widget.landingPageId,
+                statLabel: statLabel,
+                statValue: statValue,
+              ),
+            );
+
+            // Small delay between each statistic to avoid race conditions
+            await Future.delayed(const Duration(milliseconds: 100));
+          }
+        }
+      }
     }
   }
 

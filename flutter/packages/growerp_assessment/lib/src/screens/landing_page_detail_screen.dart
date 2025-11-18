@@ -39,6 +39,14 @@ String? _normalizeHookType(String? hookType) {
   return null;
 }
 
+/// Capitalizes first letter and lowercases the rest
+/// Backend returns formats like 'DRAFT', 'ACTIVE'
+/// Dropdown expects: 'Draft', 'Active'
+String _capitalizeFirst(String text) {
+  if (text.isEmpty) return text;
+  return text[0].toUpperCase() + text.substring(1).toLowerCase();
+}
+
 class LandingPageDetailScreen extends StatefulWidget {
   final LandingPage landingPage;
 
@@ -57,6 +65,9 @@ class LandingPageDetailScreenState extends State<LandingPageDetailScreen> {
   late double top;
   double? right;
   late bool isVisible;
+
+  // Form key
+  final _formKey = GlobalKey<FormState>();
 
   // Form controllers
   late TextEditingController _pseudoIdController;
@@ -96,7 +107,7 @@ class LandingPageDetailScreenState extends State<LandingPageDetailScreen> {
         TextEditingController(text: widget.landingPage.ctaButtonLink ?? '');
     _assessmentSearchBoxController = TextEditingController();
 
-    _selectedStatus = widget.landingPage.status.toUpperCase();
+    _selectedStatus = _capitalizeFirst(widget.landingPage.status);
     _selectedHookType = _normalizeHookType(widget.landingPage.hookType);
     _selectedCtaActionType = widget.landingPage.ctaActionType ?? 'assessment';
     _selectedCtaAssessmentId = widget.landingPage.ctaAssessmentId;
@@ -260,6 +271,7 @@ class LandingPageDetailScreenState extends State<LandingPageDetailScreen> {
 
   Widget _buildContent() {
     return Form(
+      key: _formKey,
       child: SingleChildScrollView(
         controller: _scrollController,
         key: const Key('landingPageDetailListView'),
@@ -282,12 +294,6 @@ class LandingPageDetailScreenState extends State<LandingPageDetailScreen> {
                           key: const Key('id'),
                           decoration: const InputDecoration(labelText: 'ID'),
                           controller: _pseudoIdController,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'ID is required';
-                            }
-                            return null;
-                          },
                         ),
                       ),
                       const SizedBox(width: 10),
@@ -297,8 +303,8 @@ class LandingPageDetailScreenState extends State<LandingPageDetailScreen> {
                           decoration:
                               const InputDecoration(labelText: 'Status'),
                           hint: const Text('Select status'),
-                          initialValue: _selectedStatus.toUpperCase(),
-                          items: ['DRAFT', 'ACTIVE', 'INACTIVE', 'PUBLISHED']
+                          initialValue: _selectedStatus,
+                          items: ['Draft', 'Active', 'Inactive', 'Published']
                               .map((item) {
                             return DropdownMenuItem<String>(
                               value: item,
@@ -307,7 +313,7 @@ class LandingPageDetailScreenState extends State<LandingPageDetailScreen> {
                           }).toList(),
                           onChanged: (String? newValue) {
                             setState(() {
-                              _selectedStatus = newValue ?? 'DRAFT';
+                              _selectedStatus = newValue ?? 'Draft';
                             });
                           },
                           isExpanded: true,
@@ -724,6 +730,10 @@ class LandingPageDetailScreenState extends State<LandingPageDetailScreen> {
               child: Text(
                   widget.landingPage.landingPageId == null ? 'Create' : 'Save'),
               onPressed: () async {
+                if (_formKey.currentState?.validate() != true) {
+                  return;
+                }
+
                 updatedLandingPage = widget.landingPage.copyWith(
                   pseudoId: _pseudoIdController.text,
                   title: _titleController.text,

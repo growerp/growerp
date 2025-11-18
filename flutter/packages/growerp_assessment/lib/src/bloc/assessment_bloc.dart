@@ -126,7 +126,13 @@ class AssessmentBloc extends Bloc<AssessmentEvent, AssessmentState> {
     try {
       emit(state.copyWith(status: AssessmentStatus.loading));
 
+      // Only send pseudoId if it's not null and not empty
+      final pseudoId = event.assessment.pseudoId?.isNotEmpty == true
+          ? event.assessment.pseudoId
+          : null;
+
       final assessment = await restClient.createAssessment(
+        pseudoId: pseudoId,
         assessmentName: event.assessment.assessmentName,
         description: event.assessment.description,
         status: event.assessment.status,
@@ -152,10 +158,15 @@ class AssessmentBloc extends Bloc<AssessmentEvent, AssessmentState> {
     try {
       emit(state.copyWith(status: AssessmentStatus.loading));
 
+      // Only send pseudoId if it's not null and not empty
+      final pseudoId = event.assessment.pseudoId?.isNotEmpty == true
+          ? event.assessment.pseudoId
+          : null;
+
       final assessment = await restClient
           .updateAssessment(
-            assessmentId: event.assessment.assessmentId,
-            pseudoId: event.assessment.pseudoId,
+            assessmentId: event.assessment.assessmentId ?? '',
+            pseudoId: pseudoId,
             assessmentName: event.assessment.assessmentName,
             description: event.assessment.description,
             status: event.assessment.status,
@@ -197,7 +208,7 @@ class AssessmentBloc extends Bloc<AssessmentEvent, AssessmentState> {
       emit(state.copyWith(status: AssessmentStatus.loading));
 
       await restClient.deleteAssessment(
-        assessmentId: event.assessment.assessmentId,
+        assessmentId: event.assessment.assessmentId ?? '',
       );
 
       final updatedAssessments = state.assessments

@@ -164,12 +164,34 @@ class CredibilityBloc extends Bloc<CredibilityEvent, CredibilityState> {
             '${event.statLabel}: ${event.statValue}', // Combine label and value
       );
 
+      // Convert the response to CredibilityStatistic
+      final statisticObj = CredibilityStatistic.fromJson(newStatistic);
+
+      // Update the credibilityElements list with the new statistic
+      final updatedElements = state.credibilityElements.map((credInfo) {
+        if (credInfo.credibilityInfoId == credibilityId) {
+          // Create a new CredibilityInfo with the updated statistics list
+          final currentStats = credInfo.statistics ?? [];
+          final newStats = [...currentStats, statisticObj];
+          return CredibilityInfo(
+            credibilityInfoId: credInfo.credibilityInfoId,
+            pseudoId: credInfo.pseudoId,
+            creatorBio: credInfo.creatorBio,
+            backgroundText: credInfo.backgroundText,
+            creatorImageUrl: credInfo.creatorImageUrl,
+            statistics: newStats,
+          );
+        }
+        return credInfo;
+      }).toList();
+
       final updatedStatistics =
           List<Map<String, dynamic>>.from(state.credibilityStatistics)
             ..add(newStatistic as Map<String, dynamic>);
 
       emit(state.copyWith(
         status: CredibilityStatus.success,
+        credibilityElements: updatedElements,
         credibilityStatistics: updatedStatistics,
         message: 'Credibility statistic created successfully',
       ));

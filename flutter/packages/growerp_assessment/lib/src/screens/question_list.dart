@@ -136,45 +136,38 @@ class QuestionListScreenState extends State<QuestionListScreen> {
                     '${question.options?.length ?? 0} options',
                     style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                   ),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.delete, color: Colors.red),
-                        onPressed: () async {
-                          final confirmed = await showDialog<bool>(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return AlertDialog(
-                                title: const Text('Delete Question'),
-                                content: const Text(
-                                  'Are you sure you want to delete this question?',
-                                ),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () =>
-                                        Navigator.of(context).pop(false),
-                                    child: const Text('Cancel'),
-                                  ),
-                                  TextButton(
-                                    onPressed: () =>
-                                        Navigator.of(context).pop(true),
-                                    child: const Text('Delete'),
-                                  ),
-                                ],
-                              );
-                            },
+                  trailing: IconButton(
+                    icon: const Icon(Icons.delete, color: Colors.red),
+                    onPressed: () async {
+                      final confirmed = await showDialog<bool>(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: const Text('Delete Question'),
+                            content: const Text(
+                              'Are you sure you want to delete this question?',
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () =>
+                                    Navigator.of(context).pop(false),
+                                child: const Text('Cancel'),
+                              ),
+                              TextButton(
+                                onPressed: () =>
+                                    Navigator.of(context).pop(true),
+                                child: const Text('Delete'),
+                              ),
+                            ],
                           );
-                          if (confirmed == true) {
-                            _questionBloc.add(
-                              QuestionDelete(
-                                  question.assessmentQuestionId ?? ''),
-                            );
-                          }
                         },
-                      ),
-                      const Icon(Icons.drag_handle),
-                    ],
+                      );
+                      if (confirmed == true) {
+                        _questionBloc.add(
+                          QuestionDelete(question.assessmentQuestionId ?? ''),
+                        );
+                      }
+                    },
                   ),
                   onTap: () async {
                     await showDialog(

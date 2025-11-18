@@ -198,6 +198,10 @@ class CredibilityInfoListScreenState extends State<CredibilityInfoListScreen> {
                         );
                       },
                     );
+                    // Reload credibility data after dialog closes to show any new statistics
+                    _credibilityBloc.add(
+                      CredibilityLoad(landingPageId: widget.landingPageId),
+                    );
                   },
                 ),
               );

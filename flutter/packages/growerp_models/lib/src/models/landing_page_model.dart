@@ -31,8 +31,7 @@ class LandingPage {
   @JsonKey(defaultValue: 'unknown')
   final String? pseudoId;
 
-  /// Landing page title
-  @JsonKey(defaultValue: 'Unnamed Page')
+  /// Landing page title (mandatory)
   final String title;
 
   /// Hook type: frustration, results, custom

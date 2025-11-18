@@ -183,9 +183,12 @@ class QuestionDetailScreenState extends State<QuestionDetailScreen> {
                 Colors.red,
               );
             }
-            if (state.status == QuestionStatus.success &&
-                (state.message ?? '').isNotEmpty) {
-              Navigator.of(context).pop();
+            if (state.status == QuestionStatus.success) {
+              // Close dialog on successful create/update
+              final message = state.message ?? '';
+              if (message.contains('created') || message.contains('updated')) {
+                Navigator.of(context).pop();
+              }
             }
           },
           builder: (context, state) {
@@ -264,121 +267,123 @@ class QuestionDetailScreenState extends State<QuestionDetailScreen> {
                     ),
                     const SizedBox(height: 24),
 
-                    // Options Section
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          'Answer Options',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        ElevatedButton.icon(
-                          key: const Key('addOption'),
-                          onPressed: _addOption,
-                          icon: const Icon(Icons.add),
-                          label: const Text('Add Option'),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    const Text(
-                      'Add answer choices with scores for assessment scoring',
-                      style: TextStyle(fontSize: 12, color: Colors.grey),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Options List
-                    if (_options.isEmpty)
-                      Center(
-                        child: Padding(
-                          padding: const EdgeInsets.all(20),
-                          child: Text(
-                            'No options yet. Add options for multiple choice questions.',
-                            style: TextStyle(color: Colors.grey[600]),
-                          ),
-                        ),
-                      )
-                    else
-                      ..._options.asMap().entries.map((entry) {
-                        final index = entry.key;
-                        final opt = entry.value;
-                        return Card(
-                          margin: const EdgeInsets.only(bottom: 12),
-                          child: Padding(
-                            padding: const EdgeInsets.all(12),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                // Option number badge
-                                CircleAvatar(
-                                  radius: 16,
-                                  child: Text('${index + 1}'),
-                                ),
-                                const SizedBox(width: 12),
-                                // Option text field
-                                Expanded(
-                                  flex: 3,
-                                  child: TextFormField(
-                                    key: Key('optionText$index'),
-                                    controller: opt['textController']
-                                        as TextEditingController,
-                                    decoration: const InputDecoration(
-                                      labelText: 'Option Text',
-                                      border: OutlineInputBorder(),
-                                      isDense: true,
-                                    ),
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'Required';
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                // Score field
-                                Expanded(
-                                  flex: 1,
-                                  child: TextFormField(
-                                    key: Key('optionScore$index'),
-                                    controller: opt['scoreController']
-                                        as TextEditingController,
-                                    decoration: const InputDecoration(
-                                      labelText: 'Score',
-                                      border: OutlineInputBorder(),
-                                      isDense: true,
-                                    ),
-                                    keyboardType:
-                                        const TextInputType.numberWithOptions(
-                                            decimal: true),
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'Required';
-                                      }
-                                      if (double.tryParse(value) == null) {
-                                        return 'Number';
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                // Delete button
-                                IconButton(
-                                  icon: const Icon(Icons.delete,
-                                      color: Colors.red),
-                                  onPressed: () => _removeOption(index),
-                                ),
-                              ],
+                    // Options Section - only show for question types that need options
+                    if (_questionType != 'text' &&
+                        _questionType != 'email') ...[
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            'Answer Options',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
-                        );
-                      }),
+                          ElevatedButton.icon(
+                            key: const Key('addOption'),
+                            onPressed: _addOption,
+                            icon: const Icon(Icons.add),
+                            label: const Text('Add Option'),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      const Text(
+                        'Add answer choices with scores for assessment scoring',
+                        style: TextStyle(fontSize: 12, color: Colors.grey),
+                      ),
+                      const SizedBox(height: 16),
 
-                    const SizedBox(height: 24),
+                      // Options List
+                      if (_options.isEmpty)
+                        Center(
+                          child: Padding(
+                            padding: const EdgeInsets.all(20),
+                            child: Text(
+                              'No options yet. Add options for multiple choice questions.',
+                              style: TextStyle(color: Colors.grey[600]),
+                            ),
+                          ),
+                        )
+                      else
+                        ..._options.asMap().entries.map((entry) {
+                          final index = entry.key;
+                          final opt = entry.value;
+                          return Card(
+                            margin: const EdgeInsets.only(bottom: 12),
+                            child: Padding(
+                              padding: const EdgeInsets.all(12),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // Option number badge
+                                  CircleAvatar(
+                                    radius: 16,
+                                    child: Text('${index + 1}'),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  // Option text field
+                                  Expanded(
+                                    flex: 3,
+                                    child: TextFormField(
+                                      key: Key('optionText$index'),
+                                      controller: opt['textController']
+                                          as TextEditingController,
+                                      decoration: const InputDecoration(
+                                        labelText: 'Option Text',
+                                        border: OutlineInputBorder(),
+                                        isDense: true,
+                                      ),
+                                      validator: (value) {
+                                        if (value == null || value.isEmpty) {
+                                          return 'Required';
+                                        }
+                                        return null;
+                                      },
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  // Score field
+                                  Expanded(
+                                    flex: 1,
+                                    child: TextFormField(
+                                      key: Key('optionScore$index'),
+                                      controller: opt['scoreController']
+                                          as TextEditingController,
+                                      decoration: const InputDecoration(
+                                        labelText: 'Score',
+                                        border: OutlineInputBorder(),
+                                        isDense: true,
+                                      ),
+                                      keyboardType:
+                                          const TextInputType.numberWithOptions(
+                                              decimal: true),
+                                      validator: (value) {
+                                        if (value == null || value.isEmpty) {
+                                          return 'Required';
+                                        }
+                                        if (double.tryParse(value) == null) {
+                                          return 'Number';
+                                        }
+                                        return null;
+                                      },
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  // Delete button
+                                  IconButton(
+                                    icon: const Icon(Icons.delete,
+                                        color: Colors.red),
+                                    onPressed: () => _removeOption(index),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        }),
+                      const SizedBox(height: 24),
+                    ],
 
                     // Save Button
                     Center(
