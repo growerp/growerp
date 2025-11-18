@@ -91,14 +91,14 @@ class QuestionBloc extends Bloc<QuestionEvent, QuestionState> {
       // Update question with options
       final questionWithOptions = newQuestion.copyWith(options: createdOptions);
 
-      final updatedQuestions = List<AssessmentQuestion>.from(state.questions)
-        ..add(questionWithOptions)
-        ..sort((a, b) =>
-            (a.questionSequence ?? 0).compareTo(b.questionSequence ?? 0));
+      // Reload questions from backend to ensure we have all the latest data including options
+      final response = await restClient.getAssessmentQuestions(
+        assessmentId: event.assessmentId,
+      );
 
       emit(state.copyWith(
         status: QuestionStatus.success,
-        questions: updatedQuestions,
+        questions: response.questions,
         selectedQuestion: questionWithOptions,
         message: 'Question created successfully',
       ));
@@ -183,18 +183,14 @@ class QuestionBloc extends Bloc<QuestionEvent, QuestionState> {
       final questionWithOptions =
           updatedQuestion.copyWith(options: finalOptions);
 
-      final updatedQuestions = state.questions
-          .map((question) => question.assessmentQuestionId ==
-                  updatedQuestion.assessmentQuestionId
-              ? questionWithOptions
-              : question)
-          .toList()
-        ..sort((a, b) =>
-            (a.questionSequence ?? 0).compareTo(b.questionSequence ?? 0));
+      // Reload questions from backend to ensure we have all the latest data including options
+      final response = await restClient.getAssessmentQuestions(
+        assessmentId: event.assessmentId,
+      );
 
       emit(state.copyWith(
         status: QuestionStatus.success,
-        questions: updatedQuestions,
+        questions: response.questions,
         selectedQuestion: questionWithOptions,
         message: 'Question updated successfully',
       ));

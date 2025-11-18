@@ -172,16 +172,22 @@ Service definitions for landing page, sections, credibility, and CTA management
       <if condition="search">
         <set field="search" value="%$search%" />
       </if>
-
+      <log message="======search: $search start: $start limit: $limit====" />
       <!-- Build entity find for landing pages -->
       <entity-find entity-name="growerp.landing.LandingPage" list="pagesList" offset="start"
         limit="limit">
         <econdition field-name="ownerPartyId" from="ownerPartyId" />
         <econdition field-name="status" from="status" ignore-if-empty="true" />
-        <econdition field-name="title" operator="like" from="search" ignore-if-empty="true" />
         <econdition field-name="landingPageId" ignore-if-empty="true" />
         <econdition field-name="pseudoId" ignore-if-empty="true" />
-        <econdition field-name="search" ignore-if-empty="true" />
+        <econditions combine="or">
+          <econdition field-name="pseudoId" operator="like" from="search"
+            ignore-if-empty="true" ignore-case="true" />
+          <econdition field-name="headline" operator="like" from="search"
+            ignore-if-empty="true" ignore-case="true" />
+          <econdition field-name="title" operator="like" from="search"
+            ignore-if-empty="true" ignore-case="true" />
+        </econditions>
         <order-by field-name="-lastModifiedDate" />
       </entity-find>
 
@@ -261,9 +267,41 @@ Service definitions for landing page, sections, credibility, and CTA management
       <parameter name="pseudoId">
         <description>Created landing page tenant-unique ID (user-facing)</description>
       </parameter>
+      <parameter name="title">
+        <description>Landing page title</description>
+      </parameter>
+      <parameter name="hookType">
+        <description>Hook type</description>
+      </parameter>
+      <parameter name="headline">
+        <description>Main headline</description>
+      </parameter>
+      <parameter name="subheading">
+        <description>Subheading</description>
+      </parameter>
+      <parameter name="privacyPolicyUrl">
+        <description>Privacy policy URL</description>
+      </parameter>
+      <parameter name="ctaActionType">
+        <description>CTA action type</description>
+      </parameter>
+      <parameter name="ctaAssessmentId">
+        <description>CTA assessment ID</description>
+      </parameter>
+      <parameter name="ctaButtonLink">
+        <description>CTA button link</description>
+      </parameter>
+      <parameter name="status">
+        <description>Landing page status</description>
+      </parameter>
+      <parameter name="createdDate" type="Timestamp">
+        <description>Creation timestamp</description>
+      </parameter>
+      <parameter name="lastModifiedDate" type="Timestamp">
+        <description>Last modified timestamp</description>
+      </parameter>
     </out-parameters>
     <actions>
-      <log message="=====pseudoId; $pseudoId" />
       <!-- Get owner party ID from authenticated user context -->
       <service-call out-map="context"
         name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
@@ -276,7 +314,7 @@ Service definitions for landing page, sections, credibility, and CTA management
       </if>
 
       <!-- Create landing page record -->
-      <service-call name="create#growerp.landing.LandingPage" out-map="context"
+      <service-call name="create#growerp.landing.LandingPage" out-map="createOut"
         in-map="[
         pseudoId: pseudoId,
         ownerPartyId: ownerPartyId,
@@ -292,6 +330,19 @@ Service definitions for landing page, sections, credibility, and CTA management
         createdDate: ec.user.nowTimestamp,
         lastModifiedDate: ec.user.nowTimestamp
       ]" />
+
+      <set field="landingPageId" from="createOut.landingPageId" />
+
+      <!-- Fetch the complete landing page using list service for consistency -->
+      <service-call name="growerp.100.LandingPageServices100.list#LandingPages"
+        in-map="[landingPageId: landingPageId, limit: 1]" out-map="listOut" />
+
+      <!-- Return the first (and only) landing page from the list -->
+      <if condition="listOut.landingPages">
+        <script>
+          context.putAll(listOut.landingPages[0])
+        </script>
+      </if>
 
       <log level="info"
         message="Created landing page: ${landingPageId} (${pseudoId}) for owner: ${ownerPartyId}" />
@@ -340,6 +391,42 @@ Service definitions for landing page, sections, credibility, and CTA management
       <parameter name="landingPageId">
         <description>Updated landing page ID</description>
       </parameter>
+      <parameter name="pseudoId">
+        <description>Updated landing page tenant-unique ID (user-facing)</description>
+      </parameter>
+      <parameter name="title">
+        <description>Landing page title</description>
+      </parameter>
+      <parameter name="hookType">
+        <description>Hook type</description>
+      </parameter>
+      <parameter name="headline">
+        <description>Main headline</description>
+      </parameter>
+      <parameter name="subheading">
+        <description>Subheading</description>
+      </parameter>
+      <parameter name="privacyPolicyUrl">
+        <description>Privacy policy URL</description>
+      </parameter>
+      <parameter name="ctaActionType">
+        <description>CTA action type</description>
+      </parameter>
+      <parameter name="ctaAssessmentId">
+        <description>CTA assessment ID</description>
+      </parameter>
+      <parameter name="ctaButtonLink">
+        <description>CTA button link</description>
+      </parameter>
+      <parameter name="status">
+        <description>Landing page status</description>
+      </parameter>
+      <parameter name="createdDate" type="Timestamp">
+        <description>Creation timestamp</description>
+      </parameter>
+      <parameter name="lastModifiedDate" type="Timestamp">
+        <description>Last modified timestamp</description>
+      </parameter>
     </out-parameters>
     <actions>
       <!-- Get owner party ID from authenticated user context -->
@@ -379,6 +466,17 @@ Service definitions for landing page, sections, credibility, and CTA management
         status: status ?: existingPage.status,
         lastModifiedDate: ec.user.nowTimestamp
       ]" />
+
+      <!-- Fetch the complete landing page using list service for consistency -->
+      <service-call name="growerp.100.LandingPageServices100.list#LandingPages"
+        in-map="[landingPageId: landingPageId, limit: 1]" out-map="listOut" />
+
+      <!-- Return the first (and only) landing page from the list -->
+      <if condition="listOut.landingPages">
+        <script>
+          context.putAll(listOut.landingPages[0])
+        </script>
+      </if>
 
       <log level="info" message="Updated landing page: ${landingPageId} for owner: ${ownerPartyId}" />
     </actions>
@@ -538,8 +636,29 @@ Service definitions for landing page, sections, credibility, and CTA management
       <parameter name="pageSectionId">
         <description>Created section ID</description>
       </parameter>
+      <parameter name="landingPageSectionId">
+        <description>Created section ID (alias for pageSectionId)</description>
+      </parameter>
       <parameter name="pseudoId">
         <description>Created section pseudoId</description>
+      </parameter>
+      <parameter name="landingPageId">
+        <description>Landing page ID</description>
+      </parameter>
+      <parameter name="sectionTitle">
+        <description>Section title</description>
+      </parameter>
+      <parameter name="sectionDescription">
+        <description>Section description</description>
+      </parameter>
+      <parameter name="sectionImageUrl">
+        <description>Section image URL</description>
+      </parameter>
+      <parameter name="sectionSequence" type="Integer">
+        <description>Section sequence</description>
+      </parameter>
+      <parameter name="createdDate" type="Timestamp">
+        <description>Creation timestamp</description>
       </parameter>
     </out-parameters>
     <actions>
@@ -580,7 +699,7 @@ Service definitions for landing page, sections, credibility, and CTA management
       <set field="pseudoId" from="'section_' + System.currentTimeMillis()" />
 
       <!-- Create page section record -->
-      <service-call name="create#growerp.landing.PageSection" out-map="context"
+      <service-call name="create#growerp.landing.PageSection" out-map="createOut"
         in-map="[
         pageSectionId: pageSectionId,
         pseudoId: pseudoId,
@@ -591,6 +710,18 @@ Service definitions for landing page, sections, credibility, and CTA management
         sectionSequence: sectionSequence,
         createdDate: ec.user.nowTimestamp
       ]" />
+
+      <!-- Fetch the complete section record to return all fields -->
+      <entity-find-one entity-name="growerp.landing.PageSection" value-field="pageSection">
+        <field-map field-name="pageSectionId" from="pageSectionId" />
+      </entity-find-one>
+
+      <!-- Map all fields including landingPageSectionId alias -->
+      <script>
+        Map sectionMap = pageSection.getMap()
+        sectionMap.put('landingPageSectionId', pageSection.pageSectionId)
+        context.putAll(sectionMap)
+      </script>
 
       <log level="info" message="Created page section: ${pageSectionId} for page: ${landingPageId}" />
     </actions>
@@ -892,6 +1023,24 @@ Service definitions for landing page, sections, credibility, and CTA management
       <parameter name="pseudoId">
         <description>Created credibility pseudoId</description>
       </parameter>
+      <parameter name="landingPageId">
+        <description>Landing page ID</description>
+      </parameter>
+      <parameter name="creatorBio">
+        <description>Creator bio text</description>
+      </parameter>
+      <parameter name="backgroundText">
+        <description>Background text</description>
+      </parameter>
+      <parameter name="creatorImageUrl">
+        <description>Creator image URL</description>
+      </parameter>
+      <parameter name="createdDate" type="Timestamp">
+        <description>Creation timestamp</description>
+      </parameter>
+      <parameter name="lastModifiedDate" type="Timestamp">
+        <description>Last modified timestamp</description>
+      </parameter>
     </out-parameters>
     <actions>
       <!-- Get owner party ID from authenticated user context -->
@@ -908,23 +1057,13 @@ Service definitions for landing page, sections, credibility, and CTA management
         <return error="true" message="Landing page not found or access denied" />
       </if>
 
-      <!-- Check if credibility info already exists for this page -->
-      <entity-find entity-name="CredibilityInfo" list="existingCredibility">
-        <econdition field-name="landingPageId" from="landingPageId" />
-      </entity-find>
-
-      <if condition="existingCredibility">
-        <return error="true"
-          message="Credibility info already exists for this page. Use update instead." />
-      </if>
-
       <!-- Generate unique IDs -->
       <set field="credibilityInfoId"
         from="ec.entity.sequencedIdPrimary('growerp.landing.CredibilityInfo', null, null)" />
       <set field="pseudoId" from="'cred_' + System.currentTimeMillis()" />
 
       <!-- Create credibility info record -->
-      <service-call name="create#growerp.landing.CredibilityInfo" out-map="context"
+      <service-call name="create#growerp.landing.CredibilityInfo" out-map="createOut"
         in-map="[
         credibilityInfoId: credibilityInfoId,
         pseudoId: pseudoId,
@@ -934,6 +1073,22 @@ Service definitions for landing page, sections, credibility, and CTA management
         creatorImageUrl: creatorImageUrl,
         createdDate: ec.user.nowTimestamp
       ]" />
+
+      <!-- Fetch the complete credibility record with statistics using get service -->
+      <service-call name="growerp.100.LandingPageServices100.get#CredibilityInfo"
+        in-map="[landingPageId: landingPageId]" out-map="credOut" />
+
+      <!-- Find and return the credibility info we just created -->
+      <script>
+        if (credOut.credibilityInfoList) {
+          for (def credInfo : credOut.credibilityInfoList) {
+            if (credInfo.credibilityInfoId == credibilityInfoId) {
+              context.putAll(credInfo)
+              break
+            }
+          }
+        }
+      </script>
 
       <log level="info"
         message="Created credibility info: ${credibilityInfoId} for page: ${landingPageId}" />
@@ -960,6 +1115,27 @@ Service definitions for landing page, sections, credibility, and CTA management
     <out-parameters>
       <parameter name="credibilityInfoId">
         <description>Updated credibility ID</description>
+      </parameter>
+      <parameter name="pseudoId">
+        <description>Credibility pseudoId</description>
+      </parameter>
+      <parameter name="landingPageId">
+        <description>Landing page ID</description>
+      </parameter>
+      <parameter name="creatorBio">
+        <description>Creator bio text</description>
+      </parameter>
+      <parameter name="backgroundText">
+        <description>Background text</description>
+      </parameter>
+      <parameter name="creatorImageUrl">
+        <description>Creator image URL</description>
+      </parameter>
+      <parameter name="createdDate" type="Timestamp">
+        <description>Creation timestamp</description>
+      </parameter>
+      <parameter name="lastModifiedDate" type="Timestamp">
+        <description>Last modified timestamp</description>
       </parameter>
     </out-parameters>
     <actions>
@@ -992,8 +1168,25 @@ Service definitions for landing page, sections, credibility, and CTA management
         credibilityInfoId: credibilityInfoId,
         creatorBio: creatorBio ?: existingCredibility.creatorBio,
         backgroundText: backgroundText,
-        creatorImageUrl: creatorImageUrl
+        creatorImageUrl: creatorImageUrl,
+        lastModifiedDate: ec.user.nowTimestamp
       ]" />
+
+      <!-- Fetch the complete credibility record with statistics using get service -->
+      <service-call name="growerp.100.LandingPageServices100.get#CredibilityInfo"
+        in-map="[landingPageId: existingCredibility.landingPageId]" out-map="credOut" />
+
+      <!-- Find and return the credibility info we just updated -->
+      <script>
+        if (credOut.credibilityInfoList) {
+          for (def credInfo : credOut.credibilityInfoList) {
+            if (credInfo.credibilityInfoId == credibilityInfoId) {
+              context.putAll(credInfo)
+              break
+            }
+          }
+        }
+      </script>
 
       <log level="info"
         message="Updated credibility info: ${credibilityInfoId} for owner: ${ownerPartyId}" />
@@ -1066,8 +1259,11 @@ Service definitions for landing page, sections, credibility, and CTA management
   <service verb="add" noun="CredibilityStatistic" authenticate="true">
     <description>Add a supporting statistic to credibility section. Owner party ID is automatically determined from authenticated user context.</description>
     <in-parameters>
-      <parameter name="credibilityInfoId" type="String" required="true">
+      <parameter name="credibilityInfoId" type="String">
         <description>Credibility ID</description>
+      </parameter>
+      <parameter name="credibilityId" type="String">
+        <description>Credibility ID (alias for credibilityInfoId)</description>
       </parameter>
       <parameter name="statistic" type="String" required="true">
         <description>Statistic text (e.g., "100+ customers")</description>
@@ -1077,16 +1273,50 @@ Service definitions for landing page, sections, credibility, and CTA management
       <parameter name="credibilityStatisticId">
         <description>Created statistic ID</description>
       </parameter>
+      <parameter name="pseudoId">
+        <description>Statistic pseudoId</description>
+      </parameter>
+      <parameter name="credibilityInfoId">
+        <description>Credibility info ID</description>
+      </parameter>
+      <parameter name="statistic">
+        <description>Statistic text</description>
+      </parameter>
+      <parameter name="sequence" type="Integer">
+        <description>Display sequence</description>
+      </parameter>
+      <parameter name="createdDate" type="Timestamp">
+        <description>Creation timestamp</description>
+      </parameter>
     </out-parameters>
     <actions>
+      <log level="warn" message="========== ADD CREDIBILITY STATISTIC SERVICE CALLED ==========" />
+      <log level="warn"
+        message="credibilityInfoId: ${credibilityInfoId}, credibilityId: ${credibilityId}, statistic: ${statistic}" />
+
       <!-- Get owner party ID from authenticated user context -->
       <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
         out-map="context" />
+
+      <log level="warn" message="ownerPartyId: ${ownerPartyId}" />
+
+      <!-- Handle both credibilityInfoId and credibilityId parameter names -->
+      <if condition="!credibilityInfoId &amp;&amp; credibilityId">
+        <set field="credibilityInfoId" from="credibilityId" />
+        <log level="warn" message="Using credibilityId as credibilityInfoId: ${credibilityInfoId}" />
+      </if>
+
+      <if condition="!credibilityInfoId">
+        <log level="error" message="No credibilityInfoId or credibilityId provided!" />
+        <return error="true" message="credibilityInfoId or credibilityId is required" />
+      </if>
 
       <!-- Verify credibility info exists and belongs to owner's landing page -->
       <entity-find-one entity-name="CredibilityInfo" value-field="credibilityInfo">
         <field-map field-name="credibilityInfoId" from="credibilityInfoId" />
       </entity-find-one>
+
+      <log level="warn" message="Found credibilityInfo: ${credibilityInfo}" />
 
       <if condition="!credibilityInfo">
         <return error="true" message="Credibility info not found" />
@@ -1102,18 +1332,47 @@ Service definitions for landing page, sections, credibility, and CTA management
         <return error="true" message="Access denied to this credibility info" />
       </if>
 
-      <!-- Generate unique ID -->
+      <!-- Auto-increment sequence if not provided -->
+      <!-- Find the highest existing sequence number for this credibility info -->
+      <entity-find entity-name="growerp.landing.CredibilityStatistic" list="existingStatistics">
+        <econdition field-name="credibilityInfoId" from="credibilityInfoId" />
+        <select-field field-name="sequence" />
+        <order-by field-name="-sequence" />
+      </entity-find>
+      <!-- Set to max + 1, or 1 if no statistics exist -->
+      <if condition="existingStatistics &amp;&amp; existingStatistics[0].sequence != null">
+        <set field="sequence" from="existingStatistics[0].sequence + 1" />
+        <else>
+          <set field="sequence" value="1" type="Integer" />
+        </else>
+      </if>
+
+      <!-- Generate unique IDs -->
       <set field="credibilityStatisticId"
         from="ec.entity.sequencedIdPrimary('growerp.landing.CredibilityStatistic', null, null)" />
+      <set field="pseudoId" from="'stat_' + System.currentTimeMillis()" />
 
       <!-- Create statistic record -->
-      <service-call name="create#growerp.landing.CredibilityStatistic" out-map="context"
+      <service-call name="create#growerp.landing.CredibilityStatistic" out-map="createOut"
         in-map="[
         credibilityStatisticId: credibilityStatisticId,
+        pseudoId: pseudoId,
         credibilityInfoId: credibilityInfoId,
         statistic: statistic,
+        sequence: sequence,
         createdDate: ec.user.nowTimestamp
       ]" />
+
+      <!-- Fetch the complete statistic record to return all fields -->
+      <entity-find-one entity-name="growerp.landing.CredibilityStatistic"
+        value-field="statisticRecord">
+        <field-map field-name="credibilityStatisticId" from="credibilityStatisticId" />
+      </entity-find-one>
+
+      <!-- Map all fields to context -->
+      <script>
+        context.putAll(statisticRecord.getMap())
+      </script>
 
       <log level="info"
         message="Added credibility statistic: ${credibilityStatisticId} for credibility: ${credibilityInfoId}" />

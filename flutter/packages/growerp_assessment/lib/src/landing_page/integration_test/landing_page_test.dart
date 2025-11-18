@@ -97,11 +97,12 @@ class LandingPageTest {
 
       // Wait for the detail screen dialog to appear
       await tester.pumpAndSettle();
-      
+
       // Check for the detail screen (key varies based on pseudoId)
-      final expectedKey = page.landingPageId == null || page.landingPageId == 'unknown'
-          ? 'LandingPageDetailnull'
-          : 'LandingPageDetail${page.pseudoId}';
+      final expectedKey =
+          page.landingPageId == null || page.landingPageId == 'unknown'
+              ? 'LandingPageDetailnull'
+              : 'LandingPageDetail${page.pseudoId}';
       expect(find.byKey(Key(expectedKey)), findsOneWidget);
 
       // Enter basic info
@@ -136,12 +137,12 @@ class LandingPageTest {
       // Save the landing page
       await CommonTest.dragUntil(
         tester,
-        key: 'update',
+        key: 'landingPageDetailSave',
         listViewName: 'landingPageDialogListView',
       );
       await CommonTest.tapByKey(
         tester,
-        'update',
+        'landingPageDetailSave',
         seconds: CommonTest.waitTime,
       );
       await CommonTest.waitForSnackbarToGo(tester);
@@ -167,8 +168,9 @@ class LandingPageTest {
     for (LandingPage page in test.landingPages) {
       await CommonTest.doNewSearch(tester, searchString: page.title);
 
-      // Check detail
-      expect(find.byKey(const Key('LandingPageDialog')), findsOneWidget);
+      // Check detail - the dialog key is LandingPageDetail${pseudoId}
+      expect(
+          find.byKey(Key('LandingPageDetail${page.pseudoId}')), findsOneWidget);
       expect(CommonTest.getTextFormField('title'), equals(page.title));
 
       if (page.headline != null) {

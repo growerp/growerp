@@ -184,10 +184,14 @@ class LandingPageListState extends State<LandingPageList> {
             );
           } else {
             landingPages = state.landingPages;
-            if (landingPages.isNotEmpty) {
+            if (landingPages.isNotEmpty && _scrollController.hasClients) {
               Future.delayed(const Duration(milliseconds: 100), () {
                 WidgetsBinding.instance.addPostFrameCallback(
-                  (_) => _scrollController.jumpTo(currentScroll),
+                  (_) {
+                    if (_scrollController.hasClients) {
+                      _scrollController.jumpTo(currentScroll);
+                    }
+                  },
                 );
               });
             }
@@ -253,7 +257,7 @@ class LandingPageListState extends State<LandingPageList> {
                                   value: _landingPageBloc,
                                   child: const LandingPageDetailScreen(
                                     landingPage: LandingPage(
-                                      title: 'New Landing Page',
+                                      title: '',
                                       status: 'DRAFT',
                                     ),
                                   ),
@@ -389,9 +393,12 @@ class SearchLandingPageListState extends State<SearchLandingPageList> {
         title: 'Search Landing Pages',
         child: Column(
           children: [
-            TextField(
+            TextFormField(
+              key: const Key('searchField'),
               controller: searchBoxController,
               focusNode: searchFocusNode,
+              textInputAction: TextInputAction.search,
+              autofocus: true,
               decoration: InputDecoration(
                 labelText: 'Search landing pages',
                 border: const OutlineInputBorder(),
@@ -400,7 +407,7 @@ class SearchLandingPageListState extends State<SearchLandingPageList> {
                   onPressed: () => searchBoxController.clear(),
                 ),
               ),
-              onChanged: (value) {
+              onFieldSubmitted: (value) {
                 _landingPageBloc.add(
                   LandingPageLoad(
                     search: value,
@@ -426,6 +433,7 @@ class SearchLandingPageListState extends State<SearchLandingPageList> {
                     itemBuilder: (context, index) {
                       final landingPage = state.landingPages[index];
                       return ListTile(
+                        key: Key('landingPageSearchItem$index'),
                         title: Text(landingPage.title),
                         subtitle: Text(
                           landingPage.pseudoId ?? 'N/A',

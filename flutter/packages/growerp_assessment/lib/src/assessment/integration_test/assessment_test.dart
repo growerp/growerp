@@ -83,14 +83,18 @@ class AssessmentTest {
     List<Assessment> newAssessments = [];
 
     for (Assessment assessment in test.assessments) {
-      if (assessment.assessmentId == 'unknown') {
+      if (assessment.assessmentId == null ||
+          assessment.assessmentId == 'unknown' ||
+          assessment.assessmentId!.isEmpty) {
         // Add new assessment
         await CommonTest.tapByKey(tester, 'addNew');
       } else {
         // Update existing assessment
-        await CommonTest.doNewSearch(tester, searchString: assessment.pseudoId);
+        await CommonTest.doNewSearch(tester,
+            searchString: assessment.pseudoId ?? '');
         expect(
-          CommonTest.getTextField('topHeader').contains(assessment.pseudoId),
+          CommonTest.getTextField('topHeader')
+              .contains(assessment.pseudoId ?? ''),
           true,
         );
       }
@@ -130,7 +134,9 @@ class AssessmentTest {
       await CommonTest.waitForSnackbarToGo(tester);
 
       // Get allocated ID for new assessments
-      if (assessment.assessmentId == 'unknown') {
+      if (assessment.assessmentId == null ||
+          assessment.assessmentId == 'unknown' ||
+          assessment.assessmentId!.isEmpty) {
         await CommonTest.tapByKey(tester, 'item0',
             seconds: CommonTest.waitTime);
         var id = CommonTest.getTextField('topHeader').split('#')[1].trim();

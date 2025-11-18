@@ -348,7 +348,14 @@ class CommonTest {
     await enterText(tester, 'searchField', searchString);
     await tester.testTextInput.receiveAction(TextInputAction.done);
     await tester.pumpAndSettle(const Duration(seconds: waitTime));
-    await tapByText(tester, searchString);
+
+    // Try to tap by key first (for landing pages), then by text as fallback
+    try {
+      await tapByKey(tester, 'landingPageSearchItem0');
+    } catch (_) {
+      // Fallback to tapping by text
+      await tapByText(tester, searchString);
+    }
     await tester.pumpAndSettle(const Duration(seconds: waitTime));
   }
 
@@ -500,11 +507,17 @@ class CommonTest {
       true,
       reason: 'Widget with key "$key" not found after scrolling.',
     );
-    // need sometimes a bit extra drag to make it fully visible
+    // Extra scrolling to ensure element is fully visible and centered
     final listViewFinder = find.byKey(Key(listViewName));
-    if (tester.any(listViewFinder)) {
-      await tester.drag(listViewFinder.last, const Offset(0, -200));
+    for (int i = 0; i < 3; i++) {
+      if (tester.any(listViewFinder)) {
+        await tester.drag(listViewFinder.last, const Offset(0, -150));
+        await tester.pumpAndSettle(const Duration(milliseconds: 50));
+      }
     }
+    // Ensure the widget is visible
+    await tester.ensureVisible(find.byKey(Key(key)));
+    await tester.pumpAndSettle();
   }
 
   /// [lowLevel]
@@ -524,7 +537,17 @@ class CommonTest {
     String value,
   ) async {
     await tester.pump();
-    await tester.enterText(find.byKey(Key(key)), value);
+    // Try to find the widget, if not found wait a bit and try again
+    final finder = find.byKey(Key(key));
+    if (!tester.any(finder)) {
+      // Widget not found, wait and try again
+      await tester.pumpAndSettle();
+      if (!tester.any(finder)) {
+        // Still not found, this is an error
+        throw StateError('Widget with key "$key" not found');
+      }
+    }
+    await tester.enterText(finder, value);
     await tester.pump();
   }
 

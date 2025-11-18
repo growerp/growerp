@@ -251,8 +251,6 @@ class AssessmentListState extends State<AssessmentList> {
                                   value: _assessmentBloc,
                                   child: const AssessmentDetailScreen(
                                     assessment: Assessment(
-                                      assessmentId: '',
-                                      pseudoId: '',
                                       assessmentName: '',
                                       status: 'Active',
                                     ),
@@ -378,7 +376,7 @@ class SearchAssessmentListState extends State<SearchAssessmentList> {
                       return ListTile(
                         title: Text(assessment.assessmentName),
                         subtitle: Text(
-                          assessment.pseudoId,
+                          assessment.pseudoId ?? '',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),

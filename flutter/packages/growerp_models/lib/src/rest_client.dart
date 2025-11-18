@@ -705,6 +705,7 @@ abstract class RestClient {
 
   @POST("rest/s1/growerp/100/Assessment")
   Future<Assessment> createAssessment({
+    @Field() String? pseudoId,
     @Field() required String assessmentName,
     @Field() String? description,
     @Field() String status = 'ACTIVE',

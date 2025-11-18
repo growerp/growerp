@@ -325,13 +325,13 @@ Service definitions for assessment management and completion
     <service verb="create" noun="Assessment" authenticate="true">
         <description>Create new assessment within a tenant. Owner automatically derived from authenticated user context.</description>
         <in-parameters>
-            <parameter name="assessmentName" type="String" required="true">
+            <parameter name="assessmentName" required="true">
                 <description>Name of the assessment</description>
             </parameter>
             <parameter name="description">
                 <description>Description or instructions for the assessment</description>
             </parameter>
-            <parameter name="status" type="String" default-value="ACTIVE">
+            <parameter name="status" default-value="ACTIVE">
                 <description>Status: ACTIVE, INACTIVE, DRAFT</description>
             </parameter>
         </in-parameters>
@@ -399,7 +399,7 @@ Service definitions for assessment management and completion
     <service verb="update" noun="Assessment" authenticate="true">
         <description>Update assessment (name, description, status only). Authorization automatically verified against authenticated user.</description>
         <in-parameters>
-            <parameter name="assessmentId" type="String" required="true">
+            <parameter name="assessmentId" required="true">
                 <description>Assessment ID to update</description>
             </parameter>
             <parameter name="assessmentName">
@@ -455,7 +455,7 @@ Service definitions for assessment management and completion
     <service verb="delete" noun="Assessment" authenticate="true">
         <description>Delete assessment and all related questions, options, thresholds, and results. Authorization automatically verified against authenticated user.</description>
         <in-parameters>
-            <parameter name="assessmentId" type="String" required="true">
+            <parameter name="assessmentId" required="true">
                 <description>Assessment ID to delete</description>
             </parameter>
         </in-parameters>
@@ -529,16 +529,16 @@ Service definitions for assessment management and completion
     <service verb="submit" noun="Assessment" authenticate="false">
         <description>Submit assessment answers, capture lead info, calculate score, determine status. Public endpoint - no authentication required. Consolidates score calculation, result creation, and optional user creation.</description>
         <in-parameters>
-            <parameter name="assessmentId" type="String" required="true">
+            <parameter name="assessmentId" required="true">
                 <description>Assessment ID being submitted</description>
             </parameter>
-            <parameter name="answersData" type="String" required="true">
+            <parameter name="answersData" required="true">
                 <description>JSON with answers: {questionId: optionId, ...}</description>
             </parameter>
-            <parameter name="respondentName" type="String" required="true">
+            <parameter name="respondentName" required="true">
                 <description>Lead name from step 1</description>
             </parameter>
-            <parameter name="respondentEmail" type="String" required="true">
+            <parameter name="respondentEmail" required="true">
                 <description>Lead email from step 1</description>
             </parameter>
             <parameter name="respondentPhone">
@@ -547,7 +547,7 @@ Service definitions for assessment management and completion
             <parameter name="respondentCompany">
                 <description>Lead company from step 1</description>
             </parameter>
-            <parameter name="ownerPartyId" type="String">
+            <parameter name="ownerPartyId">
                 <description>Optional owner party ID. If not provided, will be retrieved from assessment. Used for anonymous submissions to specify which company owns the lead.</description>
             </parameter>
         </in-parameters>
@@ -711,7 +711,7 @@ Service definitions for assessment management and completion
     <service verb="get" noun="Thresholds" authenticate="true">
         <description>Get scoring thresholds that map scores to lead statuses</description>
         <in-parameters>
-            <parameter name="assessmentId" type="String" required="true">
+            <parameter name="assessmentId" required="true">
                 <description>Assessment ID</description>
             </parameter>
         </in-parameters>
@@ -760,7 +760,7 @@ Service definitions for assessment management and completion
     <service verb="get" noun="AssessmentThresholds" authenticate="true">
         <description>Get all thresholds for an assessment</description>
         <in-parameters>
-            <parameter name="assessmentId" type="String" required="true" />
+            <parameter name="assessmentId" required="true" />
         </in-parameters>
         <out-parameters>
             <parameter name="thresholds" type="List">
@@ -792,10 +792,10 @@ Service definitions for assessment management and completion
     <service verb="create" noun="Threshold" authenticate="true">
         <description>Create new threshold</description>
         <in-parameters>
-            <parameter name="assessmentId" type="String" required="true" />
+            <parameter name="assessmentId" required="true" />
             <parameter name="minScore" type="BigDecimal" required="true" />
             <parameter name="maxScore" type="BigDecimal" />
-            <parameter name="interpretation" type="String" required="true" />
+            <parameter name="interpretation" required="true" />
         </in-parameters>
         <out-parameters>
             <parameter name="scoringThresholdId" />
@@ -826,7 +826,7 @@ Service definitions for assessment management and completion
     <service verb="update" noun="Threshold" authenticate="true">
         <description>Update existing threshold</description>
         <in-parameters>
-            <parameter name="scoringThresholdId" type="String" required="true" />
+            <parameter name="scoringThresholdId" required="true" />
             <parameter name="minScore" type="BigDecimal" />
             <parameter name="maxScore" type="BigDecimal" />
             <parameter name="leadStatus" />
@@ -866,7 +866,7 @@ Service definitions for assessment management and completion
     <service verb="delete" noun="Threshold" authenticate="true">
         <description>Delete threshold</description>
         <in-parameters>
-            <parameter name="scoringThresholdId" type="String" required="true" />
+            <parameter name="scoringThresholdId" required="true" />
         </in-parameters>
         <out-parameters>
             <parameter name="deleted" type="Boolean" />
@@ -894,7 +894,7 @@ Service definitions for assessment management and completion
     <service verb="update" noun="Thresholds" authenticate="true">
         <description>Update assessment scoring thresholds</description>
         <in-parameters>
-            <parameter name="assessmentId" type="String" required="true" />
+            <parameter name="assessmentId" required="true" />
             <parameter name="thresholds" type="List" required="true">
                 <description>List of thresholds to create or update</description>
                 <parameter name="thresholdId" />
@@ -943,7 +943,7 @@ Service definitions for assessment management and completion
     <service verb="get" noun="Questions" authenticate="anonymous-all">
         <description>Get all questions for an assessment, with options nested under each question</description>
         <in-parameters>
-            <parameter name="assessmentId" type="String" required="true" />
+            <parameter name="assessmentId" required="true" />
         </in-parameters>
         <out-parameters>
             <parameter name="questions" type="List">
@@ -1047,7 +1047,7 @@ Service definitions for assessment management and completion
     <service verb="get" noun="Question" authenticate="false">
         <description>Get question by ID or list all questions for an assessment. When questionId provided, returns single question. When not provided, returns list of all questions for the assessment. Public endpoint - accessible without authentication.</description>
         <in-parameters>
-            <parameter name="assessmentId" type="String" required="true">
+            <parameter name="assessmentId" required="true">
                 <description>Assessment ID - required for list context</description>
             </parameter>
             <parameter name="questionId">
@@ -1101,7 +1101,7 @@ Service definitions for assessment management and completion
                 <!-- SINGLE QUESTION RETRIEVAL -->
                 <entity-find-one entity-name="growerp.assessment.AssessmentQuestion"
                     value-field="question">
-                    <field-map field-name="questionId" from="questionId" />
+                    <field-map field-name="assessmentQuestionId" from="questionId" />
                     <field-map field-name="assessmentId" from="assessmentId" />
                 </entity-find-one>
 
@@ -1131,13 +1131,13 @@ Service definitions for assessment management and completion
     <service verb="create" noun="Question" authenticate="true">
         <description>Create new question</description>
         <in-parameters>
-            <parameter name="assessmentId" type="String" required="true" />
-            <parameter name="questionText" type="String" required="true">
+            <parameter name="assessmentId" required="true" />
+            <parameter name="questionText" required="true">
                 <description>Question Text</description>
             </parameter>
-            <parameter name="questionType" type="String" default-value="MULTIPLE_CHOICE" />
+            <parameter name="questionType" default-value="MULTIPLE_CHOICE" />
             <parameter name="questionSequence" type="Integer" />
-            <parameter name="isRequired" type="String" default-value="Y" />
+            <parameter name="isRequired" default-value="Y" />
         </in-parameters>
         <out-parameters>
             <parameter name="questionId" />
@@ -1155,10 +1155,8 @@ Service definitions for assessment management and completion
                 in-map="[ownerPartyId: ownerPartyId, seqName: 'AssessmentQuestion']"
                 out-map="context" />
             <set field="pseudoId" from="seqNum" />
-            <set field="questionId" from="seqNum" />
 
             <service-call name="create#growerp.assessment.AssessmentQuestion" out-map="questionOut">
-                <field-map field-name="questionId" from="questionId" />
                 <field-map field-name="assessmentId" from="assessmentId" />
                 <field-map field-name="pseudoId" from="pseudoId" />
                 <field-map field-name="questionText" from="questionText" />
@@ -1169,7 +1167,7 @@ Service definitions for assessment management and completion
                 <field-map field-name="createdByUserLogin" from="ec.user.username" />
             </service-call>
 
-            <set field="questionId" from="questionOut.questionId" />
+            <set field="questionId" from="questionOut.assessmentQuestionId" />
         </actions>
     </service>
 
@@ -1177,8 +1175,8 @@ Service definitions for assessment management and completion
     <service verb="update" noun="Question" authenticate="true">
         <description>Update existing question</description>
         <in-parameters>
-            <parameter name="assessmentId" type="String" required="true" />
-            <parameter name="questionId" type="String" required="true" />
+            <parameter name="assessmentId" required="true" />
+            <parameter name="questionId" required="true" />
             <parameter name="questionText" />
             <parameter name="questionType" />
             <parameter name="questionSequence" type="Integer" />
@@ -1193,7 +1191,7 @@ Service definitions for assessment management and completion
 
             <!-- Verify question exists and user has access -->
             <entity-find entity-name="growerp.assessment.AssessmentQuestion" list="questionList">
-                <econdition field-name="questionId" from="questionId" />
+                <econdition field-name="assessmentQuestionId" from="questionId" />
                 <econdition field-name="assessmentId" from="assessmentId" />
             </entity-find>
 
@@ -1201,7 +1199,8 @@ Service definitions for assessment management and completion
                 <return error="true" message="Question not found" />
             </if>
 
-            <set field="updateMap" from="[questionId: questionId, assessmentId: assessmentId]" />
+            <set field="updateMap"
+                from="[assessmentQuestionId: questionId, assessmentId: assessmentId]" />
             <if condition="questionText">
                 <set field="updateMap.questionText" from="questionText" />
             </if>
@@ -1223,8 +1222,8 @@ Service definitions for assessment management and completion
     <service verb="delete" noun="Question" authenticate="true">
         <description>Delete question and all its options</description>
         <in-parameters>
-            <parameter name="assessmentId" type="String" required="true" />
-            <parameter name="questionId" type="String" required="true" />
+            <parameter name="assessmentId" required="true" />
+            <parameter name="questionId" required="true" />
         </in-parameters>
         <out-parameters>
             <parameter name="deletedCount" type="Integer" />
@@ -1235,7 +1234,7 @@ Service definitions for assessment management and completion
 
             <!-- Verify question exists -->
             <entity-find entity-name="growerp.assessment.AssessmentQuestion" list="questionList">
-                <econdition field-name="questionId" from="questionId" />
+                <econdition field-name="assessmentQuestionId" from="questionId" />
                 <econdition field-name="assessmentId" from="assessmentId" />
             </entity-find>
 
@@ -1247,7 +1246,7 @@ Service definitions for assessment management and completion
 
             <!-- Delete question options first -->
             <entity-find entity-name="growerp.assessment.AssessmentQuestionOption" list="optionList">
-                <econdition field-name="questionId" from="questionId" />
+                <econdition field-name="assessmentQuestionId" from="questionId" />
                 <econdition field-name="assessmentId" from="assessmentId" />
             </entity-find>
             <iterate list="optionList" entry="option">
@@ -1269,8 +1268,8 @@ Service definitions for assessment management and completion
     <service verb="get" noun="AssessmentQuestionOptions" authenticate="true">
         <description>Get all options for a question</description>
         <in-parameters>
-            <parameter name="assessmentId" type="String" required="true" />
-            <parameter name="questionId" type="String" required="true" />
+            <parameter name="assessmentId" required="true" />
+            <parameter name="questionId" required="true" />
         </in-parameters>
         <out-parameters>
             <parameter name="options" type="List">
@@ -1291,7 +1290,7 @@ Service definitions for assessment management and completion
 
             <!-- Get options for this question -->
             <entity-find entity-name="growerp.assessment.AssessmentQuestionOption" list="options">
-                <econdition field-name="questionId" from="questionId" />
+                <econdition field-name="assessmentQuestionId" from="questionId" />
                 <econdition field-name="assessmentId" from="assessmentId" />
                 <order-by field-name="optionSequence" />
             </entity-find>
@@ -1302,10 +1301,10 @@ Service definitions for assessment management and completion
     <service verb="get" noun="Option" authenticate="false">
         <description>Get option by ID or list all options for a question. When optionId provided, returns single option. When not provided, returns list of all options for the question. Public endpoint - accessible without authentication.</description>
         <in-parameters>
-            <parameter name="assessmentId" type="String" required="true">
+            <parameter name="assessmentId" required="true">
                 <description>Assessment ID - required for context</description>
             </parameter>
-            <parameter name="questionId" type="String" required="true">
+            <parameter name="questionId" required="true">
                 <description>Question ID - required for context</description>
             </parameter>
             <parameter name="optionId">
@@ -1351,8 +1350,8 @@ Service definitions for assessment management and completion
                 <!-- SINGLE OPTION RETRIEVAL -->
                 <entity-find-one entity-name="growerp.assessment.AssessmentQuestionOption"
                     value-field="option">
-                    <field-map field-name="optionId" from="optionId" />
-                    <field-map field-name="questionId" from="questionId" />
+                    <field-map field-name="assessmentQuestionOptionId" from="optionId" />
+                    <field-map field-name="assessmentQuestionId" from="questionId" />
                     <field-map field-name="assessmentId" from="assessmentId" />
                 </entity-find-one>
 
@@ -1365,14 +1364,14 @@ Service definitions for assessment management and completion
                     <entity-find entity-name="growerp.assessment.AssessmentQuestionOption"
                         list="options"
                         limit="limit" offset="start">
-                        <econdition field-name="questionId" from="questionId" />
+                        <econdition field-name="assessmentQuestionId" from="questionId" />
                         <econdition field-name="assessmentId" from="assessmentId" />
                         <order-by field-name="optionSequence" />
                     </entity-find>
 
                     <entity-find-count entity-name="growerp.assessment.AssessmentQuestionOption"
                         count-field="optionCount">
-                        <econdition field-name="questionId" from="questionId" />
+                        <econdition field-name="assessmentQuestionId" from="questionId" />
                         <econdition field-name="assessmentId" from="assessmentId" />
                     </entity-find-count>
                 </else>
@@ -1384,9 +1383,9 @@ Service definitions for assessment management and completion
     <service verb="create" noun="Option" authenticate="true">
         <description>Create new option</description>
         <in-parameters>
-            <parameter name="assessmentId" type="String" required="true" />
-            <parameter name="questionId" type="String" required="true" />
-            <parameter name="optionText" type="String" required="true" />
+            <parameter name="assessmentId" required="true" />
+            <parameter name="questionId" required="true" />
+            <parameter name="optionText" required="true" />
             <parameter name="optionScore" type="BigDecimal" required="true" />
             <parameter name="optionSequence" type="Integer" />
         </in-parameters>
@@ -1401,13 +1400,11 @@ Service definitions for assessment management and completion
                 in-map="[ownerPartyId: ownerPartyId, seqName: 'AssessmentQuestionOption']"
                 out-map="context" />
             <set field="pseudoId" from="seqNum" />
-            <set field="optionId" from="seqNum" />
 
             <service-call name="create#growerp.assessment.AssessmentQuestionOption"
                 out-map="optionOut">
-                <field-map field-name="optionId" from="optionId" />
                 <field-map field-name="assessmentId" from="assessmentId" />
-                <field-map field-name="questionId" from="questionId" />
+                <field-map field-name="assessmentQuestionId" from="questionId" />
                 <field-map field-name="pseudoId" from="pseudoId" />
                 <field-map field-name="optionText" from="optionText" />
                 <field-map field-name="optionScore" from="optionScore" />
@@ -1415,7 +1412,7 @@ Service definitions for assessment management and completion
                 <field-map field-name="createdDate" from="ec.user.nowTimestamp" />
             </service-call>
 
-            <set field="optionId" from="optionOut.optionId" />
+            <set field="optionId" from="optionOut.assessmentQuestionOptionId" />
         </actions>
     </service>
 
@@ -1423,9 +1420,9 @@ Service definitions for assessment management and completion
     <service verb="update" noun="Option" authenticate="true">
         <description>Update existing option</description>
         <in-parameters>
-            <parameter name="assessmentId" type="String" required="true" />
-            <parameter name="questionId" type="String" required="true" />
-            <parameter name="optionId" type="String" required="true" />
+            <parameter name="assessmentId" required="true" />
+            <parameter name="questionId" required="true" />
+            <parameter name="optionId" required="true" />
             <parameter name="optionText" />
             <parameter name="optionScore" type="BigDecimal" />
             <parameter name="optionSequence" type="Integer" />
@@ -1439,8 +1436,8 @@ Service definitions for assessment management and completion
 
             <!-- Verify option exists -->
             <entity-find entity-name="growerp.assessment.AssessmentQuestionOption" list="optionList">
-                <econdition field-name="optionId" from="optionId" />
-                <econdition field-name="questionId" from="questionId" />
+                <econdition field-name="assessmentQuestionOptionId" from="optionId" />
+                <econdition field-name="assessmentQuestionId" from="questionId" />
                 <econdition field-name="assessmentId" from="assessmentId" />
             </entity-find>
 
@@ -1449,7 +1446,7 @@ Service definitions for assessment management and completion
             </if>
 
             <set field="updateMap"
-                from="[optionId: optionId, questionId: questionId, assessmentId: assessmentId]" />
+                from="[assessmentQuestionOptionId: optionId, assessmentQuestionId: questionId, assessmentId: assessmentId]" />
             <if condition="optionText">
                 <set field="updateMap.optionText" from="optionText" />
             </if>
@@ -1469,9 +1466,9 @@ Service definitions for assessment management and completion
     <service verb="delete" noun="Option" authenticate="true">
         <description>Delete option</description>
         <in-parameters>
-            <parameter name="assessmentId" type="String" required="true" />
-            <parameter name="questionId" type="String" required="true" />
-            <parameter name="optionId" type="String" required="true" />
+            <parameter name="assessmentId" required="true" />
+            <parameter name="questionId" required="true" />
+            <parameter name="optionId" required="true" />
         </in-parameters>
         <out-parameters>
             <parameter name="deleted" type="Boolean" />
@@ -1482,8 +1479,8 @@ Service definitions for assessment management and completion
 
             <!-- Verify option exists -->
             <entity-find entity-name="growerp.assessment.AssessmentQuestionOption" list="optionList">
-                <econdition field-name="optionId" from="optionId" />
-                <econdition field-name="questionId" from="questionId" />
+                <econdition field-name="assessmentQuestionOptionId" from="optionId" />
+                <econdition field-name="assessmentQuestionId" from="questionId" />
                 <econdition field-name="assessmentId" from="assessmentId" />
             </entity-find>
 
@@ -1505,8 +1502,8 @@ Service definitions for assessment management and completion
     <service verb="get" noun="Result" authenticate="false">
         <description>Get assessment result (allows anonymous users)</description>
         <in-parameters>
-            <parameter name="assessmentId" type="String" required="true" />
-            <parameter name="resultId" type="String" required="true" />
+            <parameter name="assessmentId" required="true" />
+            <parameter name="resultId" required="true" />
         </in-parameters>
         <out-parameters>
             <parameter name="result" type="Map">
@@ -1542,7 +1539,7 @@ Service definitions for assessment management and completion
     <service verb="get" noun="AssessmentResults" authenticate="true">
         <description>Get all leads (assessment respondents) for an assessment with their total scores. Returns list of leads with overall score and status, not individual question results.</description>
         <in-parameters>
-            <parameter name="assessmentId" type="String" required="true">
+            <parameter name="assessmentId" required="true">
                 <description>Assessment ID to fetch results for</description>
             </parameter>
             <parameter name="start" type="Integer" default="0">

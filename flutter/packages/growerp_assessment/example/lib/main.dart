@@ -242,8 +242,8 @@ class TakeAssessmentMenu extends StatelessWidget {
                     Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (context) => LandingPageAssessmentFlowScreen(
-                          landingPageId: assessment.pseudoId,
-                          assessmentId: assessment.assessmentId,
+                          landingPageId: assessment.pseudoId ?? '',
+                          assessmentId: assessment.assessmentId ?? '',
                           startAssessmentFlow: true,
                         ),
                       ),

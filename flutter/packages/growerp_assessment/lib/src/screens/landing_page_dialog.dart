@@ -253,12 +253,6 @@ class LandingPageDialogState extends State<LandingPageDialog> {
                       ),
                       controller: _titleController,
                       enabled: widget.landingPage.landingPageId == null,
-                      validator: (value) {
-                        if (value!.isEmpty) {
-                          return 'Title is required';
-                        }
-                        return null;
-                      },
                     ),
                   ),
                   const SizedBox(width: 10),
