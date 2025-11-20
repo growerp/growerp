@@ -49,8 +49,6 @@ class LandingPageListState extends State<LandingPageList> {
   final double _scrollThreshold = 100.0;
   late LandingPageBloc _landingPageBloc;
   List<LandingPage> landingPages = const <LandingPage>[];
-  bool showSearchField = false;
-  String searchString = '';
   bool hasReachedMax = false;
   late double bottom;
   double? right;
@@ -350,7 +348,6 @@ class LandingPageListState extends State<LandingPageList> {
       _landingPageBloc.add(
         LandingPageLoad(
           start: landingPages.length,
-          search: searchString,
         ),
       );
     }
@@ -404,15 +401,17 @@ class SearchLandingPageListState extends State<SearchLandingPageList> {
                 border: const OutlineInputBorder(),
                 suffixIcon: IconButton(
                   icon: const Icon(Icons.clear),
-                  onPressed: () => searchBoxController.clear(),
+                  onPressed: () {
+                    searchBoxController.clear();
+                    _landingPageBloc.add(
+                      const LandingPageSearchRequested(query: ''),
+                    );
+                  },
                 ),
               ),
               onFieldSubmitted: (value) {
                 _landingPageBloc.add(
-                  LandingPageLoad(
-                    search: value,
-                    start: 0,
-                  ),
+                  LandingPageSearchRequested(query: value),
                 );
               },
             ),
@@ -420,18 +419,30 @@ class SearchLandingPageListState extends State<SearchLandingPageList> {
             Expanded(
               child: BlocBuilder<LandingPageBloc, LandingPageState>(
                 builder: (context, state) {
-                  if (state.status == LandingPageStatus.loading) {
+                  final searchStatus = state.searchStatus;
+                  if (searchStatus == LandingPageStatus.loading) {
                     return const LoadingIndicator();
                   }
-                  if (state.landingPages.isEmpty) {
-                    return const Center(
-                      child: Text('No landing pages found'),
+                  if (searchStatus == LandingPageStatus.failure) {
+                    return Center(
+                      child: Text(
+                        state.searchError ?? 'Search failed, please try again.',
+                        textAlign: TextAlign.center,
+                      ),
+                    );
+                  }
+                  if (state.searchResults.isEmpty) {
+                    final message = searchStatus == LandingPageStatus.initial
+                        ? 'Enter a search term to begin.'
+                        : 'No landing pages matched your search.';
+                    return Center(
+                      child: Text(message),
                     );
                   }
                   return ListView.builder(
-                    itemCount: state.landingPages.length,
+                    itemCount: state.searchResults.length,
                     itemBuilder: (context, index) {
-                      final landingPage = state.landingPages[index];
+                      final landingPage = state.searchResults[index];
                       return ListTile(
                         key: Key('landingPageSearchItem$index'),
                         title: Text(landingPage.title),

@@ -21,7 +21,7 @@
     title="ERP Readiness Assessment" hookType="ResultsHook"
     headline="Stop now managing spreadsheets and start managing your business in a central application?"
     subheading="Answer a few questions about your current processes, and we'll provide a free, personalized report on why you're facing challenges and how a modular ERP can guarantee your success—without the typical headaches of a multi-year, over-budget project."
-    ctaActionType="assessment"
+    ctaActionType="Assessment"
     ctaAssessmentId="ERP_READINESS_ASSESSMENT"
     status="Published" privacyPolicyUrl="/privacy" createdByUserLogin="admin" />
 

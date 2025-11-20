@@ -14,25 +14,36 @@
 
 import 'package:flutter/material.dart';
 
-SnackBar snackBar(BuildContext context, Color colors, String message,
-    {int? seconds}) {
-//  var screenWidth = MediaQuery.of(context).size.width;
+Duration snackBarDuration(Color color, {int? seconds}) {
+  if (seconds != null) {
+    return Duration(seconds: seconds);
+  }
+  final isError = color == Colors.red;
+  return Duration(milliseconds: isError ? 5000 : 2000);
+}
+
+SnackBar snackBar(
+  BuildContext context,
+  Color color,
+  String message, {
+  int? seconds,
+}) {
+  //  var screenWidth = MediaQuery.of(context).size.width;
+  final resolvedDuration = snackBarDuration(color, seconds: seconds);
   return SnackBar(
-//    behavior: SnackBarBehavior.floating,
-//    width: screenWidth < 800 ? screenWidth * 0.8 : 500,
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(10),
-    ),
+    //    behavior: SnackBarBehavior.floating,
+    //    width: screenWidth < 800 ? screenWidth * 0.8 : 500,
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
     content: Text(message),
-    duration: seconds == null
-        ? Duration(milliseconds: colors == Colors.red ? 5000 : 2000)
-        : Duration(seconds: seconds),
-    backgroundColor: colors,
+    duration: resolvedDuration,
+    backgroundColor: color,
     action: SnackBarAction(
       key: const Key('dismiss'),
       label: 'Dismiss',
       textColor: Colors.yellow,
-      onPressed: () {},
+      onPressed: () {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      },
     ),
   );
 }

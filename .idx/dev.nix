@@ -15,6 +15,7 @@
     pkgs.libgtkflow3
     pkgs.gtk3-x11
     pkgs.gtk3
+    pkgs.flutter
   ];
   # Sets environment variables in the workspace
   env = {JDK11 = "${pkgs.jdk11}";

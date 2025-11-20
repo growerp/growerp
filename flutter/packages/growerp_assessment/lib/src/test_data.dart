@@ -19,7 +19,6 @@ import 'package:growerp_models/growerp_models.dart';
 /// Landing Page test data
 List<LandingPage> landingPages = [
   const LandingPage(
-    pseudoId: 'business-readiness-landing',
     title: 'Business Readiness Assessment',
     headline: 'Are you ready to unlock your business\'s full potential?',
     subheading:
@@ -30,7 +29,6 @@ List<LandingPage> landingPages = [
     privacyPolicyUrl: null,
   ),
   const LandingPage(
-    pseudoId: 'test-landing-page-2',
     title: 'Test Landing Page 2',
     headline: 'Transform Your Business Today',
     subheading: 'Discover how our solutions can help you grow',
@@ -39,7 +37,6 @@ List<LandingPage> landingPages = [
     status: 'Draft',
   ),
   const LandingPage(
-    pseudoId: 'test-landing-page-3',
     title: 'Test Landing Page 3',
     headline: 'Scale Your Operations Efficiently',
     subheading: 'Learn the best practices for business growth',
@@ -52,20 +49,17 @@ List<LandingPage> landingPages = [
 /// Assessment test data
 List<Assessment> assessments = [
   const Assessment(
-    pseudoId: 'business-readiness-assessment',
     assessmentName: 'Business Readiness Assessment',
     description:
         'Comprehensive assessment to evaluate business readiness, identify challenges, and provide tailored recommendations for success.',
     status: 'Active',
   ),
   const Assessment(
-    pseudoId: 'test-assessment-2',
     assessmentName: 'Marketing Readiness Assessment',
     description: 'Evaluate your marketing capabilities and strategies',
     status: 'Active',
   ),
   const Assessment(
-    pseudoId: 'test-assessment-3',
     assessmentName: 'Digital Transformation Assessment',
     description: 'Assess your digital maturity and transformation readiness',
     status: 'Draft',
@@ -75,32 +69,29 @@ List<Assessment> assessments = [
 /// Updated landing pages for testing
 List<LandingPage> updatedLandingPages = [
   const LandingPage(
-    pseudoId: 'business-readiness-landing',
     title: 'Updated Business Readiness Assessment',
     headline: 'Ready to transform your business operations?',
     subheading:
         'Take our comprehensive assessment to identify growth opportunities',
     hookType: null,
-    ctaActionType: 'Launch Assessment',
+    ctaActionType: 'Assessment',
     status: 'Active',
     privacyPolicyUrl: 'https://www.growerp.com/privacy-updated',
   ),
   const LandingPage(
-    pseudoId: 'test-landing-page-2',
     title: 'Updated Test Landing Page 2',
     headline: 'Revolutionize Your Business Operations',
     subheading: 'New improved solutions for exponential growth',
     hookType: null,
-    ctaActionType: 'Open URL',
+    ctaActionType: 'Url',
     status: 'Active',
   ),
   const LandingPage(
-    pseudoId: 'test-landing-page-3',
     title: 'Updated Test Landing Page 3',
     headline: 'Master Business Scaling Techniques',
     subheading: 'Advanced strategies for sustainable expansion',
     hookType: null,
-    ctaActionType: 'Launch Assessment',
+    ctaActionType: 'Assessment',
     status: 'Active',
   ),
 ];
@@ -108,20 +99,17 @@ List<LandingPage> updatedLandingPages = [
 /// Updated assessments for testing
 List<Assessment> updatedAssessments = [
   const Assessment(
-    pseudoId: 'business-readiness-assessment',
     assessmentName: 'Updated Business Readiness Assessment',
     description:
         'Enhanced comprehensive assessment with additional metrics and insights',
     status: 'Active',
   ),
   const Assessment(
-    pseudoId: 'test-assessment-2',
     assessmentName: 'Updated Marketing Readiness Assessment',
     description: 'Enhanced marketing evaluation with new criteria',
     status: 'Active',
   ),
   const Assessment(
-    pseudoId: 'test-assessment-3',
     assessmentName: 'Updated Digital Transformation Assessment',
     description: 'Comprehensive digital maturity assessment',
     status: 'Active',

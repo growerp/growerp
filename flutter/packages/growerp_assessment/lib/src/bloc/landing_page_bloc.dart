@@ -17,6 +17,7 @@ class LandingPageBloc extends Bloc<LandingPageEvent, LandingPageState> {
     on<LandingPageUpdate>(_onLandingPageUpdate);
     on<LandingPageDelete>(_onLandingPageDelete);
     on<LandingPageClear>(_onLandingPageClear);
+    on<LandingPageSearchRequested>(_onLandingPageSearch);
   }
 
   // get a single or a list of landingpages
@@ -38,7 +39,6 @@ class LandingPageBloc extends Bloc<LandingPageEvent, LandingPageState> {
       final result = await restClient.getLandingPages(
         start: event.start,
         limit: event.limit,
-        searchString: event.search,
       );
 
       final landingPages = event.start == 0
@@ -52,12 +52,52 @@ class LandingPageBloc extends Bloc<LandingPageEvent, LandingPageState> {
         hasReachedMax: result.landingPages.length < event.limit,
         start: event.start,
         limit: event.limit,
-        searchString: event.search,
       ));
     } catch (error) {
       emit(state.copyWith(
         status: LandingPageStatus.failure,
         message: await getDioError(error),
+      ));
+    }
+  }
+
+  Future<void> _onLandingPageSearch(
+    LandingPageSearchRequested event,
+    Emitter<LandingPageState> emit,
+  ) async {
+    final query = event.query.trim();
+    if (query.isEmpty) {
+      emit(state.copyWith(
+        searchStatus: LandingPageStatus.success,
+        searchResults: const [],
+        searchError: null,
+      ));
+      return;
+    }
+
+    emit(state.copyWith(
+      searchStatus: LandingPageStatus.loading,
+      searchResults: const [],
+      searchError: null,
+    ));
+
+    try {
+      final result = await restClient.getLandingPages(
+        start: 0,
+        limit: event.limit,
+        searchString: query,
+      );
+
+      emit(state.copyWith(
+        searchStatus: LandingPageStatus.success,
+        searchResults: result.landingPages,
+        searchError: null,
+      ));
+    } catch (error) {
+      emit(state.copyWith(
+        searchStatus: LandingPageStatus.failure,
+        searchResults: const [],
+        searchError: await getDioError(error),
       ));
     }
   }
@@ -132,6 +172,7 @@ class LandingPageBloc extends Bloc<LandingPageEvent, LandingPageState> {
 
       final updatedLandingPage = await restClient.updateLandingPage(
         landingPageId: event.landingPage.landingPageId ?? '',
+        pseudoId: event.landingPage.pseudoId,
         title: event.landingPage.title,
         headline: event.landingPage.headline,
         subheading: event.landingPage.subheading,

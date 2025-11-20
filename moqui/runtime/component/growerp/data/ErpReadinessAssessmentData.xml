@@ -14,7 +14,7 @@
         hookType="ResultsHook"
         headline="Are you ready to run a successful, seamless ERP implementation?"
         subheading="Answer 15 questions to find out why you might be experiencing complexity and what steps you need to take to guarantee ERP success."
-        ctaActionType="assessment"
+        ctaActionType="Assessment"
         ctaAssessmentId="ERP_READINESS"
         status="Published" privacyPolicyUrl="/privacy" createdByUserLogin="admin" />
 
