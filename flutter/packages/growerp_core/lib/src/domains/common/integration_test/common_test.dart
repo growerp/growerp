@@ -631,7 +631,9 @@ class CommonTest {
     // Ensure the item is visible and tap it
     await tester.ensureVisible(itemFinder);
     await tester.pumpAndSettle();
-    await tester.tap(itemFinder);
+
+    // Try tapping at the center of the widget
+    await tester.tapAt(tester.getCenter(itemFinder));
     await tester.pumpAndSettle();
   }
 

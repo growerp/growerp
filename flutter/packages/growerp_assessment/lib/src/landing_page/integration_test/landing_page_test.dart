@@ -69,6 +69,11 @@ class LandingPageTest {
       'delete${count - 1}',
       seconds: CommonTest.waitTime,
     );
+    await CommonTest.tapByKey(
+      tester,
+      'deleteConfirm${count - 1}',
+      seconds: CommonTest.waitTime,
+    );
     expect(
       find.byKey(const Key('landingPageItem'), skipOffstage: false),
       findsNWidgets(count - 1),
@@ -83,7 +88,7 @@ class LandingPageTest {
     List<LandingPage> newPages = [];
 
     for (LandingPage page in test.landingPages) {
-      if (page.landingPageId == null || page.landingPageId == 'unknown') {
+      if (page.pseudoId == null) {
         // Add new landing page
         await CommonTest.tapByKey(tester, 'addNewLandingPage');
       } else {
@@ -99,14 +104,23 @@ class LandingPageTest {
       await tester.pumpAndSettle();
 
       // Check for the detail screen (key varies based on pseudoId)
-      final expectedKey =
-          page.landingPageId == null || page.landingPageId == 'unknown'
-              ? 'LandingPageDetailnull'
-              : 'LandingPageDetail${page.pseudoId}';
+      final expectedKey = page.pseudoId == null
+          ? 'LandingPageDetailnull'
+          : 'LandingPageDetail${page.pseudoId}';
       expect(find.byKey(Key(expectedKey)), findsOneWidget);
 
       // Enter basic info
       await CommonTest.enterText(tester, 'title', page.title);
+      await CommonTest.enterDropDown(tester, 'status', page.status);
+
+      if (page.hookType != null) {
+        await CommonTest.enterDropDown(tester, 'hookType', page.hookType!);
+      }
+
+      if (page.privacyPolicyUrl != null) {
+        await CommonTest.enterText(
+            tester, 'privacyPolicyUrl', page.privacyPolicyUrl!);
+      }
 
       if (page.headline != null) {
         await CommonTest.enterText(tester, 'headline', page.headline!);
@@ -116,22 +130,14 @@ class LandingPageTest {
         await CommonTest.enterText(tester, 'subheading', page.subheading!);
       }
 
-      if (page.hookType != null) {
-        await CommonTest.enterDropDown(tester, 'hookType', page.hookType!);
-      }
-
       if (page.ctaActionType != null) {
+        await CommonTest.dragUntil(
+          tester,
+          key: 'ctaActionType',
+          listViewName: 'landingPageDialogListView',
+        );
         await CommonTest.enterDropDown(
             tester, 'ctaActionType', page.ctaActionType!);
-      }
-
-      if (page.status != 'DRAFT') {
-        await CommonTest.enterDropDown(tester, 'status', page.status);
-      }
-
-      if (page.privacyPolicyUrl != null) {
-        await CommonTest.enterText(
-            tester, 'privacyPolicyUrl', page.privacyPolicyUrl!);
       }
 
       // Save the landing page
@@ -145,14 +151,13 @@ class LandingPageTest {
         'landingPageDetailSave',
         seconds: CommonTest.waitTime,
       );
-      await CommonTest.waitForSnackbarToGo(tester);
 
       // Get allocated ID for new pages
-      if (page.landingPageId == null || page.landingPageId == 'unknown') {
+      if (page.pseudoId == null) {
         await CommonTest.tapByKey(tester, 'item0',
             seconds: CommonTest.waitTime);
         var id = CommonTest.getTextField('topHeader').split('#')[1].trim();
-        page = page.copyWith(landingPageId: id);
+        page = page.copyWith(pseudoId: id);
         await CommonTest.tapByKey(tester, 'cancel');
       }
 
@@ -166,7 +171,7 @@ class LandingPageTest {
     SaveTest test = await PersistFunctions.getTest(backup: false);
 
     for (LandingPage page in test.landingPages) {
-      await CommonTest.doNewSearch(tester, searchString: page.title);
+      await CommonTest.doNewSearch(tester, searchString: page.pseudoId!);
 
       // Check detail - the dialog key is LandingPageDetail${pseudoId}
       expect(

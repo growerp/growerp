@@ -24,11 +24,9 @@ class NullableTimestampConverter implements JsonConverter<DateTime?, int?> {
 @JsonSerializable(explicitToJson: true)
 class LandingPage {
   /// System-wide unique identifier
-  @JsonKey(defaultValue: 'unknown')
   final String? landingPageId;
 
   /// Tenant-unique identifier (user-facing, used in URLs)
-  @JsonKey(defaultValue: 'unknown')
   final String? pseudoId;
 
   /// Landing page title (mandatory)
@@ -156,6 +154,9 @@ class LandingPage {
   int get hashCode => landingPageId.hashCode;
 
   Map<String, dynamic> toJson() => _$LandingPageToJson(this);
+
+  @override
+  String toString() => 'LandingPage($landingPageId, $title)';
 }
 
 /// List wrapper for LandingPage objects

@@ -30,7 +30,7 @@ class PageSectionState {
       sections: sections ?? this.sections,
       selectedSection:
           clearSelectedSection ? null : selectedSection ?? this.selectedSection,
-      message: message ?? this.message,
+      message: message,
       pageId: pageId ?? this.pageId,
     );
   }

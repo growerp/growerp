@@ -429,6 +429,7 @@ Service definitions for landing page, sections, credibility, and CTA management
       </parameter>
     </out-parameters>
     <actions>
+      <log message="====updating landing page with pseudoId: $pseudoId" />
       <!-- Get owner party ID from authenticated user context -->
       <service-call out-map="context"
         name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />

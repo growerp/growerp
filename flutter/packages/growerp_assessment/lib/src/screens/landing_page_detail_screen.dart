@@ -109,7 +109,7 @@ class LandingPageDetailScreenState extends State<LandingPageDetailScreen> {
 
     _selectedStatus = _capitalizeFirst(widget.landingPage.status);
     _selectedHookType = _normalizeHookType(widget.landingPage.hookType);
-    _selectedCtaActionType = widget.landingPage.ctaActionType ?? 'assessment';
+    _selectedCtaActionType = widget.landingPage.ctaActionType ?? 'Assessment';
     _selectedCtaAssessmentId = widget.landingPage.ctaAssessmentId;
     updatedLandingPage = widget.landingPage;
     _landingPageBloc = context.read<LandingPageBloc>();
@@ -441,17 +441,17 @@ class LandingPageDetailScreenState extends State<LandingPageDetailScreen> {
                           initialValue: _selectedCtaActionType,
                           items: const [
                             DropdownMenuItem<String>(
-                              value: 'assessment',
-                              child: Text('Launch Assessment'),
+                              value: 'Assessment',
+                              child: Text('Assessment'),
                             ),
                             DropdownMenuItem<String>(
-                              value: 'url',
-                              child: Text('Open URL/Webpage'),
+                              value: 'Url',
+                              child: Text('Url'),
                             ),
                           ],
                           onChanged: (String? newValue) {
                             setState(() {
-                              _selectedCtaActionType = newValue ?? 'assessment';
+                              _selectedCtaActionType = newValue ?? 'Assessment';
                             });
                           },
                           isExpanded: true,
@@ -462,7 +462,7 @@ class LandingPageDetailScreenState extends State<LandingPageDetailScreen> {
                       if (!ResponsiveBreakpoints.of(context).isMobile)
                         Expanded(
                           flex: 3,
-                          child: _selectedCtaActionType == 'assessment'
+                          child: _selectedCtaActionType == 'Assessment'
                               ? BlocBuilder<AssessmentBloc, AssessmentState>(
                                   builder: (context, state) {
                                     // Find the selected CTA assessment from the list

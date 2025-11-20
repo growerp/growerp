@@ -368,7 +368,7 @@ this file is loaded for every owner who request demo data.
     landingPageId="PAGE_BUSI_READINESS_001"
     pseudoId="business-readiness-landing"
     ownerPartyId="DEMO"
-    ctaActionType="assessment"
+    ctaActionType="Assessment"
     ctaAssessmentId="ASMT_BUSI_READ_001"
     title="Business Readiness Assessment"
     hookType="ResultsHook"

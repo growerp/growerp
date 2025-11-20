@@ -871,6 +871,7 @@ abstract class RestClient {
   @PATCH("rest/s1/growerp/100/LandingPage")
   Future<LandingPage> updateLandingPage({
     @Query('landingPageId') required String landingPageId,
+    @Field() String? pseudoId,
     @Field() String? title,
     @Field() String? hookType,
     @Field() String? headline,

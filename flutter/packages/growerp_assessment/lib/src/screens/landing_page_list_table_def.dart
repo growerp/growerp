@@ -17,10 +17,65 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
+import '../bloc/landing_page_bloc.dart';
+import '../bloc/landing_page_event.dart';
+
 TableData getLandingPageListTableData(Bloc bloc, String classificationId,
     BuildContext context, LandingPage item, int index,
     {dynamic extra}) {
   bool isPhone = isAPhone(context);
+  final LandingPageBloc? landingPageBloc =
+      bloc is LandingPageBloc ? bloc : null;
+
+  Future<void> confirmDelete() async {
+    if (landingPageBloc == null || item.landingPageId == null) return;
+    final shouldDelete = await showDialog<bool>(
+      context: context,
+      barrierDismissible: true,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Landing Page'),
+        content: Text(
+          'Are you sure you want to delete "${item.title}"?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            key: Key('deleteConfirm$index'),
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+    if (shouldDelete == true) {
+      landingPageBloc.add(LandingPageDelete(item.landingPageId!));
+    }
+  }
+
+  TableRowContent buildDeleteAction(
+      {double width = 10, bool showLabel = true}) {
+    return TableRowContent(
+      name: showLabel
+          ? const Text('Actions', textAlign: TextAlign.start)
+          : const Text(''),
+      width: width,
+      value: IconButton(
+        key: Key('delete$index'),
+        tooltip: 'Delete landing page',
+        icon: const Icon(Icons.delete),
+        color: Colors.red.shade600,
+        onPressed: item.landingPageId == null
+            ? null
+            : () {
+                confirmDelete();
+              },
+      ),
+    );
+  }
+
   List<TableRowContent> rowContent = [];
   if (isPhone) {
     rowContent.add(TableRowContent(
@@ -35,13 +90,13 @@ TableData getLandingPageListTableData(Bloc bloc, String classificationId,
     ));
     rowContent.add(TableRowContent(
         name: const Text('ID\nTitle\nStatus', textAlign: TextAlign.start),
-        width: 85,
+        width: 65,
         value: Column(
           key: Key('item$index'),
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(item.pseudoId ?? '', key: Key('id$index')),
-            Text(item.title.truncate(18), key: Key('title$index')),
+            Text(item.title.truncate(25), key: Key('title$index')),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
               decoration: BoxDecoration(
@@ -75,7 +130,7 @@ TableData getLandingPageListTableData(Bloc bloc, String classificationId,
         )));
     rowContent.add(TableRowContent(
         name: const Text('Title', textAlign: TextAlign.start),
-        width: 25,
+        width: 20,
         value: Text(
           item.title,
           key: Key('title$index'),
@@ -122,6 +177,10 @@ TableData getLandingPageListTableData(Bloc bloc, String classificationId,
           textAlign: TextAlign.left,
           key: Key('hookType$index'),
         )));
+    rowContent.add(buildDeleteAction());
+  }
+  if (isPhone) {
+    rowContent.add(buildDeleteAction(width: 15, showLabel: false));
   }
   return TableData(
     rowHeight: isPhone ? 65 : 20,

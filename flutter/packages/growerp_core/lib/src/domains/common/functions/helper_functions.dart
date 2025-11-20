@@ -24,14 +24,27 @@ class HelperFunctions {
   static void showMessage(
     BuildContext context,
     String? message,
-    dynamic colors, {
+    Color color, {
     int? seconds,
   }) {
     if (message != null && message != "null") {
       try {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(snackBar(context, colors, message, seconds: seconds));
+        final messenger = ScaffoldMessenger.of(context);
+        messenger.hideCurrentSnackBar();
+
+        final controller = messenger.showSnackBar(
+          snackBar(context, color, message, seconds: seconds),
+        );
+
+        var isClosed = false;
+        controller.closed.whenComplete(() => isClosed = true);
+        final duration = snackBarDuration(color, seconds: seconds);
+        // Ensure snackbars still disappear when accessibility keeps them alive.
+        Future.delayed(duration, () {
+          if (!isClosed) {
+            controller.close();
+          }
+        });
       } catch (e) {
         // ScaffoldMessenger not available yet, ignore silently
         debugPrint('SnackBar not shown - no Scaffold available: $message');

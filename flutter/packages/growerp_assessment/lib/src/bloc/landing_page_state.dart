@@ -13,7 +13,9 @@ class LandingPageState extends Equatable {
   final bool hasReachedMax;
   final int start;
   final int limit;
-  final String? searchString;
+  final List<LandingPage> searchResults;
+  final LandingPageStatus searchStatus;
+  final String? searchError;
 
   const LandingPageState({
     this.status = LandingPageStatus.initial,
@@ -25,7 +27,9 @@ class LandingPageState extends Equatable {
     this.hasReachedMax = false,
     this.start = 0,
     this.limit = 20,
-    this.searchString,
+    this.searchResults = const [],
+    this.searchStatus = LandingPageStatus.initial,
+    this.searchError,
   });
 
   LandingPageState copyWith({
@@ -38,7 +42,9 @@ class LandingPageState extends Equatable {
     bool? hasReachedMax,
     int? start,
     int? limit,
-    String? searchString,
+    List<LandingPage>? searchResults,
+    LandingPageStatus? searchStatus,
+    String? searchError,
     bool clearSelectedLandingPage = false,
   }) {
     return LandingPageState(
@@ -49,11 +55,13 @@ class LandingPageState extends Equatable {
           : selectedLandingPage ?? this.selectedLandingPage,
       questions: questions ?? this.questions,
       credibility: credibility ?? this.credibility,
-      message: message ?? this.message,
+      message: message,
       hasReachedMax: hasReachedMax ?? this.hasReachedMax,
       start: start ?? this.start,
       limit: limit ?? this.limit,
-      searchString: searchString ?? this.searchString,
+      searchResults: searchResults ?? this.searchResults,
+      searchStatus: searchStatus ?? this.searchStatus,
+      searchError: searchError ?? this.searchError,
     );
   }
 
@@ -68,7 +76,9 @@ class LandingPageState extends Equatable {
         hasReachedMax,
         start,
         limit,
-        searchString,
+        searchResults,
+        searchStatus,
+        searchError,
       ];
 
   @override
@@ -83,7 +93,9 @@ class LandingPageState extends Equatable {
         'hasReachedMax: $hasReachedMax, '
         'start: $start, '
         'limit: $limit, '
-        'searchString: $searchString'
+        'searchResults: ${searchResults.length}, '
+        'searchStatus: $searchStatus, '
+        'searchError: $searchError'
         ')';
   }
 }
