@@ -42,6 +42,7 @@ class AssessmentDetailScreenState extends State<AssessmentDetailScreen> {
   late double top;
   double? right;
   late bool isVisible;
+  bool _isSubmitting = false;
 
   // Form key for validation
   final _formKey = GlobalKey<FormState>();
@@ -138,13 +139,17 @@ class AssessmentDetailScreenState extends State<AssessmentDetailScreen> {
                 body: BlocConsumer<AssessmentBloc, AssessmentState>(
                   listener: (context, state) {
                     if (state.status == AssessmentStatus.failure) {
+                      setState(() {
+                        _isSubmitting = false;
+                      });
                       HelperFunctions.showMessage(
                         context,
                         state.message ?? 'Error',
                         Colors.red,
                       );
                     }
-                    if (state.status == AssessmentStatus.success) {
+                    if (state.status == AssessmentStatus.success &&
+                        _isSubmitting) {
                       // Check if assessment was deleted
                       if (state.selectedAssessment == null &&
                           !isNewAssessment) {
@@ -436,6 +441,9 @@ class AssessmentDetailScreenState extends State<AssessmentDetailScreen> {
                     },
                   );
                   if (confirmed == true && mounted) {
+                    setState(() {
+                      _isSubmitting = true;
+                    });
                     _assessmentBloc.add(
                       AssessmentDelete(widget.assessment),
                     );
@@ -474,6 +482,10 @@ class AssessmentDetailScreenState extends State<AssessmentDetailScreen> {
                   description: description,
                   status: _selectedStatus,
                 );
+
+                setState(() {
+                  _isSubmitting = true;
+                });
 
                 // Use create for new assessments, update for existing ones
                 if (isNewAssessment) {

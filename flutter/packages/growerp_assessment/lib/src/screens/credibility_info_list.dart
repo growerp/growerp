@@ -118,6 +118,7 @@ class CredibilityInfoListScreenState extends State<CredibilityInfoListScreen> {
             itemBuilder: (context, index) {
               final credibility = state.credibilityElements[index];
               return Card(
+                key: Key('credibilityItem${credibility.pseudoId}'),
                 margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 child: ListTile(
                   leading: credibility.creatorImageUrl != null
@@ -146,6 +147,7 @@ class CredibilityInfoListScreenState extends State<CredibilityInfoListScreen> {
                         ),
                       const SizedBox(width: 8),
                       IconButton(
+                        key: Key('deleteCredibility${credibility.pseudoId}'),
                         icon: const Icon(Icons.delete, color: Colors.red),
                         onPressed: () async {
                           final confirmed = await showDialog<bool>(

@@ -103,7 +103,7 @@ class AssessmentQuestion {
   }
 
   factory AssessmentQuestion.fromJson(Map<String, dynamic> json) =>
-      _$AssessmentQuestionFromJson(json);
+      _$AssessmentQuestionFromJson(json['question'] ?? json);
   Map<String, dynamic> toJson() => _$AssessmentQuestionToJson(this);
 
   @override

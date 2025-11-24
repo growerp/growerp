@@ -234,7 +234,7 @@ void main() {
       const Duration(days: 1),
     );
     await CommonTest.startTestApp(
-      clear: true,
+      clear: false,
       restClient: restClient,
       title: 'Hotel Checkout Test',
       tester,
@@ -270,7 +270,7 @@ void main() {
       const Duration(days: 1),
     );
     await CommonTest.startTestApp(
-      clear: true,
+      clear: false,
       restClient: restClient,
       title: 'Hotel reservation empty checkin/out Test',
       tester,

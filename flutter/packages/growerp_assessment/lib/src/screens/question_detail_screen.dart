@@ -42,6 +42,7 @@ class QuestionDetailScreenState extends State<QuestionDetailScreen> {
   late String _questionType;
   late bool _isRequired;
   late List<Map<String, dynamic>> _options;
+  bool _isSubmitting = false;
 
   final List<String> _questionTypes = [
     'text',
@@ -118,6 +119,10 @@ class QuestionDetailScreenState extends State<QuestionDetailScreen> {
       return;
     }
 
+    setState(() {
+      _isSubmitting = true;
+    });
+
     final isNew = widget.question.assessmentQuestionId == null ||
         widget.question.assessmentQuestionId!.isEmpty;
     final questionBloc = context.read<QuestionBloc>();
@@ -153,6 +158,7 @@ class QuestionDetailScreenState extends State<QuestionDetailScreen> {
           assessmentId: widget.assessmentId,
           questionId: widget.question.assessmentQuestionId!,
           questionText: _questionTextController.text,
+          questionDescription: _questionDescriptionController.text,
           questionType: _questionType,
           questionSequence: widget.question.questionSequence,
           isRequired: _isRequired,
@@ -177,18 +183,18 @@ class QuestionDetailScreenState extends State<QuestionDetailScreen> {
         child: BlocConsumer<QuestionBloc, QuestionState>(
           listener: (context, state) {
             if (state.status == QuestionStatus.failure) {
+              setState(() {
+                _isSubmitting = false;
+              });
               HelperFunctions.showMessage(
                 context,
                 state.message ?? 'Error',
                 Colors.red,
               );
             }
-            if (state.status == QuestionStatus.success) {
-              // Close dialog on successful create/update
-              final message = state.message ?? '';
-              if (message.contains('created') || message.contains('updated')) {
-                Navigator.of(context).pop();
-              }
+            if (state.status == QuestionStatus.success && _isSubmitting) {
+              // Close dialog only when user explicitly saves
+              Navigator.of(context).pop();
             }
           },
           builder: (context, state) {
@@ -310,7 +316,10 @@ class QuestionDetailScreenState extends State<QuestionDetailScreen> {
                         ..._options.asMap().entries.map((entry) {
                           final index = entry.key;
                           final opt = entry.value;
+                          // Use unique ID if available, otherwise generate from index
+                          final uniqueId = opt['id'] ?? 'new_$index';
                           return Card(
+                            key: Key(uniqueId),
                             margin: const EdgeInsets.only(bottom: 12),
                             child: Padding(
                               padding: const EdgeInsets.all(12),
@@ -327,7 +336,7 @@ class QuestionDetailScreenState extends State<QuestionDetailScreen> {
                                   Expanded(
                                     flex: 3,
                                     child: TextFormField(
-                                      key: Key('optionText$index'),
+                                      key: Key('${uniqueId}_text'),
                                       controller: opt['textController']
                                           as TextEditingController,
                                       decoration: const InputDecoration(
@@ -348,7 +357,7 @@ class QuestionDetailScreenState extends State<QuestionDetailScreen> {
                                   Expanded(
                                     flex: 1,
                                     child: TextFormField(
-                                      key: Key('optionScore$index'),
+                                      key: Key('${uniqueId}_score'),
                                       controller: opt['scoreController']
                                           as TextEditingController,
                                       decoration: const InputDecoration(

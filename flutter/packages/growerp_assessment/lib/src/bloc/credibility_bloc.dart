@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'credibility_event.dart';
@@ -14,7 +15,6 @@ class CredibilityBloc extends Bloc<CredibilityEvent, CredibilityState> {
     on<CredibilityInfoDelete>(_onCredibilityInfoDelete);
     on<CredibilityStatisticCreate>(_onCredibilityStatisticCreate);
     on<CredibilityStatisticUpdate>(_onCredibilityStatisticUpdate);
-    on<CredibilityStatisticDelete>(_onCredibilityStatisticDelete);
     on<CredibilityReorder>(_onCredibilityReorder);
   }
 
@@ -54,6 +54,7 @@ class CredibilityBloc extends Bloc<CredibilityEvent, CredibilityState> {
         creatorBio: event.infoTitle, // Using title as bio for now
         backgroundText: event.infoDescription,
         creatorImageUrl: event.infoIconName, // Using icon as image URL
+        statisticsJson: event.statisticsJson,
       );
 
       final updatedElements =
@@ -86,6 +87,7 @@ class CredibilityBloc extends Bloc<CredibilityEvent, CredibilityState> {
         creatorBio: event.infoTitle,
         backgroundText: event.infoDescription,
         creatorImageUrl: event.infoIconName,
+        statisticsJson: event.statisticsJson,
       );
 
       final updatedElements = state.credibilityElements.map((element) {
@@ -145,7 +147,8 @@ class CredibilityBloc extends Bloc<CredibilityEvent, CredibilityState> {
     emit(state.copyWith(status: CredibilityStatus.loading));
 
     try {
-      // We need a credibilityId to create statistics, so get the first one or fail gracefully
+      // Statistics are now managed as nested data within credibility info
+      // Get the first credibility element or fail gracefully
       if (state.credibilityElements.isEmpty) {
         emit(state.copyWith(
           status: CredibilityStatus.failure,
@@ -155,44 +158,47 @@ class CredibilityBloc extends Bloc<CredibilityEvent, CredibilityState> {
         return;
       }
 
-      final credibilityId =
-          state.credibilityElements.first.credibilityInfoId ?? '';
+      final credibilityInfo = state.credibilityElements.first;
+      final credibilityId = credibilityInfo.credibilityInfoId ?? '';
 
-      final newStatistic = await restClient.addCredibilityStatistic(
-        credibilityId: credibilityId,
-        statistic:
-            '${event.statLabel}: ${event.statValue}', // Combine label and value
+      // Build statistics JSON with existing stats + new stat
+      final currentStats = credibilityInfo.statistics ?? [];
+      final newStat = CredibilityStatistic(
+        statistic: '${event.statLabel}: ${event.statValue}',
+        sequence: (currentStats.length) + 1,
+      );
+      final allStats = [...currentStats, newStat];
+
+      // Convert statistics to JSON array
+      final statsJsonList = allStats
+          .map((stat) => {
+                'statistic': stat.statistic,
+                'sequence': stat.sequence,
+              })
+          .toList();
+      final statsJson = jsonEncode(statsJsonList);
+
+      // Update credibility info with new statistics via the consolidated endpoint
+      final updatedCredibilityInfo = await restClient.updateCredibilityInfo(
+        landingPageId: event.landingPageId,
+        credibilityInfoId: credibilityId,
+        creatorBio: credibilityInfo.creatorBio,
+        backgroundText: credibilityInfo.backgroundText,
+        creatorImageUrl: credibilityInfo.creatorImageUrl,
+        statisticsJson: statsJson,
       );
 
-      // Convert the response to CredibilityStatistic
-      final statisticObj = CredibilityStatistic.fromJson(newStatistic);
-
-      // Update the credibilityElements list with the new statistic
+      // Update the credibilityElements list
       final updatedElements = state.credibilityElements.map((credInfo) {
         if (credInfo.credibilityInfoId == credibilityId) {
-          // Create a new CredibilityInfo with the updated statistics list
-          final currentStats = credInfo.statistics ?? [];
-          final newStats = [...currentStats, statisticObj];
-          return CredibilityInfo(
-            credibilityInfoId: credInfo.credibilityInfoId,
-            pseudoId: credInfo.pseudoId,
-            creatorBio: credInfo.creatorBio,
-            backgroundText: credInfo.backgroundText,
-            creatorImageUrl: credInfo.creatorImageUrl,
-            statistics: newStats,
-          );
+          return updatedCredibilityInfo;
         }
         return credInfo;
       }).toList();
 
-      final updatedStatistics =
-          List<Map<String, dynamic>>.from(state.credibilityStatistics)
-            ..add(newStatistic as Map<String, dynamic>);
-
       emit(state.copyWith(
         status: CredibilityStatus.success,
         credibilityElements: updatedElements,
-        credibilityStatistics: updatedStatistics,
         message: 'Credibility statistic created successfully',
       ));
     } catch (error) {
@@ -213,35 +219,6 @@ class CredibilityBloc extends Bloc<CredibilityEvent, CredibilityState> {
       status: CredibilityStatus.failure,
       message: 'Statistic update not supported - please delete and recreate',
     ));
-  }
-
-  Future<void> _onCredibilityStatisticDelete(
-    CredibilityStatisticDelete event,
-    Emitter<CredibilityState> emit,
-  ) async {
-    emit(state.copyWith(status: CredibilityStatus.loading));
-
-    try {
-      await restClient.removeCredibilityStatistic(
-        credibilityStatisticId: event.credibilityStatisticId,
-      );
-
-      final updatedStatistics = state.credibilityStatistics
-          .where((stat) =>
-              stat['credibilityStatisticId'] != event.credibilityStatisticId)
-          .toList();
-
-      emit(state.copyWith(
-        status: CredibilityStatus.success,
-        credibilityStatistics: updatedStatistics,
-        message: 'Credibility statistic deleted successfully',
-      ));
-    } catch (error) {
-      emit(state.copyWith(
-        status: CredibilityStatus.failure,
-        message: await getDioError(error),
-      ));
-    }
   }
 
   Future<void> _onCredibilityReorder(

@@ -55,6 +55,68 @@ void main() {
     );
     await LandingPageTest.checkLandingPages(tester);
     await LandingPageTest.deleteLandingPages(tester);
+  }, skip: false);
+  testWidgets('''GrowERP landing page section test''', (tester) async {
+    RestClient restClient = RestClient(await buildDioClient());
+    await CommonTest.startTestApp(
+      tester,
+      generateRoute,
+      testMenuOptions,
+      const [],
+      restClient: restClient,
+      blocProviders: getExampleBlocProviders(
+        restClient,
+        GlobalConfiguration().get("classificationId"),
+      ),
+      title: 'GrowERP landing page section test',
+      clear: false,
+    );
+    await LandingPageTest.selectLandingPages(tester);
+    await LandingPageTest.addPageSections(
+      tester,
+      assessment_data.landingPageSections,
+    );
+    await LandingPageTest.checkPageSections(tester);
+    await LandingPageTest.updatePageSections(
+      tester,
+      assessment_data.updatedLandingPageSections,
+    );
+    await LandingPageTest.checkPageSections(tester);
+    await LandingPageTest.deletePageSection(tester);
+  }, skip: false);
+  testWidgets('''GrowERP landing page credibility test''', (tester) async {
+    RestClient restClient = RestClient(await buildDioClient());
+    await CommonTest.startTestApp(
+      tester,
+      generateRoute,
+      testMenuOptions,
+      const [],
+      restClient: restClient,
+      blocProviders: getExampleBlocProviders(
+        restClient,
+        GlobalConfiguration().get("classificationId"),
+      ),
+      title: 'GrowERP landing page credibility test',
+      clear: false,
+    );
+    await LandingPageTest.selectLandingPages(tester);
+    await LandingPageTest.addCredibilityInfo(
+      tester,
+      assessment_data.credibilityInfo,
+    );
+    await LandingPageTest.addCredibilityStatistics(
+      tester,
+      assessment_data.credibilityStatistics,
+    );
+    await LandingPageTest.checkCredibilityInfo(tester);
+    await LandingPageTest.checkCredibilityStatistics(tester);
+    await LandingPageTest.updateCredibilityInfo(
+      tester,
+      assessment_data.updatedCredibilityInfo,
+    );
+    await LandingPageTest.checkCredibilityInfo(tester);
+    await LandingPageTest.checkCredibilityStatistics(tester);
+    await LandingPageTest.deleteCredibilityStatistic(tester);
     await CommonTest.logout(tester);
   });
 }

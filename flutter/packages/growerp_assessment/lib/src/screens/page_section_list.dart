@@ -134,7 +134,7 @@ class PageSectionListState extends State<PageSectionList> {
             itemBuilder: (context, index) {
               final section = state.sections[index];
               return Card(
-                key: Key('section${section.landingPageSectionId}'),
+                key: Key('section${section.sectionSequence}'),
                 margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 child: ListTile(
                   leading: CircleAvatar(

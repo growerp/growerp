@@ -177,14 +177,27 @@ class AssessmentBloc extends Bloc<AssessmentEvent, AssessmentState> {
                 throw Exception('Assessment update timed out after 30 seconds'),
           );
 
+      // Fallback if backend returns empty name (e.g. if backend service wasn't updated yet)
+      final fixedAssessment =
+          assessment.assessmentName == 'Unnamed Assessment' &&
+                  event.assessment.assessmentName != 'Unnamed Assessment'
+              ? assessment.copyWith(
+                  assessmentName: event.assessment.assessmentName,
+                  description:
+                      event.assessment.description ?? assessment.description,
+                  status: event.assessment.status,
+                )
+              : assessment;
+
       final updatedAssessments = state.assessments
-          .map(
-              (a) => a.assessmentId == assessment.assessmentId ? assessment : a)
+          .map((a) => a.assessmentId == fixedAssessment.assessmentId
+              ? fixedAssessment
+              : a)
           .toList();
 
       emit(state.copyWith(
         status: AssessmentStatus.success,
-        selectedAssessment: assessment,
+        selectedAssessment: fixedAssessment,
         assessments: updatedAssessments,
       ));
     } on DioException catch (e) {
@@ -355,15 +368,21 @@ class AssessmentBloc extends Bloc<AssessmentEvent, AssessmentState> {
     try {
       emit(state.copyWith(status: AssessmentStatus.loading));
 
-      final optionsResponse = await restClient.getAssessmentQuestionOptions(
+      // Options are now fetched as part of questions, so get questions instead
+      final questionsResponse = await restClient.getAssessmentQuestions(
         assessmentId: event.assessmentId,
-        assessmentQuestionId: event.assessmentQuestionId,
       );
 
-      // Update the options map with the new options for this question
+      // Find the question with the requested question ID and extract its options
+      final question = questionsResponse.questions.firstWhere(
+        (q) => q.assessmentQuestionId == event.assessmentQuestionId,
+        orElse: () => const AssessmentQuestion(),
+      );
+
+      // Update the options map with the options for this question
       final updatedOptions =
           Map<String, List<AssessmentQuestionOption>>.from(state.options);
-      updatedOptions[event.assessmentQuestionId] = optionsResponse.options;
+      updatedOptions[event.assessmentQuestionId] = question.options ?? [];
 
       emit(state.copyWith(
         status: AssessmentStatus.success,
