@@ -60,6 +60,7 @@ class QuestionUpdate extends QuestionEvent {
   final String assessmentId;
   final String questionId;
   final String? questionText;
+  final String? questionDescription;
   final String? questionType;
   final int? questionSequence;
   final bool? isRequired;
@@ -69,6 +70,7 @@ class QuestionUpdate extends QuestionEvent {
     required this.assessmentId,
     required this.questionId,
     this.questionText,
+    this.questionDescription,
     this.questionType,
     this.questionSequence,
     this.isRequired,
@@ -80,6 +82,7 @@ class QuestionUpdate extends QuestionEvent {
         assessmentId,
         questionId,
         questionText,
+        questionDescription,
         questionType,
         questionSequence,
         isRequired,

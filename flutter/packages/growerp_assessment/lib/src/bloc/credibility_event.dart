@@ -22,6 +22,7 @@ class CredibilityInfoCreate extends CredibilityEvent {
   final String? infoDescription;
   final String? infoIconName;
   final int? infoSequence;
+  final String? statisticsJson;
 
   const CredibilityInfoCreate({
     required this.landingPageId,
@@ -29,11 +30,18 @@ class CredibilityInfoCreate extends CredibilityEvent {
     this.infoDescription,
     this.infoIconName,
     this.infoSequence,
+    this.statisticsJson,
   });
 
   @override
-  List<Object?> get props =>
-      [landingPageId, infoTitle, infoDescription, infoIconName, infoSequence];
+  List<Object?> get props => [
+        landingPageId,
+        infoTitle,
+        infoDescription,
+        infoIconName,
+        infoSequence,
+        statisticsJson
+      ];
 }
 
 class CredibilityInfoUpdate extends CredibilityEvent {
@@ -43,6 +51,7 @@ class CredibilityInfoUpdate extends CredibilityEvent {
   final String? infoDescription;
   final String? infoIconName;
   final int? infoSequence;
+  final String? statisticsJson;
 
   const CredibilityInfoUpdate({
     required this.landingPageId,
@@ -51,6 +60,7 @@ class CredibilityInfoUpdate extends CredibilityEvent {
     this.infoDescription,
     this.infoIconName,
     this.infoSequence,
+    this.statisticsJson,
   });
 
   @override
@@ -60,7 +70,8 @@ class CredibilityInfoUpdate extends CredibilityEvent {
         infoTitle,
         infoDescription,
         infoIconName,
-        infoSequence
+        infoSequence,
+        statisticsJson
       ];
 }
 
@@ -110,15 +121,6 @@ class CredibilityStatisticUpdate extends CredibilityEvent {
   @override
   List<Object?> get props =>
       [credibilityStatisticId, statLabel, statValue, statIcon];
-}
-
-class CredibilityStatisticDelete extends CredibilityEvent {
-  final String credibilityStatisticId;
-
-  const CredibilityStatisticDelete({required this.credibilityStatisticId});
-
-  @override
-  List<Object?> get props => [credibilityStatisticId];
 }
 
 class CredibilityReorder extends CredibilityEvent {

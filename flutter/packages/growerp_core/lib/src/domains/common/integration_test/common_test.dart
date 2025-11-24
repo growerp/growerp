@@ -65,10 +65,10 @@ class CommonTest {
     String classificationId = 'AppAdmin',
   }) async {
     int seq = Random.secure().nextInt(1024);
-    SaveTest test = await PersistFunctions.getTest();
     if (clear == true) {
       await PersistFunctions.persistTest(SaveTest(sequence: seq));
     } else {
+      SaveTest test = await PersistFunctions.getTest();
       await PersistFunctions.persistTest(test.copyWith(sequence: seq));
     }
 

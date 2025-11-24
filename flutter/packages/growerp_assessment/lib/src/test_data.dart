@@ -96,6 +96,90 @@ List<LandingPage> updatedLandingPages = [
   ),
 ];
 
+/// Landing page section fixtures used by landing page integration tests
+const List<LandingPageSection> landingPageSections = [
+  LandingPageSection(
+    sectionTitle: 'Hero Banner',
+    sectionDescription: 'Instantly show the main value proposition.',
+    sectionImageUrl: 'https://cdn.growerp.com/images/hero-banner.png',
+    sectionSequence: 1,
+  ),
+  LandingPageSection(
+    sectionTitle: 'Pain Points',
+    sectionDescription: 'Highlight the top challenges customers face.',
+    sectionImageUrl: 'https://cdn.growerp.com/images/pain-points.png',
+    sectionSequence: 2,
+  ),
+  LandingPageSection(
+    sectionTitle: 'Solution Overview',
+    sectionDescription: 'Explain how GrowERP removes the friction.',
+    sectionImageUrl: 'https://cdn.growerp.com/images/solution.png',
+    sectionSequence: 3,
+  ),
+];
+
+/// Updated sections fixtures for edit scenarios
+const List<LandingPageSection> updatedLandingPageSections = [
+  LandingPageSection(
+    sectionTitle: 'New Hero Banner',
+    sectionDescription: 'Refined pitch targeting scale ups.',
+    sectionImageUrl: 'https://cdn.growerp.com/images/hero-banner-updated.png',
+    sectionSequence: 1,
+  ),
+  LandingPageSection(
+    sectionTitle: 'Key Outcomes',
+    sectionDescription: 'Summarize measurable results in three bullets.',
+    sectionImageUrl: 'https://cdn.growerp.com/images/outcomes.png',
+    sectionSequence: 2,
+  ),
+  LandingPageSection(
+    sectionTitle: 'Customer Stories',
+    sectionDescription: 'Share brief testimonials to build trust.',
+    sectionImageUrl: 'https://cdn.growerp.com/images/testimonials.png',
+    sectionSequence: 3,
+  ),
+];
+
+/// Credibility statistics fixtures bundled with credibility info
+const List<CredibilityStatistic> credibilityStatistics = [
+  CredibilityStatistic(
+    statistic: '120+ Successful Implementations',
+    sequence: 1,
+  ),
+  CredibilityStatistic(
+    statistic: 'Global team across 5 continents',
+    sequence: 2,
+  ),
+];
+
+/// Updated credibility statistics fixtures
+const List<CredibilityStatistic> updatedCredibilityStatistics = [
+  CredibilityStatistic(
+    statistic: '200+ Cloud Deployments',
+    sequence: 1,
+  ),
+  CredibilityStatistic(
+    statistic: 'Customer CSAT 4.9/5',
+    sequence: 2,
+  ),
+];
+
+/// Credibility info fixture with default statistics
+const CredibilityInfo credibilityInfo = CredibilityInfo(
+  creatorBio: 'Built by ex-ERP consultants with 15+ years experience.',
+  backgroundText: 'We helped SMBs on 3 continents streamline operations.',
+  creatorImageUrl: 'https://cdn.growerp.com/images/founder.png',
+  statistics: credibilityStatistics,
+);
+
+/// Updated credibility info fixture
+const CredibilityInfo updatedCredibilityInfo = CredibilityInfo(
+  creatorBio: 'Led by certified ERP architects and AI specialists.',
+  backgroundText: 'Trusted by fintech, healthcare, and hospitality scaleups.',
+  creatorImageUrl: 'https://cdn.growerp.com/images/founder-updated.png',
+  statistics: updatedCredibilityStatistics,
+);
+
 /// Updated assessments for testing
 List<Assessment> updatedAssessments = [
   const Assessment(

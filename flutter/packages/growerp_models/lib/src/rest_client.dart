@@ -751,12 +751,14 @@ abstract class RestClient {
   });
 
   @POST("rest/s1/growerp/100/Assessment/Question")
+  @POST("rest/s1/growerp/100/Assessment/Question")
   Future<AssessmentQuestion> createAssessmentQuestion({
     @Field() required String assessmentId,
     @Field() required String questionText,
     @Field() String? questionType,
     @Field() int? questionSequence,
     @Field() String? isRequired,
+    @Field() List<Map<String, dynamic>>? options,
   });
 
   @PATCH("rest/s1/growerp/100/Assessment/Question")
@@ -764,9 +766,11 @@ abstract class RestClient {
     @Field() required String assessmentId,
     @Field() required String questionId,
     @Field() String? questionText,
+    @Field() String? questionDescription,
     @Field() String? questionType,
     @Field() int? questionSequence,
     @Field() String? isRequired,
+    @Field() List<Map<String, dynamic>>? options,
   });
 
   @DELETE("rest/s1/growerp/100/Assessment/Question")
@@ -775,40 +779,6 @@ abstract class RestClient {
     @Field() required String questionId,
   });
   // Assessment Question Option endpoints
-  @GET("rest/s1/growerp/100/Assessment/Question/Option")
-  Future<AssessmentQuestionOptions> getAssessmentQuestionOptions({
-    @Query('assessmentId') required String assessmentId,
-    @Query('questionId') required String assessmentQuestionId,
-    @Query('start') int? start,
-    @Query('limit') int? limit,
-  });
-
-  @POST("rest/s1/growerp/100/Assessment/Question/Option")
-  Future<AssessmentQuestionOption> createAssessmentQuestionOption({
-    @Field() required String assessmentId,
-    @Field() required String questionId,
-    @Field() required String optionText,
-    @Field() required double optionScore,
-    @Field() int? optionSequence,
-  });
-
-  @PATCH("rest/s1/growerp/100/Assessment/Question/Option")
-  Future<AssessmentQuestionOption> updateAssessmentQuestionOption({
-    @Field() required String assessmentId,
-    @Field() required String questionId,
-    @Field() required String optionId,
-    @Field() String? optionText,
-    @Field() double? optionScore,
-    @Field() int? optionSequence,
-  });
-
-  @DELETE("rest/s1/growerp/100/Assessment/Question/Option")
-  Future<void> deleteAssessmentQuestionOption({
-    @Field() required String assessmentId,
-    @Field() required String questionId,
-    @Field() required String optionId,
-  });
-
   // Assessment Scoring Threshold endpoints
   @GET("rest/s1/growerp/100/Assessment/Threshold")
   Future<ScoringThresholds> getAssessmentThresholds({
@@ -956,6 +926,7 @@ abstract class RestClient {
     @Field() String? creatorBio,
     @Field() String? backgroundText,
     @Field() String? creatorImageUrl,
+    @Field() String? statisticsJson,
   });
 
   @PATCH("rest/s1/growerp/100/LandingPage/Credibility")
@@ -965,32 +936,13 @@ abstract class RestClient {
     @Field() String? creatorBio,
     @Field() String? backgroundText,
     @Field() String? creatorImageUrl,
+    @Field() String? statisticsJson,
   });
 
   @DELETE("rest/s1/growerp/100/LandingPage/Credibility")
   Future<void> deleteCredibilityInfo({
     @Field() required String landingPageId,
     @Field() required String credibilityInfoId,
-  });
-
-  // ============================================
-  // CREDIBILITY STATISTICS ENDPOINTS
-  // ============================================
-
-  @GET("rest/s1/growerp/100/CredibilityStatistic")
-  Future<dynamic> getCredibilityStatistics({
-    @Query('credibilityId') required String credibilityId,
-  });
-
-  @POST("rest/s1/growerp/100/CredibilityStatistic")
-  Future<dynamic> addCredibilityStatistic({
-    @Field() required String credibilityId,
-    @Field() required String statistic,
-  });
-
-  @DELETE("rest/s1/growerp/100/CredibilityStatistic")
-  Future<void> removeCredibilityStatistic({
-    @Query('credibilityStatisticId') required String credibilityStatisticId,
   });
 
   // ============================================

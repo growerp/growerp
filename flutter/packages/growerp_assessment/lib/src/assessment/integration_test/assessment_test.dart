@@ -87,7 +87,7 @@ class AssessmentTest {
           assessment.assessmentId == 'unknown' ||
           assessment.assessmentId!.isEmpty) {
         // Add new assessment
-        await CommonTest.tapByKey(tester, 'addNew');
+        await CommonTest.tapByKey(tester, 'addNewAssessment');
       } else {
         // Update existing assessment
         await CommonTest.doNewSearch(tester,
@@ -99,7 +99,8 @@ class AssessmentTest {
         );
       }
 
-      expect(find.byKey(const Key('AssessmentDialog')), findsOneWidget);
+      expect(find.byKey(Key('AssessmentDetail${assessment.pseudoId}')),
+          findsOneWidget);
 
       // Enter basic info
       await CommonTest.enterText(

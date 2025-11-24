@@ -12,6 +12,7 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
@@ -105,16 +106,45 @@ class CredibilityInfoDetailScreenState
     final credibilityBloc = context.read<CredibilityBloc>();
 
     if (isNew) {
+      // For new credibility info, serialize statistics with the creation
+      final statsJsonList = _statistics.where((stat) {
+        final controller = stat['controller'] as TextEditingController;
+        return controller.text.isNotEmpty;
+      }).map((stat) {
+        final controller = stat['controller'] as TextEditingController;
+        return {
+          'statistic': controller.text,
+          'sequence': stat['sequence'] ?? 1,
+        };
+      }).toList();
+      final statsJson =
+          statsJsonList.isNotEmpty ? jsonEncode(statsJsonList) : null;
+
       credibilityBloc.add(
         CredibilityInfoCreate(
           landingPageId: widget.landingPageId,
           infoTitle: _bioController.text,
           infoDescription: _backgroundController.text,
           infoIconName: _imageUrlController.text,
+          statisticsJson: statsJson,
         ),
       );
     } else {
-      // First update the credibility info
+      // For updates, serialize ALL current statistics (replaces all existing)
+      final statsJsonList = _statistics.where((stat) {
+        final controller = stat['controller'] as TextEditingController;
+        return controller.text.isNotEmpty;
+      }).map((stat) {
+        final controller = stat['controller'] as TextEditingController;
+        return {
+          'statistic': controller.text,
+          'sequence': stat['sequence'] ?? 1,
+        };
+      }).toList();
+      // Always send statistics JSON (empty array if no statistics) to signal deletion
+      final statsJson = jsonEncode(statsJsonList);
+
+      // Update credibility info with statistics atomically
       credibilityBloc.add(
         CredibilityInfoUpdate(
           landingPageId: widget.landingPageId,
@@ -122,39 +152,9 @@ class CredibilityInfoDetailScreenState
           infoTitle: _bioController.text,
           infoDescription: _backgroundController.text,
           infoIconName: _imageUrlController.text,
+          statisticsJson: statsJson,
         ),
       );
-
-      // Then handle NEW statistics only (those without an ID)
-      // Wait a bit for the update to complete before creating statistics
-      await Future.delayed(const Duration(milliseconds: 500));
-
-      for (var stat in _statistics) {
-        final statId = stat['id'];
-        // Only create statistics that don't have an ID yet
-        if (statId == null || statId.toString().isEmpty) {
-          final controller = stat['controller'] as TextEditingController;
-          if (controller.text.isNotEmpty) {
-            // Parse statistic text into label and value (expecting format "label: value")
-            final parts = controller.text.split(':');
-            final statLabel = parts.isNotEmpty ? parts[0].trim() : 'Stat';
-            final statValue = parts.length > 1
-                ? parts.sublist(1).join(':').trim()
-                : controller.text;
-
-            credibilityBloc.add(
-              CredibilityStatisticCreate(
-                landingPageId: widget.landingPageId,
-                statLabel: statLabel,
-                statValue: statValue,
-              ),
-            );
-
-            // Small delay between each statistic to avoid race conditions
-            await Future.delayed(const Duration(milliseconds: 100));
-          }
-        }
-      }
     }
   }
 
@@ -254,6 +254,7 @@ class CredibilityInfoDetailScreenState
                             ),
                           ),
                           IconButton(
+                            key: const Key('addStatistic'),
                             icon: const Icon(Icons.add_circle),
                             color: Colors.blue,
                             onPressed: _addStatistic,
@@ -304,7 +305,7 @@ class CredibilityInfoDetailScreenState
                                 const SizedBox(width: 12),
                                 Expanded(
                                   child: TextFormField(
-                                    key: Key('statistic_$index'),
+                                    key: Key('statistic$index'),
                                     controller: stat['controller']
                                         as TextEditingController,
                                     decoration: InputDecoration(

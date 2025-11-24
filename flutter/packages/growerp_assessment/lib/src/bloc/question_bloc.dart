@@ -64,42 +64,32 @@ class QuestionBloc extends Bloc<QuestionEvent, QuestionState> {
     try {
       emit(state.copyWith(status: QuestionStatus.loading));
 
-      // Create the question first
+      // Convert options to Map format for API
+      final optionsData = event.options
+          ?.map((opt) => {
+                'optionText': opt.optionText,
+                'optionScore': opt.optionScore,
+                'optionSequence': opt.optionSequence,
+              })
+          .toList();
+
+      // Create the question with options in a single call
       final newQuestion = await restClient.createAssessmentQuestion(
         assessmentId: event.assessmentId,
         questionText: event.questionText,
-        questionType: event.questionType,
+        questionType: event.questionType ?? 'MULTIPLE_CHOICE',
         questionSequence: event.questionSequence,
         isRequired: event.isRequired == true ? 'Y' : 'N',
+        options: optionsData,
       );
 
-      // If options provided, create them
-      List<AssessmentQuestionOption> createdOptions = [];
-      if (event.options != null && event.options!.isNotEmpty) {
-        for (var option in event.options!) {
-          final createdOption = await restClient.createAssessmentQuestionOption(
-            assessmentId: event.assessmentId,
-            questionId: newQuestion.assessmentQuestionId!,
-            optionText: option.optionText!,
-            optionScore: option.optionScore ?? 0.0,
-            optionSequence: option.optionSequence,
-          );
-          createdOptions.add(createdOption);
-        }
-      }
-
-      // Update question with options
-      final questionWithOptions = newQuestion.copyWith(options: createdOptions);
-
-      // Reload questions from backend to ensure we have all the latest data including options
-      final response = await restClient.getAssessmentQuestions(
-        assessmentId: event.assessmentId,
-      );
+      // Add new question to the list
+      final updatedQuestions = [...state.questions, newQuestion];
 
       emit(state.copyWith(
         status: QuestionStatus.success,
-        questions: response.questions,
-        selectedQuestion: questionWithOptions,
+        questions: updatedQuestions,
+        selectedQuestion: newQuestion,
         message: 'Question created successfully',
       ));
     } catch (error) {
@@ -117,81 +107,36 @@ class QuestionBloc extends Bloc<QuestionEvent, QuestionState> {
     try {
       emit(state.copyWith(status: QuestionStatus.loading));
 
-      // Update the question
+      // Convert options to Map format for API
+      final optionsData = event.options
+          ?.map((opt) => {
+                'optionText': opt.optionText,
+                'optionScore': opt.optionScore,
+                'optionSequence': opt.optionSequence,
+              })
+          .toList();
+
+      // Update the question with options in a single call
       final updatedQuestion = await restClient.updateAssessmentQuestion(
         assessmentId: event.assessmentId,
         questionId: event.questionId,
         questionText: event.questionText,
+        questionDescription: event.questionDescription,
         questionType: event.questionType,
         questionSequence: event.questionSequence,
         isRequired: event.isRequired == true ? 'Y' : 'N',
+        options: optionsData,
       );
 
-      // Handle options update if provided
-      List<AssessmentQuestionOption> finalOptions = [];
-      if (event.options != null) {
-        // Get existing options
-        final existingOptionsResponse =
-            await restClient.getAssessmentQuestionOptions(
-          assessmentId: event.assessmentId,
-          assessmentQuestionId: event.questionId,
-        );
-        final existingOptions = existingOptionsResponse.options;
-
-        // Delete options that are not in the new list
-        for (var existing in existingOptions) {
-          final stillExists = event.options!.any((opt) =>
-              opt.assessmentQuestionOptionId ==
-              existing.assessmentQuestionOptionId);
-          if (!stillExists) {
-            await restClient.deleteAssessmentQuestionOption(
-              assessmentId: event.assessmentId,
-              questionId: event.questionId,
-              optionId: existing.assessmentQuestionOptionId!,
-            );
-          }
-        }
-
-        // Create or update options
-        for (var option in event.options!) {
-          if (option.assessmentQuestionOptionId == null ||
-              option.assessmentQuestionOptionId!.isEmpty) {
-            // Create new option
-            final created = await restClient.createAssessmentQuestionOption(
-              assessmentId: event.assessmentId,
-              questionId: event.questionId,
-              optionText: option.optionText!,
-              optionScore: option.optionScore ?? 0.0,
-              optionSequence: option.optionSequence,
-            );
-            finalOptions.add(created);
-          } else {
-            // Update existing option
-            final updated = await restClient.updateAssessmentQuestionOption(
-              assessmentId: event.assessmentId,
-              questionId: event.questionId,
-              optionId: option.assessmentQuestionOptionId!,
-              optionText: option.optionText,
-              optionScore: option.optionScore,
-              optionSequence: option.optionSequence,
-            );
-            finalOptions.add(updated);
-          }
-        }
-      }
-
-      final questionWithOptions =
-          updatedQuestion.copyWith(options: finalOptions);
-
-      // Reload questions from backend to ensure we have all the latest data including options
-      final response = await restClient.getAssessmentQuestions(
-        assessmentId: event.assessmentId,
-      );
+      // Replace the updated question in the list
+      final updatedQuestions = state.questions.map((q) {
+        return q.assessmentQuestionId == event.questionId ? updatedQuestion : q;
+      }).toList();
 
       emit(state.copyWith(
         status: QuestionStatus.success,
-        questions: response.questions,
-        selectedQuestion: questionWithOptions,
+        questions: updatedQuestions,
+        selectedQuestion: updatedQuestion,
         message: 'Question updated successfully',
       ));
     } catch (error) {
