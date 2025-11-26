@@ -128,7 +128,9 @@ class QuestionListScreenState extends State<QuestionListScreen> {
                 key: Key('question${question.assessmentQuestionId}'),
                 margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 child: ListTile(
+                  key: Key('question$index'),
                   leading: CircleAvatar(
+                    key: const Key('questionItem'),
                     child: Text('${question.questionSequence ?? index + 1}'),
                   ),
                   title: Text(question.questionText ?? 'Untitled Question'),
@@ -137,6 +139,7 @@ class QuestionListScreenState extends State<QuestionListScreen> {
                     style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                   ),
                   trailing: IconButton(
+                    key: Key('delete$index'),
                     icon: const Icon(Icons.delete, color: Colors.red),
                     onPressed: () async {
                       final confirmed = await showDialog<bool>(
@@ -149,11 +152,13 @@ class QuestionListScreenState extends State<QuestionListScreen> {
                             ),
                             actions: [
                               TextButton(
+                                key: const Key('deleteCancel'),
                                 onPressed: () =>
                                     Navigator.of(context).pop(false),
                                 child: const Text('Cancel'),
                               ),
                               TextButton(
+                                key: const Key('deleteConfirm'),
                                 onPressed: () =>
                                     Navigator.of(context).pop(true),
                                 child: const Text('Delete'),

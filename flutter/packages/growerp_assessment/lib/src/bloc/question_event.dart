@@ -31,6 +31,7 @@ class QuestionLoad extends QuestionEvent {
 class QuestionCreate extends QuestionEvent {
   final String assessmentId;
   final String questionText;
+  final String? questionDescription;
   final String? questionType;
   final int? questionSequence;
   final bool? isRequired;
@@ -39,6 +40,7 @@ class QuestionCreate extends QuestionEvent {
   const QuestionCreate({
     required this.assessmentId,
     required this.questionText,
+    this.questionDescription,
     this.questionType,
     this.questionSequence,
     this.isRequired,
@@ -49,6 +51,7 @@ class QuestionCreate extends QuestionEvent {
   List<Object?> get props => [
         assessmentId,
         questionText,
+        questionDescription,
         questionType,
         questionSequence,
         isRequired,

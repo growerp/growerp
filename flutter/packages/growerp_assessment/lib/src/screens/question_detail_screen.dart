@@ -48,8 +48,6 @@ class QuestionDetailScreenState extends State<QuestionDetailScreen> {
     'text',
     'email',
     'radio',
-    'dropdown',
-    'yes_no',
   ];
 
   @override
@@ -203,6 +201,7 @@ class QuestionDetailScreenState extends State<QuestionDetailScreen> {
             }
 
             return SingleChildScrollView(
+              key: const Key('questionDetailListView'),
               child: Form(
                 key: _formKey,
                 child: Column(

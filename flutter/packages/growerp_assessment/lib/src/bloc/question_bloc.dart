@@ -77,6 +77,7 @@ class QuestionBloc extends Bloc<QuestionEvent, QuestionState> {
       final newQuestion = await restClient.createAssessmentQuestion(
         assessmentId: event.assessmentId,
         questionText: event.questionText,
+        questionDescription: event.questionDescription,
         questionType: event.questionType ?? 'MULTIPLE_CHOICE',
         questionSequence: event.questionSequence,
         isRequired: event.isRequired == true ? 'Y' : 'N',

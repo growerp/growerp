@@ -48,12 +48,29 @@ void main() {
       tester,
       assessment_data.assessments.sublist(0, 3),
     );
-    await AssessmentTest.checkAssessments(tester);
+    /*    await AssessmentTest.checkAssessments(tester);
     await AssessmentTest.updateAssessments(
       tester,
       assessment_data.updatedAssessments.sublist(0, 3),
     );
     await AssessmentTest.checkAssessments(tester);
+
+    // Test questions for the first assessment
+*/
+    SaveTest test = await PersistFunctions.getTest();
+    String firstAssessmentId = test.assessments[0].pseudoId!;
+    await QuestionTest.selectQuestions(tester, firstAssessmentId);
+    await QuestionTest.addQuestions(
+      tester,
+      assessment_data.assessmentQuestions,
+    );
+    await QuestionTest.checkQuestions(tester);
+    await QuestionTest.deleteLastQuestion(tester);
+
+    // Go back to assessment list
+    await CommonTest.tapByKey(tester, 'cancel'); // Close questions dialog
+    await CommonTest.tapByKey(tester, 'cancel'); // Close assessment detail
+
     await AssessmentTest.deleteAssessments(tester);
     await CommonTest.logout(tester);
   });

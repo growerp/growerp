@@ -763,6 +763,7 @@ abstract class RestClient {
   Future<AssessmentQuestion> createAssessmentQuestion({
     @Field() required String assessmentId,
     @Field() required String questionText,
+    @Field() String? questionDescription,
     @Field() String? questionType,
     @Field() int? questionSequence,
     @Field() String? isRequired,

@@ -199,3 +199,43 @@ List<Assessment> updatedAssessments = [
     status: 'Active',
   ),
 ];
+
+/// Assessment questions test data
+/// Based on GeneralLandingPageAssessmentImport.xml
+List<AssessmentQuestion> assessmentQuestions = [
+  // Question 1: Multiple Choice (radio) with options
+  const AssessmentQuestion(
+    questionText: 'Which best describes your current situation?',
+    questionDescription: 'Identify your current business state',
+    questionType: 'radio',
+    questionSequence: 1,
+    isRequired: true,
+    options: [
+      AssessmentQuestionOption(
+        optionText: 'Stagnant (No growth or declining)',
+        optionScore: 20,
+        optionSequence: 1,
+      ),
+      AssessmentQuestionOption(
+        optionText: 'Slow Growth (1-10% annually)',
+        optionScore: 50,
+        optionSequence: 2,
+      ),
+      AssessmentQuestionOption(
+        optionText: 'Rapid Growth (10%+ annually)',
+        optionScore: 80,
+        optionSequence: 3,
+      ),
+    ],
+  ),
+  // Question 2: Text input
+  const AssessmentQuestion(
+    questionText:
+        'Is there anything else that you think we need to know about?',
+    questionDescription:
+        'Open box for relevant information (budget constraints, urgency, specific needs)',
+    questionType: 'text',
+    questionSequence: 2,
+    isRequired: false,
+  ),
+];
