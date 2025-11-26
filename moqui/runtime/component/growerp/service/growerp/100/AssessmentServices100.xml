@@ -1268,6 +1268,9 @@ Service definitions for assessment management and completion
             <parameter name="questionText" required="true">
                 <description>Question Text</description>
             </parameter>
+            <parameter name="questionDescription">
+                <description>Question Description</description>
+            </parameter>
             <parameter name="questionType" default-value="MULTIPLE_CHOICE" />
             <parameter name="questionSequence" type="Integer" />
             <parameter name="isRequired" default-value="Y" />
@@ -1325,6 +1328,7 @@ Service definitions for assessment management and completion
                 <field-map field-name="assessmentId" from="assessmentId" />
                 <field-map field-name="pseudoId" from="pseudoId" />
                 <field-map field-name="questionText" from="questionText" />
+                <field-map field-name="questionDescription" from="questionDescription" />
                 <field-map field-name="questionType" from="questionType" />
                 <field-map field-name="questionSequence" from="questionSequence" />
                 <field-map field-name="isRequired" from="isRequired" />

@@ -44,3 +44,4 @@ export 'src/screens/generate_landing_page_dialog.dart';
 export 'src/test_data.dart';
 export 'src/landing_page/integration_test/landing_page_test.dart';
 export 'src/assessment/integration_test/assessment_test.dart';
+export 'src/question/integration_test/question_test.dart';
