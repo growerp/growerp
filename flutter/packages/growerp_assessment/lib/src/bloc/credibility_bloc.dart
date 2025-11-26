@@ -59,7 +59,7 @@ class CredibilityBloc extends Bloc<CredibilityEvent, CredibilityState> {
 
       final updatedElements =
           List<CredibilityInfo>.from(state.credibilityElements)
-            ..add(newCredibilityElement);
+            ..insert(0, newCredibilityElement);
 
       emit(state.copyWith(
         status: CredibilityStatus.success,
@@ -84,6 +84,7 @@ class CredibilityBloc extends Bloc<CredibilityEvent, CredibilityState> {
       final updatedCredibilityInfo = await restClient.updateCredibilityInfo(
         landingPageId: event.landingPageId,
         credibilityInfoId: event.credibilityInfoId,
+        pseudoId: event.pseudoId,
         creatorBio: event.infoTitle,
         backgroundText: event.infoDescription,
         creatorImageUrl: event.infoIconName,

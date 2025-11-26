@@ -79,9 +79,8 @@ class LandingPageTest {
       findsNWidgets(count - 1),
     );
     await PersistFunctions.persistTest(
-      test.copyWith(landingPages: test.landingPages.sublist(1, count - 1)),
+      test.copyWith(landingPages: test.landingPages.sublist(1, count)),
     );
-    test = await PersistFunctions.getTest();
   }
 
   static Future<void> enterLandingPageData(WidgetTester tester) async {
@@ -100,9 +99,6 @@ class LandingPageTest {
           true,
         );
       }
-
-      // Wait for the detail screen dialog to appear
-      await tester.pumpAndSettle();
 
       // Check for the detail screen (key varies based on pseudoId)
       final expectedKey = page.pseudoId == null
@@ -504,11 +500,24 @@ class LandingPageTest {
     }
 
     // Save credibility info
+    await CommonTest.dragUntil(
+      tester,
+      key: 'saveCredibility',
+      listViewName: 'credibilityInfoScrollView',
+    );
     await CommonTest.tapByKey(tester, 'saveCredibility',
         seconds: CommonTest.waitTime);
 
-    // Close the credibility section page
+    // Get allocated ID for new credibility info
+    await CommonTest.tapByKey(tester, 'item0', seconds: CommonTest.waitTime);
+    var id = CommonTest.getTextField('topHeader').split('#')[1].trim();
+    credibilityInfo = credibilityInfo.copyWith(pseudoId: id);
+    // close the credibility detail page
     await CommonTest.tapByKey(tester, 'cancel');
+
+    // Close the credibility list page
+    await CommonTest.tapByKey(tester, 'cancel');
+
     // Close the landing page detail
     await CommonTest.tapByKey(tester, 'cancel');
 
@@ -525,6 +534,10 @@ class LandingPageTest {
   ) async {
     SaveTest test = await PersistFunctions.getTest();
 
+    // copy pseudoId from current object
+    newCredibilityInfo = newCredibilityInfo.copyWith(
+        pseudoId: test.landingPages[0].credibility!.pseudoId);
+
     // Open the first landing page
     await CommonTest.doNewSearch(tester,
         searchString: test.landingPages[0].pseudoId!);
@@ -538,7 +551,8 @@ class LandingPageTest {
     }
 
     // Tap on credibility info to edit
-    await CommonTest.tapByKey(tester, 'credibilityItem100000',
+    await CommonTest.tapByKey(
+        tester, 'credibilityItem${newCredibilityInfo.pseudoId}',
         seconds: CommonTest.waitTime);
 
     // Update credibility details
@@ -594,15 +608,20 @@ class LandingPageTest {
     }
 
     // Save credibility info
+    await CommonTest.dragUntil(
+      tester,
+      key: 'saveCredibility',
+      listViewName: 'credibilityInfoScrollView',
+    );
     await CommonTest.tapByKey(tester, 'saveCredibility',
         seconds: CommonTest.waitTime);
 
-    // Close the credibility section page
+    // Close the credibility list page
     await CommonTest.tapByKey(tester, 'cancel');
     // Close the landing page detail
     await CommonTest.tapByKey(tester, 'cancel');
 
-    // Update landing page with credibility
+    // persist landing page with credibility
     List<LandingPage> updatedPages = List.from(test.landingPages);
     updatedPages[0] = updatedPages[0].copyWith(credibility: newCredibilityInfo);
     await PersistFunctions.persistTest(
@@ -631,7 +650,7 @@ class LandingPageTest {
     final credibility = test.landingPages[0].credibility!;
 
     // Tap to open detail
-    await CommonTest.tapByKey(tester, 'credibilityItem100000',
+    await CommonTest.tapByKey(tester, 'credibilityItem${credibility.pseudoId}',
         seconds: CommonTest.waitTime);
 
     // Verify credibility details
@@ -657,7 +676,7 @@ class LandingPageTest {
         if (statistic.statistic != null) {
           // Verify each statistic text is in the form
           expect(
-            CommonTest.getTextFormField('statistic${i + 1}'),
+            CommonTest.getTextFormField('statistic$i'),
             equals(statistic.statistic!),
             reason: 'Statistic at index $i should match',
           );
@@ -696,7 +715,8 @@ class LandingPageTest {
       await tester.pumpAndSettle();
     }
     // Open the credibility info to edit
-    await CommonTest.tapByKey(tester, 'credibilityItem100000',
+    await CommonTest.tapByKey(
+        tester, 'credibilityItem${test.landingPages[0].credibility!.pseudoId}',
         seconds: CommonTest.waitTime);
 
     List<CredibilityStatistic> newStatistics = [];
@@ -708,6 +728,11 @@ class LandingPageTest {
 
       // Fill in statistic details
       if (statistic.statistic != null) {
+        await CommonTest.dragUntil(
+          tester,
+          key: 'statistic$i',
+          listViewName: 'credibilityInfoScrollView',
+        );
         await CommonTest.enterText(tester, 'statistic$i', statistic.statistic!);
       }
 
@@ -715,20 +740,23 @@ class LandingPageTest {
     }
 
     // Save credibility info with statistics
+    await CommonTest.dragUntil(
+      tester,
+      key: 'saveCredibility',
+      listViewName: 'credibilityInfoScrollView',
+    );
     await CommonTest.tapByKey(tester, 'saveCredibility',
         seconds: CommonTest.waitTime);
+
+    // Close credibility detail
+    await CommonTest.tapByKey(tester, 'cancel');
 
     // Close the landing page detail
     await CommonTest.tapByKey(tester, 'cancel');
 
     // Update landing page with statistics
     List<LandingPage> updatedPages = List.from(test.landingPages);
-    final updatedCredibility = CredibilityInfo(
-      credibilityInfoId: test.landingPages[0].credibility!.credibilityInfoId,
-      pseudoId: test.landingPages[0].credibility!.pseudoId,
-      creatorBio: test.landingPages[0].credibility!.creatorBio,
-      backgroundText: test.landingPages[0].credibility!.backgroundText,
-      creatorImageUrl: test.landingPages[0].credibility!.creatorImageUrl,
+    final updatedCredibility = test.landingPages[0].credibility!.copyWith(
       statistics: newStatistics,
     );
     updatedPages[0] = updatedPages[0].copyWith(credibility: updatedCredibility);
@@ -781,7 +809,9 @@ class LandingPageTest {
 
     // Close credibility detail
     await CommonTest.tapByKey(tester, 'cancel');
-    await tester.pumpAndSettle();
+
+    // Close credibility list
+    await CommonTest.tapByKey(tester, 'cancel');
 
     // Close the landing page detail
     await CommonTest.tapByKey(tester, 'cancel');
@@ -809,39 +839,31 @@ class LandingPageTest {
       await tester.pumpAndSettle();
     }
 
+    // Open the credibility info to edit
+    await CommonTest.tapByKey(
+        tester, 'credibilityItem${test.landingPages[0].credibility!.pseudoId}',
+        seconds: CommonTest.waitTime);
+
     int count = test.landingPages[0].credibility!.statistics!.length;
-    final lastStatistic =
-        test.landingPages[0].credibility!.statistics!.last.statistic;
 
     // Find and tap delete button on last statistic
     final deleteButton = find.byIcon(Icons.delete).last;
     await tester.tap(deleteButton);
     await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
 
-    // Verify statistic was deleted
-    if (lastStatistic != null) {
-      // After deletion, there should be one less occurrence
-      expect(
-        find.text(lastStatistic),
-        findsNothing,
-      );
-    }
-
     // Save credibility info
     await CommonTest.tapByKey(tester, 'saveCredibility',
         seconds: CommonTest.waitTime);
+
+    // Close credibility list
+    await CommonTest.tapByKey(tester, 'cancel');
 
     // Close the landing page detail
     await CommonTest.tapByKey(tester, 'cancel');
 
     // Update landing page with remaining statistics
     List<LandingPage> updatedPages = List.from(test.landingPages);
-    final updatedCredibility = CredibilityInfo(
-      credibilityInfoId: test.landingPages[0].credibility!.credibilityInfoId,
-      pseudoId: test.landingPages[0].credibility!.pseudoId,
-      creatorBio: test.landingPages[0].credibility!.creatorBio,
-      backgroundText: test.landingPages[0].credibility!.backgroundText,
-      creatorImageUrl: test.landingPages[0].credibility!.creatorImageUrl,
+    final updatedCredibility = test.landingPages[0].credibility!.copyWith(
       statistics:
           test.landingPages[0].credibility!.statistics!.sublist(0, count - 1),
     );

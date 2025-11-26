@@ -47,6 +47,7 @@ class CredibilityInfoCreate extends CredibilityEvent {
 class CredibilityInfoUpdate extends CredibilityEvent {
   final String landingPageId;
   final String credibilityInfoId;
+  final String? pseudoId;
   final String infoTitle;
   final String? infoDescription;
   final String? infoIconName;
@@ -56,6 +57,7 @@ class CredibilityInfoUpdate extends CredibilityEvent {
   const CredibilityInfoUpdate({
     required this.landingPageId,
     required this.credibilityInfoId,
+    this.pseudoId,
     required this.infoTitle,
     this.infoDescription,
     this.infoIconName,
@@ -67,6 +69,7 @@ class CredibilityInfoUpdate extends CredibilityEvent {
   List<Object?> get props => [
         landingPageId,
         credibilityInfoId,
+        pseudoId,
         infoTitle,
         infoDescription,
         infoIconName,

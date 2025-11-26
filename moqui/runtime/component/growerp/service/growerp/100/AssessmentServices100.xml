@@ -413,9 +413,17 @@ Service definitions for assessment management and completion
             </parameter>
         </in-parameters>
         <out-parameters>
-            <parameter name="assessmentId">
-                <description>Updated assessment ID</description>
-            </parameter>
+            <parameter name="assessmentId" />
+            <parameter name="pseudoId" />
+            <parameter name="ownerPartyId" />
+            <parameter name="assessmentName" />
+            <parameter name="description" />
+            <parameter name="status" />
+            <parameter name="createdDate" type="Long" />
+            <parameter name="createdByUserLogin" />
+            <parameter name="lastModifiedDate" type="Long" />
+            <parameter name="lastModifiedByUserLogin" />
+            <parameter name="lastUpdatedStamp" type="Long" />
         </out-parameters>
         <actions>
             <service-call out-map="context"
@@ -448,6 +456,23 @@ Service definitions for assessment management and completion
             </if>
 
             <service-call name="update#growerp.assessment.Assessment" in-map="updateMap" />
+
+            <!-- Get the updated assessment and return its fields directly -->
+            <entity-find-one entity-name="growerp.assessment.Assessment" value-field="assessment">
+                <field-map field-name="assessmentId" from="assessmentId" />
+            </entity-find-one>
+
+            <!-- Set individual response fields -->
+            <set field="pseudoId" from="assessment.pseudoId" />
+            <set field="assessmentName" from="assessment.assessmentName" />
+            <set field="description" from="assessment.description" />
+            <set field="status" from="assessment.status" />
+            <set field="ownerPartyId" from="assessment.ownerPartyId" />
+            <set field="createdDate" from="assessment.createdDate" />
+            <set field="createdByUserLogin" from="assessment.createdByUserLogin" />
+            <set field="lastModifiedDate" from="assessment.lastModifiedDate" />
+            <set field="lastModifiedByUserLogin" from="assessment.lastModifiedByUserLogin" />
+            <set field="lastUpdatedStamp" from="assessment.lastUpdatedStamp" />
         </actions>
     </service>
 
@@ -1127,9 +1152,9 @@ Service definitions for assessment management and completion
         </actions>
     </service>
 
-    <!-- createQuestion: Create new question -->
+    <!-- createQuestion: Create new question with options -->
     <service verb="create" noun="Question" authenticate="true">
-        <description>Create new question</description>
+        <description>Create new question with optional answer options. Options are created in the same transaction as the question. Returns full question object with nested options.</description>
         <in-parameters>
             <parameter name="assessmentId" required="true" />
             <parameter name="questionText" required="true">
@@ -1138,11 +1163,43 @@ Service definitions for assessment management and completion
             <parameter name="questionType" default-value="MULTIPLE_CHOICE" />
             <parameter name="questionSequence" type="Integer" />
             <parameter name="isRequired" default-value="Y" />
+            <parameter name="options" type="List">
+                <description>Optional list of answer options</description>
+                <parameter name="optionText" />
+                <parameter name="optionScore" type="BigDecimal" />
+                <parameter name="optionSequence" type="Integer" />
+            </parameter>
         </in-parameters>
         <out-parameters>
-            <parameter name="questionId" />
+            <parameter name="question" type="Map">
+                <description>Full question object with nested options</description>
+                <parameter name="assessmentQuestionId" />
+                <parameter name="pseudoId" />
+                <parameter name="assessmentId" />
+                <parameter name="questionSequence" type="Integer" />
+                <parameter name="questionType" />
+                <parameter name="questionText" />
+                <parameter name="questionDescription" />
+                <parameter name="isRequired" />
+                <parameter name="defaultOption" />
+                <parameter name="defaultValue" />
+                <parameter name="createdDate" type="Timestamp" />
+                <parameter name="createdByUserLogin" />
+                <parameter name="options" type="List">
+                    <description>List of created answer options</description>
+                    <parameter name="assessmentQuestionOptionId" />
+                    <parameter name="pseudoId" />
+                    <parameter name="assessmentQuestionId" />
+                    <parameter name="assessmentId" />
+                    <parameter name="optionSequence" type="Integer" />
+                    <parameter name="optionText" />
+                    <parameter name="optionScore" type="BigDecimal" />
+                    <parameter name="createdDate" type="Timestamp" />
+                </parameter>
+            </parameter>
         </out-parameters>
         <actions>
+            <log message="===create question: $questionText option: ${options?.optionText}" />
             <!-- Validate required fields -->
             <if condition="!questionText || questionText.trim().isEmpty()">
                 <return error="true" message="Question text is required and cannot be empty" />
@@ -1168,22 +1225,109 @@ Service definitions for assessment management and completion
             </service-call>
 
             <set field="questionId" from="questionOut.assessmentQuestionId" />
+
+            <!-- Build question object to return -->
+            <script>
+                question = [
+                    assessmentQuestionId: questionId,
+                    pseudoId: pseudoId,
+                    assessmentId: assessmentId,
+                    questionSequence: questionSequence,
+                    questionType: questionType,
+                    questionText: questionText,
+                    isRequired: isRequired,
+                    createdDate: ec.user.nowTimestamp,
+                    createdByUserLogin: ec.user.username,
+                    options: []
+                ]
+            </script>
+
+            <!-- Create options if provided -->
+            <if condition="options">
+                <iterate list="options" entry="option">
+                    <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                        in-map="[ownerPartyId: ownerPartyId, seqName: 'AssessmentQuestionOption']"
+                        out-map="optionIdOut" />
+                    <set field="optionPseudoId" from="optionIdOut.seqNum" />
+
+                    <service-call name="create#growerp.assessment.AssessmentQuestionOption"
+                        out-map="optionOut">
+                        <field-map field-name="assessmentId" from="assessmentId" />
+                        <field-map field-name="assessmentQuestionId" from="questionId" />
+                        <field-map field-name="pseudoId" from="optionPseudoId" />
+                        <field-map field-name="optionText" from="option.optionText" />
+                        <field-map field-name="optionScore" from="option.optionScore" />
+                        <field-map field-name="optionSequence" from="option.optionSequence" />
+                        <field-map field-name="createdDate" from="ec.user.nowTimestamp" />
+                    </service-call>
+
+                    <!-- Add created option to the question options list -->
+                    <script>
+                        optionData = [
+                            assessmentQuestionOptionId: optionOut.assessmentQuestionOptionId,
+                            pseudoId: optionPseudoId,
+                            assessmentQuestionId: questionId,
+                            assessmentId: assessmentId,
+                            optionSequence: option.optionSequence,
+                            optionText: option.optionText,
+                            optionScore: option.optionScore,
+                            createdDate: ec.user.nowTimestamp
+                        ]
+                        question.options.add(optionData)
+                    </script>
+                </iterate>
+            </if>
         </actions>
     </service>
 
-    <!-- updateQuestion: Update existing question -->
+    <!-- updateQuestion: Update existing question with options -->
     <service verb="update" noun="Question" authenticate="true">
-        <description>Update existing question</description>
+        <description>Update existing question and its options. Options are managed as a complete replacement list. Returns full question object with nested options.</description>
         <in-parameters>
             <parameter name="assessmentId" required="true" />
             <parameter name="questionId" required="true" />
             <parameter name="questionText" />
+            <parameter name="questionDescription" />
             <parameter name="questionType" />
             <parameter name="questionSequence" type="Integer" />
             <parameter name="isRequired" />
+            <parameter name="options" type="List">
+                <description>Complete replacement list of options for this question</description>
+                <parameter name="optionId">
+                    <description>Option ID (if null/empty, option will be created)</description>
+                </parameter>
+                <parameter name="optionText" />
+                <parameter name="optionScore" type="BigDecimal" />
+                <parameter name="optionSequence" type="Integer" />
+            </parameter>
         </in-parameters>
         <out-parameters>
-            <parameter name="questionId" />
+            <parameter name="question" type="Map">
+                <description>Full question object with nested options</description>
+                <parameter name="assessmentQuestionId" />
+                <parameter name="pseudoId" />
+                <parameter name="assessmentId" />
+                <parameter name="questionSequence" type="Integer" />
+                <parameter name="questionType" />
+                <parameter name="questionText" />
+                <parameter name="questionDescription" />
+                <parameter name="isRequired" />
+                <parameter name="defaultOption" />
+                <parameter name="defaultValue" />
+                <parameter name="createdDate" type="Timestamp" />
+                <parameter name="createdByUserLogin" />
+                <parameter name="options" type="List">
+                    <description>List of answer options</description>
+                    <parameter name="assessmentQuestionOptionId" />
+                    <parameter name="pseudoId" />
+                    <parameter name="assessmentQuestionId" />
+                    <parameter name="assessmentId" />
+                    <parameter name="optionSequence" type="Integer" />
+                    <parameter name="optionText" />
+                    <parameter name="optionScore" type="BigDecimal" />
+                    <parameter name="createdDate" type="Timestamp" />
+                </parameter>
+            </parameter>
         </out-parameters>
         <actions>
             <service-call out-map="context"
@@ -1199,10 +1343,21 @@ Service definitions for assessment management and completion
                 <return error="true" message="Question not found" />
             </if>
 
+            <if condition="!pseudoId">
+                <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                    in-map="[ownerPartyId: ownerPartyId, seqName: 'assessmentQuestion']"
+                    out-map="context" />
+                <set field="pseudoId" from="seqNum" />
+            </if>
+
+            <!-- Update question fields -->
             <set field="updateMap"
                 from="[assessmentQuestionId: questionId, assessmentId: assessmentId]" />
             <if condition="questionText">
                 <set field="updateMap.questionText" from="questionText" />
+            </if>
+            <if condition="questionDescription != null">
+                <set field="updateMap.questionDescription" from="questionDescription" />
             </if>
             <if condition="questionType">
                 <set field="updateMap.questionType" from="questionType" />
@@ -1215,6 +1370,79 @@ Service definitions for assessment management and completion
             </if>
 
             <service-call name="update#growerp.assessment.AssessmentQuestion" in-map="updateMap" />
+
+            <!-- Get the updated question data -->
+            <entity-find-one entity-name="growerp.assessment.AssessmentQuestion"
+                value-field="updatedQuestion">
+                <field-map field-name="assessmentQuestionId" from="questionId" />
+            </entity-find-one>
+
+            <!-- Build question object to return -->
+            <script>
+                question = [
+                    assessmentQuestionId: updatedQuestion.assessmentQuestionId,
+                    pseudoId: updatedQuestion.pseudoId,
+                    assessmentId: updatedQuestion.assessmentId,
+                    questionSequence: updatedQuestion.questionSequence,
+                    questionType: updatedQuestion.questionType,
+                    questionText: updatedQuestion.questionText,
+                    questionDescription: updatedQuestion.questionDescription,
+                    isRequired: updatedQuestion.isRequired,
+                    defaultOption: updatedQuestion.defaultOption,
+                    defaultValue: updatedQuestion.defaultValue,
+                    createdDate: updatedQuestion.createdDate,
+                    createdByUserLogin: updatedQuestion.createdByUserLogin,
+                    options: []
+                ]
+            </script>
+
+            <!-- Handle options update if provided -->
+            <if condition="options">
+                <!-- Delete all existing options -->
+                <entity-find entity-name="growerp.assessment.AssessmentQuestionOption"
+                    list="existingOptions">
+                    <econdition field-name="assessmentQuestionId" from="questionId" />
+                    <econdition field-name="assessmentId" from="assessmentId" />
+                </entity-find>
+
+                <iterate list="existingOptions" entry="existing">
+                    <entity-delete value-field="existing" />
+                </iterate>
+
+                <!-- Create all new options -->
+                <iterate list="options" entry="option">
+                    <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                        in-map="[ownerPartyId: ownerPartyId, seqName: 'assessmentQuestionOption']"
+                        out-map="optionIdOut" />
+                    <set field="optionPseudoId" from="optionIdOut.seqNum" />
+
+                    <service-call name="create#growerp.assessment.AssessmentQuestionOption"
+                        out-map="optionOut">
+                        <field-map field-name="assessmentId" from="assessmentId" />
+                        <field-map field-name="assessmentQuestionId" from="questionId" />
+                        <field-map field-name="pseudoId" from="optionPseudoId" />
+                        <field-map field-name="optionText" from="option.optionText" />
+                        <field-map field-name="optionScore" from="option.optionScore" />
+                        <field-map field-name="optionSequence" from="option.optionSequence" />
+                        <field-map field-name="createdDate" from="ec.user.nowTimestamp" />
+                    </service-call>
+
+                    <!-- Add created option to the question options list -->
+                    <script>
+                        optionData = [
+                            assessmentQuestionOptionId: optionOut.assessmentQuestionOptionId,
+                            pseudoId: optionPseudoId,
+                            assessmentQuestionId: questionId,
+                            assessmentId: assessmentId,
+                            optionSequence: option.optionSequence,
+                            optionText: option.optionText,
+                            optionScore: option.optionScore,
+                            createdDate: ec.user.nowTimestamp
+                        ]
+                        question.options.add(optionData)
+                    </script>
+                </iterate>
+            </if>
         </actions>
     </service>
 

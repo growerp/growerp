@@ -933,6 +933,7 @@ abstract class RestClient {
   Future<CredibilityInfo> updateCredibilityInfo({
     @Field() required String landingPageId,
     @Field() required String credibilityInfoId,
+    @Field() String? pseudoId,
     @Field() String? creatorBio,
     @Field() String? backgroundText,
     @Field() String? creatorImageUrl,
