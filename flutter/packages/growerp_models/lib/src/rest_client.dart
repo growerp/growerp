@@ -703,6 +703,14 @@ abstract class RestClient {
     @Query('statusId') String? statusId,
   });
 
+  @GET("rest/s1/growerp/100/Assessment")
+  Future<Assessments> searchAssessments({
+    @Query('search') String? searchString,
+    @Query('start') int? start,
+    @Query('limit') int? limit,
+    @Query('statusId') String? statusId,
+  });
+
   @POST("rest/s1/growerp/100/Assessment")
   Future<Assessment> createAssessment({
     @Field() String? pseudoId,

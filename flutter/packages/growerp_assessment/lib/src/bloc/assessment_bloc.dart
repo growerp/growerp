@@ -49,15 +49,14 @@ class AssessmentBloc extends Bloc<AssessmentEvent, AssessmentState> {
     on<AssessmentFetchQuestionOptions>(_onAssessmentFetchQuestionOptions);
     on<AssessmentFetchThresholds>(_onAssessmentFetchThresholds);
     on<AssessmentFetchLeads>(_onAssessmentFetchLeads);
+    on<AssessmentSearchRequested>(_onAssessmentSearch);
   }
 
   Future<void> _onAssessmentFetch(
     AssessmentFetch event,
     Emitter<AssessmentState> emit,
   ) async {
-    if (state.status == AssessmentStatus.initial ||
-        event.refresh ||
-        event.searchString.isNotEmpty) {
+    if (state.status == AssessmentStatus.initial || event.refresh) {
       start = 0;
     } else {
       start = state.assessments.length;
@@ -70,7 +69,6 @@ class AssessmentBloc extends Bloc<AssessmentEvent, AssessmentState> {
         start: start,
         limit: event.limit,
         statusId: event.statusId,
-        searchString: event.searchString.isEmpty ? null : event.searchString,
       );
 
       emit(state.copyWith(
@@ -79,7 +77,6 @@ class AssessmentBloc extends Bloc<AssessmentEvent, AssessmentState> {
             ? response.assessments
             : (List.of(state.assessments)..addAll(response.assessments)),
         hasReachedMax: response.assessments.length < event.limit,
-        searchString: event.searchString,
       ));
     } on DioException catch (e) {
       emit(state.copyWith(
@@ -447,6 +444,47 @@ class AssessmentBloc extends Bloc<AssessmentEvent, AssessmentState> {
       emit(state.copyWith(
         status: AssessmentStatus.failure,
         message: await getDioError(e),
+      ));
+    }
+  }
+
+  Future<void> _onAssessmentSearch(
+    AssessmentSearchRequested event,
+    Emitter<AssessmentState> emit,
+  ) async {
+    final query = event.query.trim();
+    if (query.isEmpty) {
+      emit(state.copyWith(
+        searchStatus: AssessmentStatus.success,
+        searchResults: const [],
+        searchError: null,
+      ));
+      return;
+    }
+
+    emit(state.copyWith(
+      searchStatus: AssessmentStatus.loading,
+      searchResults: const [],
+      searchError: null,
+    ));
+
+    try {
+      final result = await restClient.searchAssessments(
+        start: 0,
+        limit: event.limit,
+        searchString: query,
+      );
+
+      emit(state.copyWith(
+        searchStatus: AssessmentStatus.success,
+        searchResults: result.assessments,
+        searchError: null,
+      ));
+    } catch (error) {
+      emit(state.copyWith(
+        searchStatus: AssessmentStatus.failure,
+        searchResults: const [],
+        searchError: await getDioError(error),
       ));
     }
   }

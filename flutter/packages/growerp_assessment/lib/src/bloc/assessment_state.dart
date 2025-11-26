@@ -29,6 +29,9 @@ class AssessmentState extends Equatable {
     this.thresholds = const <ScoringThreshold>[],
     this.results = const <AssessmentResult>[],
     this.scoreResult,
+    this.searchStatus = AssessmentStatus.initial,
+    this.searchResults = const <Assessment>[],
+    this.searchError,
   });
 
   final AssessmentStatus status;
@@ -42,6 +45,9 @@ class AssessmentState extends Equatable {
   final List<ScoringThreshold> thresholds;
   final List<AssessmentResult> results;
   final AssessmentScoreResponse? scoreResult;
+  final AssessmentStatus searchStatus;
+  final List<Assessment> searchResults;
+  final String? searchError;
 
   AssessmentState copyWith({
     AssessmentStatus? status,
@@ -55,6 +61,9 @@ class AssessmentState extends Equatable {
     List<ScoringThreshold>? thresholds,
     List<AssessmentResult>? results,
     AssessmentScoreResponse? scoreResult,
+    AssessmentStatus? searchStatus,
+    List<Assessment>? searchResults,
+    String? searchError,
   }) {
     return AssessmentState(
       status: status ?? this.status,
@@ -68,6 +77,9 @@ class AssessmentState extends Equatable {
       thresholds: thresholds ?? this.thresholds,
       results: results ?? this.results,
       scoreResult: scoreResult ?? this.scoreResult,
+      searchStatus: searchStatus ?? this.searchStatus,
+      searchResults: searchResults ?? this.searchResults,
+      searchError: searchError ?? this.searchError,
     );
   }
 
@@ -84,6 +96,9 @@ class AssessmentState extends Equatable {
         thresholds,
         results,
         scoreResult,
+        searchStatus,
+        searchResults,
+        searchError,
       ];
 
   @override

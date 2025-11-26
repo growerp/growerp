@@ -49,18 +49,18 @@ List<LandingPage> landingPages = [
 /// Assessment test data
 List<Assessment> assessments = [
   const Assessment(
-    assessmentName: 'Business Readiness Assessment',
+    assessmentName: 'Assessment1',
     description:
         'Comprehensive assessment to evaluate business readiness, identify challenges, and provide tailored recommendations for success.',
     status: 'Active',
   ),
   const Assessment(
-    assessmentName: 'Marketing Readiness Assessment',
+    assessmentName: 'Assessment2',
     description: 'Evaluate your marketing capabilities and strategies',
     status: 'Active',
   ),
   const Assessment(
-    assessmentName: 'Digital Transformation Assessment',
+    assessmentName: 'Assessment3',
     description: 'Assess your digital maturity and transformation readiness',
     status: 'Draft',
   ),

@@ -46,7 +46,6 @@ class AssessmentTest {
     for (int x = 0; x < newAssessments.length; x++) {
       updatedAssessments.add(
         newAssessments[x].copyWith(
-          assessmentId: old.assessments[x].assessmentId,
           pseudoId: old.assessments[x].pseudoId,
         ),
       );
@@ -83,18 +82,15 @@ class AssessmentTest {
     List<Assessment> newAssessments = [];
 
     for (Assessment assessment in test.assessments) {
-      if (assessment.assessmentId == null ||
-          assessment.assessmentId == 'unknown' ||
-          assessment.assessmentId!.isEmpty) {
+      if (assessment.pseudoId == null) {
         // Add new assessment
         await CommonTest.tapByKey(tester, 'addNewAssessment');
       } else {
         // Update existing assessment
         await CommonTest.doNewSearch(tester,
-            searchString: assessment.pseudoId ?? '');
+            searchString: assessment.pseudoId!);
         expect(
-          CommonTest.getTextField('topHeader')
-              .contains(assessment.pseudoId ?? ''),
+          CommonTest.getTextField('topHeader').contains(assessment.pseudoId!),
           true,
         );
       }
@@ -105,7 +101,7 @@ class AssessmentTest {
       // Enter basic info
       await CommonTest.enterText(
         tester,
-        'assessmentName',
+        'name',
         assessment.assessmentName,
       );
 
@@ -117,31 +113,27 @@ class AssessmentTest {
         );
       }
 
-      if (assessment.status != 'ACTIVE') {
-        await CommonTest.enterDropDown(tester, 'status', assessment.status);
-      }
+      await CommonTest.enterDropDown(tester, 'status', assessment.status);
 
       // Save the assessment
       await CommonTest.dragUntil(
         tester,
-        key: 'update',
-        listViewName: 'assessmentDialogListView',
+        key: 'assessmentDetailSave',
+        listViewName: 'assessmentDetailListView',
       );
       await CommonTest.tapByKey(
         tester,
-        'update',
+        'assessmentDetailSave',
         seconds: CommonTest.waitTime,
       );
       await CommonTest.waitForSnackbarToGo(tester);
 
       // Get allocated ID for new assessments
-      if (assessment.assessmentId == null ||
-          assessment.assessmentId == 'unknown' ||
-          assessment.assessmentId!.isEmpty) {
+      if (assessment.pseudoId == null) {
         await CommonTest.tapByKey(tester, 'item0',
             seconds: CommonTest.waitTime);
         var id = CommonTest.getTextField('topHeader').split('#')[1].trim();
-        assessment = assessment.copyWith(assessmentId: id);
+        assessment = assessment.copyWith(pseudoId: id);
         await CommonTest.tapByKey(tester, 'cancel');
       }
 
@@ -159,13 +151,14 @@ class AssessmentTest {
     for (Assessment assessment in test.assessments) {
       await CommonTest.doNewSearch(
         tester,
-        searchString: assessment.assessmentName,
+        searchString: assessment.pseudoId!,
       );
 
       // Check detail
-      expect(find.byKey(const Key('AssessmentDialog')), findsOneWidget);
+      expect(find.byKey(Key('AssessmentDetail${assessment.pseudoId}')),
+          findsOneWidget);
       expect(
-        CommonTest.getTextFormField('assessmentName'),
+        CommonTest.getTextFormField('name'),
         equals(assessment.assessmentName),
       );
 

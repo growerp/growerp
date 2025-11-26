@@ -17,6 +17,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
+import '../bloc/assessment_bloc.dart';
+
 TableData getAssessmentListTableData(Bloc bloc, String classificationId,
     BuildContext context, Assessment item, int index,
     {dynamic extra}) {
@@ -42,7 +44,7 @@ TableData getAssessmentListTableData(Bloc bloc, String classificationId,
           children: [
             Text(item.pseudoId ?? item.assessmentId ?? 'N/A',
                 key: Key('id$index')),
-            Text(item.assessmentName.truncate(18), key: Key('name$index')),
+            Text(item.assessmentName.truncate(25), key: Key('name$index')),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
               decoration: BoxDecoration(
@@ -112,8 +114,19 @@ TableData getAssessmentListTableData(Bloc bloc, String classificationId,
           ),
         )));
   }
+  // Add delete button
+  rowContent.add(TableRowContent(
+      name: ' ',
+      width: 10,
+      value: IconButton(
+        key: Key("delete$index"),
+        icon: const Icon(Icons.delete_forever),
+        onPressed: () {
+          bloc.add(AssessmentDelete(item));
+        },
+      )));
   return TableData(
-    rowHeight: isPhone ? 65 : 20,
+    rowHeight: isPhone ? 85 : 20,
     rowContent: rowContent,
   );
 }
