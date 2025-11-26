@@ -275,6 +275,24 @@ class CredibilityInfo {
     this.statistics,
   });
 
+  CredibilityInfo copyWith({
+    String? credibilityInfoId,
+    String? pseudoId,
+    String? creatorBio,
+    String? backgroundText,
+    String? creatorImageUrl,
+    List<CredibilityStatistic>? statistics,
+  }) {
+    return CredibilityInfo(
+      credibilityInfoId: credibilityInfoId ?? this.credibilityInfoId,
+      pseudoId: pseudoId ?? this.pseudoId,
+      creatorBio: creatorBio ?? this.creatorBio,
+      backgroundText: backgroundText ?? this.backgroundText,
+      creatorImageUrl: creatorImageUrl ?? this.creatorImageUrl,
+      statistics: statistics ?? this.statistics,
+    );
+  }
+
   factory CredibilityInfo.fromJson(Map<String, dynamic> json) =>
       _$CredibilityInfoFromJson(json);
 

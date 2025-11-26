@@ -38,6 +38,7 @@ class ChatRoomBloc extends Bloc<ChatRoomEvent, ChatRoomState> {
   final WsClient chatClient;
   final AuthBloc authBloc;
   int start = 0;
+  StreamSubscription? _wsSubscription;
 
   ChatRoomBloc(this.restClient, this.chatClient, this.authBloc)
     : super(const ChatRoomState()) {
@@ -49,6 +50,12 @@ class ChatRoomBloc extends Bloc<ChatRoomEvent, ChatRoomState> {
     on<ChatRoomUpdate>(_onChatRoomUpdate);
     on<ChatRoomDelete>(_onChatRoomDelete);
     on<ChatRoomReceiveWsChatMessage>(_onChatRoomReceiveWsChatMessage);
+  }
+
+  @override
+  Future<void> close() {
+    _wsSubscription?.cancel();
+    return super.close();
   }
 
   void _onChatRoomUpdateLocal(
@@ -87,7 +94,7 @@ class ChatRoomBloc extends Bloc<ChatRoomEvent, ChatRoomState> {
     }
     if (state.status == ChatRoomStatus.initial) {
       final myStream = chatClient.stream();
-      myStream.listen(
+      _wsSubscription = myStream.listen(
         (data) => add(
           ChatRoomReceiveWsChatMessage(ChatMessage.fromJson(jsonDecode(data))),
         ),

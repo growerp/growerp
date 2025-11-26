@@ -149,12 +149,19 @@ class CredibilityInfoDetailScreenState
         CredibilityInfoUpdate(
           landingPageId: widget.landingPageId,
           credibilityInfoId: widget.credibilityInfo.credibilityInfoId!,
+          pseudoId: widget.credibilityInfo.pseudoId,
           infoTitle: _bioController.text,
           infoDescription: _backgroundController.text,
           infoIconName: _imageUrlController.text,
           statisticsJson: statsJson,
         ),
       );
+    }
+
+    // Pop immediately after dispatching the event
+    // The credibility list will reload in the background
+    if (mounted) {
+      Navigator.of(context, rootNavigator: false).pop();
     }
   }
 
@@ -166,7 +173,8 @@ class CredibilityInfoDetailScreenState
       insetPadding: const EdgeInsets.all(10),
       child: popUp(
         context: context,
-        title: isNew ? 'New Credibility Info' : 'Edit Credibility Info',
+        title:
+            'Credibility Info${isNew ? ' #New' : ' #${widget.credibilityInfo.pseudoId}'}',
         width: 700,
         height: 650,
         child: BlocConsumer<CredibilityBloc, CredibilityState>(
@@ -178,10 +186,6 @@ class CredibilityInfoDetailScreenState
                 Colors.red,
               );
             }
-            if (state.status == CredibilityStatus.success &&
-                (state.message ?? '').isNotEmpty) {
-              Navigator.of(context).pop();
-            }
           },
           builder: (context, state) {
             if (state.status == CredibilityStatus.loading) {
@@ -191,6 +195,7 @@ class CredibilityInfoDetailScreenState
             return Form(
               key: _formKey,
               child: SingleChildScrollView(
+                key: const Key('credibilityInfoScrollView'),
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
@@ -340,7 +345,9 @@ class CredibilityInfoDetailScreenState
                         children: [
                           Expanded(
                             child: OutlinedButton(
-                              onPressed: () => Navigator.of(context).pop(),
+                              onPressed: () =>
+                                  Navigator.of(context, rootNavigator: false)
+                                      .pop(),
                               child: const Text('Cancel'),
                             ),
                           ),

@@ -65,12 +65,22 @@ class CommonTest {
     String classificationId = 'AppAdmin',
   }) async {
     int seq = Random.secure().nextInt(1024);
+    debugPrint('=== startTestApp Debug ===');
+    debugPrint('clear: $clear');
+    debugPrint('new sequence: $seq');
+
     if (clear == true) {
+      debugPrint('Creating NEW SaveTest (clear=true)');
       await PersistFunctions.persistTest(SaveTest(sequence: seq));
     } else {
       SaveTest test = await PersistFunctions.getTest();
+      debugPrint(
+        'Loaded existing test - admin: ${test.admin}, sequence: ${test.sequence}',
+      );
       await PersistFunctions.persistTest(test.copyWith(sequence: seq));
+      debugPrint('Persisted with new sequence: $seq');
     }
+    debugPrint('==========================');
 
     Bloc.observer = AppBlocObserver();
     runApp(
@@ -158,8 +168,28 @@ class CommonTest {
         .toString()
         .startsWith('Found 0 widgets with key')) {
       SaveTest test = await PersistFunctions.getTest();
+      debugPrint('=== Login Debug Info ===');
+      debugPrint('test.admin: ${test.admin}');
+      debugPrint('test.sequence: ${test.sequence}');
+      debugPrint('test.company: ${test.company}');
+      debugPrint('========================');
+
       await pressLoginWithExistingId(tester);
-      await enterText(tester, 'username', username ?? test.admin!.email!);
+
+      // Use provided username or fall back to test.admin
+      String loginUsername;
+      if (username != null) {
+        loginUsername = username;
+      } else if (test.admin != null) {
+        loginUsername = test.admin!.email!;
+      } else {
+        throw Exception(
+          'No username provided and test.admin is null. '
+          'Please call createCompanyAndAdmin() before login() or provide a username parameter.',
+        );
+      }
+
+      await enterText(tester, 'username', loginUsername);
       await enterText(tester, 'password', password ?? 'qqqqqq9!');
       await pressLogin(tester);
       await waitForSnackbarToGo(tester);

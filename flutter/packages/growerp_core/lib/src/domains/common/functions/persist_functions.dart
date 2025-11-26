@@ -16,15 +16,21 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:growerp_models/growerp_models.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:universal_io/io.dart';
 
 T getJsonObject<T>(
-    String result, T Function(Map<String, dynamic> json) fromJson) {
+  String result,
+  T Function(Map<String, dynamic> json) fromJson,
+) {
   return fromJson(json.decode(result) as Map<String, dynamic>);
 }
 
 String createJsonObject<T>(
-    T object, T Function(String json) Function() toJson) {
+  T object,
+  T Function(String json) Function() toJson,
+) {
   return jsonEncode(toJson());
 }
 
@@ -39,9 +45,7 @@ class PersistFunctions {
     await prefs.remove(key);
   }
 
-  static Future<void> persistAuthenticate(
-    Authenticate authenticate,
-  ) async {
+  static Future<void> persistAuthenticate(Authenticate authenticate) async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.setString('authenticate', jsonEncode(authenticate.toJson()));
@@ -76,8 +80,10 @@ class PersistFunctions {
 
   static Future<void> persistFinDoc(FinDoc finDoc) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString('${finDoc.sales.toString}${finDoc.docType}',
-        finDoc.toJson().toString());
+    await prefs.setString(
+      '${finDoc.sales.toString}${finDoc.docType}',
+      finDoc.toJson().toString(),
+    );
   }
 
   static Future<FinDoc?> getFinDoc(bool sales, FinDocType finDocType) async {
@@ -100,21 +106,70 @@ class PersistFunctions {
   }
 
   static const String _testName = "savetest";
+
+  /// Get the persistent directory for test data
+  /// Uses application documents directory which persists across test runs
+  static Future<String> _getPersistentTestDir() async {
+    if (kIsWeb) {
+      return '';
+    }
+    try {
+      final dir = await getApplicationDocumentsDirectory();
+      final testDir = Directory('${dir.path}/integration_test_data');
+      if (!await testDir.exists()) {
+        await testDir.create(recursive: true);
+      }
+      return testDir.path;
+    } catch (e) {
+      debugPrint("Could not get persistent test directory: $e");
+      // Fallback to current directory
+      return Directory.current.path;
+    }
+  }
+
   static Future<void> persistTest(SaveTest test, {bool backup = false}) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString(_testName, jsonEncode(test.toJson()));
+    if (!kIsWeb) {
+      try {
+        final testDir = await _getPersistentTestDir();
+        final file = File('$testDir/$_testName.json');
+        await file.writeAsString(jsonEncode(test.toJson()));
+        debugPrint("✅ Persisted test data to: ${file.path}");
+      } catch (e) {
+        debugPrint("Could not save test to file: $e");
+      }
+    }
   }
 
   static Future<SaveTest> getTest({bool backup = false}) async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      final String? result = prefs.getString(_testName);
-      if (result != null) {
+      String? result = prefs.getString(_testName);
+      if (result == null && !kIsWeb) {
+        try {
+          final testDir = await _getPersistentTestDir();
+          final file = File('$testDir/$_testName.json');
+          if (await file.exists()) {
+            result = await file.readAsString();
+            debugPrint("✅ Loaded test data from file: ${file.path}");
+          } else {
+            debugPrint("⚠️ Test data file not found: ${file.path}");
+          }
+        } catch (e) {
+          debugPrint("Could not read test from file: $e");
+        }
+      }
+      final String? finalResult = result;
+      if (finalResult != null) {
         return getJsonObject<SaveTest>(
-            result, (json) => SaveTest.fromJson(json));
+          finalResult,
+          (json) => SaveTest.fromJson(json),
+        );
       }
       return SaveTest();
     } catch (err) {
+      debugPrint("Error getting test: $err");
       return SaveTest();
     }
   }

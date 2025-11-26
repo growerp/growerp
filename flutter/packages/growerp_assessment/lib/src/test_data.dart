@@ -168,7 +168,7 @@ const List<CredibilityStatistic> updatedCredibilityStatistics = [
 const CredibilityInfo credibilityInfo = CredibilityInfo(
   creatorBio: 'Built by ex-ERP consultants with 15+ years experience.',
   backgroundText: 'We helped SMBs on 3 continents streamline operations.',
-  creatorImageUrl: 'https://cdn.growerp.com/images/founder.png',
+  creatorImageUrl: 'https://www.growerp.com/getImage/obsidian/growerp.png',
   statistics: credibilityStatistics,
 );
 
@@ -176,7 +176,7 @@ const CredibilityInfo credibilityInfo = CredibilityInfo(
 const CredibilityInfo updatedCredibilityInfo = CredibilityInfo(
   creatorBio: 'Led by certified ERP architects and AI specialists.',
   backgroundText: 'Trusted by fintech, healthcare, and hospitality scaleups.',
-  creatorImageUrl: 'https://cdn.growerp.com/images/founder-updated.png',
+  creatorImageUrl: 'https://www.growerp.com/getLogo',
   statistics: updatedCredibilityStatistics,
 );
 

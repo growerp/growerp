@@ -121,6 +121,7 @@ class CredibilityInfoListScreenState extends State<CredibilityInfoListScreen> {
                 key: Key('credibilityItem${credibility.pseudoId}'),
                 margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 child: ListTile(
+                  key: Key('item$index'),
                   leading: credibility.creatorImageUrl != null
                       ? CircleAvatar(
                           backgroundImage:

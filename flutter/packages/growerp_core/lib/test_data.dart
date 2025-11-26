@@ -52,6 +52,7 @@ User admin = User(
   firstName: "John",
   lastName: "Doe",
   email: "testXXX@example.com",
+  loginName: "testXXX@example.com",
   userGroup: UserGroup.admin,
 );
 

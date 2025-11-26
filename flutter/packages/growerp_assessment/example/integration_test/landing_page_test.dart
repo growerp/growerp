@@ -99,6 +99,7 @@ void main() {
       title: 'GrowERP landing page credibility test',
       clear: false,
     );
+    await CommonTest.login(tester);
     await LandingPageTest.selectLandingPages(tester);
     await LandingPageTest.addCredibilityInfo(
       tester,
@@ -117,6 +118,7 @@ void main() {
     await LandingPageTest.checkCredibilityInfo(tester);
     await LandingPageTest.checkCredibilityStatistics(tester);
     await LandingPageTest.deleteCredibilityStatistic(tester);
+    await LandingPageTest.checkCredibilityStatistics(tester);
     await CommonTest.logout(tester);
   });
 }
