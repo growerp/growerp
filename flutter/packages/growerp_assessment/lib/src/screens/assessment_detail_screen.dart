@@ -24,6 +24,11 @@ import '../bloc/question_bloc.dart';
 import 'question_list.dart';
 import 'assessment_leads_screen.dart';
 
+String _capitalizeFirst(String text) {
+  if (text.isEmpty) return text;
+  return text[0].toUpperCase() + text.substring(1).toLowerCase();
+}
+
 class AssessmentDetailScreen extends StatefulWidget {
   final Assessment assessment;
 
@@ -80,7 +85,7 @@ class AssessmentDetailScreenState extends State<AssessmentDetailScreen> {
     _descriptionController =
         TextEditingController(text: widget.assessment.description ?? '');
 
-    _selectedStatus = widget.assessment.status.toUpperCase();
+    _selectedStatus = _capitalizeFirst(widget.assessment.status);
     updatedAssessment = widget.assessment;
     _assessmentBloc = context.read<AssessmentBloc>();
 
@@ -289,7 +294,7 @@ class AssessmentDetailScreenState extends State<AssessmentDetailScreen> {
                               const InputDecoration(labelText: 'Status'),
                           hint: const Text('Select status'),
                           initialValue: _selectedStatus,
-                          items: ['DRAFT', 'ACTIVE', 'INACTIVE'].map((item) {
+                          items: ['Draft', 'Active', 'Inactive'].map((item) {
                             return DropdownMenuItem<String>(
                               value: item,
                               child: Text(item),
@@ -297,7 +302,7 @@ class AssessmentDetailScreenState extends State<AssessmentDetailScreen> {
                           }).toList(),
                           onChanged: (String? newValue) {
                             setState(() {
-                              _selectedStatus = newValue ?? 'DRAFT';
+                              _selectedStatus = newValue ?? 'Draft';
                             });
                           },
                           isExpanded: true,

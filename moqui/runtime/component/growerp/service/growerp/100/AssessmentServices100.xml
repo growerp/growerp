@@ -242,11 +242,14 @@ Service definitions for assessment management and completion
             <parameter name="status">
                 <description>Optional status filter: ACTIVE, INACTIVE, DRAFT</description>
             </parameter>
-            <parameter name="pageNumber" type="Integer" default-value="1">
-                <description>Page number (1-based, only for list mode)</description>
+            <parameter name="start" type="Integer" default-value="0">
+                <description>Starting index (0-based)</description>
             </parameter>
-            <parameter name="pageSize" type="Integer" default-value="20">
-                <description>Results per page (only for list mode)</description>
+            <parameter name="limit" type="Integer" default-value="20">
+                <description>Results per page</description>
+            </parameter>
+            <parameter name="search">
+                <description>Optional search string for assessmentName, description, or pseudoId</description>
             </parameter>
         </in-parameters>
         <out-parameters>
@@ -262,11 +265,14 @@ Service definitions for assessment management and completion
                 <parameter name="lastModifiedDate" type="Timestamp" />
                 <parameter name="lastModifiedByUserLogin" />
             </parameter>
-            <parameter name="totalCount" type="Integer">
+            <parameter name="totalResults" type="Integer">
                 <description>Total number of assessments matching filter</description>
             </parameter>
-            <parameter name="pageCount" type="Integer">
-                <description>Total number of pages</description>
+            <parameter name="start" type="Integer">
+                <description>Starting index for pagination</description>
+            </parameter>
+            <parameter name="limit" type="Integer">
+                <description>Results per page limit</description>
             </parameter>
         </out-parameters>
         <actions>
@@ -274,6 +280,10 @@ Service definitions for assessment management and completion
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <if condition="!ownerPartyId">
                 <return error="true" message="User not authenticated or no party associated" />
+            </if>
+
+            <if condition="search">
+                <set field="search" value="%$search%" />
             </if>
 
             <!-- MODE 1: Get single assessment WITHOUT nested data -->
@@ -288,8 +298,7 @@ Service definitions for assessment management and completion
                     <return error="true" message="Assessment not found or access denied" />
                 </if>
 
-                <set field="totalCount" from="1" />
-                <set field="pageCount" from="1" />
+                <set field="totalResults" from="1" />
 
                 <log level="info"
                     message="list#Assessments (single): Loaded assessment ${assessmentId ?: pseudoId} basic info only" />
@@ -297,27 +306,126 @@ Service definitions for assessment management and completion
                 <return />
             </if>
 
-            <!-- MODE 2: List all assessments without nested data -->
-            <!-- Count total assessments for pagination -->
-            <entity-find entity-name="growerp.assessment.Assessment" list="countList">
-                <econdition field-name="ownerPartyId" from="ownerPartyId" />
-                <econdition field-name="status" from="status" ignore-if-empty="true" />
-                <select-field field-name="assessmentId" />
-            </entity-find>
-            <set field="totalCount" from="countList.size()" />
-            <set field="pageCount" from="Math.ceil(totalCount / pageSize)" />
-
-            <!-- Get paginated assessments -->
-            <set field="offset" from="(pageNumber - 1) * pageSize" />
+            <!-- MODE 2: List all assessments without nested data with proper pagination -->
+            <!-- Get paginated results -->
             <entity-find entity-name="growerp.assessment.Assessment" list="assessments"
-                limit="pageSize" offset="offset">
+                offset="start" limit="limit">
                 <econdition field-name="ownerPartyId" from="ownerPartyId" />
                 <econdition field-name="status" from="status" ignore-if-empty="true" />
-                <order-by field-name="createdDate" />
+                <econditions combine="or">
+                    <econdition field-name="pseudoId" operator="like" from="search"
+                        ignore-if-empty="true" ignore-case="true" />
+                    <econdition field-name="assessmentName" operator="like" from="search"
+                        ignore-if-empty="true" ignore-case="true" />
+                    <econdition field-name="description" operator="like" from="search"
+                        ignore-if-empty="true" ignore-case="true" />
+                </econditions>
+                <order-by field-name="-lastModifiedDate" />
             </entity-find>
+
+            <!-- Get total count for pagination -->
+            <entity-find-count entity-name="growerp.assessment.Assessment"
+                count-field="totalResults">
+                <econdition field-name="ownerPartyId" from="ownerPartyId" />
+                <econdition field-name="status" from="status" ignore-if-empty="true" />
+                <econditions combine="or">
+                    <econdition field-name="pseudoId" operator="like" from="search"
+                        ignore-if-empty="true" ignore-case="true" />
+                    <econdition field-name="assessmentName" operator="like" from="search"
+                        ignore-if-empty="true" ignore-case="true" />
+                    <econdition field-name="description" operator="like" from="search"
+                        ignore-if-empty="true" ignore-case="true" />
+                </econditions>
+            </entity-find-count>
 
             <log level="info"
-                message="list#Assessments (list): Returned ${assessments.size()} assessments (page ${pageNumber} of ${pageCount})" />
+                message="list#Assessments (list): Returned ${assessments.size()} assessments out of ${totalResults} total" />
+        </actions>
+    </service>
+
+    <!-- searchAssessments: Dedicated search service following landing page pattern -->
+    <service verb="search" noun="Assessments" authenticate="true">
+        <description>Search assessments by name, description, or pseudoId. Follows the same pattern as landing page search. Returns paginated results matching the search criteria.</description>
+        <in-parameters>
+            <parameter name="searchString">
+                <description>Search term to match against assessmentName, description, or pseudoId</description>
+            </parameter>
+            <parameter name="start" type="Integer" default-value="0">
+                <description>Starting index (0-based)</description>
+            </parameter>
+            <parameter name="limit" type="Integer" default-value="20">
+                <description>Results per page</description>
+            </parameter>
+            <parameter name="status">
+                <description>Optional status filter: ACTIVE, INACTIVE, DRAFT</description>
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="assessments" type="List">
+                <description>List of assessment objects matching search criteria</description>
+                <parameter name="assessmentId" />
+                <parameter name="pseudoId" />
+                <parameter name="assessmentName" />
+                <parameter name="description" />
+                <parameter name="status" />
+                <parameter name="createdDate" type="Timestamp" />
+                <parameter name="createdByUserLogin" />
+                <parameter name="lastModifiedDate" type="Timestamp" />
+                <parameter name="lastModifiedByUserLogin" />
+            </parameter>
+            <parameter name="totalResults" type="Integer">
+                <description>Total number of assessments matching search criteria</description>
+            </parameter>
+            <parameter name="start" type="Integer">
+                <description>Starting index for pagination</description>
+            </parameter>
+            <parameter name="limit" type="Integer">
+                <description>Results per page limit</description>
+            </parameter>
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+
+            <if condition="!searchString">
+                <return />
+            </if>
+
+            <set field="searchString" value="%$searchString%" />
+
+            <!-- Get paginated search results -->
+            <entity-find entity-name="growerp.assessment.Assessment" list="assessments"
+                offset="start" limit="limit">
+                <econdition field-name="ownerPartyId" from="ownerPartyId" />
+                <econdition field-name="status" from="status" ignore-if-empty="true" />
+                <econditions combine="or">
+                    <econdition field-name="pseudoId" operator="like" from="searchString"
+                        ignore-case="true" />
+                    <econdition field-name="assessmentName" operator="like" from="searchString"
+                        ignore-case="true" />
+                    <econdition field-name="description" operator="like" from="searchString"
+                        ignore-case="true" />
+                </econditions>
+                <order-by field-name="-lastModifiedDate" />
+            </entity-find>
+
+            <!-- Get total count for pagination -->
+            <entity-find-count entity-name="growerp.assessment.Assessment"
+                count-field="totalResults">
+                <econdition field-name="ownerPartyId" from="ownerPartyId" />
+                <econdition field-name="status" from="status" ignore-if-empty="true" />
+                <econditions combine="or">
+                    <econdition field-name="pseudoId" operator="like" from="searchString"
+                        ignore-case="true" />
+                    <econdition field-name="assessmentName" operator="like" from="searchString"
+                        ignore-case="true" />
+                    <econdition field-name="description" operator="like" from="searchString"
+                        ignore-case="true" />
+                </econditions>
+            </entity-find-count>
+
+            <log level="info"
+                message="search#Assessments: Found ${assessments.size()} assessments matching '${searchString}' out of ${totalResults} total" />
         </actions>
     </service>
 

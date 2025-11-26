@@ -296,7 +296,7 @@ class AssessmentListState extends State<AssessmentList> {
     if (!hasReachedMax &&
         currentScroll > 0 &&
         maxScroll - currentScroll <= _scrollThreshold) {
-      _assessmentBloc.add(AssessmentFetch(searchString: searchString));
+      _assessmentBloc.add(const AssessmentFetch());
     }
   }
 }
@@ -346,14 +346,17 @@ class SearchAssessmentListState extends State<SearchAssessmentList> {
                 border: const OutlineInputBorder(),
                 suffixIcon: IconButton(
                   icon: const Icon(Icons.clear),
-                  onPressed: () => searchBoxController.clear(),
+                  onPressed: () {
+                    searchBoxController.clear();
+                    _assessmentBloc.add(
+                      const AssessmentSearchRequested(query: ''),
+                    );
+                  },
                 ),
               ),
-              onChanged: (value) {
+              onSubmitted: (value) {
                 _assessmentBloc.add(
-                  AssessmentFetch(
-                    searchString: value,
-                  ),
+                  AssessmentSearchRequested(query: value),
                 );
               },
             ),
@@ -361,18 +364,30 @@ class SearchAssessmentListState extends State<SearchAssessmentList> {
             Expanded(
               child: BlocBuilder<AssessmentBloc, AssessmentState>(
                 builder: (context, state) {
-                  if (state.status == AssessmentStatus.loading) {
+                  final searchStatus = state.searchStatus;
+                  if (searchStatus == AssessmentStatus.loading) {
                     return const LoadingIndicator();
                   }
-                  if (state.assessments.isEmpty) {
-                    return const Center(
-                      child: Text('No assessments found'),
+                  if (searchStatus == AssessmentStatus.failure) {
+                    return Center(
+                      child: Text(
+                        state.searchError ?? 'Search failed, please try again.',
+                        textAlign: TextAlign.center,
+                      ),
+                    );
+                  }
+                  if (state.searchResults.isEmpty) {
+                    final message = searchStatus == AssessmentStatus.initial
+                        ? 'Enter a search term to begin.'
+                        : 'No assessments matched your search.';
+                    return Center(
+                      child: Text(message),
                     );
                   }
                   return ListView.builder(
-                    itemCount: state.assessments.length,
+                    itemCount: state.searchResults.length,
                     itemBuilder: (context, index) {
-                      final assessment = state.assessments[index];
+                      final assessment = state.searchResults[index];
                       return ListTile(
                         title: Text(assessment.assessmentName),
                         subtitle: Text(
