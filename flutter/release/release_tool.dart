@@ -33,7 +33,7 @@ void main() async {
   // Get user preferences
   var selectedApps = await selectApplications();
   var versionConfig = await getVersionConfiguration();
-  var pushConfig = await getPushConfiguration();
+  var pushConfig = await getPushConfiguration(versionConfig);
 
   // Determine workspace (local vs repository)
   var workspaceDir = await determineWorkspace(
@@ -193,7 +193,9 @@ Future<Map<String, bool>> getVersionConfiguration() async {
   return {'patch': upgradePatch, 'minor': upgradeMinor, 'major': upgradeMajor};
 }
 
-Future<Map<String, bool>> getPushConfiguration() async {
+Future<Map<String, bool>> getPushConfiguration(
+  Map<String, bool> versionConfig,
+) async {
   var pushToDockerHub =
       ask(
         'Push to Docker Hub? (Y/n)',
@@ -204,6 +206,13 @@ Future<Map<String, bool>> getPushConfiguration() async {
   // Always push to GitHub when building Docker images
   // This ensures Docker builds from the repository with versioned code
   var pushToGitHub = pushToDockerHub;
+
+  if (versionConfig['patch'] == false) {
+    pushToGitHub = false;
+    print(
+      "   Note: Not pushing to GitHub because patch version is not incremented.",
+    );
+  }
 
   return {'pushToDockerHub': pushToDockerHub, 'pushToGitHub': pushToGitHub};
 }
