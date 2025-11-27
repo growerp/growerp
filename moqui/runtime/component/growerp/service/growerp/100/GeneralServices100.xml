@@ -727,6 +727,9 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="plan" /><!--  diyPlan, smallPlan, fullPlan -->
             <parameter name="demoData" default-value="false" type="Boolean" />
             <parameter name="classificationId" required="true" />
+            <parameter name="testDaysOffset" type="Integer">
+                <description>For testing only (dev environment): Days offset to add to current time for subscription date checks</description>
+            </parameter>
         </in-parameters>
         <out-parameters>
             <parameter name="authenticate" type="Map">
@@ -792,6 +795,15 @@ along with this software (see the LICENSE.md file). If not, see
             </parameter>
         </out-parameters>
         <actions>
+            <!-- For testing: set effective time if testDaysOffset provided (dev environment only) -->
+            <if
+                condition="testDaysOffset != null &amp;&amp; 'dev'.equals(System.getProperty('instance_purpose'))">
+                <set field="effectiveTime"
+                    from="java.sql.Timestamp.valueOf(ec.user.nowTimestamp.toLocalDateTime().plusDays(testDaysOffset))" />
+                <script>ec.user.setEffectiveTime(effectiveTime)</script>
+                <log
+                    message="Login with testDaysOffset=${testDaysOffset}, effectiveTime=${effectiveTime}" />
+            </if>
             <!-- get user account info -->
             <entity-find-one entity-name="moqui.security.UserAccount"
                 value-field="userAccount" cache="false">
@@ -931,9 +943,65 @@ along with this software (see the LICENSE.md file). If not, see
                                 from="authenticate + [apiKey: 'moreInfo']" />
                             <return />
                         </if>
+                        <!-- handle startEvaluation: create subscription without payment -->
+                        <if condition="creditCardNumber == 'startEvaluation'">
+                            <!-- get evaluation days from environment variable -->
+                            <set field="evaluationDays"
+                                from="System.getProperty('evaluationDays') ? Integer.parseInt(System.getProperty('evaluationDays')) : 14" />
+                            <!-- get GrowERP companyId-->
+                            <entity-find entity-name="growerp.party.OwnerAndCompany"
+                                list="growerpMainCompanies">
+                                <econdition field-name="ownerPartyId" value="GROWERP" />
+                                <econdition field-name="companyRole" value="OrgInternal" />
+                            </entity-find>
+                            <set field="growerpMainCompanyPartyId"
+                                from="growerpMainCompanies[0].companyPartyId" />
+                            <!-- create customer company in growerp account-->
+                            <set field="growerpCustomerCompany"
+                                from="[name: companyName, role: 'Customer', email: username]" />
+                            <service-call
+                                name="growerp.100.PartyServices100.create#Company"
+                                in-map=" [company: growerpCustomerCompany,ownerPartyId: 'GROWERP']"
+                                out-map="companyInfo" />
+                            <set field="growerpCustomerPartyId" from="companyInfo.company.partyId" />
+                            <!-- evaluation period subscription (no payment required) -->
+                            <set field="datePlus"
+                                from="java.sql.Timestamp.valueOf(ec.user.nowTimestamp.toLocalDateTime().plusDays(evaluationDays))" />
+                            <!-- subscription -->
+                            <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                                in-map="[ownerPartyId: 'GROWERP', seqName: 'subscription']"
+                                out-map="context" />
+                            <!-- get a default product for the subscription (use the cheapest plan) -->
+                            <entity-find entity-name="growerp.mobile.product.ProductAndPrices"
+                                list="productPrices" limit="1">
+                                <econdition field-name="ownerPartyId" value="GROWERP" />
+                                <econdition field-name="priceTypeEnumId" value="PptCurrent" />
+                                <date-filter from-field-name="priceFromDate"
+                                    thru-field-name="priceThruDate" />
+                                <order-by field-name="price" />
+                            </entity-find>
+                            <if condition="!productPrices">
+                                <return error="true"
+                                    message="No subscription products found, please contact support." />
+                            </if>
+                            <service-call
+                                name="create#mantle.product.subscription.Subscription"
+                                in-map="[
+                                    pseudoId: seqNum,
+                                    subscriberPartyId: growerpCustomerPartyId,
+                                    externalSubscriptionId: ownerPartyId,
+                                    fromDate: ec.user.nowTimestamp,
+                                    thruDate: datePlus,
+                                    productId: productPrices[0].productId,
+                                    subscriptionTypeId: 'StProduct',
+                                    ownerPartyId: 'GROWERP']"
+                                out-map="context" />
+                            <!-- Mark that we just started evaluation - skip payment processing -->
+                            <set field="evaluationStarted" from="true" />
+                        </if>
                         <!-- process payment with credit card -->
                         <if
-                            condition="creditCardNumber &amp;&amp; nameOnCard &amp;&amp; expireMonth &amp;&amp; expireYear &amp;&amp; cVC &amp;&amp; plan">
+                            condition="creditCardNumber &amp;&amp; creditCardNumber != 'startEvaluation' &amp;&amp; nameOnCard &amp;&amp; expireMonth &amp;&amp; expireYear &amp;&amp; cVC &amp;&amp; plan">
                             <!-- find product prices -->
                             <entity-find entity-name="growerp.mobile.product.ProductAndPrices"
                                 list="productPrices">
@@ -1000,9 +1068,11 @@ along with this software (see the LICENSE.md file). If not, see
                             <service-call name="create#mantle.account.payment.Payment"
                                 in-map="growerpPaymentInMap" out-map="paymentInfo" />
                             <set field="paymentId" from="paymentInfo.paymentId" />
-                            <!-- two week trial period -->
+                            <!-- evaluation period: use environment variable or default 14 days -->
+                            <set field="evaluationDays"
+                                from="System.getProperty('evaluationDays') ? Integer.parseInt(System.getProperty('evaluationDays')) : 14" />
                             <set field="datePlus"
-                                from="java.sql.Timestamp.valueOf(ec.user.nowTimestamp.toLocalDateTime().plusWeeks(2))" />
+                                from="java.sql.Timestamp.valueOf(ec.user.nowTimestamp.toLocalDateTime().plusDays(evaluationDays))" />
                             <!-- subscription -->
                             <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
                                 in-map="[ownerPartyId: 'GROWERP', seqName: 'subscription']"
@@ -1022,6 +1092,11 @@ along with this software (see the LICENSE.md file). If not, see
                         </if>
                         <!-- prompt for capture of payment if not first tenant != GrowERP-->
                         <if condition="ownerPartyId != 'GROWERP'">
+                            <!-- get configuration: creditCardUpfront defaults to false -->
+                            <set field="creditCardUpfront"
+                                from="System.getProperty('creditCardUpfront') == 'true'" />
+                            <set field="evaluationDays"
+                                from="System.getProperty('evaluationDays') ? Integer.parseInt(System.getProperty('evaluationDays')) : 14" />
                             <!-- test check for existing subscription in GrowERP -->
                             <entity-find entity-name="mantle.product.subscription.Subscription"
                                 list="subscriptions">
@@ -1029,45 +1104,60 @@ along with this software (see the LICENSE.md file). If not, see
                                 <econdition field-name="ownerPartyId" value="GROWERP" />
                                 <date-filter />
                             </entity-find>
-                            <!-- if no subscription prompt for initial authorization -->
-                            <if condition="!subscriptions &amp;&amp; !subscriptionId">
-                                <set field="authenticate"
-                                    from="authenticate + [apiKey: 'paymentFirst']" />
+                            <log
+                                message="Subscription check: ownerPartyId=${ownerPartyId}, effectiveTime=${ec.user.nowTimestamp}, subscriptions=${subscriptions}, subscriptionId=${subscriptionId}, evaluationStarted=${evaluationStarted}" />
+                            <!-- if no subscription: show payment form (upfront) or welcome page -->
+                            <if
+                                condition="!subscriptions &amp;&amp; !subscriptionId &amp;&amp; !evaluationStarted">
+                                <if condition="creditCardUpfront">
+                                    <!-- original behavior: show payment form upfront -->
+                                    <set field="authenticate"
+                                        from="authenticate + [apiKey: 'paymentFirst', evaluationDays: evaluationDays]" />
+                                    <else>
+                                        <!-- new behavior: show welcome page with evaluation period
+                                        info -->
+                                        <set field="authenticate"
+                                            from="authenticate + [apiKey: 'evaluationWelcome', evaluationDays: evaluationDays]" />
+                                    </else>
+                                </if>
                                 <return />
                             </if>
-                            <!-- authorize with STRIPE -->
-                            <!-- get payment gateway config -->
-                            <entity-find-one
-                                entity-name="mantle.account.method.PaymentGatewayConfig"
-                                value-field="paymentGatewayConfig">
-                                <field-map field-name="paymentGatewayConfigId"
-                                    from="System.getProperty('paymentGatewayConfigId')" />
-                            </entity-find-one>
-                            <if condition="!paymentGatewayConfig">
-                                <return error="true"
-                                    message="Payment gateway not configured, please contact support." />
-                            </if>
-                            <!-- authorize Payment -->
-                            <service-call name="${paymentGatewayConfig.authorizeServiceName}"
-                                in-map="[paymentId: paymentId,
-                                    paymentGatewayConfigId: paymentGatewayConfig.paymentGatewayConfigId]"
-                                out-map="context" />
-                            <!-- if Stripe active check gateway response -->
-                            <if
-                                condition="System.getProperty('paymentGatewayConfigId') == 'STRIPE'">
-                                <entity-find
-                                    entity-name="mantle.account.method.PaymentGatewayResponse"
-                                    list="resps">
-                                    <econdition field-name="paymentId" from="paymentId" />
-                                    <econdition
-                                        field-name="paymentOperationEnumId"
-                                        value="PgoAuthorize" />
-                                    <econdition field-name="resultSuccess" value="Y" />
-                                </entity-find>
-                                <if condition="!resps">
-                                    <!-- no capture response from gateway found-->
+                            <!-- authorize with STRIPE - skip if evaluation just started (no payment
+                            required) -->
+                            <if condition="!evaluationStarted">
+                                <!-- get payment gateway config -->
+                                <entity-find-one
+                                    entity-name="mantle.account.method.PaymentGatewayConfig"
+                                    value-field="paymentGatewayConfig">
+                                    <field-map field-name="paymentGatewayConfigId"
+                                        from="System.getProperty('paymentGatewayConfigId')" />
+                                </entity-find-one>
+                                <if condition="!paymentGatewayConfig">
                                     <return error="true"
-                                        message="No payment authorization response found from gateway." />
+                                        message="Payment gateway not configured, please contact support." />
+                                </if>
+                                <!-- authorize Payment -->
+                                <service-call name="${paymentGatewayConfig.authorizeServiceName}"
+                                    in-map="[paymentId: paymentId,
+                                    paymentGatewayConfigId: paymentGatewayConfig.paymentGatewayConfigId]"
+                                    out-map="context" />
+                                <!-- if Stripe active check gateway response -->
+                                <if
+                                    condition="System.getProperty('paymentGatewayConfigId') == 'STRIPE'">
+                                    <entity-find
+                                        entity-name="mantle.account.method.PaymentGatewayResponse"
+                                        list="resps">
+                                        <econdition field-name="paymentId" from="paymentId" />
+                                        <econdition
+                                            field-name="paymentOperationEnumId"
+                                            value="PgoAuthorize" />
+                                        <econdition field-name="resultSuccess" value="Y" />
+                                    </entity-find>
+                                    <if condition="!resps">
+                                        <!-- no capture response from gateway found-->
+                                        <return error="true"
+                                            message="No payment authorization response found from gateway." />
+                                    </if>
                                 </if>
                             </if>
                         </if>
@@ -1205,6 +1295,27 @@ along with this software (see the LICENSE.md file). If not, see
                     in-map="[partyId: userAccount.partyId,
                                 classificationTypeEnumId: 'PcltMobileApp',
                                 partyClassificationId: classificationId]" />
+            </if>
+
+            <!-- Check subscription for returning users (not GROWERP owner) -->
+            <if condition="ownerPartyId != 'GROWERP'">
+                <set field="evaluationDays"
+                    from="System.getProperty('evaluationDays') ? Integer.parseInt(System.getProperty('evaluationDays')) : 14" />
+                <!-- check for existing valid subscription -->
+                <entity-find entity-name="mantle.product.subscription.Subscription"
+                    list="subscriptionsCheck">
+                    <econdition field-name="externalSubscriptionId" from="ownerPartyId" />
+                    <econdition field-name="ownerPartyId" value="GROWERP" />
+                    <date-filter />
+                </entity-find>
+                <log
+                    message="Returning user subscription check: ownerPartyId=${ownerPartyId}, effectiveTime=${ec.user.nowTimestamp}, subscriptions=${subscriptionsCheck}" />
+                <!-- if no valid subscription, show payment form -->
+                <if condition="!subscriptionsCheck">
+                    <set field="authenticate"
+                        from="authenticate + [apiKey: 'paymentExpired', evaluationDays: evaluationDays]" />
+                    <return />
+                </if>
             </if>
 
             <!-- everything ok just login -->

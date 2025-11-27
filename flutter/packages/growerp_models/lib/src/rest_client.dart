@@ -48,6 +48,7 @@ abstract class RestClient {
     @Field() bool? demoData,
     @Field() required String classificationId,
     @Field() String? timeZoneOffset,
+    @Field() int? testDaysOffset,
   });
 
   @POST("rest/s1/growerp/100/Logout")

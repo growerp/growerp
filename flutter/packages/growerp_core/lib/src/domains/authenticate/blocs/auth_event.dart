@@ -50,6 +50,8 @@ class AuthLogin extends AuthEvent {
   final String? expireMonth;
   final String? expireYear;
   final bool? demoData;
+  // for testing: offset backend effective time by this many days
+  final int? testDaysOffset;
   const AuthLogin(
     this.username,
     this.password, {
@@ -62,6 +64,7 @@ class AuthLogin extends AuthEvent {
     this.plan,
     this.expireMonth,
     this.expireYear,
+    this.testDaysOffset,
   });
 }
 

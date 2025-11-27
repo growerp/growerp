@@ -1,5 +1,4 @@
 services:
-
   watch:
     image: containrrr/watchtower
     container_name: watch
@@ -81,6 +80,12 @@ services:
       - SMTP_PASSWORD=
       - BIRDSEND_API_KEY=
       - BIRDSEND_AUTM_SEQUENCE=
+      # Subscription/Evaluation settings
+      # creditCardUpfront: if true, require credit card before evaluation period
+      #                    if false (default), show welcome page and allow evaluation first
+      - creditCardUpfront=false
+      # evaluationDays: number of days for the evaluation period (default: 14)
+      - evaluationDays=14
 
   moqui-database:
     image: postgres:17.2

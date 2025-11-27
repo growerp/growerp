@@ -23,6 +23,7 @@ import 'package:universal_io/io.dart';
 
 import 'package:decimal/decimal.dart';
 import 'package:intl/intl.dart';
+import 'domains/authenticate/views/login_dialog.dart';
 
 extension CustomizableDateTime on DateTime {
   static DateTime? _customTime;
@@ -33,6 +34,24 @@ extension CustomizableDateTime on DateTime {
   static set customTime(DateTime customTime) {
     _customTime = customTime;
   }
+}
+
+/// Set a days offset for testing time-dependent features.
+/// This affects both frontend date (CustomizableDateTime) and backend date
+/// (applied during login for subscription checks, etc.).
+///
+/// Set [daysOffset] to 0 for normal operation, or e.g., 15 to test
+/// what happens 15 days in the future (subscription expiration, rentals, etc.).
+///
+/// Example usage in main.dart:
+/// ```dart
+/// setTestDaysOffset(15); // Test 15 days in the future
+/// ```
+void setTestDaysOffset(int daysOffset) {
+  CustomizableDateTime.customTime = DateTime.now().add(
+    Duration(days: daysOffset),
+  );
+  LoginDialog.testDaysOffset = daysOffset == 0 ? null : daysOffset;
 }
 
 extension StringExtension on String {

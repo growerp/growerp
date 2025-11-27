@@ -72,6 +72,8 @@ class CommonTest {
     if (clear == true) {
       debugPrint('Creating NEW SaveTest (clear=true)');
       await PersistFunctions.persistTest(SaveTest(sequence: seq));
+      // Also clear any stored authentication
+      await PersistFunctions.removeAuthenticate();
     } else {
       SaveTest test = await PersistFunctions.getTest();
       debugPrint(
@@ -221,8 +223,21 @@ class CommonTest {
         ); // used in rental
       }
     }
-    // check for credit card input (only shown for first registration)
+    // check for evaluation welcome or credit card input (only shown for first registration)
     await tester.pumpAndSettle(const Duration(seconds: 1));
+    // Handle evaluationWelcome form (when creditCardUpfront=false)
+    if (await doesExistKey(tester, 'evaluationWelcome')) {
+      try {
+        await tester.tap(
+          find.byKey(const Key('startEvaluation')).last,
+          warnIfMissed: false,
+        );
+        await tester.pumpAndSettle(const Duration(seconds: waitTime));
+      } catch (e) {
+        debugPrint("Warning: Could not tap startEvaluation button: $e");
+      }
+    }
+    // Handle paymentForm (when creditCardUpfront=true)
     if (await doesExistKey(tester, 'paymentForm')) {
       try {
         await tester.tap(

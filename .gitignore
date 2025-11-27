@@ -6,3 +6,6 @@ docker/logs
 *.ipa
 docker/nginx/html
 
+
+moqui/runtime/component/growerp-shopify/
+

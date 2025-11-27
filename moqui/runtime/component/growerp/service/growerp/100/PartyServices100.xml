@@ -3755,7 +3755,6 @@ along with this software (see the LICENSE.md file). If not, see
                             landingPageId: null, ownerPartyId: ownerPartyId,
                             companyPartyId: companyPartyId, pseudoId: seqNum]]"
                 out-map="newPage" />
-            <log message="====landing page created: ${newPage.landingPageId}====" />
             <!-- page sections-->
             <entity-find
                 entity-name="growerp.landing.PageSection" list="sections">
@@ -3768,13 +3767,11 @@ along with this software (see the LICENSE.md file). If not, see
                 <service-call name="create#growerp.landing.PageSection"
                     in-map="[section + [pageSectionId: null, landingPageId: newPage.landingPageId, pseudoId: seqNum]]"
                     out-map="context" />
-                <log message="======section created: ${context.pageSectionId}======" />
             </iterate>
             <!-- credibility info-->
             <entity-find entity-name="growerp.landing.CredibilityInfo" list="credibilities">
                 <econdition field-name="landingPageId" from="landingPages[0].landingPageId" />
             </entity-find>
-            <log message="==========credibilities found ${credibilities?.size()}" />
             <if condition="credibilities">
                 <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
                     in-map="[ownerPartyId: ownerPartyId, seqName: 'credibilityInfo']"
@@ -3783,12 +3780,10 @@ along with this software (see the LICENSE.md file). If not, see
                     in-map="[credibilities[0] + [credibilityInfoId: null, landingPageId: newPage.landingPageId,
                         pseudoId: seqNum]]"
                     out-map="context" />
-                <log message="========cred info created: ${credibilityInfoId}" />
                 <entity-find entity-name="growerp.landing.CredibilityStatistic" list="stats">
                     <econdition field-name="credibilityInfoId"
                         from="credibilities[0].credibilityInfoId" />
                 </entity-find>
-                <log message="==========stats found ${stats?.size()}" />
                 <iterate list="stats" entry="statistic">
                     <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
                         in-map="[ownerPartyId: ownerPartyId, seqName: 'credibilityStatistic']"
@@ -3797,7 +3792,6 @@ along with this software (see the LICENSE.md file). If not, see
                         in-map="[statistic + [credibilityInfoId: credibilityInfoId,
                                     credibilityStatisticId: null, pseudoId: seqNum]]"
                         out-map="context" />
-                    <log message="========stat created: ${context.credibilityStatisticId}" />
                 </iterate>
             </if>
             <!-- CTA: Now embedded in LandingPage entity (ctaActionType, ctaAssessmentId, etc.) -->
