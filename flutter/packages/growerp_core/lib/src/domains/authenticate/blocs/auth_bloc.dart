@@ -260,6 +260,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         plan: event.plan,
         classificationId: classificationId,
         timeZoneOffset: DateTime.now().timeZoneOffset.toString(),
+        testDaysOffset: event.testDaysOffset,
       );
       if (authenticate.apiKey != null &&
           ![
@@ -268,6 +269,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
             'paymentFirst',
             'paymentExpired',
             'paymentExpiredFinal',
+            'evaluationWelcome',
           ].contains(authenticate.apiKey)) {
         // apiKey found so save and authenticated
         emit(

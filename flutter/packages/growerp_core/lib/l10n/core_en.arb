@@ -363,10 +363,6 @@
   "@paymentTypes": {
     "description": "Payment types menu item or section header"
   },
-  "payWithinWeek": "Pay within a week",
-  "@payWithinWeek": {
-    "description": "Pay within week checkbox text"
-  },
   "privacyCodeOfConduct": "Privacy/Code of Conduct",
   "@privacyCodeOfConduct": {
     "description": "Privacy and code of conduct menu item"
@@ -383,9 +379,13 @@
   "@register": {
     "description": "Register button text"
   },
-  "registerAndCharge": "Register and charge",
-  "@registerAndCharge": {
-    "description": "Register and charge button text"
+  "payNow": "Pay now",
+  "@payNow": {
+    "description": "Pay now button text"
+  },
+  "subscriptionExpired": "Your subscription has expired. Please renew to continue.",
+  "@subscriptionExpired": {
+    "description": "Message shown when subscription has expired"
   },
   "registerNewCompanyAndAdmin": "Register new company and admin",
   "@registerNewCompanyAndAdmin": {
@@ -876,5 +876,35 @@
         "type": "String"
       }
     }
+  },
+  "welcomeTitle": "Welcome to GrowERP!",
+  "@welcomeTitle": {
+    "description": "Welcome page title for evaluation period"
+  },
+  "welcomeMessage": "Welcome, {name}!",
+  "@welcomeMessage": {
+    "description": "Personalized welcome message",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "evaluationPeriodMessage": "You have a {days}-day free evaluation period to explore all features.",
+  "@evaluationPeriodMessage": {
+    "description": "Evaluation period information message",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "evaluationPeriodDetails": "No credit card required during the evaluation period. After the evaluation, you can choose a plan to continue using GrowERP.",
+  "@evaluationPeriodDetails": {
+    "description": "Detailed evaluation period explanation"
+  },
+  "startEvaluation": "Start Evaluation",
+  "@startEvaluation": {
+    "description": "Button to start evaluation period"
   }
 }

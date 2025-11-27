@@ -30,6 +30,7 @@ abstract class Authenticate with _$Authenticate {
     Company? company,
     User? user,
     Stats? stats,
+    int? evaluationDays, // evaluation period in days (from backend config)
   }) = _Authenticate;
 
   factory Authenticate.fromJson(Map<String, dynamic> json) =>

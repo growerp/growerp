@@ -36,6 +36,10 @@ import 'package:package_info_plus/package_info_plus.dart';
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Set date offset for testing (rental, subscription expiration, etc.)
+  // Change to non-zero value to test time-dependent features, e.g., 15
+  setTestDaysOffset(15);
+
   await GlobalConfiguration().loadFromAsset('app_settings');
 
   PackageInfo packageInfo = await PackageInfo.fromPlatform();

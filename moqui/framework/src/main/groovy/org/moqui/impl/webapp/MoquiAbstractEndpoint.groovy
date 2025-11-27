@@ -80,11 +80,11 @@ abstract class MoquiAbstractEndpoint extends Endpoint implements MessageHandler.
                     .addHeader("Content-Type", "application/json")
                     .addHeader("api_key", "${apiKey}")
                 RestClient.RestResponse restResponse = restClient.call()
-                Map result = (Map) restResponse.jsonObject()
                 if (restResponse.statusCode < 200 || restResponse.statusCode >= 300 ) {
-                    eci.logger.warn("Websocket Authorisation error: ${result}")
+                    eci.logger.warn("Websocket Authorisation error: status=${restResponse.statusCode}, body=${restResponse.text()}")
                     return
                 }
+                Map result = (Map) restResponse.jsonObject()
             } else {
                 userId = eci.user.userId
                 username = eci.user.username
