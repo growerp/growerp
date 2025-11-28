@@ -19,7 +19,7 @@ dependencies:
   json_annotation: ^4.9.0
 
   # HTTP client for API calls
-  retrofit: ^4.4.2
+  retrofit: 4.9.0
   dio: ^5.3.1
   logger: ^2.1.0
 
