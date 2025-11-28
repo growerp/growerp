@@ -32,13 +32,23 @@ RUN git config --global --add safe.directory /home/mobiledevops/.flutter-sdk
 RUN dart pub global activate melos
 ENV PATH="$PATH":"$HOME/.pub-cache/bin"
 
+# Clear pub cache to ensure fresh packages (as root since it was created by root)
+RUN rm -rf /home/mobiledevops/.pub-cache
+# Also clear Flutter's pub cache
+RUN rm -rf /home/mobiledevops/.flutter-sdk/.pub-cache 2>/dev/null || true
+
 # get growerp repos
 USER mobiledevops
 WORKDIR /home/mobiledevops
+# Reinstall melos after clearing cache
+RUN dart pub global activate melos
+ENV PATH="$PATH":"/home/mobiledevops/.pub-cache/bin"
 RUN git clone --depth 1 -b $BRANCH https://github.com/growerp/growerp.git
 WORKDIR /home/mobiledevops/growerp/flutter
 RUN echo "pwd: $PWD"
 RUN sed -i 's\//webactivate \\' packages/admin/lib/main.dart
+# Clean any existing dart tool caches
+RUN find . -name ".dart_tool" -type d -exec rm -rf {} + 2>/dev/null || true
 RUN melos clean
 RUN melos bootstrap
 # localization
