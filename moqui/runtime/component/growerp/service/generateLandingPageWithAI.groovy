@@ -51,7 +51,7 @@ try {
     
     // Step 3: Construct comprehensive prompt for ALL landing page components in single call
     def generationPrompt = """
-Generate a COMPLETE, production-ready landing page in a single comprehensive response.
+Generate a COMPLETE, production-ready landing page AND a Business Readiness Assessment in a single comprehensive response.
 
 BUSINESS DESCRIPTION:
 ${businessDescription}
@@ -75,59 +75,80 @@ REQUIREMENTS:
 7. Call-to-action section with primary and secondary actions
 8. FAQ or Objection-handling section if applicable
 
-CONSTRAINTS:
-- Content must be professional, persuasive, and actionable
-- Use industry-specific terminology and best practices
-- Include realistic, credible statistics with proper context
-- Each section must be distinct with clear value messaging
-- Keep tone consistent with: ${tone}
-- Ensure content flows logically from awareness to action
+ASSESSMENT REQUIREMENTS (Must be included):
+Generate a 15-question "Business Readiness Assessment" divided into two parts:
+
+Part A: 10 Best Practices Questions (Scoring)
+- Generate 10 specific MultipleChoice questions that determine if the user follows industry best practices.
+- Each question must have 2-4 options with a score (0-100) indicating readiness.
+- High scores indicate good practices; low scores indicate needs improvement.
+
+Part B: 5 Sales Qualification Questions (Specific Format)
+- Question 1: "Which best describes your current situation?" (Options: Stagnant, Slow Growth, Rapid Growth, etc.)
+- Question 2: "Which is the most important desired outcome for you to achieve in the next 90 days?" (Options: Increase revenue, Improve efficiency, etc.)
+- Question 3: "What is the obstacle that you think is stopping you, or what have you tried that hasn't worked in the past?" (Options: specific obstacles)
+- Question 4: "Which solution do you think would suit you best?" (Options MUST hint at budget: "Education/Training", "One-to-one Coaching", "Software", "I want someone to do it all for me")
+- Question 5: "Is there anything else that you think we need to know about?" (Type: Text, No options)
+
+SCORING THRESHOLDS:
+- Define 3 scoring ranges (Critical, Needs Work, Ready) based on the total possible score from Part A.
 
 RETURN FORMAT: Return ONLY valid JSON (no markdown, no code blocks) with this exact structure:
 {
   "title": "Compelling Landing Page Title",
-  "headline": "Results-focused hook headline that captures attention",
-  "subheading": "Clear subheading with action guidance for visitor",
+  "headline": "Results-focused hook headline",
+  "subheading": "Clear subheading",
   "hookType": "results",
   "hero": {
     "title": "Hero section title",
-    "description": "Compelling narrative about the transformation/benefit",
-    "image_hint": "Description of suggested hero image/video"
+    "description": "Compelling narrative",
+    "image_hint": "Visual description"
   },
   "sections": [
-    {
-      "title": "Section Title",
-      "description": "Detailed section content with benefits and value",
-      "sequence": 1
-    }
+    { "title": "Section Title", "description": "Content", "sequence": 1 }
   ],
   "features": {
-    "title": "Why Choose Us / Key Benefits",
+    "title": "Key Benefits",
     "propositions": [
-      {"title": "Value Prop 1", "description": "Detailed description"},
-      {"title": "Value Prop 2", "description": "Detailed description"},
-      {"title": "Value Prop 3", "description": "Detailed description"}
+      {"title": "Prop 1", "description": "Desc"}
     ]
   },
   "credibility": {
-    "description": "Background story of company/author/expert - build trust through experience",
-    "backgroundText": "Additional context on credentials, experience, or track record",
+    "description": "Author background",
+    "backgroundText": "Credentials",
     "stats": [
-      {"label": "Clients Served", "value": "5000+"},
-      {"label": "Years Experience", "value": "15+"},
-      {"label": "Success Rate", "value": "94%"},
-      {"label": "Industry Award", "value": "Top Rated 2024"}
+      {"label": "Stat Label", "value": "Stat Value"}
+    ]
+  },
+  "assessment": {
+    "title": "Assessment Title",
+    "description": "Assessment Description",
+    "questions": [
+      {
+        "text": "Question Text",
+        "description": "Short description",
+        "type": "MultipleChoice", 
+        "sequence": 1,
+        "options": [
+          {"text": "Option Text", "score": 10, "sequence": 1}
+        ]
+      }
+    ],
+    "scoringThresholds": [
+       {"minScore": 0, "maxScore": 30, "status": "Critical", "description": "Urgent help needed"},
+       {"minScore": 31, "maxScore": 70, "status": "NeedsWork", "description": "Improvement needed"},
+       {"minScore": 71, "maxScore": 100, "status": "Ready", "description": "Ready for growth"}
     ]
   },
   "cta": {
-    "text": "Primary call-to-action button text",
-    "description": "CTA button description/subtext"
+    "text": "Start Assessment",
+    "description": "Take the quiz now"
   }
 }
 """
     
     // Step 4: Call Gemini API
-    def modelName = "gemini-2.5-pro"
+    def modelName = "gemini-2.0-flash"
     def apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}"
     
     def requestBody = [
@@ -193,7 +214,8 @@ RETURN FORMAT: Return ONLY valid JSON (no markdown, no code blocks) with this ex
             hookType: contentData.hookType ?: 'results',
             status: 'DRAFT',
             ownerPartyId: ownerPartyId,
-            pseudoId: pseudoId
+            pseudoId: pseudoId,
+            ctaActionType: 'Assessment' // Default to Assessment for this flow
         ]
         
         def createPageResult = ec.service.sync().name("create#growerp.landing.LandingPage")
@@ -275,19 +297,127 @@ RETURN FORMAT: Return ONLY valid JSON (no markdown, no code blocks) with this ex
                 .parameters([ownerPartyId: ownerPartyId, seqName: 'credibilityInfo'])
                 .call().seqNum
             
-            ec.service.sync().name("create#growerp.landing.CredibilityInfo")
+            def credResult = ec.service.sync().name("create#growerp.landing.CredibilityInfo")
                 .parameters([
                     landingPageId: landingPageId,
                     pseudoId: credibilityPseudoId,
                     creatorBio: contentData.credibility.description ?: '',
-                    backgroundText: contentData.credibility.description ?: ''
+                    backgroundText: contentData.credibility.backgroundText ?: ''
                 ])
                 .call()
+            
+            def credibilityInfoId = credResult.credibilityInfoId
+            
+            // Create stats
+            if (contentData.credibility.stats) {
+                contentData.credibility.stats.eachWithIndex { stat, index ->
+                     def statPseudoId = ec.service.sync().name("growerp.100.GeneralServices100.getNext#PseudoId")
+                        .parameters([ownerPartyId: ownerPartyId, seqName: 'credibilityStatistic'])
+                        .call().seqNum
+                        
+                     ec.service.sync().name("create#growerp.landing.CredibilityStatistic")
+                        .parameters([
+                            credibilityInfoId: credibilityInfoId,
+                            pseudoId: statPseudoId,
+                            statistic: "${stat.label}: ${stat.value}",
+                            sequence: index + 1
+                        ])
+                        .call()
+                }
+            }
             
             ec.logger.info("Created credibility info")
         }
         
-        // Step 9: Get the complete landing page with all relationships
+        // Step 9: Create Assessment
+        if (contentData.assessment) {
+            def assessmentPseudoId = ec.service.sync().name("growerp.100.GeneralServices100.getNext#PseudoId")
+                .parameters([ownerPartyId: ownerPartyId, seqName: 'assessment'])
+                .call().seqNum
+                
+            def assessmentResult = ec.service.sync().name("create#growerp.assessment.Assessment")
+                .parameters([
+                    pseudoId: assessmentPseudoId,
+                    ownerPartyId: ownerPartyId,
+                    assessmentName: contentData.assessment.title ?: 'Business Readiness Assessment',
+                    description: contentData.assessment.description ?: '',
+                    status: 'Active'
+                ])
+                .call()
+            
+            def assessmentId = assessmentResult.assessmentId
+            
+            // Link Assessment to Landing Page
+            ec.service.sync().name("update#growerp.landing.LandingPage")
+                .parameters([landingPageId: landingPageId, ctaAssessmentId: assessmentId])
+                .call()
+                
+            // Create Questions
+            if (contentData.assessment.questions) {
+                contentData.assessment.questions.each { q ->
+                    def questionPseudoId = ec.service.sync().name("growerp.100.GeneralServices100.getNext#PseudoId")
+                        .parameters([ownerPartyId: ownerPartyId, seqName: 'assessmentQuestion'])
+                        .call().seqNum
+                        
+                    def questionResult = ec.service.sync().name("create#growerp.assessment.AssessmentQuestion")
+                        .parameters([
+                            assessmentId: assessmentId,
+                            pseudoId: questionPseudoId,
+                            questionSequence: q.sequence,
+                            questionType: q.type ?: 'MultipleChoice',
+                            questionText: q.text,
+                            questionDescription: q.description,
+                            isRequired: 'Y'
+                        ])
+                        .call()
+                        
+                    def questionId = questionResult.assessmentQuestionId
+                    
+                    // Create Options
+                    if (q.options) {
+                        q.options.each { opt ->
+                            def optionPseudoId = ec.service.sync().name("growerp.100.GeneralServices100.getNext#PseudoId")
+                                .parameters([ownerPartyId: ownerPartyId, seqName: 'assessmentQuestionOption'])
+                                .call().seqNum
+                                
+                            ec.service.sync().name("create#growerp.assessment.AssessmentQuestionOption")
+                                .parameters([
+                                    assessmentQuestionId: questionId,
+                                    assessmentId: assessmentId,
+                                    pseudoId: optionPseudoId,
+                                    optionSequence: opt.sequence,
+                                    optionText: opt.text,
+                                    optionScore: opt.score
+                                ])
+                                .call()
+                        }
+                    }
+                }
+            }
+            
+            // Create Scoring Thresholds
+            if (contentData.assessment.scoringThresholds) {
+                contentData.assessment.scoringThresholds.each { threshold ->
+                    def thresholdPseudoId = ec.service.sync().name("growerp.100.GeneralServices100.getNext#PseudoId")
+                        .parameters([ownerPartyId: ownerPartyId, seqName: 'scoringThreshold'])
+                        .call().seqNum
+                        
+                    ec.service.sync().name("create#growerp.assessment.ScoringThreshold")
+                        .parameters([
+                            assessmentId: assessmentId,
+                            pseudoId: thresholdPseudoId,
+                            minScore: threshold.minScore,
+                            maxScore: threshold.maxScore,
+                            leadStatus: threshold.status,
+                            description: threshold.description
+                        ])
+                        .call()
+                }
+            }
+            ec.logger.info("Created assessment with ${contentData.assessment.questions?.size() ?: 0} questions")
+        }
+        
+        // Step 10: Get the complete landing page with all relationships
         def getLandingPageResult = ec.service.sync().name("growerp.100.LandingPageServices100.get#LandingPage")
             .parameters([landingPageId: landingPageId, ownerPartyId: ownerPartyId])
             .call()
