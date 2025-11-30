@@ -3684,7 +3684,7 @@ along with this software (see the LICENSE.md file). If not, see
             </while>
             <!-- load assessment demo data to be added to a landing page -->
             <entity-find entity-name="growerp.assessment.Assessment" list="assessments">
-                <econdition field-name="ownerPartyId" value="DEMO" />
+                <econdition field-name="ownerPartyId" value="_NA_" />
             </entity-find>
             <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
                 in-map="[ownerPartyId: ownerPartyId, seqName: 'assessment']" out-map="context" />
@@ -3746,7 +3746,7 @@ along with this software (see the LICENSE.md file). If not, see
             </iterate>
             <!-- load landing page demo data -->
             <entity-find entity-name="growerp.landing.LandingPage" list="landingPages">
-                <econdition field-name="ownerPartyId" value="DEMO" />
+                <econdition field-name="ownerPartyId" value="_NA_" />
             </entity-find>
             <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
                 in-map="[ownerPartyId: ownerPartyId, seqName: 'landingPage']" out-map="context" />
