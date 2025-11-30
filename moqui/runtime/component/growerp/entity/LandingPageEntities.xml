@@ -28,6 +28,16 @@ Dual-ID strategy: entityNameId (system-wide) + pseudoId (tenant-unique)
     <field name="lastModifiedDate" type="date-time" />
     <field name="lastModifiedByUserLogin" type="text-short" />
 
+    <relationship type="one" title="Owner" related="mantle.party.Party" short-alias="owner">
+      <key-map field-name="ownerPartyId" />
+    </relationship>
+    <relationship type="one" title="Company" related="mantle.party.Party" short-alias="company">
+      <key-map field-name="companyPartyId" />
+    </relationship>
+    <relationship type="one" title="Assessment" related="growerp.assessment.Assessment"
+      short-alias="assessment">
+      <key-map field-name="ctaAssessmentId" related="assessmentId" />
+    </relationship>
     <!-- Indices -->
     <index name="landing_pseudoId_idx">
       <index-field name="pseudoId" />
@@ -48,6 +58,10 @@ Dual-ID strategy: entityNameId (system-wide) + pseudoId (tenant-unique)
     <field name="sectionImageUrl" type="text-long" />
     <field name="createdDate" type="date-time" />
 
+    <relationship type="one" title="LandingPage" related="growerp.landing.LandingPage"
+      short-alias="landingPage">
+      <key-map field-name="landingPageId" />
+    </relationship>
     <!-- Indices -->
     <index name="pageSection_pseudoId_idx">
       <index-field name="pseudoId" />
@@ -68,6 +82,10 @@ Dual-ID strategy: entityNameId (system-wide) + pseudoId (tenant-unique)
     <field name="createdDate" type="date-time" />
     <field name="lastModifiedDate" type="date-time" />
 
+    <relationship type="one" title="LandingPage"
+      related="growerp.landing.LandingPage" short-alias="landingPage">
+      <key-map field-name="landingPageId" />
+    </relationship>
     <!-- Indices -->
     <index name="credibilityInfo_pseudoId_idx">
       <index-field name="pseudoId" />
@@ -86,6 +104,10 @@ Dual-ID strategy: entityNameId (system-wide) + pseudoId (tenant-unique)
     <field name="sequence" type="number-integer" />
     <field name="createdDate" type="date-time" />
 
+    <relationship type="one" title="CredibilityInfo"
+      related="growerp.landing.CredibilityInfo" short-alias="credibilityInfo">
+      <key-map field-name="credibilityInfoId" />
+    </relationship>
     <!-- Indices -->
     <index name="credibilityStatistic_pseudoId_idx">
       <index-field name="pseudoId" />

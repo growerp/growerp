@@ -13,9 +13,10 @@ this file is loaded for every owner who request demo data.
   <!-- ============================================================
        ASSESSMENT: Business Readiness Assessment
        ============================================================ -->
-  <growerp.assessment.Assessment assessmentId="ASMT_BUSI_READ_001"
+  <growerp.assessment.Assessment
+    assessmentId="ASMT_BUSI_READ_001"
     pseudoId="business-readiness-assessment"
-    ownerPartyId="DEMO"
+    ownerPartyId="_NA_"
     assessmentName="Business Readiness Assessment"
     description="Comprehensive assessment to evaluate business readiness, identify challenges, and provide tailored recommendations for success. Measures three key areas: Operational Efficiency, Customer Engagement, and Scalable Growth."
     status="Active"
@@ -367,8 +368,8 @@ this file is loaded for every owner who request demo data.
   <growerp.landing.LandingPage
     landingPageId="PAGE_BUSI_READINESS_001"
     pseudoId="business-readiness-landing"
-    ownerPartyId="DEMO"
-    ctaActionType="Assessment"
+    ownerPartyId="_NA_"
+    ctaActionType="assessment"
     ctaAssessmentId="ASMT_BUSI_READ_001"
     title="Business Readiness Assessment"
     hookType="ResultsHook"

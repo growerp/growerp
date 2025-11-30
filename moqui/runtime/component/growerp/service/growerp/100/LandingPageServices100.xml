@@ -76,7 +76,6 @@ Service definitions for landing page, sections, credibility, and CTA management
         <!-- Use pseudoId if provided (tenant-unique), otherwise use system-wide landingPageId -->
         <econdition field-name="pseudoId" ignore-if-empty="true" />
         <econdition field-name="companyPartyId" ignore-if-empty="true" />
-        <econdition field-name="pseudoId" ignore-if-empty="true" />
         <econdition field-name="landingPageId" ignore-if-empty="true" />
         <econdition field-name="ownerPartyId" />
       </entity-find>
@@ -1171,7 +1170,7 @@ Service definitions for landing page, sections, credibility, and CTA management
       </parameter>
     </out-parameters>
     <actions>
-    <log message= "update credibility info pseudoId: $pseudoId" />
+      <log message="update credibility info pseudoId: $pseudoId" />
       <!-- Get owner party ID from authenticated user context -->
       <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
         out-map="context" />

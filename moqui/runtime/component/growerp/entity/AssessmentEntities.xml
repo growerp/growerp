@@ -23,6 +23,13 @@ Dual-ID strategy: entityNameId (system-wide) + pseudoId (tenant-unique)
         <field name="lastModifiedDate" type="date-time" />
         <field name="lastModifiedByUserLogin" type="text-short" />
 
+        <relationship type="one" title="Owner" related="mantle.party.Party" short-alias="owner">
+            <key-map field-name="ownerPartyId" />
+        </relationship>
+        <relationship type="one" title="Company" related="mantle.party.Party" short-alias="company">
+            <key-map field-name="companyPartyId" />
+        </relationship>
+
         <!-- Indices -->
         <index name="assess_pseudoId_idx">
             <index-field name="pseudoId" />
@@ -47,6 +54,10 @@ Dual-ID strategy: entityNameId (system-wide) + pseudoId (tenant-unique)
         <field name="createdDate" type="date-time" />
         <field name="createdByUserLogin" type="text-short" />
 
+        <relationship type="one" title="Assessment" related="growerp.assessment.Assessment"
+            short-alias="assessment">
+            <key-map field-name="assessmentId" />
+        </relationship>
         <!-- Indices -->
         <index name="asses_question_pseudoId_idx">
             <index-field name="pseudoId" />
@@ -67,6 +78,10 @@ Dual-ID strategy: entityNameId (system-wide) + pseudoId (tenant-unique)
         <field name="optionScore" type="number-decimal" />
         <field name="createdDate" type="date-time" />
 
+        <relationship type="one" title="AssessmentQuestion"
+            related="growerp.assessment.AssessmentQuestion" short-alias="assessmentQuestion">
+            <key-map field-name="assessmentQuestionId" />
+        </relationship>
         <!-- Indices -->
         <index name="asses_question_option_pseudoId_idx">
             <index-field name="pseudoId" />
@@ -88,6 +103,10 @@ Dual-ID strategy: entityNameId (system-wide) + pseudoId (tenant-unique)
         <field name="createdDate" type="date-time" />
         <field name="createdByUserLogin" type="text-short" />
 
+        <relationship type="one" title="Assessment"
+            related="growerp.assessment.Assessment" short-alias="assessment">
+            <key-map field-name="assessmentId" />
+        </relationship>
         <!-- Indices -->
         <index name="asses_scoringThreshold_pseudoId_idx">
             <index-field name="pseudoId" />
@@ -116,6 +135,10 @@ Dual-ID strategy: entityNameId (system-wide) + pseudoId (tenant-unique)
         <field name="createdByUserLogin" type="text-short" />
         <field name="lastModifiedDate" type="date-time" />
 
+        <relationship type="one" title="Assessment"
+            related="growerp.assessment.Assessment" short-alias="assessment">
+            <key-map field-name="assessmentId" />
+        </relationship>
         <!-- Indices -->
         <index name="asses_result_pseudoId_idx">
             <index-field name="pseudoId" />

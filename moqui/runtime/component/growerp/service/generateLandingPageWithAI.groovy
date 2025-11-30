@@ -214,8 +214,9 @@ RETURN FORMAT: Return ONLY valid JSON (no markdown, no code blocks) with this ex
             hookType: contentData.hookType ?: 'results',
             status: 'DRAFT',
             ownerPartyId: ownerPartyId,
+            companyPartyId: companyPartyId,
             pseudoId: pseudoId,
-            ctaActionType: 'Assessment' // Default to Assessment for this flow
+            ctaActionType: 'assessment' // Default to assessment for this flow (lowercase to match FTL template)
         ]
         
         def createPageResult = ec.service.sync().name("create#growerp.landing.LandingPage")
