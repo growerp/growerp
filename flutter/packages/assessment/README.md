@@ -44,7 +44,7 @@ flutter build web --wasm
 Use the deployment script:
 
 ```bash
-./build-assessment.sh
+flutter/build-assessment.sh
 ```
 
 Or manually:

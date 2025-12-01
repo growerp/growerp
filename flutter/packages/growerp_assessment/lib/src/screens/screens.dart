@@ -20,6 +20,7 @@ export 'assessment_list.dart';
 export 'assessment_list_table_def.dart';
 export 'assessment_questions_screen.dart';
 export 'assessment_results_screen.dart';
+export 'assessment_confirmation_screen.dart';
 
 // Landing page screens
 export 'landing_page_detail_screen.dart';

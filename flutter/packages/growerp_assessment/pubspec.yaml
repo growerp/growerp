@@ -29,6 +29,9 @@ dependencies:
   intl: ^0.20.0
   dropdown_search: ^5.0.6
 
+  # Web support
+  web: ^1.0.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

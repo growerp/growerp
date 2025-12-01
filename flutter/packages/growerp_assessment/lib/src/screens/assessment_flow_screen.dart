@@ -215,27 +215,14 @@ class _AssessmentFlowScreenState extends State<AssessmentFlowScreen> {
               },
             ),
 
-            // Step 3: Results
-            BlocBuilder<AssessmentBloc, AssessmentState>(
-              builder: (context, state) {
-                if (state.selectedAssessment != null) {
-                  return AssessmentResultsScreen(
-                    assessment: state.selectedAssessment!,
-                    answers: _answers
-                        .map((key, value) => MapEntry(key, value.toString())),
-                  );
-                }
-                return const Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      CircularProgressIndicator(),
-                      SizedBox(height: 16),
-                      Text('Loading results...'),
-                    ],
-                  ),
-                );
-              },
+            // Step 3: Confirmation
+            AssessmentConfirmationScreen(
+              email: _respondentEmail,
+              assessmentName: BlocProvider.of<AssessmentBloc>(context)
+                      .state
+                      .selectedAssessment
+                      ?.assessmentName ??
+                  'Assessment',
             ),
           ],
         ),
