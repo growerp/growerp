@@ -1,0 +1,120 @@
+name: growerp_sales
+description: A marketing package for the GrowERP system
+version: 1.10.5
+homepage: https://www.growerp.com
+repository: https://github.com/growerp/growerp
+platforms:
+  android:
+  ios:
+  linux:
+  macos:
+  web:
+  windows:
+
+environment:
+  sdk: ^3.9.0
+  flutter: ^3.33.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  growerp_core: ^1.9.0
+  growerp_models: ^1.9.0
+  decimal: ^3.2.4
+  intl: ^0.20.2
+  global_configuration: ^2.0.0
+  equatable: ^2.0.5
+  flutter_bloc: ^8.1.4
+  bloc_concurrency: ^0.2.0
+  meta: ^1.3.0
+  image_picker: ^1.0.4
+  responsive_framework: ^1.4.0
+  dropdown_search: ^5.0.6
+  printing: ^5.14.0
+  pdf: ^3.10.8
+  about: ^2.1.1
+  shared_preferences: ^2.3.2
+  stream_transform: ^2.1.0
+  collection: ^1.16.0
+  json_annotation: ^4.9.0
+  dio: ^5.4.3
+  freezed_annotation: ^3.1.0
+  credit_card_validator: ^2.0.1
+  url_launcher: ^6.1.4
+  flutter_colorpicker: ^1.1.0
+  from_css_color: ^2.0.0
+  path_provider: ^2.0.11
+  file_picker: ^10.1.2
+  fast_csv: ^0.2.6
+  archive: ^4.0.7
+  two_dimensional_scrollables: ^0.3.1
+  flutter_test:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_driver:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  build_runner: ^2.4.12
+  json_serializable: ^6.8.0
+  freezed: ^3.2.0
+
+flutter:
+  uses-material-design: true
+  generate: true
+
+  assets:
+    - packages/growerp_core/images/about.png
+    - packages/growerp_core/images/aboutGrey.png
+    - packages/growerp_core/images/accounting.png
+    - packages/growerp_core/images/category.png
+    - packages/growerp_core/images/categoryGrey.png
+    - packages/growerp_core/images/addImage.png
+    - packages/growerp_core/images/categories.png
+    - packages/growerp_core/images/company.png
+    - packages/growerp_core/images/favicon-32x32.png
+    - packages/growerp_core/images/growerpPlaystore.png
+    - packages/growerp_core/images/orderGrey.png
+    - packages/growerp_core/images/supplierGrey.png
+    - packages/growerp_core/images/crmGrey.png
+    - packages/growerp_core/images/growerp1024x500.jpg
+    - packages/growerp_core/images/growerp.png
+    - packages/growerp_core/images/order.png
+    - packages/growerp_core/images/supplier.png
+    - packages/growerp_core/images/accountingGrey.png
+    - packages/growerp_core/images/category.png
+    - packages/growerp_core/images/crm.png
+    - packages/growerp_core/images/growerp50x50.jpg
+    - packages/growerp_core/images/infoGrey.png
+    - packages/growerp_core/images/personInfo.png
+    - packages/growerp_core/images/up-arrow.png
+    - packages/growerp_core/images/accounting.png
+    - packages/growerp_core/images/chatGrey.png
+    - packages/growerp_core/images/dashBoardGrey.png
+    - packages/growerp_core/images/growerp512x512.png
+    - packages/growerp_core/images/info.png
+    - packages/growerp_core/images/productsGrey.png
+    - packages/growerp_core/images/usersGrey.png
+    - packages/growerp_core/images/chat.png
+    - packages/growerp_core/images/dashBoard.png
+    - packages/growerp_core/images/growerpAppstore.png
+    - packages/growerp_core/images/myInfoGrey.png
+    - packages/growerp_core/images/products.png
+    - packages/growerp_core/images/users.png
+    - packages/growerp_core/images/categoriesGrey.png
+    - packages/growerp_core/images/companyGrey.png
+    - packages/growerp_core/images/export.png
+    - packages/growerp_core/images/growerp.jpg
+    - packages/growerp_core/images/growerpDark.jpg
+    - packages/growerp_core/images/growerp100.png
+    - packages/growerp_core/images/growerpDark100.png
+    - packages/growerp_core/images/myInfo.png
+    - packages/growerp_core/images/search.png
+    - packages/growerp_core/images/chat.png
+    - packages/growerp_core/images/chatGrey.png
+    - packages/growerp_core/images/info.png
+    - packages/growerp_core/images/infoGrey.png

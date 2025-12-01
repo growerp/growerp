@@ -658,13 +658,6 @@ packages:
       relative: true
     source: path
     version: "1.10.5"
-  growerp_marketing:
-    dependency: "direct main"
-    description:
-      path: "../growerp_marketing"
-      relative: true
-    source: path
-    version: "1.10.5"
   growerp_models:
     dependency: "direct main"
     description:
@@ -676,6 +669,13 @@ packages:
     dependency: "direct main"
     description:
       path: "../growerp_order_accounting"
+      relative: true
+    source: path
+    version: "1.10.5"
+  growerp_sales:
+    dependency: "direct main"
+    description:
+      path: "../growerp_sales"
       relative: true
     source: path
     version: "1.10.5"

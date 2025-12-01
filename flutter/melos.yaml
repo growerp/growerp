@@ -14,16 +14,16 @@ packages:
   - packages/growerp_catalog/example
   - packages/growerp_inventory
   - packages/growerp_inventory/example
-  - packages/growerp_marketing
-  - packages/growerp_marketing/example
+  - packages/growerp_sales
+  - packages/growerp_sales/example
   - packages/growerp_order_accounting
   - packages/growerp_order_accounting/example
   - packages/growerp_website
   - packages/growerp_website/example
   - packages/growerp_activity
   - packages/growerp_activity/example
-  - packages/growerp_assessment
-  - packages/growerp_assessment/example
+  - packages/growerp_marketing
+  - packages/growerp_marketing/example
   - packages/growerp
   - packages/admin
   - packages/website

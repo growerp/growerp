@@ -21,7 +21,7 @@ import 'package:growerp_catalog/growerp_catalog.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_inventory/growerp_inventory.dart';
-import 'package:growerp_marketing/growerp_marketing.dart';
+import 'package:growerp_sales/growerp_sales.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 import 'package:growerp_activity/growerp_activity.dart';
 import 'package:growerp_user_company/growerp_user_company.dart';
@@ -83,7 +83,7 @@ Future main() async {
         InventoryLocalizations.delegate,
         OrderAccountingLocalizations.delegate,
         WebsiteLocalizations.delegate,
-        MarketingLocalizations.delegate,
+        SalesLocalizations.delegate,
         InventoryLocalizations.delegate,
         ActivityLocalizations.delegate,
       ],
@@ -91,7 +91,7 @@ Future main() async {
         ...getUserCompanyBlocProviders(restClient, classificationId),
         ...getCatalogBlocProviders(restClient, classificationId),
         ...getOrderAccountingBlocProviders(restClient, classificationId),
-        ...getMarketingBlocProviders(restClient),
+        ...getSalesBlocProviders(restClient),
         ...getWebsiteBlocProviders(restClient),
       ],
     ),

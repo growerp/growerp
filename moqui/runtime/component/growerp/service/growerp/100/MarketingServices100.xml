@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
+
+    <!-- ============================================ -->
+    <!-- MARKETING PERSONA SERVICES                   -->
+    <!-- ============================================ -->
+
+    <service verb="create" noun="MarketingPersona" authenticate="true">
+        <description>Create a new marketing persona.</description>
+        <in-parameters>
+            <parameter name="name" required="true"/>
+            <parameter name="demographics"/>
+            <parameter name="painPoints"/>
+            <parameter name="goals"/>
+            <parameter name="toneOfVoice"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="personaId"/>
+            <parameter name="pseudoId"/>
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" out-map="context"/>
+            <if condition="!ownerPartyId"><return error="true" message="User not authenticated or no party associated"/></if>
+
+            <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                in-map="[ownerPartyId: ownerPartyId, seqName: 'MarketingPersona']" out-map="context"/>
+            <set field="pseudoId" from="seqNum"/>
+
+            <service-call name="create#growerp.marketing.MarketingPersona" out-map="context"
+                in-map="[
+                    pseudoId: pseudoId,
+                    ownerPartyId: ownerPartyId,
+                    name: name,
+                    demographics: demographics,
+                    painPoints: painPoints,
+                    goals: goals,
+                    toneOfVoice: toneOfVoice,
+                    createdDate: ec.user.nowTimestamp,
+                    lastModifiedDate: ec.user.nowTimestamp
+                ]"/>
+        </actions>
+    </service>
+
+    <service verb="update" noun="MarketingPersona" authenticate="true">
+        <in-parameters>
+            <parameter name="personaId" required="true"/>
+            <parameter name="name"/>
+            <parameter name="demographics"/>
+            <parameter name="painPoints"/>
+            <parameter name="goals"/>
+            <parameter name="toneOfVoice"/>
+        </in-parameters>
+        <actions>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" out-map="context"/>
+            <entity-find-one entity-name="growerp.marketing.MarketingPersona" value-field="persona">
+                <field-map field-name="personaId"/>
+                <field-map field-name="ownerPartyId"/>
+            </entity-find-one>
+            <if condition="!persona"><return error="true" message="Persona not found or access denied"/></if>
+
+            <service-call name="update#growerp.marketing.MarketingPersona" in-map="context + [lastModifiedDate: ec.user.nowTimestamp]"/>
+        </actions>
+    </service>
+
+    <service verb="delete" noun="MarketingPersona" authenticate="true">
+        <in-parameters><parameter name="personaId" required="true"/></in-parameters>
+        <actions>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" out-map="context"/>
+            <entity-find-one entity-name="growerp.marketing.MarketingPersona" value-field="persona">
+                <field-map field-name="personaId"/>
+                <field-map field-name="ownerPartyId"/>
+            </entity-find-one>
+            <if condition="!persona"><return error="true" message="Persona not found or access denied"/></if>
+            
+            <service-call name="delete#growerp.marketing.MarketingPersona" in-map="[personaId: personaId]"/>
+        </actions>
+    </service>
+
+    <service verb="list" noun="MarketingPersonas" authenticate="true">
+        <out-parameters>
+            <parameter name="personas" type="List"/>
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" out-map="context"/>
+            <entity-find entity-name="growerp.marketing.MarketingPersona" list="personas">
+                <econdition field-name="ownerPartyId"/>
+                <order-by field-name="-lastModifiedDate"/>
+            </entity-find>
+        </actions>
+    </service>
+
+    <!-- ============================================ -->
+    <!-- AI GENERATION SERVICES                       -->
+    <!-- ============================================ -->
+
+    <service verb="generate" noun="MarketingPersona" authenticate="true">
+        <description>Generate a persona using AI based on business description.</description>
+        <in-parameters>
+            <parameter name="businessDescription" required="true"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="persona" type="Map"/>
+        </out-parameters>
+        <actions>
+            <!-- TODO: Implement AI call similar to generateLandingPageWithAI.groovy -->
+            <!-- For now, return dummy data -->
+            <script>
+                context.persona = [
+                    name: "Alex Johnson",
+                    demographics: "Age 30-45, Small Business Owner",
+                    painPoints: "Lack of time, inconsistent leads",
+                    goals: "Scale business, automate processes",
+                    toneOfVoice: "Professional yet approachable"
+                ]
+            </script>
+        </actions>
+    </service>
+
+    <service verb="generate" noun="ContentPlan" authenticate="true">
+        <description>Generate a weekly content plan (PNP) for a persona.</description>
+        <in-parameters>
+            <parameter name="personaId" required="true"/>
+            <parameter name="weekStartDate" type="Date"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="contentPlan" type="Map"/>
+        </out-parameters>
+        <actions>
+            <!-- TODO: Implement AI call -->
+             <script>
+                context.contentPlan = [
+                    theme: "Automation Efficiency",
+                    posts: [
+                        [type: "PAIN", headline: "Why manual lead gen is killing your growth"],
+                        [type: "NEWS", headline: "New AI tools for 2025"],
+                        [type: "PRIZE", headline: "Win a free consultation"]
+                    ]
+                ]
+            </script>
+        </actions>
+    </service>
+
+    <service verb="draft" noun="SocialPost" authenticate="true">
+        <description>Draft a full social post from a headline.</description>
+        <in-parameters>
+            <parameter name="headline" required="true"/>
+            <parameter name="personaId" required="true"/>
+            <parameter name="type"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="draftContent"/>
+        </out-parameters>
+        <actions>
+            <!-- TODO: Implement AI call -->
+            <set field="draftContent" value="Here is a draft post about ${headline}..."/>
+        </actions>
+    </service>
+
+</services>

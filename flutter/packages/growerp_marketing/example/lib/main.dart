@@ -12,14 +12,15 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-// ignore_for_file: depend_on_referenced_packages
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
-import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_marketing/growerp_marketing.dart';
+import 'package:growerp_models/growerp_models.dart';
+
+// Export for integration tests
+export 'package:growerp_core/growerp_core.dart';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -28,67 +29,95 @@ Future main() async {
   RestClient restClient = RestClient(await buildDioClient());
   WsClient chatClient = WsClient('chat');
   WsClient notificationClient = WsClient('notws');
+  String classificationId = GlobalConfiguration().get("classificationId");
 
   runApp(
     TopApp(
       restClient: restClient,
-      classificationId: 'AppAdmin',
+      classificationId: classificationId,
       chatClient: chatClient,
       notificationClient: notificationClient,
-      title: 'GrowERP Marketing',
+      title: 'GrowERP Assessment & Landing Page Management',
       router: generateRoute,
-      menuOptions: menuOptions,
-      extraDelegates: const [MarketingLocalizations.delegate],
-      extraBlocProviders: getMarketingBlocProviders(restClient),
+      menuOptions: (context) => testMenuOptions,
+      extraDelegates: const [],
+      extraBlocProviders: getExampleBlocProviders(restClient, classificationId),
     ),
   );
 }
 
-// Menu definition
-List<MenuOption> menuOptions(BuildContext context) => [
+List<BlocProvider> getExampleBlocProviders(
+  RestClient restClient,
+  String classificationId,
+) {
+  return [...getMarketingBlocProviders(restClient, classificationId)];
+}
+
+// Test menu options (simplified for integration tests)
+List<MenuOption> testMenuOptions = [
   MenuOption(
     image: 'packages/growerp_core/images/dashBoardGrey.png',
     selectedImage: 'packages/growerp_core/images/dashBoard.png',
     title: 'Main',
     route: '/',
     userGroups: [UserGroup.admin, UserGroup.employee],
-    child: const MainMenuForm(),
+    child: const MainMenu(),
   ),
   MenuOption(
-    image: 'packages/growerp_core/images/crmGrey.png',
-    selectedImage: 'packages/growerp_core/images/crm.png',
-    title: 'Marketing',
-    route: '/crm',
+    image: 'packages/growerp_core/images/categoriesGrey.png',
+    selectedImage: 'packages/growerp_core/images/categories.png',
+    title: 'Landing Pages',
+    route: '/landingPages',
     userGroups: [UserGroup.admin, UserGroup.employee],
-    child: const OpportunityList(),
+    child: const LandingPageList(),
+  ),
+  MenuOption(
+    image: 'packages/growerp_core/images/orderGrey.png',
+    selectedImage: 'packages/growerp_core/images/order.png',
+    title: 'Assessments',
+    route: '/assessments',
+    userGroups: [UserGroup.admin, UserGroup.employee],
+    child: const AssessmentList(),
+  ),
+  MenuOption(
+    image: 'packages/growerp_core/images/assessment-grey.png',
+    selectedImage: 'packages/growerp_core/images/assessment-color.png',
+    title: 'Take Assessment',
+    route: '/takeAssessment',
+    userGroups: [UserGroup.admin, UserGroup.employee],
+    child: const TakeAssessmentMenu(),
   ),
 ];
 
-// routing
+// Menu definition (for compatibility)
+List<MenuOption> menuOptions(BuildContext context) => testMenuOptions;
+
+// Routing
 Route<dynamic> generateRoute(RouteSettings settings) {
-  if (kDebugMode) {
-    debugPrint(
-      '>>>NavigateTo { ${settings.name} '
-      'with: ${settings.arguments.toString()} }',
-    );
-  }
+  debugPrint(
+    '>>>NavigateTo { ${settings.name} '
+    'with: ${settings.arguments} }',
+  );
+
   switch (settings.name) {
     case '/':
       return MaterialPageRoute(
-        builder: (context) => const HomeForm(menuOptions: menuOptions),
+        builder: (context) => HomeForm(menuOptions: (c) => testMenuOptions),
       );
-    case '/company':
-      return MaterialPageRoute(
-        builder: (context) => HomeForm(menuOptions: (ctx) => menuOptions(ctx)),
-      );
-    case '/user':
-      return MaterialPageRoute(
-        builder: (context) => HomeForm(menuOptions: (ctx) => menuOptions(ctx)),
-      );
-    case '/crm':
+    case '/landingPages':
       return MaterialPageRoute(
         builder: (context) =>
-            DisplayMenuOption(menuList: menuOptions(context), menuIndex: 1),
+            DisplayMenuOption(menuList: testMenuOptions, menuIndex: 1),
+      );
+    case '/assessments':
+      return MaterialPageRoute(
+        builder: (context) =>
+            DisplayMenuOption(menuList: testMenuOptions, menuIndex: 2),
+      );
+    case '/takeAssessment':
+      return MaterialPageRoute(
+        builder: (context) =>
+            DisplayMenuOption(menuList: testMenuOptions, menuIndex: 3),
       );
     default:
       return MaterialPageRoute(
@@ -99,27 +128,132 @@ Route<dynamic> generateRoute(RouteSettings settings) {
   }
 }
 
-// main menu
-class MainMenuForm extends StatelessWidget {
-  const MainMenuForm({super.key});
+// Main menu with dashboard
+class MainMenu extends StatelessWidget {
+  const MainMenu({super.key});
 
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<AuthBloc, AuthState>(
       builder: (context, state) {
         if (state.status == AuthStatus.authenticated) {
-          Authenticate authenticate = state.authenticate!;
-          final options = menuOptions(context);
           return DashBoardForm(
             dashboardItems: [
-              makeDashboardItem('dbCrm', context, options[1], [
-                "Opportunities: ${authenticate.stats?.opportunities ?? 0}",
+              makeDashboardItem('dbLandingPages', context, testMenuOptions[1], [
+                'Landing Pages',
+                'Create and manage landing pages',
+                'Configure hooks and CTAs',
               ]),
+              makeDashboardItem('dbAssessments', context, testMenuOptions[2], [
+                'Assessments',
+                'Create and manage assessments',
+                'Define questions and scoring',
+              ]),
+              makeDashboardItem(
+                'dbTakeAssessment',
+                context,
+                testMenuOptions[3],
+                [
+                  'Take Assessment',
+                  'Experience the assessment flow',
+                  'Test your assessments',
+                ],
+              ),
             ],
           );
         }
-
         return const LoadingIndicator();
+      },
+    );
+  }
+}
+
+// Take Assessment menu - allows selecting and taking an assessment
+class TakeAssessmentMenu extends StatelessWidget {
+  const TakeAssessmentMenu({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<AssessmentBloc, AssessmentState>(
+      builder: (context, state) {
+        if (state.status == AssessmentStatus.initial) {
+          context.read<AssessmentBloc>().add(
+            const AssessmentFetch(refresh: true),
+          );
+        }
+
+        if (state.status == AssessmentStatus.loading &&
+            state.assessments.isEmpty) {
+          return const Center(child: LoadingIndicator());
+        }
+
+        if (state.assessments.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(
+                  Icons.assessment_outlined,
+                  size: 64,
+                  color: Colors.grey,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'No assessments available',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Create an assessment first in the Assessments menu',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          );
+        }
+
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text('Select an Assessment to Take'),
+            backgroundColor: Colors.transparent,
+          ),
+          body: ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: state.assessments.length,
+            itemBuilder: (context, index) {
+              final assessment = state.assessments[index];
+              return Card(
+                margin: const EdgeInsets.only(bottom: 12),
+                child: ListTile(
+                  leading: const CircleAvatar(child: Icon(Icons.quiz)),
+                  title: Text(
+                    assessment.assessmentName,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  subtitle: Text(
+                    assessment.description ?? 'No description',
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  trailing: const Icon(Icons.arrow_forward_ios),
+                  onTap: () {
+                    // Navigate to the assessment flow
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => LandingPageAssessmentFlowScreen(
+                          landingPageId: assessment.pseudoId ?? '',
+                          assessmentId: assessment.assessmentId ?? '',
+                          startAssessmentFlow: true,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              );
+            },
+          ),
+        );
       },
     );
   }

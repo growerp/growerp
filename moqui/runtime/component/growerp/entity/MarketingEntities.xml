@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entities xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/entity-definition-3.xsd">
+
+    <!-- ========================================================= -->
+    <!--  Marketing Persona (Customer Avatar)                      -->
+    <!-- ========================================================= -->
+    <entity entity-name="MarketingPersona" package-name="growerp.marketing">
+        <description>Represents a target customer avatar/persona for AI content generation.</description>
+        <field name="personaId" type="id" is-pk="true"/>
+        <field name="pseudoId" type="id" />
+        <field name="ownerPartyId" type="id"/>
+        <field name="name" type="text-medium"/>
+        <field name="demographics" type="text-long"/>
+        <field name="painPoints" type="text-long"/>
+        <field name="goals" type="text-long"/>
+        <field name="toneOfVoice" type="text-medium"/>
+        
+        <field name="createdDate" type="date-time"/>
+        <field name="lastModifiedDate" type="date-time"/>
+        
+        <relationship type="one" related-entity-name="mantle.party.Party">
+            <key-map field-name="ownerPartyId" related-field-name="partyId"/>
+        </relationship>
+    </entity>
+
+    <!-- ========================================================= -->
+    <!--  Content Plan (Weekly PNP Schedule)                       -->
+    <!-- ========================================================= -->
+    <entity entity-name="ContentPlan" package-name="growerp.marketing">
+        <description>Represents a weekly content plan based on the Pain-News-Prize formula.</description>
+        <field name="planId" type="id" is-pk="true"/>
+        <field name="pseudoId" type="id" />
+        <field name="ownerPartyId" type="id"/>
+        <field name="personaId" type="id"/>
+        <field name="weekStartDate" type="date"/>
+        <field name="theme" type="text-medium"/>
+        <field name="status" type="text-short"/> <!-- DRAFT, ACTIVE, COMPLETED -->
+        
+        <field name="createdDate" type="date-time"/>
+        <field name="lastModifiedDate" type="date-time"/>
+
+        <relationship type="one" related-entity-name="growerp.marketing.MarketingPersona">
+            <key-map field-name="personaId"/>
+        </relationship>
+        <relationship type="one" related-entity-name="mantle.party.Party">
+            <key-map field-name="ownerPartyId" related-field-name="partyId"/>
+        </relationship>
+    </entity>
+
+    <!-- ========================================================= -->
+    <!--  Social Post (Content Item)                               -->
+    <!-- ========================================================= -->
+    <entity entity-name="SocialPost" package-name="growerp.marketing">
+        <description>Represents a specific social media post.</description>
+        <field name="postId" type="id" is-pk="true"/>
+        <field name="pseudoId" type="id" />
+        <field name="planId" type="id"/>
+        <field name="type" type="text-short"/> <!-- PAIN, NEWS, PRIZE, OTHER -->
+        <field name="platform" type="text-short"/> <!-- LINKEDIN, TWITTER, FACEBOOK -->
+        <field name="headline" type="text-medium"/>
+        <field name="draftContent" type="text-very-long"/>
+        <field name="finalContent" type="text-very-long"/>
+        <field name="status" type="text-short"/> <!-- DRAFT, SCHEDULED, PUBLISHED -->
+        <field name="scheduledDate" type="date-time"/>
+        
+        <field name="createdDate" type="date-time"/>
+        <field name="lastModifiedDate" type="date-time"/>
+
+        <relationship type="one" related-entity-name="growerp.marketing.ContentPlan">
+            <key-map field-name="planId"/>
+        </relationship>
+    </entity>
+
+</entities>

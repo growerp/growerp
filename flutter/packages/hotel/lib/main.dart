@@ -24,7 +24,7 @@ import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_inventory/growerp_inventory.dart';
 import 'package:growerp_activity/growerp_activity.dart';
 import 'package:growerp_catalog/growerp_catalog.dart';
-import 'package:growerp_marketing/growerp_marketing.dart';
+import 'package:growerp_sales/growerp_sales.dart';
 import 'package:growerp_user_company/growerp_user_company.dart';
 import 'package:growerp_website/growerp_website.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
@@ -102,7 +102,7 @@ List<LocalizationsDelegate> delegates = [
   InventoryLocalizations.delegate,
   OrderAccountingLocalizations.delegate,
   WebsiteLocalizations.delegate,
-  MarketingLocalizations.delegate,
+  SalesLocalizations.delegate,
   InventoryLocalizations.delegate,
   CatalogLocalizations.delegate,
   ActivityLocalizations.delegate,
@@ -117,7 +117,7 @@ List<BlocProvider> getHotelBlocProviders(
     ...getUserCompanyBlocProviders(restClient, classificationId),
     ...getCatalogBlocProviders(restClient, classificationId),
     ...getOrderAccountingBlocProviders(restClient, classificationId),
-    ...getMarketingBlocProviders(restClient),
+    ...getSalesBlocProviders(restClient),
     ...getWebsiteBlocProviders(restClient),
   ];
 }
