@@ -770,6 +770,7 @@ Service definitions for assessment management and completion
             </entity-find>
 
             <set field="leadStatus" from="thresholds ? thresholds[0].leadStatus : 'Unknown'" />
+            <set field="adviceDescription" from="thresholds ? thresholds[0].description : null" />
 
             <!-- Always create lead user from respondent info -->
             <script>
@@ -831,6 +832,71 @@ Service definitions for assessment management and completion
                  are already in context from earlier operations, but we need to ensure
                  all output parameters are explicitly set -->
             <set field="assessmentResultId" from="resultOut.assessmentResultId" />
+
+            <!-- Send assessment results email with PDF -->
+            <entity-find-one entity-name="moqui.basic.email.EmailServer" value-field="emailExist">
+                <field-map field-name="emailServerId" value="SYSTEM" />
+            </entity-find-one>
+
+            <!-- Calculate max score and percentage for email -->
+            <set field="maxScore" type="BigDecimal" from="0" />
+            <entity-find entity-name="growerp.assessment.AssessmentQuestionOption" list="allOptions">
+                <econdition field-name="assessmentId" from="assessmentId" />
+            </entity-find>
+            <iterate list="allOptions" entry="opt">
+                <if condition="opt.optionScore">
+                    <set field="maxScore" from="maxScore + (opt.optionScore as BigDecimal)" />
+                </if>
+            </iterate>
+            <set field="percentage"
+                from="maxScore &gt; 0 ? ((score / maxScore) * 100).setScale(1, BigDecimal.ROUND_HALF_UP) : 0" />
+
+            <!-- Get assessment name for email -->
+            <set field="assessmentName" from="assessment.assessmentName" />
+
+            <!-- Build questions with answers list for PDF -->
+            <entity-find entity-name="growerp.assessment.AssessmentQuestion" list="questions">
+                <econdition field-name="assessmentId" from="assessmentId" />
+                <order-by field-name="questionSequence" />
+            </entity-find>
+            <set field="questionsWithAnswers" from="[]" />
+            <iterate list="questions" entry="question">
+                <set field="selectedOptionId" from="answers?.get(question.assessmentQuestionId)" />
+                <entity-find-one entity-name="growerp.assessment.AssessmentQuestionOption"
+                    value-field="selectedOption">
+                    <field-map field-name="assessmentQuestionOptionId" from="selectedOptionId" />
+                </entity-find-one>
+                <script>
+                    questionsWithAnswers.add([
+                        questionText: question.questionText,
+                        questionSequence: question.questionSequence,
+                        selectedAnswer: selectedOption?.optionText ?: 'No answer',
+                        optionScore: selectedOption?.optionScore ?: 0
+                    ])
+                </script>
+            </iterate>
+
+            <!-- Send email if configured and not test email -->
+            <if
+                condition="emailExist &amp;&amp; emailExist.mailPassword != 'SMTP_PASSWORD' 
+                          &amp;&amp; !respondentEmail.contains('example.com')">
+
+
+
+                <service-call name="org.moqui.impl.EmailServices.send#EmailTemplate" async="true">
+                    <field-map field-name="emailTemplateId" value="ASSESSMENT_RESULTS" />
+                    <field-map field-name="toAddresses" from="respondentEmail" />
+                    <field-map field-name="bodyParameters"
+                        from="[respondentName: respondentName, assessmentName: assessmentName,
+                               score: score, maxScore: maxScore, percentage: percentage,
+                               leadStatus: leadStatus, assessmentResultId: assessmentResultId,
+                               questionsWithAnswers: questionsWithAnswers]" />
+                </service-call>
+                <else>
+                    <log level="warn"
+                        message="====== Assessment results email not sent for ${respondentEmail}" />
+                </else>
+            </if>
             <!-- pseudoId, assessmentId, score, leadStatus, respondentName, respondentEmail, 
                  respondentPhone, respondentCompany, answersData, createdDate are already in context -->
         </actions>

@@ -34,9 +34,14 @@ class _AssessmentQuestionsScreenState extends State<AssessmentQuestionsScreen> {
     _questionPageController = PageController();
   }
 
+  final Map<String, TextEditingController> _textControllers = {};
+
   @override
   void dispose() {
     _questionPageController.dispose();
+    for (var controller in _textControllers.values) {
+      controller.dispose();
+    }
     super.dispose();
   }
 
@@ -228,6 +233,7 @@ class _AssessmentQuestionsScreenState extends State<AssessmentQuestionsScreen> {
 
   Widget _buildQuestionCard(AssessmentQuestion question) {
     return Card(
+      key: ValueKey(question.assessmentQuestionId),
       elevation: 8,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: Padding(
@@ -245,7 +251,7 @@ class _AssessmentQuestionsScreenState extends State<AssessmentQuestionsScreen> {
             ),
             const SizedBox(height: 24),
             Expanded(
-              child: question.questionType == 'OpenText'
+              child: ['Text', 'OpenText'].contains(question.questionType)
                   ? _buildOpenTextInput(question)
                   : _buildOptionsView(question),
             ),
@@ -256,14 +262,29 @@ class _AssessmentQuestionsScreenState extends State<AssessmentQuestionsScreen> {
   }
 
   Widget _buildOpenTextInput(AssessmentQuestion question) {
-    final currentAnswer =
-        _answers[question.assessmentQuestionId] as String? ?? '';
+    final questionId = question.assessmentQuestionId ?? '';
+
+    // Initialize controller if not exists
+    if (!_textControllers.containsKey(questionId)) {
+      final currentAnswer = _answers[questionId] as String? ?? '';
+      _textControllers[questionId] = TextEditingController(text: currentAnswer);
+
+      // Add listener to update answers
+      _textControllers[questionId]!.addListener(() {
+        final text = _textControllers[questionId]!.text;
+        if (_answers[questionId] != text) {
+          _answers[questionId] = text;
+          // No setState needed here as the controller manages the text field state
+        }
+      });
+    }
 
     return Column(
       children: [
         Expanded(
           child: TextField(
-            controller: TextEditingController(text: currentAnswer),
+            key: ValueKey('input_${question.assessmentQuestionId}'),
+            controller: _textControllers[questionId],
             maxLines: null,
             expands: true,
             textAlignVertical: TextAlignVertical.top,
@@ -274,11 +295,6 @@ class _AssessmentQuestionsScreenState extends State<AssessmentQuestionsScreen> {
               ),
               contentPadding: const EdgeInsets.all(16),
             ),
-            onChanged: (value) {
-              setState(() {
-                _answers[question.assessmentQuestionId ?? ''] = value;
-              });
-            },
           ),
         ),
         const SizedBox(height: 12),

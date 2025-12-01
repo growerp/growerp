@@ -119,7 +119,6 @@ class QuestionListScreenState extends State<QuestionListScreen> {
               if (oldIndex < newIndex) {
                 newIndex -= 1;
               }
-              // TODO: Implement question reordering
             },
             itemCount: state.questions.length,
             itemBuilder: (context, index) {

@@ -21,6 +21,9 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_assessment/growerp_assessment.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'dart:js_interop' if (dart.library.io) 'dart:js_interop';
+import 'package:web/web.dart' as web if (dart.library.io) 'package:web/web.dart';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -71,9 +74,28 @@ Future main() async {
       company: company,
     ),
   );
+
+  // Notify parent window that Flutter app is ready (for iframe embedding)
+  // Use a small delay to ensure the first frame is rendered
+  Future.delayed(const Duration(milliseconds: 100), () {
+    notifyFlutterReady();
+  });
 }
 
 List<LocalizationsDelegate> delegates = [];
+
+/// Notify parent window that Flutter app is ready (for iframe embedding)
+void notifyFlutterReady() {
+  if (kIsWeb) {
+    try {
+      final message = {'type': 'flutter-ready'}.jsify();
+      web.window.parent?.postMessage(message, '*'.toJS);
+      debugPrint('=== Sent flutter-ready message to parent window');
+    } catch (e) {
+      debugPrint('=== Could not send flutter-ready message: $e');
+    }
+  }
+}
 
 // Get BLoC providers for the assessment app
 List<BlocProvider> getAssessmentAppBlocProviders(

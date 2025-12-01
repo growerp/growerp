@@ -365,6 +365,38 @@
         // Track assessment loading state
         let assessmentLoaded = false;
         let assessmentLoading = false;
+        let flutterReadyReceived = false;
+        let assessmentDisplayed = false;  // Track if assessment is currently shown to user
+
+        // Listen for Flutter ready message from iframe
+        window.addEventListener('message', function(event) {
+            // Only process messages that have valid data object
+            if (!event.data || typeof event.data !== 'object') {
+                return;
+            }
+
+            console.log('Received message:', event.data.type);
+
+            // Handle flutter-ready message from Flutter app
+            if (event.data.type === 'flutter-ready') {
+                console.log('Received flutter-ready message from Flutter app');
+                flutterReadyReceived = true;
+                assessmentLoaded = true;
+                assessmentLoading = false;
+                hideSpinner();
+                enableAssessmentButtons();
+            }
+            // Handle messages from Flutter assessment to close when complete
+            // Only process these if the assessment is actually displayed
+            else if (assessmentDisplayed && event.data.type === 'assessment-complete') {
+                console.log('Assessment completed:', event.data);
+                closeAssessment();
+                alert('Thank you for completing the assessment! You should receive your results shortly.');
+            } else if (assessmentDisplayed && event.data.type === 'assessment-close') {
+                console.log('Assessment closed by user');
+                closeAssessment();
+            }
+        });
 
         // Privacy Policy Modal Functions
         function showPrivacyPolicy() {
@@ -417,45 +449,57 @@
             iframe.onload = function() {
                 console.log('Assessment iframe HTML loaded');
                 
-                // Check if Flutter app is visible/interactive by polling for Flutter elements
-                // Flutter renders into a specific structure we can detect
+                // If we already received flutter-ready message, we're done
+                if (flutterReadyReceived) {
+                    console.log('Flutter ready message already received');
+                    return;
+                }
+
+                // Fallback: Use a timeout-based approach since we can't reliably detect
+                // Flutter elements due to cross-origin restrictions and CanvasKit rendering
+                // The flutter-ready postMessage is the primary mechanism
                 let checkAttempts = 0;
-                const maxAttempts = 50; // ~10 seconds with 200ms intervals
+                const maxAttempts = 100; // ~20 seconds with 200ms intervals
                 
                 const checkFlutterReady = setInterval(() => {
                     checkAttempts++;
                     
+                    // If flutter-ready message was received, stop checking
+                    if (flutterReadyReceived) {
+                        console.log('Flutter ready confirmed via postMessage');
+                        clearInterval(checkFlutterReady);
+                        return;
+                    }
+
                     try {
-                        // Try to access iframe content
+                        // Try to access iframe content (may fail due to CORS)
                         const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
                         
-                        // Check if Flutter has rendered interactive content
-                        // Look for Flutter's main container elements that indicate actual rendering is complete
-                        const flutterRoot = iframeDoc.querySelector('[flt-opacity]') || 
-                                          iframeDoc.querySelector('flt-glass-pane') ||
-                                          iframeDoc.querySelector('flt-scene');
+                        // Check for various Flutter web indicators
+                        // Modern Flutter web uses canvas elements for CanvasKit rendering
+                        const hasCanvas = iframeDoc.querySelector('canvas');
+                        // HTML renderer uses flt-glass-pane or similar
+                        const hasFlutterElements = iframeDoc.querySelector('flt-glass-pane, flt-scene-host, [flt-renderer]');
+                        // Check if body has content (Flutter adds content to body)
+                        const bodyHasContent = iframeDoc.body && iframeDoc.body.children.length > 1;
                         
-                        // Only consider it ready if we find actual Flutter elements (not just generic HTML)
-                        if (flutterRoot) {
-                            // Additional safety: check if the element has meaningful content
-                            const elementContent = flutterRoot.textContent || flutterRoot.children.length;
-                            if (elementContent) {
-                                console.log('Flutter app is interactive!');
-                                clearInterval(checkFlutterReady);
-                                assessmentLoaded = true;
-                                assessmentLoading = false;
-                                hideSpinner();
-                                enableAssessmentButtons();
-                                return;
-                            }
+                        if (hasCanvas || hasFlutterElements || bodyHasContent) {
+                            console.log('Flutter app detected via DOM inspection');
+                            clearInterval(checkFlutterReady);
+                            assessmentLoaded = true;
+                            assessmentLoading = false;
+                            hideSpinner();
+                            enableAssessmentButtons();
+                            return;
                         }
                     } catch (e) {
-                        // Might fail due to CORS, but that's ok - means content is loading
+                        // Cross-origin restriction - can't access iframe content
+                        // This is expected, rely on postMessage or timeout
                     }
                     
-                    // Timeout after max attempts
+                    // Timeout fallback after max attempts
                     if (checkAttempts >= maxAttempts) {
-                        console.log('Assessment load timeout - marking as ready anyway');
+                        console.log('Assessment load timeout - marking as ready (fallback)');
                         clearInterval(checkFlutterReady);
                         assessmentLoaded = true;
                         assessmentLoading = false;
@@ -476,16 +520,20 @@
             iframe.src = url;
         }
 
-        // Enable assessment buttons
+        // Enable assessment buttons with 10 second delay after Flutter app is ready
         function enableAssessmentButtons() {
-            const button = document.getElementById('cta-button');
-            const buttonBottom = document.getElementById('cta-button-bottom');
-            if (button) {
-                button.disabled = false;
-            }
-            if (buttonBottom) {
-                buttonBottom.disabled = false;
-            }
+            console.log('Flutter ready - starting 10 second delay before enabling buttons');
+            setTimeout(function() {
+                console.log('10 second delay complete - enabling buttons now');
+                const button = document.getElementById('cta-button');
+                const buttonBottom = document.getElementById('cta-button-bottom');
+                if (button) {
+                    button.disabled = false;
+                }
+                if (buttonBottom) {
+                    buttonBottom.disabled = false;
+                }
+            }, 1000);
         }
 
         // Helper function to hide spinner
@@ -536,6 +584,7 @@
                     loaderBottom.style.display = 'none';
                 }
                 document.getElementById('flutter-assessment-container').style.display = 'block';
+                assessmentDisplayed = true;  // Mark as displayed so we process completion messages
                 if (button) {
                     button.disabled = false;
                 }
@@ -548,6 +597,7 @@
         // Add close button functionality
         function closeAssessment() {
             document.getElementById('flutter-assessment-container').style.display = 'none';
+            assessmentDisplayed = false;  // No longer displayed
             const loader = document.getElementById('button-loader');
             const loaderBottom = document.getElementById('button-loader-bottom');
             if (loader) {
@@ -566,6 +616,7 @@
             }
             assessmentLoaded = false;
             assessmentLoading = false;
+            flutterReadyReceived = false;  // Reset for next load
         }
 
         // Preload Flutter assessment in background when page loads (if assessment CTA exists)
@@ -575,19 +626,6 @@
             preloadAssessment('${ctaAssessmentId}');
         });
         </#if>
-
-        // Listen for messages from Flutter assessment to close when complete
-        window.addEventListener('message', function(event) {
-            // Handle messages from Flutter assessment
-            if (event.data && event.data.type === 'assessment-complete') {
-                console.log('Assessment completed:', event.data);
-                closeAssessment();
-                alert('Thank you for completing the assessment! You should receive your results shortly.');
-            } else if (event.data && event.data.type === 'assessment-close') {
-                console.log('Assessment closed by user');
-                closeAssessment();
-            }
-        });
     </script>
 </body>
 </html>

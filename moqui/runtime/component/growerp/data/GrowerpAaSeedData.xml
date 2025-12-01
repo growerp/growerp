@@ -242,6 +242,19 @@ along with this software (see the LICENSE.md file). If not, see
             screenRenderMode="text" />
     </moqui.basic.email.EmailTemplate>
 
+    <!-- Assessment Results Email Template -->
+    <moqui.basic.email.EmailTemplate emailTemplateId="ASSESSMENT_RESULTS"
+        description="Assessment Results with PDF"
+        emailServerId="SYSTEM" emailTypeEnumId="EMT_SYSTEM"
+        bodyScreenLocation="component://growerp/screen/email/AssessmentResultsEmail.xml"
+        fromAddress="support@growerp.com" fromName="GrowERP Assessments"
+        ccAddresses="" bccAddresses=""
+        subject="Your ${assessmentName} Results" sendPartial="Y">
+        <attachments fileName="assessment-results-${assessmentResultId}.pdf"
+            attachmentLocation="component://growerp/screen/email/AssessmentResultsPdf.xml"
+            screenRenderMode="xsl-fo" />
+    </moqui.basic.email.EmailTemplate>
+
     <!--<growerp.InstallServices.deleteAssetClass/>
     existing classes used in accounting -->
     <moqui.basic.Enumeration description="Hotel Room" enumId="AsClsRoom" enumTypeId="AssetClass" />

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Assessment email template for sending results with PDF attachment
+-->
+<screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-3.xsd"
+        require-authentication="false">
+    <widgets>
+        <render-mode>
+            <text type="html"><![CDATA[
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #2D3748; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header {background: linear-gradient(135deg, #667EEA 0%, #764BA2 100%); 
+                 padding: 40px 20px; text-align: center; border-radius: 8px 8px 0 0; }
+        .header h1 { color: white; margin: 0; font-size: 24px; }
+        .content { background: #fff; padding: 30px; border: 1px solid #E2E8F0; }
+        .btn { display: inline-block; padding: 12px 30px; background: #667EEA;
+               color: white; text-decoration: none; border-radius: 6px; margin: 20px 0; }
+        .footer { text-align: center; padding: 20px; color: #718096; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Your Assessment Results</h1>
+        </div>
+        <div class="content">
+            <p>Hello ${respondentName},</p>
+            
+            <p>Thank you for completing <strong>${assessmentName}</strong>!</p>
+            
+            <p>Your results have been processed. Please find attached a detailed PDF report 
+            with your score, personalized feedback, and recommendations.</p>
+            
+            <p><strong>Your Score:</strong> ${score} / ${maxScore} (${percentage}%)</p>
+            
+            <p><strong>Status:</strong> ${leadStatus}</p>
+            
+            <p>The attached PDF contains comprehensive information about your assessment results.</p>
+            
+            <p>If you have any questions about your results, please don't hesitate to contact us.</p>
+            
+            <p>Best regards,<br>
+            The GrowERP Team</p>
+        </div>
+        <div class="footer">
+            <p>This is an automated message. Please do not reply to this email.</p>
+            <p>&copy; ${ec.l10n.format(ec.user.nowTimestamp, 'yyyy')} GrowERP. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>
+]]></text>
+        </render-mode>
+    </widgets>
+</screen>

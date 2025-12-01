@@ -14,7 +14,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:growerp_core/growerp_core.dart';
+
 import 'package:growerp_models/growerp_models.dart';
 import '../bloc/assessment_bloc.dart';
 
@@ -67,11 +67,12 @@ class AssessmentResultsScreen extends StatelessWidget {
                     const SizedBox(height: 40),
                     _buildScoreCard(score, maxScore, percentage),
                     const SizedBox(height: 24),
+                    _buildAdviceCard(score, state),
+                    const SizedBox(height: 24),
                     _buildScoreBreakdown(state),
                     const SizedBox(height: 24),
                     _buildAssessmentInfo(),
                     const SizedBox(height: 24),
-                    _buildActionButtons(context, state),
                   ],
                 ),
               ),
@@ -236,6 +237,120 @@ class AssessmentResultsScreen extends StatelessWidget {
     );
   }
 
+  Widget _buildAdviceCard(double score, AssessmentState state) {
+    // Find matching threshold
+    final thresholds = state.thresholds.isNotEmpty
+        ? state.thresholds
+        : assessment.thresholds ?? [];
+
+    if (thresholds.isEmpty) return const SizedBox.shrink();
+
+    // Calculate percentage (same as in build method)
+    final maxScore = _getMaxScore(state);
+    final percentage = maxScore > 0 ? (score / maxScore * 100).round() : 0;
+
+    // Determine if thresholds are percentage-based or raw-score-based
+    double maxThresholdScore = 0;
+    for (final t in thresholds) {
+      if ((t.maxScore ?? 0) > maxThresholdScore) {
+        maxThresholdScore = t.maxScore ?? 0;
+      }
+    }
+
+    // If max threshold > 100, assume raw scores and scale user score to match
+    // Otherwise compare percentage directly
+    final double scoreToCompare;
+    if (maxThresholdScore > 100) {
+      scoreToCompare = (percentage / 100) * maxThresholdScore;
+    } else {
+      scoreToCompare = percentage.toDouble();
+    }
+
+    ScoringThreshold? matchingThreshold;
+    for (final threshold in thresholds) {
+      if ((threshold.minScore ?? 0) <= scoreToCompare &&
+          scoreToCompare <= (threshold.maxScore ?? double.infinity)) {
+        matchingThreshold = threshold;
+        break;
+      }
+    }
+
+    if (matchingThreshold == null || matchingThreshold.description == null) {
+      return const SizedBox.shrink();
+    }
+
+    return Card(
+      elevation: 8,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      child: Padding(
+        padding: const EdgeInsets.all(32.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF667EEA).withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(
+                    Icons.lightbulb_outline,
+                    color: Color(0xFF667EEA),
+                    size: 28,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                const Expanded(
+                  child: Text(
+                    'Our Advice',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF2D3748),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Text(
+              matchingThreshold.description!,
+              style: const TextStyle(
+                fontSize: 16,
+                height: 1.5,
+                color: Color(0xFF4A5568),
+              ),
+            ),
+            if (matchingThreshold.leadStatus != null) ...[
+              const SizedBox(height: 16),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF667EEA).withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: const Color(0xFF667EEA).withValues(alpha: 0.3),
+                  ),
+                ),
+                child: Text(
+                  'Status: ${matchingThreshold.leadStatus}',
+                  style: const TextStyle(
+                    color: Color(0xFF667EEA),
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildAssessmentInfo() {
     return Card(
       elevation: 8,
@@ -362,37 +477,55 @@ class AssessmentResultsScreen extends StatelessWidget {
                     const AssessmentQuestion(questionText: 'Unknown Question'),
               );
 
-              // Find the selected option
-              final options = question.options ?? [];
-              final selectedOption = options.firstWhere(
-                (o) => o.assessmentQuestionOptionId == optionId,
-                orElse: () => const AssessmentQuestionOption(
-                    optionText: 'Unknown Option'),
-              );
+              // Check if this is a text-type question
+              final isTextQuestion = question.questionType == 'Text' ||
+                  question.questionType == 'OpenText';
 
-              final score = selectedOption.optionScore ?? 0;
+              // For text questions, optionId contains the user's text answer
+              // For multiple-choice, optionId is the selected option ID
+              String answerText;
+              double score = 0;
+              Color scoreColor;
 
-              // Get max score for this question to calculate color
-              // Try state.options first, then fallback to question options
-              List<AssessmentQuestionOption> questionOptions = [];
-              if (state.options.containsKey(questionId)) {
-                questionOptions = state.options[questionId] ?? [];
+              if (isTextQuestion) {
+                // Text question: use optionId as the answer text
+                answerText =
+                    optionId.isNotEmpty ? optionId : 'No answer provided';
+                scoreColor = const Color(0xFF667EEA); // Neutral color for text
               } else {
-                questionOptions = question.options ?? [];
-              }
+                // Multiple-choice question: find the selected option
+                final options = question.options ?? [];
+                final selectedOption = options.firstWhere(
+                  (o) => o.assessmentQuestionOptionId == optionId,
+                  orElse: () => const AssessmentQuestionOption(
+                      optionText: 'Unknown Option'),
+                );
 
-              double maxScoreForQuestion = 0.0;
-              for (final opt in questionOptions) {
-                if ((opt.optionScore ?? 0) > maxScoreForQuestion) {
-                  maxScoreForQuestion = opt.optionScore ?? 0;
+                answerText = selectedOption.optionText ?? 'Unknown option';
+                score = selectedOption.optionScore ?? 0;
+
+                // Get max score for this question to calculate color
+                List<AssessmentQuestionOption> questionOptions = [];
+                if (state.options.containsKey(questionId)) {
+                  questionOptions = state.options[questionId] ?? [];
+                } else {
+                  questionOptions = question.options ?? [];
                 }
+
+                double maxScoreForQuestion = 0.0;
+                for (final opt in questionOptions) {
+                  if ((opt.optionScore ?? 0) > maxScoreForQuestion) {
+                    maxScoreForQuestion = opt.optionScore ?? 0;
+                  }
+                }
+
+                // Calculate percentage for this question to determine color
+                final questionPercentage = maxScoreForQuestion > 0
+                    ? ((score / maxScoreForQuestion) * 100).toInt()
+                    : 0;
+                scoreColor = _getScoreColor(questionPercentage);
               }
 
-              // Calculate percentage for this question to determine color
-              final questionPercentage = maxScoreForQuestion > 0
-                  ? ((score / maxScoreForQuestion) * 100).toInt()
-                  : 0;
-              final scoreColor = _getScoreColor(questionPercentage);
               final questionSequence = questions.indexOf(question) + 1;
               return Column(
                 children: [
@@ -447,7 +580,7 @@ class AssessmentResultsScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 16),
 
-                        // Chosen option with score
+                        // Answer display (different for text vs multiple-choice)
                         Container(
                           width: double.infinity,
                           padding: const EdgeInsets.all(16),
@@ -460,16 +593,19 @@ class AssessmentResultsScreen extends StatelessWidget {
                             ),
                           ),
                           child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Icon(
-                                Icons.check_circle_rounded,
+                                isTextQuestion
+                                    ? Icons.comment_outlined
+                                    : Icons.check_circle_rounded,
                                 color: scoreColor,
                                 size: 24,
                               ),
                               const SizedBox(width: 12),
                               Expanded(
                                 child: Text(
-                                  selectedOption.optionText ?? 'Unknown option',
+                                  answerText,
                                   style: const TextStyle(
                                     color: Color(0xFF2D3748),
                                     fontWeight: FontWeight.w500,
@@ -477,46 +613,48 @@ class AssessmentResultsScreen extends StatelessWidget {
                                   ),
                                 ),
                               ),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 6,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: scoreColor.withValues(alpha: 0.15),
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text(
-                                      score > 0 ? '+' : '',
-                                      style: TextStyle(
-                                        color: scoreColor,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 14,
+                              // Only show score badge for multiple-choice questions
+                              if (!isTextQuestion)
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 6,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: scoreColor.withValues(alpha: 0.15),
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        score > 0 ? '+' : '',
+                                        style: TextStyle(
+                                          color: scoreColor,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 14,
+                                        ),
                                       ),
-                                    ),
-                                    Text(
-                                      score.toStringAsFixed(0),
-                                      style: TextStyle(
-                                        color: scoreColor,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 14,
+                                      Text(
+                                        score.toStringAsFixed(0),
+                                        style: TextStyle(
+                                          color: scoreColor,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 14,
+                                        ),
                                       ),
-                                    ),
-                                    const SizedBox(width: 2),
-                                    Text(
-                                      'pts',
-                                      style: TextStyle(
-                                        color: scoreColor,
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 12,
+                                      const SizedBox(width: 2),
+                                      Text(
+                                        'pts',
+                                        style: TextStyle(
+                                          color: scoreColor,
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 12,
+                                        ),
                                       ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
-                              ),
                             ],
                           ),
                         ),
@@ -530,68 +668,6 @@ class AssessmentResultsScreen extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildActionButtons(BuildContext context, AssessmentState state) {
-    return Wrap(
-      spacing: 16,
-      runSpacing: 16,
-      alignment: WrapAlignment.center,
-      children: [
-        OutlinedButton(
-          onPressed: () => _shareResults(context),
-          style: OutlinedButton.styleFrom(
-            foregroundColor: Colors.white,
-            side: const BorderSide(color: Colors.white, width: 2),
-            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(30),
-            ),
-          ),
-          child: const Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.share, size: 20),
-              SizedBox(width: 8),
-              Text(
-                'Share',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
-        ),
-        ElevatedButton(
-          onPressed: () => _retakeAssessment(context),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.white,
-            foregroundColor: const Color(0xFF667EEA),
-            padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(30),
-            ),
-            elevation: 8,
-            shadowColor: Colors.black.withValues(alpha: 0.3),
-          ),
-          child: const Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'Retake Assessment',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              SizedBox(width: 8),
-              Icon(Icons.refresh, size: 20),
-            ],
-          ),
-        ),
-      ],
     );
   }
 
@@ -707,75 +783,5 @@ class AssessmentResultsScreen extends StatelessWidget {
 
   String _formatDate(DateTime date) {
     return '${date.day}/${date.month}/${date.year} ${date.hour}:${date.minute.toString().padLeft(2, '0')}';
-  }
-
-  void _retakeAssessment(BuildContext context) {
-    Navigator.of(context).pushReplacementNamed(
-      '/assessment/take',
-      arguments: assessment,
-    );
-  }
-
-  void _shareResults(BuildContext context) {
-    // Show share results options
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Share Assessment Results'),
-        content: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                leading: const Icon(Icons.email),
-                title: const Text('Email Results'),
-                subtitle: const Text('Send results to email'),
-                onTap: () {
-                  Navigator.of(context).pop();
-                  HelperFunctions.showMessage(
-                    context,
-                    'Email sharing available',
-                    Colors.green,
-                  );
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.link),
-                title: const Text('Copy Link'),
-                subtitle: const Text('Copy results link to clipboard'),
-                onTap: () {
-                  Navigator.of(context).pop();
-                  HelperFunctions.showMessage(
-                    context,
-                    'Link copied to clipboard',
-                    Colors.green,
-                  );
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.download),
-                title: const Text('Download PDF'),
-                subtitle: const Text('Download results as PDF'),
-                onTap: () {
-                  Navigator.of(context).pop();
-                  HelperFunctions.showMessage(
-                    context,
-                    'PDF download available',
-                    Colors.green,
-                  );
-                },
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Close'),
-          ),
-        ],
-      ),
-    );
   }
 }
