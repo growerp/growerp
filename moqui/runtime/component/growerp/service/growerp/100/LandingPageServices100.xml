@@ -92,10 +92,6 @@ Service definitions for landing page, sections, credibility, and CTA management
         <econdition field-name="landingPageId" from="page.landingPageId" />
         <order-by field-name="sectionSequence" />
       </entity-find>
-      <iterate list="sections" entry="section">
-        <log level="info"
-          message="  - Section: ${section.sectionTitle} (${section.pageSectionId}, seq=${section.sectionSequence})" />
-      </iterate>
 
       <!-- Get credibility info -->
       <entity-find entity-name="growerp.landing.CredibilityInfo" list="credibilityList">
@@ -213,9 +209,6 @@ Service definitions for landing page, sections, credibility, and CTA management
         ]" />
         <script>landingPages.add(pageMap)</script>
       </iterate>
-
-      <log level="info"
-        message="Listed ${landingPages.size()} landing pages for owner: ${ownerPartyId}" />
     </actions>
   </service>
 
@@ -337,9 +330,6 @@ Service definitions for landing page, sections, credibility, and CTA management
           context.putAll(listOut.landingPages[0])
         </script>
       </if>
-
-      <log level="info"
-        message="Created landing page: ${landingPageId} (${pseudoId}) for owner: ${ownerPartyId}" />
     </actions>
   </service>
 
@@ -1170,7 +1160,6 @@ Service definitions for landing page, sections, credibility, and CTA management
       </parameter>
     </out-parameters>
     <actions>
-      <log message="update credibility info pseudoId: $pseudoId" />
       <!-- Get owner party ID from authenticated user context -->
       <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
         out-map="context" />
