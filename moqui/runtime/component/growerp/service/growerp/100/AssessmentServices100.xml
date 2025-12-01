@@ -81,8 +81,6 @@ Service definitions for assessment management and completion
             </parameter>
         </out-parameters>
         <actions>
-            <log
-                message="=========get assessment serv owner: ${ownerPartyId} asses: ${assessmentId} pseudo: ${pseudoId}" />
             <!-- For anonymous access, ownerPartyId must be provided as parameter -->
             <!-- For authenticated access, get it from user context -->
             <if condition="!ownerPartyId">
@@ -207,19 +205,16 @@ Service definitions for assessment management and completion
                 context.assessment = assessment
                 
                 // Debug logging
-                ec.logger.warn("=== Assessment ${assessment.assessmentId} complete structure ===")
-                ec.logger.warn("Assessment name: ${assessment.assessmentName}")
-                ec.logger.warn("Questions count: ${assessment.questions?.size()}")
-                ec.logger.warn("Thresholds count: ${assessment.thresholds?.size()}")
-                if (assessment.questions) {
-                    assessment.questions.each { q ->
-                        ec.logger.warn("  Question ${q.questionSequence}: ${q.questionText?.take(50)} (${q.options?.size()} options)")
-                    }
-                }
+                //ec.logger.warn("=== Assessment ${assessment.assessmentId} complete structure ===")
+                //ec.logger.warn("Assessment name: ${assessment.assessmentName}")
+                //ec.logger.warn("Questions count: ${assessment.questions?.size()}")
+                //ec.logger.warn("Thresholds count: ${assessment.thresholds?.size()}")
+                //if (assessment.questions) {
+                //    assessment.questions.each { q ->
+                //        //ec.logger.warn("  Question ${q.questionSequence}: ${q.questionText?.take(50)} (${q.options?.size()} options)")
+                //    }
+                //}
             ]]></script>
-
-            <log level="info"
-                message="Assessment ${assessment.assessmentId}: Loaded ${assessment.questions?.size() ?: 0} questions and ${assessment.thresholds?.size() ?: 0} thresholds" />
         </actions>
     </service>
 
@@ -299,10 +294,6 @@ Service definitions for assessment management and completion
                 </if>
 
                 <set field="totalResults" from="1" />
-
-                <log level="info"
-                    message="list#Assessments (single): Loaded assessment ${assessmentId ?: pseudoId} basic info only" />
-
                 <return />
             </if>
 
@@ -337,9 +328,6 @@ Service definitions for assessment management and completion
                         ignore-if-empty="true" ignore-case="true" />
                 </econditions>
             </entity-find-count>
-
-            <log level="info"
-                message="list#Assessments (list): Returned ${assessments.size()} assessments out of ${totalResults} total" />
         </actions>
     </service>
 
@@ -423,9 +411,6 @@ Service definitions for assessment management and completion
                         ignore-case="true" />
                 </econditions>
             </entity-find-count>
-
-            <log level="info"
-                message="search#Assessments: Found ${assessments.size()} assessments matching '${searchString}' out of ${totalResults} total" />
         </actions>
     </service>
 
@@ -890,7 +875,7 @@ Service definitions for assessment management and completion
                         from="[respondentName: respondentName, assessmentName: assessmentName,
                                score: score, maxScore: maxScore, percentage: percentage,
                                leadStatus: leadStatus, assessmentResultId: assessmentResultId,
-                               questionsWithAnswers: questionsWithAnswers]" />
+                               questionsWithAnswers: questionsWithAnswers, adviceDescription: adviceDescription]" />
                 </service-call>
                 <else>
                     <log level="warn"
@@ -1173,7 +1158,6 @@ Service definitions for assessment management and completion
             </parameter>
         </out-parameters>
         <actions>
-            <log message="=====question and options using QuestionAndOptions view" />
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
 
@@ -1376,7 +1360,6 @@ Service definitions for assessment management and completion
             </parameter>
         </out-parameters>
         <actions>
-            <log message="===create question: $questionText option: ${options?.optionText}" />
             <!-- Validate required fields -->
             <if condition="!questionText || questionText.trim().isEmpty()">
                 <return error="true" message="Question text is required and cannot be empty" />
