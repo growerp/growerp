@@ -1,0 +1,26 @@
+name: marketing_example
+version: 0.0.0+0
+publish_to: none
+
+environment:
+  sdk: ^3.9.0
+  flutter: ^3.33.0
+
+dependencies:
+  growerp_sales:
+    path: ../
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
+    
+flutter:
+  uses-material-design: true
+  generate: true
+
+  assets:
+    - assets/cfg/
+flutter_intl:
+  enabled: true

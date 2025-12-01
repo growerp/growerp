@@ -19,7 +19,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
-import 'package:growerp_assessment/growerp_assessment.dart';
+import 'package:growerp_marketing/growerp_marketing.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:js_interop' if (dart.library.io) 'dart:js_interop';
@@ -114,7 +114,7 @@ List<BlocProvider> getAssessmentAppBlocProviders(
       classificationId,
       company,
     ),
-    ...getAssessmentBlocProviders(restClient, classificationId),
+    ...getMarketingBlocProviders(restClient, classificationId),
   ];
 }
 

@@ -15,5 +15,5 @@
 library landing_page;
 
 // Re-export from growerp_assessment package
-export 'package:growerp_assessment/growerp_assessment.dart'
+export 'package:growerp_marketing/growerp_marketing.dart'
     show PublicLandingPageScreen, LandingPageAssessmentFlowScreen;

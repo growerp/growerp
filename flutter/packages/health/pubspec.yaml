@@ -9,7 +9,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  growerp_marketing: ^1.9.0
+  growerp_sales: ^1.9.0
   growerp_website: ^1.9.0
   growerp_order_accounting: ^1.9.0
   growerp_user_company: ^1.9.0

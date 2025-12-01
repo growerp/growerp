@@ -14,7 +14,7 @@ dependencies:
     sdk: flutter
   growerp_core: ^1.9.0
   growerp_models: ^1.9.0
-  growerp_marketing: ^1.9.0
+  growerp_sales: ^1.9.0
   growerp_website: ^1.9.0
   growerp_inventory: ^1.9.0
   growerp_catalog: ^1.9.0

@@ -654,13 +654,6 @@ packages:
       relative: true
     source: path
     version: "1.10.5"
-  growerp_assessment:
-    dependency: "direct main"
-    description:
-      path: "../growerp_assessment"
-      relative: true
-    source: path
-    version: "1.9.0"
   growerp_catalog:
     dependency: "direct main"
     description:
@@ -695,7 +688,7 @@ packages:
       path: "../growerp_marketing"
       relative: true
     source: path
-    version: "1.10.5"
+    version: "1.9.0"
   growerp_models:
     dependency: "direct main"
     description:
@@ -707,6 +700,13 @@ packages:
     dependency: "direct main"
     description:
       path: "../growerp_order_accounting"
+      relative: true
+    source: path
+    version: "1.10.5"
+  growerp_sales:
+    dependency: "direct main"
+    description:
+      path: "../growerp_sales"
       relative: true
     source: path
     version: "1.10.5"

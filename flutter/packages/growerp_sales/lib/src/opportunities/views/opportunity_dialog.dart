@@ -1,0 +1,405 @@
+/*
+ * This GrowERP software is in the public domain under CC0 1.0 Universal plus a
+ * Grant of Patent License.
+ * 
+ * To the extent possible under law, the author(s) have dedicated all
+ * copyright and related and neighboring rights to this software to the
+ * public domain worldwide. This software is distributed without any
+ * warranty.
+ * 
+ * You should have received a copy of the CC0 Public Domain Dedication
+ * along with this software (see the LICENSE.md file). If not, see
+ * <http://creativecommons.org/publicdomain/zero/1.0/>.
+ */
+
+import 'package:decimal/decimal.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:responsive_framework/responsive_framework.dart';
+import 'package:dropdown_search/dropdown_search.dart';
+import 'package:growerp_core/growerp_core.dart';
+import 'package:growerp_models/growerp_models.dart';
+import 'package:growerp_sales/l10n/generated/marketing_localizations.dart';
+import '../bloc/opportunity_bloc.dart';
+
+class OpportunityDialog extends StatefulWidget {
+  final Opportunity opportunity;
+  const OpportunityDialog(this.opportunity, {super.key});
+  @override
+  OpportunityDialogState createState() => OpportunityDialogState();
+}
+
+class OpportunityDialogState extends State<OpportunityDialog> {
+  final _formKeyOpportunity = GlobalKey<FormState>();
+  final _nameController = TextEditingController();
+  final _pseudoIdController = TextEditingController();
+  final _descriptionController = TextEditingController();
+  final _estAmountController = TextEditingController();
+  final _estProbabilityController = TextEditingController();
+  final _estNextStepController = TextEditingController();
+  final _leadSearchBoxController = TextEditingController();
+  final _accountSearchBoxController = TextEditingController();
+
+  String? _selectedStageId;
+  User? _selectedAccount;
+  User? _selectedLead;
+  late OpportunityBloc _opportunityBloc;
+  late DataFetchBloc<Users> _employeeBloc;
+  late DataFetchBlocOther<Users> _leadBloc;
+  late SalesLocalizations _localizations;
+
+  @override
+  void initState() {
+    super.initState();
+    _employeeBloc = context.read<DataFetchBloc<Users>>()
+      ..add(
+        GetDataEvent(
+          () =>
+              context.read<RestClient>().getUser(limit: 3, role: Role.company),
+        ),
+      );
+    _leadBloc = context.read<DataFetchBlocOther<Users>>()
+      ..add(
+        GetDataEvent(
+          () => context.read<RestClient>().getUser(limit: 3, role: Role.lead),
+        ),
+      );
+    _opportunityBloc = context.read<OpportunityBloc>();
+    _nameController.text = widget.opportunity.opportunityName ?? '';
+    _pseudoIdController.text = widget.opportunity.pseudoId;
+    _descriptionController.text = widget.opportunity.description ?? '';
+    _estAmountController.text = widget.opportunity.estAmount != null
+        ? widget.opportunity.estAmount.toString()
+        : '';
+    _estProbabilityController.text = widget.opportunity.estProbability != null
+        ? widget.opportunity.estProbability.toString()
+        : '';
+    _estNextStepController.text = widget.opportunity.nextStep ?? '';
+    if (widget.opportunity.leadUser != null) {
+      _selectedLead = widget.opportunity.leadUser;
+    }
+    if (widget.opportunity.employeeUser != null) {
+      _selectedAccount = widget.opportunity.employeeUser;
+    }
+    if (widget.opportunity.stageId != null) {
+      _selectedStageId = widget.opportunity.stageId ?? opportunityStages[0];
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    _localizations = SalesLocalizations.of(context)!;
+    int columns = ResponsiveBreakpoints.of(context).isMobile ? 1 : 2;
+    return BlocListener<OpportunityBloc, OpportunityState>(
+      listener: (context, state) async {
+        switch (state.status) {
+          case OpportunityStatus.success:
+            Navigator.of(context).pop();
+            break;
+          case OpportunityStatus.failure:
+            HelperFunctions.showMessage(
+              context,
+              _localizations.error(state.message ?? ''),
+              Colors.red,
+            );
+            break;
+          default:
+            Text(_localizations.unknown);
+        }
+      },
+      child: Dialog(
+        key: const Key('OpportunityDialog'),
+        insetPadding: const EdgeInsets.all(10),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: popUp(
+          context: context,
+          title: widget.opportunity.pseudoId.isEmpty
+              ? _localizations.opportunityNew
+              : _localizations.opportunityWithMessage(
+                  '#${widget.opportunity.pseudoId}',
+                ),
+          width: columns.toDouble() * 400,
+          height: 1 / columns.toDouble() * 1000,
+          child: _opportunityForm(),
+        ),
+      ),
+    );
+  }
+
+  Widget _opportunityForm() {
+    List<Widget> widgets = [
+      TextFormField(
+        key: const Key('pseudoId'),
+        decoration: InputDecoration(labelText: _localizations.id),
+        controller: _pseudoIdController,
+      ),
+      TextFormField(
+        key: const Key('name'),
+        decoration: InputDecoration(labelText: _localizations.opportunityName),
+        controller: _nameController,
+        validator: (value) {
+          return value!.isEmpty ? _localizations.enterOppName : null;
+        },
+      ),
+      TextFormField(
+        key: const Key('description'),
+        maxLines: 3,
+        decoration: InputDecoration(labelText: _localizations.description),
+        controller: _descriptionController,
+      ),
+      TextFormField(
+        key: const Key('estAmount'),
+        keyboardType: TextInputType.number,
+        inputFormatters: <TextInputFormatter>[
+          FilteringTextInputFormatter.allow(RegExp('[0-9.,]+')),
+        ],
+        decoration: InputDecoration(labelText: _localizations.expRevenue),
+        controller: _estAmountController,
+        validator: (value) {
+          return value!.isEmpty ? _localizations.enterAmount : null;
+        },
+      ),
+      TextFormField(
+        key: const Key('estProbability'),
+        keyboardType: TextInputType.number,
+        inputFormatters: [
+          FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+        ],
+        decoration: InputDecoration(labelText: _localizations.estProbability),
+        controller: _estProbabilityController,
+        validator: (value) {
+          return value!.isEmpty ? _localizations.enterProbability : null;
+        },
+      ),
+      TextFormField(
+        key: const Key('nextStep'),
+        decoration: InputDecoration(labelText: _localizations.nextStep),
+        controller: _estNextStepController,
+        validator: (value) {
+          return value!.isEmpty ? _localizations.enterNextStep : null;
+        },
+      ),
+      DropdownButtonFormField<String>(
+        key: const Key('stageId'),
+        initialValue: _selectedStageId,
+        decoration: InputDecoration(labelText: _localizations.stage),
+        validator: (value) =>
+            value == null ? _localizations.fieldRequired : null,
+        items: opportunityStages.map((item) {
+          return DropdownMenuItem<String>(value: item, child: Text(item));
+        }).toList(),
+        onChanged: (String? newValue) {
+          _selectedStageId = newValue;
+        },
+        isExpanded: true,
+      ),
+      BlocBuilder<DataFetchBlocOther<Users>, DataFetchState>(
+        builder: (context, state) {
+          switch (state.status) {
+            case DataFetchStatus.failure:
+              return FatalErrorForm(message: _localizations.serverProblem);
+            case DataFetchStatus.loading:
+              return const LoadingIndicator();
+            case DataFetchStatus.success:
+              return DropdownSearch<User>(
+                selectedItem: _selectedLead,
+                popupProps: PopupProps.menu(
+                  isFilterOnline: true,
+                  showSearchBox: true,
+                  searchFieldProps: TextFieldProps(
+                    autofocus: true,
+                    decoration: InputDecoration(
+                      labelText: _localizations.leadSearch,
+                    ),
+                    controller: _leadSearchBoxController,
+                  ),
+                  menuProps: MenuProps(
+                    borderRadius: BorderRadius.circular(20.0),
+                  ),
+                  title: popUp(
+                    context: context,
+                    title: _localizations.selectLead,
+                    height: 50,
+                  ),
+                ),
+                dropdownDecoratorProps: DropDownDecoratorProps(
+                  dropdownSearchDecoration: InputDecoration(
+                    labelText: _localizations.lead,
+                  ),
+                ),
+                key: const Key('lead'),
+                itemAsString: (User? u) =>
+                    " ${u?.firstName} ${u?.lastName} "
+                    "${u?.company?.name ?? ''}",
+                asyncItems: (String filter) {
+                  _leadBloc.add(
+                    GetDataEvent(
+                      () => context.read<RestClient>().getUser(
+                        searchString: filter,
+                        limit: 3,
+                        isForDropDown: true,
+                        role: Role.lead,
+                      ),
+                    ),
+                  );
+                  return Future.delayed(const Duration(milliseconds: 150), () {
+                    return Future.value((_leadBloc.state.data as Users).users);
+                  });
+                },
+                compareFn: (item, sItem) => item.partyId == sItem.partyId,
+                onChanged: (User? newValue) {
+                  setState(() {
+                    _selectedLead = newValue;
+                  });
+                },
+              );
+            default:
+              return const Center(child: LoadingIndicator());
+          }
+        },
+      ),
+      BlocBuilder<DataFetchBloc<Users>, DataFetchState<Users>>(
+        builder: (context, state) {
+          switch (state.status) {
+            case DataFetchStatus.failure:
+              return FatalErrorForm(message: _localizations.serverProblem);
+            case DataFetchStatus.loading:
+              return const LoadingIndicator();
+            case DataFetchStatus.success:
+              return DropdownSearch<User>(
+                selectedItem: _selectedAccount,
+                popupProps: PopupProps.menu(
+                  isFilterOnline: true,
+                  showSearchBox: true,
+                  searchFieldProps: TextFieldProps(
+                    autofocus: true,
+                    decoration: InputDecoration(
+                      labelText: _localizations.employeeSearch,
+                    ),
+                    controller: _accountSearchBoxController,
+                  ),
+                  menuProps: MenuProps(
+                    borderRadius: BorderRadius.circular(20.0),
+                  ),
+                  title: popUp(
+                    context: context,
+                    title: _localizations.selectEmployee,
+                    height: 50,
+                  ),
+                ),
+                dropdownDecoratorProps: DropDownDecoratorProps(
+                  dropdownSearchDecoration: InputDecoration(
+                    labelText: _localizations.accountEmployee,
+                  ),
+                ),
+                key: const Key('employee'),
+                itemAsString: (User? u) =>
+                    " ${u?.firstName} ${u?.lastName} "
+                    "${u?.company?.name ?? ''}",
+                asyncItems: (String filter) {
+                  _employeeBloc.add(
+                    GetDataEvent(
+                      () => context.read<RestClient>().getUser(
+                        searchString: filter,
+                        limit: 3,
+                        isForDropDown: true,
+                        role: Role.company,
+                      ),
+                    ),
+                  );
+                  return Future.delayed(const Duration(milliseconds: 150), () {
+                    return Future.value(
+                      (_employeeBloc.state.data as Users).users,
+                    );
+                  });
+                },
+                compareFn: (item, sItem) => item.partyId == sItem.partyId,
+                onChanged: (User? newValue) {
+                  setState(() {
+                    _selectedAccount = newValue;
+                  });
+                },
+              );
+            default:
+              return const Center(child: LoadingIndicator());
+          }
+        },
+      ),
+      Row(
+        children: [
+          Expanded(
+            child: OutlinedButton(
+              key: const Key('update'),
+              child: Text(
+                widget.opportunity.opportunityId.isEmpty
+                    ? _localizations.create
+                    : _localizations.update,
+              ),
+              onPressed: () {
+                if (_formKeyOpportunity.currentState!.validate()) {
+                  _opportunityBloc.add(
+                    OpportunityUpdate(
+                      Opportunity(
+                        opportunityId: widget.opportunity.opportunityId,
+                        opportunityName: _nameController.text,
+                        pseudoId: _pseudoIdController.text,
+                        description: _descriptionController.text,
+                        estAmount: Decimal.parse(_estAmountController.text),
+                        estProbability: Decimal.parse(
+                          _estProbabilityController.text,
+                        ),
+                        stageId: _selectedStageId,
+                        nextStep: _estNextStepController.text,
+                        employeeUser: _selectedAccount,
+                        leadUser: _selectedLead,
+                      ),
+                    ),
+                  );
+                }
+              },
+            ),
+          ),
+        ],
+      ),
+    ];
+
+    List<Widget> rows = [];
+    if (!ResponsiveBreakpoints.of(context).isMobile) {
+      // change list in two columns
+      for (var i = 0; i < widgets.length; i++) {
+        rows.add(
+          Row(
+            children: [
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: widgets[i++],
+                ),
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: i < widgets.length ? widgets[i] : Container(),
+                ),
+              ),
+            ],
+          ),
+        );
+      }
+    }
+    List<Widget> column = [];
+    for (var i = 0; i < widgets.length; i++) {
+      column.add(widgets[i]);
+    }
+
+    return Form(
+      key: _formKeyOpportunity,
+      child: SingleChildScrollView(
+        key: const Key('listView'),
+        padding: const EdgeInsets.all(20),
+        child: Column(children: (rows.isEmpty ? column : rows)),
+      ),
+    );
+  }
+}

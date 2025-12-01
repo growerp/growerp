@@ -16,7 +16,7 @@ import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:growerp_core/growerp_core.dart';
-import 'package:growerp_marketing/growerp_marketing.dart';
+import 'package:growerp_sales/growerp_sales.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_user_company/growerp_user_company.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
@@ -99,7 +99,7 @@ List<BlocProvider> getAdminBlocProviders(
 ) {
   return [
     ...getUserCompanyBlocProviders(restClient, classificationId),
-    ...getMarketingBlocProviders(restClient),
+    ...getSalesBlocProviders(restClient),
     ...getOrderAccountingBlocProviders(restClient, classificationId),
     ...getWebsiteBlocProviders(restClient),
   ];
