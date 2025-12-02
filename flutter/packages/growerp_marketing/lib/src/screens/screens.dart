@@ -44,3 +44,17 @@ export 'question_list.dart';
 
 // Lead capture
 export 'lead_capture_screen.dart';
+
+// Persona screens
+export 'persona_list.dart';
+export 'persona_list_table_def.dart';
+export 'persona_detail_screen.dart';
+export 'persona_dialog.dart';
+
+// Content Plan screens
+export 'content_plan_list.dart';
+export 'content_plan_list_table_def.dart';
+export 'content_plan_detail_screen.dart';
+
+// Social Post screens
+export 'social_post_list.dart';

@@ -1733,6 +1733,22 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="classificationId" />
         </in-parameters>
         <actions>
+            <!-- Validate entity types - check for unrecognized keys -->
+            <set field="supportedEntities"
+                from="['companies', 'users', 'categories', 'personas', 'products', 'assets', 'locations', 'glAccounts']" />
+            <script><![CDATA[
+                def unrecognizedEntities = []
+                entities.keySet().each { key ->
+                    if (!supportedEntities.contains(key)) {
+                        unrecognizedEntities.add(key)
+                    }
+                }
+            ]]></script>
+            <if condition="unrecognizedEntities">
+                <return error="true"
+                    message="Unrecognized entity type(s): ${unrecognizedEntities.join(', ')}. Supported types are: ${supportedEntities.join(', ')}" />
+            </if>
+
             <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
                 out-map="relComp" />
             <if condition="entities.companies">
@@ -1766,6 +1782,18 @@ along with this software (see the LICENSE.md file). If not, see
                 <iterate list="entities.categories" entry="category">
                     <service-call name="growerp.100.CatalogServices100.create#ProductCategory"
                         in-map="[category: category, classificationId: classificationId]" />
+                </iterate>
+            </if>
+            <if condition="entities.personas">
+                <iterate list="entities.personas" entry="persona">
+                    <service-call name="growerp.100.MarketingServices100.create#MarketingPersona"
+                        in-map="[
+                            name: persona.name,
+                            demographics: persona.demographics,
+                            painPoints: persona.painPoints,
+                            goals: persona.goals,
+                            toneOfVoice: persona.toneOfVoice
+                        ]" />
                 </iterate>
             </if>
             <if condition="entities.products">

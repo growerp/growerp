@@ -398,6 +398,52 @@ along with this software (see the LICENSE.md file). If not, see
             </resource>
         </resource>
 
+        <!-- Marketing Persona -->
+        <resource name="MarketingPersonas">
+            <method type="get">
+                <service name="growerp.100.MarketingServices100.list#MarketingPersonas" />
+            </method>
+        </resource>
+        <resource name="MarketingPersona">
+            <method type="post">
+                <service name="growerp.100.MarketingServices100.create#MarketingPersona" />
+            </method>
+            <method type="patch">
+                <service name="growerp.100.MarketingServices100.update#MarketingPersona" />
+            </method>
+            <method type="delete">
+                <service name="growerp.100.MarketingServices100.delete#MarketingPersona" />
+            </method>
+            <resource name="generateWithAI">
+                <method type="post">
+                    <service name="growerp.100.MarketingServices100.generate#MarketingPersonaWithAI" />
+                </method>
+            </resource>
+        </resource>
+
+        <!-- Content Plan -->
+        <resource name="ContentPlans">
+            <method type="get">
+                <service name="growerp.100.MarketingServices100.list#ContentPlans" />
+            </method>
+        </resource>
+        <resource name="ContentPlan">
+            <method type="post">
+                <service name="growerp.100.MarketingServices100.create#ContentPlan" />
+            </method>
+            <method type="patch">
+                <service name="growerp.100.MarketingServices100.update#ContentPlan" />
+            </method>
+            <method type="delete">
+                <service name="growerp.100.MarketingServices100.delete#ContentPlan" />
+            </method>
+            <resource name="generateWithAI">
+                <method type="post">
+                    <service name="growerp.100.MarketingServices100.generate#ContentPlan" />
+                </method>
+            </resource>
+        </resource>
+
         <!-- Public landing page -->
         <resource name="LandingPagePublic" require-authentication="anonymous-view">
             <method type="get">

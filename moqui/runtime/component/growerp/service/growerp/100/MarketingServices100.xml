@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-          xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
 
     <!-- ============================================ -->
     <!-- MARKETING PERSONA SERVICES                   -->
@@ -9,23 +9,38 @@
     <service verb="create" noun="MarketingPersona" authenticate="true">
         <description>Create a new marketing persona.</description>
         <in-parameters>
-            <parameter name="name" required="true"/>
-            <parameter name="demographics"/>
-            <parameter name="painPoints"/>
-            <parameter name="goals"/>
-            <parameter name="toneOfVoice"/>
+            <parameter name="pseudoId" />
+            <parameter name="name" required="true" />
+            <parameter name="demographics" />
+            <parameter name="painPoints" />
+            <parameter name="goals" />
+            <parameter name="toneOfVoice" />
         </in-parameters>
         <out-parameters>
-            <parameter name="personaId"/>
-            <parameter name="pseudoId"/>
+            <parameter name="personaId" />
+            <parameter name="pseudoId" />
+            <parameter name="name" />
+            <parameter name="demographics" />
+            <parameter name="painPoints" />
+            <parameter name="goals" />
+            <parameter name="toneOfVoice" />
+            <parameter name="createdDate" type="Timestamp" />
+            <parameter name="lastModifiedDate" type="Timestamp" />
         </out-parameters>
         <actions>
-            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" out-map="context"/>
-            <if condition="!ownerPartyId"><return error="true" message="User not authenticated or no party associated"/></if>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="context" />
+            <if condition="!ownerPartyId">
+                <return error="true" message="User not authenticated or no party associated" />
+            </if>
 
-            <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
-                in-map="[ownerPartyId: ownerPartyId, seqName: 'MarketingPersona']" out-map="context"/>
-            <set field="pseudoId" from="seqNum"/>
+            <!-- Generate pseudoId only if not provided -->
+            <if condition="!pseudoId">
+                <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                    in-map="[ownerPartyId: ownerPartyId, seqName: 'MarketingPersona']"
+                    out-map="context" />
+                <set field="pseudoId" from="seqNum" />
+            </if>
 
             <service-call name="create#growerp.marketing.MarketingPersona" out-map="context"
                 in-map="[
@@ -38,54 +53,127 @@
                     toneOfVoice: toneOfVoice,
                     createdDate: ec.user.nowTimestamp,
                     lastModifiedDate: ec.user.nowTimestamp
-                ]"/>
+                ]" />
+
+            <!-- Get the created persona and return its fields directly -->
+            <entity-find-one entity-name="growerp.marketing.MarketingPersona" value-field="persona">
+                <field-map field-name="personaId" />
+            </entity-find-one>
+
+            <set field="name" from="persona.name" />
+            <set field="demographics" from="persona.demographics" />
+            <set field="painPoints" from="persona.painPoints" />
+            <set field="goals" from="persona.goals" />
+            <set field="toneOfVoice" from="persona.toneOfVoice" />
+            <set field="createdDate" from="persona.createdDate" />
+            <set field="lastModifiedDate" from="persona.lastModifiedDate" />
         </actions>
     </service>
 
     <service verb="update" noun="MarketingPersona" authenticate="true">
         <in-parameters>
-            <parameter name="personaId" required="true"/>
-            <parameter name="name"/>
-            <parameter name="demographics"/>
-            <parameter name="painPoints"/>
-            <parameter name="goals"/>
-            <parameter name="toneOfVoice"/>
+            <parameter name="personaId" required="true" />
+            <parameter name="pseudoId" />
+            <parameter name="name" />
+            <parameter name="demographics" />
+            <parameter name="painPoints" />
+            <parameter name="goals" />
+            <parameter name="toneOfVoice" />
         </in-parameters>
+        <out-parameters>
+            <parameter name="personaId" />
+            <parameter name="pseudoId" />
+            <parameter name="name" />
+            <parameter name="demographics" />
+            <parameter name="painPoints" />
+            <parameter name="goals" />
+            <parameter name="toneOfVoice" />
+            <parameter name="createdDate" type="Timestamp" />
+            <parameter name="lastModifiedDate" type="Timestamp" />
+        </out-parameters>
         <actions>
-            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" out-map="context"/>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="context" />
             <entity-find-one entity-name="growerp.marketing.MarketingPersona" value-field="persona">
-                <field-map field-name="personaId"/>
-                <field-map field-name="ownerPartyId"/>
+                <field-map field-name="personaId" />
+                <field-map field-name="ownerPartyId" />
             </entity-find-one>
-            <if condition="!persona"><return error="true" message="Persona not found or access denied"/></if>
+            <if condition="!persona">
+                <return error="true" message="Persona not found or access denied" />
+            </if>
 
-            <service-call name="update#growerp.marketing.MarketingPersona" in-map="context + [lastModifiedDate: ec.user.nowTimestamp]"/>
+            <!-- Generate pseudoId only if not provided -->
+            <if condition="!pseudoId">
+                <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                    in-map="[ownerPartyId: ownerPartyId, seqName: 'MarketingPersona']"
+                    out-map="context" />
+                <set field="pseudoId" from="seqNum" />
+            </if>
+
+            <service-call name="update#growerp.marketing.MarketingPersona"
+                in-map="context + [lastModifiedDate: ec.user.nowTimestamp]" />
+
+            <!-- Get the updated persona and return its fields directly -->
+            <entity-find-one entity-name="growerp.marketing.MarketingPersona" value-field="persona">
+                <field-map field-name="personaId" />
+            </entity-find-one>
+
+            <set field="pseudoId" from="persona.pseudoId" />
+            <set field="name" from="persona.name" />
+            <set field="demographics" from="persona.demographics" />
+            <set field="painPoints" from="persona.painPoints" />
+            <set field="goals" from="persona.goals" />
+            <set field="toneOfVoice" from="persona.toneOfVoice" />
+            <set field="createdDate" from="persona.createdDate" />
+            <set field="lastModifiedDate" from="persona.lastModifiedDate" />
         </actions>
     </service>
 
     <service verb="delete" noun="MarketingPersona" authenticate="true">
-        <in-parameters><parameter name="personaId" required="true"/></in-parameters>
+        <in-parameters>
+            <parameter name="personaId" required="true" />
+        </in-parameters>
         <actions>
-            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" out-map="context"/>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="context" />
             <entity-find-one entity-name="growerp.marketing.MarketingPersona" value-field="persona">
-                <field-map field-name="personaId"/>
-                <field-map field-name="ownerPartyId"/>
+                <field-map field-name="personaId" />
+                <field-map field-name="ownerPartyId" />
             </entity-find-one>
-            <if condition="!persona"><return error="true" message="Persona not found or access denied"/></if>
-            
-            <service-call name="delete#growerp.marketing.MarketingPersona" in-map="[personaId: personaId]"/>
+            <if condition="!persona">
+                <return error="true" message="Persona not found or access denied" />
+            </if>
+
+            <service-call name="delete#growerp.marketing.MarketingPersona"
+                in-map="[personaId: personaId]" />
         </actions>
     </service>
 
     <service verb="list" noun="MarketingPersonas" authenticate="true">
+        <in-parameters>
+            <parameter name="searchString" />
+            <parameter name="start" type="Integer" />
+            <parameter name="limit" type="Integer" />
+        </in-parameters>
         <out-parameters>
-            <parameter name="personas" type="List"/>
+            <parameter name="personas" type="List" />
         </out-parameters>
         <actions>
-            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" out-map="context"/>
-            <entity-find entity-name="growerp.marketing.MarketingPersona" list="personas">
-                <econdition field-name="ownerPartyId"/>
-                <order-by field-name="-lastModifiedDate"/>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="context" />
+            <entity-find entity-name="growerp.marketing.MarketingPersona" list="personas"
+                offset="start" limit="limit">
+                <search-form-inputs default-order-by="-lastModifiedDate" />
+                <econdition field-name="ownerPartyId" />
+                <econditions combine="or">
+                    <econdition field-name="pseudoId" operator="like" value="%${searchString}%"
+                        ignore-if-empty="true" ignore-case="true" />
+                    <econdition field-name="name" operator="like" value="%${searchString}%"
+                        ignore-if-empty="true" ignore-case="true" />
+                </econditions>
+                <select-field
+                    field-name="personaId,pseudoId,name,demographics,painPoints,goals,toneOfVoice" />
+                <order-by field-name="-lastModifiedDate" />
             </entity-find>
         </actions>
     </service>
@@ -97,63 +185,225 @@
     <service verb="generate" noun="MarketingPersona" authenticate="true">
         <description>Generate a persona using AI based on business description.</description>
         <in-parameters>
-            <parameter name="businessDescription" required="true"/>
+            <parameter name="businessDescription" required="true" />
+            <parameter name="targetMarket" />
         </in-parameters>
         <out-parameters>
-            <parameter name="persona" type="Map"/>
+            <parameter name="personaId" />
+            <parameter name="pseudoId" />
+            <parameter name="name" />
+            <parameter name="demographics" />
+            <parameter name="painPoints" />
+            <parameter name="goals" />
+            <parameter name="toneOfVoice" />
         </out-parameters>
         <actions>
-            <!-- TODO: Implement AI call similar to generateLandingPageWithAI.groovy -->
-            <!-- For now, return dummy data -->
-            <script>
-                context.persona = [
-                    name: "Alex Johnson",
-                    demographics: "Age 30-45, Small Business Owner",
-                    painPoints: "Lack of time, inconsistent leads",
-                    goals: "Scale business, automate processes",
-                    toneOfVoice: "Professional yet approachable"
-                ]
-            </script>
+            <script location="component://growerp/service/generatePersonaWithAI.groovy" />
         </actions>
     </service>
+
+    <!-- ============================================ -->
+    <!-- CONTENT PLAN SERVICES                        -->
+    <!-- ============================================ -->
+
+    <service verb="create" noun="ContentPlan" authenticate="true">
+        <description>Create a new content plan.</description>
+        <in-parameters>
+            <parameter name="pseudoId" />
+            <parameter name="personaId" />
+            <parameter name="weekStartDate" type="Long" />
+            <parameter name="theme" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="planId" />
+            <parameter name="pseudoId" />
+            <parameter name="personaId" />
+            <parameter name="weekStartDate" type="Timestamp" />
+            <parameter name="theme" />
+            <parameter name="createdDate" type="Timestamp" />
+            <parameter name="lastModifiedDate" type="Timestamp" />
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="context" />
+            <if condition="!ownerPartyId">
+                <return error="true" message="User not authenticated or no party associated" />
+            </if>
+
+            <!-- Generate pseudoId only if not provided -->
+            <if condition="!pseudoId">
+                <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                    in-map="[ownerPartyId: ownerPartyId, seqName: 'ContentPlan']"
+                    out-map="context" />
+                <set field="pseudoId" from="seqNum" />
+            </if>
+
+            <!-- Convert milliseconds to Timestamp -->
+            <if condition="weekStartDate">
+                <set field="weekStartDate" from="new java.sql.Timestamp(weekStartDate)" />
+            </if>
+
+            <service-call name="create#growerp.marketing.ContentPlan" out-map="context"
+                in-map="[
+                    pseudoId: pseudoId,
+                    ownerPartyId: ownerPartyId,
+                    personaId: personaId,
+                    weekStartDate: weekStartDate,
+                    theme: theme,
+                    createdDate: ec.user.nowTimestamp,
+                    lastModifiedDate: ec.user.nowTimestamp
+                ]" />
+
+            <!-- Get the created plan and return its fields directly -->
+            <entity-find-one entity-name="growerp.marketing.ContentPlan" value-field="plan">
+                <field-map field-name="planId" />
+            </entity-find-one>
+
+            <set field="personaId" from="plan.personaId" />
+            <set field="weekStartDate" from="plan.weekStartDate" />
+            <set field="theme" from="plan.theme" />
+            <set field="createdDate" from="plan.createdDate" />
+            <set field="lastModifiedDate" from="plan.lastModifiedDate" />
+        </actions>
+    </service>
+
+    <service verb="update" noun="ContentPlan" authenticate="true">
+        <in-parameters>
+            <parameter name="planId" required="true" />
+            <parameter name="pseudoId" />
+            <parameter name="personaId" />
+            <parameter name="weekStartDate" type="Long" />
+            <parameter name="theme" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="planId" />
+            <parameter name="pseudoId" />
+            <parameter name="personaId" />
+            <parameter name="weekStartDate" type="Timestamp" />
+            <parameter name="theme" />
+            <parameter name="createdDate" type="Timestamp" />
+            <parameter name="lastModifiedDate" type="Timestamp" />
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="context" />
+            <entity-find-one entity-name="growerp.marketing.ContentPlan" value-field="plan">
+                <field-map field-name="planId" />
+                <field-map field-name="ownerPartyId" />
+            </entity-find-one>
+            <if condition="!plan">
+                <return error="true" message="Content plan not found or access denied" />
+            </if>
+
+            <!-- Convert milliseconds to Timestamp -->
+            <if condition="weekStartDate">
+                <set field="weekStartDate" from="new java.sql.Timestamp(weekStartDate)" />
+            </if>
+
+            <service-call name="update#growerp.marketing.ContentPlan"
+                in-map="context + [lastModifiedDate: ec.user.nowTimestamp]" />
+
+            <!-- Get the updated plan and return its fields directly -->
+            <entity-find-one entity-name="growerp.marketing.ContentPlan" value-field="plan">
+                <field-map field-name="planId" />
+            </entity-find-one>
+
+            <set field="pseudoId" from="plan.pseudoId" />
+            <set field="personaId" from="plan.personaId" />
+            <set field="weekStartDate" from="plan.weekStartDate" />
+            <set field="theme" from="plan.theme" />
+            <set field="createdDate" from="plan.createdDate" />
+            <set field="lastModifiedDate" from="plan.lastModifiedDate" />
+        </actions>
+    </service>
+
+    <service verb="delete" noun="ContentPlan" authenticate="true">
+        <in-parameters>
+            <parameter name="planId" required="true" />
+        </in-parameters>
+        <actions>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="context" />
+            <entity-find-one entity-name="growerp.marketing.ContentPlan" value-field="plan">
+                <field-map field-name="planId" />
+                <field-map field-name="ownerPartyId" />
+            </entity-find-one>
+            <if condition="!plan">
+                <return error="true" message="Content plan not found or access denied" />
+            </if>
+
+            <!-- Delete associated social posts first -->
+            <entity-delete-by-condition entity-name="growerp.marketing.SocialPost">
+                <econdition field-name="planId" />
+            </entity-delete-by-condition>
+
+            <service-call name="delete#growerp.marketing.ContentPlan"
+                in-map="[planId: planId]" />
+        </actions>
+    </service>
+
+    <service verb="list" noun="ContentPlans" authenticate="true">
+        <in-parameters>
+            <parameter name="searchString" />
+            <parameter name="start" type="Integer" />
+            <parameter name="limit" type="Integer" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="contentPlans" type="List" />
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="context" />
+            <entity-find entity-name="growerp.marketing.ContentPlan" list="contentPlans"
+                offset="start" limit="limit">
+                <search-form-inputs default-order-by="-lastModifiedDate" />
+                <econdition field-name="ownerPartyId" />
+                <econditions combine="or">
+                    <econdition field-name="pseudoId" operator="like" value="%${searchString}%"
+                        ignore-if-empty="true" ignore-case="true" />
+                    <econdition field-name="theme" operator="like" value="%${searchString}%"
+                        ignore-if-empty="true" ignore-case="true" />
+                </econditions>
+                <select-field
+                    field-name="planId,pseudoId,personaId,weekStartDate,theme,createdDate,lastModifiedDate" />
+                <order-by field-name="-lastModifiedDate" />
+            </entity-find>
+        </actions>
+    </service>
+
+    <!-- ============================================ -->
+    <!-- CONTENT PLAN AI GENERATION                   -->
+    <!-- ============================================ -->
 
     <service verb="generate" noun="ContentPlan" authenticate="true">
         <description>Generate a weekly content plan (PNP) for a persona.</description>
         <in-parameters>
-            <parameter name="personaId" required="true"/>
-            <parameter name="weekStartDate" type="Date"/>
+            <parameter name="personaId" required="true" />
+            <parameter name="weekStartDate" type="Date" />
         </in-parameters>
         <out-parameters>
-            <parameter name="contentPlan" type="Map"/>
+            <parameter name="planId" />
+            <parameter name="pseudoId" />
+            <parameter name="theme" />
+            <parameter name="weekStartDate" />
+            <parameter name="posts" type="List" />
         </out-parameters>
         <actions>
-            <!-- TODO: Implement AI call -->
-             <script>
-                context.contentPlan = [
-                    theme: "Automation Efficiency",
-                    posts: [
-                        [type: "PAIN", headline: "Why manual lead gen is killing your growth"],
-                        [type: "NEWS", headline: "New AI tools for 2025"],
-                        [type: "PRIZE", headline: "Win a free consultation"]
-                    ]
-                ]
-            </script>
+            <script location="component://growerp/service/generateContentPlanWithAI.groovy" />
         </actions>
     </service>
 
     <service verb="draft" noun="SocialPost" authenticate="true">
-        <description>Draft a full social post from a headline.</description>
+        <description>Draft a full social post using AI.</description>
         <in-parameters>
-            <parameter name="headline" required="true"/>
-            <parameter name="personaId" required="true"/>
-            <parameter name="type"/>
+            <parameter name="postId" required="true" />
         </in-parameters>
         <out-parameters>
-            <parameter name="draftContent"/>
+            <parameter name="content" />
+            <parameter name="hashtags" type="List" />
         </out-parameters>
         <actions>
-            <!-- TODO: Implement AI call -->
-            <set field="draftContent" value="Here is a draft post about ${headline}..."/>
+            <script location="component://growerp/service/draftSocialPostWithAI.groovy" />
         </actions>
     </service>
 

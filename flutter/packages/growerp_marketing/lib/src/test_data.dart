@@ -239,3 +239,87 @@ List<AssessmentQuestion> assessmentQuestions = [
     isRequired: false,
   ),
 ];
+
+/// Marketing Persona test data
+List<Persona> personas = [
+  const Persona(
+    name: 'Alex Johnson',
+    demographics: '35-45 years old, small business owner, urban location',
+    painPoints: 'Struggling with cash flow management and scaling operations',
+    goals: 'Achieve sustainable growth and improve profitability',
+    toneOfVoice: 'Professional yet approachable',
+  ),
+  const Persona(
+    name: 'Sarah Chen',
+    demographics: '28-35 years old, startup founder, tech industry',
+    painPoints:
+        'Limited resources, time constraints, finding product-market fit',
+    goals: 'Build a scalable product and secure Series A funding',
+    toneOfVoice: 'Innovative and energetic',
+  ),
+  const Persona(
+    name: 'Michael Rodriguez',
+    demographics: '45-55 years old, established business owner, manufacturing',
+    painPoints: 'Digital transformation challenges, workforce training',
+    goals: 'Modernize operations and stay competitive',
+    toneOfVoice: 'Traditional but open to change',
+  ),
+];
+
+/// Updated persona test data for testing updates
+List<Persona> updatedPersonas = [
+  const Persona(
+    name: 'Alex Johnson Updated',
+    demographics: '40-50 years old, medium business owner, suburban location',
+    painPoints: 'Scaling operations internationally and managing remote teams',
+    goals: 'Expand to new markets and build a strong company culture',
+    toneOfVoice: 'Confident and inspiring',
+  ),
+  const Persona(
+    name: 'Sarah Chen Updated',
+    demographics: '30-38 years old, CEO, SaaS industry',
+    painPoints: 'Retaining talent, maintaining growth trajectory',
+    goals: 'Achieve unicorn status and expand globally',
+    toneOfVoice: 'Visionary and ambitious',
+  ),
+  const Persona(
+    name: 'Michael Rodriguez Updated',
+    demographics:
+        '50-60 years old, industry veteran, manufacturing & logistics',
+    painPoints: 'Supply chain optimization, sustainability requirements',
+    goals: 'Lead industry transformation and mentor next generation',
+    toneOfVoice: 'Wise and mentoring',
+  ),
+];
+
+/// Content Plan test data
+List<ContentPlan> contentPlans = [
+  ContentPlan(
+    theme: 'Digital Transformation Journey',
+    weekStartDate: DateTime.now(),
+  ),
+  ContentPlan(
+    theme: 'Customer Success Stories',
+    weekStartDate: DateTime.now().add(const Duration(days: 7)),
+  ),
+  ContentPlan(
+    theme: 'Industry Best Practices',
+    weekStartDate: DateTime.now().add(const Duration(days: 14)),
+  ),
+];
+
+/// Updated content plan test data for testing updates
+List<ContentPlan> updatedContentPlans = [
+  ContentPlan(
+    theme: 'Digital Transformation Journey - Updated',
+    weekStartDate: DateTime.now().add(const Duration(days: 1)),
+  ),
+  ContentPlan(
+    theme: 'Customer Success Stories - Updated',
+    weekStartDate: DateTime.now().add(const Duration(days: 8)),
+  ),
+  ContentPlan(
+    theme: 'Industry Best Practices - Updated',
+    weekStartDate: DateTime.now().add(const Duration(days: 15)),
+  ),
+];

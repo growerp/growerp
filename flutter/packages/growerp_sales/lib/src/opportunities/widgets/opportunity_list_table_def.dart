@@ -18,7 +18,7 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
 
-import 'package:growerp_sales/l10n/generated/marketing_localizations.dart';
+import 'package:growerp_sales/l10n/generated/sales_localizations.dart';
 import '../bloc/opportunity_bloc.dart';
 
 TableData getTableData(
@@ -29,9 +29,7 @@ TableData getTableData(
   int index, {
   dynamic extra,
 }) {
-      final SalesLocalizations localizations = SalesLocalizations.of(
-      context,
-    )!;
+  final SalesLocalizations localizations = SalesLocalizations.of(context)!;
   List<TableRowContent> rowContent = [];
   bool isPhone = isAPhone(context);
   if (isPhone) {
