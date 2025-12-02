@@ -116,6 +116,7 @@ Leverages existing GrowERP capabilities with extensions for Booking.
     *   Fields: `slotId`, `startDateTime`, `endDateTime`, `status` (Available/Booked).
 *   **`Appointment`**: A booked meeting.
     *   Fields: `appointmentId`, `slotId`, `leadPartyId`, `notes`.
+*   **Note**: Future integration with Google Calendar API for appointment scheduling.
 
 #### Services
 *   **`getAvailableSlots`**: Returns open slots.
@@ -124,7 +125,7 @@ Leverages existing GrowERP capabilities with extensions for Booking.
 ## Integration Strategy
 
 1.  **Backend (Moqui)**:
-    *   Create a new component `growerp_marketing` (or add to `growerp_core` if core functionality).
+    *   Create a new component `growerp_marketing` within the existing GrowERP component structure.
     *   Implement the Entities and Services defined above.
     *   Integrate with an LLM provider (e.g., Gemini/OpenAI) for the AI services.
 

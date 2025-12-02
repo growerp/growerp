@@ -17,7 +17,13 @@ export 'package:growerp_models/growerp_models.dart'
         LandingPages,
         LandingPageSection,
         CredibilityInfo,
-        CredibilityStatistic;
+        CredibilityStatistic,
+        Persona,
+        Personas,
+        ContentPlan,
+        ContentPlans,
+        SocialPost,
+        SocialPosts;
 
 // BLoC exports
 export 'src/bloc/assessment_bloc.dart';
@@ -34,6 +40,12 @@ export 'src/bloc/credibility_state.dart';
 export 'src/bloc/question_bloc.dart';
 export 'src/bloc/question_event.dart';
 export 'src/bloc/question_state.dart';
+export 'src/bloc/persona_bloc.dart';
+export 'src/bloc/persona_event.dart';
+export 'src/bloc/persona_state.dart';
+export 'src/bloc/content_plan_bloc.dart';
+export 'src/bloc/content_plan_event.dart';
+export 'src/bloc/content_plan_state.dart';
 
 export 'src/get_marketing_bloc_providers.dart';
 
@@ -45,3 +57,5 @@ export 'src/test_data.dart';
 export 'src/landing_page/integration_test/landing_page_test.dart';
 export 'src/assessment/integration_test/assessment_test.dart';
 export 'src/question/integration_test/question_test.dart';
+export 'src/persona/integration_test/persona_test.dart';
+export 'src/content_plan/integration_test/content_plan_test.dart';

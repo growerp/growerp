@@ -87,6 +87,30 @@ List<MenuOption> testMenuOptions = [
     userGroups: [UserGroup.admin, UserGroup.employee],
     child: const TakeAssessmentMenu(),
   ),
+  MenuOption(
+    image: 'packages/growerp_core/images/dashBoardGrey.png',
+    selectedImage: 'packages/growerp_core/images/dashBoard.png',
+    title: 'Personas',
+    route: '/personas',
+    userGroups: [UserGroup.admin, UserGroup.employee],
+    child: const PersonaList(),
+  ),
+  MenuOption(
+    image: 'packages/growerp_core/images/categoriesGrey.png',
+    selectedImage: 'packages/growerp_core/images/categories.png',
+    title: 'Content Plans',
+    route: '/contentPlans',
+    userGroups: [UserGroup.admin, UserGroup.employee],
+    child: const ContentPlanList(),
+  ),
+  MenuOption(
+    image: 'packages/growerp_core/images/productsGrey.png',
+    selectedImage: 'packages/growerp_core/images/products.png',
+    title: 'Social Posts',
+    route: '/socialPosts',
+    userGroups: [UserGroup.admin, UserGroup.employee],
+    child: const SocialPostList(),
+  ),
 ];
 
 // Menu definition (for compatibility)
@@ -118,6 +142,21 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       return MaterialPageRoute(
         builder: (context) =>
             DisplayMenuOption(menuList: testMenuOptions, menuIndex: 3),
+      );
+    case '/personas':
+      return MaterialPageRoute(
+        builder: (context) =>
+            DisplayMenuOption(menuList: testMenuOptions, menuIndex: 4),
+      );
+    case '/contentPlans':
+      return MaterialPageRoute(
+        builder: (context) =>
+            DisplayMenuOption(menuList: testMenuOptions, menuIndex: 5),
+      );
+    case '/socialPosts':
+      return MaterialPageRoute(
+        builder: (context) =>
+            DisplayMenuOption(menuList: testMenuOptions, menuIndex: 6),
       );
     default:
       return MaterialPageRoute(
@@ -159,6 +198,21 @@ class MainMenu extends StatelessWidget {
                   'Test your assessments',
                 ],
               ),
+              makeDashboardItem('dbPersonas', context, testMenuOptions[4], [
+                'Marketing Personas',
+                'Create customer avatars',
+                'Generate with AI',
+              ]),
+              makeDashboardItem('dbContentPlans', context, testMenuOptions[5], [
+                'Content Plans',
+                'Weekly PNP strategy',
+                'AI-powered planning',
+              ]),
+              makeDashboardItem('dbSocialPosts', context, testMenuOptions[6], [
+                'Social Posts',
+                'Manage PAIN/NEWS/PRIZE posts',
+                'AI drafting & scheduling',
+              ]),
             ],
           );
         }

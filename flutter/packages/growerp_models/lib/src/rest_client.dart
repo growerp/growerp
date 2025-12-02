@@ -801,6 +801,78 @@ abstract class RestClient {
     @Field() required List<ScoringThreshold> thresholds,
   });
 
+  // Marketing Persona endpoints
+  @GET("rest/s1/growerp/100/MarketingPersonas")
+  Future<Personas> getMarketingPersonas({
+    @Query('searchString') String? searchString,
+    @Query('start') int? start,
+    @Query('limit') int? limit,
+  });
+
+  @POST("rest/s1/growerp/100/MarketingPersona")
+  Future<Persona> createMarketingPersona({
+    @Field() required String name,
+    @Field() String? pseudoId,
+    @Field() String? demographics,
+    @Field() String? painPoints,
+    @Field() String? goals,
+    @Field() String? toneOfVoice,
+  });
+
+  @PATCH("rest/s1/growerp/100/MarketingPersona")
+  Future<Persona> updateMarketingPersona({
+    @Field() required String personaId,
+    @Field() String? pseudoId,
+    @Field() String? name,
+    @Field() String? demographics,
+    @Field() String? painPoints,
+    @Field() String? goals,
+    @Field() String? toneOfVoice,
+  });
+
+  @DELETE("rest/s1/growerp/100/MarketingPersona")
+  Future<void> deleteMarketingPersona({@Field() required String personaId});
+
+  @POST("rest/s1/growerp/100/MarketingPersona/generate")
+  Future<Persona> generateMarketingPersonaWithAI({
+    @Field() required String businessDescription,
+    @Field() String? targetMarket,
+  });
+
+  // Content Plan endpoints
+  @GET("rest/s1/growerp/100/ContentPlans")
+  Future<ContentPlans> getContentPlans({
+    @Query('searchString') String? searchString,
+    @Query('start') int? start,
+    @Query('limit') int? limit,
+  });
+
+  @POST("rest/s1/growerp/100/ContentPlan")
+  Future<ContentPlan> createContentPlan({
+    @Field() String? pseudoId,
+    @Field() String? personaId,
+    @Field() int? weekStartDate,
+    @Field() String? theme,
+  });
+
+  @PATCH("rest/s1/growerp/100/ContentPlan")
+  Future<ContentPlan> updateContentPlan({
+    @Field() required String planId,
+    @Field() String? pseudoId,
+    @Field() String? personaId,
+    @Field() int? weekStartDate,
+    @Field() String? theme,
+  });
+
+  @DELETE("rest/s1/growerp/100/ContentPlan")
+  Future<void> deleteContentPlan({@Field() required String planId});
+
+  @POST("rest/s1/growerp/100/ContentPlan/generateWithAI")
+  Future<ContentPlan> generateContentPlanWithAI({
+    @Field() required String personaId,
+    @Field() int? weekStartDate,
+  });
+
   // Assessment Result endpoints
   @GET("rest/s1/growerp/100/Assessment/Results")
   Future<AssessmentResults> getAssessmentResults({

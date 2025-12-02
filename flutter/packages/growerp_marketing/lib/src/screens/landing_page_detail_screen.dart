@@ -109,7 +109,8 @@ class LandingPageDetailScreenState extends State<LandingPageDetailScreen> {
 
     _selectedStatus = _capitalizeFirst(widget.landingPage.status);
     _selectedHookType = _normalizeHookType(widget.landingPage.hookType);
-    _selectedCtaActionType = widget.landingPage.ctaActionType ?? 'Assessment';
+    _selectedCtaActionType =
+        _capitalizeFirst(widget.landingPage.ctaActionType ?? 'Assessment');
     _selectedCtaAssessmentId = widget.landingPage.ctaAssessmentId;
     updatedLandingPage = widget.landingPage;
     _landingPageBloc = context.read<LandingPageBloc>();

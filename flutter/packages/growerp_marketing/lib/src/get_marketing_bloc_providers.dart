@@ -25,6 +25,12 @@ List<BlocProvider> getMarketingBlocProviders(RestClient restClient,
     BlocProvider<QuestionBloc>(
       create: (context) => QuestionBloc(restClient: restClient),
     ),
+    BlocProvider<PersonaBloc>(
+      create: (context) => PersonaBloc(restClient),
+    ),
+    BlocProvider<ContentPlanBloc>(
+      create: (context) => ContentPlanBloc(restClient),
+    ),
   ];
   return blocProviders;
 }
