@@ -91,6 +91,17 @@
             ]
         },
         {
+            "name": "Marketing linux (lib/main.dart)",
+            "type": "dart",
+            "request": "launch",
+            "cwd": "flutter/packages/growerp_marketing/example",
+            "program": "lib/main.dart",
+            "args": [
+                "-d",
+                "linux"
+            ]
+        },
+        {
             "name": "Admin mobile (lib/main.dart)",
             "type": "dart",
             "request": "launch",

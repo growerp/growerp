@@ -27,7 +27,7 @@ void main() {
     await GlobalConfiguration().loadFromAsset("app_settings");
   });
 
-  testWidgets('''GrowERP content plan test''', (tester) async {
+  testWidgets('''GrowERP social post test''', (tester) async {
     RestClient restClient = RestClient(await buildDioClient());
     await CommonTest.startTestApp(
       tester,
@@ -39,25 +39,29 @@ void main() {
         restClient,
         GlobalConfiguration().get("classificationId"),
       ),
-      title: 'GrowERP content plan test',
+      title: 'GrowERP social post test',
       clear: true,
     );
-    // Preload personas so they appear in the dropdown during content plan tests
-    await CommonTest.createCompanyAndAdmin(
-      tester,
-      testData: {"personas": marketing_data.personas.sublist(0, 2)},
-    );
+    await CommonTest.createCompanyAndAdmin(tester);
+    await PersonaTest.selectPersonas(tester);
+    await PersonaTest.addPersonas(tester, marketing_data.personas);
     await ContentPlanTest.selectContentPlans(tester);
     await ContentPlanTest.addContentPlans(
       tester,
-      marketing_data.contentPlans.sublist(0, 3),
+      marketing_data.contentPlans.sublist(0, 1),
     );
-    await ContentPlanTest.checkContentPlans(tester);
-    await ContentPlanTest.updateContentPlans(
+    await SocialPostTest.selectSocialPosts(tester);
+    await SocialPostTest.addSocialPosts(
       tester,
-      marketing_data.updatedContentPlans.sublist(0, 3),
+      marketing_data.socialPosts.sublist(0, 3),
     );
-    await ContentPlanTest.checkContentPlans(tester);
-    await ContentPlanTest.deleteContentPlans(tester);
+    await SocialPostTest.checkSocialPosts(tester);
+    await SocialPostTest.updateSocialPosts(
+      tester,
+      marketing_data.updatedSocialPosts.sublist(0, 3),
+    );
+    await SocialPostTest.checkSocialPosts(tester);
+    await SocialPostTest.deleteSocialPosts(tester);
+    await CommonTest.logout(tester);
   }, skip: false);
 }

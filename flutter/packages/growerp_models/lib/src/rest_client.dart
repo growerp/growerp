@@ -873,6 +873,48 @@ abstract class RestClient {
     @Field() int? weekStartDate,
   });
 
+  // Social Post endpoints
+  @GET("rest/s1/growerp/100/SocialPosts")
+  Future<SocialPosts> getSocialPosts({
+    @Query('searchString') String? searchString,
+    @Query('planId') String? planId,
+    @Query('start') int? start,
+    @Query('limit') int? limit,
+  });
+
+  @POST("rest/s1/growerp/100/SocialPost")
+  Future<SocialPost> createSocialPost({
+    @Field() String? pseudoId,
+    @Field() String? planId,
+    @Field() String? type,
+    @Field() String? platform,
+    @Field() String? headline,
+    @Field() String? draftContent,
+    @Field() String? finalContent,
+    @Field() String? status,
+    @Field() int? scheduledDate,
+  });
+
+  @PATCH("rest/s1/growerp/100/SocialPost")
+  Future<SocialPost> updateSocialPost({
+    @Field() required String postId,
+    @Field() String? pseudoId,
+    @Field() String? planId,
+    @Field() String? type,
+    @Field() String? platform,
+    @Field() String? headline,
+    @Field() String? draftContent,
+    @Field() String? finalContent,
+    @Field() String? status,
+    @Field() int? scheduledDate,
+  });
+
+  @DELETE("rest/s1/growerp/100/SocialPost")
+  Future<void> deleteSocialPost({@Field() required String postId});
+
+  @POST("rest/s1/growerp/100/SocialPost/draftWithAI")
+  Future<SocialPost> draftSocialPostWithAI({@Field() required String postId});
+
   // Assessment Result endpoints
   @GET("rest/s1/growerp/100/Assessment/Results")
   Future<AssessmentResults> getAssessmentResults({

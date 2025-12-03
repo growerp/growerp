@@ -37,7 +37,7 @@ Future main() async {
       classificationId: classificationId,
       chatClient: chatClient,
       notificationClient: notificationClient,
-      title: 'GrowERP Assessment & Landing Page Management',
+      title: 'GrowERP Marketing',
       router: generateRoute,
       menuOptions: (context) => testMenuOptions,
       extraDelegates: const [],

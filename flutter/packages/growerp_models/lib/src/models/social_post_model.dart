@@ -46,6 +46,9 @@ class SocialPost {
   @JsonKey(defaultValue: 'PAIN')
   final String type;
 
+  /// Platform: LINKEDIN, TWITTER, FACEBOOK
+  final String? platform;
+
   /// Post headline
   final String? headline;
 
@@ -53,7 +56,7 @@ class SocialPost {
   final String? draftContent;
 
   /// Final published content
-  final String? publishedContent;
+  final String? finalContent;
 
   /// Post status: DRAFT, READY, PUBLISHED
   @JsonKey(defaultValue: 'DRAFT')
@@ -80,9 +83,10 @@ class SocialPost {
     this.pseudoId,
     this.planId,
     required this.type,
+    this.platform,
     this.headline,
     this.draftContent,
-    this.publishedContent,
+    this.finalContent,
     required this.status,
     this.scheduledDate,
     this.publishedDate,
@@ -96,9 +100,10 @@ class SocialPost {
     String? pseudoId,
     String? planId,
     String? type,
+    String? platform,
     String? headline,
     String? draftContent,
-    String? publishedContent,
+    String? finalContent,
     String? status,
     DateTime? scheduledDate,
     DateTime? publishedDate,
@@ -110,9 +115,10 @@ class SocialPost {
       pseudoId: pseudoId ?? this.pseudoId,
       planId: planId ?? this.planId,
       type: type ?? this.type,
+      platform: platform ?? this.platform,
       headline: headline ?? this.headline,
       draftContent: draftContent ?? this.draftContent,
-      publishedContent: publishedContent ?? this.publishedContent,
+      finalContent: finalContent ?? this.finalContent,
       status: status ?? this.status,
       scheduledDate: scheduledDate ?? this.scheduledDate,
       publishedDate: publishedDate ?? this.publishedDate,
