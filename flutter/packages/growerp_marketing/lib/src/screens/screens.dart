@@ -58,3 +58,5 @@ export 'content_plan_detail_screen.dart';
 
 // Social Post screens
 export 'social_post_list.dart';
+export 'social_post_list_table_def.dart';
+export 'social_post_detail_screen.dart';

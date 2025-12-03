@@ -102,7 +102,7 @@ flutter test integration_test/take_assessment_test.dart
 ### Run with Melos (from flutter/ directory)
 ```bash
 cd flutter
-melos test --scope="assessment_example"
+melos test --scope="marketing_example"
 ```
 
 ### Run All Package Tests (from flutter/ directory)

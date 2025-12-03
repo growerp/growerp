@@ -1735,7 +1735,7 @@ along with this software (see the LICENSE.md file). If not, see
         <actions>
             <!-- Validate entity types - check for unrecognized keys -->
             <set field="supportedEntities"
-                from="['companies', 'users', 'categories', 'personas', 'products', 'assets', 'locations', 'glAccounts']" />
+                from="['companies', 'users', 'categories', 'personas', 'products', 'assets', 'locations', 'glAccounts', 'socialPosts']" />
             <script><![CDATA[
                 def unrecognizedEntities = []
                 entities.keySet().each { key ->
@@ -1793,6 +1793,21 @@ along with this software (see the LICENSE.md file). If not, see
                             painPoints: persona.painPoints,
                             goals: persona.goals,
                             toneOfVoice: persona.toneOfVoice
+                        ]" />
+                </iterate>
+            </if>
+            <if condition="entities.socialPosts">
+                <iterate list="entities.socialPosts" entry="socialPost">
+                    <service-call name="growerp.100.MarketingServices100.create#SocialPost"
+                        in-map="[
+                            pseudoId: socialPost.pseudoId,
+                            planId: socialPost.planId,
+                            type: socialPost.type,
+                            platform: socialPost.platform,
+                            headline: socialPost.headline,
+                            draftContent: socialPost.draftContent,
+                            finalContent: socialPost.finalContent,
+                            status: socialPost.status
                         ]" />
                 </iterate>
             </if>

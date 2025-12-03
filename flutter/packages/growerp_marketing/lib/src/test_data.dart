@@ -323,3 +323,58 @@ List<ContentPlan> updatedContentPlans = [
     weekStartDate: DateTime.now().add(const Duration(days: 15)),
   ),
 ];
+
+/// Social Post test data
+List<SocialPost> socialPosts = [
+  const SocialPost(
+    type: 'PAIN',
+    platform: 'LINKEDIN',
+    headline: 'Struggling with digital transformation?',
+    draftContent:
+        'Many businesses face challenges when modernizing their operations...',
+    status: 'DRAFT',
+  ),
+  const SocialPost(
+    type: 'NEWS',
+    platform: 'TWITTER',
+    headline: 'Exciting industry trends for 2025',
+    draftContent:
+        'The latest research shows significant shifts in business technology...',
+    status: 'DRAFT',
+  ),
+  const SocialPost(
+    type: 'PRIZE',
+    platform: 'FACEBOOK',
+    headline: 'Transform your business in 30 days',
+    draftContent: 'Discover how our clients achieved remarkable results...',
+    status: 'DRAFT',
+  ),
+];
+
+/// Updated social post test data for testing updates
+List<SocialPost> updatedSocialPosts = [
+  const SocialPost(
+    type: 'PAIN',
+    platform: 'LINKEDIN',
+    headline: 'Still struggling with digital transformation?',
+    draftContent:
+        'Updated: Many businesses face challenges when modernizing their operations...',
+    status: 'READY',
+  ),
+  const SocialPost(
+    type: 'NEWS',
+    platform: 'TWITTER',
+    headline: 'Breaking: Industry trends for 2025',
+    draftContent:
+        'Updated: The latest research shows significant shifts in business technology...',
+    status: 'READY',
+  ),
+  const SocialPost(
+    type: 'PRIZE',
+    platform: 'INSTAGRAM',
+    headline: 'Transform your business in just 30 days',
+    draftContent:
+        'Updated: Discover how our clients achieved remarkable results...',
+    status: 'READY',
+  ),
+];

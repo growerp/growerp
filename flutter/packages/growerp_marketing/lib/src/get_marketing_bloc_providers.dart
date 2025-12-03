@@ -31,6 +31,9 @@ List<BlocProvider> getMarketingBlocProviders(RestClient restClient,
     BlocProvider<ContentPlanBloc>(
       create: (context) => ContentPlanBloc(restClient),
     ),
+    BlocProvider<SocialPostBloc>(
+      create: (context) => SocialPostBloc(restClient),
+    ),
   ];
   return blocProviders;
 }
