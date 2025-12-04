@@ -1,18 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
+import '../json_converters.dart';
 
 part 'landing_page_model.g.dart';
-
-/// Converts nullable Unix timestamp (milliseconds) to nullable DateTime
-class NullableTimestampConverter implements JsonConverter<DateTime?, int?> {
-  const NullableTimestampConverter();
-
-  @override
-  DateTime? fromJson(int? timestamp) =>
-      timestamp != null ? DateTime.fromMillisecondsSinceEpoch(timestamp) : null;
-
-  @override
-  int? toJson(DateTime? dateTime) => dateTime?.millisecondsSinceEpoch;
-}
 
 /// Landing Page model representing a single landing page
 ///
@@ -58,14 +47,14 @@ class LandingPage {
   final String status;
 
   /// Timestamp when created
-  @NullableTimestampConverter()
+  @DateTimeConverter()
   final DateTime? createdDate;
 
   /// Username who created this landing page
   final String? createdByUserLogin;
 
   /// Timestamp when last modified
-  @NullableTimestampConverter()
+  @DateTimeConverter()
   final DateTime? lastModifiedDate;
 
   /// Username who last modified this landing page

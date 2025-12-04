@@ -31,14 +31,14 @@
         <description>Represents a weekly content plan based on the Pain-News-Prize formula.</description>
         <field name="planId" type="id" is-pk="true" />
         <field name="pseudoId" type="id" />
-        <field name="ownerPartyId" type="id" />
-        <field name="personaId" type="id" />
-        <field name="weekStartDate" type="date" />
-        <field name="theme" type="text-medium" />
-        <field name="status" type="text-short" /> <!-- DRAFT, ACTIVE, COMPLETED -->
-
-        <field name="createdDate" type="date-time" />
-        <field name="lastModifiedDate" type="date-time" />
+        <field name="ownerPartyId" type="id"/>
+        <field name="personaId" type="id"/>
+        <field name="weekStartDate" type="date-time"/>
+        <field name="theme" type="text-medium"/>
+        <field name="status" type="text-short"/> <!-- DRAFT, ACTIVE, COMPLETED -->
+        
+        <field name="createdDate" type="date-time"/>
+        <field name="lastModifiedDate" type="date-time"/>
 
         <relationship type="one" related="growerp.marketing.MarketingPersona">
             <key-map field-name="personaId" />
