@@ -578,9 +578,10 @@ public class ContextJavaUtil {
 
     public final static ObjectMapper jacksonMapper = new ObjectMapper()
             .setSerializationInclusion(JsonInclude.Include.ALWAYS)
-            .enable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS).enable(SerializationFeature.INDENT_OUTPUT)
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS).enable(SerializationFeature.INDENT_OUTPUT)
             .enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS)
-            .configure(JsonGenerator.Feature.WRITE_BIGDECIMAL_AS_PLAIN, true);
+            .configure(JsonGenerator.Feature.WRITE_BIGDECIMAL_AS_PLAIN, true)
+            .setDateFormat(new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"));
     static {
         // Jackson custom serializers, etc
         SimpleModule module = new SimpleModule();
