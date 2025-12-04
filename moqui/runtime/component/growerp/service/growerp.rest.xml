@@ -467,6 +467,27 @@ along with this software (see the LICENSE.md file). If not, see
             </resource>
         </resource>
 
+        <!-- Outreach Campaign -->
+        <resource name="OutreachCampaigns">
+            <method type="get">
+                <service name="growerp.100.OutreachServices100.list#OutreachCampaigns" />
+            </method>
+        </resource>
+        <resource name="OutreachCampaign">
+            <method type="get">
+                <service name="growerp.100.OutreachServices100.get#OutreachCampaign" />
+            </method>
+            <method type="post">
+                <service name="growerp.100.OutreachServices100.create#OutreachCampaign" />
+            </method>
+            <method type="patch">
+                <service name="growerp.100.OutreachServices100.update#OutreachCampaign" />
+            </method>
+            <method type="delete">
+                <service name="growerp.100.OutreachServices100.delete#OutreachCampaign" />
+            </method>
+        </resource>
+
         <!-- Public landing page -->
         <resource name="LandingPagePublic" require-authentication="anonymous-view">
             <method type="get">

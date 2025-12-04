@@ -87,6 +87,7 @@ class AssessmentSubmit extends AssessmentEvent {
     this.respondentPhone,
     this.respondentCompany,
     this.ownerPartyId,
+    this.campaignId,
   });
 
   final String assessmentId;
@@ -96,6 +97,7 @@ class AssessmentSubmit extends AssessmentEvent {
   final String? respondentPhone;
   final String? respondentCompany;
   final String? ownerPartyId;
+  final String? campaignId;
 
   @override
   List<Object?> get props => [
@@ -106,6 +108,7 @@ class AssessmentSubmit extends AssessmentEvent {
         respondentPhone,
         respondentCompany,
         ownerPartyId,
+        campaignId,
       ];
 }
 

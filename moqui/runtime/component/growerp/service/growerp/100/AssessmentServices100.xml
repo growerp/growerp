@@ -668,6 +668,9 @@ Service definitions for assessment management and completion
             <parameter name="ownerPartyId">
                 <description>Optional owner party ID. If not provided, will be retrieved from assessment. Used for anonymous submissions to specify which company owns the lead.</description>
             </parameter>
+            <parameter name="campaignId">
+                <description>Optional outreach campaign ID for lead attribution and metrics tracking</description>
+            </parameter>
         </in-parameters>
         <out-parameters>
             <parameter name="assessmentResultId">
@@ -817,6 +820,14 @@ Service definitions for assessment management and completion
                  are already in context from earlier operations, but we need to ensure
                  all output parameters are explicitly set -->
             <set field="assessmentResultId" from="resultOut.assessmentResultId" />
+
+            <!-- Update campaign metrics if campaignId provided -->
+            <if condition="campaignId">
+                <service-call name="growerp.100.OutreachServices100.update#CampaignMetrics" ignore-error="true">
+                    <field-map field-name="outreachCampaignId" from="campaignId" />
+                    <field-map field-name="leadsGenerated" from="1" />
+                </service-call>
+            </if>
 
             <!-- Send assessment results email with PDF -->
             <entity-find-one entity-name="moqui.basic.email.EmailServer" value-field="emailExist">

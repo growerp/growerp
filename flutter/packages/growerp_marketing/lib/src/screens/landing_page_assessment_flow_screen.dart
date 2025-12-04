@@ -28,12 +28,14 @@ class LandingPageAssessmentFlowScreen extends StatefulWidget {
     required this.landingPageId,
     this.ownerPartyId,
     this.assessmentId,
+    this.campaignId,
     this.startAssessmentFlow = false,
   });
 
   final String landingPageId;
   final String? ownerPartyId;
   final String? assessmentId;
+  final String? campaignId;
   final bool startAssessmentFlow;
 
   @override
@@ -153,6 +155,7 @@ class _LandingPageAssessmentFlowScreenState
     return AssessmentFlowScreen(
       assessmentId: _assessmentId!,
       ownerPartyId: widget.ownerPartyId,
+      campaignId: widget.campaignId,
       onComplete: () {
         // Navigate to results on assessment completion (Page 3: Results)
         _navigateToPage(3);

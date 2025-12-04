@@ -255,6 +255,7 @@ class AssessmentBloc extends Bloc<AssessmentEvent, AssessmentState> {
       // - Score calculation
       // - Result creation
       // - Lead user creation (always)
+      // - Campaign metrics update (if campaignId provided)
       final result = await restClient.submitAssessment(
         assessmentId: event.assessmentId,
         answers: answersJson,
@@ -263,6 +264,7 @@ class AssessmentBloc extends Bloc<AssessmentEvent, AssessmentState> {
         respondentPhone: event.respondentPhone,
         respondentCompany: event.respondentCompany,
         ownerPartyId: event.ownerPartyId,
+        campaignId: event.campaignId,
       );
 
       // Backend now returns enriched answersData, no need for local fallback

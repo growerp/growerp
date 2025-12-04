@@ -1,0 +1,52 @@
+name: growerp_outreach_example
+description: Example app showcasing growerp_outreach package features
+version: 1.0.0+1
+publish_to: none
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  growerp_outreach:
+    path: ../
+  growerp_core:
+    path: ../../growerp_core
+  growerp_models:
+    path: ../../growerp_models
+  growerp_user_company:
+    path: ../../growerp_user_company
+  growerp_marketing:
+    path: ../../growerp_marketing
+  global_configuration: ^2.0.0
+  flutter_bloc: ^8.1.3
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+dependency_overrides:
+  growerp_models:
+    path: ../../growerp_models
+  growerp_core:
+    path: ../../growerp_core
+  growerp_chat:
+    path: ../../growerp_chat
+  growerp_activity:
+    path: ../../growerp_activity
+  growerp_user_company:
+    path: ../../growerp_user_company
+  growerp_marketing:
+    path: ../../growerp_marketing
+
+flutter:
+  uses-material-design: true
+  generate: true
+
+  assets:
+    - assets/cfg/
+#    - packages/growerp_core/images/

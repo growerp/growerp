@@ -7,12 +7,14 @@ import 'package:growerp_marketing/growerp_marketing.dart';
 class AssessmentFlowScreen extends StatefulWidget {
   final String assessmentId;
   final String? ownerPartyId;
+  final String? campaignId;
   final VoidCallback onComplete;
 
   const AssessmentFlowScreen({
     Key? key,
     required this.assessmentId,
     this.ownerPartyId,
+    this.campaignId,
     required this.onComplete,
   }) : super(key: key);
 
@@ -101,6 +103,7 @@ class _AssessmentFlowScreenState extends State<AssessmentFlowScreen> {
             respondentEmail: _respondentEmail,
             respondentPhone: _respondentPhone,
             respondentCompany: _respondentCompany,
+            campaignId: widget.campaignId,
           ),
         );
     // Move to results page
