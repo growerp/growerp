@@ -263,12 +263,6 @@ Service definitions for assessment management and completion
             <parameter name="totalResults" type="Integer">
                 <description>Total number of assessments matching filter</description>
             </parameter>
-            <parameter name="start" type="Integer">
-                <description>Starting index for pagination</description>
-            </parameter>
-            <parameter name="limit" type="Integer">
-                <description>Results per page limit</description>
-            </parameter>
         </out-parameters>
         <actions>
             <service-call out-map="context"
