@@ -1,31 +1,8 @@
 import 'package:json_annotation/json_annotation.dart';
+import '../json_converters.dart';
 import 'social_post_model.dart';
 
 part 'content_plan_model.g.dart';
-
-/// Converts Unix timestamp (milliseconds) to DateTime
-class TimestampConverter implements JsonConverter<DateTime, int> {
-  const TimestampConverter();
-
-  @override
-  DateTime fromJson(int timestamp) =>
-      DateTime.fromMillisecondsSinceEpoch(timestamp);
-
-  @override
-  int toJson(DateTime dateTime) => dateTime.millisecondsSinceEpoch;
-}
-
-/// Converts nullable Unix timestamp (milliseconds) to nullable DateTime
-class NullableTimestampConverter implements JsonConverter<DateTime?, int?> {
-  const NullableTimestampConverter();
-
-  @override
-  DateTime? fromJson(int? timestamp) =>
-      timestamp != null ? DateTime.fromMillisecondsSinceEpoch(timestamp) : null;
-
-  @override
-  int? toJson(DateTime? dateTime) => dateTime?.millisecondsSinceEpoch;
-}
 
 /// Content Plan model representing a weekly Pain-News-Prize content strategy
 ///
@@ -44,18 +21,18 @@ class ContentPlan {
   final String? personaId;
 
   /// Week start date
-  @NullableTimestampConverter()
+  @DateTimeConverter()
   final DateTime? weekStartDate;
 
   /// Weekly theme
   final String? theme;
 
   /// Timestamp when created
-  @NullableTimestampConverter()
+  @DateTimeConverter()
   final DateTime? createdDate;
 
   /// Timestamp when last modified
-  @NullableTimestampConverter()
+  @DateTimeConverter()
   final DateTime? lastModifiedDate;
 
   /// Associated social posts (only present when fetched with posts)
