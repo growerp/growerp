@@ -211,7 +211,7 @@
         <in-parameters>
             <parameter name="pseudoId" />
             <parameter name="personaId" />
-            <parameter name="weekStartDate" type="Long" />
+            <parameter name="weekStartDate" type="Timestamp" />
             <parameter name="theme" />
         </in-parameters>
         <out-parameters>
@@ -238,10 +238,6 @@
                 <set field="pseudoId" from="seqNum" />
             </if>
 
-            <!-- Convert milliseconds to Timestamp -->
-            <if condition="weekStartDate">
-                <set field="weekStartDate" from="new java.sql.Timestamp(weekStartDate)" />
-            </if>
 
             <service-call name="create#growerp.marketing.ContentPlan" out-map="context"
                 in-map="[
@@ -272,7 +268,7 @@
             <parameter name="planId" required="true" />
             <parameter name="pseudoId" />
             <parameter name="personaId" />
-            <parameter name="weekStartDate" type="Long" />
+            <parameter name="weekStartDate" type="Timestamp" />
             <parameter name="theme" />
         </in-parameters>
         <out-parameters>
@@ -295,10 +291,6 @@
                 <return error="true" message="Content plan not found or access denied" />
             </if>
 
-            <!-- Convert milliseconds to Timestamp -->
-            <if condition="weekStartDate">
-                <set field="weekStartDate" from="new java.sql.Timestamp(weekStartDate)" />
-            </if>
 
             <service-call name="update#growerp.marketing.ContentPlan"
                 in-map="context + [lastModifiedDate: ec.user.nowTimestamp]" />
@@ -390,6 +382,43 @@
         </out-parameters>
         <actions>
             <script location="component://growerp/service/generateContentPlanWithAI.groovy" />
+        </actions>
+    </service>
+
+    <service verb="create" noun="SocialPost" authenticate="true">
+        <in-parameters>
+            <parameter name="planId" required="true" />
+            <parameter name="type" required="true" />
+            <parameter name="headline" />
+            <parameter name="draftContent" />
+            <parameter name="publishedContent" />
+            <parameter name="status" default-value="DRAFT" />
+            <parameter name="scheduledDate" type="Timestamp" />
+            <parameter name="publishedDate" type="Timestamp" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="postId" />
+        </out-parameters>
+        <actions>
+            <service-call name="create#growerp.marketing.SocialPost" in-map="context" />
+        </actions>
+    </service>
+
+    <service verb="update" noun="SocialPost" authenticate="true">
+        <in-parameters>
+            <parameter name="postId" required="true" />
+            <parameter name="headline" />
+            <parameter name="draftContent" />
+            <parameter name="publishedContent" />
+            <parameter name="status" />
+            <parameter name="scheduledDate" type="Timestamp" />
+            <parameter name="publishedDate" type="Timestamp" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="postId" />
+        </out-parameters>
+        <actions>
+            <service-call name="update#growerp.marketing.SocialPost" in-map="context" />
         </actions>
     </service>
 

@@ -33,7 +33,7 @@
         <field name="pseudoId" type="id" />
         <field name="ownerPartyId" type="id"/>
         <field name="personaId" type="id"/>
-        <field name="weekStartDate" type="date"/>
+        <field name="weekStartDate" type="date-time"/>
         <field name="theme" type="text-medium"/>
         <field name="status" type="text-short"/> <!-- DRAFT, ACTIVE, COMPLETED -->
         
