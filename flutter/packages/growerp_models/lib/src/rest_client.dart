@@ -741,6 +741,7 @@ abstract class RestClient {
     @Field() String? respondentPhone,
     @Field() String? respondentCompany,
     @Field() String? ownerPartyId,
+    @Field() String? campaignId,
   });
 
   // Assessment Question endpoints
@@ -1070,5 +1071,109 @@ abstract class RestClient {
     @Field() required String credibilityInfoId,
   });
 
-  // ============================================
+  @DELETE("rest/s1/growerp/100/LandingPage/Credibility/Statistic")
+  Future<void> deleteCredibilityStatistic({
+    @Field() required String credibilityInfoId,
+    @Field() required String credibilityStatisticId,
+  });
+
+  // ========================================================
+  // OUTREACH CAMPAIGN ENDPOINTS
+  // ========================================================
+
+  // Outreach Campaign endpoints
+  @GET("rest/s1/growerp/100/OutreachCampaigns")
+  Future<OutreachCampaigns> listOutreachCampaigns({
+    @Query('status') String? status,
+    @Query('start') int? start,
+    @Query('limit') int? limit,
+  });
+
+  @GET("rest/s1/growerp/100/OutreachCampaign")
+  Future<OutreachCampaigns> getOutreachCampaigns({
+    @Query('campaignId') String? campaignId,
+    @Query('pseudoId') String? pseudoId,
+    @Query('status') String? status,
+    @Query('start') int? start,
+    @Query('limit') int? limit,
+  });
+
+  @GET("rest/s1/growerp/100/OutreachCampaignDetail")
+  Future<CampaignDetail> getOutreachCampaignDetail({
+    @Query('campaignId') String? campaignId,
+    @Query('pseudoId') String? pseudoId,
+  });
+
+  @POST("rest/s1/growerp/100/OutreachCampaign")
+  Future<OutreachCampaign> createOutreachCampaign({
+    @Field() required Map<String, dynamic> campaign,
+  });
+
+  @PATCH("rest/s1/growerp/100/OutreachCampaign")
+  Future<OutreachCampaign> updateOutreachCampaign({
+    @Field() required Map<String, dynamic> campaign,
+  });
+
+  @DELETE("rest/s1/growerp/100/OutreachCampaign")
+  Future<void> deleteOutreachCampaign({@Field() required String campaignId});
+
+  // Outreach Message endpoints
+  @POST("rest/s1/growerp/100/OutreachMessage")
+  Future<OutreachMessage> createOutreachMessage({
+    @Field() required String campaignId,
+    @Field() required String platform,
+    @Field() String? recipientName,
+    @Field() String? recipientProfileUrl,
+    @Field() String? recipientHandle,
+    @Field() String? recipientEmail,
+    @Field() required String messageContent,
+    @Field() String? status,
+  });
+
+  @PATCH("rest/s1/growerp/100/OutreachMessage")
+  Future<OutreachMessage> updateOutreachMessageStatus({
+    @Field() required String messageId,
+    @Field() required String status,
+    @Field() int? responseDate,
+    @Field() String? errorMessage,
+  });
+
+  // Campaign Metrics endpoints
+  @GET("rest/s1/growerp/100/CampaignMetrics")
+  Future<CampaignMetrics> getCampaignMetrics({
+    @Query('campaignId') required String campaignId,
+  });
+
+  // Platform Configuration endpoints
+  @GET("rest/s1/growerp/100/PlatformConfiguration")
+  Future<PlatformConfiguration> getPlatformConfiguration({
+    @Query('platform') required String platform,
+  });
+
+  @POST("rest/s1/growerp/100/PlatformConfiguration")
+  Future<PlatformConfiguration> createPlatformConfiguration({
+    @Field() required String platform,
+    @Field() String? isEnabled,
+    @Field() int? dailyLimit,
+    @Field() required String credentials,
+  });
+
+  @PATCH("rest/s1/growerp/100/PlatformConfiguration")
+  Future<PlatformConfiguration> updatePlatformConfiguration({
+    @Field() required String configId,
+    @Field() String? isEnabled,
+    @Field() int? dailyLimit,
+    @Field() String? credentials,
+  });
+
+  // Send outreach email
+  @POST("rest/s1/growerp/100/OutreachEmail")
+  Future<OutreachMessage> sendOutreachEmail({
+    @Field() required String campaignId,
+    @Field() required String toEmail,
+    @Field() String? toName,
+    @Field() required String subject,
+    @Field() required String body,
+    @Field() String? bodyContentType,
+  });
 }

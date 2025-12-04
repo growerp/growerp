@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entities xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/entity-definition-3.xsd">
+
+    <!-- ========================================================= -->
+    <!--  Outreach Campaign Management                            -->
+    <!-- ========================================================= -->
+
+    <entity entity-name="OutreachCampaign" package="growerp.marketing">
+        <description>Multi-platform outreach campaign for lead generation</description>
+        <field name="campaignId" type="id" is-pk="true" />
+        <field name="pseudoId" type="id" />
+        <field name="ownerPartyId" type="id" />
+        <field name="name" type="text-medium" />
+        <field name="platforms" type="text-medium">
+            <description>JSON array of platforms: ["EMAIL", "LINKEDIN", "TWITTER", "MEDIUM", "SUBSTACK", "FACEBOOK"]</description>
+        </field>
+        <field name="targetAudience" type="text-long" />
+        <field name="landingPageId" type="id" />
+        <field name="messageTemplate" type="text-very-long" />
+        <field name="emailSubject" type="text-medium">
+            <description>Email subject line (for EMAIL platform)</description>
+        </field>
+        <field name="status" type="text-short" default="DRAFT">
+            <description>DRAFT, ACTIVE, PAUSED, COMPLETED</description>
+        </field>
+        <field name="dailyLimitPerPlatform" type="number-integer" default="50" />
+
+        <field name="createdDate" type="date-time" />
+        <field name="createdByUserLogin" type="id" />
+        <field name="lastModifiedDate" type="date-time" />
+        <field name="lastModifiedByUserLogin" type="id" />
+
+        <relationship type="one" related="mantle.party.Party">
+            <key-map field-name="ownerPartyId" related="partyId" />
+        </relationship>
+        <relationship type="one" related="growerp.landing.LandingPage">
+            <key-map field-name="landingPageId" />
+        </relationship>
+        <index name="OUTREACHCAMPAIGN_PSEUDOID" unique="false">
+            <index-field name="pseudoId" />
+        </index>
+    </entity>
+
+    <!-- ========================================================= -->
+    <!--  Outreach Message Tracking                               -->
+    <!-- ========================================================= -->
+
+    <entity entity-name="OutreachMessage" package="growerp.marketing">
+        <description>Individual outreach message sent via any platform</description>
+        <field name="messageId" type="id" is-pk="true" />
+        <field name="campaignId" type="id" />
+        <field name="platform" type="text-short">
+            <description>EMAIL, LINKEDIN, TWITTER, MEDIUM, SUBSTACK, FACEBOOK</description>
+        </field>
+        <field name="recipientName" type="text-medium" />
+        <field name="recipientProfileUrl" type="text-long" />
+        <field name="recipientHandle" type="text-medium">
+            <description>Platform-specific handle (e.g., @username for Twitter)</description>
+        </field>
+        <field name="recipientEmail" type="text-medium" />
+        <field name="messageContent" type="text-very-long" />
+        <field name="sentDate" type="date-time" />
+        <field name="responseDate" type="date-time" />
+        <field name="status" type="text-short" default="PENDING">
+            <description>PENDING, SENT, RESPONDED, FAILED</description>
+        </field>
+        <field name="errorMessage" type="text-long" />
+
+        <field name="createdDate" type="date-time" />
+
+        <relationship type="one" related="growerp.marketing.OutreachCampaign">
+            <key-map field-name="campaignId" />
+        </relationship>
+    </entity>
+
+    <!-- ========================================================= -->
+    <!--  Platform Configuration                                  -->
+    <!-- ========================================================= -->
+
+    <entity entity-name="PlatformConfiguration" package="growerp.marketing">
+        <description>Platform-specific settings and credentials</description>
+        <field name="configId" type="id" is-pk="true" />
+        <field name="ownerPartyId" type="id" />
+        <field name="platform" type="text-short">
+            <description>EMAIL, LINKEDIN, TWITTER, MEDIUM, SUBSTACK, FACEBOOK</description>
+        </field>
+        <field name="isEnabled" type="text-indicator" default="N" />
+        <field name="dailyLimit" type="number-integer" default="50" />
+        <field name="credentials" type="text-very-long" encrypt="true">
+            <description>JSON object with platform credentials (encrypted)</description>
+        </field>
+        <field name="lastUsedDate" type="date-time" />
+
+        <field name="createdDate" type="date-time" />
+        <field name="lastModifiedDate" type="date-time" />
+
+        <relationship type="one" related="mantle.party.Party">
+            <key-map field-name="ownerPartyId" related="partyId" />
+        </relationship>
+    </entity>
+
+    <!-- ========================================================= -->
+    <!--  Campaign Metrics                                        -->
+    <!-- ========================================================= -->
+
+    <entity entity-name="CampaignMetrics" package="growerp.marketing">
+        <description>Campaign performance tracking and analytics</description>
+        <field name="metricId" type="id" is-pk="true" />
+        <field name="campaignId" type="id" />
+        <field name="messagesSent" type="number-integer" default="0" />
+        <field name="responsesReceived" type="number-integer" default="0" />
+        <field name="leadsGenerated" type="number-integer" default="0" />
+        <field name="lastUpdated" type="date-time" />
+
+        <relationship type="one" related="growerp.marketing.OutreachCampaign">
+            <key-map field-name="campaignId" />
+        </relationship>
+    </entity>
+
+</entities>
