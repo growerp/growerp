@@ -132,8 +132,32 @@ TableData getCampaignListTableData(
       ),
     ));
     rowContent.add(TableRowContent(
+      name: 'Sent',
+      width: 8,
+      value: Text(
+        campaign.messagesSent.toString(),
+        key: Key('sent${campaign.pseudoId}'),
+      ),
+    ));
+    rowContent.add(TableRowContent(
+      name: 'Resp',
+      width: 8,
+      value: Text(
+        campaign.responsesReceived.toString(),
+        key: Key('resp${campaign.pseudoId}'),
+      ),
+    ));
+    rowContent.add(TableRowContent(
+      name: 'Leads',
+      width: 8,
+      value: Text(
+        campaign.leadsGenerated.toString(),
+        key: Key('leads${campaign.pseudoId}'),
+      ),
+    ));
+    rowContent.add(TableRowContent(
       name: 'Platforms',
-      width: 30,
+      width: 20,
       value: Text(
         campaign.platforms
             .replaceAll('[', '')
@@ -143,7 +167,7 @@ TableData getCampaignListTableData(
         overflow: TextOverflow.ellipsis,
       ),
     ));
-    rowContent.add(buildDeleteAction(width: 10));
+    rowContent.add(buildDeleteAction(width: 8));
   }
 
   return TableData(

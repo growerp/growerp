@@ -87,8 +87,17 @@
         </field>
         <field name="isEnabled" type="text-indicator" default="N" />
         <field name="dailyLimit" type="number-integer" default="50" />
-        <field name="credentials" type="text-very-long" encrypt="true">
-            <description>JSON object with platform credentials (encrypted)</description>
+        <field name="apiKey" type="text-medium" encrypt="true">
+            <description>API Key for platform authentication (encrypted)</description>
+        </field>
+        <field name="apiSecret" type="text-medium" encrypt="true">
+            <description>API Secret for platform authentication (encrypted)</description>
+        </field>
+        <field name="username" type="text-medium" encrypt="true">
+            <description>Username for platform authentication (encrypted)</description>
+        </field>
+        <field name="password" type="text-medium" encrypt="true">
+            <description>Password for platform authentication (encrypted)</description>
         </field>
         <field name="lastUsedDate" type="date-time" />
 
@@ -117,5 +126,21 @@
             <key-map field-name="campaignId" />
         </relationship>
     </entity>
+
+
+    <!-- ========================================================= -->
+    <!--  Outreach View Entities                                  -->
+    <!-- ========================================================= -->
+
+    <view-entity entity-name="OutreachCampaignAndMetrics" package="growerp.marketing">
+        <member-entity entity-alias="OC" entity-name="growerp.marketing.OutreachCampaign" />
+        <member-entity entity-alias="CM" entity-name="growerp.marketing.CampaignMetrics" join-from-alias="OC">
+            <key-map field-name="campaignId" />
+        </member-entity>
+        <alias-all entity-alias="OC" />
+        <alias entity-alias="CM" name="messagesSent" />
+        <alias entity-alias="CM" name="responsesReceived" />
+        <alias entity-alias="CM" name="leadsGenerated" />
+    </view-entity>
 
 </entities>

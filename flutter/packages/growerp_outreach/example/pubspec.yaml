@@ -49,4 +49,6 @@ flutter:
 
   assets:
     - assets/cfg/
-#    - packages/growerp_core/images/
+    - packages/growerp_core/images/setupGrey.png
+    - packages/growerp_core/images/setup.png
+    

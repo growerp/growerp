@@ -1,0 +1,1134 @@
+[  +14 ms] executing: uname -m
+[   +2 ms] Exit code 0 from: uname -m
+[        ] x86_64
+[   +6 ms] Artifact Instance of 'MaterialFonts' is not required, skipping update.
+[        ] Artifact Instance of 'GradleWrapper' is not required, skipping update.
+[        ] Artifact Instance of 'AndroidGenSnapshotArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'AndroidInternalBuildArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IOSEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterWebSdk' is not required, skipping update.
+[        ] Artifact Instance of 'LegacyCanvasKitRemover' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterSdk' is not required, skipping update.
+[        ] Artifact Instance of 'WindowsEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'MacOSEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'LinuxEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'LinuxFuchsiaSDKArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'MacOSFuchsiaSDKArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterRunnerSDKArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterRunnerDebugSymbols' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FontSubsetArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'PubDependencies' is not required, skipping update.
+[        ] executing: [/home/hans/snap/flutter/common/flutter/] git -c log.showSignature=false log HEAD -n 1 --pretty=format:%ad --date=iso
+[   +3 ms] Exit code 0 from: git -c log.showSignature=false log HEAD -n 1 --pretty=format:%ad --date=iso
+[        ] 2025-11-20 17:53:13 -0500
+[  +16 ms] Found 1 files which will be executed as Integration Tests.
+[   +1 ms] Artifact Instance of 'AndroidGenSnapshotArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'AndroidInternalBuildArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IOSEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterWebSdk' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterEngineStamp' is not required, skipping update.
+[        ] Artifact Instance of 'LegacyCanvasKitRemover' is not required, skipping update.
+[        ] Artifact Instance of 'WindowsEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'MacOSEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'LinuxEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'LinuxFuchsiaSDKArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'MacOSFuchsiaSDKArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterRunnerSDKArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterRunnerDebugSymbols' is not required, skipping update.
+[  +16 ms] Artifact Instance of 'AndroidGenSnapshotArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'AndroidInternalBuildArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IOSEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterWebSdk' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterEngineStamp' is not required, skipping update.
+[        ] Artifact Instance of 'LegacyCanvasKitRemover' is not required, skipping update.
+[        ] Artifact Instance of 'WindowsEngineArtifacts' is not required, skipping update.
+[   +1 ms] Artifact Instance of 'MacOSEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'LinuxFuchsiaSDKArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'MacOSFuchsiaSDKArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterRunnerSDKArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterRunnerDebugSymbols' is not required, skipping update.
+[  +17 ms] executing: [/home/hans/growerp/flutter/packages/growerp_outreach/example/] /home/hans/snap/flutter/common/flutter/bin/cache/dart-sdk/bin/dart pub --suppress-analytics --directory . get --example
+Resolving dependencies...
+Downloading packages...
+  _fe_analyzer_shared 91.0.0 (92.0.0 available)
+  analyzer 8.4.1 (9.0.0 available)
+  bloc 8.1.4 (9.1.0 available)
+  bloc_concurrency 0.2.5 (0.3.0 available)
+  characters 1.4.0 (1.4.1 available)
+  dio_cache_interceptor 3.5.1 (4.0.5 available)
+  dropdown_search 5.0.6 (6.0.2 available)
+  flutter_bloc 8.1.6 (9.1.1 available)
+  flutter_flow_chart 2.2.1 (4.1.0 available)
+  flutter_lints 3.0.2 (6.0.0 available)
+! growerp_activity 1.10.5 from path ../../growerp_activity (overridden)
+! growerp_chat 1.10.5 from path ../../growerp_chat (overridden)
+! growerp_core 1.10.5 from path ../../growerp_core (overridden)
+! growerp_marketing 1.9.0 from path ../../growerp_marketing (overridden)
+! growerp_models 1.10.5 from path ../../growerp_models (overridden)
+! growerp_user_company 1.10.5 from path ../../growerp_user_company (overridden)
+  image_picker_ios 0.8.13+2 (0.8.13+3 available)
+  lints 3.0.0 (6.0.0 available)
+  matcher 0.12.17 (0.12.18 available)
+  material_color_utilities 0.11.1 (0.13.0 available)
+  retrofit 4.9.0 (4.9.1 available)
+  test_api 0.7.7 (0.7.8 available)
+Got dependencies!
+16 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+[ +347 ms] Found plugin integration_test at /home/hans/snap/flutter/common/flutter/packages/integration_test/
+[  +30 ms] Found plugin url_launcher at /home/hans/.pub-cache/hosted/pub.dev/url_launcher-6.3.2/
+[   +1 ms] Found plugin url_launcher_windows at /home/hans/.pub-cache/hosted/pub.dev/url_launcher_windows-3.1.5/
+[   +2 ms] Found plugin url_launcher_web at /home/hans/.pub-cache/hosted/pub.dev/url_launcher_web-2.4.1/
+[   +2 ms] Found plugin url_launcher_macos at /home/hans/.pub-cache/hosted/pub.dev/url_launcher_macos-3.2.5/
+[   +1 ms] Found plugin url_launcher_linux at /home/hans/.pub-cache/hosted/pub.dev/url_launcher_linux-3.2.2/
+[   +1 ms] Found plugin url_launcher_ios at /home/hans/.pub-cache/hosted/pub.dev/url_launcher_ios-6.3.6/
+[        ] Found plugin url_launcher_android at /home/hans/.pub-cache/hosted/pub.dev/url_launcher_android-6.3.28/
+[   +2 ms] Found plugin shared_preferences at /home/hans/.pub-cache/hosted/pub.dev/shared_preferences-2.5.3/
+[        ] Found plugin shared_preferences_windows at /home/hans/.pub-cache/hosted/pub.dev/shared_preferences_windows-2.4.1/
+[   +1 ms] Found plugin path_provider_windows at /home/hans/.pub-cache/hosted/pub.dev/path_provider_windows-2.3.0/
+[   +1 ms] Found plugin shared_preferences_web at /home/hans/.pub-cache/hosted/pub.dev/shared_preferences_web-2.4.3/
+[        ] Found plugin shared_preferences_linux at /home/hans/.pub-cache/hosted/pub.dev/shared_preferences_linux-2.4.1/
+[        ] Found plugin path_provider_linux at /home/hans/.pub-cache/hosted/pub.dev/path_provider_linux-2.2.1/
+[   +1 ms] Found plugin shared_preferences_foundation at /home/hans/.pub-cache/hosted/pub.dev/shared_preferences_foundation-2.5.6/
+[        ] Found plugin shared_preferences_android at /home/hans/.pub-cache/hosted/pub.dev/shared_preferences_android-2.4.18/
+[   +1 ms] Found plugin printing at /home/hans/.pub-cache/hosted/pub.dev/printing-5.14.2/
+[   +8 ms] Found plugin path_provider at /home/hans/.pub-cache/hosted/pub.dev/path_provider-2.1.5/
+[        ] Found plugin path_provider_foundation at /home/hans/.pub-cache/hosted/pub.dev/path_provider_foundation-2.5.1/
+[        ] Found plugin path_provider_android at /home/hans/.pub-cache/hosted/pub.dev/path_provider_android-2.2.22/
+[   +1 ms] Found plugin image_picker at /home/hans/.pub-cache/hosted/pub.dev/image_picker-1.2.1/
+[        ] Found plugin image_picker_windows at /home/hans/.pub-cache/hosted/pub.dev/image_picker_windows-0.2.2/
+[   +1 ms] Found plugin file_selector_windows at /home/hans/.pub-cache/hosted/pub.dev/file_selector_windows-0.9.3+5/
+[   +1 ms] Found plugin image_picker_macos at /home/hans/.pub-cache/hosted/pub.dev/image_picker_macos-0.2.2+1/
+[        ] Found plugin file_selector_macos at /home/hans/.pub-cache/hosted/pub.dev/file_selector_macos-0.9.5/
+[        ] Found plugin image_picker_linux at /home/hans/.pub-cache/hosted/pub.dev/image_picker_linux-0.2.2/
+[        ] Found plugin file_selector_linux at /home/hans/.pub-cache/hosted/pub.dev/file_selector_linux-0.9.4/
+[        ] Found plugin image_picker_ios at /home/hans/.pub-cache/hosted/pub.dev/image_picker_ios-0.8.13+2/
+[        ] Found plugin image_picker_for_web at /home/hans/.pub-cache/hosted/pub.dev/image_picker_for_web-3.1.1/
+[   +1 ms] Found plugin image_picker_android at /home/hans/.pub-cache/hosted/pub.dev/image_picker_android-0.8.13+10/
+[        ] Found plugin flutter_plugin_android_lifecycle at /home/hans/.pub-cache/hosted/pub.dev/flutter_plugin_android_lifecycle-2.0.33/
+[  +15 ms] Found plugin file_picker at /home/hans/.pub-cache/hosted/pub.dev/file_picker-10.3.7/
+[  +19 ms] Found plugin integration_test at /home/hans/snap/flutter/common/flutter/packages/integration_test/
+[   +8 ms] Found plugin url_launcher at /home/hans/.pub-cache/hosted/pub.dev/url_launcher-6.3.2/
+[        ] Found plugin url_launcher_windows at /home/hans/.pub-cache/hosted/pub.dev/url_launcher_windows-3.1.5/
+[   +1 ms] Found plugin url_launcher_web at /home/hans/.pub-cache/hosted/pub.dev/url_launcher_web-2.4.1/
+[        ] Found plugin url_launcher_macos at /home/hans/.pub-cache/hosted/pub.dev/url_launcher_macos-3.2.5/
+[        ] Found plugin url_launcher_linux at /home/hans/.pub-cache/hosted/pub.dev/url_launcher_linux-3.2.2/
+[        ] Found plugin url_launcher_ios at /home/hans/.pub-cache/hosted/pub.dev/url_launcher_ios-6.3.6/
+[        ] Found plugin url_launcher_android at /home/hans/.pub-cache/hosted/pub.dev/url_launcher_android-6.3.28/
+[   +1 ms] Found plugin shared_preferences at /home/hans/.pub-cache/hosted/pub.dev/shared_preferences-2.5.3/
+[        ] Found plugin shared_preferences_windows at /home/hans/.pub-cache/hosted/pub.dev/shared_preferences_windows-2.4.1/
+[   +1 ms] Found plugin path_provider_windows at /home/hans/.pub-cache/hosted/pub.dev/path_provider_windows-2.3.0/
+[   +1 ms] Found plugin shared_preferences_web at /home/hans/.pub-cache/hosted/pub.dev/shared_preferences_web-2.4.3/
+[        ] Found plugin shared_preferences_linux at /home/hans/.pub-cache/hosted/pub.dev/shared_preferences_linux-2.4.1/
+[        ] Found plugin path_provider_linux at /home/hans/.pub-cache/hosted/pub.dev/path_provider_linux-2.2.1/
+[   +1 ms] Found plugin shared_preferences_foundation at /home/hans/.pub-cache/hosted/pub.dev/shared_preferences_foundation-2.5.6/
+[        ] Found plugin shared_preferences_android at /home/hans/.pub-cache/hosted/pub.dev/shared_preferences_android-2.4.18/
+[   +1 ms] Found plugin printing at /home/hans/.pub-cache/hosted/pub.dev/printing-5.14.2/
+[   +3 ms] Found plugin path_provider at /home/hans/.pub-cache/hosted/pub.dev/path_provider-2.1.5/
+[        ] Found plugin path_provider_foundation at /home/hans/.pub-cache/hosted/pub.dev/path_provider_foundation-2.5.1/
+[        ] Found plugin path_provider_android at /home/hans/.pub-cache/hosted/pub.dev/path_provider_android-2.2.22/
+[        ] Found plugin image_picker at /home/hans/.pub-cache/hosted/pub.dev/image_picker-1.2.1/
+[        ] Found plugin image_picker_windows at /home/hans/.pub-cache/hosted/pub.dev/image_picker_windows-0.2.2/
+[        ] Found plugin file_selector_windows at /home/hans/.pub-cache/hosted/pub.dev/file_selector_windows-0.9.3+5/
+[        ] Found plugin image_picker_macos at /home/hans/.pub-cache/hosted/pub.dev/image_picker_macos-0.2.2+1/
+[        ] Found plugin file_selector_macos at /home/hans/.pub-cache/hosted/pub.dev/file_selector_macos-0.9.5/
+[        ] Found plugin image_picker_linux at /home/hans/.pub-cache/hosted/pub.dev/image_picker_linux-0.2.2/
+[        ] Found plugin file_selector_linux at /home/hans/.pub-cache/hosted/pub.dev/file_selector_linux-0.9.4/
+[        ] Found plugin image_picker_ios at /home/hans/.pub-cache/hosted/pub.dev/image_picker_ios-0.8.13+2/
+[        ] Found plugin image_picker_for_web at /home/hans/.pub-cache/hosted/pub.dev/image_picker_for_web-3.1.1/
+[        ] Found plugin image_picker_android at /home/hans/.pub-cache/hosted/pub.dev/image_picker_android-0.8.13+10/
+[        ] Found plugin flutter_plugin_android_lifecycle at /home/hans/.pub-cache/hosted/pub.dev/flutter_plugin_android_lifecycle-2.0.33/
+[  +11 ms] Found plugin file_picker at /home/hans/.pub-cache/hosted/pub.dev/file_picker-10.3.7/
+[   +8 ms] Skipping generating generated_plugin_registrant.h because it is up-to-date.
+[   +2 ms] Skipping generating generated_plugin_registrant.cc because it is up-to-date.
+[        ] Skipping generating generated_plugins.cmake because it is up-to-date.
+[  +86 ms] Manifest contained wildcard assets. Inserting missing file into build graph to force rerun. for more information see #56466.
+[  +10 ms] running test package with arguments: [--no-color, --concurrency=1, --chain-stack-traces, --, file:///home/hans/growerp/flutter/packages/growerp_outreach/example/integration_test/outreach_campaign_test.dart?]
+00:00 +0: loading /home/hans/growerp/flutter/packages/growerp_outreach/example/integration_test/outreach_campaign_test.dart                                                                            [  +81 ms] test 0: starting test /home/hans/growerp/flutter/packages/growerp_outreach/example/integration_test/outreach_campaign_test.dart
+[   +1 ms] Stopping scan for flutter_test_config.dart; found project root at /home/hans/growerp/flutter/packages/growerp_outreach/example
+[        ] test 0: starting test device
+[   +1 ms] test 0: awaiting connection to test device
+[  +11 ms] Building Linux application...
+[   +2 ms] executing: [/home/hans/growerp/flutter/packages/growerp_outreach/example/build/linux/x64/debug/] cmake -G Ninja -DCMAKE_BUILD_TYPE=Debug -DFLUTTER_TARGET_PLATFORM=linux-x64 /home/hans/growerp/flutter/packages/growerp_outreach/example/linux
+[  +31 ms] -- Downloading/updating pdfium
+[  +33 ms] -- Configuring done
+[        ] -- Generating done
+[        ] -- Build files have been written to: /home/hans/growerp/flutter/packages/growerp_outreach/example/build/linux/x64/debug/pdfium-download
+[   +9 ms] ninja: no work to do.
+[   +9 ms] -- Configuring done
+[  +17 ms] -- Generating done
+[        ] -- Build files have been written to: /home/hans/growerp/flutter/packages/growerp_outreach/example/build/linux/x64/debug
+[  +12 ms] executing: ninja -C /home/hans/growerp/flutter/packages/growerp_outreach/example/build/linux/x64/debug install
+[  +14 ms] ninja: Entering directory `/home/hans/growerp/flutter/packages/growerp_outreach/example/build/linux/x64/debug'
+00:01 +0: loading /home/hans/growerp/flutter/packages/growerp_outreach/example/integration_test/outreach_campaign_test.dart                                                                            00:02 +0: loading /home/hans/growerp/flutter/packages/growerp_outreach/example/integration_test/outreach_campaign_test.dart                                                                            00:03 +0: loading /home/hans/growerp/flutter/packages/growerp_outreach/example/integration_test/outreach_campaign_test.dart                                                                            00:04 +0: loading /home/hans/growerp/flutter/packages/growerp_outreach/example/integration_test/outreach_campaign_test.dart                                                                            00:05 +0: loading /home/hans/growerp/flutter/packages/growerp_outreach/example/integration_test/outreach_campaign_test.dart                                                                            00:06 +0: loading /home/hans/growerp/flutter/packages/growerp_outreach/example/integration_test/outreach_campaign_test.dart                                                                            00:07 +0: loading /home/hans/growerp/flutter/packages/growerp_outreach/example/integration_test/outreach_campaign_test.dart                                                                            00:08 +0: loading /home/hans/growerp/flutter/packages/growerp_outreach/example/integration_test/outreach_campaign_test.dart                                                                            00:09 +0: loading /home/hans/growerp/flutter/packages/growerp_outreach/example/integration_test/outreach_campaign_test.dart                                                                            [+9768 ms] [1/14] Generating /home/hans/growerp/flutter/packages/growerp_outreach/example/linux/flutter/ephemeral/libflutter_linux_gtk.so, /home/hans/growerp/flutter/packages/growerp_outreach/example/linux/flutter/ephemeral/flutter_linux/fl_basic_message_channel.h, /home/hans/growerp/flutter/packages/growerp_outreach/example/linux/flutter/ephemeral/flutter_linux/fl_binary_codec.h, /home/hans/growerp/flutter/packages/growerp_outreach/example/linux/flutter/ephemeral/flutter_linux/fl_binary_messenger.h, /home/hans/growerp/flutter/packages/growerp_outreach/example/linux/flutter/ephemeral/flutter_linux/fl_dart_project.h, /home/hans/growerp/flutter/packages/growerp_outreach/example/linux/flutter/ephemeral/flutter_linux/fl_engine.h, /home/hans/growerp/flutter/packages/growerp_outreach/example/linux/flutter/ephemeral/flutter_linux/fl_json_message_codec.h, /home/hans/growerp/flutter/packages/growerp_outreach/example/linux/flutter/ephemeral/flutter_linux/fl_json_method_codec.h, /home/hans/growerp/flutter/packages/growerp_outreach/example/linux/flutter/ephemeral/flutter_linux/fl_message_codec.h, /home/hans/growerp/flutter/packages/growerp_outreach/example/linux/flutter/ephemeral/flutter_linux/fl_method_call.h, /home/hans/growerp/flutter/packages/growerp_outreach/example/linux/flutter/ephemeral/flutter_linux/fl_method_channel.h, /home/hans/growerp/flutter/packages/growerp_outreach/example/linux/flutter/ephemeral/flutter_linux/fl_method_codec.h, /home/hans/growerp/flutter/packages/growerp_outreach/example/linux/flutter/ephemeral/flutter_linux/fl_method_response.h, /home/hans/growerp/flutter/packages/growerp_outreach/example/linux/flutter/ephemeral/flutter_linux/fl_plugin_registrar.h, /home/hans/growerp/flutter/packages/growerp_outreach/example/linux/flutter/ephemeral/flutter_linux/fl_plugin_registry.h, /home/hans/growerp/flutter/packages/growerp_outreach/example/linux/flutter/ephemeral/flutter_linux/fl_standard_message_codec.h, /home/hans/growerp/flutter/packages/growerp_outreach/example/linux/flutter/ephemeral/flutter_linux/fl_standard_method_codec.h, /home/hans/growerp/flutter/packages/growerp_outreach/example/linux/flutter/ephemeral/flutter_linux/fl_string_codec.h, /home/hans/growerp/flutter/packages/growerp_outreach/example/linux/flutter/ephemeral/flutter_linux/fl_value.h, /home/hans/growerp/flutter/packages/growerp_outreach/example/linux/flutter/ephemeral/flutter_linux/fl_view.h, /home/hans/growerp/flutter/packages/growerp_outreach/example/linux/flutter/ephemeral/flutter_linux/flutter_linux.h, _phony_
+[        ] [  +18 ms] executing: uname -m
+[        ] [   +3 ms] Exit code 0 from: uname -m
+[        ] [        ] x86_64
+[        ] [   +5 ms] Artifact Instance of 'MaterialFonts' is not required, skipping update.
+[        ] [        ] Artifact Instance of 'GradleWrapper' is not required, skipping update.
+[        ] [        ] Artifact Instance of 'AndroidGenSnapshotArtifacts' is not required, skipping update.
+[        ] [        ] Artifact Instance of 'AndroidInternalBuildArtifacts' is not required, skipping update.
+[        ] [        ] Artifact Instance of 'IOSEngineArtifacts' is not required, skipping update.
+[        ] [        ] Artifact Instance of 'FlutterWebSdk' is not required, skipping update.
+[        ] [        ] Artifact Instance of 'LegacyCanvasKitRemover' is not required, skipping update.
+[        ] [        ] Artifact Instance of 'FlutterSdk' is not required, skipping update.
+[        ] [        ] Artifact Instance of 'WindowsEngineArtifacts' is not required, skipping update.
+[        ] [        ] Artifact Instance of 'MacOSEngineArtifacts' is not required, skipping update.
+[        ] [        ] Artifact Instance of 'LinuxEngineArtifacts' is not required, skipping update.
+[        ] [        ] Artifact Instance of 'LinuxFuchsiaSDKArtifacts' is not required, skipping update.
+[        ] [        ] Artifact Instance of 'MacOSFuchsiaSDKArtifacts' is not required, skipping update.
+[        ] [        ] Artifact Instance of 'FlutterRunnerSDKArtifacts' is not required, skipping update.
+[        ] [        ] Artifact Instance of 'FlutterRunnerDebugSymbols' is not required, skipping update.
+[        ] [        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] [        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] [        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] [        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] [        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] [        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] [        ] Artifact Instance of 'FontSubsetArtifacts' is not required, skipping update.
+[        ] [        ] Artifact Instance of 'PubDependencies' is not required, skipping update.
+[        ] [   +5 ms] Artifact Instance of 'AndroidGenSnapshotArtifacts' is not required, skipping update.
+[        ] [        ] Artifact Instance of 'AndroidInternalBuildArtifacts' is not required, skipping update.
+[        ] [        ] Artifact Instance of 'IOSEngineArtifacts' is not required, skipping update.
+[        ] [        ] Artifact Instance of 'FlutterWebSdk' is not required, skipping update.
+[        ] [        ] Artifact Instance of 'FlutterEngineStamp' is not required, skipping update.
+[        ] [        ] Artifact Instance of 'LegacyCanvasKitRemover' is not required, skipping update.
+[        ] [   +1 ms] Artifact Instance of 'WindowsEngineArtifacts' is not required, skipping update.
+[        ] [        ] Artifact Instance of 'MacOSEngineArtifacts' is not required, skipping update.
+[        ] [        ] Artifact Instance of 'LinuxEngineArtifacts' is not required, skipping update.
+[        ] [        ] Artifact Instance of 'LinuxFuchsiaSDKArtifacts' is not required, skipping update.
+[        ] [        ] Artifact Instance of 'MacOSFuchsiaSDKArtifacts' is not required, skipping update.
+[        ] [        ] Artifact Instance of 'FlutterRunnerSDKArtifacts' is not required, skipping update.
+[        ] [        ] Artifact Instance of 'FlutterRunnerDebugSymbols' is not required, skipping update.
+[        ] [  +22 ms] Artifact Instance of 'MaterialFonts' is not required, skipping update.
+[        ] [        ] Artifact Instance of 'GradleWrapper' is not required, skipping update.
+[        ] [        ] Artifact Instance of 'AndroidGenSnapshotArtifacts' is not required, skipping update.
+[        ] [        ] Artifact Instance of 'AndroidInternalBuildArtifacts' is not required, skipping update.
+[        ] [        ] Artifact Instance of 'IOSEngineArtifacts' is not required, skipping update.
+[        ] [        ] Artifact Instance of 'FlutterWebSdk' is not required, skipping update.
+[        ] [        ] Artifact Instance of 'FlutterEngineStamp' is not required, skipping update.
+[        ] [        ] Artifact Instance of 'LegacyCanvasKitRemover' is not required, skipping update.
+[        ] [        ] Artifact Instance of 'FlutterSdk' is not required, skipping update.
+[        ] [        ] Artifact Instance of 'WindowsEngineArtifacts' is not required, skipping update.
+[        ] [        ] Artifact Instance of 'MacOSEngineArtifacts' is not required, skipping update.
+[        ] [        ] Artifact Instance of 'LinuxFuchsiaSDKArtifacts' is not required, skipping update.
+[        ] [        ] Artifact Instance of 'MacOSFuchsiaSDKArtifacts' is not required, skipping update.
+[        ] [        ] Artifact Instance of 'FlutterRunnerSDKArtifacts' is not required, skipping update.
+[        ] [        ] Artifact Instance of 'FlutterRunnerDebugSymbols' is not required, skipping update.
+[        ] [        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] [        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] [        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] [        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] [        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] [        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] [        ] Artifact Instance of 'FontSubsetArtifacts' is not required, skipping update.
+[        ] [        ] Artifact Instance of 'PubDependencies' is not required, skipping update.
+[        ] [  +22 ms] Initializing file store
+[        ] [  +11 ms] dart_build: Starting due to {}
+[        ] [        ] Skipping target: gen_localizations
+[        ] [        ] gen_dart_plugin_registrant: Starting due to {InvalidatedReasonKind.outputSetAddition: The following outputs were added to the output set: /home/hans/growerp/flutter/packages/growerp_outreach/example/.dart_tool/flutter_build/dart_plugin_registrant.dart, InvalidatedReasonKind.inputChanged: The following inputs have updated contents: /home/hans/growerp/flutter/packages/growerp_outreach/example/.dart_tool/package_config.json}
+[        ] [   +2 ms] unpack_linux: Starting due to {}
+[        ] [  +78 ms] unpack_linux: Complete
+[        ] [ +566 ms] Found plugin integration_test at /home/hans/snap/flutter/common/flutter/packages/integration_test/
+[        ] [  +27 ms] Found plugin url_launcher at /home/hans/.pub-cache/hosted/pub.dev/url_launcher-6.3.2/
+[        ] [   +1 ms] Found plugin url_launcher_windows at /home/hans/.pub-cache/hosted/pub.dev/url_launcher_windows-3.1.5/
+[        ] [   +2 ms] Found plugin url_launcher_web at /home/hans/.pub-cache/hosted/pub.dev/url_launcher_web-2.4.1/
+[        ] [   +1 ms] Found plugin url_launcher_macos at /home/hans/.pub-cache/hosted/pub.dev/url_launcher_macos-3.2.5/
+[        ] [   +1 ms] Found plugin url_launcher_linux at /home/hans/.pub-cache/hosted/pub.dev/url_launcher_linux-3.2.2/
+[        ] [        ] No packages with native assets. Skipping native assets compilation.
+[        ] [        ] dart_build: Complete
+[        ] [        ] install_code_assets: Starting due to {}
+[        ] [   +3 ms] Writing native assets json to file:///home/hans/growerp/flutter/packages/growerp_outreach/example/.dart_tool/flutter_build/28cb6e89952dca539758324d063c2f46/native_assets.json.
+[        ] [   +1 ms] Found plugin url_launcher_ios at /home/hans/.pub-cache/hosted/pub.dev/url_launcher_ios-6.3.6/
+[        ] [        ] Writing /home/hans/growerp/flutter/packages/growerp_outreach/example/.dart_tool/flutter_build/28cb6e89952dca539758324d063c2f46/native_assets.json done.
+[        ] [        ] install_code_assets: Complete
+[        ] [   +1 ms] Found plugin url_launcher_android at /home/hans/.pub-cache/hosted/pub.dev/url_launcher_android-6.3.28/
+[        ] [   +2 ms] Found plugin shared_preferences at /home/hans/.pub-cache/hosted/pub.dev/shared_preferences-2.5.3/
+[        ] [        ] Found plugin shared_preferences_windows at /home/hans/.pub-cache/hosted/pub.dev/shared_preferences_windows-2.4.1/
+[        ] [        ] Found plugin path_provider_windows at /home/hans/.pub-cache/hosted/pub.dev/path_provider_windows-2.3.0/
+[        ] [   +1 ms] Found plugin shared_preferences_web at /home/hans/.pub-cache/hosted/pub.dev/shared_preferences_web-2.4.3/
+[        ] [        ] Found plugin shared_preferences_linux at /home/hans/.pub-cache/hosted/pub.dev/shared_preferences_linux-2.4.1/
+[        ] [   +1 ms] Found plugin path_provider_linux at /home/hans/.pub-cache/hosted/pub.dev/path_provider_linux-2.2.1/
+[        ] [   +1 ms] Found plugin shared_preferences_foundation at /home/hans/.pub-cache/hosted/pub.dev/shared_preferences_foundation-2.5.6/
+[        ] [        ] Found plugin shared_preferences_android at /home/hans/.pub-cache/hosted/pub.dev/shared_preferences_android-2.4.18/
+[        ] [   +2 ms] Found plugin printing at /home/hans/.pub-cache/hosted/pub.dev/printing-5.14.2/
+[        ] [   +9 ms] Found plugin path_provider at /home/hans/.pub-cache/hosted/pub.dev/path_provider-2.1.5/
+[        ] [        ] Found plugin path_provider_foundation at /home/hans/.pub-cache/hosted/pub.dev/path_provider_foundation-2.5.1/
+[        ] [        ] Found plugin path_provider_android at /home/hans/.pub-cache/hosted/pub.dev/path_provider_android-2.2.22/
+[        ] [   +1 ms] Found plugin image_picker at /home/hans/.pub-cache/hosted/pub.dev/image_picker-1.2.1/
+[   +2 ms] [        ] Found plugin image_picker_windows at /home/hans/.pub-cache/hosted/pub.dev/image_picker_windows-0.2.2/
+[        ] [   +1 ms] Found plugin file_selector_windows at /home/hans/.pub-cache/hosted/pub.dev/file_selector_windows-0.9.3+5/
+[        ] [        ] Found plugin image_picker_macos at /home/hans/.pub-cache/hosted/pub.dev/image_picker_macos-0.2.2+1/
+[        ] [        ] Found plugin file_selector_macos at /home/hans/.pub-cache/hosted/pub.dev/file_selector_macos-0.9.5/
+[        ] [        ] Found plugin image_picker_linux at /home/hans/.pub-cache/hosted/pub.dev/image_picker_linux-0.2.2/
+[        ] [        ] Found plugin file_selector_linux at /home/hans/.pub-cache/hosted/pub.dev/file_selector_linux-0.9.4/
+[        ] [        ] Found plugin image_picker_ios at /home/hans/.pub-cache/hosted/pub.dev/image_picker_ios-0.8.13+2/
+[        ] [        ] Found plugin image_picker_for_web at /home/hans/.pub-cache/hosted/pub.dev/image_picker_for_web-3.1.1/
+[        ] [        ] Found plugin image_picker_android at /home/hans/.pub-cache/hosted/pub.dev/image_picker_android-0.8.13+10/
+[        ] [        ] Found plugin flutter_plugin_android_lifecycle at /home/hans/.pub-cache/hosted/pub.dev/flutter_plugin_android_lifecycle-2.0.33/
+[        ] [  +37 ms] Found plugin file_picker at /home/hans/.pub-cache/hosted/pub.dev/file_picker-10.3.7/
+[        ] [  +26 ms] Skipping generating dart_plugin_registrant.dart because it is up-to-date.
+[        ] [        ] gen_dart_plugin_registrant: Complete
+[        ] [   +1 ms] kernel_snapshot_program: Starting due to {}
+[   +2 ms] [   +6 ms] /home/hans/snap/flutter/common/flutter/bin/cache/dart-sdk/bin/dartaotruntime /home/hans/snap/flutter/common/flutter/bin/cache/dart-sdk/bin/snapshots/frontend_server_aot.dart.snapshot --sdk-root /home/hans/snap/flutter/common/flutter/bin/cache/artifacts/engine/common/flutter_patched_sdk/ --target=flutter --no-print-incremental-dependencies -DFLUTTER_VERSION=3.38.3 -DFLUTTER_CHANNEL=stable -DFLUTTER_GIT_URL=https://github.com/flutter/flutter.git -DFLUTTER_FRAMEWORK_REVISION=19074d12f7 -DFLUTTER_ENGINE_REVISION=13e658725d -DFLUTTER_DART_VERSION=3.10.1 -DINTEGRATION_TEST_SHOULD_REPORT_RESULTS_TO_NATIVE=false -Ddart.vm.profile=false -Ddart.vm.product=false --enable-asserts --track-widget-creation --packages /home/hans/growerp/flutter/packages/growerp_outreach/example/.dart_tool/package_config.json --output-dill /home/hans/growerp/flutter/packages/growerp_outreach/example/.dart_tool/flutter_build/28cb6e89952dca539758324d063c2f46/app.dill --depfile /home/hans/growerp/flutter/packages/growerp_outreach/example/.dart_tool/flutter_build/28cb6e89952dca539758324d063c2f46/kernel_snapshot_program.d --incremental --initialize-from-dill /home/hans/growerp/flutter/packages/growerp_outreach/example/.dart_tool/flutter_build/28cb6e89952dca539758324d063c2f46/app.dill --source file:///home/hans/growerp/flutter/packages/growerp_outreach/example/.dart_tool/flutter_build/dart_plugin_registrant.dart --source package:flutter/src/dart_plugin_registrant.dart -Dflutter.dart_plugin_registrant=file:///home/hans/growerp/flutter/packages/growerp_outreach/example/.dart_tool/flutter_build/dart_plugin_registrant.dart --verbosity=error file:///home/hans/tmp/flutter_tools.TAPAKL/flutter_test_listener.HUUWEF/listener.dart
+[        ] [+6659 ms] kernel_snapshot_program: Complete
+[        ] [ +724 ms] debug_bundle_linux-x64_assets: Starting due to {}
+[        ] [ +136 ms] Manifest contained wildcard assets. Inserting missing file into build graph to force rerun. for more information see #56466.
+[        ] [   +5 ms] shaderc command: [/home/hans/snap/flutter/common/flutter/bin/cache/artifacts/engine/linux-x64/impellerc, --sksl, --runtime-stage-gles, --runtime-stage-gles3, --runtime-stage-vulkan, --iplr, --sl=/home/hans/growerp/flutter/packages/growerp_outreach/example/build/flutter_assets/shaders/ink_sparkle.frag, --spirv=/home/hans/growerp/flutter/packages/growerp_outreach/example/build/flutter_assets/shaders/ink_sparkle.frag.spirv, --input=/home/hans/snap/flutter/common/flutter/packages/flutter/lib/src/material/shaders/ink_sparkle.frag, --input-type=frag, --include=/home/hans/snap/flutter/common/flutter/packages/flutter/lib/src/material/shaders, --include=/home/hans/snap/flutter/common/flutter/bin/cache/artifacts/engine/linux-x64/shader_lib]
+[        ] [        ] shaderc command: [/home/hans/snap/flutter/common/flutter/bin/cache/artifacts/engine/linux-x64/impellerc, --sksl, --runtime-stage-gles, --runtime-stage-gles3, --runtime-stage-vulkan, --iplr, --sl=/home/hans/growerp/flutter/packages/growerp_outreach/example/build/flutter_assets/shaders/stretch_effect.frag, --spirv=/home/hans/growerp/flutter/packages/growerp_outreach/example/build/flutter_assets/shaders/stretch_effect.frag.spirv, --input=/home/hans/snap/flutter/common/flutter/packages/flutter/lib/src/material/shaders/stretch_effect.frag, --input-type=frag, --include=/home/hans/snap/flutter/common/flutter/packages/flutter/lib/src/material/shaders, --include=/home/hans/snap/flutter/common/flutter/bin/cache/artifacts/engine/linux-x64/shader_lib]
+[        ] [ +347 ms] debug_bundle_linux-x64_assets: Complete
+[        ] [ +586 ms] Persisting file store
+[        ] [   +7 ms] Done persisting file store
+[        ] [  +15 ms] build succeeded.
+[        ] [        ] "flutter assemble" took 9,338ms.
+[        ] [  +25 ms] Running 1 shutdown hook
+[        ] [        ] Shutdown hooks complete
+[        ] [ +116 ms] exiting with code 0
+00:10 +0: loading /home/hans/growerp/flutter/packages/growerp_outreach/example/integration_test/outreach_campaign_test.dart                                                                            [ +192 ms] [2/14] Building CXX object runner/CMakeFiles/growerp_outreach_example.dir/__/flutter/generated_plugin_registrant.cc.o
+[  +16 ms] [3/14] Building CXX object plugins/file_selector_linux/CMakeFiles/file_selector_linux_plugin.dir/file_selector_plugin.cc.o
+[        ] [4/14] Building CXX object runner/CMakeFiles/growerp_outreach_example.dir/my_application.cc.o
+[   +8 ms] [5/14] Building CXX object plugins/url_launcher_linux/CMakeFiles/url_launcher_linux_plugin.dir/messages.g.cc.o
+[  +17 ms] [6/14] Building CXX object plugins/file_selector_linux/CMakeFiles/file_selector_linux_plugin.dir/messages.g.cc.o
+[   +7 ms] [7/14] Building CXX object plugins/url_launcher_linux/CMakeFiles/url_launcher_linux_plugin.dir/url_launcher_plugin.cc.o
+[  +28 ms] [8/14] Building CXX object plugins/printing/CMakeFiles/printing_plugin.dir/print_job.cc.o
+[  +30 ms] [9/14] Linking CXX shared library plugins/file_selector_linux/libfile_selector_linux_plugin.so
+[   +4 ms] [10/14] Building CXX object plugins/printing/CMakeFiles/printing_plugin.dir/printing_plugin.cc.o
+[        ] [11/14] Linking CXX shared library plugins/url_launcher_linux/liburl_launcher_linux_plugin.so
+[  +62 ms] [12/14] Linking CXX shared library plugins/printing/libprinting_plugin.so
+[  +73 ms] [13/14] Linking CXX executable intermediates_do_not_run/growerp_outreach_example
+[        ] [13/14] Install the project...
+[   +6 ms] -- Install configuration: "Debug"
+[  +17 ms] -- Installing: /home/hans/growerp/flutter/packages/growerp_outreach/example/build/linux/x64/debug/bundle/growerp_outreach_example
+[        ] -- Set runtime path of "/home/hans/growerp/flutter/packages/growerp_outreach/example/build/linux/x64/debug/bundle/growerp_outreach_example" to "$ORIGIN/lib"
+[        ] -- Installing: /home/hans/growerp/flutter/packages/growerp_outreach/example/build/linux/x64/debug/bundle/data/icudtl.dat
+[        ] -- Installing: /home/hans/growerp/flutter/packages/growerp_outreach/example/build/linux/x64/debug/bundle/lib/libflutter_linux_gtk.so
+[  +54 ms] -- Installing: /home/hans/growerp/flutter/packages/growerp_outreach/example/build/linux/x64/debug/bundle/lib/libfile_selector_linux_plugin.so
+[        ] -- Installing: /home/hans/growerp/flutter/packages/growerp_outreach/example/build/linux/x64/debug/bundle/lib/libprinting_plugin.so
+[        ] -- Installing: /home/hans/growerp/flutter/packages/growerp_outreach/example/build/linux/x64/debug/bundle/lib/libpdfium.so
+[   +3 ms] -- Installing: /home/hans/growerp/flutter/packages/growerp_outreach/example/build/linux/x64/debug/bundle/lib/liburl_launcher_linux_plugin.so
+[        ] -- Up-to-date: /home/hans/growerp/flutter/packages/growerp_outreach/example/build/linux/x64/debug/bundle/lib
+[        ] -- Installing: /home/hans/growerp/flutter/packages/growerp_outreach/example/build/linux/x64/debug/bundle/data/flutter_assets
+[        ] -- Installing: /home/hans/growerp/flutter/packages/growerp_outreach/example/build/linux/x64/debug/bundle/data/flutter_assets/version.json
+[        ] -- Installing: /home/hans/growerp/flutter/packages/growerp_outreach/example/build/linux/x64/debug/bundle/data/flutter_assets/packages
+[        ] -- Installing: /home/hans/growerp/flutter/packages/growerp_outreach/example/build/linux/x64/debug/bundle/data/flutter_assets/packages/growerp_core
+[        ] -- Installing: /home/hans/growerp/flutter/packages/growerp_outreach/example/build/linux/x64/debug/bundle/data/flutter_assets/packages/growerp_core/images
+[        ] -- Installing: /home/hans/growerp/flutter/packages/growerp_outreach/example/build/linux/x64/debug/bundle/data/flutter_assets/packages/growerp_core/images/supplier.png
+[        ] -- Installing: /home/hans/growerp/flutter/packages/growerp_outreach/example/build/linux/x64/debug/bundle/data/flutter_assets/packages/growerp_core/images/growerp.png
+[        ] -- Installing: /home/hans/growerp/flutter/packages/growerp_outreach/example/build/linux/x64/debug/bundle/data/flutter_assets/packages/growerp_core/images/supplierGrey.png
+[        ] -- Installing: /home/hans/growerp/flutter/packages/growerp_outreach/example/build/linux/x64/debug/bundle/data/flutter_assets/packages/growerp_core/images/productsGrey.png
+[        ] -- Installing: /home/hans/growerp/flutter/packages/growerp_outreach/example/build/linux/x64/debug/bundle/data/flutter_assets/packages/growerp_core/images/dashBoard.png
+[        ] -- Installing: /home/hans/growerp/flutter/packages/growerp_outreach/example/build/linux/x64/debug/bundle/data/flutter_assets/packages/growerp_core/images/usersGrey.png
+[        ] -- Installing: /home/hans/growerp/flutter/packages/growerp_outreach/example/build/linux/x64/debug/bundle/data/flutter_assets/packages/growerp_core/images/myInfoGrey.png
+[        ] -- Installing: /home/hans/growerp/flutter/packages/growerp_outreach/example/build/linux/x64/debug/bundle/data/flutter_assets/packages/growerp_core/images/crmGrey.png
+[        ] -- Installing: /home/hans/growerp/flutter/packages/growerp_outreach/example/build/linux/x64/debug/bundle/data/flutter_assets/packages/growerp_core/images/growerp.jpg
+[        ] -- Installing: /home/hans/growerp/flutter/packages/growerp_outreach/example/build/linux/x64/debug/bundle/data/flutter_assets/packages/growerp_core/images/order.png
+[        ] -- Installing: /home/hans/growerp/flutter/packages/growerp_outreach/example/build/linux/x64/debug/bundle/data/flutter_assets/packages/growerp_core/images/crm.png
+[        ] -- Installing: /home/hans/growerp/flutter/packages/growerp_outreach/example/build/linux/x64/debug/bundle/data/flutter_assets/packages/growerp_core/images/growerpAppstore.png
+[        ] -- Installing: /home/hans/growerp/flutter/packages/growerp_outreach/example/build/linux/x64/debug/bundle/data/flutter_assets/packages/growerp_core/images/companyGrey.png
+[        ] -- Installing: /home/hans/growerp/flutter/packages/growerp_outreach/example/build/linux/x64/debug/bundle/data/flutter_assets/packages/growerp_core/images/addImage.png
+[        ] -- Installing: /home/hans/growerp/flutter/packages/growerp_outreach/example/build/linux/x64/debug/bundle/data/flutter_assets/packages/growerp_core/images/orderGrey.png
+[        ] -- Installing: /home/hans/growerp/flutter/packages/growerp_outreach/example/build/linux/x64/debug/bundle/data/flutter_assets/packages/growerp_core/images/company.png
+[        ] -- Installing: /home/hans/growerp/flutter/packages/growerp_outreach/example/build/linux/x64/debug/bundle/data/flutter_assets/packages/growerp_core/images/search.png
+[        ] -- Installing: /home/hans/growerp/flutter/packages/growerp_outreach/example/build/linux/x64/debug/bundle/data/flutter_assets/packages/growerp_core/images/growerp100.png
+[        ] -- Installing: /home/hans/growerp/flutter/packages/growerp_outreach/example/build/linux/x64/debug/bundle/data/flutter_assets/packages/growerp_core/images/about.png
+[        ] -- Installing: /home/hans/growerp/flutter/packages/growerp_outreach/example/build/linux/x64/debug/bundle/data/flutter_assets/packages/growerp_core/images/info.png
+[        ] -- Installing: /home/hans/growerp/flutter/packages/growerp_outreach/example/build/linux/x64/debug/bundle/data/flutter_assets/packages/growerp_core/images/growerpPlaystore.png
+[        ] -- Installing: /home/hans/growerp/flutter/packages/growerp_outreach/example/build/linux/x64/debug/bundle/data/flutter_assets/packages/growerp_core/images/growerp1024x500.jpg
+[        ] -- Installing: /home/hans/growerp/flutter/packages/growerp_outreach/example/build/linux/x64/debug/bundle/data/flutter_assets/packages/growerp_core/images/export.png
+[        ] -- Installing: /home/hans/growerp/flutter/packages/growerp_outreach/example/build/linux/x64/debug/bundle/data/flutter_assets/packages/growerp_core/images/growerpDark100.png
+[        ] -- Installing: /home/hans/growerp/flutter/packages/growerp_outreach/example/build/linux/x64/debug/bundle/data/flutter_assets/packages/growerp_core/images/growerp512x512.png
+[        ] -- Installing: /home/hans/growerp/flutter/packages/growerp_outreach/example/build/linux/x64/debug/bundle/data/flutter_assets/packages/growerp_core/images/chatGrey.png
+[        ] -- Installing: /home/hans/growerp/flutter/packages/growerp_outreach/example/build/linux/x64/debug/bundle/data/flutter_assets/packages/growerp_core/images/users.png
+[        ] -- Installing: /home/hans/growerp/flutter/packages/growerp_outreach/example/build/linux/x64/debug/bundle/data/flutter_assets/packages/growerp_core/images/dashBoardGrey.png
+[        ] -- Installing: /home/hans/growerp/flutter/packages/growerp_outreach/example/build/linux/x64/debug/bundle/data/flutter_assets/packages/growerp_core/images/accountingGrey.png
+[        ] -- Installing: /home/hans/growerp/flutter/packages/growerp_outreach/example/build/linux/x64/debug/bundle/data/flutter_assets/packages/growerp_core/images/growerpDark.jpg
+[        ] -- Installing: /home/hans/growerp/flutter/packages/growerp_outreach/example/build/linux/x64/debug/bundle/data/flutter_assets/packages/growerp_core/images/categories.png
+[        ] -- Installing: /home/hans/growerp/flutter/packages/growerp_outreach/example/build/linux/x64/debug/bundle/data/flutter_assets/packages/growerp_core/images/products.png
+[        ] -- Installing: /home/hans/growerp/flutter/packages/growerp_outreach/example/build/linux/x64/debug/bundle/data/flutter_assets/packages/growerp_core/images/growerp50x50.jpg
+[        ] -- Installing: /home/hans/growerp/flutter/packages/growerp_outreach/example/build/linux/x64/debug/bundle/data/flutter_assets/packages/growerp_core/images/categoryGrey.png
+[        ] -- Installing: /home/hans/growerp/flutter/packages/growerp_outreach/example/build/linux/x64/debug/bundle/data/flutter_assets/packages/growerp_core/images/categoriesGrey.png
+[        ] -- Installing: /home/hans/growerp/flutter/packages/growerp_outreach/example/build/linux/x64/debug/bundle/data/flutter_assets/packages/growerp_core/images/myInfo.png
+[        ] -- Installing: /home/hans/growerp/flutter/packages/growerp_outreach/example/build/linux/x64/debug/bundle/data/flutter_assets/packages/growerp_core/images/aboutGrey.png
+[        ] -- Installing: /home/hans/growerp/flutter/packages/growerp_outreach/example/build/linux/x64/debug/bundle/data/flutter_assets/packages/growerp_core/images/favicon-32x32.png
+[        ] -- Installing: /home/hans/growerp/flutter/packages/growerp_outreach/example/build/linux/x64/debug/bundle/data/flutter_assets/packages/growerp_core/images/up-arrow.png
+[        ] -- Installing: /home/hans/growerp/flutter/packages/growerp_outreach/example/build/linux/x64/debug/bundle/data/flutter_assets/packages/growerp_core/images/accounting.png
+[        ] -- Installing: /home/hans/growerp/flutter/packages/growerp_outreach/example/build/linux/x64/debug/bundle/data/flutter_assets/packages/growerp_core/images/personInfo.png
+[        ] -- Installing: /home/hans/growerp/flutter/packages/growerp_outreach/example/build/linux/x64/debug/bundle/data/flutter_assets/packages/growerp_core/images/category.png
+[        ] -- Installing: /home/hans/growerp/flutter/packages/growerp_outreach/example/build/linux/x64/debug/bundle/data/flutter_assets/packages/growerp_core/images/infoGrey.png
+[        ] -- Installing: /home/hans/growerp/flutter/packages/growerp_outreach/example/build/linux/x64/debug/bundle/data/flutter_assets/packages/growerp_core/images/chat.png
+[        ] -- Installing: /home/hans/growerp/flutter/packages/growerp_outreach/example/build/linux/x64/debug/bundle/data/flutter_assets/FontManifest.json
+[        ] -- Installing: /home/hans/growerp/flutter/packages/growerp_outreach/example/build/linux/x64/debug/bundle/data/flutter_assets/AssetManifest.bin
+[        ] -- Installing: /home/hans/growerp/flutter/packages/growerp_outreach/example/build/linux/x64/debug/bundle/data/flutter_assets/fonts
+[        ] -- Installing: /home/hans/growerp/flutter/packages/growerp_outreach/example/build/linux/x64/debug/bundle/data/flutter_assets/fonts/MaterialIcons-Regular.otf
+[        ] -- Installing: /home/hans/growerp/flutter/packages/growerp_outreach/example/build/linux/x64/debug/bundle/data/flutter_assets/assets
+[        ] -- Installing: /home/hans/growerp/flutter/packages/growerp_outreach/example/build/linux/x64/debug/bundle/data/flutter_assets/assets/cfg
+[        ] -- Installing: /home/hans/growerp/flutter/packages/growerp_outreach/example/build/linux/x64/debug/bundle/data/flutter_assets/assets/cfg/app_settings.json
+[        ] -- Installing: /home/hans/growerp/flutter/packages/growerp_outreach/example/build/linux/x64/debug/bundle/data/flutter_assets/NOTICES.Z
+[        ] -- Installing: /home/hans/growerp/flutter/packages/growerp_outreach/example/build/linux/x64/debug/bundle/data/flutter_assets/kernel_blob.bin
+[  +50 ms] -- Installing: /home/hans/growerp/flutter/packages/growerp_outreach/example/build/linux/x64/debug/bundle/data/flutter_assets/shaders
+[        ] -- Installing: /home/hans/growerp/flutter/packages/growerp_outreach/example/build/linux/x64/debug/bundle/data/flutter_assets/shaders/stretch_effect.frag
+[        ] -- Installing: /home/hans/growerp/flutter/packages/growerp_outreach/example/build/linux/x64/debug/bundle/data/flutter_assets/shaders/ink_sparkle.frag
+[        ] -- Installing: /home/hans/growerp/flutter/packages/growerp_outreach/example/build/linux/x64/debug/bundle/data/flutter_assets/NativeAssetsManifest.json
+[  +28 ms] Building Linux application... (completed in 10.5s)
+[   +2 ms] ✓ Built build/linux/x64/debug/bundle/growerp_outreach_example
+[ +154 ms] VM Service URL on device: http://127.0.0.1:33081/M6_iTewMLd0=/
+[        ] test 0: Starting Dart Development Service
+[   +1 ms] Launching a Dart Developer Service (DDS) instance at http://127.0.0.1:0, connecting to VM service at http://127.0.0.1:33081/M6_iTewMLd0=/.
+[ +192 ms] test 0: Dart Development Service started at http://127.0.0.1:35835/2VdCXZ5pbzI=/, forwarding to VM service at http://127.0.0.1:33081/M6_iTewMLd0=/.
+[        ] test 0: Connecting to vm service
+[   +2 ms] test 0: VM Service uri is available at http://127.0.0.1:35835/2VdCXZ5pbzI=/
+[  +15 ms] test 0: Finding the correct isolate with the integration test service extension
+[  +26 ms] test 0: connected to test device, now awaiting test result
+[        ] test 0: Waiting for test harness or tests to finish
+00:10 +0: GrowERP outreach campaign test                                                                                                                                                               00:11 +0: GrowERP outreach campaign test                                                                                                                                                               00:11 +0: GrowERP outreach campaign test                                                                                                                                                               
+[38;5;12m┌────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────[0m
+[38;5;12m│ 💡 accessing backend at http://localhost:8080/[0m
+[38;5;12m└────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────[0m
+=== startTestApp Debug ===
+clear: true
+new sequence: 769
+Creating NEW SaveTest (clear=true)
+✅ Persisted test data to: /home/hans/Documents/integration_test_data/savetest.json
+==========================
+[38;5;12m┌────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────[0m
+[38;5;12m│ 💡 Using base websocket backend url: ws://localhost:8080/chat with path: chat[0m
+[38;5;12m└────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────[0m
+[38;5;12m┌────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────[0m
+[38;5;12m│ 💡 Using base websocket backend url: ws://localhost:8080/notws with path: notws[0m
+[38;5;12m└────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────[0m
+[38;5;12m┌────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────[0m
+[38;5;12m│ 💡 EVENT: ThemeSwitch()[0m
+[38;5;12m│ 💡 Curr.State: ThemeState(ThemeMode.light)[0m
+[38;5;12m│ 💡 Next State: ThemeState(ThemeMode.dark)[0m
+[38;5;12m└────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────[0m
+[38;5;12m┌────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────[0m
+[38;5;12m│ 💡 EVENT: AuthLoad()[0m
+[38;5;12m│ 💡 Curr.State: AuthStatus.initial { owner: null company: null user: ?  message: null[0m
+[38;5;12m│ 💡 Next State: AuthStatus.loading { owner: null company: null user: ?  message: null[0m
+[38;5;12m└────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────[0m
+[38;5;12m┌────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────[0m
+[38;5;12m│ 💡 EVENT: Instance of 'LocaleLoaded'[0m
+[38;5;12m│ 💡 Curr.State: Instance of 'LocaleState'[0m
+[38;5;12m│ 💡 Next State: Instance of 'LocaleState'[0m
+[38;5;12m└────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────[0m
+
+╔╣ Request ║ GET 
+║  http://localhost:8080/rest/s1/growerp/100/Companies?limit=1
+╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+╔ Query Parameters 
+╟ limit: 1
+╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+╔ Headers 
+╟ responseType: ResponseType.json
+╟ followRedirects: true
+╟ connectTimeout: 0:00:30.000000
+╟ receiveTimeout: 0:10:00.000000
+╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+╔ Extras 
+╟ noApiKey: true
+╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+
+╔╣ Response ║ GET ║ Status: 200 OK  ║ Time: 67 ms
+║  http://localhost:8080/rest/s1/growerp/100/Companies?limit=1
+╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+╔ Headers 
+╟ set-cookie: [JSESSIONID=node05cj4xes48btseu7spgoyw426243.node0; Path=/; HttpOnly]
+╟ date: [Thu, 04 Dec 2025 10:41:51 GMT]
+╟ x-run-time-ms: [18]
+╟ content-encoding: [gzip]
+╟ vary: [Accept-Encoding]
+╟ moquisessiontoken: [vP-odowyMyQGxhd4qgly]
+╟ content-length: [163]
+╟ x-csrf-token: [vP-odowyMyQGxhd4qgly]
+╟ content-type: [application/json]
+╟ server: [Jetty(10.0.9)]
+╟ expires: [Thu, 01 Jan 1970 00:00:00 GMT]
+╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+╔ Body
+║
+║    {
+║         "companies": [
+║            {
+║                 "partyId": "100001",
+║                 "pseudoId": "100001",
+║                 "name": "Main Company",
+║                 "role": "OrgInternal",
+║                 "currency": {currencyId: USD, description: United States Dollar}
+║            }
+║         ]
+║    }
+║
+╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+[38;5;12m┌────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────[0m
+[38;5;12m│ 💡 EVENT: AuthLoad()[0m
+[38;5;12m│ 💡 Curr.State: AuthStatus.loading { owner: null company: null user: ?  message: null[0m
+[38;5;12m│ 💡 Next State: AuthStatus.unAuthenticated { owner: null company: Main Company user: ?  message: null[0m
+[38;5;12m└────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────[0m
+[38;5;12m┌────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────[0m
+[38;5;12m│ 💡 accessing backend at http://localhost:8080/[0m
+[38;5;12m└────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────[0m
+
+╔╣ Request ║ GET 
+║  http://localhost:8080/rest/s1/growerp/100/CheckEmail?email=test771%40example.com
+╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+╔ Query Parameters 
+╟ email: test771@example.com
+╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+╔ Headers 
+╟ responseType: ResponseType.json
+╟ followRedirects: true
+╟ connectTimeout: 0:00:30.000000
+╟ receiveTimeout: 0:10:00.000000
+╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+╔ Extras 
+╟ noApiKey: true
+╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+
+╔╣ Response ║ GET ║ Status: 200 OK  ║ Time: 22 ms
+║  http://localhost:8080/rest/s1/growerp/100/CheckEmail?email=test771%40example.com
+╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+╔ Headers 
+╟ set-cookie: [JSESSIONID=node01v3863mz6kudc1utr801bitva0244.node0; Path=/; HttpOnly]
+╟ date: [Thu, 04 Dec 2025 10:41:57 GMT]
+╟ x-run-time-ms: [13]
+╟ vary: [Accept-Encoding]
+╟ moquisessiontoken: [7p-DvlcYZcx3-1tnKeJY]
+╟ content-length: [18]
+╟ x-csrf-token: [7p-DvlcYZcx3-1tnKeJY]
+╟ content-type: [application/json]
+╟ server: [Jetty(10.0.9)]
+╟ expires: [Thu, 01 Jan 1970 00:00:00 GMT]
+╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+╔ Body
+║
+║    {
+║         "ok": false
+║    }
+║
+╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+[38;5;12m┌────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────[0m
+[38;5;12m│ 💡 EVENT: AuthRegister(User John Doe [null] sec: GROWERP_M_ADMIN  email: test771@example.com company: null[null] size: n...[0m
+[38;5;12m│ 💡 Curr.State: AuthStatus.unAuthenticated { owner: null company: Main Company user: ?  message: null[0m
+[38;5;12m│ 💡 Next State: AuthStatus.loading { owner: null company: Main Company user: ?  message: null[0m
+[38;5;12m└────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────[0m
+
+╔╣ Request ║ POST 
+║  http://localhost:8080/rest/s1/growerp/100/Register
+╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+╔ Headers 
+╟ content-type: application/x-www-form-urlencoded
+╟ contentType: application/x-www-form-urlencoded
+╟ responseType: ResponseType.json
+╟ followRedirects: true
+╟ connectTimeout: 0:00:30.000000
+╟ receiveTimeout: 0:10:00.000000
+╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+╔ Extras 
+╟ noApiKey: true
+╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+╔ Body 
+╟ classificationId: AppAdmin
+╟ firstName: John
+╟ lastName: Doe
+╟ email: test771@example.com
+╟ newPassword: qqqqqq9!
+╟ userGroupId: GROWERP_M_ADMIN
+╟ timeZoneOffset: 7:00:00.000000
+╟ locale: en
+╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+║ {classificationId: AppAdmin, firstName: John, lastName: Doe, email: test771@example.com, newPassword: qqqqqq9!, userGroupId: GROWERP_
+║ M_ADMIN, timeZoneOffset: 7:00:00.000000, locale: en}
+
+╔╣ Response ║ POST ║ Status: 200 OK  ║ Time: 1358 ms
+║  http://localhost:8080/rest/s1/growerp/100/Register
+╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+╔ Headers 
+╟ set-cookie: [JSESSIONID=node01oyj08o7n2eqwd7osycfyjd1y246.node0; Path=/; HttpOnly]
+╟ date: [Thu, 04 Dec 2025 10:41:59 GMT]
+╟ x-run-time-ms: [1341]
+╟ content-encoding: [gzip]
+╟ vary: [Accept-Encoding]
+╟ moquisessiontoken: [sUuUZ3OeTNavPs0eABy8]
+╟ content-length: [438]
+╟ x-csrf-token: [sUuUZ3OeTNavPs0eABy8]
+╟ content-type: [application/json]
+╟ server: [Jetty(10.0.9)]
+╟ expires: [Thu, 01 Jan 1970 00:00:00 GMT]
+╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+╔ Body
+║
+║    {
+║         "messages": "Account created with username test771@example.com ",
+║         "authenticate": {
+║             "ownerPartyId": "100071",
+║             "user": {
+║                 "partyId": "100072",
+║                 "pseudoId": "100000",
+║                 "role": "OrgInternal",
+║                 "email": "test771@example.com",
+║                 "url": null,
+║                 "emailContactMechId": "100066",
+║                 "firstName": "John",
+║                 "lastName": "Doe",
+║                 "loginDisabled": false,
+║                 "loginName": "test771@example.com",
+║                 "fullName": "John Doe",
+║                 "userGroupId": "GROWERP_M_ADMIN",
+║                 "address": null,
+║                 "paymentMethod": null,
+║                 "groupDescription": "Admin",
+║                 "language": "en",
+║                 "image": null,
+║                 "userId": "100056",
+║                 "locale": "en",
+║                 "timeZoneOffset": "7:00:00.000000",
+║                 "telephoneNr": "",
+║                 "company": {partyId: 100073, pseudoId: 100001, name: main Organization, role: OrgInternal},
+║                 "appsUsed": []
+║            }
+║             "classificationId": "AppAdmin"
+║        }
+║    }
+║
+╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+[38;5;12m┌────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────[0m
+[38;5;12m│ 💡 EVENT: AuthRegister(User John Doe [null] sec: GROWERP_M_ADMIN  email: test771@example.com company: null[null] size: n...[0m
+[38;5;12m│ 💡 Curr.State: AuthStatus.loading { owner: null company: Main Company user: ?  message: null[0m
+[38;5;12m│ 💡 Next State: AuthStatus.unAuthenticated { owner: 100071 company: null user: Doe  message: Registration successful.[0m
+[38;5;12m│ 💡 You can ...[0m
+[38;5;12m└────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────[0m
+✅ Persisted test data to: /home/hans/Documents/integration_test_data/savetest.json
+=== Login Debug Info ===
+test.admin: User John Doe [null] sec: GROWERP_M_ADMIN  email: test771@example.com  
+test.sequence: 772
+test.company: null
+========================
+[38;5;12m┌────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────[0m
+[38;5;12m│ 💡 EVENT: AuthUpdateLocal(CompName: null, Usr: Doe)[0m
+[38;5;12m│ 💡 Curr.State: AuthStatus.unAuthenticated { owner: 100071 company: null user: Doe  message: Registration successful.[0m
+[38;5;12m│ 💡 You can ...[0m
+[38;5;12m│ 💡 Next State: AuthStatus.unAuthenticated { owner: 100071 company: null user: Doe  message: null[0m
+[38;5;12m└────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────[0m
+[38;5;12m┌────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────[0m
+[38;5;12m│ 💡 EVENT: GetDataEvent<Products>(Closure: () => Future<Products>)[0m
+[38;5;12m│ 💡 Curr.State: DataFetchStatus.initial { Instance of 'Object' }[0m
+[38;5;12m│ 💡 Next State: DataFetchStatus.loading { Instance of 'Object' }[0m
+[38;5;12m└────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────[0m
+
+╔╣ Request ║ GET 
+║  http://localhost:8080/rest/s1/growerp/100/Products?ownerPartyId=GROWERP
+╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+╔ Query Parameters 
+╟ ownerPartyId: GROWERP
+╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+╔ Headers 
+╟ api_key: null
+╟ responseType: ResponseType.json
+╟ followRedirects: true
+╟ connectTimeout: 0:00:30.000000
+╟ receiveTimeout: 0:10:00.000000
+╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+
+╔╣ Response ║ GET ║ Status: 200 OK  ║ Time: 302 ms
+║  http://localhost:8080/rest/s1/growerp/100/Products?ownerPartyId=GROWERP
+╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+╔ Headers 
+╟ set-cookie: [JSESSIONID=node013mrn28x9s8rb1r69z2iyx51iq247.node0; Path=/; HttpOnly]
+╟ date: [Thu, 04 Dec 2025 10:42:04 GMT]
+╟ x-run-time-ms: [292]
+╟ content-encoding: [gzip]
+╟ vary: [Accept-Encoding]
+╟ moquisessiontoken: [y2nBo3dbr0lj3CHNirCT]
+╟ content-length: [418]
+╟ x-csrf-token: [y2nBo3dbr0lj3CHNirCT]
+╟ content-type: [application/json]
+╟ server: [Jetty(10.0.9)]
+╟ expires: [Thu, 01 Jan 1970 00:00:00 GMT]
+╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+╔ Body
+║
+║    {
+║         "products": [
+║            {
+║                 "productId": "100000",
+║                 "pseudoId": "100000",
+║                 "productName": "GrowERP do it yourself plan",
+║                 "productTypeId": "Service",
+║                 "description": "DIY Plan $49 per month|Full functionality, unlimited users!|support charged extra $75/hr",
+║                 "useWarehouse": false,
+║                 "amount": "1.00",
+║                 "amountUom": {uomId: null},
+║                 "price": "49",
+║                 "listPrice": "0.00",
+║                 "currency": {currencyId: USD},
+║                 "categories": [{categoryId: GROWERP_SERVICES, categoryName: GrowERP Services}]
+║            },
+║            {
+║                 "productId": "100002",
+║                 "pseudoId": "100002",
+║                 "productName": "GrowERP full company plan",
+║                 "productTypeId": "Service",
+║                 "description": "Full Company Plan $999 per month|Full functionality, unlimited users|including support for 40hrs/month"
+║                 "useWarehouse": false,
+║                 "amount": "1.00",
+║                 "amountUom": {uomId: null},
+║                 "price": "999",
+║                 "listPrice": "0.00",
+║                 "currency": {currencyId: USD},
+║                 "categories": [{categoryId: GROWERP_SERVICES, categoryName: GrowERP Services}]
+║            },
+║            {
+║                 "productId": "100001",
+║                 "pseudoId": "100001",
+║                 "productName": "GrowERP small Company plan",
+║                 "productTypeId": "Service",
+║                 "description": "Small Company Plan $499 per month|Full functionality, unlimited users|including support for 20hrs/month"
+║                 "useWarehouse": false,
+║                 "amount": "1.00",
+║                 "amountUom": {uomId: null},
+║                 "price": "499",
+║                 "listPrice": "0.00",
+║                 "currency": {currencyId: USD},
+║                 "categories": [{categoryId: GROWERP_SERVICES, categoryName: GrowERP Services}]
+║            }
+║         ]
+║    }
+║
+╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+[38;5;12m┌────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────[0m
+[38;5;12m│ 💡 EVENT: GetDataEvent<Products>(Closure: () => Future<Products>)[0m
+[38;5;12m│ 💡 Curr.State: DataFetchStatus.loading { Instance of 'Object' }[0m
+[38;5;12m│ 💡 Next State: DataFetchStatus.success { Products(products: [GrowERP do it yourself plan[100000], GrowERP full company plan[1...[0m
+[38;5;12m└────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────[0m
+[38;5;12m┌────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────[0m
+[38;5;12m│ 💡 EVENT: AuthLogin()[0m
+[38;5;12m│ 💡 Curr.State: AuthStatus.unAuthenticated { owner: 100071 company: null user: Doe  message: null[0m
+[38;5;12m│ 💡 Next State: AuthStatus.loading { owner: 100071 company: null user: Doe  message: null[0m
+[38;5;12m└────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────[0m
+
+╔╣ Request ║ POST 
+║  http://localhost:8080/rest/s1/growerp/100/Login
+╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+╔ Headers 
+╟ content-type: application/x-www-form-urlencoded
+╟ contentType: application/x-www-form-urlencoded
+╟ responseType: ResponseType.json
+╟ followRedirects: true
+╟ connectTimeout: 0:00:30.000000
+╟ receiveTimeout: 0:10:00.000000
+╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+╔ Extras 
+╟ noApiKey: true
+╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+╔ Body 
+╟ username: test771@example.com
+╟ password: qqqqqq9!
+╟ classificationId: AppAdmin
+╟ timeZoneOffset: 7:00:00.000000
+╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+║ {username: test771@example.com, password: qqqqqq9!, classificationId: AppAdmin, timeZoneOffset: 7:00:00.000000}
+
+╔╣ Response ║ POST ║ Status: 200 OK  ║ Time: 161 ms
+║  http://localhost:8080/rest/s1/growerp/100/Login
+╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+╔ Headers 
+╟ set-cookie: [JSESSIONID=node01bznynpdimtwk9o8fb4zebapn248.node0; Path=/; HttpOnly]
+╟ date: [Thu, 04 Dec 2025 10:42:06 GMT]
+╟ x-run-time-ms: [154]
+╟ content-encoding: [gzip]
+╟ vary: [Accept-Encoding]
+╟ moquisessiontoken: [JsdxJSHkyhlnEGwe3gtn]
+╟ content-length: [281]
+╟ x-csrf-token: [JsdxJSHkyhlnEGwe3gtn]
+╟ content-type: [application/json]
+╟ server: [Jetty(10.0.9)]
+╟ expires: [Thu, 01 Jan 1970 00:00:00 GMT]
+╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+╔ Body
+║
+║    {
+║         "authenticate": {
+║             "user": {
+║                 "partyId": "100072",
+║                 "pseudoId": "100000",
+║                 "firstName": "John",
+║                 "lastName": "Doe",
+║                 "loginName": "test771@example.com",
+║                 "email": "test771@example.com",
+║                 "userGroupId": "GROWERP_M_ADMIN",
+║                 "role": "OrgInternal"
+║            }
+║             "ownerPartyId": "100071",
+║             "moquiSessionToken": "qqqqqq9!",
+║             "classificationId": "AppAdmin",
+║             "company": {partyId: 100073, name: main Organization, role: OrgInternal},
+║             "apiKey": "moreInfo"
+║        }
+║    }
+║
+╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+[38;5;12m┌────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────[0m
+[38;5;12m│ 💡 EVENT: AuthLogin()[0m
+[38;5;12m│ 💡 Curr.State: AuthStatus.loading { owner: 100071 company: null user: Doe  message: null[0m
+[38;5;12m│ 💡 Next State: AuthStatus.unAuthenticated { owner: 100071 company: main Organization user: Doe  message: null[0m
+[38;5;12m└────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────[0m
+[38;5;12m┌────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────[0m
+[38;5;12m│ 💡 EVENT: AuthLogin()[0m
+[38;5;12m│ 💡 Curr.State: AuthStatus.unAuthenticated { owner: 100071 company: main Organization user: Doe  message: null[0m
+[38;5;12m│ 💡 Next State: AuthStatus.loading { owner: 100071 company: main Organization user: Doe  message: null[0m
+[38;5;12m└────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────[0m
+
+╔╣ Request ║ POST 
+║  http://localhost:8080/rest/s1/growerp/100/Login
+╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+╔ Headers 
+╟ content-type: application/x-www-form-urlencoded
+╟ contentType: application/x-www-form-urlencoded
+╟ responseType: ResponseType.json
+╟ followRedirects: true
+╟ connectTimeout: 0:00:30.000000
+╟ receiveTimeout: 0:10:00.000000
+╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+╔ Extras 
+╟ noApiKey: true
+╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+╔ Body 
+╟ username: test771@example.com
+╟ password: qqqqqq9!
+╟ companyName: Main Company 772
+╟ currencyId: USD
+╟ demoData: false
+╟ classificationId: AppAdmin
+╟ timeZoneOffset: 7:00:00.000000
+╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+║ {username: test771@example.com, password: qqqqqq9!, companyName: Main Company 772, currencyId: USD, demoData: false, classificationId
+║ : AppAdmin, timeZoneOffset: 7:00:00.000000}
+
+╔╣ Response ║ POST ║ Status: 200 OK  ║ Time: 23 ms
+║  http://localhost:8080/rest/s1/growerp/100/Login
+╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+╔ Headers 
+╟ set-cookie: [JSESSIONID=node01dthozud873pp1cta9hw2xc842249.node0; Path=/; HttpOnly]
+╟ date: [Thu, 04 Dec 2025 10:42:13 GMT]
+╟ x-run-time-ms: [10]
+╟ content-encoding: [gzip]
+╟ vary: [Accept-Encoding]
+╟ moquisessiontoken: [rSNEmGeG9p6Wx_zDsAhS]
+╟ content-length: [268]
+╟ x-csrf-token: [rSNEmGeG9p6Wx_zDsAhS]
+╟ content-type: [application/json]
+╟ server: [Jetty(10.0.9)]
+╟ expires: [Thu, 01 Jan 1970 00:00:00 GMT]
+╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+╔ Body
+║
+║    {
+║         "authenticate": {
+║             "user": {partyId: 100072, pseudoId: 100000, firstName: John, lastName: Doe, loginName: test771@example.com, email: test771@example.com},
+║             "ownerPartyId": "100071",
+║             "moquiSessionToken": "qqqqqq9!",
+║             "classificationId": "AppAdmin",
+║             "company": {partyId: 100073, name: Main Company 772, role: OrgInternal},
+║             "apiKey": "evaluationWelcome",
+║             "evaluationDays": 14
+║        }
+║    }
+║
+╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+[38;5;12m┌────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────[0m
+[38;5;12m│ 💡 EVENT: AuthLogin()[0m
+[38;5;12m│ 💡 Curr.State: AuthStatus.loading { owner: 100071 company: main Organization user: Doe  message: null[0m
+[38;5;12m│ 💡 Next State: AuthStatus.unAuthenticated { owner: 100071 company: Main Company 772 user: Doe  message: null[0m
+[38;5;12m└────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────[0m
+✅ Persisted test data to: /home/hans/Documents/integration_test_data/savetest.json
+[38;5;12m┌────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────[0m
+[38;5;12m│ 💡 EVENT: AuthLogin()[0m
+[38;5;12m│ 💡 Curr.State: AuthStatus.unAuthenticated { owner: 100071 company: Main Company 772 user: Doe  message: null[0m
+[38;5;12m│ 💡 Next State: AuthStatus.loading { owner: 100071 company: Main Company 772 user: Doe  message: null[0m
+[38;5;12m└────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────[0m
+
+╔╣ Request ║ POST 
+║  http://localhost:8080/rest/s1/growerp/100/Login
+╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+╔ Headers 
+╟ content-type: application/x-www-form-urlencoded
+╟ contentType: application/x-www-form-urlencoded
+╟ responseType: ResponseType.json
+╟ followRedirects: true
+╟ connectTimeout: 0:00:30.000000
+╟ receiveTimeout: 0:10:00.000000
+╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+╔ Extras 
+╟ noApiKey: true
+╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+╔ Body 
+╟ username: test771@example.com
+╟ password: qqqqqq9!
+╟ creditCardNumber: startEvaluation
+╟ classificationId: AppAdmin
+╟ timeZoneOffset: 7:00:00.000000
+╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+║ {username: test771@example.com, password: qqqqqq9!, creditCardNumber: startEvaluation, classificationId: AppAdmin, timeZoneOffset: 7:
+║ 00:00.000000}
+
+╔╣ Response ║ POST ║ Status: 200 OK  ║ Time: 406 ms
+║  http://localhost:8080/rest/s1/growerp/100/Login
+╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+╔ Headers 
+╟ set-cookie: [JSESSIONID=node0f2pi3wv089q1i7spm5mx6qi9252.node0; Path=/; HttpOnly]
+╟ date: [Thu, 04 Dec 2025 10:42:17 GMT]
+╟ x-run-time-ms: [390]
+╟ content-encoding: [gzip]
+╟ vary: [Accept-Encoding]
+╟ moquisessiontoken: [P5pSWIqN3mB1syRLZNDC]
+╟ content-length: [647]
+╟ x-csrf-token: [P5pSWIqN3mB1syRLZNDC]
+╟ content-type: [application/json]
+╟ server: [Jetty(10.0.9)]
+╟ expires: [Thu, 01 Jan 1970 00:00:00 GMT]
+╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+╔ Body
+║
+║    {
+║         "authenticate": {
+║             "ownerPartyId": "100071",
+║             "classificationId": "AppAdmin",
+║             "user": {
+║                 "partyId": "100072",
+║                 "pseudoId": "100000",
+║                 "role": "OrgInternal",
+║                 "email": "test771@example.com",
+║                 "url": null,
+║                 "emailContactMechId": "100066",
+║                 "firstName": "John",
+║                 "lastName": "Doe",
+║                 "loginDisabled": false,
+║                 "loginName": "test771@example.com",
+║                 "fullName": "John Doe",
+║                 "userGroupId": "GROWERP_M_ADMIN",
+║                 "address": null,
+║                 "paymentMethod": null,
+║                 "groupDescription": "Admin",
+║                 "language": "en",
+║                 "image": null,
+║                 "userId": "100056",
+║                 "locale": "en",
+║                 "timeZoneOffset": "7:00:00.000000",
+║                 "telephoneNr": "",
+║                 "company": {partyId: 100073, pseudoId: 100001, name: Main Company 772, role: OrgInternal},
+║                 "appsUsed": [AppAdmin]
+║            }
+║             "company": {
+║                 "ownerpartyId": "100073",
+║                 "partyId": "100073",
+║                 "pseudoId": "100001",
+║                 "name": "Main Company 772",
+║                 "role": "OrgInternal",
+║                 "email": "test771@example.com",
+║                 "url": null,
+║                 "currency": {currencyId: USD, description: United States Dollar},
+║                 "image": null,
+║                 "address": null,
+║                 "vatPerc": "0",
+║                 "salesPerc": "0",
+║                 "paymentMethod": null,
+║                 "telephoneNr": "",
+║                 "hostName": "100056.localhost:8080",
+║                 "secondaryBackend": null,
+║                 "employees": [{partyId: 100072, pseudoId: 100000, firstName: John, lastName: Doe, email: test771@example.com}]
+║            }
+║             "apiKey": "9W1bvAJr0LJFM4GXBZ2aAKwY2QGf-FGkGPKucapw",
+║             "moquiSessionToken": "P5pSWIqN3mB1syRLZNDC",
+║             "stats": {notReadChatRooms: null}
+║        }
+║    }
+║
+╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+[38;5;12m┌────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────[0m
+[38;5;12m│ 💡 EVENT: AuthLogin()[0m
+[38;5;12m│ 💡 Curr.State: AuthStatus.loading { owner: 100071 company: Main Company 772 user: Doe  message: null[0m
+[38;5;12m│ 💡 Next State: AuthStatus.authenticated { owner: 100071 company: Main Company 772 user: Doe  message: You are logged in now.....[0m
+[38;5;12m└────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────[0m
+[38;5;12m┌────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────[0m
+[38;5;12m│ 💡 WS connect ws://localhost:8080/chat[0m
+[38;5;12m└────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────[0m
+[38;5;12m┌────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────[0m
+[38;5;12m│ 💡 WS connect ws://localhost:8080/notws[0m
+[38;5;12m└────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────[0m
+
+╔╣ Request ║ GET 
+║  http://localhost:8080/rest/s1/growerp/100/ChatRoom?search=
+╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+╔ Query Parameters 
+╟ search: 
+╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+╔ Headers 
+╟ api_key: 9W1bvAJr0LJFM4GXBZ2aAKwY2QGf-FGkGPKucapw
+╟ responseType: ResponseType.json
+╟ followRedirects: true
+╟ connectTimeout: 0:00:30.000000
+╟ receiveTimeout: 0:10:00.000000
+╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+
+╔╣ Response ║ GET ║ Status: 200 OK  ║ Time: 20 ms
+║  http://localhost:8080/rest/s1/growerp/100/ChatRoom?search=
+╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+╔ Headers 
+╟ set-cookie: [JSESSIONID=node01tx93jh8pkqkv18klqi7uuhiwz253.node0; Path=/; HttpOnly]
+╟ date: [Thu, 04 Dec 2025 10:42:19 GMT]
+╟ x-run-time-ms: [13]
+╟ content-encoding: [gzip]
+╟ vary: [Accept-Encoding]
+╟ moquisessiontoken: [wdrAjXXLShYOMiHQAW8k]
+╟ content-length: [187]
+╟ x-csrf-token: [wdrAjXXLShYOMiHQAW8k]
+╟ content-type: [application/json]
+╟ server: [Jetty(10.0.9)]
+╟ expires: [Thu, 01 Jan 1970 00:00:00 GMT]
+╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+╔ Body
+║
+║    {
+║         "chatRooms": [
+║            {
+║                 "chatRoomId": "100056",
+║                 "chatRoomName": "System Support",
+║                 "hasRead": false,
+║                 "isPrivate": true,
+║                 "members": [{user: {userId: 100056}, hasRead: false, isActive: true}, {user: {userId: SYSTEM_SUPPORT}, hasRead: true, isActive: false}]
+║            }
+║         ]
+║    }
+║
+╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+[38;5;12m┌────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────[0m
+[38;5;12m│ 💡 EVENT: FetchChatRoom refresh: false limit: 20, search: [0m
+[38;5;12m│ 💡 Curr.State: ChatRoomStatus.initial { #chatRooms: 0, hasReachedMax: false message null}[0m
+[38;5;12m│ 💡 Next State: ChatRoomStatus.success { #chatRooms: 1, hasReachedMax: true message null}[0m
+[38;5;12m└────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────[0m
+Send message: subscribe: ALL
+
+╔╣ Request ║ GET 
+║  http://localhost:8080/rest/s1/growerp/100/Notification?limit=20
+╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+╔ Query Parameters 
+╟ limit: 20
+╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+╔ Headers 
+╟ api_key: 9W1bvAJr0LJFM4GXBZ2aAKwY2QGf-FGkGPKucapw
+╟ responseType: ResponseType.json
+╟ followRedirects: true
+╟ connectTimeout: 0:00:30.000000
+╟ receiveTimeout: 0:10:00.000000
+╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+
+╔╣ Response ║ GET ║ Status: 200 OK  ║ Time: 19 ms
+║  http://localhost:8080/rest/s1/growerp/100/Notification?limit=20
+╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+╔ Headers 
+╟ set-cookie: [JSESSIONID=node01um3smbk9zrbmofynmwux9fcw254.node0; Path=/; HttpOnly]
+╟ date: [Thu, 04 Dec 2025 10:42:21 GMT]
+╟ x-run-time-ms: [14]
+╟ vary: [Accept-Encoding]
+╟ moquisessiontoken: [QkSMvIubZd96fCzCRaiw]
+╟ content-length: [27]
+╟ x-csrf-token: [QkSMvIubZd96fCzCRaiw]
+╟ content-type: [application/json]
+╟ server: [Jetty(10.0.9)]
+╟ expires: [Thu, 01 Jan 1970 00:00:00 GMT]
+╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+╔ Body
+║
+║    {
+║         "notifications": []
+║    }
+║
+╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+[38;5;12m┌────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────[0m
+[38;5;12m│ 💡 EVENT: NotificationFetch()[0m
+[38;5;12m│ 💡 Curr.State: NotificationStatus.initial { #notifications: 0,  message null}[0m
+[38;5;12m│ 💡 Next State: NotificationStatus.success { #notifications: 0,  message null}[0m
+[38;5;12m└────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────[0m
+✅ Persisted test data to: /home/hans/Documents/integration_test_data/savetest.json
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: <true>
+  Actual: <false>
+could not find key: tap/Campaigns to tap on
+
+When the exception was thrown, this was the stack:
+#4      CommonTest.tapByKey (package:growerp_core/src/domains/common/integration_test/common_test.dart:849:5)
+#5      CommonTest.selectOption (package:growerp_core/src/domains/common/integration_test/common_test.dart:365:11)
+#6      OutreachCampaignTest.selectCampaigns (file:///home/hans/growerp/flutter/packages/growerp_outreach/example/integration_test/outreach_campaign_test.dart:71:22)
+#7      main.<anonymous closure> (file:///home/hans/growerp/flutter/packages/growerp_outreach/example/integration_test/outreach_campaign_test.dart:53:32)
+<asynchronous suspension>
+#8      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#9      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  package:growerp_core/src/domains/common/integration_test/common_test.dart line 849
+The test description was:
+  GrowERP outreach campaign test
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:43 +0 -1: GrowERP outreach campaign test [E]                                                                                                                                                        
+  Test failed. See exception logs above.
+  The test description was: GrowERP outreach campaign test
+  
+
+To run this test again: /home/hans/snap/flutter/common/flutter/bin/cache/dart-sdk/bin/dart test /home/hans/growerp/flutter/packages/growerp_outreach/example/integration_test/outreach_campaign_test.dart -p vm --plain-name 'GrowERP outreach campaign test'
+00:43 +0 -1: (tearDownAll)                                                                                                                                                                             00:44 +0 -1: (tearDownAll)                                                                                                                                                                             [+33062 ms] test 0: Test harness is no longer needed by test process
+[        ] test 0: finished
+[        ] test 0: cleaning up...
+[        ] test 0: ensuring test device is terminated.
+[        ] test 0: Test process is no longer needed by test harness
+[        ] test 0: deleting temporary directory
+[        ] test 0: finished
+00:44 +0 -1: Some tests failed.                                                                                                                                                                        
+[   +4 ms] test package returned with exit code 1
+[        ] Runtime for phase TestRunner: Wall-clock: 0:00:44.091992; combined: 0:00:44.092002.
+[        ] Runtime for phase Compile: Wall-clock: 0:00:00.000000; combined: 0:00:00.000000.
+[        ] Runtime for phase Run: Wall-clock: 0:00:43.997471; combined: 0:00:43.997480.
+[        ] Runtime for phase CoverageTotal: Wall-clock: 0:00:00.000000; combined: 0:00:00.000000.
+[        ] Runtime for phase CoverageCollect: Wall-clock: 0:00:00.000000; combined: 0:00:00.000000.
+[        ] Runtime for phase CoverageParseJson: Wall-clock: 0:00:00.000000; combined: 0:00:00.000000.
+[        ] Runtime for phase CoverageAddHitmap: Wall-clock: 0:00:00.000000; combined: 0:00:00.000000.
+[        ] Runtime for phase CoverageDataCollect: Wall-clock: 0:00:00.000000; combined: 0:00:00.000000.
+[        ] Runtime for phase WatcherFinishedTest: Wall-clock: 0:00:00.000026; combined: 0:00:00.000039.
+[        ] "flutter test" took 44,737ms.
+[  +40 ms] 
+           #0      throwToolExit (package:flutter_tools/src/base/common.dart:34:3)
+           #1      TestCommand.runCommand (package:flutter_tools/src/commands/test.dart:714:7)
+           <asynchronous suspension>
+           #2      FlutterCommand.run.<anonymous closure> (package:flutter_tools/src/runner/flutter_command.dart:1559:27)
+           <asynchronous suspension>
+           #3      AppContext.run.<anonymous closure> (package:flutter_tools/src/base/context.dart:154:19)
+           <asynchronous suspension>
+           #4      CommandRunner.runCommand (package:args/command_runner.dart:212:13)
+           <asynchronous suspension>
+           #5      FlutterCommandRunner.runCommand.<anonymous closure> (package:flutter_tools/src/runner/flutter_command_runner.dart:487:9)
+           <asynchronous suspension>
+           #6      AppContext.run.<anonymous closure> (package:flutter_tools/src/base/context.dart:154:19)
+           <asynchronous suspension>
+           #7      FlutterCommandRunner.runCommand (package:flutter_tools/src/runner/flutter_command_runner.dart:422:5)
+           <asynchronous suspension>
+           #8      run.<anonymous closure>.<anonymous closure> (package:flutter_tools/runner.dart:104:11)
+           <asynchronous suspension>
+           #9      AppContext.run.<anonymous closure> (package:flutter_tools/src/base/context.dart:154:19)
+           <asynchronous suspension>
+           #10     main (package:flutter_tools/executable.dart:103:3)
+           <asynchronous suspension>
+
+
+[        ] Running 4 shutdown hooks
+[   +1 ms] Shutdown hooks complete
+[ +120 ms] exiting with code 1

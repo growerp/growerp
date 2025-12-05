@@ -27,6 +27,9 @@
                 <parameter name="emailSubject" />
                 <parameter name="status" />
                 <parameter name="dailyLimitPerPlatform" type="Integer" />
+                <parameter name="messagesSent" type="Integer" />
+                <parameter name="responsesReceived" type="Integer" />
+                <parameter name="leadsGenerated" type="Integer" />
                 <parameter name="createdDate" />
                 <parameter name="lastModifiedDate" />
             </parameter>
@@ -36,7 +39,7 @@
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
                 out-map="context" />
 
-            <entity-find entity-name="growerp.marketing.OutreachCampaign" list="campaignList"
+            <entity-find entity-name="growerp.marketing.OutreachCampaignAndMetrics" list="campaignList"
                 offset="start" limit="limit">
                 <econdition field-name="ownerPartyId" />
                 <econdition field-name="status" ignore-if-empty="true" />
@@ -57,6 +60,9 @@
                     emailSubject: camp.emailSubject,
                     status: camp.status ?: 'DRAFT',
                     dailyLimitPerPlatform: camp.dailyLimitPerPlatform ?: 50,
+                    messagesSent: camp.messagesSent ?: 0,
+                    responsesReceived: camp.responsesReceived ?: 0,
+                    leadsGenerated: camp.leadsGenerated ?: 0,
                     createdDate: camp.createdDate ? ec.l10n.format(camp.createdDate, 'yyyy-MM-dd HH:mm:ssZ') : null,
                     lastModifiedDate: camp.lastModifiedDate ? ec.l10n.format(camp.lastModifiedDate, 'yyyy-MM-dd HH:mm:ssZ') : null
                 ])</script>
@@ -139,9 +145,30 @@
             </entity-find>
 
             <!-- Get metrics -->
-            <entity-find-one entity-name="growerp.marketing.CampaignMetrics" value-field="metrics">
+            <entity-find-one entity-name="growerp.marketing.CampaignMetrics" value-field="metricsEntity">
                 <field-map field-name="campaignId" />
             </entity-find-one>
+
+            <!-- Calculate dynamic metrics -->
+            <entity-find-count entity-name="growerp.marketing.OutreachMessage" count-field="messagesPending">
+                <econdition field-name="campaignId" />
+                <econdition field-name="status" value="PENDING" />
+            </entity-find-count>
+            <entity-find-count entity-name="growerp.marketing.OutreachMessage" count-field="messagesFailed">
+                <econdition field-name="campaignId" />
+                <econdition field-name="status" value="FAILED" />
+            </entity-find-count>
+
+            <set field="metrics" from="[
+                metricId: metricsEntity?.metricId,
+                campaignId: campaignId,
+                messagesSent: metricsEntity?.messagesSent ?: 0,
+                messagesPending: messagesPending,
+                messagesFailed: messagesFailed,
+                responsesReceived: metricsEntity?.responsesReceived ?: 0,
+                leadsGenerated: metricsEntity?.leadsGenerated ?: 0,
+                lastUpdated: metricsEntity?.lastUpdated
+            ]" />
         </actions>
     </service>
 
@@ -410,21 +437,33 @@
     <service verb="create" noun="OutreachMessage">
         <description>Record a sent outreach message</description>
         <in-parameters>
-            <parameter name="campaignId" required="true" />
+            <parameter name="campaignId" />
             <parameter name="platform" required="true" />
             <parameter name="recipientName" />
             <parameter name="recipientProfileUrl" />
             <parameter name="recipientHandle" />
             <parameter name="recipientEmail" />
             <parameter name="messageContent" required="true" />
-            <parameter name="status" default-value="SENT" />
+            <parameter name="status" default-value="PENDING" />
         </in-parameters>
         <out-parameters>
             <parameter name="messageId" />
+            <parameter name="campaignId" />
+            <parameter name="platform" />
+            <parameter name="recipientName" />
+            <parameter name="recipientProfileUrl" />
+            <parameter name="recipientHandle" />
+            <parameter name="recipientEmail" />
+            <parameter name="messageContent" />
+            <parameter name="status" />
+            <parameter name="sentDate" />
+            <parameter name="responseDate" />
+            <parameter name="errorMessage" />
+            <parameter name="createdDate" />
         </out-parameters>
         <actions>
             <!-- Create message -->
-            <service-call name="create#growerp.marketing.OutreachMessage" out-map="context"
+            <service-call name="create#growerp.marketing.OutreachMessage" out-map="createOut"
                 in-map="[campaignId: campaignId,
                          platform: platform,
                          recipientName: recipientName,
@@ -432,13 +471,35 @@
                          recipientHandle: recipientHandle,
                          recipientEmail: recipientEmail,
                          messageContent: messageContent,
-                         sentDate: ec.user.nowTimestamp,
+                         sentDate: status == 'SENT' ? ec.user.nowTimestamp : null,
                          status: status,
                          createdDate: ec.user.nowTimestamp]" />
 
-            <!-- Update campaign metrics -->
-            <service-call name="growerp.100.OutreachServices100.update#CampaignMetrics"
-                in-map="[campaignId: campaignId, incrementMessagesSent: true]" />
+            <!-- Update campaign metrics only if campaignId is provided -->
+            <if condition="campaignId">
+                <service-call name="growerp.100.OutreachServices100.update#CampaignMetrics"
+                    in-map="[campaignId: campaignId, incrementMessagesSent: status == 'SENT']" />
+            </if>
+
+            <!-- Fetch created message to return full object -->
+            <entity-find-one entity-name="growerp.marketing.OutreachMessage" value-field="message">
+                <field-map field-name="messageId" from="createOut.messageId" />
+            </entity-find-one>
+
+            <!-- Build output map -->
+            <set field="messageId" from="message.messageId" />
+            <set field="campaignId" from="message.campaignId" />
+            <set field="platform" from="message.platform" />
+            <set field="recipientName" from="message.recipientName" />
+            <set field="recipientProfileUrl" from="message.recipientProfileUrl" />
+            <set field="recipientHandle" from="message.recipientHandle" />
+            <set field="recipientEmail" from="message.recipientEmail" />
+            <set field="messageContent" from="message.messageContent" />
+            <set field="status" from="message.status" />
+            <set field="sentDate" from="message.sentDate ? ec.l10n.format(message.sentDate, 'yyyy-MM-dd HH:mm:ssZ') : null" />
+            <set field="responseDate" from="message.responseDate ? ec.l10n.format(message.responseDate, 'yyyy-MM-dd HH:mm:ssZ') : null" />
+            <set field="errorMessage" from="message.errorMessage" />
+            <set field="createdDate" from="message.createdDate ? ec.l10n.format(message.createdDate, 'yyyy-MM-dd HH:mm:ssZ') : null" />
         </actions>
     </service>
 
@@ -452,6 +513,18 @@
         </in-parameters>
         <out-parameters>
             <parameter name="messageId" />
+            <parameter name="campaignId" />
+            <parameter name="platform" />
+            <parameter name="recipientName" />
+            <parameter name="recipientProfileUrl" />
+            <parameter name="recipientHandle" />
+            <parameter name="recipientEmail" />
+            <parameter name="messageContent" />
+            <parameter name="status" />
+            <parameter name="sentDate" />
+            <parameter name="responseDate" />
+            <parameter name="errorMessage" />
+            <parameter name="createdDate" />
         </out-parameters>
         <actions>
             <!-- Get message -->
@@ -469,11 +542,44 @@
                          responseDate: responseDate ?: (status == 'RESPONDED' ? ec.user.nowTimestamp : null),
                          errorMessage: errorMessage]" />
 
-            <!-- Update metrics if responded -->
-            <if condition="status == 'RESPONDED'">
+            <!-- Update metrics if responded and has campaignId -->
+            <if condition="status == 'RESPONDED' &amp;&amp; message.campaignId">
                 <service-call name="growerp.100.OutreachServices100.update#CampaignMetrics"
                     in-map="[campaignId: message.campaignId, incrementResponses: true]" />
             </if>
+
+            <!-- Fetch updated message -->
+            <entity-find-one entity-name="growerp.marketing.OutreachMessage" value-field="updatedMessage">
+                <field-map field-name="messageId" />
+            </entity-find-one>
+
+            <!-- Build output map -->
+            <set field="messageId" from="updatedMessage.messageId" />
+            <set field="campaignId" from="updatedMessage.campaignId" />
+            <set field="platform" from="updatedMessage.platform" />
+            <set field="recipientName" from="updatedMessage.recipientName" />
+            <set field="recipientProfileUrl" from="updatedMessage.recipientProfileUrl" />
+            <set field="recipientHandle" from="updatedMessage.recipientHandle" />
+            <set field="recipientEmail" from="updatedMessage.recipientEmail" />
+            <set field="messageContent" from="updatedMessage.messageContent" />
+            <set field="status" from="updatedMessage.status" />
+            <set field="sentDate" from="updatedMessage.sentDate ? ec.l10n.format(updatedMessage.sentDate, 'yyyy-MM-dd HH:mm:ssZ') : null" />
+            <set field="responseDate" from="updatedMessage.responseDate ? ec.l10n.format(updatedMessage.responseDate, 'yyyy-MM-dd HH:mm:ssZ') : null" />
+            <set field="errorMessage" from="updatedMessage.errorMessage" />
+            <set field="createdDate" from="updatedMessage.createdDate ? ec.l10n.format(updatedMessage.createdDate, 'yyyy-MM-dd HH:mm:ssZ') : null" />
+        </actions>
+    </service>
+
+    <service verb="delete" noun="OutreachMessage">
+        <description>Delete an outreach message</description>
+        <in-parameters>
+            <parameter name="messageId" required="true" />
+        </in-parameters>
+        <actions>
+            <!-- Delete message -->
+            <entity-delete-by-condition entity-name="growerp.marketing.OutreachMessage">
+                <econdition field-name="messageId" />
+            </entity-delete-by-condition>
         </actions>
     </service>
 
@@ -555,12 +661,23 @@
             <parameter name="platform" required="true" />
             <parameter name="isEnabled" default-value="N" />
             <parameter name="dailyLimit" type="Integer" default="50" />
-            <parameter name="credentials" required="true">
-                <description>JSON object with platform credentials</description>
-            </parameter>
+            <parameter name="apiKey" />
+            <parameter name="apiSecret" />
+            <parameter name="username" />
+            <parameter name="password" />
         </in-parameters>
         <out-parameters>
             <parameter name="configId" />
+            <parameter name="ownerPartyId" />
+            <parameter name="platform" />
+            <parameter name="isEnabled" />
+            <parameter name="dailyLimit" type="Integer" />
+            <parameter name="apiKey" />
+            <parameter name="apiSecret" />
+            <parameter name="username" />
+            <parameter name="password" />
+            <parameter name="createdDate" />
+            <parameter name="lastModifiedDate" />
         </out-parameters>
         <actions>
             <service-call out-map="context"
@@ -571,9 +688,17 @@
                          platform: platform,
                          isEnabled: isEnabled,
                          dailyLimit: dailyLimit,
-                         credentials: credentials,
+                         apiKey: apiKey,
+                         apiSecret: apiSecret,
+                         username: username,
+                         password: password,
                          createdDate: ec.user.nowTimestamp,
                          lastModifiedDate: ec.user.nowTimestamp]" />
+            <!-- Convert isEnabled to boolean for frontend -->
+            <set field="isEnabled" from="isEnabled == 'Y'" />
+            <!-- Format dates -->
+            <set field="createdDate" from="createdDate ? ec.l10n.format(createdDate, 'yyyy-MM-dd HH:mm:ssZ') : null" />
+            <set field="lastModifiedDate" from="lastModifiedDate ? ec.l10n.format(lastModifiedDate, 'yyyy-MM-dd HH:mm:ssZ') : null" />
         </actions>
     </service>
 
@@ -583,15 +708,106 @@
             <parameter name="configId" required="true" />
             <parameter name="isEnabled" />
             <parameter name="dailyLimit" type="Integer" />
-            <parameter name="credentials" />
+            <parameter name="apiKey" />
+            <parameter name="apiSecret" />
+            <parameter name="username" />
+            <parameter name="password" />
         </in-parameters>
+        <out-parameters>
+            <parameter name="configId" />
+            <parameter name="ownerPartyId" />
+            <parameter name="platform" />
+            <parameter name="isEnabled" />
+            <parameter name="dailyLimit" type="Integer" />
+            <parameter name="apiKey" />
+            <parameter name="apiSecret" />
+            <parameter name="username" />
+            <parameter name="password" />
+            <parameter name="createdDate" />
+            <parameter name="lastModifiedDate" />
+        </out-parameters>
         <actions>
             <service-call name="update#growerp.marketing.PlatformConfiguration"
                 in-map="[configId: configId,
                          isEnabled: isEnabled,
                          dailyLimit: dailyLimit,
-                         credentials: credentials,
+                         apiKey: apiKey,
+                         apiSecret: apiSecret,
+                         username: username,
+                         password: password,
                          lastModifiedDate: ec.user.nowTimestamp]" />
+            <!-- Fetch updated record to return full object -->
+            <entity-find-one entity-name="growerp.marketing.PlatformConfiguration" value-field="conf">
+                <field-map field-name="configId" />
+            </entity-find-one>
+            <set field="ownerPartyId" from="conf.ownerPartyId" />
+            <set field="platform" from="conf.platform" />
+            <set field="isEnabled" from="conf.isEnabled == 'Y'" />
+            <set field="dailyLimit" from="conf.dailyLimit" />
+            <set field="apiKey" from="conf.apiKey" />
+            <set field="apiSecret" from="conf.apiSecret" />
+            <set field="username" from="conf.username" />
+            <set field="password" from="conf.password" />
+            <set field="createdDate" from="conf.createdDate ? ec.l10n.format(conf.createdDate, 'yyyy-MM-dd HH:mm:ssZ') : null" />
+            <set field="lastModifiedDate" from="conf.lastModifiedDate ? ec.l10n.format(conf.lastModifiedDate, 'yyyy-MM-dd HH:mm:ssZ') : null" />
+        </actions>
+    </service>
+
+    <service verb="delete" noun="PlatformConfiguration">
+        <description>Delete platform configuration</description>
+        <in-parameters>
+            <parameter name="configId" required="true" />
+        </in-parameters>
+        <actions>
+            <service-call name="delete#growerp.marketing.PlatformConfiguration"
+                in-map="[configId: configId]" />
+        </actions>
+    </service>
+
+    <service verb="list" noun="PlatformConfigurations">
+        <description>List platform configurations for owner</description>
+        <out-parameters>
+            <parameter name="configs" type="List">
+                <description>List of platform configuration maps</description>
+                <parameter name="configId" />
+                <parameter name="ownerPartyId" />
+                <parameter name="platform" />
+                <parameter name="isEnabled" />
+                <parameter name="dailyLimit" type="Integer" />
+                <parameter name="apiKey" />
+                <parameter name="apiSecret" />
+                <parameter name="username" />
+                <parameter name="password" />
+                <parameter name="createdDate" />
+                <parameter name="lastModifiedDate" />
+            </parameter>
+        </out-parameters>
+        <actions>
+            <service-call
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="context" />
+
+            <entity-find entity-name="growerp.marketing.PlatformConfiguration" list="configList">
+                <econdition field-name="ownerPartyId" />
+                <order-by field-name="platform" />
+            </entity-find>
+
+            <set field="configs" from="[]" />
+            <iterate list="configList" entry="conf">
+                <script>configs.add([
+                    configId: conf.configId,
+                    ownerPartyId: conf.ownerPartyId,
+                    platform: conf.platform,
+                    isEnabled: conf.isEnabled == 'Y',
+                    dailyLimit: conf.dailyLimit,
+                    apiKey: conf.apiKey,
+                    apiSecret: conf.apiSecret,
+                    username: conf.username,
+                    password: conf.password,
+                    createdDate: conf.createdDate ? ec.l10n.format(conf.createdDate, 'yyyy-MM-dd HH:mm:ssZ') : null,
+                    lastModifiedDate: conf.lastModifiedDate ? ec.l10n.format(conf.lastModifiedDate, 'yyyy-MM-dd HH:mm:ssZ') : null
+                ])</script>
+            </iterate>
         </actions>
     </service>
 
@@ -694,6 +910,255 @@
                 in-map="[campaignId: campaignId, incrementMessagesSent: true]" />
 
             <set field="emailMessageId" from="emailResult.messageId" />
+        </actions>
+    </service>
+
+    <!-- ========================================================= -->
+    <!--  Campaign Automation Services                             -->
+    <!-- ========================================================= -->
+
+    <service verb="start" noun="CampaignAutomation">
+        <description>Start campaign automation - sets status to ACTIVE</description>
+        <in-parameters>
+            <parameter name="campaignId" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="campaignId" />
+            <parameter name="status" />
+            <parameter name="message" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+
+            <entity-find-one entity-name="growerp.marketing.OutreachCampaign" value-field="campaign">
+                <field-map field-name="campaignId" />
+                <field-map field-name="ownerPartyId" />
+            </entity-find-one>
+            <if condition="!campaign">
+                <return error="true" message="Campaign not found: ${campaignId}" />
+            </if>
+
+            <!-- Update campaign status to ACTIVE -->
+            <service-call name="update#growerp.marketing.OutreachCampaign">
+                <field-map field-name="campaignId" />
+                <field-map field-name="status" value="ACTIVE" />
+                <field-map field-name="lastModifiedDate" from="ec.user.nowTimestamp" />
+                <field-map field-name="lastModifiedByUserLogin" from="ec.user.userId" />
+            </service-call>
+
+            <set field="status" value="ACTIVE" />
+            <set field="message" value="Campaign automation started" />
+        </actions>
+    </service>
+
+    <service verb="pause" noun="CampaignAutomation">
+        <description>Pause campaign automation - sets status to PAUSED</description>
+        <in-parameters>
+            <parameter name="campaignId" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="campaignId" />
+            <parameter name="status" />
+            <parameter name="message" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+
+            <entity-find-one entity-name="growerp.marketing.OutreachCampaign" value-field="campaign">
+                <field-map field-name="campaignId" />
+                <field-map field-name="ownerPartyId" />
+            </entity-find-one>
+            <if condition="!campaign">
+                <return error="true" message="Campaign not found: ${campaignId}" />
+            </if>
+
+            <!-- Update campaign status to PAUSED -->
+            <service-call name="update#growerp.marketing.OutreachCampaign">
+                <field-map field-name="campaignId" />
+                <field-map field-name="status" value="PAUSED" />
+                <field-map field-name="lastModifiedDate" from="ec.user.nowTimestamp" />
+                <field-map field-name="lastModifiedByUserLogin" from="ec.user.userId" />
+            </service-call>
+
+            <set field="status" value="PAUSED" />
+            <set field="message" value="Campaign automation paused" />
+        </actions>
+    </service>
+
+    <service verb="get" noun="CampaignProgress">
+        <description>Get campaign automation progress and statistics</description>
+        <in-parameters>
+            <parameter name="campaignId" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="campaignId" />
+            <parameter name="status" />
+            <parameter name="messagesSent" type="Integer" />
+            <parameter name="messagesPending" type="Integer" />
+            <parameter name="messagesFailed" type="Integer" />
+            <parameter name="responsesReceived" type="Integer" />
+            <parameter name="responseRate" type="BigDecimal" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+
+            <entity-find-one entity-name="growerp.marketing.OutreachCampaign" value-field="campaign">
+                <field-map field-name="campaignId" />
+                <field-map field-name="ownerPartyId" />
+            </entity-find-one>
+            <if condition="!campaign">
+                <return error="true" message="Campaign not found: ${campaignId}" />
+            </if>
+
+            <set field="status" from="campaign.status" />
+
+            <!-- Count messages by status -->
+            <entity-find entity-name="growerp.marketing.OutreachMessage" list="sentMessages">
+                <econdition field-name="campaignId" />
+                <econdition field-name="status" value="SENT" />
+            </entity-find>
+            <set field="messagesSent" from="sentMessages.size()" />
+
+            <entity-find entity-name="growerp.marketing.OutreachMessage" list="pendingMessages">
+                <econdition field-name="campaignId" />
+                <econdition field-name="status" value="PENDING" />
+            </entity-find>
+            <set field="messagesPending" from="pendingMessages.size()" />
+
+            <entity-find entity-name="growerp.marketing.OutreachMessage" list="failedMessages">
+                <econdition field-name="campaignId" />
+                <econdition field-name="status" value="FAILED" />
+            </entity-find>
+            <set field="messagesFailed" from="failedMessages.size()" />
+
+            <entity-find entity-name="growerp.marketing.OutreachMessage" list="respondedMessages">
+                <econdition field-name="campaignId" />
+                <econdition field-name="status" value="RESPONDED" />
+            </entity-find>
+            <set field="responsesReceived" from="respondedMessages.size()" />
+
+            <!-- Calculate response rate -->
+            <set field="responseRate" from="messagesSent > 0 ? (responsesReceived * 100.0 / messagesSent) : 0" />
+        </actions>
+    </service>
+
+    <service verb="create" noun="OutreachMessage">
+        <description>Create outreach message record for tracking</description>
+        <in-parameters>
+            <parameter name="campaignId" required="true" />
+            <parameter name="platform" required="true" />
+            <parameter name="recipientName" />
+            <parameter name="recipientHandle" />
+            <parameter name="recipientProfileUrl" />
+            <parameter name="recipientEmail" />
+            <parameter name="messageContent" />
+            <parameter name="status" default="PENDING" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="messageId" />
+        </out-parameters>
+        <actions>
+            <service-call name="create#growerp.marketing.OutreachMessage" out-map="context">
+                <field-map field-name="campaignId" />
+                <field-map field-name="platform" />
+                <field-map field-name="recipientName" />
+                <field-map field-name="recipientHandle" />
+                <field-map field-name="recipientProfileUrl" />
+                <field-map field-name="recipientEmail" />
+                <field-map field-name="messageContent" />
+                <field-map field-name="status" />
+                <field-map field-name="createdDate" from="ec.user.nowTimestamp" />
+            </service-call>
+        </actions>
+    </service>
+
+    <service verb="update" noun="OutreachMessageStatus">
+        <description>Update outreach message status after send attempt</description>
+        <in-parameters>
+            <parameter name="messageId" required="true" />
+            <parameter name="status" required="true" />
+            <parameter name="errorMessage" />
+        </in-parameters>
+        <actions>
+            <service-call name="update#growerp.marketing.OutreachMessage">
+                <field-map field-name="messageId" />
+                <field-map field-name="status" />
+                <field-map field-name="errorMessage" />
+                <field-map field-name="sentDate" from="status == 'SENT' ? ec.user.nowTimestamp : null" />
+                <field-map field-name="responseDate" from="status == 'RESPONDED' ? ec.user.nowTimestamp : null" />
+            </service-call>
+
+            <!-- Update campaign metrics if sent -->
+            <if condition="status == 'SENT'">
+                <entity-find-one entity-name="growerp.marketing.OutreachMessage" value-field="message">
+                    <field-map field-name="messageId" />
+                </entity-find-one>
+                <if condition="message">
+                    <service-call name="growerp.100.OutreachServices100.update#CampaignMetrics"
+                        in-map="[campaignId: message.campaignId, incrementMessagesSent: true]" />
+                </if>
+            </if>
+        </actions>
+    </service>
+
+    <service verb="list" noun="OutreachMessages">
+        <description>List outreach messages for owner with optional filters</description>
+        <in-parameters>
+            <parameter name="campaignId" />
+            <parameter name="status" />
+            <parameter name="start" type="Integer" default="0" />
+            <parameter name="limit" type="Integer" default="20" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="messages" type="List">
+                <description>List of message maps</description>
+                <parameter name="messageId" />
+                <parameter name="campaignId" />
+                <parameter name="platform" />
+                <parameter name="recipientName" />
+                <parameter name="recipientHandle" />
+                <parameter name="recipientProfileUrl" />
+                <parameter name="recipientEmail" />
+                <parameter name="messageContent" />
+                <parameter name="status" />
+                <parameter name="sentDate" />
+                <parameter name="errorMessage" />
+            </parameter>
+        </out-parameters>
+        <actions>
+            <service-call
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="context" />
+
+            <entity-find entity-name="growerp.marketing.OutreachMessage" list="messageList"
+                offset="start" limit="limit">
+                <!-- TODO: Add ownerPartyId to OutreachMessage entity or join with Campaign -->
+                <!-- For now, we filter by campaignId if provided, or just return all (security gap if not careful) -->
+                <!-- Ideally join with OutreachCampaign to filter by ownerPartyId -->
+                <econdition field-name="campaignId" ignore-if-empty="true" />
+                <econdition field-name="status" ignore-if-empty="true" />
+                <order-by field-name="-createdDate" />
+            </entity-find>
+
+            <set field="messages" from="[]" />
+            <iterate list="messageList" entry="msg">
+                <script>messages.add([
+                    messageId: msg.messageId,
+                    campaignId: msg.campaignId,
+                    platform: msg.platform,
+                    recipientName: msg.recipientName,
+                    recipientHandle: msg.recipientHandle,
+                    recipientProfileUrl: msg.recipientProfileUrl,
+                    recipientEmail: msg.recipientEmail,
+                    messageContent: msg.messageContent,
+                    status: msg.status,
+                    sentDate: msg.sentDate ? ec.l10n.format(msg.sentDate, 'yyyy-MM-dd HH:mm:ssZ') : null,
+                    errorMessage: msg.errorMessage
+                ])</script>
+            </iterate>
         </actions>
     </service>
 

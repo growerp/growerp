@@ -14,6 +14,12 @@ class CampaignMetrics {
   /// Total messages sent
   final int messagesSent;
 
+  /// Total messages pending
+  final int messagesPending;
+
+  /// Total messages failed
+  final int messagesFailed;
+
   /// Total responses received
   final int responsesReceived;
 
@@ -33,6 +39,8 @@ class CampaignMetrics {
     this.metricId,
     this.campaignId,
     this.messagesSent = 0,
+    this.messagesPending = 0,
+    this.messagesFailed = 0,
     this.responsesReceived = 0,
     this.leadsGenerated = 0,
     this.lastUpdated,
@@ -47,5 +55,5 @@ class CampaignMetrics {
 
   @override
   String toString() =>
-      'CampaignMetrics(sent: $messagesSent, responses: $responsesReceived, leads: $leadsGenerated)';
+      'CampaignMetrics(sent: $messagesSent, pending: $messagesPending, failed: $messagesFailed, responses: $responsesReceived, leads: $leadsGenerated)';
 }

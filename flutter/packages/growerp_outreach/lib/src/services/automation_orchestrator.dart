@@ -2,7 +2,7 @@ import 'package:growerp_models/growerp_models.dart';
 import 'platform_automation_adapter.dart';
 import 'adapters/email_automation_adapter.dart';
 import 'adapters/linkedin_automation_adapter.dart';
-import 'adapters/twitter_automation_adapter.dart';
+import 'adapters/x_automation_adapter.dart';
 
 /// Orchestrates automation across multiple platforms
 ///
@@ -32,6 +32,8 @@ class AutomationOrchestrator {
     required String searchCriteria,
     required String messageTemplate,
     required int dailyLimit,
+    required String campaignId,
+    required bool Function() checkCancelled,
   }) async {
     final adapter = _adapters[platform];
     if (adapter == null) {
@@ -50,6 +52,7 @@ class AutomationOrchestrator {
     // Send messages up to daily limit
     int sent = 0;
     for (final profile in profiles) {
+      if (checkCancelled()) break;
       if (sent >= dailyLimit) break;
 
       try {
@@ -63,13 +66,43 @@ class AutomationOrchestrator {
           await adapter.sendConnectionRequest(profile, message);
         }
 
+        // Record success in backend
+        await restClient.createOutreachMessage(
+          campaignId: campaignId,
+          platform: platform,
+          recipientName: profile.name,
+          recipientHandle: profile.handle,
+          recipientProfileUrl: profile.profileUrl,
+          recipientEmail: profile.email,
+          messageContent: message,
+          status: 'SENT',
+        );
+
         sent++;
 
         // Add delay to mimic human behavior
-        await Future.delayed(Duration(seconds: _getRandomDelay(platform)));
+        if (!checkCancelled()) {
+          await Future.delayed(Duration(seconds: _getRandomDelay(platform)));
+        }
       } catch (e) {
         // Log error and continue
         print('Error sending to ${profile.name}: $e');
+
+        // Record failure in backend
+        try {
+          await restClient.createOutreachMessage(
+            campaignId: campaignId,
+            platform: platform,
+            recipientName: profile.name,
+            recipientHandle: profile.handle,
+            recipientProfileUrl: profile.profileUrl,
+            recipientEmail: profile.email,
+            messageContent: _personalizeMessage(messageTemplate, profile),
+            status: 'FAILED',
+          );
+        } catch (_) {
+          // Ignore backend error if logging fails
+        }
       }
     }
   }
@@ -89,7 +122,7 @@ class AutomationOrchestrator {
       case 'LINKEDIN':
         return LinkedInAutomationAdapter();
       case 'TWITTER':
-        return TwitterAutomationAdapter();
+        return XAutomationAdapter();
       default:
         return null;
     }

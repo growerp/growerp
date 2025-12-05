@@ -1,5 +1,8 @@
 export 'src/models/models.dart';
 export 'src/models/subscription_model.dart';
+export 'src/models/outreach_platform.dart';
+export 'src/models/platform_configurations_model.dart';
+export 'src/models/campaign_progress_model.dart';
 export 'src/json_converters.dart';
 export 'src/rest_client.dart';
 export 'src/create_csv_row.dart';

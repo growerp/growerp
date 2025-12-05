@@ -38,14 +38,14 @@ class OutreachCampaignCreate extends OutreachCampaignEvent {
 
   @override
   List<Object?> get props => [
-    name,
-    platforms,
-    targetAudience,
-    landingPageId,
-    messageTemplate,
-    emailSubject,
-    dailyLimitPerPlatform,
-  ];
+        name,
+        platforms,
+        targetAudience,
+        landingPageId,
+        messageTemplate,
+        emailSubject,
+        dailyLimitPerPlatform,
+      ];
 }
 
 class OutreachCampaignUpdate extends OutreachCampaignEvent {
@@ -75,17 +75,17 @@ class OutreachCampaignUpdate extends OutreachCampaignEvent {
 
   @override
   List<Object?> get props => [
-    campaignId,
-    pseudoId,
-    name,
-    platforms,
-    targetAudience,
-    landingPageId,
-    messageTemplate,
-    emailSubject,
-    status,
-    dailyLimitPerPlatform,
-  ];
+        campaignId,
+        pseudoId,
+        name,
+        platforms,
+        targetAudience,
+        landingPageId,
+        messageTemplate,
+        emailSubject,
+        status,
+        dailyLimitPerPlatform,
+      ];
 }
 
 class OutreachCampaignDelete extends OutreachCampaignEvent {
@@ -105,4 +105,31 @@ class OutreachCampaignDetailFetch extends OutreachCampaignEvent {
 
   @override
   List<Object?> get props => [campaignId, pseudoId];
+}
+
+class OutreachCampaignStart extends OutreachCampaignEvent {
+  const OutreachCampaignStart(this.campaignId);
+
+  final String campaignId;
+
+  @override
+  List<Object> get props => [campaignId];
+}
+
+class OutreachCampaignPause extends OutreachCampaignEvent {
+  const OutreachCampaignPause(this.campaignId);
+
+  final String campaignId;
+
+  @override
+  List<Object> get props => [campaignId];
+}
+
+class OutreachRecentMessagesFetch extends OutreachCampaignEvent {
+  const OutreachRecentMessagesFetch({this.limit = 20});
+
+  final int limit;
+
+  @override
+  List<Object> get props => [limit];
 }

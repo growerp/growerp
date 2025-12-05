@@ -486,6 +486,56 @@ along with this software (see the LICENSE.md file). If not, see
             <method type="delete">
                 <service name="growerp.100.OutreachServices100.delete#OutreachCampaign" />
             </method>
+            <resource name="start">
+                <method type="post">
+                    <service name="growerp.100.OutreachServices100.start#CampaignAutomation" />
+                </method>
+            </resource>
+            <resource name="pause">
+                <method type="post">
+                    <service name="growerp.100.OutreachServices100.pause#CampaignAutomation" />
+                </method>
+            </resource>
+            <resource name="progress">
+                <method type="get">
+                    <service name="growerp.100.OutreachServices100.get#CampaignProgress" />
+                </method>
+            </resource>
+        </resource>
+        <resource name="OutreachMessage">
+            <method type="get">
+                <service name="growerp.100.OutreachServices100.list#OutreachMessages" />
+            </method>
+            <method type="post">
+                <service name="growerp.100.OutreachServices100.create#OutreachMessage" />
+            </method>
+            <method type="patch">
+                <service name="growerp.100.OutreachServices100.update#OutreachMessageStatus" />
+            </method>
+            <method type="delete">
+                <service name="growerp.100.OutreachServices100.delete#OutreachMessage" />
+            </method>
+        </resource>
+
+        <!-- Platform Configuration -->
+        <resource name="PlatformConfigurations">
+            <method type="get">
+                <service name="growerp.100.OutreachServices100.list#PlatformConfigurations" />
+            </method>
+        </resource>
+        <resource name="PlatformConfiguration">
+            <method type="get">
+                <service name="growerp.100.OutreachServices100.get#PlatformConfiguration" />
+            </method>
+            <method type="post">
+                <service name="growerp.100.OutreachServices100.create#PlatformConfiguration" />
+            </method>
+            <method type="patch">
+                <service name="growerp.100.OutreachServices100.update#PlatformConfiguration" />
+            </method>
+            <method type="delete">
+                <service name="growerp.100.OutreachServices100.delete#PlatformConfiguration" />
+            </method>
         </resource>
 
         <!-- Public landing page -->

@@ -211,7 +211,7 @@
         <in-parameters>
             <parameter name="pseudoId" />
             <parameter name="personaId" />
-            <parameter name="weekStartDate" type="Timestamp" />
+            <parameter name="weekStartDate" type="Long" />
             <parameter name="theme" />
         </in-parameters>
         <out-parameters>
@@ -238,6 +238,10 @@
                 <set field="pseudoId" from="seqNum" />
             </if>
 
+            <!-- Convert milliseconds to Timestamp -->
+            <if condition="weekStartDate">
+                <set field="weekStartDate" from="new java.sql.Timestamp(weekStartDate)" />
+            </if>
 
             <service-call name="create#growerp.marketing.ContentPlan" out-map="context"
                 in-map="[
@@ -268,7 +272,7 @@
             <parameter name="planId" required="true" />
             <parameter name="pseudoId" />
             <parameter name="personaId" />
-            <parameter name="weekStartDate" type="Timestamp" />
+            <parameter name="weekStartDate" type="Long" />
             <parameter name="theme" />
         </in-parameters>
         <out-parameters>
@@ -291,6 +295,10 @@
                 <return error="true" message="Content plan not found or access denied" />
             </if>
 
+            <!-- Convert milliseconds to Timestamp -->
+            <if condition="weekStartDate">
+                <set field="weekStartDate" from="new java.sql.Timestamp(weekStartDate)" />
+            </if>
 
             <service-call name="update#growerp.marketing.ContentPlan"
                 in-map="context + [lastModifiedDate: ec.user.nowTimestamp]" />
@@ -385,40 +393,241 @@
         </actions>
     </service>
 
-    <service verb="create" noun="SocialPost" authenticate="true">
+    <!-- ============================================ -->
+    <!-- SOCIAL POST CRUD SERVICES                    -->
+    <!-- ============================================ -->
+
+    <service verb="list" noun="SocialPosts" authenticate="true">
         <in-parameters>
-            <parameter name="planId" required="true" />
-            <parameter name="type" required="true" />
+            <parameter name="searchString" />
+            <parameter name="postId" />
+            <parameter name="pseudoId" />
+            <parameter name="planId" />
+            <parameter name="start" type="Integer" />
+            <parameter name="limit" type="Integer" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="socialPosts" type="List" />
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="context" />
+
+            <if condition="searchString">
+                <set field="searchString" value="%$searchString%" />
+            </if>
+
+            <entity-find entity-name="growerp.marketing.SocialPost" list="socialPosts"
+                offset="start" limit="limit">
+                <econdition field-name="ownerPartyId" />
+                <econdition field-name="planId" from="planId" ignore-if-empty="true" />
+                <econditions combine="or">
+                    <econdition field-name="pseudoId" operator="like" value="%${searchString}%"
+                        ignore-if-empty="true" ignore-case="true" />
+                    <econdition field-name="headline" operator="like" value="%${searchString}%"
+                        ignore-if-empty="true" ignore-case="true" />
+                    <econdition field-name="type" operator="like" value="%${searchString}%"
+                        ignore-if-empty="true" ignore-case="true" />
+                </econditions>
+                <order-by field-name="-lastModifiedDate" />
+            </entity-find>
+        </actions>
+    </service>
+
+    <service verb="create" noun="SocialPost" authenticate="true">
+        <description>Create a new social post.</description>
+        <in-parameters>
+            <parameter name="pseudoId" />
+            <parameter name="planId" />
+            <parameter name="type" default-value="PAIN" />
+            <parameter name="platform" />
             <parameter name="headline" />
             <parameter name="draftContent" />
-            <parameter name="publishedContent" />
+            <parameter name="finalContent" />
             <parameter name="status" default-value="DRAFT" />
-            <parameter name="scheduledDate" type="Timestamp" />
-            <parameter name="publishedDate" type="Timestamp" />
+            <parameter name="scheduledDate" type="Long" />
         </in-parameters>
         <out-parameters>
             <parameter name="postId" />
+            <parameter name="pseudoId" />
+            <parameter name="planId" />
+            <parameter name="type" />
+            <parameter name="platform" />
+            <parameter name="headline" />
+            <parameter name="draftContent" />
+            <parameter name="finalContent" />
+            <parameter name="status" />
+            <parameter name="scheduledDate" type="Timestamp" />
+            <parameter name="createdDate" type="Timestamp" />
+            <parameter name="lastModifiedDate" type="Timestamp" />
         </out-parameters>
         <actions>
-            <service-call name="create#growerp.marketing.SocialPost" in-map="context" />
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="context" />
+            <if condition="!ownerPartyId">
+                <return error="true" message="User not authenticated or no party associated" />
+            </if>
+
+            <!-- Generate pseudoId only if not provided -->
+            <if condition="!pseudoId">
+                <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                    in-map="[ownerPartyId: ownerPartyId, seqName: 'socialPost']"
+                    out-map="context" />
+                <set field="pseudoId" from="seqNum" />
+            </if>
+
+            <!-- Convert scheduledDate from Long to Timestamp if provided -->
+            <set field="scheduledDateTs"
+                from="scheduledDate ? new java.sql.Timestamp(scheduledDate) : null" />
+
+            <service-call name="create#growerp.marketing.SocialPost" out-map="context"
+                in-map="[
+                    ownerPartyId: ownerPartyId,
+                    pseudoId: pseudoId,
+                    planId: planId,
+                    type: type,
+                    platform: platform,
+                    headline: headline,
+                    draftContent: draftContent,
+                    finalContent: finalContent,
+                    status: status,
+                    scheduledDate: scheduledDateTs,
+                    createdDate: ec.user.nowTimestamp,
+                    lastModifiedDate: ec.user.nowTimestamp
+                ]" />
+
+            <!-- Get the created post and return its fields directly -->
+            <entity-find-one entity-name="growerp.marketing.SocialPost" value-field="post">
+                <field-map field-name="postId" />
+            </entity-find-one>
+
+            <set field="planId" from="post.planId" />
+            <set field="type" from="post.type" />
+            <set field="platform" from="post.platform" />
+            <set field="headline" from="post.headline" />
+            <set field="draftContent" from="post.draftContent" />
+            <set field="finalContent" from="post.finalContent" />
+            <set field="status" from="post.status" />
+            <set field="scheduledDate" from="post.scheduledDate" />
+            <set field="createdDate" from="post.createdDate" />
+            <set field="lastModifiedDate" from="post.lastModifiedDate" />
         </actions>
     </service>
 
     <service verb="update" noun="SocialPost" authenticate="true">
         <in-parameters>
             <parameter name="postId" required="true" />
+            <parameter name="pseudoId" />
+            <parameter name="planId" />
+            <parameter name="type" />
+            <parameter name="platform" />
             <parameter name="headline" />
             <parameter name="draftContent" />
-            <parameter name="publishedContent" />
+            <parameter name="finalContent" />
             <parameter name="status" />
-            <parameter name="scheduledDate" type="Timestamp" />
-            <parameter name="publishedDate" type="Timestamp" />
+            <parameter name="scheduledDate" type="Long" />
         </in-parameters>
         <out-parameters>
             <parameter name="postId" />
+            <parameter name="pseudoId" />
+            <parameter name="planId" />
+            <parameter name="type" />
+            <parameter name="platform" />
+            <parameter name="headline" />
+            <parameter name="draftContent" />
+            <parameter name="finalContent" />
+            <parameter name="status" />
+            <parameter name="scheduledDate" type="Timestamp" />
+            <parameter name="createdDate" type="Timestamp" />
+            <parameter name="lastModifiedDate" type="Timestamp" />
         </out-parameters>
         <actions>
-            <service-call name="update#growerp.marketing.SocialPost" in-map="context" />
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="context" />
+
+            <!-- Get existing post to verify ownership -->
+            <entity-find-one entity-name="growerp.marketing.SocialPost" value-field="post">
+                <field-map field-name="postId" />
+            </entity-find-one>
+            <if condition="!post">
+                <return error="true" message="Social post not found" />
+            </if>
+
+            <!-- Verify ownership via content plan if planId exists -->
+            <if condition="post.planId">
+                <entity-find-one entity-name="growerp.marketing.ContentPlan" value-field="plan">
+                    <field-map field-name="planId" from="post.planId" />
+                </entity-find-one>
+                <if condition="plan &amp;&amp; plan.ownerPartyId != ownerPartyId">
+                    <return error="true" message="Access denied to this social post" />
+                </if>
+            </if>
+
+            <!-- Convert scheduledDate from Long to Timestamp if provided -->
+            <set field="scheduledDateTs"
+                from="scheduledDate ? new java.sql.Timestamp(scheduledDate) : post.scheduledDate" />
+
+            <service-call name="update#growerp.marketing.SocialPost"
+                in-map="[
+                    postId: postId,
+                    pseudoId: pseudoId ?: post.pseudoId,
+                    planId: planId ?: post.planId,
+                    type: type ?: post.type,
+                    platform: platform ?: post.platform,
+                    headline: headline ?: post.headline,
+                    draftContent: draftContent ?: post.draftContent,
+                    finalContent: finalContent ?: post.finalContent,
+                    status: status ?: post.status,
+                    scheduledDate: scheduledDateTs,
+                    lastModifiedDate: ec.user.nowTimestamp
+                ]" />
+
+            <!-- Return updated post -->
+            <entity-find-one entity-name="growerp.marketing.SocialPost" value-field="updatedPost">
+                <field-map field-name="postId" />
+            </entity-find-one>
+
+            <set field="pseudoId" from="updatedPost.pseudoId" />
+            <set field="planId" from="updatedPost.planId" />
+            <set field="type" from="updatedPost.type" />
+            <set field="platform" from="updatedPost.platform" />
+            <set field="headline" from="updatedPost.headline" />
+            <set field="draftContent" from="updatedPost.draftContent" />
+            <set field="finalContent" from="updatedPost.finalContent" />
+            <set field="status" from="updatedPost.status" />
+            <set field="scheduledDate" from="updatedPost.scheduledDate" />
+            <set field="createdDate" from="updatedPost.createdDate" />
+            <set field="lastModifiedDate" from="updatedPost.lastModifiedDate" />
+        </actions>
+    </service>
+
+    <service verb="delete" noun="SocialPost" authenticate="true">
+        <in-parameters>
+            <parameter name="postId" required="true" />
+        </in-parameters>
+        <actions>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="context" />
+
+            <entity-find-one entity-name="growerp.marketing.SocialPost" value-field="post">
+                <field-map field-name="postId" />
+            </entity-find-one>
+            <if condition="!post">
+                <return error="true" message="Social post not found" />
+            </if>
+
+            <!-- Verify ownership via content plan if planId exists -->
+            <if condition="post.planId">
+                <entity-find-one entity-name="growerp.marketing.ContentPlan" value-field="plan">
+                    <field-map field-name="planId" from="post.planId" />
+                </entity-find-one>
+                <if condition="plan &amp;&amp; plan.ownerPartyId != ownerPartyId">
+                    <return error="true" message="Access denied to this social post" />
+                </if>
+            </if>
+
+            <service-call name="delete#growerp.marketing.SocialPost"
+                in-map="[postId: postId]" />
         </actions>
     </service>
 

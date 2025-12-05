@@ -20,9 +20,17 @@ class PlatformConfiguration {
   /// Daily limit for this platform
   final int dailyLimit;
 
-  /// Platform credentials (encrypted in backend)
-  /// For EMAIL: {smtpHost, smtpPort, smtpUser, smtpPassword, fromEmail, fromName}
-  final String? credentials;
+  /// API Key for platform authentication
+  final String? apiKey;
+
+  /// API Secret for platform authentication
+  final String? apiSecret;
+
+  /// Username for platform authentication
+  final String? username;
+
+  /// Password for platform authentication
+  final String? password;
 
   /// Last time platform was used
   final DateTime? lastUsedDate;
@@ -33,7 +41,10 @@ class PlatformConfiguration {
     required this.platform,
     this.isEnabled = false,
     this.dailyLimit = 50,
-    this.credentials,
+    this.apiKey,
+    this.apiSecret,
+    this.username,
+    this.password,
     this.lastUsedDate,
   });
 
