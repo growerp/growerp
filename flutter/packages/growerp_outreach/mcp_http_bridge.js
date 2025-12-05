@@ -37,7 +37,7 @@ async function initializeMCP() {
   try {
     const transport = new StdioClientTransport({
       command: 'npx',
-      args: ['-y', '@modelcontextprotocol/server-browsermcp'],
+      args: ['-y', '@hisma/server-puppeteer'],
     });
 
     mcpClient = new Client({
@@ -90,7 +90,7 @@ app.get('/health', (req, res) => {
 app.post('/mcp/browser_navigate', async (req, res) => {
   try {
     const { url } = req.body;
-    await callMCPTool('mcp0_browser_navigate', { url });
+    await callMCPTool('puppeteer_navigate', { url });
     res.json({ success: true });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -100,7 +100,7 @@ app.post('/mcp/browser_navigate', async (req, res) => {
 // Browser snapshot
 app.post('/mcp/browser_snapshot', async (req, res) => {
   try {
-    const result = await callMCPTool('mcp0_browser_snapshot', {});
+    const result = await callMCPTool('puppeteer_snapshot', {});
     res.json(result);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -111,7 +111,7 @@ app.post('/mcp/browser_snapshot', async (req, res) => {
 app.post('/mcp/browser_click', async (req, res) => {
   try {
     const { element, ref } = req.body;
-    await callMCPTool('mcp0_browser_click', { element, ref });
+    await callMCPTool('puppeteer_click', { element, ref });
     res.json({ success: true });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -122,7 +122,7 @@ app.post('/mcp/browser_click', async (req, res) => {
 app.post('/mcp/browser_type', async (req, res) => {
   try {
     const { element, ref, text, submit } = req.body;
-    await callMCPTool('mcp0_browser_type', { element, ref, text, submit });
+    await callMCPTool('puppeteer_type', { element, ref, text, submit });
     res.json({ success: true });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -133,7 +133,7 @@ app.post('/mcp/browser_type', async (req, res) => {
 app.post('/mcp/browser_wait', async (req, res) => {
   try {
     const { time } = req.body;
-    await callMCPTool('mcp0_browser_wait', { time });
+    await callMCPTool('puppeteer_wait', { time });
     res.json({ success: true });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -143,7 +143,7 @@ app.post('/mcp/browser_wait', async (req, res) => {
 // Browser screenshot
 app.post('/mcp/browser_screenshot', async (req, res) => {
   try {
-    const result = await callMCPTool('mcp0_browser_screenshot', {});
+    const result = await callMCPTool('puppeteer_screenshot', {});
     res.json(result);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -153,7 +153,7 @@ app.post('/mcp/browser_screenshot', async (req, res) => {
 // Browser go back
 app.post('/mcp/browser_go_back', async (req, res) => {
   try {
-    await callMCPTool('mcp0_browser_go_back', {});
+    await callMCPTool('puppeteer_go_back', {});
     res.json({ success: true });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -163,7 +163,7 @@ app.post('/mcp/browser_go_back', async (req, res) => {
 // Browser go forward
 app.post('/mcp/browser_go_forward', async (req, res) => {
   try {
-    await callMCPTool('mcp0_browser_go_forward', {});
+    await callMCPTool('puppeteer_go_forward', {});
     res.json({ success: true });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -174,7 +174,7 @@ app.post('/mcp/browser_go_forward', async (req, res) => {
 app.post('/mcp/browser_hover', async (req, res) => {
   try {
     const { element, ref } = req.body;
-    await callMCPTool('mcp0_browser_hover', { element, ref });
+    await callMCPTool('puppeteer_hover', { element, ref });
     res.json({ success: true });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -185,7 +185,7 @@ app.post('/mcp/browser_hover', async (req, res) => {
 app.post('/mcp/browser_press_key', async (req, res) => {
   try {
     const { key } = req.body;
-    await callMCPTool('mcp0_browser_press_key', { key });
+    await callMCPTool('puppeteer_press_key', { key });
     res.json({ success: true });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -196,7 +196,7 @@ app.post('/mcp/browser_press_key', async (req, res) => {
 app.post('/mcp/browser_select_option', async (req, res) => {
   try {
     const { element, ref, values } = req.body;
-    await callMCPTool('mcp0_browser_select_option', { element, ref, values });
+    await callMCPTool('puppeteer_select_option', { element, ref, values });
     res.json({ success: true });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -206,7 +206,7 @@ app.post('/mcp/browser_select_option', async (req, res) => {
 // Browser get console logs
 app.post('/mcp/browser_get_console_logs', async (req, res) => {
   try {
-    const result = await callMCPTool('mcp0_browser_get_console_logs', {});
+    const result = await callMCPTool('puppeteer_get_console_logs', {});
     res.json(result);
   } catch (error) {
     res.status(500).json({ error: error.message });

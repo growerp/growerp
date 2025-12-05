@@ -47,6 +47,12 @@ Future main() async {
         BlocProvider<OutreachCampaignBloc>(
           create: (context) => OutreachCampaignBloc(restClient),
         ),
+        BlocProvider<OutreachMessageBloc>(
+          create: (context) => OutreachMessageBloc(restClient),
+        ),
+        BlocProvider<PlatformConfigBloc>(
+          create: (context) => PlatformConfigBloc(restClient),
+        ),
         ...getUserCompanyBlocProviders(restClient, 'AppAdmin'),
         ...getMarketingBlocProviders(restClient, 'AppAdmin'),
       ],
@@ -75,6 +81,14 @@ List<MenuOption> menuOptions = [
   MenuOption(
     image: 'packages/growerp_core/images/crmGrey.png',
     selectedImage: 'packages/growerp_core/images/crm.png',
+    title: 'Messages',
+    route: '/messages',
+    userGroups: [UserGroup.admin, UserGroup.employee],
+    child: const OutreachMessageList(),
+  ),
+  MenuOption(
+    image: 'packages/growerp_core/images/crmGrey.png',
+    selectedImage: 'packages/growerp_core/images/crm.png',
     title: 'Automation',
     route: '/automation',
     userGroups: [UserGroup.admin, UserGroup.employee],
@@ -99,6 +113,14 @@ List<MenuOption> menuOptions = [
       role: Role.lead,
     ),
   ),
+  MenuOption(
+    image: 'packages/growerp_core/images/setupGrey.png',
+    selectedImage: 'packages/growerp_core/images/setup.png',
+    title: 'Platforms',
+    route: '/platforms',
+    userGroups: [UserGroup.admin, UserGroup.employee],
+    child: const PlatformConfigListScreen(),
+  ),
 ];
 
 // routing
@@ -121,25 +143,39 @@ Route<dynamic> generateRoute(RouteSettings settings) {
           menuIndex: 1,
         ),
       );
-    case '/automation':
+    case '/messages':
       return MaterialPageRoute(
         builder: (context) => DisplayMenuOption(
           menuList: menuOptions,
           menuIndex: 2,
         ),
       );
-    case '/website':
+    case '/automation':
       return MaterialPageRoute(
         builder: (context) => DisplayMenuOption(
           menuList: menuOptions,
           menuIndex: 3,
         ),
       );
-    case '/leads':
+    case '/website':
       return MaterialPageRoute(
         builder: (context) => DisplayMenuOption(
           menuList: menuOptions,
           menuIndex: 4,
+        ),
+      );
+    case '/leads':
+      return MaterialPageRoute(
+        builder: (context) => DisplayMenuOption(
+          menuList: menuOptions,
+          menuIndex: 5,
+        ),
+      );
+    case '/platforms':
+      return MaterialPageRoute(
+        builder: (context) => DisplayMenuOption(
+          menuList: menuOptions,
+          menuIndex: 6,
         ),
       );
     default:
@@ -167,18 +203,28 @@ class OutreachDashboard extends StatelessWidget {
                 'Manage outreach campaigns',
                 'Track performance',
               ]),
-              makeDashboardItem('dbAutomation', context, menuOptions[2], [
+              makeDashboardItem('dbMessages', context, menuOptions[2], [
+                'Messages',
+                'View sent messages',
+                'Track responses',
+              ]),
+              makeDashboardItem('dbAutomation', context, menuOptions[3], [
                 'Manage workflows',
               ]),
-              makeDashboardItem('dbWebsite', context, menuOptions[3], [
+              makeDashboardItem('dbWebsite', context, menuOptions[4], [
                 'Website',
                 'Manage landing pages',
                 'Track visitors',
               ]),
-              makeDashboardItem('dbLeads', context, menuOptions[4], [
+              makeDashboardItem('dbLeads', context, menuOptions[5], [
                 'Leads',
                 'View generated leads',
                 'Manage contacts',
+              ]),
+              makeDashboardItem('dbPlatforms', context, menuOptions[6], [
+                'Platforms',
+                'Manage platform configs',
+                'Set daily limits',
               ]),
             ],
           );

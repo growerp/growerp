@@ -4,6 +4,8 @@ import 'package:dio/dio.dart' hide Headers;
 import 'package:retrofit/retrofit.dart';
 
 import 'models/models.dart';
+import 'models/platform_configurations_model.dart';
+import 'models/campaign_progress_model.dart';
 
 part 'rest_client.g.dart';
 
@@ -1117,10 +1119,38 @@ abstract class RestClient {
   @DELETE("rest/s1/growerp/100/OutreachCampaign")
   Future<void> deleteOutreachCampaign({@Field() required String campaignId});
 
+  // Campaign Automation endpoints
+  @POST("rest/s1/growerp/100/OutreachCampaign/start")
+  Future<dynamic> startCampaignAutomation({
+    @Field() required String campaignId,
+  });
+
+  @POST("rest/s1/growerp/100/OutreachCampaign/pause")
+  Future<dynamic> pauseCampaignAutomation({
+    @Field() required String campaignId,
+  });
+
+  @GET("rest/s1/growerp/100/OutreachMessage")
+  Future<OutreachMessages> listOutreachMessages({
+    @Query("campaignId") String? campaignId,
+    @Query("status") String? status,
+    @Query("start") int? start,
+    @Query("limit") int? limit,
+    @Query("search") String? search,
+  });
+
+  @DELETE("rest/s1/growerp/100/OutreachMessage")
+  Future<void> deleteOutreachMessage({@Field() required String messageId});
+
+  @GET("rest/s1/growerp/100/OutreachCampaign/progress")
+  Future<CampaignProgress> getCampaignProgress({
+    @Query('campaignId') required String campaignId,
+  });
+
   // Outreach Message endpoints
   @POST("rest/s1/growerp/100/OutreachMessage")
   Future<OutreachMessage> createOutreachMessage({
-    @Field() required String campaignId,
+    @Field() String? campaignId,
     @Field() required String platform,
     @Field() String? recipientName,
     @Field() String? recipientProfileUrl,
@@ -1145,6 +1175,9 @@ abstract class RestClient {
   });
 
   // Platform Configuration endpoints
+  @GET("rest/s1/growerp/100/PlatformConfigurations")
+  Future<PlatformConfigurations> listPlatformConfigurations();
+
   @GET("rest/s1/growerp/100/PlatformConfiguration")
   Future<PlatformConfiguration> getPlatformConfiguration({
     @Query('platform') required String platform,
@@ -1155,7 +1188,10 @@ abstract class RestClient {
     @Field() required String platform,
     @Field() String? isEnabled,
     @Field() int? dailyLimit,
-    @Field() required String credentials,
+    @Field() String? apiKey,
+    @Field() String? apiSecret,
+    @Field() String? username,
+    @Field() String? password,
   });
 
   @PATCH("rest/s1/growerp/100/PlatformConfiguration")
@@ -1163,7 +1199,15 @@ abstract class RestClient {
     @Field() required String configId,
     @Field() String? isEnabled,
     @Field() int? dailyLimit,
-    @Field() String? credentials,
+    @Field() String? apiKey,
+    @Field() String? apiSecret,
+    @Field() String? username,
+    @Field() String? password,
+  });
+
+  @DELETE("rest/s1/growerp/100/PlatformConfiguration")
+  Future<void> deletePlatformConfiguration({
+    @Query('configId') required String configId,
   });
 
   // Send outreach email

@@ -40,6 +40,15 @@ class OutreachCampaign {
   /// Max messages per day per platform
   final int dailyLimitPerPlatform;
 
+  /// Messages sent count
+  final int messagesSent;
+
+  /// Responses received count
+  final int responsesReceived;
+
+  /// Leads generated count
+  final int leadsGenerated;
+
   /// Created timestamp
   @DateTimeConverter()
   final DateTime? createdDate;
@@ -60,6 +69,9 @@ class OutreachCampaign {
     this.emailSubject,
     required this.status,
     this.dailyLimitPerPlatform = 50,
+    this.messagesSent = 0,
+    this.responsesReceived = 0,
+    this.leadsGenerated = 0,
     this.createdDate,
     this.lastModifiedDate,
   });
@@ -77,6 +89,9 @@ class OutreachCampaign {
     String? emailSubject,
     String? status,
     int? dailyLimitPerPlatform,
+    int? messagesSent,
+    int? responsesReceived,
+    int? leadsGenerated,
     DateTime? createdDate,
     DateTime? lastModifiedDate,
   }) {
@@ -93,6 +108,9 @@ class OutreachCampaign {
       status: status ?? this.status,
       dailyLimitPerPlatform:
           dailyLimitPerPlatform ?? this.dailyLimitPerPlatform,
+      messagesSent: messagesSent ?? this.messagesSent,
+      responsesReceived: responsesReceived ?? this.responsesReceived,
+      leadsGenerated: leadsGenerated ?? this.leadsGenerated,
       createdDate: createdDate ?? this.createdDate,
       lastModifiedDate: lastModifiedDate ?? this.lastModifiedDate,
     );
