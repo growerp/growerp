@@ -21,8 +21,8 @@ void main() {
 
     await CommonTest.startTestApp(
       tester,
-      app.generateRoute,
-      app.menuOptions,
+      app.createOutreachExampleRouter(),
+      app.outreachMenuConfig,
       const [UserCompanyLocalizations.delegate],
       restClient: restClient,
       blocProviders: [

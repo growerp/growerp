@@ -1,0 +1,1234 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Menu Configuration Services for GrowERP Dynamic Menu System
+Service definitions for menu configuration and menu item management
+- Supports dual-ID lookup: menuConfigurationId (system-wide) or appId+userLoginId (tenant-unique)
+- All services enforce multi-tenant isolation via ownerPartyId
+- Implementation: Moqui service definitions with XML actions
+-->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
+
+  <!-- ============================================ -->
+  <!-- MENU CONFIGURATION SERVICES (6 services) -->
+  <!-- ============================================ -->
+
+  <!-- getMenuConfiguration: Retrieve single menu configuration -->
+  <service verb="get" noun="MenuConfiguration" authenticate="true">
+    <description>Get menu configuration by ID or appId+userLoginId. Returns configuration with all menu items in hierarchical structure.</description>
+    <in-parameters>
+      <parameter name="menuConfigurationId">
+        <description>Menu configuration ID (system-wide unique)</description>
+      </parameter>
+      <parameter name="appId">
+        <description>Application identifier (e.g., 'admin', 'freelance', 'hotel')</description>
+      </parameter>
+      <parameter name="userId">
+        <description>Optional user ID for user-specific configuration. If null, returns default app configuration.</description>
+      </parameter>
+    </in-parameters>
+    <out-parameters>
+        <parameter name="menuConfigurationId" />
+        <parameter name="appId" />
+        <parameter name="userId" />
+        <parameter name="name" />
+        <parameter name="description" />
+        <parameter name="isActive" type="Boolean"/>
+        <parameter name="createdDate" type="Timestamp" />
+        <parameter name="lastUpdatedStamp" type="Timestamp" />
+        <parameter name="menuOptions" type="List">
+          <description>List of top-level menu items with nested children</description>
+            <!-- nested params definitions for documentation usually -->
+        </parameter>
+    </out-parameters>
+    <actions>
+      <!-- Get owner party ID from authenticated user context -->
+      <if condition="ec.user.userId">
+        <service-call out-map="context"
+          name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+      </if>
+
+      <!-- Strategy: Try to find user-specific config first, fall back to seed data if not found -->
+      <set field="config" from="null" />
+      
+      <!-- If menuConfigurationId is provided, use it directly -->
+      <if condition="menuConfigurationId">
+        <entity-find-one entity-name="growerp.menu.MenuConfiguration" value-field="config">
+          <field-map field-name="menuConfigurationId" from="menuConfigurationId" />
+        </entity-find-one>
+      </if>
+      
+      <!-- If not found by ID and appId is provided, try user-specific config -->
+      <!-- Use ownerPartyId (authenticated user) if userId parameter not provided -->
+      <if condition="!config &amp;&amp; appId">
+        <set field="lookupUserId" from="userId ?: ec.user.userId" />
+        <if condition="lookupUserId">
+          <entity-find entity-name="growerp.menu.MenuConfiguration" list="userConfigs">
+            <econdition field-name="appId" from="appId" />
+            <econdition field-name="userId" from="lookupUserId" />
+          </entity-find>
+          <if condition="userConfigs">
+            <set field="config" from="userConfigs[0]" />
+          </if>
+        </if>
+      </if>
+      
+      <!-- If still not found and appId is provided, fall back to seed data (userId IS NULL) -->
+      <if condition="!config &amp;&amp; appId">
+        <entity-find entity-name="growerp.menu.MenuConfiguration" list="seedConfigs">
+          <econdition field-name="appId" from="appId" />
+          <econdition field-name="userId" operator="is-null" />
+        </entity-find>
+        <if condition="seedConfigs">
+          <set field="config" from="seedConfigs[0]" />
+        </if>
+      </if>
+      
+      <!-- If still not found, return error -->
+      <if condition="!config">
+        <return error="true"
+          message="Menu configuration not found: menuConfigurationId=$menuConfigurationId, appId=$appId, userId=$userId" />
+      </if>
+
+      <!-- Get all menu options for this configuration -->
+      <entity-find entity-name="growerp.menu.MenuOption" list="allOptions">
+        <econdition field-name="menuConfigurationId" from="config.menuConfigurationId" />
+        <order-by field-name="sequenceNum" />
+      </entity-find>
+
+      <!-- Get statistics to populate dashboard items -->
+      <service-call name="growerp.100.GeneralServices100.get#Stats" out-map="statMap" />
+
+      <!-- Build response structure -->
+      <script>
+        // Format timestamps as ISO 8601 strings for Flutter DateTime.parse()
+        import java.text.SimpleDateFormat
+        def isoFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+        
+        Map configMap = [
+          menuConfigurationId: config.menuConfigurationId,
+          appId: (config.appId != null ? config.appId.toString() : ''),
+          userId: config.userId,
+          name: (config.name != null ? config.name.toString() : ''),
+          description: config.description,
+          isActive: config.isActive == 'Y',
+          createdDate: (config.createdDate != null ? isoFormat.format(config.createdDate) : null),
+          lastUpdatedStamp: (config.lastUpdatedStamp != null ? isoFormat.format(config.lastUpdatedStamp) : null)
+        ]
+        
+        // Get stats map
+        Map stats = statMap?.stats ?: [:]
+        
+        // Build list of menu options with their items (tabs)
+        List menuItems = []
+        allOptions.each { option ->
+          String title = (option.title != null ? option.title.toString() : '')
+          String itemKey = option.itemKey
+          
+          if (itemKey &amp;&amp; stats.containsKey(itemKey)) {
+             def statVal = stats.get(itemKey)
+             if (statVal != null) {
+                 title = "${title} (${statVal})"
+                 
+                 // Special handling for invoice counts to also show amount
+                 if (itemKey.endsWith('Count')) {
+                     String amountKey = itemKey.replace('Count', 'Amount')
+                     if (stats.containsKey(amountKey)) {
+                         def amountVal = stats.get(amountKey)
+                         if (amountVal != null) {
+                             title = "${title.substring(0, title.length() - 1)} / ${amountVal})"
+                         }
+                     }
+                 }
+             }
+          }
+          
+          // Get items (tabs) for this option via junction table
+          def optionItems = ec.entity.find("growerp.menu.MenuOptionItem")
+              .condition("menuOptionId", option.menuOptionId)
+              .orderBy("sequenceNum")
+              .list()
+          
+          List children = []
+          optionItems.each { optItem ->
+            def item = ec.entity.find("growerp.menu.MenuItem")
+                .condition("menuItemId", optItem.menuItemId)
+                .one()
+            if (item) {
+              children.add([
+                menuItemId: item.menuItemId,
+                title: item.title,
+                iconName: item.iconName,
+                widgetName: item.widgetName,
+                image: item.image,
+                isActive: item.isActive == 'Y',
+                sequenceNum: optItem.sequenceNum
+              ])
+            }
+          }
+          // Sort children by sequence
+          children.sort { a, b -> ((a.sequenceNum ?: 0) as Integer).compareTo((b.sequenceNum ?: 0) as Integer) }
+
+          Map optionMap = [
+            menuOptionId: option.menuOptionId,
+            menuConfigurationId: option.menuConfigurationId,
+            itemKey: itemKey,
+            title: title,
+            route: option.route,
+            iconName: option.iconName,
+            widgetName: option.widgetName,
+            image: option.image,
+            selectedImage: option.selectedImage,
+            userGroupsJson: option.userGroupsJson,
+            sequenceNum: option.sequenceNum,
+            isActive: option.isActive == 'Y',
+            children: children
+          ]
+          menuItems.add(optionMap)
+        }
+        
+        // Sort by sequenceNum
+        menuItems.sort { a, b -> ((a.sequenceNum ?: 0) as Integer).compareTo((b.sequenceNum ?: 0) as Integer) }
+        
+        configMap.put('menuOptions', menuItems)
+        context.putAll(configMap)
+      </script>
+    </actions>
+  </service>
+
+  <!-- listMenuConfigurations: Get all menu configurations for tenant -->
+  <service verb="list" noun="MenuConfigurations" authenticate="true">
+    <description>List all menu configurations with pagination and optional filtering. Results automatically filtered by authenticated user's company.</description>
+    <in-parameters>
+      <parameter name="menuConfigurationId" />
+      <parameter name="appId">
+        <description>Optional app ID filter</description>
+      </parameter>
+      <parameter name="userId">
+        <description>Optional user ID filter</description>
+      </parameter>
+      <parameter name="isActive">
+        <description>Optional active status filter (Y/N)</description>
+      </parameter>
+      <parameter name="start" type="Integer" default-value="0">
+        <description>Starting index (0-based)</description>
+      </parameter>
+      <parameter name="limit" type="Integer" default-value="20">
+        <description>Results per page</description>
+      </parameter>
+      <parameter name="search">
+        <description>Optional search string for name/appId</description>
+      </parameter>
+    </in-parameters>
+    <out-parameters>
+      <parameter name="menuConfigurations" type="List">
+        <description>List of menu configuration objects</description>
+        <parameter name="menuConfigurationId" />
+        <parameter name="appId" />
+        <parameter name="userLoginId" />
+        <parameter name="name" />
+        <parameter name="description" />
+        <parameter name="isActive" />
+        <parameter name="createdDate" type="Timestamp" />
+        <parameter name="lastUpdatedStamp" type="Timestamp" />
+        <parameter name="menuItemCount" type="Integer">
+          <description>Number of menu items in this configuration</description>
+        </parameter>
+      </parameter>
+      <parameter name="totalResults" type="Integer">
+        <description>Total number of configurations matching filter</description>
+      </parameter>
+      <parameter name="start" type="Integer">
+        <description>Starting index for pagination</description>
+      </parameter>
+      <parameter name="limit" type="Integer">
+        <description>Results per page limit</description>
+      </parameter>
+    </out-parameters>
+    <actions>
+      <!-- Get owner party ID from authenticated user context -->
+      <service-call out-map="context"
+        name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+
+      <if condition="search">
+        <set field="search" value="%$search%" />
+      </if>
+
+      <!-- Build entity find for menu configurations -->
+      <entity-find entity-name="growerp.menu.MenuConfiguration" list="configsList" offset="start"
+        limit="limit">
+        <econdition field-name="menuConfigurationId" ignore-if-empty="true" />
+        <econdition field-name="appId" ignore-if-empty="true" />
+        <econdition field-name="userId" ignore-if-empty="true" />
+        <econdition field-name="isActive" ignore-if-empty="true" />
+        <econditions combine="or">
+          <econdition field-name="appId" operator="like" from="search"
+            ignore-if-empty="true" ignore-case="true" />
+          <econdition field-name="name" operator="like" from="search"
+            ignore-if-empty="true" ignore-case="true" />
+        </econditions>
+        <order-by field-name="-lastUpdatedStamp" />
+      </entity-find>
+
+      <!-- Get total count for pagination -->
+      <entity-find-count entity-name="growerp.menu.MenuConfiguration" count-field="totalResults">
+        <econdition field-name="appId" ignore-if-empty="true" />
+        <econdition field-name="isActive" ignore-if-empty="true" />
+        <econdition field-name="name" operator="like" from="search" ignore-if-empty="true" />
+      </entity-find-count>
+
+      <!-- Convert entity values to maps with item counts -->
+      <set field="menuConfigurations" from="[]" />
+      <iterate list="configsList" entry="config">
+        <!-- Get count of menu options for this configuration -->
+        <entity-find-count entity-name="growerp.menu.MenuOption" count-field="itemCount">
+          <econdition field-name="menuConfigurationId" from="config.menuConfigurationId" />
+          <econdition field-name="isActive" value="Y" />
+        </entity-find-count>
+
+        <set field="configMap"
+          from="[
+          menuConfigurationId: config.menuConfigurationId,
+          appId: config.appId,
+          userId: config.userId,
+          name: config.name,
+          description: config.description,
+          isActive: config.isActive,
+          createdDate: config.createdDate,
+          lastUpdatedStamp: config.lastUpdatedStamp,
+          menuItemCount: itemCount
+        ]" />
+        <script>menuConfigurations.add(configMap)</script>
+      </iterate>
+    </actions>
+  </service>
+
+  <!-- createMenuConfiguration: Create new menu configuration -->
+  <service verb="create" noun="MenuConfiguration" authenticate="true">
+    <description>Create new menu configuration for an application or user</description>
+    <in-parameters>
+      <parameter name="appId" required="true">
+        <description>Application identifier (e.g., 'admin', 'freelance', 'hotel')</description>
+      </parameter>
+      <parameter name="userId">
+        <description>Optional user ID for user-specific configuration. If null, creates default app configuration.</description>
+      </parameter>
+      <parameter name="name" required="true">
+        <description>Menu configuration name</description>
+      </parameter>
+      <parameter name="description">
+        <description>Optional description</description>
+      </parameter>
+      <parameter name="isActive" default-value="Y">
+        <description>Active status (Y/N)</description>
+      </parameter>
+    </in-parameters>
+    <out-parameters>
+      <parameter name="menuConfigurationId">
+        <description>Created menu configuration ID</description>
+      </parameter>
+      <parameter name="appId">
+        <description>Application ID</description>
+      </parameter>
+      <parameter name="userId">
+        <description>User ID (if user-specific)</description>
+      </parameter>
+      <parameter name="name">
+        <description>Configuration name</description>
+      </parameter>
+      <parameter name="description">
+        <description>Configuration description</description>
+      </parameter>
+      <parameter name="isActive">
+        <description>Active status</description>
+      </parameter>
+      <parameter name="createdDate" type="Timestamp">
+        <description>Creation timestamp</description>
+      </parameter>
+    </out-parameters>
+    <actions>
+      <!-- Get owner party ID from authenticated user context -->
+      <service-call out-map="context"
+        name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+
+      <!-- Create menu configuration record -->
+      <service-call name="create#growerp.menu.MenuConfiguration" out-map="createOut"
+        in-map="[
+        appId: appId,
+        userId: userId,
+        name: name,
+        description: description,
+        isActive: isActive,
+        createdDate: ec.user.nowTimestamp,
+        lastUpdatedStamp: ec.user.nowTimestamp
+      ]" />
+
+      <set field="menuConfigurationId" from="createOut.menuConfigurationId" />
+
+      <!-- Fetch the complete configuration using list service for consistency -->
+      <service-call name="growerp.100.MenuServices100.list#MenuConfigurations"
+        in-map="[menuConfigurationId: menuConfigurationId, limit: 1]" out-map="listOut" />
+
+      <!-- Return the first (and only) configuration from the list -->
+      <if condition="listOut.menuConfigurations">
+        <script>
+          context.putAll(listOut.menuConfigurations[0])
+        </script>
+      </if>
+    </actions>
+  </service>
+
+  <!-- updateMenuConfiguration: Update existing menu configuration -->
+  <service verb="update" noun="MenuConfiguration" authenticate="true">
+    <description>Update menu configuration (name, description, active status)</description>
+    <in-parameters>
+      <parameter name="menuConfigurationId" required="true">
+        <description>Menu configuration ID to update</description>
+      </parameter>
+      <parameter name="name">
+        <description>New configuration name</description>
+      </parameter>
+      <parameter name="description">
+        <description>New description</description>
+      </parameter>
+      <parameter name="isActive">
+        <description>New active status (Y/N)</description>
+      </parameter>
+    </in-parameters>
+    <out-parameters>
+      <parameter name="menuConfigurationId">
+        <description>Updated menu configuration ID</description>
+      </parameter>
+      <parameter name="appId">
+        <description>Application ID</description>
+      </parameter>
+      <parameter name="userId">
+        <description>User ID (if user-specific)</description>
+      </parameter>
+      <parameter name="name">
+        <description>Configuration name</description>
+      </parameter>
+      <parameter name="description">
+        <description>Configuration description</description>
+      </parameter>
+      <parameter name="isActive">
+        <description>Active status</description>
+      </parameter>
+      <parameter name="lastUpdatedStamp" type="Timestamp">
+        <description>Last updated timestamp</description>
+      </parameter>
+    </out-parameters>
+    <actions>
+      <!-- Get owner party ID from authenticated user context -->
+      <service-call out-map="context"
+        name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+
+      <!-- Verify configuration exists -->
+      <entity-find-one entity-name="growerp.menu.MenuConfiguration" value-field="existingConfig">
+        <field-map field-name="menuConfigurationId" from="menuConfigurationId" />
+      </entity-find-one>
+
+      <if condition="!existingConfig">
+        <return error="true" message="Menu configuration not found" />
+      </if>
+
+      <!-- Update configuration with provided fields -->
+      <service-call name="update#growerp.menu.MenuConfiguration"
+        in-map="[
+        menuConfigurationId: menuConfigurationId,
+        name: name ?: existingConfig.name,
+        description: description,
+        isActive: isActive ?: existingConfig.isActive,
+        lastUpdatedStamp: ec.user.nowTimestamp
+      ]" />
+
+      <!-- Fetch the complete configuration using list service for consistency -->
+      <service-call name="growerp.100.MenuServices100.list#MenuConfigurations"
+        in-map="[menuConfigurationId: menuConfigurationId, limit: 1]" out-map="listOut" />
+
+      <!-- Return the first (and only) configuration from the list -->
+      <if condition="listOut.menuConfigurations">
+        <script>
+          context.putAll(listOut.menuConfigurations[0])
+        </script>
+      </if>
+    </actions>
+  </service>
+
+  <!-- deleteMenuConfiguration: Delete menu configuration and cascade -->
+  <service verb="delete" noun="MenuConfiguration" authenticate="true">
+    <description>Delete menu configuration and all related menu items (cascade delete).</description>
+    <in-parameters>
+      <parameter name="menuConfigurationId" required="true">
+        <description>Menu configuration ID to delete</description>
+      </parameter>
+    </in-parameters>
+    <out-parameters>
+      <parameter name="deletedCount" type="Integer">
+        <description>Total number of records deleted (cascade)</description>
+      </parameter>
+    </out-parameters>
+    <actions>
+      <!-- Get owner party ID from authenticated user context -->
+      <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+        out-map="context" />
+
+      <!-- Verify configuration exists -->
+      <entity-find-one entity-name="growerp.menu.MenuConfiguration" value-field="existingConfig">
+        <field-map field-name="menuConfigurationId" from="menuConfigurationId" />
+      </entity-find-one>
+
+      <if condition="!existingConfig">
+        <return error="true" message="Menu configuration not found" />
+      </if>
+
+      <set field="deletedCount" value="0" type="Integer" />
+
+      <!-- Delete all menu option items (junction) for this configuration's options -->
+      <entity-find entity-name="growerp.menu.MenuOption" list="optionsToDelete">
+        <econdition field-name="menuConfigurationId" from="menuConfigurationId" />
+      </entity-find>
+      <iterate list="optionsToDelete" entry="option">
+        <!-- Delete junction table entries for this option -->
+        <entity-find entity-name="growerp.menu.MenuOptionItem" list="junctionToDelete">
+          <econdition field-name="menuOptionId" from="option.menuOptionId" />
+        </entity-find>
+        <iterate list="junctionToDelete" entry="junction">
+          <service-call name="delete#growerp.menu.MenuOptionItem"
+            in-map="[menuOptionId: junction.menuOptionId, menuItemId: junction.menuItemId]" />
+          <set field="deletedCount" from="deletedCount + 1" />
+        </iterate>
+        
+        <!-- Delete the option itself -->
+        <service-call name="delete#growerp.menu.MenuOption"
+          in-map="[menuOptionId: option.menuOptionId]" />
+        <set field="deletedCount" from="deletedCount + 1" />
+      </iterate>
+
+      <!-- Delete the configuration itself -->
+      <service-call name="delete#growerp.menu.MenuConfiguration"
+        in-map="[menuConfigurationId: menuConfigurationId]" />
+      <set field="deletedCount" from="deletedCount + 1" />
+
+    </actions>
+  </service>
+
+  <!-- ensureUserMenuConfiguration: Ensure user has their own configuration -->
+  <service verb="ensure" noun="UserMenuConfiguration" authenticate="true">
+    <description>Ensure user has their own menu configuration. If they're using seed data, clone it for them. Returns the user's configuration ID.</description>
+    <in-parameters>
+      <parameter name="menuConfigurationId" required="true">
+        <description>Current menu configuration ID (may be seed data)</description>
+      </parameter>
+    </in-parameters>
+    <out-parameters>
+      <parameter name="userMenuConfigurationId">
+        <description>User's menu configuration ID (may be newly created)</description>
+      </parameter>
+      <parameter name="wasCloned" type="Boolean">
+        <description>True if a new user-specific config was created</description>
+      </parameter>
+    </out-parameters>
+    <actions>
+      <!-- Get owner party ID from authenticated user context -->
+      <service-call out-map="context"
+        name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+
+      <!-- Get the current configuration -->
+      <entity-find-one entity-name="growerp.menu.MenuConfiguration" value-field="config">
+        <field-map field-name="menuConfigurationId" from="menuConfigurationId" />
+      </entity-find-one>
+
+      <if condition="!config">
+        <return error="true" message="Menu configuration not found: ${menuConfigurationId}" />
+      </if>
+
+      <!-- Check if this is seed data (userId is null) -->
+      <if condition="config.userId == null">
+        <!-- This is seed data - check if user already has their own configuration for this app -->
+        <entity-find entity-name="growerp.menu.MenuConfiguration" list="existingUserConfigs">
+          <econdition field-name="appId" from="config.appId" />
+          <econdition field-name="userId" from="ec.user.userId" />
+        </entity-find>
+        
+        <if condition="existingUserConfigs">
+          <!-- User already has a configuration for this app, use it -->
+          <set field="userMenuConfigurationId" from="existingUserConfigs[0].menuConfigurationId" />
+          <set field="wasCloned" from="false" type="Boolean" />
+        <else>
+          <!-- User doesn't have a configuration yet - clone the seed data -->
+          <service-call name="growerp.100.MenuServices100.clone#MenuConfiguration" out-map="cloneOut"
+            in-map="[sourceMenuConfigurationId: menuConfigurationId, name: config.name + ' (User Copy)']" />
+          <set field="userMenuConfigurationId" from="cloneOut.menuConfigurationId" />
+          <set field="wasCloned" from="true" type="Boolean" />
+        </else>
+        </if>
+      <else>
+        <!-- Already user-specific, return as-is -->
+        <set field="userMenuConfigurationId" from="menuConfigurationId" />
+        <set field="wasCloned" from="false" type="Boolean" />
+      </else>
+      </if>
+    </actions>
+  </service>
+
+  <!-- cloneMenuConfiguration: Clone configuration for user customization -->
+  <service verb="clone" noun="MenuConfiguration" authenticate="true">
+    <description>Clone an existing menu configuration for user customization. Creates a copy with userId set to current user.</description>
+    <in-parameters>
+      <parameter name="sourceMenuConfigurationId" required="true">
+        <description>Source menu configuration ID to clone</description>
+      </parameter>
+      <parameter name="name">
+        <description>Optional name for cloned configuration. Defaults to source name + ' (Custom)'</description>
+      </parameter>
+    </in-parameters>
+    <out-parameters>
+      <parameter name="menuConfigurationId">
+        <description>Created (cloned) menu configuration ID</description>
+      </parameter>
+      <parameter name="appId">
+        <description>Application ID</description>
+      </parameter>
+      <parameter name="userId">
+        <description>User ID</description>
+      </parameter>
+      <parameter name="name">
+        <description>Configuration name</description>
+      </parameter>
+    </out-parameters>
+    <actions>
+      <!-- Get owner party ID and user login ID from authenticated user context -->
+      <service-call out-map="context"
+        name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+      <set field="currentUserId" from="ec.user.userId" />
+
+      <!-- Get source configuration -->
+      <entity-find-one entity-name="growerp.menu.MenuConfiguration" value-field="sourceConfig">
+        <field-map field-name="menuConfigurationId" from="sourceMenuConfigurationId" />
+      </entity-find-one>
+
+      <if condition="!sourceConfig">
+        <return error="true" message="Source menu configuration not found" />
+      </if>
+
+      <!-- Create new configuration for user -->
+      <service-call name="growerp.100.MenuServices100.create#MenuConfiguration"
+        in-map="[
+        appId: sourceConfig.appId,
+        userId: currentUserId,
+        name: name ?: (sourceConfig.name + ' (Custom)'),
+        description: 'Cloned from ' + sourceConfig.name,
+        isActive: 'Y'
+      ]" out-map="createOut" />
+
+      <set field="newMenuConfigurationId" from="createOut.menuConfigurationId" />
+
+      <!-- Clone all menu options with their items -->
+      <entity-find entity-name="growerp.menu.MenuOption" list="sourceOptions">
+        <econdition field-name="menuConfigurationId" from="sourceMenuConfigurationId" />
+      </entity-find>
+
+      <iterate list="sourceOptions" entry="sourceOption">
+        <!-- Create new MenuOption -->
+        <service-call name="create#growerp.menu.MenuOption" out-map="optOut"
+          in-map="[
+          menuConfigurationId: newMenuConfigurationId,
+          itemKey: sourceOption.itemKey,
+          title: sourceOption.title,
+          route: sourceOption.route,
+          iconName: sourceOption.iconName,
+          widgetName: sourceOption.widgetName,
+          image: sourceOption.image,
+          selectedImage: sourceOption.selectedImage,
+          userGroupsJson: sourceOption.userGroupsJson,
+          sequenceNum: sourceOption.sequenceNum,
+          isActive: sourceOption.isActive,
+          createdDate: ec.user.nowTimestamp
+        ]" />
+        
+        <!-- Clone junction table entries for this option -->
+        <entity-find entity-name="growerp.menu.MenuOptionItem" list="sourceJunctions">
+          <econdition field-name="menuOptionId" from="sourceOption.menuOptionId" />
+        </entity-find>
+        
+        <iterate list="sourceJunctions" entry="junction">
+          <service-call name="create#growerp.menu.MenuOptionItem"
+            in-map="[
+            menuOptionId: optOut.menuOptionId,
+            menuItemId: junction.menuItemId,
+            sequenceNum: junction.sequenceNum
+          ]" />
+        </iterate>
+      </iterate>
+
+      <!-- Return the new configuration -->
+      <set field="menuConfigurationId" from="newMenuConfigurationId" />
+      <set field="appId" from="sourceConfig.appId" />
+      <set field="userId" from="currentUserId" />
+      <set field="name" from="createOut.name" />
+    </actions>
+  </service>
+
+  <!-- resetMenuConfiguration: Reset configuration to default -->
+  <service verb="reset" noun="MenuConfiguration" authenticate="true">
+    <description>Reset menu configuration to default by copying all menu items from the default app configuration (no userId).</description>
+    <in-parameters>
+      <parameter name="menuConfigurationId" required="true">
+        <description>Menu configuration ID to reset</description>
+      </parameter>
+    </in-parameters>
+    <out-parameters>
+      <parameter name="menuConfigurationId">
+        <description>Reset menu configuration ID</description>
+      </parameter>
+      <parameter name="appId">
+        <description>Application ID</description>
+      </parameter>
+      <parameter name="name">
+        <description>Configuration name</description>
+      </parameter>
+      <parameter name="resetItemCount" type="Integer">
+        <description>Number of menu items copied from default</description>
+      </parameter>
+    </out-parameters>
+    <actions>
+      <!-- Get owner party ID from authenticated user context -->
+      <service-call out-map="context"
+        name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+
+      <!-- Get current configuration -->
+      <entity-find-one entity-name="growerp.menu.MenuConfiguration" value-field="config">
+        <field-map field-name="menuConfigurationId" from="menuConfigurationId" />
+      </entity-find-one>
+
+      <if condition="!config">
+        <return error="true" message="Menu configuration not found" />
+      </if>
+
+      <!-- Check if this is seed data (userId is null) - seed data should NEVER be reset -->
+      <if condition="config.userId == null">
+        <return error="true" message="Cannot reset seed data configuration. Seed data is read-only." />
+      </if>
+
+      <!-- This is a user-specific configuration - delete it entirely -->
+      <!-- First delete all menu options with their junction entries -->
+      <entity-find entity-name="growerp.menu.MenuOption" list="existingOptions">
+        <econdition field-name="menuConfigurationId" from="menuConfigurationId" />
+      </entity-find>
+      
+      <iterate list="existingOptions" entry="option">
+        <!-- Delete junction table entries for this option -->
+        <entity-find entity-name="growerp.menu.MenuOptionItem" list="junctions">
+          <econdition field-name="menuOptionId" from="option.menuOptionId" />
+        </entity-find>
+        <iterate list="junctions" entry="junction">
+          <service-call name="delete#growerp.menu.MenuOptionItem"
+            in-map="[menuOptionId: junction.menuOptionId, menuItemId: junction.menuItemId]" />
+        </iterate>
+        
+        <!-- Delete the option itself -->
+        <service-call name="delete#growerp.menu.MenuOption"
+          in-map="[menuOptionId: option.menuOptionId]" />
+      </iterate>
+
+      <!-- Delete the configuration itself -->
+      <service-call name="delete#growerp.menu.MenuConfiguration"
+        in-map="[menuConfigurationId: menuConfigurationId]" />
+
+      <!-- Return info about what was deleted -->
+      <set field="appId" from="config.appId" />
+      <set field="name" from="config.name" />
+      <set field="resetItemCount" from="existingOptions.size()" type="Integer" />
+    </actions>
+  </service>
+
+  <!-- ============================================ -->
+  <!-- MENU ITEM SERVICES (5 services) -->
+  <!-- ============================================ -->
+
+  <!-- createMenuOption: Add menu option to configuration -->
+  <service verb="create" noun="MenuOption" authenticate="true">
+    <description>Create new menu option (top-level menu entry) within a configuration.</description>
+    <in-parameters>
+      <parameter name="menuConfigurationId" required="true">
+        <description>Menu configuration ID</description>
+      </parameter>
+      <parameter name="itemKey">
+        <description>Optional key for identification (e.g., 'dbCompany')</description>
+      </parameter>
+      <parameter name="title" required="true">
+        <description>Menu option title</description>
+      </parameter>
+      <parameter name="route">
+        <description>Route path for navigation (e.g., '/companies')</description>
+      </parameter>
+      <parameter name="iconName">
+        <description>Icon identifier from icon registry</description>
+      </parameter>
+      <parameter name="widgetName">
+        <description>Widget/Form class name for GoRouter</description>
+      </parameter>
+      <parameter name="image">
+        <description>Path to unselected image</description>
+      </parameter>
+      <parameter name="selectedImage">
+        <description>Path to selected image</description>
+      </parameter>
+      <parameter name="userGroupsJson">
+        <description>JSON array of user groups with access</description>
+      </parameter>
+      <parameter name="sequenceNum" type="Integer">
+        <description>Display order (auto-incremented if not provided)</description>
+      </parameter>
+      <parameter name="isActive" default-value="Y">
+        <description>Active status (Y/N)</description>
+      </parameter>
+    </in-parameters>
+    <out-parameters>
+      <parameter name="menuOptionId">
+        <description>Created menu option ID</description>
+      </parameter>
+      <parameter name="menuConfigurationId" />
+      <parameter name="itemKey" />
+      <parameter name="title" />
+      <parameter name="route" />
+      <parameter name="iconName" />
+      <parameter name="widgetName" />
+      <parameter name="sequenceNum" type="Integer" />
+      <parameter name="isActive" />
+      <parameter name="createdDate" type="Timestamp" />
+      <parameter name="children" type="List" />
+    </out-parameters>
+    <actions>
+      <!-- Get owner party ID from authenticated user context -->
+      <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+        out-map="context" />
+
+      <!-- Verify configuration exists -->
+      <entity-find-one entity-name="growerp.menu.MenuConfiguration" value-field="config">
+        <field-map field-name="menuConfigurationId" from="menuConfigurationId" />
+      </entity-find-one>
+
+      <if condition="!config">
+        <return error="true" message="Menu configuration not found" />
+      </if>
+
+      <!-- Auto-increment sequence if not provided -->
+      <if condition="!sequenceNum">
+        <entity-find entity-name="growerp.menu.MenuOption" list="existingOptions">
+          <econdition field-name="menuConfigurationId" from="menuConfigurationId" />
+          <select-field field-name="sequenceNum" />
+          <order-by field-name="-sequenceNum" />
+        </entity-find>
+        <if condition="existingOptions">
+          <set field="sequenceNum" from="existingOptions[0].sequenceNum + 10" />
+          <else>
+            <set field="sequenceNum" value="10" type="Integer" />
+          </else>
+        </if>
+      </if>
+
+      <!-- Create menu option record -->
+      <service-call name="create#growerp.menu.MenuOption" out-map="createOut"
+        in-map="[
+        menuConfigurationId: menuConfigurationId,
+        itemKey: itemKey,
+        title: title,
+        route: route,
+        iconName: iconName,
+        widgetName: widgetName,
+        image: image,
+        selectedImage: selectedImage,
+        userGroupsJson: userGroupsJson,
+        sequenceNum: sequenceNum,
+        isActive: isActive,
+        createdDate: ec.user.nowTimestamp
+      ]" />
+
+      <set field="menuOptionId" from="createOut.menuOptionId" />
+
+      <!-- Fetch the complete menu option to return all fields -->
+      <entity-find-one entity-name="growerp.menu.MenuOption" value-field="menuOption">
+        <field-map field-name="menuOptionId" from="menuOptionId" />
+      </entity-find-one>
+
+      <!-- Map all fields to output -->
+      <script>
+        Map optMap = menuOption.getMap()
+        optMap.put('children', [])  // New option has no children
+        context.putAll(optMap)
+      </script>
+    </actions>
+  </service>
+
+  <!-- linkMenuItem: Link an existing MenuItem to a MenuOption (as a tab) -->
+  <service verb="link" noun="MenuItem" authenticate="true">
+    <description>Link a MenuItem to a MenuOption (add as tab/child).</description>
+    <in-parameters>
+      <parameter name="menuOptionId" required="true">
+        <description>Menu option ID to link to</description>
+      </parameter>
+      <parameter name="menuItemId" required="true">
+        <description>Menu item ID to link</description>
+      </parameter>
+      <parameter name="sequenceNum" type="Integer">
+        <description>Display order within the option (auto-incremented if not provided)</description>
+      </parameter>
+    </in-parameters>
+    <out-parameters>
+      <parameter name="menuOptionId" />
+      <parameter name="menuItemId" />
+      <parameter name="sequenceNum" type="Integer" />
+    </out-parameters>
+    <actions>
+      <!-- Verify option exists -->
+      <entity-find-one entity-name="growerp.menu.MenuOption" value-field="option">
+        <field-map field-name="menuOptionId" from="menuOptionId" />
+      </entity-find-one>
+      <if condition="!option">
+        <return error="true" message="Menu option not found" />
+      </if>
+
+      <!-- Verify item exists -->
+      <entity-find-one entity-name="growerp.menu.MenuItem" value-field="item">
+        <field-map field-name="menuItemId" from="menuItemId" />
+      </entity-find-one>
+      <if condition="!item">
+        <return error="true" message="Menu item not found" />
+      </if>
+
+      <!-- Auto-increment sequence if not provided -->
+      <if condition="!sequenceNum">
+        <entity-find entity-name="growerp.menu.MenuOptionItem" list="existingLinks">
+          <econdition field-name="menuOptionId" from="menuOptionId" />
+          <select-field field-name="sequenceNum" />
+          <order-by field-name="-sequenceNum" />
+        </entity-find>
+        <if condition="existingLinks">
+          <set field="sequenceNum" from="existingLinks[0].sequenceNum + 10" />
+          <else>
+            <set field="sequenceNum" value="10" type="Integer" />
+          </else>
+        </if>
+      </if>
+
+      <!-- Create junction entry -->
+      <service-call name="create#growerp.menu.MenuOptionItem"
+        in-map="[
+        menuOptionId: menuOptionId,
+        menuItemId: menuItemId,
+        sequenceNum: sequenceNum
+      ]" />
+    </actions>
+  </service>
+
+  <!-- unlinkMenuItem: Remove a MenuItem from a MenuOption -->
+  <service verb="unlink" noun="MenuItem" authenticate="true">
+    <description>Remove a MenuItem link from a MenuOption (remove tab).</description>
+    <in-parameters>
+      <parameter name="menuOptionId" required="true">
+        <description>Menu option ID</description>
+      </parameter>
+      <parameter name="menuItemId" required="true">
+        <description>Menu item ID to unlink</description>
+      </parameter>
+    </in-parameters>
+    <out-parameters>
+      <parameter name="deleted" type="Boolean" />
+    </out-parameters>
+    <actions>
+      <service-call name="delete#growerp.menu.MenuOptionItem"
+        in-map="[menuOptionId: menuOptionId, menuItemId: menuItemId]" />
+      <set field="deleted" from="true" type="Boolean" />
+    </actions>
+  </service>
+
+  <!-- updateMenuOption: Update menu option -->
+  <service verb="update" noun="MenuOption" authenticate="true">
+    <description>Update menu option (top-level menu entry) content and display order.</description>
+    <in-parameters>
+      <parameter name="menuOptionId" required="true">
+        <description>Menu option ID to update</description>
+      </parameter>
+      <parameter name="itemKey">
+        <description>New item key</description>
+      </parameter>
+      <parameter name="title">
+        <description>New title</description>
+      </parameter>
+      <parameter name="route">
+        <description>New route</description>
+      </parameter>
+      <parameter name="iconName">
+        <description>New icon name</description>
+      </parameter>
+      <parameter name="widgetName">
+        <description>New widget name</description>
+      </parameter>
+      <parameter name="image">
+        <description>New image path</description>
+      </parameter>
+      <parameter name="selectedImage">
+        <description>New selected image path</description>
+      </parameter>
+      <parameter name="userGroupsJson">
+        <description>New user groups JSON</description>
+      </parameter>
+      <parameter name="sequenceNum" type="Integer">
+        <description>New display order</description>
+      </parameter>
+      <parameter name="isActive">
+        <description>New active status</description>
+      </parameter>
+    </in-parameters>
+    <out-parameters>
+      <parameter name="menuOptionId">
+        <description>Updated menu option ID</description>
+      </parameter>
+      <parameter name="title" />
+      <parameter name="route" />
+      <parameter name="iconName" />
+      <parameter name="widgetName" />
+      <parameter name="sequenceNum" type="Integer" />
+      <parameter name="isActive" />
+      <parameter name="lastUpdatedStamp" type="Timestamp" />
+      <parameter name="children" type="List" />
+    </out-parameters>
+    <actions>
+      <!-- Get owner party ID from authenticated user context -->
+      <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+        out-map="context" />
+
+      <!-- Verify menu option exists -->
+      <entity-find-one entity-name="growerp.menu.MenuOption" value-field="existingOption">
+        <field-map field-name="menuOptionId" from="menuOptionId" />
+      </entity-find-one>
+
+      <if condition="!existingOption">
+        <return error="true" message="Menu option not found" />
+      </if>
+
+      <!-- Ensure user has their own configuration (clone seed data if needed) -->
+      <service-call name="growerp.100.MenuServices100.ensure#UserMenuConfiguration" out-map="ensureOut"
+        in-map="[menuConfigurationId: existingOption.menuConfigurationId]" />
+      
+      <!-- If a clone was created, we need to update the option in the NEW configuration -->
+      <if condition="ensureOut.wasCloned">
+        <!-- Find the corresponding option in the new configuration by matching title -->
+        <entity-find entity-name="growerp.menu.MenuOption" list="newOptions">
+          <econdition field-name="menuConfigurationId" from="ensureOut.userMenuConfigurationId" />
+          <econdition field-name="title" from="existingOption.title" />
+        </entity-find>
+        <if condition="newOptions">
+          <set field="menuOptionId" from="newOptions[0].menuOptionId" />
+          <set field="existingOption" from="newOptions[0]" />
+        </if>
+      </if>
+
+      <!-- Update menu option with provided fields -->
+      <service-call name="update#growerp.menu.MenuOption"
+        in-map="[
+        menuOptionId: menuOptionId,
+        itemKey: itemKey,
+        title: title ?: existingOption.title,
+        route: route,
+        iconName: iconName,
+        widgetName: widgetName,
+        image: image,
+        selectedImage: selectedImage,
+        userGroupsJson: userGroupsJson,
+        sequenceNum: sequenceNum ?: existingOption.sequenceNum,
+        isActive: isActive ?: existingOption.isActive
+      ]" />
+
+      <!-- Fetch and return the updated option with its children -->
+      <entity-find-one entity-name="growerp.menu.MenuOption" value-field="updatedOption">
+        <field-map field-name="menuOptionId" from="menuOptionId" />
+      </entity-find-one>
+      
+      <!-- Get children (linked menu items) -->
+      <entity-find entity-name="growerp.menu.MenuOptionItem" list="junctions">
+        <econdition field-name="menuOptionId" from="menuOptionId" />
+        <order-by field-name="sequenceNum" />
+      </entity-find>
+      
+      <script>
+        List children = []
+        junctions.each { junction ->
+          def item = ec.entity.find("growerp.menu.MenuItem")
+              .condition("menuItemId", junction.menuItemId)
+              .one()
+          if (item) {
+            children.add([
+              menuItemId: item.menuItemId,
+              title: item.title,
+              iconName: item.iconName,
+              widgetName: item.widgetName,
+              image: item.image,
+              isActive: item.isActive == 'Y',
+              sequenceNum: junction.sequenceNum
+            ])
+          }
+        }
+        
+        Map optMap = updatedOption.getMap()
+        optMap.put('children', children)
+        context.putAll(optMap)
+      </script>
+    </actions>
+  </service>
+
+  <!-- deleteMenuOption: Delete menu option -->
+  <service verb="delete" noun="MenuOption" authenticate="true">
+    <description>Delete menu option and all its linked items (cascade delete junction entries).</description>
+    <in-parameters>
+      <parameter name="menuOptionId" required="true">
+        <description>Menu option ID to delete</description>
+      </parameter>
+    </in-parameters>
+    <out-parameters>
+      <parameter name="deletedCount" type="Integer">
+        <description>Total number of records deleted</description>
+      </parameter>
+    </out-parameters>
+    <actions>
+      <!-- Get owner party ID from authenticated user context -->
+      <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+        out-map="context" />
+
+      <!-- Verify menu option exists -->
+      <entity-find-one entity-name="growerp.menu.MenuOption" value-field="existingOption">
+        <field-map field-name="menuOptionId" from="menuOptionId" />
+      </entity-find-one>
+
+      <if condition="!existingOption">
+        <return error="true" message="Menu option not found" />
+      </if>
+
+      <!-- Ensure user has their own configuration (clone seed data if needed) -->
+      <service-call name="growerp.100.MenuServices100.ensure#UserMenuConfiguration" out-map="ensureOut"
+        in-map="[menuConfigurationId: existingOption.menuConfigurationId]" />
+      
+      <!-- If a clone was created, we need to delete the option from the NEW configuration -->
+      <if condition="ensureOut.wasCloned">
+        <!-- Find the corresponding option in the new configuration by matching title -->
+        <entity-find entity-name="growerp.menu.MenuOption" list="newOptions">
+          <econdition field-name="menuConfigurationId" from="ensureOut.userMenuConfigurationId" />
+          <econdition field-name="title" from="existingOption.title" />
+        </entity-find>
+        <if condition="newOptions">
+          <set field="menuOptionId" from="newOptions[0].menuOptionId" />
+        </if>
+      </if>
+
+      <set field="deletedCount" value="0" type="Integer" />
+
+      <!-- Delete all junction entries for this option -->
+      <entity-find entity-name="growerp.menu.MenuOptionItem" list="junctions">
+        <econdition field-name="menuOptionId" from="menuOptionId" />
+      </entity-find>
+      <iterate list="junctions" entry="junction">
+        <service-call name="delete#growerp.menu.MenuOptionItem"
+          in-map="[menuOptionId: junction.menuOptionId, menuItemId: junction.menuItemId]" />
+        <set field="deletedCount" from="deletedCount + 1" />
+      </iterate>
+      
+      <!-- Delete the option itself -->
+      <service-call name="delete#growerp.menu.MenuOption"
+        in-map="[menuOptionId: menuOptionId]" />
+      <set field="deletedCount" from="deletedCount + 1" />
+
+    </actions>
+  </service>
+
+  <!-- reorderMenuOptions: Update sequence numbers for multiple options -->
+  <service verb="reorder" noun="MenuOptions" authenticate="true">
+    <description>Update sequence numbers for multiple menu options in one operation (for drag-and-drop reordering).</description>
+    <in-parameters>
+      <parameter name="menuConfigurationId" required="true">
+        <description>Menu configuration ID</description>
+      </parameter>
+      <parameter name="optionSequences" type="List" required="true">
+        <description>List of {menuOptionId, sequenceNum} pairs</description>
+        <parameter name="menuOptionId" />
+        <parameter name="sequenceNum" type="Integer" />
+      </parameter>
+    </in-parameters>
+    <out-parameters>
+      <parameter name="updatedCount" type="Integer">
+        <description>Number of options updated</description>
+      </parameter>
+    </out-parameters>
+    <actions>
+      <!-- Get owner party ID from authenticated user context -->
+      <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+        out-map="context" />
+
+      <!-- Verify configuration exists -->
+      <entity-find-one entity-name="growerp.menu.MenuConfiguration" value-field="config">
+        <field-map field-name="menuConfigurationId" from="menuConfigurationId" />
+      </entity-find-one>
+
+      <if condition="!config">
+        <return error="true" message="Menu configuration not found" />
+      </if>
+
+      <set field="updatedCount" value="0" type="Integer" />
+
+      <!-- Update each option's sequence number -->
+      <iterate list="optionSequences" entry="optSeq">
+        <service-call name="update#growerp.menu.MenuOption"
+          in-map="[
+          menuOptionId: optSeq.menuOptionId,
+          sequenceNum: optSeq.sequenceNum
+        ]" />
+        <set field="updatedCount" from="updatedCount + 1" />
+      </iterate>
+    </actions>
+  </service>
+
+  <!-- toggleMenuOptionActive: Toggle active status -->
+  <service verb="toggle" noun="MenuOptionActive" authenticate="true">
+    <description>Toggle menu option active status (show/hide in menu).</description>
+    <in-parameters>
+      <parameter name="menuOptionId" required="true">
+        <description>Menu option ID to toggle</description>
+      </parameter>
+    </in-parameters>
+    <out-parameters>
+      <parameter name="menuOptionId">
+        <description>Menu option ID</description>
+      </parameter>
+      <parameter name="isActive">
+        <description>New active status</description>
+      </parameter>
+    </out-parameters>
+    <actions>
+      <!-- Get owner party ID from authenticated user context -->
+      <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+        out-map="context" />
+
+      <!-- Get current option -->
+      <entity-find-one entity-name="growerp.menu.MenuOption" value-field="option">
+        <field-map field-name="menuOptionId" from="menuOptionId" />
+      </entity-find-one>
+
+      <if condition="!option">
+        <return error="true" message="Menu option not found" />
+      </if>
+
+      <!-- Toggle active status -->
+      <set field="newIsActive" from="option.isActive == 'Y' ? 'N' : 'Y'" />
+
+      <service-call name="update#growerp.menu.MenuOption"
+        in-map="[
+        menuOptionId: menuOptionId,
+        isActive: newIsActive
+      ]" />
+
+      <set field="isActive" from="newIsActive" />
+    </actions>
+  </service>
+
+</services>

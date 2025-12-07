@@ -1,0 +1,9 @@
+targets:
+  $default:
+    builders:
+      freezed:
+        options:
+          # Generate separate files for better readability
+          # This helps avoid the single-line getter issue
+          union_key: 'type'
+          union_value_case: 'pascal'

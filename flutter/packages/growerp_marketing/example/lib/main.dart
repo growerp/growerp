@@ -13,8 +13,9 @@
  */
 
 import 'package:flutter/material.dart';
-import 'package:global_configuration/global_configuration.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+import 'package:global_configuration/global_configuration.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_marketing/growerp_marketing.dart';
 import 'package:growerp_models/growerp_models.dart';
@@ -37,9 +38,8 @@ Future main() async {
       classificationId: classificationId,
       chatClient: chatClient,
       notificationClient: notificationClient,
-      title: 'GrowERP Marketing',
-      router: generateRoute,
-      menuOptions: (context) => testMenuOptions,
+      title: 'GrowERP Marketing Example',
+      router: createMarketingExampleRouter(),
       extraDelegates: const [],
       extraBlocProviders: getExampleBlocProviders(restClient, classificationId),
     ),
@@ -53,176 +53,239 @@ List<BlocProvider> getExampleBlocProviders(
   return [...getMarketingBlocProviders(restClient, classificationId)];
 }
 
-// Test menu options (simplified for integration tests)
-List<MenuOption> testMenuOptions = [
-  MenuOption(
-    image: 'packages/growerp_core/images/dashBoardGrey.png',
-    selectedImage: 'packages/growerp_core/images/dashBoard.png',
-    title: 'Main',
-    route: '/',
-    userGroups: [UserGroup.admin, UserGroup.employee],
-    child: const MainMenu(),
-  ),
-  MenuOption(
-    image: 'packages/growerp_core/images/categoriesGrey.png',
-    selectedImage: 'packages/growerp_core/images/categories.png',
-    title: 'Landing Pages',
-    route: '/landingPages',
-    userGroups: [UserGroup.admin, UserGroup.employee],
-    child: const LandingPageList(),
-  ),
-  MenuOption(
-    image: 'packages/growerp_core/images/orderGrey.png',
-    selectedImage: 'packages/growerp_core/images/order.png',
-    title: 'Assessments',
-    route: '/assessments',
-    userGroups: [UserGroup.admin, UserGroup.employee],
-    child: const AssessmentList(),
-  ),
-  MenuOption(
-    image: 'packages/growerp_core/images/assessment-grey.png',
-    selectedImage: 'packages/growerp_core/images/assessment-color.png',
-    title: 'Take Assessment',
-    route: '/takeAssessment',
-    userGroups: [UserGroup.admin, UserGroup.employee],
-    child: const TakeAssessmentMenu(),
-  ),
-  MenuOption(
-    image: 'packages/growerp_core/images/dashBoardGrey.png',
-    selectedImage: 'packages/growerp_core/images/dashBoard.png',
-    title: 'Personas',
-    route: '/personas',
-    userGroups: [UserGroup.admin, UserGroup.employee],
-    child: const PersonaList(),
-  ),
-  MenuOption(
-    image: 'packages/growerp_core/images/categoriesGrey.png',
-    selectedImage: 'packages/growerp_core/images/categories.png',
-    title: 'Content Plans',
-    route: '/contentPlans',
-    userGroups: [UserGroup.admin, UserGroup.employee],
-    child: const ContentPlanList(),
-  ),
-  MenuOption(
-    image: 'packages/growerp_core/images/productsGrey.png',
-    selectedImage: 'packages/growerp_core/images/products.png',
-    title: 'Social Posts',
-    route: '/socialPosts',
-    userGroups: [UserGroup.admin, UserGroup.employee],
-    child: const SocialPostList(),
-  ),
-];
+/// Static menu configuration
+const marketingMenuConfig = MenuConfiguration(
+  menuConfigurationId: 'MARKETING_EXAMPLE',
+  appId: 'marketing_example',
+  name: 'Marketing Example Menu',
+  menuItems: [
+    MenuItem(
+      menuOptionItemId: 'MKT_MAIN',
+      title: 'Main',
+      route: '/',
+      iconName: 'dashboard',
+      sequenceNum: 10,
+    ),
+    MenuItem(
+      menuOptionItemId: 'MKT_LANDING',
+      title: 'Landing Pages',
+      route: '/landingPages',
+      iconName: 'web',
+      sequenceNum: 20,
+    ),
+    MenuItem(
+      menuOptionItemId: 'MKT_ASSESSMENTS',
+      title: 'Assessments',
+      route: '/assessments',
+      iconName: 'quiz',
+      sequenceNum: 30,
+    ),
+    MenuItem(
+      menuOptionItemId: 'MKT_TAKE',
+      title: 'Take Assessment',
+      route: '/takeAssessment',
+      iconName: 'assignment',
+      sequenceNum: 40,
+    ),
+    MenuItem(
+      menuOptionItemId: 'MKT_PERSONAS',
+      title: 'Personas',
+      route: '/personas',
+      iconName: 'people',
+      sequenceNum: 50,
+    ),
+    MenuItem(
+      menuOptionItemId: 'MKT_CONTENT',
+      title: 'Content Plans',
+      route: '/contentPlans',
+      iconName: 'calendar_today',
+      sequenceNum: 60,
+    ),
+    MenuItem(
+      menuOptionItemId: 'MKT_SOCIAL',
+      title: 'Social Posts',
+      route: '/socialPosts',
+      iconName: 'share',
+      sequenceNum: 70,
+    ),
+  ],
+);
 
-// Menu definition (for compatibility)
-List<MenuOption> menuOptions(BuildContext context) => testMenuOptions;
-
-// Routing
-Route<dynamic> generateRoute(RouteSettings settings) {
-  debugPrint(
-    '>>>NavigateTo { ${settings.name} '
-    'with: ${settings.arguments} }',
+/// Creates a static go_router for the marketing example app
+GoRouter createMarketingExampleRouter() {
+  return GoRouter(
+    initialLocation: '/',
+    redirect: (context, state) {
+      final authState = context.read<AuthBloc>().state;
+      final isAuthenticated = authState.status == AuthStatus.authenticated;
+      if (!isAuthenticated && state.uri.path != '/') {
+        return '/';
+      }
+      return null;
+    },
+    routes: [
+      GoRoute(
+        path: '/',
+        builder: (context, state) {
+          final authState = context.watch<AuthBloc>().state;
+          if (authState.status == AuthStatus.authenticated) {
+            return const DisplayMenuOption(
+              menuConfiguration: marketingMenuConfig,
+              menuIndex: 0,
+              child: MarketingDashboard(),
+            );
+          } else {
+            return const HomeForm(
+              menuConfiguration: marketingMenuConfig,
+              title: 'GrowERP Marketing Example',
+            );
+          }
+        },
+      ),
+      ShellRoute(
+        builder: (context, state, child) {
+          int menuIndex = 0;
+          final path = state.uri.path;
+          for (int i = 0; i < marketingMenuConfig.menuItems.length; i++) {
+            final route = marketingMenuConfig.menuItems[i].route;
+            if (route != null &&
+                (route == path ||
+                    (route != '/' && path.startsWith('$route/')))) {
+              menuIndex = i;
+              break;
+            }
+          }
+          return DisplayMenuOption(
+            menuConfiguration: marketingMenuConfig,
+            menuIndex: menuIndex,
+            child: child,
+          );
+        },
+        routes: [
+          GoRoute(
+            path: '/landingPages',
+            builder: (context, state) => const LandingPageList(),
+          ),
+          GoRoute(
+            path: '/assessments',
+            builder: (context, state) => const AssessmentList(),
+          ),
+          GoRoute(
+            path: '/takeAssessment',
+            builder: (context, state) => const TakeAssessmentMenu(),
+            routes: [
+              GoRoute(
+                path: 'flow',
+                builder: (context, state) => LandingPageAssessmentFlowScreen(
+                  landingPageId:
+                      state.uri.queryParameters['landingPageId'] ?? '',
+                  assessmentId: state.uri.queryParameters['assessmentId'] ?? '',
+                  startAssessmentFlow: true,
+                ),
+              ),
+            ],
+          ),
+          GoRoute(
+            path: '/personas',
+            builder: (context, state) => const PersonaList(),
+          ),
+          GoRoute(
+            path: '/contentPlans',
+            builder: (context, state) => const ContentPlanList(),
+          ),
+          GoRoute(
+            path: '/socialPosts',
+            builder: (context, state) => const SocialPostList(),
+          ),
+        ],
+      ),
+    ],
   );
-
-  switch (settings.name) {
-    case '/':
-      return MaterialPageRoute(
-        builder: (context) => HomeForm(menuOptions: (c) => testMenuOptions),
-      );
-    case '/landingPages':
-      return MaterialPageRoute(
-        builder: (context) =>
-            DisplayMenuOption(menuList: testMenuOptions, menuIndex: 1),
-      );
-    case '/assessments':
-      return MaterialPageRoute(
-        builder: (context) =>
-            DisplayMenuOption(menuList: testMenuOptions, menuIndex: 2),
-      );
-    case '/takeAssessment':
-      return MaterialPageRoute(
-        builder: (context) =>
-            DisplayMenuOption(menuList: testMenuOptions, menuIndex: 3),
-      );
-    case '/personas':
-      return MaterialPageRoute(
-        builder: (context) =>
-            DisplayMenuOption(menuList: testMenuOptions, menuIndex: 4),
-      );
-    case '/contentPlans':
-      return MaterialPageRoute(
-        builder: (context) =>
-            DisplayMenuOption(menuList: testMenuOptions, menuIndex: 5),
-      );
-    case '/socialPosts':
-      return MaterialPageRoute(
-        builder: (context) =>
-            DisplayMenuOption(menuList: testMenuOptions, menuIndex: 6),
-      );
-    default:
-      return MaterialPageRoute(
-        builder: (context) => FatalErrorForm(
-          message: "Routing not found for request: ${settings.name}",
-        ),
-      );
-  }
 }
 
-// Main menu with dashboard
-class MainMenu extends StatelessWidget {
-  const MainMenu({super.key});
+/// Simple dashboard for marketing example
+class MarketingDashboard extends StatelessWidget {
+  const MarketingDashboard({super.key});
 
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<AuthBloc, AuthState>(
       builder: (context, state) {
-        if (state.status == AuthStatus.authenticated) {
-          return DashBoardForm(
-            dashboardItems: [
-              makeDashboardItem('dbLandingPages', context, testMenuOptions[1], [
-                'Landing Pages',
-                'Create and manage landing pages',
-                'Configure hooks and CTAs',
-              ]),
-              makeDashboardItem('dbAssessments', context, testMenuOptions[2], [
-                'Assessments',
-                'Create and manage assessments',
-                'Define questions and scoring',
-              ]),
-              makeDashboardItem(
-                'dbTakeAssessment',
-                context,
-                testMenuOptions[3],
-                [
-                  'Take Assessment',
-                  'Experience the assessment flow',
-                  'Test your assessments',
-                ],
-              ),
-              makeDashboardItem('dbPersonas', context, testMenuOptions[4], [
-                'Marketing Personas',
-                'Create customer avatars',
-                'Generate with AI',
-              ]),
-              makeDashboardItem('dbContentPlans', context, testMenuOptions[5], [
-                'Content Plans',
-                'Weekly PNP strategy',
-                'AI-powered planning',
-              ]),
-              makeDashboardItem('dbSocialPosts', context, testMenuOptions[6], [
-                'Social Posts',
-                'Manage PAIN/NEWS/PRIZE posts',
-                'AI drafting & scheduling',
-              ]),
-            ],
-          );
+        if (state.status != AuthStatus.authenticated) {
+          return const LoadingIndicator();
         }
-        return const LoadingIndicator();
+
+        final items = marketingMenuConfig.menuItems
+            .where((item) => item.route != '/')
+            .toList();
+
+        return Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: GridView.builder(
+            gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+              maxCrossAxisExtent: isAPhone(context) ? 200 : 300,
+              childAspectRatio: 1,
+              crossAxisSpacing: 20,
+              mainAxisSpacing: 20,
+            ),
+            itemCount: items.length,
+            itemBuilder: (context, index) {
+              final item = items[index];
+              return _DashboardCard(
+                title: item.title,
+                iconName: item.iconName ?? 'dashboard',
+                route: item.route ?? '/',
+              );
+            },
+          ),
+        );
       },
     );
   }
 }
 
-// Take Assessment menu - allows selecting and taking an assessment
+class _DashboardCard extends StatelessWidget {
+  final String title;
+  final String iconName;
+  final String route;
+
+  const _DashboardCard({
+    required this.title,
+    required this.iconName,
+    required this.route,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 4,
+      child: InkWell(
+        onTap: () => context.go(route),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              getIconFromRegistry(iconName) ??
+                  const Icon(Icons.dashboard, size: 48),
+              const SizedBox(height: 16),
+              Text(
+                title,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Take Assessment menu - allows selecting and taking an assessment
 class TakeAssessmentMenu extends StatelessWidget {
   const TakeAssessmentMenu({super.key});
 
@@ -292,15 +355,14 @@ class TakeAssessmentMenu extends StatelessWidget {
                   ),
                   trailing: const Icon(Icons.arrow_forward_ios),
                   onTap: () {
-                    // Navigate to the assessment flow
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => LandingPageAssessmentFlowScreen(
-                          landingPageId: assessment.pseudoId ?? '',
-                          assessmentId: assessment.assessmentId ?? '',
-                          startAssessmentFlow: true,
-                        ),
-                      ),
+                    context.go(
+                      Uri(
+                        path: '/takeAssessment/flow',
+                        queryParameters: {
+                          'landingPageId': assessment.pseudoId ?? '',
+                          'assessmentId': assessment.assessmentId ?? '',
+                        },
+                      ).toString(),
                     );
                   },
                 ),

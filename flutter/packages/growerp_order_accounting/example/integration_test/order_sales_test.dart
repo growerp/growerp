@@ -24,7 +24,6 @@ import 'package:growerp_order_accounting/src/findoc/integration_test/shipment_te
 import 'package:growerp_order_accounting/src/findoc/integration_test/payment_test.dart';
 import 'package:growerp_order_accounting/src/accounting/integration_test/transaction_test.dart';
 import 'package:growerp_inventory/src/integration_test/inventory_test.dart';
-import 'package:order_accounting_example/main.dart' as router;
 import 'package:order_accounting_example/main.dart';
 import 'package:growerp_core/test_data.dart';
 import 'package:growerp_models/growerp_models.dart';
@@ -40,20 +39,20 @@ void main() {
     RestClient restClient = RestClient(await buildDioClient());
     await CommonTest.startTestApp(
       tester,
-      router.generateRoute,
-      testMenuOptions,
+      createOrderAccountingExampleRouter(),
+      orderAccountingMenuConfig,
       const [
         OrderAccountingLocalizations.delegate,
         InventoryLocalizations.delegate,
       ],
-      blocProviders: router.getOrderAccountingBlocProvidersExample(
+      blocProviders: getOrderAccountingBlocProvidersExample(
         restClient,
         'AppAdmin',
       ),
       title: "Order Sales test",
       restClient: restClient,
       clear: true,
-    ); // use data from previous run, ifnone same as true
+    );
     // prepare
     await CommonTest.createCompanyAndAdmin(
       tester,

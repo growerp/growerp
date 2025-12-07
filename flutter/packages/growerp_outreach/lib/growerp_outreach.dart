@@ -24,3 +24,5 @@ export 'src/services/adapters/email_automation_adapter.dart';
 export 'src/services/adapters/linkedin_automation_adapter.dart';
 export 'src/services/adapters/x_automation_adapter.dart';
 export 'src/services/automation_orchestrator.dart';
+
+export 'src/get_outreach_bloc_providers.dart';

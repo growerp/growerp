@@ -23,11 +23,12 @@ import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 import 'package:growerp_website/growerp_website.dart';
 import 'package:growerp_activity/growerp_activity.dart';
 
-import 'menu_options.dart';
 import 'package:flutter/material.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'router.dart' as router;
+import 'package:go_router/go_router.dart';
+import 'router_builder.dart';
+import 'views/splash_screen.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 //webactivate import 'package:web/web.dart' as web;
 
@@ -71,19 +72,101 @@ Future main() async {
   }
 
   runApp(
-    TopApp(
+    HealthApp(
       restClient: restClient,
       classificationId: classificationId,
       chatClient: chatClient,
       notificationClient: notificationClient,
-      title: 'GrowERP Health.',
-      router: router.generateRoute,
-      menuOptions: menuOptions,
       extraDelegates: delegates,
-      extraBlocProviders: getAdminBlocProviders(restClient, classificationId),
       company: company,
     ),
   );
+}
+
+class HealthApp extends StatefulWidget {
+  const HealthApp({
+    super.key,
+    required this.restClient,
+    required this.classificationId,
+    required this.chatClient,
+    required this.notificationClient,
+    required this.extraDelegates,
+    this.company,
+  });
+
+  final RestClient restClient;
+  final String classificationId;
+  final WsClient chatClient;
+  final WsClient notificationClient;
+  final List<LocalizationsDelegate> extraDelegates;
+  final Company? company;
+
+  @override
+  State<HealthApp> createState() => _HealthAppState();
+}
+
+class _HealthAppState extends State<HealthApp> {
+  late MenuConfigBloc _menuConfigBloc;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize MenuConfigBloc with 'health' appId
+    _menuConfigBloc = MenuConfigBloc(widget.restClient, 'health');
+    // Trigger menu configuration load
+    _menuConfigBloc.add(const MenuConfigLoad());
+  }
+
+  @override
+  void dispose() {
+    _menuConfigBloc.close();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider.value(
+      value: _menuConfigBloc,
+      child: BlocBuilder<MenuConfigBloc, MenuConfigState>(
+        builder: (context, state) {
+          GoRouter router;
+
+          if (state.status == MenuConfigStatus.success &&
+              state.menuConfiguration != null) {
+            // Configuration loaded, build dynamic router
+            router = createDynamicHealthRouter([
+              state.menuConfiguration!,
+            ], rootNavigatorKey: GlobalKey<NavigatorState>());
+          } else {
+            // Loading or error, show splash screen
+            router = GoRouter(
+              routes: [
+                GoRoute(
+                  path: '/',
+                  builder: (context, state) => const SplashScreen(),
+                ),
+              ],
+            );
+          }
+
+          return TopApp(
+            restClient: widget.restClient,
+            classificationId: widget.classificationId,
+            chatClient: widget.chatClient,
+            notificationClient: widget.notificationClient,
+            title: 'GrowERP Health',
+            router: router,
+            extraDelegates: widget.extraDelegates,
+            extraBlocProviders: getHealthBlocProviders(
+              widget.restClient,
+              widget.classificationId,
+            ),
+            company: widget.company,
+          );
+        },
+      ),
+    );
+  }
 }
 
 List<LocalizationsDelegate> delegates = [
@@ -93,7 +176,7 @@ List<LocalizationsDelegate> delegates = [
   ActivityLocalizations.delegate,
 ];
 
-List<BlocProvider> getAdminBlocProviders(
+List<BlocProvider> getHealthBlocProviders(
   RestClient restClient,
   String classificationId,
 ) {

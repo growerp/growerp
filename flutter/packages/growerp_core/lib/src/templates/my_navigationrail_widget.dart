@@ -14,6 +14,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:growerp_core/l10n/generated/core_localizations.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:responsive_framework/responsive_framework.dart';
@@ -30,113 +31,140 @@ Widget myNavigationRail(
   ThemeBloc themeBloc = context.read<ThemeBloc>();
   AuthBloc authBloc = context.read<AuthBloc>();
   Authenticate? auth = authBloc.state.authenticate;
+
   for (var option in menu) {
+    // Try iconName first, then fall back to image paths (for top-level items)
+    Widget iconWidget;
+    Widget selectedIconWidget;
+
+    if (option.iconName != null) {
+      iconWidget =
+          getIconFromRegistry(option.iconName) ??
+          const Icon(Icons.circle, size: 40, key: Key('defaultIcon'));
+      selectedIconWidget =
+          getIconFromRegistry(option.iconName) ??
+          const Icon(Icons.circle, size: 40);
+    } else if (option.image != null) {
+      // Use image assets for top-level menu items
+      iconWidget = Image.asset(
+        option.image!,
+        width: 40,
+        height: 40,
+        key: Key('icon_${option.menuOptionId}'),
+        errorBuilder: (context, error, stackTrace) =>
+            const Icon(Icons.circle, size: 40),
+      );
+      selectedIconWidget = option.selectedImage != null
+          ? Image.asset(
+              option.selectedImage!,
+              width: 40,
+              height: 40,
+              errorBuilder: (context, error, stackTrace) =>
+                  const Icon(Icons.circle, size: 40),
+            )
+          : iconWidget;
+    } else {
+      iconWidget = const Icon(Icons.circle, size: 40, key: Key('defaultIcon'));
+      selectedIconWidget = const Icon(Icons.circle, size: 40);
+    }
+
     items.add(
       NavigationRailDestination(
-        icon: Image.asset(
-          option.image ?? 'packages/growerp_core/images/selectGrey.png',
-          height: 40,
-          key: Key('tap${option.route}'),
+        icon: iconWidget,
+        selectedIcon: selectedIconWidget,
+        label: SizedBox(
+          width: 80,
+          child: Text(
+            option.title,
+            style: const TextStyle(fontSize: 14),
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
         ),
-        selectedIcon: Image.asset(
-          option.selectedImage ?? 'packages/growerp_core/images/select.png',
-        ),
-        label: Text(option.title, style: const TextStyle(fontSize: 16)),
       ),
     );
   }
+
   if (items.isEmpty) {
     return FatalErrorForm(message: localizations.noAccessHere);
   }
 
   return Row(
     children: <Widget>[
-      LayoutBuilder(
-        builder: (context, constraint) {
-          return SingleChildScrollView(
-            child: ConstrainedBox(
-              constraints: BoxConstraints(minHeight: constraint.maxHeight),
-              child: IntrinsicHeight(
-                child: NavigationRail(
-                  backgroundColor: Theme.of(
-                    context,
-                  ).colorScheme.primaryContainer,
-                  key: const Key('navigationrail'),
-                  leading: Center(
-                    child: InkWell(
-                      key: const Key('tapUser'),
-                      onTap: () => Navigator.pushNamed(
-                        context,
-                        '/user',
-                        arguments: auth.user,
+      SizedBox(
+        width: 96,
+        child: LayoutBuilder(
+          builder: (context, constraint) {
+            return SingleChildScrollView(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraint.maxHeight),
+                child: IntrinsicHeight(
+                  child: NavigationRail(
+                    backgroundColor: Theme.of(
+                      context,
+                    ).colorScheme.primaryContainer,
+                    key: const Key('navigationrail'),
+                    leading: Center(
+                      child: InkWell(
+                        key: const Key('tapUser'),
+                        onTap: () => context.go('/user', extra: auth?.user),
+                        child: Column(
+                          children: [
+                            SizedBox(
+                              height: ResponsiveBreakpoints.of(context).isTablet
+                                  ? 25
+                                  : 5,
+                            ),
+                            CircleAvatar(
+                              radius: 15,
+                              child: auth?.user?.image != null
+                                  ? Image.memory(auth!.user!.image!)
+                                  : Text(
+                                      auth?.user?.firstName?.substring(0, 1) ??
+                                          '',
+                                      style: const TextStyle(fontSize: 20),
+                                    ),
+                            ),
+                            Text(auth?.user?.firstName ?? ''),
+                            Text(auth?.user?.lastName ?? ''),
+                          ],
+                        ),
                       ),
+                    ),
+                    selectedIndex: menuIndex,
+                    onDestinationSelected: (int index) {
+                      if (index < menu.length && menu[index].route != null) {
+                        context.go(menu[index].route!);
+                      }
+                    },
+                    labelType: NavigationRailLabelType.all,
+                    destinations: items,
+                    groupAlignment: -0.85,
+                    trailing: InkWell(
+                      key: const Key('theme'),
+                      onTap: () => themeBloc.add(ThemeSwitch()),
                       child: Column(
                         children: [
-                          SizedBox(
-                            height: ResponsiveBreakpoints.of(context).isTablet
-                                ? 25
-                                : 5,
+                          Icon(
+                            size: 40,
+                            themeBloc.state.themeMode == ThemeMode.light
+                                ? Icons.light_mode
+                                : Icons.dark_mode,
                           ),
-                          CircleAvatar(
-                            radius: 15,
-                            child: auth!.user?.image != null
-                                ? Image.memory(auth.user!.image!)
-                                : Text(
-                                    auth.user?.firstName?.substring(0, 1) ?? '',
-                                    style: const TextStyle(fontSize: 20),
-                                  ),
+                          Text(
+                            localizations.theme,
+                            style: const TextStyle(fontSize: 16),
                           ),
-                          Text("${auth.user!.firstName}"),
-                          Text("${auth.user!.lastName}"),
                         ],
                       ),
                     ),
                   ),
-                  selectedIndex: menuIndex,
-                  onDestinationSelected: (int index) {
-                    menuIndex = index;
-                    if (menu[index].route != null) {
-                      if (menu[index].route == "/") {
-                        Navigator.of(context).pushNamedAndRemoveUntil(
-                          '/',
-                          (Route<dynamic> route) => false,
-                          arguments: menu[index].arguments,
-                        );
-                      } else {
-                        Navigator.pushNamed(
-                          context,
-                          menu[index].route!,
-                          arguments: menu[index].arguments,
-                        );
-                      }
-                    }
-                  },
-                  labelType: NavigationRailLabelType.all,
-                  destinations: items,
-                  groupAlignment: -0.85,
-                  trailing: InkWell(
-                    key: const Key('theme'),
-                    onTap: () => themeBloc.add(ThemeSwitch()),
-                    child: Column(
-                      children: [
-                        Icon(
-                          size: 40,
-                          themeBloc.state.themeMode == ThemeMode.light
-                              ? Icons.light_mode
-                              : Icons.dark_mode,
-                        ),
-                        Text(
-                          localizations.theme,
-                          style: const TextStyle(fontSize: 16),
-                        ),
-                      ],
-                    ),
-                  ),
                 ),
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
       Expanded(child: child),
     ],

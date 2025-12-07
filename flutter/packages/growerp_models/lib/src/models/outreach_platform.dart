@@ -14,35 +14,17 @@
 
 /// Enum representing available outreach platforms
 enum OutreachPlatform {
-  EMAIL,
-  LINKEDIN,
-  TWITTER,
-  MEDIUM,
-  SUBSTACK,
-  FACEBOOK;
-
-  /// Returns the display name for the platform
-  String get displayName {
-    switch (this) {
-      case OutreachPlatform.EMAIL:
-        return 'Email';
-      case OutreachPlatform.LINKEDIN:
-        return 'LinkedIn';
-      case OutreachPlatform.TWITTER:
-        return 'X';
-      case OutreachPlatform.MEDIUM:
-        return 'Medium';
-      case OutreachPlatform.SUBSTACK:
-        return 'Substack';
-      case OutreachPlatform.FACEBOOK:
-        return 'Facebook';
-    }
-  }
+  email,
+  linkedIn,
+  twitter,
+  medium,
+  substack,
+  facebook;
 
   /// Returns the enum value from a string
   static OutreachPlatform fromString(String value) {
     return OutreachPlatform.values.firstWhere(
-      (platform) => platform.name == value.toUpperCase(),
+      (platform) => platform.name == value,
       orElse: () => throw ArgumentError('Invalid platform: $value'),
     );
   }

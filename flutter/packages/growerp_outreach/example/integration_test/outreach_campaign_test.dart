@@ -35,8 +35,8 @@ void main() {
     RestClient restClient = RestClient(await buildDioClient());
     await CommonTest.startTestApp(
       tester,
-      generateRoute,
-      menuOptions,
+      createOutreachExampleRouter(),
+      outreachMenuConfig,
       const [],
       restClient: restClient,
       blocProviders: [

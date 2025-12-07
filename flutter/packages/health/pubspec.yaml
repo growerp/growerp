@@ -28,6 +28,7 @@ dependencies:
   web: ^1.0.0
   dio: ^5.4.3
   http: ^1.1.2
+  go_router: ^14.8.1
 
 dev_dependencies:
   flutter_test:

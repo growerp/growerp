@@ -68,3 +68,6 @@ export 'landing_page_generation_response_model.dart';
 export 'persona_model.dart';
 export 'content_plan_model.dart';
 export 'social_post_model.dart';
+export 'menu_item_model.dart';
+export 'menu_option_model.dart';
+export 'menu_configuration_model.dart';

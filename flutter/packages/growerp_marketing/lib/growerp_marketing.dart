@@ -57,9 +57,9 @@ export 'src/screens/generate_landing_page_dialog.dart';
 
 // Integration test helpers and test data
 export 'src/test_data.dart';
-export 'src/landing_page/integration_test/landing_page_test.dart';
-export 'src/assessment/integration_test/assessment_test.dart';
-export 'src/question/integration_test/question_test.dart';
-export 'src/persona/integration_test/persona_test.dart';
-export 'src/content_plan/integration_test/content_plan_test.dart';
-export 'src/social_post/integration_test/social_post_test.dart';
+// export 'src.*integration_test/landing_page_test.dart';
+// export 'src.*integration_test/assessment_test.dart';
+// export 'src.*integration_test/question_test.dart';
+// export 'src.*integration_test/persona_test.dart';
+// export 'src.*integration_test/content_plan_test.dart';
+// export 'src.*integration_test/social_post_test.dart';

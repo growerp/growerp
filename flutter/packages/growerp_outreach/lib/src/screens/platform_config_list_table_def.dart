@@ -52,7 +52,7 @@ TableData getPlatformConfigListTableData(
       builder: (context) => AlertDialog(
         title: const Text('Delete Configuration'),
         content: Text(
-          'Are you sure you want to delete the ${item.platform.displayName} configuration?',
+          'Are you sure you want to delete the ${item.platform.name} configuration?',
         ),
         actions: [
           TextButton(
@@ -115,7 +115,7 @@ TableData getPlatformConfigListTableData(
         key: Key('item$index'),
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(item.platform.displayName, key: Key('platform$index')),
+          Text(item.platform.name, key: Key('platform$index')),
           Text(
             item.isConfigured ? 'Configured' : 'Not Configured',
             key: Key('status$index'),
@@ -141,7 +141,7 @@ TableData getPlatformConfigListTableData(
           ),
           const SizedBox(width: 8),
           Text(
-            item.platform.displayName,
+            item.platform.name,
             key: Key('platform$index'),
           ),
         ],

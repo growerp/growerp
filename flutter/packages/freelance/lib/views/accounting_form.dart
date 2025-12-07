@@ -15,68 +15,117 @@
 // ignore_for_file: depend_on_referenced_packages
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:growerp_core/growerp_core.dart';
-import 'package:growerp_models/growerp_models.dart';
-import 'package:intl/intl.dart';
-import 'package:universal_io/io.dart';
-import '../acct_menu_options.dart';
 
 class AccountingForm extends StatelessWidget {
   const AccountingForm({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final localizations = CoreLocalizations.of(context)!;
-    String currencyId = context
-        .read<AuthBloc>()
-        .state
-        .authenticate!
-        .company!
-        .currency!
-        .currencyId!;
-    String currencySymbol = NumberFormat.simpleCurrency(
-      locale: Platform.localeName,
-      name: currencyId,
-    ).currencySymbol;
-    Authenticate authenticate = context.read<AuthBloc>().state.authenticate!;
-    List<MenuOption> acctOptions = getAcctMenuOptions(context);
-    return DashBoardForm(
-      key: const Key('AcctDashBoard'),
-      dashboardItems: [
-        makeDashboardItem('acctSales', context, acctOptions[1], [
-          localizations.openInvoices,
-          "$currencySymbol "
-              "${authenticate.stats?.salesInvoicesNotPaidAmount ?? '0.00'} "
-              "(${authenticate.stats?.salesInvoicesNotPaidCount})",
-        ]),
-        makeDashboardItem('acctPurchase', context, acctOptions[2], [
-          localizations.openInvoices,
-          "$currencySymbol "
-              "${authenticate.stats?.purchInvoicesNotPaidAmount ?? '0.00'} "
-              "(${authenticate.stats?.purchInvoicesNotPaidCount})",
-        ]),
-        makeDashboardItem('acctLedger', context, acctOptions[3], [
-          localizations.accounts,
-          localizations.transactions,
-          localizations.journal,
-        ]),
-        makeDashboardItem('acctReports', context, acctOptions[4], [
-          localizations.revenueExpense,
-          localizations.balanceSheet,
-          localizations.balanceSummary,
-        ]),
-        makeDashboardItem('AcctSetup', context, acctOptions[5], [
-          localizations.timePeriods,
-          localizations.itemTypes,
-          localizations.paymentTypes,
-        ]),
-        makeDashboardItem(
-          localizations.mainDashboard,
-          context,
-          acctOptions[6],
-          [],
+    return BlocBuilder<MenuConfigBloc, MenuConfigState>(
+      builder: (context, state) {
+        final menuConfig = state.menuConfiguration;
+        if (menuConfig == null) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        // Get dashboard items: accounting sub-options (FREELANCE_ACC_*)
+        final dashboardOptions =
+            menuConfig.menuOptions
+                .where(
+                  (option) =>
+                      option.isActive &&
+                      option.menuOptionId != null &&
+                      option.menuOptionId!.startsWith('FREELANCE_ACC_'),
+                )
+                .toList()
+              ..sort((a, b) => a.sequenceNum.compareTo(b.sequenceNum));
+
+        return Scaffold(
+          backgroundColor: Colors.transparent,
+          floatingActionButton: FloatingActionButton(
+            key: const Key('accountingFab'),
+            tooltip: 'Manage Menu Items',
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (dialogContext) => BlocProvider.value(
+                  value: context.read<MenuConfigBloc>(),
+                  child: MenuItemListDialog(menuConfiguration: menuConfig),
+                ),
+              );
+            },
+            child: const Icon(Icons.menu),
+          ),
+          body: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: GridView.builder(
+              gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                maxCrossAxisExtent: isAPhone(context) ? 200 : 300,
+                childAspectRatio: 1,
+                crossAxisSpacing: 20,
+                mainAxisSpacing: 20,
+              ),
+              itemCount: dashboardOptions.length,
+              itemBuilder: (context, index) {
+                final option = dashboardOptions[index];
+                return _DashboardCard(
+                  title: option.title,
+                  iconName: option.iconName ?? 'dashboard',
+                  route: option.route,
+                );
+              },
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+/// Dashboard card widget for displaying menu options
+class _DashboardCard extends StatelessWidget {
+  final String title;
+  final String iconName;
+  final String? route;
+
+  const _DashboardCard({
+    required this.title,
+    required this.iconName,
+    this.route,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 4,
+      child: InkWell(
+        onTap: () {
+          if (route != null) {
+            context.go(route!);
+          }
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              getIconFromRegistry(iconName) ??
+                  const Icon(Icons.dashboard, size: 48),
+              const SizedBox(height: 16),
+              Text(
+                title,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
         ),
-      ],
+      ),
     );
   }
 }

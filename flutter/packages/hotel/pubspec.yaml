@@ -26,6 +26,9 @@ dependencies:
   universal_io: ^2.2.2
   intl: ^0.20.2
   fl_chart: ^1.1.0
+  go_router: ^14.6.2
+  dio: ^5.4.3
+  web: ^1.0.0
 
 dev_dependencies:
   flutter_test:

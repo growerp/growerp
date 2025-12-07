@@ -129,6 +129,17 @@
             ]
         },
         {
+            "name": "Health linux (lib/main.dart)",
+            "type": "dart",
+            "request": "launch",
+            "cwd": "flutter/packages/health",
+            "program": "lib/main.dart",
+            "args": [
+                "-d",
+                "linux"
+            ]
+        },
+        {
             "name": "Assessment Web (lib/main.dart)",
             "type": "dart",
             "request": "launch",
@@ -191,6 +202,17 @@
             "program": "lib/main.dart"
         },
         {
+            "name": "Freelance linux(lib/main.dart)",
+            "type": "dart",
+            "request": "launch",
+            "cwd": "flutter/packages/freelance",
+            "program": "lib/main.dart",
+            "args": [
+                "-d",
+                "linux"
+            ]
+        },
+        {
             "name": "Freelance chrome (lib/main.dart)",
             "type": "dart",
             "request": "launch",
@@ -221,6 +243,17 @@
                 "chrome",
                 "--web-port",
                 "55555"
+            ]
+        },
+        {
+            "name": "Hotel linux (lib/main.dart)",
+            "type": "dart",
+            "request": "launch",
+            "cwd": "flutter/packages/hotel",
+            "program": "lib/main.dart",
+            "args": [
+                "-d",
+                "linux"
             ]
         },
         {

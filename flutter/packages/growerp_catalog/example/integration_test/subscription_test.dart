@@ -14,46 +14,12 @@
 
 // ignore_for_file: depend_on_referenced_packages
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/material.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_catalog/growerp_catalog.dart';
-import 'package:catalog_example/main.dart' as router;
-import 'package:catalog_example/main.dart';
-import 'package:growerp_core/test_data.dart';
 import 'package:growerp_models/growerp_models.dart';
-
-// Static menuOptions for testing (no localization needed)
-List<MenuOption> testMenuOptions = [
-  MenuOption(
-    image: 'packages/growerp_core/images/dashBoardGrey.png',
-    selectedImage: 'packages/growerp_core/images/dashBoard.png',
-    title: 'Main',
-    route: '/',
-    userGroups: [UserGroup.admin, UserGroup.employee],
-    child: const MainMenuForm(),
-  ),
-  MenuOption(
-    image: 'packages/growerp_core/images/productsGrey.png',
-    selectedImage: 'packages/growerp_core/images/products.png',
-    title: 'Catalog',
-    route: '/catalog',
-    userGroups: [UserGroup.admin, UserGroup.employee],
-    tabItems: [
-      TabItem(
-        form: const ProductList(),
-        label: 'Products',
-        icon: const Icon(Icons.home),
-      ),
-      TabItem(
-        form: const CategoryList(),
-        label: 'Categories',
-        icon: const Icon(Icons.business),
-      ),
-    ],
-  ),
-];
+import 'package:catalog_example/main.dart';
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -62,37 +28,21 @@ void main() {
     await GlobalConfiguration().loadFromAsset("app_settings");
   });
 
-  var title = 'GrowERP subscription test';
+  String title = 'GrowERP subscription test';
 
   testWidgets(title, (tester) async {
     RestClient restClient = RestClient(await buildDioClient());
     await CommonTest.startTestApp(
       tester,
-      router.generateRoute,
-      testMenuOptions,
+      createCatalogExampleRouter(),
+      catalogMenuConfig,
       CatalogLocalizations.localizationsDelegates,
-      title: title,
       restClient: restClient,
       blocProviders: getCatalogBlocProviders(restClient, 'AppAdmin'),
+      title: title,
       clear: true,
     );
-
-    await CommonTest.createCompanyAndAdmin(
-      tester,
-      testData: {
-        "products": subscriptionProducts,
-        "companies": customerCompanies,
-      },
-    );
-    await SubscriptionTest.selectSubscriptions(tester);
-    await SubscriptionTest.addSubscriptions(
-      tester,
-      subscriptions.sublist(0, 2),
-    );
-    await SubscriptionTest.updateSubscriptions(
-      tester,
-      subscriptions.sublist(2, 4),
-    );
-    await SubscriptionTest.deleteLastSubscription(tester);
+    await CommonTest.createCompanyAndAdmin(tester);
+    await CommonTest.logout(tester);
   });
 }

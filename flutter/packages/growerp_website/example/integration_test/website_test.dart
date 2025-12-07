@@ -23,26 +23,6 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_core/test_data.dart';
 import 'package:growerp_models/growerp_models.dart';
 
-// Static menuOptions for testing (no localization needed)
-List<MenuOption> testMenuOptions = [
-  MenuOption(
-    image: 'packages/growerp_core/images/dashBoardGrey.png',
-    selectedImage: 'packages/growerp_core/images/dashBoard.png',
-    title: 'Main',
-    route: '/',
-    userGroups: [UserGroup.admin, UserGroup.employee],
-    child: const MainMenuForm(),
-  ),
-  MenuOption(
-    image: 'packages/growerp_core/images/crmGrey.png',
-    selectedImage: 'packages/growerp_core/images/crm.png',
-    title: 'Website',
-    route: '/website',
-    userGroups: [UserGroup.admin, UserGroup.employee],
-    child: const WebsiteDialog(),
-  ),
-];
-
 void main() {
   final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
@@ -60,8 +40,8 @@ void main() {
       RestClient restClient = RestClient(await buildDioClient());
       await CommonTest.startTestApp(
         tester,
-        generateRoute,
-        testMenuOptions,
+        createWebsiteExampleRouter(),
+        websiteMenuConfig,
         WebsiteLocalizations.localizationsDelegates,
         title: testName,
         restClient: restClient,

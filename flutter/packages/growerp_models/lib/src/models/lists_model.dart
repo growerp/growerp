@@ -287,3 +287,17 @@ abstract class RestRequests with _$RestRequests {
   factory RestRequests.fromJson(Map<String, dynamic> json) =>
       _$RestRequestsFromJson(json);
 }
+
+@freezed
+abstract class MenuConfigurations with _$MenuConfigurations {
+  factory MenuConfigurations({
+    @Default([]) List<MenuConfiguration> menuConfigurations,
+    int? totalResults,
+    int? start,
+    int? limit,
+  }) = _MenuConfigurations;
+  MenuConfigurations._();
+
+  factory MenuConfigurations.fromJson(Map<String, dynamic> json) =>
+      _$MenuConfigurationsFromJson(json);
+}

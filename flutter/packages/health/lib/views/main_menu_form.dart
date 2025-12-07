@@ -14,43 +14,122 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:growerp_core/growerp_core.dart';
-import 'package:growerp_models/growerp_models.dart';
-import '../menu_options.dart';
 
+/// Health dashboard content - displays dashboard panels
+/// This is the content-only version for use with dynamic routing
 class AdminDbForm extends StatelessWidget {
   const AdminDbForm({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final localizations = CoreLocalizations.of(context)!;
-    Authenticate authenticate = context.read<AuthBloc>().state.authenticate!;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        Expanded(
-          child: DashBoardForm(
-            dashboardItems: [
-              makeDashboardItem('dbRequests', context, menuOptions(context)[1], [
-                "${localizations.requests}: ${authenticate.stats?.requests ?? 0}",
-              ]),
-              makeDashboardItem('dbCustomers', context, menuOptions(context)[2], [
-                "${localizations.clients}: ${authenticate.stats?.customers ?? 0}",
-              ]),
-              makeDashboardItem('dbEmployees', context, menuOptions(context)[3], [
-                "${localizations.staff}: ${authenticate.stats?.employees ?? 0}",
-              ]),
-              makeDashboardItem('dbCompany', context, menuOptions(context)[4], [
-                authenticate.company!.name!.length > 20
-                    ? "${authenticate.company!.name!.substring(0, 20)}..."
-                    : "${authenticate.company!.name}",
-                "${localizations.administrators}: ${authenticate.stats?.admins ?? 0}",
-                "${localizations.otherEmployees}: ${authenticate.stats?.employees ?? 0}",
-              ]),
+    return BlocBuilder<MenuConfigBloc, MenuConfigState>(
+      builder: (context, state) {
+        // Use menu configuration from bloc if available
+        final menuConfig = state.menuConfiguration;
+
+        if (menuConfig == null) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        // Get dashboard items from menu configuration (top-level, active items only)
+        // Exclude the Main/Dashboard item itself (route '/')
+        final dashboardItems =
+            menuConfig.menuOptions
+                .where(
+                  (item) =>
+                      item.isActive &&
+                      item.route != '/' &&
+                      item.route != '/about',
+                )
+                .toList()
+              ..sort((a, b) => a.sequenceNum.compareTo(b.sequenceNum));
+
+        return Scaffold(
+          backgroundColor: Colors.transparent,
+          floatingActionButton: FloatingActionButton(
+            key: const Key('healthFab'),
+            tooltip: 'Manage Menu Items',
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (dialogContext) => BlocProvider.value(
+                  value: context.read<MenuConfigBloc>(),
+                  child: MenuItemListDialog(menuConfiguration: menuConfig),
+                ),
+              );
+            },
+            child: const Icon(Icons.menu),
+          ),
+          body: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: GridView.builder(
+              gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                maxCrossAxisExtent: isAPhone(context) ? 200 : 300,
+                childAspectRatio: 1,
+                crossAxisSpacing: 20,
+                mainAxisSpacing: 20,
+              ),
+              itemCount: dashboardItems.length,
+              itemBuilder: (context, index) {
+                final item = dashboardItems[index];
+                return _DashboardCard(
+                  title: item.title,
+                  iconName: item.iconName ?? 'dashboard',
+                  route: item.route,
+                );
+              },
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+/// Dashboard card widget for displaying menu items
+class _DashboardCard extends StatelessWidget {
+  final String title;
+  final String iconName;
+  final String? route;
+
+  const _DashboardCard({
+    required this.title,
+    required this.iconName,
+    this.route,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 4,
+      child: InkWell(
+        onTap: () {
+          if (route != null) {
+            context.go(route!);
+          }
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              getIconFromRegistry(iconName) ??
+                  const Icon(Icons.dashboard, size: 48),
+              const SizedBox(height: 16),
+              Text(
+                title,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ],
           ),
         ),
-      ],
+      ),
     );
   }
 }

@@ -16,13 +16,12 @@
 
 // ignore_for_file: depend_on_referenced_packages
 import 'dart:async';
-import 'package:growerp_chat/src/chat.dart';
+import 'package:growerp_chat/growerp_chat.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:global_configuration/global_configuration.dart';
-import 'package:responsive_framework/responsive_framework.dart';
+import 'package:go_router/go_router.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 Future main() async {
@@ -31,138 +30,85 @@ Future main() async {
   await GlobalConfiguration().loadFromAsset('app_settings');
 
   Bloc.observer = AppBlocObserver();
+  RestClient restClient = RestClient(await buildDioClient());
+  WsClient chatClient = WsClient('chat');
+  String classificationId = GlobalConfiguration().get("classificationId");
+
   runApp(
-    ChatApp(
-      restClient: RestClient(await buildDioClient()),
-      chatClient: WsClient('chat'),
+    TopApp(
+      classificationId: classificationId,
+      restClient: restClient,
+      chatClient: chatClient,
       notificationClient: WsClient('notws'),
+      title: 'GrowERP Chat echo.',
+      router: createChatEchoRouter(),
+      extraBlocProviders: [
+        BlocProvider<ChatRoomBloc>(
+          create: (context) =>
+              ChatRoomBloc(restClient, chatClient, context.read<AuthBloc>())
+                ..add(const ChatRoomFetch()),
+        ),
+        BlocProvider<ChatMessageBloc>(
+          create: (context) => ChatMessageBloc(
+            restClient,
+            chatClient,
+            context.read<AuthBloc>(),
+            context.read<ChatRoomBloc>(),
+          ),
+          lazy: false,
+        ),
+      ],
     ),
   );
 }
 
-class ChatApp extends StatelessWidget {
-  const ChatApp({
-    super.key,
-    required this.restClient,
-    required this.chatClient,
-    required this.notificationClient,
-    this.company,
-  });
+const chatEchoMenuConfig = MenuConfiguration(
+  menuConfigurationId: 'CHAT_ECHO_EXAMPLE',
+  appId: 'chat_echo_example',
+  name: 'Chat Echo Example Menu',
+  menuItems: [
+    MenuItem(
+      menuOptionItemId: 'CHAT_MAIN',
+      title: 'Main',
+      route: '/',
+      iconName: 'dashboard',
+      sequenceNum: 10,
+    ),
+  ],
+);
 
-  final RestClient restClient;
-  final WsClient chatClient;
-  final WsClient notificationClient;
-  final Company? company;
-
-  @override
-  Widget build(BuildContext context) {
-    return MultiRepositoryProvider(
-      providers: [RepositoryProvider(create: (context) => chatClient)],
-      child: MultiBlocProvider(
-        providers: [
-          BlocProvider<AuthBloc>(
-            create: (context) => AuthBloc(
-              chatClient,
-              notificationClient,
-              restClient,
-              'AppAdmin',
-              company,
-            )..add(AuthLoad()),
-            lazy: false,
-          ),
-          BlocProvider<ChatRoomBloc>(
-            create: (context) => ChatRoomBloc(
-              context.read<RestClient>(),
-              chatClient,
-              context.read<AuthBloc>(),
-            )..add(const ChatRoomFetch()),
-          ),
-          BlocProvider<ChatMessageBloc>(
-            create: (context) => ChatMessageBloc(
-              context.read<RestClient>(),
-              chatClient,
-              context.read<AuthBloc>(),
-              context.read<ChatRoomBloc>(),
-            ),
-            lazy: false,
-          ),
-        ],
-        child: const MyChatApp(),
-      ),
-    );
-  }
-}
-
-class MyChatApp extends StatelessWidget {
-  const MyChatApp({super.key});
-
-  static String title = 'GrowERP Chat echo.';
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      localizationsDelegates: const [
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      builder: (context, child) => ResponsiveBreakpoints.builder(
-        child: child!,
-        breakpoints: [
-          const Breakpoint(start: 0, end: 450, name: MOBILE),
-          const Breakpoint(start: 451, end: 800, name: TABLET),
-          const Breakpoint(start: 801, end: 1920, name: DESKTOP),
-          const Breakpoint(start: 1921, end: double.infinity, name: '4K'),
-        ],
-      ),
-      theme: ThemeData(useMaterial3: true, colorScheme: lightColorScheme),
-      darkTheme: ThemeData(useMaterial3: true, colorScheme: darkColorScheme),
-      //      onGenerateRoute: router.generateRoute,
-      home: BlocBuilder<AuthBloc, AuthState>(
+GoRouter createChatEchoRouter() {
+  return GoRouter(
+    initialLocation: '/',
+    redirect: (context, state) {
+      final authState = context.read<AuthBloc>().state;
+      if (authState.status != AuthStatus.authenticated && state.path != '/') {
+        return '/';
+      }
+      return null;
+    },
+    routes: [
+      GoRoute(
+        path: '/',
         builder: (context, state) {
-          if (state.status == AuthStatus.failure) {
-            return const FatalErrorForm(message: 'Internet or server problem?');
-          }
-          if (state.status == AuthStatus.authenticated) {
+          final authState = context.watch<AuthBloc>().state;
+          if (authState.status == AuthStatus.authenticated) {
+            return DisplayMenuOption(
+              menuConfiguration: chatEchoMenuConfig,
+              menuIndex: 0,
+              child: const ChatRooms(),
+            );
+          } else {
             return HomeForm(
-              menuOptions: (context) => menuOptions,
-              title: title,
+              menuConfiguration: chatEchoMenuConfig,
+              title: 'GrowERP Chat echo.',
             );
           }
-          if (state.status == AuthStatus.unAuthenticated) {
-            return HomeForm(
-              menuOptions: (context) => menuOptions,
-              title: title,
-            );
-          }
-          if (state.status == AuthStatus.changeIp) {
-            return const ChangeIpForm();
-          }
-          return const SplashForm();
         },
       ),
-    );
-  }
+    ],
+  );
 }
-
-List<MenuOption> menuOptions = [
-  MenuOption(
-    image: 'packages/growerp_core/images/dashBoardGrey.png',
-    selectedImage: 'packages/growerp_core/images/dashBoard.png',
-    title: 'Main',
-    route: '/',
-    userGroups: [UserGroup.admin, UserGroup.employee],
-    child: const ChatRooms(),
-  ),
-  MenuOption(
-    image: 'packages/growerp_core/images/dashBoardGrey.png',
-    selectedImage: 'packages/growerp_core/images/dashBoard.png',
-    title: 'Main',
-    route: '/',
-    userGroups: [UserGroup.admin, UserGroup.employee],
-    child: const ChatRooms(),
-  ),
-];
 
 class ChatRooms extends StatefulWidget {
   const ChatRooms({super.key});

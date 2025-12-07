@@ -13,6 +13,7 @@
  */
 
 import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:universal_io/io.dart';
 import 'dart:math';
@@ -53,10 +54,15 @@ class CommonTest {
 
   static const int waitTime = 2;
 
+  /// Starts the test application with the given GoRouter configuration.
+  ///
+  /// [router] - The GoRouter instance for navigation
+  /// [menuConfiguration] - The static MenuConfiguration for menu display
+  /// [extraDelegates] - Additional localization delegates
   static Future<void> startTestApp(
     WidgetTester tester,
-    Route<dynamic> Function(RouteSettings) router,
-    List<MenuOption> menuOptions,
+    GoRouter router,
+    MenuConfiguration menuConfiguration,
     List<LocalizationsDelegate> extraDelegates, {
     List<BlocProvider>? blocProviders,
     required RestClient restClient,
@@ -93,7 +99,6 @@ class CommonTest {
         notificationClient: WsClient('notws'),
         router: router,
         title: title,
-        menuOptions: (context) => menuOptions,
         extraDelegates: extraDelegates,
         extraBlocProviders: blocProviders ?? [],
       ),

@@ -16,9 +16,11 @@ import 'package:growerp_marketing_example/main.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:integration_test/integration_test.dart';
-import 'package:growerp_marketing/growerp_marketing.dart';
+
 import 'package:growerp_models/growerp_models.dart';
+
 import 'package:growerp_marketing/src/test_data.dart' as assessment_data;
+import 'package:growerp_marketing/src/landing_page/integration_test/landing_page_test.dart';
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -31,8 +33,8 @@ void main() {
     RestClient restClient = RestClient(await buildDioClient());
     await CommonTest.startTestApp(
       tester,
-      generateRoute,
-      testMenuOptions,
+      createMarketingExampleRouter(),
+      marketingMenuConfig,
       const [],
       restClient: restClient,
       blocProviders: getExampleBlocProviders(
@@ -60,8 +62,8 @@ void main() {
     RestClient restClient = RestClient(await buildDioClient());
     await CommonTest.startTestApp(
       tester,
-      generateRoute,
-      testMenuOptions,
+      createMarketingExampleRouter(),
+      marketingMenuConfig,
       const [],
       restClient: restClient,
       blocProviders: getExampleBlocProviders(
@@ -88,8 +90,8 @@ void main() {
     RestClient restClient = RestClient(await buildDioClient());
     await CommonTest.startTestApp(
       tester,
-      generateRoute,
-      testMenuOptions,
+      createMarketingExampleRouter(),
+      marketingMenuConfig,
       const [],
       restClient: restClient,
       blocProviders: getExampleBlocProviders(

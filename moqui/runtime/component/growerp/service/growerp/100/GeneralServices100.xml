@@ -280,7 +280,31 @@ along with this software (see the LICENSE.md file). If not, see
                     ]" />
                 <else>
                     <set field="stats"
-                        from="[notReadChatRooms: chatRooms]" />
+                        from="[
+                        admins: 0,
+                        employees: 0,
+                        suppliers: 0,
+                        leads: 0,
+                        customers: 0,
+                        openSlsOrders: 0,
+                        openPurOrders: 0,
+                        opportunities: 0,
+                        myOpportunities: 0,
+                        categories: 0,
+                        products: 0,
+                        assets: 0,
+                        salesInvoicesNotPaidCount:  0,
+                        salesInvoicesNotPaidAmount: '0.00',
+                        purchInvoicesNotPaidCount:  0,
+                        purchInvoicesNotPaidAmount: '0.00',
+                        allTasks: 0,
+                        notInvoicedHours: 0,
+                        outgoingShipments: 0,
+                        incomngShipments: 0,
+                        whLocations: 0,
+                        requests: 0,
+                        notReadChatRooms: chatRooms
+                        ]" />
                 </else>
             </if>
         </actions>

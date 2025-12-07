@@ -13,23 +13,33 @@
  */
 
 import 'package:flex_color_scheme/flex_color_scheme.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:global_configuration/global_configuration.dart';
+import 'package:go_router/go_router.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:responsive_framework/responsive_framework.dart';
-import 'package:universal_io/io.dart';
 
 import '../../../get_core_bloc_providers.dart';
 import '../../../services/ws_client.dart';
 import '../../domains.dart';
 import 'package:growerp_core/l10n/generated/core_localizations.dart';
 
-class TopApp extends StatelessWidget {
-  TopApp({
+/// TopApp is the main application wrapper that provides all core functionality.
+///
+/// It sets up:
+/// - Repository providers for RestClient, WsClient, etc.
+/// - Bloc providers for theme, locale, auth, and menu configuration
+/// - Localization support
+/// - Responsive layout breakpoints
+/// - Theme configuration
+///
+/// The [appId] parameter enables the dynamic menu system. When provided,
+/// TopApp will create a MenuConfigBloc that loads menu configuration from
+/// the backend based on the appId.
+class TopApp extends StatefulWidget {
+  const TopApp({
     super.key,
     required this.restClient,
     required this.classificationId,
@@ -37,10 +47,10 @@ class TopApp extends StatelessWidget {
     required this.notificationClient,
     this.title = '',
     required this.router,
-    required this.menuOptions,
     this.extraDelegates = const [],
     this.extraBlocProviders = const [],
     this.company,
+    this.appId,
   });
 
   final RestClient restClient;
@@ -50,13 +60,24 @@ class TopApp extends StatelessWidget {
   final WsClient chatClient;
   final WsClient notificationClient;
   final String title;
-  final Route<dynamic> Function(RouteSettings) router;
-  final List<MenuOption> Function(BuildContext) menuOptions;
+  final GoRouter router;
+
   final List<LocalizationsDelegate> extraDelegates;
   final List<BlocProvider> extraBlocProviders;
-  final _rootNavigatorKey = GlobalKey<NavigatorState>();
 
-  final List<LocalizationsDelegate> localizationsDelegates = [
+  /// Optional app ID for dynamic menu configuration.
+  /// When provided, TopApp will load menu configuration from the backend.
+  /// Examples: 'admin', 'freelance', 'hotel', 'catalog_example'
+  final String? appId;
+
+  @override
+  State<TopApp> createState() => _TopAppState();
+}
+
+class _TopAppState extends State<TopApp> {
+  MenuConfigBloc? _menuConfigBloc;
+
+  final List<LocalizationsDelegate> _localizationsDelegates = [
     CoreLocalizations.delegate,
     GlobalMaterialLocalizations.delegate,
     GlobalWidgetsLocalizations.delegate,
@@ -64,29 +85,47 @@ class TopApp extends StatelessWidget {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    // Create MenuConfigBloc if appId is provided
+    if (widget.appId != null) {
+      _menuConfigBloc = MenuConfigBloc(widget.restClient, widget.appId!);
+    }
+  }
+
+  @override
+  void dispose() {
+    _menuConfigBloc?.close();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return MultiRepositoryProvider(
       providers: [
-        RepositoryProvider(create: (context) => restClient),
-        RepositoryProvider(create: (context) => chatClient),
-        RepositoryProvider(create: (context) => notificationClient),
-        RepositoryProvider(create: (context) => classificationId),
-        RepositoryProvider(create: (context) => company),
+        RepositoryProvider(create: (context) => widget.restClient),
+        RepositoryProvider(create: (context) => widget.chatClient),
+        RepositoryProvider(create: (context) => widget.notificationClient),
+        RepositoryProvider(create: (context) => widget.classificationId),
+        RepositoryProvider(create: (context) => widget.company),
       ],
       child: MultiBlocProvider(
         providers: [
           ...getCoreBlocProviders(
-            restClient,
-            chatClient,
-            notificationClient,
-            classificationId,
-            company,
+            widget.restClient,
+            widget.chatClient,
+            widget.notificationClient,
+            widget.classificationId,
+            widget.company,
           ),
-          ...extraBlocProviders,
+          // Add MenuConfigBloc if appId was provided
+          if (_menuConfigBloc != null)
+            BlocProvider<MenuConfigBloc>.value(value: _menuConfigBloc!),
+          ...widget.extraBlocProviders,
         ],
         child: BlocBuilder<ThemeBloc, ThemeState>(
           builder: (context, themeState) {
-            localizationsDelegates.addAll(extraDelegates);
+            _localizationsDelegates.addAll(widget.extraDelegates);
             return BlocBuilder<LocaleBloc, LocaleState>(
               builder: (context, localeState) {
                 return GestureDetector(
@@ -97,9 +136,8 @@ class TopApp extends StatelessWidget {
                       currentFocus.unfocus();
                     }
                   },
-                  child: MaterialApp(
-                    navigatorKey: _rootNavigatorKey,
-                    title: title,
+                  child: MaterialApp.router(
+                    title: widget.title,
                     locale: localeState.locale,
                     supportedLocales: const [
                       Locale('en'),
@@ -116,7 +154,7 @@ class TopApp extends StatelessWidget {
                       },
                     ),
                     debugShowCheckedModeBanner: false,
-                    localizationsDelegates: localizationsDelegates,
+                    localizationsDelegates: _localizationsDelegates,
                     builder: (context, child) => ResponsiveBreakpoints.builder(
                       child: child!,
                       breakpoints: [
@@ -147,29 +185,7 @@ class TopApp extends StatelessWidget {
                       ),
                       useMaterial3: true,
                     ),
-                    onGenerateRoute: router,
-                    navigatorObservers: [AppNavObserver()],
-                    home: ScaffoldMessenger(
-                      child: Scaffold(
-                        body:
-                            (!kReleaseMode ||
-                                    GlobalConfiguration().get("test") ==
-                                        true) &&
-                                //banner not allowed in appstore when in test
-                                !Platform.isIOS &&
-                                !Platform.isMacOS
-                            ? Banner(
-                                message: "test",
-                                color: Colors.red,
-                                location: BannerLocation.topStart,
-                                child: HomeForm(
-                                  menuOptions: menuOptions,
-                                  title: title,
-                                ),
-                              )
-                            : HomeForm(menuOptions: menuOptions, title: title),
-                      ),
-                    ),
+                    routerConfig: widget.router,
                   ),
                 );
               },

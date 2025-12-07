@@ -42,8 +42,8 @@ void main() {
     RestClient restClient = RestClient(await buildDioClient());
     await CommonTest.startTestApp(
       tester,
-      generateRoute,
-      testMenuOptions,
+      createUserCompanyExampleRouter(),
+      userCompanyMenuConfig,
       UserCompanyLocalizations.localizationsDelegates,
       title: "customer company test",
       restClient: restClient,
