@@ -24,12 +24,14 @@ import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_user_company/growerp_user_company.dart';
 import 'package:growerp_website/growerp_website.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
+import 'package:growerp_outreach/growerp_outreach.dart';
 import 'package:flutter/material.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'menu_options.dart';
-import 'router.dart' as router;
+import 'package:go_router/go_router.dart';
+import 'widget_registry.dart';
+import 'views/admin_dashboard_content.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 //webactivate  import 'package:web/web.dart' as web;
 
@@ -75,19 +77,110 @@ Future main() async {
   }
 
   runApp(
-    TopApp(
+    AdminApp(
       restClient: restClient,
       classificationId: classificationId,
       chatClient: chatClient,
       notificationClient: notificationClient,
-      title: 'GrowERP administrator.',
-      router: router.generateRoute,
-      menuOptions: menuOptions,
       extraDelegates: delegates,
-      extraBlocProviders: getAdminBlocProviders(restClient, classificationId),
       company: company,
     ),
   );
+}
+
+class AdminApp extends StatefulWidget {
+  const AdminApp({
+    super.key,
+    required this.restClient,
+    required this.classificationId,
+    required this.chatClient,
+    required this.notificationClient,
+    required this.extraDelegates,
+    this.company,
+  });
+
+  final RestClient restClient;
+  final String classificationId;
+  final WsClient chatClient;
+  final WsClient notificationClient;
+  final List<LocalizationsDelegate> extraDelegates;
+  final Company? company;
+
+  @override
+  State<AdminApp> createState() => _AdminAppState();
+}
+
+class _AdminAppState extends State<AdminApp> {
+  late MenuConfigBloc _menuConfigBloc;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize MenuConfigBloc with AppID 'admin'
+    _menuConfigBloc = MenuConfigBloc(widget.restClient, 'admin');
+  }
+
+  @override
+  void dispose() {
+    _menuConfigBloc.close();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider.value(
+      value: _menuConfigBloc,
+      child: BlocBuilder<MenuConfigBloc, MenuConfigState>(
+        builder: (context, state) {
+          GoRouter router;
+
+          if (state.status == MenuConfigStatus.success &&
+              state.menuConfiguration != null) {
+            // Configuration loaded, build dynamic router using shared component
+            router = createDynamicAppRouter(
+              [state.menuConfiguration!],
+              config: DynamicRouterConfig(
+                mainConfigId: 'ADMIN_DEFAULT',
+                accountingRootOptionId: 'ADMIN_ACCOUNTING',
+                dashboardBuilder: () => const AdminDashboardContent(),
+                widgetLoader: WidgetRegistry.getWidget,
+                appTitle: 'GrowERP Administrator',
+              ),
+              rootNavigatorKey: GlobalKey<NavigatorState>(),
+            );
+          } else {
+            // Loading or error, show splash screen using shared component
+            router = GoRouter(
+              routes: [
+                GoRoute(
+                  path: '/',
+                  builder: (context, state) => AppSplashScreen.simple(
+                    appTitle: 'GrowERP Administrator',
+                    appId: 'admin',
+                  ),
+                ),
+              ],
+            );
+          }
+
+          return TopApp(
+            restClient: widget.restClient,
+            classificationId: widget.classificationId,
+            chatClient: widget.chatClient,
+            notificationClient: widget.notificationClient,
+            title: 'GrowERP Administrator',
+            router: router,
+            extraDelegates: widget.extraDelegates,
+            extraBlocProviders: getAdminBlocProviders(
+              widget.restClient,
+              widget.classificationId,
+            ),
+            company: widget.company,
+          );
+        },
+      ),
+    );
+  }
 }
 
 List<LocalizationsDelegate> delegates = [
@@ -111,6 +204,7 @@ List<BlocProvider> getAdminBlocProviders(
     ...getOrderAccountingBlocProviders(restClient, classificationId),
     ...getSalesBlocProviders(restClient),
     ...getMarketingBlocProviders(restClient),
+    ...getOutreachBlocProviders(restClient),
     ...getWebsiteBlocProviders(restClient),
   ];
 }

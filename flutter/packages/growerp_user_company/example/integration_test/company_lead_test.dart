@@ -42,8 +42,8 @@ Future<void> main() async {
     RestClient restClient = RestClient(await buildDioClient());
     await CommonTest.startTestApp(
       tester,
-      generateRoute,
-      testMenuOptions,
+      createUserCompanyExampleRouter(),
+      userCompanyMenuConfig,
       UserCompanyLocalizations.localizationsDelegates,
       restClient: restClient,
       title: "lead company test",

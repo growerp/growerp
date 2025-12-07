@@ -87,7 +87,7 @@ class _PlatformConfigDetailScreenState
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: popUp(
         context: context,
-        title: '${widget.platform.displayName} Configuration',
+        title: '${widget.platform.name} Configuration',
         width: isPhone ? 400 : 600,
         height: isPhone ? 700 : 700,
         child: ScaffoldMessenger(
@@ -140,7 +140,7 @@ class _PlatformConfigDetailScreenState
                       Expanded(
                         child: TextFormField(
                           key: const Key('Platform'),
-                          initialValue: widget.platform.displayName,
+                          initialValue: widget.platform.name,
                           decoration:
                               const InputDecoration(labelText: 'Platform'),
                           readOnly: true,
@@ -264,7 +264,7 @@ class _PlatformConfigDetailScreenState
                     return AlertDialog(
                       title: const Text('Delete Configuration'),
                       content: Text(
-                        'Are you sure you want to delete the ${widget.platform.displayName} configuration?',
+                        'Are you sure you want to delete the ${widget.platform.name} configuration?',
                       ),
                       actions: [
                         TextButton(

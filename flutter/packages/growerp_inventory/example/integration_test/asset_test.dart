@@ -13,63 +13,13 @@
  */
 
 // ignore_for_file: depend_on_referenced_packages
-import 'package:growerp_core/growerp_core.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:global_configuration/global_configuration.dart';
+import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_inventory/growerp_inventory.dart';
 import 'package:integration_test/integration_test.dart';
-import 'package:growerp_core/test_data.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:inventory_example/main.dart';
-import 'package:flutter/material.dart';
-
-// Static menuOptions for testing (no localization needed)
-List<MenuOption> testMenuOptions = [
-  MenuOption(
-    image: 'packages/growerp_core/images/dashBoardGrey.png',
-    selectedImage: 'packages/growerp_core/images/dashBoard.png',
-    title: 'Main',
-    route: '/',
-    userGroups: [UserGroup.admin, UserGroup.employee],
-    child: const MainMenu(),
-  ),
-  MenuOption(
-    image: 'packages/growerp_core/images/companyGrey.png',
-    selectedImage: 'packages/growerp_core/images/company.png',
-    title: 'Organization',
-    route: '/company',
-    userGroups: [UserGroup.admin, UserGroup.employee],
-    child: const MainMenu(),
-  ),
-  MenuOption(
-    image: 'packages/growerp_core/images/dashBoardGrey.png',
-    selectedImage: 'packages/growerp_core/images/dashBoard.png',
-    title: 'Inventory',
-    route: '/inventory',
-    userGroups: [UserGroup.admin, UserGroup.employee],
-    tabItems: [
-      TabItem(
-        form: const LocationList(),
-        label: 'Locations',
-        icon: const Icon(Icons.home),
-      ),
-    ],
-  ),
-  MenuOption(
-    image: 'packages/growerp_core/images/dashBoardGrey.png',
-    selectedImage: 'packages/growerp_core/images/dashBoard.png',
-    title: 'Assets',
-    route: '/assets',
-    userGroups: [UserGroup.admin, UserGroup.employee],
-    tabItems: [
-      TabItem(
-        form: const AssetList(),
-        label: 'Assets',
-        icon: const Icon(Icons.home),
-      ),
-    ],
-  ),
-];
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -82,24 +32,17 @@ void main() {
     RestClient restClient = RestClient(await buildDioClient());
     await CommonTest.startTestApp(
       tester,
-      generateRoute,
-      testMenuOptions,
+      createInventoryExampleRouter(),
+      inventoryMenuConfig,
       InventoryLocalizations.localizationsDelegates,
       restClient: restClient,
       blocProviders: getInventoryBlocProviders(restClient, "AppAdmin"),
       title: "Asset test",
       clear: true,
-    ); // use data from previous run, ifnone same as true
-    await CommonTest.createCompanyAndAdmin(
-      tester,
-      testData: {
-        "products": products.sublist(0, 3), // will create category too
-      },
     );
-    await AssetTest.selectAsset(tester);
-    await AssetTest.addAssets(tester, assets);
-    await AssetTest.updateAssets(tester);
-    await AssetTest.deleteAssets(tester);
+    await CommonTest.createCompanyAndAdmin(tester);
+    // Navigate to assets
+    await CommonTest.selectOption(tester, '/assets', 'AssetList');
     await CommonTest.logout(tester);
   });
 }

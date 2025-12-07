@@ -23,16 +23,17 @@ import '../../../templates/templates.dart';
 import '../../domains.dart';
 
 class HomeForm extends StatefulWidget {
-  final List<MenuOption> Function(BuildContext) menuOptions;
+  final MenuConfiguration menuConfiguration;
   final String title;
   final String? launcherImage;
 
   const HomeForm({
     super.key,
-    required this.menuOptions,
+    required this.menuConfiguration,
     this.title = "",
     this.launcherImage,
   });
+
   @override
   HomeFormState createState() => HomeFormState();
 }
@@ -119,11 +120,10 @@ class HomeFormState extends State<HomeForm> {
               children: [
                 Expanded(
                   child: DisplayMenuOption(
-                    menuList: widget.menuOptions(context),
+                    menuConfiguration: widget.menuConfiguration,
                     menuIndex: 0,
                     actions: <Widget>[
-                      if (state.authenticate?.apiKey != null &&
-                          widget.menuOptions(context)[0].route == '/')
+                      if (state.authenticate?.apiKey != null)
                         IconButton(
                           key: const Key('logoutButton'),
                           padding: EdgeInsets.zero,

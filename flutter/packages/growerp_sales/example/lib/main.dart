@@ -13,10 +13,10 @@
  */
 
 // ignore_for_file: depend_on_referenced_packages
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:global_configuration/global_configuration.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+import 'package:global_configuration/global_configuration.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_sales/growerp_sales.dart';
@@ -35,92 +35,167 @@ Future main() async {
       classificationId: 'AppAdmin',
       chatClient: chatClient,
       notificationClient: notificationClient,
-      title: 'GrowERP Marketing',
-      router: generateRoute,
-      menuOptions: menuOptions,
+      title: 'GrowERP Sales Example',
+      router: createSalesExampleRouter(),
       extraDelegates: const [SalesLocalizations.delegate],
       extraBlocProviders: getSalesBlocProviders(restClient),
     ),
   );
 }
 
-// Menu definition
-List<MenuOption> menuOptions(BuildContext context) => [
-  MenuOption(
-    image: 'packages/growerp_core/images/dashBoardGrey.png',
-    selectedImage: 'packages/growerp_core/images/dashBoard.png',
-    title: 'Main',
-    route: '/',
-    userGroups: [UserGroup.admin, UserGroup.employee],
-    child: const MainMenuForm(),
-  ),
-  MenuOption(
-    image: 'packages/growerp_core/images/crmGrey.png',
-    selectedImage: 'packages/growerp_core/images/crm.png',
-    title: 'Marketing',
-    route: '/crm',
-    userGroups: [UserGroup.admin, UserGroup.employee],
-    child: const OpportunityList(),
-  ),
-];
+/// Static menu configuration
+const salesMenuConfig = MenuConfiguration(
+  menuConfigurationId: 'SALES_EXAMPLE',
+  appId: 'sales_example',
+  name: 'Sales Example Menu',
+  menuItems: [
+    MenuItem(
+      menuOptionItemId: 'SALES_MAIN',
+      title: 'Main',
+      route: '/',
+      iconName: 'dashboard',
+      sequenceNum: 10,
+    ),
+    MenuItem(
+      menuOptionItemId: 'SALES_CRM',
+      title: 'Marketing',
+      route: '/crm',
+      iconName: 'campaign',
+      sequenceNum: 20,
+    ),
+  ],
+);
 
-// routing
-Route<dynamic> generateRoute(RouteSettings settings) {
-  if (kDebugMode) {
-    debugPrint(
-      '>>>NavigateTo { ${settings.name} '
-      'with: ${settings.arguments.toString()} }',
-    );
-  }
-  switch (settings.name) {
-    case '/':
-      return MaterialPageRoute(
-        builder: (context) => const HomeForm(menuOptions: menuOptions),
-      );
-    case '/company':
-      return MaterialPageRoute(
-        builder: (context) => HomeForm(menuOptions: (ctx) => menuOptions(ctx)),
-      );
-    case '/user':
-      return MaterialPageRoute(
-        builder: (context) => HomeForm(menuOptions: (ctx) => menuOptions(ctx)),
-      );
-    case '/crm':
-      return MaterialPageRoute(
-        builder: (context) =>
-            DisplayMenuOption(menuList: menuOptions(context), menuIndex: 1),
-      );
-    default:
-      return MaterialPageRoute(
-        builder: (context) => FatalErrorForm(
-          message: "Routing not found for request: ${settings.name}",
-        ),
-      );
-  }
+/// Creates a static go_router for the sales example app
+GoRouter createSalesExampleRouter() {
+  return GoRouter(
+    initialLocation: '/',
+    redirect: (context, state) {
+      final authState = context.read<AuthBloc>().state;
+      final isAuthenticated = authState.status == AuthStatus.authenticated;
+      if (!isAuthenticated && state.uri.path != '/') {
+        return '/';
+      }
+      return null;
+    },
+    routes: [
+      GoRoute(
+        path: '/',
+        builder: (context, state) {
+          final authState = context.watch<AuthBloc>().state;
+          if (authState.status == AuthStatus.authenticated) {
+            return const DisplayMenuOption(
+              menuConfiguration: salesMenuConfig,
+              menuIndex: 0,
+              child: SalesDashboard(),
+            );
+          } else {
+            return const HomeForm(
+              menuConfiguration: salesMenuConfig,
+              title: 'GrowERP Sales Example',
+            );
+          }
+        },
+      ),
+      ShellRoute(
+        builder: (context, state, child) {
+          return DisplayMenuOption(
+            menuConfiguration: salesMenuConfig,
+            menuIndex: 1,
+            child: child,
+          );
+        },
+        routes: [
+          GoRoute(
+            path: '/crm',
+            builder: (context, state) => const OpportunityList(),
+          ),
+        ],
+      ),
+    ],
+  );
 }
 
-// main menu
-class MainMenuForm extends StatelessWidget {
-  const MainMenuForm({super.key});
+/// Simple dashboard for sales example
+class SalesDashboard extends StatelessWidget {
+  const SalesDashboard({super.key});
 
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<AuthBloc, AuthState>(
       builder: (context, state) {
-        if (state.status == AuthStatus.authenticated) {
-          Authenticate authenticate = state.authenticate!;
-          final options = menuOptions(context);
-          return DashBoardForm(
-            dashboardItems: [
-              makeDashboardItem('dbCrm', context, options[1], [
-                "Opportunities: ${authenticate.stats?.opportunities ?? 0}",
-              ]),
-            ],
-          );
+        if (state.status != AuthStatus.authenticated) {
+          return const LoadingIndicator();
         }
 
-        return const LoadingIndicator();
+        final authenticate = state.authenticate!;
+        return Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: GridView.builder(
+            gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+              maxCrossAxisExtent: isAPhone(context) ? 200 : 300,
+              childAspectRatio: 1,
+              crossAxisSpacing: 20,
+              mainAxisSpacing: 20,
+            ),
+            itemCount: 1,
+            itemBuilder: (context, index) {
+              return _DashboardCard(
+                title: 'Marketing',
+                iconName: 'campaign',
+                route: '/crm',
+                stats:
+                    'Opportunities: ${authenticate.stats?.opportunities ?? 0}',
+              );
+            },
+          ),
+        );
       },
+    );
+  }
+}
+
+class _DashboardCard extends StatelessWidget {
+  final String title;
+  final String iconName;
+  final String route;
+  final String stats;
+
+  const _DashboardCard({
+    required this.title,
+    required this.iconName,
+    required this.route,
+    required this.stats,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 4,
+      child: InkWell(
+        onTap: () => context.go(route),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              getIconFromRegistry(iconName) ??
+                  const Icon(Icons.dashboard, size: 48),
+              const SizedBox(height: 16),
+              Text(
+                title,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(stats, style: Theme.of(context).textTheme.bodySmall),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

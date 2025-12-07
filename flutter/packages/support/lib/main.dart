@@ -1,3 +1,5 @@
+// ignore_for_file: depend_on_referenced_packages, avoid_print
+
 /*
  * This GrowERP software is in the public domain under CC0 1.0 Universal plus a
  * Grant of Patent License.
@@ -14,18 +16,19 @@
 
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
+import 'package:go_router/go_router.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_user_company/growerp_user_company.dart';
-import 'menu_options.dart';
 import 'package:flutter/material.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'router.dart' as router;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:growerp_activity/growerp_activity.dart';
 
 import 'src/application/application.dart';
+import 'router_builder.dart';
+import 'views/splash_screen.dart';
 //webactivate  import 'package:web/web.dart' as web;
 
 Future main() async {
@@ -54,7 +57,6 @@ Future main() async {
     //webactivate  hostName = web.window.location.hostname;
     // ignore: unnecessary_null_comparison
     if (hostName != null) {
-      // ignore: avoid_print
       print("=====hostname: $hostName");
       try {
         company = await restClient.getCompanyFromHost(hostName);
@@ -67,19 +69,93 @@ Future main() async {
 
   //company = Company(partyId: '100002', name: 'hallo hallo');
   runApp(
-    TopApp(
+    SupportApp(
       restClient: restClient,
       classificationId: classificationId,
       chatClient: chatClient,
       notificationClient: notificationClient,
-      title: 'GrowERP System Support.',
-      router: router.generateRoute,
-      menuOptions: getMenuOptions,
-      extraDelegates: delegates,
-      extraBlocProviders: getSupportBlocProviders(restClient, classificationId),
       company: company,
     ),
   );
+}
+
+class SupportApp extends StatefulWidget {
+  const SupportApp({
+    super.key,
+    required this.restClient,
+    required this.classificationId,
+    required this.chatClient,
+    required this.notificationClient,
+    this.company,
+  });
+
+  final RestClient restClient;
+  final String classificationId;
+  final WsClient chatClient;
+  final WsClient notificationClient;
+  final Company? company;
+
+  @override
+  State<SupportApp> createState() => _SupportAppState();
+}
+
+class _SupportAppState extends State<SupportApp> {
+  late MenuConfigBloc _menuConfigBloc;
+
+  @override
+  void initState() {
+    super.initState();
+    _menuConfigBloc = MenuConfigBloc(widget.restClient, 'support');
+  }
+
+  @override
+  void dispose() {
+    _menuConfigBloc.close();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider.value(
+      value: _menuConfigBloc,
+      child: BlocBuilder<MenuConfigBloc, MenuConfigState>(
+        builder: (context, state) {
+          GoRouter router;
+
+          if (state.status == MenuConfigStatus.success &&
+              state.menuConfiguration != null) {
+            router = createDynamicSupportRouter([
+              state.menuConfiguration!,
+            ], rootNavigatorKey: GlobalKey<NavigatorState>());
+          } else {
+            router = GoRouter(
+              routes: [
+                GoRoute(
+                  path: '/',
+                  builder: (context, state) => const SplashScreen(),
+                ),
+              ],
+            );
+          }
+
+          return TopApp(
+            restClient: widget.restClient,
+            classificationId: widget.classificationId,
+            chatClient: widget.chatClient,
+            notificationClient: widget.notificationClient,
+            title: 'GrowERP System Support.',
+            router: router,
+            extraDelegates: delegates,
+            extraBlocProviders: getSupportBlocProviders(
+              widget.restClient,
+              widget.classificationId,
+            ),
+            company: widget.company,
+          );
+        },
+      ),
+    );
+  }
 }
 
 List<LocalizationsDelegate> delegates = [

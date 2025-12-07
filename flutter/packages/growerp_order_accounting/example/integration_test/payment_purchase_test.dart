@@ -20,7 +20,6 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 import 'package:growerp_order_accounting/src/findoc/integration_test/payment_test.dart';
 import 'package:growerp_order_accounting/src/accounting/integration_test/transaction_test.dart';
-import 'package:order_accounting_example/main.dart' as router;
 import 'package:order_accounting_example/main.dart';
 import 'package:growerp_core/test_data.dart';
 import 'package:growerp_models/growerp_models.dart';
@@ -36,8 +35,8 @@ void main() {
     RestClient restClient = RestClient(await buildDioClient());
     await CommonTest.startTestApp(
       tester,
-      router.generateRoute,
-      testMenuOptions,
+      createOrderAccountingExampleRouter(),
+      orderAccountingMenuConfig,
       OrderAccountingLocalizations.localizationsDelegates,
       title: 'Payment Purchase Test',
       restClient: restClient,

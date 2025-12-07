@@ -14,6 +14,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:growerp_core/l10n/generated/core_localizations.dart';
 import 'package:growerp_models/growerp_models.dart';
 import '../domains/domains.dart';
@@ -23,20 +24,23 @@ Widget? myDrawer(BuildContext context, bool isPhone, List<MenuOption> menu) {
   ThemeBloc themeBloc = context.read<ThemeBloc>();
   AuthBloc authBloc = context.read<AuthBloc>();
   Authenticate? auth = authBloc.state.authenticate;
-  List<MenuOption> options = [];
-  for (var option in menu) {
-    {
-      options.add(option);
-    }
-  }
+
+  // Add theme option to menu
+  List<MenuOption> options = List.from(menu);
   options.add(
     MenuOption(
-      route: 'theme',
+      menuOptionId: 'theme',
+      menuConfigurationId: 'system',
       title: localizations.theme,
-      userGroups: [],
+      route: 'theme',
+      iconName: 'settings',
+      sequenceNum: 999,
+      isActive: true,
     ),
   );
+
   bool loggedIn = auth?.apiKey != null;
+
   if (loggedIn && isPhone) {
     return Drawer(
       width: 200,
@@ -49,11 +53,7 @@ Widget? myDrawer(BuildContext context, bool isPhone, List<MenuOption> menu) {
             return DrawerHeader(
               child: InkWell(
                 key: const Key('tapUser'),
-                onTap: () => Navigator.pushNamed(
-                  context,
-                  '/user',
-                  arguments: auth?.user,
-                ),
+                onTap: () => context.go('/user', extra: auth?.user),
                 child: Column(
                   children: [
                     CircleAvatar(
@@ -79,7 +79,10 @@ Widget? myDrawer(BuildContext context, bool isPhone, List<MenuOption> menu) {
               ),
             );
           }
-          if (options[i - 1].route == "theme") {
+
+          final menuOption = options[i - 1];
+
+          if (menuOption.route == "theme") {
             return Padding(
               padding: const EdgeInsets.all(5.0),
               child: InkWell(
@@ -105,30 +108,25 @@ Widget? myDrawer(BuildContext context, bool isPhone, List<MenuOption> menu) {
               ),
             );
           }
+
           return ListTile(
-            key: Key('tap${options[i - 1].route}'),
+            key: Key('tap${menuOption.route}'),
             contentPadding: const EdgeInsets.all(5.0),
             title: Text(
-              options[i - 1].title,
+              menuOption.title,
               style: const TextStyle(fontSize: 16),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
             ),
-            leading: Image.asset(
-              options[i - 1].selectedImage ??
-                  'packages/growerp_core/images/select.png',
-            ),
+            leading:
+                getIconFromRegistry(menuOption.iconName) ??
+                const Icon(Icons.circle),
             onTap: () {
-              if (options[i - 1].route == "/") {
-                Navigator.of(context).pushNamedAndRemoveUntil(
-                  '/',
-                  (Route<dynamic> route) => false,
-                  arguments: options[i - 1].arguments,
-                );
-              } else {
-                Navigator.pushNamed(
-                  context,
-                  options[i - 1].route!,
-                  arguments: options[i - 1].arguments,
-                );
+              if (menuOption.route != null) {
+                // Close drawer first
+                Navigator.pop(context);
+                // Then navigate
+                context.go(menuOption.route!);
               }
             },
           );
@@ -136,5 +134,6 @@ Widget? myDrawer(BuildContext context, bool isPhone, List<MenuOption> menu) {
       ),
     );
   }
+
   return Text(localizations.error);
 }

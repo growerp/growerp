@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
-import '../json_converters.dart';
+
 import 'assessment_model.dart';
 
 part 'persona_model.g.dart';

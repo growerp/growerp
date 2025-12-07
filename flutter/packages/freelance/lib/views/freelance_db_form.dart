@@ -14,100 +14,119 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:growerp_core/growerp_core.dart';
-import 'package:growerp_models/growerp_models.dart';
-import 'package:intl/intl.dart';
-import 'package:universal_io/io.dart';
-
-import '../menu_options.dart';
 
 class FreelanceDbForm extends StatelessWidget {
   const FreelanceDbForm({super.key});
 
   @override
   Widget build(BuildContext context) {
-    String currencyId = context
-        .read<AuthBloc>()
-        .state
-        .authenticate!
-        .company!
-        .currency!
-        .currencyId!;
-    String currencySymbol = NumberFormat.simpleCurrency(
-      locale: Platform.localeName,
-      name: currencyId,
-    ).currencySymbol;
-    return BlocBuilder<AuthBloc, AuthState>(
+    return BlocBuilder<MenuConfigBloc, MenuConfigState>(
       builder: (context, state) {
-        if (state.status == AuthStatus.authenticated) {
-          Authenticate authenticate = state.authenticate!;
-          return DashBoardForm(
-            dashboardItems: [
-              makeDashboardItem(
-                'dbCompany',
-                context,
-                getMenuOptions(context)[1],
-                [
-                  authenticate.company!.name!.length > 20
-                      ? "${authenticate.company!.name!.substring(0, 20)}..."
-                      : "${authenticate.company!.name}",
-                  "All open tasks: ${authenticate.stats?.allTasks ?? 0}",
-                  "Not Invoiced hours: ${authenticate.stats?.notInvoicedHours ?? 0}",
-                ],
+        final menuConfig = state.menuConfiguration;
+
+        if (menuConfig == null) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        // Get dashboard options from menu configuration (active items only)
+        // Exclude the Main/Dashboard item itself (route '/') and About
+        final dashboardOptions =
+            menuConfig.menuOptions
+                .where(
+                  (option) =>
+                      option.isActive &&
+                      option.route != '/' &&
+                      option.route != '/about',
+                )
+                .toList()
+              ..sort((a, b) => a.sequenceNum.compareTo(b.sequenceNum));
+
+        return Scaffold(
+          backgroundColor: Colors.transparent,
+          floatingActionButton: FloatingActionButton(
+            key: const Key('freelanceFab'),
+            tooltip: 'Manage Menu Items',
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (dialogContext) => BlocProvider.value(
+                  value: context.read<MenuConfigBloc>(),
+                  child: MenuItemListDialog(menuConfiguration: menuConfig),
+                ),
+              );
+            },
+            child: const Icon(Icons.menu),
+          ),
+          body: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: GridView.builder(
+              gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                maxCrossAxisExtent: isAPhone(context) ? 200 : 300,
+                childAspectRatio: 1,
+                crossAxisSpacing: 20,
+                mainAxisSpacing: 20,
               ),
-              makeDashboardItem('dbCrm', context, getMenuOptions(context)[2], [
-                "All Opportunities: ${authenticate.stats?.opportunities ?? 0}",
-                "My Opportunities: ${authenticate.stats?.myOpportunities ?? 0}",
-                "Leads: ${authenticate.stats?.leads ?? 0}",
-                "Customers: ${authenticate.stats?.customers ?? 0}",
-              ]),
-              makeDashboardItem(
-                'dbCatalog',
-                context,
-                getMenuOptions(context)[3],
-                [
-                  "Categories: ${authenticate.stats?.categories ?? 0}",
-                  "Products: ${authenticate.stats?.products ?? 0}",
-                  "Assets: ${authenticate.stats?.products ?? 0}",
-                ],
-              ),
-              makeDashboardItem(
-                'dbOrders',
-                context,
-                getMenuOptions(context)[4],
-                [
-                  "Sales Orders: ${authenticate.stats?.openSlsOrders ?? 0}",
-                  "Customers: ${authenticate.stats?.customers ?? 0}",
-                  "Purchase Orders: ${authenticate.stats?.openPurOrders ?? 0}",
-                  "Suppliers: ${authenticate.stats?.suppliers ?? 0}",
-                ],
-              ),
-              makeDashboardItem(
-                'dbAccounting',
-                context,
-                getMenuOptions(context)[6],
-                [
-                  "Sales open invoices: \n"
-                      "$currencySymbol "
-                      "${authenticate.stats?.salesInvoicesNotPaidAmount ?? '0.00'} "
-                      "(${authenticate.stats?.salesInvoicesNotPaidCount ?? 0})",
-                  "Purchase unpaid invoices: \n"
-                      "$currencySymbol "
-                      "${authenticate.stats?.purchInvoicesNotPaidAmount ?? '0.00'} "
-                      "(${authenticate.stats?.purchInvoicesNotPaidCount ?? 0})",
-                ],
-              ),
-              makeDashboardItem(
-                'dbInventory',
-                context,
-                getMenuOptions(context)[5],
-                [],
+              itemCount: dashboardOptions.length,
+              itemBuilder: (context, index) {
+                final option = dashboardOptions[index];
+                return _DashboardCard(
+                  title: option.title,
+                  iconName: option.iconName ?? 'dashboard',
+                  route: option.route,
+                );
+              },
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+/// Dashboard card widget for displaying menu options
+class _DashboardCard extends StatelessWidget {
+  final String title;
+  final String iconName;
+  final String? route;
+
+  const _DashboardCard({
+    required this.title,
+    required this.iconName,
+    this.route,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 4,
+      child: InkWell(
+        onTap: () {
+          if (route != null) {
+            context.go(route!);
+          }
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              getIconFromRegistry(iconName) ??
+                  const Icon(Icons.dashboard, size: 48),
+              const SizedBox(height: 16),
+              Text(
+                title,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ],
-          );
-        }
-        return const LoadingIndicator();
-      },
+          ),
+        ),
+      ),
     );
   }
 }

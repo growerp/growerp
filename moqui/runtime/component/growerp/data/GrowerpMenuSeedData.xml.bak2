@@ -1,0 +1,928 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<entity-facade-xml type="seed">
+    <!-- Admin App Default Menu Configuration -->
+    <growerp.menu.MenuConfiguration menuConfigurationId="ADMIN_DEFAULT" appId="admin" 
+        name="Admin Menu" description="Default admin application menu structure"/>
+    
+    <!-- Main Dashboard -->
+    <growerp.menu.MenuOptionItem menuConfigurationId="ADMIN_DEFAULT" menuOptionItemId="ADMIN_MAIN" 
+        sequenceNum="10" title="Main" route="/" 
+        iconName="dashboard"
+        widgetName="AdminDashboard"
+        userGroupsJson='["Admin","Employee"]'/>
+    
+    <!-- Organization Menu -->
+    <growerp.menu.MenuOptionItem menuConfigurationId="ADMIN_DEFAULT" menuOptionItemId="ADMIN_ORG" 
+        sequenceNum="20" title="Organization" route="/companies"
+        iconName="business"
+        widgetName="ShowCompanyDialog"
+        userGroupsJson='["Admin","Employee"]'/>
+    
+    <!-- Organization Tabs -->
+    <growerp.menu.MenuOptionItem menuConfigurationId="ADMIN_DEFAULT" menuOptionItemId="ADMIN_ORG_COMPANY"
+        parentOptionItemId="ADMIN_ORG" sequenceNum="10" title="Company" 
+        route="/companies/company" iconName="home" widgetName="ShowCompanyDialog"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="ADMIN_DEFAULT" menuOptionItemId="ADMIN_ORG_EMPLOYEES"
+        parentOptionItemId="ADMIN_ORG" sequenceNum="20" title="Employees" 
+        route="/companies/employees" iconName="school" widgetName="UserList"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="ADMIN_DEFAULT" menuOptionItemId="ADMIN_ORG_WEBSITE"
+        parentOptionItemId="ADMIN_ORG" sequenceNum="30" title="Website" 
+        route="/companies/website" iconName="webhook" widgetName="WebsiteDialog"/>
+    
+    <!-- CRM Menu -->
+    <growerp.menu.MenuOptionItem menuConfigurationId="ADMIN_DEFAULT" menuOptionItemId="ADMIN_CRM" 
+        sequenceNum="30" title="CRM" route="/crm"
+        itemKey="myOpportunities"
+        iconName="people"
+        widgetName="ActivityList"
+        userGroupsJson='["Admin","Employee"]'/>
+    
+    <!-- CRM Tabs -->
+    <growerp.menu.MenuOptionItem menuConfigurationId="ADMIN_DEFAULT" menuOptionItemId="ADMIN_CRM_TASKS"
+        parentOptionItemId="ADMIN_CRM" sequenceNum="10" title="My To Do, tasks" 
+        route="/crm/tasks" iconName="task" widgetName="ActivityList"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="ADMIN_DEFAULT" menuOptionItemId="ADMIN_CRM_OPPORTUNITIES"
+        parentOptionItemId="ADMIN_CRM" sequenceNum="20" title="Opportunities" 
+        itemKey="myOpportunities"
+        route="/crm/opportunities" iconName="home" widgetName="OpportunityList"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="ADMIN_DEFAULT" menuOptionItemId="ADMIN_CRM_LEADS"
+        parentOptionItemId="ADMIN_CRM" sequenceNum="30" title="Leads" 
+        itemKey="leads"
+        route="/crm/leads" iconName="school" widgetName="UserList"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="ADMIN_DEFAULT" menuOptionItemId="ADMIN_CRM_CUSTOMERS"
+        parentOptionItemId="ADMIN_CRM" sequenceNum="40" title="Customers" 
+        itemKey="customers"
+        route="/crm/customers" iconName="school" widgetName="UserList"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="ADMIN_DEFAULT" menuOptionItemId="ADMIN_CRM_REQUESTS"
+        parentOptionItemId="ADMIN_CRM" sequenceNum="50" title="Requests" 
+        route="/crm/requests" iconName="question_answer" widgetName="ActivityList"/>
+    
+
+    
+    <!-- Marketing Menu -->
+    <growerp.menu.MenuOptionItem menuConfigurationId="ADMIN_DEFAULT" menuOptionItemId="ADMIN_MARKETING" 
+        sequenceNum="35" title="Marketing" route="/marketing"
+        iconName="campaign"
+        widgetName="ContentPlanList"
+        userGroupsJson='["Admin","Employee"]'/>
+    
+    <!-- Marketing Tabs -->
+    <growerp.menu.MenuOptionItem menuConfigurationId="ADMIN_DEFAULT" menuOptionItemId="ADMIN_MARKETING_CONTENT"
+        parentOptionItemId="ADMIN_MARKETING" sequenceNum="10" title="Content Plans" 
+        route="/marketing/content-plans" iconName="list" widgetName="ContentPlanList"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="ADMIN_DEFAULT" menuOptionItemId="ADMIN_MARKETING_POSTS"
+        parentOptionItemId="ADMIN_MARKETING" sequenceNum="20" title="Social Posts" 
+        route="/marketing/social-posts" iconName="share" widgetName="SocialPostList"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="ADMIN_DEFAULT" menuOptionItemId="ADMIN_MARKETING_PERSONAS"
+        parentOptionItemId="ADMIN_MARKETING" sequenceNum="30" title="Personas" 
+        route="/marketing/personas" iconName="people" widgetName="PersonaList"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="ADMIN_DEFAULT" menuOptionItemId="ADMIN_MARKETING_LANDING"
+        parentOptionItemId="ADMIN_MARKETING" sequenceNum="40" title="Landing Pages" 
+        route="/marketing/landing-pages" iconName="web" widgetName="LandingPageList"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="ADMIN_DEFAULT" menuOptionItemId="ADMIN_MARKETING_ASSESSMENTS"
+        parentOptionItemId="ADMIN_MARKETING" sequenceNum="50" title="Assessments" 
+        route="/marketing/assessments" iconName="quiz" widgetName="AssessmentList"/>
+
+    <!-- Outreach Menu -->
+    <growerp.menu.MenuOptionItem menuConfigurationId="ADMIN_DEFAULT" menuOptionItemId="ADMIN_OUTREACH" 
+        sequenceNum="38" title="Outreach" route="/outreach"
+        iconName="send"
+        widgetName="CampaignListScreen"
+        userGroupsJson='["Admin","Employee"]'/>
+    
+    <!-- Outreach Tabs -->
+    <growerp.menu.MenuOptionItem menuConfigurationId="ADMIN_DEFAULT" menuOptionItemId="ADMIN_OUTREACH_CAMPAIGNS"
+        parentOptionItemId="ADMIN_OUTREACH" sequenceNum="10" title="Campaigns" 
+        route="/outreach/campaigns" iconName="list" widgetName="CampaignListScreen"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="ADMIN_DEFAULT" menuOptionItemId="ADMIN_OUTREACH_AUTOMATION"
+        parentOptionItemId="ADMIN_OUTREACH" sequenceNum="20" title="Automation" 
+        route="/outreach/automation" iconName="settings_input_component" widgetName="AutomationScreen"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="ADMIN_DEFAULT" menuOptionItemId="ADMIN_OUTREACH_PLATFORMS"
+        parentOptionItemId="ADMIN_OUTREACH" sequenceNum="30" title="Platforms" 
+        route="/outreach/platforms" iconName="public" widgetName="PlatformConfigListScreen"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="ADMIN_DEFAULT" menuOptionItemId="ADMIN_OUTREACH_MESSAGES"
+        parentOptionItemId="ADMIN_OUTREACH" sequenceNum="40" title="Messages" 
+        route="/outreach/messages" iconName="message" widgetName="OutreachMessageList"/>
+    
+    <!-- Catalog Menu -->
+    <growerp.menu.MenuOptionItem menuConfigurationId="ADMIN_DEFAULT" menuOptionItemId="ADMIN_CATALOG" 
+        sequenceNum="40" title="Catalog" route="/catalog"
+        itemKey="products"
+        iconName="category"
+        widgetName="ProductList"
+        userGroupsJson='["Admin","Employee"]'/>
+    
+    <!-- Catalog Tabs -->
+    <growerp.menu.MenuOptionItem menuConfigurationId="ADMIN_DEFAULT" menuOptionItemId="ADMIN_CATALOG_PRODUCTS"
+        parentOptionItemId="ADMIN_CATALOG" sequenceNum="10" title="Products" 
+        itemKey="products"
+        route="/catalog/products" iconName="home" widgetName="ProductList"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="ADMIN_DEFAULT" menuOptionItemId="ADMIN_CATALOG_ASSETS"
+        parentOptionItemId="ADMIN_CATALOG" sequenceNum="20" title="Assets" 
+        itemKey="assets"
+        route="/catalog/assets" iconName="money" widgetName="AssetList"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="ADMIN_DEFAULT" menuOptionItemId="ADMIN_CATALOG_CATEGORIES"
+        parentOptionItemId="ADMIN_CATALOG" sequenceNum="30" title="Categories" 
+        route="/catalog/categories" iconName="business" widgetName="CategoryList"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="ADMIN_DEFAULT" menuOptionItemId="ADMIN_CATALOG_SUBSCRIPTIONS"
+        parentOptionItemId="ADMIN_CATALOG" sequenceNum="40" title="Subscriptions" 
+        route="/catalog/subscriptions" iconName="subscriptions" widgetName="SubscriptionList"/>
+    
+    <!-- Orders Menu -->
+    <growerp.menu.MenuOptionItem menuConfigurationId="ADMIN_DEFAULT" menuOptionItemId="ADMIN_ORDERS" 
+        sequenceNum="50" title="Orders" route="/orders"
+        itemKey="openSlsOrders"
+        iconName="shopping_cart"
+        widgetName="SalesOrderList"
+        userGroupsJson='["Admin","Employee"]'/>
+    
+    <!-- Orders Tabs -->
+    <growerp.menu.MenuOptionItem menuConfigurationId="ADMIN_DEFAULT" menuOptionItemId="ADMIN_ORDERS_SALES"
+        parentOptionItemId="ADMIN_ORDERS" sequenceNum="10" title="Sales orders" 
+        itemKey="openSlsOrders"
+        route="/orders/sales" iconName="home" widgetName="SalesOrderList"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="ADMIN_DEFAULT" menuOptionItemId="ADMIN_ORDERS_CUSTOMERS"
+        parentOptionItemId="ADMIN_ORDERS" sequenceNum="20" title="Customers" 
+        itemKey="customers"
+        route="/orders/customers" iconName="school" widgetName="UserList"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="ADMIN_DEFAULT" menuOptionItemId="ADMIN_ORDERS_PURCHASE"
+        parentOptionItemId="ADMIN_ORDERS" sequenceNum="30" title="Purchase orders" 
+        itemKey="openPurOrders"
+        route="/orders/purchase" iconName="home" widgetName="PurchaseOrderList"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="ADMIN_DEFAULT" menuOptionItemId="ADMIN_ORDERS_SUPPLIERS"
+        parentOptionItemId="ADMIN_ORDERS" sequenceNum="40" title="Suppliers" 
+        itemKey="suppliers"
+        route="/orders/suppliers" iconName="business" widgetName="UserList"/>
+    
+    <!-- Inventory Menu -->
+    <growerp.menu.MenuOptionItem menuConfigurationId="ADMIN_DEFAULT" menuOptionItemId="ADMIN_INVENTORY" 
+        sequenceNum="60" title="Inventory" route="/inventory"
+        itemKey="outgoingShipments"
+        iconName="warehouse"
+        widgetName="OutgoingShipmentList"
+        userGroupsJson='["Admin","Employee"]'/>
+    
+    <!-- Inventory Tabs -->
+    <growerp.menu.MenuOptionItem menuConfigurationId="ADMIN_DEFAULT" menuOptionItemId="ADMIN_INVENTORY_SHIPOUT"
+        parentOptionItemId="ADMIN_INVENTORY" sequenceNum="10" title="Outgoing shipments" 
+        itemKey="outgoingShipments"
+        route="/inventory/shipments-out" iconName="send" widgetName="OutgoingShipmentList"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="ADMIN_DEFAULT" menuOptionItemId="ADMIN_INVENTORY_SHIPIN"
+        parentOptionItemId="ADMIN_INVENTORY" sequenceNum="20" title="Incoming shipments" 
+        itemKey="incomingShipments"
+        route="/inventory/shipments-in" iconName="call_received" widgetName="IncomingShipmentList"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="ADMIN_DEFAULT" menuOptionItemId="ADMIN_INVENTORY_ASSETS"
+        parentOptionItemId="ADMIN_INVENTORY" sequenceNum="30" title="Assets" 
+        route="/inventory/assets" iconName="money" widgetName="AssetList"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="ADMIN_DEFAULT" menuOptionItemId="ADMIN_INVENTORY_LOCATIONS"
+        parentOptionItemId="ADMIN_INVENTORY" sequenceNum="40" title="WH Locations" 
+        itemKey="whLocations"
+        route="/inventory/locations" iconName="location_pin" widgetName="LocationList"/>
+    
+    <!-- Accounting Menu -->
+    <growerp.menu.MenuOptionItem menuConfigurationId="ADMIN_DEFAULT" menuOptionItemId="ADMIN_ACCOUNTING" 
+        sequenceNum="70" title="Accounting" route="/accounting"
+        itemKey="salesInvoicesNotPaidCount"
+        iconName="account_balance"
+        widgetName="AccountingForm"
+        userGroupsJson='["Admin","Employee"]'/>
+    
+    <!-- Accounting Submenus -->
+
+    <!-- Sales -->
+    <growerp.menu.MenuOptionItem menuConfigurationId="ADMIN_DEFAULT" menuOptionItemId="ADMIN_ACC_SALES"
+        parentOptionItemId="ADMIN_ACCOUNTING" sequenceNum="10" title="Sales"
+        itemKey="salesInvoicesNotPaidCount"
+        route="/accounting/sales" iconName="shopping_cart" widgetName="SalesInvoiceList"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="ADMIN_DEFAULT" menuOptionItemId="ADMIN_ACC_SALES_INVOICES"
+        parentOptionItemId="ADMIN_ACC_SALES" sequenceNum="10" title="Outgoing Invoices"
+        itemKey="salesInvoicesNotPaidCount"
+        route="/accounting/sales/invoices" iconName="home" widgetName="SalesInvoiceList"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="ADMIN_DEFAULT" menuOptionItemId="ADMIN_ACC_SALES_PAYMENTS"
+        parentOptionItemId="ADMIN_ACC_SALES" sequenceNum="20" title="Incoming Payments"
+        route="/accounting/sales/payments" iconName="home" widgetName="SalesPaymentList"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="ADMIN_DEFAULT" menuOptionItemId="ADMIN_ACC_SALES_CUSTOMERS"
+        parentOptionItemId="ADMIN_ACC_SALES" sequenceNum="30" title="Customers"
+        route="/accounting/sales/customers" iconName="school" widgetName="UserListCustomer"/>
+
+    <!-- Purchase -->
+    <growerp.menu.MenuOptionItem menuConfigurationId="ADMIN_DEFAULT" menuOptionItemId="ADMIN_ACC_PURCHASE"
+        parentOptionItemId="ADMIN_ACCOUNTING" sequenceNum="20" title="Purchase"
+        itemKey="purchInvoicesNotPaidCount"
+        route="/accounting/purchase" iconName="shopping_bag" widgetName="PurchaseInvoiceList"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="ADMIN_DEFAULT" menuOptionItemId="ADMIN_ACC_PURCHASE_INVOICES"
+        parentOptionItemId="ADMIN_ACC_PURCHASE" sequenceNum="10" title="Incoming Invoices"
+        itemKey="purchInvoicesNotPaidCount"
+        route="/accounting/purchase/invoices" iconName="home" widgetName="PurchaseInvoiceList"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="ADMIN_DEFAULT" menuOptionItemId="ADMIN_ACC_PURCHASE_PAYMENTS"
+        parentOptionItemId="ADMIN_ACC_PURCHASE" sequenceNum="20" title="Outgoing Payments"
+        route="/accounting/purchase/payments" iconName="home" widgetName="PurchasePaymentList"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="ADMIN_DEFAULT" menuOptionItemId="ADMIN_ACC_PURCHASE_SUPPLIERS"
+        parentOptionItemId="ADMIN_ACC_PURCHASE" sequenceNum="30" title="Suppliers"
+        route="/accounting/purchase/suppliers" iconName="business" widgetName="UserListSupplier"/>
+
+    <!-- Ledger -->
+    <growerp.menu.MenuOptionItem menuConfigurationId="ADMIN_DEFAULT" menuOptionItemId="ADMIN_ACC_LEDGER"
+        parentOptionItemId="ADMIN_ACCOUNTING" sequenceNum="30" title="Ledger"
+        route="/accounting/ledger" iconName="account_balance" widgetName="LedgerTreeForm"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="ADMIN_DEFAULT" menuOptionItemId="ADMIN_ACC_LEDGER_TREE"
+        parentOptionItemId="ADMIN_ACC_LEDGER" sequenceNum="10" title="Ledger Tree"
+        route="/accounting/ledger/tree" iconName="account_tree" widgetName="LedgerTreeForm"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="ADMIN_DEFAULT" menuOptionItemId="ADMIN_ACC_LEDGER_ACCOUNTS"
+        parentOptionItemId="ADMIN_ACC_LEDGER" sequenceNum="20" title="Ledger Accounts"
+        route="/accounting/ledger/accounts" iconName="format_list_bulleted" widgetName="GlAccountList"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="ADMIN_DEFAULT" menuOptionItemId="ADMIN_ACC_LEDGER_TRANSACTIONS"
+        parentOptionItemId="ADMIN_ACC_LEDGER" sequenceNum="30" title="Ledger Transactions"
+        route="/accounting/ledger/transactions" iconName="view_list" widgetName="TransactionList"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="ADMIN_DEFAULT" menuOptionItemId="ADMIN_ACC_LEDGER_JOURNALS"
+        parentOptionItemId="ADMIN_ACC_LEDGER" sequenceNum="40" title="Ledger Journals"
+        route="/accounting/ledger/journals" iconName="checklist" widgetName="LedgerJournalList"/>
+
+    <!-- Reports -->
+    <growerp.menu.MenuOptionItem menuConfigurationId="ADMIN_DEFAULT" menuOptionItemId="ADMIN_ACC_REPORTS"
+        parentOptionItemId="ADMIN_ACCOUNTING" sequenceNum="40" title="Reports"
+        route="/accounting/reports" iconName="assessment" widgetName="RevenueExpenseChart"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="ADMIN_DEFAULT" menuOptionItemId="ADMIN_ACC_REPORTS_REVEXP"
+        parentOptionItemId="ADMIN_ACC_REPORTS" sequenceNum="10" title="Revenue/Expense"
+        route="/accounting/reports/revenue-expense" iconName="list" widgetName="RevenueExpenseChart"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="ADMIN_DEFAULT" menuOptionItemId="ADMIN_ACC_REPORTS_BALANCESHEET"
+        parentOptionItemId="ADMIN_ACC_REPORTS" sequenceNum="20" title="Balance Sheet"
+        route="/accounting/reports/balance-sheet" iconName="list" widgetName="BalanceSheetForm"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="ADMIN_DEFAULT" menuOptionItemId="ADMIN_ACC_REPORTS_BALANCE_SUMMARY"
+        parentOptionItemId="ADMIN_ACC_REPORTS" sequenceNum="30" title="Balance Summary"
+        route="/accounting/reports/balance-summary" iconName="list" widgetName="BalanceSummaryList"/>
+
+    <!-- Setup -->
+    <growerp.menu.MenuOptionItem menuConfigurationId="ADMIN_DEFAULT" menuOptionItemId="ADMIN_ACC_SETUP"
+        parentOptionItemId="ADMIN_ACCOUNTING" sequenceNum="50" title="Setup"
+        route="/accounting/setup" iconName="settings" widgetName="TimePeriodListForm"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="ADMIN_DEFAULT" menuOptionItemId="ADMIN_ACC_SETUP_TIME"
+        parentOptionItemId="ADMIN_ACC_SETUP" sequenceNum="10" title="Time Periods"
+        route="/accounting/setup/time-periods" iconName="list" widgetName="TimePeriodListForm"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="ADMIN_DEFAULT" menuOptionItemId="ADMIN_ACC_SETUP_ITEM"
+        parentOptionItemId="ADMIN_ACC_SETUP" sequenceNum="20" title="Item Types"
+        route="/accounting/setup/item-types" iconName="list" widgetName="ItemTypeList"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="ADMIN_DEFAULT" menuOptionItemId="ADMIN_ACC_SETUP_PAYMENT"
+        parentOptionItemId="ADMIN_ACC_SETUP" sequenceNum="30" title="Payment Types"
+        route="/accounting/setup/payment-types" iconName="list" widgetName="PaymentTypeList"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="ADMIN_DEFAULT" menuOptionItemId="ADMIN_ACC_SETUP_PLAN"
+        parentOptionItemId="ADMIN_ACC_SETUP" sequenceNum="40" title="Plan Selection"
+        route="/accounting/setup/plan-selection" iconName="subscriptions" widgetName="PlanSelectionForm"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="ADMIN_DEFAULT" menuOptionItemId="ADMIN_ACC_MAIN"
+        parentOptionItemId="ADMIN_ACCOUNTING" sequenceNum="99" title="Main Menu"
+        route="/" iconName="arrow_back" widgetName="AdminDashboard"/>
+
+    <!-- About Menu -->
+    <growerp.menu.MenuOptionItem menuConfigurationId="ADMIN_DEFAULT" menuOptionItemId="ADMIN_ABOUT" 
+        sequenceNum="80" title="About" route="/about"
+        image="packages/growerp_core/images/infoGrey.png"
+        selectedImage="packages/growerp_core/images/info.png"
+        widgetName="AboutForm"
+        userGroupsJson='["Admin","Employee"]'/>
+
+    <!-- ========== FREELANCE APP ========== -->
+    <growerp.menu.MenuConfiguration menuConfigurationId="FREELANCE_DEFAULT" appId="freelance" 
+        name="Freelance Menu" description="Default freelance application menu structure"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="FREELANCE_DEFAULT" menuOptionItemId="FREELANCE_MAIN" 
+        sequenceNum="10" title="Main" route="/"
+        iconName="dashboard"
+        widgetName="FreelanceDbForm"
+        userGroupsJson='["Admin","Employee"]'/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="FREELANCE_DEFAULT" menuOptionItemId="FREELANCE_TASKS" 
+        sequenceNum="20" title="Tasks" route="/tasks"
+        itemKey="allTasks"
+        iconName="task"
+        widgetName="ActivityList"
+        userGroupsJson='["Admin","Employee"]'/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="FREELANCE_DEFAULT" menuOptionItemId="FREELANCE_CRM" 
+        sequenceNum="30" title="CRM" route="/crm"
+        itemKey="myOpportunities"
+        iconName="people"
+        widgetName="ActivityList"
+        userGroupsJson='["Admin","Employee"]'/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="FREELANCE_DEFAULT" menuOptionItemId="FREELANCE_CRM_OPPS"
+        parentOptionItemId="FREELANCE_CRM" sequenceNum="10" title="My Opportunities" 
+        itemKey="myOpportunities"
+        route="/crm/opportunities" iconName="home" widgetName="OpportunityList"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="FREELANCE_DEFAULT" menuOptionItemId="FREELANCE_CRM_LEADS"
+        parentOptionItemId="FREELANCE_CRM" sequenceNum="20" title="Leads" 
+        itemKey="leads"
+        route="/crm/leads" iconName="business" widgetName="UserListLead"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="FREELANCE_DEFAULT" menuOptionItemId="FREELANCE_CRM_CUSTOMERS"
+        parentOptionItemId="FREELANCE_CRM" sequenceNum="30" title="Customers" 
+        itemKey="customers"
+        route="/crm/customers" iconName="school" widgetName="UserListCustomer"/>
+    
+    <!-- Freelance Marketing Menu -->
+    <growerp.menu.MenuOptionItem menuConfigurationId="FREELANCE_DEFAULT" menuOptionItemId="FREELANCE_MARKETING" 
+        sequenceNum="35" title="Marketing" route="/marketing"
+        iconName="campaign"
+        widgetName="ContentPlanList"
+        userGroupsJson='["Admin","Employee"]'/>
+    
+    <!-- Freelance Marketing Tabs -->
+    <growerp.menu.MenuOptionItem menuConfigurationId="FREELANCE_DEFAULT" menuOptionItemId="FREELANCE_MARKETING_CONTENT"
+        parentOptionItemId="FREELANCE_MARKETING" sequenceNum="10" title="Content Plans" 
+        route="/marketing/content-plans" iconName="list" widgetName="ContentPlanList"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="FREELANCE_DEFAULT" menuOptionItemId="FREELANCE_MARKETING_POSTS"
+        parentOptionItemId="FREELANCE_MARKETING" sequenceNum="20" title="Social Posts" 
+        route="/marketing/social-posts" iconName="share" widgetName="SocialPostList"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="FREELANCE_DEFAULT" menuOptionItemId="FREELANCE_MARKETING_PERSONAS"
+        parentOptionItemId="FREELANCE_MARKETING" sequenceNum="30" title="Personas" 
+        route="/marketing/personas" iconName="people" widgetName="PersonaList"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="FREELANCE_DEFAULT" menuOptionItemId="FREELANCE_MARKETING_LANDING"
+        parentOptionItemId="FREELANCE_MARKETING" sequenceNum="40" title="Landing Pages" 
+        route="/marketing/landing-pages" iconName="web" widgetName="LandingPageList"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="FREELANCE_DEFAULT" menuOptionItemId="FREELANCE_MARKETING_ASSESSMENTS"
+        parentOptionItemId="FREELANCE_MARKETING" sequenceNum="50" title="Assessments" 
+        route="/marketing/assessments" iconName="quiz" widgetName="AssessmentList"/>
+
+    <!-- Freelance Outreach Menu -->
+    <growerp.menu.MenuOptionItem menuConfigurationId="FREELANCE_DEFAULT" menuOptionItemId="FREELANCE_OUTREACH" 
+        sequenceNum="38" title="Outreach" route="/outreach"
+        iconName="send"
+        widgetName="CampaignListScreen"
+        userGroupsJson='["Admin","Employee"]'/>
+    
+    <!-- Freelance Outreach Tabs -->
+    <growerp.menu.MenuOptionItem menuConfigurationId="FREELANCE_DEFAULT" menuOptionItemId="FREELANCE_OUTREACH_CAMPAIGNS"
+        parentOptionItemId="FREELANCE_OUTREACH" sequenceNum="10" title="Campaigns" 
+        route="/outreach/campaigns" iconName="list" widgetName="CampaignListScreen"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="FREELANCE_DEFAULT" menuOptionItemId="FREELANCE_OUTREACH_AUTOMATION"
+        parentOptionItemId="FREELANCE_OUTREACH" sequenceNum="20" title="Automation" 
+        route="/outreach/automation" iconName="settings_input_component" widgetName="AutomationScreen"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="FREELANCE_DEFAULT" menuOptionItemId="FREELANCE_OUTREACH_PLATFORMS"
+        parentOptionItemId="FREELANCE_OUTREACH" sequenceNum="30" title="Platforms" 
+        route="/outreach/platforms" iconName="public" widgetName="PlatformConfigListScreen"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="FREELANCE_DEFAULT" menuOptionItemId="FREELANCE_OUTREACH_MESSAGES"
+        parentOptionItemId="FREELANCE_OUTREACH" sequenceNum="40" title="Messages" 
+        route="/outreach/messages" iconName="message" widgetName="OutreachMessageList"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="FREELANCE_DEFAULT" menuOptionItemId="FREELANCE_CATALOG" 
+        sequenceNum="40" title="Catalog" route="/catalog"
+        itemKey="products"
+        iconName="category"
+        widgetName="ProductList"
+        userGroupsJson='["Admin","Employee"]'/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="FREELANCE_DEFAULT" menuOptionItemId="FREELANCE_CATALOG_PRODUCTS"
+        parentOptionItemId="FREELANCE_CATALOG" sequenceNum="10" title="Products" 
+        itemKey="products"
+        route="/catalog/products" iconName="home" widgetName="ProductList"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="FREELANCE_DEFAULT" menuOptionItemId="FREELANCE_CATALOG_CATEGORIES"
+        parentOptionItemId="FREELANCE_CATALOG" sequenceNum="20" title="Categories" 
+        itemKey="categories"
+        route="/catalog/categories" iconName="business" widgetName="CategoryList"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="FREELANCE_DEFAULT" menuOptionItemId="FREELANCE_ORDERS" 
+        sequenceNum="50" title="Orders" route="/orders"
+        itemKey="openSlsOrders"
+        iconName="shopping_cart"
+        widgetName="SalesOrderList"
+        userGroupsJson='["Admin","Employee"]'/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="FREELANCE_DEFAULT" menuOptionItemId="FREELANCE_ORDERS_SALES"
+        parentOptionItemId="FREELANCE_ORDERS" sequenceNum="10" title="Sales orders" 
+        itemKey="openSlsOrders"
+        route="/orders/sales" iconName="home" widgetName="SalesOrderList"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="FREELANCE_DEFAULT" menuOptionItemId="FREELANCE_ORDERS_CUSTOMERS"
+        parentOptionItemId="FREELANCE_ORDERS" sequenceNum="20" title="Customers" 
+        itemKey="customers"
+        route="/orders/customers" iconName="business" widgetName="UserListCustomer"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="FREELANCE_DEFAULT" menuOptionItemId="FREELANCE_ORDERS_PURCHASE"
+        parentOptionItemId="FREELANCE_ORDERS" sequenceNum="30" title="Purchase orders" 
+        itemKey="openPurOrders"
+        route="/orders/purchase" iconName="home" widgetName="PurchaseOrderList"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="FREELANCE_DEFAULT" menuOptionItemId="FREELANCE_ORDERS_SUPPLIERS"
+        parentOptionItemId="FREELANCE_ORDERS" sequenceNum="40" title="Suppliers" 
+        itemKey="suppliers"
+        route="/orders/suppliers" iconName="business" widgetName="UserListSupplier"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="FREELANCE_DEFAULT" menuOptionItemId="FREELANCE_WEBSITE" 
+        sequenceNum="60" title="Website" route="/website"
+        iconName="web"
+        widgetName="WebsiteDialog"
+        userGroupsJson='["Admin","Employee"]'/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="FREELANCE_DEFAULT" menuOptionItemId="FREELANCE_ACCOUNTING" 
+        sequenceNum="70" title="Accounting" route="/accounting"
+        itemKey="salesInvoicesNotPaidCount"
+        iconName="account_balance"
+        widgetName="AccountingForm"
+        userGroupsJson='["Admin"]'/>
+
+    <!-- Freelance Accounting Sub-Menus -->
+    <growerp.menu.MenuOptionItem menuConfigurationId="FREELANCE_DEFAULT" menuOptionItemId="FREELANCE_ACC_SALES"
+        parentOptionItemId="FREELANCE_ACCOUNTING" sequenceNum="10" title="Sales"
+        itemKey="salesInvoicesNotPaidCount"
+        route="/accounting/sales" iconName="shopping_cart" widgetName="SalesInvoiceList"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="FREELANCE_DEFAULT" menuOptionItemId="FREELANCE_ACC_SALES_INVOICES"
+        parentOptionItemId="FREELANCE_ACC_SALES" sequenceNum="10" title="Outgoing Invoices"
+        itemKey="salesInvoicesNotPaidCount"
+        route="/accounting/sales/invoices" iconName="home" widgetName="SalesInvoiceList"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="FREELANCE_DEFAULT" menuOptionItemId="FREELANCE_ACC_SALES_PAYMENTS"
+        parentOptionItemId="FREELANCE_ACC_SALES" sequenceNum="20" title="Incoming Payments"
+        route="/accounting/sales/payments" iconName="home" widgetName="SalesPaymentList"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="FREELANCE_DEFAULT" menuOptionItemId="FREELANCE_ACC_SALES_CUSTOMERS"
+        parentOptionItemId="FREELANCE_ACC_SALES" sequenceNum="30" title="Customers"
+        itemKey="customers"
+        route="/accounting/sales/customers" iconName="school" widgetName="UserListCustomer"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="FREELANCE_DEFAULT" menuOptionItemId="FREELANCE_ACC_PURCHASE"
+        parentOptionItemId="FREELANCE_ACCOUNTING" sequenceNum="20" title="Purchase"
+        itemKey="purchInvoicesNotPaidCount"
+        route="/accounting/purchase" iconName="shopping_bag" widgetName="PurchaseInvoiceList"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="FREELANCE_DEFAULT" menuOptionItemId="FREELANCE_ACC_PURCHASE_INVOICES"
+        parentOptionItemId="FREELANCE_ACC_PURCHASE" sequenceNum="10" title="Incoming Invoices"
+        itemKey="purchInvoicesNotPaidCount"
+        route="/accounting/purchase/invoices" iconName="home" widgetName="PurchaseInvoiceList"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="FREELANCE_DEFAULT" menuOptionItemId="FREELANCE_ACC_PURCHASE_PAYMENTS"
+        parentOptionItemId="FREELANCE_ACC_PURCHASE" sequenceNum="20" title="Outgoing Payments"
+        route="/accounting/purchase/payments" iconName="home" widgetName="PurchasePaymentList"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="FREELANCE_DEFAULT" menuOptionItemId="FREELANCE_ACC_PURCHASE_SUPPLIERS"
+        parentOptionItemId="FREELANCE_ACC_PURCHASE" sequenceNum="30" title="Suppliers"
+        itemKey="suppliers"
+        route="/accounting/purchase/suppliers" iconName="business" widgetName="UserListSupplier"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="FREELANCE_DEFAULT" menuOptionItemId="FREELANCE_ACC_LEDGER"
+        parentOptionItemId="FREELANCE_ACCOUNTING" sequenceNum="30" title="Ledger"
+        route="/accounting/ledger" iconName="account_balance" widgetName="LedgerTreeForm"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="FREELANCE_DEFAULT" menuOptionItemId="FREELANCE_ACC_LEDGER_TREE"
+        parentOptionItemId="FREELANCE_ACC_LEDGER" sequenceNum="10" title="Ledger Tree"
+        route="/accounting/ledger/tree" iconName="account_tree" widgetName="LedgerTreeForm"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="FREELANCE_DEFAULT" menuOptionItemId="FREELANCE_ACC_LEDGER_ACCOUNTS"
+        parentOptionItemId="FREELANCE_ACC_LEDGER" sequenceNum="20" title="Ledger Accounts"
+        route="/accounting/ledger/accounts" iconName="format_list_bulleted" widgetName="GlAccountList"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="FREELANCE_DEFAULT" menuOptionItemId="FREELANCE_ACC_LEDGER_TRANSACTIONS"
+        parentOptionItemId="FREELANCE_ACC_LEDGER" sequenceNum="30" title="Ledger Transactions"
+        route="/accounting/ledger/transactions" iconName="view_list" widgetName="TransactionList"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="FREELANCE_DEFAULT" menuOptionItemId="FREELANCE_ACC_LEDGER_JOURNALS"
+        parentOptionItemId="FREELANCE_ACC_LEDGER" sequenceNum="40" title="Ledger Journals"
+        route="/accounting/ledger/journals" iconName="checklist" widgetName="LedgerJournalList"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="FREELANCE_DEFAULT" menuOptionItemId="FREELANCE_ACC_REPORTS"
+        parentOptionItemId="FREELANCE_ACCOUNTING" sequenceNum="40" title="Reports"
+        route="/accounting/reports" iconName="assessment" widgetName="RevenueExpenseChart"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="FREELANCE_DEFAULT" menuOptionItemId="FREELANCE_ACC_REPORTS_REVEXP"
+        parentOptionItemId="FREELANCE_ACC_REPORTS" sequenceNum="10" title="Revenue/Expense"
+        route="/accounting/reports/revenue-expense" iconName="list" widgetName="RevenueExpenseChart"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="FREELANCE_DEFAULT" menuOptionItemId="FREELANCE_ACC_REPORTS_BALANCESHEET"
+        parentOptionItemId="FREELANCE_ACC_REPORTS" sequenceNum="20" title="Balance Sheet"
+        route="/accounting/reports/balance-sheet" iconName="list" widgetName="BalanceSheetForm"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="FREELANCE_DEFAULT" menuOptionItemId="FREELANCE_ACC_REPORTS_BALANCE_SUMMARY"
+        parentOptionItemId="FREELANCE_ACC_REPORTS" sequenceNum="30" title="Balance Summary"
+        route="/accounting/reports/balance-summary" iconName="list" widgetName="BalanceSummaryList"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="FREELANCE_DEFAULT" menuOptionItemId="FREELANCE_ACC_SETUP"
+        parentOptionItemId="FREELANCE_ACCOUNTING" sequenceNum="50" title="Setup"
+        route="/accounting/setup" iconName="settings" widgetName="TimePeriodListForm"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="FREELANCE_DEFAULT" menuOptionItemId="FREELANCE_ACC_SETUP_TIME"
+        parentOptionItemId="FREELANCE_ACC_SETUP" sequenceNum="10" title="Time Periods"
+        route="/accounting/setup/time-periods" iconName="list" widgetName="TimePeriodListForm"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="FREELANCE_DEFAULT" menuOptionItemId="FREELANCE_ACC_SETUP_ITEM"
+        parentOptionItemId="FREELANCE_ACC_SETUP" sequenceNum="20" title="Item Types"
+        route="/accounting/setup/item-types" iconName="list" widgetName="ItemTypeList"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="FREELANCE_DEFAULT" menuOptionItemId="FREELANCE_ACC_SETUP_PAYMENT"
+        parentOptionItemId="FREELANCE_ACC_SETUP" sequenceNum="30" title="Payment Types"
+        route="/accounting/setup/payment-types" iconName="list" widgetName="PaymentTypeList"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="FREELANCE_DEFAULT" menuOptionItemId="FREELANCE_ACC_MAIN"
+        parentOptionItemId="FREELANCE_ACCOUNTING" sequenceNum="99" title="Main Menu"
+        route="/" iconName="arrow_back" widgetName="FreelanceDbForm"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="FREELANCE_DEFAULT" menuOptionItemId="FREELANCE_ABOUT" 
+        sequenceNum="80" title="About" route="/about"
+        iconName="info"
+        widgetName="AboutForm"
+        userGroupsJson='["Admin"]'/>
+
+    <!-- ========== HEALTH APP ========== -->
+    <growerp.menu.MenuConfiguration menuConfigurationId="HEALTH_DEFAULT" appId="health" 
+        name="Health Menu" description="Default health application menu structure"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="HEALTH_DEFAULT" menuOptionItemId="HEALTH_MAIN" 
+        sequenceNum="10" title="Main" route="/"
+        iconName="dashboard"
+        widgetName="AdminDbForm"
+        userGroupsJson='["Admin","Employee","Other"]'/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="HEALTH_DEFAULT" menuOptionItemId="HEALTH_REQUESTS" 
+        itemKey="dbRequests" sequenceNum="20" title="Requests" route="/requests"
+        iconName="assignment"
+        widgetName="FinDocListRequest"
+        userGroupsJson='["Admin","Other","Employee"]'/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="HEALTH_DEFAULT" menuOptionItemId="HEALTH_CUSTOMERS" 
+        itemKey="dbCustomers" sequenceNum="30" title="Clients" route="/customers"
+        iconName="group"
+        widgetName="UserListCustomer"
+        userGroupsJson='["Employee","Admin"]'/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="HEALTH_DEFAULT" menuOptionItemId="HEALTH_EMPLOYEES" 
+        itemKey="dbEmployees" sequenceNum="40" title="Staff" route="/employees"
+        iconName="badge"
+        widgetName="UserListCompany"
+        userGroupsJson='["Employee","Admin"]'/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="HEALTH_DEFAULT" menuOptionItemId="HEALTH_COMPANY" 
+        itemKey="dbCompany" sequenceNum="50" title="Organization" route="/company"
+        iconName="business"
+        widgetName="ShowCompanyDialog"
+        userGroupsJson='["Admin","Employee"]'/>
+
+    <!-- ========== HOTEL APP ========== -->
+    <growerp.menu.MenuConfiguration menuConfigurationId="HOTEL_DEFAULT" appId="hotel" 
+        name="Hotel Menu" description="Default hotel application menu structure"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="HOTEL_DEFAULT" menuOptionItemId="HOTEL_MAIN" 
+        sequenceNum="10" title="Main" route="/"
+        iconName="dashboard"
+        widgetName="GanttForm"
+        userGroupsJson='["Admin","Employee"]'/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="HOTEL_DEFAULT" menuOptionItemId="HOTEL_MYHOTEL" 
+        sequenceNum="20" title="My Hotel" route="/myHotel"
+        iconName="business"
+        widgetName="ShowCompanyDialog"
+        userGroupsJson='["Admin","Employee"]'/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="HOTEL_DEFAULT" menuOptionItemId="HOTEL_MYHOTEL_COMPANY"
+        parentOptionItemId="HOTEL_MYHOTEL" sequenceNum="10" title="Company" 
+        route="/myHotel/company" iconName="home" widgetName="ShowCompanyDialog"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="HOTEL_DEFAULT" menuOptionItemId="HOTEL_MYHOTEL_EMPLOYEES"
+        parentOptionItemId="HOTEL_MYHOTEL" sequenceNum="20" title="Employees" 
+        route="/myHotel/employees" iconName="school" widgetName="UserListCompany"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="HOTEL_DEFAULT" menuOptionItemId="HOTEL_MYHOTEL_WEBSITE"
+        parentOptionItemId="HOTEL_MYHOTEL" sequenceNum="30" title="Website" 
+        route="/myHotel/website" iconName="webhook" widgetName="WebsiteDialog"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="HOTEL_DEFAULT" menuOptionItemId="HOTEL_ROOMS" 
+        sequenceNum="30" title="Rooms" route="/rooms"
+        iconName="king_bed"
+        widgetName="AssetList"
+        userGroupsJson='["Admin","Employee"]'/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="HOTEL_DEFAULT" menuOptionItemId="HOTEL_ROOMS_LIST"
+        parentOptionItemId="HOTEL_ROOMS" sequenceNum="10" title="Rooms" 
+        route="/rooms/list" iconName="home" widgetName="AssetList"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="HOTEL_DEFAULT" menuOptionItemId="HOTEL_ROOMS_TYPES"
+        parentOptionItemId="HOTEL_ROOMS" sequenceNum="20" title="Room Types" 
+        route="/rooms/types" iconName="home" widgetName="ProductList"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="HOTEL_DEFAULT" menuOptionItemId="HOTEL_RESERVATIONS" 
+        sequenceNum="40" title="Reservations" route="/reservations"
+        iconName="book_online"
+        widgetName="SalesOrderRentalList"
+        userGroupsJson='["Admin","Employee"]'/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="HOTEL_DEFAULT" menuOptionItemId="HOTEL_RESERVATIONS_LIST"
+        parentOptionItemId="HOTEL_RESERVATIONS" sequenceNum="10" title="Reservations" 
+        route="/reservations/list" iconName="home" widgetName="SalesOrderRentalList"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="HOTEL_DEFAULT" menuOptionItemId="HOTEL_RESERVATIONS_CUSTOMERS"
+        parentOptionItemId="HOTEL_RESERVATIONS" sequenceNum="20" title="Customers" 
+        route="/reservations/customers" iconName="school" widgetName="CompanyUserListCustomer"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="HOTEL_DEFAULT" menuOptionItemId="HOTEL_RESERVATIONS_PURCHASE"
+        parentOptionItemId="HOTEL_RESERVATIONS" sequenceNum="30" title="Purchase orders" 
+        route="/reservations/purchase" iconName="home" widgetName="PurchaseOrderList"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="HOTEL_DEFAULT" menuOptionItemId="HOTEL_RESERVATIONS_SUPPLIERS"
+        parentOptionItemId="HOTEL_RESERVATIONS" sequenceNum="40" title="Suppliers" 
+        route="/reservations/suppliers" iconName="business" widgetName="CompanyUserListSupplier"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="HOTEL_DEFAULT" menuOptionItemId="HOTEL_CHECKINOUT" 
+        sequenceNum="50" title="In/Out" route="/checkInOut"
+        iconName="luggage"
+        widgetName="CheckInList"
+        userGroupsJson='["Admin","Employee"]'/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="HOTEL_DEFAULT" menuOptionItemId="HOTEL_CHECKINOUT_IN"
+        parentOptionItemId="HOTEL_CHECKINOUT" sequenceNum="10" title="Check-In" 
+        route="/checkInOut/in" iconName="home" widgetName="CheckInList"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="HOTEL_DEFAULT" menuOptionItemId="HOTEL_CHECKINOUT_OUT"
+        parentOptionItemId="HOTEL_CHECKINOUT" sequenceNum="20" title="Check-Out" 
+        route="/checkInOut/out" iconName="home" widgetName="CheckOutList"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="HOTEL_DEFAULT" menuOptionItemId="HOTEL_ACCOUNTING" 
+        sequenceNum="60" title="Accounting" route="/accounting"
+        iconName="account_balance"
+        widgetName="AccountingForm"
+        userGroupsJson='["Admin"]'/>
+
+    <!-- Hotel Accounting Submenus -->
+
+    <!-- Sales -->
+    <growerp.menu.MenuOptionItem menuConfigurationId="HOTEL_DEFAULT" menuOptionItemId="HOTEL_ACC_SALES"
+        parentOptionItemId="HOTEL_ACCOUNTING" sequenceNum="10" title="Sales"
+        route="/accounting/sales" iconName="shopping_cart" widgetName="SalesInvoiceList"
+        userGroupsJson='["Admin"]'/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="HOTEL_DEFAULT" menuOptionItemId="HOTEL_ACC_SALES_INVOICES"
+        parentOptionItemId="HOTEL_ACC_SALES" sequenceNum="10" title="Outgoing Invoices"
+        route="/accounting/sales/invoices" iconName="home" widgetName="SalesInvoiceList"
+        userGroupsJson='["Admin"]'/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="HOTEL_DEFAULT" menuOptionItemId="HOTEL_ACC_SALES_PAYMENTS"
+        parentOptionItemId="HOTEL_ACC_SALES" sequenceNum="20" title="Incoming Payments"
+        route="/accounting/sales/payments" iconName="home" widgetName="SalesPaymentList"
+        userGroupsJson='["Admin"]'/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="HOTEL_DEFAULT" menuOptionItemId="HOTEL_ACC_SALES_CUSTOMERS"
+        parentOptionItemId="HOTEL_ACC_SALES" sequenceNum="30" title="Customers"
+        route="/accounting/sales/customers" iconName="school" widgetName="CompanyUserListCustomer"
+        userGroupsJson='["Admin"]'/>
+
+    <!-- Purchase -->
+    <growerp.menu.MenuOptionItem menuConfigurationId="HOTEL_DEFAULT" menuOptionItemId="HOTEL_ACC_PURCHASE"
+        parentOptionItemId="HOTEL_ACCOUNTING" sequenceNum="20" title="Purchase"
+        route="/accounting/purchase" iconName="shopping_bag" widgetName="PurchaseInvoiceList"
+        userGroupsJson='["Admin"]'/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="HOTEL_DEFAULT" menuOptionItemId="HOTEL_ACC_PURCHASE_INVOICES"
+        parentOptionItemId="HOTEL_ACC_PURCHASE" sequenceNum="10" title="Incoming Invoices"
+        route="/accounting/purchase/invoices" iconName="home" widgetName="PurchaseInvoiceList"
+        userGroupsJson='["Admin"]'/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="HOTEL_DEFAULT" menuOptionItemId="HOTEL_ACC_PURCHASE_PAYMENTS"
+        parentOptionItemId="HOTEL_ACC_PURCHASE" sequenceNum="20" title="Outgoing Payments"
+        route="/accounting/purchase/payments" iconName="home" widgetName="PurchasePaymentList"
+        userGroupsJson='["Admin"]'/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="HOTEL_DEFAULT" menuOptionItemId="HOTEL_ACC_PURCHASE_SUPPLIERS"
+        parentOptionItemId="HOTEL_ACC_PURCHASE" sequenceNum="30" title="Suppliers"
+        route="/accounting/purchase/suppliers" iconName="business" widgetName="CompanyUserListSupplier"
+        userGroupsJson='["Admin"]'/>
+
+    <!-- Ledger -->
+    <growerp.menu.MenuOptionItem menuConfigurationId="HOTEL_DEFAULT" menuOptionItemId="HOTEL_ACC_LEDGER"
+        parentOptionItemId="HOTEL_ACCOUNTING" sequenceNum="30" title="Ledger"
+        route="/accounting/ledger" iconName="account_balance" widgetName="LedgerTreeForm"
+        userGroupsJson='["Admin"]'/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="HOTEL_DEFAULT" menuOptionItemId="HOTEL_ACC_LEDGER_TREE"
+        parentOptionItemId="HOTEL_ACC_LEDGER" sequenceNum="10" title="Ledger Tree"
+        route="/accounting/ledger/tree" iconName="account_tree" widgetName="LedgerTreeForm"
+        userGroupsJson='["Admin"]'/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="HOTEL_DEFAULT" menuOptionItemId="HOTEL_ACC_LEDGER_ACCOUNTS"
+        parentOptionItemId="HOTEL_ACC_LEDGER" sequenceNum="20" title="Ledger Accounts"
+        route="/accounting/ledger/accounts" iconName="format_list_bulleted" widgetName="GlAccountList"
+        userGroupsJson='["Admin"]'/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="HOTEL_DEFAULT" menuOptionItemId="HOTEL_ACC_LEDGER_TRANSACTIONS"
+        parentOptionItemId="HOTEL_ACC_LEDGER" sequenceNum="30" title="Ledger Transactions"
+        route="/accounting/ledger/transactions" iconName="view_list" widgetName="TransactionList"
+        userGroupsJson='["Admin"]'/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="HOTEL_DEFAULT" menuOptionItemId="HOTEL_ACC_LEDGER_JOURNALS"
+        parentOptionItemId="HOTEL_ACC_LEDGER" sequenceNum="40" title="Ledger Journals"
+        route="/accounting/ledger/journals" iconName="checklist" widgetName="LedgerJournalList"
+        userGroupsJson='["Admin"]'/>
+
+    <!-- Reports -->
+    <growerp.menu.MenuOptionItem menuConfigurationId="HOTEL_DEFAULT" menuOptionItemId="HOTEL_ACC_REPORTS"
+        parentOptionItemId="HOTEL_ACCOUNTING" sequenceNum="40" title="Reports"
+        route="/accounting/reports" iconName="assessment" widgetName="RevenueExpenseChart"
+        userGroupsJson='["Admin"]'/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="HOTEL_DEFAULT" menuOptionItemId="HOTEL_ACC_REPORTS_REVEXP"
+        parentOptionItemId="HOTEL_ACC_REPORTS" sequenceNum="10" title="Revenue/Expense"
+        route="/accounting/reports/revenue-expense" iconName="list" widgetName="RevenueExpenseChart"
+        userGroupsJson='["Admin"]'/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="HOTEL_DEFAULT" menuOptionItemId="HOTEL_ACC_REPORTS_BALANCESHEET"
+        parentOptionItemId="HOTEL_ACC_REPORTS" sequenceNum="20" title="Balance Sheet"
+        route="/accounting/reports/balance-sheet" iconName="list" widgetName="BalanceSheetForm"
+        userGroupsJson='["Admin"]'/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="HOTEL_DEFAULT" menuOptionItemId="HOTEL_ACC_REPORTS_BALANCE_SUMMARY"
+        parentOptionItemId="HOTEL_ACC_REPORTS" sequenceNum="30" title="Balance Summary"
+        route="/accounting/reports/balance-summary" iconName="list" widgetName="BalanceSummaryList"
+        userGroupsJson='["Admin"]'/>
+
+    <!-- Setup -->
+    <growerp.menu.MenuOptionItem menuConfigurationId="HOTEL_DEFAULT" menuOptionItemId="HOTEL_ACC_SETUP"
+        parentOptionItemId="HOTEL_ACCOUNTING" sequenceNum="50" title="Setup"
+        route="/accounting/setup" iconName="settings" widgetName="TimePeriodListForm"
+        userGroupsJson='["Admin"]'/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="HOTEL_DEFAULT" menuOptionItemId="HOTEL_ACC_SETUP_TIME"
+        parentOptionItemId="HOTEL_ACC_SETUP" sequenceNum="10" title="Time Periods"
+        route="/accounting/setup/time-periods" iconName="list" widgetName="TimePeriodListForm"
+        userGroupsJson='["Admin"]'/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="HOTEL_DEFAULT" menuOptionItemId="HOTEL_ACC_SETUP_ITEM"
+        parentOptionItemId="HOTEL_ACC_SETUP" sequenceNum="20" title="Item Types"
+        route="/accounting/setup/item-types" iconName="list" widgetName="ItemTypeList"
+        userGroupsJson='["Admin"]'/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="HOTEL_DEFAULT" menuOptionItemId="HOTEL_ACC_SETUP_PAYMENT"
+        parentOptionItemId="HOTEL_ACC_SETUP" sequenceNum="30" title="Payment Types"
+        route="/accounting/setup/payment-types" iconName="list" widgetName="PaymentTypeList"
+        userGroupsJson='["Admin"]'/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="HOTEL_DEFAULT" menuOptionItemId="HOTEL_ACC_MAIN"
+        parentOptionItemId="HOTEL_ACCOUNTING" sequenceNum="99" title="Main Menu"
+        route="/" iconName="arrow_back" widgetName="GanttForm"
+        userGroupsJson='["Admin"]'/>
+
+    <!-- ========== SUPPORT APP ========== -->
+    <growerp.menu.MenuConfiguration menuConfigurationId="SUPPORT_DEFAULT" appId="support" 
+        name="Support Menu" description="Default support application menu structure"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="SUPPORT_DEFAULT" menuOptionItemId="SUPPORT_MAIN" 
+        sequenceNum="10" title="Main" route="/"
+        image="packages/growerp_core/images/dashBoardGrey.png"
+        selectedImage="packages/growerp_core/images/dashBoard.png"
+        widgetName="CompanyList"
+        userGroupsJson='["System"]'/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="SUPPORT_DEFAULT" menuOptionItemId="SUPPORT_APPLICATIONS" 
+        sequenceNum="20" title="Applications" route="/applications"
+        image="packages/growerp_core/images/productsGrey.png"
+        selectedImage="packages/growerp_core/images/products.png"
+        widgetName="ApplicationList"
+        userGroupsJson='["System"]'/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="SUPPORT_DEFAULT" menuOptionItemId="SUPPORT_REST_REQUESTS" 
+        sequenceNum="30" title="REST Requests" route="/rest-requests"
+        image="packages/growerp_core/images/orderGrey.png"
+        selectedImage="packages/growerp_core/images/order.png"
+        widgetName="RestRequestList"
+        userGroupsJson='["System"]'/>
+
+    <!-- ================================== -->
+    <!-- Example Apps Menu Configurations -->
+    <!-- ================================== -->
+
+    <!-- Catalog Example App -->
+    <growerp.menu.MenuConfiguration menuConfigurationId="CATALOG_EXAMPLE_DEFAULT" appId="catalog_example" 
+        name="Catalog Example Menu" description="Default menu for catalog example app"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="CATALOG_EXAMPLE_DEFAULT" menuOptionItemId="CATALOG_EX_MAIN" 
+        sequenceNum="10" title="Main" route="/"
+        image="packages/growerp_core/images/dashBoardGrey.png"
+        selectedImage="packages/growerp_core/images/dashBoard.png"
+        userGroupsJson='["Admin","Employee"]'/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="CATALOG_EXAMPLE_DEFAULT" menuOptionItemId="CATALOG_EX_CATALOG" 
+        sequenceNum="20" title="Catalog" route="/catalog"
+        image="packages/growerp_core/images/productsGrey.png"
+        selectedImage="packages/growerp_core/images/products.png"
+        userGroupsJson='["Admin","Employee"]'/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="CATALOG_EXAMPLE_DEFAULT" menuOptionItemId="CATALOG_EX_PRODUCTS"
+        parentOptionItemId="CATALOG_EX_CATALOG" sequenceNum="10" title="Products" 
+        route="/catalog/products" iconName="home" widgetName="ProductList"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="CATALOG_EXAMPLE_DEFAULT" menuOptionItemId="CATALOG_EX_CATEGORIES"
+        parentOptionItemId="CATALOG_EX_CATALOG" sequenceNum="20" title="Categories" 
+        route="/catalog/categories" iconName="business" widgetName="CategoryList"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="CATALOG_EXAMPLE_DEFAULT" menuOptionItemId="CATALOG_EX_SUBSCRIPTIONS"
+        parentOptionItemId="CATALOG_EX_CATALOG" sequenceNum="30" title="Subscriptions" 
+        route="/catalog/subscriptions" iconName="subscriptions" widgetName="SubscriptionList"/>
+
+    <!-- Inventory Example App -->
+    <growerp.menu.MenuConfiguration menuConfigurationId="INVENTORY_EXAMPLE_DEFAULT" appId="inventory_example" 
+        name="Inventory Example Menu" description="Default menu for inventory example app"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="INVENTORY_EXAMPLE_DEFAULT" menuOptionItemId="INVENTORY_EX_MAIN" 
+        sequenceNum="10" title="Main" route="/"
+        image="packages/growerp_core/images/dashBoardGrey.png"
+        selectedImage="packages/growerp_core/images/dashBoard.png"
+        userGroupsJson='["Admin","Employee"]'/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="INVENTORY_EXAMPLE_DEFAULT" menuOptionItemId="INVENTORY_EX_INVENTORY" 
+        sequenceNum="20" title="Inventory" route="/inventory"
+        image="packages/growerp_core/images/warehouseGrey.png"
+        selectedImage="packages/growerp_core/images/warehouse.png"
+        userGroupsJson='["Admin","Employee"]'/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="INVENTORY_EXAMPLE_DEFAULT" menuOptionItemId="INVENTORY_EX_SHIPOUT"
+        parentOptionItemId="INVENTORY_EX_INVENTORY" sequenceNum="10" title="Outgoing Shipments" 
+        route="/inventory/shipout" iconName="home" widgetName="FinDocList"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="INVENTORY_EXAMPLE_DEFAULT" menuOptionItemId="INVENTORY_EX_SHIPIN"
+        parentOptionItemId="INVENTORY_EX_INVENTORY" sequenceNum="20" title="Incoming Shipments" 
+        route="/inventory/shipin" iconName="business" widgetName="FinDocList"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="INVENTORY_EXAMPLE_DEFAULT" menuOptionItemId="INVENTORY_EX_LOCATIONS"
+        parentOptionItemId="INVENTORY_EX_INVENTORY" sequenceNum="30" title="WH Locations" 
+        route="/inventory/locations" iconName="location_on" widgetName="LocationList"/>
+
+    <!-- Sales Example App -->
+    <growerp.menu.MenuConfiguration menuConfigurationId="SALES_EXAMPLE_DEFAULT" appId="sales_example" 
+        name="Sales Example Menu" description="Default menu for sales example app"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="SALES_EXAMPLE_DEFAULT" menuOptionItemId="SALES_EX_MAIN" 
+        sequenceNum="10" title="Main" route="/"
+        image="packages/growerp_core/images/dashBoardGrey.png"
+        selectedImage="packages/growerp_core/images/dashBoard.png"
+        userGroupsJson='["Admin","Employee"]'/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="SALES_EXAMPLE_DEFAULT" menuOptionItemId="SALES_EX_SALES" 
+        sequenceNum="20" title="Sales" route="/sales"
+        image="packages/growerp_core/images/orderGrey.png"
+        selectedImage="packages/growerp_core/images/order.png"
+        userGroupsJson='["Admin","Employee"]'/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="SALES_EXAMPLE_DEFAULT" menuOptionItemId="SALES_EX_ORDERS"
+        parentOptionItemId="SALES_EX_SALES" sequenceNum="10" title="Sales Orders" 
+        route="/sales/orders" iconName="home" widgetName="FinDocList"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="SALES_EXAMPLE_DEFAULT" menuOptionItemId="SALES_EX_CUSTOMERS"
+        parentOptionItemId="SALES_EX_SALES" sequenceNum="20" title="Customers" 
+        route="/sales/customers" iconName="business" widgetName="UserList"/>
+
+    <!-- User Company Example App -->
+    <growerp.menu.MenuConfiguration menuConfigurationId="USER_COMPANY_EXAMPLE_DEFAULT" appId="user_company_example" 
+        name="User Company Example Menu" description="Default menu for user company example app"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="USER_COMPANY_EXAMPLE_DEFAULT" menuOptionItemId="USERCO_EX_MAIN" 
+        sequenceNum="10" title="Main" route="/"
+        image="packages/growerp_core/images/dashBoardGrey.png"
+        selectedImage="packages/growerp_core/images/dashBoard.png"
+        userGroupsJson='["Admin","Employee"]'/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="USER_COMPANY_EXAMPLE_DEFAULT" menuOptionItemId="USERCO_EX_COMPANY" 
+        sequenceNum="20" title="Company" route="/company"
+        image="packages/growerp_core/images/companyGrey.png"
+        selectedImage="packages/growerp_core/images/company.png"
+        userGroupsJson='["Admin","Employee"]'/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="USER_COMPANY_EXAMPLE_DEFAULT" menuOptionItemId="USERCO_EX_USERS" 
+        sequenceNum="30" title="Users" route="/users"
+        image="packages/growerp_core/images/usersGrey.png"
+        selectedImage="packages/growerp_core/images/users.png"
+        userGroupsJson='["Admin","Employee"]'/>
+
+    <!-- Activity Example App -->
+    <growerp.menu.MenuConfiguration menuConfigurationId="ACTIVITY_EXAMPLE_DEFAULT" appId="activity_example" 
+        name="Activity Example Menu" description="Default menu for activity example app"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="ACTIVITY_EXAMPLE_DEFAULT" menuOptionItemId="ACTIVITY_EX_MAIN" 
+        sequenceNum="10" title="Main" route="/"
+        image="packages/growerp_core/images/dashBoardGrey.png"
+        selectedImage="packages/growerp_core/images/dashBoard.png"
+        userGroupsJson='["Admin","Employee"]'/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="ACTIVITY_EXAMPLE_DEFAULT" menuOptionItemId="ACTIVITY_EX_TASKS" 
+        sequenceNum="20" title="Tasks" route="/tasks"
+        image="packages/growerp_core/images/tasksGrey.png"
+        selectedImage="packages/growerp_core/images/activities.png"
+        userGroupsJson='["Admin","Employee"]'/>
+
+    <!-- Marketing Example App -->
+    <growerp.menu.MenuConfiguration menuConfigurationId="MARKETING_EXAMPLE_DEFAULT" appId="marketing_example" 
+        name="Marketing Example Menu" description="Default menu for marketing example app"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="MARKETING_EXAMPLE_DEFAULT" menuOptionItemId="MARKETING_EX_MAIN" 
+        sequenceNum="10" title="Main" route="/"
+        image="packages/growerp_core/images/dashBoardGrey.png"
+        selectedImage="packages/growerp_core/images/dashBoard.png"
+        userGroupsJson='["Admin","Employee"]'/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="MARKETING_EXAMPLE_DEFAULT" menuOptionItemId="MARKETING_EX_OPPORTUNITIES" 
+        sequenceNum="20" title="Opportunities" route="/opportunities"
+        image="packages/growerp_core/images/crmGrey.png"
+        selectedImage="packages/growerp_core/images/crm.png"
+        userGroupsJson='["Admin","Employee"]'/>
+
+    <!-- Outreach Example App -->
+    <growerp.menu.MenuConfiguration menuConfigurationId="OUTREACH_EXAMPLE_DEFAULT" appId="outreach_example" 
+        name="Outreach Example Menu" description="Default menu for outreach example app"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="OUTREACH_EXAMPLE_DEFAULT" menuOptionItemId="OUTREACH_EX_MAIN" 
+        sequenceNum="10" title="Main" route="/"
+        image="packages/growerp_core/images/dashBoardGrey.png"
+        selectedImage="packages/growerp_core/images/dashBoard.png"
+        userGroupsJson='["Admin","Employee"]'/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="OUTREACH_EXAMPLE_DEFAULT" menuOptionItemId="OUTREACH_EX_CAMPAIGNS" 
+        sequenceNum="20" title="Campaigns" route="/campaigns"
+        image="packages/growerp_core/images/crmGrey.png"
+        selectedImage="packages/growerp_core/images/crm.png"
+        userGroupsJson='["Admin","Employee"]'/>
+
+    <!-- Website Example App -->
+    <growerp.menu.MenuConfiguration menuConfigurationId="WEBSITE_EXAMPLE_DEFAULT" appId="website_example" 
+        name="Website Example Menu" description="Default menu for website example app"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="WEBSITE_EXAMPLE_DEFAULT" menuOptionItemId="WEBSITE_EX_MAIN" 
+        sequenceNum="10" title="Main" route="/"
+        image="packages/growerp_core/images/dashBoardGrey.png"
+        selectedImage="packages/growerp_core/images/dashBoard.png"
+        userGroupsJson='["Admin","Employee"]'/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="WEBSITE_EXAMPLE_DEFAULT" menuOptionItemId="WEBSITE_EX_WEBSITE" 
+        sequenceNum="20" title="Website" route="/website"
+        image="packages/growerp_core/images/websiteGrey.png"
+        selectedImage="packages/growerp_core/images/website.png"
+        userGroupsJson='["Admin","Employee"]'/>
+
+    <!-- Order Accounting Example App -->
+    <growerp.menu.MenuConfiguration menuConfigurationId="ORDER_ACCT_EXAMPLE_DEFAULT" appId="order_acct_example" 
+        name="Order Accounting Example Menu" description="Default menu for order accounting example app"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="ORDER_ACCT_EXAMPLE_DEFAULT" menuOptionItemId="ORDERACCT_EX_MAIN" 
+        sequenceNum="10" title="Main" route="/"
+        image="packages/growerp_core/images/dashBoardGrey.png"
+        selectedImage="packages/growerp_core/images/dashBoard.png"
+        userGroupsJson='["Admin","Employee"]'/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="ORDER_ACCT_EXAMPLE_DEFAULT" menuOptionItemId="ORDERACCT_EX_ORDERS" 
+        sequenceNum="20" title="Orders" route="/orders"
+        image="packages/growerp_core/images/orderGrey.png"
+        selectedImage="packages/growerp_core/images/order.png"
+        userGroupsJson='["Admin","Employee"]'/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="ORDER_ACCT_EXAMPLE_DEFAULT" menuOptionItemId="ORDERACCT_EX_ACCOUNTING" 
+        sequenceNum="30" title="Accounting" route="/accounting"
+        image="packages/growerp_core/images/accountingGrey.png"
+        selectedImage="packages/growerp_core/images/accounting.png"
+        userGroupsJson='["Admin"]'/>
+
+    <!-- Core Example App -->
+    <growerp.menu.MenuConfiguration menuConfigurationId="CORE_EXAMPLE_DEFAULT" appId="core_example" 
+        name="Core Example Menu" description="Default menu for core example app"/>
+    
+    <!-- Main Dashboard -->
+    <growerp.menu.MenuOptionItem menuConfigurationId="CORE_EXAMPLE_DEFAULT" menuOptionItemId="CORE_EX_MAIN" 
+        sequenceNum="10" title="Main" route="/"
+        iconName="dashboard"
+        widgetName="CoreDashboard"
+        userGroupsJson='["Admin","Employee"]'/>
+    
+    <!-- Organization Menu -->
+    <growerp.menu.MenuOptionItem menuConfigurationId="CORE_EXAMPLE_DEFAULT" menuOptionItemId="CORE_EX_ORG" 
+        sequenceNum="20" title="Organization" route="/companies"
+        iconName="business"
+        widgetName="ShowCompanyDialog"
+        userGroupsJson='["Admin","Employee"]'/>
+    
+    <!-- Organization Tabs -->
+    <growerp.menu.MenuOptionItem menuConfigurationId="CORE_EXAMPLE_DEFAULT" menuOptionItemId="CORE_EX_ORG_COMPANY"
+        parentOptionItemId="CORE_EX_ORG" sequenceNum="10" title="Company" 
+        route="/companies/company" iconName="home" widgetName="ShowCompanyDialog"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="CORE_EXAMPLE_DEFAULT" menuOptionItemId="CORE_EX_ORG_EMPLOYEES"
+        parentOptionItemId="CORE_EX_ORG" sequenceNum="20" title="Employees" 
+        route="/companies/employees" iconName="school" widgetName="UserList"/>
+    
+    <!-- CRM Menu -->
+    <growerp.menu.MenuOptionItem menuConfigurationId="CORE_EXAMPLE_DEFAULT" menuOptionItemId="CORE_EX_CRM" 
+        sequenceNum="30" title="CRM" route="/crm"
+        iconName="people"
+        widgetName="UserList"
+        userGroupsJson='["Admin","Employee"]'/>
+    
+    <!-- CRM Tabs -->
+    <growerp.menu.MenuOptionItem menuConfigurationId="CORE_EXAMPLE_DEFAULT" menuOptionItemId="CORE_EX_CRM_LEAD_COMPANIES"
+        parentOptionItemId="CORE_EX_CRM" sequenceNum="10" title="Lead Companies" 
+        route="/crm/companies" iconName="business" widgetName="ShowCompanyDialog"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="CORE_EXAMPLE_DEFAULT" menuOptionItemId="CORE_EX_CRM_LEAD_USERS"
+        parentOptionItemId="CORE_EX_CRM" sequenceNum="20" title="Lead Users" 
+        route="/crm/users" iconName="person" widgetName="UserList"/>
+    <growerp.menu.MenuOptionItem menuConfigurationId="CORE_EXAMPLE_DEFAULT" menuOptionItemId="CORE_EX_ABOUT" 
+        sequenceNum="40" title="About" route="/about"
+        iconName="info"
+        widgetName="AboutForm"
+        userGroupsJson='["Admin","Employee"]'/>
+
+</entity-facade-xml>

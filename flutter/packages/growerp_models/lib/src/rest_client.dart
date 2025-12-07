@@ -1220,4 +1220,137 @@ abstract class RestClient {
     @Field() required String body,
     @Field() String? bodyContentType,
   });
+
+  // ============================================
+  // MENU CONFIGURATION ENDPOINTS
+  // ============================================
+
+  /// Get menu configuration by ID or appId+userLoginId
+  /// Returns configuration with hierarchical menu items
+  @GET("rest/s1/growerp/100/MenuConfiguration")
+  Future<MenuConfiguration> getMenuConfiguration({
+    @Query('menuConfigurationId') String? menuConfigurationId,
+    @Query('appId') String? appId,
+    @Query('userId') String? userId,
+  });
+
+  /// List all menu configurations with pagination
+  @GET("rest/s1/growerp/100/MenuConfigurations")
+  Future<MenuConfigurations> listMenuConfigurations({
+    @Query('menuConfigurationId') String? menuConfigurationId,
+    @Query('appId') String? appId,
+    @Query('userId') String? userId,
+    @Query('isActive') String? isActive,
+    @Query('start') int? start,
+    @Query('limit') int? limit,
+    @Query('search') String? search,
+  });
+
+  /// Create new menu configuration
+  @POST("rest/s1/growerp/100/MenuConfiguration")
+  Future<MenuConfiguration> createMenuConfiguration({
+    @Field() required String appId,
+    @Field() String? userId,
+    @Field() required String name,
+    @Field() String? description,
+    @Field() String? isActive,
+  });
+
+  /// Update menu configuration
+  @PATCH("rest/s1/growerp/100/MenuConfiguration")
+  Future<MenuConfiguration> updateMenuConfiguration({
+    @Field() required String menuConfigurationId,
+    @Field() String? name,
+    @Field() String? description,
+    @Field() String? isActive,
+  });
+
+  /// Delete menu configuration and all its items
+  @DELETE("rest/s1/growerp/100/MenuConfiguration")
+  Future<Map<String, int>> deleteMenuConfiguration({
+    @Field() required String menuConfigurationId,
+  });
+
+  /// Clone menu configuration for user customization
+  @POST("rest/s1/growerp/100/MenuConfiguration/clone")
+  Future<MenuConfiguration> cloneMenuConfiguration({
+    @Field() required String sourceMenuConfigurationId,
+    @Field() String? name,
+  });
+
+  /// Reset menu configuration to default (copies items from default app config)
+  @POST("rest/s1/growerp/100/MenuConfiguration/reset")
+  Future<void> resetMenuConfiguration({
+    @Field() required String menuConfigurationId,
+  });
+
+  // ============================================
+  // MENU OPTION ENDPOINTS
+  // ============================================
+
+  /// Create new menu option (main menu entry)
+  @POST("rest/s1/growerp/100/MenuOption")
+  Future<MenuOption> createMenuOption({
+    @Field() required String menuConfigurationId,
+    @Field() String? itemKey,
+    @Field() required String title,
+    @Field() String? route,
+    @Field() String? iconName,
+    @Field() String? widgetName,
+    @Field() String? image,
+    @Field() String? selectedImage,
+    @Field() String? userGroupsJson,
+    @Field() int? sequenceNum,
+    @Field() String? isActive,
+  });
+
+  /// Update menu option
+  @PATCH("rest/s1/growerp/100/MenuOption")
+  Future<MenuOption> updateMenuOption({
+    @Field() required String menuOptionId,
+    @Field() String? itemKey,
+    @Field() String? title,
+    @Field() String? route,
+    @Field() String? iconName,
+    @Field() String? widgetName,
+    @Field() String? image,
+    @Field() String? selectedImage,
+    @Field() String? userGroupsJson,
+    @Field() int? sequenceNum,
+    @Field() String? isActive,
+  });
+
+  /// Delete menu option and its child links
+  @DELETE("rest/s1/growerp/100/MenuOption")
+  Future<Map<String, int>> deleteMenuOption({
+    @Query('menuOptionId') required String menuOptionId,
+  });
+
+  /// Reorder multiple menu options (batch sequence update)
+  @PATCH("rest/s1/growerp/100/MenuOptions/reorder")
+  Future<Map<String, int>> reorderMenuOptions({
+    @Field() required String menuConfigurationId,
+    @Field() required List<Map<String, dynamic>> optionSequences,
+  });
+
+  /// Toggle menu option active status
+  @PATCH("rest/s1/growerp/100/MenuOption/toggle")
+  Future<MenuOption> toggleMenuOptionActive({
+    @Field() required String menuOptionId,
+  });
+
+  /// Link a MenuItem (tab) to a MenuOption
+  @POST("rest/s1/growerp/100/MenuOption/link")
+  Future<MenuOption> linkMenuItem({
+    @Field() required String menuOptionId,
+    @Field() required String menuItemId,
+    @Field() int? sequenceNum,
+  });
+
+  /// Unlink a MenuItem (tab) from a MenuOption
+  @POST("rest/s1/growerp/100/MenuOption/unlink")
+  Future<Map<String, int>> unlinkMenuItem({
+    @Field() required String menuOptionId,
+    @Field() required String menuItemId,
+  });
 }

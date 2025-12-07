@@ -155,7 +155,7 @@ class OutreachMessageDetailScreenState
                             key: const Key('status'),
                             decoration:
                                 const InputDecoration(labelText: 'Status'),
-                            value: _selectedStatus,
+                            initialValue: _selectedStatus,
                             items: _statusOptions.map((status) {
                               return DropdownMenuItem<String>(
                                 value: status,
@@ -175,7 +175,7 @@ class OutreachMessageDetailScreenState
                             key: const Key('platform'),
                             decoration:
                                 const InputDecoration(labelText: 'Platform *'),
-                            value: _selectedPlatform,
+                            initialValue: _selectedPlatform,
                             items: _availablePlatforms.map((platform) {
                               return DropdownMenuItem<String>(
                                 value: platform,
@@ -232,7 +232,7 @@ class OutreachMessageDetailScreenState
                             key: const Key('platform'),
                             decoration:
                                 const InputDecoration(labelText: 'Platform'),
-                            value: _selectedPlatform,
+                            initialValue: _selectedPlatform,
                             items: _availablePlatforms.map((platform) {
                               return DropdownMenuItem<String>(
                                 value: platform,
@@ -254,7 +254,7 @@ class OutreachMessageDetailScreenState
                             key: const Key('platform'),
                             decoration:
                                 const InputDecoration(labelText: 'Platform *'),
-                            value: _selectedPlatform,
+                            initialValue: _selectedPlatform,
                             items: _availablePlatforms.map((platform) {
                               return DropdownMenuItem<String>(
                                 value: platform,
@@ -276,7 +276,7 @@ class OutreachMessageDetailScreenState
                             key: const Key('status'),
                             decoration:
                                 const InputDecoration(labelText: 'Status'),
-                            value: _selectedStatus,
+                            initialValue: _selectedStatus,
                             items: _statusOptions.map((status) {
                               return DropdownMenuItem<String>(
                                 value: status,

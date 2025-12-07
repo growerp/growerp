@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<entities xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/entity-definition-2.1.xsd">
+
+    <!-- Menu Configuration Entity -->
+    <entity entity-name="MenuConfiguration" package="growerp.menu">
+        <field name="menuConfigurationId" type="id" is-pk="true"/>
+        <field name="appId" type="id">
+            <description>Application identifier (e.g., 'admin', 'freelance', 'hotel')</description>
+        </field>
+        <field name="userId" type="id">
+            <description>Optional user-specific override. Null for default app configuration.</description>
+        </field>
+        <field name="name" type="text-medium"/>
+        <field name="description" type="text-long"/>
+        <field name="isActive" type="text-indicator" default="'Y'"/>
+        <field name="createdDate" type="date-time" default="ec.user.nowTimestamp"/>
+        
+        <relationship type="one" related="moqui.security.UserAccount" short-alias="userLogin">
+            <key-map field-name="userId"/>
+        </relationship>
+        
+        <index name="MENU_CONFIG_APP" unique="false">
+            <index-field name="appId"/>
+        </index>
+        <index name="MENU_CONFIG_APP_USER" unique="true">
+            <index-field name="appId"/>
+            <index-field name="userId"/>
+        </index>
+    </entity>
+
+    <!-- Menu Option Entity: Main menu entries linked to configuration -->
+    <entity entity-name="MenuOption" package="growerp.menu">
+        <field name="menuOptionId" type="id" is-pk="true"/>
+        <field name="menuConfigurationId" type="id">
+            <description>Links to menu configuration</description>
+        </field>
+        <field name="itemKey" type="id">
+            <description>Optional key for identification (e.g., 'dbCompany', 'dbOrders')</description>
+        </field>
+        <field name="title" type="text-medium"/>
+        <field name="route" type="text-medium">
+            <description>Route path for navigation (e.g., '/companies', '/crm/tasks')</description>
+        </field>
+        <field name="iconName" type="text-short">
+            <description>Icon identifier from icon registry (e.g., 'home', 'business')</description>
+        </field>
+        <field name="widgetName" type="text-medium">
+            <description>Widget/Form class name for GoRouter (e.g., 'CompanyList', 'ProductList')</description>
+        </field>
+        <field name="image" type="text-medium">
+            <description>Path to unselected image</description>
+        </field>
+        <field name="selectedImage" type="text-medium">
+            <description>Path to selected image</description>
+        </field>
+        <field name="userGroupsJson" type="text-long">
+            <description>JSON array of user groups with access (e.g., '["Admin","Employee"]')</description>
+        </field>
+        <field name="sequenceNum" type="number-integer" default="10">
+            <description>Display order</description>
+        </field>
+        <field name="isActive" type="text-indicator" default="'Y'"/>
+        
+        <relationship type="one" related="growerp.menu.MenuConfiguration" short-alias="configuration">
+            <key-map field-name="menuConfigurationId"/>
+        </relationship>
+        
+    </entity>
+
+    <!-- Menu Option Item Entity: Junction table linking MenuOption to MenuItem (tabs) -->
+    <entity entity-name="MenuOptionItem" package="growerp.menu">
+        <field name="menuOptionId" type="id" is-pk="true"/>
+        <field name="menuItemId" type="id" is-pk="true"/>
+        <field name="sequenceNum" type="number-integer" default="10">
+            <description>Display order of tab within option</description>
+        </field>
+        
+        <relationship type="one" title="Option" related="growerp.menu.MenuOption" short-alias="option">
+            <key-map field-name="menuOptionId"/>
+        </relationship>
+        <relationship type="one" title="Item" related="growerp.menu.MenuItem" short-alias="item">
+            <key-map field-name="menuItemId"/>
+        </relationship>
+    </entity>
+
+    <!-- Menu Item Entity: Tab/child items that can be linked to options -->
+    <entity entity-name="MenuItem" package="growerp.menu">
+        <field name="menuItemId" type="id" is-pk="true"/>
+        <field name="title" type="text-medium"/>
+        <field name="iconName" type="text-short">
+            <description>Icon identifier from icon registry (e.g., 'home', 'business')</description>
+        </field>
+        <field name="widgetName" type="text-medium">
+            <description>Widget/Form class name for GoRouter (e.g., 'CompanyList', 'ProductList')</description>
+        </field>
+        <field name="image" type="text-medium">
+            <description>Path to unselected image</description>
+        </field>
+        <field name="isActive" type="text-indicator" default="'Y'"/>
+    </entity>
+
+</entities>

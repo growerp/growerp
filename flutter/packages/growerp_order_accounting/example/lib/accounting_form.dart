@@ -12,51 +12,127 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-// ignore_for_file: depend_on_referenced_packages
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:growerp_core/growerp_core.dart';
-import 'acct_menu_option_data.dart';
 import 'package:growerp_models/growerp_models.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 
 class AccountingForm extends StatelessWidget {
   const AccountingForm({super.key});
 
   @override
   Widget build(BuildContext context) {
-    Authenticate authenticate = context.read<AuthBloc>().state.authenticate!;
-    final acctOptions = acctMenuOptions(context);
-    return DashBoardForm(
-      key: const Key('AcctDashBoard'),
-      dashboardItems: [
-        makeDashboardItem('acctSales', context, acctOptions[1], [
-          "Sls open inv: "
-              "${authenticate.company!.currency!.description} "
-              "${authenticate.stats?.salesInvoicesNotPaidAmount ?? '0.00'} "
-              "(${authenticate.stats?.salesInvoicesNotPaidCount})",
-        ]),
-        makeDashboardItem('acctPurchase', context, acctOptions[2], [
-          "Pur unp inv: "
-              "${authenticate.company!.currency!.description} "
-              "${authenticate.stats?.purchInvoicesNotPaidAmount ?? '0.00'} "
-              "(${authenticate.stats?.purchInvoicesNotPaidCount})",
-        ]),
-        makeDashboardItem('acctLedger', context, acctOptions[3], [
-          "Accounts",
-          "Transactions",
-          "Journals",
-        ]),
-        makeDashboardItem('reports', context, acctOptions[4], [
-          "Balance Sheet",
-          "Balance summary",
-        ]),
-        makeDashboardItem('AcctSetup', context, acctOptions[5], [
-          "Time Periods",
-          "Item Types",
-          "Payment Types",
-        ]),
-        makeDashboardItem('Main dashboard', context, acctOptions[6], []),
-      ],
+    return BlocBuilder<AuthBloc, AuthState>(
+      builder: (context, state) {
+        if (state.status != AuthStatus.authenticated) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        Authenticate authenticate = state.authenticate!;
+
+        return Padding(
+          padding: const EdgeInsets.all(10),
+          child: GridView.count(
+            crossAxisCount: ResponsiveBreakpoints.of(context).isMobile ? 2 : 3,
+            mainAxisSpacing: 10,
+            crossAxisSpacing: 10,
+            children: [
+              _AcctCard(
+                title: "Sales",
+                subtitle:
+                    "Open Inv: ${authenticate.company!.currency!.description} ${authenticate.stats?.salesInvoicesNotPaidAmount ?? '0.00'}",
+                count: "(${authenticate.stats?.salesInvoicesNotPaidCount})",
+                icon: Icons.attach_money,
+                onTap: () =>
+                    context.go('/accounting/sales'), // Placeholder route
+              ),
+              _AcctCard(
+                title: "Purchase",
+                subtitle:
+                    "Unpaid Inv: ${authenticate.company!.currency!.description} ${authenticate.stats?.purchInvoicesNotPaidAmount ?? '0.00'}",
+                count: "(${authenticate.stats?.purchInvoicesNotPaidCount})",
+                icon: Icons.money_off,
+                onTap: () => context.go('/accounting/purchase'),
+              ),
+              _AcctCard(
+                title: "Ledger",
+                subtitle: "Accounts, Trans, Journals",
+                icon: Icons.account_balance_wallet,
+                onTap: () => context.go('/accounting/ledger'),
+              ),
+              _AcctCard(
+                title: "Reports",
+                subtitle: "Balance Sheet, Summary",
+                icon: Icons.summarize,
+                onTap: () => context.go('/accounting/reports'),
+              ),
+              _AcctCard(
+                title: "Setup",
+                subtitle: "Periods, Item types, Payment types",
+                icon: Icons.settings,
+                onTap: () => context.go('/accounting/setup'),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _AcctCard extends StatelessWidget {
+  final String title;
+  final String? subtitle;
+  final String? count;
+  final IconData icon;
+  final VoidCallback onTap;
+
+  const _AcctCard({
+    required this.title,
+    this.subtitle,
+    this.count,
+    required this.icon,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 4,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, size: 40, color: Colors.grey),
+              const SizedBox(height: 10),
+              Text(
+                title,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                ),
+              ),
+              if (subtitle != null) ...[
+                const SizedBox(height: 5),
+                Text(
+                  subtitle!,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontSize: 12),
+                ),
+              ],
+              if (count != null)
+                Text(
+                  count!,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<entities xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/entity-definition-2.1.xsd">
+
+    <!-- Menu Configuration with Options View -->
+    <view-entity entity-name="MenuConfigurationAndOptions" package="growerp.menu">
+        <description>View to retrieve menu configurations with their options</description>
+        
+        <member-entity entity-alias="CONFIG" entity-name="growerp.menu.MenuConfiguration"/>
+        
+        <member-entity entity-alias="OPTION" entity-name="growerp.menu.MenuOption"
+            join-from-alias="CONFIG" join-optional="true">
+            <key-map field-name="menuConfigurationId"/>
+        </member-entity>
+
+        <!-- Configuration fields -->
+        <alias name="menuConfigurationId" entity-alias="CONFIG"/>
+        <alias name="appId" entity-alias="CONFIG"/>
+        <alias name="userId" entity-alias="CONFIG"/>
+        <alias name="configName" field="name" entity-alias="CONFIG"/>
+        <alias name="configDescription" field="description" entity-alias="CONFIG"/>
+        <alias name="configIsActive" field="isActive" entity-alias="CONFIG"/>
+        <alias name="configCreatedDate" field="createdDate" entity-alias="CONFIG"/>
+        
+        <!-- Menu option fields -->
+        <alias name="menuOptionId" entity-alias="OPTION"/>
+        <alias name="itemKey" entity-alias="OPTION"/>
+        <alias name="title" entity-alias="OPTION"/>
+        <alias name="route" entity-alias="OPTION"/>
+        <alias name="iconName" entity-alias="OPTION"/>
+        <alias name="widgetName" entity-alias="OPTION"/>
+        <alias name="image" entity-alias="OPTION"/>
+        <alias name="selectedImage" entity-alias="OPTION"/>
+        <alias name="userGroupsJson" entity-alias="OPTION"/>
+        <alias name="sequenceNum" entity-alias="OPTION"/>
+        <alias name="optionIsActive" field="isActive" entity-alias="OPTION"/>
+    </view-entity>
+
+    <!-- Menu Option with Items View (joins through junction table) -->
+    <view-entity entity-name="MenuOptionAndItems" package="growerp.menu">
+        <description>View to retrieve menu options with their tab items</description>
+        
+        <member-entity entity-alias="OPTION" entity-name="growerp.menu.MenuOption"/>
+        
+        <member-entity entity-alias="OPTITEM" entity-name="growerp.menu.MenuOptionItem"
+            join-from-alias="OPTION" join-optional="true">
+            <key-map field-name="menuOptionId"/>
+        </member-entity>
+        
+        <member-entity entity-alias="ITEM" entity-name="growerp.menu.MenuItem"
+            join-from-alias="OPTITEM" join-optional="true">
+            <key-map field-name="menuItemId"/>
+        </member-entity>
+        
+        <!-- Option fields -->
+        <alias name="menuOptionId" entity-alias="OPTION"/>
+        <alias name="menuConfigurationId" entity-alias="OPTION"/>
+        <alias name="optionTitle" field="title" entity-alias="OPTION"/>
+        <alias name="optionRoute" field="route" entity-alias="OPTION"/>
+        <alias name="optionIconName" field="iconName" entity-alias="OPTION"/>
+        <alias name="optionWidgetName" field="widgetName" entity-alias="OPTION"/>
+        <alias name="optionSequenceNum" field="sequenceNum" entity-alias="OPTION"/>
+        <alias name="optionIsActive" field="isActive" entity-alias="OPTION"/>
+        
+        <!-- Junction table fields -->
+        <alias name="itemSequenceNum" field="sequenceNum" entity-alias="OPTITEM"/>
+        
+        <!-- Item fields -->
+        <alias name="menuItemId" entity-alias="ITEM"/>
+        <alias name="itemTitle" field="title" entity-alias="ITEM"/>
+        <alias name="itemIconName" field="iconName" entity-alias="ITEM"/>
+        <alias name="itemWidgetName" field="widgetName" entity-alias="ITEM"/>
+        <alias name="itemImage" field="image" entity-alias="ITEM"/>
+        <alias name="itemIsActive" field="isActive" entity-alias="ITEM"/>
+    </view-entity>
+
+</entities>

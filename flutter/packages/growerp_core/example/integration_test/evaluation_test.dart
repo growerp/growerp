@@ -31,24 +31,14 @@
 
 // ignore_for_file: depend_on_referenced_packages
 import 'package:core_example/main.dart';
+import 'package:core_example/router_builder.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
-
-// Static menuOptions for testing
-List<MenuOption> testMenuOptions = [
-  MenuOption(
-    image: 'packages/growerp_core/images/dashBoardGrey.png',
-    selectedImage: 'packages/growerp_core/images/dashBoard.png',
-    title: 'Main',
-    route: '/',
-    userGroups: <UserGroup>[UserGroup.admin, UserGroup.employee],
-    child: const MainMenu(),
-  ),
-];
+import 'package:growerp_core/src/domains/authenticate/integration_test/evaluation_test.dart';
 
 // Test user credentials - will be set during registration
 String? testUserEmail;
@@ -77,10 +67,45 @@ void main() {
         // Ensure time is at current
         EvaluationTest.resetTestDaysOffset();
 
+        const coreMenuConfig = MenuConfiguration(
+          menuConfigurationId: 'CORE_EXAMPLE',
+          appId: 'core_example',
+          name: 'Core Example Menu',
+          menuOptions: [
+            MenuOption(
+              menuOptionId: 'CORE_MAIN',
+              title: 'Main',
+              route: '/',
+              iconName: 'dashboard',
+              sequenceNum: 10,
+              widgetName: 'CoreDashboard',
+            ),
+            MenuOption(
+              menuOptionId: 'CORE_COMPANY',
+              title: 'Organization',
+              route: '/company',
+              iconName: 'business',
+              sequenceNum: 20,
+              widgetName: 'CoreDashboard',
+            ),
+            MenuOption(
+              menuOptionId: 'CORE_USER',
+              title: 'Logged in User',
+              route: '/user',
+              iconName: 'person',
+              sequenceNum: 30,
+              widgetName: 'CoreDashboard',
+            ),
+          ],
+        );
+        final router = createDynamicCoreRouter([
+          coreMenuConfig,
+        ], rootNavigatorKey: GlobalKey<NavigatorState>());
+
         await CommonTest.startTestApp(
           tester,
-          generateRoute,
-          testMenuOptions,
+          router,
+          coreMenuConfig,
           CoreLocalizations.localizationsDelegates,
           restClient: restClient,
           clear: true,
@@ -180,10 +205,45 @@ void main() {
 
       final restClient = RestClient(await buildDioClient());
 
+      const coreMenuConfig = MenuConfiguration(
+        menuConfigurationId: 'CORE_EXAMPLE',
+        appId: 'core_example',
+        name: 'Core Example Menu',
+        menuOptions: [
+          MenuOption(
+            menuOptionId: 'CORE_MAIN',
+            title: 'Main',
+            route: '/',
+            iconName: 'dashboard',
+            sequenceNum: 10,
+            widgetName: 'CoreDashboard',
+          ),
+          MenuOption(
+            menuOptionId: 'CORE_COMPANY',
+            title: 'Organization',
+            route: '/company',
+            iconName: 'business',
+            sequenceNum: 20,
+            widgetName: 'CoreDashboard',
+          ),
+          MenuOption(
+            menuOptionId: 'CORE_USER',
+            title: 'Logged in User',
+            route: '/user',
+            iconName: 'person',
+            sequenceNum: 30,
+            widgetName: 'CoreDashboard',
+          ),
+        ],
+      );
+      final router = createDynamicCoreRouter([
+        coreMenuConfig,
+      ], rootNavigatorKey: GlobalKey<NavigatorState>());
+
       await CommonTest.startTestApp(
         tester,
-        generateRoute,
-        testMenuOptions,
+        router,
+        coreMenuConfig,
         CoreLocalizations.localizationsDelegates,
         restClient: restClient,
         clear: false,
@@ -205,10 +265,45 @@ void main() {
 
         final restClient = RestClient(await buildDioClient());
 
+        const coreMenuConfig = MenuConfiguration(
+          menuConfigurationId: 'CORE_EXAMPLE',
+          appId: 'core_example',
+          name: 'Core Example Menu',
+          menuOptions: [
+            MenuOption(
+              menuOptionId: 'CORE_MAIN',
+              title: 'Main',
+              route: '/',
+              iconName: 'dashboard',
+              sequenceNum: 10,
+              widgetName: 'CoreDashboard',
+            ),
+            MenuOption(
+              menuOptionId: 'CORE_COMPANY',
+              title: 'Organization',
+              route: '/company',
+              iconName: 'business',
+              sequenceNum: 20,
+              widgetName: 'CoreDashboard',
+            ),
+            MenuOption(
+              menuOptionId: 'CORE_USER',
+              title: 'Logged in User',
+              route: '/user',
+              iconName: 'person',
+              sequenceNum: 30,
+              widgetName: 'CoreDashboard',
+            ),
+          ],
+        );
+        final router = createDynamicCoreRouter([
+          coreMenuConfig,
+        ], rootNavigatorKey: GlobalKey<NavigatorState>());
+
         await CommonTest.startTestApp(
           tester,
-          generateRoute,
-          testMenuOptions,
+          router,
+          coreMenuConfig,
           CoreLocalizations.localizationsDelegates,
           restClient: restClient,
           clear: false,

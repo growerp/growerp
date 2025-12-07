@@ -3,7 +3,7 @@ export 'loading_indicator.dart';
 export 'multi_select.dart';
 export 'confirm_dialog.dart';
 export 'dialog_close_button.dart';
-export 'make_dashboard_item.dart';
+
 export 'app_bloc_observer.dart';
 export 'app_navigator_observer.dart';
 export 'popup_dialog.dart';

@@ -14,39 +14,13 @@
 
 // ignore_for_file: depend_on_referenced_packages
 import 'package:core_example/main.dart';
+import 'package:core_example/router_builder.dart'; // For createDynamicCoreRouter
+import 'package:flutter/material.dart'; // For GlobalKey, NavigatorState
 import 'package:flutter_test/flutter_test.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
-
-// Static menuOptions for testing (no localization needed)
-List<MenuOption> testMenuOptions = [
-  MenuOption(
-    image: 'packages/growerp_core/images/dashBoardGrey.png',
-    selectedImage: 'packages/growerp_core/images/dashBoard.png',
-    title: 'Main',
-    route: '/',
-    userGroups: <UserGroup>[UserGroup.admin, UserGroup.employee],
-    child: const MainMenu(),
-  ),
-  MenuOption(
-    image: 'packages/growerp_core/images/companyGrey.png',
-    selectedImage: 'packages/growerp_core/images/company.png',
-    title: 'Organization',
-    route: '/company',
-    userGroups: <UserGroup>[UserGroup.admin, UserGroup.employee],
-    child: const MainMenu(),
-  ),
-  MenuOption(
-    image: 'packages/growerp_core/images/dashBoardGrey.png',
-    selectedImage: 'packages/growerp_core/images/dashBoard.png',
-    title: 'Logged in User',
-    route: '/user',
-    userGroups: [UserGroup.admin, UserGroup.employee],
-    child: const MainMenu(),
-  ),
-];
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -57,10 +31,50 @@ void main() {
 
   testWidgets('GrowERP Core integration test', (WidgetTester tester) async {
     final restClient = RestClient(await buildDioClient());
+
+    const coreMenuConfig = MenuConfiguration(
+      menuConfigurationId: 'CORE_EXAMPLE',
+      appId: 'core_example',
+      name: 'Core Example Menu',
+      menuOptions: [
+        MenuOption(
+          menuOptionId: 'CORE_MAIN',
+          title: 'Main',
+          route: '/',
+          iconName: 'dashboard',
+          sequenceNum: 10,
+          widgetName: 'CoreDashboard',
+          isActive: true,
+        ),
+        MenuOption(
+          menuOptionId: 'CORE_COMPANY',
+          title: 'Organization',
+          route: '/company',
+          iconName: 'business',
+          sequenceNum: 20,
+          widgetName: 'CoreDashboard',
+          isActive: true,
+        ),
+        MenuOption(
+          menuOptionId: 'CORE_USER',
+          title: 'Logged in User',
+          route: '/user',
+          iconName: 'person',
+          sequenceNum: 30,
+          widgetName: 'CoreDashboard',
+          isActive: true,
+        ),
+      ],
+    );
+
+    final router = createDynamicCoreRouter([
+      coreMenuConfig,
+    ], rootNavigatorKey: GlobalKey<NavigatorState>());
+
     await CommonTest.startTestApp(
       tester,
-      generateRoute,
-      testMenuOptions,
+      router,
+      coreMenuConfig,
       CoreLocalizations.localizationsDelegates,
       restClient: restClient,
       clear: true,
@@ -68,7 +82,16 @@ void main() {
     );
 
     await CommonTest.createCompanyAndAdmin(tester);
-    await CommonTest.checkCompanyAndAdmin(tester);
+
+    // Check specific specific widgets as checkCompanyAndAdmin expects AdminDbForm
+    SaveTest savedTest = await PersistFunctions.getTest();
+    expect(find.text('Organization'), findsOneWidget);
+    expect(find.text(savedTest.company!.name!), findsWidgets);
+    expect(find.text('User'), findsOneWidget);
+    expect(
+      find.text('${savedTest.admin!.firstName} ${savedTest.admin!.lastName}'),
+      findsWidgets,
+    );
     await CommonTest.logout(tester);
   });
 }

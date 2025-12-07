@@ -21,6 +21,7 @@ dependencies:
     path: ../../growerp_marketing
   global_configuration: ^2.0.0
   flutter_bloc: ^8.1.3
+  go_router: ^14.6.2
 
 dev_dependencies:
   flutter_test:

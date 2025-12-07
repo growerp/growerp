@@ -12,63 +12,58 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+// This file is deprecated. Use MenuOption and MenuItem from growerp_models instead.
+// Keeping for backward compatibility during migration.
+
 import 'package:flutter/material.dart';
 import 'package:growerp_models/growerp_models.dart';
 
-import 'models.dart';
-
-/// item on the main menu, containing tabitems on a lower level.
-class MenuOption {
-  final String? key;
-  final String? image; // image when not seleced
-  final String? selectedImage; // image when selected
-  final String title; // a the top of the page
-  final String?
-      route; // route path required to show this item from other Menuoptions
-  final Object? arguments; // optional arguments to used with route
-  final List<TabItem>? tabItems; // top/bottom tabs
-  final Widget? child; // when no tabs this is single page
+/// DEPRECATED: Legacy MenuOption class for backward compatibility
+/// Use MenuOption from growerp_models instead
+@Deprecated('Use MenuOption from growerp_models instead')
+class LegacyMenuOption {
+  final String? image;
+  final String? selectedImage;
+  final String title;
+  final String? route;
+  final Widget? child;
+  final List<TabItem>? tabItems;
+  final String? floatButtonRoute;
   final List<UserGroup>? userGroups;
+  final dynamic arguments;
+  final int? sequenceNum;
 
-  MenuOption({
-    this.key,
+  const LegacyMenuOption({
     this.image,
     this.selectedImage,
     required this.title,
     this.route,
-    this.arguments,
-    this.tabItems,
     this.child,
-    this.userGroups, // access to the option
+    this.tabItems,
+    this.floatButtonRoute,
+    this.userGroups,
+    this.arguments,
+    this.sequenceNum,
   });
+}
 
-  MenuOption copyWith({
-    String? key,
-    String? image,
-    String? selectedImage,
-    String? title,
-    String? route,
-    Object? arguments,
-    List<TabItem>? tabItems,
-    Widget? child,
-    List<UserGroup>? userGroups,
-  }) {
-    return MenuOption(
-      key: key ?? this.key,
-      image: image ?? this.image,
-      selectedImage: selectedImage ?? this.selectedImage,
-      title: title ?? this.title,
-      route: route ?? this.route,
-      arguments: arguments ?? this.arguments,
-      tabItems: tabItems ?? this.tabItems,
-      child: child ?? this.child,
-      userGroups: userGroups ?? this.userGroups,
-    );
-  }
+/// DEPRECATED: Legacy TabItem class for backward compatibility
+/// Use MenuItem children instead
+@Deprecated('Use MenuItem from growerp_models instead')
+class TabItem {
+  final String? key;
+  final String title;
+  final Widget? form;
+  final String? route;
+  final Icon? icon;
+  final List<UserGroup>? userGroups;
 
-  @override
-  String toString() => 'MenuOption name: $title route: $route '
-      'arguments: ${arguments.toString()} '
-      'child: ${child.toString()} '
-      'tabItems# ${tabItems != null ? tabItems!.length : "0"}';
+  const TabItem({
+    this.key,
+    required this.title,
+    this.form,
+    this.route,
+    this.icon,
+    this.userGroups,
+  });
 }
