@@ -53,5 +53,8 @@ Map<String, GrowerpWidgetBuilder> getUserCompanyWidgets() {
         CompanyUserList(key: getKeyFromArgs(args), role: Role.customer),
     'CompanyUserListSupplier': (args) =>
         CompanyUserList(key: getKeyFromArgs(args), role: Role.supplier),
+
+    // System settings
+    'SystemSetupDialog': (args) => const SystemSetupDialog(),
   };
 }

@@ -65,51 +65,51 @@ const outreachMenuConfig = MenuConfiguration(
   menuConfigurationId: 'OUTREACH_EXAMPLE',
   appId: 'outreach_example',
   name: 'Outreach Example Menu',
-  menuItems: [
-    MenuItem(
-      menuOptionItemId: 'OUT_MAIN',
+  menuOptions: [
+    MenuOption(
+      menuOptionId: 'OUT_MAIN',
       title: 'Main',
       route: '/',
       iconName: 'dashboard',
       sequenceNum: 10,
     ),
-    MenuItem(
-      menuOptionItemId: 'OUT_CAMPAIGNS',
+    MenuOption(
+      menuOptionId: 'OUT_CAMPAIGNS',
       title: 'Campaigns',
       route: '/campaigns',
       iconName: 'campaign',
       sequenceNum: 20,
     ),
-    MenuItem(
-      menuOptionItemId: 'OUT_MESSAGES',
+    MenuOption(
+      menuOptionId: 'OUT_MESSAGES',
       title: 'Messages',
       route: '/messages',
       iconName: 'message',
       sequenceNum: 30,
     ),
-    MenuItem(
-      menuOptionItemId: 'OUT_AUTOMATION',
+    MenuOption(
+      menuOptionId: 'OUT_AUTOMATION',
       title: 'Automation',
       route: '/automation',
       iconName: 'autorenew',
       sequenceNum: 40,
     ),
-    MenuItem(
-      menuOptionItemId: 'OUT_WEBSITE',
+    MenuOption(
+      menuOptionId: 'OUT_WEBSITE',
       title: 'Website',
       route: '/website',
       iconName: 'web',
       sequenceNum: 50,
     ),
-    MenuItem(
-      menuOptionItemId: 'OUT_LEADS',
+    MenuOption(
+      menuOptionId: 'OUT_LEADS',
       title: 'Leads',
       route: '/leads',
       iconName: 'people',
       sequenceNum: 60,
     ),
-    MenuItem(
-      menuOptionItemId: 'OUT_PLATFORMS',
+    MenuOption(
+      menuOptionId: 'OUT_PLATFORMS',
       title: 'Platforms',
       route: '/platforms',
       iconName: 'settings',
@@ -153,8 +153,8 @@ GoRouter createOutreachExampleRouter() {
         builder: (context, state, child) {
           int menuIndex = 0;
           final path = state.uri.path;
-          for (int i = 0; i < outreachMenuConfig.menuItems.length; i++) {
-            if (outreachMenuConfig.menuItems[i].route == path) {
+          for (int i = 0; i < outreachMenuConfig.menuOptions.length; i++) {
+            if (outreachMenuConfig.menuOptions[i].route == path) {
               menuIndex = i;
               break;
             }
@@ -211,7 +211,7 @@ class OutreachDashboard extends StatelessWidget {
           return const LoadingIndicator();
         }
 
-        final items = outreachMenuConfig.menuItems
+        final items = outreachMenuConfig.menuOptions
             .where((item) => item.route != '/')
             .toList();
 

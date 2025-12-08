@@ -1,49 +1,24 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_models/growerp_models.dart';
-import '../services/campaign_automation_service.dart';
 
 part 'outreach_campaign_event.dart';
 part 'outreach_campaign_state.dart';
 
 class OutreachCampaignBloc
     extends Bloc<OutreachCampaignEvent, OutreachCampaignState> {
-  OutreachCampaignBloc(this.restClient)
-      : automationService = CampaignAutomationService(restClient),
-        super(const OutreachCampaignState()) {
+  OutreachCampaignBloc(this.restClient) : super(const OutreachCampaignState()) {
     on<OutreachCampaignFetch>(_onFetch);
     on<OutreachCampaignCreate>(_onCreate);
     on<OutreachCampaignUpdate>(_onUpdate);
     on<OutreachCampaignDelete>(_onDelete);
     on<OutreachCampaignDetailFetch>(_onDetailFetch);
-    on<OutreachCampaignStart>(_onStart);
     on<OutreachCampaignPause>(_onPause);
+    on<OutreachCampaignStart>(_onStart);
     on<OutreachRecentMessagesFetch>(_onRecentMessagesFetch);
   }
 
   final RestClient restClient;
-  final CampaignAutomationService automationService;
-
-  Future<void> _onRecentMessagesFetch(
-    OutreachRecentMessagesFetch event,
-    Emitter<OutreachCampaignState> emit,
-  ) async {
-    try {
-      final result = await restClient.listOutreachMessages(
-        limit: event.limit,
-      );
-
-      emit(state.copyWith(
-        status: OutreachCampaignStatus.success,
-        messages: result.messages,
-      ));
-    } catch (error) {
-      emit(state.copyWith(
-        status: OutreachCampaignStatus.failure,
-        message: await getDioError(error),
-      ));
-    }
-  }
 
   Future<void> _onFetch(
     OutreachCampaignFetch event,
@@ -213,61 +188,89 @@ class OutreachCampaignBloc
     }
   }
 
-  Future<void> _onStart(
-    OutreachCampaignStart event,
-    Emitter<OutreachCampaignState> emit,
-  ) async {
-    try {
-      // Find campaign in state
-      final campaign = state.selectedCampaign?.campaignId == event.campaignId
-          ? state.selectedCampaign
-          : state.campaigns.firstWhere(
-              (c) => c.campaignId == event.campaignId,
-              orElse: () => throw Exception('Campaign not found'),
-            );
-
-      if (campaign == null) throw Exception('Campaign not found');
-
-      await automationService.startCampaign(campaign);
-
-      // Refresh detail if selected
-      if (state.selectedCampaign?.campaignId == event.campaignId) {
-        add(OutreachCampaignDetailFetch(campaignId: event.campaignId));
-      } else {
-        // Refresh list
-        add(const OutreachCampaignFetch(start: 0));
-      }
-
-      emit(state.copyWith(message: 'Campaign automation started'));
-    } catch (error) {
-      emit(state.copyWith(
-        status: OutreachCampaignStatus.failure,
-        message: await getDioError(error),
-      ));
-    }
-  }
-
   Future<void> _onPause(
     OutreachCampaignPause event,
     Emitter<OutreachCampaignState> emit,
   ) async {
     try {
-      await automationService.pauseCampaign(event.campaignId);
+      await restClient.updateOutreachCampaign(
+        campaign: {
+          'campaignId': event.campaignId,
+          'status': 'PAUSED',
+        },
+      );
 
-      // Refresh detail if selected
-      if (state.selectedCampaign?.campaignId == event.campaignId) {
-        add(OutreachCampaignDetailFetch(campaignId: event.campaignId));
-      } else {
-        // Refresh list
-        add(const OutreachCampaignFetch(start: 0));
-      }
-
-      emit(state.copyWith(message: 'Campaign automation paused'));
+      // Refresh list
+      final result = await restClient.listOutreachCampaigns();
+      emit(
+        state.copyWith(
+          status: OutreachCampaignStatus.success,
+          campaigns: result.campaigns,
+          message: 'Campaign paused',
+        ),
+      );
     } catch (error) {
-      emit(state.copyWith(
-        status: OutreachCampaignStatus.failure,
-        message: await getDioError(error),
-      ));
+      emit(
+        state.copyWith(
+          status: OutreachCampaignStatus.failure,
+          message: await getDioError(error),
+        ),
+      );
+    }
+  }
+
+  Future<void> _onStart(
+    OutreachCampaignStart event,
+    Emitter<OutreachCampaignState> emit,
+  ) async {
+    try {
+      await restClient.updateOutreachCampaign(
+        campaign: {
+          'campaignId': event.campaignId,
+          'status': 'ACTIVE',
+        },
+      );
+
+      // Refresh list
+      final result = await restClient.listOutreachCampaigns();
+      emit(
+        state.copyWith(
+          status: OutreachCampaignStatus.success,
+          campaigns: result.campaigns,
+          message: 'Campaign started',
+        ),
+      );
+    } catch (error) {
+      emit(
+        state.copyWith(
+          status: OutreachCampaignStatus.failure,
+          message: await getDioError(error),
+        ),
+      );
+    }
+  }
+
+  Future<void> _onRecentMessagesFetch(
+    OutreachRecentMessagesFetch event,
+    Emitter<OutreachCampaignState> emit,
+  ) async {
+    try {
+      final result = await restClient.listOutreachMessages(
+        limit: event.limit,
+      );
+      emit(
+        state.copyWith(
+          status: OutreachCampaignStatus.success,
+          messages: result.messages,
+        ),
+      );
+    } catch (error) {
+      emit(
+        state.copyWith(
+          status: OutreachCampaignStatus.failure,
+          message: await getDioError(error),
+        ),
+      );
     }
   }
 }

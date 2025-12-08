@@ -49,10 +49,11 @@ TableData getActiveCampaignsTableData(Bloc bloc, String classificationId,
             color: item.status == 'ACTIVE' ? Colors.orange : Colors.green),
         onPressed: () {
           if (item.campaignId != null) {
+            final outreachBloc = bloc as OutreachCampaignBloc;
             if (item.status == 'ACTIVE') {
-              bloc.add(OutreachCampaignPause(item.campaignId!));
+              outreachBloc.add(OutreachCampaignPause(item.campaignId!));
             } else {
-              bloc.add(OutreachCampaignStart(item.campaignId!));
+              outreachBloc.add(OutreachCampaignStart(item.campaignId!));
             }
           }
         },
@@ -80,10 +81,11 @@ TableData getActiveCampaignsTableData(Bloc bloc, String classificationId,
             color: item.status == 'ACTIVE' ? Colors.orange : Colors.green),
         onPressed: () {
           if (item.campaignId != null) {
+            final outreachBloc = bloc as OutreachCampaignBloc;
             if (item.status == 'ACTIVE') {
-              bloc.add(OutreachCampaignPause(item.campaignId!));
+              outreachBloc.add(OutreachCampaignPause(item.campaignId!));
             } else {
-              bloc.add(OutreachCampaignStart(item.campaignId!));
+              outreachBloc.add(OutreachCampaignStart(item.campaignId!));
             }
           }
         },

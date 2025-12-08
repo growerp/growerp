@@ -46,7 +46,7 @@ class _AutomationScreenState extends State<AutomationScreen> {
           const OutreachCampaignFetch(status: 'ACTIVE'),
         );
     context.read<OutreachCampaignBloc>().add(
-          const OutreachRecentMessagesFetch(),
+          OutreachRecentMessagesFetch(),
         );
   }
 

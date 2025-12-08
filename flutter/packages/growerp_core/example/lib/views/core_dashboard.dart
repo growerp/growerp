@@ -23,52 +23,34 @@ class CoreDashboard extends StatelessWidget {
         // Get dashboard items from menu configuration (top-level, active items only)
         // Exclude the Main/Dashboard item itself (route '/')
         final dashboardItems =
-            menuConfig.menuItems
+            menuConfig.menuOptions
                 .where(
-                  (item) =>
-                      item.isActive &&
-                      item.parentOptionItemId == null &&
-                      item.route != '/' &&
-                      item.route != '/about',
+                  (option) =>
+                      option.isActive &&
+                      option.route != '/' &&
+                      option.route != '/about',
                 )
                 .toList()
               ..sort((a, b) => a.sequenceNum.compareTo(b.sequenceNum));
 
-        return Scaffold(
-          backgroundColor: Colors.transparent,
-          floatingActionButton: FloatingActionButton(
-            key: const Key('coreFab'),
-            tooltip: 'Manage Menu Items',
-            onPressed: () {
-              showDialog(
-                context: context,
-                builder: (dialogContext) => BlocProvider.value(
-                  value: context.read<MenuConfigBloc>(),
-                  child: MenuItemListDialog(menuConfiguration: menuConfig),
-                ),
+        return Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: GridView.builder(
+            gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+              maxCrossAxisExtent: isAPhone(context) ? 200 : 300,
+              childAspectRatio: 1,
+              crossAxisSpacing: 20,
+              mainAxisSpacing: 20,
+            ),
+            itemCount: dashboardItems.length,
+            itemBuilder: (context, index) {
+              final item = dashboardItems[index];
+              return _DashboardCard(
+                title: item.title,
+                iconName: item.iconName ?? 'dashboard',
+                route: item.route,
               );
             },
-            child: const Icon(Icons.menu),
-          ),
-          body: Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: GridView.builder(
-              gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                maxCrossAxisExtent: isAPhone(context) ? 200 : 300,
-                childAspectRatio: 1,
-                crossAxisSpacing: 20,
-                mainAxisSpacing: 20,
-              ),
-              itemCount: dashboardItems.length,
-              itemBuilder: (context, index) {
-                final item = dashboardItems[index];
-                return _DashboardCard(
-                  title: item.title,
-                  iconName: item.iconName ?? 'dashboard',
-                  route: item.route,
-                );
-              },
-            ),
           ),
         );
       },
@@ -80,13 +62,11 @@ class _DashboardCard extends StatelessWidget {
   final String title;
   final String iconName;
   final String? route;
-  final String? stats;
 
   const _DashboardCard({
     required this.title,
     required this.iconName,
     this.route,
-    this.stats,
   });
 
   @override
@@ -111,14 +91,6 @@ class _DashboardCard extends StatelessWidget {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              if (stats != null) ...[
-                const SizedBox(height: 8),
-                Text(
-                  stats!,
-                  style: Theme.of(context).textTheme.bodySmall,
-                  textAlign: TextAlign.center,
-                ),
-              ],
             ],
           ),
         ),

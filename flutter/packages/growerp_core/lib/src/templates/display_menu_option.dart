@@ -41,6 +41,12 @@ class DisplayMenuOption extends StatefulWidget {
   tabWidgetLoader;
   final bool suppressBlocMenuConfig;
 
+  /// Optional floating action button to display above the AI FAB
+  final Widget? floatingActionButton;
+
+  /// Optional Gemini API key for AI navigation
+  final String? aiApiKey;
+
   const DisplayMenuOption({
     super.key,
     required this.menuConfiguration,
@@ -50,6 +56,8 @@ class DisplayMenuOption extends StatefulWidget {
     this.child,
     this.tabWidgetLoader,
     this.suppressBlocMenuConfig = false,
+    this.floatingActionButton,
+    this.aiApiKey,
   });
 
   @override
@@ -373,6 +381,7 @@ class DisplayMenuOptionState extends State<DisplayMenuOption>
           actions: actions,
         ),
         drawer: myDrawer(context, isPhone, menuList),
+        floatingActionButton: _buildAiFab(),
         body: BlocListener<NotificationBloc, NotificationState>(
           listener: _handleNotifications,
           child: widget.child ?? const SizedBox.shrink(),
@@ -456,6 +465,7 @@ class DisplayMenuOptionState extends State<DisplayMenuOption>
                 },
               )
             : null,
+        floatingActionButton: _buildAiFab(),
         body: BlocListener<NotificationBloc, NotificationState>(
           listener: _handleNotifications,
           child: isPhone
@@ -476,6 +486,56 @@ class DisplayMenuOptionState extends State<DisplayMenuOption>
         ),
       ),
     );
+  }
+
+  /// Build AI FAB button (and optional additional FAB above it)
+  Widget? _buildAiFab() {
+    final aiFab = FloatingActionButton(
+      key: const Key('aiFab'),
+      heroTag: 'aiFab',
+      mini: true,
+      tooltip: 'AI Navigation',
+      onPressed: () async {
+        // Load API key from SharedPreferences
+        final apiKey = await SystemSetupDialog.getGeminiApiKey() ?? '';
+        if (!context.mounted) return;
+
+        AiPromptDialog.show(
+          context,
+          apiKey: apiKey,
+          menuConfiguration: widget.menuConfiguration,
+          onNavigate: (intent) {
+            // Use route from intent if available, otherwise derive from widget name
+            if (intent.route != null && intent.route!.isNotEmpty) {
+              context.go(intent.route!);
+            } else {
+              final route = intent.widgetName
+                  .replaceAllMapped(
+                    RegExp(r'([A-Z])'),
+                    (m) => '-${m.group(1)!.toLowerCase()}',
+                  )
+                  .substring(1); // Remove leading dash
+              context.go('/$route');
+            }
+          },
+        );
+      },
+      child: const Icon(Icons.psychology),
+    );
+
+    // If there's an additional FAB, stack it above the AI FAB
+    if (widget.floatingActionButton != null) {
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          widget.floatingActionButton!,
+          const SizedBox(height: 12),
+          aiFab,
+        ],
+      );
+    }
+
+    return aiFab;
   }
 
   void _handleNotifications(BuildContext context, NotificationState state) {

@@ -10,6 +10,7 @@ export 'src/services/ws_client.dart';
 export 'src/services/build_dio_client.dart';
 export 'src/services/timezone_helper.dart';
 export 'src/services/widget_registry.dart';
+export 'src/services/ai_navigation_service.dart';
 export 'src/get_core_bloc_providers.dart';
 export 'src/domains/authenticate/authenticate.dart';
 export 'src/rest_request/rest_request.dart';
