@@ -48,16 +48,16 @@ const salesMenuConfig = MenuConfiguration(
   menuConfigurationId: 'SALES_EXAMPLE',
   appId: 'sales_example',
   name: 'Sales Example Menu',
-  menuItems: [
-    MenuItem(
-      menuOptionItemId: 'SALES_MAIN',
+  menuOptions: [
+    MenuOption(
+      itemKey: 'SALES_MAIN',
       title: 'Main',
       route: '/',
       iconName: 'dashboard',
       sequenceNum: 10,
     ),
-    MenuItem(
-      menuOptionItemId: 'SALES_CRM',
+    MenuOption(
+      itemKey: 'SALES_CRM',
       title: 'Marketing',
       route: '/crm',
       iconName: 'campaign',

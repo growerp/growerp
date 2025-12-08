@@ -238,7 +238,7 @@ class DisplayMenuOptionState extends State<DisplayMenuOption>
           // AND we are suppressing the global config
           final effectiveConfig = widget.suppressBlocMenuConfig
               ? widget.menuConfiguration
-              : menuConfiguration!;
+              : menuConfiguration;
 
           if (!_isInitialized || effectiveConfig != _lastMenuConfig) {
             _localizations = CoreLocalizations.of(context)!;
@@ -498,7 +498,7 @@ class DisplayMenuOptionState extends State<DisplayMenuOption>
       onPressed: () async {
         // Load API key from SharedPreferences
         final apiKey = await SystemSetupDialog.getGeminiApiKey() ?? '';
-        if (!context.mounted) return;
+        if (!mounted) return;
 
         AiPromptDialog.show(
           context,

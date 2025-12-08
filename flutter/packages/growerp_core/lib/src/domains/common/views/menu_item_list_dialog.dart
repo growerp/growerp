@@ -127,7 +127,7 @@ class MenuItemListDialogState extends State<MenuItemListDialog> {
                                 ],
                               ),
                             );
-                            if (confirmed == true && mounted) {
+                            if (confirmed == true && context.mounted) {
                               context.read<MenuConfigBloc>().add(
                                 MenuConfigReset(
                                   menuConfig.menuConfigurationId ?? '',
@@ -229,7 +229,7 @@ class MenuItemListDialogState extends State<MenuItemListDialog> {
                                   option.image!,
                                   width: 24,
                                   height: 24,
-                                  errorBuilder: (_, __, ___) =>
+                                  errorBuilder: (context, error, stackTrace) =>
                                       const Icon(Icons.menu, size: 24),
                                 )
                               : const Icon(Icons.menu, size: 24)),
@@ -334,7 +334,7 @@ class MenuItemListDialogState extends State<MenuItemListDialog> {
                           ],
                         ),
                       );
-                      if (confirmed == true && mounted) {
+                      if (confirmed == true && context.mounted) {
                         final bloc = context.read<MenuConfigBloc>();
                         bloc.add(MenuOptionDelete(option.menuOptionId!));
                       }

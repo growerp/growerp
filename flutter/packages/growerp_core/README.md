@@ -20,7 +20,7 @@ It uses a local backend system.
 You can also use our test backend system   
     set in: example/assets/cfg/app_settings.json  
         "databaseUrlDebug": https://backend.growerp.org
-        "chatUrlDebug": "wss://chat.growerp.org"
+        "chatUrlDebug": "wss://backend.growerp.org"
 
 Start test with melos: (activate with: dart global activate melos) 
 ```sh

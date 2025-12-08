@@ -1,8 +1,7 @@
+import 'package:flutter/foundation.dart';
 import '../platform_automation_adapter.dart';
 import '../browser_mcp_service.dart';
-import '../element_selector.dart';
 import '../../utils/logger.dart';
-import '../../utils/rate_limiter.dart';
 
 /// X (formerly Twitter) automation adapter using browsermcp
 ///
@@ -10,7 +9,6 @@ import '../../utils/rate_limiter.dart';
 /// profile searches, follows, and direct messages.
 class XAutomationAdapter with LoggerMixin implements PlatformAutomationAdapter {
   final BrowserMCPService _browser = BrowserMCPService();
-  final RateLimiter _rateLimiter = PlatformRateLimiters.twitter;
   bool _initialized = false;
 
   @override
@@ -99,7 +97,7 @@ class XAutomationAdapter with LoggerMixin implements PlatformAutomationAdapter {
         title: 'Software Engineer',
       ));
     } catch (e) {
-      print('Error searching Twitter profiles: $e');
+      debugPrint('Error searching Twitter profiles: $e');
     }
 
     return profiles;
@@ -140,7 +138,7 @@ class XAutomationAdapter with LoggerMixin implements PlatformAutomationAdapter {
       // Wait for action to complete
       await _browser.wait(0.5);
 
-      print('✓ Followed ${profile.handle ?? profile.name} on Twitter');
+      debugPrint('✓ Followed ${profile.handle ?? profile.name} on Twitter');
     } catch (e) {
       throw Exception('Failed to follow Twitter profile: $e');
     }
@@ -198,7 +196,7 @@ class XAutomationAdapter with LoggerMixin implements PlatformAutomationAdapter {
       // Wait for message to send
       await _browser.wait(0.5);
 
-      print('✓ Sent DM to ${profile.handle ?? profile.name}: $message');
+      debugPrint('✓ Sent DM to ${profile.handle ?? profile.name}: $message');
     } catch (e) {
       throw Exception('Failed to send Twitter DM: $e');
     }

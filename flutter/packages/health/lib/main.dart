@@ -57,8 +57,7 @@ Future main() async {
     //webactivate  hostName = web.window.location.hostname;
     // ignore: unnecessary_null_comparison
     if (hostName != null) {
-      // ignore: avoid_print
-      print("=====hostname: $hostName");
+      debugPrint("=====hostname: $hostName");
       try {
         company = await restClient.getCompanyFromHost(hostName);
       } on DioException catch (e) {

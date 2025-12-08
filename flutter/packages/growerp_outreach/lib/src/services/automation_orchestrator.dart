@@ -1,3 +1,5 @@
+import 'package:flutter/widgets.dart';
+import 'package:flutter/foundation.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'platform_automation_adapter.dart';
 import 'adapters/email_automation_adapter.dart';
@@ -86,7 +88,7 @@ class AutomationOrchestrator {
         }
       } catch (e) {
         // Log error and continue
-        print('Error sending to ${profile.name}: $e');
+        debugPrint('Error sending to ${profile.name}: $e');
 
         // Record failure in backend
         try {

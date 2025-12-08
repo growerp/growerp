@@ -57,23 +57,23 @@ const activityMenuConfig = MenuConfiguration(
   menuConfigurationId: 'ACTIVITY_EXAMPLE',
   appId: 'activity_example',
   name: 'Activity Example Menu',
-  menuItems: [
-    MenuItem(
-      menuOptionItemId: 'ACT_MAIN',
+  menuOptions: [
+    MenuOption(
+      itemKey: 'ACT_MAIN',
       title: 'Main',
       route: '/',
       iconName: 'dashboard',
       sequenceNum: 10,
     ),
-    MenuItem(
-      menuOptionItemId: 'ACT_TODO',
+    MenuOption(
+      itemKey: 'ACT_TODO',
       title: 'To Do',
       route: '/todos',
       iconName: 'check_circle',
       sequenceNum: 20,
     ),
-    MenuItem(
-      menuOptionItemId: 'ACT_EVENTS',
+    MenuOption(
+      itemKey: 'ACT_EVENTS',
       title: 'Events',
       route: '/events',
       iconName: 'event',
@@ -117,8 +117,8 @@ GoRouter createActivityExampleRouter() {
         builder: (context, state, child) {
           int menuIndex = 0;
           final path = state.uri.path;
-          for (int i = 0; i < activityMenuConfig.menuItems.length; i++) {
-            if (activityMenuConfig.menuItems[i].route == path) {
+          for (int i = 0; i < activityMenuConfig.menuOptions.length; i++) {
+            if (activityMenuConfig.menuOptions[i].route == path) {
               menuIndex = i;
               break;
             }

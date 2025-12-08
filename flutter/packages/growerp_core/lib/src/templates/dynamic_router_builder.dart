@@ -143,7 +143,7 @@ GoRouter createDynamicAppRouter(
       (o) => o.route == '/' || o.sequenceNum == 0,
       orElse: () => mainDisplayConfig.menuOptions.isNotEmpty
           ? mainDisplayConfig.menuOptions.first
-          : MenuOption(title: 'Main', widgetName: 'Unknown'),
+          : const MenuOption(title: 'Main', widgetName: 'Unknown'),
     );
     return config.widgetLoader(mainOption.widgetName ?? 'Unknown', {});
   }
@@ -189,12 +189,12 @@ GoRouter createDynamicAppRouter(
                   },
                 ),
               ],
-              child: getDashboard(),
               suppressBlocMenuConfig: true,
               tabWidgetLoader: config.widgetLoader,
               floatingActionButton: config.dashboardFabBuilder != null
                   ? config.dashboardFabBuilder!(mainDisplayConfig)
                   : null,
+              child: getDashboard(),
             );
           } else {
             return HomeForm(
@@ -233,9 +233,9 @@ GoRouter createDynamicAppRouter(
                   },
                 ),
               ],
-              child: child,
               tabWidgetLoader: config.widgetLoader,
               suppressBlocMenuConfig: true,
+              child: child,
             );
           },
           routes: _generateRoutes(
@@ -271,12 +271,12 @@ GoRouter createDynamicAppRouter(
                   },
                 ),
               ],
-              child: child,
               tabWidgetLoader: config.widgetLoader,
               suppressBlocMenuConfig: true,
               floatingActionButton: config.accountingFabBuilder != null
                   ? config.accountingFabBuilder!(accountingConfig)
                   : null,
+              child: child,
             );
           },
           routes: _generateRoutes(accountingConfig, config.widgetLoader),
