@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 /// Snapshot element from browsermcp accessibility tree
 class SnapshotElement {
   final String ref;
@@ -207,10 +209,10 @@ class SnapshotParser {
   /// Debug: Print element tree
   static void printTree(SnapshotElement element, {int indent = 0}) {
     final prefix = '  ' * indent;
-    print(
+    debugPrint(
         '$prefix${element.role}: ${element.name ?? element.value ?? "(no text)"}');
     if (element.testId != null) {
-      print('$prefix  [data-testid="${element.testId}"]');
+      debugPrint('$prefix  [data-testid="${element.testId}"]');
     }
     for (final child in element.children) {
       printTree(child, indent: indent + 1);

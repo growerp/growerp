@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'automation_orchestrator.dart';
 
@@ -37,11 +38,11 @@ class CampaignAutomationService {
           .where((e) => e.isNotEmpty)
           .toList();
     } catch (e) {
-      print('Error parsing platforms: $e');
+      debugPrint('Error parsing platforms: $e');
     }
 
     if (platforms.isEmpty) {
-      print('No platforms configured for campaign $campaignId');
+      debugPrint('No platforms configured for campaign $campaignId');
       return;
     }
 
@@ -62,7 +63,7 @@ class CampaignAutomationService {
           checkCancelled: () => _activeCampaigns[campaignId] != true,
         );
       } catch (e) {
-        print('Error running automation for campaign $campaignId: $e');
+        debugPrint('Error running automation for campaign $campaignId: $e');
         // Don't stop the whole campaign on one platform error, but log it
       }
     }

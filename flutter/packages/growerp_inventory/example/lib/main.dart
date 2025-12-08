@@ -48,23 +48,23 @@ const inventoryMenuConfig = MenuConfiguration(
   menuConfigurationId: 'INVENTORY_EXAMPLE',
   appId: 'inventory_example',
   name: 'Inventory Example Menu',
-  menuItems: [
-    MenuItem(
-      menuOptionItemId: 'INV_MAIN',
+  menuOptions: [
+    MenuOption(
+      itemKey: 'INV_MAIN',
       title: 'Main',
       route: '/',
       iconName: 'dashboard',
       sequenceNum: 10,
     ),
-    MenuItem(
-      menuOptionItemId: 'INV_ASSETS',
+    MenuOption(
+      itemKey: 'INV_ASSETS',
       title: 'Assets',
       route: '/assets',
       iconName: 'money',
       sequenceNum: 20,
     ),
-    MenuItem(
-      menuOptionItemId: 'INV_LOCATIONS',
+    MenuOption(
+      itemKey: 'INV_LOCATIONS',
       title: 'WH Locations',
       route: '/locations',
       iconName: 'location_on',
@@ -108,8 +108,8 @@ GoRouter createInventoryExampleRouter() {
         builder: (context, state, child) {
           int menuIndex = 0;
           final path = state.uri.path;
-          for (int i = 0; i < inventoryMenuConfig.menuItems.length; i++) {
-            if (inventoryMenuConfig.menuItems[i].route == path) {
+          for (int i = 0; i < inventoryMenuConfig.menuOptions.length; i++) {
+            if (inventoryMenuConfig.menuOptions[i].route == path) {
               menuIndex = i;
               break;
             }

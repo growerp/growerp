@@ -188,7 +188,7 @@ class MenuItemDialogState extends State<MenuItemDialog> {
                 Expanded(
                   child: DropdownButtonFormField<String>(
                     key: const Key('menuItemIcon'),
-                    value: _selectedIconName,
+                    initialValue: _selectedIconName,
                     decoration: const InputDecoration(
                       labelText: 'Icon',
                       border: OutlineInputBorder(),
@@ -212,9 +212,7 @@ class MenuItemDialogState extends State<MenuItemDialog> {
                       );
                     }).toList(),
                     onChanged: (value) {
-                      setState(() {
-                        _selectedIconName = value;
-                      });
+                      _selectedIconName = value;
                     },
                   ),
                 ),

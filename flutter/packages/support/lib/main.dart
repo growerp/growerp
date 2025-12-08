@@ -1,4 +1,4 @@
-// ignore_for_file: depend_on_referenced_packages, avoid_print
+// ignore_for_file: depend_on_referenced_packages
 
 /*
  * This GrowERP software is in the public domain under CC0 1.0 Universal plus a
@@ -55,7 +55,7 @@ Future main() async {
     //webactivate  hostName = web.window.location.hostname;
     // ignore: unnecessary_null_comparison
     if (hostName != null) {
-      print("=====hostname: $hostName");
+      debugPrint("=====hostname: $hostName");
       try {
         company = await restClient.getCompanyFromHost(hostName);
       } on DioException catch (e) {

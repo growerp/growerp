@@ -55,30 +55,30 @@ const userCompanyMenuConfig = MenuConfiguration(
   menuConfigurationId: 'USER_COMPANY_EXAMPLE',
   appId: 'user_company_example',
   name: 'User & Company Example Menu',
-  menuItems: [
-    MenuItem(
-      menuOptionItemId: 'UC_MAIN',
+  menuOptions: [
+    MenuOption(
+      itemKey: 'UC_MAIN',
       title: 'Main',
       route: '/',
       iconName: 'dashboard',
       sequenceNum: 10,
     ),
-    MenuItem(
-      menuOptionItemId: 'UC_COMPANIES',
+    MenuOption(
+      itemKey: 'UC_COMPANIES',
       title: 'Companies',
       route: '/companies',
       iconName: 'business',
       sequenceNum: 20,
     ),
-    MenuItem(
-      menuOptionItemId: 'UC_USERS',
+    MenuOption(
+      itemKey: 'UC_USERS',
       title: 'Users',
       route: '/users',
       iconName: 'people',
       sequenceNum: 30,
     ),
-    MenuItem(
-      menuOptionItemId: 'UC_COMPANY_USERS',
+    MenuOption(
+      itemKey: 'UC_COMPANY_USERS',
       title: 'Companies & Users',
       route: '/companiesUsers',
       iconName: 'groups',
@@ -140,8 +140,8 @@ GoRouter createUserCompanyExampleRouter() {
         builder: (context, state, child) {
           int menuIndex = 0;
           final path = state.uri.path;
-          for (int i = 0; i < userCompanyMenuConfig.menuItems.length; i++) {
-            if (userCompanyMenuConfig.menuItems[i].route == path) {
+          for (int i = 0; i < userCompanyMenuConfig.menuOptions.length; i++) {
+            if (userCompanyMenuConfig.menuOptions[i].route == path) {
               menuIndex = i;
               break;
             }

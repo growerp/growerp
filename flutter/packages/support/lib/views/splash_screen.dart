@@ -56,7 +56,7 @@ class _SplashScreenState extends State<SplashScreen> {
           // We pass an empty configuration as it's not needed for login
           return HomeForm(
             menuConfiguration: const MenuConfiguration(
-              menuItems: [],
+              menuOptions: [],
               name: 'Login',
               appId: 'support',
             ),

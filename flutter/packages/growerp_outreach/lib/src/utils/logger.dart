@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 
 /// Outreach system logger
@@ -13,15 +14,15 @@ class OutreachLogger {
     Logger.root.onRecord.listen((record) {
       // Format: [LEVEL] ClassName.method: message
       final className = record.loggerName.split('.').last;
-      print(
+      debugPrint(
         '[${record.level.name}] $className: ${record.message}',
       );
 
       if (record.error != null) {
-        print('  Error: ${record.error}');
+        debugPrint('  Error: ${record.error}');
       }
       if (record.stackTrace != null) {
-        print('  Stack: ${record.stackTrace}');
+        debugPrint('  Stack: ${record.stackTrace}');
       }
     });
 

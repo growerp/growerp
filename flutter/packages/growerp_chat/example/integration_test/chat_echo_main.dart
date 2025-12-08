@@ -66,9 +66,9 @@ const chatEchoMenuConfig = MenuConfiguration(
   menuConfigurationId: 'CHAT_ECHO_EXAMPLE',
   appId: 'chat_echo_example',
   name: 'Chat Echo Example Menu',
-  menuItems: [
-    MenuItem(
-      menuOptionItemId: 'CHAT_MAIN',
+  menuOptions: [
+    MenuOption(
+      itemKey: 'CHAT_MAIN',
       title: 'Main',
       route: '/',
       iconName: 'dashboard',

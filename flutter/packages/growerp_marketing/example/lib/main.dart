@@ -58,51 +58,51 @@ const marketingMenuConfig = MenuConfiguration(
   menuConfigurationId: 'MARKETING_EXAMPLE',
   appId: 'marketing_example',
   name: 'Marketing Example Menu',
-  menuItems: [
-    MenuItem(
-      menuOptionItemId: 'MKT_MAIN',
+  menuOptions: [
+    MenuOption(
+      itemKey: 'MKT_MAIN',
       title: 'Main',
       route: '/',
       iconName: 'dashboard',
       sequenceNum: 10,
     ),
-    MenuItem(
-      menuOptionItemId: 'MKT_LANDING',
+    MenuOption(
+      itemKey: 'MKT_LANDING',
       title: 'Landing Pages',
       route: '/landingPages',
       iconName: 'web',
       sequenceNum: 20,
     ),
-    MenuItem(
-      menuOptionItemId: 'MKT_ASSESSMENTS',
+    MenuOption(
+      itemKey: 'MKT_ASSESSMENTS',
       title: 'Assessments',
       route: '/assessments',
       iconName: 'quiz',
       sequenceNum: 30,
     ),
-    MenuItem(
-      menuOptionItemId: 'MKT_TAKE',
+    MenuOption(
+      itemKey: 'MKT_TAKE',
       title: 'Take Assessment',
       route: '/takeAssessment',
       iconName: 'assignment',
       sequenceNum: 40,
     ),
-    MenuItem(
-      menuOptionItemId: 'MKT_PERSONAS',
+    MenuOption(
+      itemKey: 'MKT_PERSONAS',
       title: 'Personas',
       route: '/personas',
       iconName: 'people',
       sequenceNum: 50,
     ),
-    MenuItem(
-      menuOptionItemId: 'MKT_CONTENT',
+    MenuOption(
+      itemKey: 'MKT_CONTENT',
       title: 'Content Plans',
       route: '/contentPlans',
       iconName: 'calendar_today',
       sequenceNum: 60,
     ),
-    MenuItem(
-      menuOptionItemId: 'MKT_SOCIAL',
+    MenuOption(
+      itemKey: 'MKT_SOCIAL',
       title: 'Social Posts',
       route: '/socialPosts',
       iconName: 'share',
@@ -146,8 +146,8 @@ GoRouter createMarketingExampleRouter() {
         builder: (context, state, child) {
           int menuIndex = 0;
           final path = state.uri.path;
-          for (int i = 0; i < marketingMenuConfig.menuItems.length; i++) {
-            final route = marketingMenuConfig.menuItems[i].route;
+          for (int i = 0; i < marketingMenuConfig.menuOptions.length; i++) {
+            final route = marketingMenuConfig.menuOptions[i].route;
             if (route != null &&
                 (route == path ||
                     (route != '/' && path.startsWith('$route/')))) {
@@ -215,7 +215,7 @@ class MarketingDashboard extends StatelessWidget {
           return const LoadingIndicator();
         }
 
-        final items = marketingMenuConfig.menuItems
+        final items = marketingMenuConfig.menuOptions
             .where((item) => item.route != '/')
             .toList();
 
