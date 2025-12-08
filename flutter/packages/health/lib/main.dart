@@ -27,8 +27,7 @@ import 'package:flutter/material.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'router_builder.dart';
-import 'views/splash_screen.dart';
+import 'views/health_dashboard.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 //webactivate import 'package:web/web.dart' as web;
 
@@ -45,8 +44,6 @@ Future main() async {
 
   String classificationId = GlobalConfiguration().get("classificationId");
 
-  // check if there is override for the production backend url
-  // if there is a overide we are in test mode: see the banner in the app
   await getBackendUrlOverride(classificationId, packageInfo.version);
 
   Bloc.observer = AppBlocObserver();
@@ -111,9 +108,7 @@ class _HealthAppState extends State<HealthApp> {
   @override
   void initState() {
     super.initState();
-    // Initialize MenuConfigBloc with 'health' appId
     _menuConfigBloc = MenuConfigBloc(widget.restClient, 'health');
-    // Trigger menu configuration load
     _menuConfigBloc.add(const MenuConfigLoad());
   }
 
@@ -133,17 +128,23 @@ class _HealthAppState extends State<HealthApp> {
 
           if (state.status == MenuConfigStatus.success &&
               state.menuConfiguration != null) {
-            // Configuration loaded, build dynamic router
-            router = createDynamicHealthRouter([
-              state.menuConfiguration!,
-            ], rootNavigatorKey: GlobalKey<NavigatorState>());
+            // Use simplified config - no accounting submenu
+            router = createDynamicAppRouter(
+              [state.menuConfiguration!],
+              config: DynamicRouterConfig(
+                widgetLoader: WidgetRegistry.getWidget,
+                appTitle: 'GrowERP Health',
+                // No accounting submenu for health app
+              ),
+            );
           } else {
-            // Loading or error, show splash screen
             router = GoRouter(
               routes: [
                 GoRoute(
                   path: '/',
-                  builder: (context, state) => const SplashScreen(),
+                  builder: (context, routeState) => const Scaffold(
+                    body: Center(child: CircularProgressIndicator()),
+                  ),
                 ),
               ],
             );
@@ -162,6 +163,7 @@ class _HealthAppState extends State<HealthApp> {
               widget.classificationId,
             ),
             company: widget.company,
+            widgetRegistrations: healthWidgetRegistrations,
           );
         },
       ),
@@ -174,6 +176,20 @@ List<LocalizationsDelegate> delegates = [
   OrderAccountingLocalizations.delegate,
   WebsiteLocalizations.delegate,
   ActivityLocalizations.delegate,
+];
+
+/// Widget registrations for all packages used by Health app
+List<Map<String, GrowerpWidgetBuilder>> healthWidgetRegistrations = [
+  getUserCompanyWidgets(),
+  getOrderAccountingWidgets(),
+  getActivityWidgets(),
+  getSalesWidgets(),
+  getWebsiteWidgets(),
+  // App-specific widgets
+  {
+    'HealthDashboard': (args) => const HealthDashboard(),
+    'AboutForm': (args) => const AboutForm(),
+  },
 ];
 
 List<BlocProvider> getHealthBlocProviders(

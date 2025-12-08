@@ -31,8 +31,8 @@ import 'package:growerp_marketing/growerp_marketing.dart';
 import 'package:growerp_outreach/growerp_outreach.dart';
 import 'package:flutter/material.dart';
 import 'package:global_configuration/global_configuration.dart';
-import 'widget_registry.dart';
 import 'views/freelance_db_form.dart';
+import 'views/accounting_form.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 //webactivate  import 'package:web/web.dart' as web;
 
@@ -190,9 +190,28 @@ class _FreelanceAppState extends State<FreelanceApp> {
               ...getMarketingBlocProviders(widget.restClient),
               ...getOutreachBlocProviders(widget.restClient),
             ],
+            widgetRegistrations: freelanceWidgetRegistrations,
           );
         },
       ),
     );
   }
 }
+
+/// Widget registrations for all packages used by Freelance app
+List<Map<String, GrowerpWidgetBuilder>> freelanceWidgetRegistrations = [
+  getUserCompanyWidgets(),
+  getCatalogWidgets(),
+  getOrderAccountingWidgets(),
+  getActivityWidgets(),
+  getMarketingWidgets(),
+  getOutreachWidgets(),
+  getSalesWidgets(),
+  getWebsiteWidgets(),
+  // App-specific widgets
+  {
+    'FreelanceDbForm': (args) => const FreelanceDbForm(),
+    'AccountingForm': (args) => const AccountingForm(),
+    'AboutForm': (args) => const AboutForm(),
+  },
+];

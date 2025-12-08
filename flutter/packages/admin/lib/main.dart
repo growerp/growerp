@@ -30,8 +30,9 @@ import 'package:global_configuration/global_configuration.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:go_router/go_router.dart';
-import 'widget_registry.dart';
 import 'views/admin_dashboard_content.dart';
+import 'views/plan_selection_form.dart';
+import 'views/accounting_form.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 //webactivate  import 'package:web/web.dart' as web;
 
@@ -145,6 +146,7 @@ class _AdminAppState extends State<AdminApp> {
                 dashboardBuilder: () => const AdminDashboardContent(),
                 widgetLoader: WidgetRegistry.getWidget,
                 appTitle: 'GrowERP Administrator',
+                hasAccountingSubmenu: true,
               ),
               rootNavigatorKey: GlobalKey<NavigatorState>(),
             );
@@ -176,6 +178,7 @@ class _AdminAppState extends State<AdminApp> {
               widget.classificationId,
             ),
             company: widget.company,
+            widgetRegistrations: adminWidgetRegistrations,
           );
         },
       ),
@@ -191,6 +194,26 @@ List<LocalizationsDelegate> delegates = [
   WebsiteLocalizations.delegate,
   SalesLocalizations.delegate,
   ActivityLocalizations.delegate,
+];
+
+/// Widget registrations for all packages used by Admin app
+List<Map<String, GrowerpWidgetBuilder>> adminWidgetRegistrations = [
+  getUserCompanyWidgets(),
+  getCatalogWidgets(),
+  getInventoryWidgets(),
+  getOrderAccountingWidgets(),
+  getActivityWidgets(),
+  getMarketingWidgets(),
+  getOutreachWidgets(),
+  getSalesWidgets(),
+  getWebsiteWidgets(),
+  // App-specific widgets
+  {
+    'AdminDashboard': (args) => const AdminDashboardContent(),
+    'AccountingForm': (args) => const AccountingForm(),
+    'PlanSelectionForm': (args) => const PlanSelectionForm(),
+    'AboutForm': (args) => const AboutForm(),
+  },
 ];
 
 List<BlocProvider> getAdminBlocProviders(

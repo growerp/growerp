@@ -63,3 +63,4 @@ export 'src/test_data.dart';
 // export 'src.*integration_test/persona_test.dart';
 // export 'src.*integration_test/content_plan_test.dart';
 // export 'src.*integration_test/social_post_test.dart';
+export 'src/get_marketing_widgets.dart';
