@@ -53,6 +53,14 @@ class DynamicRouterConfig {
   /// Optional splash screen widget to show during loading
   final Widget? splashScreen;
 
+  /// Optional FAB builder for dashboard (receives MenuConfiguration)
+  /// Used to add additional FABs that appear above the AI FAB
+  final Widget Function(MenuConfiguration)? dashboardFabBuilder;
+
+  /// Optional FAB builder for accounting menu (receives MenuConfiguration)
+  /// Used to add additional FABs that appear above the AI FAB
+  final Widget Function(MenuConfiguration)? accountingFabBuilder;
+
   const DynamicRouterConfig({
     this.mainConfigId,
     this.accountingRootOptionId,
@@ -62,6 +70,8 @@ class DynamicRouterConfig {
     this.initialLocation = '/',
     this.hasAccountingSubmenu = false,
     this.splashScreen,
+    this.dashboardFabBuilder,
+    this.accountingFabBuilder,
   });
 }
 
@@ -141,6 +151,14 @@ GoRouter createDynamicAppRouter(
   return GoRouter(
     navigatorKey: navKey,
     initialLocation: config.initialLocation,
+    onException: (context, state, router) {
+      // Handle invalid routes gracefully - just log and redirect to home
+      // Note: Cannot show snackbar here as there's no Scaffold in navigator context
+      debugPrint(
+        'GoRouter: No route found for ${state.uri.path}, redirecting to home',
+      );
+      router.go('/');
+    },
     redirect: (context, state) {
       // Authentication check
       final authState = context.read<AuthBloc>().state;
@@ -174,6 +192,9 @@ GoRouter createDynamicAppRouter(
               child: getDashboard(),
               suppressBlocMenuConfig: true,
               tabWidgetLoader: config.widgetLoader,
+              floatingActionButton: config.dashboardFabBuilder != null
+                  ? config.dashboardFabBuilder!(mainDisplayConfig)
+                  : null,
             );
           } else {
             return HomeForm(
@@ -253,6 +274,9 @@ GoRouter createDynamicAppRouter(
               child: child,
               tabWidgetLoader: config.widgetLoader,
               suppressBlocMenuConfig: true,
+              floatingActionButton: config.accountingFabBuilder != null
+                  ? config.accountingFabBuilder!(accountingConfig)
+                  : null,
             );
           },
           routes: _generateRoutes(accountingConfig, config.widgetLoader),

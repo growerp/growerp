@@ -12,6 +12,7 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:growerp_models/growerp_models.dart';
 
@@ -19,7 +20,42 @@ import 'package:growerp_models/growerp_models.dart';
 /// Named GrowerpWidgetBuilder to avoid conflict with Flutter's WidgetBuilder
 typedef GrowerpWidgetBuilder = Widget Function(Map<String, dynamic>? args);
 
-/// Composable Widget Registry
+/// Metadata for a registered widget (for AI navigation)
+class WidgetMetadata {
+  /// Unique widget name (e.g., 'SalesInvoiceList')
+  final String widgetName;
+
+  /// Human-readable description for AI context
+  final String description;
+
+  /// Keywords for AI matching (e.g., ['invoice', 'bill', 'AR'])
+  final List<String> keywords;
+
+  /// Parameter descriptions for AI
+  /// e.g., {'status': 'Filter: open, paid, cancelled'}
+  final Map<String, String> parameters;
+
+  /// The widget builder function
+  final GrowerpWidgetBuilder builder;
+
+  const WidgetMetadata({
+    required this.widgetName,
+    required this.description,
+    this.keywords = const [],
+    this.parameters = const {},
+    required this.builder,
+  });
+
+  /// Convert to JSON for AI context
+  Map<String, dynamic> toJson() => {
+    'widgetName': widgetName,
+    'description': description,
+    'keywords': keywords,
+    'parameters': parameters,
+  };
+}
+
+/// Composable Widget Registry with AI discovery support
 ///
 /// Each package exports its widgets via a function like:
 /// ```dart
@@ -29,19 +65,33 @@ typedef GrowerpWidgetBuilder = Widget Function(Map<String, dynamic>? args);
 /// Apps compose them in main.dart:
 /// ```dart
 /// WidgetRegistry.register(getUserCompanyWidgets());
-/// WidgetRegistry.register(getCatalogWidgets());
 /// ```
 class WidgetRegistry {
-  static final Map<String, GrowerpWidgetBuilder> _widgets = {};
+  static final Map<String, WidgetMetadata> _widgets = {};
 
-  /// Register widgets from a package
+  /// Register widgets from a package (backward compatible)
   ///
-  /// Example:
-  /// ```dart
-  /// WidgetRegistry.register(getUserCompanyWidgets());
-  /// ```
+  /// Creates basic metadata without descriptions
   static void register(Map<String, GrowerpWidgetBuilder> widgets) {
-    _widgets.addAll(widgets);
+    for (final entry in widgets.entries) {
+      _widgets[entry.key] = WidgetMetadata(
+        widgetName: entry.key,
+        description: entry.key, // Default to widget name
+        builder: entry.value,
+      );
+    }
+  }
+
+  /// Register widget with full metadata (for AI discovery)
+  static void registerWithMetadata(WidgetMetadata metadata) {
+    _widgets[metadata.widgetName] = metadata;
+  }
+
+  /// Register multiple widgets with metadata
+  static void registerAllWithMetadata(List<WidgetMetadata> metadataList) {
+    for (final metadata in metadataList) {
+      _widgets[metadata.widgetName] = metadata;
+    }
   }
 
   /// Clear all registered widgets (useful for testing)
@@ -53,9 +103,9 @@ class WidgetRegistry {
   ///
   /// Returns a fallback widget if not found
   static Widget getWidget(String widgetName, [Map<String, dynamic>? args]) {
-    final builder = _widgets[widgetName];
-    if (builder != null) {
-      return builder(args);
+    final metadata = _widgets[widgetName];
+    if (metadata != null) {
+      return metadata.builder(args);
     }
     debugPrint('WidgetRegistry: Widget "$widgetName" not found');
     return Center(
@@ -71,6 +121,41 @@ class WidgetRegistry {
 
   /// Get all registered widget names (for debugging)
   static List<String> get registeredWidgets => _widgets.keys.toList();
+
+  /// Get metadata for a widget
+  static WidgetMetadata? getMetadata(String widgetName) => _widgets[widgetName];
+
+  /// Search widgets by keywords (for AI matching)
+  ///
+  /// Returns widgets matching any of the given keywords
+  static List<WidgetMetadata> searchByKeywords(List<String> searchTerms) {
+    final lowerTerms = searchTerms.map((t) => t.toLowerCase()).toList();
+    return _widgets.values.where((meta) {
+      // Check widget name
+      if (lowerTerms.any((t) => meta.widgetName.toLowerCase().contains(t))) {
+        return true;
+      }
+      // Check description
+      if (lowerTerms.any((t) => meta.description.toLowerCase().contains(t))) {
+        return true;
+      }
+      // Check keywords
+      return meta.keywords.any(
+        (k) => lowerTerms.any((t) => k.toLowerCase().contains(t)),
+      );
+    }).toList();
+  }
+
+  /// Get widget catalog as JSON string (for AI context)
+  ///
+  /// Provides AI with available screens and their parameters
+  static String getWidgetCatalog() {
+    final catalog = _widgets.values.map((m) => m.toJson()).toList();
+    return jsonEncode(catalog);
+  }
+
+  /// Get all metadata (for AI system prompt building)
+  static List<WidgetMetadata> get allMetadata => _widgets.values.toList();
 }
 
 // ============================================================================

@@ -102,3 +102,195 @@ Map<String, GrowerpWidgetBuilder> getOrderAccountingWidgets() {
     'PaymentTypeList': (args) => const PaymentTypeList(),
   };
 }
+
+/// Returns widget metadata for AI-powered navigation
+List<WidgetMetadata> getOrderAccountingWidgetsWithMetadata() {
+  return [
+    // Sales documents
+    WidgetMetadata(
+      widgetName: 'SalesInvoiceList',
+      description: 'List of sales invoices sent to customers',
+      keywords: [
+        'invoice',
+        'bill',
+        'sales',
+        'AR',
+        'accounts receivable',
+        'customer invoice',
+      ],
+      parameters: {
+        'status': 'Filter: open, in preparation, approved, completed',
+      },
+      builder: (args) => FinDocList(
+        key: getKeyFromArgs(args),
+        sales: true,
+        docType: FinDocType.invoice,
+      ),
+    ),
+    WidgetMetadata(
+      widgetName: 'SalesOrderList',
+      description: 'List of sales orders from customers',
+      keywords: ['order', 'sales', 'customer order', 'SO'],
+      parameters: {'status': 'Filter: open, approved, completed'},
+      builder: (args) => FinDocList(
+        key: getKeyFromArgs(args),
+        sales: true,
+        docType: FinDocType.order,
+      ),
+    ),
+    WidgetMetadata(
+      widgetName: 'SalesPaymentList',
+      description: 'List of payments received from customers',
+      keywords: [
+        'payment',
+        'receipt',
+        'income',
+        'customer payment',
+        'AR payment',
+      ],
+      parameters: {'status': 'Filter: open, approved, completed'},
+      builder: (args) => FinDocList(
+        key: getKeyFromArgs(args),
+        sales: true,
+        docType: FinDocType.payment,
+      ),
+    ),
+    WidgetMetadata(
+      widgetName: 'OutgoingShipmentList',
+      description: 'List of shipments sent to customers',
+      keywords: ['shipment', 'delivery', 'shipping', 'outgoing', 'dispatch'],
+      parameters: {'status': 'Filter: open, approved, completed'},
+      builder: (args) => FinDocList(
+        key: getKeyFromArgs(args),
+        sales: true,
+        docType: FinDocType.shipment,
+      ),
+    ),
+
+    // Purchase documents
+    WidgetMetadata(
+      widgetName: 'PurchaseInvoiceList',
+      description: 'List of purchase invoices from suppliers',
+      keywords: [
+        'invoice',
+        'bill',
+        'purchase',
+        'AP',
+        'accounts payable',
+        'supplier invoice',
+        'vendor invoice',
+      ],
+      parameters: {
+        'status': 'Filter: open, in preparation, approved, completed',
+      },
+      builder: (args) => FinDocList(
+        key: getKeyFromArgs(args),
+        sales: false,
+        docType: FinDocType.invoice,
+      ),
+    ),
+    WidgetMetadata(
+      widgetName: 'PurchaseOrderList',
+      description: 'List of purchase orders to suppliers',
+      keywords: ['order', 'purchase', 'supplier order', 'vendor order', 'PO'],
+      parameters: {'status': 'Filter: open, approved, completed'},
+      builder: (args) => FinDocList(
+        key: getKeyFromArgs(args),
+        sales: false,
+        docType: FinDocType.order,
+      ),
+    ),
+    WidgetMetadata(
+      widgetName: 'PurchasePaymentList',
+      description: 'List of payments made to suppliers',
+      keywords: [
+        'payment',
+        'expense',
+        'supplier payment',
+        'vendor payment',
+        'AP payment',
+      ],
+      parameters: {'status': 'Filter: open, approved, completed'},
+      builder: (args) => FinDocList(
+        key: getKeyFromArgs(args),
+        sales: false,
+        docType: FinDocType.payment,
+      ),
+    ),
+    WidgetMetadata(
+      widgetName: 'IncomingShipmentList',
+      description: 'List of shipments received from suppliers',
+      keywords: [
+        'shipment',
+        'receiving',
+        'incoming',
+        'receipt',
+        'goods receipt',
+      ],
+      parameters: {'status': 'Filter: open, approved, completed'},
+      builder: (args) => FinDocList(
+        key: getKeyFromArgs(args),
+        sales: false,
+        docType: FinDocType.shipment,
+      ),
+    ),
+
+    // Accounting
+    WidgetMetadata(
+      widgetName: 'LedgerTreeForm',
+      description: 'Chart of accounts tree view',
+      keywords: [
+        'ledger',
+        'chart of accounts',
+        'COA',
+        'GL',
+        'general ledger',
+        'accounts',
+      ],
+      builder: (args) => const LedgerTreeForm(),
+    ),
+    WidgetMetadata(
+      widgetName: 'GlAccountList',
+      description: 'List of general ledger accounts',
+      keywords: ['accounts', 'GL', 'general ledger', 'COA'],
+      builder: (args) => const GlAccountList(),
+    ),
+    WidgetMetadata(
+      widgetName: 'TransactionList',
+      description: 'List of accounting transactions and journal entries',
+      keywords: ['transaction', 'journal', 'entry', 'posting', 'accounting'],
+      builder: (args) => FinDocList(
+        key: getKeyFromArgs(args),
+        sales: true,
+        docType: FinDocType.transaction,
+      ),
+    ),
+    WidgetMetadata(
+      widgetName: 'BalanceSheetForm',
+      description: 'Balance sheet financial report',
+      keywords: [
+        'balance sheet',
+        'financial statement',
+        'assets',
+        'liabilities',
+        'equity',
+        'report',
+      ],
+      builder: (args) => const BalanceSheetForm(),
+    ),
+    WidgetMetadata(
+      widgetName: 'RevenueExpenseChart',
+      description: 'Revenue and expense chart visualization',
+      keywords: [
+        'revenue',
+        'expense',
+        'profit',
+        'loss',
+        'P&L',
+        'income statement',
+        'chart',
+      ],
+      builder: (args) => const RevenueExpenseChart(),
+    ),
+  ];
+}

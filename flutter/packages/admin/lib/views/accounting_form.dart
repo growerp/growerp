@@ -45,18 +45,6 @@ class AccountingForm extends StatelessWidget {
 
         return Scaffold(
           backgroundColor: Colors.transparent,
-          floatingActionButton: FloatingActionButton(
-            key: const Key('accountingFab'),
-            tooltip: 'Manage Menu Items',
-            onPressed: () {
-              showDialog(
-                context: context,
-                builder: (dialogContext) =>
-                    MenuItemListDialog(menuConfiguration: menuConfig),
-              );
-            },
-            child: const Icon(Icons.menu),
-          ),
           body: Padding(
             padding: const EdgeInsets.all(20.0),
             child: GridView.builder(

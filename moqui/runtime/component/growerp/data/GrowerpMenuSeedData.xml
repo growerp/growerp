@@ -96,6 +96,7 @@ along with this software (see the LICENSE.md file). If not, see
     <growerp.menu.MenuItem menuItemId="UserListLead" title="Leads" iconName="business" widgetName="UserListLead"/>
     <growerp.menu.MenuItem menuItemId="UserListSupplier" title="Suppliers" iconName="business" widgetName="UserListSupplier"/>
     <growerp.menu.MenuItem menuItemId="WebsiteDialog" title="Website" iconName="webhook" widgetName="WebsiteDialog"/>
+    <growerp.menu.MenuItem menuItemId="SystemSetupDialog" title="AI Settings" iconName="psychology" widgetName="SystemSetupDialog"/>
 
     <!-- ADMIN_DEFAULT Menu Options -->
     <growerp.menu.MenuOption menuOptionId="ADMIN_MAIN" menuConfigurationId="ADMIN_DEFAULT" title="Main" route="/" iconName="dashboard" widgetName="AdminDashboard" sequenceNum="10"/>
@@ -166,6 +167,8 @@ along with this software (see the LICENSE.md file). If not, see
     <growerp.menu.MenuOptionItem menuOptionId="ADMIN_ACC_SETUP" menuItemId="ItemTypeList" sequenceNum="20"/>
     <growerp.menu.MenuOptionItem menuOptionId="ADMIN_ACC_SETUP" menuItemId="PaymentTypeList" sequenceNum="30"/>
     <growerp.menu.MenuOptionItem menuOptionId="ADMIN_ACC_SETUP" menuItemId="PlanSelectionForm" sequenceNum="40"/>
+    <growerp.menu.MenuOptionItem menuOptionId="ADMIN_ACC_SETUP" menuItemId="SystemSetupDialog" sequenceNum="50"/>
+
     <growerp.menu.MenuOptionItem menuOptionId="ADMIN_ACCOUNTING" menuItemId="AdminDashboard" sequenceNum="99"/>
 
     <!-- FREELANCE_DEFAULT Menu Options -->
@@ -351,6 +354,7 @@ along with this software (see the LICENSE.md file). If not, see
     <growerp.menu.MenuOption menuOptionId="CORE_EX_ORG" menuConfigurationId="CORE_EXAMPLE_DEFAULT" title="Organization" route="/companies" iconName="business" widgetName="ShowCompanyDialog" sequenceNum="20"/>
     <growerp.menu.MenuOption menuOptionId="CORE_EX_CRM" menuConfigurationId="CORE_EXAMPLE_DEFAULT" title="CRM" route="/crm" iconName="people" widgetName="UserList" sequenceNum="30"/>
     <growerp.menu.MenuOption menuOptionId="CORE_EX_ABOUT" menuConfigurationId="CORE_EXAMPLE_DEFAULT" title="About" route="/about" iconName="info" widgetName="AboutForm" sequenceNum="40"/>
+    <growerp.menu.MenuOption menuOptionId="CORE_EX_SETUP" menuConfigurationId="CORE_EXAMPLE_DEFAULT" title="AI Settings" route="/setup" iconName="psychology" widgetName="SystemSetupDialog" sequenceNum="50"/>
 <!-- CORE_EXAMPLE_DEFAULT Menu Option Items (junction) -->
     <growerp.menu.MenuOptionItem menuOptionId="CORE_EX_ORG" menuItemId="ShowCompanyDialog" sequenceNum="10"/>
     <growerp.menu.MenuOptionItem menuOptionId="CORE_EX_ORG" menuItemId="UserList" sequenceNum="20"/>

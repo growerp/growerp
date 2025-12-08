@@ -13,11 +13,11 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   growerp_core:
-    path: ../..
+    path: ..
   growerp_user_company:
-    path: ../../../growerp_user_company
+    path: ../../growerp_user_company
   growerp_models:
-    path: ../../../growerp_models
+    path: ../../growerp_models
   global_configuration: ^2.0.0-nullsafety.1
   flutter_test:
     sdk: flutter

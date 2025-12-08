@@ -20,7 +20,7 @@ import 'package:global_configuration/global_configuration.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_user_company/growerp_user_company.dart';
-import 'views/core_dashboard.dart';
+import 'router_builder.dart';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -90,15 +90,36 @@ class _CoreAppState extends State<CoreApp> {
               config: DynamicRouterConfig(
                 widgetLoader: WidgetRegistry.getWidget,
                 appTitle: 'Core Example',
+                dashboardFabBuilder: (menuConfig) => Builder(
+                  builder: (fabContext) => FloatingActionButton(
+                    key: const Key('coreFab'),
+                    heroTag: 'menuFab',
+                    tooltip: 'Manage Menu Items',
+                    onPressed: () {
+                      showDialog(
+                        context: fabContext,
+                        builder: (dialogContext) => BlocProvider.value(
+                          value: fabContext.read<MenuConfigBloc>(),
+                          child: MenuItemListDialog(
+                            menuConfiguration: menuConfig,
+                          ),
+                        ),
+                      );
+                    },
+                    child: const Icon(Icons.menu),
+                  ),
+                ),
               ),
             );
           } else {
+            // Loading or error, show splash screen using shared component
             router = GoRouter(
               routes: [
                 GoRoute(
                   path: '/',
-                  builder: (context, routeState) => const Scaffold(
-                    body: Center(child: CircularProgressIndicator()),
+                  builder: (context, routeState) => AppSplashScreen.simple(
+                    appTitle: 'GrowERP Core Example',
+                    appId: 'core_example',
                   ),
                 ),
               ],
@@ -126,13 +147,3 @@ class _CoreAppState extends State<CoreApp> {
     );
   }
 }
-
-/// Widget registrations for Core example app
-List<Map<String, GrowerpWidgetBuilder>> coreWidgetRegistrations = [
-  getUserCompanyWidgets(),
-  // App-specific widgets
-  {
-    'CoreDashboard': (args) => const CoreDashboard(),
-    'AboutForm': (args) => const AboutForm(),
-  },
-];

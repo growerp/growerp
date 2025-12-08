@@ -13,7 +13,6 @@
  */
 
 // ignore_for_file: depend_on_referenced_packages
-import 'package:core_example/main.dart';
 import 'package:core_example/router_builder.dart'; // For createDynamicCoreRouter
 import 'package:flutter/material.dart'; // For GlobalKey, NavigatorState
 import 'package:flutter_test/flutter_test.dart';
