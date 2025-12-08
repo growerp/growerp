@@ -4,3 +4,4 @@ export 'src/subscription/subscription.dart';
 export 'l10n/generated/catalog_localizations.dart';
 export 'src/get_catalog_bloc_providers.dart';
 export 'src/common/translate_bloc_messages.dart';
+export 'src/get_catalog_widgets.dart';

@@ -22,6 +22,7 @@ import 'package:growerp_models/growerp_models.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
 import '../../../get_core_bloc_providers.dart';
+import '../../../services/widget_registry.dart';
 import '../../../services/ws_client.dart';
 import '../../domains.dart';
 import 'package:growerp_core/l10n/generated/core_localizations.dart';
@@ -34,10 +35,15 @@ import 'package:growerp_core/l10n/generated/core_localizations.dart';
 /// - Localization support
 /// - Responsive layout breakpoints
 /// - Theme configuration
+/// - Widget registration for dynamic menu system
 ///
 /// The [appId] parameter enables the dynamic menu system. When provided,
 /// TopApp will create a MenuConfigBloc that loads menu configuration from
 /// the backend based on the appId.
+///
+/// The [widgetRegistrations] parameter accepts a list of widget maps from
+/// packages (e.g., getUserCompanyWidgets(), getCatalogWidgets()) that will
+/// be registered with the WidgetRegistry on initialization.
 class TopApp extends StatefulWidget {
   const TopApp({
     super.key,
@@ -51,6 +57,7 @@ class TopApp extends StatefulWidget {
     this.extraBlocProviders = const [],
     this.company,
     this.appId,
+    this.widgetRegistrations = const [],
   });
 
   final RestClient restClient;
@@ -70,6 +77,11 @@ class TopApp extends StatefulWidget {
   /// Examples: 'admin', 'freelance', 'hotel', 'catalog_example'
   final String? appId;
 
+  /// Optional list of widget registration maps from packages.
+  /// Each map is typically returned by a package's getXxxWidgets() function.
+  /// Example: [getUserCompanyWidgets(), getCatalogWidgets()]
+  final List<Map<String, GrowerpWidgetBuilder>> widgetRegistrations;
+
   @override
   State<TopApp> createState() => _TopAppState();
 }
@@ -87,6 +99,12 @@ class _TopAppState extends State<TopApp> {
   @override
   void initState() {
     super.initState();
+
+    // Register widgets from all provided registration maps
+    for (final widgetMap in widget.widgetRegistrations) {
+      WidgetRegistry.register(widgetMap);
+    }
+
     // Create MenuConfigBloc if appId is provided
     if (widget.appId != null) {
       _menuConfigBloc = MenuConfigBloc(widget.restClient, widget.appId!);

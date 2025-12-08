@@ -45,8 +45,8 @@ import 'package:growerp_user_company/growerp_user_company.dart';
 import 'package:growerp_website/growerp_website.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 
-import 'widget_registry.dart';
 import 'views/gantt_form.dart';
+import 'views/accounting_form.dart';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -190,6 +190,7 @@ class _HotelAppState extends State<HotelApp> {
               widget.restClient,
               widget.classificationId,
             ),
+            widgetRegistrations: hotelWidgetRegistrations,
           );
         },
       ),
@@ -207,6 +208,20 @@ List<LocalizationsDelegate> delegates = [
   InventoryLocalizations.delegate,
   CatalogLocalizations.delegate,
   ActivityLocalizations.delegate,
+];
+
+/// Widget registrations for all packages used by Hotel app
+List<Map<String, GrowerpWidgetBuilder>> hotelWidgetRegistrations = [
+  getUserCompanyWidgets(),
+  getCatalogWidgets(),
+  getInventoryWidgets(),
+  getOrderAccountingWidgets(),
+  getWebsiteWidgets(),
+  // App-specific widgets
+  {
+    'GanttForm': (args) => const GanttForm(),
+    'AccountingForm': (args) => const AccountingForm(),
+  },
 ];
 
 List<BlocProvider> getHotelBlocProviders(

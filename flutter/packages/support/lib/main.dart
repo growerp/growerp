@@ -27,8 +27,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:growerp_activity/growerp_activity.dart';
 
 import 'src/application/application.dart';
-import 'router_builder.dart';
-import 'views/splash_screen.dart';
+import 'views/support_dashboard.dart';
 //webactivate  import 'package:web/web.dart' as web;
 
 Future main() async {
@@ -43,7 +42,6 @@ Future main() async {
   GlobalConfiguration().updateValue('build', packageInfo.buildNumber);
 
   String classificationId = GlobalConfiguration().get("classificationId");
-  // check if there is override for the production(now test) backend url
   await getBackendUrlOverride(classificationId, packageInfo.version);
 
   Bloc.observer = AppBlocObserver();
@@ -67,7 +65,6 @@ Future main() async {
     }
   }
 
-  //company = Company(partyId: '100002', name: 'hallo hallo');
   runApp(
     SupportApp(
       restClient: restClient,
@@ -106,6 +103,7 @@ class _SupportAppState extends State<SupportApp> {
   void initState() {
     super.initState();
     _menuConfigBloc = MenuConfigBloc(widget.restClient, 'support');
+    _menuConfigBloc.add(const MenuConfigLoad());
   }
 
   @override
@@ -124,15 +122,22 @@ class _SupportAppState extends State<SupportApp> {
 
           if (state.status == MenuConfigStatus.success &&
               state.menuConfiguration != null) {
-            router = createDynamicSupportRouter([
-              state.menuConfiguration!,
-            ], rootNavigatorKey: GlobalKey<NavigatorState>());
+            // Use simplified config - no accounting submenu
+            router = createDynamicAppRouter(
+              [state.menuConfiguration!],
+              config: DynamicRouterConfig(
+                widgetLoader: WidgetRegistry.getWidget,
+                appTitle: 'GrowERP Support',
+              ),
+            );
           } else {
             router = GoRouter(
               routes: [
                 GoRoute(
                   path: '/',
-                  builder: (context, state) => const SplashScreen(),
+                  builder: (context, routeState) => const Scaffold(
+                    body: Center(child: CircularProgressIndicator()),
+                  ),
                 ),
               ],
             );
@@ -151,6 +156,7 @@ class _SupportAppState extends State<SupportApp> {
               widget.classificationId,
             ),
             company: widget.company,
+            widgetRegistrations: supportWidgetRegistrations,
           );
         },
       ),
@@ -161,6 +167,17 @@ class _SupportAppState extends State<SupportApp> {
 List<LocalizationsDelegate> delegates = [
   UserCompanyLocalizations.delegate,
   ActivityLocalizations.delegate,
+];
+
+/// Widget registrations for all packages used by Support app
+List<Map<String, GrowerpWidgetBuilder>> supportWidgetRegistrations = [
+  getUserCompanyWidgets(),
+  getActivityWidgets(),
+  // App-specific widgets
+  {
+    'SupportDashboard': (args) => const SupportDashboard(),
+    'AboutForm': (args) => const AboutForm(),
+  },
 ];
 
 List<BlocProvider> getSupportBlocProviders(

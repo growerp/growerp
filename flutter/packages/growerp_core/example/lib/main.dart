@@ -19,9 +19,8 @@ import 'package:go_router/go_router.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
-import 'router_builder.dart';
-import 'package:core_example/views/splash_screen.dart'; // Import for AuthenticatedDisplayMenuOption if needed or remove if unused here
-// Note: router_builder handles AuthenticatedDisplayMenuOption in core app context
+import 'package:growerp_user_company/growerp_user_company.dart';
+import 'views/core_dashboard.dart';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -66,7 +65,6 @@ class _CoreAppState extends State<CoreApp> {
   @override
   void initState() {
     super.initState();
-    // Initialize MenuConfigBloc without eager loading
     _menuConfigBloc = MenuConfigBloc(widget.restClient, 'core_example');
   }
 
@@ -86,16 +84,22 @@ class _CoreAppState extends State<CoreApp> {
 
           if (state.status == MenuConfigStatus.success &&
               state.menuConfiguration != null) {
-            router = createDynamicCoreRouter([
-              state.menuConfiguration!,
-            ], rootNavigatorKey: GlobalKey<NavigatorState>());
+            // Use simplified config - no accounting submenu
+            router = createDynamicAppRouter(
+              [state.menuConfiguration!],
+              config: DynamicRouterConfig(
+                widgetLoader: WidgetRegistry.getWidget,
+                appTitle: 'Core Example',
+              ),
+            );
           } else {
-            // Loading or error or initial, show splash screen
             router = GoRouter(
               routes: [
                 GoRoute(
                   path: '/',
-                  builder: (context, state) => const SplashScreen(),
+                  builder: (context, routeState) => const Scaffold(
+                    body: Center(child: CircularProgressIndicator()),
+                  ),
                 ),
               ],
             );
@@ -106,11 +110,29 @@ class _CoreAppState extends State<CoreApp> {
             classificationId: widget.classificationId,
             chatClient: widget.chatClient,
             notificationClient: widget.notificationClient,
-            title: 'Content/Marketing',
+            title: 'Core Example',
             router: router,
+            extraDelegates: const [UserCompanyLocalizations.delegate],
+            extraBlocProviders: [
+              ...getUserCompanyBlocProviders(
+                widget.restClient,
+                widget.classificationId,
+              ),
+            ],
+            widgetRegistrations: coreWidgetRegistrations,
           );
         },
       ),
     );
   }
 }
+
+/// Widget registrations for Core example app
+List<Map<String, GrowerpWidgetBuilder>> coreWidgetRegistrations = [
+  getUserCompanyWidgets(),
+  // App-specific widgets
+  {
+    'CoreDashboard': (args) => const CoreDashboard(),
+    'AboutForm': (args) => const AboutForm(),
+  },
+];
