@@ -5,3 +5,4 @@ export 'image_buttons.dart';
 export 'display_menu_option.dart';
 export 'dynamic_router_builder.dart';
 export 'app_splash_screen.dart';
+export 'dashboard_card.dart';

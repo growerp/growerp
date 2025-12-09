@@ -68,45 +68,17 @@ For detailed information, see our [Extensibility Documentation](docs/README.md).
 
 ### Frontend Development
 
-1. **Install Flutter** (version 3.2.6 or higher)
+1. **Install Flutter** (stable channel)
 2. **Clone the repository**:
    ```bash
    git clone https://github.com/growerp/growerp.git
    cd growerp
    ```
-
-3. **Set up Flutter packages**:
-   ```bash
-   cd flutter
-   flutter pub get
-   ```
-
-4. **Run the admin application**:
-   ```bash
-   cd packages/admin
-   flutter run
-   ```
+3. initialize the system as is described in the [README](README.md)
 
 For detailed frontend development, see the [Building Blocks Development Guide](docs/Building_Blocks_Development_Guide.md).
 
-### Backend Development
-
-1. **Install Java** (version 11 or higher)
-2. **Install Gradle** (version 7.0 or higher)
-3. **Set up the backend**:
-   ```bash
-   cd moqui
-   ./gradlew run
-   ```
-
 For detailed backend development, see the [Backend Components Development Guide](docs/Backend_Components_Development_Guide.md).
-
-### Full Stack Development
-
-For complete application development:
-1. Start the backend server
-2. Configure the Flutter app to connect to your local backend
-3. Run the Flutter application
 
 ## Contribution Workflow
 
@@ -199,27 +171,7 @@ Then create a pull request on GitHub with:
 ```bash
 # Run all tests
 cd flutter
-flutter test
-
-# Run tests for specific package
-cd packages/growerp_catalog
-flutter test
-```
-
-### Backend Testing
-
-```bash
-# Run Moqui tests
-cd moqui
-./gradlew test
-```
-
-### Test Requirements
-
-- **Unit Tests**: Required for all new business logic
-- **Widget Tests**: Required for new UI components
-- **Integration Tests**: Required for new workflows
-- **API Tests**: Required for new backend services
+melos test
 
 ## Documentation
 
@@ -341,7 +293,7 @@ We follow [Semantic Versioning](https://semver.org/):
 
 ### Release Cycle
 
-- Regular releases every 2-4 weeks
+- Regular releases every 2-4 months
 - Security patches as needed
 - Major releases with significant new features
 - Beta releases for testing new functionality
@@ -377,4 +329,4 @@ If you have questions about contributing:
 
 **Thank you for contributing to GrowERP!** Your contributions help make enterprise software more accessible, flexible, and powerful for businesses worldwide.
 
-*Last updated: January 2025*
+*Last updated: December 2025*

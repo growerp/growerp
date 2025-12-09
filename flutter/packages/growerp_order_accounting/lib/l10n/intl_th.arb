@@ -42,7 +42,7 @@
   "onlyUsed": "เฉพาะที่ใช้",
   "fetchPaymentTypesFail": "ไม่สามารถดึงข้อมูลประเภทการชำระเงินได้: ",
   "search": "ค้นหา",
-  "searchFinDoc": "ค้นหาเอกสารทางการเงิน",
+  "searchFinDoc": "ค้นหา {docType}",
   "newRental": "การจองใหม่",
   "sales": "การขาย",
   "purchase": "การซื้อ",

@@ -70,7 +70,7 @@ Widget myNavigationRail(
 
     items.add(
       NavigationRailDestination(
-        icon: iconWidget,
+        icon: Container(key: Key('tap${option.route}'), child: iconWidget),
         selectedIcon: selectedIconWidget,
         label: SizedBox(
           width: 80,

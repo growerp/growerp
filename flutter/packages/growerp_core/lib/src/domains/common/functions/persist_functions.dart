@@ -135,7 +135,6 @@ class PersistFunctions {
         final testDir = await _getPersistentTestDir();
         final file = File('$testDir/$_testName.json');
         await file.writeAsString(jsonEncode(test.toJson()));
-        debugPrint("✅ Persisted test data to: ${file.path}");
       } catch (e) {
         debugPrint("Could not save test to file: $e");
       }
@@ -152,9 +151,6 @@ class PersistFunctions {
           final file = File('$testDir/$_testName.json');
           if (await file.exists()) {
             result = await file.readAsString();
-            debugPrint("✅ Loaded test data from file: ${file.path}");
-          } else {
-            debugPrint("⚠️ Test data file not found: ${file.path}");
           }
         } catch (e) {
           debugPrint("Could not read test from file: $e");

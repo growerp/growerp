@@ -14,7 +14,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import 'package:growerp_core/growerp_core.dart';
 
 class FreelanceDbForm extends StatelessWidget {
@@ -22,111 +21,72 @@ class FreelanceDbForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<MenuConfigBloc, MenuConfigState>(
-      builder: (context, state) {
-        final menuConfig = state.menuConfiguration;
+    return BlocBuilder<AuthBloc, AuthState>(
+      builder: (context, authState) {
+        final stats = authState.authenticate?.stats;
 
-        if (menuConfig == null) {
-          return const Center(child: CircularProgressIndicator());
-        }
+        return BlocBuilder<MenuConfigBloc, MenuConfigState>(
+          builder: (context, menuState) {
+            final menuConfig = menuState.menuConfiguration;
 
-        // Get dashboard options from menu configuration (active items only)
-        // Exclude the Main/Dashboard item itself (route '/') and About
-        final dashboardOptions =
-            menuConfig.menuOptions
-                .where(
-                  (option) =>
-                      option.isActive &&
-                      option.route != '/' &&
-                      option.route != '/about',
-                )
-                .toList()
-              ..sort((a, b) => a.sequenceNum.compareTo(b.sequenceNum));
+            if (menuConfig == null) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-        return Scaffold(
-          backgroundColor: Colors.transparent,
-          floatingActionButton: FloatingActionButton(
-            key: const Key('freelanceFab'),
-            tooltip: 'Manage Menu Items',
-            onPressed: () {
-              showDialog(
-                context: context,
-                builder: (dialogContext) => BlocProvider.value(
-                  value: context.read<MenuConfigBloc>(),
-                  child: MenuItemListDialog(menuConfiguration: menuConfig),
-                ),
-              );
-            },
-            child: const Icon(Icons.menu),
-          ),
-          body: Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: GridView.builder(
-              gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                maxCrossAxisExtent: isAPhone(context) ? 200 : 300,
-                childAspectRatio: 1,
-                crossAxisSpacing: 20,
-                mainAxisSpacing: 20,
+            // Get dashboard options from menu configuration (active items only)
+            // Exclude the Main/Dashboard item itself (route '/') and About
+            final dashboardOptions =
+                menuConfig.menuOptions
+                    .where(
+                      (option) =>
+                          option.isActive &&
+                          option.route != '/' &&
+                          option.route != '/about',
+                    )
+                    .toList()
+                  ..sort((a, b) => a.sequenceNum.compareTo(b.sequenceNum));
+
+            return Scaffold(
+              backgroundColor: Colors.transparent,
+              floatingActionButton: FloatingActionButton(
+                key: const Key('freelanceFab'),
+                tooltip: 'Manage Menu Items',
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (dialogContext) => BlocProvider.value(
+                      value: context.read<MenuConfigBloc>(),
+                      child: MenuItemListDialog(menuConfiguration: menuConfig),
+                    ),
+                  );
+                },
+                child: const Icon(Icons.menu),
               ),
-              itemCount: dashboardOptions.length,
-              itemBuilder: (context, index) {
-                final option = dashboardOptions[index];
-                return _DashboardCard(
-                  title: option.title,
-                  iconName: option.iconName ?? 'dashboard',
-                  route: option.route,
-                );
-              },
-            ),
-          ),
+              body: Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: GridView.builder(
+                  gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                    maxCrossAxisExtent: isAPhone(context) ? 200 : 300,
+                    childAspectRatio: 1,
+                    crossAxisSpacing: 20,
+                    mainAxisSpacing: 20,
+                  ),
+                  itemCount: dashboardOptions.length,
+                  itemBuilder: (context, index) {
+                    final option = dashboardOptions[index];
+                    return DashboardCard(
+                      title: option.title,
+                      iconName: option.iconName ?? 'dashboard',
+                      route: option.route,
+                      stats: getStatsForRoute(option.route, stats),
+                    );
+                  },
+                ),
+              ),
+            );
+          },
         );
       },
-    );
-  }
-}
-
-/// Dashboard card widget for displaying menu options
-class _DashboardCard extends StatelessWidget {
-  final String title;
-  final String iconName;
-  final String? route;
-
-  const _DashboardCard({
-    required this.title,
-    required this.iconName,
-    this.route,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      elevation: 4,
-      child: InkWell(
-        onTap: () {
-          if (route != null) {
-            context.go(route!);
-          }
-        },
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              getIconFromRegistry(iconName) ??
-                  const Icon(Icons.dashboard, size: 48),
-              const SizedBox(height: 16),
-              Text(
-                title,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }

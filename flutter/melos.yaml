@@ -24,6 +24,8 @@ packages:
   - packages/growerp_activity/example
   - packages/growerp_marketing
   - packages/growerp_marketing/example
+  - packages/growerp_outreach
+  - packages/growerp_outreach/example
   - packages/growerp
   - packages/admin
   - packages/website

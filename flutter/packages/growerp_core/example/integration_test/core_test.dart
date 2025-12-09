@@ -18,6 +18,7 @@ import 'package:flutter/material.dart'; // For GlobalKey, NavigatorState
 import 'package:flutter_test/flutter_test.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:integration_test/integration_test.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
@@ -70,6 +71,10 @@ void main() {
       coreMenuConfig,
     ], rootNavigatorKey: GlobalKey<NavigatorState>());
 
+    // Create and seed MenuConfigBloc with the test configuration
+    final menuConfigBloc = MenuConfigBloc(restClient, 'core_example')
+      ..add(MenuConfigUpdateLocal(coreMenuConfig));
+
     await CommonTest.startTestApp(
       tester,
       router,
@@ -78,19 +83,21 @@ void main() {
       restClient: restClient,
       clear: true,
       title: "Core Test",
+      blocProviders: [
+        BlocProvider<MenuConfigBloc>.value(value: menuConfigBloc),
+      ],
     );
 
     await CommonTest.createCompanyAndAdmin(tester);
 
-    // Check specific specific widgets as checkCompanyAndAdmin expects AdminDbForm
-    SaveTest savedTest = await PersistFunctions.getTest();
+    // Check that menu option cards are displayed on the dashboard
+    // CoreDashboard shows cards for each menu option (excluding '/' and '/about')
     expect(find.text('Organization'), findsOneWidget);
-    expect(find.text(savedTest.company!.name!), findsWidgets);
-    expect(find.text('User'), findsOneWidget);
-    expect(
-      find.text('${savedTest.admin!.firstName} ${savedTest.admin!.lastName}'),
-      findsWidgets,
-    );
+    expect(find.text('Logged in User'), findsOneWidget);
+
+    // Verify we're authenticated (HomeFormAuth key should be present in logout button icon)
+    expect(find.byKey(const Key('HomeFormAuth')), findsOneWidget);
+
     await CommonTest.logout(tester);
   });
 }

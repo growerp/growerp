@@ -20,12 +20,7 @@ import 'package:growerp_models/growerp_models.dart';
 class TransactionTest {
   static Future<void> selectTransactions(WidgetTester tester) async {
     await CommonTest.selectOption(tester, 'dbAccounting', 'AcctDashBoard');
-    await CommonTest.selectOption(
-      tester,
-      'acctLedger',
-      'FinDocListTransaction',
-      '3',
-    );
+    await CommonTest.selectOption(tester, 'accounting/ledger', 'Transaction');
   }
 
   static Future<void> addTransactions(

@@ -57,12 +57,6 @@ flutter:
     - packages/growerp_core/images/growerpDark.jpg
     - packages/growerp_core/images/growerp100.png
     - packages/growerp_core/images/growerpDark100.png
-    - packages/growerp_core/images/single-bedGrey.png
-    - packages/growerp_core/images/single-bed.png
-    - packages/growerp_core/images/reservationGrey.png
-    - packages/growerp_core/images/reservation.png
-    - packages/growerp_core/images/check-in-outGrey.png
-    - packages/growerp_core/images/check-in-out.png
 
 flutter_intl:
   enabled: true

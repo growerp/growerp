@@ -188,9 +188,14 @@
   "@searchGlAccountHint": {
     "description": "Search hint for GL Accounts"
   },
-  "searchFinDoc": "Search Fin Doc",
+  "searchFinDoc": "Search {docType}",
   "@searchFinDoc": {
-    "description": "button label"
+    "description": "button label",
+    "placeholders": {
+      "docType": {
+        "type": "String"
+      }
+    }
   },
   "newRental": "New Reservation",
   "@newRental": {

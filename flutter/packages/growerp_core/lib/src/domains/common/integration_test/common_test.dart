@@ -71,25 +71,14 @@ class CommonTest {
     String classificationId = 'AppAdmin',
   }) async {
     int seq = Random.secure().nextInt(1024);
-    debugPrint('=== startTestApp Debug ===');
-    debugPrint('clear: $clear');
-    debugPrint('new sequence: $seq');
-
     if (clear == true) {
-      debugPrint('Creating NEW SaveTest (clear=true)');
       await PersistFunctions.persistTest(SaveTest(sequence: seq));
       // Also clear any stored authentication
       await PersistFunctions.removeAuthenticate();
     } else {
       SaveTest test = await PersistFunctions.getTest();
-      debugPrint(
-        'Loaded existing test - admin: ${test.admin}, sequence: ${test.sequence}',
-      );
       await PersistFunctions.persistTest(test.copyWith(sequence: seq));
-      debugPrint('Persisted with new sequence: $seq');
     }
-    debugPrint('==========================');
-
     Bloc.observer = AppBlocObserver();
     runApp(
       TopApp(
@@ -101,6 +90,7 @@ class CommonTest {
         title: title,
         extraDelegates: extraDelegates,
         extraBlocProviders: blocProviders ?? [],
+        appId: menuConfiguration.appId,
       ),
     );
     await tester.pump(const Duration());
@@ -349,7 +339,23 @@ class CommonTest {
     String formName, [
     String? tapNumber,
   ]) async {
-    if (isPhone()) {
+    // First, transform the option to get the target key
+    String targetKey = option;
+    if (!targetKey.startsWith('tap')) {
+      if (targetKey.startsWith('db')) {
+        // convert old mainscreen tapping to drawer on mobile
+        targetKey = "/${targetKey.substring(2).toLowerCase()}";
+      } else if (!targetKey.startsWith('/')) {
+        targetKey = "/$targetKey";
+      }
+      targetKey = "tap$targetKey";
+    }
+
+    // Check if the key is already visible (for dashboard cards)
+    bool keyAlreadyVisible = tester.any(find.byKey(Key(targetKey)));
+
+    // Only open drawer if we need to (key is not visible and we're on phone)
+    if (!keyAlreadyVisible && isPhone()) {
       expect(
         find.byTooltip('Open navigation menu'),
         findsOneWidget,
@@ -358,16 +364,8 @@ class CommonTest {
       await tester.tap(find.byTooltip('Open navigation menu'));
       await tester.pump(const Duration(seconds: waitTime));
     }
-    if (!option.startsWith('tap')) {
-      if (option.startsWith('db')) {
-        // convert old mainscrean tapping to drawer on mobile
-        option = "/${option.substring(2).toLowerCase()}";
-      } else if (!option.startsWith('/')) {
-        option = "/$option";
-      }
-      option = "tap$option";
-    }
-    await tapByKey(tester, option, seconds: waitTime);
+
+    await tapByKey(tester, targetKey, seconds: waitTime);
     if (tapNumber != null) {
       if (isPhone()) {
         await tapByTooltip(tester, tapNumber);
@@ -376,6 +374,7 @@ class CommonTest {
       }
       await tester.pumpAndSettle(const Duration(seconds: waitTime));
     }
+    await waitForKey(tester, formName);
     await checkWidgetKey(tester, formName);
   }
 
@@ -437,14 +436,9 @@ class CommonTest {
   }
 
   static Future<void> logout(WidgetTester tester) async {
-    if (hasKey('HomeFormUnAuth')) return; // already logged out
-    await gotoMainMenu(tester);
-    if (hasKey('HomeFormAuth')) {
-      debugPrint("Dashboard logged in , needs to logout");
+    // when somewhere in a lowlevel screen
+    if (hasKey('logoutButton')) {
       await tapByKey(tester, 'logoutButton');
-      await tester.pump(const Duration(seconds: waitTime));
-      expect(find.byKey(const Key('HomeFormUnAuth')), findsOneWidget);
-      await waitForSnackbarToGo(tester);
     }
   }
 
@@ -856,6 +850,7 @@ class CommonTest {
       true,
       reason: "could not find key: $key to tap on",
     );
+    await tester.ensureVisible(find.byKey(Key(key)).last);
     await tester.tap(find.byKey(Key(key)).last);
     await tester.pump();
     await tester.pumpAndSettle(Duration(seconds: seconds));

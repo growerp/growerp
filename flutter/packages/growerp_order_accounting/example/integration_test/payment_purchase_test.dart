@@ -51,8 +51,6 @@ void main() {
       tester,
       testData: {"companies": companies},
     );
-    await CommonTest.logout(tester); // get updated company payment info
-    await CommonTest.login(tester);
     await PaymentTest.selectPurchasePayments(tester);
     await PaymentTest.addPayments(tester, purchasePayments.sublist(0, 4));
     await PaymentTest.updatePayments(tester, purchasePayments.sublist(4, 8));

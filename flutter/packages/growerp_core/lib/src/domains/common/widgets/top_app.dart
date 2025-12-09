@@ -155,6 +155,7 @@ class _TopAppState extends State<TopApp> {
                     }
                   },
                   child: MaterialApp.router(
+                    scaffoldMessengerKey: Constant.scaffoldMessengerKey,
                     title: widget.title,
                     locale: localeState.locale,
                     supportedLocales: const [
