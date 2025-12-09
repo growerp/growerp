@@ -7,4 +7,5 @@ docker/logs
 docker/nginx/html
 .env
 moqui/runtime/component/growerp-shopify/
+test_output**
 

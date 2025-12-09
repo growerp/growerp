@@ -182,7 +182,10 @@ GoRouter createDynamicAppRouter(
               actions: [
                 IconButton(
                   key: const Key('logoutButton'),
-                  icon: const Icon(Icons.do_not_disturb),
+                  icon: const Icon(
+                    Icons.do_not_disturb,
+                    key: Key('HomeFormAuth'),
+                  ),
                   tooltip: 'Logout',
                   onPressed: () {
                     context.read<AuthBloc>().add(const AuthLoggedOut());
@@ -227,7 +230,10 @@ GoRouter createDynamicAppRouter(
               actions: [
                 IconButton(
                   key: const Key('logoutButton'),
-                  icon: const Icon(Icons.do_not_disturb),
+                  icon: const Icon(
+                    Icons.do_not_disturb,
+                    key: Key('HomeFormAuth'),
+                  ),
                   onPressed: () {
                     context.read<AuthBloc>().add(const AuthLoggedOut());
                   },
@@ -265,7 +271,10 @@ GoRouter createDynamicAppRouter(
               actions: [
                 IconButton(
                   key: const Key('logoutButton'),
-                  icon: const Icon(Icons.do_not_disturb),
+                  icon: const Icon(
+                    Icons.do_not_disturb,
+                    key: Key('HomeFormAuth'),
+                  ),
                   onPressed: () {
                     context.read<AuthBloc>().add(const AuthLoggedOut());
                   },

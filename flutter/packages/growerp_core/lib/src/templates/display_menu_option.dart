@@ -384,7 +384,13 @@ class DisplayMenuOptionState extends State<DisplayMenuOption>
         floatingActionButton: _buildAiFab(),
         body: BlocListener<NotificationBloc, NotificationState>(
           listener: _handleNotifications,
-          child: widget.child ?? const SizedBox.shrink(),
+          child: Column(
+            children: [
+              Expanded(child: widget.child ?? const SizedBox.shrink()),
+              // Hidden API key and session token for integration testing
+              _buildHiddenTestWidgets(),
+            ],
+          ),
         ),
       ),
     );
@@ -468,21 +474,29 @@ class DisplayMenuOptionState extends State<DisplayMenuOption>
         floatingActionButton: _buildAiFab(),
         body: BlocListener<NotificationBloc, NotificationState>(
           listener: _handleNotifications,
-          child: isPhone
-              ? (widget.child ?? const SizedBox.shrink())
-              : TabBarView(
-                  physics: const NeverScrollableScrollPhysics(),
-                  controller: _controller,
-                  children: List.generate(tabItems.length, (index) {
-                    if (widget.tabWidgetLoader != null) {
-                      return widget.tabWidgetLoader!(
-                        tabItems[index].widgetName ?? 'Unknown',
-                        {},
-                      );
-                    }
-                    return widget.child ?? const SizedBox.shrink();
-                  }),
-                ),
+          child: Column(
+            children: [
+              Expanded(
+                child: isPhone
+                    ? (widget.child ?? const SizedBox.shrink())
+                    : TabBarView(
+                        physics: const NeverScrollableScrollPhysics(),
+                        controller: _controller,
+                        children: List.generate(tabItems.length, (index) {
+                          if (widget.tabWidgetLoader != null) {
+                            return widget.tabWidgetLoader!(
+                              tabItems[index].widgetName ?? 'Unknown',
+                              {},
+                            );
+                          }
+                          return widget.child ?? const SizedBox.shrink();
+                        }),
+                      ),
+              ),
+              // Hidden API key and session token for integration testing
+              _buildHiddenTestWidgets(),
+            ],
+          ),
         ),
       ),
     );
@@ -536,6 +550,37 @@ class DisplayMenuOptionState extends State<DisplayMenuOption>
     }
 
     return aiFab;
+  }
+
+  /// Build hidden widgets for integration testing
+  /// These display API key and session token with font size 0
+  /// so they're accessible to WidgetTester but invisible to users
+  Widget _buildHiddenTestWidgets() {
+    if (kReleaseMode) {
+      return const SizedBox.shrink();
+    }
+
+    final authenticate = authBloc.state.authenticate;
+    if (authenticate?.apiKey == null) {
+      return const SizedBox.shrink();
+    }
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          authenticate!.apiKey!,
+          key: const Key('apiKey'),
+          style: const TextStyle(fontSize: 0),
+        ),
+        if (authenticate.moquiSessionToken != null)
+          Text(
+            authenticate.moquiSessionToken!,
+            key: const Key('moquiSessionToken'),
+            style: const TextStyle(fontSize: 0),
+          ),
+      ],
+    );
   }
 
   void _handleNotifications(BuildContext context, NotificationState state) {

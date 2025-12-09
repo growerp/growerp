@@ -139,10 +139,23 @@ GoRouter createOrderAccountingExampleRouter() {
         builder: (context, state) {
           final authState = context.watch<AuthBloc>().state;
           if (authState.status == AuthStatus.authenticated) {
-            return const DisplayMenuOption(
+            return DisplayMenuOption(
               menuConfiguration: orderAccountingMenuConfig,
               menuIndex: 0,
-              child: OrderAccountingDashboard(),
+              actions: [
+                IconButton(
+                  key: const Key('logoutButton'),
+                  icon: const Icon(
+                    Icons.do_not_disturb,
+                    key: Key('HomeFormAuth'),
+                  ),
+                  tooltip: 'Logout',
+                  onPressed: () {
+                    context.read<AuthBloc>().add(const AuthLoggedOut());
+                  },
+                ),
+              ],
+              child: const OrderAccountingDashboard(),
             );
           } else {
             return const HomeForm(
@@ -185,6 +198,19 @@ GoRouter createOrderAccountingExampleRouter() {
           return DisplayMenuOption(
             menuConfiguration: orderAccountingMenuConfig,
             menuIndex: menuIndex,
+            actions: [
+              IconButton(
+                key: const Key('logoutButton'),
+                icon: const Icon(
+                  Icons.do_not_disturb,
+                  key: Key('HomeFormAuth'),
+                ),
+                tooltip: 'Logout',
+                onPressed: () {
+                  context.read<AuthBloc>().add(const AuthLoggedOut());
+                },
+              ),
+            ],
             child: child,
           );
         },
@@ -218,9 +244,28 @@ GoRouter createOrderAccountingExampleRouter() {
                 ),
               ),
               GoRoute(
+                path: 'sales_payments',
+                builder: (context, state) => const FinDocList(
+                  key: Key('SalesPayment'),
+                  sales: true,
+                  docType: FinDocType.payment,
+                ),
+              ),
+              GoRoute(
+                path: 'purchase_payments',
+                builder: (context, state) => const FinDocList(
+                  key: Key('PurchasePayment'),
+                  sales: false,
+                  docType: FinDocType.payment,
+                ),
+              ),
+              GoRoute(
                 path: 'ledger',
-                builder: (context, state) =>
-                    const Center(child: Text("Ledger")),
+                builder: (context, state) => const FinDocList(
+                  key: Key('Transaction'),
+                  sales: true,
+                  docType: FinDocType.transaction,
+                ),
               ),
               GoRoute(
                 path: 'reports',
@@ -358,23 +403,37 @@ class _DashboardCard extends StatelessWidget {
           padding: const EdgeInsets.all(16.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
             children: [
-              getIconFromRegistry(iconName) ??
-                  const Icon(Icons.dashboard, size: 48),
-              const SizedBox(height: 16),
-              Text(
-                title,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
+              Flexible(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child:
+                      getIconFromRegistry(iconName) ??
+                      const Icon(Icons.dashboard, size: 48),
                 ),
               ),
               const SizedBox(height: 8),
-              Text(
-                stats,
-                style: Theme.of(context).textTheme.bodySmall,
-                textAlign: TextAlign.center,
+              Flexible(
+                child: Text(
+                  title,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Flexible(
+                child: Text(
+                  stats,
+                  style: Theme.of(context).textTheme.bodySmall,
+                  textAlign: TextAlign.center,
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 2,
+                ),
               ),
             ],
           ),

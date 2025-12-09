@@ -12,14 +12,12 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 import 'package:growerp_core/l10n/generated/core_localizations.dart';
-import '../../../templates/templates.dart';
 import '../../domains.dart';
 
 class HomeForm extends StatefulWidget {
@@ -89,66 +87,16 @@ class HomeFormState extends State<HomeForm> {
         }
       },
       builder: (context, state) {
-        // Hidden text widgets for integration tests to access API keys
-        // These are needed in both authenticated and certain unAuthenticated states
-        // (e.g., when apiKey is 'paymentFirst', 'moreInfo', etc.)
-        Widget hiddenApiKeyWidgets() {
-          if (!kReleaseMode && state.authenticate?.apiKey != null) {
-            return Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  state.authenticate!.apiKey!,
-                  key: const Key('apiKey'),
-                  style: const TextStyle(fontSize: 0),
-                ),
-                if (state.authenticate?.moquiSessionToken != null)
-                  Text(
-                    state.authenticate!.moquiSessionToken!,
-                    key: const Key('moquiSessionToken'),
-                    style: const TextStyle(fontSize: 0),
-                  ),
-              ],
-            );
-          }
-          return const SizedBox.shrink();
-        }
-
         switch (state.status) {
           case AuthStatus.authenticated:
-            return Column(
-              children: [
-                Expanded(
-                  child: DisplayMenuOption(
-                    menuConfiguration: widget.menuConfiguration,
-                    menuIndex: 0,
-                    actions: <Widget>[
-                      if (state.authenticate?.apiKey != null)
-                        IconButton(
-                          key: const Key('logoutButton'),
-                          padding: EdgeInsets.zero,
-                          icon: const Icon(
-                            Icons.do_not_disturb,
-                            key: Key('HomeFormAuth'),
-                          ),
-                          tooltip: _localizations!.logout,
-                          onPressed: () => {
-                            _authBloc.add(const AuthLoggedOut()),
-                          },
-                        ),
-                    ],
-                  ),
-                ),
-                hiddenApiKeyWidgets(),
-                appInfo,
-              ],
+            return const Text(
+              "should never show because this form is only used for non authenticated",
             );
           case AuthStatus.failure:
           case AuthStatus.unAuthenticated:
             ThemeMode? themeMode = context.read<ThemeBloc>().state.themeMode;
             return Column(
               children: [
-                hiddenApiKeyWidgets(),
                 Expanded(
                   child: ScaffoldMessenger(
                     child: Scaffold(

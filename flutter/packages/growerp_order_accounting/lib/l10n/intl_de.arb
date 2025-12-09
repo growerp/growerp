@@ -42,7 +42,7 @@
   "onlyUsed": "nur gebraucht",
   "fetchPaymentTypesFail": "Zahlungsarten konnten nicht abgerufen werden: ",
   "search": "Suchen",
-  "searchFinDoc": "Finanzdokument suchen",
+  "searchFinDoc": "{docType} suchen",
   "newRental": "Neue Reservierung",
   "sales": "Verkauf",
   "purchase": "Kaufen",

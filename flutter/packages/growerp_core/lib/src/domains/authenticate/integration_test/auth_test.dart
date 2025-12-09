@@ -21,8 +21,11 @@ class AuthTest {
   //===============================high level tests ============================
 
   static Future<void> createNewAdminAndCompany(
-      WidgetTester tester, User user, Company company) async {
-    await logoutIfRequired(tester);
+    WidgetTester tester,
+    User user,
+    Company company,
+  ) async {
+    await CommonTest.logout(tester);
     await CommonTest.checkText(tester, 'Login / New company'); // initial screen
     await pressNewCompany(tester);
     await enterFirstName(tester, user.firstName!);
@@ -33,11 +36,20 @@ class AuthTest {
     await CommonTest.drag(tester, seconds: 10);
     await clearDemoData(tester);
     await CommonTest.drag(tester, seconds: CommonTest.waitTime);
-    await pressRegisterAndcreateNewAdminAndCompany(tester);
+    await CommonTest.tapByKey(
+      tester,
+      'newCompany',
+      seconds: CommonTest.waitTime,
+    );
+    await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
+    await tester.pumpAndSettle();
   }
 
   static Future<void> login(
-      WidgetTester tester, String loginName, String password) async {
+    WidgetTester tester,
+    String loginName,
+    String password,
+  ) async {
     await pressLoginWithExistingId(tester);
     await enterLoginName(tester, loginName);
     await enterPassword(tester, password);
@@ -46,19 +58,15 @@ class AuthTest {
   }
 
   static Future<void> loginIfRequired(
-      WidgetTester tester, String loginName, String password) async {
+    WidgetTester tester,
+    String loginName,
+    String password,
+  ) async {
     try {
       expect(find.byKey(const Key('HomeFormAuth')), findsOneWidget);
     } catch (_) {
       await login(tester, loginName, password);
     }
-  }
-
-  static Future<void> logout(WidgetTester tester) async {
-    await gotoMainMenu(tester);
-    await CommonTest.tapByKey(tester, 'logoutButton',
-        seconds: CommonTest.waitTime);
-    await CommonTest.checkWidgetKey(tester, 'HomeFormUnAuth');
   }
 
   // ===============================low level tests ============================
@@ -76,32 +84,44 @@ class AuthTest {
   }
 
   static Future<void> enterCurrency(
-      WidgetTester tester, Currency currency) async {
+    WidgetTester tester,
+    Currency currency,
+  ) async {
     await CommonTest.selectDropDown(tester, 'currency', currency.description!);
   }
 
   static Future<void> enterEmailAddress(
-      WidgetTester tester, String emailAddress) async {
+    WidgetTester tester,
+    String emailAddress,
+  ) async {
     await CommonTest.enterText(tester, 'email', emailAddress);
   }
 
   static Future<void> enterFirstName(
-      WidgetTester tester, String firstName) async {
+    WidgetTester tester,
+    String firstName,
+  ) async {
     await CommonTest.enterText(tester, 'firstName', firstName);
   }
 
   static Future<void> enterLastname(
-      WidgetTester tester, String lastName) async {
+    WidgetTester tester,
+    String lastName,
+  ) async {
     await CommonTest.enterText(tester, 'lastName', lastName);
   }
 
   static Future<void> enterLoginName(
-      WidgetTester tester, String loginName) async {
+    WidgetTester tester,
+    String loginName,
+  ) async {
     await CommonTest.enterText(tester, 'username', loginName);
   }
 
   static Future<void> enterPassword(
-      WidgetTester tester, String password) async {
+    WidgetTester tester,
+    String password,
+  ) async {
     await CommonTest.enterText(tester, 'password', password);
   }
 
@@ -113,26 +133,7 @@ class AuthTest {
     await CommonTest.tapByKey(tester, 'login', seconds: CommonTest.waitTime);
   }
 
-  static Future<void> logoutIfRequired(WidgetTester tester) async {
-    try {
-      expect(find.byKey(const Key('HomeFormUnAuth')), findsOneWidget);
-    } catch (_) {
-      // assumes still logged in, so logout
-      await CommonTest.tapByKey(tester, 'logoutButton');
-      await tester.pump(const Duration(seconds: CommonTest.waitTime));
-      expect(find.byKey(const Key('HomeFormUnAuth')), findsOneWidget);
-    }
-  }
-
   static Future<void> pressNewCompany(WidgetTester tester) async {
     await CommonTest.tapByKey(tester, 'newCompButton');
-  }
-
-  static Future<void> pressRegisterAndcreateNewAdminAndCompany(
-      WidgetTester tester) async {
-    await CommonTest.tapByKey(tester, 'newCompany',
-        seconds: CommonTest.waitTime);
-    await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
-    await tester.pumpAndSettle();
   }
 }

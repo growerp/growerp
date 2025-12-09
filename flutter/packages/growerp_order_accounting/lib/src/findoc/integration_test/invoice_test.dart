@@ -22,14 +22,16 @@ class InvoiceTest {
   static Future<void> selectPurchaseInvoices(WidgetTester tester) async {
     await CommonTest.selectOption(tester, 'dbAccounting', 'AcctDashBoard');
     await CommonTest.selectOption(
-        tester, 'acctPurchase', 'FinDocListPurchaseInvoice');
+      tester,
+      'accounting/purchase',
+      'PurchaseInvoice',
+    );
     await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
   }
 
   static Future<void> selectSalesInvoices(WidgetTester tester) async {
     await CommonTest.selectOption(tester, 'dbAccounting', 'AcctDashBoard');
-    await CommonTest.selectOption(
-        tester, 'acctSales', 'FinDocListSalesInvoice');
+    await CommonTest.selectOption(tester, 'accounting/sales', 'SalesInvoice');
   }
 
   static Future<void> addInvoices(
@@ -41,7 +43,9 @@ class InvoiceTest {
   }
 
   static Future<void> updateInvoices(
-      WidgetTester tester, List<FinDoc> newFinDocs) async {
+    WidgetTester tester,
+    List<FinDoc> newFinDocs,
+  ) async {
     await FinDocTest.updateFinDocData(tester, newFinDocs);
   }
 
@@ -58,18 +62,28 @@ class InvoiceTest {
   }
 
   static Future<void> approveInvoicePayments(WidgetTester tester) async {
-    await FinDocTest.changeStatusFinDocs(tester, FinDocType.invoice,
-        subType: FinDocType.payment);
+    await FinDocTest.changeStatusFinDocs(
+      tester,
+      FinDocType.invoice,
+      subType: FinDocType.payment,
+    );
   }
 
   static Future<void> completeInvoicePayments(WidgetTester tester) async {
-    await FinDocTest.changeStatusFinDocs(tester, FinDocType.invoice,
-        subType: FinDocType.payment, status: FinDocStatusVal.completed);
+    await FinDocTest.changeStatusFinDocs(
+      tester,
+      FinDocType.invoice,
+      subType: FinDocType.payment,
+      status: FinDocStatusVal.completed,
+    );
   }
 
   static Future<void> checkInvoicePaymentsComplete(WidgetTester tester) async {
-    await FinDocTest.checkFinDocsComplete(tester, FinDocType.invoice,
-        subType: FinDocType.payment);
+    await FinDocTest.checkFinDocsComplete(
+      tester,
+      FinDocType.invoice,
+      subType: FinDocType.payment,
+    );
   }
 
   /// check if the purchase process has been completed successfuly

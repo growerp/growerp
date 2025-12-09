@@ -42,7 +42,7 @@
   "onlyUsed": "仅已用",
   "fetchPaymentTypesFail": "获取支付类型失败：",
   "search": "搜索",
-  "searchFinDoc": "搜索财务单据",
+  "searchFinDoc": "搜索 {docType}",
   "newRental": "新建预订",
   "sales": "销售",
   "purchase": "采购",

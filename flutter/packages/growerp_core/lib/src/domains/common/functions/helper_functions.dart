@@ -29,7 +29,13 @@ class HelperFunctions {
   }) {
     if (message != null && message != "null") {
       try {
-        final messenger = ScaffoldMessenger.of(context);
+        final messenger =
+            ScaffoldMessenger.maybeOf(context) ??
+            Constant.scaffoldMessengerKey.currentState;
+        if (messenger == null) {
+          debugPrint('SnackBar not shown - no Scaffold available: $message');
+          return;
+        }
         messenger.hideCurrentSnackBar();
 
         final controller = messenger.showSnackBar(
@@ -58,7 +64,14 @@ class HelperFunctions {
     Duration? duration,
   }) {
     try {
-      ScaffoldMessenger.of(context).showSnackBar(
+      final messenger =
+          ScaffoldMessenger.maybeOf(context) ??
+          Constant.scaffoldMessengerKey.currentState;
+      if (messenger == null) {
+        debugPrint('TopMessage not shown - no Scaffold available: $message');
+        return;
+      }
+      messenger.showSnackBar(
         SnackBar(
           dismissDirection: DismissDirection.up,
           duration: duration ?? const Duration(milliseconds: 3000),

@@ -23,24 +23,34 @@ class PaymentTest {
   static Future<void> selectPurchasePayments(WidgetTester tester) async {
     await CommonTest.selectOption(tester, 'dbAccounting', 'AcctDashBoard');
     await CommonTest.selectOption(
-        tester, 'acctPurchase', 'FinDocListPurchasePayment', '2');
+      tester,
+      'accounting/purchase_payments',
+      'PurchasePayment',
+    );
   }
 
   static Future<void> selectSalesPayments(WidgetTester tester) async {
     await CommonTest.selectOption(tester, 'dbAccounting', 'AcctDashBoard');
     await CommonTest.selectOption(
-        tester, 'acctSales', 'FinDocListSalesPayment', '2');
+      tester,
+      'accounting/sales_payments',
+      'SalesPayment',
+    );
   }
 
-  static Future<void> addPayments(WidgetTester tester, List<FinDoc> payments,
-      {bool check = true}) async {
+  static Future<void> addPayments(
+    WidgetTester tester,
+    List<FinDoc> payments, {
+    bool check = true,
+  }) async {
     SaveTest test = await PersistFunctions.getTest();
     // test = test.copyWith(payments: []); //======= remove
     // await PersistFunctions.persistTest(test); //=====remove
     if (test.payments.isEmpty) {
       // not yet created
       await PersistFunctions.persistTest(
-          test.copyWith(payments: await enterPaymentData(tester, payments)));
+        test.copyWith(payments: await enterPaymentData(tester, payments)),
+      );
     }
     if (check) {
       await checkPayment(tester, test.payments);
@@ -48,15 +58,18 @@ class PaymentTest {
   }
 
   static Future<void> updatePayments(
-      WidgetTester tester, List<FinDoc> payments) async {
+    WidgetTester tester,
+    List<FinDoc> payments,
+  ) async {
     SaveTest test = await PersistFunctions.getTest();
     var newPayments = List.of(test.payments);
     if (newPayments[0].grandTotal != payments[0].grandTotal) {
       // copy new payment data with paymentId
       for (int x = 0; x < test.payments.length; x++) {
         newPayments[x] = payments[x].copyWith(
-            paymentId: test.payments[x].paymentId,
-            pseudoId: test.payments[x].paymentId);
+          paymentId: test.payments[x].paymentId,
+          pseudoId: test.payments[x].paymentId,
+        );
       }
       // update existing records, no need to use return data
       await enterPaymentData(tester, newPayments);
@@ -66,25 +79,40 @@ class PaymentTest {
   }
 
   static Future<List<FinDoc>> enterPaymentData(
-      WidgetTester tester, List<FinDoc> payments) async {
+    WidgetTester tester,
+    List<FinDoc> payments,
+  ) async {
     List<FinDoc> newPayments = [];
     for (FinDoc payment in payments) {
       if (payment.paymentId == null) {
         await CommonTest.tapByKey(tester, 'addNew');
       } else {
         await CommonTest.doNewSearch(tester, searchString: payment.paymentId!);
-        expect(CommonTest.getTextField('topHeader').split('#')[1],
-            payment.paymentId,
-            reason: 'found different detail than was searched for');
+        expect(
+          CommonTest.getTextField('topHeader').split('#')[1],
+          payment.paymentId,
+          reason: 'found different detail than was searched for',
+        );
       }
       await CommonTest.checkWidgetKey(
-          tester, "PaymentDialog${payment.sales ? 'Sales' : 'Purchase'}");
-      await CommonTest.enterDropDownSearch(tester,
-          payment.sales ? 'customer' : 'supplier', payment.otherCompany!.name!);
-      await CommonTest.enterText(tester, 'amount',
-          payment.grandTotal!.toString()); // required because keyboard come up
+        tester,
+        "PaymentDialog${payment.sales ? 'Sales' : 'Purchase'}",
+      );
+      await CommonTest.enterDropDownSearch(
+        tester,
+        payment.sales ? 'customer' : 'supplier',
+        payment.otherCompany!.name!,
+      );
+      await CommonTest.enterText(
+        tester,
+        'amount',
+        payment.grandTotal!.toString(),
+      ); // required because keyboard come up
       await CommonTest.enterDropDown(
-          tester, 'paymentType', payment.items[0].paymentType!.accountCode);
+        tester,
+        'paymentType',
+        payment.items[0].paymentType!.accountCode,
+      );
       switch (payment.paymentInstrument) {
         case PaymentInstrument.bank:
           await CommonTest.tapByKey(tester, 'bank');
@@ -102,28 +130,41 @@ class PaymentTest {
       }
       await CommonTest.tapByKey(tester, 'update', seconds: CommonTest.waitTime);
       await CommonTest.waitForSnackbarToGo(tester);
-      newPayments
-          .add(payment.copyWith(paymentId: CommonTest.getTextField('id0')));
+      newPayments.add(
+        payment.copyWith(paymentId: CommonTest.getTextField('id0')),
+      );
     }
     return newPayments;
   }
 
   static Future<void> checkPayment(
-      WidgetTester tester, List<FinDoc> payments) async {
+    WidgetTester tester,
+    List<FinDoc> payments,
+  ) async {
     for (FinDoc payment in payments) {
-      await CommonTest.doNewSearch(tester,
-          searchString: payment.paymentId!, seconds: CommonTest.waitTime);
+      await CommonTest.doNewSearch(
+        tester,
+        searchString: payment.paymentId!,
+        seconds: CommonTest.waitTime,
+      );
       expect(
-          CommonTest.getDropdownSearch(payment.sales ? 'customer' : 'supplier'),
-          equals(payment.otherCompany!.name));
-      expect(CommonTest.getDropdown('statusDropDown'),
-          equals(FinDocStatusVal.created.name));
+        CommonTest.getDropdownSearch(payment.sales ? 'customer' : 'supplier'),
+        equals(payment.otherCompany!.name),
+      );
       expect(
-          find.byKey(Key(
-              'PaymentDialog${payment.sales == true ? "Sales" : "Purchase"}')),
-          findsOneWidget);
-      expect(CommonTest.getTextFormField('amount'),
-          equals(payment.grandTotal.currency(currencyId: '')));
+        CommonTest.getDropdown('statusDropDown'),
+        equals(FinDocStatusVal.created.name),
+      );
+      expect(
+        find.byKey(
+          Key('PaymentDialog${payment.sales == true ? "Sales" : "Purchase"}'),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        CommonTest.getTextFormField('amount'),
+        equals(payment.grandTotal.currency(currencyId: '')),
+      );
       switch (payment.paymentInstrument) {
         case PaymentInstrument.creditcard:
           expect(CommonTest.getCheckbox('creditCard'), equals(true));
@@ -149,8 +190,8 @@ class PaymentTest {
     List<FinDoc> payments = test.orders.isNotEmpty
         ? test.orders
         : test.invoices.isNotEmpty
-            ? test.invoices
-            : test.payments;
+        ? test.invoices
+        : test.payments;
     List<FinDoc> finDocs = [];
     for (FinDoc payment in payments) {
       await CommonTest.doNewSearch(tester, searchString: payment.id()!);
@@ -185,20 +226,28 @@ class PaymentTest {
 
   /// complete/post a payment related to an order
   static Future<void> completePayments(WidgetTester tester) async {
-    await FinDocTest.changeStatusFinDocs(tester, FinDocType.payment,
-        status: FinDocStatusVal.completed);
+    await FinDocTest.changeStatusFinDocs(
+      tester,
+      FinDocType.payment,
+      status: FinDocStatusVal.completed,
+    );
   }
 
   /// check if a payment related to an order  has the status complete
   static Future<void> checkPaymentsComplete(WidgetTester tester) async {
     await FinDocTest.checkFinDocsComplete(tester, FinDocType.payment);
     // check if have transactions generated
-    List<FinDoc> transactions =
-        await FinDocTest.getFinDocs(FinDocType.transaction);
+    List<FinDoc> transactions = await FinDocTest.getFinDocs(
+      FinDocType.transaction,
+    );
     List<FinDoc> payments = await FinDocTest.getFinDocs(FinDocType.payment);
-    expect(payments.length, transactions.length,
-        reason: "#transactions(${transactions.length}) should be the same "
-            "as #payments(${payments.length}");
+    expect(
+      payments.length,
+      transactions.length,
+      reason:
+          "#transactions(${transactions.length}) should be the same "
+          "as #payments(${payments.length}",
+    );
   }
 
   /// cancel a payment

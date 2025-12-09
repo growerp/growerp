@@ -101,7 +101,9 @@ class FinDocSearchDialog extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: popUp(
         context: context,
-        title: local.searchFinDoc,
+        title: local.searchFinDoc(
+          widget.docType.toString().split('.').last.capitalize(),
+        ),
         height: 500,
         width: 350,
         child: Column(

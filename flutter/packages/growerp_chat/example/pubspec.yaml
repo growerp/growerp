@@ -30,10 +30,6 @@ flutter:
 
   assets:
     - assets/cfg/
-    - packages/growerp_core/images/dashBoard.png
-    - packages/growerp_core/images/dashBoardGrey.png
-    - packages/growerp_core/images/company.png
-    - packages/growerp_core/images/companyGrey.png
     - packages/growerp_core/images/growerp.jpg
     - packages/growerp_core/images/growerpDark.jpg
     - packages/growerp_core/images/growerp100.png

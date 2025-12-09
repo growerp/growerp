@@ -42,7 +42,7 @@
   "onlyUsed": "uniquement utilisé",
   "fetchPaymentTypesFail": "échec de la récupération des types de paiement : ",
   "search": "Rechercher",
-  "searchFinDoc": "Rechercher un document financier",
+  "searchFinDoc": "Rechercher {docType}",
   "newRental": "Nouvelle réservation",
   "sales": "Ventes",
   "purchase": "Achat",

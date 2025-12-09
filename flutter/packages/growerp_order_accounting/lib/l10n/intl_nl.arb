@@ -42,7 +42,7 @@
   "onlyUsed": "alleen gebruikt",
   "fetchPaymentTypesFail": "ophalen van betaalmethoden mislukt: ",
   "search": "Zoeken",
-  "searchFinDoc": "Financieel document zoeken",
+  "searchFinDoc": "{docType} zoeken",
   "newRental": "Nieuwe reservering",
   "sales": "Verkoop",
   "purchase": "Inkoop",
