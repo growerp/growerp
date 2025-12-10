@@ -21,19 +21,21 @@ import 'integration_test.dart';
 
 class PaymentTest {
   static Future<void> selectPurchasePayments(WidgetTester tester) async {
-    await CommonTest.selectOption(tester, 'dbAccounting', 'AcctDashBoard');
+    // Navigate to accounting dashboard first, then purchase payments
+    await CommonTest.selectOption(tester, '/accounting', 'AcctDashBoard');
     await CommonTest.selectOption(
       tester,
-      'accounting/purchase_payments',
+      '/accounting/purchase_payments',
       'PurchasePayment',
     );
   }
 
   static Future<void> selectSalesPayments(WidgetTester tester) async {
-    await CommonTest.selectOption(tester, 'dbAccounting', 'AcctDashBoard');
+    // Navigate to accounting dashboard first, then sales payments
+    await CommonTest.selectOption(tester, '/accounting', 'AcctDashBoard');
     await CommonTest.selectOption(
       tester,
-      'accounting/sales_payments',
+      '/accounting/sales_payments',
       'SalesPayment',
     );
   }

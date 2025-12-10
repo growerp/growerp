@@ -134,6 +134,7 @@ class _FreelanceAppState extends State<FreelanceApp> {
               config: DynamicRouterConfig(
                 mainConfigId: 'FREELANCE_DEFAULT',
                 accountingRootOptionId: 'FREELANCE_ACCOUNTING',
+                hasAccountingSubmenu: true,
                 dashboardBuilder: () => const FreelanceDbForm(),
                 widgetLoader: WidgetRegistry.getWidget,
                 appTitle: 'GrowERP Freelance',

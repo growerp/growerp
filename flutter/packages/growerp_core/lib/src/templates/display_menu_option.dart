@@ -164,7 +164,10 @@ class DisplayMenuOptionState extends State<DisplayMenuOption>
             .toList()
           ..sort((a, b) => (a.sequenceNum ?? 0).compareTo(b.sequenceNum ?? 0));
 
-    title = menuOption.title;
+    title = HelperFunctions.translateMenuTitle(
+      _localizations!,
+      menuOption.title,
+    );
 
     // Determine the initial tab index
     tabIndex = widget.tabIndex ?? 0;
@@ -425,7 +428,10 @@ class DisplayMenuOptionState extends State<DisplayMenuOption>
                           (item) => Tab(
                             height: 30,
                             key: Key('tab_${item.menuItemId}'),
-                            text: item.title,
+                            text: HelperFunctions.translateMenuTitle(
+                              _localizations!,
+                              item.title,
+                            ),
                           ),
                         )
                         .toList(),
@@ -448,7 +454,7 @@ class DisplayMenuOptionState extends State<DisplayMenuOption>
           actions: actions,
         ),
         drawer: myDrawer(context, isPhone, menuList),
-        bottomNavigationBar: isPhone
+        bottomNavigationBar: isPhone && tabItems.length >= 2
             ? BottomNavigationBar(
                 type: BottomNavigationBarType.fixed,
                 items: tabItems
@@ -457,7 +463,10 @@ class DisplayMenuOptionState extends State<DisplayMenuOption>
                         icon:
                             getIconFromRegistry(item.iconName) ??
                             const Icon(Icons.circle),
-                        label: item.title.replaceAll('\n', ' '),
+                        label: HelperFunctions.translateMenuTitle(
+                          _localizations!,
+                          item.title,
+                        ).replaceAll('\n', ' '),
                       ),
                     )
                     .toList(),

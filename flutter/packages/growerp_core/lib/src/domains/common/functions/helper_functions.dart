@@ -18,6 +18,7 @@ import 'package:flutter/material.dart';
 import 'package:image/image.dart' as image;
 import 'package:universal_io/io.dart';
 import 'package:http/http.dart' show get;
+import 'package:growerp_core/l10n/generated/core_localizations.dart';
 import '../../domains.dart';
 
 class HelperFunctions {
@@ -127,6 +128,62 @@ class HelperFunctions {
       return imageData;
     } else {
       return null;
+    }
+  }
+
+  static String translateMenuTitle(
+    CoreLocalizations localizations,
+    String key,
+  ) {
+    switch (key) {
+      case 'customers':
+        return localizations.customers;
+      case 'suppliers':
+        return localizations.suppliers;
+      case 'salesOrders':
+        return localizations.salesOrders;
+      case 'purchaseOrders':
+        return localizations.purchaseOrders;
+      case 'employees':
+        return localizations.employees;
+      case 'leads':
+        return localizations.leads;
+      case 'reservations':
+        return localizations.reservations;
+      case 'subscriptions':
+        return localizations.subscriptions;
+      case 'setUp':
+        return localizations.setUp;
+      case 'transactions':
+        return localizations.transactions;
+      case 'ledgerTransaction':
+        return localizations.ledgerTransaction;
+      case 'incomingPayments':
+        return localizations.incomingPayments;
+      case 'outgoingPayments':
+        return localizations.outgoingPayments;
+      case 'company':
+        return localizations.company;
+      case 'about':
+        return localizations.about;
+      case 'main':
+        return localizations.main;
+      case 'organization':
+        return localizations.organization;
+      case 'reports':
+        return localizations.reports;
+      case 'crm':
+        return localizations.crm;
+      case 'catalog':
+        return localizations.catalog;
+      case 'orders':
+        return localizations.orders;
+      case 'inventory':
+        return localizations.inventory;
+      case 'accounting':
+        return localizations.accounting;
+      default:
+        return key;
     }
   }
 }

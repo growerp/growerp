@@ -198,19 +198,7 @@ GoRouter createOrderAccountingExampleRouter() {
           return DisplayMenuOption(
             menuConfiguration: orderAccountingMenuConfig,
             menuIndex: menuIndex,
-            actions: [
-              IconButton(
-                key: const Key('logoutButton'),
-                icon: const Icon(
-                  Icons.do_not_disturb,
-                  key: Key('HomeFormAuth'),
-                ),
-                tooltip: 'Logout',
-                onPressed: () {
-                  context.read<AuthBloc>().add(const AuthLoggedOut());
-                },
-              ),
-            ],
+            actions: const [],
             child: child,
           );
         },
@@ -288,7 +276,8 @@ GoRouter createOrderAccountingExampleRouter() {
           ),
           GoRoute(
             path: '/inventory',
-            builder: (context, state) => const LocationList(),
+            builder: (context, state) =>
+                const LocationList(key: Key('LocationList')),
           ),
           GoRoute(
             path: '/requests',

@@ -77,44 +77,44 @@ along with this software (see the LICENSE.md file). If not, see
     <growerp.menu.MenuItem menuItemId="PlanSelectionForm" title="Plan Selection" iconName="subscriptions" widgetName="PlanSelectionForm"/>
     <growerp.menu.MenuItem menuItemId="PlatformConfigListSc" title="Platforms" iconName="public" widgetName="PlatformConfigListScreen"/>
     <growerp.menu.MenuItem menuItemId="ProductList" title="Products" iconName="home" widgetName="ProductList"/>
-    <growerp.menu.MenuItem menuItemId="PurchaseInvoiceList" title="Purchase" iconName="shopping_bag" widgetName="PurchaseInvoiceList"/>
+    <growerp.menu.MenuItem menuItemId="PurchaseInvoiceList" title="Purchase Invoices" iconName="shopping_bag" widgetName="PurchaseInvoiceList"/>
     <growerp.menu.MenuItem menuItemId="PurchaseOrderList" title="Purchase orders" iconName="home" widgetName="PurchaseOrderList"/>
-    <growerp.menu.MenuItem menuItemId="PurchasePaymentList" title="Outgoing Payments" iconName="home" widgetName="PurchasePaymentList"/>
+    <growerp.menu.MenuItem menuItemId="PurchasePaymentList" title="Outgoing Payments" iconName="output" widgetName="PurchasePaymentList"/>
     <growerp.menu.MenuItem menuItemId="RevenueExpenseChart" title="Reports" iconName="assessment" widgetName="RevenueExpenseChart"/>
-    <growerp.menu.MenuItem menuItemId="SalesInvoiceList" title="Sales" iconName="shopping_cart" widgetName="SalesInvoiceList"/>
-    <growerp.menu.MenuItem menuItemId="SalesOrderList" title="Sales orders" iconName="home" widgetName="SalesOrderList"/>
-    <growerp.menu.MenuItem menuItemId="SalesOrderRentalList" title="Reservations" iconName="home" widgetName="SalesOrderRentalList"/>
-    <growerp.menu.MenuItem menuItemId="SalesPaymentList" title="Incoming Payments" iconName="home" widgetName="SalesPaymentList"/>
-    <growerp.menu.MenuItem menuItemId="ShowCompanyDialog" title="Company" iconName="home" widgetName="ShowCompanyDialog"/>
+    <growerp.menu.MenuItem menuItemId="SalesInvoiceList" title="Sales Invoices" iconName="shopping_cart" widgetName="SalesInvoiceList"/>
+    <growerp.menu.MenuItem menuItemId="SalesOrderList" title="salesOrders" iconName="home" widgetName="SalesOrderList"/>
+    <growerp.menu.MenuItem menuItemId="SalesOrderRentalList" title="reservations" iconName="home" widgetName="SalesOrderRentalList"/>
+    <growerp.menu.MenuItem menuItemId="SalesPaymentList" title="Incoming Payments" iconName="input" widgetName="SalesPaymentList"/>
+    <growerp.menu.MenuItem menuItemId="ShowCompanyDialog" title="company" iconName="home" widgetName="ShowCompanyDialog"/>
     <growerp.menu.MenuItem menuItemId="SocialPostList" title="Social Posts" iconName="share" widgetName="SocialPostList"/>
-    <growerp.menu.MenuItem menuItemId="SubscriptionList" title="Subscriptions" iconName="subscriptions" widgetName="SubscriptionList"/>
-    <growerp.menu.MenuItem menuItemId="TimePeriodListForm" title="Setup" iconName="settings" widgetName="TimePeriodListForm"/>
-    <growerp.menu.MenuItem menuItemId="TransactionList" title="Ledger Transactions" iconName="view_list" widgetName="TransactionList"/>
-    <growerp.menu.MenuItem menuItemId="UserList" title="Employees" iconName="school" widgetName="UserList"/>
-    <growerp.menu.MenuItem menuItemId="UserListCompany" title="Employees" iconName="school" widgetName="UserListCompany"/>
-    <growerp.menu.MenuItem menuItemId="UserListCustomer" title="Customers" iconName="school" widgetName="UserListCustomer"/>
-    <growerp.menu.MenuItem menuItemId="UserListLead" title="Leads" iconName="business" widgetName="UserListLead"/>
-    <growerp.menu.MenuItem menuItemId="UserListSupplier" title="Suppliers" iconName="business" widgetName="UserListSupplier"/>
+    <growerp.menu.MenuItem menuItemId="SubscriptionList" title="subscriptions" iconName="subscriptions" widgetName="SubscriptionList"/>
+    <growerp.menu.MenuItem menuItemId="TimePeriodListForm" title="setUp" iconName="settings" widgetName="TimePeriodListForm"/>
+    <growerp.menu.MenuItem menuItemId="TransactionList" title="transactions" iconName="view_list" widgetName="TransactionList"/>
+    <growerp.menu.MenuItem menuItemId="UserList" title="employees" iconName="school" widgetName="UserList"/>
+    <growerp.menu.MenuItem menuItemId="UserListCompany" title="employees" iconName="school" widgetName="UserListCompany"/>
+    <growerp.menu.MenuItem menuItemId="UserListCustomer" title="customers" iconName="school" widgetName="UserListCustomer"/>
+    <growerp.menu.MenuItem menuItemId="UserListLead" title="leads" iconName="business" widgetName="UserListLead"/>
+    <growerp.menu.MenuItem menuItemId="UserListSupplier" title="suppliers" iconName="business" widgetName="UserListSupplier"/>
     <growerp.menu.MenuItem menuItemId="WebsiteDialog" title="Website" iconName="webhook" widgetName="WebsiteDialog"/>
     <growerp.menu.MenuItem menuItemId="SystemSetupDialog" title="AI Settings" iconName="psychology" widgetName="SystemSetupDialog"/>
 
     <!-- ADMIN_DEFAULT Menu Options -->
-    <growerp.menu.MenuOption menuOptionId="ADMIN_MAIN" menuConfigurationId="ADMIN_DEFAULT" title="Main" route="/" iconName="dashboard" widgetName="AdminDashboard" sequenceNum="10"/>
-    <growerp.menu.MenuOption menuOptionId="ADMIN_ORG" menuConfigurationId="ADMIN_DEFAULT" title="Organization" route="/companies" iconName="business" widgetName="ShowCompanyDialog" sequenceNum="20"/>
-    <growerp.menu.MenuOption menuOptionId="ADMIN_CRM" menuConfigurationId="ADMIN_DEFAULT" itemKey="myOpportunities" title="CRM" route="/crm" iconName="people" widgetName="ActivityList" sequenceNum="30"/>
+    <growerp.menu.MenuOption menuOptionId="ADMIN_MAIN" menuConfigurationId="ADMIN_DEFAULT" title="main" route="/" iconName="dashboard" widgetName="AdminDashboard" sequenceNum="10"/>
+    <growerp.menu.MenuOption menuOptionId="ADMIN_ORG" menuConfigurationId="ADMIN_DEFAULT" title="organization" route="/companies" iconName="business" widgetName="ShowCompanyDialog" sequenceNum="20"/>
+    <growerp.menu.MenuOption menuOptionId="ADMIN_CRM" menuConfigurationId="ADMIN_DEFAULT" itemKey="myOpportunities" title="crm" route="/crm" iconName="people" widgetName="ActivityList" sequenceNum="30"/>
     <growerp.menu.MenuOption menuOptionId="ADMIN_MARKETING" menuConfigurationId="ADMIN_DEFAULT" title="Marketing" route="/marketing" iconName="campaign" widgetName="ContentPlanList" sequenceNum="35"/>
     <growerp.menu.MenuOption menuOptionId="ADMIN_OUTREACH" menuConfigurationId="ADMIN_DEFAULT" title="Outreach" route="/outreach" iconName="send" widgetName="CampaignListScreen" sequenceNum="38"/>
-    <growerp.menu.MenuOption menuOptionId="ADMIN_CATALOG" menuConfigurationId="ADMIN_DEFAULT" itemKey="products" title="Catalog" route="/catalog" iconName="category" widgetName="ProductList" sequenceNum="40"/>
-    <growerp.menu.MenuOption menuOptionId="ADMIN_ORDERS" menuConfigurationId="ADMIN_DEFAULT" itemKey="openSlsOrders" title="Orders" route="/orders" iconName="shopping_cart" widgetName="SalesOrderList" sequenceNum="50"/>
-    <growerp.menu.MenuOption menuOptionId="ADMIN_INVENTORY" menuConfigurationId="ADMIN_DEFAULT" itemKey="outgoingShipments" title="Inventory" route="/inventory" iconName="warehouse" widgetName="OutgoingShipmentList" sequenceNum="60"/>
-    <growerp.menu.MenuOption menuOptionId="ADMIN_ACCOUNTING" menuConfigurationId="ADMIN_DEFAULT" itemKey="salesInvoicesNotPaidCount" title="Accounting" route="/accounting" iconName="account_balance" widgetName="AccountingForm" sequenceNum="70"/>
-    <growerp.menu.MenuOption menuOptionId="ADMIN_ABOUT" menuConfigurationId="ADMIN_DEFAULT" title="About" route="/about" widgetName="AboutForm" image="packages/growerp_core/images/infoGrey.png" selectedImage="packages/growerp_core/images/info.png" sequenceNum="80"/>
+    <growerp.menu.MenuOption menuOptionId="ADMIN_CATALOG" menuConfigurationId="ADMIN_DEFAULT" itemKey="products" title="catalog" route="/catalog" iconName="category" widgetName="ProductList" sequenceNum="40"/>
+    <growerp.menu.MenuOption menuOptionId="ADMIN_ORDERS" menuConfigurationId="ADMIN_DEFAULT" itemKey="openSlsOrders" title="orders" route="/orders" iconName="shopping_cart" widgetName="SalesOrderList" sequenceNum="50"/>
+    <growerp.menu.MenuOption menuOptionId="ADMIN_INVENTORY" menuConfigurationId="ADMIN_DEFAULT" itemKey="outgoingShipments" title="inventory" route="/inventory" iconName="warehouse" widgetName="OutgoingShipmentList" sequenceNum="60"/>
+    <growerp.menu.MenuOption menuOptionId="ADMIN_ACCOUNTING" menuConfigurationId="ADMIN_DEFAULT" itemKey="salesInvoicesNotPaidCount" title="accounting" route="/accounting" iconName="account_balance" widgetName="AccountingForm" sequenceNum="70"/>
+    <growerp.menu.MenuOption menuOptionId="ADMIN_ABOUT" menuConfigurationId="ADMIN_DEFAULT" title="about" route="/about" widgetName="AboutForm" image="packages/growerp_core/images/infoGrey.png" selectedImage="packages/growerp_core/images/info.png" sequenceNum="80"/>
     <!-- ADMIN_DEFAULT Accounting Sub-Menu Options -->
     <growerp.menu.MenuOption menuOptionId="ADMIN_ACC_SALES" menuConfigurationId="ADMIN_DEFAULT" title="Sales" route="/accounting/sales" iconName="shopping_cart" widgetName="SalesInvoiceList" sequenceNum="71"/>
     <growerp.menu.MenuOption menuOptionId="ADMIN_ACC_PURCHASE" menuConfigurationId="ADMIN_DEFAULT" title="Purchase" route="/accounting/purchase" iconName="shopping_bag" widgetName="PurchaseInvoiceList" sequenceNum="72"/>
     <growerp.menu.MenuOption menuOptionId="ADMIN_ACC_LEDGER" menuConfigurationId="ADMIN_DEFAULT" title="Ledger" route="/accounting/ledger" iconName="account_balance" widgetName="LedgerTreeForm" sequenceNum="73"/>
-    <growerp.menu.MenuOption menuOptionId="ADMIN_ACC_REPORTS" menuConfigurationId="ADMIN_DEFAULT" title="Reports" route="/accounting/reports" iconName="assessment" widgetName="RevenueExpenseChart" sequenceNum="74"/>
-    <growerp.menu.MenuOption menuOptionId="ADMIN_ACC_SETUP" menuConfigurationId="ADMIN_DEFAULT" title="Setup" route="/accounting/setup" iconName="settings" widgetName="TimePeriodListForm" sequenceNum="75"/>
+    <growerp.menu.MenuOption menuOptionId="ADMIN_ACC_REPORTS" menuConfigurationId="ADMIN_DEFAULT" title="reports" route="/accounting/reports" iconName="assessment" widgetName="RevenueExpenseChart" sequenceNum="74"/>
+    <growerp.menu.MenuOption menuOptionId="ADMIN_ACC_SETUP" menuConfigurationId="ADMIN_DEFAULT" title="setUp" route="/accounting/setup" iconName="settings" widgetName="TimePeriodListForm" sequenceNum="75"/>
 
 <!-- ADMIN_DEFAULT Menu Option Items (junction) -->
     <growerp.menu.MenuOptionItem menuOptionId="ADMIN_ORG" menuItemId="ShowCompanyDialog" sequenceNum="10"/>
@@ -123,7 +123,7 @@ along with this software (see the LICENSE.md file). If not, see
     <growerp.menu.MenuOptionItem menuOptionId="ADMIN_CRM" menuItemId="ActivityList" sequenceNum="10"/>
     <growerp.menu.MenuOptionItem menuOptionId="ADMIN_CRM" menuItemId="OpportunityList" sequenceNum="20"/>
     <growerp.menu.MenuOptionItem menuOptionId="ADMIN_CRM" menuItemId="UserListLead" sequenceNum="30"/>
-    <growerp.menu.MenuOptionItem menuOptionId="ADMIN_CRM" menuItemId="ActivityList" sequenceNum="50"/>
+    <growerp.menu.MenuOptionItem menuOptionId="ADMIN_CRM" menuItemId="UserListCustomer" sequenceNum="40"/>
     <growerp.menu.MenuOptionItem menuOptionId="ADMIN_MARKETING" menuItemId="ContentPlanList" sequenceNum="10"/>
     <growerp.menu.MenuOptionItem menuOptionId="ADMIN_MARKETING" menuItemId="SocialPostList" sequenceNum="20"/>
     <growerp.menu.MenuOptionItem menuOptionId="ADMIN_MARKETING" menuItemId="PersonaList" sequenceNum="30"/>
@@ -138,9 +138,9 @@ along with this software (see the LICENSE.md file). If not, see
     <growerp.menu.MenuOptionItem menuOptionId="ADMIN_CATALOG" menuItemId="CategoryList" sequenceNum="30"/>
     <growerp.menu.MenuOptionItem menuOptionId="ADMIN_CATALOG" menuItemId="SubscriptionList" sequenceNum="40"/>
     <growerp.menu.MenuOptionItem menuOptionId="ADMIN_ORDERS" menuItemId="SalesOrderList" sequenceNum="10"/>
-    <growerp.menu.MenuOptionItem menuOptionId="ADMIN_ORDERS" menuItemId="UserList" sequenceNum="20"/>
+    <growerp.menu.MenuOptionItem menuOptionId="ADMIN_ORDERS" menuItemId="UserListCustomer" sequenceNum="20"/>
     <growerp.menu.MenuOptionItem menuOptionId="ADMIN_ORDERS" menuItemId="PurchaseOrderList" sequenceNum="30"/>
-    <growerp.menu.MenuOptionItem menuOptionId="ADMIN_ORDERS" menuItemId="UserList" sequenceNum="40"/>
+    <growerp.menu.MenuOptionItem menuOptionId="ADMIN_ORDERS" menuItemId="UserListSupplier" sequenceNum="40"/>
     <growerp.menu.MenuOptionItem menuOptionId="ADMIN_INVENTORY" menuItemId="OutgoingShipmentList" sequenceNum="10"/>
     <growerp.menu.MenuOptionItem menuOptionId="ADMIN_INVENTORY" menuItemId="IncomingShipmentList" sequenceNum="20"/>
     <growerp.menu.MenuOptionItem menuOptionId="ADMIN_INVENTORY" menuItemId="AssetList" sequenceNum="30"/>
@@ -289,9 +289,10 @@ along with this software (see the LICENSE.md file). If not, see
     <growerp.menu.MenuOptionItem menuOptionId="HOTEL_ACCOUNTING" menuItemId="GanttForm" sequenceNum="99"/>
 
     <!-- SUPPORT_DEFAULT Menu Options -->
-    <growerp.menu.MenuOption menuOptionId="SUPPORT_MAIN" menuConfigurationId="SUPPORT_DEFAULT" title="Main" route="/" widgetName="CompanyList" image="packages/growerp_core/images/dashBoardGrey.png" selectedImage="packages/growerp_core/images/dashBoard.png" sequenceNum="10"/>
-    <growerp.menu.MenuOption menuOptionId="SUPPORT_APPLICATIONS" menuConfigurationId="SUPPORT_DEFAULT" title="Applications" route="/applications" widgetName="ApplicationList" image="packages/growerp_core/images/productsGrey.png" selectedImage="packages/growerp_core/images/products.png" sequenceNum="20"/>
-    <growerp.menu.MenuOption menuOptionId="SUPPORT_REST_REQUESTS" menuConfigurationId="SUPPORT_DEFAULT" title="REST Requests" route="/rest-requests" widgetName="RestRequestList" image="packages/growerp_core/images/orderGrey.png" selectedImage="packages/growerp_core/images/order.png" sequenceNum="30"/>
+    <growerp.menu.MenuOption menuOptionId="SUPPORT_MAIN" menuConfigurationId="SUPPORT_DEFAULT" title="Main" route="/" iconName="dashboard" widgetName="SupportDashboard" sequenceNum="10"/>
+    <growerp.menu.MenuOption menuOptionId="SUPPORT_APPLICATIONS" menuConfigurationId="SUPPORT_DEFAULT" title="Applications" route="/applications" iconName="apps" widgetName="ApplicationList" sequenceNum="20"/>
+    <growerp.menu.MenuOption menuOptionId="SUPPORT_REST_REQUESTS" menuConfigurationId="SUPPORT_DEFAULT" title="REST Requests" route="/rest-requests" iconName="http" widgetName="RestRequestList" sequenceNum="30"/>
+    <growerp.menu.MenuOption menuOptionId="SUPPORT_ABOUT" menuConfigurationId="SUPPORT_DEFAULT" title="About" route="/about" iconName="info" widgetName="AboutForm" sequenceNum="40"/>
 <!-- SUPPORT_DEFAULT Menu Option Items (junction) -->
 
     <!-- CATALOG_EXAMPLE_DEFAULT Menu Options -->

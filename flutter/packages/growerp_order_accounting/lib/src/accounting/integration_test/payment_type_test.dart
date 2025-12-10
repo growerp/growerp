@@ -18,8 +18,14 @@ import 'package:growerp_models/growerp_models.dart';
 
 class PaymentTypeTest {
   static Future<void> selectPaymentType(WidgetTester tester) async {
-    await CommonTest.selectOption(tester, 'dbAccounting', 'AcctDashBoard');
-    await CommonTest.selectOption(tester, 'acctSetup', 'PaymentTypeList', '3');
+    // Navigate to accounting dashboard first
+    await CommonTest.selectOption(tester, '/accounting', 'AcctDashBoard');
+    // Then navigate to setup for payment types
+    await CommonTest.selectOption(
+      tester,
+      '/accounting/setup',
+      'PaymentTypeList',
+    );
   }
 
   static bool showAll(WidgetTester tester) {
@@ -43,8 +49,10 @@ class PaymentTypeTest {
   }
 
   static Future<void> addPaymentTypes(
-      WidgetTester tester, List<PaymentType> paymentTypes,
-      {bool check = true}) async {
+    WidgetTester tester,
+    List<PaymentType> paymentTypes, {
+    bool check = true,
+  }) async {
     SaveTest test = await PersistFunctions.getTest();
     if (showAll(tester) == false) {
       // switch to show all payment types
@@ -52,39 +60,60 @@ class PaymentTypeTest {
     }
     await enterPaymentTypeData(tester, paymentTypes);
     await PersistFunctions.persistTest(
-        test.copyWith(paymentTypes: paymentTypes));
+      test.copyWith(paymentTypes: paymentTypes),
+    );
     if (check) {
-      await PersistFunctions.persistTest(test.copyWith(
-          paymentTypes: await checkPaymentType(tester, paymentTypes)));
+      await PersistFunctions.persistTest(
+        test.copyWith(
+          paymentTypes: await checkPaymentType(tester, paymentTypes),
+        ),
+      );
     }
   }
 
   static Future<void> enterPaymentTypeData(
-      WidgetTester tester, List<PaymentType> paymentTypes) async {
+    WidgetTester tester,
+    List<PaymentType> paymentTypes,
+  ) async {
     for (PaymentType paymentType in paymentTypes) {
-      await CommonTest.doSearch(tester,
-          searchString: "${paymentType.paymentTypeName} -- "
-              "${paymentType.isPayable ? 'Outgoing' : 'Incoming'} -- "
-              "${paymentType.isApplied ? 'Y' : 'N'}");
+      await CommonTest.doSearch(
+        tester,
+        searchString:
+            "${paymentType.paymentTypeName} -- "
+            "${paymentType.isPayable ? 'Outgoing' : 'Incoming'} -- "
+            "${paymentType.isApplied ? 'Y' : 'N'}",
+      );
       await CommonTest.enterDropDownSearch(
-          tester, 'glAccount0', paymentType.accountCode,
-          seconds: CommonTest.waitTime);
+        tester,
+        'glAccount0',
+        paymentType.accountCode,
+        seconds: CommonTest.waitTime,
+      );
       await CommonTest.waitForSnackbarToGo(tester);
     }
   }
 
   static Future<List<PaymentType>> checkPaymentType(
-      WidgetTester tester, List<PaymentType> paymentTypes) async {
+    WidgetTester tester,
+    List<PaymentType> paymentTypes,
+  ) async {
     List<PaymentType> newPaymentTypes = [];
     for (PaymentType paymentType in paymentTypes) {
-      await CommonTest.doSearch(tester,
-          searchString: "${paymentType.paymentTypeName} -- "
-              "${paymentType.isPayable ? 'Outgoing' : 'Incoming'} -- "
-              "${paymentType.isApplied ? 'Y' : 'N'}");
-      expect(CommonTest.getTextField('name0'),
-          contains(paymentType.paymentTypeName));
-      expect(CommonTest.getDropdownSearch('glAccount0'),
-          contains(paymentType.accountCode));
+      await CommonTest.doSearch(
+        tester,
+        searchString:
+            "${paymentType.paymentTypeName} -- "
+            "${paymentType.isPayable ? 'Outgoing' : 'Incoming'} -- "
+            "${paymentType.isApplied ? 'Y' : 'N'}",
+      );
+      expect(
+        CommonTest.getTextField('name0'),
+        contains(paymentType.paymentTypeName),
+      );
+      expect(
+        CommonTest.getDropdownSearch('glAccount0'),
+        contains(paymentType.accountCode),
+      );
       newPaymentTypes.add(paymentType);
     }
     return newPaymentTypes;

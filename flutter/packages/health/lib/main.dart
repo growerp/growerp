@@ -108,7 +108,6 @@ class _HealthAppState extends State<HealthApp> {
   void initState() {
     super.initState();
     _menuConfigBloc = MenuConfigBloc(widget.restClient, 'health');
-    _menuConfigBloc.add(const MenuConfigLoad());
   }
 
   @override
@@ -137,12 +136,14 @@ class _HealthAppState extends State<HealthApp> {
               ),
             );
           } else {
+            // Loading or error, show splash screen using shared component
             router = GoRouter(
               routes: [
                 GoRoute(
                   path: '/',
-                  builder: (context, routeState) => const Scaffold(
-                    body: Center(child: CircularProgressIndicator()),
+                  builder: (context, routeState) => AppSplashScreen.simple(
+                    appTitle: 'GrowERP Health',
+                    appId: 'health',
                   ),
                 ),
               ],

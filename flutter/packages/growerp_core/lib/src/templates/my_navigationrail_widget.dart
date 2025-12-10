@@ -75,7 +75,7 @@ Widget myNavigationRail(
         label: SizedBox(
           width: 80,
           child: Text(
-            option.title,
+            HelperFunctions.translateMenuTitle(localizations, option.title),
             style: const TextStyle(fontSize: 14),
             textAlign: TextAlign.center,
             maxLines: 2,

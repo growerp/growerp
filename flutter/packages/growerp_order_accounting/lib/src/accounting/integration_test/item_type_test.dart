@@ -18,8 +18,10 @@ import 'package:growerp_models/growerp_models.dart';
 
 class ItemTypeTest {
   static Future<void> selectItemType(WidgetTester tester) async {
-    await CommonTest.selectOption(tester, 'dbAccounting', 'AcctDashBoard');
-    await CommonTest.selectOption(tester, 'acctSetup', 'ItemTypeList', '2');
+    // Navigate to accounting dashboard first
+    await CommonTest.selectOption(tester, '/accounting', 'AcctDashBoard');
+    // Then navigate to setup for item types
+    await CommonTest.selectOption(tester, '/accounting/setup', 'ItemTypeList');
   }
 
   static bool showAll(WidgetTester tester) {
@@ -43,8 +45,10 @@ class ItemTypeTest {
   }
 
   static Future<void> addItemTypes(
-      WidgetTester tester, List<ItemType> itemTypes,
-      {bool check = true}) async {
+    WidgetTester tester,
+    List<ItemType> itemTypes, {
+    bool check = true,
+  }) async {
     SaveTest test = await PersistFunctions.getTest();
     if (showAll(tester) == false) {
       // switch to show all item types
@@ -54,33 +58,49 @@ class ItemTypeTest {
     await PersistFunctions.persistTest(test.copyWith(itemTypes: itemTypes));
     if (check) {
       await PersistFunctions.persistTest(
-          test.copyWith(itemTypes: await checkItemType(tester, itemTypes)));
+        test.copyWith(itemTypes: await checkItemType(tester, itemTypes)),
+      );
     }
   }
 
   static Future<void> enterItemTypeData(
-      WidgetTester tester, List<ItemType> itemTypes) async {
+    WidgetTester tester,
+    List<ItemType> itemTypes,
+  ) async {
     for (ItemType itemType in itemTypes) {
-      await CommonTest.doSearch(tester,
-          searchString: "${itemType.itemTypeName} ${itemType.direction}");
+      await CommonTest.doSearch(
+        tester,
+        searchString: "${itemType.itemTypeName} ${itemType.direction}",
+      );
       await CommonTest.enterDropDownSearch(
-          tester, 'glAccount0', itemType.accountCode);
+        tester,
+        'glAccount0',
+        itemType.accountCode,
+      );
       await CommonTest.waitForSnackbarToGo(tester);
     }
   }
 
   static Future<List<ItemType>> checkItemType(
-      WidgetTester tester, List<ItemType> itemTypes) async {
+    WidgetTester tester,
+    List<ItemType> itemTypes,
+  ) async {
     List<ItemType> newItemTypes = [];
     for (ItemType itemType in itemTypes) {
-      await CommonTest.doSearch(tester,
-          searchString: "${itemType.itemTypeName} ${itemType.direction}");
+      await CommonTest.doSearch(
+        tester,
+        searchString: "${itemType.itemTypeName} ${itemType.direction}",
+      );
       expect(
-          CommonTest.getTextField('name0'),
-          contains(
-              "${itemType.itemTypeName} ${itemType.direction == 'I' ? 'InComing' : 'OutGoing'}"));
-      expect(CommonTest.getDropdownSearch('glAccount0'),
-          contains(itemType.accountCode));
+        CommonTest.getTextField('name0'),
+        contains(
+          "${itemType.itemTypeName} ${itemType.direction == 'I' ? 'InComing' : 'OutGoing'}",
+        ),
+      );
+      expect(
+        CommonTest.getDropdownSearch('glAccount0'),
+        contains(itemType.accountCode),
+      );
       newItemTypes.add(itemType);
     }
     return newItemTypes;

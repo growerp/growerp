@@ -18,41 +18,55 @@ import 'package:growerp_models/growerp_models.dart';
 
 class LedgerJournalTest {
   static Future<void> selectLedgerJournal(WidgetTester tester) async {
-    await CommonTest.selectOption(tester, 'dbAccounting', 'AcctDashBoard');
+    // Navigate to accounting dashboard first
+    await CommonTest.selectOption(tester, '/accounting', 'AcctDashBoard');
     await CommonTest.selectOption(
-        tester, 'acctLedger', 'LedgerJournalListLedgerJournal', '4');
+      tester,
+      '/accounting/ledger',
+      'LedgerJournalListLedgerJournal',
+    );
   }
 
   static Future<void> addLedgerJournals(
-      WidgetTester tester, List<LedgerJournal> ledgerJournals,
-      {bool check = true}) async {
+    WidgetTester tester,
+    List<LedgerJournal> ledgerJournals, {
+    bool check = true,
+  }) async {
     SaveTest test = await PersistFunctions.getTest();
     if (test.ledgerJournals.isEmpty) {
       // not yet created
       await enterLedgerJournalData(tester, ledgerJournals);
       await PersistFunctions.persistTest(
-          test.copyWith(ledgerJournals: ledgerJournals));
+        test.copyWith(ledgerJournals: ledgerJournals),
+      );
     }
     if (check) {
-      await PersistFunctions.persistTest(test.copyWith(
-          ledgerJournals: await checkLedgerJournal(tester, ledgerJournals)));
+      await PersistFunctions.persistTest(
+        test.copyWith(
+          ledgerJournals: await checkLedgerJournal(tester, ledgerJournals),
+        ),
+      );
     }
   }
 
   static Future<void> updateLedgerJournals(
-      WidgetTester tester, List<LedgerJournal> ledgerJournals) async {
+    WidgetTester tester,
+    List<LedgerJournal> ledgerJournals,
+  ) async {
     SaveTest test = await PersistFunctions.getTest();
     // check if already modified then skip
     var newLedgerJournals = List.of(test.ledgerJournals);
     if (newLedgerJournals[0].journalName != ledgerJournals[0].journalName) {
       // get new ledgerJournals preserving id
       for (int x = 0; x < test.ledgerJournals.length; x++) {
-        newLedgerJournals[x] = ledgerJournals[x]
-            .copyWith(journalId: test.ledgerJournals[x].journalId);
+        newLedgerJournals[x] = ledgerJournals[x].copyWith(
+          journalId: test.ledgerJournals[x].journalId,
+        );
       }
       await enterLedgerJournalData(tester, newLedgerJournals);
       await PersistFunctions.persistTest(
-          test.copyWith(ledgerJournals: newLedgerJournals));
+        test.copyWith(ledgerJournals: newLedgerJournals),
+      );
     }
     await checkLedgerJournal(tester, newLedgerJournals);
   }
@@ -63,29 +77,45 @@ class LedgerJournalTest {
     if (count == test.ledgerJournals.length) {
       await CommonTest.gotoMainMenu(tester);
       await selectLedgerJournal(tester);
-      await CommonTest.tapByKey(tester, 'delete${count - 1}',
-          seconds: CommonTest.waitTime);
+      await CommonTest.tapByKey(
+        tester,
+        'delete${count - 1}',
+        seconds: CommonTest.waitTime,
+      );
       await CommonTest.gotoMainMenu(tester);
       await selectLedgerJournal(tester);
       expect(
-          find.byKey(const Key('ledgerJournalItem')), findsNWidgets(count - 1));
-      await PersistFunctions.persistTest(test.copyWith(
-          ledgerJournals:
-              test.ledgerJournals.sublist(0, test.ledgerJournals.length - 1)));
+        find.byKey(const Key('ledgerJournalItem')),
+        findsNWidgets(count - 1),
+      );
+      await PersistFunctions.persistTest(
+        test.copyWith(
+          ledgerJournals: test.ledgerJournals.sublist(
+            0,
+            test.ledgerJournals.length - 1,
+          ),
+        ),
+      );
     }
   }
 
   static Future<void> enterLedgerJournalData(
-      WidgetTester tester, List<LedgerJournal> ledgerJournals) async {
+    WidgetTester tester,
+    List<LedgerJournal> ledgerJournals,
+  ) async {
     for (LedgerJournal ledgerJournal in ledgerJournals) {
       if (ledgerJournal.journalId.isEmpty) {
         await CommonTest.tapByKey(tester, 'addNew');
       } else {
-        await CommonTest.doSearch(tester,
-            searchString: ledgerJournal.journalId);
+        await CommonTest.doSearch(
+          tester,
+          searchString: ledgerJournal.journalId,
+        );
         await CommonTest.tapByKey(tester, 'name0');
-        expect(CommonTest.getTextField('topHeader').split('#')[1],
-            ledgerJournal.journalId);
+        expect(
+          CommonTest.getTextField('topHeader').split('#')[1],
+          ledgerJournal.journalId,
+        );
       }
       await CommonTest.checkWidgetKey(tester, 'LedgerJournalDialog');
       await CommonTest.enterText(tester, 'name', ledgerJournal.journalName);
@@ -95,18 +125,26 @@ class LedgerJournalTest {
   }
 
   static Future<List<LedgerJournal>> checkLedgerJournal(
-      WidgetTester tester, List<LedgerJournal> ledgerJournals) async {
+    WidgetTester tester,
+    List<LedgerJournal> ledgerJournals,
+  ) async {
     List<LedgerJournal> newLedgerJournals = [];
     for (LedgerJournal ledgerJournal in ledgerJournals) {
-      await CommonTest.doSearch(tester,
-          searchString: ledgerJournal.journalName);
+      await CommonTest.doSearch(
+        tester,
+        searchString: ledgerJournal.journalName,
+      );
       expect(
-          CommonTest.getTextField('name0'), equals(ledgerJournal.journalName));
+        CommonTest.getTextField('name0'),
+        equals(ledgerJournal.journalName),
+      );
       await CommonTest.tapByKey(tester, 'name0');
       expect(find.byKey(const Key('LedgerJournalDialog')), findsOneWidget);
       var id = CommonTest.getTextField('topHeader').split('#')[1];
-      expect(CommonTest.getTextFormField('name'),
-          equals(ledgerJournal.journalName));
+      expect(
+        CommonTest.getTextFormField('name'),
+        equals(ledgerJournal.journalName),
+      );
       newLedgerJournals.add(ledgerJournal.copyWith(journalId: id));
       await CommonTest.tapByKey(tester, 'cancel');
     }

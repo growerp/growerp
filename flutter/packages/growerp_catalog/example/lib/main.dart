@@ -140,15 +140,7 @@ GoRouter createCatalogExampleRouter() {
           return DisplayMenuOption(
             menuConfiguration: catalogMenuConfig,
             menuIndex: menuIndex,
-            actions: [
-              IconButton(
-                key: const Key('logoutButton'),
-                icon: const Icon(Icons.do_not_disturb),
-                onPressed: () {
-                  context.read<AuthBloc>().add(const AuthLoggedOut());
-                },
-              ),
-            ],
+            actions: const [],
             child: child,
           );
         },

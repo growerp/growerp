@@ -20,18 +20,20 @@ import 'integration_test.dart';
 
 class InvoiceTest {
   static Future<void> selectPurchaseInvoices(WidgetTester tester) async {
-    await CommonTest.selectOption(tester, 'dbAccounting', 'AcctDashBoard');
+    // Navigate to accounting dashboard first
+    await CommonTest.selectOption(tester, '/accounting', 'AcctDashBoard');
     await CommonTest.selectOption(
       tester,
-      'accounting/purchase',
+      '/accounting/purchase',
       'PurchaseInvoice',
     );
     await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
   }
 
   static Future<void> selectSalesInvoices(WidgetTester tester) async {
-    await CommonTest.selectOption(tester, 'dbAccounting', 'AcctDashBoard');
-    await CommonTest.selectOption(tester, 'accounting/sales', 'SalesInvoice');
+    // Navigate to accounting dashboard first
+    await CommonTest.selectOption(tester, '/accounting', 'AcctDashBoard');
+    await CommonTest.selectOption(tester, '/accounting/sales', 'SalesInvoice');
   }
 
   static Future<void> addInvoices(

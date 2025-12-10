@@ -72,6 +72,13 @@ final Map<String, Icon> iconRegistry = {
   'public': const Icon(Icons.public),
   'message': const Icon(Icons.message),
   'settings_input_component': const Icon(Icons.settings_input_component),
+  // Support app icons
+  'apps': const Icon(Icons.apps),
+  'http': const Icon(Icons.http),
+  // Hotel app icons
+  'king_bed': const Icon(Icons.king_bed),
+  'book_online': const Icon(Icons.book_online),
+  'luggage': const Icon(Icons.luggage),
 };
 
 /// Get an Icon by its name from the registry.
