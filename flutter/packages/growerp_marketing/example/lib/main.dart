@@ -111,93 +111,30 @@ const marketingMenuConfig = MenuConfiguration(
   ],
 );
 
-/// Creates a static go_router for the marketing example app
+/// Creates a static go_router for the marketing example app using shared helper
 GoRouter createMarketingExampleRouter() {
-  return GoRouter(
-    initialLocation: '/',
-    redirect: (context, state) {
-      final authState = context.read<AuthBloc>().state;
-      final isAuthenticated = authState.status == AuthStatus.authenticated;
-      if (!isAuthenticated && state.uri.path != '/') {
-        return '/';
-      }
-      return null;
+  return createStaticAppRouter(
+    menuConfig: marketingMenuConfig,
+    appTitle: 'GrowERP Marketing Example',
+    dashboard: const MarketingDashboard(),
+    widgetBuilder: (route) => switch (route) {
+      '/landingPages' => const LandingPageList(),
+      '/assessments' => const AssessmentList(),
+      '/takeAssessment' => const TakeAssessmentMenu(),
+      '/personas' => const PersonaList(),
+      '/contentPlans' => const ContentPlanList(),
+      '/socialPosts' => const SocialPostList(),
+      _ => const MarketingDashboard(),
     },
-    routes: [
+    additionalRoutes: [
+      // Nested route for assessment flow
       GoRoute(
-        path: '/',
-        builder: (context, state) {
-          final authState = context.watch<AuthBloc>().state;
-          if (authState.status == AuthStatus.authenticated) {
-            return const DisplayMenuOption(
-              menuConfiguration: marketingMenuConfig,
-              menuIndex: 0,
-              child: MarketingDashboard(),
-            );
-          } else {
-            return const HomeForm(
-              menuConfiguration: marketingMenuConfig,
-              title: 'GrowERP Marketing Example',
-            );
-          }
-        },
-      ),
-      ShellRoute(
-        builder: (context, state, child) {
-          int menuIndex = 0;
-          final path = state.uri.path;
-          for (int i = 0; i < marketingMenuConfig.menuOptions.length; i++) {
-            final route = marketingMenuConfig.menuOptions[i].route;
-            if (route != null &&
-                (route == path ||
-                    (route != '/' && path.startsWith('$route/')))) {
-              menuIndex = i;
-              break;
-            }
-          }
-          return DisplayMenuOption(
-            menuConfiguration: marketingMenuConfig,
-            menuIndex: menuIndex,
-            child: child,
-          );
-        },
-        routes: [
-          GoRoute(
-            path: '/landingPages',
-            builder: (context, state) => const LandingPageList(),
-          ),
-          GoRoute(
-            path: '/assessments',
-            builder: (context, state) => const AssessmentList(),
-          ),
-          GoRoute(
-            path: '/takeAssessment',
-            builder: (context, state) => const TakeAssessmentMenu(),
-            routes: [
-              GoRoute(
-                path: 'flow',
-                builder: (context, state) => LandingPageAssessmentFlowScreen(
-                  landingPageId:
-                      state.uri.queryParameters['landingPageId'] ?? '',
-                  assessmentId: state.uri.queryParameters['assessmentId'] ?? '',
-                  startAssessmentFlow: true,
-                ),
-              ),
-            ],
-          ),
-          GoRoute(
-            path: '/personas',
-            builder: (context, state) => const PersonaList(),
-          ),
-          GoRoute(
-            path: '/contentPlans',
-            builder: (context, state) => const ContentPlanList(),
-          ),
-          GoRoute(
-            path: '/socialPosts',
-            builder: (context, state) => const SocialPostList(),
-          ),
-        ],
+        path: '/takeAssessment/flow',
+        builder: (context, state) => LandingPageAssessmentFlowScreen(
+          landingPageId: state.uri.queryParameters['landingPageId'] ?? '',
+          assessmentId: state.uri.queryParameters['assessmentId'] ?? '',
+          startAssessmentFlow: true,
+        ),
       ),
     ],
   );

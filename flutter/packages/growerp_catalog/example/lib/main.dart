@@ -84,82 +84,18 @@ const catalogMenuConfig = MenuConfiguration(
   ],
 );
 
-/// Creates a static go_router for the catalog example app
+/// Creates a static go_router for the catalog example app using shared helper
 GoRouter createCatalogExampleRouter() {
-  return GoRouter(
-    initialLocation: '/',
-    redirect: (context, state) {
-      final authState = context.read<AuthBloc>().state;
-      final isAuthenticated = authState.status == AuthStatus.authenticated;
-      if (!isAuthenticated && state.uri.path != '/') {
-        return '/';
-      }
-      return null;
+  return createStaticAppRouter(
+    menuConfig: catalogMenuConfig,
+    appTitle: 'GrowERP Catalog Example',
+    dashboard: const CatalogDashboard(),
+    widgetBuilder: (route) => switch (route) {
+      '/products' => const ProductList(),
+      '/categories' => const CategoryList(),
+      '/subscriptions' => const SubscriptionList(),
+      _ => const CatalogDashboard(),
     },
-    routes: [
-      // Root route - shows home or dashboard
-      GoRoute(
-        path: '/',
-        builder: (context, state) {
-          final authState = context.watch<AuthBloc>().state;
-          if (authState.status == AuthStatus.authenticated) {
-            return DisplayMenuOption(
-              menuConfiguration: catalogMenuConfig,
-              menuIndex: 0,
-              actions: [
-                IconButton(
-                  key: const Key('logoutButton'),
-                  icon: const Icon(Icons.do_not_disturb),
-                  tooltip: 'Logout',
-                  onPressed: () {
-                    context.read<AuthBloc>().add(const AuthLoggedOut());
-                  },
-                ),
-              ],
-              child: const CatalogDashboard(),
-            );
-          } else {
-            return const HomeForm(
-              menuConfiguration: catalogMenuConfig,
-              title: 'GrowERP Catalog Example',
-            );
-          }
-        },
-      ),
-      // Other routes wrapped in ShellRoute for consistent menu
-      ShellRoute(
-        builder: (context, state, child) {
-          int menuIndex = 0;
-          final path = state.uri.path;
-          for (int i = 0; i < catalogMenuConfig.menuOptions.length; i++) {
-            if (catalogMenuConfig.menuOptions[i].route == path) {
-              menuIndex = i;
-              break;
-            }
-          }
-          return DisplayMenuOption(
-            menuConfiguration: catalogMenuConfig,
-            menuIndex: menuIndex,
-            actions: const [],
-            child: child,
-          );
-        },
-        routes: [
-          GoRoute(
-            path: '/products',
-            builder: (context, state) => const ProductList(),
-          ),
-          GoRoute(
-            path: '/categories',
-            builder: (context, state) => const CategoryList(),
-          ),
-          GoRoute(
-            path: '/subscriptions',
-            builder: (context, state) => const SubscriptionList(),
-          ),
-        ],
-      ),
-    ],
   );
 }
 

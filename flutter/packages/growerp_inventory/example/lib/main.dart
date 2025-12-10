@@ -73,66 +73,17 @@ const inventoryMenuConfig = MenuConfiguration(
   ],
 );
 
-/// Creates a static go_router for the inventory example app
+/// Creates a static go_router for the inventory example app using shared helper
 GoRouter createInventoryExampleRouter() {
-  return GoRouter(
-    initialLocation: '/',
-    redirect: (context, state) {
-      final authState = context.read<AuthBloc>().state;
-      final isAuthenticated = authState.status == AuthStatus.authenticated;
-      if (!isAuthenticated && state.uri.path != '/') {
-        return '/';
-      }
-      return null;
+  return createStaticAppRouter(
+    menuConfig: inventoryMenuConfig,
+    appTitle: 'GrowERP Inventory Example',
+    dashboard: const InventoryDashboard(),
+    widgetBuilder: (route) => switch (route) {
+      '/assets' => const AssetList(),
+      '/locations' => const LocationList(key: Key('Locations')),
+      _ => const InventoryDashboard(),
     },
-    routes: [
-      GoRoute(
-        path: '/',
-        builder: (context, state) {
-          final authState = context.watch<AuthBloc>().state;
-          if (authState.status == AuthStatus.authenticated) {
-            return const DisplayMenuOption(
-              menuConfiguration: inventoryMenuConfig,
-              menuIndex: 0,
-              child: InventoryDashboard(),
-            );
-          } else {
-            return const HomeForm(
-              menuConfiguration: inventoryMenuConfig,
-              title: 'GrowERP Inventory Example',
-            );
-          }
-        },
-      ),
-      ShellRoute(
-        builder: (context, state, child) {
-          int menuIndex = 0;
-          final path = state.uri.path;
-          for (int i = 0; i < inventoryMenuConfig.menuOptions.length; i++) {
-            if (inventoryMenuConfig.menuOptions[i].route == path) {
-              menuIndex = i;
-              break;
-            }
-          }
-          return DisplayMenuOption(
-            menuConfiguration: inventoryMenuConfig,
-            menuIndex: menuIndex,
-            child: child,
-          );
-        },
-        routes: [
-          GoRoute(
-            path: '/assets',
-            builder: (context, state) => const AssetList(),
-          ),
-          GoRoute(
-            path: '/locations',
-            builder: (context, state) =>
-                const LocationList(key: Key('Locations')),
-          ),
-        ],
-      ),
-    ],
   );
 }
 

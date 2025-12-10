@@ -118,84 +118,21 @@ const outreachMenuConfig = MenuConfiguration(
   ],
 );
 
-/// Creates a static go_router for the outreach example app
+/// Creates a static go_router for the outreach example app using shared helper
 GoRouter createOutreachExampleRouter() {
-  return GoRouter(
-    initialLocation: '/',
-    redirect: (context, state) {
-      final authState = context.read<AuthBloc>().state;
-      final isAuthenticated = authState.status == AuthStatus.authenticated;
-      if (!isAuthenticated && state.uri.path != '/') {
-        return '/';
-      }
-      return null;
+  return createStaticAppRouter(
+    menuConfig: outreachMenuConfig,
+    appTitle: 'GrowERP Outreach Example',
+    dashboard: const OutreachDashboard(),
+    widgetBuilder: (route) => switch (route) {
+      '/campaigns' => const CampaignListScreen(),
+      '/messages' => const OutreachMessageList(),
+      '/automation' => const AutomationScreen(),
+      '/website' => const LandingPageList(),
+      '/leads' => const UserList(key: Key('Lead'), role: Role.lead),
+      '/platforms' => const PlatformConfigListScreen(),
+      _ => const OutreachDashboard(),
     },
-    routes: [
-      GoRoute(
-        path: '/',
-        builder: (context, state) {
-          final authState = context.watch<AuthBloc>().state;
-          if (authState.status == AuthStatus.authenticated) {
-            return const DisplayMenuOption(
-              menuConfiguration: outreachMenuConfig,
-              menuIndex: 0,
-              child: OutreachDashboard(),
-            );
-          } else {
-            return const HomeForm(
-              menuConfiguration: outreachMenuConfig,
-              title: 'GrowERP Outreach Example',
-            );
-          }
-        },
-      ),
-      ShellRoute(
-        builder: (context, state, child) {
-          int menuIndex = 0;
-          final path = state.uri.path;
-          for (int i = 0; i < outreachMenuConfig.menuOptions.length; i++) {
-            if (outreachMenuConfig.menuOptions[i].route == path) {
-              menuIndex = i;
-              break;
-            }
-          }
-          return DisplayMenuOption(
-            menuConfiguration: outreachMenuConfig,
-            menuIndex: menuIndex,
-            child: child,
-          );
-        },
-        routes: [
-          GoRoute(
-            path: '/campaigns',
-            builder: (context, state) => const CampaignListScreen(),
-          ),
-          GoRoute(
-            path: '/messages',
-            builder: (context, state) => const OutreachMessageList(),
-          ),
-          GoRoute(
-            path: '/automation',
-            builder: (context, state) => const AutomationScreen(),
-          ),
-          GoRoute(
-            path: '/website',
-            builder: (context, state) => const LandingPageList(),
-          ),
-          GoRoute(
-            path: '/leads',
-            builder: (context, state) => const UserList(
-              key: Key('Lead'),
-              role: Role.lead,
-            ),
-          ),
-          GoRoute(
-            path: '/platforms',
-            builder: (context, state) => const PlatformConfigListScreen(),
-          ),
-        ],
-      ),
-    ],
   );
 }
 

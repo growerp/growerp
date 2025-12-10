@@ -121,50 +121,33 @@ const orderAccountingMenuConfig = MenuConfiguration(
   ],
 );
 
-/// Creates a static go_router for the order accounting example app
+/// Creates a static go_router for the order accounting example app using shared helper
 GoRouter createOrderAccountingExampleRouter() {
-  return GoRouter(
-    initialLocation: '/',
-    redirect: (context, state) {
-      final authState = context.read<AuthBloc>().state;
-      final isAuthenticated = authState.status == AuthStatus.authenticated;
-      if (!isAuthenticated && state.uri.path != '/') {
-        return '/';
-      }
-      return null;
-    },
-    routes: [
-      GoRoute(
-        path: '/',
-        builder: (context, state) {
-          final authState = context.watch<AuthBloc>().state;
-          if (authState.status == AuthStatus.authenticated) {
-            return DisplayMenuOption(
-              menuConfiguration: orderAccountingMenuConfig,
-              menuIndex: 0,
-              actions: [
-                IconButton(
-                  key: const Key('logoutButton'),
-                  icon: const Icon(
-                    Icons.do_not_disturb,
-                    key: Key('HomeFormAuth'),
-                  ),
-                  tooltip: 'Logout',
-                  onPressed: () {
-                    context.read<AuthBloc>().add(const AuthLoggedOut());
-                  },
-                ),
-              ],
-              child: const OrderAccountingDashboard(),
-            );
-          } else {
-            return const HomeForm(
-              menuConfiguration: orderAccountingMenuConfig,
-              title: 'GrowERP Order & Accounting Example',
-            );
-          }
-        },
+  return createStaticAppRouter(
+    menuConfig: orderAccountingMenuConfig,
+    appTitle: 'GrowERP Order & Accounting Example',
+    dashboard: const OrderAccountingDashboard(),
+    widgetBuilder: (route) => switch (route) {
+      '/orders' => const FinDocList(
+        key: Key('SalesOrder'),
+        sales: true,
+        docType: FinDocType.order,
       ),
+      '/accounting' => const AccountingForm(),
+      '/shipments' => const FinDocList(
+        key: Key('ShipmentsOut'),
+        sales: true,
+        docType: FinDocType.shipment,
+      ),
+      '/inventory' => const LocationList(key: Key('LocationList')),
+      '/requests' => const FinDocList(
+        key: Key('Request'),
+        sales: false,
+        docType: FinDocType.request,
+      ),
+      _ => const OrderAccountingDashboard(),
+    },
+    additionalRoutes: [
       // FinDoc dialog route
       GoRoute(
         path: '/findoc',
@@ -181,113 +164,54 @@ GoRouter createOrderAccountingExampleRouter() {
           return PrintingForm(finDocIn: finDoc ?? FinDoc());
         },
       ),
-      ShellRoute(
-        builder: (context, state, child) {
-          int menuIndex = 0;
-          final path = state.uri.path;
-          for (
-            int i = 0;
-            i < orderAccountingMenuConfig.menuOptions.length;
-            i++
-          ) {
-            if (orderAccountingMenuConfig.menuOptions[i].route == path) {
-              menuIndex = i;
-              break;
-            }
-          }
-          return DisplayMenuOption(
-            menuConfiguration: orderAccountingMenuConfig,
-            menuIndex: menuIndex,
-            actions: const [],
-            child: child,
-          );
-        },
-        routes: [
-          GoRoute(
-            path: '/orders',
-            builder: (context, state) => const FinDocList(
-              key: Key('SalesOrder'),
-              sales: true,
-              docType: FinDocType.order,
-            ),
-          ),
-          GoRoute(
-            path: '/accounting',
-            builder: (context, state) => const AccountingForm(),
-            routes: [
-              GoRoute(
-                path: 'sales',
-                builder: (context, state) => const FinDocList(
-                  key: Key('SalesInvoice'),
-                  sales: true,
-                  docType: FinDocType.invoice,
-                ),
-              ),
-              GoRoute(
-                path: 'purchase',
-                builder: (context, state) => const FinDocList(
-                  key: Key('PurchaseInvoice'),
-                  sales: false,
-                  docType: FinDocType.invoice,
-                ),
-              ),
-              GoRoute(
-                path: 'sales_payments',
-                builder: (context, state) => const FinDocList(
-                  key: Key('SalesPayment'),
-                  sales: true,
-                  docType: FinDocType.payment,
-                ),
-              ),
-              GoRoute(
-                path: 'purchase_payments',
-                builder: (context, state) => const FinDocList(
-                  key: Key('PurchasePayment'),
-                  sales: false,
-                  docType: FinDocType.payment,
-                ),
-              ),
-              GoRoute(
-                path: 'ledger',
-                builder: (context, state) => const FinDocList(
-                  key: Key('Transaction'),
-                  sales: true,
-                  docType: FinDocType.transaction,
-                ),
-              ),
-              GoRoute(
-                path: 'reports',
-                builder: (context, state) =>
-                    const Center(child: Text("Reports")),
-              ),
-              GoRoute(
-                path: 'setup',
-                builder: (context, state) => const Center(child: Text("Setup")),
-              ),
-            ],
-          ),
-          GoRoute(
-            path: '/shipments',
-            builder: (context, state) => const FinDocList(
-              key: Key('ShipmentsOut'),
-              sales: true,
-              docType: FinDocType.shipment,
-            ),
-          ),
-          GoRoute(
-            path: '/inventory',
-            builder: (context, state) =>
-                const LocationList(key: Key('LocationList')),
-          ),
-          GoRoute(
-            path: '/requests',
-            builder: (context, state) => const FinDocList(
-              key: Key('Request'),
-              sales: false,
-              docType: FinDocType.request,
-            ),
-          ),
-        ],
+      // Nested accounting routes
+      GoRoute(
+        path: '/accounting/sales',
+        builder: (context, state) => const FinDocList(
+          key: Key('SalesInvoice'),
+          sales: true,
+          docType: FinDocType.invoice,
+        ),
+      ),
+      GoRoute(
+        path: '/accounting/purchase',
+        builder: (context, state) => const FinDocList(
+          key: Key('PurchaseInvoice'),
+          sales: false,
+          docType: FinDocType.invoice,
+        ),
+      ),
+      GoRoute(
+        path: '/accounting/sales_payments',
+        builder: (context, state) => const FinDocList(
+          key: Key('SalesPayment'),
+          sales: true,
+          docType: FinDocType.payment,
+        ),
+      ),
+      GoRoute(
+        path: '/accounting/purchase_payments',
+        builder: (context, state) => const FinDocList(
+          key: Key('PurchasePayment'),
+          sales: false,
+          docType: FinDocType.payment,
+        ),
+      ),
+      GoRoute(
+        path: '/accounting/ledger',
+        builder: (context, state) => const FinDocList(
+          key: Key('Transaction'),
+          sales: true,
+          docType: FinDocType.transaction,
+        ),
+      ),
+      GoRoute(
+        path: '/accounting/reports',
+        builder: (context, state) => const Center(child: Text("Reports")),
+      ),
+      GoRoute(
+        path: '/accounting/setup',
+        builder: (context, state) => const Center(child: Text("Setup")),
       ),
     ],
   );

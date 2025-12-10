@@ -66,53 +66,16 @@ const salesMenuConfig = MenuConfiguration(
   ],
 );
 
-/// Creates a static go_router for the sales example app
+/// Creates a static go_router for the sales example app using shared helper
 GoRouter createSalesExampleRouter() {
-  return GoRouter(
-    initialLocation: '/',
-    redirect: (context, state) {
-      final authState = context.read<AuthBloc>().state;
-      final isAuthenticated = authState.status == AuthStatus.authenticated;
-      if (!isAuthenticated && state.uri.path != '/') {
-        return '/';
-      }
-      return null;
+  return createStaticAppRouter(
+    menuConfig: salesMenuConfig,
+    appTitle: 'GrowERP Sales Example',
+    dashboard: const SalesDashboard(),
+    widgetBuilder: (route) => switch (route) {
+      '/crm' => const OpportunityList(),
+      _ => const SalesDashboard(),
     },
-    routes: [
-      GoRoute(
-        path: '/',
-        builder: (context, state) {
-          final authState = context.watch<AuthBloc>().state;
-          if (authState.status == AuthStatus.authenticated) {
-            return const DisplayMenuOption(
-              menuConfiguration: salesMenuConfig,
-              menuIndex: 0,
-              child: SalesDashboard(),
-            );
-          } else {
-            return const HomeForm(
-              menuConfiguration: salesMenuConfig,
-              title: 'GrowERP Sales Example',
-            );
-          }
-        },
-      ),
-      ShellRoute(
-        builder: (context, state, child) {
-          return DisplayMenuOption(
-            menuConfiguration: salesMenuConfig,
-            menuIndex: 1,
-            child: child,
-          );
-        },
-        routes: [
-          GoRoute(
-            path: '/crm',
-            builder: (context, state) => const OpportunityList(),
-          ),
-        ],
-      ),
-    ],
   );
 }
 
