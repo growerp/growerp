@@ -64,6 +64,7 @@ const activityMenuConfig = MenuConfiguration(
       route: '/',
       iconName: 'dashboard',
       sequenceNum: 10,
+      widgetName: 'ActivityDashboard',
     ),
     MenuOption(
       itemKey: 'ACT_TODO',
@@ -71,6 +72,7 @@ const activityMenuConfig = MenuConfiguration(
       route: '/todos',
       iconName: 'check_circle',
       sequenceNum: 20,
+      widgetName: 'ActivityList',
     ),
     MenuOption(
       itemKey: 'ACT_EVENTS',
@@ -78,6 +80,7 @@ const activityMenuConfig = MenuConfiguration(
       route: '/events',
       iconName: 'event',
       sequenceNum: 30,
+      widgetName: 'ActivityList',
     ),
   ],
 );
@@ -89,14 +92,8 @@ GoRouter createActivityExampleRouter() {
     appTitle: 'GrowERP Activity Example',
     dashboard: const ActivityDashboard(),
     widgetBuilder: (route) => switch (route) {
-      '/todos' => const ActivityList(
-        ActivityType.todo,
-        key: Key('ActivityList'),
-      ),
-      '/events' => const ActivityList(
-        ActivityType.event,
-        key: Key('ActivityList'),
-      ),
+      '/todos' => const ActivityList(ActivityType.todo),
+      '/events' => const ActivityList(ActivityType.event),
       _ => const ActivityDashboard(),
     },
   );

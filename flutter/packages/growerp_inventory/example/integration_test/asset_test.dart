@@ -16,7 +16,9 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:growerp_core/growerp_core.dart';
+import 'package:growerp_core/test_data.dart';
 import 'package:growerp_inventory/growerp_inventory.dart';
+import 'package:growerp_inventory/src/location/integration_test/location_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:inventory_example/main.dart';
@@ -40,9 +42,30 @@ void main() {
       title: "Asset test",
       clear: true,
     );
-    await CommonTest.createCompanyAndAdmin(tester);
+    // Create company and load products (assets need products for association)
+    await CommonTest.createCompanyAndAdmin(
+      tester,
+      testData: {
+        "products": products.sublist(0, 3), // Load first 3 products for assets
+      },
+    );
+
+    // First create locations needed for assets
+    await CommonTest.selectOption(tester, '/locations', 'LocationList');
+    await LocationTest.addLocations(tester, locations.sublist(0, 2));
+
     // Navigate to assets
     await CommonTest.selectOption(tester, '/assets', 'AssetList');
+
+    // Add assets (using first 3 assets from test data)
+    await AssetTest.addAssets(tester, assets.sublist(0, 3));
+
+    // Update assets
+    await AssetTest.updateAssets(tester);
+
+    // Delete (deactivate) the last asset
+    await AssetTest.deleteLastAsset(tester);
+
     await CommonTest.logout(tester);
   });
 }

@@ -55,6 +55,7 @@ const websiteMenuConfig = MenuConfiguration(
       route: '/',
       iconName: 'dashboard',
       sequenceNum: 10,
+      widgetName: 'WebsiteDashboard',
     ),
     MenuOption(
       itemKey: 'WEB_WEBSITE',
@@ -62,6 +63,7 @@ const websiteMenuConfig = MenuConfiguration(
       route: '/website',
       iconName: 'web',
       sequenceNum: 20,
+      widgetName: 'WebsiteDialog',
     ),
   ],
 );

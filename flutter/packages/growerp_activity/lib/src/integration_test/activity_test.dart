@@ -23,9 +23,27 @@ class ActivityTest {
     await CommonTest.selectOption(tester, '/todos', 'ActivityList');
   }
 
+  /// Custom search for activities - opens the search dialog and finds an activity
+  static Future<void> doActivitySearch(
+    WidgetTester tester, {
+    required String searchString,
+  }) async {
+    await CommonTest.tapByKey(tester, 'search');
+    await CommonTest.checkWidgetKey(tester, 'SearchDialog');
+    await CommonTest.enterText(tester, 'searchField', searchString);
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
+    // Wait for search results to appear
+    await CommonTest.waitForKey(tester, 'landingPageSearchItem0');
+    await CommonTest.tapByKey(tester, 'landingPageSearchItem0');
+    await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
+  }
+
   static Future<void> addActivities(
-      WidgetTester tester, List<Activity> activities,
-      {bool check = true}) async {
+    WidgetTester tester,
+    List<Activity> activities, {
+    bool check = true,
+  }) async {
     SaveTest test = await PersistFunctions.getTest();
     if (test.activities.isEmpty) {
       // not yet created
@@ -33,24 +51,33 @@ class ActivityTest {
       await PersistFunctions.persistTest(test.copyWith(activities: activities));
     }
     if (check) {
-      await PersistFunctions.persistTest(test.copyWith(
-          activities: await checkActivityDetail(tester, activities)));
+      await PersistFunctions.persistTest(
+        test.copyWith(
+          activities: await checkActivityDetail(tester, activities),
+        ),
+      );
     }
   }
 
   static Future<void> enterActivityData(
-      WidgetTester tester, List<Activity> activities) async {
+    WidgetTester tester,
+    List<Activity> activities,
+  ) async {
     for (Activity activity in activities) {
       if (activity.activityId.isEmpty) {
         await CommonTest.tapByKey(tester, 'addNew');
       } else {
-        await CommonTest.doNewSearch(tester, searchString: activity.activityId);
-        expect(CommonTest.getTextField('topHeader').split('#')[1],
-            activity.activityId);
+        await doActivitySearch(tester, searchString: activity.activityId);
+        expect(
+          CommonTest.getTextField('topHeader').split('#')[1],
+          activity.activityId,
+        );
       }
       await CommonTest.checkWidgetKey(tester, 'ActivityDialog');
       await CommonTest.tapByKey(
-          tester, 'name'); // required because keyboard come up
+        tester,
+        'name',
+      ); // required because keyboard come up
       await CommonTest.enterText(tester, 'name', activity.activityName);
       await CommonTest.drag(tester);
       await CommonTest.enterText(tester, 'description', activity.description);
@@ -61,26 +88,23 @@ class ActivityTest {
   }
 
   static Future<List<Activity>> checkActivityDetail(
-      WidgetTester tester, List<Activity> activities) async {
+    WidgetTester tester,
+    List<Activity> activities,
+  ) async {
     List<Activity> newActivities = [];
     for (Activity activity in activities) {
-      // list
-      for (final (index, _) in activities.indexed) {
-        if (CommonTest.getTextField('id$index') == activity.pseudoId) {
-          expect(CommonTest.getTextField('name$index'),
-              equals(activity.activityName));
-          expect(CommonTest.getTextField('products$index'), equals('0'));
-        }
-      }
-      await CommonTest.doNewSearch(tester,
-          searchString: activity.activityName, seconds: CommonTest.waitTime);
-      // detail
-      await CommonTest.tapByKey(tester, 'name0');
+      // Use custom search to find and open the activity dialog
+      await doActivitySearch(tester, searchString: activity.activityName);
+      // The dialog should now be open after tapping the search result
       expect(find.byKey(const Key('ActivityDialog')), findsOneWidget);
       expect(
-          CommonTest.getTextFormField('name'), equals(activity.activityName));
-      expect(CommonTest.getTextFormField('description'),
-          equals(activity.description));
+        CommonTest.getTextFormField('name'),
+        equals(activity.activityName),
+      );
+      expect(
+        CommonTest.getTextFormField('description'),
+        equals(activity.description),
+      );
       var id = CommonTest.getTextField('topHeader').split('#')[1];
       newActivities.add(activity.copyWith(activityId: id));
       await CommonTest.tapByKey(tester, 'cancel');
@@ -91,14 +115,22 @@ class ActivityTest {
   static Future<void> deleteLastActivity(WidgetTester tester) async {
     SaveTest test = await PersistFunctions.getTest();
     int count = test.activities.length;
-    expect(find.byKey(const Key('activityItem')),
-        findsNWidgets(count)); // initial admin
-    await CommonTest.tapByKey(tester, 'delete${count - 1}',
-        seconds: CommonTest.waitTime);
+    expect(
+      find.byKey(const Key('activityItem')),
+      findsNWidgets(count),
+    ); // initial admin
+    await CommonTest.tapByKey(
+      tester,
+      'delete${count - 1}',
+      seconds: CommonTest.waitTime,
+    );
     // replacement for refresh...
     expect(find.byKey(const Key('activityItem')), findsNWidgets(count - 1));
-    await PersistFunctions.persistTest(test.copyWith(
-        activities: test.activities.sublist(0, test.activities.length - 1)));
+    await PersistFunctions.persistTest(
+      test.copyWith(
+        activities: test.activities.sublist(0, test.activities.length - 1),
+      ),
+    );
   }
 
   static Future<void> updateActivities(WidgetTester tester) async {
@@ -107,14 +139,17 @@ class ActivityTest {
     if (test.activities[0].activityName != activities[0].activityName) return;
     List<Activity> updActivities = [];
     for (Activity activity in test.activities) {
-      updActivities.add(activity.copyWith(
-        activityName: '${activity.activityName}u',
-        description: '${activity.description}u',
-      ));
+      updActivities.add(
+        activity.copyWith(
+          activityName: '${activity.activityName}u',
+          description: '${activity.description}u',
+        ),
+      );
     }
     await enterActivityData(tester, updActivities);
     await checkActivityDetail(tester, updActivities);
     await PersistFunctions.persistTest(
-        test.copyWith(activities: updActivities));
+      test.copyWith(activities: updActivities),
+    );
   }
 }

@@ -20,6 +20,8 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_catalog/growerp_catalog.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:catalog_example/main.dart';
+import 'package:growerp_catalog/src/product/integration_test/product_test.dart';
+import 'package:growerp_core/test_data.dart';
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -45,6 +47,14 @@ void main() {
     await CommonTest.createCompanyAndAdmin(tester);
     // Navigate to products
     await CommonTest.selectOption(tester, '/products', 'ProductList');
+    await CommonTest.createCompanyAndAdmin(
+      tester,
+      testData: {"categories": categories.sublist(0, 2)},
+    );
+    await ProductTest.selectProducts(tester);
+    await ProductTest.addProducts(tester, products.sublist(0, 2));
+    await ProductTest.updateProducts(tester, products.sublist(2, 4));
+    await ProductTest.deleteLastProduct(tester);
     await CommonTest.logout(tester);
   });
 }

@@ -73,6 +73,7 @@ const orderAccountingMenuConfig = MenuConfiguration(
       route: '/',
       iconName: 'dashboard',
       sequenceNum: 10,
+      widgetName: 'OrderAccountingDashboard',
     ),
     MenuOption(
       menuOptionId: 'OA_ORDERS',
@@ -80,6 +81,7 @@ const orderAccountingMenuConfig = MenuConfiguration(
       route: '/orders',
       iconName: 'shopping_cart',
       sequenceNum: 20,
+      widgetName: 'FinDocList',
       children: [
         MenuItem(
           menuItemId: 'ORDER_ACCOUNTING',
@@ -96,6 +98,7 @@ const orderAccountingMenuConfig = MenuConfiguration(
       route: '/accounting',
       iconName: 'account_balance',
       sequenceNum: 30,
+      widgetName: 'AccountingForm',
     ),
     MenuOption(
       menuOptionId: 'OA_SHIPMENTS',
@@ -103,6 +106,7 @@ const orderAccountingMenuConfig = MenuConfiguration(
       route: '/shipments',
       iconName: 'local_shipping',
       sequenceNum: 40,
+      widgetName: 'FinDocList',
     ),
     MenuOption(
       menuOptionId: 'OA_INVENTORY',
@@ -110,6 +114,7 @@ const orderAccountingMenuConfig = MenuConfiguration(
       route: '/inventory',
       iconName: 'inventory',
       sequenceNum: 50,
+      widgetName: 'LocationList',
     ),
     MenuOption(
       menuOptionId: 'OA_REQUESTS',
@@ -117,6 +122,7 @@ const orderAccountingMenuConfig = MenuConfiguration(
       route: '/requests',
       iconName: 'assignment',
       sequenceNum: 60,
+      widgetName: 'FinDocList',
     ),
   ],
 );

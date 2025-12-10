@@ -65,6 +65,7 @@ const marketingMenuConfig = MenuConfiguration(
       route: '/',
       iconName: 'dashboard',
       sequenceNum: 10,
+      widgetName: 'MarketingDashboard',
     ),
     MenuOption(
       itemKey: 'MKT_LANDING',
@@ -72,6 +73,7 @@ const marketingMenuConfig = MenuConfiguration(
       route: '/landingPages',
       iconName: 'web',
       sequenceNum: 20,
+      widgetName: 'LandingPageList',
     ),
     MenuOption(
       itemKey: 'MKT_ASSESSMENTS',
@@ -79,6 +81,7 @@ const marketingMenuConfig = MenuConfiguration(
       route: '/assessments',
       iconName: 'quiz',
       sequenceNum: 30,
+      widgetName: 'AssessmentList',
     ),
     MenuOption(
       itemKey: 'MKT_TAKE',
@@ -86,6 +89,7 @@ const marketingMenuConfig = MenuConfiguration(
       route: '/takeAssessment',
       iconName: 'assignment',
       sequenceNum: 40,
+      widgetName: 'TakeAssessmentMenu',
     ),
     MenuOption(
       itemKey: 'MKT_PERSONAS',
@@ -93,6 +97,7 @@ const marketingMenuConfig = MenuConfiguration(
       route: '/personas',
       iconName: 'people',
       sequenceNum: 50,
+      widgetName: 'PersonaList',
     ),
     MenuOption(
       itemKey: 'MKT_CONTENT',
@@ -100,6 +105,7 @@ const marketingMenuConfig = MenuConfiguration(
       route: '/contentPlans',
       iconName: 'calendar_today',
       sequenceNum: 60,
+      widgetName: 'ContentPlanList',
     ),
     MenuOption(
       itemKey: 'MKT_SOCIAL',
@@ -107,6 +113,7 @@ const marketingMenuConfig = MenuConfiguration(
       route: '/socialPosts',
       iconName: 'share',
       sequenceNum: 70,
+      widgetName: 'SocialPostList',
     ),
   ],
 );

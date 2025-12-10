@@ -55,6 +55,7 @@ const salesMenuConfig = MenuConfiguration(
       route: '/',
       iconName: 'dashboard',
       sequenceNum: 10,
+      widgetName: 'SalesDashboard',
     ),
     MenuOption(
       itemKey: 'SALES_CRM',
@@ -62,6 +63,7 @@ const salesMenuConfig = MenuConfiguration(
       route: '/crm',
       iconName: 'campaign',
       sequenceNum: 20,
+      widgetName: 'OpportunityList',
     ),
   ],
 );
