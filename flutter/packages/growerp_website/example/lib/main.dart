@@ -66,53 +66,16 @@ const websiteMenuConfig = MenuConfiguration(
   ],
 );
 
-/// Creates a static go_router for the website example app
+/// Creates a static go_router for the website example app using shared helper
 GoRouter createWebsiteExampleRouter() {
-  return GoRouter(
-    initialLocation: '/',
-    redirect: (context, state) {
-      final authState = context.read<AuthBloc>().state;
-      final isAuthenticated = authState.status == AuthStatus.authenticated;
-      if (!isAuthenticated && state.uri.path != '/') {
-        return '/';
-      }
-      return null;
+  return createStaticAppRouter(
+    menuConfig: websiteMenuConfig,
+    appTitle: 'GrowERP Website Example',
+    dashboard: const WebsiteDashboard(),
+    widgetBuilder: (route) => switch (route) {
+      '/website' => const WebsiteDialog(),
+      _ => const WebsiteDashboard(),
     },
-    routes: [
-      GoRoute(
-        path: '/',
-        builder: (context, state) {
-          final authState = context.watch<AuthBloc>().state;
-          if (authState.status == AuthStatus.authenticated) {
-            return const DisplayMenuOption(
-              menuConfiguration: websiteMenuConfig,
-              menuIndex: 0,
-              child: WebsiteDashboard(),
-            );
-          } else {
-            return const HomeForm(
-              menuConfiguration: websiteMenuConfig,
-              title: 'GrowERP Website Example',
-            );
-          }
-        },
-      ),
-      ShellRoute(
-        builder: (context, state, child) {
-          return DisplayMenuOption(
-            menuConfiguration: websiteMenuConfig,
-            menuIndex: 1,
-            child: child,
-          );
-        },
-        routes: [
-          GoRoute(
-            path: '/website',
-            builder: (context, state) => const WebsiteDialog(),
-          ),
-        ],
-      ),
-    ],
   );
 }
 

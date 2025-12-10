@@ -87,37 +87,26 @@ const userCompanyMenuConfig = MenuConfiguration(
   ],
 );
 
-/// Creates a static go_router for the user company example app
+/// Creates a static go_router for the user company example app using shared helper
 GoRouter createUserCompanyExampleRouter() {
-  return GoRouter(
-    initialLocation: '/',
-    redirect: (context, state) {
-      final authState = context.read<AuthBloc>().state;
-      final isAuthenticated = authState.status == AuthStatus.authenticated;
-      if (!isAuthenticated && state.uri.path != '/') {
-        return '/';
-      }
-      return null;
-    },
-    routes: [
-      GoRoute(
-        path: '/',
-        builder: (context, state) {
-          final authState = context.watch<AuthBloc>().state;
-          if (authState.status == AuthStatus.authenticated) {
-            return const DisplayMenuOption(
-              menuConfiguration: userCompanyMenuConfig,
-              menuIndex: 0,
-              child: UserCompanyDashboard(),
-            );
-          } else {
-            return const HomeForm(
-              menuConfiguration: userCompanyMenuConfig,
-              title: 'GrowERP User & Company Example',
-            );
-          }
-        },
+  return createStaticAppRouter(
+    menuConfig: userCompanyMenuConfig,
+    appTitle: 'GrowERP User & Company Example',
+    dashboard: const UserCompanyDashboard(),
+    widgetBuilder: (route) => switch (route) {
+      '/companies' => ShowCompanyDialog(
+        Company(role: Role.company),
+        key: const Key('CompanyForm'),
+        dialog: false,
       ),
+      '/users' => const UserList(key: Key('Employee'), role: Role.company),
+      '/companiesUsers' => const CompanyUserList(
+        key: Key('Lead'),
+        role: Role.lead,
+      ),
+      _ => const UserCompanyDashboard(),
+    },
+    additionalRoutes: [
       // Company dialog route
       GoRoute(
         path: '/company/:companyId',
@@ -135,43 +124,6 @@ GoRouter createUserCompanyExampleRouter() {
           final userId = state.pathParameters['userId'];
           return UserDialog(User(partyId: userId));
         },
-      ),
-      ShellRoute(
-        builder: (context, state, child) {
-          int menuIndex = 0;
-          final path = state.uri.path;
-          for (int i = 0; i < userCompanyMenuConfig.menuOptions.length; i++) {
-            if (userCompanyMenuConfig.menuOptions[i].route == path) {
-              menuIndex = i;
-              break;
-            }
-          }
-          return DisplayMenuOption(
-            menuConfiguration: userCompanyMenuConfig,
-            menuIndex: menuIndex,
-            child: child,
-          );
-        },
-        routes: [
-          GoRoute(
-            path: '/companies',
-            builder: (context, state) => ShowCompanyDialog(
-              Company(role: Role.company),
-              key: const Key('CompanyForm'),
-              dialog: false,
-            ),
-          ),
-          GoRoute(
-            path: '/users',
-            builder: (context, state) =>
-                const UserList(key: Key('Employee'), role: Role.company),
-          ),
-          GoRoute(
-            path: '/companiesUsers',
-            builder: (context, state) =>
-                const CompanyUserList(key: Key('Lead'), role: Role.lead),
-          ),
-        ],
       ),
     ],
   );

@@ -82,69 +82,23 @@ const activityMenuConfig = MenuConfiguration(
   ],
 );
 
-/// Creates a static go_router for the activity example app
+/// Creates a static go_router for the activity example app using shared helper
 GoRouter createActivityExampleRouter() {
-  return GoRouter(
-    initialLocation: '/',
-    redirect: (context, state) {
-      final authState = context.read<AuthBloc>().state;
-      final isAuthenticated = authState.status == AuthStatus.authenticated;
-      if (!isAuthenticated && state.uri.path != '/') {
-        return '/';
-      }
-      return null;
+  return createStaticAppRouter(
+    menuConfig: activityMenuConfig,
+    appTitle: 'GrowERP Activity Example',
+    dashboard: const ActivityDashboard(),
+    widgetBuilder: (route) => switch (route) {
+      '/todos' => const ActivityList(
+        ActivityType.todo,
+        key: Key('ActivityList'),
+      ),
+      '/events' => const ActivityList(
+        ActivityType.event,
+        key: Key('ActivityList'),
+      ),
+      _ => const ActivityDashboard(),
     },
-    routes: [
-      GoRoute(
-        path: '/',
-        builder: (context, state) {
-          final authState = context.watch<AuthBloc>().state;
-          if (authState.status == AuthStatus.authenticated) {
-            return DisplayMenuOption(
-              menuConfiguration: activityMenuConfig,
-              menuIndex: 0,
-              child: const ActivityDashboard(),
-            );
-          } else {
-            return HomeForm(
-              menuConfiguration: activityMenuConfig,
-              title: 'GrowERP Activity Example',
-            );
-          }
-        },
-      ),
-      ShellRoute(
-        builder: (context, state, child) {
-          int menuIndex = 0;
-          final path = state.uri.path;
-          for (int i = 0; i < activityMenuConfig.menuOptions.length; i++) {
-            if (activityMenuConfig.menuOptions[i].route == path) {
-              menuIndex = i;
-              break;
-            }
-          }
-          return DisplayMenuOption(
-            menuConfiguration: activityMenuConfig,
-            menuIndex: menuIndex,
-            child: child,
-          );
-        },
-        routes: [
-          GoRoute(
-            path: '/todos',
-            builder: (context, state) =>
-                const ActivityList(ActivityType.todo, key: Key('ActivityList')),
-          ),
-          GoRoute(
-            path: '/events',
-            builder: (context, state) => const ActivityList(
-              ActivityType.event,
-              key: Key('ActivityList'),
-            ),
-          ),
-        ],
-      ),
-    ],
   );
 }
 

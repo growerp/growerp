@@ -69,11 +69,11 @@ void main() {
     // Verify menu items from the dynamic configuration
     // Navigate to "Main" (dashboard) is default
     expect(find.text('Organization'), findsOneWidget);
-    expect(find.text('User'), findsOneWidget);
+    expect(find.text('CRM'), findsOneWidget);
 
     // Verify Side Menu or Bottom Bar items depending on screen size
     // Note: AuthenticatedDisplayMenuOption uses DisplayMenuOption which renders navigation rail/bar
-    // We expect "Main", "Organization", "Logged in User", "About"
+    // We expect "Main", "Organization", "CRM", "About", "AI Settings"
 
     // On wide screen (desktop/tablet), standard menu
     // We need to tap the menu button if it's a drawer, or just check text if it's a rail
