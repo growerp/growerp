@@ -20,6 +20,8 @@ import 'package:global_configuration/global_configuration.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:growerp_activity/growerp_activity.dart';
+import 'package:growerp_activity/src/integration_test/activity_test.dart';
+import 'package:growerp_core/test_data.dart';
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -41,9 +43,10 @@ void main() {
       clear: true,
     );
     await CommonTest.createCompanyAndAdmin(tester);
-    // Navigate to activities
-    await CommonTest.selectOption(tester, '/todos', 'ActivityList');
-    // Basic test - just verify we can navigate to activity screen
+    await ActivityTest.selectActivities(tester);
+    await ActivityTest.addActivities(tester, activities);
+    await ActivityTest.updateActivities(tester);
+    await ActivityTest.deleteLastActivity(tester);
     await CommonTest.logout(tester);
   });
 }

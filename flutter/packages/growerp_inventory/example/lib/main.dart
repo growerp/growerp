@@ -55,6 +55,7 @@ const inventoryMenuConfig = MenuConfiguration(
       route: '/',
       iconName: 'dashboard',
       sequenceNum: 10,
+      widgetName: 'InventoryDashboard',
     ),
     MenuOption(
       itemKey: 'INV_ASSETS',
@@ -62,6 +63,7 @@ const inventoryMenuConfig = MenuConfiguration(
       route: '/assets',
       iconName: 'money',
       sequenceNum: 20,
+      widgetName: 'AssetList',
     ),
     MenuOption(
       itemKey: 'INV_LOCATIONS',
@@ -69,6 +71,7 @@ const inventoryMenuConfig = MenuConfiguration(
       route: '/locations',
       iconName: 'location_on',
       sequenceNum: 30,
+      widgetName: 'LocationList',
     ),
   ],
 );

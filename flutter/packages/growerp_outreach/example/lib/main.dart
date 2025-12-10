@@ -72,6 +72,7 @@ const outreachMenuConfig = MenuConfiguration(
       route: '/',
       iconName: 'dashboard',
       sequenceNum: 10,
+      widgetName: 'OutreachDashboard',
     ),
     MenuOption(
       menuOptionId: 'OUT_CAMPAIGNS',
@@ -79,6 +80,7 @@ const outreachMenuConfig = MenuConfiguration(
       route: '/campaigns',
       iconName: 'campaign',
       sequenceNum: 20,
+      widgetName: 'CampaignListScreen',
     ),
     MenuOption(
       menuOptionId: 'OUT_MESSAGES',
@@ -86,6 +88,7 @@ const outreachMenuConfig = MenuConfiguration(
       route: '/messages',
       iconName: 'message',
       sequenceNum: 30,
+      widgetName: 'OutreachMessageList',
     ),
     MenuOption(
       menuOptionId: 'OUT_AUTOMATION',
@@ -93,6 +96,7 @@ const outreachMenuConfig = MenuConfiguration(
       route: '/automation',
       iconName: 'autorenew',
       sequenceNum: 40,
+      widgetName: 'AutomationScreen',
     ),
     MenuOption(
       menuOptionId: 'OUT_WEBSITE',
@@ -100,6 +104,7 @@ const outreachMenuConfig = MenuConfiguration(
       route: '/website',
       iconName: 'web',
       sequenceNum: 50,
+      widgetName: 'LandingPageList',
     ),
     MenuOption(
       menuOptionId: 'OUT_LEADS',
@@ -107,6 +112,7 @@ const outreachMenuConfig = MenuConfiguration(
       route: '/leads',
       iconName: 'people',
       sequenceNum: 60,
+      widgetName: 'UserList',
     ),
     MenuOption(
       menuOptionId: 'OUT_PLATFORMS',
@@ -114,6 +120,7 @@ const outreachMenuConfig = MenuConfiguration(
       route: '/platforms',
       iconName: 'settings',
       sequenceNum: 70,
+      widgetName: 'PlatformConfigListScreen',
     ),
   ],
 );

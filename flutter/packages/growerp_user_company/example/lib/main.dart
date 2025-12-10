@@ -62,6 +62,7 @@ const userCompanyMenuConfig = MenuConfiguration(
       route: '/',
       iconName: 'dashboard',
       sequenceNum: 10,
+      widgetName: 'UserCompanyDashboard',
     ),
     MenuOption(
       itemKey: 'UC_COMPANIES',
@@ -69,6 +70,7 @@ const userCompanyMenuConfig = MenuConfiguration(
       route: '/companies',
       iconName: 'business',
       sequenceNum: 20,
+      widgetName: 'CompanyList',
     ),
     MenuOption(
       itemKey: 'UC_USERS',
@@ -76,6 +78,7 @@ const userCompanyMenuConfig = MenuConfiguration(
       route: '/users',
       iconName: 'people',
       sequenceNum: 30,
+      widgetName: 'UserList',
     ),
     MenuOption(
       itemKey: 'UC_COMPANY_USERS',
@@ -83,6 +86,7 @@ const userCompanyMenuConfig = MenuConfiguration(
       route: '/companiesUsers',
       iconName: 'groups',
       sequenceNum: 40,
+      widgetName: 'CompanyUserList',
     ),
   ],
 );

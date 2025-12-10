@@ -24,59 +24,52 @@ Future<bool?> confirmDialog(
   String content,
 ) {
   final localizations = CoreLocalizations.of(context)!;
-  // set up the buttons
-  Widget cancelButton = OutlinedButton(
-    child: Text(
-      localizations.cancel,
-      key: const Key('cancel'),
-    ),
-    onPressed: () {
-      Navigator.of(context).pop(false);
-    },
-  );
-  Widget continueButton = OutlinedButton(
-    child: Text(
-      localizations.continueButton,
-      key: const Key('continue'),
-    ),
-    onPressed: () {
-      Navigator.of(context).pop(true);
-    },
-  );
 
-  // set up the AlertDialog
-  Dialog dialog = Dialog(
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-    child: popUp(
-      height: 220,
-      width: 400,
-      context: context,
-      title: title,
-      child: Center(
-        child: Column(
-          children: [
-            const SizedBox(height: 20),
-            Text(content),
-            const SizedBox(height: 20),
-            Row(
-              children: [
-                cancelButton,
-                const SizedBox(width: 20),
-                Expanded(child: continueButton),
-              ],
-            ),
-          ],
-        ),
-      ),
-    ),
-  );
-
-  // show the dialog
+  // show the dialog - buttons must be created inside builder to use dialog's context
   return showDialog(
     context: context,
     barrierDismissible: true,
-    builder: (BuildContext context) {
-      return dialog;
+    builder: (BuildContext dialogContext) {
+      // set up the buttons with dialog's context
+      Widget cancelButton = OutlinedButton(
+        child: Text(localizations.cancel, key: const Key('cancel')),
+        onPressed: () {
+          Navigator.of(dialogContext).pop(false);
+        },
+      );
+      Widget continueButton = OutlinedButton(
+        child: Text(localizations.continueButton, key: const Key('continue')),
+        onPressed: () {
+          Navigator.of(dialogContext).pop(true);
+        },
+      );
+
+      // set up the AlertDialog
+      return Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: popUp(
+          height: 220,
+          width: 400,
+          context: dialogContext,
+          title: title,
+          child: Center(
+            child: Column(
+              children: [
+                const SizedBox(height: 20),
+                Text(content),
+                const SizedBox(height: 20),
+                Row(
+                  children: [
+                    cancelButton,
+                    const SizedBox(width: 20),
+                    Expanded(child: continueButton),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
     },
   );
 }

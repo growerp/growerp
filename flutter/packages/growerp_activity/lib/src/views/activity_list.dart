@@ -187,7 +187,8 @@ class ActivityListState extends State<ActivityList> {
                             builder: (BuildContext context) {
                               // search separate from finDocBloc
                               return BlocProvider.value(
-                                value: context.read<DataFetchBloc<Locations>>(),
+                                value: context
+                                    .read<DataFetchBloc<Activities>>(),
                                 child: SearchActivityList(widget.activityType),
                               );
                             },

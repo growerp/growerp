@@ -43,7 +43,7 @@ void main() {
       clear: true,
     );
     await CommonTest.createCompanyAndAdmin(tester);
-    await CommonTest.selectOption(tester, '/inventory', 'LocationList');
+    await CommonTest.selectOption(tester, '/locations', 'LocationList');
     await LocationTest.addLocations(tester, locations.sublist(0, 2));
     await LocationTest.updateLocations(tester, locations.sublist(2, 4));
     await LocationTest.deleteLocations(tester, 2);

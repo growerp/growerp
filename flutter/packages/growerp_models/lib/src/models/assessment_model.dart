@@ -17,12 +17,24 @@ class TimestampConverter implements JsonConverter<DateTime, int> {
 }
 
 /// Converts nullable Unix timestamp (milliseconds) to nullable DateTime
-class NullableTimestampConverter implements JsonConverter<DateTime?, int?> {
+/// Handles both int and String inputs from backend
+class NullableTimestampConverter implements JsonConverter<DateTime?, dynamic> {
   const NullableTimestampConverter();
 
   @override
-  DateTime? fromJson(int? timestamp) =>
-      timestamp != null ? DateTime.fromMillisecondsSinceEpoch(timestamp) : null;
+  DateTime? fromJson(dynamic timestamp) {
+    if (timestamp == null) return null;
+    if (timestamp is int) {
+      return DateTime.fromMillisecondsSinceEpoch(timestamp);
+    }
+    if (timestamp is String) {
+      final parsed = int.tryParse(timestamp);
+      if (parsed != null) {
+        return DateTime.fromMillisecondsSinceEpoch(parsed);
+      }
+    }
+    return null;
+  }
 
   @override
   int? toJson(DateTime? dateTime) => dateTime?.millisecondsSinceEpoch;

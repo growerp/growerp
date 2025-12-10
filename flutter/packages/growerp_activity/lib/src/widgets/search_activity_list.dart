@@ -33,36 +33,46 @@ class SearchActivityState extends State<SearchActivityList> {
   void initState() {
     super.initState();
     _activityBloc = context.read<DataFetchBloc<Activities>>()
-      ..add(GetDataEvent(() => context
-          .read<RestClient>()
-          .getActivity(limit: 0, activityType: widget.type)));
+      ..add(
+        GetDataEvent(
+          () => context.read<RestClient>().getActivity(
+            limit: 0,
+            activityType: widget.type,
+          ),
+        ),
+      );
   }
 
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<DataFetchBloc<Activities>, DataFetchState<Activities>>(
-        listener: (context, state) {
-      if (state.status == DataFetchStatus.failure) {
-        HelperFunctions.showMessage(context, '${state.message}', Colors.red);
-      }
-    }, builder: (context, state) {
-      if (state.status == DataFetchStatus.failure) {
-        return Center(
-            child: Text('failed to fetch search items: ${state.message}'));
-      }
-      if (state.status == DataFetchStatus.success) {
-        activities = (state.data as Activities).activities;
-      }
-      return Stack(
-        children: [
-          ActivitySearchDialog(
+      listener: (context, state) {
+        if (state.status == DataFetchStatus.failure) {
+          HelperFunctions.showMessage(context, '${state.message}', Colors.red);
+        }
+      },
+      builder: (context, state) {
+        if (state.status == DataFetchStatus.failure) {
+          return Center(
+            child: Text('failed to fetch search items: ${state.message}'),
+          );
+        }
+        if (state.status == DataFetchStatus.success) {
+          activities = (state.data as Activities).activities;
+        }
+        return Stack(
+          children: [
+            ActivitySearchDialog(
               finDocBloc: _activityBloc,
               widget: widget,
-              activities: activities),
-          if (state.status == DataFetchStatus.loading) const LoadingIndicator(),
-        ],
-      );
-    });
+              activities: activities,
+            ),
+            if (state.status == DataFetchStatus.loading)
+              const LoadingIndicator(),
+          ],
+        );
+      },
+    );
   }
 }
 
@@ -82,67 +92,82 @@ class ActivitySearchDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     final ScrollController scrollController = ScrollController();
     return Dialog(
-        key: const Key('SearchDialog'),
-        insetPadding: const EdgeInsets.all(10),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
+      key: const Key('SearchDialog'),
+      insetPadding: const EdgeInsets.all(10),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      child: popUp(
+        context: context,
+        title: 'Activity Search ',
+        height: 500,
+        width: 350,
+        child: Column(
+          children: [
+            TextFormField(
+              key: const Key('searchField'),
+              textInputAction: TextInputAction.search,
+              autofocus: true,
+              decoration: const InputDecoration(labelText: "Search input"),
+              validator: (value) {
+                if (value!.isEmpty) {
+                  return 'Please enter a search value?';
+                }
+                return null;
+              },
+              onFieldSubmitted: (value) => _activityBloc.add(
+                GetDataEvent(
+                  () => context.read<RestClient>().getActivity(
+                    limit: 5,
+                    searchString: value,
+                    activityType: widget.type,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            const Text('Search results'),
+            Expanded(
+              child: ListView.builder(
+                key: const Key('listView'),
+                shrinkWrap: true,
+                physics: const AlwaysScrollableScrollPhysics(),
+                itemCount: activities.length + 2,
+                controller: scrollController,
+                itemBuilder: (BuildContext context, int index) {
+                  if (index == 0) {
+                    return Visibility(
+                      visible: activities.isEmpty,
+                      child: const Center(
+                        heightFactor: 20,
+                        child: Text(
+                          'No search items found (yet)',
+                          key: Key('empty'),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    );
+                  }
+                  index--;
+                  return index >= activities.length
+                      ? const Text('')
+                      : Dismissible(
+                          key: const Key('searchItem'),
+                          direction: DismissDirection.startToEnd,
+                          child: ListTile(
+                            title: Text(
+                              "ID: ${activities[index].pseudoId}\n"
+                              "Name: ${activities[index].activityName}",
+                              key: Key("landingPageSearchItem$index"),
+                            ),
+                            onTap: () =>
+                                Navigator.of(context).pop(activities[index]),
+                          ),
+                        );
+                },
+              ),
+            ),
+          ],
         ),
-        child: popUp(
-            context: context,
-            title: 'Activity Search ',
-            height: 500,
-            width: 350,
-            child: Column(children: [
-              TextFormField(
-                  key: const Key('searchField'),
-                  textInputAction: TextInputAction.search,
-                  autofocus: true,
-                  decoration: const InputDecoration(labelText: "Search input"),
-                  validator: (value) {
-                    if (value!.isEmpty) {
-                      return 'Please enter a search value?';
-                    }
-                    return null;
-                  },
-                  onFieldSubmitted: (value) => _activityBloc.add(GetDataEvent(
-                      () => context.read<RestClient>().getActivity(
-                          limit: 5,
-                          searchString: value,
-                          activityType: widget.type)))),
-              const SizedBox(height: 20),
-              const Text('Search results'),
-              Expanded(
-                  child: ListView.builder(
-                      key: const Key('listView'),
-                      shrinkWrap: true,
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      itemCount: activities.length + 2,
-                      controller: scrollController,
-                      itemBuilder: (BuildContext context, int index) {
-                        if (index == 0) {
-                          return Visibility(
-                              visible: activities.isEmpty,
-                              child: const Center(
-                                  heightFactor: 20,
-                                  child: Text('No search items found (yet)',
-                                      key: Key('empty'),
-                                      textAlign: TextAlign.center)));
-                        }
-                        index--;
-                        return index >= activities.length
-                            ? const Text('')
-                            : Dismissible(
-                                key: const Key('searchItem'),
-                                direction: DismissDirection.startToEnd,
-                                child: ListTile(
-                                  title: Text(
-                                      "ID: ${activities[index].pseudoId}\n"
-                                      "Name: ${activities[index].activityName}",
-                                      key: Key("searchResult$index")),
-                                  onTap: () => Navigator.of(context)
-                                      .pop(activities[index]),
-                                ));
-                      }))
-            ])));
+      ),
+    );
   }
 }

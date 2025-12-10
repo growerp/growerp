@@ -12,14 +12,15 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-// ignore_for_file: depend_on_referenced_packages
+import 'package:growerp_core/growerp_core.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:integration_test/integration_test.dart';
-import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_catalog/growerp_catalog.dart';
-import 'package:growerp_models/growerp_models.dart';
 import 'package:catalog_example/main.dart';
+import 'package:growerp_core/test_data.dart';
+import 'package:growerp_models/growerp_models.dart';
+import 'package:growerp_catalog/src/category/integration_test/category_test.dart';
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -28,9 +29,7 @@ void main() {
     await GlobalConfiguration().loadFromAsset("app_settings");
   });
 
-  String title = 'GrowERP category test';
-
-  testWidgets(title, (tester) async {
+  testWidgets('''GrowERP category test''', (tester) async {
     RestClient restClient = RestClient(await buildDioClient());
     await CommonTest.startTestApp(
       tester,
@@ -39,12 +38,14 @@ void main() {
       CatalogLocalizations.localizationsDelegates,
       restClient: restClient,
       blocProviders: getCatalogBlocProviders(restClient, 'AppAdmin'),
-      title: title,
+      title: "Category test",
       clear: true,
     );
     await CommonTest.createCompanyAndAdmin(tester);
-    // Navigate to categories
-    await CommonTest.selectOption(tester, '/categories', 'CategoryList');
+    await CategoryTest.selectCategories(tester);
+    await CategoryTest.addCategories(tester, categories);
+    await CategoryTest.updateCategories(tester);
+    await CategoryTest.deleteLastCategory(tester);
     await CommonTest.logout(tester);
   });
 }
