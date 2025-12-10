@@ -1592,7 +1592,7 @@ along with this software (see the LICENSE.md file). If not, see
                         loginName: restData.loginName
                     ],
                     dateTime: restData.startDateTime ? ec.l10n.format(restData.startDateTime,'yyyy-MM-dd HH:mm:ssZ') : null,
-                    restRequestName: restData.artifactName.substring(restData.artifactName.lastIndexOf('.') + 1),
+                    restRequestName: restData.artifactName ? restData.artifactName.substring(restData.artifactName.lastIndexOf('.') + 1) : null,
                     serverIp: restData.serverIpAddress,
                     serverHostName: restData.serverHostName,
                     parameterString: restData.parameterString,

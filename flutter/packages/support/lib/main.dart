@@ -103,7 +103,6 @@ class _SupportAppState extends State<SupportApp> {
   void initState() {
     super.initState();
     _menuConfigBloc = MenuConfigBloc(widget.restClient, 'support');
-    _menuConfigBloc.add(const MenuConfigLoad());
   }
 
   @override
@@ -131,12 +130,14 @@ class _SupportAppState extends State<SupportApp> {
               ),
             );
           } else {
+            // Loading or error, show splash screen using shared component
             router = GoRouter(
               routes: [
                 GoRoute(
                   path: '/',
-                  builder: (context, routeState) => const Scaffold(
-                    body: Center(child: CircularProgressIndicator()),
+                  builder: (context, routeState) => AppSplashScreen.simple(
+                    appTitle: 'GrowERP Support',
+                    appId: 'support',
                   ),
                 ),
               ],
@@ -177,6 +178,8 @@ List<Map<String, GrowerpWidgetBuilder>> supportWidgetRegistrations = [
   {
     'SupportDashboard': (args) => const SupportDashboard(),
     'AboutForm': (args) => const AboutForm(),
+    'ApplicationList': (args) => const ApplicationList(),
+    'RestRequestList': (args) => const RestRequestList(),
   },
 ];
 

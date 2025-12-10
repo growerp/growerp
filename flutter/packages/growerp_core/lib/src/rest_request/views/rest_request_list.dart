@@ -151,11 +151,11 @@ class RestRequestListState extends State<RestRequestList> {
               );
             } else {
               restRequests = state.restRequests;
-              if (restRequests.isNotEmpty) {
-                Future.delayed(const Duration(milliseconds: 100), () {
-                  WidgetsBinding.instance.addPostFrameCallback(
-                    (_) => _scrollController.jumpTo(currentScroll),
-                  );
+              if (restRequests.isNotEmpty && currentScroll > 0) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (_scrollController.hasClients) {
+                    _scrollController.jumpTo(currentScroll);
+                  }
                 });
               }
               hasReachedMax = state.hasReachedMax;

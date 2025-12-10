@@ -46,7 +46,17 @@ class AccountingDashboard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Check if AuthBloc is available in the context
+    final authBloc = context.read<AuthBloc?>();
+    if (authBloc == null) {
+      return const Center(
+        child: Text('AuthBloc not available. Please ensure it is provided.'),
+      );
+    }
+
     return BlocBuilder<AuthBloc, AuthState>(
+      bloc:
+          authBloc, // Explicitly pass the bloc to avoid context.read during initState
       builder: (context, authState) {
         if (authState.status != AuthStatus.authenticated) {
           return const Center(child: CircularProgressIndicator());
@@ -56,7 +66,16 @@ class AccountingDashboard extends StatelessWidget {
         final stats = authenticate.stats;
         final currency = authenticate.company?.currency?.description ?? '';
 
+        // Check if MenuConfigBloc is available
+        final menuConfigBloc = context.read<MenuConfigBloc?>();
+
+        if (menuConfigBloc == null) {
+          // MenuConfigBloc not available - use static dashboard
+          return _buildStaticDashboard(context, stats, currency);
+        }
+
         return BlocBuilder<MenuConfigBloc, MenuConfigState>(
+          bloc: menuConfigBloc, // Explicitly pass the bloc
           builder: (context, menuState) {
             final menuConfig = menuState.menuConfiguration;
 

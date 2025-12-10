@@ -132,11 +132,15 @@ GoRouter createActivityExampleRouter() {
         routes: [
           GoRoute(
             path: '/todos',
-            builder: (context, state) => const ActivityList(ActivityType.todo),
+            builder: (context, state) =>
+                const ActivityList(ActivityType.todo, key: Key('ActivityList')),
           ),
           GoRoute(
             path: '/events',
-            builder: (context, state) => const ActivityList(ActivityType.event),
+            builder: (context, state) => const ActivityList(
+              ActivityType.event,
+              key: Key('ActivityList'),
+            ),
           ),
         ],
       ),

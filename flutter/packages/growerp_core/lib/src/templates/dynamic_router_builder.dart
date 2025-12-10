@@ -121,13 +121,15 @@ GoRouter createDynamicAppRouter(
   }
 
   // Filter mainConfig to exclude accounting sub-menu items for the main display
+  // This excludes both /accounting and /accounting/* routes
   final mainDisplayConfig = config.hasAccountingSubmenu
       ? mainConfig.copyWith(
           menuOptions: mainConfig.menuOptions
               .where(
                 (option) =>
                     option.route == null ||
-                    !option.route!.startsWith('/accounting/'),
+                    (option.route != '/accounting' &&
+                        !option.route!.startsWith('/accounting/')),
               )
               .toList(),
         )
@@ -227,18 +229,6 @@ GoRouter createDynamicAppRouter(
             return DisplayMenuOption(
               menuConfiguration: mainDisplayConfig,
               menuIndex: menuIndex,
-              actions: [
-                IconButton(
-                  key: const Key('logoutButton'),
-                  icon: const Icon(
-                    Icons.do_not_disturb,
-                    key: Key('HomeFormAuth'),
-                  ),
-                  onPressed: () {
-                    context.read<AuthBloc>().add(const AuthLoggedOut());
-                  },
-                ),
-              ],
               tabWidgetLoader: config.widgetLoader,
               suppressBlocMenuConfig: true,
               child: child,
@@ -268,18 +258,6 @@ GoRouter createDynamicAppRouter(
             return DisplayMenuOption(
               menuConfiguration: accountingConfig,
               menuIndex: menuIndex,
-              actions: [
-                IconButton(
-                  key: const Key('logoutButton'),
-                  icon: const Icon(
-                    Icons.do_not_disturb,
-                    key: Key('HomeFormAuth'),
-                  ),
-                  onPressed: () {
-                    context.read<AuthBloc>().add(const AuthLoggedOut());
-                  },
-                ),
-              ],
               tabWidgetLoader: config.widgetLoader,
               suppressBlocMenuConfig: true,
               floatingActionButton: config.accountingFabBuilder != null

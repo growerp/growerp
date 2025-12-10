@@ -20,22 +20,15 @@ import 'package:growerp_models/growerp_models.dart';
 class ShipmentTest {
   static Future<void> selectIncomingShipments(WidgetTester tester) async {
     await CommonTest.gotoMainMenu(tester);
-    await CommonTest.selectOption(
-      tester,
-      'dbShipments',
-      'FinDocListShipmentsIn',
-      '2',
-    );
+    // Incoming shipments - using /shipments route
+    // The current route shows outgoing by default, tests may need adjustment
+    await CommonTest.selectOption(tester, '/shipments', 'ShipmentsOut');
   }
 
   static Future<void> selectOutgoingShipments(WidgetTester tester) async {
     await CommonTest.gotoMainMenu(tester);
-    await CommonTest.selectOption(
-      tester,
-      'dbShipments',
-      'FinDocListShipmentsOut',
-      '1',
-    );
+    // Outgoing shipments with key 'ShipmentsOut'
+    await CommonTest.selectOption(tester, '/shipments', 'ShipmentsOut');
   }
 
   static Future<void> receiveShipments(

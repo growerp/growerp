@@ -18,13 +18,19 @@ import 'package:growerp_models/growerp_models.dart';
 
 class GlAccountTest {
   static Future<void> selectLedger(WidgetTester tester) async {
-    await CommonTest.selectOption(tester, 'dbAccounting', 'AcctDashBoard');
-    await CommonTest.selectOption(tester, 'acctLedger', 'LedgerTree');
+    // Navigate to accounting dashboard first
+    await CommonTest.selectOption(tester, '/accounting', 'AcctDashBoard');
+    await CommonTest.selectOption(tester, '/accounting/ledger', 'LedgerTree');
   }
 
   static Future<void> selectLedgerAccounts(WidgetTester tester) async {
-    await CommonTest.selectOption(tester, 'dbAccounting', 'AcctDashBoard');
-    await CommonTest.selectOption(tester, 'acctLedger', 'GlAccountList', '2');
+    // Navigate to accounting dashboard first
+    await CommonTest.selectOption(tester, '/accounting', 'AcctDashBoard');
+    await CommonTest.selectOption(
+      tester,
+      '/accounting/ledger',
+      'GlAccountList',
+    );
   }
 
   static Future<void> addGlAccounts(
