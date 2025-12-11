@@ -6,6 +6,10 @@ docker/logs
 *.ipa
 docker/nginx/html
 .env
+
+flutter/packages/growerp_agent
 moqui/runtime/component/growerp-shopify/
+moqui/runtime/component/growerp-agent/
 test_output**
+
 

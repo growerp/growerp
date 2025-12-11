@@ -16,6 +16,7 @@ class OutreachCampaignBloc
     on<OutreachCampaignPause>(_onPause);
     on<OutreachCampaignStart>(_onStart);
     on<OutreachRecentMessagesFetch>(_onRecentMessagesFetch);
+    on<OutreachCampaignSearchRequested>(_onSearch);
   }
 
   final RestClient restClient;
@@ -271,6 +272,47 @@ class OutreachCampaignBloc
           message: await getDioError(error),
         ),
       );
+    }
+  }
+
+  Future<void> _onSearch(
+    OutreachCampaignSearchRequested event,
+    Emitter<OutreachCampaignState> emit,
+  ) async {
+    final query = event.query.trim();
+    if (query.isEmpty) {
+      emit(state.copyWith(
+        searchStatus: OutreachCampaignStatus.success,
+        searchResults: const [],
+        searchError: null,
+      ));
+      return;
+    }
+
+    emit(state.copyWith(
+      searchStatus: OutreachCampaignStatus.loading,
+      searchResults: const [],
+      searchError: null,
+    ));
+
+    try {
+      final result = await restClient.listOutreachCampaigns(
+        start: 0,
+        limit: event.limit,
+        searchString: query,
+      );
+
+      emit(state.copyWith(
+        searchStatus: OutreachCampaignStatus.success,
+        searchResults: result.campaigns,
+        searchError: null,
+      ));
+    } catch (error) {
+      emit(state.copyWith(
+        searchStatus: OutreachCampaignStatus.failure,
+        searchResults: const [],
+        searchError: await getDioError(error),
+      ));
     }
   }
 }

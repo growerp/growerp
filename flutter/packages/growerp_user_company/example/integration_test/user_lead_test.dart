@@ -30,7 +30,7 @@ void main() {
   });
 
   Future<void> selectLeads(WidgetTester tester) async {
-    await UserTest.selectUsers(tester, '/users', 'UserListLead', '2');
+    await UserTest.selectUsers(tester, '/users', 'UserListLead', 'Lead Users');
   }
 
   testWidgets('''GrowERP user lead test''', (tester) async {

@@ -136,6 +136,7 @@ class _DashboardCard extends StatelessWidget {
     return Card(
       elevation: 4,
       child: InkWell(
+        key: Key('tap$route'),
         onTap: () => context.go(route),
         child: Padding(
           padding: const EdgeInsets.all(16.0),

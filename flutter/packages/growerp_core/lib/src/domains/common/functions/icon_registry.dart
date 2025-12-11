@@ -79,6 +79,28 @@ final Map<String, Icon> iconRegistry = {
   'king_bed': const Icon(Icons.king_bed),
   'book_online': const Icon(Icons.book_online),
   'luggage': const Icon(Icons.luggage),
+  // User company icons
+  'groups': const Icon(Icons.groups),
+  'badge': const Icon(Icons.badge),
+  'storefront': const Icon(Icons.storefront),
+  'local_shipping': const Icon(Icons.local_shipping),
+  'person_search': const Icon(Icons.person_search),
+  'home_work': const Icon(Icons.home_work),
+  'apartment': const Icon(Icons.apartment),
+  'person': const Icon(Icons.person),
+  'person_add': const Icon(Icons.person_add),
+  'contacts': const Icon(Icons.contacts),
+  'business_center': const Icon(Icons.business_center),
+  'domain': const Icon(Icons.domain),
+  'corporate_fare': const Icon(Icons.corporate_fare),
+  'factory': const Icon(Icons.factory),
+  'handshake': const Icon(Icons.handshake),
+  'trending_up': const Icon(Icons.trending_up),
+  'group_add': const Icon(Icons.group_add),
+  'person_outline': const Icon(Icons.person_outline),
+  'supervisor_account': const Icon(Icons.supervisor_account),
+  'work': const Icon(Icons.work),
+  'engineering': const Icon(Icons.engineering),
 };
 
 /// Get an Icon by its name from the registry.

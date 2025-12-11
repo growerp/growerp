@@ -367,11 +367,9 @@ class CommonTest {
 
     await tapByKey(tester, targetKey, seconds: waitTime);
     if (tapNumber != null) {
-      if (isPhone()) {
-        await tapByTooltip(tester, tapNumber);
-      } else {
-        await tapByKey(tester, "tap$formName");
-      }
+      // Both phone (BottomNavigationBar) and desktop (TabBar) use text labels
+      // Newlines in titles are replaced with spaces in BottomNavigationBar labels
+      await tapByText(tester, tapNumber.replaceAll('\n', ' '));
       await tester.pumpAndSettle(const Duration(seconds: waitTime));
     }
     await waitForKey(tester, formName);
@@ -460,7 +458,22 @@ class CommonTest {
     int times = 0;
     bool found = true;
     await tester.pump();
-    if (hasKey('dismiss')) await tapByText(tester, 'dismiss');
+    // Try to tap dismiss if it exists - use try-catch because the snackbar
+    // might disappear between the check and the tap attempt (race condition)
+    try {
+      final dismissFinder = find.textContaining(
+        RegExp('dismiss', caseSensitive: false),
+      );
+      if (tester.any(dismissFinder)) {
+        await tester.ensureVisible(dismissFinder.last);
+        await tester.pumpAndSettle();
+        await tester.tap(dismissFinder.last, warnIfMissed: false);
+        await tester.pumpAndSettle();
+      }
+    } catch (e) {
+      // Snackbar may have disappeared before we could tap it - that's fine
+      debugPrint('Dismiss button disappeared before tap: $e');
+    }
     await tester.pumpAndSettle();
     while (times++ < 10 && found == true) {
       found = tester.any(find.byType(SnackBar));
@@ -879,9 +892,16 @@ class CommonTest {
     String text, {
     int seconds = 1,
   }) async {
-    await tester.tap(
-      find.textContaining(RegExp(text, caseSensitive: false)).last,
+    final baseFinder = find.textContaining(RegExp(text, caseSensitive: false));
+    expect(
+      tester.any(baseFinder),
+      true,
+      reason: "could not find text: '$text' to tap on",
     );
+    final finder = baseFinder.last;
+    await tester.ensureVisible(finder);
+    await tester.pumpAndSettle();
+    await tester.tap(finder);
     await tester.pumpAndSettle(Duration(seconds: seconds));
   }
 

@@ -1,9 +1,5 @@
 /*
- * This GrowERP soimimport 'package:growerp_models/growerp_models.dart';
-
-Future<void> main() async {owerp_models/growerp_models.dart';
-
-Future<void> main() async { public domain under CC0 1.0 Universal plus a
+ * This GrowERP software is in the public domain under CC0 1.0 Universal plus a
  * Grant of Patent License.
  * 
  * To the extent possible under law, the author(s) have dedicated all
@@ -34,7 +30,12 @@ void main() {
   });
 
   Future<void> selectCustomers(WidgetTester tester) async {
-    await UserTest.selectUsers(tester, 'dbUsers', 'UserListCustomer', '3');
+    await UserTest.selectUsers(
+      tester,
+      '/users',
+      'UserListCustomer',
+      'Customer Users',
+    );
   }
 
   testWidgets('''GrowERP user customer test''', (tester) async {

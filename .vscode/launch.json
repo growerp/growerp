@@ -60,6 +60,17 @@
             ]
         },
         {
+            "name": "Agent linux (lib/main.dart)",
+            "type": "dart",
+            "request": "launch",
+            "cwd": "flutter/packages/growerp_agent/example",
+            "program": "lib/main.dart",
+            "args": [
+                "-d",
+                "linux"
+            ]
+        },
+        {
             "name": "Support mobile (lib/main.dart)",
             "type": "dart",
             "request": "launch",

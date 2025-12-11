@@ -23,6 +23,7 @@ import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
 import '../bloc/outreach_campaign_bloc.dart';
 import 'campaign_detail_screen.dart';
 import 'campaign_list_table_def.dart';
+import 'search_campaign_list.dart';
 
 // Table padding and background decoration
 const campaignPadding = SpanPadding(trailing: 5, leading: 5);
@@ -205,6 +206,40 @@ class CampaignListScreenState extends State<CampaignListScreen> {
                     },
                     child: Column(
                       children: [
+                        FloatingActionButton(
+                          key: const Key("search"),
+                          heroTag: "campaignBtn0",
+                          onPressed: () async {
+                            // find campaign to show
+                            await showDialog(
+                              barrierDismissible: true,
+                              context: context,
+                              builder: (BuildContext context) {
+                                return BlocProvider.value(
+                                  value: _campaignBloc,
+                                  child: const SearchCampaignList(),
+                                );
+                              },
+                            ).then(
+                              (value) async => value != null
+                                  ? await showDialog(
+                                      barrierDismissible: true,
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return BlocProvider.value(
+                                          value: _campaignBloc,
+                                          child: CampaignDetailScreen(
+                                            campaign: value,
+                                          ),
+                                        );
+                                      },
+                                    )
+                                  : const SizedBox.shrink(),
+                            );
+                          },
+                          child: const Icon(Icons.search),
+                        ),
+                        const SizedBox(height: 10),
                         FloatingActionButton(
                           key: const Key("addNew"),
                           heroTag: "campaignBtn1",

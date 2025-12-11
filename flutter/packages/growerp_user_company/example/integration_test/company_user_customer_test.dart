@@ -33,9 +33,9 @@ void main() {
   Future<void> selectCustomers(WidgetTester tester) async {
     await CommonTest.selectOption(
       tester,
-      'companiesUsers',
+      '/companiesUsers',
       'CompanyUserListCustomer',
-      '2',
+      'Customer\nComp & Users', // Tab title for phone bottom navigation
     );
   }
 

@@ -13,6 +13,7 @@ export 'src/screens/platform_config_list_screen.dart';
 export 'src/screens/platform_config_detail_screen.dart';
 export 'src/screens/outreach_message_list.dart';
 export 'src/screens/outreach_message_detail_screen.dart';
+export 'src/screens/search_campaign_list.dart';
 
 // Widget exports
 export 'src/widgets/campaign_metrics_card.dart';
@@ -27,3 +28,6 @@ export 'src/services/automation_orchestrator.dart';
 
 export 'src/get_outreach_bloc_providers.dart';
 export 'src/get_outreach_widgets.dart';
+
+// Integration test exports
+export 'src/integration_test/outreach_campaign_test.dart';

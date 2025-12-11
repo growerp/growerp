@@ -116,9 +116,20 @@ class DisplayMenuOptionState extends State<DisplayMenuOption>
         menuList.add(option);
 
         // Check if this is the item we should highlight
-        if (targetOption != null &&
-            option.menuOptionId == targetOption.menuOptionId) {
-          menuIndex = newIndex;
+        // Use menuOptionId if available, otherwise fall back to route or itemKey
+        if (targetOption != null) {
+          bool isMatch = false;
+          if (option.menuOptionId != null &&
+              targetOption.menuOptionId != null) {
+            isMatch = option.menuOptionId == targetOption.menuOptionId;
+          } else if (option.route != null && targetOption.route != null) {
+            isMatch = option.route == targetOption.route;
+          } else if (option.itemKey != null && targetOption.itemKey != null) {
+            isMatch = option.itemKey == targetOption.itemKey;
+          }
+          if (isMatch) {
+            menuIndex = newIndex;
+          }
         }
         newIndex++;
       }
@@ -487,7 +498,14 @@ class DisplayMenuOptionState extends State<DisplayMenuOption>
             children: [
               Expanded(
                 child: isPhone
-                    ? (widget.child ?? const SizedBox.shrink())
+                    ? (widget.tabWidgetLoader != null &&
+                              tabItems.isNotEmpty &&
+                              tabIndex < tabItems.length
+                          ? widget.tabWidgetLoader!(
+                              tabItems[tabIndex].widgetName ?? 'Unknown',
+                              {},
+                            )
+                          : (widget.child ?? const SizedBox.shrink()))
                     : TabBarView(
                         physics: const NeverScrollableScrollPhysics(),
                         controller: _controller,

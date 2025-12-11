@@ -10,6 +10,7 @@
         <description>List campaigns for owner with optional status filter</description>
         <in-parameters>
             <parameter name="status" />
+            <parameter name="search" />
             <parameter name="start" type="Integer" default="0" />
             <parameter name="limit" type="Integer" default="20" />
         </in-parameters>
@@ -39,10 +40,19 @@
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
                 out-map="context" />
 
+            <if condition="!search">
+                <set field="search" value="%${search}%" />
+            </if>
+
             <entity-find entity-name="growerp.marketing.OutreachCampaignAndMetrics" list="campaignList"
                 offset="start" limit="limit">
                 <econdition field-name="ownerPartyId" />
-                <econdition field-name="status" ignore-if-empty="true" />
+                <econditions combine="or">
+                    <econdition field-name="pseudoId" operator="like"
+                        value="search" ignore-case="true" ignore-if-empty="true"/>
+                    <econdition field-name="name" operator="like"
+                        value="search" ignore-case="true" ignore-if-empty="true" />
+                </econditions>
                 <order-by field-name="-lastModifiedDate" />
             </entity-find>
 

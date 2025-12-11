@@ -133,3 +133,13 @@ class OutreachRecentMessagesFetch extends OutreachCampaignEvent {
   @override
   List<Object> get props => [limit];
 }
+
+class OutreachCampaignSearchRequested extends OutreachCampaignEvent {
+  const OutreachCampaignSearchRequested({required this.query, this.limit = 20});
+
+  final String query;
+  final int limit;
+
+  @override
+  List<Object> get props => [query, limit];
+}

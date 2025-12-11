@@ -45,6 +45,11 @@ class StaticRouterConfig {
   /// If null, adds a default logout button
   final List<Widget>? mainRouteActions;
 
+  /// Optional function to load tab widgets by widgetName
+  /// Used when MenuOptions have children (tabs)
+  final Widget Function(String widgetName, Map<String, dynamic> args)?
+  tabWidgetLoader;
+
   const StaticRouterConfig({
     required this.menuConfig,
     required this.appTitle,
@@ -52,6 +57,7 @@ class StaticRouterConfig {
     this.dashboard,
     this.additionalRoutes = const [],
     this.mainRouteActions,
+    this.tabWidgetLoader,
   });
 }
 
@@ -82,6 +88,8 @@ GoRouter createStaticAppRouter({
   Widget? dashboard,
   List<RouteBase> additionalRoutes = const [],
   List<Widget>? mainRouteActions,
+  Widget Function(String widgetName, Map<String, dynamic> args)?
+  tabWidgetLoader,
 }) {
   final config = StaticRouterConfig(
     menuConfig: menuConfig,
@@ -90,6 +98,7 @@ GoRouter createStaticAppRouter({
     dashboard: dashboard,
     additionalRoutes: additionalRoutes,
     mainRouteActions: mainRouteActions,
+    tabWidgetLoader: tabWidgetLoader,
   );
 
   return _buildStaticRouter(config);
@@ -178,6 +187,7 @@ GoRouter _buildStaticRouter(StaticRouterConfig config) {
               menuConfiguration: config.menuConfig,
               menuIndex: 0,
               actions: getMainActions(context),
+              tabWidgetLoader: config.tabWidgetLoader,
               child: getDashboard(),
             );
           } else {
@@ -203,6 +213,7 @@ GoRouter _buildStaticRouter(StaticRouterConfig config) {
             return DisplayMenuOption(
               menuConfiguration: config.menuConfig,
               menuIndex: menuIndex,
+              tabWidgetLoader: config.tabWidgetLoader,
               child: child,
             );
           },

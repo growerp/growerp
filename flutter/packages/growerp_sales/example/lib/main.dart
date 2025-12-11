@@ -59,7 +59,7 @@ const salesMenuConfig = MenuConfiguration(
     ),
     MenuOption(
       itemKey: 'SALES_CRM',
-      title: 'Marketing',
+      title: 'Opportunities',
       route: '/crm',
       iconName: 'campaign',
       sequenceNum: 20,
@@ -106,7 +106,7 @@ class SalesDashboard extends StatelessWidget {
             itemCount: 1,
             itemBuilder: (context, index) {
               return _DashboardCard(
-                title: 'Marketing',
+                title: 'Opportunities',
                 iconName: 'campaign',
                 route: '/crm',
                 stats:

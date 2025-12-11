@@ -33,9 +33,9 @@ void main() {
   Future<void> selectLeads(WidgetTester tester) async {
     await CommonTest.selectOption(
       tester,
-      'companiesUsers',
+      '/companiesUsers',
       'CompanyUserListLead',
-      '1',
+      'Lead\nComp & Users', // Tab title for phone bottom navigation
     );
   }
 

@@ -6,6 +6,9 @@ import 'package:growerp_sales_example/main.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
+import 'package:growerp_sales/src/opportunities/integration_test/opportunity_test.dart';
+import 'package:growerp_sales/src/opportunities/integration_test/data.dart';
+import 'package:growerp_core/test_data.dart';
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -26,9 +29,23 @@ void main() {
       clear: true,
       title: "Opportunity test",
     );
-    await CommonTest.createCompanyAndAdmin(tester);
+    await CommonTest.createCompanyAndAdmin(
+      tester,
+      testData: {"users": administrators.sublist(0, 2) + leads.sublist(0, 2)},
+    );
     // Navigate to opportunities
     await CommonTest.selectOption(tester, '/crm', 'OpportunityList');
+    await CommonTest.createCompanyAndAdmin(
+      tester,
+      testData: {"users": administrators.sublist(0, 2) + leads.sublist(0, 2)},
+    );
+    await OpportunityTest.selectOpportunities(tester);
+    await OpportunityTest.addOpportunities(tester, opportunities.sublist(0, 4));
+    await OpportunityTest.updateOpportunities(
+      tester,
+      opportunities.sublist(4, 8),
+    );
+    await OpportunityTest.deleteOpportunities(tester);
     await CommonTest.logout(tester);
   });
 }
