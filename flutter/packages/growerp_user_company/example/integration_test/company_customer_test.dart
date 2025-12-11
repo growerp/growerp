@@ -34,7 +34,7 @@ void main() {
       tester,
       '/companies',
       'CompanyListCustomer',
-      '3',
+      'Customers', // Tab title for phone bottom navigation
     );
   }
 

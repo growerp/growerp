@@ -11,6 +11,9 @@ class OutreachCampaignState extends Equatable {
     this.metrics,
     this.message,
     this.hasReachedMax = false,
+    this.searchStatus = OutreachCampaignStatus.initial,
+    this.searchResults = const [],
+    this.searchError,
   });
 
   final OutreachCampaignStatus status;
@@ -20,6 +23,9 @@ class OutreachCampaignState extends Equatable {
   final CampaignMetrics? metrics;
   final String? message;
   final bool hasReachedMax;
+  final OutreachCampaignStatus searchStatus;
+  final List<OutreachCampaign> searchResults;
+  final String? searchError;
 
   OutreachCampaignState copyWith({
     OutreachCampaignStatus? status,
@@ -29,6 +35,9 @@ class OutreachCampaignState extends Equatable {
     CampaignMetrics? metrics,
     String? message,
     bool? hasReachedMax,
+    OutreachCampaignStatus? searchStatus,
+    List<OutreachCampaign>? searchResults,
+    String? searchError,
   }) {
     return OutreachCampaignState(
       status: status ?? this.status,
@@ -38,6 +47,9 @@ class OutreachCampaignState extends Equatable {
       metrics: metrics ?? this.metrics,
       message: message,
       hasReachedMax: hasReachedMax ?? this.hasReachedMax,
+      searchStatus: searchStatus ?? this.searchStatus,
+      searchResults: searchResults ?? this.searchResults,
+      searchError: searchError,
     );
   }
 
@@ -50,5 +62,8 @@ class OutreachCampaignState extends Equatable {
         metrics,
         message,
         hasReachedMax,
+        searchStatus,
+        searchResults,
+        searchError,
       ];
 }

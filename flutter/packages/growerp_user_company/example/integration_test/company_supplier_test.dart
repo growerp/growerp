@@ -32,9 +32,9 @@ void main() {
   Future<void> selectSuppliers(WidgetTester tester) async {
     await CommonTest.selectOption(
       tester,
-      'dbCompanies',
+      '/companies',
       'CompanyListSupplier',
-      '4',
+      'Suppliers', // Tab title for phone bottom navigation
     );
   }
 

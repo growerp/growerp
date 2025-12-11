@@ -71,3 +71,11 @@ export 'social_post_model.dart';
 export 'menu_item_model.dart';
 export 'menu_option_model.dart';
 export 'menu_configuration_model.dart';
+// Agent Manager models
+export 'agent_instance_model.dart';
+export 'agent_task_model.dart';
+export 'approval_request_model.dart';
+export 'agent_action_log_model.dart';
+export 'agent_dashboard_model.dart';
+export 'agent_instances_model.dart';
+export 'rate_limit_check_model.dart';

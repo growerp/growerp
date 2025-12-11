@@ -37,7 +37,12 @@ class HelperFunctions {
           debugPrint('SnackBar not shown - no Scaffold available: $message');
           return;
         }
-        messenger.hideCurrentSnackBar();
+        // Use try-catch for hideCurrentSnackBar in case scaffold is disposed
+        try {
+          messenger.hideCurrentSnackBar();
+        } catch (e) {
+          debugPrint('Could not hide snackbar: $e');
+        }
 
         final controller = messenger.showSnackBar(
           snackBar(context, color, message, seconds: seconds),
@@ -49,7 +54,12 @@ class HelperFunctions {
         // Ensure snackbars still disappear when accessibility keeps them alive.
         Future.delayed(duration, () {
           if (!isClosed) {
-            controller.close();
+            try {
+              controller.close();
+            } catch (e) {
+              // Scaffold may have been disposed, ignore
+              debugPrint('Could not close snackbar: $e');
+            }
           }
         });
       } catch (e) {

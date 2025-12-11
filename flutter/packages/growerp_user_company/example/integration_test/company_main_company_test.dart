@@ -42,9 +42,20 @@ void main() {
       clear: true,
     );
     await CommonTest.createCompanyAndAdmin(tester);
-    await CommonTest.selectMainCompany(tester);
+    // Navigate to Companies tab - Main Company is the first tab (default)
+    await CommonTest.selectOption(
+      tester,
+      '/companies',
+      'CompanyListMain',
+      'Main Company', // Tab title for phone bottom navigation
+    );
     await CompanyTest.addCompanies(tester, [company]); // modify
-    await CommonTest.selectMainCompany(tester);
+    await CommonTest.selectOption(
+      tester,
+      '/companies',
+      'CompanyListMain',
+      'Main Company',
+    );
     await CompanyTest.checkCompanies(tester);
     await CommonTest.logout(tester);
   });

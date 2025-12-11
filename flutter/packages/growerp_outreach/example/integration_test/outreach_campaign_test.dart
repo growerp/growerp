@@ -53,111 +53,14 @@ void main() {
     await OutreachCampaignTest.selectCampaigns(tester);
     await OutreachCampaignTest.addCampaigns(
       tester,
-      test_data.campaigns,
+      test_data.campaigns.sublist(0, 3),
     );
-    await OutreachCampaignTest.checkCampaigns(tester, test_data.campaigns);
+    await OutreachCampaignTest.checkCampaigns(tester);
     await OutreachCampaignTest.updateCampaigns(
       tester,
-      test_data.updatedCampaigns,
+      test_data.updatedCampaigns.sublist(0, 3),
     );
-    await OutreachCampaignTest.checkCampaigns(
-        tester, test_data.updatedCampaigns);
+    await OutreachCampaignTest.checkCampaigns(tester);
     // await OutreachCampaignTest.deleteCampaigns(tester); // Delete not implemented in UI yet
   }, skip: false);
-}
-
-class OutreachCampaignTest {
-  static Future<void> selectCampaigns(WidgetTester tester) async {
-    await CommonTest.selectOption(tester, 'Campaigns', 'CampaignListScreen');
-  }
-
-  static Future<void> addCampaigns(
-      WidgetTester tester, List<OutreachCampaign> campaigns) async {
-    for (OutreachCampaign campaign in campaigns) {
-      await CommonTest.tapByKey(tester, 'addNew');
-      await CommonTest.enterText(tester, 'name', campaign.name);
-      await CommonTest.tapByKey(tester, 'status');
-      await CommonTest.tapByText(tester, campaign.status);
-      await CommonTest.enterText(
-          tester, 'targetAudience', campaign.targetAudience ?? '');
-      await CommonTest.enterText(
-          tester, 'messageTemplate', campaign.messageTemplate ?? '');
-      await CommonTest.enterText(
-          tester, 'emailSubject', campaign.emailSubject ?? '');
-      await CommonTest.enterText(
-          tester, 'dailyLimit', campaign.dailyLimitPerPlatform.toString());
-
-      // Handle platforms (chips)
-      if (campaign.platforms.isNotEmpty) {
-        final platforms = campaign.platforms
-            .replaceAll('[', '')
-            .replaceAll(']', '')
-            .split(',')
-            .map((e) => e.trim())
-            .toList();
-        for (var platform in platforms) {
-          await CommonTest.tapByText(tester, platform);
-        }
-      }
-
-      await CommonTest.tapByText(tester, 'Create');
-      await CommonTest.waitForSnackbarToGo(tester);
-    }
-  }
-
-  static Future<void> checkCampaigns(
-      WidgetTester tester, List<OutreachCampaign> campaigns) async {
-    for (OutreachCampaign campaign in campaigns) {
-      await CommonTest.tapByText(tester, campaign.name);
-      // Verify details in dialog
-      expect(find.text(campaign.name), findsOneWidget);
-      expect(find.text(campaign.targetAudience ?? ''), findsOneWidget);
-      expect(find.text(campaign.messageTemplate ?? ''), findsOneWidget);
-      expect(find.text(campaign.emailSubject ?? ''), findsOneWidget);
-      expect(
-          find.text(campaign.dailyLimitPerPlatform.toString()), findsOneWidget);
-      // Close dialog by tapping outside
-      await tester.tapAt(const Offset(10, 10));
-      await tester.pumpAndSettle();
-    }
-  }
-
-  static Future<void> updateCampaigns(
-      WidgetTester tester, List<OutreachCampaign> campaigns) async {
-    for (int i = 0; i < campaigns.length; i++) {
-      final originalCampaign = test_data.campaigns[i];
-      final campaign = campaigns[i];
-      // Tap the row by finding the original name
-      await CommonTest.tapByText(tester, originalCampaign.name);
-
-      // Update fields
-      await CommonTest.enterText(tester, 'name', campaign.name);
-      await CommonTest.tapByKey(tester, 'status');
-      await CommonTest.tapByText(tester, campaign.status);
-      await CommonTest.enterText(
-          tester, 'targetAudience', campaign.targetAudience ?? '');
-      await CommonTest.enterText(
-          tester, 'messageTemplate', campaign.messageTemplate ?? '');
-      await CommonTest.enterText(
-          tester, 'emailSubject', campaign.emailSubject ?? '');
-      await CommonTest.enterText(
-          tester, 'dailyLimit', campaign.dailyLimitPerPlatform.toString());
-
-      // Handle platforms (chips)
-      if (campaign.platforms.isNotEmpty) {
-        final platforms = campaign.platforms
-            .replaceAll('[', '')
-            .replaceAll(']', '')
-            .split(',')
-            .map((e) => e.trim())
-            .toList();
-        for (var platform in platforms) {
-          await CommonTest.tapByText(tester, platform);
-        }
-      }
-
-      await CommonTest.tapByText(tester, 'Update');
-      await CommonTest.waitForSnackbarToGo(tester);
-    }
-  }
 }

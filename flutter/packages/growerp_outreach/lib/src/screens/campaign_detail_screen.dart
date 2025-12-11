@@ -221,6 +221,7 @@ class CampaignDetailScreenState extends State<CampaignDetailScreen> {
                       ),
                       const SizedBox(height: 20),
                       TextFormField(
+                        key: const Key('targetAudience'),
                         controller: _targetAudienceController,
                         decoration:
                             const InputDecoration(labelText: 'Target Audience'),
@@ -228,6 +229,7 @@ class CampaignDetailScreenState extends State<CampaignDetailScreen> {
                       ),
                       const SizedBox(height: 20),
                       TextFormField(
+                        key: const Key('messageTemplate'),
                         controller: _messageTemplateController,
                         decoration: const InputDecoration(
                             labelText: 'Message Template'),
@@ -235,12 +237,14 @@ class CampaignDetailScreenState extends State<CampaignDetailScreen> {
                       ),
                       const SizedBox(height: 20),
                       TextFormField(
+                        key: const Key('emailSubject'),
                         controller: _emailSubjectController,
                         decoration:
                             const InputDecoration(labelText: 'Email Subject'),
                       ),
                       const SizedBox(height: 20),
                       TextFormField(
+                        key: const Key('dailyLimit'),
                         controller: _dailyLimitController,
                         decoration: const InputDecoration(
                             labelText: 'Daily Limit per Platform'),

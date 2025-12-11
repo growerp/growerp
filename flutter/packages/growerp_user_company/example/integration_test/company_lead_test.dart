@@ -32,9 +32,9 @@ Future<void> main() async {
   Future<void> selectLeads(WidgetTester tester) async {
     await CommonTest.selectOption(
       tester,
-      'dbCompanies',
+      '/companies',
       'CompanyListLead',
-      '2',
+      'Leads', // Tab title for phone bottom navigation
     );
   }
 

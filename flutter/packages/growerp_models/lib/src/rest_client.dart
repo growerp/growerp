@@ -1089,6 +1089,7 @@ abstract class RestClient {
     @Query('status') String? status,
     @Query('start') int? start,
     @Query('limit') int? limit,
+    @Query('search') String? searchString,
   });
 
   @GET("rest/s1/growerp/100/OutreachCampaign")
@@ -1352,5 +1353,82 @@ abstract class RestClient {
   Future<Map<String, int>> unlinkMenuItem({
     @Field() required String menuOptionId,
     @Field() required String menuItemId,
+  });
+
+  // ========== Agent Manager ==========
+
+  /// Get agent dashboard data
+  @GET("rest/s1/growerp-agent/Dashboard")
+  Future<AgentDashboard> getAgentDashboard();
+
+  /// List agent instances
+  @GET("rest/s1/growerp-agent/Agents")
+  Future<AgentInstances> getAgentInstances({
+    @Query('status') String? status,
+    @Query('start') int? start,
+    @Query('limit') int? limit,
+  });
+
+  /// Get single agent instance
+  @GET("rest/s1/growerp-agent/Agent/{instanceId}")
+  Future<AgentInstance> getAgentInstance({
+    @Path('instanceId') required String instanceId,
+  });
+
+  /// Create agent instance
+  @POST("rest/s1/growerp-agent/Agents")
+  Future<AgentInstance> createAgentInstance({
+    @Field() required AgentInstance agent,
+  });
+
+  /// Update agent instance
+  @PATCH("rest/s1/growerp-agent/Agent/{instanceId}")
+  Future<AgentInstance> updateAgentInstance({
+    @Field() required AgentInstance agent,
+  });
+
+  /// Delete agent instance
+  @DELETE("rest/s1/growerp-agent/Agent/{instanceId}")
+  Future<void> deleteAgentInstance({
+    @Path('instanceId') required String instanceId,
+  });
+
+  /// Start agent instance
+  @POST("rest/s1/growerp-agent/Agent/{instanceId}/start")
+  Future<void> startAgentInstance({
+    @Path('instanceId') required String instanceId,
+  });
+
+  /// Pause agent instance
+  @POST("rest/s1/growerp-agent/Agent/{instanceId}/pause")
+  Future<void> pauseAgentInstance({
+    @Path('instanceId') required String instanceId,
+  });
+
+  /// Stop agent instance
+  @POST("rest/s1/growerp-agent/Agent/{instanceId}/stop")
+  Future<void> stopAgentInstance({
+    @Path('instanceId') required String instanceId,
+  });
+
+  /// List approval requests
+  @GET("rest/s1/growerp-agent/Approvals")
+  Future<List<ApprovalRequest>> getAgentApprovalRequests({
+    @Query('status') String? status,
+  });
+
+  /// Resolve (approve/reject) approval request
+  @POST("rest/s1/growerp-agent/Approval/{requestId}/resolve")
+  Future<void> resolveAgentApprovalRequest({
+    @Path('requestId') required String requestId,
+    @Field() required bool approved,
+    @Field() String? comment,
+  });
+
+  /// Check rate limit
+  @GET("rest/s1/growerp-agent/RateLimit/check")
+  Future<RateLimitCheck> checkAgentRateLimit({
+    @Query('instanceId') required String instanceId,
+    @Query('platform') required String platform,
   });
 }
