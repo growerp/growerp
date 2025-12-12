@@ -70,7 +70,7 @@ class AutomationOrchestrator {
 
         // Record success in backend
         await restClient.createOutreachMessage(
-          campaignId: campaignId,
+          marketingCampaignId: campaignId,
           platform: platform,
           recipientName: profile.name,
           recipientHandle: profile.handle,
@@ -93,7 +93,7 @@ class AutomationOrchestrator {
         // Record failure in backend
         try {
           await restClient.createOutreachMessage(
-            campaignId: campaignId,
+            marketingCampaignId: campaignId,
             platform: platform,
             recipientName: profile.name,
             recipientHandle: profile.handle,

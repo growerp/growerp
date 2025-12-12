@@ -212,6 +212,11 @@ GoRouter createOrderAccountingExampleRouter() {
         ),
       ),
       GoRoute(
+        path: '/accounting/ledger-journal',
+        builder: (context, state) =>
+            const LedgerJournalList(key: Key('LedgerJournalListLedgerJournal')),
+      ),
+      GoRoute(
         path: '/accounting/reports',
         builder: (context, state) => const Center(child: Text("Reports")),
       ),

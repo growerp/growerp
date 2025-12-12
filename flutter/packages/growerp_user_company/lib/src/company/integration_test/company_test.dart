@@ -182,6 +182,11 @@ class CompanyTest {
         );
         await CommonTest.dragNew(tester, key: 'companyDialogListView');
       }
+      await CommonTest.dragUntil(
+        tester,
+        key: 'addressLabel',
+        listViewName: 'companyDialogListView',
+      );
       expect(
         CommonTest.getTextField('addressLabel'),
         equals(
@@ -195,6 +200,11 @@ class CompanyTest {
         await CommonTest.tapByKey(tester, 'address');
         await checkAddress(tester, c.address!);
       }
+      await CommonTest.dragUntil(
+        tester,
+        key: 'paymentMethodLabel',
+        listViewName: 'companyDialogListView',
+      );
       expect(
         CommonTest.getTextField('paymentMethodLabel'),
         contains(

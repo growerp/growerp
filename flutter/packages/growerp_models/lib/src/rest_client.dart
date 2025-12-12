@@ -1094,16 +1094,16 @@ abstract class RestClient {
 
   @GET("rest/s1/growerp/100/OutreachCampaign")
   Future<OutreachCampaigns> getOutreachCampaigns({
-    @Query('campaignId') String? campaignId,
+    @Query('marketingCampaignId') String? marketingCampaignId,
     @Query('pseudoId') String? pseudoId,
-    @Query('status') String? status,
+    @Query('statusId') String? statusId,
     @Query('start') int? start,
     @Query('limit') int? limit,
   });
 
-  @GET("rest/s1/growerp/100/OutreachCampaignDetail")
+  @GET("rest/s1/growerp/100/OutreachCampaign")
   Future<CampaignDetail> getOutreachCampaignDetail({
-    @Query('campaignId') String? campaignId,
+    @Query('marketingCampaignId') String? marketingCampaignId,
     @Query('pseudoId') String? pseudoId,
   });
 
@@ -1118,22 +1118,24 @@ abstract class RestClient {
   });
 
   @DELETE("rest/s1/growerp/100/OutreachCampaign")
-  Future<void> deleteOutreachCampaign({@Field() required String campaignId});
+  Future<void> deleteOutreachCampaign({
+    @Field() required String marketingCampaignId,
+  });
 
   // Campaign Automation endpoints
   @POST("rest/s1/growerp/100/OutreachCampaign/start")
   Future<dynamic> startCampaignAutomation({
-    @Field() required String campaignId,
+    @Field() required String marketingCampaignId,
   });
 
   @POST("rest/s1/growerp/100/OutreachCampaign/pause")
   Future<dynamic> pauseCampaignAutomation({
-    @Field() required String campaignId,
+    @Field() required String marketingCampaignId,
   });
 
   @GET("rest/s1/growerp/100/OutreachMessage")
   Future<OutreachMessages> listOutreachMessages({
-    @Query("campaignId") String? campaignId,
+    @Query("marketingCampaignId") String? marketingCampaignId,
     @Query("status") String? status,
     @Query("start") int? start,
     @Query("limit") int? limit,
@@ -1145,13 +1147,13 @@ abstract class RestClient {
 
   @GET("rest/s1/growerp/100/OutreachCampaign/progress")
   Future<CampaignProgress> getCampaignProgress({
-    @Query('campaignId') required String campaignId,
+    @Query('marketingCampaignId') required String marketingCampaignId,
   });
 
   // Outreach Message endpoints
   @POST("rest/s1/growerp/100/OutreachMessage")
   Future<OutreachMessage> createOutreachMessage({
-    @Field() String? campaignId,
+    @Field() String? marketingCampaignId,
     @Field() required String platform,
     @Field() String? recipientName,
     @Field() String? recipientProfileUrl,
@@ -1172,7 +1174,7 @@ abstract class RestClient {
   // Campaign Metrics endpoints
   @GET("rest/s1/growerp/100/CampaignMetrics")
   Future<CampaignMetrics> getCampaignMetrics({
-    @Query('campaignId') required String campaignId,
+    @Query('marketingCampaignId') required String marketingCampaignId,
   });
 
   // Platform Configuration endpoints
@@ -1214,7 +1216,7 @@ abstract class RestClient {
   // Send outreach email
   @POST("rest/s1/growerp/100/OutreachEmail")
   Future<OutreachMessage> sendOutreachEmail({
-    @Field() required String campaignId,
+    @Field() required String marketingCampaignId,
     @Field() required String toEmail,
     @Field() String? toName,
     @Field() required String subject,

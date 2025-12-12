@@ -8,7 +8,8 @@ class OutreachMessage {
   /// Message unique identifier
   final String? messageId;
 
-  /// Parent campaign ID
+  /// Parent campaign ID (maps to marketingCampaignId in JSON)
+  @JsonKey(name: 'marketingCampaignId')
   final String? campaignId;
 
   /// Platform: EMAIL, LINKEDIN, TWITTER, etc.

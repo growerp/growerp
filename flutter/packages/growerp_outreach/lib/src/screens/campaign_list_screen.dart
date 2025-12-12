@@ -254,7 +254,7 @@ class CampaignListScreenState extends State<CampaignListScreen> {
                                     campaign: OutreachCampaign(
                                       name: '',
                                       platforms: '[]',
-                                      status: 'DRAFT',
+                                      status: 'MKTG_CAMP_PLANNED',
                                     ),
                                   ),
                                 );

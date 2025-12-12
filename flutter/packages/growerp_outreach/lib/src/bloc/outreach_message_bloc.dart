@@ -63,7 +63,7 @@ class OutreachMessageBloc
       final result = await restClient.listOutreachMessages(
         start: event.start,
         limit: event.limit,
-        campaignId: event.campaignId,
+        marketingCampaignId: event.campaignId,
         status: event.status,
       );
 
@@ -94,7 +94,7 @@ class OutreachMessageBloc
       emit(state.copyWith(status: OutreachMessageStatus.loading));
 
       final newMessage = await restClient.createOutreachMessage(
-        campaignId: event.campaignId,
+        marketingCampaignId: event.campaignId,
         platform: event.platform,
         recipientName: event.recipientName,
         recipientProfileUrl: event.recipientProfileUrl,

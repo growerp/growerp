@@ -3,10 +3,11 @@ import '../json_converters.dart';
 
 part 'outreach_campaign_model.g.dart';
 
-/// Outreach Campaign model
+/// Outreach Campaign model - wraps MarketingCampaign entity
 @JsonSerializable(explicitToJson: true)
 class OutreachCampaign {
-  /// System-wide unique identifier
+  /// System-wide unique identifier (maps to marketingCampaignId)
+  @JsonKey(name: 'marketingCampaignId')
   final String? campaignId;
 
   /// User-friendly identifier
@@ -15,8 +16,13 @@ class OutreachCampaign {
   /// Owner party ID
   final String? ownerPartyId;
 
-  /// Campaign name
+  /// Campaign name (maps to campaignName)
+  @JsonKey(name: 'campaignName')
   final String name;
+
+  /// Campaign summary/description
+  @JsonKey(name: 'campaignSummary')
+  final String? description;
 
   /// JSON array of platforms (EMAIL, LINKEDIN, TWITTER, etc.)
   final String platforms;
@@ -33,35 +39,71 @@ class OutreachCampaign {
   /// Email subject line (for EMAIL platform)
   final String? emailSubject;
 
-  /// Campaign status: DRAFT, ACTIVE, PAUSED, COMPLETED
-  @JsonKey(defaultValue: 'DRAFT')
+  /// Campaign status: MKTG_CAMP_PLANNED, MKTG_CAMP_APPROVED, MKTG_CAMP_INPROGRESS, etc.
+  @JsonKey(name: 'statusId', defaultValue: 'MKTG_CAMP_PLANNED')
   final String status;
 
   /// Max messages per day per platform
+  @JsonKey(defaultValue: 50)
   final int dailyLimitPerPlatform;
 
-  /// Messages sent count
+  /// Budgeted cost for the campaign (stored as String to handle BigDecimal)
+  final String? budgetedCost;
+
+  /// Actual cost incurred (stored as String to handle BigDecimal)
+  final String? actualCost;
+
+  /// Estimated cost (stored as String to handle BigDecimal)
+  final String? estimatedCost;
+
+  /// Expected revenue from the campaign (stored as String to handle BigDecimal)
+  final String? expectedRevenue;
+
+  /// Expected response percentage (stored as String to handle BigDecimal)
+  final String? expectedResponsePercent;
+
+  /// Number of messages/emails sent
+  @JsonKey(defaultValue: 0)
+  final int numSent;
+
+  /// Number of converted leads
+  final String? convertedLeads;
+
+  /// Whether the campaign is active
+  @JsonKey(defaultValue: 'N')
+  final String? isActive;
+
+  /// Messages sent count (from metrics)
+  @JsonKey(defaultValue: 0)
   final int messagesSent;
 
-  /// Responses received count
+  /// Responses received count (from metrics)
+  @JsonKey(defaultValue: 0)
   final int responsesReceived;
 
-  /// Leads generated count
+  /// Leads generated count (from metrics)
+  @JsonKey(defaultValue: 0)
   final int leadsGenerated;
 
-  /// Created timestamp
+  /// Campaign start date (fromDate in backend)
+  @JsonKey(name: 'fromDate')
   @DateTimeConverter()
   final DateTime? createdDate;
 
-  /// Last modified timestamp
+  /// Campaign end date
   @DateTimeConverter()
-  final DateTime? lastModifiedDate;
+  final DateTime? thruDate;
+
+  /// Campaign automation start date
+  @DateTimeConverter()
+  final DateTime? startDate;
 
   const OutreachCampaign({
     this.campaignId,
     this.pseudoId,
     this.ownerPartyId,
     required this.name,
+    this.description,
     required this.platforms,
     this.targetAudience,
     this.landingPageId,
@@ -69,11 +111,20 @@ class OutreachCampaign {
     this.emailSubject,
     required this.status,
     this.dailyLimitPerPlatform = 50,
+    this.budgetedCost,
+    this.actualCost,
+    this.estimatedCost,
+    this.expectedRevenue,
+    this.expectedResponsePercent,
+    this.numSent = 0,
+    this.convertedLeads,
+    this.isActive,
     this.messagesSent = 0,
     this.responsesReceived = 0,
     this.leadsGenerated = 0,
     this.createdDate,
-    this.lastModifiedDate,
+    this.thruDate,
+    this.startDate,
   });
 
   /// Creates a copy with optionally replaced fields
@@ -82,6 +133,7 @@ class OutreachCampaign {
     String? pseudoId,
     String? ownerPartyId,
     String? name,
+    String? description,
     String? platforms,
     String? targetAudience,
     String? landingPageId,
@@ -89,17 +141,27 @@ class OutreachCampaign {
     String? emailSubject,
     String? status,
     int? dailyLimitPerPlatform,
+    String? budgetedCost,
+    String? actualCost,
+    String? estimatedCost,
+    String? expectedRevenue,
+    String? expectedResponsePercent,
+    int? numSent,
+    String? convertedLeads,
+    String? isActive,
     int? messagesSent,
     int? responsesReceived,
     int? leadsGenerated,
     DateTime? createdDate,
-    DateTime? lastModifiedDate,
+    DateTime? thruDate,
+    DateTime? startDate,
   }) {
     return OutreachCampaign(
       campaignId: campaignId ?? this.campaignId,
       pseudoId: pseudoId ?? this.pseudoId,
       ownerPartyId: ownerPartyId ?? this.ownerPartyId,
       name: name ?? this.name,
+      description: description ?? this.description,
       platforms: platforms ?? this.platforms,
       targetAudience: targetAudience ?? this.targetAudience,
       landingPageId: landingPageId ?? this.landingPageId,
@@ -108,11 +170,21 @@ class OutreachCampaign {
       status: status ?? this.status,
       dailyLimitPerPlatform:
           dailyLimitPerPlatform ?? this.dailyLimitPerPlatform,
+      budgetedCost: budgetedCost ?? this.budgetedCost,
+      actualCost: actualCost ?? this.actualCost,
+      estimatedCost: estimatedCost ?? this.estimatedCost,
+      expectedRevenue: expectedRevenue ?? this.expectedRevenue,
+      expectedResponsePercent:
+          expectedResponsePercent ?? this.expectedResponsePercent,
+      numSent: numSent ?? this.numSent,
+      convertedLeads: convertedLeads ?? this.convertedLeads,
+      isActive: isActive ?? this.isActive,
       messagesSent: messagesSent ?? this.messagesSent,
       responsesReceived: responsesReceived ?? this.responsesReceived,
       leadsGenerated: leadsGenerated ?? this.leadsGenerated,
       createdDate: createdDate ?? this.createdDate,
-      lastModifiedDate: lastModifiedDate ?? this.lastModifiedDate,
+      thruDate: thruDate ?? this.thruDate,
+      startDate: startDate ?? this.startDate,
     );
   }
 

@@ -701,16 +701,17 @@ class CommonTest {
     DropdownButtonFormField tff =
         find.byKey(Key(key)).last.evaluate().single.widget
             as DropdownButtonFormField;
-    if (tff.initialValue is Currency) return tff.initialValue.description;
-    if (tff.initialValue is UserGroup) return tff.initialValue.toString();
-    if (tff.initialValue is RequestType) return tff.initialValue.value;
-    if (tff.initialValue is Role) return tff.initialValue.value;
-    if (tff.initialValue is FinDocStatusVal) {
-      return classificationId == 'AppHotel'
-          ? tff.initialValue.hotel as String
-          : tff.initialValue.name as String;
+    // Support both initialValue and value properties
+    final val = tff.initialValue ?? (tff as dynamic).value;
+    if (val == null) return '';
+    if (val is Currency) return val.description ?? '';
+    if (val is UserGroup) return val.toString();
+    if (val is RequestType) return val.toString();
+    if (val is Role) return val.value;
+    if (val is FinDocStatusVal) {
+      return classificationId == 'AppHotel' ? val.hotel : val.name;
     }
-    return tff.initialValue;
+    return val.toString();
   }
 
   static String getDropdownSearch(String key) {

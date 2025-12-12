@@ -67,7 +67,7 @@ class OutreachCampaignBloc
     try {
       await restClient.createOutreachCampaign(
         campaign: {
-          'name': event.name,
+          'campaignName': event.name,
           'platforms': event.platforms,
           'targetAudience': event.targetAudience,
           'landingPageId': event.landingPageId,
@@ -100,18 +100,20 @@ class OutreachCampaignBloc
     OutreachCampaignUpdate event,
     Emitter<OutreachCampaignState> emit,
   ) async {
+    // Emit loading to ensure state change is detected on repeated updates
+    emit(state.copyWith(status: OutreachCampaignStatus.loading));
     try {
       await restClient.updateOutreachCampaign(
         campaign: {
-          'campaignId': event.campaignId,
+          'marketingCampaignId': event.campaignId,
           'pseudoId': event.pseudoId,
-          'name': event.name,
+          'campaignName': event.name,
           'platforms': event.platforms,
           'targetAudience': event.targetAudience,
           'landingPageId': event.landingPageId,
           'messageTemplate': event.messageTemplate,
           'emailSubject': event.emailSubject,
-          'status': event.status,
+          'statusId': event.status,
           'dailyLimitPerPlatform': event.dailyLimitPerPlatform,
         },
       );
@@ -140,7 +142,8 @@ class OutreachCampaignBloc
     Emitter<OutreachCampaignState> emit,
   ) async {
     try {
-      await restClient.deleteOutreachCampaign(campaignId: event.campaignId);
+      await restClient.deleteOutreachCampaign(
+          marketingCampaignId: event.campaignId);
 
       // Refresh list
       final result = await restClient.listOutreachCampaigns();
@@ -168,7 +171,7 @@ class OutreachCampaignBloc
     emit(state.copyWith(status: OutreachCampaignStatus.loading));
     try {
       final detail = await restClient.getOutreachCampaignDetail(
-        campaignId: event.campaignId,
+        marketingCampaignId: event.campaignId,
         pseudoId: event.pseudoId,
       );
       emit(
@@ -196,8 +199,9 @@ class OutreachCampaignBloc
     try {
       await restClient.updateOutreachCampaign(
         campaign: {
-          'campaignId': event.campaignId,
-          'status': 'PAUSED',
+          'marketingCampaignId': event.campaignId,
+          'statusId': 'MKTG_CAMP_PLANNED',
+          'isActive': 'N',
         },
       );
 
@@ -227,8 +231,9 @@ class OutreachCampaignBloc
     try {
       await restClient.updateOutreachCampaign(
         campaign: {
-          'campaignId': event.campaignId,
-          'status': 'ACTIVE',
+          'marketingCampaignId': event.campaignId,
+          'statusId': 'MKTG_CAMP_INPROGRESS',
+          'isActive': 'Y',
         },
       );
 

@@ -20,7 +20,7 @@ class CampaignAutomationService {
     if (_activeCampaigns[campaignId] == true) return;
 
     // 1. Notify backend
-    await restClient.startCampaignAutomation(campaignId: campaignId);
+    await restClient.startCampaignAutomation(marketingCampaignId: campaignId);
     _activeCampaigns[campaignId] = true;
 
     // 2. Initialize orchestrator for platforms
@@ -74,14 +74,15 @@ class CampaignAutomationService {
 
   Future<void> pauseCampaign(String campaignId) async {
     // 1. Notify backend
-    await restClient.pauseCampaignAutomation(campaignId: campaignId);
+    await restClient.pauseCampaignAutomation(marketingCampaignId: campaignId);
 
     // 2. Stop local automation
     _activeCampaigns[campaignId] = false;
   }
 
   Future<CampaignProgress> getProgress(String campaignId) async {
-    return await restClient.getCampaignProgress(campaignId: campaignId);
+    return await restClient.getCampaignProgress(
+        marketingCampaignId: campaignId);
   }
 
   bool isCampaignActive(String campaignId) {
