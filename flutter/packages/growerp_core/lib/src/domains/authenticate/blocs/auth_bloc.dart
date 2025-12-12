@@ -172,7 +172,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         // when debug mode password is always qqqqqq9!
         newPassword: kReleaseMode ? null : 'qqqqqq9!',
         timeZoneOffset: DateTime.now().timeZoneOffset.toString(),
-        locale: event.locale ?? PlatformDispatcher.instance.locale,
+        locale: (event.locale ?? PlatformDispatcher.instance.locale)
+            .toLanguageTag(),
       );
       await PersistFunctions.persistAuthenticate(result);
       emit(
