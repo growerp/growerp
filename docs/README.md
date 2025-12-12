@@ -46,6 +46,7 @@ This directory contains comprehensive documentation for extending and developing
 
 ### 🔧 Technical Guides
 
+- **[Dynamic Menu System and Widget Repository](./Dynamic_Menu_System_And_Widget_Repository.md)** ⭐ **NEW!** - Complete guide to dynamic menus and widget registry patterns
 - **[Data Model Basic Guide](./basic_explanation_of_the_frontend_REST_Backend_data_models.md)** - Frontend/Backend data models
 - **[Flutter-Moqui REST Backend Interface](./Flutter_Moqui_REST_Backend_Interface.md)** - Complete REST API communication guide with code examples
 - **[Integration Test Guide](./Integration_Test_Guide.md)** ⭐ **NEW!** - Comprehensive guide to GrowERP's integration testing framework
@@ -255,6 +256,10 @@ BlocListener<UserBloc, UserState>(
 
 | Need to find | Document | Section |
 |---|---|---|
+| **Dynamic menu system** | [Dynamic Menu System and Widget Repository](./Dynamic_Menu_System_And_Widget_Repository.md) | Complete guide |
+| **Widget registry pattern** | [Dynamic Menu System and Widget Repository](./Dynamic_Menu_System_And_Widget_Repository.md) | Widget Registry |
+| **Static vs dynamic router** | [Dynamic Menu System and Widget Repository](./Dynamic_Menu_System_And_Widget_Repository.md) | When to Use Each Pattern |
+| **Example app menu setup** | [Dynamic Menu System and Widget Repository](./Dynamic_Menu_System_And_Widget_Repository.md) | Static Router |
 | **Integration test framework** | [Integration Test Guide](./Integration_Test_Guide.md) | Complete guide |
 | **Landing page implementation (Phase 12)** | [Assessment Landing Page Explanation](./Assessment_Landing_Page_Explanation.md) | Complete guide |
 | **FTL + Flutter integration** | [Assessment Landing Page Explanation](./Assessment_Landing_Page_Explanation.md) | Architecture, Runtime Behavior |
