@@ -20,6 +20,14 @@ import 'package:responsive_framework/responsive_framework.dart';
 
 import '../bloc/outreach_campaign_bloc.dart';
 
+/// Formats backend status for display
+/// 'MKTG_CAMP_PLANNED' -> 'Planned'
+String _formatStatus(String status) {
+  final cleaned = status.replaceFirst('MKTG_CAMP_', '');
+  if (cleaned.isEmpty) return status;
+  return cleaned[0].toUpperCase() + cleaned.substring(1).toLowerCase();
+}
+
 class CampaignDetailScreen extends StatefulWidget {
   final OutreachCampaign campaign;
 
@@ -51,10 +59,11 @@ class CampaignDetailScreenState extends State<CampaignDetailScreen> {
     'FACEBOOK',
   ];
   final List<String> _statusOptions = [
-    'DRAFT',
-    'ACTIVE',
-    'PAUSED',
-    'COMPLETED'
+    'MKTG_CAMP_PLANNED',
+    'MKTG_CAMP_APPROVED',
+    'MKTG_CAMP_INPROGRESS',
+    'MKTG_CAMP_COMPLETED',
+    'MKTG_CAMP_CANCELLED',
   ];
   late String _selectedStatus;
 
@@ -68,8 +77,9 @@ class CampaignDetailScreenState extends State<CampaignDetailScreen> {
     _pseudoIdController =
         TextEditingController(text: widget.campaign.pseudoId ?? '');
     _nameController = TextEditingController(text: widget.campaign.name);
-    _selectedStatus =
-        widget.campaign.status.isNotEmpty ? widget.campaign.status : 'DRAFT';
+    _selectedStatus = widget.campaign.status.isNotEmpty
+        ? widget.campaign.status
+        : 'MKTG_CAMP_PLANNED';
     _targetAudienceController = TextEditingController(
       text: widget.campaign.targetAudience,
     );
@@ -162,16 +172,17 @@ class CampaignDetailScreenState extends State<CampaignDetailScreen> {
                               key: const Key('status'),
                               decoration:
                                   const InputDecoration(labelText: 'Status'),
-                              initialValue: _selectedStatus,
+                              value: _selectedStatus,
                               items: _statusOptions.map((status) {
                                 return DropdownMenuItem<String>(
                                   value: status,
-                                  child: Text(status),
+                                  child: Text(_formatStatus(status)),
                                 );
                               }).toList(),
                               onChanged: (String? newValue) {
                                 setState(() {
-                                  _selectedStatus = newValue ?? 'DRAFT';
+                                  _selectedStatus =
+                                      newValue ?? 'MKTG_CAMP_PLANNED';
                                 });
                               },
                               isExpanded: true,
@@ -262,7 +273,16 @@ class CampaignDetailScreenState extends State<CampaignDetailScreen> {
                       Row(
                         children: [
                           Expanded(
+                            child: OutlinedButton(
+                              key: const Key('cancel'),
+                              onPressed: () => Navigator.of(context).pop(),
+                              child: const Text('Cancel'),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
                             child: ElevatedButton(
+                              key: const Key('update'),
                               onPressed: () {
                                 if (_formKey.currentState!.validate()) {
                                   final platforms =

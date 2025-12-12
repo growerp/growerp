@@ -100,7 +100,7 @@ const outreachMenuConfig = MenuConfiguration(
     ),
     MenuOption(
       menuOptionId: 'OUT_WEBSITE',
-      title: 'Website',
+      title: 'Landing Page',
       route: '/website',
       iconName: 'web',
       sequenceNum: 50,

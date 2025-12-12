@@ -17,6 +17,14 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
+/// Formats backend status for display (mirrors the UI formatting)
+/// 'MKTG_CAMP_PLANNED' -> 'Planned'
+String _formatStatus(String status) {
+  final cleaned = status.replaceFirst('MKTG_CAMP_', '');
+  if (cleaned.isEmpty) return status;
+  return cleaned[0].toUpperCase() + cleaned.substring(1).toLowerCase();
+}
+
 /// Integration test class for OutreachCampaign following the LandingPageTest pattern.
 /// Uses external test data and PersistFunctions to manage test state.
 class OutreachCampaignTest {
@@ -123,24 +131,30 @@ class OutreachCampaignTest {
   static Future<void> enterCampaignData(WidgetTester tester) async {
     SaveTest test = await PersistFunctions.getTest();
     List<OutreachCampaign> newCampaigns = [];
-    int index = 0;
 
     for (OutreachCampaign campaign in test.outreachCampaigns) {
-      if (campaign.campaignId == null) {
+      // Determine if this is a new campaign or existing one
+      // Backend pseudoIds are 6-digit numbers (e.g., '100000')
+      // Test data uses simple numbers like '1', '2', '3'
+      final isExisting =
+          campaign.pseudoId != null && campaign.pseudoId!.length >= 5;
+
+      if (isExisting) {
+        // Update existing campaign - use search by pseudoId
+        // (name may have changed in updatedCampaigns)
+        await searchAndOpenCampaign(tester, campaign.pseudoId!);
+      } else {
         // Add new campaign
         await CommonTest.tapByKey(tester, 'addNew');
         await tester.pumpAndSettle();
-      } else {
-        // Update existing campaign - use search to find it
-        await searchAndOpenCampaign(tester, campaign.name);
       }
 
       // Enter campaign name
       await CommonTest.enterText(tester, 'name', campaign.name);
 
-      // Select status
+      // Select status (tap on formatted display text)
       await CommonTest.tapByKey(tester, 'status');
-      await CommonTest.tapByText(tester, campaign.status);
+      await CommonTest.tapByText(tester, _formatStatus(campaign.status));
 
       // Enter target audience
       if (campaign.targetAudience != null) {
@@ -196,20 +210,16 @@ class OutreachCampaignTest {
         }
       }
 
-      // Save the campaign
-      if (campaign.campaignId == null) {
-        await CommonTest.tapByText(tester, 'Create');
-      } else {
-        await CommonTest.tapByText(tester, 'Update');
-      }
+      // Save the campaign using key (more reliable than text)
+      await CommonTest.tapByKey(tester, 'update');
       // Wait for dialog to close and list to refresh
       await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
 
       // Get allocated pseudoId from the list for new campaigns
-      if (campaign.campaignId == null) {
-        // The new campaign should be first in the list (index 0)
-        // Read the id from the table row key
-        final idFinder = find.byKey(Key('id$index'));
+      if (!isExisting) {
+        // The new campaign should be at index 0 in the list (newest first by -fromDate)
+        // Read the id from the first table row (id0)
+        final idFinder = find.byKey(const Key('id0'));
         if (tester.any(idFinder)) {
           final Text idText = tester.widget<Text>(idFinder);
           campaign = campaign.copyWith(pseudoId: idText.data);
@@ -217,7 +227,6 @@ class OutreachCampaignTest {
       }
 
       newCampaigns.add(campaign);
-      index++;
     }
 
     await PersistFunctions.persistTest(
@@ -278,10 +287,10 @@ class OutreachCampaignTest {
         equals(campaign.dailyLimitPerPlatform.toString()),
       );
 
-      // Verify status
+      // Verify status (compare formatted values for consistency with UI)
       expect(
-        CommonTest.getDropdown('status'),
-        equals(campaign.status),
+        _formatStatus(CommonTest.getDropdown('status')),
+        equals(_formatStatus(campaign.status)),
       );
 
       // Close dialog by tapping cancel button

@@ -22,7 +22,7 @@ class LedgerJournalTest {
     await CommonTest.selectOption(tester, '/accounting', 'AcctDashBoard');
     await CommonTest.selectOption(
       tester,
-      '/accounting/ledger',
+      '/accounting/ledger-journal',
       'LedgerJournalListLedgerJournal',
     );
   }

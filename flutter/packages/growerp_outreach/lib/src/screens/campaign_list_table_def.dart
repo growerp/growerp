@@ -20,6 +20,14 @@ import 'package:responsive_framework/responsive_framework.dart';
 
 import '../bloc/outreach_campaign_bloc.dart';
 
+/// Formats backend status for display
+/// 'MKTG_CAMP_PLANNED' -> 'Planned'
+String _formatStatus(String status) {
+  final cleaned = status.replaceFirst('MKTG_CAMP_', '');
+  if (cleaned.isEmpty) return status;
+  return cleaned[0].toUpperCase() + cleaned.substring(1).toLowerCase();
+}
+
 TableData getCampaignListTableData(
   Bloc bloc,
   String classificationId,
@@ -102,7 +110,7 @@ TableData getCampaignListTableData(
           children: [
             Text(campaign.pseudoId ?? '', key: Key('id$index')),
             Text(campaign.name.truncate(25), key: Key('name$index')),
-            Text(campaign.status, key: Key('status$index')),
+            Text(_formatStatus(campaign.status), key: Key('status$index')),
           ],
         )));
     rowContent.add(buildDeleteAction(width: 20));
@@ -127,7 +135,7 @@ TableData getCampaignListTableData(
       name: 'Status',
       width: 10,
       value: Text(
-        campaign.status,
+        _formatStatus(campaign.status),
         key: Key('status${campaign.pseudoId}'),
       ),
     ));

@@ -61,6 +61,7 @@ void main() {
       test_data.updatedCampaigns.sublist(0, 3),
     );
     await OutreachCampaignTest.checkCampaigns(tester);
-    // await OutreachCampaignTest.deleteCampaigns(tester); // Delete not implemented in UI yet
+    await OutreachCampaignTest.deleteCampaigns(tester);
+    await CommonTest.logout(tester);
   }, skip: false);
 }

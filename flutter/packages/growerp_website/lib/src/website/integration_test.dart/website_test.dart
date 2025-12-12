@@ -57,6 +57,7 @@ class WebsiteTest {
       'updateHost',
       seconds: CommonTest.waitTime,
     );
+    await CommonTest.waitForSnackbarToGo(tester);
 
     // Get the expected result (URLs are typically converted to lowercase)
     String expectedUrl = url.toLowerCase();

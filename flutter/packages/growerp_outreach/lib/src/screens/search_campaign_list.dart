@@ -18,6 +18,14 @@ import 'package:growerp_core/growerp_core.dart';
 
 import '../bloc/outreach_campaign_bloc.dart';
 
+/// Formats backend status for display
+/// 'MKTG_CAMP_PLANNED' -> 'Planned'
+String _formatStatus(String status) {
+  final cleaned = status.replaceFirst('MKTG_CAMP_', '');
+  if (cleaned.isEmpty) return status;
+  return cleaned[0].toUpperCase() + cleaned.substring(1).toLowerCase();
+}
+
 class SearchCampaignList extends StatefulWidget {
   const SearchCampaignList({super.key});
 
@@ -112,7 +120,7 @@ class SearchCampaignListState extends State<SearchCampaignList> {
                         key: Key('campaignSearchItem$index'),
                         title: Text(campaign.name),
                         subtitle: Text(
-                          '${campaign.pseudoId ?? 'N/A'} - ${campaign.status}',
+                          '${campaign.pseudoId ?? 'N/A'} - ${_formatStatus(campaign.status)}',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
