@@ -29,7 +29,7 @@ abstract class RestClient {
     @Field() String? newPassword,
     @Field('userGroupId') UserGroup? userGroup, // if admin also company
     @Field() String? timeZoneOffset,
-    @Field() Locale? locale,
+    @Field() String? locale,
   });
 
   @POST("rest/s1/growerp/100/Login")
