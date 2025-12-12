@@ -1,9 +1,9 @@
 ````markdown
 # Complete Documentation Index - Updated Architecture
 
-**Date:** November 11, 2025  
+**Date:** December 12, 2024  
 **Status:** ✅ COMPLETE & PRODUCTION-READY  
-**Total:** 12 Documents | 8,750+ Lines | Comprehensive Specification
+**Total:** 13 Documents | 9,000+ Lines | Comprehensive Specification
 
 ---
 
@@ -115,6 +115,29 @@
 
 ---
 
+### 6. GrowERP_CLI_Reference.md ⭐ DEVELOPER TOOLS
+**Size:** 450+ lines | **Purpose:** Complete CLI command documentation  
+**Read Time:** 25 minutes  
+**For:** Developers, DevOps, system administrators
+
+**Contents:**
+- All CLI commands (help, install, import, export, finalize, createPackage, exportPackage, importPackage)
+- Command options and arguments
+- Usage examples
+- Common workflows
+- Troubleshooting guide
+- Package creation and distribution
+
+**Key Commands:**
+- ✅ `growerp install` - Set up complete GrowERP environment
+- ✅ `growerp import/export` - Data migration
+- ✅ `growerp createPackage` - Create new GrowERP packages
+- ✅ `growerp exportPackage/importPackage` - Package distribution
+
+**Start Reading:** YES - Essential for development workflow
+
+---
+
 ## 📖 Reading Recommendations by Role
 
 ### 👔 Project Managers / Stakeholders
@@ -181,7 +204,8 @@
 | 00_START_HERE | 389 | Visual overview | Everyone |
 | GROWERP_ASSESSMENT_ARCHITECTURE | 566 | Package design | Architects |
 | ARCHITECTURE_UPDATE_SUMMARY | 429 | Changes made | Tech leads |
-| **TOTAL** | **2,330+** | **Complete spec** | **All roles** |
+| GrowERP_CLI_Reference | 450+ | CLI commands & workflows | Developers/DevOps |
+| **TOTAL** | **2,780+** | **Complete spec** | **All roles** |
 
 ---
 
@@ -197,6 +221,10 @@
 | **MIME Type Configuration** | Assessment_Landing_Page_Explanation | MIME Type Configuration section |
 | **Architecture Overview** | GROWERP_ASSESSMENT_ARCHITECTURE | All |
 | **Testing Strategy** | Assessment_Landing_Page_Explanation | Testing Checklist |
+| **CLI Commands** | GrowERP_CLI_Reference | All commands |
+| **Package Creation** | GrowERP_CLI_Reference | createPackage |
+| **Package Distribution** | GrowERP_CLI_Reference | exportPackage, importPackage |
+| **Data Migration** | GrowERP_CLI_Reference | import, export, finalize |
 
 ---
 

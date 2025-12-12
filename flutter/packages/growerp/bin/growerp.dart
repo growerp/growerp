@@ -24,7 +24,7 @@ import 'package:growerp/src/src.dart';
 Future<void> main(List<String> args) async {
   String growerpPath = '$HOME/growerp';
   String validCommands =
-      "valid commands are:'help | install | import | export | finalize'";
+      "valid commands are:'help | install | import | export | finalize | createPackage | exportPackage | importPackage'";
   String? backendUrl;
   String outputDirectory = 'growerpCsv';
   String branch = 'master';
@@ -71,33 +71,43 @@ Future<void> main(List<String> args) async {
           timeout = int.parse(args[++i]);
         case '-ft':
           i++;
-          startFileType = FileType.values.firstWhere((e) => e.name == args[i],
-              orElse: () => FileType.unknown);
+          startFileType = FileType.values.firstWhere(
+            (e) => e.name == args[i],
+            orElse: () => FileType.unknown,
+          );
           if (startFileType == FileType.unknown) {
             logger.e(
-                "Start Filetype: ${args[i]}  not recognized, existing filetypes $fileTypeList");
+              "Start Filetype: ${args[i]}  not recognized, existing filetypes $fileTypeList",
+            );
             exit(1);
           }
         case '-sft':
           i++;
-          stopFileType = FileType.values.firstWhere((e) => e.name == args[i],
-              orElse: () => FileType.unknown);
+          stopFileType = FileType.values.firstWhere(
+            (e) => e.name == args[i],
+            orElse: () => FileType.unknown,
+          );
           if (stopFileType == FileType.unknown) {
             logger.e(
-                "Stop Filetype: ${args[i]}  not recognized, existing filetypes $fileTypeList");
+              "Stop Filetype: ${args[i]}  not recognized, existing filetypes $fileTypeList",
+            );
             exit(1);
           }
         case '-fn':
           startFileName = args[++i];
         case '-y':
           fiscalYear = args[++i];
+        case '-d':
+          growerpPath = args[++i];
         default:
           modifiedArgs.add(args[i]);
       }
     }
-    logger.i("Growerp command: ${modifiedArgs[0].toLowerCase()} i: $inputFile "
-        "u: $username p: $password -branch: $branch -ft ${startFileType.name} "
-        "-fn $startFileName -sft ${stopFileType.name} -n $companyName -y $fiscalYear");
+    logger.i(
+      "Growerp command: ${modifiedArgs[0].toLowerCase()} i: $inputFile "
+      "u: $username p: $password -branch: $branch -ft ${startFileType.name} "
+      "-fn $startFileName -sft ${stopFileType.name} -n $companyName -y $fiscalYear",
+    );
 
     // commands
     if (modifiedArgs.isEmpty) {
@@ -106,54 +116,86 @@ Future<void> main(List<String> args) async {
     switch (modifiedArgs[0].toLowerCase()) {
       case 'help':
         // ignore: avoid_print
-        print("Help for the growerp command\n"
-            " -- install:\n "
-            "     will install the complete system: frontend, backend and chat\n"
-            "     and will start the backend and chat in the background.\n"
-            "     The install directory will be $HOME/growerp\n"
-            "     The admin frontend can now be started with the 'flutter run' command\n"
-            "       in the directory growerp/flutter/packages/admin\n"
-            " -- import:\n "
-            "     will import standard csv files into a local or remote system\n"
-            "     these standard csv files can be created by the conversion framework\n"
-            "     in the command convert_to_csv\n"
-            "     A new company and admin will be created in the process\n"
-            "     Parameters:\n"
-            "     -i    input directory which contains the csv files and images\n"
-            "     -u    user email address to for logging in.\n"
-            "     -p    password for logging in.\n"
-            "     -url  The backend url or empty for localhost\n"
-            "     -n    The new company name\n"
-            "     -c    The currency id to be used, example: USD,EUR\n"
-            "     -ft   resume from this filetype\n"
-            "     -fn   resume from this filename\n"
-            "     -sft  stop just before this filetype\n"
-            " -- export: (under development)\n "
-            "     Will export all company related information in csv files\n"
-            "     -u    user email address to for logging in.\n"
-            "     -p    password for logging in.\n"
-            "     -o    output directory name\n"
-            "     -f    just this filetype\n"
-            " -- finalize:\n "
-            "     wil finalize the import process by completing finished \n"
-            "     documents and accounting time periods.\n"
-            "     -u    user email address to for logging in.\n"
-            "     -p    password for logging in.\n"
-            "     -Y    YYYY  close a specific fiscal year, when missing close all except current year\n");
+        print(
+          "Help for the growerp command\n"
+          " -- install:\n "
+          "     will install the complete system: frontend, backend and chat\n"
+          "     and will start the backend and chat in the background.\n"
+          "     The install directory will be $HOME/growerp\n"
+          "     The admin frontend can now be started with the 'flutter run' command\n"
+          "       in the directory growerp/flutter/packages/admin\n"
+          " -- import:\n "
+          "     will import standard csv files into a local or remote system\n"
+          "     these standard csv files can be created by the conversion framework\n"
+          "     in the command convert_to_csv\n"
+          "     A new company and admin will be created in the process\n"
+          "     Parameters:\n"
+          "     -i    input directory which contains the csv files and images\n"
+          "     -u    user email address to for logging in.\n"
+          "     -p    password for logging in.\n"
+          "     -url  The backend url or empty for localhost\n"
+          "     -n    The new company name\n"
+          "     -c    The currency id to be used, example: USD,EUR\n"
+          "     -ft   resume from this filetype\n"
+          "     -fn   resume from this filename\n"
+          "     -sft  stop just before this filetype\n"
+          " -- export: (under development)\n "
+          "     Will export all company related information in csv files\n"
+          "     -u    user email address to for logging in.\n"
+          "     -p    password for logging in.\n"
+          "     -o    output directory name\n"
+          "     -f    just this filetype\n"
+          " -- finalize:\n "
+          "     wil finalize the import process by completing finished \n"
+          "     documents and accounting time periods.\n"
+          "     -u    user email address to for logging in.\n"
+          "     -p    password for logging in.\n"
+          "     -Y    YYYY  close a specific fiscal year, when missing close all except current year\n"
+          " -- createPackage <name>:\n "
+          "     Creates a new GrowERP package with Flutter frontend and Moqui backend.\n"
+          "     <name>  The package name (without growerp_ prefix).\n"
+          "             Creates flutter/packages/growerp_<name> and\n"
+          "             moqui/runtime/component/growerp-<name>\n"
+          "     -d      Target directory (default: ~/growerp)\n"
+          " -- exportPackage <packageName>:\n "
+          "     Exports a GrowERP package as a zip archive.\n"
+          "     <packageName>  Full package name (e.g., growerp_testpkg)\n"
+          "     -o      Output directory for the zip file (default: current dir)\n"
+          " -- importPackage <archivePath>:\n "
+          "     Imports a GrowERP package from a zip archive.\n"
+          "     <archivePath>  Path to the zip file to import\n"
+          "     Automatically adds package to melos.yaml\n",
+        );
         exit(1);
       case 'install':
         install(growerpPath, branch);
       case 'import':
         import(
-            inputFile, backendUrl, username, password, companyName, currencyId,
-            startFileType: startFileType,
-            startFileName: startFileName,
-            stopFileType: stopFileType);
+          inputFile,
+          backendUrl,
+          username,
+          password,
+          companyName,
+          currencyId,
+          startFileType: startFileType,
+          startFileName: startFileName,
+          stopFileType: stopFileType,
+        );
       case 'finalize':
-        final client = RestClient(await buildDioClient(backendUrl,
-            timeout: Duration(seconds: timeout), miniLog: true));
-        await login(client, username, password,
-            companyName: companyName, currencyId: currencyId);
+        final client = RestClient(
+          await buildDioClient(
+            backendUrl,
+            timeout: Duration(seconds: timeout),
+            miniLog: true,
+          ),
+        );
+        await login(
+          client,
+          username,
+          password,
+          companyName: companyName,
+          currencyId: currencyId,
+        );
 
         Map<String, int> parts = {
           'closePeriod': 1,
@@ -171,7 +213,10 @@ Future<void> main(List<String> args) async {
             start = 0;
             do {
               result = await client.finalizeImport(
-                  start: start, limit: part.value, part: part.key);
+                start: start,
+                limit: part.value,
+                part: part.key,
+              );
               limitOut = int.parse(result['limitOut']);
               start += limitOut;
             } while (limitOut != -1); // && --count != 0);
@@ -183,6 +228,24 @@ Future<void> main(List<String> args) async {
 
       case 'export':
         export(backendUrl, outputDirectory, username, password);
+      case 'createpackage':
+        if (modifiedArgs.length < 2) {
+          logger.e('Usage: growerp createPackage <packageName>');
+          exit(1);
+        }
+        createPackage(modifiedArgs[1], growerpPath);
+      case 'exportpackage':
+        if (modifiedArgs.length < 2) {
+          logger.e('Usage: growerp exportPackage <packageName> [-o outputDir]');
+          exit(1);
+        }
+        await exportPackage(modifiedArgs[1], outputDirectory);
+      case 'importpackage':
+        if (modifiedArgs.length < 2) {
+          logger.e('Usage: growerp importPackage <archivePath>');
+          exit(1);
+        }
+        await importPackage(modifiedArgs[1]);
       case 'report':
         // (hansbak): create a data (conversion) report
         // how many open documents order,invoices, payments  value
