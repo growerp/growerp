@@ -8,6 +8,7 @@ export 'src/date_format_extensions.dart';
 export 'l10n/generated/core_localizations.dart';
 export 'src/services/ws_client.dart';
 export 'src/services/build_dio_client.dart';
+export 'src/services/get_dio_error.dart';
 export 'src/services/timezone_helper.dart';
 export 'src/services/widget_registry.dart';
 export 'src/services/ai_navigation_service.dart';

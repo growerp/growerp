@@ -25,6 +25,7 @@ import 'package:credit_card_type_detector/credit_card_type_detector.dart';
 
 import '../../../services/ws_client.dart';
 import '../../../services/build_dio_client.dart';
+import '../../../services/get_dio_error.dart';
 import '../../common/functions/functions.dart';
 
 part 'auth_event.dart';

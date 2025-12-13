@@ -1,6 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:dio/dio.dart';
 import 'package:growerp_models/growerp_models.dart';
+import 'package:growerp_core/growerp_core.dart';
 import 'social_post_event.dart';
 import 'social_post_state.dart';
 

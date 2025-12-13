@@ -1,8 +1,17 @@
+/*
+ * This GrowERP software is in the public domain under CC0 1.0 Universal plus a
+ * Grant of Patent License.
+ * 
+ * CLI-specific error handling that doesn't depend on Flutter.
+ * Uses Hive for storage instead of SharedPreferences.
+ */
+
 import 'dart:convert';
-
 import 'package:dio/dio.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:hive/hive.dart';
 
+/// Get a user-friendly error message from a Dio exception.
+/// This is a pure Dart implementation that uses Hive instead of SharedPreferences.
 Future<String> getDioError(dynamic e) async {
   String returnMessage = '';
   if (e is DioException) {
@@ -21,32 +30,25 @@ Future<String> getDioError(dynamic e) async {
             errorMessage = decoded['errors'].toString();
 
             // Try to extract the inner error message from nested JSON errors
-            // Example: "Failed to generate: { "error": { "message": "Model overloaded" } }"
             try {
-              // Check if the error contains nested JSON
               final RegExp jsonPattern = RegExp(
                 r'\{[^}]*"message"\s*:\s*"([^"]+)"',
               );
               final match = jsonPattern.firstMatch(errorMessage);
               if (match != null && match.group(1) != null) {
-                // Extract just the meaningful message
                 errorMessage = match.group(1)!;
               } else {
-                // Clean up the message by removing extra whitespace and formatting
                 errorMessage = errorMessage.replaceAll('\\n', '\n').trim();
               }
             } catch (_) {
-              // If parsing fails, just clean up the original message
               errorMessage = errorMessage.replaceAll('\\n', '\n').trim();
             }
 
-            // Return only the clean error message without technical prefixes
             returnMessage = errorMessage;
           } else if (decoded['errorCode'] != null) {
             returnMessage = 'Error code: ${decoded['errorCode']}';
           }
         } else {
-          // Fallback to technical error for non-JSON responses
           returnMessage = 'Server error occurred';
         }
       } catch (_) {
@@ -81,8 +83,12 @@ Future<String> getDioError(dynamic e) async {
 
   // remove key from db when not valid
   if (returnMessage.trim() == 'Login key not valid') {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.remove('apiKey');
+    try {
+      var box = await Hive.openBox('growerp');
+      await box.delete('apiKey');
+    } catch (_) {
+      // Ignore Hive errors
+    }
     returnMessage = 'Login key expired, please login again';
   }
   return returnMessage.trim();

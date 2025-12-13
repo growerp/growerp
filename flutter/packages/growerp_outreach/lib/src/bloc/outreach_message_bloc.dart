@@ -16,6 +16,7 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:growerp_models/growerp_models.dart';
+import 'package:growerp_core/growerp_core.dart';
 import 'package:stream_transform/stream_transform.dart';
 
 import 'outreach_message_event.dart';

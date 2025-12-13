@@ -20,6 +20,8 @@ import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:stream_transform/stream_transform.dart';
 
+import '../../services/get_dio_error.dart';
+
 part 'rest_request_event.dart';
 part 'rest_request_state.dart';
 
