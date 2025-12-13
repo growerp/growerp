@@ -261,6 +261,7 @@ growerp_<name>/
 - ✅ Integration test class with CRUD methods
 - ✅ Moqui entity and service definitions
 - ✅ Localization support
+- ✅ **Automatically adds package to `flutter/melos.yaml`**
 
 **Example:**
 ```bash

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_models/growerp_models.dart';
+import 'package:growerp_core/growerp_core.dart';
 import 'credibility_event.dart';
 import 'credibility_state.dart';
 

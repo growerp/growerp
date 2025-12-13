@@ -1,9 +1,10 @@
 import 'package:dio/dio.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:growerp_models/growerp_models.dart';
 import 'package:stream_transform/stream_transform.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
+
+import '../../../services/get_dio_error.dart';
 
 part 'data_fetch_state.dart';
 part 'data_fetch_event.dart';
@@ -27,14 +28,21 @@ class DataFetchBloc<T> extends Bloc<DataFetchBlocEvent, DataFetchState<T>>
         emit(state.copyWith(status: DataFetchStatus.loading));
         final data = await event.futureFunction();
         return emit(
-            state.copyWith(status: DataFetchStatus.success, data: data));
+          state.copyWith(status: DataFetchStatus.success, data: data),
+        );
       } on DioException catch (e) {
-        emit(state.copyWith(
-            status: DataFetchStatus.failure, message: await getDioError(e)));
+        emit(
+          state.copyWith(
+            status: DataFetchStatus.failure,
+            message: await getDioError(e),
+          ),
+        );
       }
     }
 
-    on<GetDataEvent<T>>(onGetDataEvent<T>,
-        transformer: dataEventDroppable(const Duration(milliseconds: 100)));
+    on<GetDataEvent<T>>(
+      onGetDataEvent<T>,
+      transformer: dataEventDroppable(const Duration(milliseconds: 100)),
+    );
   }
 }
