@@ -172,7 +172,7 @@ class CampaignDetailScreenState extends State<CampaignDetailScreen> {
                               key: const Key('status'),
                               decoration:
                                   const InputDecoration(labelText: 'Status'),
-                              value: _selectedStatus,
+                              initialValue: _selectedStatus,
                               items: _statusOptions.map((status) {
                                 return DropdownMenuItem<String>(
                                   value: status,
@@ -188,6 +188,54 @@ class CampaignDetailScreenState extends State<CampaignDetailScreen> {
                               isExpanded: true,
                             ),
                           ),
+                          const SizedBox(width: 10),
+                          // Active status indicator
+                          if (widget.campaign.campaignId != null)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 8,
+                              ),
+                              decoration: BoxDecoration(
+                                color: widget.campaign.isActive == 'Y'
+                                    ? Colors.green.withValues(alpha: 0.2)
+                                    : Colors.grey.withValues(alpha: 0.2),
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: widget.campaign.isActive == 'Y'
+                                      ? Colors.green
+                                      : Colors.grey,
+                                  width: 1,
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    widget.campaign.isActive == 'Y'
+                                        ? Icons.play_circle
+                                        : Icons.pause_circle,
+                                    size: 16,
+                                    color: widget.campaign.isActive == 'Y'
+                                        ? Colors.green
+                                        : Colors.grey,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    widget.campaign.isActive == 'Y'
+                                        ? 'Active'
+                                        : 'Paused',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                      color: widget.campaign.isActive == 'Y'
+                                          ? Colors.green
+                                          : Colors.grey,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                         ],
                       ),
                       const SizedBox(height: 10),

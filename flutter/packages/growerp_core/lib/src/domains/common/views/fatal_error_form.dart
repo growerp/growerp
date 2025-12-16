@@ -13,6 +13,7 @@
  */
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:growerp_core/l10n/generated/core_localizations.dart';
 
 class FatalErrorForm extends StatelessWidget {
@@ -44,7 +45,7 @@ class FatalErrorForm extends StatelessWidget {
           ),
           OutlinedButton(
             child: Text(localizations.restart),
-            onPressed: () => Navigator.pushNamed(context, '/'),
+            onPressed: () => context.go('/'),
           ),
         ],
       ),

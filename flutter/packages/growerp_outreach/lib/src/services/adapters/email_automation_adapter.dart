@@ -5,6 +5,11 @@ import '../platform_automation_adapter.dart';
 ///
 /// This adapter sends emails via Moqui's built-in email functionality
 /// through the REST API. No direct SMTP configuration needed in Flutter.
+/// The backend handles:
+/// - SMTP sending via configured email server
+/// - Adding unsubscribe link automatically
+/// - Recording the message in OutreachMessage entity
+/// - Updating campaign metrics (messages sent count)
 class EmailAutomationAdapter implements PlatformAutomationAdapter {
   EmailAutomationAdapter(this.restClient);
 
@@ -27,9 +32,9 @@ class EmailAutomationAdapter implements PlatformAutomationAdapter {
 
   @override
   Future<List<ProfileData>> searchProfiles(String criteria) async {
-    // For email, profiles would be loaded from CSV or database
-    // This is a placeholder - actual implementation would parse CSV
-    // or fetch from a contact list
+    // For email, profiles come from leads in the system
+    // The criteria can be used to filter by tags or attributes
+    // For now, return empty - caller should provide profiles directly
     return [];
   }
 
@@ -43,30 +48,30 @@ class EmailAutomationAdapter implements PlatformAutomationAdapter {
   }
 
   @override
-  Future<void> sendDirectMessage(ProfileData profile, String message) async {
+  Future<void> sendDirectMessage(
+    ProfileData profile,
+    String message, {
+    String? campaignId,
+    String? subject,
+  }) async {
     if (profile.email == null || profile.email!.isEmpty) {
       throw ArgumentError('Profile must have an email address');
     }
+    if (campaignId == null) {
+      throw ArgumentError('Campaign ID is required for email');
+    }
+    if (subject == null || subject.isEmpty) {
+      throw ArgumentError('Email subject is required');
+    }
 
-    // TODO: Create a new Moqui service endpoint for sending outreach emails
-    // The service should:
-    // 1. Use Moqui's EmailServices to send the email
-    // 2. Add unsubscribe link automatically
-    // 3. Track email opens/clicks if configured
-    // 4. Record the message via create#OutreachMessage
-    //
-    // Example service call:
-    // await restClient.sendOutreachEmail(
-    //   toEmail: profile.email!,
-    //   toName: profile.name,
-    //   subject: emailSubject,
-    //   body: message,
-    //   campaignId: campaignId,
-    // );
-
-    throw UnimplementedError(
-      'Email sending via Moqui email services not yet implemented. '
-      'Need to create backend service endpoint.',
+    // Send email via Moqui backend service
+    await restClient.sendOutreachEmail(
+      marketingCampaignId: campaignId,
+      toEmail: profile.email!,
+      toName: profile.name,
+      subject: subject,
+      body: message,
+      bodyContentType: 'text/html',
     );
   }
 

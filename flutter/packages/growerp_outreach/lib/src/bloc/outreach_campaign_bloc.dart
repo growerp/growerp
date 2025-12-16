@@ -198,12 +198,8 @@ class OutreachCampaignBloc
     Emitter<OutreachCampaignState> emit,
   ) async {
     try {
-      await restClient.updateOutreachCampaign(
-        campaign: {
-          'marketingCampaignId': event.campaignId,
-          'statusId': 'MKTG_CAMP_PLANNED',
-          'isActive': 'N',
-        },
+      await restClient.pauseCampaignAutomation(
+        marketingCampaignId: event.campaignId,
       );
 
       // Refresh list
@@ -230,12 +226,8 @@ class OutreachCampaignBloc
     Emitter<OutreachCampaignState> emit,
   ) async {
     try {
-      await restClient.updateOutreachCampaign(
-        campaign: {
-          'marketingCampaignId': event.campaignId,
-          'statusId': 'MKTG_CAMP_INPROGRESS',
-          'isActive': 'Y',
-        },
+      await restClient.startCampaignAutomation(
+        marketingCampaignId: event.campaignId,
       );
 
       // Refresh list

@@ -35,6 +35,7 @@ class AutomationOrchestrator {
     required String messageTemplate,
     required int dailyLimit,
     required String campaignId,
+    String? emailSubject,
     required bool Function() checkCancelled,
   }) async {
     final adapter = _adapters[platform];
@@ -63,7 +64,12 @@ class AutomationOrchestrator {
 
         // Send message (or connection request for social platforms)
         if (platform == 'EMAIL') {
-          await adapter.sendDirectMessage(profile, message);
+          await adapter.sendDirectMessage(
+            profile,
+            message,
+            campaignId: campaignId,
+            subject: emailSubject,
+          );
         } else {
           await adapter.sendConnectionRequest(profile, message);
         }

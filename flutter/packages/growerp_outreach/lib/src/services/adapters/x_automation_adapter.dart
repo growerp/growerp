@@ -1,15 +1,20 @@
 import 'package:flutter/foundation.dart';
 import '../platform_automation_adapter.dart';
-import '../browser_mcp_service.dart';
-import '../../utils/logger.dart';
+import '../flutter_mcp_browser_service.dart';
+import '../snapshot_parser.dart';
 
-/// X (formerly Twitter) automation adapter using browsermcp
+/// X (formerly Twitter) automation adapter using browsermcp via flutter_mcp
 ///
-/// This adapter uses the browsermcp MCP server to automate X
-/// profile searches, follows, and direct messages.
-class XAutomationAdapter with LoggerMixin implements PlatformAutomationAdapter {
-  final BrowserMCPService _browser = BrowserMCPService();
+/// This adapter uses the flutter_mcp package to communicate with
+/// browsermcp MCP server for X profile searches, follows, and direct messages.
+/// No separate HTTP bridge needed.
+class XAutomationAdapter implements PlatformAutomationAdapter {
+  final FlutterMcpBrowserService _browser;
   bool _initialized = false;
+
+  /// Create adapter with optional browser service for testing
+  XAutomationAdapter({FlutterMcpBrowserService? browser})
+      : _browser = browser ?? FlutterMcpBrowserService();
 
   @override
   String get platformName => 'TWITTER';
@@ -24,7 +29,7 @@ class XAutomationAdapter with LoggerMixin implements PlatformAutomationAdapter {
     await _browser.navigate('https://twitter.com');
 
     // Wait for page load
-    await _browser.wait(2.0);
+    await _browser.wait(2000);
 
     _initialized = true;
   }
@@ -37,20 +42,20 @@ class XAutomationAdapter with LoggerMixin implements PlatformAutomationAdapter {
 
     try {
       // Take snapshot and check for logged-in indicators
-      await _browser.snapshot();
-      final selector = _browser.selector;
-
-      if (selector == null) return false;
+      final snapshot = await _browser.snapshot();
 
       // Check if we can see the home timeline or profile elements
       // Look for Tweet compose button or profile navigation
-      final tweetButton = selector.byTestId('tweetButton');
-      final homeTimeline = selector.byText('Home');
+      final tweetButton = SnapshotParser.findFirst(
+        snapshot,
+        testId: 'tweetButton',
+      );
+      final homeTimeline = SnapshotParser.findByText(snapshot, 'Home');
 
       // If we can find these elements, we're logged in
       return tweetButton != null || homeTimeline != null;
     } catch (e) {
-      logger.warning('Error checking Twitter login status: $e');
+      debugPrint('Error checking Twitter login status: $e');
       return false;
     }
   }
@@ -70,32 +75,35 @@ class XAutomationAdapter with LoggerMixin implements PlatformAutomationAdapter {
       await _browser.navigate(searchUrl);
 
       // Wait for search results to load
-      await _browser.wait(2.0);
+      await _browser.wait(2000);
 
       // Take snapshot to get search results
-      await _browser.snapshot();
+      final snapshot = await _browser.snapshot();
 
-      // Parse snapshot to extract profile data
-      // In production, iterate through snapshot['elements'] to find:
-      // - Profile cards (typically have data-testid="UserCell")
-      // - Extract name, handle, bio, etc.
+      // Find user cells in the snapshot
+      final userCells = SnapshotParser.findAll(
+        snapshot,
+        testId: 'UserCell',
+      );
 
-      // Example profile extraction (mock for now)
-      // In production, this would parse actual snapshot data:
-      // final elements = snapshot['elements'] as List? ?? [];
-      // for (final element in elements) {
-      //   Look for user cells and extract data
-      //   profiles.add(ProfileData(...));
-      // }
-
-      // Mock data for demonstration
-      profiles.add(const ProfileData(
-        name: 'Example User',
-        profileUrl: 'https://twitter.com/exampleuser',
-        handle: '@exampleuser',
-        company: 'Tech Company',
-        title: 'Software Engineer',
-      ));
+      for (final cell in userCells) {
+        // Extract profile data from cell
+        final nameElement = SnapshotParser.findFirst(
+          cell,
+          role: 'link',
+        );
+        if (nameElement != null) {
+          final href = nameElement.getAttribute('href') ?? '';
+          final name = nameElement.name ?? '';
+          if (href.isNotEmpty && name.isNotEmpty) {
+            profiles.add(ProfileData(
+              name: name,
+              profileUrl: 'https://twitter.com$href',
+              handle: href.startsWith('/') ? '@${href.substring(1)}' : href,
+            ));
+          }
+        }
+      }
     } catch (e) {
       debugPrint('Error searching Twitter profiles: $e');
     }
@@ -119,33 +127,37 @@ class XAutomationAdapter with LoggerMixin implements PlatformAutomationAdapter {
     try {
       // Navigate to profile
       await _browser.navigate(profile.profileUrl!);
-      await _browser.wait(1.5);
+      await _browser.wait(1500);
 
       // Take snapshot to find follow button
-      await _browser.snapshot();
+      final snapshot = await _browser.snapshot();
 
-      // Find and click follow button
-      // In production, parse snapshot to find button with:
-      // - data-testid="follow" or text "Follow"
-      // - Get the element reference
+      // Find follow button by test ID
+      final followButton = SnapshotParser.findFirst(
+            snapshot,
+            testId: 'follow',
+          ) ??
+          SnapshotParser.findButton(snapshot, 'Follow');
 
-      // Mock click for demonstration
-      await _browser.click(
-        element: 'Follow button',
-        ref: 'follow-button-ref', // Would come from snapshot
-      );
-
-      // Wait for action to complete
-      await _browser.wait(0.5);
-
-      debugPrint('✓ Followed ${profile.handle ?? profile.name} on Twitter');
+      if (followButton != null) {
+        await _browser.clickElement(followButton);
+        await _browser.wait(500);
+        debugPrint('✓ Followed ${profile.handle ?? profile.name} on Twitter');
+      } else {
+        throw Exception('Follow button not found');
+      }
     } catch (e) {
       throw Exception('Failed to follow Twitter profile: $e');
     }
   }
 
   @override
-  Future<void> sendDirectMessage(ProfileData profile, String message) async {
+  Future<void> sendDirectMessage(
+    ProfileData profile,
+    String message, {
+    String? campaignId,
+    String? subject,
+  }) async {
     if (!_initialized) {
       throw StateError('Adapter not initialized. Call initialize() first.');
     }
@@ -157,44 +169,57 @@ class XAutomationAdapter with LoggerMixin implements PlatformAutomationAdapter {
     try {
       // Navigate to profile
       await _browser.navigate(profile.profileUrl!);
-      await _browser.wait(1.5);
+      await _browser.wait(1500);
 
       // Take snapshot to find message button
-      await _browser.snapshot();
+      var snapshot = await _browser.snapshot();
 
       // Find and click message button
-      // In production, look for data-testid="sendDMFromProfile"
-      await _browser.click(
-        element: 'Message button',
-        ref: 'message-button-ref', // Would come from snapshot
-      );
+      final messageButton = SnapshotParser.findFirst(
+            snapshot,
+            testId: 'sendDMFromProfile',
+          ) ??
+          SnapshotParser.findButton(snapshot, 'Message');
 
-      // Wait for DM dialog to open
-      await _browser.wait(1.0);
+      if (messageButton == null) {
+        throw Exception('Message button not found');
+      }
+
+      await _browser.clickElement(messageButton);
+      await _browser.wait(1000);
 
       // Take new snapshot to find message input
-      await _browser.snapshot();
+      snapshot = await _browser.snapshot();
 
-      // Find message input field and type message
-      // In production, look for data-testid="dmComposerTextInput"
-      await _browser.type(
-        element: 'DM text input',
-        ref: 'dm-input-ref', // Would come from snapshot
-        text: message,
-      );
+      // Find message input field
+      final messageInput = SnapshotParser.findFirst(
+            snapshot,
+            testId: 'dmComposerTextInput',
+          ) ??
+          SnapshotParser.findInput(snapshot,
+              placeholder: 'Start a new message');
 
-      // Wait a moment for typing to complete
-      await _browser.wait(0.3);
+      if (messageInput == null) {
+        throw Exception('Message input not found');
+      }
+
+      await _browser.typeIntoElement(messageInput, message);
+      await _browser.wait(300);
 
       // Find and click send button
-      // In production, look for data-testid="dmComposerSendButton"
-      await _browser.click(
-        element: 'Send button',
-        ref: 'send-button-ref', // Would come from snapshot
-      );
+      snapshot = await _browser.snapshot();
+      final sendButton = SnapshotParser.findFirst(
+            snapshot,
+            testId: 'dmComposerSendButton',
+          ) ??
+          SnapshotParser.findButton(snapshot, 'Send');
 
-      // Wait for message to send
-      await _browser.wait(0.5);
+      if (sendButton == null) {
+        throw Exception('Send button not found');
+      }
+
+      await _browser.clickElement(sendButton);
+      await _browser.wait(500);
 
       debugPrint('✓ Sent DM to ${profile.handle ?? profile.name}: $message');
     } catch (e) {
