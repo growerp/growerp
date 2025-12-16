@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
+
+    <!-- ========================================================= -->
+    <!--  Twitter Automation - AI-Driven Approach                 -->
+    <!-- ========================================================= -->
+
+    <service verb="send" noun="TwitterMessage">
+        <description>
+            Mark Twitter message as ready for AI to send via browsermcp
+        </description>
+        <in-parameters>
+            <parameter name="message" type="org.moqui.entity.EntityValue" required="true"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="success" type="Boolean"/>
+            <parameter name="errorMessage"/>
+            <parameter name="screenshotPath"/>
+        </out-parameters>
+        <actions>
+            <script><![CDATA[
+                success = false
+                errorMessage = null
+                screenshotPath = null
+                
+                try {
+                    ec.logger.info("Marking Twitter message ${message.messageId} as READY_TO_SEND")
+                    
+                    // Get platform configuration
+                    def platformConfig = ec.entity.find("growerp.marketing.PlatformConfiguration")
+                        .condition("platform", "TWITTER")
+                        .condition("ownerPartyId", ownerPartyId)
+                        .one()
+                    
+                    if (!platformConfig || platformConfig.isEnabled != 'Y') {
+                        throw new Exception("Twitter platform not configured or disabled")
+                    }
+                    
+                    // Mark message as ready for AI to process
+                    ec.service.sync().name("update#growerp.marketing.OutreachMessage")
+                        .parameter("messageId", message.messageId)
+                        .parameter("status", "READY_TO_SEND")
+                        .call()
+                    
+                    success = true
+                    ec.logger.info("Message ${message.messageId} marked as READY_TO_SEND for AI processing")
+                    
+                } catch (Exception e) {
+                    ec.logger.error("Error marking Twitter message: ${e.message}", e)
+                    errorMessage = e.message
+                }
+            ]]></script>
+        </actions>
+    </service>
+
+    <service verb="get" noun="ReadyMessages">
+        <description>
+            Get all messages that are ready for AI to send
+        </description>
+        <in-parameters>
+            <parameter name="platform"/>
+            <parameter name="limit" type="Integer" default="10"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="messages" type="List"/>
+        </out-parameters>
+        <actions>
+            <entity-find entity-name="growerp.marketing.OutreachMessage" list="messages">
+                <econdition field-name="status" value="READY_TO_SEND"/>
+                <econdition field-name="platform" from="platform" ignore-if-empty="true"/>
+                <select-field field-name="messageId"/>
+                <select-field field-name="marketingCampaignId"/>
+                <select-field field-name="platform"/>
+                <select-field field-name="recipientHandle"/>
+                <select-field field-name="recipientName"/>
+                <select-field field-name="messageContent"/>
+                <select-field field-name="status"/>
+                <select-field field-name="createdDate"/>
+                <order-by field-name="createdDate"/>
+            </entity-find>
+        </actions>
+    </service>
+
+    <service verb="mark" noun="MessageSent">
+        <description>
+            Mark a message as successfully sent by AI
+        </description>
+        <in-parameters>
+            <parameter name="messageId" required="true"/>
+            <parameter name="screenshotPath"/>
+        </in-parameters>
+        <actions>
+            <service-call name="update#growerp.marketing.OutreachMessage">
+                <field-map field-name="messageId"/>
+                <field-map field-name="status" value="SENT"/>
+                <field-map field-name="sentDate" from="ec.user.nowTimestamp"/>
+                <field-map field-name="screenshotPath" from="screenshotPath"/>
+            </service-call>
+        </actions>
+    </service>
+
+    <service verb="mark" noun="MessageFailed">
+        <description>
+            Mark a message as failed by AI
+        </description>
+        <in-parameters>
+            <parameter name="messageId" required="true"/>
+            <parameter name="errorMessage"/>
+            <parameter name="screenshotPath"/>
+        </in-parameters>
+        <actions>
+            <service-call name="update#growerp.marketing.OutreachMessage">
+                <field-map field-name="messageId"/>
+                <field-map field-name="status" value="FAILED"/>
+                <field-map field-name="errorMessage" from="errorMessage"/>
+                <field-map field-name="screenshotPath" from="screenshotPath"/>
+            </service-call>
+        </actions>
+    </service>
+
+</services>

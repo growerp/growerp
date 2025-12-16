@@ -21,6 +21,8 @@ export 'src/widgets/message_list_item.dart';
 
 // Service exports
 export 'src/services/platform_automation_adapter.dart';
+export 'src/services/flutter_mcp_browser_service.dart';
+export 'src/services/snapshot_parser.dart';
 export 'src/services/adapters/email_automation_adapter.dart';
 export 'src/services/adapters/linkedin_automation_adapter.dart';
 export 'src/services/adapters/x_automation_adapter.dart';

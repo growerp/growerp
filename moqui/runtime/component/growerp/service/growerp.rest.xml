@@ -538,6 +538,35 @@ along with this software (see the LICENSE.md file). If not, see
             </method>
         </resource>
 
+        <!-- MCP Testing & Manual Automation -->
+        <resource name="TestMCPConnection">
+            <method type="get">
+                <service name="growerp.100.MCPAutomationServices100.test#MCPConnection" />
+            </method>
+        </resource>
+        <resource name="SendOutreachMessage">
+            <method type="post">
+                <service name="growerp.100.MCPAutomationServices100.send#OutreachMessageViaBrowser" />
+            </method>
+        </resource>
+        
+        <!-- AI-Driven Automation Endpoints -->
+        <resource name="ReadyMessages">
+            <method type="get">
+                <service name="growerp.100.TwitterAutomationServices100.get#ReadyMessages" />
+            </method>
+        </resource>
+        <resource name="MarkMessageSent">
+            <method type="post">
+                <service name="growerp.100.TwitterAutomationServices100.mark#MessageSent" />
+            </method>
+        </resource>
+        <resource name="MarkMessageFailed">
+            <method type="post">
+                <service name="growerp.100.TwitterAutomationServices100.mark#MessageFailed" />
+            </method>
+        </resource>
+
         <!-- Public landing page -->
         <resource name="LandingPagePublic" require-authentication="anonymous-view">
             <method type="get">

@@ -22,6 +22,7 @@ import 'package:intl/intl.dart';
 import '../bloc/outreach_message_bloc.dart';
 import '../bloc/outreach_message_event.dart';
 import '../bloc/outreach_message_state.dart';
+import '../bloc/outreach_campaign_bloc.dart';
 
 class OutreachMessageDetailScreen extends StatefulWidget {
   final OutreachMessage message;
@@ -64,6 +65,9 @@ class OutreachMessageDetailScreenState
 
   late String _selectedPlatform;
   late String _selectedStatus;
+  String? _selectedCampaignId;
+  List<OutreachCampaign> _availableCampaigns = [];
+  bool _loadingCampaigns = false;
 
   @override
   void initState() {
@@ -80,11 +84,34 @@ class OutreachMessageDetailScreenState
         TextEditingController(text: widget.message.messageContent);
     _campaignIdController =
         TextEditingController(text: widget.message.campaignId ?? '');
+    _selectedCampaignId = widget.message.campaignId;
 
     _selectedPlatform =
         widget.message.platform.isNotEmpty ? widget.message.platform : 'EMAIL';
     _selectedStatus =
         widget.message.status.isNotEmpty ? widget.message.status : 'PENDING';
+
+    // Load available campaigns for dropdown
+    _loadCampaigns();
+  }
+
+  Future<void> _loadCampaigns() async {
+    setState(() => _loadingCampaigns = true);
+    try {
+      final bloc = context.read<OutreachCampaignBloc>();
+      // Trigger fetch if not already loaded
+      if (bloc.state.campaigns.isEmpty) {
+        bloc.add(const OutreachCampaignFetch(start: 0));
+      }
+      // Wait a bit for the campaigns to load
+      await Future.delayed(const Duration(milliseconds: 500));
+      setState(() {
+        _availableCampaigns = bloc.state.campaigns;
+        _loadingCampaigns = false;
+      });
+    } catch (e) {
+      setState(() => _loadingCampaigns = false);
+    }
   }
 
   @override
@@ -143,10 +170,75 @@ class OutreachMessageDetailScreenState
                     Row(
                       children: [
                         Expanded(
-                          child: TextFormField(
+                          child: Autocomplete<OutreachCampaign>(
                             key: const Key('campaignId'),
-                            controller: _campaignIdController,
-                            decoration: const InputDecoration(labelText: 'ID'),
+                            initialValue: _selectedCampaignId != null
+                                ? TextEditingValue(
+                                    text: _availableCampaigns
+                                        .firstWhere(
+                                          (c) =>
+                                              c.campaignId ==
+                                              _selectedCampaignId,
+                                          orElse: () => const OutreachCampaign(
+                                            name: '',
+                                            platforms: '',
+                                            status: '',
+                                          ),
+                                        )
+                                        .name)
+                                : TextEditingValue.empty,
+                            optionsBuilder:
+                                (TextEditingValue textEditingValue) {
+                              if (textEditingValue.text.isEmpty) {
+                                return _availableCampaigns;
+                              }
+                              return _availableCampaigns.where((campaign) {
+                                return campaign.name.toLowerCase().contains(
+                                        textEditingValue.text.toLowerCase()) ||
+                                    (campaign.pseudoId ?? '')
+                                        .toLowerCase()
+                                        .contains(textEditingValue.text
+                                            .toLowerCase());
+                              });
+                            },
+                            displayStringForOption:
+                                (OutreachCampaign campaign) =>
+                                    '${campaign.name} (${campaign.pseudoId})',
+                            fieldViewBuilder: (context, controller, focusNode,
+                                onEditingComplete) {
+                              return TextFormField(
+                                controller: controller,
+                                focusNode: focusNode,
+                                decoration: InputDecoration(
+                                  labelText: 'Campaign *',
+                                  helperText: 'Type to search campaigns',
+                                  suffixIcon: _loadingCampaigns
+                                      ? const SizedBox(
+                                          width: 20,
+                                          height: 20,
+                                          child: Center(
+                                            child: CircularProgressIndicator(
+                                                strokeWidth: 2),
+                                          ),
+                                        )
+                                      : const Icon(Icons.search),
+                                ),
+                                validator: (value) {
+                                  if (_selectedCampaignId == null ||
+                                      _selectedCampaignId!.isEmpty) {
+                                    return 'Please select a campaign';
+                                  }
+                                  return null;
+                                },
+                              );
+                            },
+                            onSelected: (OutreachCampaign campaign) {
+                              setState(() {
+                                _selectedCampaignId = campaign.campaignId;
+                                _campaignIdController.text =
+                                    campaign.campaignId ?? '';
+                              });
+                            },
                           ),
                         ),
                         const SizedBox(width: 10),
@@ -196,10 +288,69 @@ class OutreachMessageDetailScreenState
 
                   // For mobile: Campaign ID separate
                   if (isPhone && isNewMessage)
-                    TextFormField(
+                    Autocomplete<OutreachCampaign>(
                       key: const Key('campaignId'),
-                      controller: _campaignIdController,
-                      decoration: const InputDecoration(labelText: 'ID'),
+                      initialValue: _selectedCampaignId != null
+                          ? TextEditingValue(
+                              text: _availableCampaigns
+                                  .firstWhere(
+                                    (c) => c.campaignId == _selectedCampaignId,
+                                    orElse: () => const OutreachCampaign(
+                                      name: '',
+                                      platforms: '',
+                                      status: '',
+                                    ),
+                                  )
+                                  .name)
+                          : TextEditingValue.empty,
+                      optionsBuilder: (TextEditingValue textEditingValue) {
+                        if (textEditingValue.text.isEmpty) {
+                          return _availableCampaigns;
+                        }
+                        return _availableCampaigns.where((campaign) {
+                          return campaign.name.toLowerCase().contains(
+                                  textEditingValue.text.toLowerCase()) ||
+                              (campaign.pseudoId ?? '').toLowerCase().contains(
+                                  textEditingValue.text.toLowerCase());
+                        });
+                      },
+                      displayStringForOption: (OutreachCampaign campaign) =>
+                          '${campaign.name} (${campaign.pseudoId})',
+                      fieldViewBuilder:
+                          (context, controller, focusNode, onEditingComplete) {
+                        return TextFormField(
+                          controller: controller,
+                          focusNode: focusNode,
+                          decoration: InputDecoration(
+                            labelText: 'Campaign *',
+                            helperText: 'Type to search campaigns',
+                            suffixIcon: _loadingCampaigns
+                                ? const SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: Center(
+                                      child: CircularProgressIndicator(
+                                          strokeWidth: 2),
+                                    ),
+                                  )
+                                : const Icon(Icons.search),
+                          ),
+                          validator: (value) {
+                            if (_selectedCampaignId == null ||
+                                _selectedCampaignId!.isEmpty) {
+                              return 'Please select a campaign';
+                            }
+                            return null;
+                          },
+                        );
+                      },
+                      onSelected: (OutreachCampaign campaign) {
+                        setState(() {
+                          _selectedCampaignId = campaign.campaignId;
+                          _campaignIdController.text =
+                              campaign.campaignId ?? '';
+                        });
+                      },
                     ),
                   if (isNewMessage) const SizedBox(height: 20),
 

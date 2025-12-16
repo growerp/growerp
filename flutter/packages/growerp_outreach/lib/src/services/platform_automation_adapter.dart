@@ -19,7 +19,13 @@ abstract class PlatformAutomationAdapter {
   Future<void> sendConnectionRequest(ProfileData profile, String message);
 
   /// Send direct message to a profile
-  Future<void> sendDirectMessage(ProfileData profile, String message);
+  /// For email: [campaignId] and [subject] are required
+  Future<void> sendDirectMessage(
+    ProfileData profile,
+    String message, {
+    String? campaignId,
+    String? subject,
+  });
 
   /// Cleanup resources (e.g., close browser, disconnect)
   Future<void> cleanup();

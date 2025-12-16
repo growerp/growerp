@@ -22,6 +22,7 @@ import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_outreach/growerp_outreach.dart';
 import 'package:growerp_user_company/growerp_user_company.dart';
 import 'package:growerp_marketing/growerp_marketing.dart';
+import 'browser_test_screen.dart';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -122,6 +123,14 @@ const outreachMenuConfig = MenuConfiguration(
       sequenceNum: 70,
       widgetName: 'PlatformConfigListScreen',
     ),
+    MenuOption(
+      menuOptionId: 'OUT_BROWSER_TEST',
+      title: 'Browser Test',
+      route: '/browser-test',
+      iconName: 'bug_report',
+      sequenceNum: 80,
+      widgetName: 'BrowserTestScreen',
+    ),
   ],
 );
 
@@ -138,6 +147,7 @@ GoRouter createOutreachExampleRouter() {
       '/website' => const LandingPageList(),
       '/leads' => const UserList(key: Key('Lead'), role: Role.lead),
       '/platforms' => const PlatformConfigListScreen(),
+      '/browser-test' => const BrowserTestScreen(),
       _ => const OutreachDashboard(),
     },
   );

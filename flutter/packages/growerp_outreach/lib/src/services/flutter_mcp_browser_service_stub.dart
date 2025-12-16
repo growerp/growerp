@@ -1,0 +1,25 @@
+import 'package:mcp_dart/mcp_dart.dart';
+
+/// Stub implementation - should never be instantiated directly
+/// Used only for conditional imports
+class FlutterMcpBrowserServiceImpl {
+  Client? _client;
+  Transport? _transport;
+  bool _isInitialized = false;
+
+  bool get isInitialized => _isInitialized;
+
+  Future<void> initialize({String? serverUrl}) {
+    throw UnsupportedError('Cannot create browser service on this platform');
+  }
+
+  Future<void> cleanup() async {}
+
+  Client? get client => _client;
+  Transport? get transport => _transport;
+}
+
+/// Factory function for creating the platform-specific implementation
+FlutterMcpBrowserServiceImpl createBrowserServiceImpl() {
+  throw UnsupportedError('Cannot create browser service on this platform');
+}

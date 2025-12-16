@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
+
+    <!-- ========================================================= -->
+    <!--  MCP Browser Automation Services                          -->
+    <!-- ========================================================= -->
+
+    <service verb="test" noun="MCPConnection">
+        <description>Test MCP browsermcp connection</description>
+        <out-parameters>
+            <parameter name="success" type="Boolean"/>
+            <parameter name="message"/>
+        </out-parameters>
+        <actions>
+            <script><![CDATA[
+                import groovy.json.JsonOutput
+                import groovy.json.JsonSlurper
+                import java.net.http.HttpClient
+                import java.net.http.HttpRequest
+                import java.net.http.HttpResponse
+                import java.time.Duration
+                
+                success = false
+                message = ""
+                
+                try {
+                    def mcpServerUrl = "http://localhost:3000"
+                    def httpClient = HttpClient.newBuilder()
+                        .connectTimeout(Duration.ofSeconds(10))
+                        .build()
+                    
+                    // Simple test - navigate to example.com
+                    def requestBody = [
+                        jsonrpc: "2.0",
+                        id: System.currentTimeMillis(),
+                        method: "tools/call",
+                        params: [
+                            name: "mcp_browsermcp_browser_navigate",
+                            arguments: [url: "https://example.com"]
+                        ]
+                    ]
+                    
+                    def request = HttpRequest.newBuilder()
+                        .uri(URI.create("${mcpServerUrl}/mcp"))
+                        .header("Content-Type", "application/json")
+                        .POST(HttpRequest.BodyPublishers.ofString(JsonOutput.toJson(requestBody)))
+                        .timeout(Duration.ofMinutes(1))
+                        .build()
+                    
+                    def response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
+                    
+                    if (response.statusCode() == 200) {
+                        success = true
+                        message = "Successfully connected to browsermcp and navigated to example.com"
+                    } else {
+                        message = "MCP server returned status ${response.statusCode()}: ${response.body()}"
+                    }
+                    
+                } catch (java.net.ConnectException e) {
+                    message = "Failed to connect to browsermcp on localhost:3000. Is browsermcp running?"
+                    ec.logger.warn("MCP connection test failed: ${e.message}")
+                } catch (Exception e) {
+                    message = "Failed to connect to browsermcp: ${e.message}"
+                    ec.logger.error("MCP connection test failed", e)
+                }
+            ]]></script>
+        </actions>
+    </service>
+
+    <service verb="process" noun="CampaignAutomation" type="interface">
+        <description>
+            Process automation for a specific campaign
+            This is the main entry point called by the scheduler
+        </description>
+        <in-parameters>
+            <parameter name="marketingCampaignId"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="messagesProcessed" type="Integer"/>
+            <parameter name="messagesSent" type="Integer"/>
+            <parameter name="messagesFailed" type="Integer"/>
+        </out-parameters>
+    </service>
+
+    <service verb="send" noun="OutreachMessageViaBrowser">
+        <description>
+            Send a single outreach message via browser automation
+            Uses browsermcp MCP server
+        </description>
+        <in-parameters>
+            <parameter name="messageId" required="true"/>
+            <parameter name="platform" required="true">
+                <description>TWITTER, LINKEDIN, EMAIL, etc.</description>
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="success" type="Boolean"/>
+            <parameter name="errorMessage"/>
+            <parameter name="screenshotPath"/>
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"/>
+
+            <!-- Get the message details -->
+            <entity-find-one entity-name="growerp.marketing.OutreachMessage" value-field="message">
+                <field-map field-name="messageId"/>
+            </entity-find-one>
+            
+            <if condition="!message">
+                <return error="true" message="Message not found: ${messageId}"/>
+            </if>
+
+            <!-- Route to platform-specific automation -->
+            <if condition="platform == 'TWITTER'">
+                <service-call name="growerp.100.TwitterAutomationServices100.send#TwitterMessage" 
+                    in-map="[message: message, ownerPartyId: ownerPartyId]" out-map="sendResult"/>
+            </if>
+            <else-if condition="platform == 'LINKEDIN'">
+                <service-call name="growerp.100.LinkedInAutomationServices100.send#LinkedInMessage"
+                    in-map="[message: message, ownerPartyId: ownerPartyId]" out-map="sendResult"/>
+            </else-if>
+            <else-if condition="platform == 'EMAIL'">
+                <!-- Email uses existing backend service -->
+                <return error="true" message="Email platform not yet implemented"/>
+            </else-if>
+            <else>
+                <return error="true" message="Unsupported platform: ${platform}"/>
+            </else>
+
+            <set field="success" from="sendResult.success"/>
+            <set field="errorMessage" from="sendResult.errorMessage"/>
+            <set field="screenshotPath" from="sendResult.screenshotPath"/>
+
+            <!-- Update message status -->
+            <service-call name="update#growerp.marketing.OutreachMessage">
+                <field-map field-name="messageId"/>
+                <field-map field-name="status" from="success ? 'SENT' : 'FAILED'"/>
+                <field-map field-name="sentDate" from="success ? ec.user.nowTimestamp : null"/>
+                <field-map field-name="errorMessage" from="errorMessage"/>
+            </service-call>
+        </actions>
+    </service>
+
+</services>

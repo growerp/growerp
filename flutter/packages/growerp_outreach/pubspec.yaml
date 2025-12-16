@@ -1,10 +1,10 @@
 name: growerp_outreach
 description: Multi-platform outreach campaign management for GrowERP
 version: 0.0.1
-publish_to: 'none'
+publish_to: "none"
 
 environment:
-  sdk: '>=3.0.0 <4.0.0'
+  sdk: ">=3.0.0 <4.0.0"
 
 dependencies:
   flutter:
@@ -18,6 +18,7 @@ dependencies:
   responsive_framework: ^1.1.0
   dio: ^5.3.3
   logging: ^1.2.0
+  mcp_dart: ^1.0.2
 
 dev_dependencies:
   flutter_test:
