@@ -11,9 +11,6 @@
         <field name="ownerPartyId" type="id">
             <description>The company owner, to separate companies.</description>
         </field>
-        <relationship type="one" title="Owner" related="mantle.party.Party" short-alias="owner">
-            <key-map field-name="ownerPartyId" />
-        </relationship>
         <field name="platforms" type="text-medium">
             <description>JSON array of platforms: ["EMAIL", "LINKEDIN", "TWITTER", "MEDIUM", "SUBSTACK", "FACEBOOK"]</description>
         </field>
@@ -26,6 +23,9 @@
         <field name="dailyLimitPerPlatform" type="number-integer" default="50" />
         <field name="createdByUserLogin" type="id" />
         <field name="lastModifiedByUserLogin" type="id" />
+        <relationship type="one" title="Owner" related="mantle.party.Party" short-alias="owner">
+            <key-map field-name="ownerPartyId" />
+        </relationship>
         <relationship type="one" related="growerp.landing.LandingPage">
             <key-map field-name="landingPageId" />
         </relationship>
@@ -126,7 +126,8 @@
 
     <view-entity entity-name="MarketingCampaignAndMetrics" package="growerp.marketing">
         <member-entity entity-alias="MC" entity-name="mantle.marketing.campaign.MarketingCampaign" />
-        <member-entity entity-alias="CM" entity-name="growerp.marketing.CampaignMetrics" join-from-alias="MC" join-optional="true">
+        <member-entity entity-alias="CM" entity-name="growerp.marketing.CampaignMetrics"
+            join-from-alias="MC" join-optional="true">
             <key-map field-name="marketingCampaignId" />
         </member-entity>
         <alias-all entity-alias="MC" />

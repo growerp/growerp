@@ -1,6 +1,8 @@
+import 'dart:math';
 import '../platform_automation_adapter.dart';
 import '../flutter_mcp_browser_service.dart';
 import '../snapshot_parser.dart';
+import '../../utils/rate_limiter.dart';
 
 /// LinkedIn automation adapter using browsermcp via flutter_mcp
 ///
@@ -148,6 +150,168 @@ class LinkedInAutomationAdapter implements PlatformAutomationAdapter {
     // Send message
     await _browser.click(element: 'Send', ref: 'send-message-button');
     await _browser.wait(1000);
+  }
+
+  /// Get 1st-level connections from LinkedIn My Network page
+  ///
+  /// Navigates to the connections list and extracts profile data.
+  /// [maxResults] limits the number of connections to return.
+  /// [scrollCount] determines how many times to scroll for more results.
+  Future<List<ProfileData>> getFirstLevelConnections({
+    int maxResults = 50,
+    int scrollCount = 3,
+  }) async {
+    if (!_initialized) {
+      throw StateError('Adapter not initialized. Call initialize() first.');
+    }
+
+    // Navigate to connections list
+    await _browser.navigate(
+        'https://www.linkedin.com/mynetwork/invite-connect/connections/');
+    await _browser.wait(3000);
+
+    final profiles = <ProfileData>[];
+    final seenUrls = <String>{};
+
+    for (var scroll = 0; scroll <= scrollCount; scroll++) {
+      // Get page snapshot
+      final snapshot = await _browser.snapshot();
+
+      // Find connection cards - they contain profile links with /in/
+      final links = SnapshotParser.findAll(
+        snapshot,
+        role: 'link',
+        predicate: (element) {
+          final href = element.getAttribute('href') ?? element.value ?? '';
+          return href.contains('/in/');
+        },
+      );
+
+      for (final link in links) {
+        if (profiles.length >= maxResults) break;
+
+        final href = link.getAttribute('href') ?? link.value ?? '';
+        final name = link.name?.trim();
+
+        if (name != null && name.isNotEmpty && href.contains('/in/')) {
+          final inMatch = RegExp(r'/in/[^/?]+').firstMatch(href);
+          if (inMatch != null) {
+            final profileUrl = 'https://www.linkedin.com${inMatch.group(0)}';
+
+            // Avoid duplicates
+            if (!seenUrls.contains(profileUrl)) {
+              seenUrls.add(profileUrl);
+              profiles.add(ProfileData(
+                name: name,
+                profileUrl: profileUrl,
+                isConnection: true, // Mark as 1st-level connection
+              ));
+            }
+          }
+        }
+      }
+
+      if (profiles.length >= maxResults) break;
+
+      // Scroll down to load more connections
+      if (scroll < scrollCount) {
+        await _browser.scroll(direction: 'down');
+        await _browser.wait(2000);
+      }
+    }
+
+    return profiles;
+  }
+
+  /// Send messages to multiple 1st-level connections with rate limiting
+  ///
+  /// [connections] - List of profiles to message
+  /// [messageTemplate] - Message template with {name} placeholder
+  /// [variables] - Optional additional variables for template substitution
+  /// [delayBetweenMessages] - Base delay between messages (randomized +/- 5s)
+  Future<List<MessageResult>> sendBatchMessages({
+    required List<ProfileData> connections,
+    required String messageTemplate,
+    Map<String, String>? variables,
+    Duration delayBetweenMessages = const Duration(seconds: 10),
+  }) async {
+    if (!_initialized) {
+      throw StateError('Adapter not initialized. Call initialize() first.');
+    }
+
+    final results = <MessageResult>[];
+    final rateLimiter = PlatformRateLimiters.linkedin;
+    final random = Random();
+
+    for (var i = 0; i < connections.length; i++) {
+      final connection = connections[i];
+
+      try {
+        // Personalize message with name
+        var message = messageTemplate.replaceAll('{name}', connection.name);
+
+        // Apply additional variables
+        if (variables != null) {
+          for (final entry in variables.entries) {
+            message = message.replaceAll('{${entry.key}}', entry.value);
+          }
+        }
+
+        // Execute with rate limiting
+        await rateLimiter.execute(() async {
+          await sendDirectMessage(connection, message);
+        });
+
+        results.add(MessageResult(
+          profile: connection,
+          success: true,
+        ));
+
+        // Random delay between messages (human-like behavior)
+        if (i < connections.length - 1) {
+          final variance = random.nextInt(10) - 5; // -5 to +5 seconds
+          final delay = Duration(
+            seconds: delayBetweenMessages.inSeconds + variance,
+          );
+          await Future.delayed(delay);
+        }
+      } catch (e) {
+        results.add(MessageResult(
+          profile: connection,
+          success: false,
+          error: e.toString(),
+        ));
+      }
+    }
+
+    return results;
+  }
+
+  /// Check if a profile is a 1st-level connection
+  ///
+  /// Navigates to the profile and checks for "Message" button presence
+  /// (vs "Connect" button for non-connections)
+  Future<bool> isFirstLevelConnection(ProfileData profile) async {
+    if (!_initialized) {
+      throw StateError('Adapter not initialized. Call initialize() first.');
+    }
+
+    if (profile.profileUrl == null) {
+      throw ArgumentError('Profile URL is required');
+    }
+
+    await _browser.navigate(profile.profileUrl!);
+    await _browser.wait(2000);
+
+    final snapshot = await _browser.snapshot();
+
+    // 1st-level connections show "Message" button directly
+    // Non-connections show "Connect" button
+    final messageButton = SnapshotParser.findByText(snapshot, 'Message');
+    final connectButton = SnapshotParser.findByText(snapshot, 'Connect');
+
+    // If Message button exists and Connect doesn't, it's a 1st-level connection
+    return messageButton != null && connectButton == null;
   }
 
   @override

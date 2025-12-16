@@ -134,7 +134,8 @@ class CampaignListScreenState extends State<CampaignListScreen> {
                               return index > campaigns.length
                                   ? const BottomLoader()
                                   : Dismissible(
-                                      key: const Key('xxxxxx'),
+                                      key: Key(
+                                          'campaign_${campaigns[index - 1].campaignId}'),
                                       direction: DismissDirection.startToEnd,
                                       child: BlocProvider.value(
                                         value: _campaignBloc,

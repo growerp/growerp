@@ -22,7 +22,6 @@ import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_outreach/growerp_outreach.dart';
 import 'package:growerp_user_company/growerp_user_company.dart';
 import 'package:growerp_marketing/growerp_marketing.dart';
-import 'browser_test_screen.dart';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -79,7 +78,7 @@ const outreachMenuConfig = MenuConfiguration(
       menuOptionId: 'OUT_CAMPAIGNS',
       title: 'Campaigns',
       route: '/campaigns',
-      iconName: 'campaign',
+      iconName: 'rocket_launch',
       sequenceNum: 20,
       widgetName: 'CampaignListScreen',
     ),
@@ -87,7 +86,7 @@ const outreachMenuConfig = MenuConfiguration(
       menuOptionId: 'OUT_MESSAGES',
       title: 'Messages',
       route: '/messages',
-      iconName: 'message',
+      iconName: 'outbox',
       sequenceNum: 30,
       widgetName: 'OutreachMessageList',
     ),
@@ -95,7 +94,7 @@ const outreachMenuConfig = MenuConfiguration(
       menuOptionId: 'OUT_AUTOMATION',
       title: 'Automation',
       route: '/automation',
-      iconName: 'autorenew',
+      iconName: 'smart_toy',
       sequenceNum: 40,
       widgetName: 'AutomationScreen',
     ),
@@ -111,7 +110,7 @@ const outreachMenuConfig = MenuConfiguration(
       menuOptionId: 'OUT_LEADS',
       title: 'Leads',
       route: '/leads',
-      iconName: 'people',
+      iconName: 'person_search',
       sequenceNum: 60,
       widgetName: 'UserList',
     ),
@@ -119,17 +118,17 @@ const outreachMenuConfig = MenuConfiguration(
       menuOptionId: 'OUT_PLATFORMS',
       title: 'Platforms',
       route: '/platforms',
-      iconName: 'settings',
+      iconName: 'hub',
       sequenceNum: 70,
       widgetName: 'PlatformConfigListScreen',
     ),
     MenuOption(
-      menuOptionId: 'OUT_BROWSER_TEST',
-      title: 'Browser Test',
-      route: '/browser-test',
-      iconName: 'bug_report',
-      sequenceNum: 80,
-      widgetName: 'BrowserTestScreen',
+      menuOptionId: 'OUT_LINKEDIN_MSG',
+      title: 'LinkedIn Messaging',
+      route: '/linkedin-messaging',
+      iconName: 'connect_without_contact',
+      sequenceNum: 75,
+      widgetName: 'LinkedInMessagingScreen',
     ),
   ],
 );
@@ -147,7 +146,7 @@ GoRouter createOutreachExampleRouter() {
       '/website' => const LandingPageList(),
       '/leads' => const UserList(key: Key('Lead'), role: Role.lead),
       '/platforms' => const PlatformConfigListScreen(),
-      '/browser-test' => const BrowserTestScreen(),
+      '/linkedin-messaging' => const LinkedInMessagingScreen(),
       _ => const OutreachDashboard(),
     },
   );

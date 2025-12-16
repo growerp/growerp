@@ -2,13 +2,18 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_core/growerp_core.dart';
+import '../services/campaign_automation_service.dart';
 
 part 'outreach_campaign_event.dart';
 part 'outreach_campaign_state.dart';
 
 class OutreachCampaignBloc
     extends Bloc<OutreachCampaignEvent, OutreachCampaignState> {
-  OutreachCampaignBloc(this.restClient) : super(const OutreachCampaignState()) {
+  OutreachCampaignBloc(this.restClient,
+      {CampaignAutomationService? automationService})
+      : _automationService =
+            automationService ?? CampaignAutomationService(restClient),
+        super(const OutreachCampaignState()) {
     on<OutreachCampaignFetch>(_onFetch);
     on<OutreachCampaignCreate>(_onCreate);
     on<OutreachCampaignUpdate>(_onUpdate);
@@ -21,6 +26,7 @@ class OutreachCampaignBloc
   }
 
   final RestClient restClient;
+  final CampaignAutomationService _automationService;
 
   Future<void> _onFetch(
     OutreachCampaignFetch event,
@@ -198,11 +204,10 @@ class OutreachCampaignBloc
     Emitter<OutreachCampaignState> emit,
   ) async {
     try {
-      await restClient.pauseCampaignAutomation(
-        marketingCampaignId: event.campaignId,
-      );
+      // Stop local automation first
+      await _automationService.pauseCampaign(event.campaignId);
 
-      // Refresh list
+      // Refresh list (backend status already updated by pauseCampaign)
       final result = await restClient.listOutreachCampaigns();
       emit(
         state.copyWith(
@@ -226,9 +231,26 @@ class OutreachCampaignBloc
     Emitter<OutreachCampaignState> emit,
   ) async {
     try {
-      await restClient.startCampaignAutomation(
-        marketingCampaignId: event.campaignId,
-      );
+      // Find campaign from state
+      OutreachCampaign? campaign;
+      for (final c in state.campaigns) {
+        if (c.campaignId == event.campaignId) {
+          campaign = c;
+          break;
+        }
+      }
+
+      // If not found in state, fetch from backend
+      if (campaign == null) {
+        final detail = await restClient.getOutreachCampaignDetail(
+          marketingCampaignId: event.campaignId,
+        );
+        campaign = detail.campaign;
+      }
+
+      // Start local automation (this also notifies backend)
+      // Run in background - don't await the full automation
+      _automationService.startCampaign(campaign);
 
       // Refresh list
       final result = await restClient.listOutreachCampaigns();

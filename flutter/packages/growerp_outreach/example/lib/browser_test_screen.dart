@@ -15,7 +15,7 @@
 import 'package:flutter/material.dart';
 import 'package:growerp_outreach/growerp_outreach.dart';
 
-/// Test screen for BrowserMCP integration
+/// Test screen for BrowserMCP integration with LinkedIn adapter testing
 class BrowserTestScreen extends StatefulWidget {
   const BrowserTestScreen({super.key});
 
@@ -23,36 +23,46 @@ class BrowserTestScreen extends StatefulWidget {
   State<BrowserTestScreen> createState() => _BrowserTestScreenState();
 }
 
-class _BrowserTestScreenState extends State<BrowserTestScreen> {
+class _BrowserTestScreenState extends State<BrowserTestScreen>
+    with SingleTickerProviderStateMixin {
   final FlutterMcpBrowserService _browserService = FlutterMcpBrowserService();
   final TextEditingController _urlController = TextEditingController();
+  final TextEditingController _linkedInSearchController =
+      TextEditingController();
   final List<String> _logs = [];
   bool _isLoading = false;
   bool _isInitialized = false;
   SnapshotElement? _lastSnapshot;
+  List<ProfileData> _searchResults = [];
+  late TabController _tabController;
 
   @override
   void initState() {
     super.initState();
     _urlController.text = 'https://example.com';
+    _linkedInSearchController.text = 'Flutter developer Thailand';
+    _tabController = TabController(length: 2, vsync: this);
   }
 
   @override
   void dispose() {
     _browserService.cleanup();
     _urlController.dispose();
+    _linkedInSearchController.dispose();
+    _tabController.dispose();
     super.dispose();
   }
 
   void _log(String message) {
     setState(() {
       _logs.add('[${DateTime.now().toString().substring(11, 19)}] $message');
-      // Keep only last 50 logs
       if (_logs.length > 50) {
         _logs.removeAt(0);
       }
     });
   }
+
+  // ========== Browser Tab Methods ==========
 
   Future<void> _initialize() async {
     setState(() => _isLoading = true);
@@ -172,8 +182,7 @@ class _BrowserTestScreenState extends State<BrowserTestScreen> {
   String _formatSnapshot(SnapshotElement element, int depth) {
     final buffer = StringBuffer();
     final indent = '  ' * depth;
-    
-    // Format: role "name" [ref=xxx]
+
     buffer.write(indent);
     buffer.write('- ${element.role}');
     if (element.name != null && element.name!.isNotEmpty) {
@@ -181,17 +190,16 @@ class _BrowserTestScreenState extends State<BrowserTestScreen> {
     }
     buffer.write(' [ref=${element.ref}]');
     buffer.writeln();
-    
+
     for (final child in element.children) {
       buffer.write(_formatSnapshot(child, depth + 1));
     }
-    
+
     return buffer.toString();
   }
 
   String _extractTitle(SnapshotElement? element) {
     if (element == null) return 'Unknown';
-    // Try to find heading or title
     final headings = SnapshotParser.getElementsByRole(element, 'heading');
     if (headings.isNotEmpty) {
       return headings.first.name ?? 'Unknown';
@@ -216,6 +224,7 @@ class _BrowserTestScreenState extends State<BrowserTestScreen> {
       await _browserService.cleanup();
       setState(() {
         _isInitialized = false;
+        _searchResults = [];
       });
       _log('✅ Cleanup complete');
     } catch (e) {
@@ -225,19 +234,124 @@ class _BrowserTestScreenState extends State<BrowserTestScreen> {
     }
   }
 
+  // ========== LinkedIn Tab Methods ==========
+
+  Future<void> _linkedInNavigate() async {
+    if (!_isInitialized) {
+      _log('⚠️ Please initialize first');
+      return;
+    }
+
+    setState(() => _isLoading = true);
+    _log('Navigating to LinkedIn...');
+
+    try {
+      await _browserService.navigate('https://www.linkedin.com');
+      _log('✅ LinkedIn page loaded');
+
+      final snapshot = await _browserService.snapshot();
+      final homeNav = SnapshotParser.findByText(snapshot, 'Home');
+      final signIn = SnapshotParser.findByText(snapshot, 'Sign in');
+
+      if (homeNav != null) {
+        _log('✅ Logged in to LinkedIn');
+      } else if (signIn != null) {
+        _log('⚠️ Not logged in. Please log in manually in the browser.');
+      } else {
+        _log('⚠️ Unable to determine login status');
+      }
+    } catch (e) {
+      _log('❌ Navigation failed: $e');
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _linkedInSearch() async {
+    if (!_isInitialized) {
+      _log('⚠️ Please initialize first');
+      return;
+    }
+
+    final searchQuery = _linkedInSearchController.text.trim();
+    if (searchQuery.isEmpty) {
+      _log('⚠️ Please enter a search query');
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+      _searchResults = [];
+    });
+    _log('Searching LinkedIn for: $searchQuery');
+
+    try {
+      final adapter = LinkedInAutomationAdapter(browser: _browserService);
+      final profiles = await adapter.searchProfiles(searchQuery);
+
+      setState(() => _searchResults = profiles);
+      _log('✅ Found ${profiles.length} profiles');
+
+      for (final profile in profiles.take(5)) {
+        _log('  - ${profile.name}');
+        if (profile.profileUrl != null) {
+          _log('    URL: ${profile.profileUrl}');
+        }
+      }
+
+      if (profiles.length > 5) {
+        _log('  ... and ${profiles.length - 5} more');
+      }
+    } catch (e) {
+      _log('❌ Search failed: $e');
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _linkedInCheckLogin() async {
+    if (!_isInitialized) {
+      _log('⚠️ Please initialize first');
+      return;
+    }
+
+    setState(() => _isLoading = true);
+    _log('Checking LinkedIn login status...');
+
+    try {
+      final adapter = LinkedInAutomationAdapter(browser: _browserService);
+      final isLoggedIn = await adapter.isLoggedIn();
+      _log(isLoggedIn
+          ? '✅ Logged in to LinkedIn'
+          : '❌ Not logged in to LinkedIn');
+    } catch (e) {
+      _log('❌ Login check failed: $e');
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  // ========== Build Methods ==========
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('BrowserMCP Test'),
+        bottom: TabBar(
+          controller: _tabController,
+          tabs: const [
+            Tab(icon: Icon(Icons.language), text: 'Browser'),
+            Tab(icon: Icon(Icons.business), text: 'LinkedIn'),
+          ],
+        ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Status indicator
-            Card(
+      body: Column(
+        children: [
+          // Status indicator (always visible)
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Card(
               color:
                   _isInitialized ? Colors.green.shade100 : Colors.grey.shade200,
               child: Padding(
@@ -251,146 +365,260 @@ class _BrowserTestScreenState extends State<BrowserTestScreen> {
                       color: _isInitialized ? Colors.green : Colors.grey,
                     ),
                     const SizedBox(width: 8),
-                    Text(
-                      _isInitialized ? 'BrowserMCP Connected' : 'Not Connected',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: _isInitialized
-                            ? Colors.green.shade800
-                            : Colors.grey.shade700,
+                    Expanded(
+                      child: Text(
+                        _isInitialized
+                            ? 'BrowserMCP Connected'
+                            : 'Not Connected',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: _isInitialized
+                              ? Colors.green.shade800
+                              : Colors.grey.shade700,
+                        ),
                       ),
                     ),
+                    if (!_isInitialized)
+                      ElevatedButton.icon(
+                        onPressed: _isLoading ? null : _initialize,
+                        icon: const Icon(Icons.play_arrow, size: 18),
+                        label: const Text('Initialize'),
+                      )
+                    else
+                      ElevatedButton.icon(
+                        onPressed: _isLoading ? null : _cleanup,
+                        icon: const Icon(Icons.stop, size: 18),
+                        label: const Text('Cleanup'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red.shade100,
+                        ),
+                      ),
                   ],
                 ),
               ),
             ),
-            const SizedBox(height: 16),
+          ),
 
-            // Control buttons
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
+          // Loading indicator
+          if (_isLoading) const LinearProgressIndicator(),
+
+          // Tab content
+          Expanded(
+            child: TabBarView(
+              controller: _tabController,
               children: [
-                ElevatedButton.icon(
-                  onPressed: _isLoading || _isInitialized ? null : _initialize,
-                  icon: const Icon(Icons.play_arrow),
-                  label: const Text('Initialize'),
-                ),
-                ElevatedButton.icon(
-                  onPressed: _isLoading || !_isInitialized ? null : _cleanup,
-                  icon: const Icon(Icons.stop),
-                  label: const Text('Cleanup'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red.shade100,
-                  ),
-                ),
+                _buildBrowserTab(),
+                _buildLinkedInTab(),
               ],
             ),
-            const SizedBox(height: 16),
+          ),
 
-            // URL input
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _urlController,
-                    decoration: const InputDecoration(
-                      labelText: 'URL',
-                      border: OutlineInputBorder(),
-                      hintText: 'https://example.com',
-                    ),
+          // Logs (always visible)
+          _buildLogsSection(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBrowserTab() {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // URL input
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _urlController,
+                  decoration: const InputDecoration(
+                    labelText: 'URL',
+                    border: OutlineInputBorder(),
+                    hintText: 'https://example.com',
                   ),
                 ),
-                const SizedBox(width: 8),
-                ElevatedButton.icon(
-                  onPressed: _isLoading || !_isInitialized ? null : _navigate,
-                  icon: const Icon(Icons.navigation),
-                  label: const Text('Navigate'),
+              ),
+              const SizedBox(width: 8),
+              ElevatedButton.icon(
+                onPressed: _isLoading || !_isInitialized ? null : _navigate,
+                icon: const Icon(Icons.navigation),
+                label: const Text('Go'),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+
+          // Snapshot buttons
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed:
+                      _isLoading || !_isInitialized ? null : _getSnapshot,
+                  icon: const Icon(Icons.camera),
+                  label: const Text('Get Snapshot'),
                 ),
-              ],
+              ),
+              const SizedBox(width: 8),
+              ElevatedButton.icon(
+                onPressed: _lastSnapshot == null ? null : _showSnapshotDialog,
+                icon: const Icon(Icons.visibility),
+                label: const Text('View Snapshot'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor:
+                      _lastSnapshot != null ? Colors.blue.shade100 : null,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLinkedInTab() {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Quick actions
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              ElevatedButton.icon(
+                onPressed:
+                    _isLoading || !_isInitialized ? null : _linkedInNavigate,
+                icon: const Icon(Icons.login),
+                label: const Text('Go to LinkedIn'),
+              ),
+              ElevatedButton.icon(
+                onPressed:
+                    _isLoading || !_isInitialized ? null : _linkedInCheckLogin,
+                icon: const Icon(Icons.verified_user),
+                label: const Text('Check Login'),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+
+          // Search input
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _linkedInSearchController,
+                  decoration: const InputDecoration(
+                    labelText: 'Search Query',
+                    border: OutlineInputBorder(),
+                    hintText: 'e.g., Flutter developer Thailand',
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              ElevatedButton.icon(
+                onPressed:
+                    _isLoading || !_isInitialized ? null : _linkedInSearch,
+                icon: const Icon(Icons.search),
+                label: const Text('Search'),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+
+          // Search results
+          if (_searchResults.isNotEmpty) ...[
+            Text(
+              'Search Results (${_searchResults.length})',
+              style: Theme.of(context).textTheme.titleSmall,
             ),
             const SizedBox(height: 8),
-
-            // Snapshot buttons
-            Row(
-              children: [
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed:
-                        _isLoading || !_isInitialized ? null : _getSnapshot,
-                    icon: const Icon(Icons.camera),
-                    label: const Text('Get Snapshot'),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                ElevatedButton.icon(
-                  onPressed: _lastSnapshot == null ? null : _showSnapshotDialog,
-                  icon: const Icon(Icons.visibility),
-                  label: const Text('View Snapshot'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: _lastSnapshot != null
-                        ? Colors.blue.shade100
-                        : null,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-
-            // Loading indicator
-            if (_isLoading) const LinearProgressIndicator(),
-
-            const SizedBox(height: 8),
-
-            // Logs
             Expanded(
-              child: Card(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text(
-                            'Logs',
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.clear_all, size: 20),
-                            onPressed: () => setState(() => _logs.clear()),
-                            tooltip: 'Clear logs',
-                          ),
-                        ],
+              child: ListView.builder(
+                itemCount: _searchResults.length,
+                itemBuilder: (context, index) {
+                  final profile = _searchResults[index];
+                  return Card(
+                    child: ListTile(
+                      leading: const CircleAvatar(
+                        child: Icon(Icons.person),
                       ),
+                      title: Text(profile.name),
+                      subtitle: profile.profileUrl != null
+                          ? Text(
+                              profile.profileUrl!,
+                              overflow: TextOverflow.ellipsis,
+                            )
+                          : null,
                     ),
-                    const Divider(height: 1),
-                    Expanded(
-                      child: ListView.builder(
-                        padding: const EdgeInsets.all(8),
-                        itemCount: _logs.length,
-                        itemBuilder: (context, index) {
-                          final log = _logs[_logs.length - 1 - index];
-                          return Text(
-                            log,
-                            style: TextStyle(
-                              fontFamily: 'monospace',
-                              fontSize: 12,
-                              color: log.contains('❌')
-                                  ? Colors.red
-                                  : log.contains('✅')
-                                      ? Colors.green
-                                      : log.contains('⚠️')
-                                          ? Colors.orange
-                                          : null,
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  ],
+                  );
+                },
+              ),
+            ),
+          ] else
+            const Expanded(
+              child: Center(
+                child: Text(
+                  'No search results yet.\nUse the search above to find profiles.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.grey),
                 ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLogsSection() {
+    return SizedBox(
+      height: 150,
+      child: Card(
+        margin: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Logs',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.clear_all, size: 20),
+                    onPressed: () => setState(() => _logs.clear()),
+                    tooltip: 'Clear logs',
+                  ),
+                ],
+              ),
+            ),
+            const Divider(height: 1),
+            Expanded(
+              child: ListView.builder(
+                padding: const EdgeInsets.all(8),
+                itemCount: _logs.length,
+                itemBuilder: (context, index) {
+                  final log = _logs[_logs.length - 1 - index];
+                  return Text(
+                    log,
+                    style: TextStyle(
+                      fontFamily: 'monospace',
+                      fontSize: 12,
+                      color: log.contains('❌')
+                          ? Colors.red
+                          : log.contains('✅')
+                              ? Colors.green
+                              : log.contains('⚠️')
+                                  ? Colors.orange
+                                  : null,
+                    ),
+                  );
+                },
               ),
             ),
           ],

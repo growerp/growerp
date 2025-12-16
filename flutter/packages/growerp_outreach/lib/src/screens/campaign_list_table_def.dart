@@ -125,7 +125,7 @@ TableData getCampaignListTableData(
     ));
     rowContent.add(TableRowContent(
       name: 'Name',
-      width: 30,
+      width: 25,
       value: Text(
         campaign.name,
         key: Key('name${campaign.pseudoId}'),
@@ -133,7 +133,7 @@ TableData getCampaignListTableData(
     ));
     rowContent.add(TableRowContent(
       name: 'Status',
-      width: 10,
+      width: 8,
       value: Text(
         _formatStatus(campaign.status),
         key: Key('status${campaign.pseudoId}'),
@@ -141,7 +141,7 @@ TableData getCampaignListTableData(
     ));
     rowContent.add(TableRowContent(
       name: 'Sent',
-      width: 8,
+      width: 5,
       value: Text(
         campaign.messagesSent.toString(),
         key: Key('sent${campaign.pseudoId}'),
@@ -149,7 +149,7 @@ TableData getCampaignListTableData(
     ));
     rowContent.add(TableRowContent(
       name: 'Resp',
-      width: 8,
+      width: 5,
       value: Text(
         campaign.responsesReceived.toString(),
         key: Key('resp${campaign.pseudoId}'),
@@ -157,7 +157,7 @@ TableData getCampaignListTableData(
     ));
     rowContent.add(TableRowContent(
       name: 'Leads',
-      width: 8,
+      width: 5,
       value: Text(
         campaign.leadsGenerated.toString(),
         key: Key('leads${campaign.pseudoId}'),

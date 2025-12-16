@@ -44,7 +44,7 @@ const server = http.createServer((clientReq, clientRes) => {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Expose-Headers': 'Mcp-Session-Id',
       };
-      
+
       clientRes.writeHead(proxyRes.statusCode, headers);
       proxyRes.pipe(clientRes);
     });
