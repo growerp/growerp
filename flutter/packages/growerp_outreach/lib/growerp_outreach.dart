@@ -14,10 +14,12 @@ export 'src/screens/platform_config_detail_screen.dart';
 export 'src/screens/outreach_message_list.dart';
 export 'src/screens/outreach_message_detail_screen.dart';
 export 'src/screens/search_campaign_list.dart';
+export 'src/screens/linkedin_messaging_screen.dart';
 
 // Widget exports
 export 'src/widgets/campaign_metrics_card.dart';
 export 'src/widgets/message_list_item.dart';
+export 'src/widgets/automation_progress_card.dart';
 
 // Service exports
 export 'src/services/platform_automation_adapter.dart';
@@ -27,6 +29,8 @@ export 'src/services/adapters/email_automation_adapter.dart';
 export 'src/services/adapters/linkedin_automation_adapter.dart';
 export 'src/services/adapters/x_automation_adapter.dart';
 export 'src/services/automation_orchestrator.dart';
+export 'src/services/campaign_automation_service.dart';
+export 'src/utils/rate_limiter.dart';
 
 export 'src/get_outreach_bloc_providers.dart';
 export 'src/get_outreach_widgets.dart';

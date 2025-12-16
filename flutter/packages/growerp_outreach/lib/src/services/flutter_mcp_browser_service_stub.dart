@@ -1,11 +1,16 @@
 import 'package:mcp_dart/mcp_dart.dart';
 
+/// Stub configuration - not used on this platform
+class McpServerConfig {
+  const McpServerConfig._();
+}
+
 /// Stub implementation - should never be instantiated directly
 /// Used only for conditional imports
 class FlutterMcpBrowserServiceImpl {
   Client? _client;
   Transport? _transport;
-  bool _isInitialized = false;
+  final bool _isInitialized = false;
 
   bool get isInitialized => _isInitialized;
 

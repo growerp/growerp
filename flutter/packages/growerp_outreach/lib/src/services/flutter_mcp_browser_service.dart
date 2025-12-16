@@ -8,6 +8,12 @@ import 'flutter_mcp_browser_service_stub.dart'
     if (dart.library.io) 'flutter_mcp_browser_service_native.dart'
     if (dart.library.js_interop) 'flutter_mcp_browser_service_web.dart';
 
+// Re-export config class for native platforms (stubbed on web)
+export 'flutter_mcp_browser_service_stub.dart'
+    if (dart.library.io) 'flutter_mcp_browser_service_native.dart'
+    if (dart.library.js_interop) 'flutter_mcp_browser_service_web.dart'
+    show McpServerConfig;
+
 /// Browser automation service using mcp_dart package
 ///
 /// This service uses the mcp_dart package to communicate with
@@ -21,6 +27,27 @@ import 'flutter_mcp_browser_service_stub.dart'
 ///   ```bash
 ///   mcp-server-playwright --port 9222 --headless
 ///   ```
+///
+/// Configuration (Native only):
+/// The MCP server paths can be configured in several ways:
+///
+/// 1. Environment variables:
+///    - MCP_NODE_PATH: Path to Node.js executable
+///    - MCP_PLAYWRIGHT_PATH: Path to Playwright MCP CLI script
+///
+/// 2. Programmatically before calling initialize():
+///    ```dart
+///    import 'package:growerp_outreach/growerp_outreach.dart';
+///    FlutterMcpBrowserServiceImpl.config = McpServerConfig.linux(
+///      homeDir: '/home/myuser',
+///      nodeVersion: 'v20.0.0',
+///    );
+///    ```
+///
+/// 3. Factory constructors for common setups:
+///    - McpServerConfig.fromEnvironment() - Auto-detect from env vars
+///    - McpServerConfig.linux() - NVM-based Linux setup
+///    - McpServerConfig.system() - System-installed Node.js
 class FlutterMcpBrowserService {
   static final logging.Logger _logger =
       logging.Logger('outreach.FlutterMcpBrowserService');
@@ -219,6 +246,60 @@ class FlutterMcpBrowserService {
     _logger.fine('Pressing key: $key');
 
     await _callTool('browser_press_key', {'key': key});
+  }
+
+  /// Scroll the page by executing JavaScript
+  ///
+  /// [direction] - 'down', 'up', 'bottom', 'top'
+  /// [pixels] - Number of pixels to scroll (for 'down'/'up')
+  Future<void> scroll({
+    String direction = 'down',
+    int pixels = 500,
+  }) async {
+    _ensureInitialized();
+
+    _logger.fine('Scrolling $direction');
+
+    // Use Page Down/Up keys for scrolling (more reliable than JS)
+    switch (direction) {
+      case 'down':
+        await pressKey('PageDown');
+        break;
+      case 'up':
+        await pressKey('PageUp');
+        break;
+      case 'bottom':
+        await pressKey('End');
+        break;
+      case 'top':
+        await pressKey('Home');
+        break;
+    }
+  }
+
+  /// Evaluate JavaScript on the page (if supported by MCP server)
+  ///
+  /// Note: This may not be supported by all MCP server implementations.
+  /// Falls back to using keyboard shortcuts for common operations.
+  Future<Map<String, dynamic>> evaluate(String script) async {
+    _ensureInitialized();
+
+    _logger.fine('Evaluating script');
+
+    try {
+      // Try browser_evaluate tool (may not exist in all MCP servers)
+      return await _callTool('browser_evaluate', {'script': script});
+    } catch (e) {
+      _logger.warning('browser_evaluate not supported, using fallback');
+
+      // For common scroll operations, use keyboard fallback
+      if (script.contains('scrollTo') && script.contains('scrollHeight')) {
+        await pressKey('End');
+        return {'success': true, 'fallback': true};
+      }
+
+      rethrow;
+    }
   }
 
   /// Get console logs

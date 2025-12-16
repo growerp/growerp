@@ -39,6 +39,7 @@ class ProfileData {
   final String? email;
   final String? company;
   final String? title;
+  final bool isConnection;
 
   const ProfileData({
     required this.name,
@@ -47,5 +48,42 @@ class ProfileData {
     this.email,
     this.company,
     this.title,
+    this.isConnection = false,
   });
+
+  /// Create a copy with updated fields
+  ProfileData copyWith({
+    String? name,
+    String? profileUrl,
+    String? handle,
+    String? email,
+    String? company,
+    String? title,
+    bool? isConnection,
+  }) {
+    return ProfileData(
+      name: name ?? this.name,
+      profileUrl: profileUrl ?? this.profileUrl,
+      handle: handle ?? this.handle,
+      email: email ?? this.email,
+      company: company ?? this.company,
+      title: title ?? this.title,
+      isConnection: isConnection ?? this.isConnection,
+    );
+  }
+}
+
+/// Result of sending a message to a profile
+class MessageResult {
+  final ProfileData profile;
+  final bool success;
+  final String? error;
+  final DateTime timestamp;
+
+  MessageResult({
+    required this.profile,
+    required this.success,
+    this.error,
+    DateTime? timestamp,
+  }) : timestamp = timestamp ?? DateTime.now();
 }

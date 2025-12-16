@@ -1,11 +1,16 @@
 import 'package:logging/logging.dart' as logging;
 import 'package:mcp_dart/mcp_dart.dart';
 
+/// Stub configuration - web platform uses serverUrl parameter instead
+class McpServerConfig {
+  const McpServerConfig._();
+}
+
 /// Web implementation using HTTP/SSE transport
-/// 
+///
 /// On web, we cannot spawn processes, so the Playwright MCP server
 /// must be running externally with --port flag for SSE transport.
-/// 
+///
 /// Start the server manually before using:
 /// ```bash
 /// mcp-server-playwright --port 9222 --headless
@@ -19,7 +24,7 @@ class FlutterMcpBrowserServiceImpl {
   bool _isInitialized = false;
 
   /// Default URL for the Playwright MCP server via CORS proxy
-  /// 
+  ///
   /// The Playwright MCP server doesn't support CORS, so we need a proxy.
   /// Start both:
   /// 1. mcp-server-playwright --port 9222 --headless
@@ -31,7 +36,7 @@ class FlutterMcpBrowserServiceImpl {
   Transport? get transport => _transport;
 
   /// Initialize the MCP client using HTTP transport
-  /// 
+  ///
   /// [serverUrl] - URL of the Playwright MCP CORS proxy (e.g., http://localhost:9223/mcp)
   ///               Start the proxy with: node mcp_cors_proxy.js
   Future<void> initialize({String? serverUrl}) async {
@@ -51,7 +56,8 @@ class FlutterMcpBrowserServiceImpl {
 
     // Create and connect the MCP client
     _client = Client(
-      const Implementation(name: 'GrowERP Browser Client (Web)', version: '1.0.0'),
+      const Implementation(
+          name: 'GrowERP Browser Client (Web)', version: '1.0.0'),
     );
 
     await _client!.connect(_transport!);

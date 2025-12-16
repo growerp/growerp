@@ -5,6 +5,7 @@ import 'platform_automation_adapter.dart';
 import 'adapters/email_automation_adapter.dart';
 import 'adapters/linkedin_automation_adapter.dart';
 import 'adapters/x_automation_adapter.dart';
+import '../utils/rate_limiter.dart';
 
 /// Orchestrates automation across multiple platforms
 ///
@@ -16,6 +17,44 @@ class AutomationOrchestrator {
 
   final RestClient restClient;
   final Map<String, PlatformAutomationAdapter> _adapters = {};
+  final Map<String, RateLimiter> _rateLimiters = {};
+
+  /// Get or create a rate limiter for a platform
+  RateLimiter _getRateLimiter(String platform) {
+    return _rateLimiters.putIfAbsent(platform, () {
+      // Configure rate limits per platform
+      // These are conservative defaults to avoid platform detection
+      switch (platform.toUpperCase()) {
+        case 'EMAIL':
+          // 60 emails per hour (1 per minute)
+          return RateLimiter(
+            name: 'EMAIL',
+            maxRequests: 60,
+            window: const Duration(hours: 1),
+          );
+        case 'LINKEDIN':
+          // 20 actions per hour (to stay under radar)
+          return RateLimiter(
+            name: 'LINKEDIN',
+            maxRequests: 20,
+            window: const Duration(hours: 1),
+          );
+        case 'TWITTER':
+          // 15 actions per hour (Twitter is strict)
+          return RateLimiter(
+            name: 'TWITTER',
+            maxRequests: 15,
+            window: const Duration(hours: 1),
+          );
+        default:
+          return RateLimiter(
+            name: platform,
+            maxRequests: 30,
+            window: const Duration(hours: 1),
+          );
+      }
+    });
+  }
 
   /// Initialize adapters for the specified platforms
   Future<void> initialize(List<String> platforms) async {
@@ -29,6 +68,9 @@ class AutomationOrchestrator {
   }
 
   /// Run automation for a specific platform
+  ///
+  /// If [targetLeads] is provided and non-empty, those profiles will be used
+  /// directly instead of searching with [searchCriteria].
   Future<void> runAutomation({
     required String platform,
     required String searchCriteria,
@@ -36,6 +78,7 @@ class AutomationOrchestrator {
     required int dailyLimit,
     required String campaignId,
     String? emailSubject,
+    List<ProfileData>? targetLeads,
     required bool Function() checkCancelled,
   }) async {
     final adapter = _adapters[platform];
@@ -49,8 +92,18 @@ class AutomationOrchestrator {
       throw Exception('Not logged in to $platform');
     }
 
-    // Search for profiles
-    final profiles = await adapter.searchProfiles(searchCriteria);
+    // Use target leads if provided, otherwise search for profiles
+    final List<ProfileData> profiles;
+    if (targetLeads != null && targetLeads.isNotEmpty) {
+      profiles = targetLeads;
+      debugPrint('Using ${profiles.length} target leads for $platform');
+    } else {
+      profiles = await adapter.searchProfiles(searchCriteria);
+      debugPrint('Found ${profiles.length} profiles via search for $platform');
+    }
+
+    // Get rate limiter for this platform
+    final rateLimiter = _getRateLimiter(platform);
 
     // Send messages up to daily limit
     int sent = 0;
@@ -59,39 +112,44 @@ class AutomationOrchestrator {
       if (sent >= dailyLimit) break;
 
       try {
-        // Personalize message
-        final message = _personalizeMessage(messageTemplate, profile);
+        // Use rate limiter to control send rate
+        await rateLimiter.execute(() async {
+          // Personalize message
+          final message = _personalizeMessage(messageTemplate, profile);
 
-        // Send message (or connection request for social platforms)
-        if (platform == 'EMAIL') {
-          await adapter.sendDirectMessage(
-            profile,
-            message,
-            campaignId: campaignId,
-            subject: emailSubject,
+          // Send message (or connection request for social platforms)
+          if (platform == 'EMAIL') {
+            await adapter.sendDirectMessage(
+              profile,
+              message,
+              campaignId: campaignId,
+              subject: emailSubject,
+            );
+          } else {
+            await adapter.sendConnectionRequest(profile, message);
+          }
+
+          // Record success in backend
+          await restClient.createOutreachMessage(
+            marketingCampaignId: campaignId,
+            platform: platform,
+            recipientName: profile.name,
+            recipientHandle: profile.handle,
+            recipientProfileUrl: profile.profileUrl,
+            recipientEmail: profile.email,
+            messageContent: message,
+            status: 'SENT',
           );
-        } else {
-          await adapter.sendConnectionRequest(profile, message);
-        }
 
-        // Record success in backend
-        await restClient.createOutreachMessage(
-          marketingCampaignId: campaignId,
-          platform: platform,
-          recipientName: profile.name,
-          recipientHandle: profile.handle,
-          recipientProfileUrl: profile.profileUrl,
-          recipientEmail: profile.email,
-          messageContent: message,
-          status: 'SENT',
-        );
+          sent++;
 
-        sent++;
-
-        // Add delay to mimic human behavior
-        if (!checkCancelled()) {
-          await Future.delayed(Duration(seconds: _getRandomDelay(platform)));
-        }
+          // Add small random delay on top of rate limiting to appear more human
+          if (!checkCancelled()) {
+            final jitter =
+                DateTime.now().millisecond % 10; // 0-10 seconds extra
+            await Future.delayed(Duration(seconds: jitter));
+          }
+        });
       } catch (e) {
         // Log error and continue
         debugPrint('Error sending to ${profile.name}: $e');
@@ -113,14 +171,27 @@ class AutomationOrchestrator {
         }
       }
     }
+
+    // Log rate limiter stats at end
+    debugPrint('Rate limiter stats: ${rateLimiter.getStats()}');
   }
 
-  /// Cleanup all adapters
+  /// Cleanup all adapters and reset rate limiters
   Future<void> cleanup() async {
     for (final adapter in _adapters.values) {
       await adapter.cleanup();
     }
     _adapters.clear();
+
+    for (final limiter in _rateLimiters.values) {
+      limiter.reset();
+    }
+    _rateLimiters.clear();
+  }
+
+  /// Get rate limiter stats for a platform
+  Map<String, dynamic>? getRateLimiterStats(String platform) {
+    return _rateLimiters[platform]?.getStats();
   }
 
   PlatformAutomationAdapter? _createAdapter(String platform) {
@@ -141,19 +212,5 @@ class AutomationOrchestrator {
         .replaceAll('{name}', profile.name)
         .replaceAll('{company}', profile.company ?? '')
         .replaceAll('{title}', profile.title ?? '');
-  }
-
-  int _getRandomDelay(String platform) {
-    // Different delays for different platforms
-    switch (platform.toUpperCase()) {
-      case 'EMAIL':
-        return 30 + (DateTime.now().millisecond % 30); // 30-60 seconds
-      case 'LINKEDIN':
-        return 120 + (DateTime.now().millisecond % 180); // 2-5 minutes
-      case 'TWITTER':
-        return 180 + (DateTime.now().millisecond % 240); // 3-7 minutes
-      default:
-        return 60;
-    }
   }
 }

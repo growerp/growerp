@@ -134,7 +134,8 @@ class OutreachMessageListState extends State<OutreachMessageList> {
                                 return index > messages.length
                                     ? const BottomLoader()
                                     : Dismissible(
-                                        key: const Key('xxxxxx'),
+                                        key: Key(
+                                            'message_${messages[index - 1].messageId}'),
                                         direction: DismissDirection.startToEnd,
                                         child: BlocProvider.value(
                                           value: _messageBloc,

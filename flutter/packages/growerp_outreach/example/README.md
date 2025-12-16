@@ -49,7 +49,7 @@ npm install -g @playwright/mcp
 
 ### Running on Linux (Native)
 
-On Linux (and other native platforms), the browser automation works out of the box:
+On Linux (and probably Windows, MacOs), the browser automation works out of the box:
 
 1. Run the example app:
    ```bash
