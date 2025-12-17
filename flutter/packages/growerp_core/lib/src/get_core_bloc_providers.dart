@@ -22,11 +22,7 @@ List<BlocProvider> getCoreBlocProviders(
   ChatRoomBloc chatRoomBloc = ChatRoomBloc(restClient, chatClient, authBloc);
   List<BlocProvider<StateStreamableSource<Object?>>> blocProviders = [
     BlocProvider<AuthBloc>(create: (context) => authBloc..add(AuthLoad())),
-    BlocProvider<ChatRoomBloc>(
-      create: (context) =>
-          ChatRoomBloc(restClient, chatClient, authBloc)
-            ..add(const ChatRoomFetch()),
-    ),
+    BlocProvider<ChatRoomBloc>(create: (context) => chatRoomBloc),
     BlocProvider<ActivityBloc>(create: (context) => ActivityBloc(restClient)),
     BlocProvider<ThemeBloc>(
       create: (context) => ThemeBloc()..add(ThemeSwitch()),

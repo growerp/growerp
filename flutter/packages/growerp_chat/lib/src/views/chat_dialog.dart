@@ -40,6 +40,7 @@ class ChatState extends State<ChatDialog> {
           chatRoomId: widget.chatRoom.chatRoomId,
           chatRoomName: widget.chatRoom.chatRoomName!,
           limit: limit,
+          refresh: true, // Always refresh when opening a chat room
         ),
       );
     Timer(const Duration(seconds: 1), () => _scrollController.jumpTo(0.0));
