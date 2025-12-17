@@ -21,6 +21,9 @@
             <description>Email subject line (for EMAIL platform)</description>
         </field>
         <field name="dailyLimitPerPlatform" type="number-integer" default="50" />
+        <field name="platformSettings" type="text-very-long">
+            <description>JSON object storing per-platform settings: actionType, searchKeywords, messageTemplate</description>
+        </field>
         <field name="createdByUserLogin" type="id" />
         <field name="lastModifiedByUserLogin" type="id" />
         <relationship type="one" title="Owner" related="mantle.party.Party" short-alias="owner">

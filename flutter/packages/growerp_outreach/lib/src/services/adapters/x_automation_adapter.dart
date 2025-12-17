@@ -227,6 +227,62 @@ class XAutomationAdapter implements PlatformAutomationAdapter {
     }
   }
 
+  /// Post a tweet
+  Future<void> postTweet(String content) async {
+    if (!_initialized) {
+      throw StateError('Adapter not initialized. Call initialize() first.');
+    }
+
+    try {
+      // Navigate to home to ensure we're on main page
+      await _browser.navigate('https://twitter.com/home');
+      await _browser.wait(2000);
+
+      // Take snapshot to find tweet compose area
+      var snapshot = await _browser.snapshot();
+
+      // Find the tweet compose input
+      final composeInput = SnapshotParser.findFirst(
+            snapshot,
+            testId: 'tweetTextarea_0',
+          ) ??
+          SnapshotParser.findInput(
+            snapshot,
+            placeholder: "What's happening",
+          );
+
+      if (composeInput == null) {
+        throw Exception('Tweet compose input not found');
+      }
+
+      await _browser.clickElement(composeInput);
+      await _browser.wait(500);
+
+      await _browser.typeIntoElement(composeInput, content);
+      await _browser.wait(500);
+
+      // Find and click tweet/post button
+      snapshot = await _browser.snapshot();
+      final tweetButton = SnapshotParser.findFirst(
+            snapshot,
+            testId: 'tweetButton',
+          ) ??
+          SnapshotParser.findButton(snapshot, 'Post');
+
+      if (tweetButton == null) {
+        throw Exception('Tweet button not found');
+      }
+
+      await _browser.clickElement(tweetButton);
+      await _browser.wait(1000);
+
+      debugPrint(
+          '✓ Posted tweet: ${content.substring(0, content.length > 50 ? 50 : content.length)}...');
+    } catch (e) {
+      throw Exception('Failed to post tweet: $e');
+    }
+  }
+
   @override
   Future<void> cleanup() async {
     await _browser.cleanup();

@@ -13,6 +13,8 @@
  */
 
 @TestOn('vm')
+library;
+
 import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 // Import native implementation directly for testing

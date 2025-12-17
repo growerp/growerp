@@ -68,8 +68,7 @@ TableData getCampaignListTableData(
     }
   }
 
-  TableRowContent buildDeleteAction(
-      {double width = 10, bool showLabel = true}) {
+  TableRowContent buildActions({double width = 10, bool showLabel = true}) {
     return TableRowContent(
       name: showLabel
           ? const Text('Actions', textAlign: TextAlign.start)
@@ -80,11 +79,7 @@ TableData getCampaignListTableData(
         tooltip: 'Delete campaign',
         icon: const Icon(Icons.delete),
         color: Colors.red.shade600,
-        onPressed: campaign.campaignId == null
-            ? null
-            : () {
-                confirmDelete();
-              },
+        onPressed: campaign.campaignId == null ? null : () => confirmDelete(),
       ),
     );
   }
@@ -113,7 +108,7 @@ TableData getCampaignListTableData(
             Text(_formatStatus(campaign.status), key: Key('status$index')),
           ],
         )));
-    rowContent.add(buildDeleteAction(width: 20));
+    rowContent.add(buildActions(width: 20));
   } else {
     rowContent.add(TableRowContent(
       name: 'ID',
@@ -175,7 +170,7 @@ TableData getCampaignListTableData(
         overflow: TextOverflow.ellipsis,
       ),
     ));
-    rowContent.add(buildDeleteAction(width: 8));
+    rowContent.add(buildActions(width: 12));
   }
 
   return TableData(

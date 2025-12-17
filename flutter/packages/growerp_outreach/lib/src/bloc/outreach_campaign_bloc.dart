@@ -80,6 +80,7 @@ class OutreachCampaignBloc
           'landingPageId': event.landingPageId,
           'messageTemplate': event.messageTemplate,
           'emailSubject': event.emailSubject,
+          'platformSettings': event.platformSettings,
           'dailyLimitPerPlatform': event.dailyLimitPerPlatform,
         },
       );
@@ -120,6 +121,7 @@ class OutreachCampaignBloc
           'landingPageId': event.landingPageId,
           'messageTemplate': event.messageTemplate,
           'emailSubject': event.emailSubject,
+          'platformSettings': event.platformSettings,
           'statusId': event.status,
           'dailyLimitPerPlatform': event.dailyLimitPerPlatform,
         },
