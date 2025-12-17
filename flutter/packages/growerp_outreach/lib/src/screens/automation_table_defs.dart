@@ -16,12 +16,44 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
+import 'package:intl/intl.dart';
 import '../bloc/outreach_campaign_bloc.dart';
+
+/// Formats backend status for display
+/// 'MKTG_CAMP_PLANNED' -> 'Planned'
+String _formatStatus(String status) {
+  final cleaned = status.replaceFirst('MKTG_CAMP_', '');
+  if (cleaned.isEmpty) return status;
+  return cleaned[0].toUpperCase() + cleaned.substring(1).toLowerCase();
+}
+
+/// Check if campaign is in an active/running state
+bool _isActiveStatus(String status) {
+  return status == 'MKTG_CAMP_INPROGRESS' || status == 'MKTG_CAMP_APPROVED';
+}
+
+/// Get status color based on campaign status
+Color _getStatusColor(String status) {
+  switch (status) {
+    case 'MKTG_CAMP_INPROGRESS':
+      return Colors.green;
+    case 'MKTG_CAMP_APPROVED':
+      return Colors.blue;
+    case 'MKTG_CAMP_COMPLETED':
+      return Colors.purple;
+    case 'MKTG_CAMP_CANCELLED':
+      return Colors.red;
+    case 'MKTG_CAMP_PLANNED':
+    default:
+      return Colors.grey;
+  }
+}
 
 TableData getActiveCampaignsTableData(Bloc bloc, String classificationId,
     BuildContext context, OutreachCampaign item, int index,
     {dynamic extra}) {
   bool isPhone = isAPhone(context);
+  final isActive = _isActiveStatus(item.status);
 
   List<TableRowContent> rowContent = [];
   if (isPhone) {
@@ -32,9 +64,8 @@ TableData getActiveCampaignsTableData(Bloc bloc, String classificationId,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(item.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-          Text(item.status,
-              style: TextStyle(
-                  color: item.status == 'ACTIVE' ? Colors.green : Colors.grey)),
+          Text(_formatStatus(item.status),
+              style: TextStyle(color: _getStatusColor(item.status))),
         ],
       ),
     ));
@@ -43,14 +74,12 @@ TableData getActiveCampaignsTableData(Bloc bloc, String classificationId,
       width: 20,
       value: IconButton(
         icon: Icon(
-            item.status == 'ACTIVE'
-                ? Icons.pause_circle_outline
-                : Icons.play_circle_outline,
-            color: item.status == 'ACTIVE' ? Colors.orange : Colors.green),
+            isActive ? Icons.pause_circle_outline : Icons.play_circle_outline,
+            color: isActive ? Colors.orange : Colors.green),
         onPressed: () {
           if (item.campaignId != null) {
             final outreachBloc = bloc as OutreachCampaignBloc;
-            if (item.status == 'ACTIVE') {
+            if (isActive) {
               outreachBloc.add(OutreachCampaignPause(item.campaignId!));
             } else {
               outreachBloc.add(OutreachCampaignStart(item.campaignId!));
@@ -67,22 +96,19 @@ TableData getActiveCampaignsTableData(Bloc bloc, String classificationId,
     rowContent.add(TableRowContent(
         name: 'Status',
         width: 10,
-        value: Text(item.status,
-            style: TextStyle(
-                color: item.status == 'ACTIVE' ? Colors.green : Colors.grey))));
+        value: Text(_formatStatus(item.status),
+            style: TextStyle(color: _getStatusColor(item.status)))));
     rowContent.add(TableRowContent(
       name: 'Action',
       width: 10,
       value: IconButton(
         icon: Icon(
-            item.status == 'ACTIVE'
-                ? Icons.pause_circle_outline
-                : Icons.play_circle_outline,
-            color: item.status == 'ACTIVE' ? Colors.orange : Colors.green),
+            isActive ? Icons.pause_circle_outline : Icons.play_circle_outline,
+            color: isActive ? Colors.orange : Colors.green),
         onPressed: () {
           if (item.campaignId != null) {
             final outreachBloc = bloc as OutreachCampaignBloc;
-            if (item.status == 'ACTIVE') {
+            if (isActive) {
               outreachBloc.add(OutreachCampaignPause(item.campaignId!));
             } else {
               outreachBloc.add(OutreachCampaignStart(item.campaignId!));
@@ -104,6 +130,11 @@ TableData getRecentActivityTableData(Bloc bloc, String classificationId,
     {dynamic extra}) {
   bool isPhone = isAPhone(context);
 
+  // Format the sent date/time
+  final timeStr = item.sentDate != null
+      ? DateFormat('MMM d, HH:mm').format(item.sentDate!)
+      : '';
+
   List<TableRowContent> rowContent = [];
   if (isPhone) {
     rowContent.add(TableRowContent(
@@ -114,7 +145,7 @@ TableData getRecentActivityTableData(Bloc bloc, String classificationId,
         children: [
           Text(item.recipientName ?? 'Unknown',
               style: const TextStyle(fontWeight: FontWeight.bold)),
-          Text('${item.platform} • ${item.status}',
+          Text('${item.platform} • ${item.status} • $timeStr',
               style: TextStyle(
                   fontSize: 12,
                   color: item.status == 'FAILED' ? Colors.red : Colors.grey)),
@@ -139,8 +170,12 @@ TableData getRecentActivityTableData(Bloc bloc, String classificationId,
                         ? Colors.green
                         : Colors.grey))));
     rowContent.add(TableRowContent(
+        name: 'Time',
+        width: 12,
+        value: Text(timeStr, style: const TextStyle(fontSize: 12))));
+    rowContent.add(TableRowContent(
         name: 'Error',
-        width: 20,
+        width: 15,
         value: Text(item.errorMessage ?? '',
             style: const TextStyle(color: Colors.red),
             overflow: TextOverflow.ellipsis)));

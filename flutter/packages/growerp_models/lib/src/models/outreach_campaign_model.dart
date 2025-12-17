@@ -17,7 +17,7 @@ class OutreachCampaign {
   final String? ownerPartyId;
 
   /// Campaign name (maps to campaignName)
-  @JsonKey(name: 'campaignName')
+  @JsonKey(name: 'campaignName', defaultValue: '')
   final String name;
 
   /// Campaign summary/description
@@ -25,6 +25,7 @@ class OutreachCampaign {
   final String? description;
 
   /// JSON array of platforms (EMAIL, LINKEDIN, TWITTER, etc.)
+  @JsonKey(defaultValue: '[]')
   final String platforms;
 
   /// Target audience description
@@ -38,6 +39,9 @@ class OutreachCampaign {
 
   /// Email subject line (for EMAIL platform)
   final String? emailSubject;
+
+  /// JSON object storing per-platform settings: actionType, searchKeywords, messageTemplate
+  final String? platformSettings;
 
   /// Campaign status: MKTG_CAMP_PLANNED, MKTG_CAMP_APPROVED, MKTG_CAMP_INPROGRESS, etc.
   @JsonKey(name: 'statusId', defaultValue: 'MKTG_CAMP_PLANNED')
@@ -109,6 +113,7 @@ class OutreachCampaign {
     this.landingPageId,
     this.messageTemplate,
     this.emailSubject,
+    this.platformSettings,
     required this.status,
     this.dailyLimitPerPlatform = 50,
     this.budgetedCost,
@@ -139,6 +144,7 @@ class OutreachCampaign {
     String? landingPageId,
     String? messageTemplate,
     String? emailSubject,
+    String? platformSettings,
     String? status,
     int? dailyLimitPerPlatform,
     String? budgetedCost,
@@ -167,6 +173,7 @@ class OutreachCampaign {
       landingPageId: landingPageId ?? this.landingPageId,
       messageTemplate: messageTemplate ?? this.messageTemplate,
       emailSubject: emailSubject ?? this.emailSubject,
+      platformSettings: platformSettings ?? this.platformSettings,
       status: status ?? this.status,
       dailyLimitPerPlatform:
           dailyLimitPerPlatform ?? this.dailyLimitPerPlatform,

@@ -25,6 +25,7 @@ class OutreachCampaignCreate extends OutreachCampaignEvent {
     this.landingPageId,
     this.messageTemplate,
     this.emailSubject,
+    this.platformSettings,
     this.dailyLimitPerPlatform = 50,
   });
 
@@ -34,6 +35,7 @@ class OutreachCampaignCreate extends OutreachCampaignEvent {
   final String? landingPageId;
   final String? messageTemplate;
   final String? emailSubject;
+  final String? platformSettings;
   final int dailyLimitPerPlatform;
 
   @override
@@ -44,6 +46,7 @@ class OutreachCampaignCreate extends OutreachCampaignEvent {
         landingPageId,
         messageTemplate,
         emailSubject,
+        platformSettings,
         dailyLimitPerPlatform,
       ];
 }
@@ -58,6 +61,7 @@ class OutreachCampaignUpdate extends OutreachCampaignEvent {
     this.landingPageId,
     this.messageTemplate,
     this.emailSubject,
+    this.platformSettings,
     this.status,
     this.dailyLimitPerPlatform,
   });
@@ -70,6 +74,7 @@ class OutreachCampaignUpdate extends OutreachCampaignEvent {
   final String? landingPageId;
   final String? messageTemplate;
   final String? emailSubject;
+  final String? platformSettings;
   final String? status;
   final int? dailyLimitPerPlatform;
 
@@ -83,6 +88,7 @@ class OutreachCampaignUpdate extends OutreachCampaignEvent {
         landingPageId,
         messageTemplate,
         emailSubject,
+        platformSettings,
         status,
         dailyLimitPerPlatform,
       ];

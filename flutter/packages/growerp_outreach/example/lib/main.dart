@@ -122,14 +122,6 @@ const outreachMenuConfig = MenuConfiguration(
       sequenceNum: 70,
       widgetName: 'PlatformConfigListScreen',
     ),
-    MenuOption(
-      menuOptionId: 'OUT_LINKEDIN_MSG',
-      title: 'LinkedIn Messaging',
-      route: '/linkedin-messaging',
-      iconName: 'connect_without_contact',
-      sequenceNum: 75,
-      widgetName: 'LinkedInMessagingScreen',
-    ),
   ],
 );
 
@@ -146,7 +138,6 @@ GoRouter createOutreachExampleRouter() {
       '/website' => const LandingPageList(),
       '/leads' => const UserList(key: Key('Lead'), role: Role.lead),
       '/platforms' => const PlatformConfigListScreen(),
-      '/linkedin-messaging' => const LinkedInMessagingScreen(),
       _ => const OutreachDashboard(),
     },
   );

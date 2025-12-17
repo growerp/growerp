@@ -52,12 +52,13 @@
                 <set field="searchPattern" value="%${search}%" />
             </if>
 
-            <entity-find entity-name="growerp.marketing.MarketingCampaignAndMetrics" list="campaignList"
+            <entity-find entity-name="growerp.marketing.MarketingCampaignAndMetrics"
+                list="campaignList"
                 offset="start" limit="limit">
                 <econdition field-name="ownerPartyId" />
                 <econditions combine="or">
                     <econdition field-name="pseudoId" operator="like"
-                        from="searchPattern" ignore-case="true" ignore-if-empty="true"/>
+                        from="searchPattern" ignore-case="true" ignore-if-empty="true" />
                     <econdition field-name="campaignName" operator="like"
                         from="searchPattern" ignore-case="true" ignore-if-empty="true" />
                 </econditions>
@@ -77,6 +78,7 @@
                     landingPageId: camp.landingPageId,
                     messageTemplate: camp.messageTemplate,
                     emailSubject: camp.emailSubject,
+                    platformSettings: camp.platformSettings,
                     statusId: camp.statusId ?: 'MKTG_CAMP_PLANNED',
                     dailyLimitPerPlatform: camp.dailyLimitPerPlatform ?: 50,
                     budgetedCost: camp.budgetedCost,
@@ -117,6 +119,7 @@
                 <parameter name="landingPageId" />
                 <parameter name="messageTemplate" />
                 <parameter name="emailSubject" />
+                <parameter name="platformSettings" />
                 <parameter name="statusId" />
                 <parameter name="dailyLimitPerPlatform" type="Integer" />
                 <parameter name="budgetedCost" type="BigDecimal" />
@@ -140,9 +143,10 @@
 
             <!-- Find campaign by ID or pseudoId -->
             <if condition="!campaignValue &amp;&amp; pseudoId">
-                <entity-find entity-name="mantle.marketing.campaign.MarketingCampaign" list="campaignList">
-                    <econdition field-name="pseudoId" ignore-if-empty="true"/>
-                    <econdition field-name="marketingCampaignId" ignore-if-empty="true"/>
+                <entity-find entity-name="mantle.marketing.campaign.MarketingCampaign"
+                    list="campaignList">
+                    <econdition field-name="pseudoId" ignore-if-empty="true" />
+                    <econdition field-name="marketingCampaignId" ignore-if-empty="true" />
                     <econdition field-name="ownerPartyId" />
                 </entity-find>
                 <set field="campaignValue" from="campaignList?.first()" />
@@ -164,6 +168,7 @@
                 landingPageId: campaignValue.landingPageId,
                 messageTemplate: campaignValue.messageTemplate,
                 emailSubject: campaignValue.emailSubject,
+                platformSettings: campaignValue.platformSettings,
                 statusId: campaignValue.statusId ?: 'MKTG_CAMP_PLANNED',
                 dailyLimitPerPlatform: campaignValue.dailyLimitPerPlatform ?: 50,
                 budgetedCost: campaignValue.budgetedCost,
@@ -187,21 +192,25 @@
             </entity-find>
 
             <!-- Get metrics -->
-            <entity-find-one entity-name="growerp.marketing.CampaignMetrics" value-field="metricsEntity">
+            <entity-find-one entity-name="growerp.marketing.CampaignMetrics"
+                value-field="metricsEntity">
                 <field-map field-name="marketingCampaignId" />
             </entity-find-one>
 
             <!-- Calculate dynamic metrics -->
-            <entity-find-count entity-name="growerp.marketing.OutreachMessage" count-field="messagesPending">
+            <entity-find-count entity-name="growerp.marketing.OutreachMessage"
+                count-field="messagesPending">
                 <econdition field-name="marketingCampaignId" />
                 <econdition field-name="status" value="PENDING" />
             </entity-find-count>
-            <entity-find-count entity-name="growerp.marketing.OutreachMessage" count-field="messagesFailed">
+            <entity-find-count entity-name="growerp.marketing.OutreachMessage"
+                count-field="messagesFailed">
                 <econdition field-name="marketingCampaignId" />
                 <econdition field-name="status" value="FAILED" />
             </entity-find-count>
 
-            <set field="metrics" from="[
+            <set field="metrics"
+                from="[
                 metricId: metricsEntity?.metricId,
                 marketingCampaignId: marketingCampaignId,
                 messagesSent: metricsEntity?.messagesSent ?: 0,
@@ -227,6 +236,7 @@
                 <parameter name="landingPageId" />
                 <parameter name="messageTemplate" />
                 <parameter name="emailSubject" />
+                <parameter name="platformSettings" />
                 <parameter name="dailyLimitPerPlatform" type="Integer" default="50" />
                 <parameter name="budgetedCost" type="BigDecimal" />
                 <parameter name="estimatedCost" type="BigDecimal" />
@@ -246,6 +256,7 @@
                 <parameter name="landingPageId" />
                 <parameter name="messageTemplate" />
                 <parameter name="emailSubject" />
+                <parameter name="platformSettings" />
                 <parameter name="statusId" />
                 <parameter name="dailyLimitPerPlatform" type="Integer" />
                 <parameter name="budgetedCost" type="BigDecimal" />
@@ -270,6 +281,7 @@
             <set field="landingPageId" from="campaign.landingPageId" />
             <set field="messageTemplate" from="campaign.messageTemplate" />
             <set field="emailSubject" from="campaign.emailSubject" />
+            <set field="platformSettings" from="campaign.platformSettings" />
             <set field="dailyLimitPerPlatform" from="campaign.dailyLimitPerPlatform ?: 50"
                 type="Integer" />
             <set field="budgetedCost" from="campaign.budgetedCost" />
@@ -305,7 +317,8 @@
             </if>
 
             <!-- Create campaign -->
-            <service-call name="create#mantle.marketing.campaign.MarketingCampaign" out-map="createOut"
+            <service-call name="create#mantle.marketing.campaign.MarketingCampaign"
+                out-map="createOut"
                 in-map="[
                          pseudoId: pseudoId,
                          ownerPartyId: ownerPartyId,
@@ -316,6 +329,7 @@
                          landingPageId: landingPageId,
                          messageTemplate: messageTemplate,
                          emailSubject: emailSubject,
+                         platformSettings: platformSettings,
                          statusId: 'MKTG_CAMP_PLANNED',
                          dailyLimitPerPlatform: dailyLimitPerPlatform,
                          budgetedCost: budgetedCost,
@@ -348,6 +362,7 @@
                 landingPageId: landingPageId,
                 messageTemplate: messageTemplate,
                 emailSubject: emailSubject,
+                platformSettings: platformSettings,
                 statusId: 'MKTG_CAMP_PLANNED',
                 dailyLimitPerPlatform: dailyLimitPerPlatform,
                 budgetedCost: budgetedCost,
@@ -374,6 +389,7 @@
                 <parameter name="landingPageId" />
                 <parameter name="messageTemplate" />
                 <parameter name="emailSubject" />
+                <parameter name="platformSettings" />
                 <parameter name="statusId" />
                 <parameter name="dailyLimitPerPlatform" type="Integer" />
                 <parameter name="budgetedCost" type="BigDecimal" />
@@ -396,6 +412,7 @@
                 <parameter name="landingPageId" />
                 <parameter name="messageTemplate" />
                 <parameter name="emailSubject" />
+                <parameter name="platformSettings" />
                 <parameter name="statusId" />
                 <parameter name="dailyLimitPerPlatform" type="Integer" />
                 <parameter name="budgetedCost" type="BigDecimal" />
@@ -424,6 +441,7 @@
             <set field="landingPageId" from="campaign.landingPageId" />
             <set field="messageTemplate" from="campaign.messageTemplate" />
             <set field="emailSubject" from="campaign.emailSubject" />
+            <set field="platformSettings" from="campaign.platformSettings" />
             <set field="statusId" from="campaign.statusId" />
             <set field="dailyLimitPerPlatform" from="campaign.dailyLimitPerPlatform" type="Integer" />
             <set field="budgetedCost" from="campaign.budgetedCost" />
@@ -437,16 +455,19 @@
             <if condition="pseudoId == ''">
                 <set field="pseudoid" from="null" />
             </if>
-            <log message="===looking for id ${marketingCampaignId} and pseudoId ${pseudoId} and ownerPartyId ${ownerPartyId}" />
-            <entity-find entity-name="mantle.marketing.campaign.MarketingCampaign" list="campaignList">
-                <econdition field-name="pseudoId" ignore-if-empty="true"/>
-                <econdition field-name="marketingCampaignId" ignore-if-empty="true"/>
+            <log
+                message="===looking for id ${marketingCampaignId} and pseudoId ${pseudoId} and ownerPartyId ${ownerPartyId}" />
+            <entity-find entity-name="mantle.marketing.campaign.MarketingCampaign"
+                list="campaignList">
+                <econdition field-name="pseudoId" ignore-if-empty="true" />
+                <econdition field-name="marketingCampaignId" ignore-if-empty="true" />
                 <econdition field-name="ownerPartyId" />
             </entity-find>
             <set field="existingCampaign" from="campaignList?.first()" />
 
             <if condition="!existingCampaign">
-                <return error="true" message="Campaign not found: ${pseudoId} or ${marketingCampaignId}" />
+                <return error="true"
+                    message="Campaign not found: ${pseudoId} or ${marketingCampaignId}" />
             </if>
 
             <!-- Validate landing page if provided -->
@@ -481,6 +502,7 @@
                          landingPageId: landingPageId,
                          messageTemplate: messageTemplate,
                          emailSubject: emailSubject,
+                         platformSettings: platformSettings,
                          statusId: statusId,
                          dailyLimitPerPlatform: dailyLimitPerPlatform,
                          budgetedCost: budgetedCost,
@@ -503,6 +525,7 @@
                 landingPageId: landingPageId ?: existingCampaign.landingPageId,
                 messageTemplate: messageTemplate ?: existingCampaign.messageTemplate,
                 emailSubject: emailSubject ?: existingCampaign.emailSubject,
+                platformSettings: platformSettings ?: existingCampaign.platformSettings,
                 statusId: statusId ?: existingCampaign.statusId ?: 'MKTG_CAMP_PLANNED',
                 dailyLimitPerPlatform: dailyLimitPerPlatform ?: existingCampaign.dailyLimitPerPlatform ?: 50,
                 budgetedCost: budgetedCost ?: existingCampaign.budgetedCost,
@@ -529,14 +552,16 @@
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
 
             <!-- Find campaign by ID or pseudoId -->
-            <entity-find entity-name="mantle.marketing.campaign.MarketingCampaign" list="campaignList">
-                <econdition field-name="pseudoId" ignore-if-empty="true"/>
-                <econdition field-name="marketingCampaignId" ignore-if-empty="true"/>
+            <entity-find entity-name="mantle.marketing.campaign.MarketingCampaign"
+                list="campaignList">
+                <econdition field-name="pseudoId" ignore-if-empty="true" />
+                <econdition field-name="marketingCampaignId" ignore-if-empty="true" />
                 <econdition field-name="ownerPartyId" />
             </entity-find>
             <set field="marketingCampaignId" from="campaignList?.first().marketingCampaignId" />
             <if condition="!marketingCampaignId">
-                <return error="true" message="Campaign not found: ${pseudoId} or ${marketingCampaignId}" />
+                <return error="true"
+                    message="Campaign not found: ${pseudoId} or ${marketingCampaignId}" />
             </if>
 
             <!-- Delete messages -->
@@ -622,10 +647,13 @@
             <set field="recipientEmail" from="message.recipientEmail" />
             <set field="messageContent" from="message.messageContent" />
             <set field="status" from="message.status" />
-            <set field="sentDate" from="message.sentDate ? ec.l10n.format(message.sentDate, 'yyyy-MM-dd HH:mm:ssZ') : null" />
-            <set field="responseDate" from="message.responseDate ? ec.l10n.format(message.responseDate, 'yyyy-MM-dd HH:mm:ssZ') : null" />
+            <set field="sentDate"
+                from="message.sentDate ? ec.l10n.format(message.sentDate, 'yyyy-MM-dd HH:mm:ssZ') : null" />
+            <set field="responseDate"
+                from="message.responseDate ? ec.l10n.format(message.responseDate, 'yyyy-MM-dd HH:mm:ssZ') : null" />
             <set field="errorMessage" from="message.errorMessage" />
-            <set field="createdDate" from="message.createdDate ? ec.l10n.format(message.createdDate, 'yyyy-MM-dd HH:mm:ssZ') : null" />
+            <set field="createdDate"
+                from="message.createdDate ? ec.l10n.format(message.createdDate, 'yyyy-MM-dd HH:mm:ssZ') : null" />
         </actions>
     </service>
 
@@ -675,7 +703,8 @@
             </if>
 
             <!-- Fetch updated message -->
-            <entity-find-one entity-name="growerp.marketing.OutreachMessage" value-field="updatedMessage">
+            <entity-find-one entity-name="growerp.marketing.OutreachMessage"
+                value-field="updatedMessage">
                 <field-map field-name="messageId" />
             </entity-find-one>
 
@@ -689,10 +718,13 @@
             <set field="recipientEmail" from="updatedMessage.recipientEmail" />
             <set field="messageContent" from="updatedMessage.messageContent" />
             <set field="status" from="updatedMessage.status" />
-            <set field="sentDate" from="updatedMessage.sentDate ? ec.l10n.format(updatedMessage.sentDate, 'yyyy-MM-dd HH:mm:ssZ') : null" />
-            <set field="responseDate" from="updatedMessage.responseDate ? ec.l10n.format(updatedMessage.responseDate, 'yyyy-MM-dd HH:mm:ssZ') : null" />
+            <set field="sentDate"
+                from="updatedMessage.sentDate ? ec.l10n.format(updatedMessage.sentDate, 'yyyy-MM-dd HH:mm:ssZ') : null" />
+            <set field="responseDate"
+                from="updatedMessage.responseDate ? ec.l10n.format(updatedMessage.responseDate, 'yyyy-MM-dd HH:mm:ssZ') : null" />
             <set field="errorMessage" from="updatedMessage.errorMessage" />
-            <set field="createdDate" from="updatedMessage.createdDate ? ec.l10n.format(updatedMessage.createdDate, 'yyyy-MM-dd HH:mm:ssZ') : null" />
+            <set field="createdDate"
+                from="updatedMessage.createdDate ? ec.l10n.format(updatedMessage.createdDate, 'yyyy-MM-dd HH:mm:ssZ') : null" />
         </actions>
     </service>
 
@@ -822,8 +854,10 @@
             <!-- Convert isEnabled to boolean for frontend -->
             <set field="isEnabled" from="isEnabled == 'Y'" />
             <!-- Format dates -->
-            <set field="createdDate" from="createdDate ? ec.l10n.format(createdDate, 'yyyy-MM-dd HH:mm:ssZ') : null" />
-            <set field="lastModifiedDate" from="lastModifiedDate ? ec.l10n.format(lastModifiedDate, 'yyyy-MM-dd HH:mm:ssZ') : null" />
+            <set field="createdDate"
+                from="createdDate ? ec.l10n.format(createdDate, 'yyyy-MM-dd HH:mm:ssZ') : null" />
+            <set field="lastModifiedDate"
+                from="lastModifiedDate ? ec.l10n.format(lastModifiedDate, 'yyyy-MM-dd HH:mm:ssZ') : null" />
         </actions>
     </service>
 
@@ -862,7 +896,8 @@
                          password: password,
                          lastModifiedDate: ec.user.nowTimestamp]" />
             <!-- Fetch updated record to return full object -->
-            <entity-find-one entity-name="growerp.marketing.PlatformConfiguration" value-field="conf">
+            <entity-find-one entity-name="growerp.marketing.PlatformConfiguration"
+                value-field="conf">
                 <field-map field-name="configId" />
             </entity-find-one>
             <set field="ownerPartyId" from="conf.ownerPartyId" />
@@ -873,8 +908,10 @@
             <set field="apiSecret" from="conf.apiSecret" />
             <set field="username" from="conf.username" />
             <set field="password" from="conf.password" />
-            <set field="createdDate" from="conf.createdDate ? ec.l10n.format(conf.createdDate, 'yyyy-MM-dd HH:mm:ssZ') : null" />
-            <set field="lastModifiedDate" from="conf.lastModifiedDate ? ec.l10n.format(conf.lastModifiedDate, 'yyyy-MM-dd HH:mm:ssZ') : null" />
+            <set field="createdDate"
+                from="conf.createdDate ? ec.l10n.format(conf.createdDate, 'yyyy-MM-dd HH:mm:ssZ') : null" />
+            <set field="lastModifiedDate"
+                from="conf.lastModifiedDate ? ec.l10n.format(conf.lastModifiedDate, 'yyyy-MM-dd HH:mm:ssZ') : null" />
         </actions>
     </service>
 
@@ -959,7 +996,8 @@
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
 
             <!-- Get campaign to validate and get landing page URL -->
-            <entity-find-one entity-name="mantle.marketing.campaign.MarketingCampaign" value-field="campaign">
+            <entity-find-one entity-name="mantle.marketing.campaign.MarketingCampaign"
+                value-field="campaign">
                 <field-map field-name="marketingCampaignId" />
                 <field-map field-name="ownerPartyId" />
             </entity-find-one>
@@ -1037,7 +1075,8 @@
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
 
-            <entity-find-one entity-name="mantle.marketing.campaign.MarketingCampaign" value-field="campaign">
+            <entity-find-one entity-name="mantle.marketing.campaign.MarketingCampaign"
+                value-field="campaign">
                 <field-map field-name="marketingCampaignId" />
                 <field-map field-name="ownerPartyId" />
             </entity-find-one>
@@ -1073,7 +1112,8 @@
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
 
-            <entity-find-one entity-name="mantle.marketing.campaign.MarketingCampaign" value-field="campaign">
+            <entity-find-one entity-name="mantle.marketing.campaign.MarketingCampaign"
+                value-field="campaign">
                 <field-map field-name="marketingCampaignId" />
                 <field-map field-name="ownerPartyId" />
             </entity-find-one>
@@ -1111,7 +1151,8 @@
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
 
-            <entity-find-one entity-name="mantle.marketing.campaign.MarketingCampaign" value-field="campaign">
+            <entity-find-one entity-name="mantle.marketing.campaign.MarketingCampaign"
+                value-field="campaign">
                 <field-map field-name="marketingCampaignId" />
                 <field-map field-name="ownerPartyId" />
             </entity-find-one>
@@ -1147,7 +1188,8 @@
             <set field="responsesReceived" from="respondedMessages.size()" />
 
             <!-- Calculate response rate -->
-            <set field="responseRate" from="messagesSent > 0 ? (responsesReceived * 100.0 / messagesSent) : 0" />
+            <set field="responseRate"
+                from="messagesSent > 0 ? (responsesReceived * 100.0 / messagesSent) : 0" />
         </actions>
     </service>
 

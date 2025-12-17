@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'automation_orchestrator.dart';
 import 'platform_automation_adapter.dart';
+import '../models/platform_settings.dart';
 
 class CampaignAutomationService {
   final RestClient restClient;
@@ -68,19 +69,32 @@ class CampaignAutomationService {
 
     await _orchestrator.initialize(platforms);
 
-    // 3. Get target leads if available (from programmatic API or parsed from targetAudience)
+    // 3. Parse platform-specific settings
+    final platformSettings =
+        PlatformSettings.fromJson(campaign.platformSettings);
+
+    // 4. Get target leads if available (from programmatic API or parsed from targetAudience)
     final targetLeads = _getTargetLeads(campaign);
 
-    // 4. Run automation in background
+    // 5. Run automation in background
     // Note: This runs for each platform sequentially for now
     for (final platform in platforms) {
       if (_activeCampaigns[campaignId] != true) break;
 
+      // Get platform-specific settings with fallbacks to campaign defaults
+      final config = platformSettings.getForPlatform(platform);
+      final actionType = config?.actionType ?? _getDefaultAction(platform);
+      final searchKeywords =
+          config?.searchKeywords ?? campaign.targetAudience ?? '';
+      final messageTemplate =
+          config?.messageTemplate ?? campaign.messageTemplate ?? '';
+
       try {
         await _orchestrator.runAutomation(
           platform: platform,
-          searchCriteria: campaign.targetAudience ?? '',
-          messageTemplate: campaign.messageTemplate ?? '',
+          actionType: actionType,
+          searchCriteria: searchKeywords,
+          messageTemplate: messageTemplate,
           dailyLimit: campaign.dailyLimitPerPlatform,
           campaignId: campaignId,
           emailSubject: campaign.emailSubject,
@@ -95,6 +109,22 @@ class CampaignAutomationService {
 
     // If finished naturally (not cancelled), mark as complete or paused?
     // For now, we leave it active until manually paused or daily limit reached
+  }
+
+  /// Get default action type for a platform
+  String _getDefaultAction(String platform) {
+    switch (platform.toUpperCase()) {
+      case 'EMAIL':
+        return 'send_email';
+      case 'LINKEDIN':
+        return 'message_connections';
+      case 'TWITTER':
+        return 'post_tweet';
+      case 'SUBSTACK':
+        return 'post_note';
+      default:
+        return 'send_message';
+    }
   }
 
   /// Get target leads for a campaign

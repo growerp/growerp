@@ -37,10 +37,15 @@ EventTransformer<E> chatMessageDroppable<E>(Duration duration) {
 
 class ChatMessageBloc extends Bloc<ChatMessageEvent, ChatMessageState> {
   ChatMessageBloc(
-      this.restClient, this.chatClient, this.authBloc, this.chatRoomBloc)
-      : super(const ChatMessageState()) {
-    on<ChatMessageFetch>(_onChatMessageFetch,
-        transformer: chatMessageDroppable(const Duration(milliseconds: 100)));
+    this.restClient,
+    this.chatClient,
+    this.authBloc,
+    this.chatRoomBloc,
+  ) : super(const ChatMessageState()) {
+    on<ChatMessageFetch>(
+      _onChatMessageFetch,
+      transformer: chatMessageDroppable(const Duration(milliseconds: 100)),
+    );
     on<ChatMessageReceiveWs>(_onChatMessageReceiveWs);
     on<ChatMessageSendWs>(_onChatMessageSendWs);
   }
@@ -58,39 +63,48 @@ class ChatMessageBloc extends Bloc<ChatMessageEvent, ChatMessageState> {
     if (state.status == ChatMessageStatus.initial) {
       final myStream = chatClient.stream();
       // ignore: unused_local_variable
-      final subscription = myStream.listen((data) =>
-          add(ChatMessageReceiveWs(ChatMessage.fromJson(jsonDecode(data)))));
+      final subscription = myStream.listen(
+        (data) =>
+            add(ChatMessageReceiveWs(ChatMessage.fromJson(jsonDecode(data)))),
+      );
     }
     try {
-      // start from record zero for initial and refresh
-      if (state.status == ChatMessageStatus.initial ||
+      // Always start from 0 for a fresh fetch (new room or refresh)
+      // Only append when scrolling for more messages in the same room
+      bool shouldReplace =
+          state.status == ChatMessageStatus.initial ||
           event.refresh ||
-          event.searchString != '') {
-        start = 0;
-      } else {
-        start = state.chatMessages.length;
-      }
+          event.searchString != '';
+      start = shouldReplace ? 0 : state.chatMessages.length;
+
       ChatMessages compResult = await restClient.getChatMessages(
-          chatRoomId: event.chatRoomId, searchString: event.searchString);
-      // reset badges
-      chatRoomBloc
-          .add(ChatRoomUpdateLocal(addNotReadChatRoomId: event.chatRoomId));
-      chatRoomBloc
-          .add(ChatRoomUpdateLocal(delNotReadChatRoomId: event.chatRoomId));
-      return emit(state.copyWith(
-        status: ChatMessageStatus.success,
-        chatMessages: start == 0
-            ? compResult.chatMessages
-            : (List.of(state.chatMessages)..addAll(compResult.chatMessages)),
-        hasReachedMax:
-            compResult.chatMessages.length < _chatMessageLimit ? true : false,
-        searchString: '',
-      ));
+        chatRoomId: event.chatRoomId,
+        searchString: event.searchString,
+      );
+      // Mark chat room as read (hasRead: true)
+      chatRoomBloc.add(
+        ChatRoomUpdateLocal(delNotReadChatRoomId: event.chatRoomId),
+      );
+      return emit(
+        state.copyWith(
+          status: ChatMessageStatus.success,
+          chatMessages: shouldReplace
+              ? compResult.chatMessages
+              : (List.of(state.chatMessages)..addAll(compResult.chatMessages)),
+          hasReachedMax: compResult.chatMessages.length < _chatMessageLimit
+              ? true
+              : false,
+          searchString: '',
+        ),
+      );
     } on DioException catch (e) {
-      emit(state.copyWith(
+      emit(
+        state.copyWith(
           status: ChatMessageStatus.failure,
           chatMessages: [],
-          message: await getDioError(e)));
+          message: await getDioError(e),
+        ),
+      );
     }
   }
 
@@ -100,13 +114,17 @@ class ChatMessageBloc extends Bloc<ChatMessageEvent, ChatMessageState> {
   ) async {
     List<ChatMessage> chatMessages = List.from(state.chatMessages);
     chatMessages.insert(
-        0,
-        ChatMessage(
-          fromUserId: event.chatMessage.fromUserId,
-          content: event.chatMessage.content,
-        ));
-    chatRoomBloc.add(ChatRoomUpdateLocal(
-        addNotReadChatRoomId: event.chatMessage.chatRoom!.chatRoomId));
+      0,
+      ChatMessage(
+        fromUserId: event.chatMessage.fromUserId,
+        content: event.chatMessage.content,
+      ),
+    );
+    chatRoomBloc.add(
+      ChatRoomUpdateLocal(
+        addNotReadChatRoomId: event.chatMessage.chatRoom!.chatRoomId,
+      ),
+    );
     emit(state.copyWith(chatMessages: chatMessages));
   }
 
@@ -125,8 +143,12 @@ class ChatMessageBloc extends Bloc<ChatMessageEvent, ChatMessageState> {
       }
       emit(state.copyWith(chatMessages: chatMessages));
     } on DioException catch (e) {
-      emit(state.copyWith(
-          status: ChatMessageStatus.failure, message: await getDioError(e)));
+      emit(
+        state.copyWith(
+          status: ChatMessageStatus.failure,
+          message: await getDioError(e),
+        ),
+      );
     }
   }
 }

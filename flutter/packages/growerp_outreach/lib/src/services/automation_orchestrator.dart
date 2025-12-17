@@ -5,6 +5,7 @@ import 'platform_automation_adapter.dart';
 import 'adapters/email_automation_adapter.dart';
 import 'adapters/linkedin_automation_adapter.dart';
 import 'adapters/x_automation_adapter.dart';
+import 'adapters/substack_automation_adapter.dart';
 import '../utils/rate_limiter.dart';
 
 /// Orchestrates automation across multiple platforms
@@ -46,6 +47,13 @@ class AutomationOrchestrator {
             maxRequests: 15,
             window: const Duration(hours: 1),
           );
+        case 'SUBSTACK':
+          // 30 actions per hour (Substack is more lenient)
+          return RateLimiter(
+            name: 'SUBSTACK',
+            maxRequests: 30,
+            window: const Duration(hours: 1),
+          );
         default:
           return RateLimiter(
             name: platform,
@@ -69,10 +77,17 @@ class AutomationOrchestrator {
 
   /// Run automation for a specific platform
   ///
+  /// The [actionType] determines what action to perform:
+  /// - EMAIL: 'send_email'
+  /// - LINKEDIN: 'message_connections', 'search_and_connect'
+  /// - TWITTER: 'post_tweet', 'follow_profiles', 'send_dms'
+  /// - SUBSTACK: 'post_note', 'subscribe', 'comment'
+  ///
   /// If [targetLeads] is provided and non-empty, those profiles will be used
   /// directly instead of searching with [searchCriteria].
   Future<void> runAutomation({
     required String platform,
+    required String actionType,
     required String searchCriteria,
     required String messageTemplate,
     required int dailyLimit,
@@ -92,20 +107,36 @@ class AutomationOrchestrator {
       throw Exception('Not logged in to $platform');
     }
 
-    // Use target leads if provided, otherwise search for profiles
+    // Handle broadcast actions (no target profiles needed)
+    if (_isBroadcastAction(actionType)) {
+      await _runBroadcastAction(
+        adapter: adapter,
+        platform: platform,
+        actionType: actionType,
+        messageTemplate: messageTemplate,
+        campaignId: campaignId,
+        checkCancelled: checkCancelled,
+      );
+      return;
+    }
+
+    // For targeted actions, get profiles
     final List<ProfileData> profiles;
     if (targetLeads != null && targetLeads.isNotEmpty) {
       profiles = targetLeads;
       debugPrint('Using ${profiles.length} target leads for $platform');
-    } else {
+    } else if (searchCriteria.isNotEmpty) {
       profiles = await adapter.searchProfiles(searchCriteria);
       debugPrint('Found ${profiles.length} profiles via search for $platform');
+    } else {
+      debugPrint('No search criteria or target leads for $platform');
+      return;
     }
 
     // Get rate limiter for this platform
     final rateLimiter = _getRateLimiter(platform);
 
-    // Send messages up to daily limit
+    // Process profiles up to daily limit
     int sent = 0;
     for (final profile in profiles) {
       if (checkCancelled()) break;
@@ -117,17 +148,16 @@ class AutomationOrchestrator {
           // Personalize message
           final message = _personalizeMessage(messageTemplate, profile);
 
-          // Send message (or connection request for social platforms)
-          if (platform == 'EMAIL') {
-            await adapter.sendDirectMessage(
-              profile,
-              message,
-              campaignId: campaignId,
-              subject: emailSubject,
-            );
-          } else {
-            await adapter.sendConnectionRequest(profile, message);
-          }
+          // Execute action based on actionType
+          await _executeTargetedAction(
+            adapter: adapter,
+            platform: platform,
+            actionType: actionType,
+            profile: profile,
+            message: message,
+            campaignId: campaignId,
+            emailSubject: emailSubject,
+          );
 
           // Record success in backend
           await restClient.createOutreachMessage(
@@ -202,6 +232,8 @@ class AutomationOrchestrator {
         return LinkedInAutomationAdapter();
       case 'TWITTER':
         return XAutomationAdapter();
+      case 'SUBSTACK':
+        return SubstackAutomationAdapter();
       default:
         return null;
     }
@@ -212,5 +244,124 @@ class AutomationOrchestrator {
         .replaceAll('{name}', profile.name)
         .replaceAll('{company}', profile.company ?? '')
         .replaceAll('{title}', profile.title ?? '');
+  }
+
+  /// Check if an action is a broadcast (doesn't target specific profiles)
+  bool _isBroadcastAction(String actionType) {
+    return const ['post_tweet', 'post_note'].contains(actionType);
+  }
+
+  /// Run a broadcast action (post without targeting specific profiles)
+  Future<void> _runBroadcastAction({
+    required PlatformAutomationAdapter adapter,
+    required String platform,
+    required String actionType,
+    required String messageTemplate,
+    required String campaignId,
+    required bool Function() checkCancelled,
+  }) async {
+    if (checkCancelled()) return;
+
+    final rateLimiter = _getRateLimiter(platform);
+
+    try {
+      await rateLimiter.execute(() async {
+        switch (actionType) {
+          case 'post_tweet':
+            // X/Twitter tweet
+            if (adapter is XAutomationAdapter) {
+              await adapter.postTweet(messageTemplate);
+            }
+            break;
+          case 'post_note':
+            // Substack note
+            if (adapter is SubstackAutomationAdapter) {
+              await adapter.postNote(messageTemplate);
+            }
+            break;
+        }
+
+        // Record success
+        await restClient.createOutreachMessage(
+          marketingCampaignId: campaignId,
+          platform: platform,
+          messageContent: messageTemplate,
+          status: 'SENT',
+        );
+
+        debugPrint('✓ Broadcast $actionType on $platform');
+      });
+    } catch (e) {
+      debugPrint('Error broadcasting on $platform: $e');
+      try {
+        await restClient.createOutreachMessage(
+          marketingCampaignId: campaignId,
+          platform: platform,
+          messageContent: messageTemplate,
+          status: 'FAILED',
+        );
+      } catch (_) {}
+    }
+  }
+
+  /// Execute a targeted action on a specific profile
+  Future<void> _executeTargetedAction({
+    required PlatformAutomationAdapter adapter,
+    required String platform,
+    required String actionType,
+    required ProfileData profile,
+    required String message,
+    required String campaignId,
+    String? emailSubject,
+  }) async {
+    switch (actionType) {
+      // Email actions
+      case 'send_email':
+        await adapter.sendDirectMessage(
+          profile,
+          message,
+          campaignId: campaignId,
+          subject: emailSubject,
+        );
+        break;
+
+      // LinkedIn actions
+      case 'message_connections':
+        await adapter.sendDirectMessage(
+          profile,
+          message,
+          campaignId: campaignId,
+        );
+        break;
+      case 'search_and_connect':
+        await adapter.sendConnectionRequest(profile, message);
+        break;
+
+      // Twitter/X actions
+      case 'follow_profiles':
+        await adapter.sendConnectionRequest(profile, message);
+        break;
+      case 'send_dms':
+        await adapter.sendDirectMessage(
+          profile,
+          message,
+          campaignId: campaignId,
+        );
+        break;
+
+      // Substack actions
+      case 'subscribe':
+        await adapter.sendConnectionRequest(profile, message);
+        break;
+      case 'comment':
+        if (adapter is SubstackAutomationAdapter) {
+          await adapter.commentOnLatestPost(profile, message);
+        }
+        break;
+
+      // Default fallback
+      default:
+        await adapter.sendConnectionRequest(profile, message);
+    }
   }
 }

@@ -19,6 +19,7 @@ import 'package:growerp_models/growerp_models.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
 import '../bloc/outreach_campaign_bloc.dart';
+import 'campaign_execution_dialog.dart';
 
 /// Formats backend status for display
 /// 'MKTG_CAMP_PLANNED' -> 'Planned'
@@ -119,6 +120,18 @@ class CampaignDetailScreenState extends State<CampaignDetailScreen> {
     super.dispose();
   }
 
+  /// Show the campaign execution dialog with platform tabs
+  Future<void> _showExecutionDialog() async {
+    await showDialog(
+      barrierDismissible: true,
+      context: context,
+      builder: (dialogContext) => BlocProvider.value(
+        value: _campaignBloc,
+        child: CampaignExecutionDialog(campaign: widget.campaign),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final isPhone = ResponsiveBreakpoints.of(context).isMobile;
@@ -137,6 +150,10 @@ class CampaignDetailScreenState extends State<CampaignDetailScreen> {
           child: Scaffold(
             backgroundColor: Colors.transparent,
             body: BlocListener<OutreachCampaignBloc, OutreachCampaignState>(
+              listenWhen: (previous, current) =>
+                  previous.status == OutreachCampaignStatus.loading &&
+                  (current.status == OutreachCampaignStatus.success ||
+                      current.status == OutreachCampaignStatus.failure),
               listener: (context, state) {
                 if (state.status == OutreachCampaignStatus.success) {
                   Navigator.of(context).pop();
@@ -258,8 +275,29 @@ class CampaignDetailScreenState extends State<CampaignDetailScreen> {
                         ],
                       ),
                       const SizedBox(height: 20),
-                      Text('Platforms',
-                          style: Theme.of(context).textTheme.titleMedium),
+                      Row(
+                        children: [
+                          Text('Platforms',
+                              style: Theme.of(context).textTheme.titleMedium),
+                          const Spacer(),
+                          ElevatedButton.icon(
+                            key: const Key('configure'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor:
+                                  widget.campaign.campaignId != null
+                                      ? Colors.green
+                                      : Colors.grey,
+                              foregroundColor: Colors.white,
+                            ),
+                            onPressed: widget.campaign.campaignId != null
+                                ? () => _showExecutionDialog()
+                                : null,
+                            icon: const Icon(Icons.play_circle, size: 18),
+                            label: const Text('Configure'),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
                       Wrap(
                         spacing: 8.0,
                         children: _availablePlatforms.map((platform) {
