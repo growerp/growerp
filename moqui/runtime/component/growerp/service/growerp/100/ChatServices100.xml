@@ -146,15 +146,16 @@ along with this software (see the LICENSE.md file). If not, see
                     <econdition field-name="chatRoomId" from="room.chatRoomId" />
                 </entity-find>
                 <set field="members" from="[]" />
+                <set field="hasRead" from="null" />
                 <iterate list="memberList" entry="member">
-                    <set field="member"
-                        from="[user: [userId: member.userId],
-                        hasRead: member.hasRead == 'Y' ? true : false,
-                        isActive: member.isActive == 'Y' ? true : false]" />
-                    <script>members.add(member)</script>
                     <if condition="member.userId == ec.user.userAccount.userId">
                         <set field="hasRead" from="member.hasRead" />
                     </if>
+                    <set field="memberOut"
+                        from="[user: [userId: member.userId],
+                        hasRead: member.hasRead == 'Y' ? true : false,
+                        isActive: member.isActive == 'Y' ? true : false]" />
+                    <script>members.add(memberOut)</script>
                 </iterate>
                 <set field="roomOut"
                     from="[

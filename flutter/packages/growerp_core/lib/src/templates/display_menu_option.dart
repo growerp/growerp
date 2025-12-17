@@ -84,6 +84,23 @@ class DisplayMenuOptionState extends State<DisplayMenuOption>
   @override
   void initState() {
     super.initState();
+    // Trigger chat room fetch after first frame if already authenticated
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _triggerChatRoomFetchIfNeeded();
+    });
+  }
+
+  void _triggerChatRoomFetchIfNeeded() {
+    try {
+      final authBloc = context.read<AuthBloc>();
+      final chatBloc = context.read<ChatRoomBloc>();
+      if (authBloc.state.status == AuthStatus.authenticated) {
+        // Always refresh to ensure we have fresh data after login
+        chatBloc.add(const ChatRoomFetch(refresh: true));
+      }
+    } catch (e) {
+      // Blocs not available, ignore
+    }
   }
 
   @override
@@ -278,15 +295,26 @@ class DisplayMenuOptionState extends State<DisplayMenuOption>
   Widget _buildWithChatBloc() {
     // Try to use BlocBuilder for chat, fallback if not available
     try {
-      return BlocBuilder<ChatRoomBloc, ChatRoomState>(
-        builder: (context, state) {
-          if (state.status == ChatRoomStatus.success) {
-            _buildActions(state);
-            return _buildPage();
-          } else {
-            return const Center(child: LoadingIndicator());
-          }
+      return BlocListener<AuthBloc, AuthState>(
+        listenWhen: (previous, current) =>
+            previous.status != AuthStatus.authenticated &&
+            current.status == AuthStatus.authenticated,
+        listener: (context, authState) {
+          // Trigger chat room fetch when user becomes authenticated
+          // Always refresh to get fresh data after login
+          context.read<ChatRoomBloc>().add(const ChatRoomFetch(refresh: true));
         },
+        child: BlocBuilder<ChatRoomBloc, ChatRoomState>(
+          builder: (context, chatState) {
+            // Always build the page, show chat badge when data is available
+            if (chatState.status == ChatRoomStatus.success) {
+              _buildActions(chatState);
+            } else {
+              _buildActions(null);
+            }
+            return _buildPage();
+          },
+        ),
       );
     } catch (e) {
       // ChatRoomBloc not available, render without it
