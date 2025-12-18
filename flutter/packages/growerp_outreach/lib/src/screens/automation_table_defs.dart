@@ -32,6 +32,11 @@ bool _isActiveStatus(String status) {
   return status == 'MKTG_CAMP_INPROGRESS' || status == 'MKTG_CAMP_APPROVED';
 }
 
+/// Check if campaign is in failed state
+bool _isFailedStatus(String status) {
+  return status == 'MKTG_CAMP_FAILED';
+}
+
 /// Get status color based on campaign status
 Color _getStatusColor(String status) {
   switch (status) {
@@ -42,10 +47,12 @@ Color _getStatusColor(String status) {
     case 'MKTG_CAMP_COMPLETED':
       return Colors.purple;
     case 'MKTG_CAMP_CANCELLED':
+      return Colors.grey;
+    case 'MKTG_CAMP_FAILED':
       return Colors.red;
     case 'MKTG_CAMP_PLANNED':
     default:
-      return Colors.grey;
+      return Colors.orange;
   }
 }
 
@@ -54,6 +61,7 @@ TableData getActiveCampaignsTableData(Bloc bloc, String classificationId,
     {dynamic extra}) {
   bool isPhone = isAPhone(context);
   final isActive = _isActiveStatus(item.status);
+  final isFailed = _isFailedStatus(item.status);
 
   List<TableRowContent> rowContent = [];
   if (isPhone) {
@@ -74,12 +82,31 @@ TableData getActiveCampaignsTableData(Bloc bloc, String classificationId,
       width: 20,
       value: IconButton(
         icon: Icon(
-            isActive ? Icons.pause_circle_outline : Icons.play_circle_outline,
-            color: isActive ? Colors.orange : Colors.green),
+            isFailed
+                ? Icons.replay
+                : isActive
+                    ? Icons.pause_circle_outline
+                    : Icons.play_circle_outline,
+            color: isFailed
+                ? Colors.red
+                : isActive
+                    ? Colors.orange
+                    : Colors.green),
+        tooltip: isFailed
+            ? 'Restart'
+            : isActive
+                ? 'Pause'
+                : 'Start',
         onPressed: () {
           if (item.campaignId != null) {
             final outreachBloc = bloc as OutreachCampaignBloc;
-            if (isActive) {
+            if (isFailed) {
+              // Restart: change status to APPROVED to trigger re-run
+              outreachBloc.add(OutreachCampaignUpdate(
+                campaignId: item.campaignId!,
+                status: 'MKTG_CAMP_APPROVED',
+              ));
+            } else if (isActive) {
               outreachBloc.add(OutreachCampaignPause(item.campaignId!));
             } else {
               outreachBloc.add(OutreachCampaignStart(item.campaignId!));
@@ -103,12 +130,30 @@ TableData getActiveCampaignsTableData(Bloc bloc, String classificationId,
       width: 10,
       value: IconButton(
         icon: Icon(
-            isActive ? Icons.pause_circle_outline : Icons.play_circle_outline,
-            color: isActive ? Colors.orange : Colors.green),
+            isFailed
+                ? Icons.replay
+                : isActive
+                    ? Icons.pause_circle_outline
+                    : Icons.play_circle_outline,
+            color: isFailed
+                ? Colors.red
+                : isActive
+                    ? Colors.orange
+                    : Colors.green),
+        tooltip: isFailed
+            ? 'Restart'
+            : isActive
+                ? 'Pause'
+                : 'Start',
         onPressed: () {
           if (item.campaignId != null) {
             final outreachBloc = bloc as OutreachCampaignBloc;
-            if (isActive) {
+            if (isFailed) {
+              outreachBloc.add(OutreachCampaignUpdate(
+                campaignId: item.campaignId!,
+                status: 'MKTG_CAMP_APPROVED',
+              ));
+            } else if (isActive) {
               outreachBloc.add(OutreachCampaignPause(item.campaignId!));
             } else {
               outreachBloc.add(OutreachCampaignStart(item.campaignId!));

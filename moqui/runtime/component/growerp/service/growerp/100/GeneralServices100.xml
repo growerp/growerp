@@ -458,10 +458,7 @@ along with this software (see the LICENSE.md file). If not, see
                     count-field="requests">
                     <econdition field-name="requestOwnerPartyId" from="ownerPartyId" />
                 </entity-find-count>
-                <service-call name="delete#growerp.general.Statistics">
-                    <field-map field-name="ownerPartyId" />
-                </service-call>
-                <service-call name="create#growerp.general.Statistics"
+                <service-call name="store#growerp.general.Statistics"
                     in-map="[
                         ownerPartyId: ownerPartyId,
                         admins: admins,
@@ -1606,6 +1603,53 @@ along with this software (see the LICENSE.md file). If not, see
 
                 <script>restRequests.add(restRequest)</script>
             </iterate>
+        </actions>
+    </service>
+
+    <!-- Unified Gemini AI Service -->
+    <service verb="call" noun="GeminiApi">
+        <description>Call Gemini AI API with a prompt and optional configuration</description>
+        <in-parameters>
+            <parameter name="prompt" required="true" type="String">
+                <description>The text prompt to send to Gemini</description>
+            </parameter>
+            <parameter name="options" type="Map">
+                <description>Optional config: model, temperature, topK, topP, maxOutputTokens, jsonMode</description>
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="generatedText" type="String" />
+        </out-parameters>
+        <actions>
+            <script location="component://growerp/service/GeminiAiUtil.groovy" />
+            <script>
+                def GeminiAiUtil = _scriptResult
+                generatedText = GeminiAiUtil.callGeminiApi(ec, prompt, options ?: [:])
+            </script>
+        </actions>
+    </service>
+
+    <!-- Generate platform-specific message from campaign template -->
+    <service verb="generate" noun="PlatformMessage">
+        <description>Generate a platform-optimized message from a campaign template using AI</description>
+        <in-parameters>
+            <parameter name="campaignTemplate" required="true" type="String" />
+            <parameter name="platform" required="true" type="String">
+                <description>TWITTER, LINKEDIN, EMAIL, SUBSTACK</description>
+            </parameter>
+            <parameter name="actionType" required="true" type="String">
+                <description>post_tweet, send_dms, message_connections, send_email, etc.</description>
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="platformMessage" type="String" />
+        </out-parameters>
+        <actions>
+            <script location="component://growerp/service/GeminiAiUtil.groovy" />
+            <script>
+                def GeminiAiUtil = _scriptResult
+                platformMessage = GeminiAiUtil.generatePlatformMessage(ec, campaignTemplate, platform, actionType)
+            </script>
         </actions>
     </service>
 

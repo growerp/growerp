@@ -19,7 +19,7 @@ import 'package:growerp_models/growerp_models.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
 import '../bloc/outreach_campaign_bloc.dart';
-import 'campaign_execution_dialog.dart';
+import '../models/platform_settings.dart';
 
 /// Formats backend status for display
 /// 'MKTG_CAMP_PLANNED' -> 'Planned'
@@ -64,9 +64,33 @@ class CampaignDetailScreenState extends State<CampaignDetailScreen> {
     'MKTG_CAMP_APPROVED',
     'MKTG_CAMP_INPROGRESS',
     'MKTG_CAMP_COMPLETED',
+    'MKTG_CAMP_FAILED',
     'MKTG_CAMP_CANCELLED',
   ];
   late String _selectedStatus;
+
+  // Platform settings for storing action types
+  late PlatformSettings _platformSettings;
+
+  /// Get default action type for a platform
+  String _getDefaultAction(String platform) {
+    switch (platform.toUpperCase()) {
+      case 'EMAIL':
+        return 'send_email';
+      case 'LINKEDIN':
+        return 'message_connections';
+      case 'TWITTER':
+        return 'post_tweet';
+      case 'SUBSTACK':
+        return 'post_note';
+      case 'MEDIUM':
+        return 'post_article';
+      case 'FACEBOOK':
+        return 'post_update';
+      default:
+        return 'send_message';
+    }
+  }
 
   late OutreachCampaignBloc _campaignBloc;
 
@@ -107,6 +131,10 @@ class CampaignDetailScreenState extends State<CampaignDetailScreen> {
     } catch (e) {
       // Ignore parsing errors
     }
+
+    // Parse existing platform settings
+    _platformSettings =
+        PlatformSettings.fromJson(widget.campaign.platformSettings);
   }
 
   @override
@@ -120,16 +148,25 @@ class CampaignDetailScreenState extends State<CampaignDetailScreen> {
     super.dispose();
   }
 
-  /// Show the campaign execution dialog with platform tabs
-  Future<void> _showExecutionDialog() async {
-    await showDialog(
+  /// Show platform configuration dialog for editing platform-specific settings
+  Future<void> _showPlatformConfigDialog() async {
+    final restClient =
+        RepositoryProvider.of<RestClient>(context, listen: false);
+    final result = await showDialog<PlatformSettings>(
       barrierDismissible: true,
       context: context,
-      builder: (dialogContext) => BlocProvider.value(
-        value: _campaignBloc,
-        child: CampaignExecutionDialog(campaign: widget.campaign),
+      builder: (dialogContext) => _PlatformConfigDialog(
+        platforms: _selectedPlatforms.toList(),
+        settings: _platformSettings,
+        campaignTemplate: _messageTemplateController.text,
+        restClient: restClient,
       ),
     );
+    if (result != null) {
+      setState(() {
+        _platformSettings = result;
+      });
+    }
   }
 
   @override
@@ -283,16 +320,15 @@ class CampaignDetailScreenState extends State<CampaignDetailScreen> {
                           ElevatedButton.icon(
                             key: const Key('configure'),
                             style: ElevatedButton.styleFrom(
-                              backgroundColor:
-                                  widget.campaign.campaignId != null
-                                      ? Colors.green
-                                      : Colors.grey,
+                              backgroundColor: _selectedPlatforms.isNotEmpty
+                                  ? Colors.green
+                                  : Colors.grey,
                               foregroundColor: Colors.white,
                             ),
-                            onPressed: widget.campaign.campaignId != null
-                                ? () => _showExecutionDialog()
+                            onPressed: _selectedPlatforms.isNotEmpty
+                                ? () => _showPlatformConfigDialog()
                                 : null,
-                            icon: const Icon(Icons.play_circle, size: 18),
+                            icon: const Icon(Icons.settings, size: 18),
                             label: const Text('Configure'),
                           ),
                         ],
@@ -308,6 +344,18 @@ class CampaignDetailScreenState extends State<CampaignDetailScreen> {
                               setState(() {
                                 if (selected) {
                                   _selectedPlatforms.add(platform);
+                                  // Initialize default action for this platform
+                                  if (_platformSettings
+                                          .getForPlatform(platform) ==
+                                      null) {
+                                    _platformSettings =
+                                        _platformSettings.updatePlatform(
+                                      platform.toLowerCase(),
+                                      PlatformConfig(
+                                        actionType: _getDefaultAction(platform),
+                                      ),
+                                    );
+                                  }
                                 } else {
                                   _selectedPlatforms.remove(platform);
                                 }
@@ -386,6 +434,8 @@ class CampaignDetailScreenState extends State<CampaignDetailScreen> {
                                       dailyLimitPerPlatform: int.tryParse(
                                               _dailyLimitController.text) ??
                                           50,
+                                      platformSettings:
+                                          _platformSettings.toJson(),
                                     ));
                                   } else {
                                     _campaignBloc.add(OutreachCampaignUpdate(
@@ -403,6 +453,8 @@ class CampaignDetailScreenState extends State<CampaignDetailScreen> {
                                       dailyLimitPerPlatform: int.tryParse(
                                               _dailyLimitController.text) ??
                                           50,
+                                      platformSettings:
+                                          _platformSettings.toJson(),
                                     ));
                                   }
                                 }
@@ -420,6 +472,657 @@ class CampaignDetailScreenState extends State<CampaignDetailScreen> {
               ),
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Dialog for configuring platform-specific settings
+class _PlatformConfigDialog extends StatefulWidget {
+  final List<String> platforms;
+  final PlatformSettings settings;
+  final String campaignTemplate;
+  final RestClient? restClient;
+
+  const _PlatformConfigDialog({
+    required this.platforms,
+    required this.settings,
+    required this.campaignTemplate,
+    this.restClient,
+  });
+
+  @override
+  State<_PlatformConfigDialog> createState() => _PlatformConfigDialogState();
+}
+
+class _PlatformConfigDialogState extends State<_PlatformConfigDialog>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+  late PlatformSettings _settings;
+  final Map<String, TextEditingController> _messageControllers = {};
+  final Map<String, TextEditingController> _keywordsControllers = {};
+  final Map<String, String> _selectedActions = {};
+  final Map<String, List<Map<String, String>>> _messageLists = {};
+  final Map<String, bool> _isGenerating = {};
+  final Map<String, bool?> _loginStatus =
+      {}; // null=unknown, true=logged in, false=not logged in
+  final Map<String, bool> _isCheckingLogin = {};
+
+  static const Map<String, String> _platformLoginUrls = {
+    'TWITTER': 'https://twitter.com/login',
+    'LINKEDIN': 'https://www.linkedin.com/login',
+    'EMAIL': '', // Email uses SMTP, no browser login needed
+    'SUBSTACK': 'https://substack.com/sign-in',
+    'MEDIUM': 'https://medium.com/m/signin',
+    'FACEBOOK': 'https://www.facebook.com/login',
+  };
+
+  static const Map<String, List<Map<String, String>>> _platformActions = {
+    'EMAIL': [
+      {'value': 'send_email', 'label': 'Send Email'},
+    ],
+    'LINKEDIN': [
+      {'value': 'message_connections', 'label': 'Message Connections'},
+      {'value': 'search_and_connect', 'label': 'Search & Connect'},
+    ],
+    'TWITTER': [
+      {'value': 'post_tweet', 'label': 'Post Tweet'},
+      {'value': 'follow_profiles', 'label': 'Follow Profiles'},
+      {'value': 'send_dms', 'label': 'Send DMs'},
+    ],
+    'SUBSTACK': [
+      {'value': 'post_note', 'label': 'Post Note'},
+      {'value': 'subscribe', 'label': 'Subscribe'},
+      {'value': 'comment', 'label': 'Comment'},
+    ],
+    'MEDIUM': [
+      {'value': 'post_article', 'label': 'Post Article'},
+    ],
+    'FACEBOOK': [
+      {'value': 'post_update', 'label': 'Post Update'},
+    ],
+  };
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController =
+        TabController(length: widget.platforms.length, vsync: this);
+    _settings = widget.settings;
+
+    // Initialize controllers for each platform
+    for (final platform in widget.platforms) {
+      final config = _settings.getForPlatform(platform);
+      _messageControllers[platform] = TextEditingController(
+        text: config?.messageTemplate ?? '',
+      );
+      _keywordsControllers[platform] = TextEditingController(
+        text: config?.searchKeywords ?? '',
+      );
+      _selectedActions[platform] = config?.actionType ??
+          (_platformActions[platform.toUpperCase()]?.first['value'] ??
+              'send_message');
+      _messageLists[platform] = List<Map<String, String>>.from(
+        config?.messageList ?? [],
+      );
+      _isGenerating[platform] = false;
+      _loginStatus[platform] = null; // Unknown
+      _isCheckingLogin[platform] = false;
+    }
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    for (final controller in _messageControllers.values) {
+      controller.dispose();
+    }
+    for (final controller in _keywordsControllers.values) {
+      controller.dispose();
+    }
+    super.dispose();
+  }
+
+  void _saveAndClose() {
+    // Build updated settings
+    var updatedSettings = _settings;
+    for (final platform in widget.platforms) {
+      updatedSettings = updatedSettings.updatePlatform(
+        platform.toLowerCase(),
+        PlatformConfig(
+          actionType: _selectedActions[platform],
+          messageTemplate: _messageControllers[platform]?.text,
+          searchKeywords: _keywordsControllers[platform]?.text,
+          messageList: _messageLists[platform],
+        ),
+      );
+    }
+    Navigator.of(context).pop(updatedSettings);
+  }
+
+  Future<void> _generateWithAI(String platform) async {
+    if (widget.restClient == null || widget.campaignTemplate.isEmpty) return;
+
+    setState(() => _isGenerating[platform] = true);
+    try {
+      final result = await widget.restClient!.generatePlatformMessage(
+        campaignTemplate: widget.campaignTemplate,
+        platform: platform,
+        actionType: _selectedActions[platform] ?? 'send_message',
+      );
+      if (result['platformMessage'] != null) {
+        setState(() {
+          _messageControllers[platform]?.text = result['platformMessage'];
+        });
+      }
+    } catch (e) {
+      // Show error if needed
+    } finally {
+      setState(() => _isGenerating[platform] = false);
+    }
+  }
+
+  void _openMessageListEditor(String platform) async {
+    final result = await showDialog<List<Map<String, String>>>(
+      context: context,
+      builder: (ctx) => _MessageListEditor(
+        messages: _messageLists[platform] ?? [],
+      ),
+    );
+    if (result != null) {
+      setState(() {
+        _messageLists[platform] = result;
+      });
+    }
+  }
+
+  String _getLoginUrl(String platform) {
+    return _platformLoginUrls[platform.toUpperCase()] ?? '';
+  }
+
+  Future<void> _launchLogin(String platform) async {
+    final url = _getLoginUrl(platform);
+    if (url.isEmpty) return;
+    // Show a dialog prompting user to log in via browser
+    await showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('Login to $platform'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Please log in to this platform in your browser:'),
+            const SizedBox(height: 8),
+            SelectableText(url, style: const TextStyle(color: Colors.blue)),
+            const SizedBox(height: 16),
+            const Text('After logging in, return here and click "Done".'),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Done'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      child: popUp(
+        context: context,
+        title: 'Platform Configuration',
+        width: 500,
+        height: 500,
+        child: Column(
+          children: [
+            TabBar(
+              controller: _tabController,
+              tabs: widget.platforms.map((p) => Tab(text: p)).toList(),
+            ),
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
+                children:
+                    widget.platforms.map((p) => _buildPlatformTab(p)).toList(),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                OutlinedButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('Cancel'),
+                ),
+                const SizedBox(width: 8),
+                ElevatedButton(
+                  onPressed: _saveAndClose,
+                  child: const Text('Save'),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPlatformTab(String platform) {
+    final actions = _platformActions[platform.toUpperCase()] ?? [];
+    final selectedAction = _selectedActions[platform] ?? '';
+
+    // Determine which fields to show based on action
+    final showMessage = _isMessageAction(selectedAction);
+    final showKeywords = _isSearchAction(selectedAction);
+    final showMessageList = _isDmAction(selectedAction);
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Action dropdown
+          DropdownButtonFormField<String>(
+            decoration: const InputDecoration(
+              labelText: 'Action',
+              border: OutlineInputBorder(),
+            ),
+            initialValue: _selectedActions[platform],
+            items: actions.map((a) {
+              return DropdownMenuItem<String>(
+                value: a['value'],
+                child: Text(a['label']!),
+              );
+            }).toList(),
+            onChanged: (v) {
+              setState(() => _selectedActions[platform] = v!);
+            },
+          ),
+          const SizedBox(height: 20),
+
+          // Login status indicator for browser-based platforms
+          if (_getLoginUrl(platform).isNotEmpty) ...[
+            Card(
+              color: _loginStatus[platform] == true
+                  ? Colors.green.shade50
+                  : _loginStatus[platform] == false
+                      ? Colors.orange.shade50
+                      : Colors.grey.shade50,
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Row(
+                  children: [
+                    Icon(
+                      _loginStatus[platform] == true
+                          ? Icons.check_circle
+                          : _loginStatus[platform] == false
+                              ? Icons.warning
+                              : Icons.help_outline,
+                      color: _loginStatus[platform] == true
+                          ? Colors.green
+                          : _loginStatus[platform] == false
+                              ? Colors.orange
+                              : Colors.grey,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        _loginStatus[platform] == true
+                            ? 'Ready to automate'
+                            : 'Login required for browser automation',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ),
+                    TextButton.icon(
+                      onPressed: () => _launchLogin(platform),
+                      icon: const Icon(Icons.open_in_browser, size: 16),
+                      label: Text(_loginStatus[platform] == true
+                          ? 'Re-login'
+                          : 'Login'),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+          ],
+
+          // Conditional: Search keywords (for follow/search actions)
+          if (showKeywords) ...[
+            TextFormField(
+              controller: _keywordsControllers[platform],
+              decoration: const InputDecoration(
+                labelText: 'Search Keywords',
+                hintText: 'e.g., "Flutter Developer Thailand"',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 20),
+          ],
+
+          // Conditional: Message template (for post/message actions)
+          if (showMessage) ...[
+            TextFormField(
+              controller: _messageControllers[platform],
+              decoration: InputDecoration(
+                labelText: selectedAction == 'post_tweet'
+                    ? 'Tweet Content'
+                    : 'Message Template',
+                hintText: widget.campaignTemplate.isNotEmpty
+                    ? 'Leave empty to use campaign template'
+                    : 'Enter your message',
+                border: const OutlineInputBorder(),
+                suffixIcon: widget.restClient != null &&
+                        widget.campaignTemplate.isNotEmpty
+                    ? IconButton(
+                        onPressed: _isGenerating[platform] == true
+                            ? null
+                            : () => _generateWithAI(platform),
+                        icon: _isGenerating[platform] == true
+                            ? const SizedBox(
+                                width: 16,
+                                height: 16,
+                                child:
+                                    CircularProgressIndicator(strokeWidth: 2),
+                              )
+                            : const Icon(Icons.auto_awesome),
+                        tooltip: 'Generate with AI',
+                      )
+                    : null,
+              ),
+              maxLines: 5,
+            ),
+            if (widget.campaignTemplate.isNotEmpty &&
+                (_messageControllers[platform]?.text.isEmpty ?? true))
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Text(
+                  'Using campaign template',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Colors.green,
+                        fontStyle: FontStyle.italic,
+                      ),
+                ),
+              ),
+          ],
+
+          if (showMessageList) ...[
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(Icons.list_alt, size: 20),
+                        const SizedBox(width: 8),
+                        Text(
+                            'Message List (${_messageLists[platform]?.length ?? 0})',
+                            style: Theme.of(context).textTheme.titleSmall),
+                        const Spacer(),
+                        TextButton.icon(
+                          onPressed: () => _openMessageListEditor(platform),
+                          icon: const Icon(Icons.edit, size: 16),
+                          label: const Text('Edit'),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    if ((_messageLists[platform]?.isEmpty ?? true))
+                      Text(
+                        'Add recipients with personalized messages for DMs.',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      )
+                    else
+                      Text(
+                        '${_messageLists[platform]!.length} recipients configured',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Colors.green,
+                            ),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  bool _isMessageAction(String action) {
+    return [
+      'post_tweet',
+      'post_note',
+      'post_article',
+      'post_update',
+      'message_connections',
+      'send_email',
+      'comment'
+    ].contains(action);
+  }
+
+  bool _isSearchAction(String action) {
+    return ['follow_profiles', 'search_and_connect', 'subscribe']
+        .contains(action);
+  }
+
+  bool _isDmAction(String action) {
+    return ['send_dms'].contains(action);
+  }
+}
+
+/// Dialog for editing message list (recipients with personalized messages)
+class _MessageListEditor extends StatefulWidget {
+  final List<Map<String, String>> messages;
+
+  const _MessageListEditor({required this.messages});
+
+  @override
+  State<_MessageListEditor> createState() => _MessageListEditorState();
+}
+
+class _MessageListEditorState extends State<_MessageListEditor> {
+  late List<Map<String, String>> _messages;
+  final _nameController = TextEditingController();
+  final _handleController = TextEditingController();
+  final _messageController = TextEditingController();
+  int? _editingIndex;
+
+  @override
+  void initState() {
+    super.initState();
+    _messages = List<Map<String, String>>.from(widget.messages);
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _handleController.dispose();
+    _messageController.dispose();
+    super.dispose();
+  }
+
+  void _addOrUpdateMessage() {
+    if (_handleController.text.isEmpty) return;
+
+    final newMessage = {
+      'name': _nameController.text,
+      'handle': _handleController.text,
+      'message': _messageController.text,
+    };
+
+    setState(() {
+      if (_editingIndex != null) {
+        _messages[_editingIndex!] = newMessage;
+        _editingIndex = null;
+      } else {
+        _messages.add(newMessage);
+      }
+      _nameController.clear();
+      _handleController.clear();
+      _messageController.clear();
+    });
+  }
+
+  void _editMessage(int index) {
+    setState(() {
+      _editingIndex = index;
+      _nameController.text = _messages[index]['name'] ?? '';
+      _handleController.text = _messages[index]['handle'] ?? '';
+      _messageController.text = _messages[index]['message'] ?? '';
+    });
+  }
+
+  void _deleteMessage(int index) {
+    setState(() {
+      _messages.removeAt(index);
+      if (_editingIndex == index) {
+        _editingIndex = null;
+        _nameController.clear();
+        _handleController.clear();
+        _messageController.clear();
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      child: popUp(
+        context: context,
+        title: 'Message List',
+        width: 550,
+        height: 550,
+        child: Column(
+          children: [
+            // Input form
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: _nameController,
+                            decoration: const InputDecoration(
+                              labelText: 'Name',
+                              isDense: true,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: TextField(
+                            controller: _handleController,
+                            decoration: const InputDecoration(
+                              labelText: 'Handle *',
+                              hintText: '@username',
+                              isDense: true,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: _messageController,
+                      decoration: const InputDecoration(
+                        labelText: 'Message',
+                        hintText: 'Personalized message (optional)',
+                        isDense: true,
+                      ),
+                      maxLines: 2,
+                    ),
+                    const SizedBox(height: 8),
+                    ElevatedButton.icon(
+                      onPressed: _addOrUpdateMessage,
+                      icon:
+                          Icon(_editingIndex != null ? Icons.save : Icons.add),
+                      label: Text(_editingIndex != null ? 'Update' : 'Add'),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            // List of messages
+            Expanded(
+              child: _messages.isEmpty
+                  ? Center(
+                      child: Text(
+                        'No recipients added yet',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: Colors.grey,
+                            ),
+                      ),
+                    )
+                  : ListView.builder(
+                      itemCount: _messages.length,
+                      itemBuilder: (context, index) {
+                        final msg = _messages[index];
+                        return ListTile(
+                          dense: true,
+                          title: Text(
+                            '${msg['name']?.isNotEmpty == true ? msg['name'] : 'No name'} (${msg['handle']})',
+                          ),
+                          subtitle: msg['message']?.isNotEmpty == true
+                              ? Text(
+                                  msg['message']!,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                )
+                              : null,
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.edit, size: 18),
+                                onPressed: () => _editMessage(index),
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.delete, size: 18),
+                                onPressed: () => _deleteMessage(index),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('${_messages.length} recipients'),
+                Row(
+                  children: [
+                    OutlinedButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: const Text('Cancel'),
+                    ),
+                    const SizedBox(width: 8),
+                    ElevatedButton(
+                      onPressed: () => Navigator.of(context).pop(_messages),
+                      child: const Text('Save'),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );

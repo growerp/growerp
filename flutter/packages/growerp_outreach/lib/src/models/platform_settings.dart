@@ -108,17 +108,29 @@ class PlatformConfig {
   final String? searchKeywords;
   final String? messageTemplate;
 
+  /// List of recipients with personalized messages for DM actions
+  /// Format: [{"name": "...", "handle": "...", "message": "..."}]
+  final List<Map<String, String>>? messageList;
+
   const PlatformConfig({
     this.actionType,
     this.searchKeywords,
     this.messageTemplate,
+    this.messageList,
   });
 
   factory PlatformConfig.fromJson(Map<String, dynamic> json) {
+    List<Map<String, String>>? parsedList;
+    if (json['messageList'] is List) {
+      parsedList = (json['messageList'] as List)
+          .map((e) => Map<String, String>.from(e as Map))
+          .toList();
+    }
     return PlatformConfig(
       actionType: json['actionType'] as String?,
       searchKeywords: json['searchKeywords'] as String?,
       messageTemplate: json['messageTemplate'] as String?,
+      messageList: parsedList,
     );
   }
 
@@ -126,21 +138,25 @@ class PlatformConfig {
         if (actionType != null) 'actionType': actionType,
         if (searchKeywords != null) 'searchKeywords': searchKeywords,
         if (messageTemplate != null) 'messageTemplate': messageTemplate,
+        if (messageList != null && messageList!.isNotEmpty)
+          'messageList': messageList,
       };
 
   PlatformConfig copyWith({
     String? actionType,
     String? searchKeywords,
     String? messageTemplate,
+    List<Map<String, String>>? messageList,
   }) {
     return PlatformConfig(
       actionType: actionType ?? this.actionType,
       searchKeywords: searchKeywords ?? this.searchKeywords,
       messageTemplate: messageTemplate ?? this.messageTemplate,
+      messageList: messageList ?? this.messageList,
     );
   }
 
   @override
   String toString() =>
-      'PlatformConfig(action: $actionType, keywords: $searchKeywords)';
+      'PlatformConfig(action: $actionType, keywords: $searchKeywords, listSize: ${messageList?.length ?? 0})';
 }
