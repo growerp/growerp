@@ -142,34 +142,13 @@ class _AdminAppState extends State<AdminApp> {
               [state.menuConfiguration!],
               config: DynamicRouterConfig(
                 mainConfigId: 'ADMIN_DEFAULT',
-                accountingRootOptionId: 'ADMIN_ACCOUNTING',
                 dashboardBuilder: () => const AdminDashboardContent(),
                 widgetLoader: WidgetRegistry.getWidget,
                 appTitle: 'GrowERP Administrator',
-                hasAccountingSubmenu: true,
                 dashboardFabBuilder: (menuConfig) => Builder(
                   builder: (fabContext) => FloatingActionButton(
                     key: const Key('menuFab'),
                     heroTag: 'menuFab',
-                    tooltip: 'Manage Menu Items',
-                    onPressed: () {
-                      showDialog(
-                        context: fabContext,
-                        builder: (dialogContext) => BlocProvider.value(
-                          value: fabContext.read<MenuConfigBloc>(),
-                          child: MenuItemListDialog(
-                            menuConfiguration: menuConfig,
-                          ),
-                        ),
-                      );
-                    },
-                    child: const Icon(Icons.menu),
-                  ),
-                ),
-                accountingFabBuilder: (menuConfig) => Builder(
-                  builder: (fabContext) => FloatingActionButton(
-                    key: const Key('accountingMenuFab'),
-                    heroTag: 'accountingMenuFab',
                     tooltip: 'Manage Menu Items',
                     onPressed: () {
                       showDialog(

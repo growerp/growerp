@@ -123,24 +123,10 @@ Service definitions for menu configuration and menu item management
         List menuItems = []
         allOptions.each { option ->
           String title = (option.title != null ? option.title.toString() : '')
-          String itemKey = option.itemKey
           
-          if (itemKey &amp;&amp; stats.containsKey(itemKey)) {
-             def statVal = stats.get(itemKey)
-             if (statVal != null) {
-                 title = "${title} (${statVal})"
-                 
-                 // Special handling for invoice counts to also show amount
-                 if (itemKey.endsWith('Count')) {
-                     String amountKey = itemKey.replace('Count', 'Amount')
-                     if (stats.containsKey(amountKey)) {
-                         def amountVal = stats.get(amountKey)
-                         if (amountVal != null) {
-                             title = "${title.substring(0, title.length() - 1)} / ${amountVal})"
-                         }
-                     }
-                 }
-             }
+          // Capitalize first letter of title
+          if (title.length() > 0) {
+              title = title.substring(0, 1).toUpperCase() + title.substring(1)
           }
           
           // Get items (tabs) for this option via junction table

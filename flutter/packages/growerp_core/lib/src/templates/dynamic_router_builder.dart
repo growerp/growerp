@@ -26,10 +26,6 @@ class DynamicRouterConfig {
   /// If null, uses the first configuration from the list
   final String? mainConfigId;
 
-  /// The ID prefix for accounting menu options (e.g., 'ADMIN_ACCOUNTING')
-  /// Only needed if [hasAccountingSubmenu] is true
-  final String? accountingRootOptionId;
-
   /// Builder for the main dashboard widget
   /// If null, uses widgetLoader with the first menu option's widgetName
   final Widget Function()? dashboardBuilder;
@@ -46,10 +42,6 @@ class DynamicRouterConfig {
   /// Initial route location (default: '/')
   final String initialLocation;
 
-  /// Whether this app has an accounting submenu that needs its own shell
-  /// Default: false
-  final bool hasAccountingSubmenu;
-
   /// Optional splash screen widget to show during loading
   final Widget? splashScreen;
 
@@ -57,29 +49,21 @@ class DynamicRouterConfig {
   /// Used to add additional FABs that appear above the AI FAB
   final Widget Function(MenuConfiguration)? dashboardFabBuilder;
 
-  /// Optional FAB builder for accounting menu (receives MenuConfiguration)
-  /// Used to add additional FABs that appear above the AI FAB
-  final Widget Function(MenuConfiguration)? accountingFabBuilder;
-
   const DynamicRouterConfig({
     this.mainConfigId,
-    this.accountingRootOptionId,
     this.dashboardBuilder,
     required this.widgetLoader,
     required this.appTitle,
     this.initialLocation = '/',
-    this.hasAccountingSubmenu = false,
     this.splashScreen,
     this.dashboardFabBuilder,
-    this.accountingFabBuilder,
   });
 }
 
 /// Creates a dynamic GoRouter based on menu configurations.
 ///
 /// This function handles:
-/// - Main app shell with filtered menu (excluding accounting sub-items if applicable)
-/// - Accounting sub-app shell with its own menu (if hasAccountingSubmenu is true)
+/// - Main app shell with menu
 /// - Authentication redirects
 /// - Route generation from menu options
 GoRouter createDynamicAppRouter(
@@ -109,42 +93,16 @@ GoRouter createDynamicAppRouter(
                 name: config.appTitle,
               ));
 
-  // Create accounting sub-configuration only if needed
-  MenuConfiguration? accountingConfig;
-  if (config.hasAccountingSubmenu && config.accountingRootOptionId != null) {
-    accountingConfig = _createSubConfiguration(
-      mainConfig,
-      config.accountingRootOptionId!,
-      'ACCOUNTING_SYNTHESISED',
-      'Accounting Menu',
-    );
-  }
-
-  // Filter mainConfig to exclude accounting sub-menu items for the main display
-  // This excludes both /accounting and /accounting/* routes
-  final mainDisplayConfig = config.hasAccountingSubmenu
-      ? mainConfig.copyWith(
-          menuOptions: mainConfig.menuOptions
-              .where(
-                (option) =>
-                    option.route == null ||
-                    (option.route != '/accounting' &&
-                        !option.route!.startsWith('/accounting/')),
-              )
-              .toList(),
-        )
-      : mainConfig;
-
   // Get dashboard widget - use provided builder or load from first menu option
   Widget getDashboard() {
     if (config.dashboardBuilder != null) {
       return config.dashboardBuilder!();
     }
     // Find the main/dashboard widget from menu options
-    final mainOption = mainDisplayConfig.menuOptions.firstWhere(
+    final mainOption = mainConfig.menuOptions.firstWhere(
       (o) => o.route == '/' || o.sequenceNum == 0,
-      orElse: () => mainDisplayConfig.menuOptions.isNotEmpty
-          ? mainDisplayConfig.menuOptions.first
+      orElse: () => mainConfig.menuOptions.isNotEmpty
+          ? mainConfig.menuOptions.first
           : const MenuOption(title: 'Main', widgetName: 'Unknown'),
     );
     return config.widgetLoader(mainOption.widgetName ?? 'Unknown', {});
@@ -179,7 +137,7 @@ GoRouter createDynamicAppRouter(
           final authState = context.watch<AuthBloc>().state;
           if (authState.status == AuthStatus.authenticated) {
             return DisplayMenuOption(
-              menuConfiguration: mainDisplayConfig,
+              menuConfiguration: mainConfig,
               menuIndex: 0,
               actions: [
                 IconButton(
@@ -197,13 +155,13 @@ GoRouter createDynamicAppRouter(
               suppressBlocMenuConfig: true,
               tabWidgetLoader: config.widgetLoader,
               floatingActionButton: config.dashboardFabBuilder != null
-                  ? config.dashboardFabBuilder!(mainDisplayConfig)
+                  ? config.dashboardFabBuilder!(mainConfig)
                   : null,
               child: getDashboard(),
             );
           } else {
             return HomeForm(
-              menuConfiguration: mainDisplayConfig,
+              menuConfiguration: mainConfig,
               title: config.appTitle,
             );
           }
@@ -211,78 +169,26 @@ GoRouter createDynamicAppRouter(
       ),
 
       // Main Shell - only add if there are routes
-      if (_generateRoutes(
-        mainDisplayConfig,
-        config.widgetLoader,
-        excludePrefix: config.hasAccountingSubmenu ? '/accounting' : null,
-      ).isNotEmpty)
+      if (_generateRoutes(mainConfig, config.widgetLoader).isNotEmpty)
         ShellRoute(
           builder: (context, state, child) {
             int menuIndex = 0;
             final path = state.uri.path;
-            for (int i = 0; i < mainDisplayConfig.menuOptions.length; i++) {
-              if (mainDisplayConfig.menuOptions[i].route == path) {
+            for (int i = 0; i < mainConfig.menuOptions.length; i++) {
+              if (mainConfig.menuOptions[i].route == path) {
                 menuIndex = i;
                 break;
               }
             }
             return DisplayMenuOption(
-              menuConfiguration: mainDisplayConfig,
+              menuConfiguration: mainConfig,
               menuIndex: menuIndex,
               tabWidgetLoader: config.widgetLoader,
               suppressBlocMenuConfig: true,
               child: child,
             );
           },
-          routes: _generateRoutes(
-            mainDisplayConfig,
-            config.widgetLoader,
-            excludePrefix: config.hasAccountingSubmenu ? '/accounting' : null,
-          ),
-        ),
-
-      // Accounting Shell - only add if hasAccountingSubmenu and there are routes
-      if (config.hasAccountingSubmenu && accountingConfig != null)
-        ShellRoute(
-          builder: (context, state, child) {
-            int menuIndex = 0;
-            final path = state.uri.path;
-            for (int i = 0; i < accountingConfig!.menuOptions.length; i++) {
-              if (accountingConfig.menuOptions[i].route == path) {
-                menuIndex = i;
-                break;
-              }
-            }
-            return DisplayMenuOption(
-              menuConfiguration: accountingConfig,
-              menuIndex: menuIndex,
-              tabWidgetLoader: config.widgetLoader,
-              suppressBlocMenuConfig: true,
-              floatingActionButton: config.accountingFabBuilder != null
-                  ? config.accountingFabBuilder!(accountingConfig)
-                  : null,
-              child: child,
-            );
-          },
-          routes: [
-            // Add explicit /accounting route for the dashboard
-            GoRoute(
-              path: '/accounting',
-              builder: (context, state) {
-                // Get the accounting root option's widget
-                final rootOption = accountingConfig!.menuOptions.isNotEmpty
-                    ? accountingConfig.menuOptions.first
-                    : null;
-                if (rootOption?.widgetName != null) {
-                  return config.widgetLoader(rootOption!.widgetName!, {});
-                }
-                // Fallback - try to load AccountingForm
-                return config.widgetLoader('AccountingForm', {});
-              },
-            ),
-            // Add remaining accounting routes
-            ..._generateRoutes(accountingConfig!, config.widgetLoader),
-          ],
+          routes: _generateRoutes(mainConfig, config.widgetLoader),
         ),
     ],
   );
@@ -290,18 +196,14 @@ GoRouter createDynamicAppRouter(
 
 List<RouteBase> _generateRoutes(
   MenuConfiguration config,
-  Widget Function(String, [Map<String, dynamic>?]) widgetLoader, {
-  String? excludePrefix,
-}) {
+  Widget Function(String, [Map<String, dynamic>?]) widgetLoader,
+) {
   List<RouteBase> routes = [];
   Set<String> processedPaths = {};
 
   for (var option in config.menuOptions) {
     if (!option.isActive) continue;
     if (option.route == null || option.route == '/' || option.route!.isEmpty) {
-      continue;
-    }
-    if (excludePrefix != null && option.route!.startsWith(excludePrefix)) {
       continue;
     }
     if (processedPaths.contains(option.route)) continue;
@@ -319,41 +221,4 @@ List<RouteBase> _generateRoutes(
     );
   }
   return routes;
-}
-
-/// Creates a virtual MenuConfiguration for a submenu (e.g. Accounting)
-MenuConfiguration _createSubConfiguration(
-  MenuConfiguration fullConfig,
-  String rootOptionId,
-  String newConfigId,
-  String newName,
-) {
-  MenuOption? rootOption;
-  try {
-    rootOption = fullConfig.menuOptions.firstWhere(
-      (o) => o.menuOptionId == rootOptionId,
-    );
-  } catch (_) {}
-
-  String prefix = rootOptionId.replaceAll('_ACCOUNTING', '_ACC_');
-
-  List<MenuOption> subOptions = fullConfig.menuOptions
-      .where((o) => o.menuOptionId?.startsWith(prefix) ?? false)
-      .toList();
-
-  if (rootOption != null) {
-    subOptions.insert(
-      0,
-      rootOption.copyWith(title: 'Dashboard', sequenceNum: 0, children: []),
-    );
-  }
-
-  subOptions.sort((a, b) => a.sequenceNum.compareTo(b.sequenceNum));
-
-  return MenuConfiguration(
-    menuConfigurationId: newConfigId,
-    appId: fullConfig.appId,
-    name: newName,
-    menuOptions: subOptions,
-  );
 }
