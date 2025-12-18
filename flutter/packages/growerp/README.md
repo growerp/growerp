@@ -1,117 +1,251 @@
+# GrowERP CLI Utilities
 
-# GrowERP utilities
+A command line utility for GrowERP installation, import/export, and package management.
 
-A command line utility to easy install/import/export
+## Installation
 
 Activate local version:
 ```bash
-  dart pub global activate --source path ~/growerp/flutter/packages/growerp
+dart pub global activate --source path ~/growerp/flutter/packages/growerp
 ```
+
 Activate public version:
 ```bash
-  dart pub global activate growerp
+dart pub global activate growerp
 ```
-## The Basic global dart GrowERP command.
-Sub commands:
-### install:
-  1. clone the repository from github into the local ~/growerp directory
-  2. start the backend and chat server
-  3. activate the dart melos global command.
-  4. build the flutter system
-  5. package 'admin' can now be started with flutter run.
-  
-### import:
-  will upload data like ledger(glaccount), customers products etc from the terminal
-  Also has a helper program convertToCsv to convert your files to the
-    GrowERP CSV format.
-  #### Parameters
-  * -i input file or directory, if directory will process filenames according the [FileType]
-  * -u -p user/password optional, will remember from last time
-  * -url the base url of the backend, local host is default
-  * -f optional filetype, is missing will process all filetype in the specified dir
 
-### finalize:
-  After all imports, this will finalize the import
-  1. complete all documents which have been posted in the ledger
-  2. complete order of which the invoice is completed
-  3. complete past time periods
+## Subcommands
 
-### export: (partly developed)
-  will create CSV files for growerp entities in the current 'growerp'
-  directory, if not exist will create it.
-  #### Parameters:
-  * -f optional filetype, is missing will process all filetypes
+| Command | Description |
+|---------|-------------|
+| `help` | Display help information for all commands |
+| `install` | Install the complete GrowERP system (frontend, backend, chat) |
+| `import` | Import CSV data files into a GrowERP system |
+| `export` | Export company data to CSV files (under development) |
+| `finalize` | Finalize the import process by completing documents and periods |
+| `createPackage` | Create a new GrowERP package with Flutter frontend and Moqui backend |
+| `exportPackage` | Export a GrowERP package as a zip archive |
+| `importPackage` | Import a GrowERP package from a zip archive |
 
-## flags:
-  * -dev if present uses development branch by installation
-  * -i filename : input file
-  * -u user : email address, with password create new company otherwise use last one
-  * -p password : required for new company
-  * -o outputDirectory : directory used for exported csv output files,default: growerp
-  * -url for import/export backend url
-  * -t receive timeout: default 60 seconds
-  * -f optional filetype [FileType] like glAccount, product, category etc...
+---
 
-### the convertToCsv command
-this command converts from your exported csv/ods/xlsx files to the GrowERP csv files to import. This command provides an example which was used for an existing customer previously using a SAGE50 system
+## help
 
-#### input parameters:
-* mandatatory the input directory name
-* optional the filetype, if missing all filetypes
+Display detailed help information for all available commands.
 
-examples:
 ```bash
-  dart run ~/growerp/flutter/packages/growerp/bin/convertToCsv.dart inputDir transaction
+growerp help
 ```
-or after the activate growerp at the top:
+
+---
+
+## install
+
+Installs the complete GrowERP system:
+1. Clone the repository from GitHub into the local `~/growerp` directory
+2. Start the backend and chat server
+3. Activate the dart melos global command
+4. Build the Flutter system
+5. The 'admin' package can now be started with `flutter run`
+
 ```bash
-  dart pub global run growerp:csvToCsv inputDir
+growerp install
 ```
-will create a new directory: growerpOutput with the converted file(s).
 
-### The conversion workflow
-1. Extract csv/ods/xlsx files from the old system and put them in a single directory.
-2. When importing images create an 'images' directory and a images.csv file in the format: filetype,id,filename
-3. Specify the conversion rules.
-    * specify the names of these files in the getFileNames function
-    * specify any file wide changes in the convertFile function
-    * specific the column to column conversion the convertRow function
-4. convert the old system files to the GrowERP CSV format into the growerpOutput directory
-    * execute activate: 
-    ```bash
-    dart pub global activate --source path ~/growerp/flutter/packages/growerp
-    ```
-    * run conversion for a single file type for testing (date optional)
-    for creating starting balances you need at least a start date for the transactions 
-    ```bash
-    dart pub global run growerp:csvToCsv inputDir -f fileType -start yyyy/mm/dd -end yyy/mm/dd
-    ```
-    * run conversion for all files
-    ```bash
-    dart pub global run growerp:convertToCsv inputDir
-    ```
-5. Import the generated GrowERP csv files into the growerp system
-   * execute activate 
+**Flags:**
+- `-dev` — Use the development branch instead of master
+- `-d <path>` — Target directory (default: `~/growerp`)
+
+---
+
+## import
+
+Upload data (ledger/glAccount, customers, products, etc.) from CSV files into GrowERP.
+
+```bash
+growerp import -i <inputDir> -u <email> -p <password> [options]
+```
+
+**Parameters:**
+| Flag | Description |
+|------|-------------|
+| `-i <path>` | Input file or directory containing CSV files and images |
+| `-u <email>` | User email address for login |
+| `-p <password>` | Password for login |
+| `-url <url>` | Backend URL (default: localhost) |
+| `-n <name>` | New company name |
+| `-c <currency>` | Currency ID (e.g., USD, EUR) |
+| `-ft <fileType>` | Resume from this file type |
+| `-fn <filename>` | Resume from this filename |
+| `-sft <fileType>` | Stop just before this file type |
+| `-t <seconds>` | Receive timeout (default: 600 seconds) |
+
+**Example:**
+```bash
+growerp import -i growerpOutput -u admin@example.com -p secret123 -n "My Company" -c USD
+```
+
+---
+
+## export
+
+Export company-related information to CSV files. *(Under development)*
+
+```bash
+growerp export -u <email> -p <password> [options]
+```
+
+**Parameters:**
+| Flag | Description |
+|------|-------------|
+| `-u <email>` | User email address for login |
+| `-p <password>` | Password for login |
+| `-o <dir>` | Output directory name (default: `growerpCsv`) |
+| `-ft <fileType>` | Export only this file type |
+| `-url <url>` | Backend URL |
+
+---
+
+## finalize
+
+Finalize the import process by:
+1. Complete all documents posted in the ledger
+2. Complete orders with completed invoices
+3. Approve invoices and complete payments
+4. Process shipments
+5. Close past time periods
+
+```bash
+growerp finalize -u <email> -p <password> [options]
+```
+
+**Parameters:**
+| Flag | Description |
+|------|-------------|
+| `-u <email>` | User email address for login |
+| `-p <password>` | Password for login |
+| `-y <YYYY>` | Close a specific fiscal year (if missing, closes all except current year) |
+| `-url <url>` | Backend URL |
+
+---
+
+## createPackage
+
+Create a new GrowERP package with both Flutter frontend and Moqui backend components.
+
+```bash
+growerp createPackage <name> [options]
+```
+
+**Parameters:**
+| Argument/Flag | Description |
+|---------------|-------------|
+| `<name>` | Package name (without `growerp_` prefix) |
+| `-d <path>` | Target directory (default: `~/growerp`) |
+
+Creates:
+- `flutter/packages/growerp_<name>/` — Flutter frontend package
+- `moqui/runtime/component/growerp-<name>/` — Moqui backend component
+
+**Example:**
+```bash
+growerp createPackage inventory
+```
+
+---
+
+## exportPackage
+
+Export an existing GrowERP package as a zip archive for distribution or backup.
+
+```bash
+growerp exportPackage <packageName> [options]
+```
+
+**Parameters:**
+| Argument/Flag | Description |
+|---------------|-------------|
+| `<packageName>` | Full package name (e.g., `growerp_inventory`) |
+| `-o <dir>` | Output directory for the zip file (default: current directory) |
+
+**Example:**
+```bash
+growerp exportPackage growerp_inventory -o ~/backups
+```
+
+---
+
+## importPackage
+
+Import a GrowERP package from a zip archive. Automatically adds the package to `melos.yaml`.
+
+```bash
+growerp importPackage <archivePath>
+```
+
+**Parameters:**
+| Argument | Description |
+|----------|-------------|
+| `<archivePath>` | Path to the zip file to import |
+
+**Example:**
+```bash
+growerp importPackage ~/downloads/growerp_inventory.zip
+```
+
+---
+
+## convertToCsv Command
+
+A separate utility to convert exported CSV/ODS/XLSX files from other systems to the GrowERP CSV format.
+
+```bash
+convertToCsv <inputDir> [fileType]
+```
+
+**Parameters:**
+- `<inputDir>` — Directory containing the source files
+- `[fileType]` — Optional: specific file type to convert
+
+**Example:**
+```bash
+convertToCsv inputDir transaction
+```
+
+Creates a `growerpOutput` directory with the converted files.
+
+---
+
+## Complete Conversion Workflow
+
+1. **Export** files from the old system and place them in a single directory
+2. **Create images directory** (if importing images): create an `images/` folder and `images.csv` file
+3. **Configure conversion rules** in the `convert_to_csv` program:
+   - Specify file names in `getFileNames` function
+   - Specify file-wide changes in `convertFile` function
+   - Specify column mappings in `convertRow` function
+4. **Convert** the files:
    ```bash
-   dart pub global activate growerp
+   dart pub global activate --source path ~/growerp/flutter/packages/growerp
+   dart pub global run growerp:convertToCsv inputDir -f fileType -start yyyy/mm/dd -end yyyy/mm/dd
    ```
-   * import the generated files into the growerp system for a single file type 
+5. **Import** into GrowERP:
    ```bash
-   growerp import -i growerpOutput -d fileType -u username -p password
+   growerp import -i growerpOutput -u username -p password
    ```
-    * import all files
-    ```bash
-    growerp import -i growerpOutput -u username -p password
-    ```
+6. **Finalize** the import:
+   ```bash
+   growerp finalize -u username -p password
+   ```
 
-# the complete conversion process.
+### Pre-Import Checklist
 
-1. Export files from the old system
-2. adjust the convert_to_csv program
-3. Import process
-  1. [pause](http://localhost:8080/vapps/system/ServiceJob/Jobs/ServiceJobDetail?jobName=recalculate_GlAccountOrgSummaries) the 'recalculate account summaries' program
-  2. run the import growerp command
-  3. disable the accounting seca by removing the programs as listed in the [initstart](moqui/runtime/component/growerp/deploy/initstart.sh) file under 'DISABLE_SECA' setting
-  4. run the finalize growerp command
-4. enable the recalculate job and restore the seca files.
+Before running `import`:
+1. [Pause](http://localhost:8080/vapps/system/ServiceJob/Jobs/ServiceJobDetail?jobName=recalculate_GlAccountOrgSummaries) the 'recalculate account summaries' job
 
+Before running `finalize`:
+1. Disable accounting SECA by modifying files as listed in [initstart.sh](moqui/runtime/component/growerp/deploy/initstart.sh) under 'DISABLE_SECA'
+
+After `finalize`:
+1. Re-enable the recalculate job
+2. Restore SECA files

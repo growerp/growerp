@@ -14,7 +14,7 @@ dependencies:
   growerp_activity:
     path: ../
   growerp_core: ^1.9.0
-  growerp_models: ^1.9.0
+  growerp_models: ^1.11.6
   growerp_order_accounting: ^1.9.0
   growerp_user_company: ^1.9.0
   decimal: ^3.2.4

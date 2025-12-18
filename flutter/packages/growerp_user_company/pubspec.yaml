@@ -21,7 +21,7 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   growerp_core: ^1.9.0
-  growerp_models: ^1.9.0
+  growerp_models: ^1.11.6
   growerp_activity: ^1.8.1
   decimal: ^3.2.4
   intl: ^0.20.2

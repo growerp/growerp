@@ -13,7 +13,7 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   growerp_core: ^1.9.0
-  growerp_models: ^1.9.0
+  growerp_models: ^1.11.6
   growerp_sales: ^1.9.0
   growerp_website: ^1.9.0
   growerp_inventory: ^1.9.0

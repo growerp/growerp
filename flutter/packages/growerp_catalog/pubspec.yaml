@@ -20,7 +20,7 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   growerp_core: ^1.9.0
-  growerp_models: ^1.9.0
+  growerp_models: ^1.11.6
   intl: ^0.20.2
   flutter_bloc: ^8.1.4
   equatable: ^2.0.5

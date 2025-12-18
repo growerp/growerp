@@ -18,7 +18,7 @@ dependencies:
   integration_test:
     sdk: flutter
   flutter_bloc: ^8.1.4
-  growerp_models: ^1.9.0
+  growerp_models: ^1.11.6
   growerp_chat:
     path: ../
   go_router: ^14.6.2
