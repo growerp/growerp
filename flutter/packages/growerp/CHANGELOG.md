@@ -1,3 +1,9 @@
+## 1.11.6
+
+ - **FIX**: growerp command pure dart including models package, growerp createPackage improvements and fixes. ([a8b70e1c](https://github.com/growerp/growerp/commit/a8b70e1cfa40a0564e283357e8e703570afd36a3))
+ - **FEAT**: upgrade model and growerp packages. ([cb1ac35e](https://github.com/growerp/growerp/commit/cb1ac35e3bdc8683c2853ec96151b0c7ef12763b))
+ - **FEAT**: extended the growerp command for create/import/export package, check docs for detail.(PLEASE note Locale, changed to String otherwise could not use in CLI). ([801b3091](https://github.com/growerp/growerp/commit/801b3091ba160857b5e657417f54b6558dd7c304))
+
 ## 1.9.0
 
  - **FIX**: growerp install error when already installed is modified. ([300a4df1](https://github.com/growerp/growerp/commit/300a4df158a9393b9d6d96c1dbfcfd33c27d2057))

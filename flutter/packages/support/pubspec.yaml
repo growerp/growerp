@@ -14,7 +14,7 @@ dependencies:
   growerp_user_company: ^1.9.0
   growerp_activity: ^1.8.1
   growerp_core: ^1.9.0
-  growerp_models: ^1.9.0
+  growerp_models: ^1.11.6
   flutter_localizations:
     sdk: flutter
   global_configuration: ^2.0.0

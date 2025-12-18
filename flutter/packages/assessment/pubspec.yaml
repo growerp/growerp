@@ -13,7 +13,7 @@ dependencies:
   flutter:
     sdk: flutter
   growerp_core: ^1.9.0
-  growerp_models: ^1.9.0
+  growerp_models: ^1.11.6
   growerp_marketing:
     path: ../growerp_marketing
   package_info_plus: ^8.0.2

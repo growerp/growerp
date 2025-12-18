@@ -613,7 +613,7 @@ class _PlatformConfigDialogState extends State<_PlatformConfigDialog>
       );
       if (result['platformMessage'] != null) {
         setState(() {
-          _messageControllers[platform]?.text = result['platformMessage'];
+          _messageControllers[platform]?.text = result['platformMessage'] ?? '';
         });
       }
     } catch (e) {

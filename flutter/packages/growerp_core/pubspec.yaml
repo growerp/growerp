@@ -14,7 +14,7 @@ environment:
   sdk: ^3.9.0
   flutter: ^3.33.0
 dependencies:
-  growerp_models: ^1.9.0
+  growerp_models: ^1.11.6
   growerp_chat: ^1.9.0
   flutter:
     sdk: flutter

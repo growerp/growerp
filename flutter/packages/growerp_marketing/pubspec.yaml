@@ -12,7 +12,7 @@ dependencies:
     sdk: flutter
 
   # Core packages (dependency on growerp ecosystem)
-  growerp_models: ^1.9.0
+  growerp_models: ^1.11.6
   growerp_core: ^1.9.0
 
   # JSON serialization
