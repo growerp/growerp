@@ -56,26 +56,17 @@ class AdminDashboardContent extends StatelessWidget {
 
             return Scaffold(
               backgroundColor: Colors.transparent,
-              body: Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: GridView.builder(
-                  gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                    maxCrossAxisExtent: isAPhone(context) ? 200 : 300,
-                    childAspectRatio: 1,
-                    crossAxisSpacing: 20,
-                    mainAxisSpacing: 20,
-                  ),
-                  itemCount: dashboardOptions.length,
-                  itemBuilder: (context, index) {
-                    final option = dashboardOptions[index];
-                    return DashboardCard(
-                      title: option.title,
-                      iconName: option.iconName ?? 'dashboard',
-                      route: option.route,
-                      stats: getStatsForRoute(option.route, stats),
-                    );
-                  },
-                ),
+              body: DashboardGrid(
+                itemCount: dashboardOptions.length,
+                itemBuilder: (context, index) {
+                  final option = dashboardOptions[index];
+                  return DashboardCard(
+                    title: option.title,
+                    iconName: option.iconName ?? 'dashboard',
+                    route: option.route,
+                    stats: getStatsForRoute(option.route, stats),
+                  );
+                },
               ),
             );
           },

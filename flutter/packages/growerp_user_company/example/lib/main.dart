@@ -326,48 +326,39 @@ class UserCompanyDashboard extends StatelessWidget {
         }
 
         final authenticate = state.authenticate!;
-        return Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: GridView.builder(
-            gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-              maxCrossAxisExtent: isAPhone(context) ? 200 : 300,
-              childAspectRatio: 1,
-              crossAxisSpacing: 20,
-              mainAxisSpacing: 20,
-            ),
-            itemCount: 3,
-            itemBuilder: (context, index) {
-              switch (index) {
-                case 0:
-                  return _DashboardCard(
-                    title: 'Companies',
-                    iconName: 'business',
-                    route: '/companies',
-                    stats: [
-                      'Customers: ${authenticate.stats?.customers ?? 0}',
-                      'Leads: ${authenticate.stats?.leads ?? 0}',
-                      'Suppliers: ${authenticate.stats?.suppliers ?? 0}',
-                    ],
-                  );
-                case 1:
-                  return _DashboardCard(
-                    title: 'Users',
-                    iconName: 'people',
-                    route: '/users',
-                    stats: [
-                      'Employees: ${authenticate.company?.employees.length ?? 0}',
-                    ],
-                  );
-                default:
-                  return _DashboardCard(
-                    title: 'Companies\n& Users',
-                    iconName: 'groups',
-                    route: '/companiesUsers',
-                    stats: ['Leads: ${authenticate.stats?.leads ?? 0}'],
-                  );
-              }
-            },
-          ),
+        return DashboardGrid(
+          itemCount: 3,
+          itemBuilder: (context, index) {
+            switch (index) {
+              case 0:
+                return _DashboardCard(
+                  title: 'Companies',
+                  iconName: 'business',
+                  route: '/companies',
+                  stats: [
+                    'Customers: ${authenticate.stats?.customers ?? 0}',
+                    'Leads: ${authenticate.stats?.leads ?? 0}',
+                    'Suppliers: ${authenticate.stats?.suppliers ?? 0}',
+                  ],
+                );
+              case 1:
+                return _DashboardCard(
+                  title: 'Users',
+                  iconName: 'people',
+                  route: '/users',
+                  stats: [
+                    'Employees: ${authenticate.company?.employees.length ?? 0}',
+                  ],
+                );
+              default:
+                return _DashboardCard(
+                  title: 'Companies\n& Users',
+                  iconName: 'groups',
+                  route: '/companiesUsers',
+                  stats: ['Leads: ${authenticate.stats?.leads ?? 0}'],
+                );
+            }
+          },
         );
       },
     );
@@ -391,51 +382,34 @@ class _DashboardCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       elevation: 4,
+      margin: EdgeInsets.zero,
       child: InkWell(
         onTap: () => context.go(route),
         child: Padding(
-          padding: const EdgeInsets.all(12.0),
+          padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Flexible(
-                flex: 2,
-                child:
-                    getIconFromRegistry(iconName) ??
-                    const Icon(Icons.dashboard, size: 36),
-              ),
+              getIconFromRegistry(iconName) ??
+                  const Icon(Icons.dashboard, size: 28),
               const SizedBox(height: 4),
-              Flexible(
-                flex: 2,
-                child: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Text(
-                    title,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+              Text(
+                title,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
                 ),
+                overflow: TextOverflow.ellipsis,
               ),
               const SizedBox(height: 2),
-              Expanded(
-                flex: 3,
-                child: SingleChildScrollView(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: stats
-                        .map(
-                          (stat) => Text(
-                            stat,
-                            style: Theme.of(context).textTheme.bodySmall,
-                            textAlign: TextAlign.center,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        )
-                        .toList(),
-                  ),
+              ...stats.map(
+                (stat) => Text(
+                  stat,
+                  style: Theme.of(context).textTheme.bodySmall,
+                  textAlign: TextAlign.center,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ],

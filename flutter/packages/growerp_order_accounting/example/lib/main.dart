@@ -241,128 +241,56 @@ class OrderAccountingDashboard extends StatelessWidget {
         }
 
         final authenticate = state.authenticate!;
-        return Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: GridView.builder(
-            gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-              maxCrossAxisExtent: isAPhone(context) ? 200 : 300,
-              childAspectRatio: 1,
-              crossAxisSpacing: 20,
-              mainAxisSpacing: 20,
-            ),
-            itemCount: 5,
-            itemBuilder: (context, index) {
-              switch (index) {
-                case 0:
-                  return _DashboardCard(
-                    title: 'Orders',
-                    iconName: 'shopping_cart',
-                    route: '/orders',
-                    stats:
-                        'Sales: ${authenticate.stats?.openSlsOrders ?? 0}\n'
-                        'Purchase: ${authenticate.stats?.openPurOrders ?? 0}',
-                  );
-                case 1:
-                  return _DashboardCard(
-                    title: 'Accounting',
-                    iconName: 'account_balance',
-                    route: '/accounting',
-                    stats:
-                        'Sales Invoices: ${authenticate.stats?.salesInvoicesNotPaidCount ?? 0}\n'
-                        'Purchase: ${authenticate.stats?.purchInvoicesNotPaidCount ?? 0}',
-                  );
-                case 2:
-                  return _DashboardCard(
-                    title: 'Shipments',
-                    iconName: 'local_shipping',
-                    route: '/shipments',
-                    stats:
-                        'Incoming: ${authenticate.stats?.incomingShipments ?? 0}\n'
-                        'Outgoing: ${authenticate.stats?.outgoingShipments ?? 0}',
-                  );
-                case 3:
-                  return _DashboardCard(
-                    title: 'Inventory',
-                    iconName: 'inventory',
-                    route: '/inventory',
-                    stats:
-                        'WH Locations: ${authenticate.stats?.whLocations ?? 0}',
-                  );
-                default:
-                  return _DashboardCard(
-                    title: 'Requests',
-                    iconName: 'assignment',
-                    route: '/requests',
-                    stats: 'Requests: ${authenticate.stats?.requests ?? 0}',
-                  );
-              }
-            },
-          ),
+        return DashboardGrid(
+          itemCount: 5,
+          itemBuilder: (context, index) {
+            switch (index) {
+              case 0:
+                return DashboardCard(
+                  title: 'Orders',
+                  iconName: 'shopping_cart',
+                  route: '/orders',
+                  stats:
+                      'Sales: ${authenticate.stats?.openSlsOrders ?? 0}\n'
+                      'Purchase: ${authenticate.stats?.openPurOrders ?? 0}',
+                );
+              case 1:
+                return DashboardCard(
+                  title: 'Accounting',
+                  iconName: 'account_balance',
+                  route: '/accounting',
+                  stats:
+                      'Sales Invoices: ${authenticate.stats?.salesInvoicesNotPaidCount ?? 0}\n'
+                      'Purchase: ${authenticate.stats?.purchInvoicesNotPaidCount ?? 0}',
+                );
+              case 2:
+                return DashboardCard(
+                  title: 'Shipments',
+                  iconName: 'local_shipping',
+                  route: '/shipments',
+                  stats:
+                      'Incoming: ${authenticate.stats?.incomingShipments ?? 0}\n'
+                      'Outgoing: ${authenticate.stats?.outgoingShipments ?? 0}',
+                );
+              case 3:
+                return DashboardCard(
+                  title: 'Inventory',
+                  iconName: 'inventory',
+                  route: '/inventory',
+                  stats:
+                      'WH Locations: ${authenticate.stats?.whLocations ?? 0}',
+                );
+              default:
+                return DashboardCard(
+                  title: 'Requests',
+                  iconName: 'assignment',
+                  route: '/requests',
+                  stats: 'Requests: ${authenticate.stats?.requests ?? 0}',
+                );
+            }
+          },
         );
       },
-    );
-  }
-}
-
-class _DashboardCard extends StatelessWidget {
-  final String title;
-  final String iconName;
-  final String route;
-  final String stats;
-
-  const _DashboardCard({
-    required this.title,
-    required this.iconName,
-    required this.route,
-    required this.stats,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      elevation: 4,
-      child: InkWell(
-        onTap: () => context.go(route),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Flexible(
-                child: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child:
-                      getIconFromRegistry(iconName) ??
-                      const Icon(Icons.dashboard, size: 48),
-                ),
-              ),
-              const SizedBox(height: 8),
-              Flexible(
-                child: Text(
-                  title,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Flexible(
-                child: Text(
-                  stats,
-                  style: Theme.of(context).textTheme.bodySmall,
-                  textAlign: TextAlign.center,
-                  overflow: TextOverflow.ellipsis,
-                  maxLines: 2,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }

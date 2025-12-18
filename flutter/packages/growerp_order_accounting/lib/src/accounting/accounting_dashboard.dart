@@ -16,7 +16,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
-import 'package:responsive_framework/responsive_framework.dart';
 
 /// A reusable accounting dashboard widget that displays accounting menu options
 /// as cards with statistics. This widget can be used across different apps
@@ -121,26 +120,17 @@ class AccountingDashboard extends StatelessWidget {
       key: const Key('AcctDashBoard'),
       backgroundColor: Colors.transparent,
       floatingActionButton: floatingActionButton,
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: GridView.builder(
-          gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-            maxCrossAxisExtent: isAPhone(context) ? 200 : 300,
-            childAspectRatio: 1,
-            crossAxisSpacing: 20,
-            mainAxisSpacing: 20,
-          ),
-          itemCount: options.length,
-          itemBuilder: (context, index) {
-            final option = options[index];
-            return DashboardCard(
-              title: option.title,
-              iconName: option.iconName ?? 'accounting',
-              route: option.route,
-              stats: _getStatsForAccountingRoute(option.route, stats),
-            );
-          },
-        ),
+      body: DashboardGrid(
+        itemCount: options.length,
+        itemBuilder: (context, index) {
+          final option = options[index];
+          return DashboardCard(
+            title: option.title,
+            iconName: option.iconName ?? 'accounting',
+            route: option.route,
+            stats: _getStatsForAccountingRoute(option.route, stats),
+          );
+        },
       ),
     );
   }
@@ -150,63 +140,60 @@ class AccountingDashboard extends StatelessWidget {
     Stats? stats,
     String currency,
   ) {
+    final staticCards = [
+      DashboardCard(
+        title: "Sales",
+        iconName: 'attach_money',
+        route: '/accounting/sales',
+        stats:
+            "Open Inv: $currency ${stats?.salesInvoicesNotPaidAmount ?? '0.00'}\n(${stats?.salesInvoicesNotPaidCount ?? 0})",
+      ),
+      DashboardCard(
+        title: "Purchase",
+        iconName: 'money_off',
+        route: '/accounting/purchase',
+        stats:
+            "Unpaid Inv: $currency ${stats?.purchInvoicesNotPaidAmount ?? '0.00'}\n(${stats?.purchInvoicesNotPaidCount ?? 0})",
+      ),
+      const DashboardCard(
+        title: "Sales Payments",
+        iconName: 'input',
+        route: '/accounting/sales_payments',
+        stats: "Payments",
+      ),
+      const DashboardCard(
+        title: "Purchase Payments",
+        iconName: 'output',
+        route: '/accounting/purchase_payments',
+        stats: "Payments",
+      ),
+      const DashboardCard(
+        title: "Ledger",
+        iconName: 'account_balance_wallet',
+        route: '/accounting/ledger',
+        stats: "Accounts, Trans, Journals",
+      ),
+      const DashboardCard(
+        title: "Reports",
+        iconName: 'summarize',
+        route: '/accounting/reports',
+        stats: "Balance Sheet, Summary",
+      ),
+      const DashboardCard(
+        title: "Setup",
+        iconName: 'settings',
+        route: '/accounting/setup',
+        stats: "Periods, Item types, Payment types",
+      ),
+    ];
+
     return Scaffold(
       key: const Key('AcctDashBoard'),
       backgroundColor: Colors.transparent,
       floatingActionButton: floatingActionButton,
-      body: Padding(
-        padding: const EdgeInsets.all(10),
-        child: GridView.count(
-          crossAxisCount: ResponsiveBreakpoints.of(context).isMobile ? 2 : 3,
-          mainAxisSpacing: 10,
-          crossAxisSpacing: 10,
-          children: [
-            DashboardCard(
-              title: "Sales",
-              iconName: 'attach_money',
-              route: '/accounting/sales',
-              stats:
-                  "Open Inv: $currency ${stats?.salesInvoicesNotPaidAmount ?? '0.00'}\n(${stats?.salesInvoicesNotPaidCount ?? 0})",
-            ),
-            DashboardCard(
-              title: "Purchase",
-              iconName: 'money_off',
-              route: '/accounting/purchase',
-              stats:
-                  "Unpaid Inv: $currency ${stats?.purchInvoicesNotPaidAmount ?? '0.00'}\n(${stats?.purchInvoicesNotPaidCount ?? 0})",
-            ),
-            const DashboardCard(
-              title: "Sales Payments",
-              iconName: 'input',
-              route: '/accounting/sales_payments',
-              stats: "Payments",
-            ),
-            const DashboardCard(
-              title: "Purchase Payments",
-              iconName: 'output',
-              route: '/accounting/purchase_payments',
-              stats: "Payments",
-            ),
-            const DashboardCard(
-              title: "Ledger",
-              iconName: 'account_balance_wallet',
-              route: '/accounting/ledger',
-              stats: "Accounts, Trans, Journals",
-            ),
-            const DashboardCard(
-              title: "Reports",
-              iconName: 'summarize',
-              route: '/accounting/reports',
-              stats: "Balance Sheet, Summary",
-            ),
-            const DashboardCard(
-              title: "Setup",
-              iconName: 'settings',
-              route: '/accounting/setup',
-              stats: "Periods, Item types, Payment types",
-            ),
-          ],
-        ),
+      body: DashboardGrid(
+        itemCount: staticCards.length,
+        itemBuilder: (context, index) => staticCards[index],
       ),
     );
   }

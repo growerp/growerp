@@ -163,68 +163,18 @@ class MarketingDashboard extends StatelessWidget {
             .where((item) => item.route != '/')
             .toList();
 
-        return Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: GridView.builder(
-            gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-              maxCrossAxisExtent: isAPhone(context) ? 200 : 300,
-              childAspectRatio: 1,
-              crossAxisSpacing: 20,
-              mainAxisSpacing: 20,
-            ),
-            itemCount: items.length,
-            itemBuilder: (context, index) {
-              final item = items[index];
-              return _DashboardCard(
-                title: item.title,
-                iconName: item.iconName ?? 'dashboard',
-                route: item.route ?? '/',
-              );
-            },
-          ),
+        return DashboardGrid(
+          itemCount: items.length,
+          itemBuilder: (context, index) {
+            final item = items[index];
+            return DashboardCard(
+              title: item.title,
+              iconName: item.iconName ?? 'dashboard',
+              route: item.route,
+            );
+          },
         );
       },
-    );
-  }
-}
-
-class _DashboardCard extends StatelessWidget {
-  final String title;
-  final String iconName;
-  final String route;
-
-  const _DashboardCard({
-    required this.title,
-    required this.iconName,
-    required this.route,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      elevation: 4,
-      child: InkWell(
-        onTap: () => context.go(route),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              getIconFromRegistry(iconName) ??
-                  const Icon(Icons.dashboard, size: 48),
-              const SizedBox(height: 16),
-              Text(
-                title,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }

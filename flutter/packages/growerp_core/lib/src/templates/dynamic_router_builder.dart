@@ -242,9 +242,7 @@ GoRouter createDynamicAppRouter(
         ),
 
       // Accounting Shell - only add if hasAccountingSubmenu and there are routes
-      if (config.hasAccountingSubmenu &&
-          accountingConfig != null &&
-          _generateRoutes(accountingConfig, config.widgetLoader).isNotEmpty)
+      if (config.hasAccountingSubmenu && accountingConfig != null)
         ShellRoute(
           builder: (context, state, child) {
             int menuIndex = 0;
@@ -266,7 +264,25 @@ GoRouter createDynamicAppRouter(
               child: child,
             );
           },
-          routes: _generateRoutes(accountingConfig, config.widgetLoader),
+          routes: [
+            // Add explicit /accounting route for the dashboard
+            GoRoute(
+              path: '/accounting',
+              builder: (context, state) {
+                // Get the accounting root option's widget
+                final rootOption = accountingConfig!.menuOptions.isNotEmpty
+                    ? accountingConfig.menuOptions.first
+                    : null;
+                if (rootOption?.widgetName != null) {
+                  return config.widgetLoader(rootOption!.widgetName!, {});
+                }
+                // Fallback - try to load AccountingForm
+                return config.widgetLoader('AccountingForm', {});
+              },
+            ),
+            // Add remaining accounting routes
+            ..._generateRoutes(accountingConfig!, config.widgetLoader),
+          ],
         ),
     ],
   );

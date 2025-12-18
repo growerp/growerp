@@ -65,26 +65,17 @@ class AdminDbForm extends StatelessWidget {
                 },
                 child: const Icon(Icons.menu),
               ),
-              body: Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: GridView.builder(
-                  gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                    maxCrossAxisExtent: isAPhone(context) ? 200 : 300,
-                    childAspectRatio: 1,
-                    crossAxisSpacing: 20,
-                    mainAxisSpacing: 20,
-                  ),
-                  itemCount: dashboardItems.length,
-                  itemBuilder: (context, index) {
-                    final item = dashboardItems[index];
-                    return DashboardCard(
-                      title: item.title,
-                      iconName: item.iconName ?? 'dashboard',
-                      route: item.route,
-                      stats: getStatsForRoute(item.route, stats),
-                    );
-                  },
-                ),
+              body: DashboardGrid(
+                itemCount: dashboardItems.length,
+                itemBuilder: (context, index) {
+                  final item = dashboardItems[index];
+                  return DashboardCard(
+                    title: item.title,
+                    iconName: item.iconName ?? 'dashboard',
+                    route: item.route,
+                    stats: getStatsForRoute(item.route, stats),
+                  );
+                },
               ),
             );
           },
