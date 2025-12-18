@@ -71,6 +71,8 @@ class OutreachCampaignBloc
     OutreachCampaignCreate event,
     Emitter<OutreachCampaignState> emit,
   ) async {
+    // Emit loading to ensure state change is detected
+    emit(state.copyWith(status: OutreachCampaignStatus.loading));
     try {
       await restClient.createOutreachCampaign(
         campaign: {
@@ -127,13 +129,34 @@ class OutreachCampaignBloc
         },
       );
 
+      // Auto-start automation when status changes to APPROVED
+      if (event.status == 'MKTG_CAMP_APPROVED') {
+        // Fetch the updated campaign to get full data
+        final detail = await restClient.getOutreachCampaignDetail(
+          marketingCampaignId: event.campaignId,
+        );
+
+        // Update status to IN_PROGRESS
+        await restClient.updateOutreachCampaign(
+          campaign: {
+            'marketingCampaignId': event.campaignId,
+            'statusId': 'MKTG_CAMP_INPROGRESS',
+          },
+        );
+
+        // Start automation in background
+        _startAutomationWithErrorHandling(detail.campaign, event.campaignId);
+      }
+
       // Refresh list
       final result = await restClient.listOutreachCampaigns();
       emit(
         state.copyWith(
           status: OutreachCampaignStatus.success,
           campaigns: result.campaigns,
-          message: 'Campaign updated successfully',
+          message: event.status == 'MKTG_CAMP_APPROVED'
+              ? 'Campaign approved and started'
+              : 'Campaign updated successfully',
         ),
       );
     } catch (error) {
@@ -143,6 +166,33 @@ class OutreachCampaignBloc
           message: await getDioError(error),
         ),
       );
+    }
+  }
+
+  /// Start automation with error handling - updates status to FAILED on error
+  void _startAutomationWithErrorHandling(
+      OutreachCampaign campaign, String campaignId) async {
+    try {
+      await _automationService.startCampaign(campaign);
+      // Update to COMPLETED when done
+      await restClient.updateOutreachCampaign(
+        campaign: {
+          'marketingCampaignId': campaignId,
+          'statusId': 'MKTG_CAMP_COMPLETED',
+        },
+      );
+    } catch (e) {
+      // Update to FAILED on error
+      try {
+        await restClient.updateOutreachCampaign(
+          campaign: {
+            'marketingCampaignId': campaignId,
+            'statusId': 'MKTG_CAMP_FAILED',
+          },
+        );
+      } catch (_) {
+        // Ignore error updating status
+      }
     }
   }
 

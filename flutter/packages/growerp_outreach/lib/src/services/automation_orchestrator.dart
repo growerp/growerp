@@ -120,9 +120,27 @@ class AutomationOrchestrator {
       return;
     }
 
-    // For targeted actions, get profiles
-    final List<ProfileData> profiles;
-    if (targetLeads != null && targetLeads.isNotEmpty) {
+    // SEARCH-TO-LEADS FLOW: For search/follow actions, save results as PENDING
+    if (_isSearchOnlyAction(actionType)) {
+      await _runSearchAndSaveLeads(
+        adapter: adapter,
+        platform: platform,
+        searchCriteria: searchCriteria,
+        campaignId: campaignId,
+        dailyLimit: dailyLimit,
+      );
+      return;
+    }
+
+    // DM-FROM-LEADS FLOW: For DM actions, fetch PENDING leads first
+    List<ProfileData> profiles;
+    if (_isDmAction(actionType)) {
+      profiles = await _fetchPendingLeads(campaignId, platform);
+      if (profiles.isEmpty && targetLeads != null && targetLeads.isNotEmpty) {
+        profiles = targetLeads;
+      }
+      debugPrint('Using ${profiles.length} leads for DM on $platform');
+    } else if (targetLeads != null && targetLeads.isNotEmpty) {
       profiles = targetLeads;
       debugPrint('Using ${profiles.length} target leads for $platform');
     } else if (searchCriteria.isNotEmpty) {
@@ -362,6 +380,86 @@ class AutomationOrchestrator {
       // Default fallback
       default:
         await adapter.sendConnectionRequest(profile, message);
+    }
+  }
+
+  /// Check if action is a search-only action (saves leads but doesn't message)
+  bool _isSearchOnlyAction(String actionType) {
+    return [
+      'follow_profiles',
+      'search_and_connect',
+      'subscribe',
+    ].contains(actionType);
+  }
+
+  /// Check if action is a DM action (fetches leads then messages)
+  bool _isDmAction(String actionType) {
+    return ['send_dms'].contains(actionType);
+  }
+
+  /// Run search and save results as PENDING leads
+  Future<void> _runSearchAndSaveLeads({
+    required PlatformAutomationAdapter adapter,
+    required String platform,
+    required String searchCriteria,
+    required String campaignId,
+    required int dailyLimit,
+  }) async {
+    if (searchCriteria.isEmpty) {
+      debugPrint('No search criteria for $platform');
+      return;
+    }
+
+    final profiles = await adapter.searchProfiles(searchCriteria);
+    debugPrint('Found ${profiles.length} profiles via search for $platform');
+
+    int saved = 0;
+    for (final profile in profiles) {
+      if (saved >= dailyLimit) break;
+
+      try {
+        await restClient.createOutreachMessage(
+          marketingCampaignId: campaignId,
+          platform: platform,
+          recipientName: profile.name,
+          recipientHandle: profile.handle,
+          recipientProfileUrl: profile.profileUrl,
+          recipientEmail: profile.email,
+          messageContent: '', // Will be personalized when sending
+          status: 'PENDING',
+        );
+        saved++;
+      } catch (e) {
+        debugPrint('Error saving lead ${profile.name}: $e');
+      }
+    }
+
+    debugPrint('✓ Saved $saved leads as PENDING for $platform');
+  }
+
+  /// Fetch PENDING leads from backend for a campaign
+  Future<List<ProfileData>> _fetchPendingLeads(
+    String campaignId,
+    String platform,
+  ) async {
+    try {
+      final messages = await restClient.listOutreachMessages(
+        marketingCampaignId: campaignId,
+        status: 'PENDING',
+      );
+
+      return messages.messages
+          .where((m) => m.platform.toUpperCase() == platform.toUpperCase())
+          .map((m) => ProfileData(
+                name: m.recipientName ?? '',
+                handle: m.recipientHandle,
+                profileUrl: m.recipientProfileUrl,
+                email: m.recipientEmail,
+              ))
+          .toList();
+    } catch (e) {
+      debugPrint('Error fetching pending leads: $e');
+      return [];
     }
   }
 }

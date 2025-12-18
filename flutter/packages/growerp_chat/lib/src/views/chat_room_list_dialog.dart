@@ -229,12 +229,14 @@ class ChatRoomListDialogsState extends State<ChatRoomListDialog> {
                         _localizations?.status ?? 'Status',
                         textAlign: TextAlign.center,
                       ),
+                    const SizedBox(width: 10),
                     Text(
                       _localizations?.pvt ?? 'Pvt',
                       textAlign: TextAlign.center,
                     ),
+                    const SizedBox(width: 10),
                     Text(
-                      _localizations?.nroMembers ?? '# Members',
+                      _localizations?.nroMembers ?? '#Members',
                       textAlign: TextAlign.center,
                     ),
                     const Text("    ", textAlign: TextAlign.center),
@@ -291,10 +293,11 @@ class ListDetail extends StatelessWidget {
           if (!ResponsiveBreakpoints.of(context).isMobile)
             Text(
               chatRoom.hasRead
-                  ? localizations?.allMessagesRead ?? 'All messages read'
-                  : localizations?.unreadMessages ?? 'Unread messages',
+                  ? localizations?.allMessagesRead ?? 'All read'
+                  : localizations?.unreadMessages ?? 'Unread',
               key: Key('unRead$index'),
             ),
+          const SizedBox(width: 30),
           Text(
             chatRoom.isPrivate != true ? ' N   ' : 'Y   ',
             key: Key('isPrivate$index'),

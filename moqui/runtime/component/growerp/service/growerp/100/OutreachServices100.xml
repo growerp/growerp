@@ -1248,4 +1248,28 @@
         </actions>
     </service>
 
+    <!-- Generate platform-specific message with AI -->
+    <service verb="generate" noun="PlatformMessage">
+        <description>Generate a platform-optimized message from a campaign template using AI</description>
+        <in-parameters>
+            <parameter name="campaignTemplate" required="true" type="String" />
+            <parameter name="platform" required="true" type="String">
+                <description>TWITTER, LINKEDIN, EMAIL, SUBSTACK</description>
+            </parameter>
+            <parameter name="actionType" required="true" type="String">
+                <description>post_tweet, send_dms, message_connections, send_email, etc.</description>
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="platformMessage" type="String" />
+        </out-parameters>
+        <actions>
+            <script location="component://growerp/service/GeminiAiUtil.groovy" />
+            <script>
+                def result = GeminiAiUtil.generatePlatformMessage(ec, campaignTemplate, platform, actionType)
+                platformMessage = result
+            </script>
+        </actions>
+    </service>
+
 </services>

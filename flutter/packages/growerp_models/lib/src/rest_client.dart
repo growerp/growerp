@@ -1222,6 +1222,14 @@ abstract class RestClient {
     @Field() String? bodyContentType,
   });
 
+  // Generate platform-specific message with AI
+  @POST("rest/s1/growerp/100/GeneratePlatformMessage")
+  Future<Map<String, dynamic>> generatePlatformMessage({
+    @Field() required String campaignTemplate,
+    @Field() required String platform,
+    @Field() required String actionType,
+  });
+
   // ============================================
   // MENU CONFIGURATION ENDPOINTS
   // ============================================
