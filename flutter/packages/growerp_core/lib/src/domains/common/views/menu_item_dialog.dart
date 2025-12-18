@@ -197,16 +197,12 @@ class MenuItemDialogState extends State<MenuItemDialog> {
                       return DropdownMenuItem(
                         value: iconName,
                         child: Row(
+                          mainAxisSize: MainAxisSize.min,
                           children: [
                             getIconFromRegistry(iconName) ??
                                 const Icon(Icons.circle, size: 20),
                             const SizedBox(width: 8),
-                            Flexible(
-                              child: Text(
-                                iconName,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
+                            Text(iconName, overflow: TextOverflow.ellipsis),
                           ],
                         ),
                       );
@@ -218,15 +214,92 @@ class MenuItemDialogState extends State<MenuItemDialog> {
                 ),
                 const SizedBox(width: 16),
                 Expanded(
-                  child: TextFormField(
+                  child: Autocomplete<String>(
                     key: const Key('menuItemWidget'),
-                    initialValue: _selectedWidgetName,
-                    decoration: const InputDecoration(
-                      labelText: 'Widget Name',
-                      border: OutlineInputBorder(),
+                    initialValue: TextEditingValue(
+                      text: _selectedWidgetName ?? '',
                     ),
-                    onChanged: (value) {
-                      _selectedWidgetName = value;
+                    optionsBuilder: (TextEditingValue textEditingValue) {
+                      final query = textEditingValue.text.toLowerCase();
+                      if (query.isEmpty) {
+                        return WidgetRegistry.registeredWidgets;
+                      }
+                      return WidgetRegistry.registeredWidgets.where(
+                        (widget) => widget.toLowerCase().contains(query),
+                      );
+                    },
+                    fieldViewBuilder:
+                        (context, textController, focusNode, onFieldSubmitted) {
+                          return TextFormField(
+                            controller: textController,
+                            focusNode: focusNode,
+                            decoration: InputDecoration(
+                              labelText: 'Widget Name',
+                              border: const OutlineInputBorder(),
+                              suffixIcon: textController.text.isNotEmpty
+                                  ? IconButton(
+                                      icon: const Icon(Icons.clear, size: 18),
+                                      onPressed: () {
+                                        textController.clear();
+                                        setState(() {
+                                          _selectedWidgetName = null;
+                                        });
+                                      },
+                                    )
+                                  : const Icon(Icons.search, size: 18),
+                            ),
+                            onFieldSubmitted: (_) => onFieldSubmitted(),
+                          );
+                        },
+                    optionsViewBuilder: (context, onSelected, options) {
+                      return Align(
+                        alignment: Alignment.topLeft,
+                        child: Material(
+                          elevation: 4,
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(
+                              maxHeight: 200,
+                              maxWidth: 300,
+                            ),
+                            child: ListView.builder(
+                              padding: EdgeInsets.zero,
+                              shrinkWrap: true,
+                              itemCount: options.length,
+                              itemBuilder: (context, index) {
+                                final option = options.elementAt(index);
+                                return ListTile(
+                                  dense: true,
+                                  title: Text(
+                                    option,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  onTap: () => onSelected(option),
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                    onSelected: (value) {
+                      setState(() {
+                        _selectedWidgetName = value;
+                        // Auto-fill title and route if widget is selected
+                        if (_titleController.text.isEmpty) {
+                          // Convert CamelCase to Title Case
+                          _titleController.text = value
+                              .replaceAllMapped(
+                                RegExp(r'([A-Z])'),
+                                (m) => ' ${m.group(1)}',
+                              )
+                              .trim();
+                        }
+                        if (_routeController.text.isEmpty) {
+                          // Convert to route format
+                          _routeController.text =
+                              '/${value[0].toLowerCase()}${value.substring(1)}';
+                        }
+                      });
                     },
                   ),
                 ),

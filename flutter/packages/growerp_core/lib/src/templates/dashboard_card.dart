@@ -38,11 +38,12 @@ class DashboardCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       elevation: 4,
+      margin: EdgeInsets.zero,
       child: InkWell(
         key: route != null ? Key('tap$route') : null,
         onTap: route != null ? () => context.go(route!) : null,
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
@@ -52,10 +53,10 @@ class DashboardCard extends StatelessWidget {
                   fit: BoxFit.scaleDown,
                   child:
                       getIconFromRegistry(iconName) ??
-                      const Icon(Icons.dashboard, size: 48),
+                      const Icon(Icons.dashboard, size: 28),
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 4),
               Flexible(
                 child: Text(
                   title,
@@ -68,7 +69,7 @@ class DashboardCard extends StatelessWidget {
                 ),
               ),
               if (stats != null) ...[
-                const SizedBox(height: 4),
+                const SizedBox(height: 2),
                 Flexible(
                   child: Text(
                     stats!,
@@ -83,6 +84,162 @@ class DashboardCard extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Reusable dashboard grid widget that provides consistent compact layout.
+/// This widget handles the grid configuration for dashboard cards across all apps.
+///
+/// Usage:
+/// ```dart
+/// DashboardGrid(
+///   itemCount: menuOptions.length,
+///   itemBuilder: (context, index) => DashboardCard(
+///     title: menuOptions[index].title,
+///     iconName: menuOptions[index].iconName,
+///     route: menuOptions[index].route,
+///   ),
+/// )
+/// ```
+class DashboardGrid extends StatefulWidget {
+  final int itemCount;
+  final Widget Function(BuildContext, int) itemBuilder;
+
+  const DashboardGrid({
+    super.key,
+    required this.itemCount,
+    required this.itemBuilder,
+  });
+
+  @override
+  State<DashboardGrid> createState() => _DashboardGridState();
+}
+
+class _DashboardGridState extends State<DashboardGrid>
+    with SingleTickerProviderStateMixin {
+  // Static flag to ensure overlay only shows once per app session
+  static bool _hasShownOverlay = false;
+
+  late AnimationController _fadeController;
+  late Animation<double> _fadeAnimation;
+  bool _showOverlay = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _fadeController = AnimationController(
+      duration: const Duration(milliseconds: 500),
+      vsync: this,
+    );
+    _fadeAnimation = Tween<double>(
+      begin: 1.0,
+      end: 0.0,
+    ).animate(CurvedAnimation(parent: _fadeController, curve: Curves.easeOut));
+
+    // Only show overlay if it hasn't been shown yet this session
+    if (!_hasShownOverlay) {
+      _hasShownOverlay = true;
+      _showOverlay = true;
+
+      // Start fade out after 5 seconds
+      Future.delayed(const Duration(seconds: 5), () {
+        if (mounted) {
+          _fadeController.forward().then((_) {
+            if (mounted) {
+              setState(() {
+                _showOverlay = false;
+              });
+            }
+          });
+        }
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _fadeController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: GridView.builder(
+            gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+              maxCrossAxisExtent: isAPhone(context) ? 154 : 198,
+              childAspectRatio: 1.0,
+              crossAxisSpacing: 10,
+              mainAxisSpacing: 10,
+            ),
+            itemCount: widget.itemCount,
+            itemBuilder: widget.itemBuilder,
+          ),
+        ),
+        // Temporary instructional overlay (card style)
+        if (_showOverlay)
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            height: MediaQuery.of(context).size.height * 0.30,
+            child: FadeTransition(
+              opacity: _fadeAnimation,
+              child: Container(
+                color: Colors.black54,
+                child: Center(
+                  child: Card(
+                    elevation: 8,
+                    margin: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 12,
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20.0,
+                        vertical: 16.0,
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.menu,
+                            size: 36,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                          const SizedBox(height: 10),
+                          Text(
+                            'Add Your Own Items',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).colorScheme.onSurface,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            'With the ☰ menu button you can add your own menu items',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurface.withValues(alpha: 0.7),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+      ],
     );
   }
 }

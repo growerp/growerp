@@ -94,73 +94,18 @@ class SalesDashboard extends StatelessWidget {
         }
 
         final authenticate = state.authenticate!;
-        return Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: GridView.builder(
-            gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-              maxCrossAxisExtent: isAPhone(context) ? 200 : 300,
-              childAspectRatio: 1,
-              crossAxisSpacing: 20,
-              mainAxisSpacing: 20,
-            ),
-            itemCount: 1,
-            itemBuilder: (context, index) {
-              return _DashboardCard(
-                title: 'Opportunities',
-                iconName: 'campaign',
-                route: '/crm',
-                stats:
-                    'Opportunities: ${authenticate.stats?.opportunities ?? 0}',
-              );
-            },
-          ),
+        return DashboardGrid(
+          itemCount: 1,
+          itemBuilder: (context, index) {
+            return DashboardCard(
+              title: 'Opportunities',
+              iconName: 'campaign',
+              route: '/crm',
+              stats: 'Opportunities: ${authenticate.stats?.opportunities ?? 0}',
+            );
+          },
         );
       },
-    );
-  }
-}
-
-class _DashboardCard extends StatelessWidget {
-  final String title;
-  final String iconName;
-  final String route;
-  final String stats;
-
-  const _DashboardCard({
-    required this.title,
-    required this.iconName,
-    required this.route,
-    required this.stats,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      elevation: 4,
-      child: InkWell(
-        onTap: () => context.go(route),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              getIconFromRegistry(iconName) ??
-                  const Icon(Icons.dashboard, size: 48),
-              const SizedBox(height: 16),
-              Text(
-                title,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(stats, style: Theme.of(context).textTheme.bodySmall),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }
