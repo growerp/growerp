@@ -392,33 +392,39 @@ class BalanceSheetFormState extends State<BalanceSheetListForm> {
                                 ),
                               ],
                             ),
-                            Row(
-                              children: [
-                                Text(
-                                  '${_localizations.period} ${_selectedPeriod.periodName}',
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
+                            Flexible(
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Flexible(
+                                    child: Text(
+                                      '${_localizations.period} ${_selectedPeriod.periodName}',
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16,
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(width: 10),
-                                if (!expanded)
-                                  OutlinedButton(
-                                    child: Text(_localizations.expand),
-                                    onPressed: () => setState(() {
-                                      expanded = !expanded;
-                                      _controller!.expandAll();
-                                    }),
-                                  ),
-                                if (expanded)
-                                  OutlinedButton(
-                                    child: Text(_localizations.collapse),
-                                    onPressed: () => setState(() {
-                                      expanded = !expanded;
-                                      _controller!.collapseAll();
-                                    }),
-                                  ),
-                              ],
+                                  const SizedBox(width: 10),
+                                  if (!expanded)
+                                    OutlinedButton(
+                                      child: Text(_localizations.expand),
+                                      onPressed: () => setState(() {
+                                        expanded = !expanded;
+                                        _controller!.expandAll();
+                                      }),
+                                    ),
+                                  if (expanded)
+                                    OutlinedButton(
+                                      child: Text(_localizations.collapse),
+                                      onPressed: () => setState(() {
+                                        expanded = !expanded;
+                                        _controller!.collapseAll();
+                                      }),
+                                    ),
+                                ],
+                              ),
                             ),
                           ],
                         ),

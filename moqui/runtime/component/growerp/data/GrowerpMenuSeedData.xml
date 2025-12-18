@@ -107,14 +107,12 @@ along with this software (see the LICENSE.md file). If not, see
     <growerp.menu.MenuOption menuOptionId="ADMIN_CATALOG" menuConfigurationId="ADMIN_DEFAULT" itemKey="products" title="catalog" route="/catalog" iconName="category" widgetName="ProductList" sequenceNum="40"/>
     <growerp.menu.MenuOption menuOptionId="ADMIN_ORDERS" menuConfigurationId="ADMIN_DEFAULT" itemKey="openSlsOrders" title="orders" route="/orders" iconName="shopping_cart" widgetName="SalesOrderList" sequenceNum="50"/>
     <growerp.menu.MenuOption menuOptionId="ADMIN_INVENTORY" menuConfigurationId="ADMIN_DEFAULT" itemKey="outgoingShipments" title="inventory" route="/inventory" iconName="warehouse" widgetName="OutgoingShipmentList" sequenceNum="60"/>
-    <growerp.menu.MenuOption menuOptionId="ADMIN_ACCOUNTING" menuConfigurationId="ADMIN_DEFAULT" itemKey="salesInvoicesNotPaidCount" title="accounting" route="/accounting" iconName="account_balance" widgetName="AccountingForm" sequenceNum="70"/>
+    <growerp.menu.MenuOption menuOptionId="ADMIN_ACC_SALES" menuConfigurationId="ADMIN_DEFAULT" itemKey="salesInvoicesNotPaidCount" title="Acct Sales" route="/acct-sales" iconName="receipt_long" widgetName="SalesInvoiceList" sequenceNum="70"/>
+    <growerp.menu.MenuOption menuOptionId="ADMIN_ACC_PURCHASE" menuConfigurationId="ADMIN_DEFAULT" itemKey="purchInvoicesNotPaidCount" title="Acct Purchase" route="/acct-purchase" iconName="receipt" widgetName="PurchaseInvoiceList" sequenceNum="71"/>
+    <growerp.menu.MenuOption menuOptionId="ADMIN_ACC_LEDGER" menuConfigurationId="ADMIN_DEFAULT" title="Acct Ledger" route="/acct-ledger" iconName="account_balance" widgetName="LedgerTreeForm" sequenceNum="72"/>
+    <growerp.menu.MenuOption menuOptionId="ADMIN_ACC_REPORTS" menuConfigurationId="ADMIN_DEFAULT" title="Acct Reports" route="/acct-reports" iconName="assessment" widgetName="RevenueExpenseChart" sequenceNum="73"/>
+    <growerp.menu.MenuOption menuOptionId="ADMIN_ACC_SETUP" menuConfigurationId="ADMIN_DEFAULT" title="Acct Setup" route="/acct-setup" iconName="settings" widgetName="TimePeriodListForm" sequenceNum="74"/>
     <growerp.menu.MenuOption menuOptionId="ADMIN_ABOUT" menuConfigurationId="ADMIN_DEFAULT" title="about" route="/about" widgetName="AboutForm" image="packages/growerp_core/images/infoGrey.png" selectedImage="packages/growerp_core/images/info.png" sequenceNum="80"/>
-    <!-- ADMIN_DEFAULT Accounting Sub-Menu Options -->
-    <growerp.menu.MenuOption menuOptionId="ADMIN_ACC_SALES" menuConfigurationId="ADMIN_DEFAULT" title="Sales" route="/accounting/sales" iconName="shopping_cart" widgetName="SalesInvoiceList" sequenceNum="71"/>
-    <growerp.menu.MenuOption menuOptionId="ADMIN_ACC_PURCHASE" menuConfigurationId="ADMIN_DEFAULT" title="Purchase" route="/accounting/purchase" iconName="shopping_bag" widgetName="PurchaseInvoiceList" sequenceNum="72"/>
-    <growerp.menu.MenuOption menuOptionId="ADMIN_ACC_LEDGER" menuConfigurationId="ADMIN_DEFAULT" title="Ledger" route="/accounting/ledger" iconName="account_balance" widgetName="LedgerTreeForm" sequenceNum="73"/>
-    <growerp.menu.MenuOption menuOptionId="ADMIN_ACC_REPORTS" menuConfigurationId="ADMIN_DEFAULT" title="reports" route="/accounting/reports" iconName="assessment" widgetName="RevenueExpenseChart" sequenceNum="74"/>
-    <growerp.menu.MenuOption menuOptionId="ADMIN_ACC_SETUP" menuConfigurationId="ADMIN_DEFAULT" title="setUp" route="/accounting/setup" iconName="settings" widgetName="TimePeriodListForm" sequenceNum="75"/>
 
 <!-- ADMIN_DEFAULT Menu Option Items (junction) -->
     <growerp.menu.MenuOptionItem menuOptionId="ADMIN_ORG" menuItemId="ShowCompanyDialog" sequenceNum="10"/>
@@ -145,31 +143,24 @@ along with this software (see the LICENSE.md file). If not, see
     <growerp.menu.MenuOptionItem menuOptionId="ADMIN_INVENTORY" menuItemId="IncomingShipmentList" sequenceNum="20"/>
     <growerp.menu.MenuOptionItem menuOptionId="ADMIN_INVENTORY" menuItemId="AssetList" sequenceNum="30"/>
     <growerp.menu.MenuOptionItem menuOptionId="ADMIN_INVENTORY" menuItemId="LocationList" sequenceNum="40"/>
-    <growerp.menu.MenuOptionItem menuOptionId="ADMIN_ACCOUNTING" menuItemId="SalesInvoiceList" sequenceNum="10"/>
     <growerp.menu.MenuOptionItem menuOptionId="ADMIN_ACC_SALES" menuItemId="SalesInvoiceList" sequenceNum="10"/>
     <growerp.menu.MenuOptionItem menuOptionId="ADMIN_ACC_SALES" menuItemId="SalesPaymentList" sequenceNum="20"/>
     <growerp.menu.MenuOptionItem menuOptionId="ADMIN_ACC_SALES" menuItemId="UserListCustomer" sequenceNum="30"/>
-    <growerp.menu.MenuOptionItem menuOptionId="ADMIN_ACCOUNTING" menuItemId="PurchaseInvoiceList" sequenceNum="20"/>
     <growerp.menu.MenuOptionItem menuOptionId="ADMIN_ACC_PURCHASE" menuItemId="PurchaseInvoiceList" sequenceNum="10"/>
     <growerp.menu.MenuOptionItem menuOptionId="ADMIN_ACC_PURCHASE" menuItemId="PurchasePaymentList" sequenceNum="20"/>
     <growerp.menu.MenuOptionItem menuOptionId="ADMIN_ACC_PURCHASE" menuItemId="UserListSupplier" sequenceNum="30"/>
-    <growerp.menu.MenuOptionItem menuOptionId="ADMIN_ACCOUNTING" menuItemId="LedgerTreeForm" sequenceNum="30"/>
     <growerp.menu.MenuOptionItem menuOptionId="ADMIN_ACC_LEDGER" menuItemId="LedgerTreeForm" sequenceNum="10"/>
     <growerp.menu.MenuOptionItem menuOptionId="ADMIN_ACC_LEDGER" menuItemId="GlAccountList" sequenceNum="20"/>
     <growerp.menu.MenuOptionItem menuOptionId="ADMIN_ACC_LEDGER" menuItemId="TransactionList" sequenceNum="30"/>
     <growerp.menu.MenuOptionItem menuOptionId="ADMIN_ACC_LEDGER" menuItemId="LedgerJournalList" sequenceNum="40"/>
-    <growerp.menu.MenuOptionItem menuOptionId="ADMIN_ACCOUNTING" menuItemId="RevenueExpenseChart" sequenceNum="40"/>
     <growerp.menu.MenuOptionItem menuOptionId="ADMIN_ACC_REPORTS" menuItemId="RevenueExpenseChart" sequenceNum="10"/>
     <growerp.menu.MenuOptionItem menuOptionId="ADMIN_ACC_REPORTS" menuItemId="BalanceSheetForm" sequenceNum="20"/>
     <growerp.menu.MenuOptionItem menuOptionId="ADMIN_ACC_REPORTS" menuItemId="BalanceSummaryList" sequenceNum="30"/>
-    <growerp.menu.MenuOptionItem menuOptionId="ADMIN_ACCOUNTING" menuItemId="TimePeriodListForm" sequenceNum="50"/>
     <growerp.menu.MenuOptionItem menuOptionId="ADMIN_ACC_SETUP" menuItemId="TimePeriodListForm" sequenceNum="10"/>
     <growerp.menu.MenuOptionItem menuOptionId="ADMIN_ACC_SETUP" menuItemId="ItemTypeList" sequenceNum="20"/>
     <growerp.menu.MenuOptionItem menuOptionId="ADMIN_ACC_SETUP" menuItemId="PaymentTypeList" sequenceNum="30"/>
     <growerp.menu.MenuOptionItem menuOptionId="ADMIN_ACC_SETUP" menuItemId="PlanSelectionForm" sequenceNum="40"/>
     <growerp.menu.MenuOptionItem menuOptionId="ADMIN_ACC_SETUP" menuItemId="SystemSetupDialog" sequenceNum="50"/>
-
-    <growerp.menu.MenuOptionItem menuOptionId="ADMIN_ACCOUNTING" menuItemId="AdminDashboard" sequenceNum="99"/>
 
     <!-- FREELANCE_DEFAULT Menu Options -->
     <growerp.menu.MenuOption menuOptionId="FREELANCE_MAIN" menuConfigurationId="FREELANCE_DEFAULT" title="Main" route="/" iconName="dashboard" widgetName="FreelanceDbForm" sequenceNum="10"/>
@@ -180,14 +171,12 @@ along with this software (see the LICENSE.md file). If not, see
     <growerp.menu.MenuOption menuOptionId="FREELANCE_CATALOG" menuConfigurationId="FREELANCE_DEFAULT" itemKey="products" title="Catalog" route="/catalog" iconName="category" widgetName="ProductList" sequenceNum="40"/>
     <growerp.menu.MenuOption menuOptionId="FREELANCE_ORDERS" menuConfigurationId="FREELANCE_DEFAULT" itemKey="openSlsOrders" title="Orders" route="/orders" iconName="shopping_cart" widgetName="SalesOrderList" sequenceNum="50"/>
     <growerp.menu.MenuOption menuOptionId="FREELANCE_WEBSITE" menuConfigurationId="FREELANCE_DEFAULT" title="Website" route="/website" iconName="web" widgetName="WebsiteDialog" sequenceNum="60"/>
-    <growerp.menu.MenuOption menuOptionId="FREELANCE_ACCOUNTING" menuConfigurationId="FREELANCE_DEFAULT" itemKey="salesInvoicesNotPaidCount" title="Accounting" route="/accounting" iconName="account_balance" widgetName="AccountingForm" sequenceNum="70"/>
+    <growerp.menu.MenuOption menuOptionId="FREELANCE_ACC_SALES" menuConfigurationId="FREELANCE_DEFAULT" itemKey="salesInvoicesNotPaidCount" title="Acct Sales" route="/acct-sales" iconName="receipt_long" widgetName="SalesInvoiceList" sequenceNum="70"/>
+    <growerp.menu.MenuOption menuOptionId="FREELANCE_ACC_PURCHASE" menuConfigurationId="FREELANCE_DEFAULT" itemKey="purchInvoicesNotPaidCount" title="Acct Purchase" route="/acct-purchase" iconName="receipt" widgetName="PurchaseInvoiceList" sequenceNum="71"/>
+    <growerp.menu.MenuOption menuOptionId="FREELANCE_ACC_LEDGER" menuConfigurationId="FREELANCE_DEFAULT" title="Acct Ledger" route="/acct-ledger" iconName="account_balance" widgetName="LedgerTreeForm" sequenceNum="72"/>
+    <growerp.menu.MenuOption menuOptionId="FREELANCE_ACC_REPORTS" menuConfigurationId="FREELANCE_DEFAULT" title="Acct Reports" route="/acct-reports" iconName="assessment" widgetName="RevenueExpenseChart" sequenceNum="73"/>
+    <growerp.menu.MenuOption menuOptionId="FREELANCE_ACC_SETUP" menuConfigurationId="FREELANCE_DEFAULT" title="Acct Setup" route="/acct-setup" iconName="settings" widgetName="TimePeriodListForm" sequenceNum="74"/>
     <growerp.menu.MenuOption menuOptionId="FREELANCE_ABOUT" menuConfigurationId="FREELANCE_DEFAULT" title="About" route="/about" iconName="info" widgetName="AboutForm" sequenceNum="80"/>
-    <!-- FREELANCE_DEFAULT Accounting Sub-Menu Options -->
-    <growerp.menu.MenuOption menuOptionId="FREELANCE_ACC_SALES" menuConfigurationId="FREELANCE_DEFAULT" title="Sales" route="/accounting/sales" iconName="shopping_cart" widgetName="SalesInvoiceList" sequenceNum="71"/>
-    <growerp.menu.MenuOption menuOptionId="FREELANCE_ACC_PURCHASE" menuConfigurationId="FREELANCE_DEFAULT" title="Purchase" route="/accounting/purchase" iconName="shopping_bag" widgetName="PurchaseInvoiceList" sequenceNum="72"/>
-    <growerp.menu.MenuOption menuOptionId="FREELANCE_ACC_LEDGER" menuConfigurationId="FREELANCE_DEFAULT" title="Ledger" route="/accounting/ledger" iconName="account_balance" widgetName="LedgerTreeForm" sequenceNum="73"/>
-    <growerp.menu.MenuOption menuOptionId="FREELANCE_ACC_REPORTS" menuConfigurationId="FREELANCE_DEFAULT" title="Reports" route="/accounting/reports" iconName="assessment" widgetName="RevenueExpenseChart" sequenceNum="74"/>
-    <growerp.menu.MenuOption menuOptionId="FREELANCE_ACC_SETUP" menuConfigurationId="FREELANCE_DEFAULT" title="Setup" route="/accounting/setup" iconName="settings" widgetName="TimePeriodListForm" sequenceNum="75"/>
 
 <!-- FREELANCE_DEFAULT Menu Option Items (junction) -->
     <growerp.menu.MenuOptionItem menuOptionId="FREELANCE_CRM" menuItemId="OpportunityList" sequenceNum="10"/>
@@ -208,28 +197,22 @@ along with this software (see the LICENSE.md file). If not, see
     <growerp.menu.MenuOptionItem menuOptionId="FREELANCE_ORDERS" menuItemId="UserListCustomer" sequenceNum="20"/>
     <growerp.menu.MenuOptionItem menuOptionId="FREELANCE_ORDERS" menuItemId="PurchaseOrderList" sequenceNum="30"/>
     <growerp.menu.MenuOptionItem menuOptionId="FREELANCE_ORDERS" menuItemId="UserListSupplier" sequenceNum="40"/>
-    <growerp.menu.MenuOptionItem menuOptionId="FREELANCE_ACCOUNTING" menuItemId="SalesInvoiceList" sequenceNum="10"/>
     <growerp.menu.MenuOptionItem menuOptionId="FREELANCE_ACC_SALES" menuItemId="SalesInvoiceList" sequenceNum="10"/>
     <growerp.menu.MenuOptionItem menuOptionId="FREELANCE_ACC_SALES" menuItemId="SalesPaymentList" sequenceNum="20"/>
     <growerp.menu.MenuOptionItem menuOptionId="FREELANCE_ACC_SALES" menuItemId="UserListCustomer" sequenceNum="30"/>
-    <growerp.menu.MenuOptionItem menuOptionId="FREELANCE_ACCOUNTING" menuItemId="PurchaseInvoiceList" sequenceNum="20"/>
     <growerp.menu.MenuOptionItem menuOptionId="FREELANCE_ACC_PURCHASE" menuItemId="PurchaseInvoiceList" sequenceNum="10"/>
     <growerp.menu.MenuOptionItem menuOptionId="FREELANCE_ACC_PURCHASE" menuItemId="PurchasePaymentList" sequenceNum="20"/>
     <growerp.menu.MenuOptionItem menuOptionId="FREELANCE_ACC_PURCHASE" menuItemId="UserListSupplier" sequenceNum="30"/>
-    <growerp.menu.MenuOptionItem menuOptionId="FREELANCE_ACCOUNTING" menuItemId="LedgerTreeForm" sequenceNum="30"/>
     <growerp.menu.MenuOptionItem menuOptionId="FREELANCE_ACC_LEDGER" menuItemId="LedgerTreeForm" sequenceNum="10"/>
     <growerp.menu.MenuOptionItem menuOptionId="FREELANCE_ACC_LEDGER" menuItemId="GlAccountList" sequenceNum="20"/>
     <growerp.menu.MenuOptionItem menuOptionId="FREELANCE_ACC_LEDGER" menuItemId="TransactionList" sequenceNum="30"/>
     <growerp.menu.MenuOptionItem menuOptionId="FREELANCE_ACC_LEDGER" menuItemId="LedgerJournalList" sequenceNum="40"/>
-    <growerp.menu.MenuOptionItem menuOptionId="FREELANCE_ACCOUNTING" menuItemId="RevenueExpenseChart" sequenceNum="40"/>
     <growerp.menu.MenuOptionItem menuOptionId="FREELANCE_ACC_REPORTS" menuItemId="RevenueExpenseChart" sequenceNum="10"/>
     <growerp.menu.MenuOptionItem menuOptionId="FREELANCE_ACC_REPORTS" menuItemId="BalanceSheetForm" sequenceNum="20"/>
     <growerp.menu.MenuOptionItem menuOptionId="FREELANCE_ACC_REPORTS" menuItemId="BalanceSummaryList" sequenceNum="30"/>
-    <growerp.menu.MenuOptionItem menuOptionId="FREELANCE_ACCOUNTING" menuItemId="TimePeriodListForm" sequenceNum="50"/>
     <growerp.menu.MenuOptionItem menuOptionId="FREELANCE_ACC_SETUP" menuItemId="TimePeriodListForm" sequenceNum="10"/>
     <growerp.menu.MenuOptionItem menuOptionId="FREELANCE_ACC_SETUP" menuItemId="ItemTypeList" sequenceNum="20"/>
     <growerp.menu.MenuOptionItem menuOptionId="FREELANCE_ACC_SETUP" menuItemId="PaymentTypeList" sequenceNum="30"/>
-    <growerp.menu.MenuOptionItem menuOptionId="FREELANCE_ACCOUNTING" menuItemId="FreelanceDbForm" sequenceNum="99"/>
 
     <!-- HEALTH_DEFAULT Menu Options -->
     <growerp.menu.MenuOption menuOptionId="HEALTH_MAIN" menuConfigurationId="HEALTH_DEFAULT" title="Main" route="/" iconName="dashboard" widgetName="AdminDbForm" sequenceNum="10"/>
@@ -245,13 +228,11 @@ along with this software (see the LICENSE.md file). If not, see
     <growerp.menu.MenuOption menuOptionId="HOTEL_ROOMS" menuConfigurationId="HOTEL_DEFAULT" title="Rooms" route="/rooms" iconName="king_bed" widgetName="AssetList" sequenceNum="30"/>
     <growerp.menu.MenuOption menuOptionId="HOTEL_RESERVATIONS" menuConfigurationId="HOTEL_DEFAULT" title="Reservations" route="/reservations" iconName="book_online" widgetName="SalesOrderRentalList" sequenceNum="40"/>
     <growerp.menu.MenuOption menuOptionId="HOTEL_CHECKINOUT" menuConfigurationId="HOTEL_DEFAULT" title="In/Out" route="/checkInOut" iconName="luggage" widgetName="CheckInList" sequenceNum="50"/>
-    <growerp.menu.MenuOption menuOptionId="HOTEL_ACCOUNTING" menuConfigurationId="HOTEL_DEFAULT" title="Accounting" route="/accounting" iconName="account_balance" widgetName="AccountingForm" sequenceNum="60"/>
-    <!-- HOTEL_DEFAULT Accounting Sub-Menu Options -->
-    <growerp.menu.MenuOption menuOptionId="HOTEL_ACC_SALES" menuConfigurationId="HOTEL_DEFAULT" title="Sales" route="/accounting/sales" iconName="shopping_cart" widgetName="SalesInvoiceList" sequenceNum="61"/>
-    <growerp.menu.MenuOption menuOptionId="HOTEL_ACC_PURCHASE" menuConfigurationId="HOTEL_DEFAULT" title="Purchase" route="/accounting/purchase" iconName="shopping_bag" widgetName="PurchaseInvoiceList" sequenceNum="62"/>
-    <growerp.menu.MenuOption menuOptionId="HOTEL_ACC_LEDGER" menuConfigurationId="HOTEL_DEFAULT" title="Ledger" route="/accounting/ledger" iconName="account_balance" widgetName="LedgerTreeForm" sequenceNum="63"/>
-    <growerp.menu.MenuOption menuOptionId="HOTEL_ACC_REPORTS" menuConfigurationId="HOTEL_DEFAULT" title="Reports" route="/accounting/reports" iconName="assessment" widgetName="RevenueExpenseChart" sequenceNum="64"/>
-    <growerp.menu.MenuOption menuOptionId="HOTEL_ACC_SETUP" menuConfigurationId="HOTEL_DEFAULT" title="Setup" route="/accounting/setup" iconName="settings" widgetName="TimePeriodListForm" sequenceNum="65"/>
+    <growerp.menu.MenuOption menuOptionId="HOTEL_ACC_SALES" menuConfigurationId="HOTEL_DEFAULT" itemKey="salesInvoicesNotPaidCount" title="Acct Sales" route="/acct-sales" iconName="receipt_long" widgetName="SalesInvoiceList" sequenceNum="60"/>
+    <growerp.menu.MenuOption menuOptionId="HOTEL_ACC_PURCHASE" menuConfigurationId="HOTEL_DEFAULT" itemKey="purchInvoicesNotPaidCount" title="Acct Purchase" route="/acct-purchase" iconName="receipt" widgetName="PurchaseInvoiceList" sequenceNum="61"/>
+    <growerp.menu.MenuOption menuOptionId="HOTEL_ACC_LEDGER" menuConfigurationId="HOTEL_DEFAULT" title="Acct Ledger" route="/acct-ledger" iconName="account_balance" widgetName="LedgerTreeForm" sequenceNum="62"/>
+    <growerp.menu.MenuOption menuOptionId="HOTEL_ACC_REPORTS" menuConfigurationId="HOTEL_DEFAULT" title="Acct Reports" route="/acct-reports" iconName="assessment" widgetName="RevenueExpenseChart" sequenceNum="63"/>
+    <growerp.menu.MenuOption menuOptionId="HOTEL_ACC_SETUP" menuConfigurationId="HOTEL_DEFAULT" title="Acct Setup" route="/acct-setup" iconName="settings" widgetName="TimePeriodListForm" sequenceNum="64"/>
 
 <!-- HOTEL_DEFAULT Menu Option Items (junction) -->
     <growerp.menu.MenuOptionItem menuOptionId="HOTEL_MYHOTEL" menuItemId="ShowCompanyDialog" sequenceNum="10"/>
@@ -265,28 +246,22 @@ along with this software (see the LICENSE.md file). If not, see
     <growerp.menu.MenuOptionItem menuOptionId="HOTEL_RESERVATIONS" menuItemId="CompanyUserListSuppl" sequenceNum="40"/>
     <growerp.menu.MenuOptionItem menuOptionId="HOTEL_CHECKINOUT" menuItemId="CheckInList" sequenceNum="10"/>
     <growerp.menu.MenuOptionItem menuOptionId="HOTEL_CHECKINOUT" menuItemId="CheckOutList" sequenceNum="20"/>
-    <growerp.menu.MenuOptionItem menuOptionId="HOTEL_ACCOUNTING" menuItemId="SalesInvoiceList" sequenceNum="10"/>
     <growerp.menu.MenuOptionItem menuOptionId="HOTEL_ACC_SALES" menuItemId="SalesInvoiceList" sequenceNum="10"/>
     <growerp.menu.MenuOptionItem menuOptionId="HOTEL_ACC_SALES" menuItemId="SalesPaymentList" sequenceNum="20"/>
     <growerp.menu.MenuOptionItem menuOptionId="HOTEL_ACC_SALES" menuItemId="CompanyUserListCusto" sequenceNum="30"/>
-    <growerp.menu.MenuOptionItem menuOptionId="HOTEL_ACCOUNTING" menuItemId="PurchaseInvoiceList" sequenceNum="20"/>
     <growerp.menu.MenuOptionItem menuOptionId="HOTEL_ACC_PURCHASE" menuItemId="PurchaseInvoiceList" sequenceNum="10"/>
     <growerp.menu.MenuOptionItem menuOptionId="HOTEL_ACC_PURCHASE" menuItemId="PurchasePaymentList" sequenceNum="20"/>
     <growerp.menu.MenuOptionItem menuOptionId="HOTEL_ACC_PURCHASE" menuItemId="CompanyUserListSuppl" sequenceNum="30"/>
-    <growerp.menu.MenuOptionItem menuOptionId="HOTEL_ACCOUNTING" menuItemId="LedgerTreeForm" sequenceNum="30"/>
     <growerp.menu.MenuOptionItem menuOptionId="HOTEL_ACC_LEDGER" menuItemId="LedgerTreeForm" sequenceNum="10"/>
     <growerp.menu.MenuOptionItem menuOptionId="HOTEL_ACC_LEDGER" menuItemId="GlAccountList" sequenceNum="20"/>
     <growerp.menu.MenuOptionItem menuOptionId="HOTEL_ACC_LEDGER" menuItemId="TransactionList" sequenceNum="30"/>
     <growerp.menu.MenuOptionItem menuOptionId="HOTEL_ACC_LEDGER" menuItemId="LedgerJournalList" sequenceNum="40"/>
-    <growerp.menu.MenuOptionItem menuOptionId="HOTEL_ACCOUNTING" menuItemId="RevenueExpenseChart" sequenceNum="40"/>
     <growerp.menu.MenuOptionItem menuOptionId="HOTEL_ACC_REPORTS" menuItemId="RevenueExpenseChart" sequenceNum="10"/>
     <growerp.menu.MenuOptionItem menuOptionId="HOTEL_ACC_REPORTS" menuItemId="BalanceSheetForm" sequenceNum="20"/>
     <growerp.menu.MenuOptionItem menuOptionId="HOTEL_ACC_REPORTS" menuItemId="BalanceSummaryList" sequenceNum="30"/>
-    <growerp.menu.MenuOptionItem menuOptionId="HOTEL_ACCOUNTING" menuItemId="TimePeriodListForm" sequenceNum="50"/>
     <growerp.menu.MenuOptionItem menuOptionId="HOTEL_ACC_SETUP" menuItemId="TimePeriodListForm" sequenceNum="10"/>
     <growerp.menu.MenuOptionItem menuOptionId="HOTEL_ACC_SETUP" menuItemId="ItemTypeList" sequenceNum="20"/>
     <growerp.menu.MenuOptionItem menuOptionId="HOTEL_ACC_SETUP" menuItemId="PaymentTypeList" sequenceNum="30"/>
-    <growerp.menu.MenuOptionItem menuOptionId="HOTEL_ACCOUNTING" menuItemId="GanttForm" sequenceNum="99"/>
 
     <!-- SUPPORT_DEFAULT Menu Options -->
     <growerp.menu.MenuOption menuOptionId="SUPPORT_MAIN" menuConfigurationId="SUPPORT_DEFAULT" title="Main" route="/" iconName="dashboard" widgetName="SupportDashboard" sequenceNum="10"/>

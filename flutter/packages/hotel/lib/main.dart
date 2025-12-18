@@ -156,7 +156,6 @@ class _HotelAppState extends State<HotelApp> {
               [state.menuConfiguration!],
               config: DynamicRouterConfig(
                 mainConfigId: 'HOTEL_DEFAULT',
-                accountingRootOptionId: 'HOTEL_ACCOUNTING',
                 dashboardBuilder: () => const GanttForm(),
                 widgetLoader: WidgetRegistry.getWidget,
                 appTitle: 'GrowERP Hotel',
