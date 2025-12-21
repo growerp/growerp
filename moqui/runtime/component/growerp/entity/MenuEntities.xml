@@ -18,6 +18,9 @@ along with this software (see the LICENSE.md file). If not, see
     <!-- Menu Configuration Entity -->
     <entity entity-name="MenuConfiguration" package="growerp.menu">
         <field name="menuConfigurationId" type="id" is-pk="true"/>
+        <field name="ownerPartyId" type="id">
+            <description>Owner of the menu configuration</description>
+        </field>
         <field name="appId" type="id">
             <description>Application identifier (e.g., 'admin', 'freelance', 'hotel')</description>
         </field>
@@ -29,6 +32,10 @@ along with this software (see the LICENSE.md file). If not, see
         <field name="isActive" type="text-indicator" default="'Y'"/>
         <field name="createdDate" type="date-time" default="ec.user.nowTimestamp"/>
         
+        <relationship type="one" related="mantle.party.Party">
+            <key-map field-name="ownerPartyId" related="partyId" />
+        </relationship>
+
         <relationship type="one" related="moqui.security.UserAccount" short-alias="userLogin">
             <key-map field-name="userId"/>
         </relationship>

@@ -44,7 +44,7 @@ class MenuItemListDialogState extends State<MenuItemListDialog> {
   @override
   Widget build(BuildContext context) {
     isPhone = ResponsiveBreakpoints.of(context).isMobile;
-    right = right ?? (isPhone ? 20 : 40);
+    right = right ?? (isPhone ? 70 : 90);
 
     return BlocConsumer<MenuConfigBloc, MenuConfigState>(
       listener: (context, state) {
@@ -247,24 +247,8 @@ class MenuItemListDialogState extends State<MenuItemListDialog> {
                     ),
                   ),
 
-                  // Route
-                  if (option.route != null) ...[
-                    const SizedBox(width: 8),
-                    Expanded(
-                      flex: 2,
-                      child: Text(
-                        option.route!,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Theme.of(context).colorScheme.secondary,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
-
-                  // Tabs Count
-                  if (childrenCount > 0) ...[
+                  // Tabs Count (hide on phone to save space)
+                  if (childrenCount > 0 && !isPhone) ...[
                     const SizedBox(width: 8),
                     Chip(
                       label: Text('$childrenCount tabs'),

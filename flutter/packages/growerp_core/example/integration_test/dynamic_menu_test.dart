@@ -1,30 +1,104 @@
+/*
+ * This GrowERP software is in the public domain under CC0 1.0 Universal plus a
+ * Grant of Patent License.
+ * 
+ * To the extent possible under law, the author(s) have dedicated all
+ * copyright and related and neighboring rights to this software to the
+ * public domain worldwide. This software is distributed without any
+ * warranty.
+ * 
+ * You should have received a copy of the CC0 Public Domain Dedication
+ * along with this software (see the LICENSE.md file). If not, see
+ * <http://creativecommons.org/publicdomain/zero/1.0/>.
+ */
+
+import 'package:flutter_bloc/flutter_bloc.dart' show Bloc;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:core_example/main.dart';
-import 'package:flutter/material.dart';
+import 'dart:math';
+
+/// Test data for menu options
+final testMenuOptions = [
+  const MenuOption(
+    title: 'Test Option 1',
+    route: '/test1',
+    iconName: 'home',
+    widgetName: 'CoreDashboard',
+    sequenceNum: 100,
+    isActive: true,
+  ),
+  const MenuOption(
+    title: 'Test Option 2',
+    route: '/test2',
+    iconName: 'people',
+    widgetName: 'UserList',
+    sequenceNum: 110,
+    isActive: true,
+  ),
+];
+
+final updatedMenuOptions = [
+  const MenuOption(
+    title: 'Updated Option 1',
+    route: '/updated1',
+    iconName: 'business',
+    widgetName: 'ShowCompanyDialog',
+    sequenceNum: 100,
+    isActive: true,
+  ),
+  const MenuOption(
+    title: 'Updated Option 2',
+    route: '/updated2',
+    iconName: 'info',
+    widgetName: 'AboutForm',
+    sequenceNum: 110,
+    isActive: true,
+  ),
+];
+
+/// Test data for menu items (tabs) to add to menu options
+final testMenuItems = [
+  const MenuItem(
+    menuItemId: 'USERLIST',
+    title: 'Users Tab',
+    widgetName: 'UserList',
+    iconName: 'people',
+  ),
+  const MenuItem(
+    menuItemId: 'COMPANYUSERLIST',
+    title: 'Companies Tab',
+    widgetName: 'CompanyUserList',
+    iconName: 'business',
+  ),
+];
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   setUpAll(() async {
-    // Clear any existing session to ensure a fresh login/menu fetch
     await PersistFunctions.removeAuthenticate();
-
+    await PersistFunctions.persistTest(SaveTest());
     await GlobalConfiguration().loadFromAsset("app_settings");
   });
 
-  testWidgets('Dynamic Menu Loading Test', (WidgetTester tester) async {
-    // Override URL to ensure localhost if running on Linux host, though buildDioClient should handle it.
-    // If running in container as android, might need 10.0.2.2.
-    // But integration_test usually runs on host.
-
-    // Check platform?
-    // Let's rely on default since 10.0.2.2 worked for CheckEmail in logs.
-
+  testWidgets('GrowERP dynamic menu CRUD test', (tester) async {
     final restClient = RestClient(await buildDioClient());
+
+    bool clear = true;
+    int seq = Random.secure().nextInt(1024);
+    if (clear == true) {
+      await PersistFunctions.persistTest(SaveTest(sequence: seq));
+      // Also clear any stored authentication
+      await PersistFunctions.removeAuthenticate();
+    } else {
+      SaveTest test = await PersistFunctions.getTest();
+      await PersistFunctions.persistTest(test.copyWith(sequence: seq));
+    }
+    Bloc.observer = AppBlocObserver();
 
     await tester.pumpWidget(
       CoreApp(
@@ -35,53 +109,41 @@ void main() {
       ),
     );
 
-    // Initial pump to start widgets
     await tester.pump();
 
-    // Wait for a bit to allow async bloc to fetch menu
-    // We avoid pumpAndSettle here because LoadingIndicator might be infinite loop
+    // Wait for menu to load
     for (int i = 0; i < 50; i++) {
       await tester.pump(const Duration(milliseconds: 100));
-      if (find.byType(LoadingIndicator).evaluate().isEmpty) {
-        break;
-      }
+      if (find.byType(LoadingIndicator).evaluate().isEmpty) break;
     }
 
-    if (find.byType(LoadingIndicator).evaluate().isNotEmpty) {
-      debugPrint(
-        "Still seeing LoadingIndicator after wait. Menu fetch might have failed or is slow.",
-      );
-    } else {
-      debugPrint("LoadingIndicator gone. Menu likely loaded.");
-    }
-
-    // Login (if not already logged in, though removeAuthenticate should ensure we are at login screen)
-    // createCompanyAndAdmin expects to find 'newUserButton' or 'login' fields.
-    // If we are still at LoadingIndicator, this will fail.
+    // Login
     await CommonTest.createCompanyAndAdmin(tester);
 
-    // After login, the menu should be fetched and the router updated.
-    // CoreApp handles this transition.
+    // Add menu options
+    await DynamicMenuTest.addMenuOptions(tester, testMenuOptions);
+    await DynamicMenuTest.checkMenuOptions(tester);
 
-    // Check if the dashboard is displayed, implying successful menu load
-    await tester.pumpAndSettle();
+    // Update menu options
+    await DynamicMenuTest.updateMenuOptions(tester, updatedMenuOptions);
+    await DynamicMenuTest.checkMenuOptions(tester);
 
-    // Verify menu items from the dynamic configuration
-    // Navigate to "Main" (dashboard) is default
-    expect(find.text('Organization'), findsOneWidget);
-    expect(find.text('CRM'), findsOneWidget);
+    // Add menu items (tabs) to the first menu option
+    await DynamicMenuTest.addMenuItems(tester, testMenuItems);
+    await DynamicMenuTest.checkMenuItems(tester, testMenuItems);
 
-    // Verify Side Menu or Bottom Bar items depending on screen size
-    // Note: AuthenticatedDisplayMenuOption uses DisplayMenuOption which renders navigation rail/bar
-    // We expect "Main", "Organization", "CRM", "About", "AI Settings"
+    // Delete a menu item (tab) from the menu option
+    await DynamicMenuTest.deleteMenuItems(tester);
 
-    // On wide screen (desktop/tablet), standard menu
-    // We need to tap the menu button if it's a drawer, or just check text if it's a rail
+    // Verify persistence after logout/login
+    await DynamicMenuTest.verifyMenuPersistence(tester);
 
-    // Let's assume dashboard is enough to prove the "Main" route worked.
-    // Let's try to navigate to "About"
+    // Delete menu options
+    await DynamicMenuTest.deleteLastMenuOption(tester);
 
-    // Since we are in an integration test, we can try to find the "About" menu item
-    // Depending on resolution, it might be in a drawer.
+    // Reset to default
+    await DynamicMenuTest.resetMenuToDefault(tester);
+    await DynamicMenuTest.closeMenuOptions(tester);
+    await CommonTest.logout(tester);
   });
 }

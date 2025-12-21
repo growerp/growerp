@@ -127,6 +127,12 @@ class _CoreAppState extends State<CoreApp> {
           }
 
           return TopApp(
+            // Key forces complete rebuild when menu options change,
+            // ensuring the new GoRouter with updated routes takes effect
+            key: ValueKey(
+              '${state.menuConfiguration?.menuConfigurationId ?? ''}_'
+              '${state.menuConfiguration?.menuOptions.length ?? 0}',
+            ),
             restClient: widget.restClient,
             classificationId: widget.classificationId,
             chatClient: widget.chatClient,

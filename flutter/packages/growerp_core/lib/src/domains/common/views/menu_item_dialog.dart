@@ -116,7 +116,7 @@ class MenuItemDialogState extends State<MenuItemDialog> {
         context: context,
         title: title,
         width: isPhone ? 400 : 600,
-        height: isPhone ? 550 : 450,
+        height: isPhone ? 650 : 550,
         child: ScaffoldMessenger(
           child: Scaffold(
             backgroundColor: Colors.transparent,
@@ -124,6 +124,8 @@ class MenuItemDialogState extends State<MenuItemDialog> {
             floatingActionButtonLocation:
                 FloatingActionButtonLocation.centerFloat,
             body: BlocConsumer<MenuConfigBloc, MenuConfigState>(
+              listenWhen: (previous, current) =>
+                  previous.status != current.status,
               listener: (context, state) {
                 if (state.status == MenuConfigStatus.failure) {
                   HelperFunctions.showMessage(
@@ -182,128 +184,170 @@ class MenuItemDialogState extends State<MenuItemDialog> {
             ),
             const SizedBox(height: 16),
 
-            // Icon and Widget Name Row
-            Row(
-              children: [
-                Expanded(
-                  child: DropdownButtonFormField<String>(
-                    key: const Key('menuItemIcon'),
-                    initialValue: _selectedIconName,
-                    decoration: const InputDecoration(
-                      labelText: 'Icon',
-                      border: OutlineInputBorder(),
-                    ),
-                    items: _iconOptions.map((iconName) {
-                      return DropdownMenuItem(
-                        value: iconName,
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            getIconFromRegistry(iconName) ??
+            // Icon - Searchable Autocomplete
+            Autocomplete<String>(
+              key: const Key('menuItemIcon'),
+              initialValue: TextEditingValue(text: _selectedIconName ?? ''),
+              optionsBuilder: (TextEditingValue textEditingValue) {
+                final query = textEditingValue.text.toLowerCase();
+                if (query.isEmpty) {
+                  return _iconOptions;
+                }
+                return _iconOptions.where(
+                  (iconName) => iconName.toLowerCase().contains(query),
+                );
+              },
+              fieldViewBuilder:
+                  (context, textController, focusNode, onFieldSubmitted) {
+                    return TextFormField(
+                      controller: textController,
+                      focusNode: focusNode,
+                      decoration: InputDecoration(
+                        labelText: 'Icon',
+                        border: const OutlineInputBorder(),
+                        prefixIcon: _selectedIconName != null
+                            ? getIconFromRegistry(_selectedIconName!) ??
+                                  const Icon(Icons.circle, size: 20)
+                            : null,
+                        suffixIcon: textController.text.isNotEmpty
+                            ? IconButton(
+                                icon: const Icon(Icons.clear, size: 18),
+                                onPressed: () {
+                                  textController.clear();
+                                  setState(() {
+                                    _selectedIconName = null;
+                                  });
+                                },
+                              )
+                            : const Icon(Icons.search, size: 18),
+                      ),
+                      onFieldSubmitted: (_) => onFieldSubmitted(),
+                    );
+                  },
+              optionsViewBuilder: (context, onSelected, options) {
+                return Align(
+                  alignment: Alignment.topLeft,
+                  child: Material(
+                    elevation: 4,
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(
+                        maxHeight: 200,
+                        maxWidth: 300,
+                      ),
+                      child: ListView.builder(
+                        padding: EdgeInsets.zero,
+                        shrinkWrap: true,
+                        itemCount: options.length,
+                        itemBuilder: (context, index) {
+                          final option = options.elementAt(index);
+                          return ListTile(
+                            leading:
+                                getIconFromRegistry(option) ??
                                 const Icon(Icons.circle, size: 20),
-                            const SizedBox(width: 8),
-                            Text(iconName, overflow: TextOverflow.ellipsis),
-                          ],
-                        ),
-                      );
-                    }).toList(),
-                    onChanged: (value) {
-                      _selectedIconName = value;
-                    },
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Autocomplete<String>(
-                    key: const Key('menuItemWidget'),
-                    initialValue: TextEditingValue(
-                      text: _selectedWidgetName ?? '',
-                    ),
-                    optionsBuilder: (TextEditingValue textEditingValue) {
-                      final query = textEditingValue.text.toLowerCase();
-                      if (query.isEmpty) {
-                        return WidgetRegistry.registeredWidgets;
-                      }
-                      return WidgetRegistry.registeredWidgets.where(
-                        (widget) => widget.toLowerCase().contains(query),
-                      );
-                    },
-                    fieldViewBuilder:
-                        (context, textController, focusNode, onFieldSubmitted) {
-                          return TextFormField(
-                            controller: textController,
-                            focusNode: focusNode,
-                            decoration: InputDecoration(
-                              labelText: 'Widget Name',
-                              border: const OutlineInputBorder(),
-                              suffixIcon: textController.text.isNotEmpty
-                                  ? IconButton(
-                                      icon: const Icon(Icons.clear, size: 18),
-                                      onPressed: () {
-                                        textController.clear();
-                                        setState(() {
-                                          _selectedWidgetName = null;
-                                        });
-                                      },
-                                    )
-                                  : const Icon(Icons.search, size: 18),
-                            ),
-                            onFieldSubmitted: (_) => onFieldSubmitted(),
+                            title: Text(option),
+                            onTap: () {
+                              onSelected(option);
+                            },
                           );
                         },
-                    optionsViewBuilder: (context, onSelected, options) {
-                      return Align(
-                        alignment: Alignment.topLeft,
-                        child: Material(
-                          elevation: 4,
-                          child: ConstrainedBox(
-                            constraints: const BoxConstraints(
-                              maxHeight: 200,
-                              maxWidth: 300,
-                            ),
-                            child: ListView.builder(
-                              padding: EdgeInsets.zero,
-                              shrinkWrap: true,
-                              itemCount: options.length,
-                              itemBuilder: (context, index) {
-                                final option = options.elementAt(index);
-                                return ListTile(
-                                  dense: true,
-                                  title: Text(
-                                    option,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  onTap: () => onSelected(option),
-                                );
-                              },
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                    onSelected: (value) {
-                      setState(() {
-                        _selectedWidgetName = value;
-                        // Auto-fill title and route if widget is selected
-                        if (_titleController.text.isEmpty) {
-                          // Convert CamelCase to Title Case
-                          _titleController.text = value
-                              .replaceAllMapped(
-                                RegExp(r'([A-Z])'),
-                                (m) => ' ${m.group(1)}',
-                              )
-                              .trim();
-                        }
-                        if (_routeController.text.isEmpty) {
-                          // Convert to route format
-                          _routeController.text =
-                              '/${value[0].toLowerCase()}${value.substring(1)}';
-                        }
-                      });
-                    },
+                      ),
+                    ),
                   ),
-                ),
-              ],
+                );
+              },
+              onSelected: (String selection) {
+                setState(() {
+                  _selectedIconName = selection;
+                });
+              },
+            ),
+            const SizedBox(height: 16),
+
+            // Widget Name - Searchable Autocomplete
+            Autocomplete<String>(
+              key: const Key('menuItemWidget'),
+              initialValue: TextEditingValue(text: _selectedWidgetName ?? ''),
+              optionsBuilder: (TextEditingValue textEditingValue) {
+                final query = textEditingValue.text.toLowerCase();
+                if (query.isEmpty) {
+                  return WidgetRegistry.registeredWidgets;
+                }
+                return WidgetRegistry.registeredWidgets.where(
+                  (widget) => widget.toLowerCase().contains(query),
+                );
+              },
+              fieldViewBuilder:
+                  (context, textController, focusNode, onFieldSubmitted) {
+                    return TextFormField(
+                      controller: textController,
+                      focusNode: focusNode,
+                      decoration: InputDecoration(
+                        labelText: 'Widget Name',
+                        border: const OutlineInputBorder(),
+                        suffixIcon: textController.text.isNotEmpty
+                            ? IconButton(
+                                icon: const Icon(Icons.clear, size: 18),
+                                onPressed: () {
+                                  textController.clear();
+                                  setState(() {
+                                    _selectedWidgetName = null;
+                                  });
+                                },
+                              )
+                            : const Icon(Icons.search, size: 18),
+                      ),
+                      onFieldSubmitted: (_) => onFieldSubmitted(),
+                    );
+                  },
+              optionsViewBuilder: (context, onSelected, options) {
+                return Align(
+                  alignment: Alignment.topLeft,
+                  child: Material(
+                    elevation: 4,
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(
+                        maxHeight: 200,
+                        maxWidth: 300,
+                      ),
+                      child: ListView.builder(
+                        padding: EdgeInsets.zero,
+                        shrinkWrap: true,
+                        itemCount: options.length,
+                        itemBuilder: (context, index) {
+                          final option = options.elementAt(index);
+                          return ListTile(
+                            dense: true,
+                            title: Text(
+                              option,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            onTap: () => onSelected(option),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                );
+              },
+              onSelected: (value) {
+                setState(() {
+                  _selectedWidgetName = value;
+                  if (_titleController.text.isEmpty) {
+                    // Convert CamelCase to Title Case
+                    _titleController.text = value
+                        .replaceAllMapped(
+                          RegExp(r'([A-Z])'),
+                          (m) => ' ${m.group(1)}',
+                        )
+                        .trim();
+                  }
+                  if (_routeController.text.isEmpty) {
+                    // Convert to route format
+                    _routeController.text =
+                        '/${value[0].toLowerCase()}${value.substring(1)}';
+                  }
+                });
+              },
             ),
             const SizedBox(height: 16),
 
@@ -339,27 +383,61 @@ class MenuItemDialogState extends State<MenuItemDialog> {
             ),
             const SizedBox(height: 16),
 
-            // Children (tabs) info
-            if (!widget.isNew && widget.menuOption.children != null) ...[
-              const Text(
-                'Linked Menu Items (Tabs):',
-                style: TextStyle(fontWeight: FontWeight.bold),
+            // Children (tabs) management - only show for existing (not new) menu options
+            if (!widget.isNew) ...[
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Linked Menu Items (Tabs):',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  // Add Tab button
+                  IconButton(
+                    key: const Key('addTabButton'),
+                    icon: const Icon(Icons.add_circle_outline),
+                    tooltip: 'Add Tab',
+                    onPressed: () => _showAddTabDialog(),
+                  ),
+                ],
               ),
               const SizedBox(height: 8),
-              if (widget.menuOption.children!.isEmpty)
-                const Text('No tabs linked to this menu option.')
-              else
-                Wrap(
-                  spacing: 8,
-                  children: widget.menuOption.children!.map((item) {
-                    return Chip(
-                      label: Text(item.title),
-                      avatar:
-                          getIconFromRegistry(item.iconName) ??
-                          const Icon(Icons.tab, size: 16),
+              BlocBuilder<MenuConfigBloc, MenuConfigState>(
+                builder: (context, state) {
+                  // Get current children from bloc state if available
+                  final currentOption = state.menuConfiguration?.menuOptions
+                      .where(
+                        (o) => o.menuOptionId == widget.menuOption.menuOptionId,
+                      )
+                      .firstOrNull;
+                  final children =
+                      currentOption?.children ??
+                      widget.menuOption.children ??
+                      [];
+
+                  if (children.isEmpty) {
+                    return const Text(
+                      'No tabs linked. Click + to add a tab.',
+                      style: TextStyle(color: Colors.grey),
                     );
-                  }).toList(),
-                ),
+                  }
+                  return Wrap(
+                    spacing: 8,
+                    runSpacing: 4,
+                    children: children.map((item) {
+                      return Chip(
+                        key: Key('tab_${item.menuItemId}'),
+                        label: Text(item.title),
+                        avatar:
+                            getIconFromRegistry(item.iconName) ??
+                            const Icon(Icons.tab, size: 16),
+                        deleteIcon: const Icon(Icons.close, size: 16),
+                        onDeleted: () => _unlinkTab(item),
+                      );
+                    }).toList(),
+                  );
+                },
+              ),
             ],
           ],
         ),
@@ -382,9 +460,19 @@ class MenuItemDialogState extends State<MenuItemDialog> {
       return;
     }
 
+    // Auto-generate route from title if not provided
+    String? route = _routeController.text.isNotEmpty
+        ? _routeController.text
+        : null;
+    if (route == null && _titleController.text.isNotEmpty) {
+      // Convert title to route: lowercase, replace spaces with hyphens
+      route =
+          '/${_titleController.text.toLowerCase().replaceAll(RegExp(r'\s+'), '-')}';
+    }
+
     final updatedOption = widget.menuOption.copyWith(
       title: _titleController.text,
-      route: _routeController.text.isNotEmpty ? _routeController.text : null,
+      route: route,
       iconName: _selectedIconName,
       widgetName: _selectedWidgetName,
       sequenceNum: int.tryParse(_sequenceNumController.text) ?? 10,
@@ -406,5 +494,130 @@ class MenuItemDialogState extends State<MenuItemDialog> {
         ),
       );
     }
+  }
+
+  /// Show dialog to add a new tab (link a widget as MenuItem)
+  void _showAddTabDialog() {
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        String? selectedWidget;
+        final titleController = TextEditingController();
+
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              key: const Key('addTabDialog'),
+              title: const Text('Add Tab'),
+              content: SizedBox(
+                width: 300,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Widget selector
+                    Autocomplete<String>(
+                      key: const Key('tabWidgetSelector'),
+                      optionsBuilder: (TextEditingValue textEditingValue) {
+                        final query = textEditingValue.text.toLowerCase();
+                        if (query.isEmpty) {
+                          return WidgetRegistry.registeredWidgets;
+                        }
+                        return WidgetRegistry.registeredWidgets.where(
+                          (widget) => widget.toLowerCase().contains(query),
+                        );
+                      },
+                      fieldViewBuilder:
+                          (context, controller, focusNode, onSubmit) {
+                            return TextFormField(
+                              controller: controller,
+                              focusNode: focusNode,
+                              decoration: const InputDecoration(
+                                labelText: 'Widget Name *',
+                                border: OutlineInputBorder(),
+                                hintText: 'Search widgets...',
+                              ),
+                            );
+                          },
+                      onSelected: (value) {
+                        setDialogState(() {
+                          selectedWidget = value;
+                          // Auto-fill title from widget name
+                          if (titleController.text.isEmpty) {
+                            titleController.text = value
+                                .replaceAllMapped(
+                                  RegExp(r'([A-Z])'),
+                                  (m) => ' ${m.group(1)}',
+                                )
+                                .trim();
+                          }
+                        });
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    // Title field
+                    TextFormField(
+                      key: const Key('tabTitle'),
+                      controller: titleController,
+                      decoration: const InputDecoration(
+                        labelText: 'Tab Title *',
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(dialogContext).pop(),
+                  child: const Text('Cancel'),
+                ),
+                TextButton(
+                  key: const Key('addTabConfirm'),
+                  onPressed: () {
+                    if (selectedWidget != null &&
+                        titleController.text.isNotEmpty) {
+                      // Create a new MenuItem and link it
+                      _linkNewTab(selectedWidget!, titleController.text);
+                      Navigator.of(dialogContext).pop();
+                    }
+                  },
+                  child: const Text('Add'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  /// Link a new tab (widget) to this MenuOption
+  void _linkNewTab(String widgetName, String title) {
+    // Generate a menuItemId from the widget name
+    final menuItemId = widgetName.toUpperCase();
+
+    // Get current children count for sequence
+    final currentChildren = widget.menuOption.children ?? [];
+    final newSequence = (currentChildren.length + 1) * 10;
+
+    _menuConfigBloc.add(
+      MenuItemLink(
+        menuOptionId: widget.menuOption.menuOptionId!,
+        menuItemId: menuItemId,
+        sequenceNum: newSequence,
+        title: title,
+        widgetName: widgetName,
+      ),
+    );
+  }
+
+  /// Unlink a tab from this MenuOption
+  void _unlinkTab(MenuItem item) {
+    _menuConfigBloc.add(
+      MenuItemUnlink(
+        menuOptionId: widget.menuOption.menuOptionId!,
+        menuItemId: item.menuItemId,
+      ),
+    );
   }
 }
