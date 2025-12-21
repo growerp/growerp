@@ -56,10 +56,10 @@ const userCompanyMenuConfig = MenuConfiguration(
   menuConfigurationId: 'USER_COMPANY_EXAMPLE',
   appId: 'user_company_example',
   name: 'User & Company Example Menu',
-  menuOptions: [
+  menuItems: [
     // Main Dashboard
-    MenuOption(
-      menuOptionId: 'UC_MAIN',
+    MenuItem(
+      menuItemId: 'UC_MAIN',
       itemKey: 'UC_MAIN',
       title: 'Main',
       route: '/',
@@ -68,8 +68,8 @@ const userCompanyMenuConfig = MenuConfiguration(
       widgetName: 'UserCompanyDashboard',
     ),
     // Companies Tab with sub-tabs
-    MenuOption(
-      menuOptionId: 'UC_COMPANIES',
+    MenuItem(
+      menuItemId: 'UC_COMPANIES',
       itemKey: 'UC_COMPANIES',
       title: 'Companies',
       route: '/companies',
@@ -115,8 +115,8 @@ const userCompanyMenuConfig = MenuConfiguration(
       ],
     ),
     // Users Tab with sub-tabs
-    MenuOption(
-      menuOptionId: 'UC_USERS',
+    MenuItem(
+      menuItemId: 'UC_USERS',
       itemKey: 'UC_USERS',
       title: 'Users',
       route: '/users',
@@ -162,8 +162,8 @@ const userCompanyMenuConfig = MenuConfiguration(
       ],
     ),
     // Companies & Users Tab with sub-tabs
-    MenuOption(
-      menuOptionId: 'UC_COMPANY_USERS',
+    MenuItem(
+      menuItemId: 'UC_COMPANY_USERS',
       itemKey: 'UC_COMPANY_USERS',
       title: 'Companies & Users',
       route: '/companiesUsers',

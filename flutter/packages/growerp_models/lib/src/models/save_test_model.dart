@@ -52,7 +52,7 @@ abstract class SaveTest with _$SaveTest {
     @Default([]) List<ContentPlan> contentPlans,
     @Default([]) List<SocialPost> socialPosts,
     @Default([]) List<OutreachCampaign> outreachCampaigns,
-    @Default([]) List<MenuOption> menuOptions,
+    @Default([]) List<MenuItem> menuItems,
   }) = _SaveTest;
   SaveTest._();
 

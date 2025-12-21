@@ -18,12 +18,12 @@ import 'package:http/http.dart' as http;
 import 'widget_registry.dart';
 
 /// Simple data class for menu option info (to avoid model dependency)
-class MenuOptionInfo {
+class MenuItemInfo {
   final String title;
   final String route;
   final String widgetName;
 
-  const MenuOptionInfo({
+  const MenuItemInfo({
     required this.title,
     required this.route,
     required this.widgetName,
@@ -85,7 +85,7 @@ class AiNavigationService {
   final String _model = 'gemini-2.0-flash';
 
   /// Optional menu configuration for route-aware navigation
-  List<MenuOptionInfo>? _menuOptions;
+  List<MenuItemInfo>? _menuItems;
 
   AiNavigationService({required this.apiKey});
 
@@ -95,19 +95,19 @@ class AiNavigationService {
   /// deriving routes from widget names.
   void setMenuConfiguration(dynamic menuConfig) {
     if (menuConfig == null) {
-      _menuOptions = null;
+      _menuItems = null;
       return;
     }
 
     // Extract menu options from MenuConfiguration
     // Using dynamic to avoid import dependency on growerp_models
     try {
-      final options = menuConfig.menuOptions as List<dynamic>?;
+      final options = menuConfig.menuItems as List<dynamic>?;
       if (options != null) {
-        _menuOptions = options
+        _menuItems = options
             .where((o) => o.isActive == true && o.route != null)
             .map(
-              (o) => MenuOptionInfo(
+              (o) => MenuItemInfo(
                 title: o.title as String? ?? '',
                 route: o.route as String? ?? '',
                 widgetName: o.widgetName as String? ?? '',
@@ -115,12 +115,12 @@ class AiNavigationService {
             )
             .toList();
         debugPrint(
-          'AiNavigationService: Loaded ${_menuOptions?.length ?? 0} menu options for AI context',
+          'AiNavigationService: Loaded ${_menuItems?.length ?? 0} menu options for AI context',
         );
       }
     } catch (e) {
       debugPrint('AiNavigationService: Failed to parse menu config: $e');
-      _menuOptions = null;
+      _menuItems = null;
     }
   }
 
@@ -149,7 +149,7 @@ class AiNavigationService {
 
   /// Build system prompt - uses menu config if available, otherwise widget registry
   String _buildSystemPrompt() {
-    if (_menuOptions != null && _menuOptions!.isNotEmpty) {
+    if (_menuItems != null && _menuItems!.isNotEmpty) {
       return _buildMenuBasedPrompt();
     }
     return _buildWidgetRegistryPrompt();
@@ -157,7 +157,7 @@ class AiNavigationService {
 
   /// Build prompt from actual menu configuration with routes
   String _buildMenuBasedPrompt() {
-    final menuList = _menuOptions!
+    final menuList = _menuItems!
         .map(
           (o) => '- "${o.title}": route="${o.route}", widget="${o.widgetName}"',
         )

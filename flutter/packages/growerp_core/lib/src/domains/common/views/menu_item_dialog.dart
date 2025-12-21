@@ -20,7 +20,7 @@ import 'package:responsive_framework/responsive_framework.dart';
 
 /// Dialog for creating/editing menu options
 class MenuItemDialog extends StatefulWidget {
-  final MenuOption menuOption;
+  final MenuItem menuOption;
   final String menuConfigurationId;
   final bool isNew;
 
@@ -405,9 +405,9 @@ class MenuItemDialogState extends State<MenuItemDialog> {
               BlocBuilder<MenuConfigBloc, MenuConfigState>(
                 builder: (context, state) {
                   // Get current children from bloc state if available
-                  final currentOption = state.menuConfiguration?.menuOptions
+                  final currentOption = state.menuConfiguration?.menuItems
                       .where(
-                        (o) => o.menuOptionId == widget.menuOption.menuOptionId,
+                        (o) => o.menuItemId == widget.menuOption.menuItemId,
                       )
                       .firstOrNull;
                   final children =
@@ -449,13 +449,13 @@ class MenuItemDialogState extends State<MenuItemDialog> {
     return FloatingActionButton.extended(
       key: const Key('menuItemUpdate'),
       heroTag: 'menuItemSave',
-      onPressed: _saveMenuOption,
+      onPressed: _saveMenuItem,
       icon: const Icon(Icons.save),
       label: Text(widget.isNew ? 'Create' : 'Update'),
     );
   }
 
-  void _saveMenuOption() {
+  void _saveMenuItem() {
     if (!(_formKey.currentState?.validate() ?? false)) {
       return;
     }
@@ -481,15 +481,15 @@ class MenuItemDialogState extends State<MenuItemDialog> {
 
     if (widget.isNew) {
       _menuConfigBloc.add(
-        MenuOptionCreate(
+        MenuItemCreate(
           menuConfigurationId: widget.menuConfigurationId,
           menuOption: updatedOption,
         ),
       );
     } else {
       _menuConfigBloc.add(
-        MenuOptionUpdate(
-          menuOptionId: widget.menuOption.menuOptionId!,
+        MenuItemUpdate(
+          menuItemId: widget.menuOption.menuItemId!,
           menuOption: updatedOption,
         ),
       );
@@ -591,19 +591,15 @@ class MenuItemDialogState extends State<MenuItemDialog> {
     );
   }
 
-  /// Link a new tab (widget) to this MenuOption
+  /// Link a new tab (widget) to this MenuItem
   void _linkNewTab(String widgetName, String title) {
-    // Generate a menuItemId from the widget name
-    final menuItemId = widgetName.toUpperCase();
-
     // Get current children count for sequence
     final currentChildren = widget.menuOption.children ?? [];
     final newSequence = (currentChildren.length + 1) * 10;
 
     _menuConfigBloc.add(
       MenuItemLink(
-        menuOptionId: widget.menuOption.menuOptionId!,
-        menuItemId: menuItemId,
+        parentMenuItemId: widget.menuOption.menuItemId!,
         sequenceNum: newSequence,
         title: title,
         widgetName: widgetName,
@@ -611,13 +607,8 @@ class MenuItemDialogState extends State<MenuItemDialog> {
     );
   }
 
-  /// Unlink a tab from this MenuOption
+  /// Unlink a tab from this MenuItem
   void _unlinkTab(MenuItem item) {
-    _menuConfigBloc.add(
-      MenuItemUnlink(
-        menuOptionId: widget.menuOption.menuOptionId!,
-        menuItemId: item.menuItemId,
-      ),
-    );
+    _menuConfigBloc.add(MenuItemUnlink(childMenuItemId: item.menuItemId!));
   }
 }

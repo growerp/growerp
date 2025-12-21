@@ -39,7 +39,7 @@ class AdminDbForm extends StatelessWidget {
             // Get dashboard items from menu configuration (top-level, active items only)
             // Exclude the Main/Dashboard item itself (route '/')
             final dashboardItems =
-                menuConfig.menuOptions
+                menuConfig.menuItems
                     .where(
                       (item) =>
                           item.isActive &&

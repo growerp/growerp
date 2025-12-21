@@ -36,9 +36,9 @@ void main() {
       menuConfigurationId: 'CORE_EXAMPLE',
       appId: 'core_example',
       name: 'Core Example Menu',
-      menuOptions: [
-        MenuOption(
-          menuOptionId: 'CORE_MAIN',
+      menuItems: [
+        MenuItem(
+          menuItemId: 'CORE_MAIN',
           title: 'Main',
           route: '/',
           iconName: 'dashboard',
@@ -46,8 +46,8 @@ void main() {
           widgetName: 'CoreDashboard',
           isActive: true,
         ),
-        MenuOption(
-          menuOptionId: 'CORE_COMPANY',
+        MenuItem(
+          menuItemId: 'CORE_COMPANY',
           title: 'Organization',
           route: '/company',
           iconName: 'business',
@@ -55,8 +55,8 @@ void main() {
           widgetName: 'CoreDashboard',
           isActive: true,
         ),
-        MenuOption(
-          menuOptionId: 'CORE_USER',
+        MenuItem(
+          menuItemId: 'CORE_USER',
           title: 'Logged in User',
           route: '/user',
           iconName: 'person',

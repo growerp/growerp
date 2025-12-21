@@ -96,11 +96,11 @@ class DashboardCard extends StatelessWidget {
 /// Usage:
 /// ```dart
 /// DashboardGrid(
-///   itemCount: menuOptions.length,
+///   itemCount: menuItems.length,
 ///   itemBuilder: (context, index) => DashboardCard(
-///     title: menuOptions[index].title,
-///     iconName: menuOptions[index].iconName,
-///     route: menuOptions[index].route,
+///     title: menuItems[index].title,
+///     iconName: menuItems[index].iconName,
+///     route: menuItems[index].route,
 ///   ),
 /// )
 /// ```

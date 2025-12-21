@@ -79,17 +79,17 @@ class AccountingDashboard extends StatelessWidget {
             final menuConfig = menuState.menuConfiguration;
 
             // Get dashboard options based on prefix or route pattern
-            List<MenuOption> dashboardOptions;
+            List<MenuItem> dashboardOptions;
 
             if (menuConfig != null && menuOptionPrefix != null) {
               // Use menu configuration with prefix filtering
               dashboardOptions =
-                  menuConfig.menuOptions
+                  menuConfig.menuItems
                       .where(
                         (option) =>
                             option.isActive &&
-                            option.menuOptionId != null &&
-                            option.menuOptionId!.startsWith(menuOptionPrefix!),
+                            option.menuItemId != null &&
+                            option.menuItemId!.startsWith(menuOptionPrefix!),
                       )
                       .toList()
                     ..sort((a, b) => a.sequenceNum.compareTo(b.sequenceNum));
@@ -113,7 +113,7 @@ class AccountingDashboard extends StatelessWidget {
 
   Widget _buildDynamicDashboard(
     BuildContext context,
-    List<MenuOption> options,
+    List<MenuItem> options,
     Stats? stats,
   ) {
     return Scaffold(

@@ -33,7 +33,7 @@ import 'package:growerp_models/growerp_models.dart';
 /// - menuItemUpdate: save FloatingActionButton
 class DynamicMenuTest {
   /// Navigate to the Menu Item List Dialog via dashboard FAB
-  static Future<void> selectMenuOptions(WidgetTester tester) async {
+  static Future<void> selectMenuItems(WidgetTester tester) async {
     // Tap on the dashboard FAB to access menu configuration
     if (await CommonTest.doesExistKey(tester, 'coreFab')) {
       await CommonTest.tapByKey(
@@ -53,17 +53,17 @@ class DynamicMenuTest {
   }
 
   /// Add menu options from the provided list
-  /// Calls selectMenuOptions before each add since list closes after saving
-  static Future<void> addMenuOptions(
+  /// Calls selectMenuItems before each add since list closes after saving
+  static Future<void> addMenuItems(
     WidgetTester tester,
-    List<MenuOption> menuOptions,
+    List<MenuItem> menuItems,
   ) async {
     SaveTest test = await PersistFunctions.getTest();
-    List<MenuOption> createdOptions = [];
+    List<MenuItem> createdOptions = [];
 
-    for (final option in menuOptions) {
+    for (final option in menuItems) {
       // Navigate to menu config list (closes after each save)
-      await selectMenuOptions(tester);
+      await selectMenuItems(tester);
 
       // Tap add button
       await CommonTest.tapByKey(
@@ -73,7 +73,7 @@ class DynamicMenuTest {
       );
 
       // Enter menu option data
-      await _enterMenuOptionData(tester, option);
+      await _enterMenuItemData(tester, option);
 
       // Save
       await CommonTest.tapByKey(
@@ -90,18 +90,18 @@ class DynamicMenuTest {
 
     // Persist test data
     await PersistFunctions.persistTest(
-      test.copyWith(menuOptions: createdOptions),
+      test.copyWith(menuItems: createdOptions),
     );
   }
 
   /// Check that menu options were created correctly
-  /// Calls selectMenuOptions for each option since list closes after viewing
-  static Future<void> checkMenuOptions(WidgetTester tester) async {
+  /// Calls selectMenuItems for each option since list closes after viewing
+  static Future<void> checkMenuItems(WidgetTester tester) async {
     SaveTest test = await PersistFunctions.getTest(backup: false);
 
     // Navigate to menu config list
-    await selectMenuOptions(tester);
-    for (final option in test.menuOptions) {
+    await selectMenuItems(tester);
+    for (final option in test.menuItems) {
       expect(
         find.text(option.title),
         findsWidgets,
@@ -135,29 +135,29 @@ class DynamicMenuTest {
   }
 
   /// Update menu options with new data
-  /// Calls selectMenuOptions for each update since list closes after saving
-  static Future<void> updateMenuOptions(
+  /// Calls selectMenuItems for each update since list closes after saving
+  static Future<void> updateMenuItems(
     WidgetTester tester,
-    List<MenuOption> updatedOptions,
+    List<MenuItem> updatedOptions,
   ) async {
     SaveTest test = await PersistFunctions.getTest();
 
     for (
       int i = 0;
-      i < updatedOptions.length && i < test.menuOptions.length;
+      i < updatedOptions.length && i < test.menuItems.length;
       i++
     ) {
-      final oldOption = test.menuOptions[i];
+      final oldOption = test.menuItems[i];
       final newOption = updatedOptions[i];
 
       // Navigate to menu config list
-      await selectMenuOptions(tester);
+      await selectMenuItems(tester);
 
       // Find and tap the existing option
       await CommonTest.tapByText(tester, oldOption.title);
 
       // Clear and update the data
-      await _enterMenuOptionData(tester, newOption);
+      await _enterMenuItemData(tester, newOption);
 
       // Save
       await CommonTest.tapByKey(
@@ -172,17 +172,17 @@ class DynamicMenuTest {
 
     // Update persisted test data
     await PersistFunctions.persistTest(
-      test.copyWith(menuOptions: updatedOptions),
+      test.copyWith(menuItems: updatedOptions),
     );
   }
 
   /// Delete the last menu option
-  /// Calls selectMenuOptions first since list may be closed
-  static Future<void> deleteLastMenuOption(WidgetTester tester) async {
+  /// Calls selectMenuItems first since list may be closed
+  static Future<void> deleteLastMenuItem(WidgetTester tester) async {
     SaveTest test = await PersistFunctions.getTest();
-    if (test.menuOptions.isEmpty) return;
+    if (test.menuItems.isEmpty) return;
 
-    final lastOption = test.menuOptions.last;
+    final lastOption = test.menuItems.last;
 
     // Find delete buttons
     final deleteButtons = find.byIcon(Icons.delete_outline);
@@ -206,7 +206,7 @@ class DynamicMenuTest {
     // Update persisted test data
     await PersistFunctions.persistTest(
       test.copyWith(
-        menuOptions: test.menuOptions.sublist(0, test.menuOptions.length - 1),
+        menuItems: test.menuItems.sublist(0, test.menuItems.length - 1),
       ),
     );
   }
@@ -216,7 +216,7 @@ class DynamicMenuTest {
     SaveTest test = await PersistFunctions.getTest(backup: false);
 
     // Close menu dialog if open
-    await closeMenuOptions(tester);
+    await closeMenuItems(tester);
 
     // Logout
     await CommonTest.logout(tester);
@@ -227,10 +227,10 @@ class DynamicMenuTest {
     await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
 
     // Navigate back to menu options
-    await selectMenuOptions(tester);
+    await selectMenuItems(tester);
 
     // Verify all options still exist
-    for (final option in test.menuOptions) {
+    for (final option in test.menuItems) {
       expect(
         find.text(option.title),
         findsWidgets,
@@ -240,15 +240,15 @@ class DynamicMenuTest {
     }
 
     debugPrint(
-      'Verified ${test.menuOptions.length} menu options persist after logout/login',
+      'Verified ${test.menuItems.length} menu options persist after logout/login',
     );
   }
 
   /// Reset menu to default configuration
-  /// Calls selectMenuOptions first since list may be closed
+  /// Calls selectMenuItems first since list may be closed
   static Future<void> resetMenuToDefault(WidgetTester tester) async {
     // Navigate to menu config list
-    await selectMenuOptions(tester);
+    await selectMenuItems(tester);
 
     await CommonTest.tapByKey(
       tester,
@@ -264,7 +264,7 @@ class DynamicMenuTest {
   }
 
   /// Close the menu options dialog
-  static Future<void> closeMenuOptions(WidgetTester tester) async {
+  static Future<void> closeMenuItems(WidgetTester tester) async {
     // Try to close via cancel key or Navigator.pop
     if (await CommonTest.doesExistKey(tester, 'MenuItemListDialog')) {
       // Press Escape or tap outside to close
@@ -276,9 +276,9 @@ class DynamicMenuTest {
   // ==================== Helper methods ====================
 
   /// Enter menu option data into the form
-  static Future<void> _enterMenuOptionData(
+  static Future<void> _enterMenuItemData(
     WidgetTester tester,
-    MenuOption option,
+    MenuItem option,
   ) async {
     // Title - clear first then enter
     await CommonTest.enterText(tester, 'menuItemTitle', option.title);
@@ -319,27 +319,27 @@ class DynamicMenuTest {
     }
   }
 
-  // ==================== Menu Item (Tab) Test Methods ====================
+  // ==================== Child Menu Item (Tab) Test Methods ====================
 
-  /// Add menu items (tabs) to the first menu option
-  /// Opens the first menu option, then adds each menu item via the "Add Tab" dialog
-  static Future<void> addMenuItems(
+  /// Add child menu items (tabs) to the first menu item
+  /// Opens the first menu item, then adds each child via the "Add Tab" dialog
+  static Future<void> addChildMenuItems(
     WidgetTester tester,
-    List<MenuItem> menuItems,
+    List<MenuItem> childMenuItems,
   ) async {
     SaveTest test = await PersistFunctions.getTest();
-    if (test.menuOptions.isEmpty) {
+    if (test.menuItems.isEmpty) {
       debugPrint('Warning: No menu options to add tabs to');
       return;
     }
 
     // Tap on the first menu option to open detail
-    final firstOption = test.menuOptions.first;
+    final firstOption = test.menuItems.first;
 
-    // Add each menu item (tab)
-    for (final menuItem in menuItems) {
+    // Add each child menu item (tab)
+    for (final menuItem in childMenuItems) {
       // Navigate to menu config list
-      await selectMenuOptions(tester);
+      await selectMenuItems(tester);
       // go to first option
       await CommonTest.tapByText(tester, firstOption.title);
       // Tap add tab button to open the Add Tab dialog
@@ -374,35 +374,35 @@ class DynamicMenuTest {
 
     // Update the first menu option with the new children
     // Navigate to menu config list
-    await selectMenuOptions(tester);
+    await selectMenuItems(tester);
     final updatedFirstOption = firstOption.copyWith(
-      children: [...(firstOption.children ?? []), ...menuItems],
+      children: [...(firstOption.children ?? []), ...childMenuItems],
     );
-    final updatedMenuOptions = [
+    final updatedMenuItemsList = [
       updatedFirstOption,
-      ...test.menuOptions.skip(1),
+      ...test.menuItems.skip(1),
     ];
     await PersistFunctions.persistTest(
-      test.copyWith(menuOptions: updatedMenuOptions),
+      test.copyWith(menuItems: updatedMenuItemsList),
     );
   }
 
-  /// Check that menu items (tabs) were added to the first added menu option
-  static Future<void> checkMenuItems(
+  /// Check that child menu items (tabs) were added to the first menu item
+  static Future<void> checkChildMenuItems(
     WidgetTester tester,
     List<MenuItem> expectedItems,
   ) async {
     SaveTest test = await PersistFunctions.getTest(backup: false);
-    if (test.menuOptions.isEmpty) {
+    if (test.menuItems.isEmpty) {
       debugPrint('Warning: No menu options to check tabs for');
       return;
     }
 
     // Navigate to menu config list
-    await selectMenuOptions(tester);
+    await selectMenuItems(tester);
 
     // Tap on the first menu option to open detail
-    final firstOption = test.menuOptions.first;
+    final firstOption = test.menuItems.first;
     await CommonTest.tapByText(tester, firstOption.title);
 
     // Verify each expected menu item appears as a chip
@@ -415,19 +415,19 @@ class DynamicMenuTest {
     await CommonTest.gotoMainMenu(tester);
   }
 
-  /// Delete the last menu item (tab) from the first menu option
-  static Future<void> deleteMenuItems(WidgetTester tester) async {
+  /// Delete the last child menu item (tab) from the first menu item
+  static Future<void> deleteChildMenuItems(WidgetTester tester) async {
     SaveTest test = await PersistFunctions.getTest(backup: false);
-    if (test.menuOptions.isEmpty) {
+    if (test.menuItems.isEmpty) {
       debugPrint('Warning: No menu options to delete tabs from');
       return;
     }
 
     // Navigate to menu config list
-    await selectMenuOptions(tester);
+    await selectMenuItems(tester);
 
     // Tap on the first menu option to open detail
-    final firstOption = test.menuOptions.first;
+    final firstOption = test.menuItems.first;
     await CommonTest.tapByText(tester, firstOption.title);
 
     // Find delete icons on chips (the small 'x' on each tab chip)

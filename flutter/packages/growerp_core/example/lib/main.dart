@@ -131,7 +131,7 @@ class _CoreAppState extends State<CoreApp> {
             // ensuring the new GoRouter with updated routes takes effect
             key: ValueKey(
               '${state.menuConfiguration?.menuConfigurationId ?? ''}_'
-              '${state.menuConfiguration?.menuOptions.length ?? 0}',
+              '${state.menuConfiguration?.menuItems.length ?? 0}',
             ),
             restClient: widget.restClient,
             classificationId: widget.classificationId,

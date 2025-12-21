@@ -21,9 +21,9 @@ import 'package:growerp_models/growerp_models.dart';
 import 'package:core_example/main.dart';
 import 'dart:math';
 
-/// Test data for menu options
-final testMenuOptions = [
-  const MenuOption(
+/// Test data for top-level menu items
+final testMenuItems = [
+  const MenuItem(
     title: 'Test Option 1',
     route: '/test1',
     iconName: 'home',
@@ -31,7 +31,7 @@ final testMenuOptions = [
     sequenceNum: 100,
     isActive: true,
   ),
-  const MenuOption(
+  const MenuItem(
     title: 'Test Option 2',
     route: '/test2',
     iconName: 'people',
@@ -41,8 +41,8 @@ final testMenuOptions = [
   ),
 ];
 
-final updatedMenuOptions = [
-  const MenuOption(
+final updatedMenuItems = [
+  const MenuItem(
     title: 'Updated Option 1',
     route: '/updated1',
     iconName: 'business',
@@ -50,7 +50,7 @@ final updatedMenuOptions = [
     sequenceNum: 100,
     isActive: true,
   ),
-  const MenuOption(
+  const MenuItem(
     title: 'Updated Option 2',
     route: '/updated2',
     iconName: 'info',
@@ -60,8 +60,8 @@ final updatedMenuOptions = [
   ),
 ];
 
-/// Test data for menu items (tabs) to add to menu options
-final testMenuItems = [
+/// Test data for child menu items (tabs) to add to menu items
+final testChildMenuItems = [
   const MenuItem(
     menuItemId: 'USERLIST',
     title: 'Users Tab',
@@ -120,30 +120,30 @@ void main() {
     // Login
     await CommonTest.createCompanyAndAdmin(tester);
 
-    // Add menu options
-    await DynamicMenuTest.addMenuOptions(tester, testMenuOptions);
-    await DynamicMenuTest.checkMenuOptions(tester);
-
-    // Update menu options
-    await DynamicMenuTest.updateMenuOptions(tester, updatedMenuOptions);
-    await DynamicMenuTest.checkMenuOptions(tester);
-
-    // Add menu items (tabs) to the first menu option
+    // Add menu items
     await DynamicMenuTest.addMenuItems(tester, testMenuItems);
-    await DynamicMenuTest.checkMenuItems(tester, testMenuItems);
+    await DynamicMenuTest.checkMenuItems(tester);
 
-    // Delete a menu item (tab) from the menu option
-    await DynamicMenuTest.deleteMenuItems(tester);
+    // Update menu items
+    await DynamicMenuTest.updateMenuItems(tester, updatedMenuItems);
+    await DynamicMenuTest.checkMenuItems(tester);
+
+    // Add child menu items (tabs) to the first menu item
+    await DynamicMenuTest.addChildMenuItems(tester, testChildMenuItems);
+    await DynamicMenuTest.checkChildMenuItems(tester, testChildMenuItems);
+
+    // Delete a child menu item (tab) from the menu item
+    await DynamicMenuTest.deleteChildMenuItems(tester);
 
     // Verify persistence after logout/login
     await DynamicMenuTest.verifyMenuPersistence(tester);
 
-    // Delete menu options
-    await DynamicMenuTest.deleteLastMenuOption(tester);
+    // Delete menu items
+    await DynamicMenuTest.deleteLastMenuItem(tester);
 
     // Reset to default
     await DynamicMenuTest.resetMenuToDefault(tester);
-    await DynamicMenuTest.closeMenuOptions(tester);
+    await DynamicMenuTest.closeMenuItems(tester);
     await CommonTest.logout(tester);
   });
 }

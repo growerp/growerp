@@ -988,17 +988,17 @@ const ${pascalCaseName.toLowerCase()}MenuConfig = MenuConfiguration(
   menuConfigurationId: '${pascalCaseName.toUpperCase()}_EXAMPLE',
   appId: '${pascalCaseName.toLowerCase()}_example',
   name: '$pascalCaseName Example Menu',
-  menuOptions: [
-    MenuOption(
-      menuOptionId: '${pascalCaseName.toUpperCase()}_MAIN',
+  menuItems: [
+    MenuItem(
+      menuItemId: '${pascalCaseName.toUpperCase()}_MAIN',
       title: 'Dashboard',
       route: '/',
       iconName: 'dashboard',
       sequenceNum: 10,
       widgetName: '${pascalCaseName}Dashboard',
     ),
-    MenuOption(
-      menuOptionId: '${pascalCaseName.toUpperCase()}_DEMOS',
+    MenuItem(
+      menuItemId: '${pascalCaseName.toUpperCase()}_DEMOS',
       title: 'Demo Items',
       route: '/demos',
       iconName: 'list',
@@ -1033,7 +1033,7 @@ class ${pascalCaseName}Dashboard extends StatelessWidget {
           return const LoadingIndicator();
         }
 
-        final dashboardItems = ${pascalCaseName.toLowerCase()}MenuConfig.menuOptions
+        final dashboardItems = ${pascalCaseName.toLowerCase()}MenuConfig.menuItems
             .where((item) => item.route != '/' && item.route != null)
             .toList();
 

@@ -48,8 +48,8 @@ const websiteMenuConfig = MenuConfiguration(
   menuConfigurationId: 'WEBSITE_EXAMPLE',
   appId: 'website_example',
   name: 'Website Example Menu',
-  menuOptions: [
-    MenuOption(
+  menuItems: [
+    MenuItem(
       itemKey: 'WEB_MAIN',
       title: 'Main',
       route: '/',
@@ -57,7 +57,7 @@ const websiteMenuConfig = MenuConfiguration(
       sequenceNum: 10,
       widgetName: 'WebsiteDashboard',
     ),
-    MenuOption(
+    MenuItem(
       itemKey: 'WEB_WEBSITE',
       title: 'Website',
       route: '/website',

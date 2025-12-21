@@ -80,7 +80,7 @@ GoRouter createDynamicAppRouter(
           orElse: () => configurations.isNotEmpty
               ? configurations.first
               : MenuConfiguration(
-                  menuOptions: [],
+                  menuItems: [],
                   appId: 'DEFAULT',
                   name: config.appTitle,
                 ),
@@ -88,7 +88,7 @@ GoRouter createDynamicAppRouter(
       : (configurations.isNotEmpty
             ? configurations.first
             : MenuConfiguration(
-                menuOptions: [],
+                menuItems: [],
                 appId: 'DEFAULT',
                 name: config.appTitle,
               ));
@@ -99,11 +99,11 @@ GoRouter createDynamicAppRouter(
       return config.dashboardBuilder!();
     }
     // Find the main/dashboard widget from menu options
-    final mainOption = mainConfig.menuOptions.firstWhere(
+    final mainOption = mainConfig.menuItems.firstWhere(
       (o) => o.route == '/' || o.sequenceNum == 0,
-      orElse: () => mainConfig.menuOptions.isNotEmpty
-          ? mainConfig.menuOptions.first
-          : const MenuOption(title: 'Main', widgetName: 'Unknown'),
+      orElse: () => mainConfig.menuItems.isNotEmpty
+          ? mainConfig.menuItems.first
+          : const MenuItem(title: 'Main', widgetName: 'Unknown'),
     );
     return config.widgetLoader(mainOption.widgetName ?? 'Unknown', {});
   }
@@ -132,7 +132,7 @@ GoRouter createDynamicAppRouter(
         builder: (context, state) {
           final authState = context.watch<AuthBloc>().state;
           if (authState.status == AuthStatus.authenticated) {
-            return DisplayMenuOption(
+            return DisplayMenuItem(
               menuConfiguration: mainConfig,
               menuIndex: 0,
               actions: [
@@ -170,13 +170,13 @@ GoRouter createDynamicAppRouter(
           builder: (context, state, child) {
             int menuIndex = 0;
             final path = state.uri.path;
-            for (int i = 0; i < mainConfig.menuOptions.length; i++) {
-              if (mainConfig.menuOptions[i].route == path) {
+            for (int i = 0; i < mainConfig.menuItems.length; i++) {
+              if (mainConfig.menuItems[i].route == path) {
                 menuIndex = i;
                 break;
               }
             }
-            return DisplayMenuOption(
+            return DisplayMenuItem(
               menuConfiguration: mainConfig,
               menuIndex: menuIndex,
               tabWidgetLoader: config.widgetLoader,
@@ -200,13 +200,13 @@ GoRouter createDynamicAppRouter(
 
           // Find the menu option for this path
           int menuIndex = 0;
-          for (int i = 0; i < currentConfig.menuOptions.length; i++) {
-            if (currentConfig.menuOptions[i].route == path) {
+          for (int i = 0; i < currentConfig.menuItems.length; i++) {
+            if (currentConfig.menuItems[i].route == path) {
               menuIndex = i;
               break;
             }
           }
-          return DisplayMenuOption(
+          return DisplayMenuItem(
             menuConfiguration: currentConfig,
             menuIndex: menuIndex,
             tabWidgetLoader: config.widgetLoader,
@@ -226,10 +226,10 @@ GoRouter createDynamicAppRouter(
                   menuConfigBloc?.state.menuConfiguration ?? mainConfig;
 
               // Find the option with this route
-              final option = currentConfig.menuOptions.firstWhere(
+              final option = currentConfig.menuItems.firstWhere(
                 (o) => o.route == path,
                 orElse: () =>
-                    const MenuOption(title: 'Not Found', widgetName: 'Unknown'),
+                    const MenuItem(title: 'Not Found', widgetName: 'Unknown'),
               );
 
               if (option.widgetName == 'Unknown') {
@@ -254,7 +254,7 @@ List<RouteBase> _generateRoutes(
   List<RouteBase> routes = [];
   Set<String> processedPaths = {};
 
-  for (var option in config.menuOptions) {
+  for (var option in config.menuItems) {
     if (!option.isActive) continue;
     if (option.route == null || option.route == '/' || option.route!.isEmpty) {
       continue;

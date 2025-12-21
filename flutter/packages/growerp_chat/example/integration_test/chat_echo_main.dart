@@ -66,8 +66,8 @@ const chatEchoMenuConfig = MenuConfiguration(
   menuConfigurationId: 'CHAT_ECHO_EXAMPLE',
   appId: 'chat_echo_example',
   name: 'Chat Echo Example Menu',
-  menuOptions: [
-    MenuOption(
+  menuItems: [
+    MenuItem(
       itemKey: 'CHAT_MAIN',
       title: 'Main',
       route: '/',
@@ -93,7 +93,7 @@ GoRouter createChatEchoRouter() {
         builder: (context, state) {
           final authState = context.watch<AuthBloc>().state;
           if (authState.status == AuthStatus.authenticated) {
-            return DisplayMenuOption(
+            return DisplayMenuItem(
               menuConfiguration: chatEchoMenuConfig,
               menuIndex: 0,
               child: const ChatRooms(),

@@ -30,7 +30,7 @@ class StaticRouterConfig {
   final String appTitle;
 
   /// Function to build widget for a given route
-  /// The route string matches [MenuOption.route]
+  /// The route string matches [MenuItem.route]
   final Widget Function(String route) widgetBuilder;
 
   /// Optional dashboard widget for the main '/' route
@@ -46,7 +46,7 @@ class StaticRouterConfig {
   final List<Widget>? mainRouteActions;
 
   /// Optional function to load tab widgets by widgetName
-  /// Used when MenuOptions have children (tabs)
+  /// Used when MenuItems have children (tabs)
   final Widget Function(String widgetName, Map<String, dynamic> args)?
   tabWidgetLoader;
 
@@ -132,7 +132,7 @@ GoRouter _buildStaticRouter(StaticRouterConfig config) {
     final routes = <RouteBase>[];
     final processedPaths = <String>{};
 
-    for (final option in config.menuConfig.menuOptions) {
+    for (final option in config.menuConfig.menuItems) {
       if (option.route == null ||
           option.route == '/' ||
           option.route!.isEmpty) {
@@ -142,7 +142,7 @@ GoRouter _buildStaticRouter(StaticRouterConfig config) {
       processedPaths.add(option.route!);
 
       final route = option.route!;
-      // Use widgetName from MenuOption as the key for test discoverability
+      // Use widgetName from MenuItem as the key for test discoverability
       final widgetKey = option.widgetName ?? option.itemKey;
 
       routes.add(
@@ -183,7 +183,7 @@ GoRouter _buildStaticRouter(StaticRouterConfig config) {
         builder: (context, state) {
           final authState = context.watch<AuthBloc>().state;
           if (authState.status == AuthStatus.authenticated) {
-            return DisplayMenuOption(
+            return DisplayMenuItem(
               menuConfiguration: config.menuConfig,
               menuIndex: 0,
               actions: getMainActions(context),
@@ -204,13 +204,13 @@ GoRouter _buildStaticRouter(StaticRouterConfig config) {
           builder: (context, state, child) {
             int menuIndex = 0;
             final path = state.uri.path;
-            for (int i = 0; i < config.menuConfig.menuOptions.length; i++) {
-              if (config.menuConfig.menuOptions[i].route == path) {
+            for (int i = 0; i < config.menuConfig.menuItems.length; i++) {
+              if (config.menuConfig.menuItems[i].route == path) {
                 menuIndex = i;
                 break;
               }
             }
-            return DisplayMenuOption(
+            return DisplayMenuItem(
               menuConfiguration: config.menuConfig,
               menuIndex: menuIndex,
               tabWidgetLoader: config.tabWidgetLoader,

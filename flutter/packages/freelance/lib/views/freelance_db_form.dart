@@ -36,7 +36,7 @@ class FreelanceDbForm extends StatelessWidget {
             // Get dashboard options from menu configuration (active items only)
             // Exclude the Main/Dashboard item itself (route '/'), About, and accounting routes
             final dashboardOptions =
-                menuConfig.menuOptions
+                menuConfig.menuItems
                     .where(
                       (option) =>
                           option.isActive &&

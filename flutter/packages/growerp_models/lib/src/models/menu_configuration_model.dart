@@ -40,9 +40,9 @@ class MenuConfiguration {
   final bool isActive;
   final DateTime? createdDate;
 
-  /// List of menu options (main menu entries) for this configuration
-  @JsonKey(name: 'menuOptions')
-  final List<MenuOption> menuOptions;
+  /// List of top-level menu items (those with no parent) for this configuration
+  @JsonKey(name: 'menuItems')
+  final List<MenuItem> menuItems;
 
   const MenuConfiguration({
     this.menuConfigurationId,
@@ -52,7 +52,7 @@ class MenuConfiguration {
     this.userId,
     this.isActive = true,
     this.createdDate,
-    this.menuOptions = const [],
+    this.menuItems = const [],
   });
 
   factory MenuConfiguration.fromJson(Map<String, dynamic> json) =>
@@ -68,7 +68,7 @@ class MenuConfiguration {
     String? userId,
     bool? isActive,
     DateTime? createdDate,
-    List<MenuOption>? menuOptions,
+    List<MenuItem>? menuItems,
   }) {
     return MenuConfiguration(
       menuConfigurationId: menuConfigurationId ?? this.menuConfigurationId,
@@ -78,7 +78,7 @@ class MenuConfiguration {
       userId: userId ?? this.userId,
       isActive: isActive ?? this.isActive,
       createdDate: createdDate ?? this.createdDate,
-      menuOptions: menuOptions ?? this.menuOptions,
+      menuItems: menuItems ?? this.menuItems,
     );
   }
 }

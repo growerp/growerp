@@ -58,8 +58,8 @@ const marketingMenuConfig = MenuConfiguration(
   menuConfigurationId: 'MARKETING_EXAMPLE',
   appId: 'marketing_example',
   name: 'Marketing Example Menu',
-  menuOptions: [
-    MenuOption(
+  menuItems: [
+    MenuItem(
       itemKey: 'MKT_MAIN',
       title: 'Main',
       route: '/',
@@ -67,7 +67,7 @@ const marketingMenuConfig = MenuConfiguration(
       sequenceNum: 10,
       widgetName: 'MarketingDashboard',
     ),
-    MenuOption(
+    MenuItem(
       itemKey: 'MKT_LANDING',
       title: 'Landing Pages',
       route: '/landingPages',
@@ -75,7 +75,7 @@ const marketingMenuConfig = MenuConfiguration(
       sequenceNum: 20,
       widgetName: 'LandingPageList',
     ),
-    MenuOption(
+    MenuItem(
       itemKey: 'MKT_ASSESSMENTS',
       title: 'Assessments',
       route: '/assessments',
@@ -83,7 +83,7 @@ const marketingMenuConfig = MenuConfiguration(
       sequenceNum: 30,
       widgetName: 'AssessmentList',
     ),
-    MenuOption(
+    MenuItem(
       itemKey: 'MKT_TAKE',
       title: 'Take Assessment',
       route: '/takeAssessment',
@@ -91,7 +91,7 @@ const marketingMenuConfig = MenuConfiguration(
       sequenceNum: 40,
       widgetName: 'TakeAssessmentMenu',
     ),
-    MenuOption(
+    MenuItem(
       itemKey: 'MKT_PERSONAS',
       title: 'Personas',
       route: '/personas',
@@ -99,7 +99,7 @@ const marketingMenuConfig = MenuConfiguration(
       sequenceNum: 50,
       widgetName: 'PersonaList',
     ),
-    MenuOption(
+    MenuItem(
       itemKey: 'MKT_CONTENT',
       title: 'Content Plans',
       route: '/contentPlans',
@@ -107,7 +107,7 @@ const marketingMenuConfig = MenuConfiguration(
       sequenceNum: 60,
       widgetName: 'ContentPlanList',
     ),
-    MenuOption(
+    MenuItem(
       itemKey: 'MKT_SOCIAL',
       title: 'Social Posts',
       route: '/socialPosts',
@@ -159,7 +159,7 @@ class MarketingDashboard extends StatelessWidget {
           return const LoadingIndicator();
         }
 
-        final items = marketingMenuConfig.menuOptions
+        final items = marketingMenuConfig.menuItems
             .where((item) => item.route != '/')
             .toList();
 

@@ -1295,13 +1295,14 @@ abstract class RestClient {
   });
 
   // ============================================
-  // MENU OPTION ENDPOINTS
+  // MENU ITEM ENDPOINTS (UNIFIED)
   // ============================================
 
-  /// Create new menu option (main menu entry)
-  @POST("rest/s1/growerp/100/MenuOption")
-  Future<MenuOption> createMenuOption({
+  /// Create new menu item (can be top-level or child)
+  @POST("rest/s1/growerp/100/MenuItem")
+  Future<MenuItem> createMenuItem({
     @Field() required String menuConfigurationId,
+    @Field() String? parentMenuItemId,
     @Field() String? itemKey,
     @Field() required String title,
     @Field() String? route,
@@ -1314,10 +1315,11 @@ abstract class RestClient {
     @Field() String? isActive,
   });
 
-  /// Update menu option
-  @PATCH("rest/s1/growerp/100/MenuOption")
-  Future<MenuOption> updateMenuOption({
-    @Field() required String menuOptionId,
+  /// Update menu item
+  @PATCH("rest/s1/growerp/100/MenuItem")
+  Future<MenuItem> updateMenuItem({
+    @Field() required String menuItemId,
+    @Field() String? parentMenuItemId,
     @Field() String? itemKey,
     @Field() String? title,
     @Field() String? route,
@@ -1330,41 +1332,22 @@ abstract class RestClient {
     @Field() String? isActive,
   });
 
-  /// Delete menu option and its child links
-  @DELETE("rest/s1/growerp/100/MenuOption")
-  Future<Map<String, int>> deleteMenuOption({
-    @Query('menuOptionId') required String menuOptionId,
+  /// Delete menu item and its children
+  @DELETE("rest/s1/growerp/100/MenuItem")
+  Future<Map<String, int>> deleteMenuItem({
+    @Query('menuItemId') required String menuItemId,
   });
 
-  /// Reorder multiple menu options (batch sequence update)
-  @PATCH("rest/s1/growerp/100/MenuOptions/reorder")
-  Future<Map<String, int>> reorderMenuOptions({
+  /// Reorder multiple menu items (batch sequence update)
+  @PATCH("rest/s1/growerp/100/MenuItems/reorder")
+  Future<Map<String, int>> reorderMenuItems({
     @Field() required String menuConfigurationId,
-    @Field() required List<Map<String, dynamic>> optionSequences,
+    @Field() required List<Map<String, dynamic>> itemSequences,
   });
 
-  /// Toggle menu option active status
-  @PATCH("rest/s1/growerp/100/MenuOption/toggle")
-  Future<MenuOption> toggleMenuOptionActive({
-    @Field() required String menuOptionId,
-  });
-
-  /// Link a MenuItem (tab) to a MenuOption
-  @POST("rest/s1/growerp/100/MenuOption/link")
-  Future<void> linkMenuItem({
-    @Field() required String menuOptionId,
-    @Field() required String menuItemId,
-    @Field() int? sequenceNum,
-    @Field() String? title,
-    @Field() String? widgetName,
-  });
-
-  /// Unlink a MenuItem (tab) from a MenuOption
-  @POST("rest/s1/growerp/100/MenuOption/unlink")
-  Future<Map<String, int>> unlinkMenuItem({
-    @Field() required String menuOptionId,
-    @Field() required String menuItemId,
-  });
+  /// Toggle menu item active status
+  @PATCH("rest/s1/growerp/100/MenuItem/toggle")
+  Future<MenuItem> toggleMenuItemActive({@Field() required String menuItemId});
 
   // ========== Agent Manager ==========
 

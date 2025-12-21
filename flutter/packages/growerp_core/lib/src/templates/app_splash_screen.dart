@@ -47,7 +47,7 @@ class AppSplashScreen extends StatefulWidget {
       key: key,
       appTitle: appTitle,
       emptyMenuConfig: MenuConfiguration(
-        menuOptions: [],
+        menuItems: [],
         name: 'Login',
         appId: appId,
       ),

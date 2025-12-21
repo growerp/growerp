@@ -887,38 +887,28 @@ along with this software (see the LICENSE.md file). If not, see
             </method>
         </resource>
 
-        <!-- Menu Option -->
-        <resource name="MenuOption">
+        <!-- Menu Item (unified model - replaces MenuOption) -->
+        <resource name="MenuItem">
             <method type="post">
-                <service name="growerp.100.MenuServices100.create#MenuOption" />
+                <service name="growerp.100.MenuServices100.create#MenuItem" />
             </method>
             <method type="patch">
-                <service name="growerp.100.MenuServices100.update#MenuOption" />
+                <service name="growerp.100.MenuServices100.update#MenuItem" />
             </method>
             <method type="delete">
-                <service name="growerp.100.MenuServices100.delete#MenuOption" />
+                <service name="growerp.100.MenuServices100.delete#MenuItem" />
             </method>
             <resource name="toggle">
                 <method type="patch">
-                    <service name="growerp.100.MenuServices100.toggle#MenuOptionActive" />
-                </method>
-            </resource>
-            <resource name="link">
-                <method type="post">
-                    <service name="growerp.100.MenuServices100.link#MenuItem" />
-                </method>
-            </resource>
-            <resource name="unlink">
-                <method type="post">
-                    <service name="growerp.100.MenuServices100.unlink#MenuItem" />
+                    <service name="growerp.100.MenuServices100.toggle#MenuItemActive" />
                 </method>
             </resource>
         </resource>
         
-        <resource name="MenuOptions">
+        <resource name="MenuItems">
             <resource name="reorder">
                 <method type="patch">
-                    <service name="growerp.100.MenuServices100.reorder#MenuOptions" />
+                    <service name="growerp.100.MenuServices100.reorder#MenuItems" />
                 </method>
             </resource>
         </resource>
