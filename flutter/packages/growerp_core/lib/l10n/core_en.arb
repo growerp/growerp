@@ -483,6 +483,10 @@
   "@theme": {
     "description": "Theme menu item"
   },
+  "colorScheme": "Color Scheme",
+  "@colorScheme": {
+    "description": "Color scheme picker dialog title"
+  },
   "timePeriods": "Time Periods",
   "@timePeriods": {
     "description": "Time periods menu item or section header"

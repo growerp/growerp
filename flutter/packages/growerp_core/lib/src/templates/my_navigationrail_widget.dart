@@ -28,7 +28,6 @@ Widget myNavigationRail(
 ) {
   final localizations = CoreLocalizations.of(context)!;
   List<NavigationRailDestination> items = [];
-  ThemeBloc themeBloc = context.read<ThemeBloc>();
   AuthBloc authBloc = context.read<AuthBloc>();
   Authenticate? auth = authBloc.state.authenticate;
 
@@ -143,18 +142,19 @@ Widget myNavigationRail(
                     groupAlignment: -0.85,
                     trailing: InkWell(
                       key: const Key('theme'),
-                      onTap: () => themeBloc.add(ThemeSwitch()),
+                      onTap: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) => const ThemePickerDialog(),
+                        );
+                      },
                       child: Column(
                         children: [
-                          Icon(
-                            size: 40,
-                            themeBloc.state.themeMode == ThemeMode.light
-                                ? Icons.light_mode
-                                : Icons.dark_mode,
-                          ),
+                          const Icon(Icons.palette, size: 40),
                           Text(
                             localizations.theme,
-                            style: const TextStyle(fontSize: 16),
+                            style: const TextStyle(fontSize: 14),
+                            textAlign: TextAlign.center,
                           ),
                         ],
                       ),
