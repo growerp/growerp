@@ -40,7 +40,7 @@ class AdminDashboardContent extends StatelessWidget {
             // Exclude the Main/Dashboard item itself (route '/'), About, and sub-items
             // Top-level items don't have routes starting with /accounting/ (those are sub-items)
             final dashboardOptions =
-                menuConfig.menuOptions
+                menuConfig.menuItems
                     .where(
                       (option) =>
                           option.isActive &&

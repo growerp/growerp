@@ -25,7 +25,7 @@ class CoreDashboard extends StatelessWidget {
             // Get dashboard items from menu configuration (top-level, active items only)
             // Exclude the Main/Dashboard item itself (route '/')
             final dashboardItems =
-                menuConfig.menuOptions
+                menuConfig.menuItems
                     .where(
                       (option) =>
                           option.isActive &&
@@ -54,8 +54,8 @@ class CoreDashboard extends StatelessWidget {
   }
 }
 
-class AuthenticatedDisplayMenuOption extends StatelessWidget {
-  const AuthenticatedDisplayMenuOption({
+class AuthenticatedDisplayMenuItem extends StatelessWidget {
+  const AuthenticatedDisplayMenuItem({
     super.key,
     required this.menuConfiguration,
     required this.menuIndex,
@@ -68,8 +68,8 @@ class AuthenticatedDisplayMenuOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Hidden API key widgets are now handled by DisplayMenuOption's _buildHiddenTestWidgets()
-    return DisplayMenuOption(
+    // Hidden API key widgets are now handled by DisplayMenuItem's _buildHiddenTestWidgets()
+    return DisplayMenuItem(
       menuConfiguration: menuConfiguration,
       menuIndex: menuIndex,
       actions: [

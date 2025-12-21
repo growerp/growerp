@@ -1,4 +1,3 @@
-export 'models/models.dart';
 export 'bloc/data_fetch_bloc.dart';
 export 'bloc/locale_bloc.dart';
 export 'bloc/theme_bloc.dart';

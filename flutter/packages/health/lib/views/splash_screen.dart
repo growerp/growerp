@@ -55,7 +55,7 @@ class _SplashScreenState extends State<SplashScreen> {
           // If not authenticated, show Login Screen (HomeForm)
           return HomeForm(
             menuConfiguration: const MenuConfiguration(
-              menuOptions: [],
+              menuItems: [],
               name: 'Login',
               appId: 'health',
             ),

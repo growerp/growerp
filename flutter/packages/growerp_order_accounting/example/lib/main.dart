@@ -66,17 +66,17 @@ const orderAccountingMenuConfig = MenuConfiguration(
   menuConfigurationId: 'ORDER_ACCOUNTING_EXAMPLE',
   appId: 'order_accounting_example',
   name: 'Order & Accounting Example Menu',
-  menuOptions: [
-    MenuOption(
-      menuOptionId: 'OA_MAIN',
+  menuItems: [
+    MenuItem(
+      menuItemId: 'OA_MAIN',
       title: 'Main',
       route: '/',
       iconName: 'dashboard',
       sequenceNum: 10,
       widgetName: 'OrderAccountingDashboard',
     ),
-    MenuOption(
-      menuOptionId: 'OA_ORDERS',
+    MenuItem(
+      menuItemId: 'OA_ORDERS',
       title: 'Orders',
       route: '/orders',
       iconName: 'shopping_cart',
@@ -92,32 +92,32 @@ const orderAccountingMenuConfig = MenuConfiguration(
         ),
       ],
     ),
-    MenuOption(
-      menuOptionId: 'OA_ACCOUNTING',
+    MenuItem(
+      menuItemId: 'OA_ACCOUNTING',
       title: 'Accounting',
       route: '/accounting',
       iconName: 'account_balance',
       sequenceNum: 30,
       widgetName: 'AccountingForm',
     ),
-    MenuOption(
-      menuOptionId: 'OA_SHIPMENTS',
+    MenuItem(
+      menuItemId: 'OA_SHIPMENTS',
       title: 'Shipments',
       route: '/shipments',
       iconName: 'local_shipping',
       sequenceNum: 40,
       widgetName: 'FinDocList',
     ),
-    MenuOption(
-      menuOptionId: 'OA_INVENTORY',
+    MenuItem(
+      menuItemId: 'OA_INVENTORY',
       title: 'Inventory',
       route: '/inventory',
       iconName: 'inventory',
       sequenceNum: 50,
       widgetName: 'LocationList',
     ),
-    MenuOption(
-      menuOptionId: 'OA_REQUESTS',
+    MenuItem(
+      menuItemId: 'OA_REQUESTS',
       title: 'Requests',
       route: '/requests',
       iconName: 'assignment',

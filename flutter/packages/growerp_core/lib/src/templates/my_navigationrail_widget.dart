@@ -24,7 +24,7 @@ Widget myNavigationRail(
   BuildContext context,
   Widget child,
   int menuIndex,
-  List<MenuOption> menu,
+  List<MenuItem> menu,
 ) {
   final localizations = CoreLocalizations.of(context)!;
   List<NavigationRailDestination> items = [];
@@ -50,7 +50,7 @@ Widget myNavigationRail(
         option.image!,
         width: 40,
         height: 40,
-        key: Key('icon_${option.menuOptionId}'),
+        key: Key('icon_${option.menuItemId}'),
         errorBuilder: (context, error, stackTrace) =>
             const Icon(Icons.circle, size: 40),
       );

@@ -69,7 +69,6 @@ export 'persona_model.dart';
 export 'content_plan_model.dart';
 export 'social_post_model.dart';
 export 'menu_item_model.dart';
-export 'menu_option_model.dart';
 export 'menu_configuration_model.dart';
 // Agent Manager models
 export 'agent_instance_model.dart';

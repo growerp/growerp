@@ -57,8 +57,8 @@ const activityMenuConfig = MenuConfiguration(
   menuConfigurationId: 'ACTIVITY_EXAMPLE',
   appId: 'activity_example',
   name: 'Activity Example Menu',
-  menuOptions: [
-    MenuOption(
+  menuItems: [
+    MenuItem(
       itemKey: 'ACT_MAIN',
       title: 'Main',
       route: '/',
@@ -66,7 +66,7 @@ const activityMenuConfig = MenuConfiguration(
       sequenceNum: 10,
       widgetName: 'ActivityDashboard',
     ),
-    MenuOption(
+    MenuItem(
       itemKey: 'ACT_TODO',
       title: 'To Do',
       route: '/todos',
@@ -74,7 +74,7 @@ const activityMenuConfig = MenuConfiguration(
       sequenceNum: 20,
       widgetName: 'ActivityList',
     ),
-    MenuOption(
+    MenuItem(
       itemKey: 'ACT_EVENTS',
       title: 'Events',
       route: '/events',

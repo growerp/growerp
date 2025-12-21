@@ -49,11 +49,14 @@ along with this software (see the LICENSE.md file). If not, see
         </index>
     </entity>
 
-    <!-- Menu Option Entity: Main menu entries linked to configuration -->
-    <entity entity-name="MenuOption" package="growerp.menu">
-        <field name="menuOptionId" type="id" is-pk="true"/>
+    <!-- Unified MenuItem Entity with recursive parent/children support -->
+    <entity entity-name="MenuItem" package="growerp.menu">
+        <field name="menuItemId" type="id" is-pk="true"/>
         <field name="menuConfigurationId" type="id">
-            <description>Links to menu configuration</description>
+            <description>Links to menu configuration (only set for top-level items)</description>
+        </field>
+        <field name="parentMenuItemId" type="id">
+            <description>Parent menu item for hierarchy (null for top-level items)</description>
         </field>
         <field name="itemKey" type="id">
             <description>Optional key for identification (e.g., 'dbCompany', 'dbOrders')</description>
@@ -86,38 +89,20 @@ along with this software (see the LICENSE.md file). If not, see
             <key-map field-name="menuConfigurationId"/>
         </relationship>
         
-    </entity>
-
-    <!-- Menu Option Item Entity: Junction table linking MenuOption to MenuItem (tabs) -->
-    <entity entity-name="MenuOptionItem" package="growerp.menu">
-        <field name="menuOptionId" type="id" is-pk="true"/>
-        <field name="menuItemId" type="id" is-pk="true"/>
-        <field name="sequenceNum" type="number-integer" default="10">
-            <description>Display order of tab within option</description>
-        </field>
+        <relationship type="one" title="Parent" related="growerp.menu.MenuItem" short-alias="parent">
+            <key-map field-name="parentMenuItemId" related="menuItemId"/>
+        </relationship>
         
-        <relationship type="one" title="Option" related="growerp.menu.MenuOption" short-alias="option">
-            <key-map field-name="menuOptionId"/>
+        <relationship type="many" title="Children" related="growerp.menu.MenuItem" short-alias="children">
+            <key-map field-name="menuItemId" related="parentMenuItemId"/>
         </relationship>
-        <relationship type="one" title="Item" related="growerp.menu.MenuItem" short-alias="item">
-            <key-map field-name="menuItemId"/>
-        </relationship>
-    </entity>
-
-    <!-- Menu Item Entity: Tab/child items that can be linked to options -->
-    <entity entity-name="MenuItem" package="growerp.menu">
-        <field name="menuItemId" type="id" is-pk="true"/>
-        <field name="title" type="text-medium"/>
-        <field name="iconName" type="text-short">
-            <description>Icon identifier from icon registry (e.g., 'home', 'business')</description>
-        </field>
-        <field name="widgetName" type="text-medium">
-            <description>Widget/Form class name for GoRouter (e.g., 'CompanyList', 'ProductList')</description>
-        </field>
-        <field name="image" type="text-medium">
-            <description>Path to unselected image</description>
-        </field>
-        <field name="isActive" type="text-indicator" default="'Y'"/>
+        
+        <index name="MENU_ITEM_PARENT" unique="false">
+            <index-field name="parentMenuItemId"/>
+        </index>
+        <index name="MENU_ITEM_CONFIG" unique="false">
+            <index-field name="menuConfigurationId"/>
+        </index>
     </entity>
 
 </entities>

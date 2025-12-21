@@ -48,8 +48,8 @@ const inventoryMenuConfig = MenuConfiguration(
   menuConfigurationId: 'INVENTORY_EXAMPLE',
   appId: 'inventory_example',
   name: 'Inventory Example Menu',
-  menuOptions: [
-    MenuOption(
+  menuItems: [
+    MenuItem(
       itemKey: 'INV_MAIN',
       title: 'Main',
       route: '/',
@@ -57,7 +57,7 @@ const inventoryMenuConfig = MenuConfiguration(
       sequenceNum: 10,
       widgetName: 'InventoryDashboard',
     ),
-    MenuOption(
+    MenuItem(
       itemKey: 'INV_ASSETS',
       title: 'Assets',
       route: '/assets',
@@ -65,7 +65,7 @@ const inventoryMenuConfig = MenuConfiguration(
       sequenceNum: 20,
       widgetName: 'AssetList',
     ),
-    MenuOption(
+    MenuItem(
       itemKey: 'INV_LOCATIONS',
       title: 'WH Locations',
       route: '/locations',

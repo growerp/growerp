@@ -15,13 +15,13 @@ along with this software (see the LICENSE.md file). If not, see
 <entities xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/entity-definition-2.1.xsd">
 
-    <!-- Menu Configuration with Options View -->
-    <view-entity entity-name="MenuConfigurationAndOptions" package="growerp.menu">
-        <description>View to retrieve menu configurations with their options</description>
+    <!-- Menu Configuration with Top-Level Items View -->
+    <view-entity entity-name="MenuConfigurationAndItems" package="growerp.menu">
+        <description>View to retrieve menu configurations with their top-level menu items</description>
         
         <member-entity entity-alias="CONFIG" entity-name="growerp.menu.MenuConfiguration"/>
         
-        <member-entity entity-alias="OPTION" entity-name="growerp.menu.MenuOption"
+        <member-entity entity-alias="ITEM" entity-name="growerp.menu.MenuItem"
             join-from-alias="CONFIG" join-optional="true">
             <key-map field-name="menuConfigurationId"/>
         </member-entity>
@@ -35,56 +35,55 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="configIsActive" field="isActive" entity-alias="CONFIG"/>
         <alias name="configCreatedDate" field="createdDate" entity-alias="CONFIG"/>
         
-        <!-- Menu option fields -->
-        <alias name="menuOptionId" entity-alias="OPTION"/>
-        <alias name="itemKey" entity-alias="OPTION"/>
-        <alias name="title" entity-alias="OPTION"/>
-        <alias name="route" entity-alias="OPTION"/>
-        <alias name="iconName" entity-alias="OPTION"/>
-        <alias name="widgetName" entity-alias="OPTION"/>
-        <alias name="image" entity-alias="OPTION"/>
-        <alias name="selectedImage" entity-alias="OPTION"/>
-        <alias name="userGroupsJson" entity-alias="OPTION"/>
-        <alias name="sequenceNum" entity-alias="OPTION"/>
-        <alias name="optionIsActive" field="isActive" entity-alias="OPTION"/>
+        <!-- Menu item fields -->
+        <alias name="menuItemId" entity-alias="ITEM"/>
+        <alias name="parentMenuItemId" entity-alias="ITEM"/>
+        <alias name="itemKey" entity-alias="ITEM"/>
+        <alias name="title" entity-alias="ITEM"/>
+        <alias name="route" entity-alias="ITEM"/>
+        <alias name="iconName" entity-alias="ITEM"/>
+        <alias name="widgetName" entity-alias="ITEM"/>
+        <alias name="image" entity-alias="ITEM"/>
+        <alias name="selectedImage" entity-alias="ITEM"/>
+        <alias name="userGroupsJson" entity-alias="ITEM"/>
+        <alias name="sequenceNum" entity-alias="ITEM"/>
+        <alias name="itemIsActive" field="isActive" entity-alias="ITEM"/>
     </view-entity>
 
-    <!-- Menu Option with Items View (joins through junction table) -->
-    <view-entity entity-name="MenuOptionAndItems" package="growerp.menu">
-        <description>View to retrieve menu options with their tab items</description>
+    <!-- Menu Item with Children View (for hierarchical queries) -->
+    <view-entity entity-name="MenuItemAndChildren" package="growerp.menu">
+        <description>View to retrieve menu items with their child items</description>
         
-        <member-entity entity-alias="OPTION" entity-name="growerp.menu.MenuOption"/>
+        <member-entity entity-alias="ITEM" entity-name="growerp.menu.MenuItem"/>
         
-        <member-entity entity-alias="OPTITEM" entity-name="growerp.menu.MenuOptionItem"
-            join-from-alias="OPTION" join-optional="true">
-            <key-map field-name="menuOptionId"/>
+        <member-entity entity-alias="CHILD" entity-name="growerp.menu.MenuItem"
+            join-from-alias="ITEM" join-optional="true">
+            <key-map field-name="menuItemId" related="parentMenuItemId"/>
         </member-entity>
         
-        <member-entity entity-alias="ITEM" entity-name="growerp.menu.MenuItem"
-            join-from-alias="OPTITEM" join-optional="true">
-            <key-map field-name="menuItemId"/>
-        </member-entity>
-        
-        <!-- Option fields -->
-        <alias name="menuOptionId" entity-alias="OPTION"/>
-        <alias name="menuConfigurationId" entity-alias="OPTION"/>
-        <alias name="optionTitle" field="title" entity-alias="OPTION"/>
-        <alias name="optionRoute" field="route" entity-alias="OPTION"/>
-        <alias name="optionIconName" field="iconName" entity-alias="OPTION"/>
-        <alias name="optionWidgetName" field="widgetName" entity-alias="OPTION"/>
-        <alias name="optionSequenceNum" field="sequenceNum" entity-alias="OPTION"/>
-        <alias name="optionIsActive" field="isActive" entity-alias="OPTION"/>
-        
-        <!-- Junction table fields -->
-        <alias name="itemSequenceNum" field="sequenceNum" entity-alias="OPTITEM"/>
-        
-        <!-- Item fields -->
+        <!-- Parent item fields -->
         <alias name="menuItemId" entity-alias="ITEM"/>
-        <alias name="itemTitle" field="title" entity-alias="ITEM"/>
-        <alias name="itemIconName" field="iconName" entity-alias="ITEM"/>
-        <alias name="itemWidgetName" field="widgetName" entity-alias="ITEM"/>
-        <alias name="itemImage" field="image" entity-alias="ITEM"/>
+        <alias name="menuConfigurationId" entity-alias="ITEM"/>
+        <alias name="parentMenuItemId" entity-alias="ITEM"/>
+        <alias name="itemKey" entity-alias="ITEM"/>
+        <alias name="title" entity-alias="ITEM"/>
+        <alias name="route" entity-alias="ITEM"/>
+        <alias name="iconName" entity-alias="ITEM"/>
+        <alias name="widgetName" entity-alias="ITEM"/>
+        <alias name="image" entity-alias="ITEM"/>
+        <alias name="selectedImage" entity-alias="ITEM"/>
+        <alias name="userGroupsJson" entity-alias="ITEM"/>
+        <alias name="sequenceNum" entity-alias="ITEM"/>
         <alias name="itemIsActive" field="isActive" entity-alias="ITEM"/>
+        
+        <!-- Child item fields -->
+        <alias name="childMenuItemId" field="menuItemId" entity-alias="CHILD"/>
+        <alias name="childTitle" field="title" entity-alias="CHILD"/>
+        <alias name="childIconName" field="iconName" entity-alias="CHILD"/>
+        <alias name="childWidgetName" field="widgetName" entity-alias="CHILD"/>
+        <alias name="childImage" field="image" entity-alias="CHILD"/>
+        <alias name="childSequenceNum" field="sequenceNum" entity-alias="CHILD"/>
+        <alias name="childIsActive" field="isActive" entity-alias="CHILD"/>
     </view-entity>
 
 </entities>

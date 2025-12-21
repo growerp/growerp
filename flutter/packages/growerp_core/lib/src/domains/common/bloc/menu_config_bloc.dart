@@ -41,14 +41,14 @@ class MenuConfigBloc extends Bloc<MenuConfigEvent, MenuConfigState> {
   MenuConfigBloc(this.restClient, this.appId) : super(const MenuConfigState()) {
     on<MenuConfigLoad>(_onMenuConfigLoad);
     on<MenuConfigUpdateLocal>(_onMenuConfigUpdateLocal);
-    on<MenuOptionCreate>(_onMenuOptionCreate);
-    on<MenuOptionUpdate>(_onMenuOptionUpdate);
-    on<MenuOptionDelete>(_onMenuOptionDelete);
-    on<MenuOptionsReorder>(
-      _onMenuOptionsReorder,
+    on<MenuItemCreate>(_onMenuItemCreate);
+    on<MenuItemUpdate>(_onMenuItemUpdate);
+    on<MenuItemDelete>(_onMenuItemDelete);
+    on<MenuItemsReorder>(
+      _onMenuItemsReorder,
       transformer: menuConfigDroppable(const Duration(milliseconds: 300)),
     );
-    on<MenuOptionToggleActive>(_onMenuOptionToggleActive);
+    on<MenuItemToggleActive>(_onMenuItemToggleActive);
     on<MenuItemLink>(_onMenuItemLink);
     on<MenuItemUnlink>(_onMenuItemUnlink);
     on<MenuConfigClone>(_onMenuConfigClone);
@@ -106,14 +106,14 @@ class MenuConfigBloc extends Bloc<MenuConfigEvent, MenuConfigState> {
   }
 
   /// Create new menu option (main menu entry)
-  Future<void> _onMenuOptionCreate(
-    MenuOptionCreate event,
+  Future<void> _onMenuItemCreate(
+    MenuItemCreate event,
     Emitter<MenuConfigState> emit,
   ) async {
     try {
       emit(state.copyWith(status: MenuConfigStatus.loading));
 
-      await restClient.createMenuOption(
+      await restClient.createMenuItem(
         menuConfigurationId: event.menuConfigurationId,
         itemKey: event.menuOption.itemKey,
         title: event.menuOption.title,
@@ -152,15 +152,15 @@ class MenuConfigBloc extends Bloc<MenuConfigEvent, MenuConfigState> {
   }
 
   /// Update existing menu option
-  Future<void> _onMenuOptionUpdate(
-    MenuOptionUpdate event,
+  Future<void> _onMenuItemUpdate(
+    MenuItemUpdate event,
     Emitter<MenuConfigState> emit,
   ) async {
     try {
       emit(state.copyWith(status: MenuConfigStatus.loading));
 
-      await restClient.updateMenuOption(
-        menuOptionId: event.menuOptionId,
+      await restClient.updateMenuItem(
+        menuItemId: event.menuItemId,
         itemKey: event.menuOption.itemKey,
         title: event.menuOption.title,
         route: event.menuOption.route,
@@ -197,14 +197,14 @@ class MenuConfigBloc extends Bloc<MenuConfigEvent, MenuConfigState> {
   }
 
   /// Delete menu option
-  Future<void> _onMenuOptionDelete(
-    MenuOptionDelete event,
+  Future<void> _onMenuItemDelete(
+    MenuItemDelete event,
     Emitter<MenuConfigState> emit,
   ) async {
     try {
       emit(state.copyWith(status: MenuConfigStatus.loading));
 
-      await restClient.deleteMenuOption(menuOptionId: event.menuOptionId);
+      await restClient.deleteMenuItem(menuItemId: event.menuItemId);
 
       // Reload menu configuration with userVersion=true to get user-specific config
       final menuConfig = await restClient.getMenuConfiguration(
@@ -230,16 +230,16 @@ class MenuConfigBloc extends Bloc<MenuConfigEvent, MenuConfigState> {
   }
 
   /// Reorder menu options (for drag and drop)
-  Future<void> _onMenuOptionsReorder(
-    MenuOptionsReorder event,
+  Future<void> _onMenuItemsReorder(
+    MenuItemsReorder event,
     Emitter<MenuConfigState> emit,
   ) async {
     try {
       emit(state.copyWith(status: MenuConfigStatus.loading));
 
-      await restClient.reorderMenuOptions(
+      await restClient.reorderMenuItems(
         menuConfigurationId: event.menuConfigurationId,
-        optionSequences: event.optionSequences,
+        itemSequences: event.optionSequences,
       );
 
       // Reload menu configuration with userVersion=true to get user-specific config
@@ -266,14 +266,14 @@ class MenuConfigBloc extends Bloc<MenuConfigEvent, MenuConfigState> {
   }
 
   /// Toggle menu option active status
-  Future<void> _onMenuOptionToggleActive(
-    MenuOptionToggleActive event,
+  Future<void> _onMenuItemToggleActive(
+    MenuItemToggleActive event,
     Emitter<MenuConfigState> emit,
   ) async {
     try {
       emit(state.copyWith(status: MenuConfigStatus.loading));
 
-      await restClient.toggleMenuOptionActive(menuOptionId: event.menuOptionId);
+      await restClient.toggleMenuItemActive(menuItemId: event.menuItemId);
 
       // Reload menu configuration with userVersion=true to get user-specific config
       final menuConfig = await restClient.getMenuConfiguration(
@@ -298,7 +298,8 @@ class MenuConfigBloc extends Bloc<MenuConfigEvent, MenuConfigState> {
     }
   }
 
-  /// Link a MenuItem (tab) to a MenuOption
+  /// Add a child MenuItem (tab) to a parent MenuItem
+  /// In the unified model, this creates a new MenuItem with parentMenuItemId set
   Future<void> _onMenuItemLink(
     MenuItemLink event,
     Emitter<MenuConfigState> emit,
@@ -306,12 +307,12 @@ class MenuConfigBloc extends Bloc<MenuConfigEvent, MenuConfigState> {
     try {
       emit(state.copyWith(status: MenuConfigStatus.loading));
 
-      await restClient.linkMenuItem(
-        menuOptionId: event.menuOptionId,
-        menuItemId: event.menuItemId,
-        sequenceNum: event.sequenceNum,
-        title: event.title,
+      await restClient.createMenuItem(
+        menuConfigurationId: state.menuConfiguration!.menuConfigurationId!,
+        parentMenuItemId: event.parentMenuItemId,
+        title: event.title ?? 'New Tab',
         widgetName: event.widgetName,
+        sequenceNum: event.sequenceNum,
       );
 
       // Reload menu configuration with userVersion=true to get user-specific config
@@ -324,7 +325,7 @@ class MenuConfigBloc extends Bloc<MenuConfigEvent, MenuConfigState> {
         state.copyWith(
           status: MenuConfigStatus.success,
           menuConfiguration: menuConfig,
-          message: 'Menu item linked successfully',
+          message: 'Child menu item added successfully',
         ),
       );
     } on DioException catch (e) {
@@ -337,7 +338,8 @@ class MenuConfigBloc extends Bloc<MenuConfigEvent, MenuConfigState> {
     }
   }
 
-  /// Unlink a MenuItem (tab) from a MenuOption
+  /// Remove a child MenuItem (tab) from a parent MenuItem
+  /// In the unified model, this deletes the child MenuItem
   Future<void> _onMenuItemUnlink(
     MenuItemUnlink event,
     Emitter<MenuConfigState> emit,
@@ -345,10 +347,7 @@ class MenuConfigBloc extends Bloc<MenuConfigEvent, MenuConfigState> {
     try {
       emit(state.copyWith(status: MenuConfigStatus.loading));
 
-      await restClient.unlinkMenuItem(
-        menuOptionId: event.menuOptionId,
-        menuItemId: event.menuItemId,
-      );
+      await restClient.deleteMenuItem(menuItemId: event.childMenuItemId);
 
       // Reload menu configuration with userVersion=true to get user-specific config
       final menuConfig = await restClient.getMenuConfiguration(
@@ -360,7 +359,7 @@ class MenuConfigBloc extends Bloc<MenuConfigEvent, MenuConfigState> {
         state.copyWith(
           status: MenuConfigStatus.success,
           menuConfiguration: menuConfig,
-          message: 'Menu item unlinked successfully',
+          message: 'Child menu item removed successfully',
         ),
       );
     } on DioException catch (e) {

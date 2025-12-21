@@ -49,32 +49,32 @@ const catalogMenuConfig = MenuConfiguration(
   menuConfigurationId: 'CATALOG_EXAMPLE',
   appId: 'catalog_example',
   name: 'Catalog Example Menu',
-  menuOptions: [
-    MenuOption(
-      menuOptionId: 'CATALOG_MAIN',
+  menuItems: [
+    MenuItem(
+      menuItemId: 'CATALOG_MAIN',
       title: 'Catalog',
       route: '/',
       iconName: 'category',
       sequenceNum: 10,
       widgetName: 'CatalogDashboard',
     ),
-    MenuOption(
-      menuOptionId: 'CATALOG_PRODUCTS',
+    MenuItem(
+      menuItemId: 'CATALOG_PRODUCTS',
       title: 'Products',
       route: '/products',
       iconName: 'products',
       sequenceNum: 20,
       widgetName: 'ProductList',
     ),
-    MenuOption(
-      menuOptionId: 'CATALOG_CATEGORIES',
+    MenuItem(
+      menuItemId: 'CATALOG_CATEGORIES',
       title: 'Categories',
       route: '/categories',
       iconName: 'folder',
       widgetName: 'CategoryList',
     ),
-    MenuOption(
-      menuOptionId: 'CATALOG_SUBSCRIPTIONS',
+    MenuItem(
+      menuItemId: 'CATALOG_SUBSCRIPTIONS',
       title: 'Subscriptions',
       route: '/subscriptions',
       iconName: 'subscriptions',
@@ -112,7 +112,7 @@ class CatalogDashboard extends StatelessWidget {
         }
 
         final authenticate = state.authenticate!;
-        final dashboardItems = catalogMenuConfig.menuOptions
+        final dashboardItems = catalogMenuConfig.menuItems
             .where((item) => item.route != '/' && item.route != null)
             .toList();
 
@@ -132,7 +132,7 @@ class CatalogDashboard extends StatelessWidget {
     );
   }
 
-  String _getStatsForItem(MenuOption item, Authenticate auth) {
+  String _getStatsForItem(MenuItem item, Authenticate auth) {
     switch (item.route) {
       case '/products':
         return 'Products: ${auth.stats?.products ?? 0}';

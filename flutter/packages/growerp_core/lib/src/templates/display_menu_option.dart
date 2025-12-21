@@ -22,7 +22,7 @@ import 'package:growerp_models/growerp_models.dart';
 import 'package:universal_io/io.dart';
 import '../../growerp_core.dart';
 
-/// DisplayMenuOption - Renders menu-based navigation with GoRouter
+/// DisplayMenuItem - Renders menu-based navigation with GoRouter
 ///
 /// This widget handles:
 /// - Menu rendering (simple pages vs tabbed pages)
@@ -31,7 +31,7 @@ import '../../growerp_core.dart';
 /// - Notification handling
 /// - Drawer and navigation rail integration
 /// - Security filtering by user groups
-class DisplayMenuOption extends StatefulWidget {
+class DisplayMenuItem extends StatefulWidget {
   final MenuConfiguration menuConfiguration;
   final int menuIndex;
   final int? tabIndex;
@@ -47,7 +47,7 @@ class DisplayMenuOption extends StatefulWidget {
   /// Optional Gemini API key for AI navigation
   final String? aiApiKey;
 
-  const DisplayMenuOption({
+  const DisplayMenuItem({
     super.key,
     required this.menuConfiguration,
     required this.menuIndex,
@@ -61,10 +61,10 @@ class DisplayMenuOption extends StatefulWidget {
   });
 
   @override
-  DisplayMenuOptionState createState() => DisplayMenuOptionState();
+  DisplayMenuItemState createState() => DisplayMenuItemState();
 }
 
-class DisplayMenuOptionState extends State<DisplayMenuOption>
+class DisplayMenuItemState extends State<DisplayMenuItem>
     with TickerProviderStateMixin {
   late int tabIndex;
   List<MenuItem> tabItems = [];
@@ -75,7 +75,7 @@ class DisplayMenuOptionState extends State<DisplayMenuOption>
   String currentRoute = '';
   late bool isPhone;
   late AuthBloc authBloc;
-  List<MenuOption> menuList = [];
+  List<MenuItem> menuList = [];
   int menuIndex = 0;
   CoreLocalizations? _localizations;
   bool _isInitialized = false;
@@ -104,7 +104,7 @@ class DisplayMenuOptionState extends State<DisplayMenuOption>
   }
 
   @override
-  void didUpdateWidget(DisplayMenuOption oldWidget) {
+  void didUpdateWidget(DisplayMenuItem oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.menuIndex != oldWidget.menuIndex ||
         widget.menuConfiguration != oldWidget.menuConfiguration) {
@@ -116,29 +116,28 @@ class DisplayMenuOptionState extends State<DisplayMenuOption>
     authBloc = context.read<AuthBloc>();
 
     // Get the target menu option
-    MenuOption? targetOption;
+    MenuItem? targetOption;
 
     if (widget.menuIndex >= 0 &&
-        widget.menuIndex < menuConfiguration.menuOptions.length) {
-      targetOption = menuConfiguration.menuOptions[widget.menuIndex];
+        widget.menuIndex < menuConfiguration.menuItems.length) {
+      targetOption = menuConfiguration.menuItems[widget.menuIndex];
     }
 
     // Filter menu options: Keep only accessible AND active items
     int newIndex = 0;
     menuList = [];
 
-    for (final option in menuConfiguration.menuOptions) {
+    for (final option in menuConfiguration.menuItems) {
       // Only add if user has access AND it's active
       if (_hasAccess(option) && option.isActive) {
         menuList.add(option);
 
         // Check if this is the item we should highlight
-        // Use menuOptionId if available, otherwise fall back to route or itemKey
+        // Use menuItemId if available, otherwise fall back to route or itemKey
         if (targetOption != null) {
           bool isMatch = false;
-          if (option.menuOptionId != null &&
-              targetOption.menuOptionId != null) {
-            isMatch = option.menuOptionId == targetOption.menuOptionId;
+          if (option.menuItemId != null && targetOption.menuItemId != null) {
+            isMatch = option.menuItemId == targetOption.menuItemId;
           } else if (option.route != null && targetOption.route != null) {
             isMatch = option.route == targetOption.route;
           } else if (option.itemKey != null && targetOption.itemKey != null) {
@@ -155,8 +154,8 @@ class DisplayMenuOptionState extends State<DisplayMenuOption>
     // Fallback if no menu options accessible
     if (menuList.isEmpty) {
       menuList = [
-        MenuOption(
-          menuOptionId: 'no-access',
+        MenuItem(
+          menuItemId: 'no-access',
           menuConfigurationId: menuConfiguration.menuConfigurationId,
           title: _localizations!.noAccess,
           route: '/',
@@ -165,8 +164,8 @@ class DisplayMenuOptionState extends State<DisplayMenuOption>
           isActive: true,
         ),
         // Navigation rail needs at least 2 items
-        MenuOption(
-          menuOptionId: 'no-access-2',
+        MenuItem(
+          menuItemId: 'no-access-2',
           menuConfigurationId: menuConfiguration.menuConfigurationId,
           title: '',
           route: '/',
@@ -183,14 +182,14 @@ class DisplayMenuOptionState extends State<DisplayMenuOption>
       menuIndex = 0;
     }
 
-    MenuOption menuOption = menuList[menuIndex];
+    MenuItem menuOption = menuList[menuIndex];
 
     // Get child menu items (tabs) from the option's children
     tabItems =
         (menuOption.children ?? [])
             .where((item) => item.isActive && _hasAccessToItem(item))
             .toList()
-          ..sort((a, b) => (a.sequenceNum ?? 0).compareTo(b.sequenceNum ?? 0));
+          ..sort((a, b) => a.sequenceNum.compareTo(b.sequenceNum));
 
     title = HelperFunctions.translateMenuTitle(
       _localizations!,
@@ -216,7 +215,7 @@ class DisplayMenuOptionState extends State<DisplayMenuOption>
     }
   }
 
-  bool _hasAccess(MenuOption option) {
+  bool _hasAccess(MenuItem option) {
     if (option.userGroups == null || option.userGroups!.isEmpty) {
       return true; // No restrictions
     }
@@ -227,7 +226,7 @@ class DisplayMenuOptionState extends State<DisplayMenuOption>
 
   bool _hasAccessToItem(MenuItem item) {
     // MenuItems don't have userGroups in the new model
-    // Access is controlled at the MenuOption level
+    // Access is controlled at the MenuItem level
     return true;
   }
 

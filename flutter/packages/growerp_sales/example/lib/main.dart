@@ -48,8 +48,8 @@ const salesMenuConfig = MenuConfiguration(
   menuConfigurationId: 'SALES_EXAMPLE',
   appId: 'sales_example',
   name: 'Sales Example Menu',
-  menuOptions: [
-    MenuOption(
+  menuItems: [
+    MenuItem(
       itemKey: 'SALES_MAIN',
       title: 'Main',
       route: '/',
@@ -57,7 +57,7 @@ const salesMenuConfig = MenuConfiguration(
       sequenceNum: 10,
       widgetName: 'SalesDashboard',
     ),
-    MenuOption(
+    MenuItem(
       itemKey: 'SALES_CRM',
       title: 'Opportunities',
       route: '/crm',

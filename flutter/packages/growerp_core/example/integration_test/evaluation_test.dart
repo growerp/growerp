@@ -70,25 +70,25 @@ void main() {
           menuConfigurationId: 'CORE_EXAMPLE',
           appId: 'core_example',
           name: 'Core Example Menu',
-          menuOptions: [
-            MenuOption(
-              menuOptionId: 'CORE_MAIN',
+          menuItems: [
+            MenuItem(
+              menuItemId: 'CORE_MAIN',
               title: 'Main',
               route: '/',
               iconName: 'dashboard',
               sequenceNum: 10,
               widgetName: 'CoreDashboard',
             ),
-            MenuOption(
-              menuOptionId: 'CORE_COMPANY',
+            MenuItem(
+              menuItemId: 'CORE_COMPANY',
               title: 'Organization',
               route: '/company',
               iconName: 'business',
               sequenceNum: 20,
               widgetName: 'CoreDashboard',
             ),
-            MenuOption(
-              menuOptionId: 'CORE_USER',
+            MenuItem(
+              menuItemId: 'CORE_USER',
               title: 'Logged in User',
               route: '/user',
               iconName: 'person',
@@ -208,25 +208,25 @@ void main() {
         menuConfigurationId: 'CORE_EXAMPLE',
         appId: 'core_example',
         name: 'Core Example Menu',
-        menuOptions: [
-          MenuOption(
-            menuOptionId: 'CORE_MAIN',
+        menuItems: [
+          MenuItem(
+            menuItemId: 'CORE_MAIN',
             title: 'Main',
             route: '/',
             iconName: 'dashboard',
             sequenceNum: 10,
             widgetName: 'CoreDashboard',
           ),
-          MenuOption(
-            menuOptionId: 'CORE_COMPANY',
+          MenuItem(
+            menuItemId: 'CORE_COMPANY',
             title: 'Organization',
             route: '/company',
             iconName: 'business',
             sequenceNum: 20,
             widgetName: 'CoreDashboard',
           ),
-          MenuOption(
-            menuOptionId: 'CORE_USER',
+          MenuItem(
+            menuItemId: 'CORE_USER',
             title: 'Logged in User',
             route: '/user',
             iconName: 'person',
@@ -268,25 +268,25 @@ void main() {
           menuConfigurationId: 'CORE_EXAMPLE',
           appId: 'core_example',
           name: 'Core Example Menu',
-          menuOptions: [
-            MenuOption(
-              menuOptionId: 'CORE_MAIN',
+          menuItems: [
+            MenuItem(
+              menuItemId: 'CORE_MAIN',
               title: 'Main',
               route: '/',
               iconName: 'dashboard',
               sequenceNum: 10,
               widgetName: 'CoreDashboard',
             ),
-            MenuOption(
-              menuOptionId: 'CORE_COMPANY',
+            MenuItem(
+              menuItemId: 'CORE_COMPANY',
               title: 'Organization',
               route: '/company',
               iconName: 'business',
               sequenceNum: 20,
               widgetName: 'CoreDashboard',
             ),
-            MenuOption(
-              menuOptionId: 'CORE_USER',
+            MenuItem(
+              menuItemId: 'CORE_USER',
               title: 'Logged in User',
               route: '/user',
               iconName: 'person',

@@ -19,17 +19,17 @@ import 'package:growerp_core/l10n/generated/core_localizations.dart';
 import 'package:growerp_models/growerp_models.dart';
 import '../domains/domains.dart';
 
-Widget? myDrawer(BuildContext context, bool isPhone, List<MenuOption> menu) {
+Widget? myDrawer(BuildContext context, bool isPhone, List<MenuItem> menu) {
   final localizations = CoreLocalizations.of(context)!;
   ThemeBloc themeBloc = context.read<ThemeBloc>();
   AuthBloc authBloc = context.read<AuthBloc>();
   Authenticate? auth = authBloc.state.authenticate;
 
   // Add theme option to menu
-  List<MenuOption> options = List.from(menu);
+  List<MenuItem> options = List.from(menu);
   options.add(
-    MenuOption(
-      menuOptionId: 'theme',
+    MenuItem(
+      menuItemId: 'theme',
       menuConfigurationId: 'system',
       title: localizations.theme,
       route: 'theme',

@@ -47,46 +47,43 @@ class MenuConfigUpdateLocal extends MenuConfigEvent {
 }
 
 /// Create new menu option (main menu entry)
-class MenuOptionCreate extends MenuConfigEvent {
-  const MenuOptionCreate({
+class MenuItemCreate extends MenuConfigEvent {
+  const MenuItemCreate({
     required this.menuConfigurationId,
     required this.menuOption,
   });
 
   final String menuConfigurationId;
-  final MenuOption menuOption;
+  final MenuItem menuOption;
 
   @override
   List<Object?> get props => [menuConfigurationId, menuOption];
 }
 
 /// Update existing menu option
-class MenuOptionUpdate extends MenuConfigEvent {
-  const MenuOptionUpdate({
-    required this.menuOptionId,
-    required this.menuOption,
-  });
+class MenuItemUpdate extends MenuConfigEvent {
+  const MenuItemUpdate({required this.menuItemId, required this.menuOption});
 
-  final String menuOptionId;
-  final MenuOption menuOption;
+  final String menuItemId;
+  final MenuItem menuOption;
 
   @override
-  List<Object?> get props => [menuOptionId, menuOption];
+  List<Object?> get props => [menuItemId, menuOption];
 }
 
 /// Delete menu option
-class MenuOptionDelete extends MenuConfigEvent {
-  const MenuOptionDelete(this.menuOptionId);
+class MenuItemDelete extends MenuConfigEvent {
+  const MenuItemDelete(this.menuItemId);
 
-  final String menuOptionId;
+  final String menuItemId;
 
   @override
-  List<Object?> get props => [menuOptionId];
+  List<Object?> get props => [menuItemId];
 }
 
 /// Reorder menu options (drag and drop)
-class MenuOptionsReorder extends MenuConfigEvent {
-  const MenuOptionsReorder({
+class MenuItemsReorder extends MenuConfigEvent {
+  const MenuItemsReorder({
     required this.menuConfigurationId,
     required this.optionSequences,
   });
@@ -99,50 +96,41 @@ class MenuOptionsReorder extends MenuConfigEvent {
 }
 
 /// Toggle menu option active status
-class MenuOptionToggleActive extends MenuConfigEvent {
-  const MenuOptionToggleActive(this.menuOptionId);
+class MenuItemToggleActive extends MenuConfigEvent {
+  const MenuItemToggleActive(this.menuItemId);
 
-  final String menuOptionId;
+  final String menuItemId;
 
   @override
-  List<Object?> get props => [menuOptionId];
+  List<Object?> get props => [menuItemId];
 }
 
-/// Link a MenuItem (tab) to a MenuOption
+/// Add a child MenuItem (tab) to a parent MenuItem
 class MenuItemLink extends MenuConfigEvent {
   const MenuItemLink({
-    required this.menuOptionId,
-    required this.menuItemId,
+    required this.parentMenuItemId,
     this.sequenceNum,
     this.title,
     this.widgetName,
   });
 
-  final String menuOptionId;
-  final String menuItemId;
+  final String parentMenuItemId;
   final int? sequenceNum;
   final String? title;
   final String? widgetName;
 
   @override
-  List<Object?> get props => [
-    menuOptionId,
-    menuItemId,
-    sequenceNum,
-    title,
-    widgetName,
-  ];
+  List<Object?> get props => [parentMenuItemId, sequenceNum, title, widgetName];
 }
 
-/// Unlink a MenuItem (tab) from a MenuOption
+/// Remove a child MenuItem (tab) from parent
 class MenuItemUnlink extends MenuConfigEvent {
-  const MenuItemUnlink({required this.menuOptionId, required this.menuItemId});
+  const MenuItemUnlink({required this.childMenuItemId});
 
-  final String menuOptionId;
-  final String menuItemId;
+  final String childMenuItemId;
 
   @override
-  List<Object?> get props => [menuOptionId, menuItemId];
+  List<Object?> get props => [childMenuItemId];
 }
 
 /// Clone menu configuration for user customization

@@ -65,57 +65,57 @@ const outreachMenuConfig = MenuConfiguration(
   menuConfigurationId: 'OUTREACH_EXAMPLE',
   appId: 'outreach_example',
   name: 'Outreach Example Menu',
-  menuOptions: [
-    MenuOption(
-      menuOptionId: 'OUT_MAIN',
+  menuItems: [
+    MenuItem(
+      menuItemId: 'OUT_MAIN',
       title: 'Main',
       route: '/',
       iconName: 'dashboard',
       sequenceNum: 10,
       widgetName: 'OutreachDashboard',
     ),
-    MenuOption(
-      menuOptionId: 'OUT_CAMPAIGNS',
+    MenuItem(
+      menuItemId: 'OUT_CAMPAIGNS',
       title: 'Campaigns',
       route: '/campaigns',
       iconName: 'rocket_launch',
       sequenceNum: 20,
       widgetName: 'CampaignListScreen',
     ),
-    MenuOption(
-      menuOptionId: 'OUT_MESSAGES',
+    MenuItem(
+      menuItemId: 'OUT_MESSAGES',
       title: 'Messages',
       route: '/messages',
       iconName: 'outbox',
       sequenceNum: 30,
       widgetName: 'OutreachMessageList',
     ),
-    MenuOption(
-      menuOptionId: 'OUT_AUTOMATION',
+    MenuItem(
+      menuItemId: 'OUT_AUTOMATION',
       title: 'Automation',
       route: '/automation',
       iconName: 'smart_toy',
       sequenceNum: 40,
       widgetName: 'AutomationScreen',
     ),
-    MenuOption(
-      menuOptionId: 'OUT_WEBSITE',
+    MenuItem(
+      menuItemId: 'OUT_WEBSITE',
       title: 'Landing Page',
       route: '/website',
       iconName: 'web',
       sequenceNum: 50,
       widgetName: 'LandingPageList',
     ),
-    MenuOption(
-      menuOptionId: 'OUT_LEADS',
+    MenuItem(
+      menuItemId: 'OUT_LEADS',
       title: 'Leads',
       route: '/leads',
       iconName: 'person_search',
       sequenceNum: 60,
       widgetName: 'UserList',
     ),
-    MenuOption(
-      menuOptionId: 'OUT_PLATFORMS',
+    MenuItem(
+      menuItemId: 'OUT_PLATFORMS',
       title: 'Platforms',
       route: '/platforms',
       iconName: 'hub',
@@ -155,7 +155,7 @@ class OutreachDashboard extends StatelessWidget {
           return const LoadingIndicator();
         }
 
-        final items = outreachMenuConfig.menuOptions
+        final items = outreachMenuConfig.menuItems
             .where((item) => item.route != '/')
             .toList();
 

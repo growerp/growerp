@@ -64,7 +64,7 @@ class MenuItemListDialogState extends State<MenuItemListDialog> {
         final menuConfig = state.menuConfiguration ?? widget.menuConfiguration;
 
         // Get menu options sorted by sequence
-        final menuOptions = menuConfig.menuOptions.toList()
+        final menuItems = menuConfig.menuItems.toList()
           ..sort((a, b) => a.sequenceNum.compareTo(b.sequenceNum));
 
         return Dialog(
@@ -82,7 +82,7 @@ class MenuItemListDialogState extends State<MenuItemListDialog> {
               children: [
                 state.status == MenuConfigStatus.loading
                     ? const Center(child: CircularProgressIndicator())
-                    : _buildMenuOptionList(menuOptions, menuConfig),
+                    : _buildMenuItemList(menuItems, menuConfig),
                 Positioned(
                   right: right,
                   bottom: bottom,
@@ -148,11 +148,11 @@ class MenuItemListDialogState extends State<MenuItemListDialog> {
                               builder: (dialogContext) => BlocProvider.value(
                                 value: context.read<MenuConfigBloc>(),
                                 child: MenuItemDialog(
-                                  menuOption: MenuOption(
+                                  menuOption: MenuItem(
                                     title: '',
                                     menuConfigurationId:
                                         menuConfig.menuConfigurationId,
-                                    sequenceNum: menuOptions.length * 10 + 10,
+                                    sequenceNum: menuItems.length * 10 + 10,
                                     isActive: true,
                                   ),
                                   menuConfigurationId:
@@ -176,8 +176,8 @@ class MenuItemListDialogState extends State<MenuItemListDialog> {
     );
   }
 
-  Widget _buildMenuOptionList(
-    List<MenuOption> options,
+  Widget _buildMenuItemList(
+    List<MenuItem> options,
     MenuConfiguration menuConfig,
   ) {
     if (options.isEmpty) {
@@ -196,7 +196,7 @@ class MenuItemListDialogState extends State<MenuItemListDialog> {
         return Card(
           margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           child: InkWell(
-            key: Key('menuOption_${option.menuOptionId}'),
+            key: Key('menuOption_${option.menuItemId}'),
             onTap: () async {
               await showDialog<bool>(
                 context: context,
@@ -283,7 +283,7 @@ class MenuItemListDialogState extends State<MenuItemListDialog> {
 
                   // Actions
                   IconButton(
-                    key: Key('deleteMenuOption_${option.menuOptionId}'),
+                    key: Key('deleteMenuItem_${option.menuItemId}'),
                     icon: const Icon(
                       Icons.delete_outline,
                       size: 20,
@@ -320,7 +320,7 @@ class MenuItemListDialogState extends State<MenuItemListDialog> {
                       );
                       if (confirmed == true && context.mounted) {
                         final bloc = context.read<MenuConfigBloc>();
-                        bloc.add(MenuOptionDelete(option.menuOptionId!));
+                        bloc.add(MenuItemDelete(option.menuItemId!));
                       }
                     },
                   ),
