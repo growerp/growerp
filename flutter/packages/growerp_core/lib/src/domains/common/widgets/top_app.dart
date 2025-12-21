@@ -189,7 +189,7 @@ class _TopAppState extends State<TopApp> {
                     ),
                     themeMode: themeState.themeMode,
                     theme: FlexThemeData.light(
-                      scheme: FlexScheme.jungle,
+                      scheme: themeState.colorScheme,
                       subThemesData: const FlexSubThemesData(
                         dialogBackgroundSchemeColor: SchemeColor.surface,
                         inputDecoratorBorderType: FlexInputBorderType.underline,
@@ -197,7 +197,7 @@ class _TopAppState extends State<TopApp> {
                       useMaterial3: true,
                     ),
                     darkTheme: FlexThemeData.dark(
-                      scheme: FlexScheme.jungle,
+                      scheme: themeState.colorScheme,
                       subThemesData: const FlexSubThemesData(
                         dialogBackgroundSchemeColor: SchemeColor.surface,
                         inputDecoratorBorderType: FlexInputBorderType.underline,

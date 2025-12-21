@@ -21,11 +21,10 @@ import '../domains/domains.dart';
 
 Widget? myDrawer(BuildContext context, bool isPhone, List<MenuItem> menu) {
   final localizations = CoreLocalizations.of(context)!;
-  ThemeBloc themeBloc = context.read<ThemeBloc>();
   AuthBloc authBloc = context.read<AuthBloc>();
   Authenticate? auth = authBloc.state.authenticate;
 
-  // Add theme option to menu
+  // Add theme option to menu (combines light/dark + color scheme)
   List<MenuItem> options = List.from(menu);
   options.add(
     MenuItem(
@@ -33,7 +32,7 @@ Widget? myDrawer(BuildContext context, bool isPhone, List<MenuItem> menu) {
       menuConfigurationId: 'system',
       title: localizations.theme,
       route: 'theme',
-      iconName: 'settings',
+      iconName: 'palette',
       sequenceNum: 999,
       isActive: true,
     ),
@@ -87,17 +86,18 @@ Widget? myDrawer(BuildContext context, bool isPhone, List<MenuItem> menu) {
               padding: const EdgeInsets.all(5.0),
               child: InkWell(
                 key: const Key('theme'),
-                onTap: () => themeBloc.add(ThemeSwitch()),
+                onTap: () {
+                  Navigator.pop(context); // Close drawer first
+                  showDialog(
+                    context: context,
+                    builder: (context) => const ThemePickerDialog(),
+                  );
+                },
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     const SizedBox(width: 5),
-                    Icon(
-                      size: 40,
-                      themeBloc.state.themeMode == ThemeMode.light
-                          ? Icons.light_mode
-                          : Icons.dark_mode,
-                    ),
+                    const Icon(Icons.palette, size: 40),
                     const SizedBox(width: 20),
                     Text(
                       localizations.theme,

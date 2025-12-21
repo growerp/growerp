@@ -1,5 +1,6 @@
 export 'about_form.dart';
 export 'change_ip_form.dart';
+export 'color_scheme_picker_dialog.dart';
 
 export 'fatal_error_form.dart';
 export 'home_form.dart';

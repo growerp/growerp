@@ -10,3 +10,11 @@ abstract class ThemeEvent extends Equatable {
 class ThemeSwitch extends ThemeEvent {}
 
 class ThemeModeGet extends ThemeEvent {}
+
+class ColorSchemeChange extends ThemeEvent {
+  final FlexScheme scheme;
+  const ColorSchemeChange(this.scheme);
+
+  @override
+  List<Object?> get props => [scheme];
+}
