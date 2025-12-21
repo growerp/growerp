@@ -58,3 +58,99 @@ Map<String, GrowerpWidgetBuilder> getUserCompanyWidgets() {
     'SystemSetupDialog': (args) => const SystemSetupDialog(),
   };
 }
+
+/// Returns widget metadata with icons for the user_company package
+List<WidgetMetadata> getUserCompanyWidgetsWithMetadata() {
+  return [
+    WidgetMetadata(
+      widgetName: 'UserList',
+      description: 'List of users by role',
+      iconName: 'people',
+      keywords: ['user', 'person', 'employee', 'customer', 'supplier'],
+      builder: (args) =>
+          UserList(key: getKeyFromArgs(args), role: parseRole(args?['role'])),
+    ),
+    WidgetMetadata(
+      widgetName: 'UserListCustomer',
+      description: 'List of customer users',
+      iconName: 'groups',
+      keywords: ['customer', 'client', 'buyer'],
+      builder: (args) =>
+          UserList(key: getKeyFromArgs(args), role: Role.customer),
+    ),
+    WidgetMetadata(
+      widgetName: 'UserListSupplier',
+      description: 'List of supplier users',
+      iconName: 'factory',
+      keywords: ['supplier', 'vendor', 'provider'],
+      builder: (args) =>
+          UserList(key: getKeyFromArgs(args), role: Role.supplier),
+    ),
+    WidgetMetadata(
+      widgetName: 'UserListLead',
+      description: 'List of lead users',
+      iconName: 'person_search',
+      keywords: ['lead', 'prospect', 'potential'],
+      builder: (args) => UserList(key: getKeyFromArgs(args), role: Role.lead),
+    ),
+    WidgetMetadata(
+      widgetName: 'UserListEmployee',
+      description: 'List of employee users',
+      iconName: 'badge',
+      keywords: ['employee', 'staff', 'worker'],
+      builder: (args) =>
+          UserList(key: getKeyFromArgs(args), role: Role.company),
+    ),
+    WidgetMetadata(
+      widgetName: 'UserListCompany',
+      description: 'List of company users',
+      iconName: 'business',
+      keywords: ['company', 'organization', 'firm'],
+      builder: (args) =>
+          UserList(key: getKeyFromArgs(args), role: Role.company),
+    ),
+    WidgetMetadata(
+      widgetName: 'ShowCompanyDialog',
+      description: 'Company details dialog',
+      iconName: 'business',
+      keywords: ['company', 'details', 'info'],
+      builder: (args) => ShowCompanyDialog(
+        Company(role: parseRole(args?['role'])),
+        dialog: false,
+      ),
+    ),
+    WidgetMetadata(
+      widgetName: 'CompanyUserList',
+      description: 'List of companies with their users',
+      iconName: 'people',
+      keywords: ['company', 'user', 'organization'],
+      builder: (args) => CompanyUserList(
+        key: getKeyFromArgs(args),
+        role: parseRole(args?['role']),
+      ),
+    ),
+    WidgetMetadata(
+      widgetName: 'CompanyUserListCustomer',
+      description: 'List of customer companies with users',
+      iconName: 'groups',
+      keywords: ['customer', 'company', 'client'],
+      builder: (args) =>
+          CompanyUserList(key: getKeyFromArgs(args), role: Role.customer),
+    ),
+    WidgetMetadata(
+      widgetName: 'CompanyUserListSupplier',
+      description: 'List of supplier companies with users',
+      iconName: 'local_shipping',
+      keywords: ['supplier', 'company', 'vendor'],
+      builder: (args) =>
+          CompanyUserList(key: getKeyFromArgs(args), role: Role.supplier),
+    ),
+    WidgetMetadata(
+      widgetName: 'SystemSetupDialog',
+      description: 'System configuration and setup',
+      iconName: 'settings',
+      keywords: ['settings', 'setup', 'configuration', 'system'],
+      builder: (args) => const SystemSetupDialog(),
+    ),
+  ];
+}

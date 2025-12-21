@@ -315,8 +315,12 @@ class MenuItemDialogState extends State<MenuItemDialog> {
                         itemCount: options.length,
                         itemBuilder: (context, index) {
                           final option = options.elementAt(index);
+                          final iconName = WidgetRegistry.getIconName(option);
                           return ListTile(
                             dense: true,
+                            leading:
+                                getIconFromRegistry(iconName) ??
+                                const Icon(Icons.widgets, size: 20),
                             title: Text(
                               option,
                               overflow: TextOverflow.ellipsis,

@@ -1347,7 +1347,7 @@ abstract class RestClient {
 
   /// Toggle menu item active status
   @PATCH("rest/s1/growerp/100/MenuItem/toggle")
-  Future<MenuItem> toggleMenuItemActive({@Field() required String menuItemId});
+  Future<void> toggleMenuItemActive({@Field() required String menuItemId});
 
   // ========== Agent Manager ==========
 

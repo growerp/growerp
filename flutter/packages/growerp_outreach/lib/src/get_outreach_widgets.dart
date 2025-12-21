@@ -15,3 +15,37 @@ Map<String, GrowerpWidgetBuilder> getOutreachWidgets() {
     'OutreachMessageList': (args) => const OutreachMessageList(),
   };
 }
+
+/// Returns widget metadata with icons for the outreach package
+List<WidgetMetadata> getOutreachWidgetsWithMetadata() {
+  return [
+    WidgetMetadata(
+      widgetName: 'CampaignListScreen',
+      description: 'List of outreach campaigns',
+      iconName: 'campaign',
+      keywords: ['campaign', 'outreach', 'marketing', 'email'],
+      builder: (args) => const CampaignListScreen(),
+    ),
+    WidgetMetadata(
+      widgetName: 'AutomationScreen',
+      description: 'Campaign automation management',
+      iconName: 'autorenew',
+      keywords: ['automation', 'workflow', 'automatic', 'schedule'],
+      builder: (args) => const AutomationScreen(),
+    ),
+    WidgetMetadata(
+      widgetName: 'PlatformConfigListScreen',
+      description: 'Platform configuration settings',
+      iconName: 'hub',
+      keywords: ['platform', 'config', 'integration', 'setup'],
+      builder: (args) => const PlatformConfigListScreen(),
+    ),
+    WidgetMetadata(
+      widgetName: 'OutreachMessageList',
+      description: 'List of outreach messages',
+      iconName: 'message',
+      keywords: ['message', 'outreach', 'communication', 'email'],
+      builder: (args) => const OutreachMessageList(),
+    ),
+  ];
+}

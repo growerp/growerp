@@ -36,9 +36,9 @@ class DashboardCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final colorScheme = Theme.of(context).colorScheme;
     return Card(
-      color: isDarkMode ? Colors.grey[850] : Colors.grey[300],
+      color: colorScheme.primaryContainer.withValues(alpha: 0.5),
       elevation: 4,
       margin: EdgeInsets.zero,
       child: InkWell(

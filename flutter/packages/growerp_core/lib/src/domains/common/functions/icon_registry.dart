@@ -111,6 +111,14 @@ final Map<String, Icon> iconRegistry = {
   'supervisor_account': const Icon(Icons.supervisor_account),
   'work': const Icon(Icons.work),
   'engineering': const Icon(Icons.engineering),
+  // Additional icons used in seed data
+  'receipt_long': const Icon(Icons.receipt_long),
+  'receipt': const Icon(Icons.receipt),
+  'input': const Icon(Icons.input),
+  'output': const Icon(Icons.output),
+  'psychology': const Icon(Icons.psychology),
+  'assignment': const Icon(Icons.assignment),
+  'group': const Icon(Icons.group),
 };
 
 /// Get an Icon by its name from the registry.
