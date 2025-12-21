@@ -22,25 +22,44 @@ Duration snackBarDuration(Color color, {int? seconds}) {
   return Duration(milliseconds: isError ? 5000 : 2000);
 }
 
+/// Maps the passed color to a theme-appropriate color
+Color _resolveSnackBarColor(BuildContext context, Color color) {
+  final colorScheme = Theme.of(context).colorScheme;
+
+  // Map hardcoded colors to theme colors
+  if (color == Colors.red) {
+    return colorScheme.error;
+  } else if (color == Colors.green) {
+    return colorScheme.primary;
+  }
+  // Return original color if not a standard success/error color
+  return color;
+}
+
 SnackBar snackBar(
   BuildContext context,
   Color color,
   String message, {
   int? seconds,
 }) {
-  //  var screenWidth = MediaQuery.of(context).size.width;
   final resolvedDuration = snackBarDuration(color, seconds: seconds);
+  final resolvedColor = _resolveSnackBarColor(context, color);
+  final colorScheme = Theme.of(context).colorScheme;
+
+  // Determine text color based on background
+  final textColor = resolvedColor == colorScheme.error
+      ? colorScheme.onError
+      : colorScheme.onPrimary;
+
   return SnackBar(
-    //    behavior: SnackBarBehavior.floating,
-    //    width: screenWidth < 800 ? screenWidth * 0.8 : 500,
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-    content: Text(message),
+    content: Text(message, style: TextStyle(color: textColor)),
     duration: resolvedDuration,
-    backgroundColor: color,
+    backgroundColor: resolvedColor,
     action: SnackBarAction(
       key: const Key('dismiss'),
       label: 'Dismiss',
-      textColor: Colors.yellow,
+      textColor: textColor.withValues(alpha: 0.8),
       onPressed: () {
         ScaffoldMessenger.of(context).hideCurrentSnackBar();
       },

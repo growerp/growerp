@@ -82,11 +82,12 @@ class HelperFunctions {
         debugPrint('TopMessage not shown - no Scaffold available: $message');
         return;
       }
+      final colorScheme = Theme.of(context).colorScheme;
       messenger.showSnackBar(
         SnackBar(
           dismissDirection: DismissDirection.up,
           duration: duration ?? const Duration(milliseconds: 3000),
-          backgroundColor: Colors.green[600],
+          backgroundColor: colorScheme.primary,
           margin: EdgeInsets.only(
             top: 100,
             bottom: MediaQuery.of(context).size.height - 200,
@@ -98,15 +99,15 @@ class HelperFunctions {
           elevation: 4,
           content: Row(
             children: [
-              const Icon(Icons.check_circle, color: Colors.white, size: 20),
+              Icon(Icons.check_circle, color: colorScheme.onPrimary, size: 20),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
                   message,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
-                    color: Colors.white,
+                    color: colorScheme.onPrimary,
                   ),
                 ),
               ),

@@ -91,7 +91,7 @@ class LoginDialogState extends State<LoginDialog> {
                 HelperFunctions.showMessage(
                   context,
                   '${state.message}',
-                  Colors.red,
+                  Theme.of(context).colorScheme.error,
                 );
               case AuthStatus.authenticated:
                 Navigator.of(context).pop();
@@ -99,7 +99,7 @@ class LoginDialogState extends State<LoginDialog> {
                 HelperFunctions.showMessage(
                   context,
                   state.message,
-                  Colors.green,
+                  Theme.of(context).colorScheme.primary,
                 );
             }
           },
@@ -374,7 +374,11 @@ class LoginDialogState extends State<LoginDialog> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              const Icon(Icons.celebration, size: 60, color: Colors.amber),
+              Icon(
+                Icons.celebration,
+                size: 60,
+                color: Theme.of(context).colorScheme.tertiary,
+              ),
               const SizedBox(height: 20),
               Text(
                 _localizations!.welcomeMessage(
@@ -396,7 +400,10 @@ class LoginDialogState extends State<LoginDialog> {
               Text(
                 _localizations!.evaluationPeriodDetails,
                 textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 14, color: Colors.grey),
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Theme.of(context).colorScheme.outline,
+                ),
               ),
               const SizedBox(height: 30),
               OutlinedButton(
@@ -601,9 +608,9 @@ class LoginDialogState extends State<LoginDialog> {
                       kReleaseMode && GlobalConfiguration().get("test") == false
                           ? _localizations!.trialPeriod
                           : _localizations!.testSystem,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 16,
-                        color: Colors.yellow,
+                        color: Theme.of(context).colorScheme.tertiary,
                       ),
                     ),
                   ),
@@ -611,7 +618,10 @@ class LoginDialogState extends State<LoginDialog> {
                   Center(
                     child: Text(
                       _localizations!.subscriptionExpired,
-                      style: const TextStyle(fontSize: 16, color: Colors.red),
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Theme.of(context).colorScheme.error,
+                      ),
                     ),
                   ),
                 const SizedBox(height: 10),

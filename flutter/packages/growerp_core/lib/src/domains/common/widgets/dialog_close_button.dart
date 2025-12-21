@@ -13,23 +13,33 @@
  */
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class DialogCloseButton extends StatelessWidget {
   const DialogCloseButton({super.key});
 
   @override
   Widget build(BuildContext context) => Center(
-        child: GestureDetector(
-            key: const Key('cancel'),
-            onTap: () => Navigator.of(context).pop(),
-            child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.grey[200],
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(
-                  Icons.close,
-                  color: Colors.red,
-                ))),
-      );
+    child: GestureDetector(
+      key: const Key('cancel'),
+      onTap: () {
+        // Check if we can pop, otherwise go to home
+        if (Navigator.of(context).canPop()) {
+          Navigator.of(context).pop();
+        } else {
+          context.go('/');
+        }
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.secondaryContainer,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Icon(
+          Icons.close,
+          color: Theme.of(context).colorScheme.onSecondaryContainer,
+        ),
+      ),
+    ),
+  );
 }

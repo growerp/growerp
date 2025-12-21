@@ -12,3 +12,16 @@ Map<String, GrowerpWidgetBuilder> getSalesWidgets() {
     'OpportunityList': (args) => OpportunityList(key: getKeyFromArgs(args)),
   };
 }
+
+/// Returns widget metadata with icons for the sales package
+List<WidgetMetadata> getSalesWidgetsWithMetadata() {
+  return [
+    WidgetMetadata(
+      widgetName: 'OpportunityList',
+      description: 'List of sales opportunities',
+      iconName: 'trending_up',
+      keywords: ['opportunity', 'sales', 'deal', 'lead', 'prospect'],
+      builder: (args) => OpportunityList(key: getKeyFromArgs(args)),
+    ),
+  ];
+}

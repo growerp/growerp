@@ -261,22 +261,32 @@ class MenuItemListDialogState extends State<MenuItemListDialog> {
                   const Spacer(),
 
                   // Status
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: option.isActive
-                          ? Colors.green.withValues(alpha: 0.2)
-                          : Colors.red.withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      option.isActive ? 'Active' : 'Inactive',
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: option.isActive ? Colors.green : Colors.red,
+                  // Status
+                  InkWell(
+                    key: Key('toggleActive_${option.menuItemId}'),
+                    borderRadius: BorderRadius.circular(12),
+                    onTap: () {
+                      context.read<MenuConfigBloc>().add(
+                        MenuItemToggleActive(option.menuItemId!),
+                      );
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: option.isActive
+                            ? Colors.green.withValues(alpha: 0.2)
+                            : Colors.red.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        option.isActive ? 'Active' : 'Inactive',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: option.isActive ? Colors.green : Colors.red,
+                        ),
                       ),
                     ),
                   ),

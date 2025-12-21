@@ -110,6 +110,7 @@ List<WidgetMetadata> getOrderAccountingWidgetsWithMetadata() {
     WidgetMetadata(
       widgetName: 'SalesInvoiceList',
       description: 'List of sales invoices sent to customers',
+      iconName: 'send',
       keywords: [
         'invoice',
         'bill',
@@ -130,6 +131,7 @@ List<WidgetMetadata> getOrderAccountingWidgetsWithMetadata() {
     WidgetMetadata(
       widgetName: 'SalesOrderList',
       description: 'List of sales orders from customers',
+      iconName: 'shopping_cart',
       keywords: ['order', 'sales', 'customer order', 'SO'],
       parameters: {'status': 'Filter: open, approved, completed'},
       builder: (args) => FinDocList(
@@ -141,6 +143,7 @@ List<WidgetMetadata> getOrderAccountingWidgetsWithMetadata() {
     WidgetMetadata(
       widgetName: 'SalesPaymentList',
       description: 'List of payments received from customers',
+      iconName: 'money',
       keywords: [
         'payment',
         'receipt',
@@ -158,6 +161,7 @@ List<WidgetMetadata> getOrderAccountingWidgetsWithMetadata() {
     WidgetMetadata(
       widgetName: 'OutgoingShipmentList',
       description: 'List of shipments sent to customers',
+      iconName: 'local_shipping',
       keywords: ['shipment', 'delivery', 'shipping', 'outgoing', 'dispatch'],
       parameters: {'status': 'Filter: open, approved, completed'},
       builder: (args) => FinDocList(
@@ -171,6 +175,7 @@ List<WidgetMetadata> getOrderAccountingWidgetsWithMetadata() {
     WidgetMetadata(
       widgetName: 'PurchaseInvoiceList',
       description: 'List of purchase invoices from suppliers',
+      iconName: 'call_received',
       keywords: [
         'invoice',
         'bill',
@@ -192,6 +197,7 @@ List<WidgetMetadata> getOrderAccountingWidgetsWithMetadata() {
     WidgetMetadata(
       widgetName: 'PurchaseOrderList',
       description: 'List of purchase orders to suppliers',
+      iconName: 'shopping_bag',
       keywords: ['order', 'purchase', 'supplier order', 'vendor order', 'PO'],
       parameters: {'status': 'Filter: open, approved, completed'},
       builder: (args) => FinDocList(
@@ -203,6 +209,7 @@ List<WidgetMetadata> getOrderAccountingWidgetsWithMetadata() {
     WidgetMetadata(
       widgetName: 'PurchasePaymentList',
       description: 'List of payments made to suppliers',
+      iconName: 'money',
       keywords: [
         'payment',
         'expense',
@@ -220,6 +227,7 @@ List<WidgetMetadata> getOrderAccountingWidgetsWithMetadata() {
     WidgetMetadata(
       widgetName: 'IncomingShipmentList',
       description: 'List of shipments received from suppliers',
+      iconName: 'local_shipping',
       keywords: [
         'shipment',
         'receiving',
@@ -239,6 +247,7 @@ List<WidgetMetadata> getOrderAccountingWidgetsWithMetadata() {
     WidgetMetadata(
       widgetName: 'LedgerTreeForm',
       description: 'Chart of accounts tree view',
+      iconName: 'account_tree',
       keywords: [
         'ledger',
         'chart of accounts',
@@ -252,12 +261,14 @@ List<WidgetMetadata> getOrderAccountingWidgetsWithMetadata() {
     WidgetMetadata(
       widgetName: 'GlAccountList',
       description: 'List of general ledger accounts',
+      iconName: 'account_balance',
       keywords: ['accounts', 'GL', 'general ledger', 'COA'],
       builder: (args) => const GlAccountList(),
     ),
     WidgetMetadata(
       widgetName: 'TransactionList',
       description: 'List of accounting transactions and journal entries',
+      iconName: 'list',
       keywords: ['transaction', 'journal', 'entry', 'posting', 'accounting'],
       builder: (args) => FinDocList(
         key: getKeyFromArgs(args),
@@ -268,6 +279,7 @@ List<WidgetMetadata> getOrderAccountingWidgetsWithMetadata() {
     WidgetMetadata(
       widgetName: 'BalanceSheetForm',
       description: 'Balance sheet financial report',
+      iconName: 'assessment',
       keywords: [
         'balance sheet',
         'financial statement',
@@ -281,6 +293,7 @@ List<WidgetMetadata> getOrderAccountingWidgetsWithMetadata() {
     WidgetMetadata(
       widgetName: 'RevenueExpenseChart',
       description: 'Revenue and expense chart visualization',
+      iconName: 'assessment',
       keywords: [
         'revenue',
         'expense',

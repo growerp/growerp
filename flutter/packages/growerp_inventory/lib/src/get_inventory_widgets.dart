@@ -13,3 +13,23 @@ Map<String, GrowerpWidgetBuilder> getInventoryWidgets() {
     'AssetList': (args) => AssetList(key: getKeyFromArgs(args)),
   };
 }
+
+/// Returns widget metadata with icons for the inventory package
+List<WidgetMetadata> getInventoryWidgetsWithMetadata() {
+  return [
+    WidgetMetadata(
+      widgetName: 'LocationList',
+      description: 'List of warehouse locations',
+      iconName: 'location_pin',
+      keywords: ['location', 'warehouse', 'storage', 'bin'],
+      builder: (args) => LocationList(key: getKeyFromArgs(args)),
+    ),
+    WidgetMetadata(
+      widgetName: 'AssetList',
+      description: 'List of inventory assets',
+      iconName: 'warehouse',
+      keywords: ['asset', 'inventory', 'stock', 'equipment'],
+      builder: (args) => AssetList(key: getKeyFromArgs(args)),
+    ),
+  ];
+}

@@ -64,11 +64,17 @@ class HomeFormState extends State<HomeForm> {
                 "${GlobalConfiguration().get("appName")} "
                 "V${GlobalConfiguration().get("version")} "
                 "#${GlobalConfiguration().get("build")}",
-                style: const TextStyle(color: Colors.lightGreen, fontSize: 10),
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.primary,
+                  fontSize: 10,
+                ),
               )
-            : const Text(
+            : Text(
                 'GrowERP',
-                style: TextStyle(color: Colors.grey, fontSize: 10),
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.outline,
+                  fontSize: 10,
+                ),
               ),
       ),
     );
@@ -80,10 +86,14 @@ class HomeFormState extends State<HomeForm> {
             HelperFunctions.showMessage(
               context,
               '${state.message}',
-              Colors.red,
+              Theme.of(context).colorScheme.error,
             );
           default:
-            HelperFunctions.showMessage(context, state.message, Colors.green);
+            HelperFunctions.showMessage(
+              context,
+              state.message,
+              Theme.of(context).colorScheme.primary,
+            );
         }
       },
       builder: (context, state) {

@@ -74,7 +74,7 @@ along with this software (see the LICENSE.md file). If not, see
     <growerp.menu.MenuItem menuItemId="ADMIN_ACC_SETUP" menuConfigurationId="ADMIN_DEFAULT" 
         title="Acct Setup" route="/acct-setup" iconName="settings" widgetName="TimePeriodListForm" sequenceNum="74"/>
     <growerp.menu.MenuItem menuItemId="ADMIN_ABOUT" menuConfigurationId="ADMIN_DEFAULT" 
-        title="about" route="/about" widgetName="AboutForm" image="packages/growerp_core/images/infoGrey.png" selectedImage="packages/growerp_core/images/info.png" sequenceNum="80"/>
+        title="about" route="/about" iconName="info" widgetName="AboutForm" image="packages/growerp_core/images/infoGrey.png" selectedImage="packages/growerp_core/images/info.png" sequenceNum="80"/>
 
     <!-- ADMIN_ORG children (tabs) -->
     <growerp.menu.MenuItem menuItemId="ADMIN_ORG_COMPANY" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_ORG"

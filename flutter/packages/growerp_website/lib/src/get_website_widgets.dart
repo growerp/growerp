@@ -10,3 +10,16 @@ import '../growerp_website.dart';
 Map<String, GrowerpWidgetBuilder> getWebsiteWidgets() {
   return {'WebsiteDialog': (args) => const WebsiteDialog()};
 }
+
+/// Returns widget metadata with icons for the website package
+List<WidgetMetadata> getWebsiteWidgetsWithMetadata() {
+  return [
+    WidgetMetadata(
+      widgetName: 'WebsiteDialog',
+      description: 'Website configuration dialog',
+      iconName: 'web',
+      keywords: ['website', 'site', 'web', 'online'],
+      builder: (args) => const WebsiteDialog(),
+    ),
+  ];
+}

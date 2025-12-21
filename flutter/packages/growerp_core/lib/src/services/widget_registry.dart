@@ -35,6 +35,9 @@ class WidgetMetadata {
   /// e.g., {'status': 'Filter: open, paid, cancelled'}
   final Map<String, String> parameters;
 
+  /// Default icon name for this widget (from icon registry)
+  final String? iconName;
+
   /// The widget builder function
   final GrowerpWidgetBuilder builder;
 
@@ -43,6 +46,7 @@ class WidgetMetadata {
     required this.description,
     this.keywords = const [],
     this.parameters = const {},
+    this.iconName,
     required this.builder,
   });
 
@@ -52,6 +56,7 @@ class WidgetMetadata {
     'description': description,
     'keywords': keywords,
     'parameters': parameters,
+    'iconName': iconName,
   };
 }
 
@@ -124,6 +129,10 @@ class WidgetRegistry {
 
   /// Get metadata for a widget
   static WidgetMetadata? getMetadata(String widgetName) => _widgets[widgetName];
+
+  /// Get icon name for a widget
+  static String? getIconName(String widgetName) =>
+      _widgets[widgetName]?.iconName;
 
   /// Search widgets by keywords (for AI matching)
   ///

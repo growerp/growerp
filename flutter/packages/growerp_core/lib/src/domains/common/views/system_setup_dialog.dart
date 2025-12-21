@@ -83,7 +83,7 @@ class _SystemSetupDialogState extends State<SystemSetupDialog> {
         HelperFunctions.showMessage(
           context,
           'Settings saved successfully',
-          Colors.green,
+          Theme.of(context).colorScheme.primary,
         );
       }
     } catch (e) {
@@ -91,7 +91,7 @@ class _SystemSetupDialogState extends State<SystemSetupDialog> {
         HelperFunctions.showMessage(
           context,
           'Failed to save settings: $e',
-          Colors.red,
+          Theme.of(context).colorScheme.error,
         );
       }
     } finally {
@@ -129,9 +129,9 @@ class _SystemSetupDialogState extends State<SystemSetupDialog> {
                 const SizedBox(height: 8),
                 Text(
                   'Configure AI and other system settings',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodyMedium?.copyWith(color: Colors.grey),
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.outline,
+                  ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 32),
@@ -172,10 +172,13 @@ class _SystemSetupDialogState extends State<SystemSetupDialog> {
             ),
             const Divider(),
             const SizedBox(height: 8),
-            const Text(
+            Text(
               'Enter your Google Gemini API key to enable AI-powered navigation. '
               'Get your key from the Google AI Studio.',
-              style: TextStyle(fontSize: 14, color: Colors.grey),
+              style: TextStyle(
+                fontSize: 14,
+                color: Theme.of(context).colorScheme.outline,
+              ),
             ),
             const SizedBox(height: 16),
             TextFormField(
@@ -225,7 +228,7 @@ class _SystemSetupDialogState extends State<SystemSetupDialog> {
                 HelperFunctions.showMessage(
                   context,
                   'Visit: https://aistudio.google.com/apikey',
-                  Colors.blue,
+                  Theme.of(context).colorScheme.primary,
                 );
               },
             ),

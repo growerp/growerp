@@ -17,6 +17,22 @@ Map<String, GrowerpWidgetBuilder> getActivityWidgets() {
   };
 }
 
+/// Returns widget metadata with icons for the activity package
+List<WidgetMetadata> getActivityWidgetsWithMetadata() {
+  return [
+    WidgetMetadata(
+      widgetName: 'ActivityList',
+      description: 'List of activities and tasks',
+      iconName: 'task',
+      keywords: ['activity', 'task', 'todo', 'action', 'event'],
+      builder: (args) => ActivityList(
+        _parseActivityType(args?['activityType']),
+        key: getKeyFromArgs(args),
+      ),
+    ),
+  ];
+}
+
 ActivityType _parseActivityType(String? typeName) {
   if (typeName == null) return ActivityType.todo;
   try {
