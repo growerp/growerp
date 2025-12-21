@@ -112,11 +112,7 @@ GoRouter createDynamicAppRouter(
     navigatorKey: navKey,
     initialLocation: config.initialLocation,
     onException: (context, state, router) {
-      // Handle invalid routes gracefully - just log and redirect to home
-      // Note: Cannot show snackbar here as there's no Scaffold in navigator context
-      debugPrint(
-        'GoRouter: No route found for ${state.uri.path}, redirecting to home',
-      );
+      // Handle invalid routes gracefully - redirect to home
       router.go('/');
     },
     redirect: (context, state) {
@@ -184,12 +180,69 @@ GoRouter createDynamicAppRouter(
               menuConfiguration: mainConfig,
               menuIndex: menuIndex,
               tabWidgetLoader: config.widgetLoader,
-              suppressBlocMenuConfig: true,
+              suppressBlocMenuConfig:
+                  false, // Allow BLoC updates for dynamic menus
               child: child,
             );
           },
           routes: _generateRoutes(mainConfig, config.widgetLoader),
         ),
+
+      // Dynamic fallback route - catches routes for dynamically created menu options
+      // This allows new menu options added after app startup to work
+      ShellRoute(
+        builder: (context, state, child) {
+          final path = state.uri.path;
+          // Get current menu configuration from BLoC
+          final menuConfigBloc = context.read<MenuConfigBloc?>();
+          final currentConfig =
+              menuConfigBloc?.state.menuConfiguration ?? mainConfig;
+
+          // Find the menu option for this path
+          int menuIndex = 0;
+          for (int i = 0; i < currentConfig.menuOptions.length; i++) {
+            if (currentConfig.menuOptions[i].route == path) {
+              menuIndex = i;
+              break;
+            }
+          }
+          return DisplayMenuOption(
+            menuConfiguration: currentConfig,
+            menuIndex: menuIndex,
+            tabWidgetLoader: config.widgetLoader,
+            suppressBlocMenuConfig: false,
+            child: child,
+          );
+        },
+        routes: [
+          // Wildcard route to catch all dynamic paths
+          GoRoute(
+            path: '/:path',
+            builder: (context, state) {
+              final path = '/${state.pathParameters['path']}';
+              // Look up the menu option from current BLoC state
+              final menuConfigBloc = context.read<MenuConfigBloc?>();
+              final currentConfig =
+                  menuConfigBloc?.state.menuConfiguration ?? mainConfig;
+
+              // Find the option with this route
+              final option = currentConfig.menuOptions.firstWhere(
+                (o) => o.route == path,
+                orElse: () =>
+                    const MenuOption(title: 'Not Found', widgetName: 'Unknown'),
+              );
+
+              if (option.widgetName == 'Unknown') {
+                return Center(child: Text('Route not found: $path'));
+              }
+
+              Map<String, dynamic> args = {};
+              if (option.itemKey != null) args['key'] = option.itemKey;
+              return config.widgetLoader(option.widgetName!, args);
+            },
+          ),
+        ],
+      ),
     ],
   );
 }

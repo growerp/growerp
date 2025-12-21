@@ -1236,11 +1236,12 @@ abstract class RestClient {
 
   /// Get menu configuration by ID or appId+userLoginId
   /// Returns configuration with hierarchical menu items
+  /// Set userVersion=true to get user-specific config instead of seed data
   @GET("rest/s1/growerp/100/MenuConfiguration")
   Future<MenuConfiguration> getMenuConfiguration({
     @Query('menuConfigurationId') String? menuConfigurationId,
     @Query('appId') String? appId,
-    @Query('userId') String? userId,
+    @Query('userVersion') bool? userVersion,
   });
 
   /// List all menu configurations with pagination
@@ -1350,10 +1351,12 @@ abstract class RestClient {
 
   /// Link a MenuItem (tab) to a MenuOption
   @POST("rest/s1/growerp/100/MenuOption/link")
-  Future<MenuOption> linkMenuItem({
+  Future<void> linkMenuItem({
     @Field() required String menuOptionId,
     @Field() required String menuItemId,
     @Field() int? sequenceNum,
+    @Field() String? title,
+    @Field() String? widgetName,
   });
 
   /// Unlink a MenuItem (tab) from a MenuOption

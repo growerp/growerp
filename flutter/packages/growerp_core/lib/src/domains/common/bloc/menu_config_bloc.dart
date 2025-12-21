@@ -73,7 +73,7 @@ class MenuConfigBloc extends Bloc<MenuConfigEvent, MenuConfigState> {
       // Load menu configuration from backend
       final menuConfig = await restClient.getMenuConfiguration(
         appId: targetAppId,
-        userId: event.userId,
+        userVersion: event.userVersion ? true : null,
       );
 
       emit(
@@ -127,9 +127,11 @@ class MenuConfigBloc extends Bloc<MenuConfigEvent, MenuConfigState> {
         isActive: event.menuOption.isActive ? 'Y' : 'N',
       );
 
-      // Reload menu configuration to get updated structure
+      // Reload menu configuration with userVersion=true to get user-specific config
+      // (backend may have cloned seed data to a new user-specific config)
       final menuConfig = await restClient.getMenuConfiguration(
-        menuConfigurationId: event.menuConfigurationId,
+        appId: appId,
+        userVersion: true,
       );
 
       emit(
@@ -171,20 +173,19 @@ class MenuConfigBloc extends Bloc<MenuConfigEvent, MenuConfigState> {
         isActive: event.menuOption.isActive ? 'Y' : 'N',
       );
 
-      // Reload menu configuration
-      if (state.menuConfiguration?.menuConfigurationId != null) {
-        final menuConfig = await restClient.getMenuConfiguration(
-          menuConfigurationId: state.menuConfiguration!.menuConfigurationId,
-        );
+      // Reload menu configuration with userVersion=true to get user-specific config
+      final menuConfig = await restClient.getMenuConfiguration(
+        appId: appId,
+        userVersion: true,
+      );
 
-        emit(
-          state.copyWith(
-            status: MenuConfigStatus.success,
-            menuConfiguration: menuConfig,
-            message: 'Menu option updated successfully',
-          ),
-        );
-      }
+      emit(
+        state.copyWith(
+          status: MenuConfigStatus.success,
+          menuConfiguration: menuConfig,
+          message: 'Menu option updated successfully',
+        ),
+      );
     } on DioException catch (e) {
       emit(
         state.copyWith(
@@ -205,8 +206,11 @@ class MenuConfigBloc extends Bloc<MenuConfigEvent, MenuConfigState> {
 
       await restClient.deleteMenuOption(menuOptionId: event.menuOptionId);
 
-      // Reload menu configuration using appId to get fresh data
-      final menuConfig = await restClient.getMenuConfiguration(appId: appId);
+      // Reload menu configuration with userVersion=true to get user-specific config
+      final menuConfig = await restClient.getMenuConfiguration(
+        appId: appId,
+        userVersion: true,
+      );
 
       emit(
         state.copyWith(
@@ -238,9 +242,10 @@ class MenuConfigBloc extends Bloc<MenuConfigEvent, MenuConfigState> {
         optionSequences: event.optionSequences,
       );
 
-      // Reload menu configuration
+      // Reload menu configuration with userVersion=true to get user-specific config
       final menuConfig = await restClient.getMenuConfiguration(
-        menuConfigurationId: event.menuConfigurationId,
+        appId: appId,
+        userVersion: true,
       );
 
       emit(
@@ -270,20 +275,19 @@ class MenuConfigBloc extends Bloc<MenuConfigEvent, MenuConfigState> {
 
       await restClient.toggleMenuOptionActive(menuOptionId: event.menuOptionId);
 
-      // Reload menu configuration
-      if (state.menuConfiguration?.menuConfigurationId != null) {
-        final menuConfig = await restClient.getMenuConfiguration(
-          menuConfigurationId: state.menuConfiguration!.menuConfigurationId,
-        );
+      // Reload menu configuration with userVersion=true to get user-specific config
+      final menuConfig = await restClient.getMenuConfiguration(
+        appId: appId,
+        userVersion: true,
+      );
 
-        emit(
-          state.copyWith(
-            status: MenuConfigStatus.success,
-            menuConfiguration: menuConfig,
-            message: 'Menu option visibility toggled',
-          ),
-        );
-      }
+      emit(
+        state.copyWith(
+          status: MenuConfigStatus.success,
+          menuConfiguration: menuConfig,
+          message: 'Menu option visibility toggled',
+        ),
+      );
     } on DioException catch (e) {
       emit(
         state.copyWith(
@@ -306,22 +310,23 @@ class MenuConfigBloc extends Bloc<MenuConfigEvent, MenuConfigState> {
         menuOptionId: event.menuOptionId,
         menuItemId: event.menuItemId,
         sequenceNum: event.sequenceNum,
+        title: event.title,
+        widgetName: event.widgetName,
       );
 
-      // Reload menu configuration
-      if (state.menuConfiguration?.menuConfigurationId != null) {
-        final menuConfig = await restClient.getMenuConfiguration(
-          menuConfigurationId: state.menuConfiguration!.menuConfigurationId,
-        );
+      // Reload menu configuration with userVersion=true to get user-specific config
+      final menuConfig = await restClient.getMenuConfiguration(
+        appId: appId,
+        userVersion: true,
+      );
 
-        emit(
-          state.copyWith(
-            status: MenuConfigStatus.success,
-            menuConfiguration: menuConfig,
-            message: 'Menu item linked successfully',
-          ),
-        );
-      }
+      emit(
+        state.copyWith(
+          status: MenuConfigStatus.success,
+          menuConfiguration: menuConfig,
+          message: 'Menu item linked successfully',
+        ),
+      );
     } on DioException catch (e) {
       emit(
         state.copyWith(
@@ -345,20 +350,19 @@ class MenuConfigBloc extends Bloc<MenuConfigEvent, MenuConfigState> {
         menuItemId: event.menuItemId,
       );
 
-      // Reload menu configuration
-      if (state.menuConfiguration?.menuConfigurationId != null) {
-        final menuConfig = await restClient.getMenuConfiguration(
-          menuConfigurationId: state.menuConfiguration!.menuConfigurationId,
-        );
+      // Reload menu configuration with userVersion=true to get user-specific config
+      final menuConfig = await restClient.getMenuConfiguration(
+        appId: appId,
+        userVersion: true,
+      );
 
-        emit(
-          state.copyWith(
-            status: MenuConfigStatus.success,
-            menuConfiguration: menuConfig,
-            message: 'Menu item unlinked successfully',
-          ),
-        );
-      }
+      emit(
+        state.copyWith(
+          status: MenuConfigStatus.success,
+          menuConfiguration: menuConfig,
+          message: 'Menu item unlinked successfully',
+        ),
+      );
     } on DioException catch (e) {
       emit(
         state.copyWith(
@@ -461,7 +465,8 @@ class MenuConfigBloc extends Bloc<MenuConfigEvent, MenuConfigState> {
         menuConfigurationId: event.menuConfigurationId,
       );
 
-      // Reload menu configuration by appId to get the reset items
+      // Reload menu configuration by appId to get the seed data after reset
+      // (user config was deleted, so we need seed data)
       final menuConfig = await restClient.getMenuConfiguration(appId: appId);
 
       emit(

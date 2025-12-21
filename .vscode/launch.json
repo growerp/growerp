@@ -1,41 +1,6 @@
 {
     "configurations": [
         {
-            "name": "export with user",
-            "type": "dart",
-            "request": "launch",
-            "program": "flutter/packages/growerp/bin/growerp.dart",
-            "args": [
-                "export",
-                "website",
-                "-p",
-                "qqqqqq9!",
-                "-u",
-                "test75@example.com"
-            ]
-        },
-        {
-            "name": "export",
-            "type": "dart",
-            "request": "launch",
-            "program": "flutter/packages/growerp/bin/growerp.dart",
-            "args": [
-                "export",
-                "website"
-            ]
-        },
-        {
-            "name": "import",
-            "type": "dart",
-            "request": "launch",
-            "program": "flutter/packages/growerp/bin/growerp.dart",
-            "args": [
-                "import",
-                "-i",
-                "growerpOutput"
-            ]
-        },
-        {
             "name": "Support Web (lib/main.dart)",
             "type": "dart",
             "request": "launch",
@@ -60,6 +25,13 @@
             ]
         },
         {
+            "name": "Support Mobile (lib/main.dart)",
+            "type": "dart",
+            "request": "launch",
+            "cwd": "flutter/packages/support",
+            "program": "lib/main.dart"
+        },
+        {
             "name": "Agent linux (lib/main.dart)",
             "type": "dart",
             "request": "launch",
@@ -69,13 +41,6 @@
                 "-d",
                 "linux"
             ]
-        },
-        {
-            "name": "Support mobile (lib/main.dart)",
-            "type": "dart",
-            "request": "launch",
-            "cwd": "flutter/packages/support",
-            "program": "lib/main.dart"
         },
         {
             "name": "Admin Web (lib/main.dart)",
@@ -95,17 +60,6 @@
             "type": "dart",
             "request": "launch",
             "cwd": "flutter/packages/admin",
-            "program": "lib/main.dart",
-            "args": [
-                "-d",
-                "linux"
-            ]
-        },
-        {
-            "name": "Marketing linux (lib/main.dart)",
-            "type": "dart",
-            "request": "launch",
-            "cwd": "flutter/packages/growerp_marketing/example",
             "program": "lib/main.dart",
             "args": [
                 "-d",
@@ -149,61 +103,6 @@
                 "-d",
                 "linux"
             ]
-        },
-        {
-            "name": "Assessment Web (lib/main.dart)",
-            "type": "dart",
-            "request": "launch",
-            "cwd": "flutter/packages/assessment",
-            "program": "lib/main.dart",
-            "args": [
-                "-d",
-                "chrome",
-                "--web-port",
-                "55555"
-            ]
-        },
-        {
-            "name": "Flutter Integration Test - User Employee",
-            "type": "dart",
-            "request": "launch",
-            "cwd": "flutter/packages/growerp_user_company/example",
-            "program": "integration_test/user_employee_test.dart",
-            "args": [
-                "--device-id",
-                "emulator"
-            ],
-            "env": {
-                "FLUTTER_TEST": "true"
-            }
-        },
-        {
-            "name": "Flutter Integration Test - User Employee (Mobile)",
-            "type": "dart",
-            "request": "launch",
-            "cwd": "flutter/packages/growerp_user_company/example",
-            "program": "integration_test/user_employee_test.dart",
-            "args": [
-                "--device-id",
-                "flutter-tester"
-            ],
-            "env": {
-                "FLUTTER_TEST": "true"
-            }
-        },
-        {
-            "name": "Flutter Integration Test - All Tests",
-            "type": "dart",
-            "request": "launch",
-            "cwd": "flutter/packages/growerp_user_company/example",
-            "program": "integration_test",
-            "args": [
-                "--device-id",
-                "chrome"
-            ],
-            "env": {
-                "FLUTTER_TEST": "true"
-            }
         },
         {
             "name": "Freelance mobile (lib/main.dart)",
@@ -266,34 +165,6 @@
                 "-d",
                 "linux"
             ]
-        },
-        {
-            "name": "convertToCSv",
-            "type": "dart",
-            "request": "launch",
-            "cwd": "flutter/packages/growerp/bin",
-            "program": "convert_to_csv.dart",
-            "args": [
-                "/home/hans/accugeo/accugeoConvert",
-                "-start",
-                "1999-01-01",
-                "-end",
-                "1999-12-31"
-            ]
-        },
-        {
-            "name": "Core (lib/main.dart)",
-            "type": "dart",
-            "request": "launch",
-            "cwd": "flutter/packages/growerp_core/example",
-            "program": "lib/main.dart"
-        },
-        {
-            "name": "UserCompany (lib/main.dart)",
-            "type": "dart",
-            "request": "launch",
-            "cwd": "flutter/packages/growerp_user_company/example",
-            "program": "lib/main.dart"
         },
     ]
 }

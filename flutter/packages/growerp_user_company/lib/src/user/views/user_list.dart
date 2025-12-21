@@ -201,11 +201,13 @@ class UserListState extends State<UserList> {
             );
           } else {
             users = state.users;
-            if (users.isNotEmpty) {
+            if (users.isNotEmpty && _scrollController.hasClients) {
               Future.delayed(const Duration(milliseconds: 100), () {
-                WidgetsBinding.instance.addPostFrameCallback(
-                  (_) => _scrollController.jumpTo(currentScroll),
-                );
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (_scrollController.hasClients) {
+                    _scrollController.jumpTo(currentScroll);
+                  }
+                });
               });
             }
             hasReachedMax = state.hasReachedMax;

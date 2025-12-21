@@ -22,14 +22,18 @@ abstract class MenuConfigEvent extends Equatable {
 
 /// Load menu configuration for the current app
 class MenuConfigLoad extends MenuConfigEvent {
-  const MenuConfigLoad({this.appId, this.userId, this.forceRefresh = false});
+  const MenuConfigLoad({
+    this.appId,
+    this.userVersion = false,
+    this.forceRefresh = false,
+  });
 
   final String? appId;
-  final String? userId;
+  final bool userVersion;
   final bool forceRefresh;
 
   @override
-  List<Object?> get props => [appId, userId, forceRefresh];
+  List<Object?> get props => [appId, userVersion, forceRefresh];
 }
 
 /// Update local menu configuration (without backend call)
@@ -110,14 +114,24 @@ class MenuItemLink extends MenuConfigEvent {
     required this.menuOptionId,
     required this.menuItemId,
     this.sequenceNum,
+    this.title,
+    this.widgetName,
   });
 
   final String menuOptionId;
   final String menuItemId;
   final int? sequenceNum;
+  final String? title;
+  final String? widgetName;
 
   @override
-  List<Object?> get props => [menuOptionId, menuItemId, sequenceNum];
+  List<Object?> get props => [
+    menuOptionId,
+    menuItemId,
+    sequenceNum,
+    title,
+    widgetName,
+  ];
 }
 
 /// Unlink a MenuItem (tab) from a MenuOption

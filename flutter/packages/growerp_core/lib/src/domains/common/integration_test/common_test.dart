@@ -506,9 +506,11 @@ class CommonTest {
 
   /// check if a particular text can be found on the page.
   static Future<void> checkText(WidgetTester tester, String text) async {
+    final finder = find.textContaining(RegExp(text, caseSensitive: false));
     expect(
-      find.textContaining(RegExp(text, caseSensitive: false)).last,
-      findsOneWidget,
+      tester.any(finder),
+      true,
+      reason: "Could not find text: '$text' on the page",
     );
   }
 
@@ -588,6 +590,74 @@ class CommonTest {
     await tester.pumpAndSettle();
   }
 
+  /// Enter value into an Autocomplete field
+  static Future<void> enterAutocompleteValue(
+    WidgetTester tester,
+    String key,
+    String value,
+  ) async {
+    final autocomplete = find.byKey(Key(key));
+    if (!tester.any(autocomplete)) {
+      debugPrint('Warning: Autocomplete with key $key not found');
+      return;
+    }
+
+    // Find the text field within the autocomplete
+    final textField = find.descendant(
+      of: autocomplete,
+      matching: find.byType(TextFormField),
+    );
+
+    if (tester.any(textField)) {
+      // Tap to focus the field first
+      await tester.tap(textField.first);
+      await tester.pumpAndSettle();
+
+      // Clear the field and enter new text
+      await tester.enterText(textField.first, '');
+      await tester.pumpAndSettle();
+      await tester.enterText(textField.first, value);
+      await tester.pump(const Duration(milliseconds: 200));
+      await tester.pumpAndSettle();
+
+      // Wait for the dropdown overlay to appear
+      await tester.pump(const Duration(milliseconds: 800));
+      await tester.pumpAndSettle();
+
+      // Try multiple approaches to select the suggestion:
+
+      // Approach 1: Try to find a ListTile with our value (custom optionsViewBuilder)
+      final listTileFinder = find.widgetWithText(ListTile, value);
+      if (tester.any(listTileFinder)) {
+        await tester.tap(listTileFinder.first);
+        await tester.pumpAndSettle();
+        return;
+      }
+
+      // Approach 2: Find Text widget with value and tap it (default Autocomplete uses InkWell > Text)
+      final textFinder = find.text(value);
+      if (tester.any(textFinder)) {
+        // Try to tap from last to first (overlay is rendered after input, so last is most likely the dropdown)
+        final matchCount = textFinder.evaluate().length;
+        for (int i = matchCount - 1; i >= 0; i--) {
+          try {
+            await tester.tap(textFinder.at(i));
+            await tester.pumpAndSettle();
+            return;
+          } catch (e) {
+            // Continue to next index
+          }
+        }
+      }
+
+      // Approach 3: Use keyboard navigation (fallback)
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.pumpAndSettle();
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await tester.pumpAndSettle();
+    }
+  }
+
   static Future<void> enterText(
     WidgetTester tester,
     String key,
@@ -605,7 +675,7 @@ class CommonTest {
       }
     }
     await tester.enterText(finder, value);
-    await tester.pump();
+    await tester.pumpAndSettle();
   }
 
   static Future<void> enterDate(
