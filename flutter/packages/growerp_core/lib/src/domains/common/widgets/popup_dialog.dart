@@ -15,6 +15,7 @@
 import 'package:flutter/material.dart';
 import '../../domains.dart';
 
+/// Premium popup dialog with gradient header matching the app's design system.
 Widget popUpDialog({
   required BuildContext context,
   required List<Widget> children,
@@ -23,6 +24,8 @@ Widget popUpDialog({
   double width = 400,
   Key key = const Key('popUp'),
 }) {
+  final colorScheme = Theme.of(context).colorScheme;
+
   return Dialog(
     insetPadding: const EdgeInsets.all(10),
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -34,10 +37,18 @@ Widget popUpDialog({
           height: height,
           child: Column(
             children: [
+              // Premium gradient header
               Container(
                 height: 50,
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.secondaryContainer,
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      colorScheme.primaryContainer,
+                      colorScheme.secondaryContainer.withValues(alpha: 0.8),
+                    ],
+                  ),
                   borderRadius: const BorderRadius.only(
                     topLeft: Radius.circular(20),
                     topRight: Radius.circular(20),
@@ -46,10 +57,11 @@ Widget popUpDialog({
                 child: Center(
                   child: Text(
                     title,
-                    style: const TextStyle(
-                      fontSize: 20,
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 0.3,
+                      color: colorScheme.onSurface,
                     ),
                   ),
                 ),
@@ -58,8 +70,8 @@ Widget popUpDialog({
                 child: Container(
                   decoration: BoxDecoration(
                     color: Theme.of(context).brightness == Brightness.dark
-                        ? Theme.of(context).colorScheme.surfaceContainerHighest
-                        : Theme.of(context).colorScheme.surface,
+                        ? colorScheme.surfaceContainerHighest
+                        : colorScheme.surface,
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(20),

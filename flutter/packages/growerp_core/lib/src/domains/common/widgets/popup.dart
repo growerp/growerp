@@ -15,6 +15,7 @@
 import 'package:flutter/material.dart';
 import '../../../../growerp_core.dart';
 
+/// Premium popup dialog with gradient header matching the app's design system.
 Widget popUp({
   Widget? child,
   String title = '',
@@ -24,6 +25,8 @@ Widget popUp({
   bool? closeButton = true,
   required BuildContext context,
 }) {
+  final colorScheme = Theme.of(context).colorScheme;
+
   if (width == null) {
     isPhone(context) ? width = 450 : width = 700;
   }
@@ -35,10 +38,18 @@ Widget popUp({
         height: height,
         child: Column(
           children: [
+            // Premium gradient header matching navigation rail and theme picker
             Container(
               height: 50,
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.secondaryContainer,
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    colorScheme.primaryContainer,
+                    colorScheme.secondaryContainer.withValues(alpha: 0.8),
+                  ],
+                ),
                 borderRadius: const BorderRadius.only(
                   topLeft: Radius.circular(20),
                   topRight: Radius.circular(20),
@@ -49,6 +60,12 @@ Widget popUp({
                   title,
                   key: const Key('topHeader'),
                   textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.3,
+                    color: colorScheme.onSurface,
+                  ),
                 ),
               ),
             ),
@@ -56,8 +73,8 @@ Widget popUp({
               child: Container(
                 decoration: BoxDecoration(
                   color: Theme.of(context).brightness == Brightness.dark
-                      ? Theme.of(context).colorScheme.surfaceContainerHighest
-                      : Theme.of(context).colorScheme.surface,
+                      ? colorScheme.surfaceContainerHighest
+                      : colorScheme.surface,
                   borderRadius: const BorderRadius.only(
                     bottomLeft: Radius.circular(20),
                     bottomRight: Radius.circular(20),

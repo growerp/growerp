@@ -44,6 +44,7 @@ class CoreDashboard extends StatelessWidget {
                   iconName: item.iconName ?? 'dashboard',
                   route: item.route,
                   stats: getStatsForRoute(item.route, stats),
+                  animationIndex: index,
                 );
               },
             );
