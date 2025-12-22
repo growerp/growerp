@@ -174,166 +174,163 @@ class HomeFormState extends State<HomeForm> with TickerProviderStateMixin {
               child: Column(
                 children: [
                   Expanded(
-                    child: ScaffoldMessenger(
-                      child: Scaffold(
-                        backgroundColor: Colors.transparent,
-                        appBar: AppBar(
-                          backgroundColor: colorScheme.primaryContainer
-                              .withValues(alpha: 0.9),
-                          elevation: 0,
-                          key: const Key('HomeFormUnAuth'),
-                          title: Center(
-                            child: Text(
-                              _localizations!.welcomeToGrowERPBusinessSystem,
-                              style: TextStyle(
-                                fontSize: isPhone ? 14 : 16,
-                                fontWeight: FontWeight.w600,
-                                letterSpacing: 0.3,
-                              ),
+                    child: Scaffold(
+                      backgroundColor: Colors.transparent,
+                      appBar: AppBar(
+                        backgroundColor: colorScheme.primaryContainer
+                            .withValues(alpha: 0.9),
+                        elevation: 0,
+                        key: const Key('HomeFormUnAuth'),
+                        title: Center(
+                          child: Text(
+                            _localizations!.welcomeToGrowERPBusinessSystem,
+                            style: TextStyle(
+                              fontSize: isPhone ? 14 : 16,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 0.3,
                             ),
                           ),
-                          actions: [
-                            PopupMenuButton<Locale>(
-                              key: const Key('languageSelector'),
-                              icon: Icon(
-                                Icons.language,
-                                color: colorScheme.onSurface,
-                              ),
-                              tooltip: _localizations!.selectLanguage,
-                              onSelected: (Locale locale) {
-                                context.read<LocaleBloc>().add(
-                                  LocaleChanged(locale),
-                                );
-                              },
-                              itemBuilder: (BuildContext context) => [
-                                _buildLanguageMenuItem(
-                                  const Locale('en'),
-                                  '🇺🇸',
-                                  'English',
-                                ),
-                                _buildLanguageMenuItem(
-                                  const Locale('th'),
-                                  '🇹🇭',
-                                  'ไทย',
-                                ),
-                                _buildLanguageMenuItem(
-                                  const Locale('zh'),
-                                  '🇨🇳',
-                                  '中文',
-                                ),
-                                _buildLanguageMenuItem(
-                                  const Locale('de'),
-                                  '🇩🇪',
-                                  'Deutsch',
-                                ),
-                                _buildLanguageMenuItem(
-                                  const Locale('fr'),
-                                  '🇫🇷',
-                                  'Français',
-                                ),
-                                _buildLanguageMenuItem(
-                                  const Locale('nl'),
-                                  '🇳🇱',
-                                  'Nederlands',
-                                ),
-                              ],
-                            ),
-                          ],
                         ),
-                        body: FadeTransition(
-                          opacity: _fadeAnimation,
-                          child: SlideTransition(
-                            position: _slideAnimation,
-                            child: Center(
-                              child: SingleChildScrollView(
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: <Widget>[
-                                    const SizedBox(height: 60),
-                                    // Premium logo with glow effect
-                                    _buildLogoWithGlow(
-                                      context,
-                                      company,
-                                      themeMode,
-                                      colorScheme,
-                                    ),
-                                    const SizedBox(height: 32),
-                                    // Company/App name with gradient
-                                    ShaderMask(
-                                      shaderCallback: (bounds) =>
-                                          LinearGradient(
-                                            colors: [
-                                              colorScheme.primary,
-                                              colorScheme.secondary,
-                                            ],
-                                          ).createShader(bounds),
-                                      child: Text(
-                                        company == null
-                                            ? widget.title
-                                            : company!.name!,
-                                        style: TextStyle(
-                                          fontSize: isPhone ? 20 : 28,
-                                          fontWeight: FontWeight.bold,
-                                          letterSpacing: 0.5,
-                                          color: Colors.white,
-                                        ),
+                        actions: [
+                          PopupMenuButton<Locale>(
+                            key: const Key('languageSelector'),
+                            icon: Icon(
+                              Icons.language,
+                              color: colorScheme.onSurface,
+                            ),
+                            tooltip: _localizations!.selectLanguage,
+                            onSelected: (Locale locale) {
+                              context.read<LocaleBloc>().add(
+                                LocaleChanged(locale),
+                              );
+                            },
+                            itemBuilder: (BuildContext context) => [
+                              _buildLanguageMenuItem(
+                                const Locale('en'),
+                                '🇺🇸',
+                                'English',
+                              ),
+                              _buildLanguageMenuItem(
+                                const Locale('th'),
+                                '🇹🇭',
+                                'ไทย',
+                              ),
+                              _buildLanguageMenuItem(
+                                const Locale('zh'),
+                                '🇨🇳',
+                                '中文',
+                              ),
+                              _buildLanguageMenuItem(
+                                const Locale('de'),
+                                '🇩🇪',
+                                'Deutsch',
+                              ),
+                              _buildLanguageMenuItem(
+                                const Locale('fr'),
+                                '🇫🇷',
+                                'Français',
+                              ),
+                              _buildLanguageMenuItem(
+                                const Locale('nl'),
+                                '🇳🇱',
+                                'Nederlands',
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      body: FadeTransition(
+                        opacity: _fadeAnimation,
+                        child: SlideTransition(
+                          position: _slideAnimation,
+                          child: Center(
+                            child: SingleChildScrollView(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: <Widget>[
+                                  const SizedBox(height: 60),
+                                  // Premium logo with glow effect
+                                  _buildLogoWithGlow(
+                                    context,
+                                    company,
+                                    themeMode,
+                                    colorScheme,
+                                  ),
+                                  const SizedBox(height: 32),
+                                  // Company/App name with gradient
+                                  ShaderMask(
+                                    shaderCallback: (bounds) => LinearGradient(
+                                      colors: [
+                                        colorScheme.primary,
+                                        colorScheme.secondary,
+                                      ],
+                                    ).createShader(bounds),
+                                    child: Text(
+                                      company == null
+                                          ? widget.title
+                                          : company!.name!,
+                                      style: TextStyle(
+                                        fontSize: isPhone ? 20 : 28,
+                                        fontWeight: FontWeight.bold,
+                                        letterSpacing: 0.5,
+                                        color: Colors.white,
                                       ),
                                     ),
-                                    const SizedBox(height: 40),
-                                    // Premium login button
+                                  ),
+                                  const SizedBox(height: 40),
+                                  // Premium login button
+                                  _buildPremiumButton(
+                                    context: context,
+                                    key: const Key('loginButton'),
+                                    label: _localizations!.login,
+                                    isPrimary: true,
+                                    colorScheme: colorScheme,
+                                    onPressed: () {
+                                      _authBloc.add(
+                                        AuthUpdateLocal(
+                                          state.authenticate!.copyWith(
+                                            apiKey: '',
+                                          ),
+                                        ),
+                                      );
+                                      showDialog(
+                                        barrierDismissible: true,
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return BlocProvider.value(
+                                            value: _authBloc,
+                                            child: const LoginDialog(),
+                                          );
+                                        },
+                                      );
+                                    },
+                                  ),
+                                  const SizedBox(height: 50),
+                                  if (classificationId != 'AppSupport')
                                     _buildPremiumButton(
                                       context: context,
-                                      key: const Key('loginButton'),
-                                      label: _localizations!.login,
-                                      isPrimary: true,
+                                      key: const Key('newUserButton'),
+                                      label: _localizations!
+                                          .registerNewCompanyAndAdmin,
+                                      isPrimary: false,
                                       colorScheme: colorScheme,
                                       onPressed: () {
-                                        _authBloc.add(
-                                          AuthUpdateLocal(
-                                            state.authenticate!.copyWith(
-                                              apiKey: '',
-                                            ),
-                                          ),
-                                        );
                                         showDialog(
                                           barrierDismissible: true,
                                           context: context,
                                           builder: (BuildContext context) {
                                             return BlocProvider.value(
                                               value: _authBloc,
-                                              child: const LoginDialog(),
+                                              child: const RegisterUserDialog(
+                                                true,
+                                              ),
                                             );
                                           },
                                         );
                                       },
                                     ),
-                                    const SizedBox(height: 50),
-                                    if (classificationId != 'AppSupport')
-                                      _buildPremiumButton(
-                                        context: context,
-                                        key: const Key('newUserButton'),
-                                        label: _localizations!
-                                            .registerNewCompanyAndAdmin,
-                                        isPrimary: false,
-                                        colorScheme: colorScheme,
-                                        onPressed: () {
-                                          showDialog(
-                                            barrierDismissible: true,
-                                            context: context,
-                                            builder: (BuildContext context) {
-                                              return BlocProvider.value(
-                                                value: _authBloc,
-                                                child: const RegisterUserDialog(
-                                                  true,
-                                                ),
-                                              );
-                                            },
-                                          );
-                                        },
-                                      ),
-                                    const SizedBox(height: 60),
-                                  ],
-                                ),
+                                  const SizedBox(height: 60),
+                                ],
                               ),
                             ),
                           ),
