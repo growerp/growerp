@@ -69,6 +69,7 @@ class _RegisterUserDialogState extends State<RegisterUserDialog> {
                 Colors.red,
               );
             case AuthStatus.unAuthenticated:
+              // Just pop the dialog - HomeForm's listener will show the message
               Navigator.of(context).pop();
               break;
             default:
