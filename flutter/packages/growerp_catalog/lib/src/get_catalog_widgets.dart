@@ -11,6 +11,7 @@ Map<String, GrowerpWidgetBuilder> getCatalogWidgets() {
   return {
     'ProductList': (args) => ProductList(key: getKeyFromArgs(args)),
     'CategoryList': (args) => CategoryList(key: getKeyFromArgs(args)),
+    'SubscriptionList': (args) => SubscriptionList(key: getKeyFromArgs(args)),
   };
 }
 
@@ -30,6 +31,13 @@ List<WidgetMetadata> getCatalogWidgetsWithMetadata() {
       iconName: 'category',
       keywords: ['category', 'classification', 'group'],
       builder: (args) => CategoryList(key: getKeyFromArgs(args)),
+    ),
+    WidgetMetadata(
+      widgetName: 'SubscriptionList',
+      description: 'List of subscriptions',
+      iconName: 'subscriptions',
+      keywords: ['subscription', 'recurring', 'membership'],
+      builder: (args) => SubscriptionList(key: getKeyFromArgs(args)),
     ),
   ];
 }

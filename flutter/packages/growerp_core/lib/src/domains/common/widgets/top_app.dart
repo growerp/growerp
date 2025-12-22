@@ -12,38 +12,25 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+import 'package:animations/animations.dart';
 import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
 import '../../../get_core_bloc_providers.dart';
 import '../../../services/widget_registry.dart';
 import '../../../services/ws_client.dart';
+import '../../../styles/color_schemes.dart';
 import '../../domains.dart';
 import 'package:growerp_core/l10n/generated/core_localizations.dart';
 
 /// TopApp is the main application wrapper that provides all core functionality.
-///
-/// It sets up:
-/// - Repository providers for RestClient, WsClient, etc.
-/// - Bloc providers for theme, locale, auth, and menu configuration
-/// - Localization support
-/// - Responsive layout breakpoints
-/// - Theme configuration
-/// - Widget registration for dynamic menu system
-///
-/// The [appId] parameter enables the dynamic menu system. When provided,
-/// TopApp will create a MenuConfigBloc that loads menu configuration from
-/// the backend based on the appId.
-///
-/// The [widgetRegistrations] parameter accepts a list of widget maps from
-/// packages (e.g., getUserCompanyWidgets(), getCatalogWidgets()) that will
-/// be registered with the WidgetRegistry on initialization.
 class TopApp extends StatefulWidget {
   const TopApp({
     super.key,
@@ -72,14 +59,7 @@ class TopApp extends StatefulWidget {
   final List<LocalizationsDelegate> extraDelegates;
   final List<BlocProvider> extraBlocProviders;
 
-  /// Optional app ID for dynamic menu configuration.
-  /// When provided, TopApp will load menu configuration from the backend.
-  /// Examples: 'admin', 'freelance', 'hotel', 'catalog_example'
   final String? appId;
-
-  /// Optional list of widget registration maps from packages.
-  /// Each map is typically returned by a package's getXxxWidgets() function.
-  /// Example: [getUserCompanyWidgets(), getCatalogWidgets()]
   final List<Map<String, GrowerpWidgetBuilder>> widgetRegistrations;
 
   @override
@@ -99,13 +79,9 @@ class _TopAppState extends State<TopApp> {
   @override
   void initState() {
     super.initState();
-
-    // Register widgets from all provided registration maps
     for (final widgetMap in widget.widgetRegistrations) {
       WidgetRegistry.register(widgetMap);
     }
-
-    // Create MenuConfigBloc if appId is provided
     if (widget.appId != null) {
       _menuConfigBloc = MenuConfigBloc(widget.restClient, widget.appId!);
     }
@@ -136,7 +112,6 @@ class _TopAppState extends State<TopApp> {
             widget.classificationId,
             widget.company,
           ),
-          // Add MenuConfigBloc if appId was provided
           if (_menuConfigBloc != null)
             BlocProvider<MenuConfigBloc>.value(value: _menuConfigBloc!),
           ...widget.extraBlocProviders,
@@ -149,7 +124,6 @@ class _TopAppState extends State<TopApp> {
                 return GestureDetector(
                   onTap: () {
                     FocusScopeNode currentFocus = FocusScope.of(context);
-
                     if (!currentFocus.hasPrimaryFocus) {
                       currentFocus.unfocus();
                     }
@@ -189,20 +163,93 @@ class _TopAppState extends State<TopApp> {
                     ),
                     themeMode: themeState.themeMode,
                     theme: FlexThemeData.light(
+                      colors: themeState.colorScheme == FlexScheme.jungle
+                          ? growerpPremium.light
+                          : null,
                       scheme: themeState.colorScheme,
+                      fontFamily: GoogleFonts.outfit().fontFamily,
+                      blendLevel: 10,
                       subThemesData: const FlexSubThemesData(
+                        blendOnLevel: 10,
+                        blendOnColors: false,
+                        useM2StyleDividerInM3: true,
                         dialogBackgroundSchemeColor: SchemeColor.surface,
-                        inputDecoratorBorderType: FlexInputBorderType.underline,
+                        inputDecoratorBorderType: FlexInputBorderType.outline,
+                        inputDecoratorRadius: 25.0,
+                        defaultRadius: 25.0,
+                        useInputDecoratorThemeInDialogs: true,
+                        cardElevation: 2,
+                        dialogElevation: 3,
                       ),
                       useMaterial3: true,
+                      visualDensity: VisualDensity.adaptivePlatformDensity,
+                      pageTransitionsTheme: const PageTransitionsTheme(
+                        builders: {
+                          TargetPlatform
+                              .android: SharedAxisPageTransitionsBuilder(
+                            transitionType: SharedAxisTransitionType.horizontal,
+                          ),
+                          TargetPlatform.iOS: SharedAxisPageTransitionsBuilder(
+                            transitionType: SharedAxisTransitionType.horizontal,
+                          ),
+                          TargetPlatform
+                              .linux: SharedAxisPageTransitionsBuilder(
+                            transitionType: SharedAxisTransitionType.horizontal,
+                          ),
+                          TargetPlatform
+                              .macOS: SharedAxisPageTransitionsBuilder(
+                            transitionType: SharedAxisTransitionType.horizontal,
+                          ),
+                          TargetPlatform
+                              .windows: SharedAxisPageTransitionsBuilder(
+                            transitionType: SharedAxisTransitionType.horizontal,
+                          ),
+                        },
+                      ),
                     ),
                     darkTheme: FlexThemeData.dark(
+                      colors: themeState.colorScheme == FlexScheme.jungle
+                          ? growerpPremium.dark
+                          : null,
                       scheme: themeState.colorScheme,
+                      fontFamily: GoogleFonts.outfit().fontFamily,
+                      blendLevel: 13,
                       subThemesData: const FlexSubThemesData(
+                        blendOnLevel: 20,
+                        useM2StyleDividerInM3: true,
                         dialogBackgroundSchemeColor: SchemeColor.surface,
-                        inputDecoratorBorderType: FlexInputBorderType.underline,
+                        inputDecoratorBorderType: FlexInputBorderType.outline,
+                        inputDecoratorRadius: 25.0,
+                        defaultRadius: 25.0,
+                        useInputDecoratorThemeInDialogs: true,
+                        cardElevation: 2,
+                        dialogElevation: 3,
                       ),
                       useMaterial3: true,
+                      visualDensity: VisualDensity.adaptivePlatformDensity,
+                      pageTransitionsTheme: const PageTransitionsTheme(
+                        builders: {
+                          TargetPlatform
+                              .android: SharedAxisPageTransitionsBuilder(
+                            transitionType: SharedAxisTransitionType.horizontal,
+                          ),
+                          TargetPlatform.iOS: SharedAxisPageTransitionsBuilder(
+                            transitionType: SharedAxisTransitionType.horizontal,
+                          ),
+                          TargetPlatform
+                              .linux: SharedAxisPageTransitionsBuilder(
+                            transitionType: SharedAxisTransitionType.horizontal,
+                          ),
+                          TargetPlatform
+                              .macOS: SharedAxisPageTransitionsBuilder(
+                            transitionType: SharedAxisTransitionType.horizontal,
+                          ),
+                          TargetPlatform
+                              .windows: SharedAxisPageTransitionsBuilder(
+                            transitionType: SharedAxisTransitionType.horizontal,
+                          ),
+                        },
+                      ),
                     ),
                     routerConfig: widget.router,
                   ),

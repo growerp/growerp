@@ -1,4 +1,30 @@
+import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
+
+const FlexSchemeData growerpPremium = FlexSchemeData(
+  name: 'GrowERP Premium',
+  description: 'Premium emerald and teal theme for GrowERP',
+  light: FlexSchemeColor(
+    primary: Color(0xFF006B5A),
+    primaryContainer: Color(0xFF63FADB),
+    secondary: Color(0xFF006C53),
+    secondaryContainer: Color(0xFF81F8D0),
+    tertiary: Color(0xFF426278),
+    tertiaryContainer: Color(0xFFC7E7FF),
+    appBarColor: Color(0xFF006C53),
+    error: Color(0xFFBA1A1A),
+  ),
+  dark: FlexSchemeColor(
+    primary: Color(0xFF3EDDBF),
+    primaryContainer: Color(0xFF005144),
+    secondary: Color(0xFF64DBB4),
+    secondaryContainer: Color(0xFF00513E),
+    tertiary: Color(0xFFAACBE4),
+    tertiaryContainer: Color(0xFF2A4A5F),
+    appBarColor: Color(0xFF005144),
+    error: Color(0xFFFFB4AB),
+  ),
+);
 
 const lightColorScheme = ColorScheme(
   brightness: Brightness.light,

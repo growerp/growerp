@@ -1,16 +1,5 @@
 /*
- * This GrowERP software is in the public doma              Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).brightness == Brightness.dark
-                          ? Theme.of(context).colorScheme.surfaceContainerHighest
-                          : Theme.of(context).colorScheme.surface,
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(20),
-                      child: SingleChildScrollView(child: Column(children: children)),
-                    ),
-                  )),der CC0 1.0 Universal plus a
+ * This GrowERP software is in the public domain under CC0 1.0 Universal plus a
  * Grant of Patent License.
  * 
  * To the extent possible under law, the author(s) have dedicated all
@@ -26,6 +15,7 @@
 import 'package:flutter/material.dart';
 import '../../domains.dart';
 
+/// Premium popup dialog without scaffold, with gradient header matching the app's design system.
 Widget popUpDialogNoScaffold({
   required BuildContext context,
   required List<Widget> children,
@@ -34,6 +24,8 @@ Widget popUpDialogNoScaffold({
   double width = 400,
   Key key = const Key('popUp'),
 }) {
+  final colorScheme = Theme.of(context).colorScheme;
+
   return Dialog(
     insetPadding: const EdgeInsets.all(10),
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -45,10 +37,18 @@ Widget popUpDialogNoScaffold({
           height: height,
           child: Column(
             children: [
+              // Premium gradient header
               Container(
                 height: 50,
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.secondaryContainer,
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      colorScheme.primaryContainer,
+                      colorScheme.secondaryContainer.withValues(alpha: 0.8),
+                    ],
+                  ),
                   borderRadius: const BorderRadius.only(
                     topLeft: Radius.circular(20),
                     topRight: Radius.circular(20),
@@ -57,19 +57,31 @@ Widget popUpDialogNoScaffold({
                 child: Center(
                   child: Text(
                     title,
-                    style: const TextStyle(
-                      fontSize: 20,
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 0.3,
+                      color: colorScheme.onSurface,
                     ),
                   ),
                 ),
               ),
               Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: SingleChildScrollView(
-                    child: Column(children: children),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? colorScheme.surfaceContainerHighest
+                        : colorScheme.surface,
+                    borderRadius: const BorderRadius.only(
+                      bottomLeft: Radius.circular(20),
+                      bottomRight: Radius.circular(20),
+                    ),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: SingleChildScrollView(
+                      child: Column(children: children),
+                    ),
                   ),
                 ),
               ),

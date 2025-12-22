@@ -73,6 +73,7 @@ class FreelanceDbForm extends StatelessWidget {
                     iconName: option.iconName ?? 'dashboard',
                     route: option.route,
                     stats: getStatsForRoute(option.route, stats),
+                    animationIndex: index,
                   );
                 },
               ),

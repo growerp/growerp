@@ -19,8 +19,12 @@ import 'package:growerp_core/l10n/generated/core_localizations.dart';
 import 'package:growerp_models/growerp_models.dart';
 import '../domains/domains.dart';
 
+/// Premium drawer widget with gradient styling, enhanced user profile,
+/// and polished menu items for a modern mobile experience.
 Widget? myDrawer(BuildContext context, bool isPhone, List<MenuItem> menu) {
   final localizations = CoreLocalizations.of(context)!;
+  final colorScheme = Theme.of(context).colorScheme;
+  final isDark = Theme.of(context).brightness == Brightness.dark;
   AuthBloc authBloc = context.read<AuthBloc>();
   Authenticate? auth = authBloc.state.authenticate;
 
@@ -42,98 +46,255 @@ Widget? myDrawer(BuildContext context, bool isPhone, List<MenuItem> menu) {
 
   if (loggedIn && isPhone) {
     return Drawer(
-      width: 200,
+      width: 260,
       key: const Key('drawer'),
-      child: ListView.builder(
-        key: const Key('listView'),
-        itemCount: options.length + 1,
-        itemBuilder: (context, i) {
-          if (i == 0) {
-            return DrawerHeader(
-              child: InkWell(
-                key: const Key('tapUser'),
-                onTap: () => context.go('/user', extra: auth?.user),
-                child: Column(
-                  children: [
-                    CircleAvatar(
-                      radius: 40,
-                      child: auth?.user?.image != null
-                          ? Image.memory(auth!.user!.image!)
-                          : Text(
-                              auth?.user?.firstName?.substring(0, 1) ?? '',
-                              style: const TextStyle(fontSize: 30),
-                            ),
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      "${auth?.user!.firstName} ",
-                      style: const TextStyle(fontSize: 15),
-                    ),
-                    Text(
-                      "${auth?.user!.lastName}",
-                      style: const TextStyle(fontSize: 15),
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              colorScheme.surface,
+              colorScheme.surface,
+              colorScheme.primaryContainer.withValues(
+                alpha: isDark ? 0.2 : 0.1,
+              ),
+            ],
+            stops: const [0.0, 0.7, 1.0],
+          ),
+        ),
+        child: ListView.builder(
+          key: const Key('listView'),
+          itemCount: options.length + 1,
+          itemBuilder: (context, i) {
+            if (i == 0) {
+              // Premium drawer header with gradient
+              return Container(
+                padding: EdgeInsets.only(
+                  top: MediaQuery.of(context).padding.top + 24,
+                  bottom: 24,
+                  left: 20,
+                  right: 20,
+                ),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      colorScheme.primaryContainer,
+                      colorScheme.secondaryContainer.withValues(alpha: 0.8),
+                    ],
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: colorScheme.shadow.withValues(alpha: 0.1),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
                     ),
                   ],
                 ),
-              ),
-            );
-          }
+                child: InkWell(
+                  key: const Key('tapUser'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    context.go('/user', extra: auth?.user);
+                  },
+                  borderRadius: BorderRadius.circular(16),
+                  child: Column(
+                    children: [
+                      // Avatar with gradient ring
+                      Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              colorScheme.primary,
+                              colorScheme.secondary,
+                            ],
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: colorScheme.primary.withValues(alpha: 0.3),
+                              blurRadius: 12,
+                              spreadRadius: 1,
+                            ),
+                          ],
+                        ),
+                        child: CircleAvatar(
+                          radius: 40,
+                          backgroundColor: colorScheme.surface,
+                          child: auth?.user?.image != null
+                              ? ClipOval(
+                                  child: Image.memory(
+                                    auth!.user!.image!,
+                                    width: 72,
+                                    height: 72,
+                                    fit: BoxFit.cover,
+                                  ),
+                                )
+                              : Text(
+                                  auth?.user?.firstName?.substring(0, 1) ?? '',
+                                  style: TextStyle(
+                                    fontSize: 32,
+                                    fontWeight: FontWeight.bold,
+                                    color: colorScheme.primary,
+                                  ),
+                                ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      // User name with premium styling
+                      Text(
+                        "${auth?.user!.firstName ?? ''} ${auth?.user!.lastName ?? ''}",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 0.3,
+                          color: colorScheme.onSurface,
+                        ),
+                      ),
+                      if (auth?.user?.email != null) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          auth!.user!.email!,
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: colorScheme.onSurface.withValues(alpha: 0.7),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              );
+            }
 
-          final menuOption = options[i - 1];
+            final menuOption = options[i - 1];
 
-          if (menuOption.route == "theme") {
-            return Padding(
-              padding: const EdgeInsets.all(5.0),
-              child: InkWell(
-                key: const Key('theme'),
+            if (menuOption.route == "theme") {
+              return _buildDrawerItem(
+                context: context,
+                colorScheme: colorScheme,
+                icon: Icons.palette,
+                iconColor: colorScheme.tertiary,
+                title: localizations.theme,
                 onTap: () {
-                  Navigator.pop(context); // Close drawer first
+                  Navigator.pop(context);
                   showDialog(
                     context: context,
                     builder: (context) => const ThemePickerDialog(),
                   );
                 },
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    const SizedBox(width: 5),
-                    const Icon(Icons.palette, size: 40),
-                    const SizedBox(width: 20),
-                    Text(
-                      localizations.theme,
-                      style: const TextStyle(fontSize: 16),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          }
+                isLast: true,
+              );
+            }
 
-          return ListTile(
-            key: Key('tap${menuOption.route}'),
-            contentPadding: const EdgeInsets.all(5.0),
-            title: Text(
-              menuOption.title,
-              style: const TextStyle(fontSize: 16),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-            leading:
-                getIconFromRegistry(menuOption.iconName) ??
-                const Icon(Icons.circle),
-            onTap: () {
-              if (menuOption.route != null) {
-                // Close drawer first
-                Navigator.pop(context);
-                // Then navigate
-                context.go(menuOption.route!);
-              }
-            },
-          );
-        },
+            return _buildDrawerItem(
+              context: context,
+              colorScheme: colorScheme,
+              icon: null,
+              customIcon:
+                  getIconFromRegistry(menuOption.iconName) ??
+                  const Icon(Icons.circle),
+              title: menuOption.title,
+              onTap: () {
+                if (menuOption.route != null) {
+                  Navigator.pop(context);
+                  context.go(menuOption.route!);
+                }
+              },
+              routeKey: 'tap${menuOption.route}',
+            );
+          },
+        ),
       ),
     );
   }
 
   return Text(localizations.error);
+}
+
+/// Builds a styled drawer menu item with gradient hover effect
+Widget _buildDrawerItem({
+  required BuildContext context,
+  required ColorScheme colorScheme,
+  IconData? icon,
+  Widget? customIcon,
+  Color? iconColor,
+  required String title,
+  required VoidCallback onTap,
+  String? routeKey,
+  bool isLast = false,
+}) {
+  return Padding(
+    padding: EdgeInsets.only(
+      left: 12,
+      right: 12,
+      top: 4,
+      bottom: isLast ? 20 : 4,
+    ),
+    child: Material(
+      color: Colors.transparent,
+      borderRadius: BorderRadius.circular(12),
+      child: InkWell(
+        key: routeKey != null ? Key(routeKey) : null,
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        splashColor: colorScheme.primary.withValues(alpha: 0.1),
+        highlightColor: colorScheme.primary.withValues(alpha: 0.05),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          decoration: BoxDecoration(borderRadius: BorderRadius.circular(12)),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  color: (iconColor ?? colorScheme.primary).withValues(
+                    alpha: 0.1,
+                  ),
+                ),
+                child: icon != null
+                    ? Icon(
+                        icon,
+                        size: 22,
+                        color: iconColor ?? colorScheme.primary,
+                      )
+                    : IconTheme(
+                        data: IconThemeData(
+                          size: 22,
+                          color: colorScheme.primary,
+                        ),
+                        child: customIcon!,
+                      ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
+                    letterSpacing: 0.2,
+                    color: colorScheme.onSurface,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              Icon(
+                Icons.chevron_right,
+                size: 20,
+                color: colorScheme.onSurface.withValues(alpha: 0.4),
+              ),
+            ],
+          ),
+        ),
+      ),
+    ),
+  );
 }

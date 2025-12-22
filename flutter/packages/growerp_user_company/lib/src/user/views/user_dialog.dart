@@ -393,10 +393,7 @@ class UserDialogState extends State<UserDialogStateFull> {
   Widget _userDialog(UserCompanyLocalizations localizations) {
     List<Widget> widgets = [
       InputDecorator(
-        decoration: InputDecoration(
-          labelText: localizations.userInfo,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(25.0)),
-        ),
+        decoration: InputDecoration(labelText: localizations.userInfo),
         child: Column(
           children: [
             Row(
@@ -517,10 +514,7 @@ class UserDialogState extends State<UserDialogStateFull> {
         ),
       ),
       InputDecorator(
-        decoration: InputDecoration(
-          labelText: localizations.postalAddress,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(25.0)),
-        ),
+        decoration: InputDecoration(labelText: localizations.postalAddress),
         child: Row(
           children: [
             Expanded(
@@ -582,10 +576,7 @@ class UserDialogState extends State<UserDialogStateFull> {
         ),
       ),
       InputDecorator(
-        decoration: InputDecoration(
-          labelText: localizations.paymentMethod,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(25.0)),
-        ),
+        decoration: InputDecoration(labelText: localizations.paymentMethod),
         child: Row(
           children: [
             Expanded(
@@ -658,9 +649,6 @@ class UserDialogState extends State<UserDialogStateFull> {
         InputDecorator(
           decoration: InputDecoration(
             labelText: localizations.relatedCompanyInfo,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(25.0),
-            ),
           ),
           child: Column(
             children: [
