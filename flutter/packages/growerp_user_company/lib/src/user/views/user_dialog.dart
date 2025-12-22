@@ -19,6 +19,7 @@ import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
@@ -37,7 +38,8 @@ import '../bloc/user_bloc.dart';
 
 class UserDialog extends StatelessWidget {
   final User user;
-  const UserDialog(this.user, {super.key});
+  final bool dialog;
+  const UserDialog(this.user, {super.key, this.dialog = true});
   @override
   Widget build(BuildContext context) {
     DataFetchBloc userBloc = context.read<DataFetchBloc<Users>>()
@@ -58,6 +60,7 @@ class UserDialog extends StatelessWidget {
           }
           return UserDialogStateFull(
             user: (userBloc.state.data as Users).users[0],
+            dialog: dialog,
           );
         }
         return const LoadingIndicator();
@@ -68,7 +71,9 @@ class UserDialog extends StatelessWidget {
 
 class UserDialogStateFull extends StatefulWidget {
   final User user;
-  const UserDialogStateFull({Key? key, required this.user}) : super(key: key);
+  final bool dialog;
+  const UserDialogStateFull({Key? key, required this.user, this.dialog = true})
+    : super(key: key);
   @override
   UserDialogState createState() => UserDialogState();
 }
@@ -260,9 +265,27 @@ class UserDialogState extends State<UserDialogStateFull> {
                       );
                     }
                     if (state.status == UserStatus.success) {
-                      Navigator.of(
-                        context,
-                      ).pop(state.users.isNotEmpty ? state.users.first : null);
+                      // Update AuthBloc if this is the logged-in user
+                      if (state.users.isNotEmpty) {
+                        final updatedUser = state.users.first;
+                        final authBloc = context.read<AuthBloc>();
+                        final currentAuth = authBloc.state.authenticate;
+                        if (currentAuth?.user?.partyId == updatedUser.partyId) {
+                          // Update the authenticate state with the new user data
+                          authBloc.add(
+                            AuthUpdateLocal(
+                              currentAuth!.copyWith(user: updatedUser),
+                            ),
+                          );
+                        }
+                      }
+                      if (widget.dialog) {
+                        Navigator.of(context).pop(
+                          state.users.isNotEmpty ? state.users.first : null,
+                        );
+                      } else {
+                        context.go('/');
+                      }
                     }
                   },
                   builder: (context, state) {

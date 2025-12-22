@@ -38,6 +38,9 @@ Map<String, GrowerpWidgetBuilder> getUserCompanyWidgets() {
     'UserListCompany': (args) =>
         UserList(key: getKeyFromArgs(args), role: Role.company),
 
+    // User Dialog
+    'UserDialog': (args) => UserDialog(args?['user'] as User, dialog: false),
+
     // Company dialogs
     'ShowCompanyDialog': (args) => ShowCompanyDialog(
       Company(role: parseRole(args?['role'])),
@@ -108,6 +111,13 @@ List<WidgetMetadata> getUserCompanyWidgetsWithMetadata() {
       keywords: ['company', 'organization', 'firm'],
       builder: (args) =>
           UserList(key: getKeyFromArgs(args), role: Role.company),
+    ),
+    WidgetMetadata(
+      widgetName: 'UserDialog',
+      description: 'User details dialog',
+      iconName: 'person',
+      keywords: ['user', 'profile', 'details'],
+      builder: (args) => UserDialog(args?['user'] as User, dialog: false),
     ),
     WidgetMetadata(
       widgetName: 'ShowCompanyDialog',

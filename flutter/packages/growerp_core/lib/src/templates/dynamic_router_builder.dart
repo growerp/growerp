@@ -164,6 +164,18 @@ GoRouter createDynamicAppRouter(
         },
       ),
 
+      // User Profile
+      GoRoute(
+        path: '/user',
+        builder: (context, state) {
+          Map<String, dynamic> args = {};
+          if (state.extra != null) {
+            args['user'] = state.extra;
+          }
+          return config.widgetLoader('UserDialog', args);
+        },
+      ),
+
       // Main Shell - only add if there are routes
       if (_generateRoutes(mainConfig, config.widgetLoader).isNotEmpty)
         ShellRoute(
