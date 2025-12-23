@@ -1,101 +1,190 @@
-<div>
-    <div class="container">
-        <div class="container mt-2">
-            <a class="customer-link" href="/">Home <i class="fas fa-angle-right"></i></a>
-            <span class="modal-text">${category.categoryName}</span>
+<div class="container" style="padding-top: 1.5rem;">
+    <!-- Breadcrumb Navigation -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb" style="background: none; padding: 0; margin-bottom: 1.5rem;">
+            <li class="breadcrumb-item">
+                <a href="/" class="customer-link" style="color: var(--primary-600);">
+                    <i class="fas fa-home mr-1"></i>Home
+                </a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page" style="color: var(--neutral-500);">
+                ${category.categoryName}
+            </li>
+        </ol>
+    </nav>
+    
+    <div class="row">
+        <!-- Sidebar Filters -->
+        <div class="col-lg-3 col-md-4 col-12 mb-4">
+            <div class="customer-menu" style="position: sticky; top: 100px;">
+                <h5 style="font-family: 'Outfit', sans-serif; font-weight: 600; color: var(--neutral-800); margin-bottom: 1.25rem;">
+                    <i class="fas fa-filter mr-2" style="color: var(--primary-500);"></i>Shop By
+                </h5>
+                
+                <ul class="deals-ul" style="border-left: 2px solid var(--neutral-200); padding-left: 1rem;">
+                    <#if (storeInfo.categoryByType.PsctSearch.productCategoryId)??>
+                        <li class="mb-2">
+                            <a href="/category/${storeInfo.categoryByType.PsctSearch.productCategoryId}" 
+                                class="d-flex align-items-center <#if storeInfo.categoryByType.PsctSearch.productCategoryId == categoryId>active-category</#if>" 
+                                style="<#if storeInfo.categoryByType.PsctSearch.productCategoryId == categoryId>color: var(--primary-600); font-weight: 600;<#else>color: var(--neutral-600);</#if>">
+                                <i class="fas fa-th mr-2" style="width: 18px;"></i>All Products
+                            </a>
+                        </li>
+                    </#if>
+                    <#if (storeInfo.categoryByType.PsctPromotions.productCategoryId)??>
+                        <li class="mb-2">
+                            <a href="/category/${storeInfo.categoryByType.PsctPromotions.productCategoryId}" 
+                                class="d-flex align-items-center <#if storeInfo.categoryByType.PsctPromotions.productCategoryId == categoryId>active-category</#if>"
+                                style="<#if storeInfo.categoryByType.PsctPromotions.productCategoryId == categoryId>color: var(--primary-600); font-weight: 600;<#else>color: var(--neutral-600);</#if>">
+                                <i class="fas fa-fire mr-2" style="width: 18px; color: var(--accent-500);"></i>Deals
+                            </a>
+                        </li>
+                    </#if>
+                    <#if (storeInfo.categoryByType.PsctNewProducts.productCategoryId)??>
+                        <li class="mb-2">
+                            <a href="/category/${storeInfo.categoryByType.PsctNewProducts.productCategoryId}" 
+                                class="d-flex align-items-center <#if storeInfo.categoryByType.PsctNewProducts.productCategoryId == categoryId>active-category</#if>"
+                                style="<#if storeInfo.categoryByType.PsctNewProducts.productCategoryId == categoryId>color: var(--primary-600); font-weight: 600;<#else>color: var(--neutral-600);</#if>">
+                                <i class="fas fa-tag mr-2" style="width: 18px; color: var(--success);"></i>New Arrivals
+                            </a>
+                        </li>
+                    </#if>
+                    <#if (storeInfo.categoryByType.PsctFeatured.productCategoryId)??>
+                        <li class="mb-2">
+                            <a href="/category/${storeInfo.categoryByType.PsctFeatured.productCategoryId}" 
+                                class="d-flex align-items-center <#if storeInfo.categoryByType.PsctFeatured.productCategoryId == categoryId>active-category</#if>"
+                                style="<#if storeInfo.categoryByType.PsctFeatured.productCategoryId == categoryId>color: var(--primary-600); font-weight: 600;<#else>color: var(--neutral-600);</#if>">
+                                <i class="fas fa-star mr-2" style="width: 18px; color: var(--gold);"></i>Best Sellers
+                            </a>
+                        </li>
+                    </#if>
+                </ul>
+                
+                <hr style="margin: 1.25rem 0; border-color: var(--neutral-200);">
+                
+                <h6 style="font-weight: 600; color: var(--neutral-500); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px; margin-bottom: 1rem;">
+                    Categories
+                </h6>
+                <ul class="deals-ul" style="padding-left: 0;">
+                    <#list browseRootCategoryInfo.subCategoryList as cat>
+                        <li class="mb-2">
+                            <a href="/category/${cat.productCategoryId}" 
+                                class="d-flex align-items-center"
+                                style="<#if cat.productCategoryId == categoryId>color: var(--primary-600); font-weight: 600;<#else>color: var(--neutral-600);</#if> transition: all 0.2s ease;">
+                                <i class="fas fa-chevron-right mr-2" style="font-size: 0.7rem; color: var(--primary-400);"></i>
+                                ${cat.categoryName}
+                            </a>
+                        </li>
+                    </#list>
+                </ul>
+            </div>
         </div>
-        <div class="row mt-4">
-            <div class="col col-lg-2 col-12">
-                <div class="customer-menu">
-                    <ul class="deals-ul">
-                        <#if (storeInfo.categoryByType.PsctSearch.productCategoryId)??>
-                            <li><a <#if storeInfo.categoryByType.PsctSearch.productCategoryId == categoryId>class="category-select"</#if> href="/category/${storeInfo.categoryByType.PsctSearch.productCategoryId}">
-                                <i class="fas fa-th" id="all"></i> All</a></li>
-                        </#if>
-                        <#if (storeInfo.categoryByType.PsctPromotions.productCategoryId)??>
-                            <li><a <#if storeInfo.categoryByType.PsctPromotions.productCategoryId == categoryId>class="category-select"</#if> href="/category/${storeInfo.categoryByType.PsctPromotions.productCategoryId}">
-                                <i class="fa fa-fire" id="deals" aria-hidden="true"></i> Deals</a></li>
-                        </#if>
-                        <#if (storeInfo.categoryByType.PsctNewProducts.productCategoryId)??>
-                            <li><a <#if storeInfo.categoryByType.PsctNewProducts.productCategoryId == categoryId>class="category-select"</#if> href="/category/${storeInfo.categoryByType.PsctNewProducts.productCategoryId}">
-                                <i class="fas fa-tag" id="new"></i> New</a></li>
-                        </#if>
-                        <#if (storeInfo.categoryByType.PsctFeatured.productCategoryId)??>
-                            <li><a <#if storeInfo.categoryByType.PsctFeatured.productCategoryId == categoryId>class="category-select"</#if> href="/category/${storeInfo.categoryByType.PsctFeatured.productCategoryId}">
-                                <i class="fas fa-bullhorn" id="featured"></i> Best Sellers</a></li>
-                        </#if>
-                    </ul>
-                    <hr width="180px" style="margin-left: -15px !important;">
-                    <span class="deals-subtitle">Categories</span>
-                    <ul class="deals-ul">
-                        <#list browseRootCategoryInfo.subCategoryList as category>
-                            <li><a <#if category.productCategoryId == categoryId>class="category-select"</#if> href="/category/${category.productCategoryId}">${category.categoryName}</a></li>
-                        </#list>
-                    </ul>
+        
+        <!-- Product Grid -->
+        <div class="col-lg-9 col-md-8 col-12">
+            <!-- Category Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap">
+                <h1 class="customer-orders-title mb-2" style="font-size: 2rem;">${category.categoryName}</h1>
+            </div>
+            
+            <!-- Results Bar -->
+            <div class="deals-sellers mb-4" style="padding: 1rem 1.5rem; border-radius: var(--radius-md);">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="deals-sortby-text">
+                        <i class="fas fa-box-open mr-2" style="color: var(--primary-500);"></i>
+                        <strong>${products.productListCount!0}</strong> product<#if (products.productListCount!0) != 1>s</#if> found
+                    </span>
                 </div>
             </div>
-            <div class="col col-lg-9 offset-lg-1 col-12">
-                <span class="customer-orders-title">${category.categoryName}</span>
-                <br>
-                <div class="col col-lg-12 col-12 deals-sellers">
-                    <span class="deals-sortby-text col col-lg-4">${products.productListCount!0} results</span>
-                    <!--<span class="deals-sortby-text col col-lg-3 offset-lg-5">Sort by Best Sellers <i class="fas fa-angle-down"></i></span>-->
-                </div>
-                <div class="row mt-5">
-                    <#if products??>
-                        <#list products.productList as localProd>
-                            <div class="col col-lg-4 col-md-6 col-6">
-                                <a href="/product/${localProd.productId}">
-                                    <div class="category-product">
-                                        <figure class="figure">
-                                            <#if localProd.mediumImageInfo?? || localProd.smallImageInfo??>
-                                                <#assign img = localProd.smallImageInfo! localProd.mediumImageInfo>
-                                                <img class="figure-img img-fluid product-img product-small-img"
-                                                    src="/content/productImage/${img.productContentId}"
-                                                    alt="Product Image">
-                                            <#else>
-                                                <img class="figure-img img-fluid product-img product-small-img"
-                                                    src="/assets/default.png"
-                                                    alt="Product Image">
-                                            </#if>
-                                            <figcaption class="text-left title-product-text figure-caption">${localProd.productName}</figcaption>
-                                            <!--<figcaption class="text-left figure-caption">
-                                                <#list 1..5 as x>
-                                                    <span class="star-rating"><i class="fas fa-star"></i></span>
-                                                </#list>
-                                                <#if localProd.numberOfRatings??>
-                                                    <span class="text-dark">${localProd.numberOfRatings}</span>
-                                                </#if>
-                                            </figcaption>-->
-                                            <figcaption class="text-primary text-left figure-caption">
-                                                <span class="product-price-text">${ec.l10n.formatCurrency(localProd.price,localProd.priceUomId)}</span>
-                                                <#if localProd.listPrice??>
-                                                    <span class="product-last-price"><del>${ec.l10n.formatCurrency(localProd.listPrice, localProd.priceUomId)}</del></span>
-                                                </#if>
-                                            </figcaption>
-                                       </figure>
+            
+            <!-- Product Grid -->
+            <div class="row">
+                <#if products?? && products.productList?has_content>
+                    <#list products.productList as localProd>
+                        <div class="col-lg-4 col-md-6 col-6 mb-4">
+                            <a href="/product/${localProd.productId}" class="category-product">
+                                <figure class="figure" style="margin: 0;">
+                                    <!-- Product Image -->
+                                    <div class="product-image-wrapper" style="overflow: hidden; border-radius: var(--radius-md); background: #fff;">
+                                        <#if localProd.mediumImageInfo?? || localProd.smallImageInfo??>
+                                            <#assign img = localProd.smallImageInfo! localProd.mediumImageInfo>
+                                            <img class="figure-img img-fluid w-100"
+                                                src="/content/productImage/${img.productContentId}"
+                                                alt="${localProd.productName}"
+                                                style="aspect-ratio: 1; object-fit: cover;">
+                                        <#else>
+                                            <div class="placeholder-image d-flex align-items-center justify-content-center" 
+                                                style="aspect-ratio: 1; background: var(--neutral-100);">
+                                                <i class="fas fa-image fa-3x" style="color: var(--neutral-300);"></i>
+                                            </div>
+                                        </#if>
                                     </div>
-                                </a>
-                            </div>
-                        </#list>
-                    </#if>
-                </div>
-                <nav aria-label="Page navigation" class="<#if products.productListCount == 0 || products.productListCount <= 5 >d-none</#if>">
+                                    
+                                    <!-- Product Info -->
+                                    <figcaption class="text-left title-product-text figure-caption mt-3" style="min-height: 48px;">
+                                        ${localProd.productName}
+                                    </figcaption>
+                                    
+                                    <!-- Price -->
+                                    <figcaption class="text-left figure-caption mt-2">
+                                        <#if localProd.price?? && localProd.price gt 0>
+                                            <span class="product-price-text">${ec.l10n.formatCurrency(localProd.price, localProd.priceUomId)}</span>
+                                            <#if localProd.listPrice?? && localProd.listPrice gt localProd.price>
+                                                <span class="product-last-price ml-2">
+                                                    <del>${ec.l10n.formatCurrency(localProd.listPrice, localProd.priceUomId)}</del>
+                                                </span>
+                                            </#if>
+                                        <#elseif localProd.listPrice?? && localProd.listPrice gt 0>
+                                            <span class="product-price-text">${ec.l10n.formatCurrency(localProd.listPrice,localProd.priceUomId)}</span>
+                                        <#else>
+                                            <span class="product-price-text">Free</span>
+                                        </#if>
+                                    </figcaption>
+                                </figure>
+                            </a>
+                        </div>
+                    </#list>
+                <#else>
+                    <div class="col-12">
+                        <div class="text-center py-5" style="background: var(--neutral-50); border-radius: var(--radius-lg);">
+                            <i class="fas fa-box-open fa-4x mb-3" style="color: var(--neutral-300);"></i>
+                            <h4 style="color: var(--neutral-500);">No products found</h4>
+                            <p style="color: var(--neutral-400);">Check back later for new arrivals!</p>
+                            <a href="/" class="btn btn-continue mt-2">
+                                <i class="fas fa-home mr-2"></i>Back to Home
+                            </a>
+                        </div>
+                    </div>
+                </#if>
+            </div>
+            
+            <!-- Pagination -->
+            <#if products?? && products.productListCount?? && products.productListCount gt 5>
+                <nav aria-label="Page navigation" class="mt-4">
                     <ul class="pagination justify-content-center">
                         <li class="page-item <#if pageIndex?number == 0>disabled</#if>">
-                            <a class="page-link" href="/category/${categoryId}?pageIndex=${pageIndex?number - 1}">Previous</a>
+                            <a class="page-link" href="/category/${categoryId}?pageIndex=${pageIndex?number - 1}" 
+                                style="border-radius: var(--radius-md) 0 0 var(--radius-md); border-color: var(--neutral-200);">
+                                <i class="fas fa-chevron-left mr-1"></i>Previous
+                            </a>
                         </li>
                         <#list 0..(products.productListCount / products.productListPageSize)?floor as n>
                             <li class="page-item <#if pageIndex?number == n>active</#if>">
-                                <a class="page-link" href="/category/${categoryId}?pageIndex=${n}">${n + 1}</a>
+                                <a class="page-link" href="/category/${categoryId}?pageIndex=${n}" 
+                                    style="border-color: var(--neutral-200); <#if pageIndex?number == n>background: var(--primary-500); border-color: var(--primary-500);</#if>">
+                                    ${n + 1}
+                                </a>
                             </li>
                         </#list>
                         <li class="page-item <#if products.productListCount == products.productListPageRangeHigh>disabled</#if>">
-                            <a class="page-link" href="/category/${categoryId}?pageIndex=${pageIndex?number + 1}">Next</a>
+                            <a class="page-link" href="/category/${categoryId}?pageIndex=${pageIndex?number + 1}" 
+                                style="border-radius: 0 var(--radius-md) var(--radius-md) 0; border-color: var(--neutral-200);">
+                                Next<i class="fas fa-chevron-right ml-1"></i>
+                            </a>
                         </li>
                     </ul>
                 </nav>
-            </div>
+            </#if>
         </div>
     </div>
 </div>
