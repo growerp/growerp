@@ -1,4 +1,4 @@
-<nav class="navbar navbar-expand-md navbar-dark bg-dark" style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%) !important;">
+<nav class="navbar navbar-expand-md navbar-dark bg-dark">
     <div class="d-flex flex-column moqui-navbar" style="background: transparent;">
         <div class="container d-flex flex-row main-navbar justify-content-between">
             <!-- Logo and Brand -->

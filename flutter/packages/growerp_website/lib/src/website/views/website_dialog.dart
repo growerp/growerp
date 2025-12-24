@@ -910,26 +910,45 @@ class WebsiteDialogState extends State<WebsiteDialog> {
               onPressed: () async {
                 FilePickerResult? result;
                 String? path;
-                if (foundation.kIsWeb) {
-                  result = await FilePicker.platform.pickFiles(
-                    allowedExtensions: ['zip'],
-                    type: FileType.custom,
-                  );
-                } else {
-                  path = await FilePicker.platform.getDirectoryPath();
+                // Note: Using FileType.any because file_picker 10.1.2 has a
+                // known bug where FileType.custom with allowedExtensions
+                // prevents file selection. We validate the extension manually.
+                result = await FilePicker.platform.pickFiles(
+                  type: FileType.any,
+                  withData: true, // Ensure bytes are available on all platforms
+                );
+
+                // Cancelled by user
+                if (result == null || result.files.isEmpty) {
+                  return;
                 }
 
-                if (path != null || result != null) {
-                  _websiteBloc.add(
-                    WebsiteObsUpload(
-                      Obsidian(
-                        title: _obsidianController.text,
-                        zip: result?.files.first.bytes!,
-                      ),
-                      path,
-                    ),
-                  );
+                // Validate that the selected file is a .zip file
+                if (!result.files.first.name.toLowerCase().endsWith('.zip')) {
+                  if (mounted) {
+                    HelperFunctions.showMessage(
+                      context,
+                      'Please select a .zip file',
+                      Colors.red,
+                    );
+                  }
+                  return;
                 }
+
+                // On desktop platforms, get the path from the file
+                if (!foundation.kIsWeb) {
+                  path = result.files.first.path;
+                }
+
+                _websiteBloc.add(
+                  WebsiteObsUpload(
+                    Obsidian(
+                      title: _obsidianController.text,
+                      zip: result.files.first.bytes,
+                    ),
+                    path,
+                  ),
+                );
               },
             ),
             const SizedBox(width: 10),

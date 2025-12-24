@@ -97,24 +97,34 @@ class WebsiteBloc extends Bloc<WebsiteEvent, WebsiteState> {
       emit(state.copyWith(status: WebsiteStatus.loading));
       Obsidian? input;
       if (event.path != null) {
-        Directory appDocDirectory = await getApplicationDocumentsDirectory();
-        final zipFile = '${appDocDirectory.path}/out.zip';
-        var inputDir = Directory(event.path!);
-        var encoder = ZipFileEncoder();
-        encoder.create(zipFile);
-        for (FileSystemEntity entity in inputDir.listSync(
-          recursive: true,
-          followLinks: false,
-        )) {
-          if (entity is File && !entity.path.contains('.obsidian')) {
-            encoder.addFile(
-              File(entity.path),
-              entity.path.substring(event.path!.length + 1),
-            );
+        // Check if the path is a zip file (new behavior) or a directory (legacy)
+        if (event.path!.toLowerCase().endsWith('.zip')) {
+          // User selected a zip file directly - read its bytes
+          final zipFile = File(event.path!);
+          input = event.obsidian.copyWith(zip: await zipFile.readAsBytes());
+        } else {
+          // Legacy behavior: path is a directory, zip its contents
+          Directory appDocDirectory = await getApplicationDocumentsDirectory();
+          final zipFile = '${appDocDirectory.path}/out.zip';
+          var inputDir = Directory(event.path!);
+          var encoder = ZipFileEncoder();
+          encoder.create(zipFile);
+          for (FileSystemEntity entity in inputDir.listSync(
+            recursive: true,
+            followLinks: false,
+          )) {
+            if (entity is File && !entity.path.contains('.obsidian')) {
+              encoder.addFile(
+                File(entity.path),
+                entity.path.substring(event.path!.length + 1),
+              );
+            }
           }
+          encoder.close();
+          input = event.obsidian.copyWith(
+            zip: await File(zipFile).readAsBytes(),
+          );
         }
-        encoder.close();
-        input = event.obsidian.copyWith(zip: await File(zipFile).readAsBytes());
       } else {
         input = event.obsidian;
       }
