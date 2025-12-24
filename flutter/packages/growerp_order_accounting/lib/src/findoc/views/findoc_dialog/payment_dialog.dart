@@ -560,14 +560,8 @@ class PaymentDialogState extends State<PaymentDialog> {
               },
             ),
             const SizedBox(height: 10),
-            InputDecorator(
-              decoration: InputDecoration(
-                labelText: _localizations!.paymentMethods,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(25.0),
-                ),
-                enabled: !readOnly,
-              ),
+            GroupingDecorator(
+              labelText: _localizations!.paymentMethods,
               child: Column(
                 children: [
                   Row(
@@ -725,15 +719,9 @@ class PaymentDialogState extends State<PaymentDialog> {
               ),
             const SizedBox(height: 20),
             if (finDoc.gatewayResponses.isNotEmpty)
-              InputDecorator(
-                decoration: InputDecoration(
-                  labelText:
-                      '${_localizations!.gatewayResponses}(${finDoc.gatewayResponses.length})',
-                  enabled: false,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(25.0),
-                  ),
-                ),
+              GroupingDecorator(
+                labelText:
+                    '${_localizations!.gatewayResponses}(${finDoc.gatewayResponses.length})',
                 child: SingleChildScrollView(child: _createGatewayTable()),
               ),
             if (finDoc.gatewayResponses.isNotEmpty)

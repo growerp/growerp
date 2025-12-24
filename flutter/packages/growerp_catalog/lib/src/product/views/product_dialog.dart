@@ -482,11 +482,8 @@ class ProductDialogState extends State<ProductDialog> {
           FormBuilderValidators.required(),
         ]),
       ),
-      InputDecorator(
-        decoration: InputDecoration(
-          labelText: catalogLocalizations.prices,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(25.0)),
-        ),
+      GroupingDecorator(
+        labelText: catalogLocalizations.prices,
         child: Row(
           children: [
             Expanded(
@@ -559,24 +556,14 @@ class ProductDialogState extends State<ProductDialog> {
       if (classificationId != 'AppHotel')
         Padding(
           padding: const EdgeInsets.fromLTRB(0, 5, 0, 5),
-          child: InputDecorator(
-            decoration: InputDecoration(
-              labelText: catalogLocalizations.relatedCategories,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(25.0),
-              ),
-            ),
+          child: GroupingDecorator(
+            labelText: catalogLocalizations.relatedCategories,
             child: Wrap(spacing: 10.0, children: relCategories),
           ),
         ),
       if (classificationId != 'AppHotel' && _selectedProductTypeId != 'Service')
-        InputDecorator(
-          decoration: InputDecoration(
-            labelText: catalogLocalizations.warehouseInventory,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(25.0),
-            ),
-          ),
+        GroupingDecorator(
+          labelText: catalogLocalizations.warehouseInventory,
           child: Row(
             children: [
               Expanded(
@@ -613,11 +600,8 @@ class ProductDialogState extends State<ProductDialog> {
             ],
           ),
         ),
-      InputDecorator(
-        decoration: InputDecoration(
-          labelText: catalogLocalizations.typeAmount,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(25.0)),
-        ),
+      GroupingDecorator(
+        labelText: catalogLocalizations.typeAmount,
         child: Column(
           children: [
             Row(

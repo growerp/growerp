@@ -436,11 +436,8 @@ class WebsiteDialogState extends State<WebsiteDialog> {
     }
 
     List<Widget> widgets = [
-      InputDecorator(
-        decoration: InputDecoration(
-          labelText: _localizations.websiteUrl,
-          border: const OutlineInputBorder(borderRadius: _borderRadius),
-        ),
+      GroupingDecorator(
+        labelText: _localizations.websiteUrl,
         child: Column(
           children: [
             InkWell(
@@ -510,11 +507,8 @@ class WebsiteDialogState extends State<WebsiteDialog> {
       ),
       Form(
         key: _websiteFormKey2,
-        child: InputDecorator(
-          decoration: InputDecoration(
-            labelText: _localizations.websiteTitle,
-            border: const OutlineInputBorder(borderRadius: _borderRadius),
-          ),
+        child: GroupingDecorator(
+          labelText: _localizations.websiteTitle,
           child: Row(
             children: [
               Expanded(
@@ -545,11 +539,8 @@ class WebsiteDialogState extends State<WebsiteDialog> {
           ),
         ),
       ),
-      InputDecorator(
-        decoration: const InputDecoration(
-          labelText: 'Quick Links',
-          border: OutlineInputBorder(borderRadius: _borderRadius),
-        ),
+      GroupingDecorator(
+        labelText: 'Quick Links',
         child: Column(
           children: [
             OutlinedButton.icon(
@@ -674,11 +665,8 @@ class WebsiteDialogState extends State<WebsiteDialog> {
           ],
         ),
       ),
-      InputDecorator(
-        decoration: InputDecoration(
-          labelText: _localizations.content,
-          border: const OutlineInputBorder(borderRadius: _borderRadius),
-        ),
+      GroupingDecorator(
+        labelText: _localizations.content,
         child: Column(
           children: [
             Text(_localizations.page, style: const TextStyle(fontSize: 10)),
@@ -713,11 +701,8 @@ class WebsiteDialogState extends State<WebsiteDialog> {
           ],
         ),
       ),
-      InputDecorator(
-        decoration: InputDecoration(
-          labelText: _localizations.images,
-          border: const OutlineInputBorder(borderRadius: _borderRadius),
-        ),
+      GroupingDecorator(
+        labelText: _localizations.images,
         child: Wrap(runSpacing: 10, spacing: 10, children: imageButtons),
       ),
       for (Category category in state.website!.websiteCategories)
@@ -903,18 +888,12 @@ class WebsiteDialogState extends State<WebsiteDialog> {
           }
         },
       ),
-      InputDecorator(
-        decoration: InputDecoration(
-          labelText: _localizations.websiteColor,
-          border: const OutlineInputBorder(borderRadius: _borderRadius),
-        ),
+      GroupingDecorator(
+        labelText: _localizations.websiteColor,
         child: Column(children: [Wrap(spacing: 10, children: colorCatButtons)]),
       ),
-      InputDecorator(
-        decoration: InputDecoration(
-          labelText: _localizations.websiteObsidian,
-          border: const OutlineInputBorder(borderRadius: _borderRadius),
-        ),
+      GroupingDecorator(
+        labelText: _localizations.websiteObsidian,
         child: Row(
           children: [
             Expanded(
@@ -977,11 +956,8 @@ class WebsiteDialogState extends State<WebsiteDialog> {
       ),
       Form(
         key: _websiteFormKey3,
-        child: InputDecorator(
-          decoration: InputDecoration(
-            labelText: _localizations.websiteMeasurementId,
-            border: const OutlineInputBorder(borderRadius: _borderRadius),
-          ),
+        child: GroupingDecorator(
+          labelText: _localizations.websiteMeasurementId,
           child: Row(
             children: [
               Expanded(
@@ -1014,11 +990,8 @@ class WebsiteDialogState extends State<WebsiteDialog> {
       ),
       Form(
         key: _websiteFormKey4,
-        child: InputDecorator(
-          decoration: InputDecoration(
-            labelText: _localizations.websiteStripeApiKey,
-            border: const OutlineInputBorder(borderRadius: _borderRadius),
-          ),
+        child: GroupingDecorator(
+          labelText: _localizations.websiteStripeApiKey,
           child: Row(
             children: [
               Expanded(

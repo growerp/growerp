@@ -133,9 +133,7 @@ class CategoryDialogState extends State<CategoryDialog> {
               case ProductStatus.failure:
                 HelperFunctions.showMessage(
                   context,
-                  _localizations!.errorGettingProducts(
-                    state.message ?? '',
-                  ),
+                  _localizations!.errorGettingProducts(state.message ?? ''),
                   Colors.red,
                 );
                 break;
@@ -182,8 +180,7 @@ class CategoryDialogState extends State<CategoryDialog> {
                 builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
                   if (snapshot.hasError) {
                     return Text(
-                      _localizations!
-                          .pickImageError(snapshot.error.toString()),
+                      _localizations!.pickImageError(snapshot.error.toString()),
                       textAlign: TextAlign.center,
                     );
                   }
@@ -316,14 +313,9 @@ class CategoryDialogState extends State<CategoryDialog> {
                   },
                 ),
                 const SizedBox(height: 20),
-                InputDecorator(
-                  decoration: InputDecoration(
-                    labelText:
-                        '${_localizations!.relatedProducts}${widget.category.nbrOfProducts > widget.category.products.length ? _localizations!.totalShown(widget.category.nbrOfProducts, widget.category.products.length) : ''}',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(25.0),
-                    ),
-                  ),
+                GroupingDecorator(
+                  labelText:
+                      '${_localizations!.relatedProducts}${widget.category.nbrOfProducts > widget.category.products.length ? _localizations!.totalShown(widget.category.nbrOfProducts, widget.category.products.length) : ''}',
                   child: Wrap(spacing: 10.0, children: relProducts),
                 ),
                 const SizedBox(height: 10),

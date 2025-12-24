@@ -411,13 +411,8 @@ class ActivityDialogState extends State<ActivityDialog> {
                 },
               ),
             const SizedBox(height: 20),
-            InputDecorator(
-              decoration: InputDecoration(
-                labelText: _localizations.activity_startDate,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(25.0),
-                ),
-              ),
+            GroupingDecorator(
+              labelText: _localizations.activity_startDate,
               child: Row(
                 children: [
                   Expanded(

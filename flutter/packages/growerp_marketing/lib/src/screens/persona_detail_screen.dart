@@ -172,13 +172,8 @@ class PersonaDetailScreenState extends State<PersonaDetailScreen> {
         child: Column(
           children: [
             const SizedBox(height: 10),
-            InputDecorator(
-              decoration: InputDecoration(
-                labelText: 'Persona Information',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(25.0),
-                ),
-              ),
+            GroupingDecorator(
+              labelText: 'Persona Information',
               child: Column(
                 children: [
                   Row(
@@ -233,13 +228,8 @@ class PersonaDetailScreenState extends State<PersonaDetailScreen> {
               ),
             ),
             const SizedBox(height: 20),
-            InputDecorator(
-              decoration: InputDecoration(
-                labelText: 'Pain Points & Goals',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(25.0),
-                ),
-              ),
+            GroupingDecorator(
+              labelText: 'Pain Points & Goals',
               child: Column(
                 children: [
                   Row(
@@ -277,13 +267,8 @@ class PersonaDetailScreenState extends State<PersonaDetailScreen> {
               ),
             ),
             const SizedBox(height: 20),
-            InputDecorator(
-              decoration: InputDecoration(
-                labelText: 'Communication Style',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(25.0),
-                ),
-              ),
+            GroupingDecorator(
+              labelText: 'Communication Style',
               child: Column(
                 children: [
                   Row(

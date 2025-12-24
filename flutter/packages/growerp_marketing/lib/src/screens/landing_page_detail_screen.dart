@@ -279,13 +279,8 @@ class LandingPageDetailScreenState extends State<LandingPageDetailScreen> {
         child: Column(
           children: [
             const SizedBox(height: 10),
-            InputDecorator(
-              decoration: InputDecoration(
-                labelText: 'Landing Page Information',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(25.0),
-                ),
-              ),
+            GroupingDecorator(
+              labelText: 'Landing Page Information',
               child: Column(
                 children: [
                   Row(
@@ -419,13 +414,8 @@ class LandingPageDetailScreenState extends State<LandingPageDetailScreen> {
               ),
             ),
             const SizedBox(height: 10),
-            InputDecorator(
-              decoration: InputDecoration(
-                labelText: 'Call-to-Action Configuration',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(25.0),
-                ),
-              ),
+            GroupingDecorator(
+              labelText: 'Call-to-Action Configuration',
               child: Column(
                 children: [
                   Row(

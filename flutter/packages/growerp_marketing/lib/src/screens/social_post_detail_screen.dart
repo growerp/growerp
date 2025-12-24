@@ -202,13 +202,8 @@ class SocialPostDetailScreenState extends State<SocialPostDetailScreen> {
         child: Column(
           children: [
             const SizedBox(height: 10),
-            InputDecorator(
-              decoration: InputDecoration(
-                labelText: 'Post Information',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(25.0),
-                ),
-              ),
+            GroupingDecorator(
+              labelText: 'Post Information',
               child: Column(
                 children: [
                   Row(
@@ -319,13 +314,8 @@ class SocialPostDetailScreenState extends State<SocialPostDetailScreen> {
               ),
             ),
             const SizedBox(height: 20),
-            InputDecorator(
-              decoration: InputDecoration(
-                labelText: 'Content',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(25.0),
-                ),
-              ),
+            GroupingDecorator(
+              labelText: 'Content',
               child: Column(
                 children: [
                   TextFormField(

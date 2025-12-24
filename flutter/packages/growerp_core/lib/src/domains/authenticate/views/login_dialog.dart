@@ -673,14 +673,8 @@ class LoginDialogState extends State<LoginDialog> {
                   ]),
                 ),
                 const SizedBox(height: 10),
-                InputDecorator(
-                  decoration: InputDecoration(
-                    labelText: _localizations!.creditCardInfo,
-                    hintText: _localizations!.creditCardDetails,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(25.0),
-                    ),
-                  ),
+                GroupingDecorator(
+                  labelText: _localizations!.creditCardInfo,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisSize: MainAxisSize.min,

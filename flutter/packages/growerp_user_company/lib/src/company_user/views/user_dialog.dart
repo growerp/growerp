@@ -413,11 +413,8 @@ class UserDialogState extends State<UserDialog> {
 
   Widget _userDialog() {
     List<Widget> widgets = [
-      InputDecorator(
-        decoration: InputDecoration(
-          labelText: _localizations.userInfo,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(25.0)),
-        ),
+      GroupingDecorator(
+        labelText: _localizations.userInfo,
         child: Column(
           children: [
             Row(
@@ -535,11 +532,8 @@ class UserDialogState extends State<UserDialog> {
           ],
         ),
       ),
-      InputDecorator(
-        decoration: InputDecoration(
-          labelText: _localizations.postalAddress,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(25.0)),
-        ),
+      GroupingDecorator(
+        labelText: _localizations.postalAddress,
         child: Row(
           children: [
             Expanded(
@@ -600,11 +594,8 @@ class UserDialogState extends State<UserDialog> {
           ],
         ),
       ),
-      InputDecorator(
-        decoration: InputDecoration(
-          labelText: _localizations.paymentMethod,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(25.0)),
-        ),
+      GroupingDecorator(
+        labelText: _localizations.paymentMethod,
         child: Row(
           children: [
             Expanded(
@@ -674,14 +665,9 @@ class UserDialogState extends State<UserDialog> {
         ),
       ),
       if (_selectedRole != Role.company)
-        InputDecorator(
-          decoration: InputDecoration(
-            labelText: _localizations.roleCompanyInfo(
-              _selectedCompany.role?.value ?? Role.unknown.toString(),
-            ),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(25.0),
-            ),
+        GroupingDecorator(
+          labelText: _localizations.roleCompanyInfo(
+            _selectedCompany.role?.value ?? Role.unknown.toString(),
           ),
           child: Column(
             children: [
@@ -846,11 +832,8 @@ class UserDialogState extends State<UserDialog> {
             ],
           ),
         ),
-      InputDecorator(
-        decoration: InputDecoration(
-          labelText: _localizations.userLogin,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(25.0)),
-        ),
+      GroupingDecorator(
+        labelText: _localizations.userLogin,
         child: Column(
           children: [
             TextFormField(
@@ -911,13 +894,8 @@ class UserDialogState extends State<UserDialog> {
                       SizedBox(
                         width: 100,
                         height: 60,
-                        child: InputDecorator(
-                          decoration: InputDecoration(
-                            labelText: _localizations.disabled,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(25.0),
-                            ),
-                          ),
+                        child: GroupingDecorator(
+                          labelText: _localizations.disabled,
                           child: Checkbox(
                             key: const Key('loginDisabled'),
                             value: _isLoginDisabled,
