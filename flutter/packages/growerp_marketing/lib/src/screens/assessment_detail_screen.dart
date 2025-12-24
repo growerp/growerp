@@ -264,13 +264,8 @@ class AssessmentDetailScreenState extends State<AssessmentDetailScreen> {
         child: Column(
           children: [
             const SizedBox(height: 10),
-            InputDecorator(
-              decoration: InputDecoration(
-                labelText: 'Assessment Information',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(25.0),
-                ),
-              ),
+            GroupingDecorator(
+              labelText: 'Assessment Information',
               child: Column(
                 children: [
                   Row(

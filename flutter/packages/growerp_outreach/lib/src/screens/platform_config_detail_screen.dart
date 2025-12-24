@@ -126,13 +126,8 @@ class _PlatformConfigDetailScreenState
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            InputDecorator(
-              decoration: InputDecoration(
-                labelText: 'Platform Information',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(25.0),
-                ),
-              ),
+            GroupingDecorator(
+              labelText: 'Platform Information',
               child: Column(
                 children: [
                   Row(
@@ -190,13 +185,8 @@ class _PlatformConfigDetailScreenState
               ),
             ),
             const SizedBox(height: 16),
-            InputDecorator(
-              decoration: InputDecoration(
-                labelText: 'Authentication Credentials',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(25.0),
-                ),
-              ),
+            GroupingDecorator(
+              labelText: 'Authentication Credentials',
               child: Column(
                 children: [
                   TextFormField(

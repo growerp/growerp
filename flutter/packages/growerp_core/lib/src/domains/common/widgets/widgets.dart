@@ -3,6 +3,7 @@ export 'loading_indicator.dart';
 export 'multi_select.dart';
 export 'confirm_dialog.dart';
 export 'dialog_close_button.dart';
+export 'grouping_decorator.dart';
 
 export 'app_bloc_observer.dart';
 export 'app_navigator_observer.dart';

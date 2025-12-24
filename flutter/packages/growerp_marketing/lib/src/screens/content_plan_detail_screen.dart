@@ -181,13 +181,8 @@ class ContentPlanDetailScreenState extends State<ContentPlanDetailScreen> {
         child: Column(
           children: [
             const SizedBox(height: 10),
-            InputDecorator(
-              decoration: InputDecoration(
-                labelText: 'Content Plan Information',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(25.0),
-                ),
-              ),
+            GroupingDecorator(
+              labelText: 'Content Plan Information',
               child: Column(
                 children: [
                   Row(
@@ -284,13 +279,8 @@ class ContentPlanDetailScreenState extends State<ContentPlanDetailScreen> {
               ),
             ),
             const SizedBox(height: 20),
-            InputDecorator(
-              decoration: InputDecoration(
-                labelText: 'Theme & Strategy',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(25.0),
-                ),
-              ),
+            GroupingDecorator(
+              labelText: 'Theme & Strategy',
               child: Column(
                 children: [
                   Row(

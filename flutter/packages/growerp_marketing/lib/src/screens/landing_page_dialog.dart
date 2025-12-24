@@ -235,12 +235,8 @@ class LandingPageDialogState extends State<LandingPageDialog> {
   Widget _landingPageForm() {
     return Column(
       children: [
-        InputDecorator(
-          decoration: InputDecoration(
-            labelText: 'Landing Page Information',
-            border:
-                OutlineInputBorder(borderRadius: BorderRadius.circular(25.0)),
-          ),
+        GroupingDecorator(
+          labelText: 'Landing Page Information',
           child: Column(
             children: [
               Row(

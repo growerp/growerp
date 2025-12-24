@@ -519,8 +519,8 @@ class CompanyFormState extends State<CompanyDialog> {
             ),
           ],
         ),
-      InputDecorator(
-        decoration: InputDecoration(labelText: _localizations.postalAddress),
+      GroupingDecorator(
+        labelText: _localizations.postalAddress,
         child: Row(
           children: [
             Expanded(
@@ -581,8 +581,8 @@ class CompanyFormState extends State<CompanyDialog> {
           ],
         ),
       ),
-      InputDecorator(
-        decoration: InputDecoration(labelText: _localizations.paymentMethod),
+      GroupingDecorator(
+        labelText: _localizations.paymentMethod,
         child: Row(
           children: [
             Expanded(
@@ -840,13 +840,8 @@ class CompanyForm extends StatelessWidget {
               updateButton,
               if (widget.dialog) const SizedBox(height: 10),
               if (widget.dialog)
-                InputDecorator(
-                  decoration: InputDecoration(
-                    labelText: localizations.employees,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(25.0),
-                    ),
-                  ),
+                GroupingDecorator(
+                  labelText: localizations.employees,
                   child: Wrap(spacing: 10, children: employeeChips),
                 ),
             ],
