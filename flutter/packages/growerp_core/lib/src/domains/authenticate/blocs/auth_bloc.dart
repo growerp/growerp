@@ -181,9 +181,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         state.copyWith(
           status: AuthStatus.unAuthenticated,
           authenticate: result,
-          message:
-              'Registration successful.\n'
-              'You can now login with the password sent by email',
+          message: result.apiKey == 'trialWelcome'
+              ? 'Registration successful! Welcome to your 14-day free trial.\n'
+                    'Please login to continue setup.'
+              : 'Registration successful.\n'
+                    'You can now login with the password sent by email',
         ),
       );
     } on DioException catch (e) {
@@ -264,21 +266,29 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         timeZoneOffset: DateTime.now().timeZoneOffset.toString(),
         testDaysOffset: event.testDaysOffset,
       );
+
+      // Handle new apiKey values from refactored backend
       if (authenticate.apiKey != null &&
           ![
-            'moreInfo',
-            'passwordChange',
-            'paymentFirst',
-            'paymentExpired',
-            'paymentExpiredFinal',
-            'evaluationWelcome',
+            // Legacy values (to be removed after frontend refactoring)
+            'moreInfo', // Replaced by 'setupRequired'
+            'paymentFirst', // Replaced by 'subscriptionExpired'
+            'paymentExpired', // Replaced by 'subscriptionExpired'
+            'paymentExpiredFinal', // Replaced by 'subscriptionExpired'
+            'evaluationWelcome', // Replaced by 'trialWelcome'
+            // New values from refactored backend
+            'setupRequired', // Admin needs to provide company info
+            'subscriptionExpired', // Subscription expired, payment required
+            'trialWelcome', // New tenant, show trial welcome
+            'registered', // User registered for existing company
+            'passwordChange', // Password reset required
           ].contains(authenticate.apiKey)) {
         // apiKey found so save and authenticated
         emit(
           state.copyWith(
             status: AuthStatus.authenticated,
             authenticate: authenticate,
-            message: 'You are logged in now...',
+            // No message here - dialogs handle their own messages
           ),
         );
         PersistFunctions.persistAuthenticate(state.authenticate!);

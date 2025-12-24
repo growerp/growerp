@@ -101,7 +101,7 @@ Widget myNavigationRail(
           width: 80,
           child: Text(
             HelperFunctions.translateMenuTitle(localizations, option.title),
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w500,
               letterSpacing: 0.2,

@@ -294,15 +294,68 @@ class DisplayMenuItemState extends State<DisplayMenuItem>
   Widget _buildWithChatBloc() {
     // Try to use BlocBuilder for chat, fallback if not available
     try {
-      return BlocListener<AuthBloc, AuthState>(
-        listenWhen: (previous, current) =>
-            previous.status != AuthStatus.authenticated &&
-            current.status == AuthStatus.authenticated,
-        listener: (context, authState) {
-          // Trigger chat room fetch when user becomes authenticated
-          // Always refresh to get fresh data after login
-          context.read<ChatRoomBloc>().add(const ChatRoomFetch(refresh: true));
-        },
+      return MultiBlocListener(
+        listeners: [
+          // Listener for auth messages (login, logout, etc.)
+          BlocListener<AuthBloc, AuthState>(
+            listenWhen: (previous, current) =>
+                current.message != null && previous.message != current.message,
+            listener: (context, authState) {
+              if (authState.message != null && authState.message!.isNotEmpty) {
+                final isError = authState.status == AuthStatus.failure;
+                final message = authState.message!;
+                // Use post-frame callback to ensure we show message after navigation
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  // Use global scaffold messenger key for logout messages
+                  // since the current scaffold may be disposed during navigation
+                  final messenger = Constant.scaffoldMessengerKey.currentState;
+                  if (messenger != null) {
+                    // Create a simple snackbar without using the potentially deactivated context
+                    messenger.showSnackBar(
+                      SnackBar(
+                        content: Text(message),
+                        backgroundColor: isError ? Colors.red : Colors.green,
+                        duration: Duration(milliseconds: isError ? 5000 : 2000),
+                        action: SnackBarAction(
+                          label: 'Dismiss',
+                          textColor: Colors.white,
+                          onPressed: () => messenger.hideCurrentSnackBar(),
+                        ),
+                      ),
+                    );
+                  }
+                });
+              }
+            },
+          ),
+          // Listener for authentication status changes
+          BlocListener<AuthBloc, AuthState>(
+            listenWhen: (previous, current) =>
+                previous.status != AuthStatus.authenticated &&
+                current.status == AuthStatus.authenticated,
+            listener: (context, authState) async {
+              // Trigger chat room fetch when user becomes authenticated
+              // Always refresh to get fresh data after login
+              context.read<ChatRoomBloc>().add(
+                const ChatRoomFetch(refresh: true),
+              );
+
+              // Note: Trial welcome dialog is now shown in TenantSetupDialog
+              // before the user reaches the main menu
+
+              // Show subscription expiration warning (last 3 days, once per day)
+              // Uses consolidated helper for cleaner code
+              await SubscriptionWarningHelper.showWarningIfNeeded(
+                context: context,
+                authenticate: authState.authenticate,
+                onSubscribeNow: () {
+                  // Navigate to subscription management
+                  // context.go('/subscription');
+                },
+              );
+            },
+          ),
+        ],
         child: BlocBuilder<ChatRoomBloc, ChatRoomState>(
           builder: (context, chatState) {
             // Always build the page, show chat badge when data is available
@@ -400,160 +453,176 @@ class DisplayMenuItemState extends State<DisplayMenuItem>
       // Simple page (no tabs)
       return isPhone
           ? _buildSimplePage()
-          : myNavigationRail(context, _buildSimplePage(), menuIndex, menuList);
+          : ScaffoldMessenger(
+              child: myNavigationRail(
+                context,
+                _buildSimplePage(wrapInScaffoldMessenger: false),
+                menuIndex,
+                menuList,
+              ),
+            );
     } else {
       // Tabbed page
       return isPhone
           ? _buildTabbedPage()
-          : myNavigationRail(context, _buildTabbedPage(), menuIndex, menuList);
+          : ScaffoldMessenger(
+              child: myNavigationRail(
+                context,
+                _buildTabbedPage(wrapInScaffoldMessenger: false),
+                menuIndex,
+                menuList,
+              ),
+            );
     }
   }
 
-  Widget _buildSimplePage() {
-    return ScaffoldMessenger(
-      child: Scaffold(
-        key: Key(currentRoute),
-        appBar: AppBar(
-          backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-          key: Key('appBar_$currentRoute'),
-          automaticallyImplyLeading: isPhone,
-          leading: leadAction,
-          title: appBarTitle(context, title, isPhone),
-          actions: actions,
-        ),
-        drawer: myDrawer(context, isPhone, menuList),
-        floatingActionButton: _buildAiFab(),
-        body: BlocListener<NotificationBloc, NotificationState>(
-          listener: _handleNotifications,
-          child: Column(
-            children: [
-              Expanded(child: widget.child ?? const SizedBox.shrink()),
-              // Hidden API key and session token for integration testing
-              _buildHiddenTestWidgets(),
-            ],
-          ),
+  Widget _buildSimplePage({bool wrapInScaffoldMessenger = true}) {
+    final scaffold = Scaffold(
+      key: Key(currentRoute),
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+        key: Key('appBar_$currentRoute'),
+        automaticallyImplyLeading: isPhone,
+        leading: leadAction,
+        title: appBarTitle(context, title, isPhone),
+        actions: actions,
+      ),
+      drawer: myDrawer(context, isPhone, menuList),
+      floatingActionButton: _buildAiFab(),
+      body: BlocListener<NotificationBloc, NotificationState>(
+        listener: _handleNotifications,
+        child: Column(
+          children: [
+            Expanded(child: widget.child ?? const SizedBox.shrink()),
+            // Hidden API key and session token for integration testing
+            _buildHiddenTestWidgets(),
+          ],
         ),
       ),
     );
+    return wrapInScaffoldMessenger
+        ? ScaffoldMessenger(child: scaffold)
+        : scaffold;
   }
 
-  Widget _buildTabbedPage() {
+  Widget _buildTabbedPage({bool wrapInScaffoldMessenger = true}) {
     Color tabSelectedBackground = Theme.of(context).colorScheme.onSecondary;
 
-    return ScaffoldMessenger(
-      child: Scaffold(
-        key: Key(currentRoute),
-        appBar: AppBar(
-          backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-          automaticallyImplyLeading: isPhone,
-          bottom: isPhone
-              ? null
-              : PreferredSize(
-                  preferredSize: const Size.fromHeight(30.0),
-                  child: TabBar(
-                    controller: _controller,
-                    labelPadding: const EdgeInsets.symmetric(horizontal: 10.0),
-                    indicatorSize: TabBarIndicatorSize.tab,
-                    indicator: BoxDecoration(
-                      color: tabSelectedBackground,
-                      borderRadius: const BorderRadius.only(
-                        topLeft: Radius.circular(10),
-                        topRight: Radius.circular(10),
-                      ),
+    final scaffold = Scaffold(
+      key: Key(currentRoute),
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+        automaticallyImplyLeading: isPhone,
+        bottom: isPhone
+            ? null
+            : PreferredSize(
+                preferredSize: const Size.fromHeight(30.0),
+                child: TabBar(
+                  controller: _controller,
+                  labelPadding: const EdgeInsets.symmetric(horizontal: 10.0),
+                  indicatorSize: TabBarIndicatorSize.tab,
+                  indicator: BoxDecoration(
+                    color: tabSelectedBackground,
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(10),
+                      topRight: Radius.circular(10),
                     ),
-                    tabs: tabItems
-                        .map(
-                          (item) => Tab(
-                            height: 30,
-                            key: Key('tab_${item.menuItemId}'),
-                            text: HelperFunctions.translateMenuTitle(
-                              _localizations!,
-                              item.title,
-                            ),
-                          ),
-                        )
-                        .toList(),
-                    onTap: (index) {
-                      // Navigate using widget name via router
-                      if (index < tabItems.length) {
-                        final option = menuList[menuIndex];
-                        // For tabs, use the parent option route
-                        final baseRoute = option.route ?? '/';
-                        context.go(baseRoute);
-                      }
-                    },
                   ),
+                  tabs: tabItems
+                      .map(
+                        (item) => Tab(
+                          height: 30,
+                          key: Key('tab_${item.menuItemId}'),
+                          text: HelperFunctions.translateMenuTitle(
+                            _localizations!,
+                            item.title,
+                          ),
+                        ),
+                      )
+                      .toList(),
+                  onTap: (index) {
+                    // Navigate using widget name via router
+                    if (index < tabItems.length) {
+                      final option = menuList[menuIndex];
+                      // For tabs, use the parent option route
+                      final baseRoute = option.route ?? '/';
+                      context.go(baseRoute);
+                    }
+                  },
                 ),
-          title: appBarTitle(
-            context,
-            '$title ${isPhone ? '\n' : ', '}${tabItems.isNotEmpty && tabIndex < tabItems.length ? tabItems[tabIndex].title : ''}',
-            isPhone,
-          ),
-          actions: actions,
-        ),
-        drawer: myDrawer(context, isPhone, menuList),
-        bottomNavigationBar: isPhone && tabItems.length >= 2
-            ? BottomNavigationBar(
-                type: BottomNavigationBarType.fixed,
-                items: tabItems
-                    .map(
-                      (item) => BottomNavigationBarItem(
-                        icon:
-                            getIconFromRegistry(item.iconName) ??
-                            const Icon(Icons.circle),
-                        label: HelperFunctions.translateMenuTitle(
-                          _localizations!,
-                          item.title,
-                        ).replaceAll('\n', ' '),
-                      ),
-                    )
-                    .toList(),
-                currentIndex: tabIndex,
-                selectedItemColor: Colors.amber[800],
-                onTap: (index) {
-                  setState(() {
-                    tabIndex = index;
-                    _controller?.animateTo(index);
-                  });
-                },
-              )
-            : null,
-        floatingActionButton: _buildAiFab(),
-        body: BlocListener<NotificationBloc, NotificationState>(
-          listener: _handleNotifications,
-          child: Column(
-            children: [
-              Expanded(
-                child: isPhone
-                    ? (widget.tabWidgetLoader != null &&
-                              tabItems.isNotEmpty &&
-                              tabIndex < tabItems.length
-                          ? widget.tabWidgetLoader!(
-                              tabItems[tabIndex].widgetName ?? 'Unknown',
-                              {},
-                            )
-                          : (widget.child ?? const SizedBox.shrink()))
-                    : TabBarView(
-                        physics: const NeverScrollableScrollPhysics(),
-                        controller: _controller,
-                        children: List.generate(tabItems.length, (index) {
-                          if (widget.tabWidgetLoader != null) {
-                            return widget.tabWidgetLoader!(
-                              tabItems[index].widgetName ?? 'Unknown',
-                              {},
-                            );
-                          }
-                          return widget.child ?? const SizedBox.shrink();
-                        }),
-                      ),
               ),
-              // Hidden API key and session token for integration testing
-              _buildHiddenTestWidgets(),
-            ],
-          ),
+        title: appBarTitle(
+          context,
+          '$title ${isPhone ? '\n' : ', '}${tabItems.isNotEmpty && tabIndex < tabItems.length ? tabItems[tabIndex].title : ''}',
+          isPhone,
+        ),
+        actions: actions,
+      ),
+      drawer: myDrawer(context, isPhone, menuList),
+      bottomNavigationBar: isPhone && tabItems.length >= 2
+          ? BottomNavigationBar(
+              type: BottomNavigationBarType.fixed,
+              items: tabItems
+                  .map(
+                    (item) => BottomNavigationBarItem(
+                      icon:
+                          getIconFromRegistry(item.iconName) ??
+                          const Icon(Icons.circle),
+                      label: HelperFunctions.translateMenuTitle(
+                        _localizations!,
+                        item.title,
+                      ).replaceAll('\n', ' '),
+                    ),
+                  )
+                  .toList(),
+              currentIndex: tabIndex,
+              selectedItemColor: Colors.amber[800],
+              onTap: (index) {
+                setState(() {
+                  tabIndex = index;
+                  _controller?.animateTo(index);
+                });
+              },
+            )
+          : null,
+      floatingActionButton: _buildAiFab(),
+      body: BlocListener<NotificationBloc, NotificationState>(
+        listener: _handleNotifications,
+        child: Column(
+          children: [
+            Expanded(
+              child: isPhone
+                  ? (widget.tabWidgetLoader != null &&
+                            tabItems.isNotEmpty &&
+                            tabIndex < tabItems.length
+                        ? widget.tabWidgetLoader!(
+                            tabItems[tabIndex].widgetName ?? 'Unknown',
+                            {},
+                          )
+                        : (widget.child ?? const SizedBox.shrink()))
+                  : TabBarView(
+                      physics: const NeverScrollableScrollPhysics(),
+                      controller: _controller,
+                      children: List.generate(tabItems.length, (index) {
+                        if (widget.tabWidgetLoader != null) {
+                          return widget.tabWidgetLoader!(
+                            tabItems[index].widgetName ?? 'Unknown',
+                            {},
+                          );
+                        }
+                        return widget.child ?? const SizedBox.shrink();
+                      }),
+                    ),
+            ),
+            // Hidden API key and session token for integration testing
+            _buildHiddenTestWidgets(),
+          ],
         ),
       ),
     );
+    return wrapInScaffoldMessenger
+        ? ScaffoldMessenger(child: scaffold)
+        : scaffold;
   }
 
   /// Build AI FAB button (and optional additional FAB above it)

@@ -294,4 +294,21 @@ along with this software (see the LICENSE.md file). If not, see
         <field name="routing" type="text-medium" />
     </extend-entity>
 
+    <entity entity-name="TenantSetup" package="growerp.general">
+        <field name="ownerPartyId" type="id" is-pk="true" />
+        <field name="setupComplete" type="text-indicator">
+            <description>Y if tenant setup is complete, N otherwise</description>
+        </field>
+        <field name="setupCompletedDate" type="date-time" />
+        <field name="classificationId" type="id">
+            <description>The app classification (e.g., AppAdmin, AppHotel) used during registration</description>
+        </field>
+        <relationship type="one" title="Owner" related="mantle.party.Party" short-alias="owner">
+            <key-map field-name="ownerPartyId" />
+        </relationship>
+        <relationship type="one" title="Classification" related="mantle.party.PartyClassification" short-alias="classification">
+            <key-map field-name="classificationId" related="partyClassificationId" />
+        </relationship>
+    </entity>
+
 </entities>

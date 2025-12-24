@@ -41,7 +41,7 @@ Future main() async {
 
   // Set date offset for testing (rental, subscription expiration, etc.)
   // Change to non-zero value to test time-dependent features, e.g., 15
-  setTestDaysOffset(0);
+  setTestDaysOffset(15);
 
   await GlobalConfiguration().loadFromAsset('app_settings');
 

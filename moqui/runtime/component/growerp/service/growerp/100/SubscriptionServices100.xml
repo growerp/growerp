@@ -32,15 +32,8 @@
         </out-parameters>
         <actions>
             <!-- get current user and company -->
-            <service-call out-map="parties"
+            <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
-            <if condition="ownerPartyId == 'GROWERP'">
-                <set field="ownerPartyId" value="GROWERP" />
-                <set field="externalId" from="parties.ownerPartyId" />
-                <else><!-- get all subscribers of owner -->
-                    <set field="ownerPartyId" from="parties.ownerPartyId" />
-                </else>
-            </if>
             <if condition="search != null">
                 <set field="search" value="%${search}%" />
             </if>
@@ -105,6 +98,7 @@
 
     <service verb="create" noun="Subscription">
         <in-parameters>
+            <parameter name="ownerPartyId"/><!-- optional: override owner for subscription -->
             <parameter name="subscription" type="Map" required="true">
                 <parameter name="pseudoId" />
                 <parameter name="description" />
@@ -128,13 +122,12 @@
         <actions>
             <service-call out-map="parties"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
-            <!-- other tenants can create subscription -->
-            <if condition="subscription.ownerPartyId == 'GROWERP'">
-                <set field="ownerPartyId" value="GROWERP" />
-                <set field="externalId" from="parties.ownerPartyId" />
-                <else><!-- ignore incoming ownerPartyId -->
-                    <set field="ownerPartyId" from="parties.ownerPartyId" />
-                </else>
+            <!-- Use provided ownerPartyId (from subscription or top-level) or get from current user -->
+            <if condition="subscription.ownerPartyId">
+                <set field="ownerPartyId" from="subscription.ownerPartyId"/>
+            <else-if condition="!ownerPartyId">
+                <set field="ownerPartyId" from="parties.ownerPartyId"/>
+            </else-if>
             </if>
             <!-- generate pseudoId -->
             <if condition="!subscription.pseudoId || subscription.pseudoId == ''">

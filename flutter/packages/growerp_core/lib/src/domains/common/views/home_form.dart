@@ -12,10 +12,12 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:growerp_models/growerp_models.dart';
+import 'package:universal_io/io.dart';
 
 import 'package:growerp_core/l10n/generated/core_localizations.dart';
 import '../../domains.dart';
@@ -126,7 +128,7 @@ class HomeFormState extends State<HomeForm> with TickerProviderStateMixin {
       ),
     );
 
-    return BlocConsumer<AuthBloc, AuthState>(
+    Widget content = BlocConsumer<AuthBloc, AuthState>(
       listener: (context, state) {
         switch (state.status) {
           case AuthStatus.failure:
@@ -350,6 +352,20 @@ class HomeFormState extends State<HomeForm> with TickerProviderStateMixin {
         }
       },
     );
+
+    // Wrap in test banner if in debug/test mode
+    if (!kReleaseMode ||
+        (GlobalConfiguration().get("test") == true &&
+            !Platform.isIOS &&
+            !Platform.isMacOS)) {
+      return Banner(
+        message: _localizations!.test,
+        color: Colors.red,
+        location: BannerLocation.topStart,
+        child: content,
+      );
+    }
+    return content;
   }
 
   PopupMenuItem<Locale> _buildLanguageMenuItem(
