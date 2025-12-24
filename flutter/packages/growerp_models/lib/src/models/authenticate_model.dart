@@ -31,6 +31,8 @@ abstract class Authenticate with _$Authenticate {
     User? user,
     Stats? stats,
     int? evaluationDays, // evaluation period in days (from backend config)
+    int? subscriptionDaysRemaining, // days until subscription expires
+    String? subscriptionStatus, // 'active', 'trial', 'expired', 'none'
   }) = _Authenticate;
 
   factory Authenticate.fromJson(Map<String, dynamic> json) =>

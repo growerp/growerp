@@ -49,7 +49,11 @@ TableData getSubscriptionTableData(
       TableRowContent(
         name: 'Subscriber\nEmail',
         width: isPhone ? 45 : 20,
-        value: Column(children: [subscriber, email]),
+        value: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [subscriber, email],
+        ),
       ),
     );
   } else {
@@ -78,9 +82,13 @@ TableData getSubscriptionTableData(
   if (isPhone) {
     rowContent.add(
       TableRowContent(
-        name: 'From Date\nThrue Date',
-        width: 20,
-        value: Column(children: [fromDate, thruDate]),
+        name: 'From Date\nThru Date',
+        width: 25,
+        value: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [fromDate, thruDate],
+        ),
       ),
     );
   } else {
@@ -119,7 +127,7 @@ TableData getSubscriptionTableData(
   rowContent.add(
     TableRowContent(
       name: '',
-      width: 10,
+      width: isPhone ? 10 : 10,
       value: IconButton(
         key: Key('delete$index'),
         padding: EdgeInsets.zero,
@@ -131,5 +139,5 @@ TableData getSubscriptionTableData(
     ),
   );
 
-  return TableData(rowHeight: isPhone ? 45 : 20, rowContent: rowContent);
+  return TableData(rowHeight: isPhone ? 50 : 20, rowContent: rowContent);
 }

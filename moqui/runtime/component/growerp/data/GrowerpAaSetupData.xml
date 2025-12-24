@@ -31,4 +31,29 @@ along with this software (see the LICENSE.md file). If not, see
         ownerPartyId="GROWERP" productCategoryTypeEnumId="PctCatalog"
         categoryName="GrowERP Services" description="" />
 
+    <!-- Subscription Plans -->
+    <mantle.product.Product productId="GROWERP_DIY_PLAN" productTypeEnumId="PtService" 
+        ownerPartyId="GROWERP" productName="DIY Plan" 
+        description="Perfect for individuals and small teams" />
+    <mantle.product.ProductPrice productId="GROWERP_DIY_PLAN" priceTypeEnumId="PptCurrent" 
+        price="29.00" pricePurposeEnumId="PppPurchase" priceUomId="USD" />
+    <mantle.product.category.ProductCategoryMember productCategoryId="GROWERP_SERVICES" 
+        productId="GROWERP_DIY_PLAN" fromDate="2024-01-01 00:00:00" />
+    
+    <mantle.product.Product productId="GROWERP_SMALL_PLAN" productTypeEnumId="PtService"
+        ownerPartyId="GROWERP" productName="Small Business Plan" 
+        description="For growing businesses" />
+    <mantle.product.ProductPrice productId="GROWERP_SMALL_PLAN" priceTypeEnumId="PptCurrent"
+        price="99.00" pricePurposeEnumId="PppPurchase" priceUomId="USD" />
+    <mantle.product.category.ProductCategoryMember productCategoryId="GROWERP_SERVICES" 
+        productId="GROWERP_SMALL_PLAN" fromDate="2024-01-01 00:00:00" />
+    
+    <mantle.product.Product productId="GROWERP_FULL_PLAN" productTypeEnumId="PtService"
+        ownerPartyId="GROWERP" productName="Full Plan" 
+        description="Complete solution for enterprises" />
+    <mantle.product.ProductPrice productId="GROWERP_FULL_PLAN" priceTypeEnumId="PptCurrent"
+        price="299.00" pricePurposeEnumId="PppPurchase" priceUomId="USD" />
+    <mantle.product.category.ProductCategoryMember productCategoryId="GROWERP_SERVICES" 
+        productId="GROWERP_FULL_PLAN" fromDate="2024-01-01 00:00:00" />
+
 </entity-facade-xml>

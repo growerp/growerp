@@ -37,7 +37,6 @@ import 'package:global_configuration/global_configuration.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
-import 'package:growerp_core/src/domains/authenticate/integration_test/evaluation_test.dart';
 
 // Test user credentials - will be set during registration
 String? testUserEmail;

@@ -1,0 +1,334 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-2.1.xsd">
+
+    <service verb="create" noun="Tenant" authenticate="anonymous-all">
+        <description>
+            Create a new tenant (owner party) with admin user and main company.
+            This service is called during new tenant registration.
+        </description>
+        <in-parameters>
+            <parameter name="adminEmail" required="true"/>
+            <parameter name="adminFirstName" required="true"/>
+            <parameter name="adminLastName" required="true"/>
+            <parameter name="password" default="org.moqui.util.StringUtilities.getRandomString(6) + '9!'"/>
+            <parameter name="classificationId" required="true"/>
+            <parameter name="timeZoneOffset"/>
+            <parameter name="locale"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="ownerPartyId"/>
+            <parameter name="companyPartyId"/>
+            <parameter name="adminPartyId"/>
+            <parameter name="adminUserId"/>
+        </out-parameters>
+        <actions>
+            <!-- Set locale for error messages -->
+            <if condition="locale">
+                <script>ec.user.setLocale(new Locale(locale))</script>
+            </if>
+
+            <!-- Check if GROWERP party exists (from seed data) -->
+            <entity-find-one entity-name="mantle.party.Party" value-field="growerpParty">
+                <field-map field-name="partyId" value="GROWERP"/>
+            </entity-find-one>
+
+            <if condition="growerpParty">
+                <!-- GROWERP exists from seed data - check if it has any users -->
+                <entity-find entity-name="mantle.party.Party" list="growerpUsers">
+                    <econdition field-name="ownerPartyId" value="GROWERP"/>
+                    <econdition field-name="partyTypeEnumId" operator="not-equals" value="PtyOwner"/>
+                </entity-find>
+                
+                <if condition="!growerpUsers">
+                    <!-- GROWERP exists but has no users - this is the first registration -->
+                    <log message="First registration: Using existing GROWERP party from seed data"/>
+                    <set field="ownerPartyId" value="GROWERP"/>
+                <else>
+                    <!-- GROWERP has users - create new tenant -->
+                    <log message="Creating additional tenant (GROWERP already has users)"/>
+                    <service-call name="create#mantle.party.Party"
+                        in-map="[partyTypeEnumId: 'PtyOwner', disabled: 'Y']"
+                        out-map="owner"/>
+                    <set field="ownerPartyId" from="owner.partyId"/>
+                </else>
+                </if>
+            <else>
+                <!-- GROWERP doesn't exist - create it (shouldn't happen with seed data) -->
+                <log message="Creating GROWERP party (not found in seed data)"/>
+                <set field="ownerPartyId" value="GROWERP"/>
+                <service-call name="create#mantle.party.Party"
+                    in-map="[partyId: 'GROWERP', partyTypeEnumId: 'PtyOwner', disabled: 'Y']"/>
+            </else>
+            </if>
+
+            <!-- Create temporary main company -->
+            <set field="user" from="[
+                userGroupId: 'GROWERP_M_ADMIN',
+                role: 'OrgInternal',
+                email: adminEmail,
+                firstName: adminFirstName,
+                lastName: adminLastName,
+                loginName: adminEmail,
+                timeZoneOffset: timeZoneOffset,
+                locale: locale,
+                company: [
+                    name: 'Main Organization',
+                    role: 'OrgInternal',
+                    email: adminEmail
+                ]
+            ]"/>
+
+            <!-- Create admin user with company -->
+            <service-call name="growerp.100.PartyServices100.create#User"
+                in-map="[user: user, password: password, ownerPartyId: ownerPartyId, classificationId: classificationId]"
+                out-map="userResult"/>
+
+            <set field="adminPartyId" from="userResult.user.partyId"/>
+            <set field="adminUserId" from="userResult.user.userId"/>
+            <set field="companyPartyId" from="userResult.user.company.partyId"/>
+
+            <!-- Create TenantSetup record (not complete yet) -->
+            <service-call name="create#growerp.general.TenantSetup"
+                in-map="[ownerPartyId: ownerPartyId, setupComplete: 'N', classificationId: classificationId]"/>
+
+            <!-- Create event for system tracking -->
+            <service-call name="growerp.100.ActivityServices100.create#Event"
+                in-map="[partyId: adminPartyId, userGroupId: 'GROWERP_M_SYSTEM', name: 'New tenant &amp; admin created']"/>
+        </actions>
+    </service>
+
+    <service verb="complete" noun="TenantSetup">
+        <description>
+            Complete tenant setup after admin provides company name, currency, and demo data preference.
+            This activates the owner party and initializes the organizational structure.
+        </description>
+        <in-parameters>
+            <parameter name="ownerPartyId" required="true"/>
+            <parameter name="companyPartyId" required="true"/>
+            <parameter name="companyName" required="true"/>
+            <parameter name="currencyId" required="true"/>
+            <parameter name="demoData" type="Boolean" default="false"/>
+            <parameter name="classificationId" required="true"/>
+            <parameter name="userPartyId" required="true"/>
+            <parameter name="hostName"/>
+            <parameter name="timeZoneOffset"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="success" type="Boolean"/>
+        </out-parameters>
+        <actions>
+            <!-- Special handling for GROWERP system administrator -->
+            <if condition="ownerPartyId == 'GROWERP'">
+                <!-- Force no demo data for GROWERP -->
+                <set field="demoData" value="false" type="Boolean"/>
+            </if>
+
+            <!-- Update company name -->
+            <service-call name="update#mantle.party.Organization"
+                in-map="[partyId: companyPartyId, organizationName: companyName]"/>
+
+            <!-- Activate owner party -->
+            <service-call name="update#mantle.party.Party"
+                in-map="[partyId: ownerPartyId, disabled: 'N']"/>
+
+            <!-- Initialize accounting configuration -->
+            <service-call name="growerp.100.AccountingServices100.init#PartyAccountingConfiguration"
+                in-map="[sourcePartyId: 'DefaultSettings', organizationPartyId: companyPartyId, baseCurrencyUomId: currencyId]"/>
+
+            <!-- Setup main organization (product store, warehouse, wiki, etc.) -->
+            <service-call name="growerp.100.PartyServices100.setup#MainOrganization"
+                in-map="[ownerPartyId: ownerPartyId, userPartyId: userPartyId, companyPartyId: companyPartyId, 
+                         classificationId: classificationId, hostName: hostName]"/>
+
+            <!-- App-specific setup -->
+            <service-call name="growerp.100.PartyServices100.setup#SpecificApp"
+                in-map="[ownerPartyId: ownerPartyId, companyPartyId: companyPartyId, 
+                         userPartyId: userPartyId, classificationId: classificationId, 
+                         demoData: demoData, currencyId: currencyId, timeZoneOffset: timeZoneOffset]"/>
+
+            <!-- Create trial subscription for new tenants (not GROWERP) -->
+            <log message="=======creating subscription for ${ownerPartyId}"/>
+            <if condition="ownerPartyId != 'GROWERP'">
+                <log message="Creating 14-day trial subscription for tenant ${ownerPartyId}"/>
+                <set field="evaluationDays" 
+                    from="System.getProperty('evaluationDays') ? Integer.parseInt(System.getProperty('evaluationDays')) : 14"/>
+                <set field="fromDate" from="ec.user.nowTimestamp"/>
+                <set field="thruDate" 
+                    from="java.sql.Timestamp.valueOf(fromDate.toLocalDateTime().plusDays(evaluationDays))"/>
+                
+                <!-- Check if customer party for this tenant already exists in GROWERP -->
+                <entity-find entity-name="mantle.product.subscription.Subscription" list="existingSubscriptions">
+                    <econdition field-name="ownerPartyId" value="GROWERP"/>
+                    <econdition field-name="externalSubscriptionId" from="ownerPartyId"/>
+                    <order-by field-name="-fromDate"/>
+                </entity-find>
+                
+                <if condition="existingSubscriptions">
+                    <!-- Reuse existing subscriber party -->
+                    <set field="subscriberPartyId" from="existingSubscriptions[0].subscriberPartyId"/>
+                    <log message="Found existing customer party ${subscriberPartyId} for tenant ${ownerPartyId}"/>
+                <else>
+                    <!-- Get admin user info from the tenant using get#User -->
+                    <service-call name="growerp.100.PartyServices100.get#User"
+                        out-map="adminUserResult"
+                        in-map="[userPartyId: userPartyId]"/>
+                    <set field="adminUser" from="adminUserResult.users ? adminUserResult.users[0] : null"/>
+                    <log message="Retrieved admin user for subscription: ${adminUser?.firstName} ${adminUser?.lastName} ${adminUser?.email}"/>
+                    
+                    <!-- Create a customer (user + company) in GROWERP using create#User service -->
+                    <service-call name="growerp.100.PartyServices100.create#User"
+                        out-map="tenantCustomer"
+                        in-map="[
+                            ownerPartyId: 'GROWERP',
+                            user: [
+                                firstName: adminUser?.firstName ?: 'Tenant',
+                                lastName: adminUser?.lastName ?: ownerPartyId,
+                                email: adminUser?.email ?: '',
+                                role: 'Customer',
+                                loginDisabled: true,
+                                company: [
+                                    name: companyName,
+                                    role: 'Customer',
+                                    email: adminUser?.email ?: ''
+                                ]
+                            ]
+                        ]"/>
+                    <set field="subscriberPartyId" from="tenantCustomer.user.company.partyId"/>
+                    <log message="Created customer via create#User: company partyId=${subscriberPartyId}, user partyId=${tenantCustomer.user.partyId} for tenant ${ownerPartyId} in GROWERP"/>
+                </else>
+                </if>
+                
+                <!-- Create trial subscription in GROWERP tenant with customer as subscriber -->
+                <set field="description" value="${evaluationDays}-day trial subscription"/>
+                <service-call name="growerp.100.SubscriptionServices100.create#Subscription"
+                    in-map="[
+                        ownerPartyId: 'GROWERP',
+                        subscription: [
+                            description: description,
+                            fromDate: fromDate,
+                            thruDate: thruDate,
+                            subscriber: [partyId: subscriberPartyId],
+                            product: [productId: 'GROWERP_SMALL_PLAN'],
+                            externalId: ownerPartyId
+                        ]
+                    ]"
+                    out-map="subscriptionResult"/>
+                <log message="Trial subscription created: ${subscriptionResult.subscription?.pseudoId} - ${evaluationDays} days until ${thruDate} for subscriber ${subscriberPartyId}"/>
+            </if>
+
+            <!-- Mark tenant setup as complete -->
+            <service-call name="update#growerp.general.TenantSetup"
+                in-map="[ownerPartyId: ownerPartyId, setupComplete: 'Y', setupCompletedDate: ec.user.nowTimestamp]"/>
+
+            <set field="success" value="true" type="Boolean"/>
+        </actions>
+    </service>
+
+    <service verb="check" noun="TenantSubscription">
+        <description>
+            Check if tenant has an active subscription.
+            Uses the existing SubscriptionServices100.get#Subscription to query GROWERP tenant
+            for subscriptions where externalSubscriptionId matches the tenant's ownerPartyId.
+        </description>
+        <in-parameters>
+            <parameter name="ownerPartyId" required="true"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="hasActiveSubscription" type="Boolean"/>
+            <parameter name="subscriptionStatus"/><!-- 'active', 'trial', 'expired', 'none' -->
+            <parameter name="expiryDate" type="Timestamp"/>
+            <parameter name="daysRemaining" type="Integer"/>
+            <parameter name="subscription" type="Map"/>
+        </out-parameters>
+        <actions>
+            <!-- Query subscriptions in GROWERP tenant where externalId = ownerPartyId -->
+            <entity-find entity-name="mantle.product.subscription.Subscription" list="subscriptions">
+                <econdition field-name="ownerPartyId" value="GROWERP"/>
+                <econdition field-name="externalSubscriptionId" from="ownerPartyId"/>
+                <date-filter/>
+                <order-by field-name="-fromDate"/>
+            </entity-find>
+            <log message="check#TenantSubscription: ownerPartyId=${ownerPartyId}, found ${subscriptions?.size() ?: 0} subscriptions, nowTimestamp=${ec.user.nowTimestamp}"/>
+
+            <if condition="subscriptions">
+                <then>
+                    <set field="subscription" from="subscriptions[0]"/>
+                    <set field="expiryDate" from="subscription.thruDate"/>
+                    
+                    <!-- Calculate days remaining -->
+                    <if condition="expiryDate">
+                        <set field="now" from="ec.user.nowTimestamp"/>
+                        <set field="millisRemaining" from="expiryDate.time - now.time"/>
+                        <set field="daysRemaining" from="(int)(millisRemaining / (1000 * 60 * 60 * 24))" type="Integer"/>
+                        <log message="check#TenantSubscription: expiryDate=${expiryDate}, now=${now}, daysRemaining=${daysRemaining}"/>
+                        
+                        <if condition="daysRemaining > 0">
+                            <set field="hasActiveSubscription" value="true" type="Boolean"/>
+                            <set field="subscriptionStatus" value="active"/>
+                        <else>
+                            <set field="hasActiveSubscription" value="false" type="Boolean"/>
+                            <set field="subscriptionStatus" value="expired"/>
+                            <set field="daysRemaining" value="0" type="Integer"/>
+                        </else>
+                        </if>
+                    <else>
+                        <!-- No expiry date means permanent/active -->
+                        <set field="hasActiveSubscription" value="true" type="Boolean"/>
+                        <set field="subscriptionStatus" value="active"/>
+                        <set field="daysRemaining" value="-1" type="Integer"/><!-- -1 = unlimited -->
+                    </else>
+                    </if>
+                </then>
+                <else>
+                    <!-- No subscription found -->
+                    <set field="hasActiveSubscription" value="false" type="Boolean"/>
+                    <set field="subscriptionStatus" value="none"/>
+                    <set field="daysRemaining" value="0" type="Integer"/>
+                </else>
+            </if>
+        </actions>
+    </service>
+
+    <service verb="check" noun="TenantSetupStatus">
+        <description>
+            Check if tenant setup is complete.
+        </description>
+        <in-parameters>
+            <parameter name="ownerPartyId" required="true"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="setupComplete" type="Boolean"/>
+            <parameter name="setupCompletedDate" type="Timestamp"/>
+            <parameter name="classificationId"/>
+        </out-parameters>
+        <actions>
+            <entity-find-one entity-name="growerp.general.TenantSetup" value-field="tenantSetup">
+                <field-map field-name="ownerPartyId"/>
+            </entity-find-one>
+
+            <if condition="tenantSetup">
+                <set field="setupComplete" from="tenantSetup.setupComplete == 'Y'" type="Boolean"/>
+                <set field="setupCompletedDate" from="tenantSetup.setupCompletedDate"/>
+                <set field="classificationId" from="tenantSetup.classificationId"/>
+            <else>
+                <set field="setupComplete" value="false" type="Boolean"/>
+            </else>
+            </if>
+        </actions>
+    </service>
+
+</services>

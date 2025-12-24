@@ -160,92 +160,154 @@ class CommonTest {
     Map testData = const {},
   }) async {
     CustomizableDateTime.customTime = DateTime.now().add(Duration(days: days));
-    if (find
-        .byKey(const Key('HomeFormAuth'))
-        .toString()
-        .startsWith('Found 0 widgets with key')) {
-      SaveTest test = await PersistFunctions.getTest();
-      debugPrint('=== Login Debug Info ===');
-      debugPrint('test.admin: ${test.admin}');
-      debugPrint('test.sequence: ${test.sequence}');
-      debugPrint('test.company: ${test.company}');
-      debugPrint('========================');
 
-      await pressLoginWithExistingId(tester);
+    // Skip if already authenticated
+    if (tester.any(find.byKey(const Key('HomeFormAuth')))) {
+      debugPrint('Login: Already authenticated, skipping login');
+      return;
+    }
 
-      // Use provided username or fall back to test.admin
-      String loginUsername;
-      if (username != null) {
-        loginUsername = username;
-      } else if (test.admin != null) {
-        loginUsername = test.admin!.email!;
-      } else {
-        throw Exception(
-          'No username provided and test.admin is null. '
-          'Please call createCompanyAndAdmin() before login() or provide a username parameter.',
+    SaveTest test = await PersistFunctions.getTest();
+    debugPrint('=== Login Debug Info ===');
+    debugPrint('test.admin: ${test.admin}');
+    debugPrint('test.sequence: ${test.sequence}');
+    debugPrint('test.company: ${test.company}');
+    debugPrint('========================');
+
+    await pressLoginWithExistingId(tester);
+
+    // Use provided username or fall back to test.admin
+    String loginUsername;
+    if (username != null) {
+      loginUsername = username;
+    } else if (test.admin != null) {
+      loginUsername = test.admin!.email!;
+    } else {
+      throw Exception(
+        'No username provided and test.admin is null. '
+        'Please call createCompanyAndAdmin() before login() or provide a username parameter.',
+      );
+    }
+
+    await enterText(tester, 'username', loginUsername);
+    await enterText(tester, 'password', password ?? 'qqqqqq9!');
+    await pressLogin(tester);
+    await waitForSnackbarToGo(tester);
+    await tester.pumpAndSettle(const Duration(seconds: 2));
+
+    // Handle the authentication flow dialogs
+    int maxAttempts = 10;
+    int attempts = 0;
+    bool setupCompleted = false;
+    String companyName = '${initialCompany.name!} ${test.sequence}';
+
+    while (!setupCompleted && attempts < maxAttempts) {
+      attempts++;
+      await tester.pumpAndSettle(const Duration(seconds: 1));
+
+      // Check for TrialWelcomeDialog - has 'startTrial' button
+      if (await doesExistKey(tester, 'startTrial')) {
+        debugPrint(
+          'Login: TrialWelcomeDialog detected, clicking startTrial...',
         );
+        await tapByKey(tester, 'startTrial');
+        await tester.pumpAndSettle(const Duration(seconds: 2));
+        continue;
       }
 
-      await enterText(tester, 'username', loginUsername);
-      await enterText(tester, 'password', password ?? 'qqqqqq9!');
-      await pressLogin(tester);
-      await waitForSnackbarToGo(tester);
-      if (find
-          .byKey(const Key('moreInfo'))
-          .toString()
-          .startsWith('Found 1 widget')) {
-        String companyName = '${initialCompany.name!} ${test.sequence}';
+      // Check for TenantSetupDialog - has 'submit' button and 'companyName'
+      if (await doesExistKey(tester, 'submit') &&
+          await doesExistKey(tester, 'companyName')) {
+        debugPrint('Login: TenantSetupDialog detected, completing...');
         await enterText(tester, 'companyName', companyName);
         await enterDropDown(
           tester,
           'currency',
           initialCompany.currency!.description!,
         );
-        if (demoData == false) {
+        if (!demoData) {
           await tapByKey(tester, 'demoData');
-        } // no demo data
-        await tapByKey(tester, 'continue', seconds: waitTime);
+        }
+        await tapByKey(tester, 'submit', seconds: waitTime);
         await waitForSnackbarToGo(tester);
-        await PersistFunctions.persistTest(
-          test.copyWith(
-            company: Company(
-              name: companyName,
-              currency: initialCompany.currency,
-            ),
-            sequence: test.sequence + 1,
-            nowDate: DateTime.now(),
+        test = test.copyWith(
+          company: Company(
+            name: companyName,
+            currency: initialCompany.currency,
           ),
-        ); // used in rental
-      }
-    }
-    // check for evaluation welcome or credit card input (only shown for first registration)
-    await tester.pumpAndSettle(const Duration(seconds: 1));
-    // Handle evaluationWelcome form (when creditCardUpfront=false)
-    if (await doesExistKey(tester, 'evaluationWelcome')) {
-      try {
-        await tester.tap(
-          find.byKey(const Key('startEvaluation')).last,
-          warnIfMissed: false,
+          sequence: test.sequence + 1,
+          nowDate: DateTime.now(),
         );
-        await tester.pumpAndSettle(const Duration(seconds: waitTime));
-      } catch (e) {
-        debugPrint("Warning: Could not tap startEvaluation button: $e");
+        await PersistFunctions.persistTest(test);
+        await tester.pumpAndSettle(const Duration(seconds: 2));
+        continue;
       }
-    }
-    // Handle paymentForm (when creditCardUpfront=true)
-    if (await doesExistKey(tester, 'paymentForm')) {
-      try {
-        await tester.tap(
-          find.byKey(const Key('pay')).last,
-          warnIfMissed: false,
+
+      // Check for paymentForm
+      if (await doesExistKey(tester, 'paymentForm')) {
+        debugPrint('Login: PaymentForm detected, clicking pay...');
+        try {
+          await tester.tap(
+            find.byKey(const Key('pay')).last,
+            warnIfMissed: false,
+          );
+          await tester.pumpAndSettle(const Duration(seconds: waitTime));
+        } catch (e) {
+          debugPrint("Warning: Could not tap pay button: $e");
+        }
+        continue;
+      }
+
+      // Check for TrialWelcomeHelper dialog (shown after authentication)
+      if (await doesExistKey(tester, 'getStarted')) {
+        debugPrint(
+          'Login: TrialWelcomeHelper dialog detected, clicking getStarted...',
         );
-        await tester.pumpAndSettle(const Duration(seconds: waitTime));
-      } catch (e) {
-        debugPrint("Warning: Could not tap pay button: $e");
+        await tapByKey(tester, 'getStarted');
+        await tester.pumpAndSettle(const Duration(seconds: 1));
+        continue;
+      }
+
+      // Check if we're authenticated (dashboard visible and no dialogs on top)
+      if (tester.any(find.byKey(const Key('HomeFormAuth')))) {
+        // Wait a bit more for any dialog to appear on top
+        await tester.pumpAndSettle(const Duration(seconds: 2));
+
+        // Double-check no dialog appeared
+        if (await doesExistKey(tester, 'getStarted')) {
+          debugPrint(
+            'Login: TrialWelcomeHelper appeared after auth, clicking getStarted...',
+          );
+          await tapByKey(tester, 'getStarted');
+          await tester.pumpAndSettle(const Duration(seconds: 1));
+          continue;
+        }
+
+        debugPrint('Login: Authentication complete, dashboard reached!');
+        setupCompleted = true;
+        break;
+      }
+
+      // If login form is still visible, might have an issue
+      if (await doesExistKey(tester, 'username') &&
+          await doesExistKey(tester, 'login')) {
+        debugPrint('Login: Still on login form after attempt $attempts');
+        if (attempts >= 3) {
+          break;
+        }
       }
     }
 
-    SaveTest test = await PersistFunctions.getTest();
+    // Final check for any lingering TrialWelcomeHelper dialog
+    await tester.pumpAndSettle(const Duration(seconds: 2));
+    if (await doesExistKey(tester, 'getStarted')) {
+      debugPrint('Login: Final cleanup - dismissing TrialWelcomeHelper...');
+      await tapByKey(tester, 'getStarted');
+      await tester.pumpAndSettle(const Duration(seconds: 1));
+    }
+
+    // Refresh test data and handle test data upload
+    test = await PersistFunctions.getTest();
     String apiKey = getTextField('apiKey');
     String moquiSessionToken = getTextField('moquiSessionToken');
     await GlobalConfiguration().add({
@@ -255,7 +317,6 @@ class CommonTest {
     int seq = test.sequence;
     if (!test.testDataLoaded && testData.isNotEmpty) {
       final restClient = RestClient(await buildDioClient());
-      // replace XXX strings
       Map<String, dynamic> parsed = {};
       testData.forEach((k, v) {
         List newList = [];

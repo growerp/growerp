@@ -17,6 +17,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/foundation.dart';
 import 'package:global_configuration/global_configuration.dart';
+import 'package:go_router/go_router.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
@@ -85,7 +86,7 @@ class LoginDialogState extends State<LoginDialog> {
       child: Scaffold(
         backgroundColor: Colors.transparent,
         body: BlocConsumer<AuthBloc, AuthState>(
-          listener: (context, state) {
+          listener: (context, state) async {
             switch (state.status) {
               case AuthStatus.failure:
                 HelperFunctions.showMessage(
@@ -94,7 +95,23 @@ class LoginDialogState extends State<LoginDialog> {
                   Theme.of(context).colorScheme.error,
                 );
               case AuthStatus.authenticated:
-                Navigator.of(context).pop();
+                // Show trial welcome dialog for new tenants using consolidated helper
+                // This handles both the new TenantSetupDialog flow and legacy moreInfoForm case
+                await TrialWelcomeHelper.showTrialWelcomeIfNeeded(
+                  context: context,
+                  authenticate: state.authenticate,
+                );
+                // Close the login dialog and navigate to home
+                // LoginDialog is shown as a dialog, so we pop it and ensure we're at home
+                if (context.mounted) {
+                  // First check if we can pop (dialog case), otherwise go to root
+                  if (Navigator.of(context).canPop()) {
+                    Navigator.of(context).pop();
+                  } else {
+                    // We're the root page, navigate to home instead
+                    context.go('/');
+                  }
+                }
               default:
                 HelperFunctions.showMessage(
                   context,
@@ -120,6 +137,29 @@ class LoginDialogState extends State<LoginDialog> {
                 Dialog(
                   insetPadding: const EdgeInsets.all(10),
                   child: switch (furtherAction) {
+                    // New apiKey values from refactored backend
+                    'setupRequired' => TenantSetupDialog(
+                      authenticate: state.authenticate!,
+                    ),
+                    'trialWelcome' => TrialWelcomeDialog(
+                      authenticate: state.authenticate!,
+                      onStartTrial: () {
+                        Navigator.of(context).pop();
+                        showDialog(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (context) => TenantSetupDialog(
+                            authenticate: state.authenticate!,
+                          ),
+                        );
+                      },
+                    ),
+                    'subscriptionExpired' => PaymentSubscriptionDialog(
+                      authenticate: state.authenticate!,
+                    ),
+                    'registered' =>
+                      loginForm(), // Show login after registration
+                    // Legacy apiKey values (for backward compatibility during transition)
                     'moreInfo' => moreInfoForm(),
                     'evaluationWelcome' => evaluationWelcomeForm(),
                     'paymentFirst' => paymentForm(paymentFirst: true),
@@ -560,7 +600,7 @@ class LoginDialogState extends State<LoginDialog> {
     bool test = GlobalConfiguration().get("test");
     String testCreditCardNumber = kReleaseMode && !test
         ? ''
-        : '4012888888881881';
+        : '4242424242424242';
     String testExpiryDate = kReleaseMode && !test ? '' : '11/33';
     String testCvv = kReleaseMode && !test ? '' : '123';
     String testNameOnCart = kReleaseMode && !test ? '' : 'Test Customer';

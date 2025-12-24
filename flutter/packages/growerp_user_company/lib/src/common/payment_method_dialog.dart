@@ -12,8 +12,10 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:credit_card_validator/credit_card_validator.dart';
+import 'package:global_configuration/global_configuration.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_user_company/l10n/generated/user_company_localizations.dart';
@@ -38,13 +40,25 @@ class PaymentMethodDialogState extends State<PaymentMethodDialog> {
   @override
   void initState() {
     super.initState();
+    // Check if we should use test data
+    bool isTestMode = !kReleaseMode || GlobalConfiguration().get("test");
+
     _cardType =
         (widget.paymentMethod?.creditCardType ??
         CreditCardType.getByValue(''))!;
-    _creditCardNumberController.text =
-        widget.paymentMethod?.creditCardNumber ?? '';
-    _expireMonthController.text = widget.paymentMethod?.expireMonth ?? '';
-    _expireYearController.text = widget.paymentMethod?.expireYear ?? '';
+
+    // If no existing payment method and in test mode, use test data
+    if (widget.paymentMethod?.creditCardNumber == null && isTestMode) {
+      _creditCardNumberController.text = '4242424242424242';
+      _expireMonthController.text = '11';
+      _expireYearController.text = '33';
+      _cardType = CreditCardType.visa;
+    } else {
+      _creditCardNumberController.text =
+          widget.paymentMethod?.creditCardNumber ?? '';
+      _expireMonthController.text = widget.paymentMethod?.expireMonth ?? '';
+      _expireYearController.text = widget.paymentMethod?.expireYear ?? '';
+    }
   }
 
   @override
