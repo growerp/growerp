@@ -5,6 +5,10 @@
 
 /* CSS Custom Properties - Design Tokens */
 :root {
+    /* Dynamic Header/Footer colors from website settings */
+    --header-footer-bg: ${HeaderFooterBg!'#1e293b'};
+    --header-footer-text: ${HeaderFooterText!'#ffffff'};
+    
     /* Primary Palette - Deep Emerald/Teal */
     --primary-50: #e6f7f5;
     --primary-100: #b3e8e3;
@@ -120,8 +124,10 @@ a:hover {
    NAVBAR - PREMIUM DESIGN
    =================================================================== */
 
-.navbar {
-    background: linear-gradient(135deg, var(--neutral-900) 0%, var(--neutral-800) 100%) !important;
+nav.navbar,
+.navbar.navbar-expand-md.navbar-dark.bg-dark {
+    background: var(--header-footer-bg) !important;
+    background-color: var(--header-footer-bg) !important;
     padding: var(--space-4) 0;
     position: sticky;
     top: 0;
@@ -148,14 +154,16 @@ a:hover {
     50% { background-position: 100% 50%; }
 }
 
-.moqui-navbar {
+nav.navbar .moqui-navbar {
     width: 100%;
     background: transparent !important;
     text-align: center !important;
 }
 
-.bg-dark {
-    background: transparent !important;
+nav.navbar.bg-dark,
+.navbar-dark.bg-dark {
+    background: var(--header-footer-bg) !important;
+    background-color: var(--header-footer-bg) !important;
 }
 
 .main-navbar {
@@ -194,18 +202,14 @@ a:hover {
     font-family: 'Outfit', sans-serif;
     font-size: 1.75rem;
     font-weight: 700;
-    color: #ffffff;
+    color: var(--header-footer-text);
     letter-spacing: -0.5px;
     margin: 0;
     display: inline-block;
-    background: linear-gradient(135deg, #ffffff 0%, var(--primary-200) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
 }
 
 .navbar-dark .navbar-nav .nav-link {
-    color: rgba(255, 255, 255, 0.9);
+    color: var(--header-footer-text);
     font-weight: 500;
     padding: var(--space-2) var(--space-4);
     border-radius: var(--radius-md);
@@ -764,8 +768,8 @@ a:hover {
    =================================================================== */
 
 .footer {
-    background: linear-gradient(135deg, var(--neutral-900) 0%, var(--neutral-800) 100%);
-    color: rgba(255, 255, 255, 0.8);
+    background: var(--header-footer-bg);
+    color: var(--header-footer-text);
     padding: var(--space-12) 0 var(--space-8);
     position: relative;
     margin-top: var(--space-16);
@@ -808,7 +812,8 @@ a:hover {
 }
 
 .footer-ul li a {
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--header-footer-text);
+    opacity: 0.7;
     transition: all var(--transition-fast);
 }
 
@@ -829,7 +834,8 @@ a:hover {
 .footer-icons {
     font-size: 1.5rem;
     margin-right: var(--space-4);
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--header-footer-text);
+    opacity: 0.6;
     transition: all var(--transition-fast);
     cursor: pointer;
 }
@@ -840,7 +846,82 @@ a:hover {
 }
 
 .footer-a {
-    color: rgba(255, 255, 255, 0.7) !important;
+    color: var(--header-footer-text) !important;
+    opacity: 0.7;
+}
+
+/* Footer Additional Classes */
+.footer-logo {
+    width: 45px;
+    height: 45px;
+    border-radius: var(--radius-md);
+    margin-right: 12px;
+}
+
+.footer-brand-name {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--header-footer-text);
+}
+
+.footer-description {
+    color: var(--header-footer-text);
+    opacity: 0.7;
+    font-size: 0.9rem;
+    line-height: 1.7;
+}
+
+.footer-heading {
+    color: var(--header-footer-text);
+    font-family: 'Outfit', sans-serif;
+    font-weight: 600;
+    font-size: 1rem;
+    margin-bottom: 1.25rem;
+}
+
+.footer-contact {
+    font-size: 0.9rem;
+}
+
+.footer-contact-item {
+    display: flex;
+    align-items: flex-start;
+}
+
+.footer-contact-icon {
+    color: var(--primary-400);
+}
+
+.footer-contact-text {
+    color: var(--header-footer-text);
+    opacity: 0.7;
+}
+
+.footer-bottom {
+    border-top: 1px solid rgba(128, 128, 128, 0.2);
+}
+
+.footer-copyright {
+    margin: 0;
+    color: var(--header-footer-text);
+    opacity: 0.5;
+    font-size: 0.85rem;
+}
+
+.footer-credits {
+    margin: 0;
+    font-size: 0.85rem;
+}
+
+.footer-credit-link {
+    color: var(--primary-400);
+}
+
+.footer-separator {
+    color: var(--header-footer-text);
+    opacity: 0.3;
+    margin: 0 10px;
 }
 
 /* ===================================================================
