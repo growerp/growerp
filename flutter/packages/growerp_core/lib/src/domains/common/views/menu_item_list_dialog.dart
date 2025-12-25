@@ -186,17 +186,22 @@ class MenuItemListDialogState extends State<MenuItemListDialog> {
       );
     }
 
-    return ListView.builder(
+    return ReorderableListView.builder(
+      padding: const EdgeInsets.only(bottom: 120),
+      buildDefaultDragHandles: false,
       itemCount: options.length,
+      onReorder: (oldIndex, newIndex) {
+        _onMenuItemsReorder(options, menuConfig, oldIndex, newIndex);
+      },
       itemBuilder: (context, index) {
         final option = options[index];
         // Get children count (MenuItem tabs linked to this option)
         final childrenCount = option.children?.length ?? 0;
 
         return Card(
+          key: Key('menuOption_${option.menuItemId}'),
           margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           child: InkWell(
-            key: Key('menuOption_${option.menuItemId}'),
             onTap: () async {
               await showDialog<bool>(
                 context: context,
@@ -217,6 +222,12 @@ class MenuItemListDialogState extends State<MenuItemListDialog> {
               ),
               child: Row(
                 children: [
+                  // Drag handle
+                  ReorderableDragStartListener(
+                    index: index,
+                    child: const Icon(Icons.drag_handle, size: 20),
+                  ),
+                  const SizedBox(width: 8),
                   // Icon
                   SizedBox(
                     width: 32,
@@ -342,6 +353,41 @@ class MenuItemListDialogState extends State<MenuItemListDialog> {
           ),
         );
       },
+    );
+  }
+
+  /// Handle reorder of top-level menu items
+  void _onMenuItemsReorder(
+    List<MenuItem> options,
+    MenuConfiguration menuConfig,
+    int oldIndex,
+    int newIndex,
+  ) {
+    // Adjust newIndex for ReorderableListView behavior
+    if (newIndex > oldIndex) {
+      newIndex -= 1;
+    }
+
+    // Build the new sequence list
+    final reorderedOptions = List<MenuItem>.from(options);
+    final movedItem = reorderedOptions.removeAt(oldIndex);
+    reorderedOptions.insert(newIndex, movedItem);
+
+    // Create sequence updates
+    final optionSequences = <Map<String, dynamic>>[];
+    for (int i = 0; i < reorderedOptions.length; i++) {
+      optionSequences.add({
+        'menuItemId': reorderedOptions[i].menuItemId,
+        'sequenceNum': (i + 1) * 10,
+      });
+    }
+
+    // Dispatch reorder event
+    context.read<MenuConfigBloc>().add(
+      MenuItemsReorder(
+        menuConfigurationId: menuConfig.menuConfigurationId ?? '',
+        optionSequences: optionSequences,
+      ),
     );
   }
 }
