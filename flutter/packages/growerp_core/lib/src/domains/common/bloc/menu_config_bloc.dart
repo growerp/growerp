@@ -161,6 +161,7 @@ class MenuConfigBloc extends Bloc<MenuConfigEvent, MenuConfigState> {
 
       await restClient.updateMenuItem(
         menuItemId: event.menuItemId,
+        parentMenuItemId: event.menuOption.parentMenuItemId,
         itemKey: event.menuOption.itemKey,
         title: event.menuOption.title,
         route: event.menuOption.route,

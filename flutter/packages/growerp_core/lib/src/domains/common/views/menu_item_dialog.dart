@@ -47,6 +47,10 @@ class MenuItemDialogState extends State<MenuItemDialog> {
   late MenuConfigBloc _menuConfigBloc;
   late bool isPhone;
 
+  /// Track when the user explicitly saves the menu item.
+  /// This prevents the dialog from closing when a child tab is added/modified.
+  bool _pendingClose = false;
+
   // Available icon names
   final List<String> _iconOptions = [
     'dashboard',
@@ -121,8 +125,7 @@ class MenuItemDialogState extends State<MenuItemDialog> {
           child: Scaffold(
             backgroundColor: Colors.transparent,
             floatingActionButton: _updateButton(),
-            floatingActionButtonLocation:
-                FloatingActionButtonLocation.centerFloat,
+            floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
             body: BlocConsumer<MenuConfigBloc, MenuConfigState>(
               listenWhen: (previous, current) =>
                   previous.status != current.status,
@@ -134,8 +137,10 @@ class MenuItemDialogState extends State<MenuItemDialog> {
                     Colors.red,
                   );
                 }
+                // Only close the dialog when the user explicitly saved the menu item
                 if (state.status == MenuConfigStatus.success &&
-                    state.message != null) {
+                    state.message != null &&
+                    _pendingClose) {
                   Navigator.of(context).pop(true);
                 }
               },
@@ -156,7 +161,12 @@ class MenuItemDialogState extends State<MenuItemDialog> {
     return Form(
       key: _formKey,
       child: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.only(
+          left: 16,
+          right: 16,
+          top: 16,
+          bottom: 80,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -425,20 +435,60 @@ class MenuItemDialogState extends State<MenuItemDialog> {
                       style: TextStyle(color: Colors.grey),
                     );
                   }
-                  return Wrap(
-                    spacing: 8,
-                    runSpacing: 4,
-                    children: children.map((item) {
-                      return Chip(
-                        key: Key('tab_${item.menuItemId}'),
-                        label: Text(item.title),
-                        avatar:
-                            getIconFromRegistry(item.iconName) ??
-                            const Icon(Icons.tab, size: 16),
-                        deleteIcon: const Icon(Icons.close, size: 16),
-                        onDeleted: () => _unlinkTab(item),
-                      );
-                    }).toList(),
+                  // Use ReorderableListView for drag-drop reordering
+                  return SizedBox(
+                    height: (children.length * 56.0).clamp(56.0, 200.0),
+                    child: ReorderableListView.builder(
+                      shrinkWrap: true,
+                      buildDefaultDragHandles: false,
+                      itemCount: children.length,
+                      onReorder: (oldIndex, newIndex) {
+                        _onChildTabsReorder(children, oldIndex, newIndex);
+                      },
+                      itemBuilder: (context, index) {
+                        final item = children[index];
+                        return Card(
+                          key: Key('tab_${item.menuItemId}'),
+                          margin: const EdgeInsets.symmetric(vertical: 2),
+                          child: ListTile(
+                            dense: true,
+                            leading: ReorderableDragStartListener(
+                              index: index,
+                              child: const Icon(Icons.drag_handle, size: 20),
+                            ),
+                            title: Row(
+                              children: [
+                                getIconFromRegistry(item.iconName) ??
+                                    const Icon(Icons.tab, size: 16),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    item.title,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  icon: const Icon(Icons.edit, size: 18),
+                                  tooltip: 'Edit tab',
+                                  onPressed: () => _showEditTabDialog(item),
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.close, size: 18),
+                                  tooltip: 'Remove tab',
+                                  onPressed: () => _unlinkTab(item),
+                                ),
+                              ],
+                            ),
+                            onTap: () => _showEditTabDialog(item),
+                          ),
+                        );
+                      },
+                    ),
                   );
                 },
               ),
@@ -463,6 +513,9 @@ class MenuItemDialogState extends State<MenuItemDialog> {
     if (!(_formKey.currentState?.validate() ?? false)) {
       return;
     }
+
+    // Mark that we're explicitly saving, so the dialog should close on success
+    _pendingClose = true;
 
     // Auto-generate route from title if not provided
     String? route = _routeController.text.isNotEmpty
@@ -614,5 +667,137 @@ class MenuItemDialogState extends State<MenuItemDialog> {
   /// Unlink a tab from this MenuItem
   void _unlinkTab(MenuItem item) {
     _menuConfigBloc.add(MenuItemUnlink(childMenuItemId: item.menuItemId!));
+  }
+
+  /// Handle reorder of child tabs
+  void _onChildTabsReorder(
+    List<MenuItem> children,
+    int oldIndex,
+    int newIndex,
+  ) {
+    // Adjust newIndex for ReorderableListView behavior
+    if (newIndex > oldIndex) {
+      newIndex -= 1;
+    }
+
+    // Build the new sequence list
+    final reorderedChildren = List<MenuItem>.from(children);
+    final movedItem = reorderedChildren.removeAt(oldIndex);
+    reorderedChildren.insert(newIndex, movedItem);
+
+    // Create sequence updates
+    final optionSequences = <Map<String, dynamic>>[];
+    for (int i = 0; i < reorderedChildren.length; i++) {
+      optionSequences.add({
+        'menuItemId': reorderedChildren[i].menuItemId,
+        'sequenceNum': (i + 1) * 10,
+      });
+    }
+
+    // Dispatch reorder event
+    _menuConfigBloc.add(
+      MenuItemsReorder(
+        menuConfigurationId: widget.menuConfigurationId,
+        optionSequences: optionSequences,
+      ),
+    );
+  }
+
+  /// Show dialog to edit an existing tab
+  void _showEditTabDialog(MenuItem tab) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        String? selectedWidget = tab.widgetName;
+        final titleController = TextEditingController(text: tab.title);
+
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              key: const Key('editTabDialog'),
+              title: const Text('Edit Tab'),
+              content: SizedBox(
+                width: 300,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Widget selector
+                    Autocomplete<String>(
+                      key: const Key('editTabWidgetSelector'),
+                      initialValue: TextEditingValue(
+                        text: selectedWidget ?? '',
+                      ),
+                      optionsBuilder: (TextEditingValue textEditingValue) {
+                        final query = textEditingValue.text.toLowerCase();
+                        if (query.isEmpty) {
+                          return WidgetRegistry.registeredWidgets;
+                        }
+                        return WidgetRegistry.registeredWidgets.where(
+                          (widget) => widget.toLowerCase().contains(query),
+                        );
+                      },
+                      fieldViewBuilder:
+                          (context, controller, focusNode, onSubmit) {
+                            return TextFormField(
+                              controller: controller,
+                              focusNode: focusNode,
+                              decoration: const InputDecoration(
+                                labelText: 'Widget Name *',
+                                border: OutlineInputBorder(),
+                                hintText: 'Search widgets...',
+                              ),
+                            );
+                          },
+                      onSelected: (value) {
+                        setDialogState(() {
+                          selectedWidget = value;
+                        });
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    // Title field
+                    TextFormField(
+                      key: const Key('editTabTitle'),
+                      controller: titleController,
+                      decoration: const InputDecoration(
+                        labelText: 'Tab Title *',
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(dialogContext).pop(),
+                  child: const Text('Cancel'),
+                ),
+                TextButton(
+                  key: const Key('editTabConfirm'),
+                  onPressed: () {
+                    if (selectedWidget != null &&
+                        titleController.text.isNotEmpty) {
+                      // Update the existing tab
+                      _updateTab(tab, selectedWidget!, titleController.text);
+                      Navigator.of(dialogContext).pop();
+                    }
+                  },
+                  child: const Text('Save'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  /// Update an existing tab's properties
+  void _updateTab(MenuItem tab, String widgetName, String title) {
+    final updatedTab = tab.copyWith(title: title, widgetName: widgetName);
+
+    _menuConfigBloc.add(
+      MenuItemUpdate(menuItemId: tab.menuItemId!, menuOption: updatedTab),
+    );
   }
 }
