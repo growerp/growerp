@@ -203,17 +203,7 @@ class CommonTest {
 
     while (!setupCompleted && attempts < maxAttempts) {
       attempts++;
-      await tester.pumpAndSettle(const Duration(seconds: 1));
-
-      // Check for TrialWelcomeDialog - has 'startTrial' button
-      if (await doesExistKey(tester, 'startTrial')) {
-        debugPrint(
-          'Login: TrialWelcomeDialog detected, clicking startTrial...',
-        );
-        await tapByKey(tester, 'startTrial');
-        await tester.pumpAndSettle(const Duration(seconds: 2));
-        continue;
-      }
+      await tester.pump(const Duration(seconds: 1));
 
       // Check for TenantSetupDialog - has 'submit' button and 'companyName'
       if (await doesExistKey(tester, 'submit') &&
@@ -226,10 +216,25 @@ class CommonTest {
           initialCompany.currency!.description!,
         );
         if (!demoData) {
-          await tapByKey(tester, 'demoData');
+          await tapByKey(tester, 'demoData', settle: false);
         }
-        await tapByKey(tester, 'submit', seconds: waitTime);
-        await waitForSnackbarToGo(tester);
+
+        // Tap submit - don't wait here, the dialog will close when auth completes
+        await tester.tap(find.byKey(const Key('submit')));
+        await tester.pump();
+
+        // Wait for the dialog to close (submit button disappears)
+        // This can take a while if demo data is being created
+        int waitAttempts = 0;
+        while (await doesExistKey(tester, 'submit') && waitAttempts < 120) {
+          await tester.pump(const Duration(seconds: 1));
+          waitAttempts++;
+        }
+
+        debugPrint(
+          'Login: TenantSetupDialog closed after $waitAttempts seconds',
+        );
+
         test = test.copyWith(
           company: Company(
             name: companyName,
@@ -239,7 +244,8 @@ class CommonTest {
           nowDate: DateTime.now(),
         );
         await PersistFunctions.persistTest(test);
-        await tester.pumpAndSettle(const Duration(seconds: 2));
+        // Use pump instead of pumpAndSettle to avoid hanging on animations
+        await tester.pump(const Duration(seconds: 2));
         continue;
       }
 
@@ -251,7 +257,7 @@ class CommonTest {
             find.byKey(const Key('pay')).last,
             warnIfMissed: false,
           );
-          await tester.pumpAndSettle(const Duration(seconds: waitTime));
+          await tester.pump(const Duration(seconds: waitTime));
         } catch (e) {
           debugPrint("Warning: Could not tap pay button: $e");
         }
@@ -263,23 +269,21 @@ class CommonTest {
         debugPrint(
           'Login: TrialWelcomeHelper dialog detected, clicking getStarted...',
         );
-        await tapByKey(tester, 'getStarted');
-        await tester.pumpAndSettle(const Duration(seconds: 1));
+        await tapByKey(tester, 'getStarted', settle: false);
         continue;
       }
 
       // Check if we're authenticated (dashboard visible and no dialogs on top)
       if (tester.any(find.byKey(const Key('HomeFormAuth')))) {
         // Wait a bit more for any dialog to appear on top
-        await tester.pumpAndSettle(const Duration(seconds: 2));
+        await tester.pump(const Duration(seconds: 2));
 
         // Double-check no dialog appeared
         if (await doesExistKey(tester, 'getStarted')) {
           debugPrint(
             'Login: TrialWelcomeHelper appeared after auth, clicking getStarted...',
           );
-          await tapByKey(tester, 'getStarted');
-          await tester.pumpAndSettle(const Duration(seconds: 1));
+          await tapByKey(tester, 'getStarted', settle: false);
           continue;
         }
 
@@ -299,11 +303,10 @@ class CommonTest {
     }
 
     // Final check for any lingering TrialWelcomeHelper dialog
-    await tester.pumpAndSettle(const Duration(seconds: 2));
+    await tester.pump(const Duration(seconds: 2));
     if (await doesExistKey(tester, 'getStarted')) {
       debugPrint('Login: Final cleanup - dismissing TrialWelcomeHelper...');
-      await tapByKey(tester, 'getStarted');
-      await tester.pumpAndSettle(const Duration(seconds: 1));
+      await tapByKey(tester, 'getStarted', settle: false);
     }
 
     // Refresh test data and handle test data upload
@@ -989,7 +992,9 @@ class CommonTest {
     WidgetTester tester,
     String key, {
     int seconds = 1,
+    bool settle = true, // If false, use pump instead of pumpAndSettle
   }) async {
+    await tester.pump();
     expect(
       tester.any(find.byKey(Key(key))),
       true,
@@ -998,7 +1003,11 @@ class CommonTest {
     await tester.ensureVisible(find.byKey(Key(key)).last);
     await tester.tap(find.byKey(Key(key)).last);
     await tester.pump();
-    await tester.pumpAndSettle(Duration(seconds: seconds));
+    if (settle) {
+      await tester.pumpAndSettle(Duration(seconds: seconds));
+    } else {
+      await tester.pump(Duration(seconds: seconds));
+    }
   }
 
   static Future<void> tapByWidget(

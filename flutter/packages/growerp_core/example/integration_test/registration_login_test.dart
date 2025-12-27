@@ -102,9 +102,9 @@ void main() {
       // Generate unique email
       SaveTest test = await PersistFunctions.getTest();
       registeredAdminEmail = 'authtest${test.sequence}@example.com';
-      debugPrint('Registering admin: $registeredAdminEmail');
 
       // Open registration form
+      await tester.pumpAndSettle(Duration(seconds: CommonTest.waitTime));
       await CommonTest.tapByKey(tester, 'newUserButton');
       await tester.pumpAndSettle();
 
@@ -142,8 +142,7 @@ void main() {
       await tester.pumpAndSettle(const Duration(seconds: 2));
 
       // The registration should complete and show login form
-      bool loginDisplayed = await AuthTest.isLoginFormDisplayed(tester);
-      debugPrint('Login form displayed after registration: $loginDisplayed');
+      await AuthTest.isLoginFormDisplayed(tester);
 
       // Save test data
       test = test.copyWith(
@@ -178,6 +177,7 @@ void main() {
       );
 
       // Open registration form
+      await tester.pumpAndSettle(Duration(seconds: CommonTest.waitTime));
       await CommonTest.tapByKey(tester, 'newUserButton');
       await tester.pumpAndSettle();
 
@@ -234,7 +234,6 @@ void main() {
 
       // Verify login form displayed first
       await CommonTest.pressLoginWithExistingId(tester);
-      await tester.pumpAndSettle();
 
       expect(
         find.byKey(const Key('username')),
@@ -269,6 +268,10 @@ void main() {
       );
 
       debugPrint('✓ TC-LOGIN-001: Successful login completed');
+
+      // logout if logged in
+      await CommonTest.logout(tester);
+      await tester.pumpAndSettle();
     });
 
     testWidgets('TC-LOGIN-002: Login with Invalid Credentials', (
@@ -288,10 +291,6 @@ void main() {
         clear: false,
         title: "TC-LOGIN-002: Invalid Login",
       );
-
-      // First logout if logged in
-      await CommonTest.logout(tester);
-      await tester.pumpAndSettle();
 
       // Navigate to login form
       await CommonTest.pressLoginWithExistingId(tester);
@@ -338,19 +337,14 @@ void main() {
         title: "TC-LOGIN-003: Empty Fields",
       );
 
-      // Logout first
-      await CommonTest.logout(tester);
-      await tester.pumpAndSettle();
-
       // Navigate to login form
       await CommonTest.pressLoginWithExistingId(tester);
-      await tester.pumpAndSettle();
 
       // Clear fields and submit
       await CommonTest.enterText(tester, 'username', '');
       await CommonTest.enterText(tester, 'password', '');
       await CommonTest.tapByKey(tester, 'login');
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       // Verify still on login form (validation should prevent submission)
       expect(
@@ -431,7 +425,6 @@ void main() {
       );
 
       // Check if currently logged in
-      await tester.pumpAndSettle(const Duration(seconds: 2));
       bool isLoggedIn = await AuthTest.isAuthenticated(tester);
 
       if (isLoggedIn) {

@@ -267,16 +267,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         testDaysOffset: event.testDaysOffset,
       );
 
-      // Handle new apiKey values from refactored backend
+      // Handle apiKey values from backend
       if (authenticate.apiKey != null &&
           ![
-            // Legacy values (to be removed after frontend refactoring)
-            'moreInfo', // Replaced by 'setupRequired'
-            'paymentFirst', // Replaced by 'subscriptionExpired'
-            'paymentExpired', // Replaced by 'subscriptionExpired'
-            'paymentExpiredFinal', // Replaced by 'subscriptionExpired'
-            'evaluationWelcome', // Replaced by 'trialWelcome'
-            // New values from refactored backend
             'setupRequired', // Admin needs to provide company info
             'subscriptionExpired', // Subscription expired, payment required
             'trialWelcome', // New tenant, show trial welcome

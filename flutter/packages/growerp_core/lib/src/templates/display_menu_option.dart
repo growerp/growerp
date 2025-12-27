@@ -259,9 +259,15 @@ class DisplayMenuItemState extends State<DisplayMenuItem>
               ? menuConfigState.menuConfiguration
               : widget.menuConfiguration;
 
-          // If config is still null (shouldn't happen), return loading/empty
+          // If config is still null (shouldn't happen), return error message
+          // Don't use CircularProgressIndicator as it prevents pumpAndSettle in tests
           if (menuConfiguration == null) {
-            return const Center(child: CircularProgressIndicator());
+            return Center(
+              child: Text(
+                'Menu configuration not available',
+                style: Theme.of(context).textTheme.bodyLarge,
+              ),
+            );
           }
 
           // Force using the passed configuration if it's different (e.g. for sub-menus)

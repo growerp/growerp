@@ -39,7 +39,6 @@ class LoginDialog extends StatefulWidget {
 
 class LoginDialogState extends State<LoginDialog> {
   final _loginFormKey = GlobalKey<FormBuilderState>();
-  final _moreInfoFormKey = GlobalKey<FormBuilderState>();
   final _changePasswordFormKey = GlobalKey<FormBuilderState>();
   final builderFormKey = GlobalKey<FormBuilderState>();
   late Authenticate authenticate;
@@ -49,8 +48,6 @@ class LoginDialogState extends State<LoginDialog> {
   late bool _obscureText3;
   late bool _obscureText4;
   late AuthBloc _authBloc;
-  late Currency _currencySelected;
-  late bool _demoData;
   late String _classification;
   late User? user;
   late String? moquiSessionToken; // in login process used for password
@@ -66,8 +63,6 @@ class LoginDialogState extends State<LoginDialog> {
     _authBloc = context.read<AuthBloc>();
     _classification = context.read<String>();
     authenticate = _authBloc.state.authenticate!;
-    _currencySelected = currencies[1];
-    _demoData = kReleaseMode ? false : true;
     _obscureText = true;
     _obscureText3 = true;
     _obscureText4 = true;
@@ -159,12 +154,6 @@ class LoginDialogState extends State<LoginDialog> {
                     ),
                     'registered' =>
                       loginForm(), // Show login after registration
-                    // Legacy apiKey values (for backward compatibility during transition)
-                    'moreInfo' => moreInfoForm(),
-                    'evaluationWelcome' => evaluationWelcomeForm(),
-                    'paymentFirst' => paymentForm(paymentFirst: true),
-                    'paymentExpired' => paymentForm(expired: true),
-                    'paymentExpiredFinal' => paymentForm(finalExpired: true),
                     'passwordChange' => changePasswordForm(username, password),
                     _ => loginForm(),
                   },
@@ -279,189 +268,6 @@ class LoginDialogState extends State<LoginDialog> {
               },
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget moreInfoForm() {
-    String defaultCompanyName = kReleaseMode ? '' : 'Main Company';
-    return popUp(
-      height: user?.userGroup == UserGroup.admin ? 450 : 350,
-      context: context,
-      title: _localizations!.completeRegistration,
-      child: FormBuilder(
-        key: _moreInfoFormKey,
-        initialValue: {
-          'companyName': defaultCompanyName,
-          'currency': _currencySelected,
-          'demoData': _demoData,
-        },
-        child: SingleChildScrollView(
-          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-          key: const Key('listView'),
-          child: Column(
-            key: const Key('moreInfo'),
-            children: <Widget>[
-              Column(
-                children: [
-                  const SizedBox(height: 10),
-                  Text(_localizations!.welcome, textAlign: TextAlign.center),
-                  Text("${user?.firstName} ${user?.lastName}"),
-                  if (user?.userGroup == UserGroup.admin)
-                    Text(_localizations!.enterCompanyAndCurrency),
-                  if (user?.userGroup != UserGroup.admin)
-                    Text(_localizations!.enterCompanyName),
-                  const SizedBox(height: 10),
-                  FormBuilderTextField(
-                    name: 'companyName',
-                    key: const Key('companyName'),
-                    decoration: InputDecoration(
-                      labelText: _localizations!.businessCompanyName,
-                    ),
-                    validator: user?.userGroup == UserGroup.admin
-                        ? FormBuilderValidators.compose([
-                            FormBuilderValidators.required(
-                              errorText: _localizations!.businessNameError,
-                            ),
-                          ])
-                        : null,
-                  ),
-                  if (user?.userGroup == UserGroup.admin)
-                    const SizedBox(height: 10),
-                  if (user?.userGroup == UserGroup.admin)
-                    FormBuilderDropdown<Currency>(
-                      name: 'currency',
-                      key: const Key('currency'),
-                      decoration: InputDecoration(
-                        labelText: _localizations!.currency,
-                      ),
-                      hint: Text(_localizations!.currency),
-                      validator: FormBuilderValidators.compose([
-                        FormBuilderValidators.required(
-                          errorText: _localizations!.currencyError,
-                        ),
-                      ]),
-                      items: currencies.map((item) {
-                        return DropdownMenuItem<Currency>(
-                          value: item,
-                          child: Text(item.description!),
-                        );
-                      }).toList(),
-                      onChanged: (Currency? newValue) {
-                        setState(() {
-                          _currencySelected = newValue!;
-                        });
-                      },
-                    ),
-                  const SizedBox(height: 10),
-                  if (user?.userGroup == UserGroup.admin)
-                    FormBuilderCheckbox(
-                      name: 'demoData',
-                      key: const Key('demoData'),
-                      title: Text(_localizations!.generateDemoData),
-                      decoration: InputDecoration(
-                        labelText: _localizations!.demoData,
-                        border: InputBorder.none,
-                      ),
-                      onChanged: (bool? value) {
-                        setState(() {
-                          _demoData = value ?? false;
-                        });
-                      },
-                    ),
-                  const SizedBox(height: 10),
-                  OutlinedButton(
-                    key: const Key('continue'),
-                    child: Text(_localizations!.continueButton),
-                    onPressed: () {
-                      if (_moreInfoFormKey.currentState!.saveAndValidate()) {
-                        final formData = _moreInfoFormKey.currentState!.value;
-
-                        context.read<AuthBloc>().add(
-                          AuthLogin(
-                            user!.loginName!,
-                            moquiSessionToken!, // returned password
-                            companyName:
-                                formData['companyName']?.toString() ?? '',
-                            currency: formData['currency'] ?? _currencySelected,
-                            demoData: formData['demoData'] ?? _demoData,
-                          ),
-                        );
-                      }
-                    },
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget evaluationWelcomeForm() {
-    int evaluationDays = authenticate.evaluationDays ?? 14;
-    return popUp(
-      height: 500,
-      width: 450,
-      context: context,
-      title: _localizations!.welcomeTitle,
-      child: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: SingleChildScrollView(
-          key: const Key('evaluationWelcome'),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Icon(
-                Icons.celebration,
-                size: 60,
-                color: Theme.of(context).colorScheme.tertiary,
-              ),
-              const SizedBox(height: 20),
-              Text(
-                _localizations!.welcomeMessage(
-                  "${user?.firstName ?? ''} ${user?.lastName ?? ''}",
-                ),
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 20),
-              Text(
-                _localizations!.evaluationPeriodMessage(evaluationDays),
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 16),
-              ),
-              const SizedBox(height: 10),
-              Text(
-                _localizations!.evaluationPeriodDetails,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Theme.of(context).colorScheme.outline,
-                ),
-              ),
-              const SizedBox(height: 30),
-              OutlinedButton(
-                key: const Key('startEvaluation'),
-                child: Text(_localizations!.startEvaluation),
-                onPressed: () {
-                  // Continue with login process - pass special flag to backend
-                  context.read<AuthBloc>().add(
-                    AuthLogin(
-                      user!.loginName!,
-                      moquiSessionToken!, // returned password
-                      creditCardNumber: 'startEvaluation', // special flag
-                    ),
-                  );
-                },
-              ),
-            ],
-          ),
         ),
       ),
     );
