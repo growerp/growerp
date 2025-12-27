@@ -58,11 +58,11 @@ class TenantSetupDialogState extends State<TenantSetupDialog> {
       child: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) async {
           if (state.status == AuthStatus.authenticated) {
-            // Don't show trial welcome here - LoginDialog will handle it
-            // when it receives the authenticated state. This prevents
-            // showing the welcome dialog twice.
-            // Don't pop here - LoginDialog will handle navigation
-            // The dialog will be dismissed automatically when LoginDialog rebuilds
+            // Setup complete - close the dialog
+            // LoginDialog will handle showing trial welcome and navigation
+            if (mounted) {
+              Navigator.of(context).pop();
+            }
           } else if (state.status == AuthStatus.failure) {
             setState(() => _isSubmitting = false);
             HelperFunctions.showMessage(

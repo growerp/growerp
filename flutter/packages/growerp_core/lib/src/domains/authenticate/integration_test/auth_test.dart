@@ -176,7 +176,7 @@ class AuthTest {
       attempts++;
       await tester.pumpAndSettle(const Duration(seconds: 1));
 
-      // Check for TrialWelcomeDialog (new flow) - has 'startTrial' button
+      // Check for TrialWelcomeDialog - has 'startTrial' button
       if (await CommonTest.doesExistKey(tester, 'startTrial')) {
         debugPrint(
           'AuthTest: TrialWelcomeDialog detected, clicking startTrial...',
@@ -247,7 +247,7 @@ class AuthTest {
   static Future<bool> handleTrialWelcome(WidgetTester tester) async {
     await tester.pumpAndSettle(const Duration(seconds: 1));
 
-    // Check for new TrialWelcomeDialog (startTrial button)
+    // Check for TrialWelcomeDialog (startTrial button)
     if (await CommonTest.doesExistKey(tester, 'startTrial')) {
       debugPrint('TrialWelcomeDialog detected, tapping startTrial');
       await CommonTest.tapByKey(tester, 'startTrial');

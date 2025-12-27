@@ -138,33 +138,31 @@ void main() {
         await CommonTest.pressLogin(tester);
         await CommonTest.waitForSnackbarToGo(tester);
 
-        // Complete company info form (moreInfo)
-        await tester.pumpAndSettle(const Duration(seconds: 1));
-        if (await CommonTest.doesExistKey(tester, 'moreInfo')) {
-          debugPrint('Filling in company info...');
-          await CommonTest.enterText(
-            tester,
-            'companyName',
-            'EvalTest Company ${test.sequence}',
-          );
-          await CommonTest.enterDropDown(tester, 'currency', 'Euro');
-          await CommonTest.tapByKey(tester, 'demoData'); // no demo data
-          await CommonTest.tapByKey(
-            tester,
-            'continue',
-            seconds: CommonTest.waitTime,
-          );
-          await CommonTest.waitForSnackbarToGo(tester);
-        }
-
-        // Should now see evaluation welcome form (creditCardUpfront=false)
+        // Should now see trial welcome dialog (creditCardUpfront=false)
         await tester.pumpAndSettle(const Duration(seconds: 2));
 
-        if (await EvaluationTest.isEvaluationWelcomeDisplayed(tester)) {
-          debugPrint('✓ Evaluation welcome form displayed');
-          await EvaluationTest.checkEvaluationWelcomeContent(tester);
-          await EvaluationTest.startEvaluation(tester);
-          debugPrint('✓ Started evaluation period');
+        if (await EvaluationTest.isTrialWelcomeDisplayed(tester)) {
+          debugPrint('✓ Trial welcome dialog displayed');
+          await EvaluationTest.checkTrialWelcomeContent(tester);
+          await EvaluationTest.startTrial(tester);
+          debugPrint('✓ Started trial, now filling tenant setup...');
+
+          // Complete tenant setup if shown
+          if (await CommonTest.doesExistKey(tester, 'companyName')) {
+            await CommonTest.enterText(
+              tester,
+              'companyName',
+              'EvalTest Company ${test.sequence}',
+            );
+            await CommonTest.enterDropDown(tester, 'currency', 'Euro');
+            await CommonTest.tapByKey(tester, 'demoData'); // no demo data
+            await CommonTest.tapByKey(
+              tester,
+              'submit',
+              seconds: CommonTest.waitTime,
+            );
+            await CommonTest.waitForSnackbarToGo(tester);
+          }
         } else if (await EvaluationTest.isPaymentFormDisplayed(tester)) {
           debugPrint(
             '! Payment form shown - test requires creditCardUpfront=false',
@@ -355,8 +353,8 @@ void main() {
               'Payment with test credit card should have succeeded in test environment',
             );
           }
-        } else if (await EvaluationTest.isEvaluationWelcomeDisplayed(tester)) {
-          debugPrint('✗ Evaluation welcome shown - should have expired');
+        } else if (await EvaluationTest.isTrialWelcomeDisplayed(tester)) {
+          debugPrint('✗ Trial welcome shown - should have expired');
           fail('Evaluation should have expired after 15 days');
         } else if (await CommonTest.doesExistKey(tester, 'HomeFormAuth')) {
           debugPrint(

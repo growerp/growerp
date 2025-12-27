@@ -20,7 +20,7 @@ import '../../../extensions.dart' as ext;
 /// Test class for evaluation period and subscription flows.
 ///
 /// This class provides methods to test both configuration scenarios:
-/// - creditCardUpfront=false (default): Shows evaluation welcome page first
+/// - creditCardUpfront=false (default): Shows trial welcome dialog first
 /// - creditCardUpfront=true: Shows payment form upfront
 ///
 /// IMPORTANT: Before running these tests, ensure:
@@ -49,11 +49,11 @@ class EvaluationTest {
     debugPrint('Test days offset reset');
   }
 
-  /// Check if the evaluation welcome form is displayed.
-  /// This form is shown when creditCardUpfront=false (default).
-  static Future<bool> isEvaluationWelcomeDisplayed(WidgetTester tester) async {
+  /// Check if the trial welcome dialog is displayed.
+  /// This dialog is shown when creditCardUpfront=false (default).
+  static Future<bool> isTrialWelcomeDisplayed(WidgetTester tester) async {
     await tester.pumpAndSettle(const Duration(seconds: 1));
-    return await CommonTest.doesExistKey(tester, 'evaluationWelcome');
+    return await CommonTest.doesExistKey(tester, 'startTrial');
   }
 
   /// Check if the payment form is displayed.
@@ -63,42 +63,28 @@ class EvaluationTest {
     return await CommonTest.doesExistKey(tester, 'paymentForm');
   }
 
-  /// Tap the "Start Evaluation" button on the evaluation welcome form.
-  /// This creates a subscription without requiring payment upfront.
-  static Future<void> startEvaluation(WidgetTester tester) async {
+  /// Tap the "Start Trial" button on the trial welcome dialog.
+  /// This opens the TenantSetupDialog for company configuration.
+  static Future<void> startTrial(WidgetTester tester) async {
     await CommonTest.tapByKey(
       tester,
-      'startEvaluation',
+      'startTrial',
       seconds: CommonTest.waitTime,
     );
-    await CommonTest.waitForSnackbarToGo(tester);
+    await tester.pumpAndSettle(const Duration(seconds: 2));
   }
 
-  /// Check that the evaluation welcome form displays correct information.
-  /// Verifies the welcome message and evaluation period are shown.
-  static Future<void> checkEvaluationWelcomeContent(
+  /// Check that the trial welcome dialog displays correct information.
+  /// Verifies the welcome message and trial period are shown.
+  static Future<void> checkTrialWelcomeContent(
     WidgetTester tester, {
     int expectedDays = 14,
   }) async {
-    // Check that the welcome form is displayed
+    // Check for start trial button
     expect(
-      find.byKey(const Key('evaluationWelcome')),
+      find.byKey(const Key('startTrial')),
       findsOneWidget,
-      reason: 'Evaluation welcome form should be displayed',
-    );
-
-    // Check for celebration icon
-    expect(
-      find.byIcon(Icons.celebration),
-      findsOneWidget,
-      reason: 'Celebration icon should be displayed',
-    );
-
-    // Check for start evaluation button
-    expect(
-      find.byKey(const Key('startEvaluation')),
-      findsOneWidget,
-      reason: 'Start Evaluation button should be displayed',
+      reason: 'Start Trial button should be displayed',
     );
   }
 
@@ -120,7 +106,7 @@ class EvaluationTest {
   }
 
   /// Submit the payment form with the pre-filled test credit card data.
-  /// The form is pre-filled with test card 4012888888881881 in non-release mode.
+  /// The form is pre-filled with test card 4242424242424242 in non-release mode.
   /// Returns true if payment was successful (dashboard shown), false if payment
   /// form is still displayed (payment failed).
   static Future<bool> submitPayment(WidgetTester tester) async {
@@ -148,14 +134,14 @@ class EvaluationTest {
   }
 
   /// Verify the correct form is shown based on backend configuration.
-  /// If creditCardUpfront=false (default), evaluationWelcome is shown.
+  /// If creditCardUpfront=false (default), trialWelcome is shown.
   /// If creditCardUpfront=true, paymentForm is shown.
   static Future<String> verifyRegistrationForm(WidgetTester tester) async {
     await tester.pumpAndSettle(const Duration(seconds: 1));
 
-    if (await isEvaluationWelcomeDisplayed(tester)) {
+    if (await isTrialWelcomeDisplayed(tester)) {
       debugPrint('Backend configured with creditCardUpfront=false');
-      return 'evaluationWelcome';
+      return 'trialWelcome';
     } else if (await isPaymentFormDisplayed(tester)) {
       debugPrint('Backend configured with creditCardUpfront=true');
       return 'paymentForm';
