@@ -427,9 +427,14 @@ class CommonTest {
       );
       await tester.tap(find.byTooltip('Open navigation menu'));
       await tester.pump(const Duration(seconds: waitTime));
+      // Wait for drawer animation to complete
+      await tester.pumpAndSettle();
     }
 
-    await tapByKey(tester, targetKey, seconds: waitTime);
+    await tapByKey(tester, targetKey, seconds: waitTime, settle: false);
+    // Wait for navigation to complete
+    await tester.pumpAndSettle(const Duration(seconds: waitTime));
+
     if (tapNumber != null) {
       // Both phone (BottomNavigationBar) and desktop (TabBar) use text labels
       // Newlines in titles are replaced with spaces in BottomNavigationBar labels
