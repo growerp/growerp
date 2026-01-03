@@ -41,12 +41,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "3 Technical documentation/3 Moqui Backend.md",
+                "file": "1 Introduction/5 Road Map.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "3 Moqui Backend"
+              "title": "5 Road Map"
             }
           }
         ],
@@ -198,6 +198,7 @@
   },
   "left-ribbon": {
     "hiddenItems": {
+      "bases:Create new base": false,
       "switcher:Open quick switcher": false,
       "graph:Open graph view": false,
       "canvas:Create new canvas": false,
@@ -208,6 +209,7 @@
   },
   "active": "4f78e8f1d8a2cb6d",
   "lastOpenFiles": [
+    "3 Technical documentation/3 Moqui Backend.md",
     "1 Introduction/3 Feature list.md",
     "GrowERP documentation.md",
     "End User Introduction.md",
@@ -217,7 +219,6 @@
     "3 Technical documentation/6 Stripe.md",
     "3 Technical documentation/5 HTML Website.md",
     "3 Technical documentation/4 Chat & Backend notification.md",
-    "3 Technical documentation/3 Moqui Backend.md",
     "3 Technical documentation/2 Flutter frontend & development.md",
     "3 Technical documentation/1 Technical Introduction.md",
     "2 End User documentation/5 Accounting/7 Item Type.md",

@@ -20,7 +20,7 @@ import 'package:growerp_models/growerp_models.dart';
 
 class SubscriptionTest {
   static Future<void> selectSubscriptions(WidgetTester tester) async {
-    await CommonTest.selectOption(tester, 'dbCatalog', 'SubscriptionList', '3');
+    await CommonTest.selectOption(tester, '/subscriptions', 'SubscriptionList');
   }
 
   static Future<void> addSubscriptions(

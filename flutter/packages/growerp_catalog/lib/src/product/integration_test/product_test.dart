@@ -21,7 +21,7 @@ import 'package:growerp_models/growerp_models.dart';
 
 class ProductTest {
   static Future<void> selectProducts(WidgetTester tester) async {
-    await CommonTest.selectOption(tester, 'dbCatalog', 'ProductList', '1');
+    await CommonTest.selectOption(tester, '/products', 'ProductList');
   }
 
   static Future<void> addProducts(
