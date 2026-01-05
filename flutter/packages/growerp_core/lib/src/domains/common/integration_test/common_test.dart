@@ -265,11 +265,11 @@ class CommonTest {
       }
 
       // Check for TrialWelcomeHelper dialog (shown after authentication)
-      if (await doesExistKey(tester, 'getStarted')) {
+      if (await doesExistKey(tester, 'startTrial')) {
         debugPrint(
           'Login: TrialWelcomeHelper dialog detected, clicking getStarted...',
         );
-        await tapByKey(tester, 'getStarted', settle: false);
+        await tapByKey(tester, 'startTrial', settle: false);
         continue;
       }
 
@@ -279,11 +279,11 @@ class CommonTest {
         await tester.pump(const Duration(seconds: 2));
 
         // Double-check no dialog appeared
-        if (await doesExistKey(tester, 'getStarted')) {
+        if (await doesExistKey(tester, 'startTrial')) {
           debugPrint(
             'Login: TrialWelcomeHelper appeared after auth, clicking getStarted...',
           );
-          await tapByKey(tester, 'getStarted', settle: false);
+          await tapByKey(tester, 'startTrial', settle: false);
           continue;
         }
 
@@ -495,11 +495,11 @@ class CommonTest {
   }
 
   static Future<void> pressLoginButton(WidgetTester tester) async {
-    await tapByKey(tester, 'loginButton', seconds: 1);
+    await tapByKey(tester, 'loginButton', seconds: 1, settle: false);
   }
 
   static Future<void> pressLogin(WidgetTester tester) async {
-    await tapByKey(tester, 'login', seconds: waitTime);
+    await tapByKey(tester, 'login', seconds: waitTime, settle: false);
   }
 
   static Future<void> logout(WidgetTester tester) async {

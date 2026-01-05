@@ -51,13 +51,16 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
   ) async {
     try {
       if (state.status == NotificationStatus.initial) {
-        notificationClient.send("subscribe: ALL");
-        final myStream = notificationClient.stream();
-        myStream.listen(
-          (data) => add(
-            NotificationReceive(NotificationWs.fromJson(jsonDecode(data))),
-          ),
-        );
+        // Only subscribe if the WebSocket is connected
+        if (notificationClient.isConnected) {
+          notificationClient.send("subscribe: ALL");
+          final myStream = notificationClient.stream();
+          myStream.listen(
+            (data) => add(
+              NotificationReceive(NotificationWs.fromJson(jsonDecode(data))),
+            ),
+          );
+        }
       }
 
       Notifications compResult = await restClient.getNotifications(

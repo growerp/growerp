@@ -24,9 +24,11 @@ import 'package:web_socket_channel/status.dart' as status;
 import 'dart:io' show Platform;
 
 class WsClient {
-  late WebSocketChannel channel;
+  WebSocketChannel? _channel;
   late String wsUrl;
-  late StreamController streamController;
+  StreamController? _streamController;
+
+  bool get isConnected => _channel != null;
 
   var logger = Logger(
     filter: null, // Use the default LogFilter (-> only log in debug mode)
@@ -56,7 +58,7 @@ class WsClient {
   Future<void> connect(String apiKey, String userId) async {
     try {
       logger.i("WS connect $wsUrl");
-      channel = WebSocketChannel.connect(
+      _channel = WebSocketChannel.connect(
         Uri.parse("$wsUrl?apiKey=$apiKey&userId=$userId"),
       );
 
@@ -70,10 +72,16 @@ class WsClient {
         logger.e('Websocket error: ${error.message}');
       }
     }
-    streamController = StreamController.broadcast()..addStream(channel.stream);
+    _streamController = StreamController.broadcast()
+      ..addStream(_channel!.stream);
   }
 
   void send(Object message) {
+    if (_channel == null) {
+      logger.w("Cannot send message - WebSocket not connected yet: $message");
+      return;
+    }
+
     String out;
     debugPrint("Send message: $message");
     if (message is ChatMessage) {
@@ -82,15 +90,15 @@ class WsClient {
     } else {
       out = message as String;
     }
-    channel.sink.add(out);
+    _channel!.sink.add(out);
   }
 
   Stream<dynamic> stream() {
-    return streamController.stream;
+    return _streamController!.stream;
   }
 
   void close() {
-    channel.sink.close(status.normalClosure);
-    streamController.close();
+    _channel?.sink.close(status.normalClosure);
+    _streamController?.close();
   }
 }

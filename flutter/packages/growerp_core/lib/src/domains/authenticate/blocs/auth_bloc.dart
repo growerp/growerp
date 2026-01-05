@@ -127,9 +127,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         // Authenticated
         await PersistFunctions.persistAuthenticate(authResult);
         // chat
-        chat.connect(authResult.apiKey!, authResult.user!.userId!);
+        await chat.connect(authResult.apiKey!, authResult.user!.userId!);
         // notification
-        notification.connect(authResult.apiKey!, authResult.user!.userId!);
+        await notification.connect(
+          authResult.apiKey!,
+          authResult.user!.userId!,
+        );
         return emit(
           state.copyWith(
             status: AuthStatus.authenticated,
@@ -286,11 +289,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         );
         PersistFunctions.persistAuthenticate(state.authenticate!);
         if (state.authenticate!.user!.userId != null) {
-          chat.connect(
+          await chat.connect(
             state.authenticate!.apiKey!,
             state.authenticate!.user!.userId!,
           );
-          notification.connect(
+          await notification.connect(
             state.authenticate!.apiKey!,
             state.authenticate!.user!.userId!,
           );
@@ -358,11 +361,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         classificationId: classificationId,
       );
       if (state.authenticate!.user!.userId != null) {
-        chat.connect(
+        await chat.connect(
           state.authenticate!.apiKey!,
           state.authenticate!.user!.userId!,
         );
-        notification.connect(
+        await notification.connect(
           state.authenticate!.apiKey!,
           state.authenticate!.user!.userId!,
         );
