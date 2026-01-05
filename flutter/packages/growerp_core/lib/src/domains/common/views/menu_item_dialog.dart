@@ -174,10 +174,7 @@ class MenuItemDialogState extends State<MenuItemDialog> {
             TextFormField(
               key: const Key('menuItemTitle'),
               controller: _titleController,
-              decoration: const InputDecoration(
-                labelText: 'Title *',
-                border: OutlineInputBorder(),
-              ),
+              decoration: const InputDecoration(labelText: 'Title *'),
               validator: (value) =>
                   (value == null || value.isEmpty) ? 'Title is required' : null,
             ),
@@ -189,7 +186,6 @@ class MenuItemDialogState extends State<MenuItemDialog> {
               controller: _routeController,
               decoration: const InputDecoration(
                 labelText: 'Route (e.g., /users)',
-                border: OutlineInputBorder(),
               ),
             ),
             const SizedBox(height: 16),
@@ -214,7 +210,6 @@ class MenuItemDialogState extends State<MenuItemDialog> {
                       focusNode: focusNode,
                       decoration: InputDecoration(
                         labelText: 'Icon',
-                        border: const OutlineInputBorder(),
                         prefixIcon: _selectedIconName != null
                             ? getIconFromRegistry(_selectedIconName!) ??
                                   const Icon(Icons.circle, size: 20)
@@ -293,7 +288,6 @@ class MenuItemDialogState extends State<MenuItemDialog> {
                       focusNode: focusNode,
                       decoration: InputDecoration(
                         labelText: 'Widget Name',
-                        border: const OutlineInputBorder(),
                         suffixIcon: textController.text.isNotEmpty
                             ? IconButton(
                                 icon: const Icon(Icons.clear, size: 18),
@@ -372,10 +366,7 @@ class MenuItemDialogState extends State<MenuItemDialog> {
                   child: TextFormField(
                     key: const Key('menuItemSequence'),
                     controller: _sequenceNumController,
-                    decoration: const InputDecoration(
-                      labelText: 'Sequence',
-                      border: OutlineInputBorder(),
-                    ),
+                    decoration: const InputDecoration(labelText: 'Sequence'),
                     keyboardType: TextInputType.number,
                   ),
                 ),
@@ -590,7 +581,6 @@ class MenuItemDialogState extends State<MenuItemDialog> {
                               focusNode: focusNode,
                               decoration: const InputDecoration(
                                 labelText: 'Widget Name *',
-                                border: OutlineInputBorder(),
                                 hintText: 'Search widgets...',
                               ),
                             );
@@ -617,7 +607,6 @@ class MenuItemDialogState extends State<MenuItemDialog> {
                       controller: titleController,
                       decoration: const InputDecoration(
                         labelText: 'Tab Title *',
-                        border: OutlineInputBorder(),
                       ),
                     ),
                   ],
@@ -743,7 +732,6 @@ class MenuItemDialogState extends State<MenuItemDialog> {
                               focusNode: focusNode,
                               decoration: const InputDecoration(
                                 labelText: 'Widget Name *',
-                                border: OutlineInputBorder(),
                                 hintText: 'Search widgets...',
                               ),
                             );
@@ -761,7 +749,6 @@ class MenuItemDialogState extends State<MenuItemDialog> {
                       controller: titleController,
                       decoration: const InputDecoration(
                         labelText: 'Tab Title *',
-                        border: OutlineInputBorder(),
                       ),
                     ),
                   ],
