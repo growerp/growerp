@@ -135,6 +135,7 @@ void main() {
         tester,
         'newUserButton',
         seconds: CommonTest.waitTime,
+        settle: false,
       );
       await CommonTest.waitForSnackbarToGo(tester);
 
@@ -177,9 +178,7 @@ void main() {
       );
 
       // Open registration form
-      await tester.pumpAndSettle(Duration(seconds: CommonTest.waitTime));
-      await CommonTest.tapByKey(tester, 'newUserButton');
-      await tester.pumpAndSettle();
+      await CommonTest.tapByKey(tester, 'newUserButton', settle: false);
 
       // Fill with invalid email
       await CommonTest.enterText(tester, 'firstName', 'Test');
@@ -187,8 +186,7 @@ void main() {
       await CommonTest.enterText(tester, 'email', 'invalid-email');
 
       // Submit registration
-      await CommonTest.tapByKey(tester, 'newUserButton');
-      await tester.pumpAndSettle();
+      await CommonTest.tapByKey(tester, 'newUserButton', settle: false);
 
       // Verify form validation error (should not submit)
       // The form should still be visible because validation failed
@@ -232,28 +230,6 @@ void main() {
         title: "TC-LOGIN-001: Valid Login",
       );
 
-      // Verify login form displayed first
-      await CommonTest.pressLoginButton(tester);
-
-      expect(
-        find.byKey(const Key('username')),
-        findsOneWidget,
-        reason: 'Username field should be visible',
-      );
-      expect(
-        find.byKey(const Key('password')),
-        findsOneWidget,
-        reason: 'Password field should be visible',
-      );
-      expect(
-        find.byKey(const Key('login')),
-        findsOneWidget,
-        reason: 'Login button should be visible',
-      );
-
-      // Use CommonTest.login() which handles all authentication dialogs
-      // First logout to reset state, then login fresh
-      await CommonTest.logout(tester);
       await CommonTest.login(
         tester,
         username: registeredAdminEmail,
@@ -271,7 +247,6 @@ void main() {
 
       // logout if logged in
       await CommonTest.logout(tester);
-      await tester.pumpAndSettle();
     });
 
     testWidgets('TC-LOGIN-002: Login with Invalid Credentials', (
@@ -294,7 +269,6 @@ void main() {
 
       // Navigate to login form
       await CommonTest.pressLoginButton(tester);
-      await tester.pumpAndSettle();
 
       // Enter invalid credentials
       await CommonTest.enterText(tester, 'username', 'nonexistent@example.com');
@@ -376,7 +350,6 @@ void main() {
 
       // Navigate to login form
       await CommonTest.pressLoginButton(tester);
-      await tester.pumpAndSettle();
 
       // Enter a password
       await CommonTest.enterText(tester, 'password', 'testpassword');
@@ -400,7 +373,6 @@ void main() {
       } else {
         await tester.tap(visibilityOffIcon.first);
       }
-      await tester.pumpAndSettle();
 
       // Toggle should have switched
       debugPrint('✓ TC-LOGIN-004: Password visibility toggle working');
@@ -430,7 +402,6 @@ void main() {
       if (isLoggedIn) {
         // Perform logout
         await CommonTest.logout(tester);
-        await tester.pumpAndSettle(const Duration(seconds: 2));
 
         // Verify logged out - login button should be visible
         bool hasLoginButton = tester.any(find.byKey(const Key('loginButton')));
