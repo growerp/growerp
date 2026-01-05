@@ -174,7 +174,7 @@ class CommonTest {
     debugPrint('test.company: ${test.company}');
     debugPrint('========================');
 
-    await pressLoginWithExistingId(tester);
+    await pressLoginButton(tester);
 
     // Use provided username or fall back to test.admin
     String loginUsername;
@@ -494,7 +494,7 @@ class CommonTest {
     } // cancel search
   }
 
-  static Future<void> pressLoginWithExistingId(WidgetTester tester) async {
+  static Future<void> pressLoginButton(WidgetTester tester) async {
     await tapByKey(tester, 'loginButton', seconds: 1);
   }
 

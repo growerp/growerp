@@ -94,6 +94,7 @@ class PaymentSubscriptionDialogState extends State<PaymentSubscriptionDialog> {
           }
         },
         child: SingleChildScrollView(
+          key: const Key('paymentForm'),
           child: Padding(
             padding: const EdgeInsets.all(20.0),
             child: Column(
@@ -271,7 +272,7 @@ class PaymentSubscriptionDialogState extends State<PaymentSubscriptionDialog> {
                     const SizedBox(width: 16),
                     Expanded(
                       child: ElevatedButton(
-                        key: const Key('subscribe'),
+                        key: const Key('pay'),
                         onPressed: _isSubmitting ? null : _handleSubscribe,
                         child: _isSubmitting
                             ? const SizedBox(

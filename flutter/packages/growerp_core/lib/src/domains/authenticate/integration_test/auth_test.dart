@@ -70,7 +70,7 @@ class AuthTest {
     String loginName,
     String password,
   ) async {
-    await pressLoginWithExistingId(tester);
+    await pressLoginButton(tester);
     await enterLoginName(tester, loginName);
     await enterPassword(tester, password);
     await pressLogin(tester);
@@ -241,7 +241,7 @@ class AuthTest {
   ///
   /// This handles both:
   /// - New TrialWelcomeDialog (key: 'startTrial') - shown when apiKey='trialWelcome'
-  /// - TrialWelcomeHelper dialog (key: 'getStarted') - shown after TenantSetupDialog
+  /// - TrialWelcomeHelper dialog (key: 'startTrial') - shown after TenantSetupDialog
   ///
   /// Returns true if the dialog was handled, false if not displayed.
   static Future<bool> handleTrialWelcome(WidgetTester tester) async {
@@ -258,10 +258,10 @@ class AuthTest {
       return true;
     }
 
-    // Check for TrialWelcomeHelper dialog (getStarted button)
-    if (await CommonTest.doesExistKey(tester, 'getStarted')) {
-      debugPrint('TrialWelcomeHelper dialog detected, tapping getStarted');
-      await CommonTest.tapByKey(tester, 'getStarted');
+    // Check for TrialWelcomeHelper dialog (startTrial button)
+    if (await CommonTest.doesExistKey(tester, 'startTrial')) {
+      debugPrint('TrialWelcomeHelper dialog detected, tapping startTrial');
+      await CommonTest.tapByKey(tester, 'startTrial');
       await tester.pumpAndSettle();
       return true;
     }
@@ -450,7 +450,7 @@ class AuthTest {
     await CommonTest.enterText(tester, 'password', password);
   }
 
-  static Future<void> pressLoginWithExistingId(WidgetTester tester) async {
+  static Future<void> pressLoginButton(WidgetTester tester) async {
     await CommonTest.tapByKey(tester, 'loginButton', seconds: 1);
   }
 
