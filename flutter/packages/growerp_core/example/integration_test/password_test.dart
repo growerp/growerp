@@ -82,7 +82,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Navigate to login form
-      await CommonTest.pressLoginWithExistingId(tester);
+      await CommonTest.pressLoginButton(tester);
       await tester.pumpAndSettle();
 
       // Verify login form is displayed
@@ -159,7 +159,7 @@ void main() {
       // by the form validation before submission.
 
       // Navigate to login (we can test password validation in any password field)
-      await CommonTest.pressLoginWithExistingId(tester);
+      await CommonTest.pressLoginButton(tester);
       await tester.pumpAndSettle();
 
       // Verify login form is displayed

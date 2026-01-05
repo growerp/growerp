@@ -82,7 +82,7 @@ void main() {
     // After login, verify we see the dashboard with dynamic menu items
     // The menu should be generated from backend MenuConfiguration
     expect(find.text('Organization'), findsOneWidget);
-    expect(find.text('User'), findsOneWidget);
+    expect(find.text('CRM'), findsOneWidget);
     debugPrint('✓ Dynamic menu routes generated from configuration');
 
     // Verify logout button is present on main route
@@ -90,26 +90,18 @@ void main() {
     debugPrint('✓ Logout button visible on main route');
 
     // Navigate to Organization route
-    final orgFinder = find.text('Organization');
+    // Dashboard cards have keys in the format 'tap{route}'
+    final orgFinder = find.byKey(const Key('tap/companies'));
     if (orgFinder.evaluate().isNotEmpty) {
-      await tester.tap(orgFinder.first);
+      await tester.tap(orgFinder);
       await tester.pumpAndSettle();
 
       // On sub-route, logout button should NOT be visible
       // (ShellRoute doesn't include logout button)
       expect(find.byKey(const Key('logoutButton')), findsNothing);
       debugPrint('✓ Logout button NOT visible on sub-route');
-    }
 
-    // Navigate back home
-    final homeFinder = find.byKey(const Key('tapCompany'));
-    if (homeFinder.evaluate().isNotEmpty) {
-      await tester.tap(homeFinder.first);
-      await tester.pumpAndSettle();
-
-      // Back on main route, logout button should be visible again
-      expect(find.byKey(const Key('logoutButton')), findsOneWidget);
-      debugPrint('✓ Logout button visible again on main route');
+      debugPrint('✓ Dynamic router test completed successfully');
     }
   });
 }

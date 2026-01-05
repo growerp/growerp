@@ -248,7 +248,7 @@ class TrialWelcomeHelper {
         ),
         actions: [
           FilledButton.icon(
-            key: const Key('getStarted'),
+            key: const Key('startTrial'),
             onPressed: () => Navigator.of(dialogContext).pop(),
             icon: const Icon(Icons.rocket_launch),
             label: const Text('Get Started'),

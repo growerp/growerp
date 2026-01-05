@@ -233,7 +233,7 @@ void main() {
       );
 
       // Verify login form displayed first
-      await CommonTest.pressLoginWithExistingId(tester);
+      await CommonTest.pressLoginButton(tester);
 
       expect(
         find.byKey(const Key('username')),
@@ -293,7 +293,7 @@ void main() {
       );
 
       // Navigate to login form
-      await CommonTest.pressLoginWithExistingId(tester);
+      await CommonTest.pressLoginButton(tester);
       await tester.pumpAndSettle();
 
       // Enter invalid credentials
@@ -338,7 +338,7 @@ void main() {
       );
 
       // Navigate to login form
-      await CommonTest.pressLoginWithExistingId(tester);
+      await CommonTest.pressLoginButton(tester);
 
       // Clear fields and submit
       await CommonTest.enterText(tester, 'username', '');
@@ -375,7 +375,7 @@ void main() {
       );
 
       // Navigate to login form
-      await CommonTest.pressLoginWithExistingId(tester);
+      await CommonTest.pressLoginButton(tester);
       await tester.pumpAndSettle();
 
       // Enter a password

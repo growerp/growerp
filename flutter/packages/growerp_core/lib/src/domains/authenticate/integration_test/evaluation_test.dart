@@ -52,26 +52,36 @@ class EvaluationTest {
   /// Check if the trial welcome dialog is displayed.
   /// This dialog is shown when creditCardUpfront=false (default).
   static Future<bool> isTrialWelcomeDisplayed(WidgetTester tester) async {
-    await tester.pumpAndSettle(const Duration(seconds: 1));
+    // Use manual pump to avoid getting stuck on animations
+    for (int i = 0; i < 10; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
     return await CommonTest.doesExistKey(tester, 'startTrial');
   }
 
   /// Check if the payment form is displayed.
   /// This form is shown when creditCardUpfront=true or after evaluation expires.
   static Future<bool> isPaymentFormDisplayed(WidgetTester tester) async {
-    await tester.pumpAndSettle(const Duration(seconds: 1));
+    // Use manual pump to avoid getting stuck on animations
+    for (int i = 0; i < 10; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
     return await CommonTest.doesExistKey(tester, 'paymentForm');
   }
 
   /// Tap the "Start Trial" button on the trial welcome dialog.
-  /// This opens the TenantSetupDialog for company configuration.
+  /// This dismisses the welcome dialog.
   static Future<void> startTrial(WidgetTester tester) async {
     await CommonTest.tapByKey(
       tester,
       'startTrial',
       seconds: CommonTest.waitTime,
+      settle: false,
     );
-    await tester.pumpAndSettle(const Duration(seconds: 2));
+    // Use manual pump to avoid getting stuck on animations
+    for (int i = 0; i < 20; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
   }
 
   /// Check that the trial welcome dialog displays correct information.
@@ -112,9 +122,16 @@ class EvaluationTest {
   static Future<bool> submitPayment(WidgetTester tester) async {
     // The payment form should already be displayed with pre-filled test data
     // Just tap the pay button
-    await CommonTest.tapByKey(tester, 'pay', seconds: CommonTest.waitTime);
-    await CommonTest.waitForSnackbarToGo(tester);
-    await tester.pumpAndSettle(const Duration(seconds: 2));
+    await CommonTest.tapByKey(
+      tester,
+      'pay',
+      seconds: CommonTest.waitTime,
+      settle: false,
+    );
+    // Use manual pump to avoid getting stuck on animations
+    for (int i = 0; i < 20; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
 
     // Check if we reached the dashboard (payment successful)
     if (await CommonTest.doesExistKey(tester, 'HomeFormAuth')) {
@@ -137,7 +154,10 @@ class EvaluationTest {
   /// If creditCardUpfront=false (default), trialWelcome is shown.
   /// If creditCardUpfront=true, paymentForm is shown.
   static Future<String> verifyRegistrationForm(WidgetTester tester) async {
-    await tester.pumpAndSettle(const Duration(seconds: 1));
+    // Use manual pump to avoid getting stuck on animations
+    for (int i = 0; i < 10; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
 
     if (await isTrialWelcomeDisplayed(tester)) {
       debugPrint('Backend configured with creditCardUpfront=false');

@@ -100,7 +100,6 @@ class TenantSetupDialogState extends State<TenantSetupDialog> {
                             : null,
                         decoration: const InputDecoration(
                           labelText: 'Company Name',
-                          border: OutlineInputBorder(),
                         ),
                         validator: FormBuilderValidators.compose([
                           FormBuilderValidators.required(),
@@ -115,7 +114,6 @@ class TenantSetupDialogState extends State<TenantSetupDialog> {
                         name: 'currency',
                         decoration: InputDecoration(
                           labelText: localizations?.currency ?? 'Currency',
-                          border: const OutlineInputBorder(),
                         ),
                         initialValue: _currencySelected,
                         items: currencies
