@@ -343,7 +343,7 @@ class SearchAssessmentListState extends State<SearchAssessmentList> {
               focusNode: searchFocusNode,
               decoration: InputDecoration(
                 labelText: 'Search assessments',
-                border: const OutlineInputBorder(),
+                
                 suffixIcon: IconButton(
                   icon: const Icon(Icons.clear),
                   onPressed: () {

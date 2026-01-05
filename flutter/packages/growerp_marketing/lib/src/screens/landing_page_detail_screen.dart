@@ -494,11 +494,6 @@ class LandingPageDetailScreenState extends State<LandingPageDetailScreen> {
                                               horizontal: 12,
                                               vertical: 8,
                                             ),
-                                            border: OutlineInputBorder(
-                                              borderRadius: BorderRadius.all(
-                                                Radius.circular(8),
-                                              ),
-                                            ),
                                           ),
                                         ),
                                         menuProps: MenuProps(
@@ -515,10 +510,6 @@ class LandingPageDetailScreenState extends State<LandingPageDetailScreen> {
                                           hintText:
                                               'Select assessment to launch',
                                           prefixIcon: const Icon(Icons.quiz),
-                                          border: OutlineInputBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(8),
-                                          ),
                                           isDense: true,
                                           contentPadding:
                                               const EdgeInsets.symmetric(
@@ -542,9 +533,6 @@ class LandingPageDetailScreenState extends State<LandingPageDetailScreen> {
                                     labelText: 'CTA URL',
                                     hintText: 'https://example.com/page',
                                     prefixIcon: const Icon(Icons.link),
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
                                     isDense: true,
                                     contentPadding: const EdgeInsets.symmetric(
                                       horizontal: 12,

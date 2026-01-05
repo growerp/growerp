@@ -182,7 +182,6 @@ class PaymentSubscriptionDialogState extends State<PaymentSubscriptionDialog> {
                         name: 'nameOnCard',
                         decoration: const InputDecoration(
                           labelText: 'Name on Card',
-                          border: OutlineInputBorder(),
                         ),
                         validator: FormBuilderValidators.required(),
                       ),
@@ -192,7 +191,6 @@ class PaymentSubscriptionDialogState extends State<PaymentSubscriptionDialog> {
                         name: 'cardNumber',
                         decoration: const InputDecoration(
                           labelText: 'Card Number',
-                          border: OutlineInputBorder(),
                         ),
                         validator: FormBuilderValidators.compose([
                           FormBuilderValidators.required(),
@@ -208,7 +206,6 @@ class PaymentSubscriptionDialogState extends State<PaymentSubscriptionDialog> {
                               name: 'expireMonth',
                               decoration: const InputDecoration(
                                 labelText: 'MM',
-                                border: OutlineInputBorder(),
                               ),
                               validator: FormBuilderValidators.compose([
                                 FormBuilderValidators.required(),
@@ -225,7 +222,6 @@ class PaymentSubscriptionDialogState extends State<PaymentSubscriptionDialog> {
                               name: 'expireYear',
                               decoration: const InputDecoration(
                                 labelText: 'YY',
-                                border: OutlineInputBorder(),
                               ),
                               validator: FormBuilderValidators.compose([
                                 FormBuilderValidators.required(),
@@ -240,7 +236,6 @@ class PaymentSubscriptionDialogState extends State<PaymentSubscriptionDialog> {
                               name: 'cvc',
                               decoration: const InputDecoration(
                                 labelText: 'CVC',
-                                border: OutlineInputBorder(),
                               ),
                               validator: FormBuilderValidators.compose([
                                 FormBuilderValidators.required(),

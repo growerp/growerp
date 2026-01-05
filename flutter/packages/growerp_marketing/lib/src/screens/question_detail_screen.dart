@@ -213,7 +213,6 @@ class QuestionDetailScreenState extends State<QuestionDetailScreen> {
                       controller: _questionTextController,
                       decoration: const InputDecoration(
                         labelText: 'Question Text *',
-                        border: OutlineInputBorder(),
                       ),
                       maxLines: 2,
                       validator: (value) {
@@ -231,7 +230,6 @@ class QuestionDetailScreenState extends State<QuestionDetailScreen> {
                       controller: _questionDescriptionController,
                       decoration: const InputDecoration(
                         labelText: 'Description (optional)',
-                        border: OutlineInputBorder(),
                       ),
                       maxLines: 2,
                     ),
@@ -243,7 +241,6 @@ class QuestionDetailScreenState extends State<QuestionDetailScreen> {
                       initialValue: _questionType,
                       decoration: const InputDecoration(
                         labelText: 'Question Type',
-                        border: OutlineInputBorder(),
                       ),
                       items: _questionTypes
                           .map((type) => DropdownMenuItem(
@@ -340,7 +337,6 @@ class QuestionDetailScreenState extends State<QuestionDetailScreen> {
                                           as TextEditingController,
                                       decoration: const InputDecoration(
                                         labelText: 'Option Text',
-                                        border: OutlineInputBorder(),
                                         isDense: true,
                                       ),
                                       validator: (value) {
@@ -361,7 +357,6 @@ class QuestionDetailScreenState extends State<QuestionDetailScreen> {
                                           as TextEditingController,
                                       decoration: const InputDecoration(
                                         labelText: 'Score',
-                                        border: OutlineInputBorder(),
                                         isDense: true,
                                       ),
                                       keyboardType:

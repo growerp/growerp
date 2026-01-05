@@ -213,7 +213,6 @@ class _SystemSetupDialogState extends State<SystemSetupDialog> {
                       ),
                   ],
                 ),
-                border: const OutlineInputBorder(),
               ),
               validator: (value) {
                 // API key is optional

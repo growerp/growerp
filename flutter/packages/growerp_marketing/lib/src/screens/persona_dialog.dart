@@ -92,7 +92,7 @@ class PersonaDialogState extends State<PersonaDialog> {
                   decoration: const InputDecoration(
                     labelText: 'ID',
                     hintText: 'Leave empty to auto-generate',
-                    border: OutlineInputBorder(),
+                    
                   ),
                   enabled:
                       widget.persona == null, // Only editable when creating
@@ -104,7 +104,7 @@ class PersonaDialogState extends State<PersonaDialog> {
                   decoration: const InputDecoration(
                     labelText: 'Persona Name *',
                     hintText: 'e.g., Alex Johnson',
-                    border: OutlineInputBorder(),
+                    
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -120,7 +120,7 @@ class PersonaDialogState extends State<PersonaDialog> {
                   decoration: const InputDecoration(
                     labelText: 'Demographics',
                     hintText: 'Age, occupation, location, etc.',
-                    border: OutlineInputBorder(),
+                    
                   ),
                   maxLines: 2,
                 ),
@@ -131,7 +131,7 @@ class PersonaDialogState extends State<PersonaDialog> {
                   decoration: const InputDecoration(
                     labelText: 'Pain Points',
                     hintText: 'What challenges does this persona face?',
-                    border: OutlineInputBorder(),
+                    
                   ),
                   maxLines: 3,
                 ),
@@ -142,7 +142,7 @@ class PersonaDialogState extends State<PersonaDialog> {
                   decoration: const InputDecoration(
                     labelText: 'Goals',
                     hintText: 'What does this persona want to achieve?',
-                    border: OutlineInputBorder(),
+                    
                   ),
                   maxLines: 3,
                 ),
@@ -153,7 +153,7 @@ class PersonaDialogState extends State<PersonaDialog> {
                   decoration: const InputDecoration(
                     labelText: 'Tone of Voice',
                     hintText: 'e.g., Professional yet approachable',
-                    border: OutlineInputBorder(),
+                    
                   ),
                   maxLines: 2,
                 ),

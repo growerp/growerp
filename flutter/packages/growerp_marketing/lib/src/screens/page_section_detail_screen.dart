@@ -108,7 +108,7 @@ class PageSectionDetailScreenState extends State<PageSectionDetailScreen> {
                         controller: _titleController,
                         decoration: const InputDecoration(
                           labelText: 'Section Title *',
-                          border: OutlineInputBorder(),
+                          
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
@@ -123,7 +123,7 @@ class PageSectionDetailScreenState extends State<PageSectionDetailScreen> {
                         controller: _descriptionController,
                         decoration: const InputDecoration(
                           labelText: 'Description',
-                          border: OutlineInputBorder(),
+                          
                         ),
                         maxLines: 4,
                       ),
@@ -133,7 +133,7 @@ class PageSectionDetailScreenState extends State<PageSectionDetailScreen> {
                         controller: _imageUrlController,
                         decoration: const InputDecoration(
                           labelText: 'Image URL',
-                          border: OutlineInputBorder(),
+                          
                           hintText: 'https://example.com/image.jpg',
                         ),
                         validator: (value) {
@@ -152,7 +152,7 @@ class PageSectionDetailScreenState extends State<PageSectionDetailScreen> {
                         controller: _sequenceController,
                         decoration: const InputDecoration(
                           labelText: 'Display Order',
-                          border: OutlineInputBorder(),
+                          
                           hintText: '1, 2, 3...',
                         ),
                         keyboardType: TextInputType.number,

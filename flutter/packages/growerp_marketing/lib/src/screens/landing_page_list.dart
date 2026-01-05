@@ -398,7 +398,7 @@ class SearchLandingPageListState extends State<SearchLandingPageList> {
               autofocus: true,
               decoration: InputDecoration(
                 labelText: 'Search landing pages',
-                border: const OutlineInputBorder(),
+                
                 suffixIcon: IconButton(
                   icon: const Icon(Icons.clear),
                   onPressed: () {

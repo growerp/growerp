@@ -208,9 +208,6 @@ class _AiPromptDialogState extends State<AiPromptDialog> {
               onSubmitted: (_) => _handleSubmit(),
               decoration: InputDecoration(
                 hintText: 'What would you like to see?',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
                 prefixIcon: const Icon(Icons.search),
                 suffixIcon: _isLoading
                     ? const Padding(
