@@ -288,12 +288,9 @@ class _AssessmentQuestionsScreenState extends State<AssessmentQuestionsScreen> {
             maxLines: null,
             expands: true,
             textAlignVertical: TextAlignVertical.top,
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               hintText: 'Enter your response here...',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-              contentPadding: const EdgeInsets.all(16),
+              contentPadding: EdgeInsets.all(16),
             ),
           ),
         ),

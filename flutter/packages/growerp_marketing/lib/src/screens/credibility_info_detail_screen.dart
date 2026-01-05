@@ -215,7 +215,7 @@ class CredibilityInfoDetailScreenState
                         controller: _bioController,
                         decoration: const InputDecoration(
                           labelText: 'Creator Bio *',
-                          border: OutlineInputBorder(),
+                          
                         ),
                         maxLines: 3,
                         validator: (value) {
@@ -231,7 +231,7 @@ class CredibilityInfoDetailScreenState
                         controller: _backgroundController,
                         decoration: const InputDecoration(
                           labelText: 'Background/Experience',
-                          border: OutlineInputBorder(),
+                          
                         ),
                         maxLines: 3,
                       ),
@@ -241,7 +241,7 @@ class CredibilityInfoDetailScreenState
                         controller: _imageUrlController,
                         decoration: const InputDecoration(
                           labelText: 'Creator Image URL',
-                          border: OutlineInputBorder(),
+                          
                           hintText: 'https://example.com/photo.jpg',
                         ),
                       ),
@@ -315,7 +315,7 @@ class CredibilityInfoDetailScreenState
                                         as TextEditingController,
                                     decoration: InputDecoration(
                                       labelText: 'Statistic ${index + 1}',
-                                      border: const OutlineInputBorder(),
+                                      
                                       hintText: 'e.g., 100+ customers',
                                     ),
                                     validator: (value) {

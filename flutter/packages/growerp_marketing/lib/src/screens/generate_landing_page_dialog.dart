@@ -154,7 +154,7 @@ class _GenerateLandingPageDialogState extends State<GenerateLandingPageDialog> {
                 labelText: 'Business Description*',
                 hintText:
                     'E.g., I run a digital marketing agency helping small businesses with social media strategy...',
-                border: OutlineInputBorder(),
+                
                 helperText: 'Min 20 characters, Max 500 characters',
               ),
             ),
@@ -167,7 +167,7 @@ class _GenerateLandingPageDialogState extends State<GenerateLandingPageDialog> {
               decoration: const InputDecoration(
                 labelText: 'Target Audience (optional)',
                 hintText: 'E.g., Small business owners with 1-10 employees...',
-                border: OutlineInputBorder(),
+                
               ),
             ),
             const SizedBox(height: 16),
@@ -191,7 +191,7 @@ class _GenerateLandingPageDialogState extends State<GenerateLandingPageDialog> {
                           setState(() => _selectedTone = value),
                       decoration: const InputDecoration(
                         labelText: 'Tone',
-                        border: OutlineInputBorder(),
+                        
                       ),
                     ),
                     const SizedBox(height: 12),

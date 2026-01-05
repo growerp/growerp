@@ -182,21 +182,6 @@ class _LeadCaptureScreenState extends State<LeadCaptureScreen> {
                             hintStyle: TextStyle(
                               color: Colors.grey[400],
                             ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide(color: Colors.grey[300]!),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide(color: Colors.grey[300]!),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: const BorderSide(
-                                color: Color(0xFF667EEA),
-                                width: 2,
-                              ),
-                            ),
                             filled: true,
                             fillColor: Colors.grey[50],
                             contentPadding: const EdgeInsets.symmetric(
@@ -271,21 +256,6 @@ class _LeadCaptureScreenState extends State<LeadCaptureScreen> {
                             hintStyle: TextStyle(
                               color: Colors.grey[400],
                             ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide(color: Colors.grey[300]!),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide(color: Colors.grey[300]!),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: const BorderSide(
-                                color: Color(0xFF667EEA),
-                                width: 2,
-                              ),
-                            ),
                             filled: true,
                             fillColor: Colors.grey[50],
                             contentPadding: const EdgeInsets.symmetric(
@@ -329,21 +299,6 @@ class _LeadCaptureScreenState extends State<LeadCaptureScreen> {
                             hintStyle: TextStyle(
                               color: Colors.grey[400],
                             ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide(color: Colors.grey[300]!),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide(color: Colors.grey[300]!),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: const BorderSide(
-                                color: Color(0xFF667EEA),
-                                width: 2,
-                              ),
-                            ),
                             filled: true,
                             fillColor: Colors.grey[50],
                             contentPadding: const EdgeInsets.symmetric(
@@ -373,21 +328,6 @@ class _LeadCaptureScreenState extends State<LeadCaptureScreen> {
                             ),
                             hintStyle: TextStyle(
                               color: Colors.grey[400],
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide(color: Colors.grey[300]!),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide(color: Colors.grey[300]!),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: const BorderSide(
-                                color: Color(0xFF667EEA),
-                                width: 2,
-                              ),
                             ),
                             filled: true,
                             fillColor: Colors.grey[50],
