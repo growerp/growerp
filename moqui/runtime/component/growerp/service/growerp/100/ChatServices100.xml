@@ -573,7 +573,7 @@ along with this software (see the LICENSE.md file). If not, see
                             preferenceKey: 'notification-lastReadDate',
                             preferenceValue: nowTimestamp]" />
                 <else>
-                    <set field="lastReadTimeStamp" from="lastReadDate[0].preferenceValue" />
+                    <set field="lastReadTimeStamp" from="java.sql.Timestamp.valueOf(lastReadDate[0].preferenceValue.toString().trim())" />
                     <service-call name="update#moqui.security.UserPreference"
                         in-map="[userId: ec.user.userAccount.userId,
                             preferenceKey: 'notification-lastReadDate',
