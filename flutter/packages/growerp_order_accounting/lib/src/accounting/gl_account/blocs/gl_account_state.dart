@@ -57,16 +57,17 @@ class GlAccountState extends Equatable {
 
   @override
   List<Object?> get props => [
-        message,
-        glAccounts,
-        accountClasses,
-        accountTypes,
-        status,
-        hasReachedMax
-      ];
+    message,
+    glAccounts,
+    accountClasses,
+    accountTypes,
+    status,
+    hasReachedMax,
+  ];
 
   @override
-  String toString() => '$status { #glAccounts: ${glAccounts.length}, '
+  String toString() =>
+      '$status { #glAccounts: ${glAccounts.length}, '
       '#classes: ${accountClasses.length} #types: ${accountTypes.length} '
       'hasReachedMax: $hasReachedMax message $message}';
 }

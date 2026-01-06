@@ -21,8 +21,11 @@ abstract class LocationEvent extends Equatable {
 }
 
 class LocationFetch extends LocationEvent {
-  const LocationFetch(
-      {this.searchString = '', this.refresh = false, this.limit = 20});
+  const LocationFetch({
+    this.searchString = '',
+    this.refresh = false,
+    this.limit = 20,
+  });
   final String searchString;
   final bool refresh;
   final int limit;

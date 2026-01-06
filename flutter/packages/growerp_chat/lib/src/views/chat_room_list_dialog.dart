@@ -185,9 +185,6 @@ class ChatRoomListDialogsState extends State<ChatRoomListDialog> {
                     textInputAction: TextInputAction.go,
                     autofocus: true,
                     decoration: InputDecoration(
-                      focusedBorder: const OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.transparent),
-                      ),
                       hintText:
                           _localizations?.searchInName ?? 'Search in name',
                     ),

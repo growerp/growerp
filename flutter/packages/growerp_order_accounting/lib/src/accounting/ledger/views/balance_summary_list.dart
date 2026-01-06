@@ -314,7 +314,8 @@ class BalanceSummaryListState extends State<BalanceSummaryList> {
                                       heightFactor: 20,
                                       child: Text(
                                         started
-                                            ? _localizations.noBalanceSummaryFound
+                                            ? _localizations
+                                                  .noBalanceSummaryFound
                                             : '',
                                         key: const Key('empty'),
                                         textAlign: TextAlign.center,
@@ -432,7 +433,9 @@ class BalanceSummaryListState extends State<BalanceSummaryList> {
               ],
             );
           case LedgerStatus.failure:
-            return FatalErrorForm(message: _localizations.getBalanceSummaryFail);
+            return FatalErrorForm(
+              message: _localizations.getBalanceSummaryFail,
+            );
           default:
             return const LoadingIndicator();
         }

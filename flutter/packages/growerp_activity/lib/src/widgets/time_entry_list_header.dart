@@ -24,19 +24,25 @@ class TimeEntryListHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      title: Column(children: [
-        Row(children: <Widget>[
-          const Expanded(child: Text("Date")),
-          const Text("Hours"),
-          if (isPhone(context))
-            const Expanded(
-                child: Text("From/To Party", textAlign: TextAlign.center)),
-          if (isPhone(context))
-            const Expanded(
-                child: Text("Comments", textAlign: TextAlign.center)),
-        ]),
-        const Divider(),
-      ]),
+      title: Column(
+        children: [
+          Row(
+            children: <Widget>[
+              const Expanded(child: Text("Date")),
+              const Text("Hours"),
+              if (isPhone(context))
+                const Expanded(
+                  child: Text("From/To Party", textAlign: TextAlign.center),
+                ),
+              if (isPhone(context))
+                const Expanded(
+                  child: Text("Comments", textAlign: TextAlign.center),
+                ),
+            ],
+          ),
+          const Divider(),
+        ],
+      ),
     );
   }
 }

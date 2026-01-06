@@ -22,10 +22,7 @@ import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
 class TableData {
   final double rowHeight;
   final List<TableRowContent> rowContent; // name,width,content,action buttons
-  TableData({
-    required this.rowHeight,
-    required this.rowContent,
-  });
+  TableData({required this.rowHeight, required this.rowContent});
 }
 
 /// Table field definition
@@ -42,16 +39,22 @@ class TableRowContent {
 }
 
 (List<List<TableViewCell>>, List<double>, double? height) get2dTableData<T>(
-    TableData Function(Bloc bloc, String classificationId, BuildContext context,
-            T item, int index,
-            {dynamic extra})
-        getTableData,
-    {required Bloc bloc,
-    required String classificationId,
-    required BuildContext context,
-    required List<T> items,
-    double? screenWidth,
-    dynamic extra}) {
+  TableData Function(
+    Bloc bloc,
+    String classificationId,
+    BuildContext context,
+    T item,
+    int index, {
+    dynamic extra,
+  })
+  getTableData, {
+  required Bloc bloc,
+  required String classificationId,
+  required BuildContext context,
+  required List<T> items,
+  double? screenWidth,
+  dynamic extra,
+}) {
   double width = screenWidth ?? MediaQuery.of(context).size.width;
   List<double> fieldWidth = [];
   late TableData tableData;
@@ -59,33 +62,48 @@ class TableRowContent {
   List<TableViewCell> contentRow = []; // row content
   // create table content headers
   for (final (rowIndex, item) in items.indexed) {
-    tableData = getTableData(bloc, classificationId, context, item, rowIndex,
-        extra: extra);
+    tableData = getTableData(
+      bloc,
+      classificationId,
+      context,
+      item,
+      rowIndex,
+      extra: extra,
+    );
     if (rowIndex == 0) {
       for (final fieldContent in tableData.rowContent) {
         // add header
-        contentRow.add(TableViewCell(
+        contentRow.add(
+          TableViewCell(
             child: fieldContent.name is String
                 ? Text(fieldContent.name, textAlign: TextAlign.left)
-                : fieldContent.name as Widget));
+                : fieldContent.name as Widget,
+          ),
+        );
       }
       tableViewCells.add(contentRow);
       contentRow = [];
 
       // field width
       for (final field in tableData.rowContent) {
-        fieldWidth
-            .add(width / 100 * field.width); // use percetage of screen width
+        fieldWidth.add(
+          width / 100 * field.width,
+        ); // use percetage of screen width
       }
     }
     // add data to table
     for (final fieldContent in tableData.rowContent) {
-      contentRow.add(TableViewCell(
+      contentRow.add(
+        TableViewCell(
           child: fieldContent.value is String
-              ? Text(fieldContent.value,
+              ? Text(
+                  fieldContent.value,
                   textAlign: TextAlign.left,
-                  key: Key('${tableData.rowContent.first.name}$rowIndex'))
-              : fieldContent.value as Widget));
+                  key: Key('${tableData.rowContent.first.name}$rowIndex'),
+                )
+              : fieldContent.value as Widget,
+        ),
+      );
     }
     tableViewCells.add(contentRow);
     contentRow = [];

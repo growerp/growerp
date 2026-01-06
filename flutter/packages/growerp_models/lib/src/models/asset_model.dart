@@ -48,7 +48,8 @@ abstract class Asset with _$Asset {
       _$AssetFromJson(json['asset'] ?? json);
 
   @override
-  String toString() => 'Asset name: $assetName[$assetId] '
+  String toString() =>
+      'Asset name: $assetName[$assetId] '
       'Product: ${product?.productName}[${product?.productId}] '
       'QOH: $quantityOnHand Status: $statusId';
 }
@@ -56,7 +57,7 @@ abstract class Asset with _$Asset {
 List<String> assetClassIds = [
   'Hotel Room',
   'Restaurant Table',
-  'Restaurant Table Area'
+  'Restaurant Table Area',
 ];
 
 List<String> assetStatusValues = ['Available', 'Deactivated', 'In Use'];
@@ -74,28 +75,34 @@ List<Asset> csvToAssets(String csvFile, Logger logger) {
   for (final row in result) {
     if (row == result.first) continue;
     try {
-      assets.add(Asset(
-        assetClassId: row[0],
-        assetName: row[1],
-        acquireCost: row[2].isNotEmpty && row[2] != 'null'
-            ? Decimal.parse(row[2])
-            : null,
-        quantityOnHand:
-            row[3] == '' ? Decimal.parse('0') : Decimal.parse(row[3]),
-        availableToPromise:
-            row[4] == '' ? Decimal.parse('0') : Decimal.parse(row[4]),
-        receivedDate: DateTime.tryParse(row[5]),
-        expectedEndOfLifeDate: DateTime.tryParse(row[6]),
-        product: Product(pseudoId: row[7]),
-        location: Location(locationId: row[8]),
-      ));
+      assets.add(
+        Asset(
+          assetClassId: row[0],
+          assetName: row[1],
+          acquireCost: row[2].isNotEmpty && row[2] != 'null'
+              ? Decimal.parse(row[2])
+              : null,
+          quantityOnHand: row[3] == ''
+              ? Decimal.parse('0')
+              : Decimal.parse(row[3]),
+          availableToPromise: row[4] == ''
+              ? Decimal.parse('0')
+              : Decimal.parse(row[4]),
+          receivedDate: DateTime.tryParse(row[5]),
+          expectedEndOfLifeDate: DateTime.tryParse(row[6]),
+          product: Product(pseudoId: row[7]),
+          location: Location(locationId: row[8]),
+        ),
+      );
     } catch (e) {
       String fieldList = '';
-      assetCsvTitles
-          .asMap()
-          .forEach((index, value) => fieldList += "$value: ${row[index]}\n");
-      logger.e("Error processing asset csv line: $fieldList \n"
-          "error message: $e");
+      assetCsvTitles.asMap().forEach(
+        (index, value) => fieldList += "$value: ${row[index]}\n",
+      );
+      logger.e(
+        "Error processing asset csv line: $fieldList \n"
+        "error message: $e",
+      );
       if (errors++ == 5) exit(1);
     }
   }
@@ -105,18 +112,20 @@ List<Asset> csvToAssets(String csvFile, Logger logger) {
 String csvFromAssets(List<Asset> assets) {
   var csv = [assetCsvFormat];
   for (Asset asset in assets) {
-    csv.add(createCsvRow([
-      asset.assetId,
-      asset.assetClassId ?? '',
-      asset.assetName ?? '',
-      asset.acquireCost.toString(),
-      asset.quantityOnHand.toString(),
-      asset.availableToPromise.toString(),
-      asset.receivedDate.toString(),
-      asset.expectedEndOfLifeDate.toString(),
-      asset.product!.pseudoId,
-      asset.location!.locationId ?? '',
-    ], assetCsvLength));
+    csv.add(
+      createCsvRow([
+        asset.assetId,
+        asset.assetClassId ?? '',
+        asset.assetName ?? '',
+        asset.acquireCost.toString(),
+        asset.quantityOnHand.toString(),
+        asset.availableToPromise.toString(),
+        asset.receivedDate.toString(),
+        asset.expectedEndOfLifeDate.toString(),
+        asset.product!.pseudoId,
+        asset.location!.locationId ?? '',
+      ], assetCsvLength),
+    );
   }
   return csv.join();
 }

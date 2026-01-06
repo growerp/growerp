@@ -37,28 +37,41 @@ class TimeEntryListItem extends StatelessWidget {
       title: Row(
         children: <Widget>[
           Expanded(
-              child: Text("${timeEntry.date!.toLocal()}".split(' ')[0],
-                  key: Key('date$index'))),
+            child: Text(
+              "${timeEntry.date!.toLocal()}".split(' ')[0],
+              key: Key('date$index'),
+            ),
+          ),
           Text("${timeEntry.hours}", key: Key('hours$index')),
           if (!isPhone(context))
             Expanded(
-                child: Text("${timeEntry.partyId}",
-                    key: Key('partyId$index'), textAlign: TextAlign.center)),
+              child: Text(
+                "${timeEntry.partyId}",
+                key: Key('partyId$index'),
+                textAlign: TextAlign.center,
+              ),
+            ),
           if (!isPhone(context))
             Expanded(
-                child: Text("${timeEntry.comments}",
-                    key: Key('comments$index'), textAlign: TextAlign.center)),
+              child: Text(
+                "${timeEntry.comments}",
+                key: Key('comments$index'),
+                textAlign: TextAlign.center,
+              ),
+            ),
         ],
       ),
       onTap: () async {
         await showDialog(
-            barrierDismissible: true,
-            context: context,
-            builder: (BuildContext context) {
-              return BlocProvider.value(
-                  value: context.read<ActivityBloc>(),
-                  child: TimeEntryDialog(timeEntry));
-            });
+          barrierDismissible: true,
+          context: context,
+          builder: (BuildContext context) {
+            return BlocProvider.value(
+              value: context.read<ActivityBloc>(),
+              child: TimeEntryDialog(timeEntry),
+            );
+          },
+        );
       },
       trailing: IconButton(
         key: Key('delete$index'),

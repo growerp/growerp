@@ -47,10 +47,7 @@ TableData getRestRequestListTableData(
     );
     rowContent.add(
       TableRowContent(
-        name: Text(
-          localizations.userRequestStatus,
-          textAlign: TextAlign.start,
-        ),
+        name: Text(localizations.userRequestStatus, textAlign: TextAlign.start),
         width: 55,
         value: Column(
           key: Key('item$index'),
@@ -110,10 +107,7 @@ TableData getRestRequestListTableData(
   } else {
     rowContent.add(
       TableRowContent(
-        name: Text(
-          localizations.dateTime,
-          textAlign: TextAlign.start,
-        ),
+        name: Text(localizations.dateTime, textAlign: TextAlign.start),
         width: 12,
         value: Text(
           item.dateTime != null
@@ -125,10 +119,7 @@ TableData getRestRequestListTableData(
     );
     rowContent.add(
       TableRowContent(
-        name: Text(
-          localizations.user,
-          textAlign: TextAlign.start,
-        ),
+        name: Text(localizations.user, textAlign: TextAlign.start),
         width: 15,
         value: Text(
           '${item.user?.firstName ?? ''} ${item.user?.lastName ?? ''}',

@@ -7,19 +7,25 @@ import 'package:logger/logger.dart';
 
 import '../src.dart';
 
-Future<void> export(String? backendUrl, String outputDirectory, String username,
-    String password) async {
+Future<void> export(
+  String? backendUrl,
+  String outputDirectory,
+  String username,
+  String password,
+) async {
   var logger = Logger(filter: MyFilter());
   int timeout = 600; //in seconds
 
   FileType fileType = FileType.unknown;
 
   final client = RestClient(
-      await buildDioClient(backendUrl, timeout: Duration(seconds: timeout)));
+    await buildDioClient(backendUrl, timeout: Duration(seconds: timeout)),
+  );
   try {
     if (isDirectory(outputDirectory)) {
       logger.e(
-          "output directory $outputDirectory already exists, do not overwrite");
+        "output directory $outputDirectory already exists, do not overwrite",
+      );
       exit(1);
     }
 

@@ -21,12 +21,13 @@ abstract class CategoryEvent extends Equatable {
 }
 
 class CategoryFetch extends CategoryEvent {
-  const CategoryFetch(
-      {this.companyPartyId = '',
-      this.searchString = '',
-      this.refresh = false,
-      this.isForDropDown = false,
-      this.limit = 20});
+  const CategoryFetch({
+    this.companyPartyId = '',
+    this.searchString = '',
+    this.refresh = false,
+    this.isForDropDown = false,
+    this.limit = 20,
+  });
 
   /// companyPartyId required for ecommerce
   final String companyPartyId;

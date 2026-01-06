@@ -33,55 +33,66 @@ class _LedgerJournalListHeaderState extends State<LedgerJournalListHeader> {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-        leading: GestureDetector(
-            key: const Key('search'),
-            onTap: (() =>
-                setState(() => search ? search = false : search = true)),
-            child: const Icon(Icons.search_sharp, size: 40)),
-        title: search
-            ? Row(children: <Widget>[
+      leading: GestureDetector(
+        key: const Key('search'),
+        onTap: (() => setState(() => search ? search = false : search = true)),
+        child: const Icon(Icons.search_sharp, size: 40),
+      ),
+      title: search
+          ? Row(
+              children: <Widget>[
                 SizedBox(
-                    width: ResponsiveBreakpoints.of(context).isMobile
-                        ? MediaQuery.of(context).size.width - 250
-                        : MediaQuery.of(context).size.width - 350,
-                    child: TextField(
-                      key: const Key('searchField'),
-                      autofocus: true,
-                      decoration: const InputDecoration(
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.transparent),
-                        ),
-                        hintText: "search in ID, name and lead...",
-                      ),
-                      onChanged: ((value) => setState(() {
-                            searchString = value;
-                          })),
-                    )),
+                  width: ResponsiveBreakpoints.of(context).isMobile
+                      ? MediaQuery.of(context).size.width - 250
+                      : MediaQuery.of(context).size.width - 350,
+                  child: TextField(
+                    key: const Key('searchField'),
+                    autofocus: true,
+                    decoration: const InputDecoration(
+                      hintText: "search in ID, name and lead...",
+                    ),
+                    onChanged: ((value) => setState(() {
+                      searchString = value;
+                    })),
+                  ),
+                ),
                 OutlinedButton(
-                    key: const Key('searchButton'),
-                    child: const Text('Search'),
-                    onPressed: () {
-                      context
-                          .read<LedgerJournalBloc>()
-                          .add(LedgerJournalFetch(searchString: searchString));
-                    })
-              ])
-            : Column(children: [
+                  key: const Key('searchButton'),
+                  child: const Text('Search'),
+                  onPressed: () {
+                    context.read<LedgerJournalBloc>().add(
+                      LedgerJournalFetch(searchString: searchString),
+                    );
+                  },
+                ),
+              ],
+            )
+          : Column(
+              children: [
                 if (ResponsiveBreakpoints.of(context).isMobile)
                   const Text("Journal Name"),
-                Row(children: <Widget>[
-                  if (ResponsiveBreakpoints.of(context).largerThan(MOBILE))
-                    const Expanded(child: Text("Journal Name")),
-                  const Expanded(
-                      child: Text("Posted date", textAlign: TextAlign.center)),
-                  const Expanded(
-                      child: Text("Posted?", textAlign: TextAlign.center)),
-                  const Expanded(
-                      child:
-                          Text("Error Journal?", textAlign: TextAlign.center)),
-                ]),
+                Row(
+                  children: <Widget>[
+                    if (ResponsiveBreakpoints.of(context).largerThan(MOBILE))
+                      const Expanded(child: Text("Journal Name")),
+                    const Expanded(
+                      child: Text("Posted date", textAlign: TextAlign.center),
+                    ),
+                    const Expanded(
+                      child: Text("Posted?", textAlign: TextAlign.center),
+                    ),
+                    const Expanded(
+                      child: Text(
+                        "Error Journal?",
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ],
+                ),
                 const Divider(),
-              ]),
-        trailing: search ? null : const SizedBox(width: 20));
+              ],
+            ),
+      trailing: search ? null : const SizedBox(width: 20),
+    );
   }
 }

@@ -74,7 +74,9 @@ class ItemTypeListState extends State<ItemTypeList> {
         switch (state.status) {
           case FinDocStatus.failure:
             return Center(
-              child: Text('${_localizations.fetchItemTypesFail} ${state.message}'),
+              child: Text(
+                '${_localizations.fetchItemTypesFail} ${state.message}',
+              ),
             );
           case FinDocStatus.success:
             var newList = [];
@@ -140,7 +142,9 @@ class ItemTypeListState extends State<ItemTypeList> {
                         });
                       },
                       tooltip: _localizations.showAllUsed,
-                      label: showAll ? Text(_localizations.all) : Text(_localizations.onlyUsed),
+                      label: showAll
+                          ? Text(_localizations.all)
+                          : Text(_localizations.onlyUsed),
                     ),
                   ),
                 ),

@@ -49,17 +49,18 @@ abstract class CompanyUser with _$CompanyUser {
   Company? getCompany() {
     if (type == PartyType.company) {
       return Company(
-          role: role,
-          partyId: partyId,
-          pseudoId: pseudoId,
-          name: name,
-          email: email,
-          url: url,
-          telephoneNr: telephoneNr,
-          image: image,
-          paymentMethod: paymentMethod,
-          address: address,
-          employees: employees ?? []);
+        role: role,
+        partyId: partyId,
+        pseudoId: pseudoId,
+        name: name,
+        email: email,
+        url: url,
+        telephoneNr: telephoneNr,
+        image: image,
+        paymentMethod: paymentMethod,
+        address: address,
+        employees: employees ?? [],
+      );
     } else {
       List<String> names = [];
       for (final sep in [', ', ' ,', ' , ', ',', ' ']) {
@@ -69,21 +70,23 @@ abstract class CompanyUser with _$CompanyUser {
         names.add(name!.substring(index + sep.length));
       }
       if (company != null) {
-        return company!.copyWith(employees: [
-          User(
-            role: role,
-            partyId: partyId,
-            pseudoId: pseudoId,
-            firstName: names[0],
-            lastName: names[1],
-            email: email,
-            url: url,
-            telephoneNr: telephoneNr,
-            image: image,
-            paymentMethod: paymentMethod,
-            address: address,
-          )
-        ]);
+        return company!.copyWith(
+          employees: [
+            User(
+              role: role,
+              partyId: partyId,
+              pseudoId: pseudoId,
+              firstName: names[0],
+              lastName: names[1],
+              email: email,
+              url: url,
+              telephoneNr: telephoneNr,
+              image: image,
+              paymentMethod: paymentMethod,
+              address: address,
+            ),
+          ],
+        );
       } else {
         return Company();
       }
@@ -101,18 +104,19 @@ abstract class CompanyUser with _$CompanyUser {
         names.add(name!.substring(index + sep.length));
       }
       return User(
-          partyId: partyId,
-          pseudoId: pseudoId,
-          role: role,
-          firstName: names[0],
-          lastName: names[1],
-          address: address,
-          email: email,
-          url: url,
-          telephoneNr: telephoneNr,
-          image: image,
-          paymentMethod: paymentMethod,
-          company: company);
+        partyId: partyId,
+        pseudoId: pseudoId,
+        role: role,
+        firstName: names[0],
+        lastName: names[1],
+        address: address,
+        email: email,
+        url: url,
+        telephoneNr: telephoneNr,
+        image: image,
+        paymentMethod: paymentMethod,
+        company: company,
+      );
     } else {
       if (employees != null && employees!.isNotEmpty) {
         user = User(
@@ -130,18 +134,19 @@ abstract class CompanyUser with _$CompanyUser {
         );
       }
       return user.copyWith(
-          company: Company(
-        role: role,
-        partyId: partyId,
-        pseudoId: pseudoId,
-        name: name,
-        email: email,
-        url: url,
-        telephoneNr: telephoneNr,
-        image: image,
-        paymentMethod: paymentMethod,
-        address: address,
-      ));
+        company: Company(
+          role: role,
+          partyId: partyId,
+          pseudoId: pseudoId,
+          name: name,
+          email: email,
+          url: url,
+          telephoneNr: telephoneNr,
+          image: image,
+          paymentMethod: paymentMethod,
+          address: address,
+        ),
+      );
     }
   }
 
@@ -164,18 +169,19 @@ abstract class CompanyUser with _$CompanyUser {
         );
       case Company _:
         return CompanyUser(
-            type: PartyType.company,
-            role: obj.role,
-            partyId: obj.partyId,
-            pseudoId: obj.pseudoId,
-            name: obj.name,
-            email: obj.email,
-            url: obj.url,
-            telephoneNr: obj.telephoneNr,
-            image: obj.image,
-            paymentMethod: obj.paymentMethod,
-            address: obj.address,
-            employees: obj.employees);
+          type: PartyType.company,
+          role: obj.role,
+          partyId: obj.partyId,
+          pseudoId: obj.pseudoId,
+          name: obj.name,
+          email: obj.email,
+          url: obj.url,
+          telephoneNr: obj.telephoneNr,
+          image: obj.image,
+          paymentMethod: obj.paymentMethod,
+          address: obj.address,
+          employees: obj.employees,
+        );
       default:
         return null;
     }
@@ -186,10 +192,27 @@ CompanyUser? toCompanyUser(dynamic object) {
   switch (object) {
     case Company():
       return CompanyUser(
-          type: PartyType.company,
+        type: PartyType.company,
+        partyId: object.partyId,
+        pseudoId: object.pseudoId,
+        name: object.name,
+        role: object.role,
+        email: object.email,
+        url: object.url,
+        image: object.image,
+        paymentMethod: object.paymentMethod,
+        address: object.address,
+        telephoneNr: object.telephoneNr,
+        employees: object.employees,
+      );
+    case User():
+      if (object.company == null) {
+        // return only user when no company
+        return CompanyUser(
+          type: PartyType.user,
           partyId: object.partyId,
           pseudoId: object.pseudoId,
-          name: object.name,
+          name: "${object.firstName} ${object.lastName}",
           role: object.role,
           email: object.email,
           url: object.url,
@@ -197,38 +220,24 @@ CompanyUser? toCompanyUser(dynamic object) {
           paymentMethod: object.paymentMethod,
           address: object.address,
           telephoneNr: object.telephoneNr,
-          employees: object.employees);
-    case User():
-      if (object.company == null) {
-        // return only user when no company
-        return CompanyUser(
-            type: PartyType.user,
-            partyId: object.partyId,
-            pseudoId: object.pseudoId,
-            name: "${object.firstName} ${object.lastName}",
-            role: object.role,
-            email: object.email,
-            url: object.url,
-            image: object.image,
-            paymentMethod: object.paymentMethod,
-            address: object.address,
-            telephoneNr: object.telephoneNr,
-            company: object.company);
+          company: object.company,
+        );
       }
       // if related company return that
       return CompanyUser(
-          type: PartyType.company,
-          partyId: object.company?.partyId,
-          pseudoId: object.company?.pseudoId,
-          name: object.company?.name,
-          role: object.company?.role,
-          email: object.company?.email,
-          url: object.company?.url,
-          image: object.company?.image,
-          paymentMethod: object.company?.paymentMethod,
-          address: object.company?.address,
-          telephoneNr: object.company?.telephoneNr,
-          employees: object.company?.employees ?? []);
+        type: PartyType.company,
+        partyId: object.company?.partyId,
+        pseudoId: object.company?.pseudoId,
+        name: object.company?.name,
+        role: object.company?.role,
+        email: object.company?.email,
+        url: object.company?.url,
+        image: object.company?.image,
+        paymentMethod: object.company?.paymentMethod,
+        address: object.company?.address,
+        telephoneNr: object.company?.telephoneNr,
+        employees: object.company?.employees ?? [],
+      );
     default:
       return null;
   }

@@ -49,20 +49,23 @@ abstract class ChatRoom with _$ChatRoom {
 
   String? getToUserId(String currentUserId) {
     ChatRoomMember chatRoomMember = members.firstWhere(
-        (element) => element.user?.userId != currentUserId,
-        orElse: () => ChatRoomMember());
+      (element) => element.user?.userId != currentUserId,
+      orElse: () => ChatRoomMember(),
+    );
     return chatRoomMember.user?.userId;
   }
 
   String? getFromUserId(String currentUserId) {
-    ChatRoomMember chatRoomMember =
-        members.firstWhere((element) => element.user?.userId == currentUserId);
+    ChatRoomMember chatRoomMember = members.firstWhere(
+      (element) => element.user?.userId == currentUserId,
+    );
     return chatRoomMember.user?.userId;
   }
 
   ChatRoomMember? getFromMember(String currentUserId) {
-    return members
-        .firstWhere((element) => element.user?.userId == currentUserId);
+    return members.firstWhere(
+      (element) => element.user?.userId == currentUserId,
+    );
   }
 
   int getUserIndex(User user) {

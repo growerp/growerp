@@ -22,14 +22,15 @@ abstract class ProductEvent extends Equatable {
 
 /// Get A product list with optional selection criteria
 class ProductFetch extends ProductEvent {
-  const ProductFetch(
-      {this.categoryId = '',
-      this.assetClassId = '',
-      this.companyPartyId = '',
-      this.searchString = '', // general search
-      this.isForDropDown = false, // for dropdowns
-      this.refresh = false,
-      this.limit = 20});
+  const ProductFetch({
+    this.categoryId = '',
+    this.assetClassId = '',
+    this.companyPartyId = '',
+    this.searchString = '', // general search
+    this.isForDropDown = false, // for dropdowns
+    this.refresh = false,
+    this.limit = 20,
+  });
   final String companyPartyId;
   final String categoryId;
   final String assetClassId;

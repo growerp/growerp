@@ -10,8 +10,13 @@ import 'package:logger/logger.dart';
 
 import '../src.dart';
 
-Future<bool> login(RestClient client, String username, String password,
-    {String companyName = '', String currencyId = ''}) async {
+Future<bool> login(
+  RestClient client,
+  String username,
+  String password, {
+  String companyName = '',
+  String currencyId = '',
+}) async {
   Hive.init('growerpDB');
   var box = await Hive.openBox('growerp');
   late Authenticate authenticate;
@@ -35,9 +40,11 @@ Future<bool> login(RestClient client, String username, String password,
           lastName: 'user',
         );
       } else {
-        print("Email adddress not registered yet, however "
-            "Without company name and currency you can not register"
-            ", use the -n for company name and -c for currency");
+        print(
+          "Email adddress not registered yet, however "
+          "Without company name and currency you can not register"
+          ", use the -n for company name and -c for currency",
+        );
         exit(1);
       }
     } else {
@@ -49,7 +56,10 @@ Future<bool> login(RestClient client, String username, String password,
 
   // login
   await client.login(
-      username: username, password: password, classificationId: 'AppAdmin');
+    username: username,
+    password: password,
+    classificationId: 'AppAdmin',
+  );
   // login again to provide more info and get apikey
   authenticate = await client.login(
     username: username,
@@ -67,27 +77,44 @@ Future<bool> login(RestClient client, String username, String password,
   return alreadyRegistered;
 }
 
-Future<void> import(String inputFile, String? backendUrl, String username, String password,
-    String companyName, String currencyId,
-    {FileType startFileType = FileType.unknown,
-    FileType stopFileType = FileType.unknown,
-    String startFileName = ''}) async {
+Future<void> import(
+  String inputFile,
+  String? backendUrl,
+  String username,
+  String password,
+  String companyName,
+  String currencyId, {
+  FileType startFileType = FileType.unknown,
+  FileType stopFileType = FileType.unknown,
+  String startFileName = '',
+}) async {
   var logger = Logger(filter: MyFilter());
   int timeout = 600; //in seconds
 
   List<String> files = find('*.csv', workingDirectory: inputFile).toList();
   if (files.isEmpty) {
     logger.e(
-        "no files found to process, use the -i directive for the directory?");
+      "no files found to process, use the -i directive for the directory?",
+    );
     exit(1);
   }
   // talk to backend
-  final client = RestClient(await buildDioClient(backendUrl,
-      timeout: Duration(seconds: timeout), miniLog: true));
+  final client = RestClient(
+    await buildDioClient(
+      backendUrl,
+      timeout: Duration(seconds: timeout),
+      miniLog: true,
+    ),
+  );
   FileType fileType = FileType.unknown;
   try {
-    final bool alreadyRegistered = await login(client, username, password,
-        companyName: companyName, currencyId: currencyId);
+    final bool alreadyRegistered = await login(
+      client,
+      username,
+      password,
+      companyName: companyName,
+      currencyId: currencyId,
+    );
     // import
     bool continueFileType = false;
     if (startFileType != FileType.unknown) continueFileType = true;
@@ -98,8 +125,10 @@ Future<void> import(String inputFile, String? backendUrl, String username, Strin
       // check for resume starfiletype
       if (startFileType == fileType) continueFileType = false;
       if (continueFileType) continue;
-      var fileNames =
-          find('${fileType.name}-*.csv', workingDirectory: inputFile).toList();
+      var fileNames = find(
+        '${fileType.name}-*.csv',
+        workingDirectory: inputFile,
+      ).toList();
       fileNames.sort();
       for (final fileName in fileNames) {
         if (fileName.contains(startFileName)) continueFileName = false;
@@ -123,7 +152,9 @@ Future<void> import(String inputFile, String? backendUrl, String username, Strin
           case FileType.product:
             if (!alreadyRegistered) {
               await client.importProducts(
-                  csvToProducts(csvFile, logger), 'AppAdmin');
+                csvToProducts(csvFile, logger),
+                'AppAdmin',
+              );
             }
           case FileType.category:
             if (!alreadyRegistered) {
@@ -132,7 +163,9 @@ Future<void> import(String inputFile, String? backendUrl, String username, Strin
           case FileType.asset:
             if (!alreadyRegistered) {
               await client.importAssets(
-                  csvToAssets(csvFile, logger), 'AppAdmin');
+                csvToAssets(csvFile, logger),
+                'AppAdmin',
+              );
             }
           case FileType.company:
             if (!alreadyRegistered) {
@@ -166,7 +199,9 @@ Future<void> import(String inputFile, String? backendUrl, String username, Strin
           case FileType.finDocShipmentOutgoingItem:
           case FileType.finDocShipmentIncomingItem:
             await client.importFinDocItem(
-                csvToFinDocItems(csvFile, logger), 'AppAdmin');
+              csvToFinDocItems(csvFile, logger),
+              'AppAdmin',
+            );
           default:
             logger.e("FileType ${fileType.name} not implemented yet");
             exit(1);

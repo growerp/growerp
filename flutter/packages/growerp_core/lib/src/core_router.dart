@@ -18,13 +18,16 @@ import 'domains/domains.dart';
 // https://medium.com/flutter-community/flutter-navigation-cheatsheet-a-guide-to-named-routing-dc642702b98c
 Route<dynamic> coreRoute(RouteSettings settings) {
   debugPrint(
-      ">>>NavigateTo { ${settings.name} with: ${settings.arguments.toString()} }");
+    ">>>NavigateTo { ${settings.name} with: ${settings.arguments.toString()} }",
+  );
   switch (settings.name) {
     case '/about':
       return MaterialPageRoute(builder: (context) => const AboutForm());
     default:
       return MaterialPageRoute(
-          builder: (context) => FatalErrorForm(
-              message: "Routing not found for request: ${settings.name}"));
+        builder: (context) => FatalErrorForm(
+          message: "Routing not found for request: ${settings.name}",
+        ),
+      );
   }
 }

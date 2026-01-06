@@ -21,8 +21,11 @@ abstract class OpportunityEvent extends Equatable {
 }
 
 class OpportunityFetch extends OpportunityEvent {
-  const OpportunityFetch(
-      {this.searchString = '', this.refresh = false, this.limit = 20});
+  const OpportunityFetch({
+    this.searchString = '',
+    this.refresh = false,
+    this.limit = 20,
+  });
   final String searchString;
   final bool refresh;
   final int limit;

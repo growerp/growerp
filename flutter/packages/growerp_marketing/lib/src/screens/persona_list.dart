@@ -375,7 +375,6 @@ class SearchPersonaDialogState extends State<SearchPersonaDialog> {
               decoration: InputDecoration(
                 labelText: 'Search by ID or Name',
                 hintText: 'Enter persona ID or name',
-                
                 suffixIcon: IconButton(
                   icon: const Icon(Icons.clear),
                   onPressed: () {
@@ -499,7 +498,6 @@ class GeneratePersonaDialogState extends State<GeneratePersonaDialog> {
                 decoration: const InputDecoration(
                   labelText: 'Business Description *',
                   hintText: 'Describe your business...',
-                  
                 ),
                 maxLines: 3,
                 validator: (value) {
@@ -516,7 +514,6 @@ class GeneratePersonaDialogState extends State<GeneratePersonaDialog> {
                 decoration: const InputDecoration(
                   labelText: 'Target Market (Optional)',
                   hintText: 'Who is your target customer?',
-                  
                 ),
                 maxLines: 2,
               ),

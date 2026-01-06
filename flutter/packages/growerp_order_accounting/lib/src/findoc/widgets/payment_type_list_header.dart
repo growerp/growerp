@@ -38,51 +38,60 @@ class _PaymentTypeListHeaderState extends State<PaymentTypeListHeader> {
     return Column(
       children: [
         ListTile(
-            leading: GestureDetector(
-                key: const Key('search'),
-                onTap: (() {
-                  setState(() => search = !search);
-                  if (!search) finDocBloc.add(const FinDocGetItemTypes());
-                }),
-                child: const Icon(Icons.search_sharp, size: 40)),
-            title: search
-                ? Row(children: <Widget>[
+          leading: GestureDetector(
+            key: const Key('search'),
+            onTap: (() {
+              setState(() => search = !search);
+              if (!search) finDocBloc.add(const FinDocGetItemTypes());
+            }),
+            child: const Icon(Icons.search_sharp, size: 40),
+          ),
+          title: search
+              ? Row(
+                  children: <Widget>[
                     Expanded(
-                        child: TextField(
-                      key: const Key('searchField'),
-                      textInputAction: TextInputAction.go,
-                      autofocus: true,
-                      decoration: const InputDecoration(
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.transparent),
+                      child: TextField(
+                        key: const Key('searchField'),
+                        textInputAction: TextInputAction.go,
+                        autofocus: true,
+                        decoration: const InputDecoration(
+                          hintText: "search payment type or account",
                         ),
-                        hintText: "search payment type or account",
+                        onChanged: ((value) => setState(() {
+                          searchString = value;
+                        })),
                       ),
-                      onChanged: ((value) => setState(() {
-                            searchString = value;
-                          })),
-                    )),
+                    ),
                     OutlinedButton(
-                        key: const Key('searchButton'),
-                        child: const Text('Search'),
-                        onPressed: () {
-                          finDocBloc.add(FinDocGetPaymentTypes(
-                              searchString: searchString));
-                        })
-                  ])
-                : Row(children: <Widget>[
+                      key: const Key('searchButton'),
+                      child: const Text('Search'),
+                      onPressed: () {
+                        finDocBloc.add(
+                          FinDocGetPaymentTypes(searchString: searchString),
+                        );
+                      },
+                    ),
+                  ],
+                )
+              : Row(
+                  children: <Widget>[
                     const Expanded(
-                        child: Text("Name -- Outgo-/Incoming -- Applied",
-                            textAlign: TextAlign.left)),
+                      child: Text(
+                        "Name -- Outgo-/Incoming -- Applied",
+                        textAlign: TextAlign.left,
+                      ),
+                    ),
                     if (ResponsiveBreakpoints.of(context).largerThan(MOBILE))
                       Expanded(child: glAccount),
                     if (ResponsiveBreakpoints.of(context).largerThan(MOBILE))
                       const Text('    ', textAlign: TextAlign.left),
-                  ]),
-            subtitle: ResponsiveBreakpoints.of(context).equals(MOBILE)
-                ? const Text('Account Code  Account Name')
-                : null,
-            trailing: const Text(' ')),
+                  ],
+                ),
+          subtitle: ResponsiveBreakpoints.of(context).equals(MOBILE)
+              ? const Text('Account Code  Account Name')
+              : null,
+          trailing: const Text(' '),
+        ),
         const Divider(),
       ],
     );

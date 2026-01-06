@@ -731,7 +731,6 @@ class _PlatformConfigDialogState extends State<_PlatformConfigDialog>
           DropdownButtonFormField<String>(
             decoration: const InputDecoration(
               labelText: 'Action',
-              border: OutlineInputBorder(),
             ),
             initialValue: _selectedActions[platform],
             items: actions.map((a) {
@@ -801,7 +800,6 @@ class _PlatformConfigDialogState extends State<_PlatformConfigDialog>
               decoration: const InputDecoration(
                 labelText: 'Search Keywords',
                 hintText: 'e.g., "Flutter Developer Thailand"',
-                border: OutlineInputBorder(),
               ),
             ),
             const SizedBox(height: 20),
@@ -818,7 +816,6 @@ class _PlatformConfigDialogState extends State<_PlatformConfigDialog>
                 hintText: widget.campaignTemplate.isNotEmpty
                     ? 'Leave empty to use campaign template'
                     : 'Enter your message',
-                border: const OutlineInputBorder(),
                 suffixIcon: widget.restClient != null &&
                         widget.campaignTemplate.isNotEmpty
                     ? IconButton(

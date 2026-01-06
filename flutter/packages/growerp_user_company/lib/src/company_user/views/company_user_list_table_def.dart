@@ -19,113 +19,144 @@ import 'package:growerp_models/growerp_models.dart';
 
 import '../company_user.dart';
 
-TableData getCompanyUserTableData(Bloc bloc, String classificationId,
-    BuildContext context, CompanyUser item, int index,
-    {dynamic extra}) {
+TableData getCompanyUserTableData(
+  Bloc bloc,
+  String classificationId,
+  BuildContext context,
+  CompanyUser item,
+  int index, {
+  dynamic extra,
+}) {
   bool isPhone = isAPhone(context);
   List<TableRowContent> rowContent = [];
 
   if (isPhone) {
-    rowContent.add(TableRowContent(
-      name: 'ShortId',
-      width: 12,
-      value: CircleAvatar(
-        child: item.image != null
-            ? Image.memory(item.image!)
-            : Text(
-                item.pseudoId == null ? '' : item.pseudoId!.lastChar(3),
-              ),
+    rowContent.add(
+      TableRowContent(
+        name: 'ShortId',
+        width: 12,
+        value: CircleAvatar(
+          child: item.image != null
+              ? Image.memory(item.image!)
+              : Text(item.pseudoId == null ? '' : item.pseudoId!.lastChar(3)),
+        ),
       ),
-    ));
+    );
   }
 
-  rowContent.add(TableRowContent(
-    name: 'Id',
-    width: isPhone ? 13 : 7,
-    value: Text(item.pseudoId ?? '', key: Key('id$index')),
-  ));
+  rowContent.add(
+    TableRowContent(
+      name: 'Id',
+      width: isPhone ? 13 : 7,
+      value: Text(item.pseudoId ?? '', key: Key('id$index')),
+    ),
+  );
 
-  rowContent.add(TableRowContent(
-    name: 'T',
-    width: 1,
-    value: Text(
+  rowContent.add(
+    TableRowContent(
+      name: 'T',
+      width: 1,
+      value: Text(
         item.type == PartyType.company
             ? 'O'
             : item.type == PartyType.user
-                ? 'P'
-                : '?',
-        key: Key('type$index')),
-  ));
+            ? 'P'
+            : '?',
+        key: Key('type$index'),
+      ),
+    ),
+  );
 
   if (isPhone) {
-    rowContent.add(TableRowContent(
-      name: const Text('Company/Person Name\nEmail'),
-      width: 55,
-      value: Column(
-        key: Key('item$index'),
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text("${item.name.truncate(20)} ",
-              textAlign: TextAlign.start, key: Key('name$index')),
-          Text(item.email.truncate(20), key: const Key("companyEmail")),
-        ],
+    rowContent.add(
+      TableRowContent(
+        name: const Text('Company/Person Name\nEmail'),
+        width: 55,
+        value: Column(
+          key: Key('item$index'),
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "${item.name.truncate(20)} ",
+              textAlign: TextAlign.start,
+              key: Key('name$index'),
+            ),
+            Text(item.email.truncate(20), key: const Key("companyEmail")),
+          ],
+        ),
       ),
-    ));
+    );
   }
 
   if (!isPhone) {
-    rowContent.add(TableRowContent(
-      name: 'Name',
-      width: 25,
-      value: Text(item.name ?? '', key: Key('name$index')),
-    ));
+    rowContent.add(
+      TableRowContent(
+        name: 'Name',
+        width: 25,
+        value: Text(item.name ?? '', key: Key('name$index')),
+      ),
+    );
   }
 
   if (!isPhone) {
-    rowContent.add(TableRowContent(
-      name: 'Role',
-      width: 8,
-      value: Text(item.role != null ? item.role!.value : Role.unknown.value,
-          key: Key('role$index')),
-    ));
+    rowContent.add(
+      TableRowContent(
+        name: 'Role',
+        width: 8,
+        value: Text(
+          item.role != null ? item.role!.value : Role.unknown.value,
+          key: Key('role$index'),
+        ),
+      ),
+    );
   }
 
   if (!isPhone) {
-    rowContent.add(TableRowContent(
-      name: 'Email',
-      width: 15,
-      value: Text(item.email ?? '', key: Key('email$index')),
-    ));
+    rowContent.add(
+      TableRowContent(
+        name: 'Email',
+        width: 15,
+        value: Text(item.email ?? '', key: Key('email$index')),
+      ),
+    );
   }
 
   if (!isPhone) {
-    rowContent.add(TableRowContent(
-      name: 'TelephoneNr',
+    rowContent.add(
+      TableRowContent(
+        name: 'TelephoneNr',
+        width: 10,
+        value: Text(item.telephoneNr ?? '', key: Key('telephone$index')),
+      ),
+    );
+  }
+
+  if (!isPhone) {
+    rowContent.add(
+      TableRowContent(
+        name: 'Location',
+        width: 10,
+        value: Text(
+          "${item.address?.country ?? ''} ${item.address?.city ?? ''}",
+          key: Key('telephone$index'),
+        ),
+      ),
+    );
+  }
+
+  rowContent.add(
+    TableRowContent(
+      name: '',
       width: 10,
-      value: Text(item.telephoneNr ?? '', key: Key('telephone$index')),
-    ));
-  }
-
-  if (!isPhone) {
-    rowContent.add(TableRowContent(
-      name: 'Location',
-      width: 10,
-      value: Text("${item.address?.country ?? ''} ${item.address?.city ?? ''}",
-          key: Key('telephone$index')),
-    ));
-  }
-
-  rowContent.add(TableRowContent(
-    name: '',
-    width: 10,
-    value: IconButton(
-      key: Key("delete$index"),
-      icon: const Icon(Icons.delete_forever),
-      onPressed: () {
-        bloc.add(const CompanyUserDelete());
-      },
+      value: IconButton(
+        key: Key("delete$index"),
+        icon: const Icon(Icons.delete_forever),
+        onPressed: () {
+          bloc.add(const CompanyUserDelete());
+        },
+      ),
     ),
-  ));
+  );
 
   return TableData(rowHeight: isPhone ? 42 : 20, rowContent: rowContent);
 }

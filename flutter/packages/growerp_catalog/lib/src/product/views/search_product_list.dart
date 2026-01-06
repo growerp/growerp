@@ -35,33 +35,44 @@ class SearchProductState extends State<SearchProductList> {
     super.initState();
     _productBloc = context.read<DataFetchBloc<Products>>()
       ..add(
-          GetDataEvent(() => context.read<RestClient>().getProduct(limit: 0)));
+        GetDataEvent(() => context.read<RestClient>().getProduct(limit: 0)),
+      );
   }
 
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<DataFetchBloc<Products>, DataFetchState<Products>>(
-        listener: (context, state) {
-      if (state.status == DataFetchStatus.failure) {
-        HelperFunctions.showMessage(context, '${state.message}', Colors.red);
-      }
-    }, builder: (context, state) {
-      if (state.status == DataFetchStatus.failure) {
-        return Center(
-            child: Text(CatalogLocalizations.of(context)!
-                .fetchSearchError(state.message ?? '')));
-      }
-      if (state.status == DataFetchStatus.success) {
-        products = (state.data as Products).products;
-      }
-      return Stack(
-        children: [
-          ProductSearchDialog(
-              finDocBloc: _productBloc, widget: widget, products: products),
-          if (state.status == DataFetchStatus.loading) const LoadingIndicator(),
-        ],
-      );
-    });
+      listener: (context, state) {
+        if (state.status == DataFetchStatus.failure) {
+          HelperFunctions.showMessage(context, '${state.message}', Colors.red);
+        }
+      },
+      builder: (context, state) {
+        if (state.status == DataFetchStatus.failure) {
+          return Center(
+            child: Text(
+              CatalogLocalizations.of(
+                context,
+              )!.fetchSearchError(state.message ?? ''),
+            ),
+          );
+        }
+        if (state.status == DataFetchStatus.success) {
+          products = (state.data as Products).products;
+        }
+        return Stack(
+          children: [
+            ProductSearchDialog(
+              finDocBloc: _productBloc,
+              widget: widget,
+              products: products,
+            ),
+            if (state.status == DataFetchStatus.loading)
+              const LoadingIndicator(),
+          ],
+        );
+      },
+    );
   }
 }
 
@@ -82,69 +93,85 @@ class ProductSearchDialog extends StatelessWidget {
     var catalogLocalizations = CatalogLocalizations.of(context)!;
     final ScrollController scrollController = ScrollController();
     return Dialog(
-        key: const Key('SearchDialog'),
-        insetPadding: const EdgeInsets.all(10),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
+      key: const Key('SearchDialog'),
+      insetPadding: const EdgeInsets.all(10),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      child: popUp(
+        context: context,
+        title: catalogLocalizations.productSearch,
+        height: 500,
+        width: 350,
+        child: Column(
+          children: [
+            TextFormField(
+              key: const Key('searchField'),
+              textInputAction: TextInputAction.search,
+              autofocus: true,
+              decoration: InputDecoration(
+                labelText: catalogLocalizations.searchInput,
+              ),
+              validator: (value) {
+                if (value!.isEmpty) {
+                  return catalogLocalizations.enterSearch;
+                }
+                return null;
+              },
+              onFieldSubmitted: (value) => _productBloc.add(
+                GetDataEvent(
+                  () => context.read<RestClient>().getProduct(
+                    limit: 5,
+                    searchString: value,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            Text(catalogLocalizations.searchResults),
+            Expanded(
+              child: ListView.builder(
+                key: const Key('listView'),
+                shrinkWrap: true,
+                physics: const AlwaysScrollableScrollPhysics(),
+                itemCount: products.length + 2,
+                controller: scrollController,
+                itemBuilder: (BuildContext context, int index) {
+                  if (index == 0) {
+                    return Visibility(
+                      visible: products.isEmpty,
+                      child: Center(
+                        heightFactor: 20,
+                        child: Text(
+                          catalogLocalizations.noSearchItems,
+                          key: const Key('empty'),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    );
+                  }
+                  index--;
+                  return index >= products.length
+                      ? const Text('')
+                      : Dismissible(
+                          key: const Key('searchItem'),
+                          direction: DismissDirection.startToEnd,
+                          child: ListTile(
+                            title: Text(
+                              catalogLocalizations.idLabel(
+                                products[index].pseudoId,
+                                products[index].productName ?? '',
+                              ),
+                              key: Key("searchResult$index"),
+                            ),
+                            onTap: () =>
+                                Navigator.of(context).pop(products[index]),
+                          ),
+                        );
+                },
+              ),
+            ),
+          ],
         ),
-        child: popUp(
-            context: context,
-            title: catalogLocalizations.productSearch,
-            height: 500,
-            width: 350,
-            child: Column(children: [
-              TextFormField(
-                  key: const Key('searchField'),
-                  textInputAction: TextInputAction.search,
-                  autofocus: true,
-                  decoration: InputDecoration(
-                      labelText: catalogLocalizations.searchInput),
-                  validator: (value) {
-                    if (value!.isEmpty) {
-                      return catalogLocalizations.enterSearch;
-                    }
-                    return null;
-                  },
-                  onFieldSubmitted: (value) => _productBloc.add(GetDataEvent(
-                      () => context
-                          .read<RestClient>()
-                          .getProduct(limit: 5, searchString: value)))),
-              const SizedBox(height: 20),
-              Text(catalogLocalizations.searchResults),
-              Expanded(
-                  child: ListView.builder(
-                      key: const Key('listView'),
-                      shrinkWrap: true,
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      itemCount: products.length + 2,
-                      controller: scrollController,
-                      itemBuilder: (BuildContext context, int index) {
-                        if (index == 0) {
-                          return Visibility(
-                              visible: products.isEmpty,
-                              child: Center(
-                                  heightFactor: 20,
-                                  child: Text(
-                                      catalogLocalizations.noSearchItems,
-                                      key: const Key('empty'),
-                                      textAlign: TextAlign.center)));
-                        }
-                        index--;
-                        return index >= products.length
-                            ? const Text('')
-                            : Dismissible(
-                                key: const Key('searchItem'),
-                                direction: DismissDirection.startToEnd,
-                                child: ListTile(
-                                  title: Text(
-                                      catalogLocalizations.idLabel(
-                                          products[index].pseudoId,
-                                          products[index].productName ?? ''),
-                                      key: Key("searchResult$index")),
-                                  onTap: () => Navigator.of(context)
-                                      .pop(products[index]),
-                                ));
-                      }))
-            ])));
+      ),
+    );
   }
 }

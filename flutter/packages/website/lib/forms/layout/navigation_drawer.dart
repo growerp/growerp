@@ -11,9 +11,7 @@ class NavigationDrawer extends StatelessWidget {
       width: 300,
       decoration: const BoxDecoration(
         color: Colors.white,
-        boxShadow: [
-          BoxShadow(color: Colors.black12, blurRadius: 16),
-        ],
+        boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 16)],
       ),
       child: const Column(
         children: <Widget>[
@@ -43,10 +41,8 @@ class DrawerItem extends StatelessWidget {
       child: Row(
         children: <Widget>[
           Icon(icon),
-          const SizedBox(
-            width: 30,
-          ),
-          NavBarItem(title, navigationPath, drawer: true)
+          const SizedBox(width: 30),
+          NavBarItem(title, navigationPath, drawer: true),
         ],
       ),
     );
@@ -65,9 +61,7 @@ class NavigationDrawerHeader extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           Image.asset('assets/growerp.png'),
-          const Text(
-            'Please select...',
-          )
+          const Text('Please select...'),
         ],
       ),
     );

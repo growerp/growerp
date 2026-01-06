@@ -356,7 +356,6 @@ class SearchSocialPostDialogState extends State<SearchSocialPostDialog> {
               decoration: InputDecoration(
                 labelText: 'Search by ID, headline, or type',
                 hintText: 'Enter ID, headline, or type',
-                
                 suffixIcon: IconButton(
                   icon: const Icon(Icons.clear),
                   onPressed: () {

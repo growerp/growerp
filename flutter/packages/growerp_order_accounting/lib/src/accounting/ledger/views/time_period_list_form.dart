@@ -23,9 +23,9 @@ class TimePeriodListForm extends StatelessWidget {
   const TimePeriodListForm({super.key});
   @override
   Widget build(BuildContext context) => BlocProvider<LedgerBloc>(
-        create: (context) => LedgerBloc(context.read<RestClient>()),
-        child: const TimePeriodList(),
-      );
+    create: (context) => LedgerBloc(context.read<RestClient>()),
+    child: const TimePeriodList(),
+  );
 }
 
 class TimePeriodList extends StatefulWidget {
@@ -59,90 +59,105 @@ class TimePeriodListState extends State<TimePeriodList> {
     top = top ?? (isAPhone(context) ? 500 : height - 200);
     left = left ?? (isAPhone(context) ? 300 : width - 250);
     return BlocConsumer<LedgerBloc, LedgerState>(
-        listenWhen: (previous, current) =>
-            previous.status == LedgerStatus.loading,
-        listener: (context, state) {
-          if (state.status == LedgerStatus.failure) {
-            HelperFunctions.showMessage(
-                context, '${state.message}', Colors.red);
-          }
-          if (state.status == LedgerStatus.success) {
-            HelperFunctions.showMessage(
-                context, '${state.message}', Colors.green);
-          }
-        },
-        builder: (context, state) {
-          switch (state.status) {
-            case LedgerStatus.failure:
-              return Center(
-                  child: Text('failed to fetch timePeriods: ${state.message}'));
-            case LedgerStatus.success:
-              return Stack(
-                children: [
-                  Column(children: [
+      listenWhen: (previous, current) =>
+          previous.status == LedgerStatus.loading,
+      listener: (context, state) {
+        if (state.status == LedgerStatus.failure) {
+          HelperFunctions.showMessage(context, '${state.message}', Colors.red);
+        }
+        if (state.status == LedgerStatus.success) {
+          HelperFunctions.showMessage(
+            context,
+            '${state.message}',
+            Colors.green,
+          );
+        }
+      },
+      builder: (context, state) {
+        switch (state.status) {
+          case LedgerStatus.failure:
+            return Center(
+              child: Text('failed to fetch timePeriods: ${state.message}'),
+            );
+          case LedgerStatus.success:
+            return Stack(
+              children: [
+                Column(
+                  children: [
                     const TimePeriodListHeader(),
                     Expanded(
-                        child: RefreshIndicator(
-                            onRefresh: (() async =>
-                                _ledgerBloc.add(const LedgerTimePeriods())),
-                            child: ListView.builder(
-                                key: const Key('listView'),
-                                shrinkWrap: true,
-                                physics: const AlwaysScrollableScrollPhysics(),
-                                itemCount: state.timePeriods.length,
-                                controller: _scrollController,
-                                itemBuilder: (BuildContext context, int index) {
-                                  if (state.timePeriods.isEmpty) {
-                                    return Visibility(
-                                        visible: state.timePeriods.isEmpty,
-                                        child: Center(
-                                            heightFactor: 20,
-                                            child: Text(
-                                                "no ${entityName}s found!",
-                                                key: const Key('empty'),
-                                                textAlign: TextAlign.center)));
-                                  } else {
-                                    return TimePeriodListItem(
-                                        timePeriod: state.timePeriods[index],
-                                        index: index);
-                                  }
-                                })))
-                  ]),
-                  Positioned(
-                    left: left,
-                    top: top,
-                    child: GestureDetector(
-                      onPanUpdate: (details) {
-                        setState(() {
-                          left = left! + details.delta.dx;
-                          top = top! + details.delta.dy;
-                        });
-                      },
-                      child: FloatingActionButton.extended(
-                          heroTag: "timePeriodNew",
-                          key: const Key("changePeriod"),
-                          onPressed: () async {
-                            setState(() {
-                              if (periodType == 'Y') {
-                                periodType = 'Q';
-                              } else if (periodType == 'Q') {
-                                periodType = 'M';
-                              } else if (periodType == 'M') {
-                                periodType = 'Y';
-                              }
-                            });
-                            _ledgerBloc
-                                .add(LedgerTimePeriods(periodType: periodType));
+                      child: RefreshIndicator(
+                        onRefresh: (() async =>
+                            _ledgerBloc.add(const LedgerTimePeriods())),
+                        child: ListView.builder(
+                          key: const Key('listView'),
+                          shrinkWrap: true,
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          itemCount: state.timePeriods.length,
+                          controller: _scrollController,
+                          itemBuilder: (BuildContext context, int index) {
+                            if (state.timePeriods.isEmpty) {
+                              return Visibility(
+                                visible: state.timePeriods.isEmpty,
+                                child: Center(
+                                  heightFactor: 20,
+                                  child: Text(
+                                    "no ${entityName}s found!",
+                                    key: const Key('empty'),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              );
+                            } else {
+                              return TimePeriodListItem(
+                                timePeriod: state.timePeriods[index],
+                                index: index,
+                              );
+                            }
                           },
-                          tooltip: 'Change period type(Y/Q/M)',
-                          label: const Text('Y/Q/M')),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                Positioned(
+                  left: left,
+                  top: top,
+                  child: GestureDetector(
+                    onPanUpdate: (details) {
+                      setState(() {
+                        left = left! + details.delta.dx;
+                        top = top! + details.delta.dy;
+                      });
+                    },
+                    child: FloatingActionButton.extended(
+                      heroTag: "timePeriodNew",
+                      key: const Key("changePeriod"),
+                      onPressed: () async {
+                        setState(() {
+                          if (periodType == 'Y') {
+                            periodType = 'Q';
+                          } else if (periodType == 'Q') {
+                            periodType = 'M';
+                          } else if (periodType == 'M') {
+                            periodType = 'Y';
+                          }
+                        });
+                        _ledgerBloc.add(
+                          LedgerTimePeriods(periodType: periodType),
+                        );
+                      },
+                      tooltip: 'Change period type(Y/Q/M)',
+                      label: const Text('Y/Q/M'),
                     ),
                   ),
-                ],
-              );
-            default:
-              return const Center(child: LoadingIndicator());
-          }
-        });
+                ),
+              ],
+            );
+          default:
+            return const Center(child: LoadingIndicator());
+        }
+      },
+    );
   }
 }

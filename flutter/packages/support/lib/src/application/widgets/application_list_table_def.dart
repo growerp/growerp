@@ -20,34 +20,48 @@ import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
 
 import '../blocs/application_bloc.dart';
 
-TableData getApplicationTableData(Bloc bloc, String classificationId,
-    BuildContext context, Application item, int index,
-    {dynamic extra}) {
+TableData getApplicationTableData(
+  Bloc bloc,
+  String classificationId,
+  BuildContext context,
+  Application item,
+  int index, {
+  dynamic extra,
+}) {
   List<TableRowContent> rowContent = [];
   bool isPhone = isAPhone(context);
-  rowContent.add(TableRowContent(
+  rowContent.add(
+    TableRowContent(
       name: 'Id',
       width: isPhone ? 18 : 10,
-      value: Text(item.applicationId, key: Key("id$index"))));
-  rowContent.add(TableRowContent(
+      value: Text(item.applicationId, key: Key("id$index")),
+    ),
+  );
+  rowContent.add(
+    TableRowContent(
       name: 'Version',
       width: 20,
-      value: Text(item.version ?? '', key: Key("version$index"))));
-  rowContent.add(TableRowContent(
+      value: Text(item.version ?? '', key: Key("version$index")),
+    ),
+  );
+  rowContent.add(
+    TableRowContent(
       name: 'Backend URL',
       width: 40,
-      value: Text(item.backendUrl ?? '', key: Key("backendUrl$index"))));
-
-  rowContent.add(TableRowContent(
-    // just for testing needs key
-    name: 'ShortId',
-    width: 0,
-    value: const Text(
-      '',
-      key: Key('applicationItem'),
+      value: Text(item.backendUrl ?? '', key: Key("backendUrl$index")),
     ),
-  ));
-  rowContent.add(TableRowContent(
+  );
+
+  rowContent.add(
+    TableRowContent(
+      // just for testing needs key
+      name: 'ShortId',
+      width: 0,
+      value: const Text('', key: Key('applicationItem')),
+    ),
+  );
+  rowContent.add(
+    TableRowContent(
       name: '',
       width: 10,
       value: IconButton(
@@ -57,7 +71,9 @@ TableData getApplicationTableData(Bloc bloc, String classificationId,
         onPressed: () {
           bloc.add(ApplicationDelete(item));
         },
-      )));
+      ),
+    ),
+  );
 
   return TableData(rowHeight: isPhone ? 38 : 20, rowContent: rowContent);
 }

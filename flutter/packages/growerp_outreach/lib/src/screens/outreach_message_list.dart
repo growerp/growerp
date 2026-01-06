@@ -351,7 +351,6 @@ class SearchOutreachMessageListState extends State<SearchOutreachMessageList> {
               autofocus: true,
               decoration: InputDecoration(
                 labelText: 'Search messages',
-                border: const OutlineInputBorder(),
                 suffixIcon: IconButton(
                   icon: const Icon(Icons.clear),
                   onPressed: () {

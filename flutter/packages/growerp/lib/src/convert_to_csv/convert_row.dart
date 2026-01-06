@@ -4,12 +4,13 @@ import 'file_type_model.dart';
 
 /// specify columns to columns mapping for every row here
 List<String> convertRow(
-    FileType fileType,
-    List<String> columnsFrom,
-    String fileName,
-    List<List<String>> images,
-    DateTime? startDate,
-    DateTime? endDate) {
+  FileType fileType,
+  List<String> columnsFrom,
+  String fileName,
+  List<List<String>> images,
+  DateTime? startDate,
+  DateTime? endDate,
+) {
   List<String> columnsTo = [];
 
   bool dateOk(String stringDate) {
@@ -17,8 +18,11 @@ List<String> convertRow(
     // yyyy-mm-dd
     bool start = true, end = true;
     List stringDates = stringDate.split('-');
-    DateTime date = DateTime(int.parse(stringDates[0]),
-        int.parse(stringDates[1]), int.parse(stringDates[2]));
+    DateTime date = DateTime(
+      int.parse(stringDates[0]),
+      int.parse(stringDates[1]),
+      int.parse(stringDates[2]),
+    );
     if (startDate != null && startDate.isAfter(date)) start = false;
     if (endDate != null && endDate.isBefore(date)) end = false;
     return start && end;
@@ -274,9 +278,11 @@ List<String> convertRow(
       columnsTo.add(columnsFrom[29]); // product id
       columnsTo.add(columnsFrom[30]); // descr
       columnsTo.add(columnsFrom[28] == '0' ? '1' : columnsFrom[28]); // quant
-      columnsTo.add(double.parse(columnsFrom[32]) == 0.0
-          ? columnsFrom[33]
-          : columnsFrom[32]); // price
+      columnsTo.add(
+        double.parse(columnsFrom[32]) == 0.0
+            ? columnsFrom[33]
+            : columnsFrom[32],
+      ); // price
       columnsTo.add(columnsFrom[31]); // itemType accountCode
       columnsTo.add('');
       columnsTo.add(accountCodeToItemType(columnsFrom[31], columnsFrom[29]));
@@ -318,12 +324,14 @@ List<String> convertRow(
       columnsTo.add(''); //seqId by system
       columnsTo.add(columnsFrom[25]); // product id
       columnsTo.add(columnsFrom[26]); // descr
-      columnsTo.add(double.parse(columnsFrom[24]) == 0.00
-          ? '1'
-          : columnsFrom[24]); // quant
-      columnsTo.add(double.parse(columnsFrom[28]) == 0.0
-          ? columnsFrom[29]
-          : columnsFrom[28]); // price
+      columnsTo.add(
+        double.parse(columnsFrom[24]) == 0.00 ? '1' : columnsFrom[24],
+      ); // quant
+      columnsTo.add(
+        double.parse(columnsFrom[28]) == 0.0
+            ? columnsFrom[29]
+            : columnsFrom[28],
+      ); // price
       columnsTo.add(columnsFrom[27]); // itemType accountCode
       columnsTo.add('');
       columnsTo.add(accountCodeToItemType(columnsFrom[27], columnsFrom[25]));
@@ -338,7 +346,8 @@ List<String> convertRow(
       if (!dateOk(dateConvert(columnsFrom[11]))) return [];
       // date/checknumber is key here because checknumber is reference in ledger
       columnsTo.add(
-          "${dateConvert(columnsFrom[11])}-${columnsFrom[10]}-${columnsFrom[20]}"); // will be replaced by sequential id
+        "${dateConvert(columnsFrom[11])}-${columnsFrom[10]}-${columnsFrom[20]}",
+      ); // will be replaced by sequential id
       columnsTo.add('false');
       columnsTo.add('Payment');
       columnsTo.add('converted');
@@ -346,8 +355,9 @@ List<String> convertRow(
       columnsTo.add('');
       columnsTo.add(columnsFrom[1]);
       columnsTo.add(columnsFrom[2]);
-      columnsTo.add(columnsFrom[20]
-          .replaceFirst(' & ', ',')); // trans invoice id in reference
+      columnsTo.add(
+        columnsFrom[20].replaceFirst(' & ', ','),
+      ); // trans invoice id in reference
       columnsTo.add(columnsFrom[10]); // checknumber
       String amount = columnsFrom[14].replaceAll('-', ''); // check number
       columnsTo.add(amount); // total amount
@@ -365,7 +375,8 @@ List<String> convertRow(
       if (!dateOk(dateConvert(columnsFrom[11]))) return [];
 
       columnsTo.add(
-          "${dateConvert(columnsFrom[11])}-${columnsFrom[10]}"); // will be replaced by sequential id
+        "${dateConvert(columnsFrom[11])}-${columnsFrom[10]}",
+      ); // will be replaced by sequential id
       columnsTo.add('Payment');
       columnsTo.add(''); //seqId by system
       columnsTo.add(columnsFrom[24]); // product id
@@ -406,12 +417,14 @@ List<String> convertRow(
       columnsTo.add(''); //seqId by system
       columnsTo.add(columnsFrom[23]); // product id
       columnsTo.add(columnsFrom[24]); // descr
-      columnsTo.add(double.parse(columnsFrom[22]) == 0.0
-          ? '1'
-          : columnsFrom[22]); // quant
-      columnsTo.add(double.parse(columnsFrom[26]) == 0.0
-          ? columnsFrom[28].replaceAll('-', '')
-          : columnsFrom[26]); // price
+      columnsTo.add(
+        double.parse(columnsFrom[22]) == 0.0 ? '1' : columnsFrom[22],
+      ); // quant
+      columnsTo.add(
+        double.parse(columnsFrom[26]) == 0.0
+            ? columnsFrom[28].replaceAll('-', '')
+            : columnsFrom[26],
+      ); // price
       columnsTo.add(columnsFrom[25]); // itemType accountCode
       columnsTo.add('');
       columnsTo.add(accountCodeToItemType(columnsFrom[25], ''));
@@ -452,12 +465,14 @@ List<String> convertRow(
       columnsTo.add(''); //seqId by system
       columnsTo.add(columnsFrom[30]); // product id
       columnsTo.add(columnsFrom[32]); // descr
-      columnsTo.add(double.parse(columnsFrom[28]) == 0.0
-          ? '1'
-          : columnsFrom[28]); // quant
-      columnsTo.add(double.parse(columnsFrom[34]) == 0.0
-          ? columnsFrom[36].replaceAll('-', '')
-          : columnsFrom[34]); // price
+      columnsTo.add(
+        double.parse(columnsFrom[28]) == 0.0 ? '1' : columnsFrom[28],
+      ); // quant
+      columnsTo.add(
+        double.parse(columnsFrom[34]) == 0.0
+            ? columnsFrom[36].replaceAll('-', '')
+            : columnsFrom[34],
+      ); // price
       columnsTo.add(columnsFrom[33]); // itemType accountCode
       columnsTo.add('');
       columnsTo.add(accountCodeToItemType(columnsFrom[33], columnsFrom[30]));
@@ -472,7 +487,8 @@ List<String> convertRow(
       if (!dateOk(dateConvert(columnsFrom[5]))) return [];
 
       columnsTo.add(
-          "${dateConvert(columnsFrom[5])}-${columnsFrom[4]}"); // will be replaced by sequential id
+        "${dateConvert(columnsFrom[5])}-${columnsFrom[4]}",
+      ); // will be replaced by sequential id
       columnsTo.add('true');
       columnsTo.add('Payment');
       columnsTo.add('converted');
@@ -495,7 +511,8 @@ List<String> convertRow(
       if (columnsFrom.length < 22) return [];
       if (!dateOk(dateConvert(columnsFrom[5]))) return [];
       columnsTo.add(
-          "${dateConvert(columnsFrom[5])}-${columnsFrom[0]}"); // will be replaced by sequential id
+        "${dateConvert(columnsFrom[5])}-${columnsFrom[0]}",
+      ); // will be replaced by sequential id
       columnsTo.add('Payment');
       columnsTo.add(''); //seqId by system
       columnsTo.add(''); // product id
@@ -515,7 +532,8 @@ List<String> convertRow(
 
       if (columnsFrom[0] == '10100') {
         columnsTo.add(
-            "${dateConvert(columnsFrom[2])}-P00000"); // will be replaced by sequential id
+          "${dateConvert(columnsFrom[2])}-P00000",
+        ); // will be replaced by sequential id
         columnsTo.add("true");
         columnsTo.add('Transaction');
         columnsTo.add('Initial ledger posted values');
@@ -549,7 +567,8 @@ List<String> convertRow(
         sales = false;
       }
       columnsTo.add(
-          "${dateConvert(columnsFrom[2])}-${columnsFrom[3]}"); // will be replaced by sequential id
+        "${dateConvert(columnsFrom[2])}-${columnsFrom[3]}",
+      ); // will be replaced by sequential id
       columnsTo.add(sales.toString());
       columnsTo.add('Transaction');
       columnsTo.add(columnsFrom[5]);
@@ -620,7 +639,8 @@ List<String> convertRow(
       }
 
       columnsTo.add(
-          "${dateConvert(columnsFrom[2])}-${columnsFrom[3]}"); // will be replaced by sequential id
+        "${dateConvert(columnsFrom[2])}-${columnsFrom[3]}",
+      ); // will be replaced by sequential id
       columnsTo.add('Transaction');
       columnsTo.add(columnsFrom[3]);
       columnsTo.add(columnsFrom[17]);

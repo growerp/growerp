@@ -14,13 +14,15 @@ void install(String growerpPath, String branch) {
     // only stash and pop if changes present
     var lines = '';
     'git status'.start(
-        workingDirectory: growerpPath,
-        progress: Progress((line) => lines += line));
+      workingDirectory: growerpPath,
+      progress: Progress((line) => lines += line),
+    );
     bool doPop = false;
     if (!lines.contains('working tree clean')) {
       'git stash'.start(
-          workingDirectory: growerpPath,
-          progress: Progress((line) => lines += line));
+        workingDirectory: growerpPath,
+        progress: Progress((line) => lines += line),
+      );
       if (!lines.contains('No local changes')) {
         doPop = true;
       }
@@ -30,21 +32,29 @@ void install(String growerpPath, String branch) {
       run('git stash pop', workingDirectory: growerpPath);
     }
   } else {
-    run('git clone -b $branch https://github.com/growerp/growerp.git $growerpPath',
-        workingDirectory: HOME);
+    run(
+      'git clone -b $branch https://github.com/growerp/growerp.git $growerpPath',
+      workingDirectory: HOME,
+    );
   }
   logger.i('Start backend in separate window...');
   if (!exists('$growerpPath/moqui/moqui.war')) {
     logger.i('first compile backend and initially load data...');
     run('./gradlew build', workingDirectory: '$growerpPath/moqui');
-    run('java -jar moqui.war load types=seed,seed-initial,install',
-        workingDirectory: '$growerpPath/moqui');
+    run(
+      'java -jar moqui.war load types=seed,seed-initial,install',
+      workingDirectory: '$growerpPath/moqui',
+    );
   }
-  run('gnome-terminal -- bash -c "cd $growerpPath/moqui && java -jar moqui.war"');
+  run(
+    'gnome-terminal -- bash -c "cd $growerpPath/moqui && java -jar moqui.war"',
+  );
   if (!exists("$growerpPath/flutter/packages/admin/pubspec_overrides.yaml")) {
     logger.i('activate melos package to build frontend...');
-    run('dart pub global activate melos',
-        workingDirectory: '$growerpPath/flutter');
+    run(
+      'dart pub global activate melos',
+      workingDirectory: '$growerpPath/flutter',
+    );
     String path = "$PATH";
     if (!path.contains("$HOME/.pub-cache/bin")) {
       run("PATH=$HOME/.pub-cache/bin");
@@ -52,17 +62,23 @@ void install(String growerpPath, String branch) {
     run('melos bootstrap', workingDirectory: '$growerpPath/flutter');
   }
   if (!exists(
-      "$growerpPath/flutter/packages/growerp_models/lib/src/models/account_class_model.freezed.dart")) {
+    "$growerpPath/flutter/packages/growerp_models/lib/src/models/account_class_model.freezed.dart",
+  )) {
     logger.i('build flutter frontend with freezed....');
     run('melos build --no-select', workingDirectory: '$growerpPath/flutter');
   }
   if (!exists(
-      "$growerpPath/flutter/packages/growerp_core/lib/src/l10n/generated")) {
+    "$growerpPath/flutter/packages/growerp_core/lib/src/l10n/generated",
+  )) {
     logger.i('Create language translation files...');
     run('melos l10n --no-select', workingDirectory: '$growerpPath/flutter');
   }
-  logger.i("Install successfull, now starting the admin app with chrome\n"
-      " You can create company and login, parameters are provided...");
-  run('flutter run -d chrome',
-      workingDirectory: '$growerpPath/flutter/packages/admin');
+  logger.i(
+    "Install successfull, now starting the admin app with chrome\n"
+    " You can create company and login, parameters are provided...",
+  );
+  run(
+    'flutter run -d chrome',
+    workingDirectory: '$growerpPath/flutter/packages/admin',
+  );
 }

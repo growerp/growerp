@@ -30,7 +30,8 @@ abstract class Application with _$Application {
       _$ApplicationFromJson(json['application'] ?? json);
 
   @override
-  String toString() => 'Application: $applicationId '
+  String toString() =>
+      'Application: $applicationId '
       'Version: $version '
       'BackendUrl: $backendUrl ';
 }

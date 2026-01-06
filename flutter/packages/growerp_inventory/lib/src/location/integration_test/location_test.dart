@@ -19,8 +19,10 @@ import 'package:growerp_models/growerp_models.dart';
 
 class LocationTest {
   static Future<void> addLocations(
-      WidgetTester tester, List<Location> locations,
-      {bool check = true}) async {
+    WidgetTester tester,
+    List<Location> locations, {
+    bool check = true,
+  }) async {
     SaveTest test = await PersistFunctions.getTest();
     int seq = test.sequence;
     if (test.locations.isEmpty) {
@@ -30,27 +32,37 @@ class LocationTest {
       await PersistFunctions.persistTest(test);
     }
     if (check && test.locations[0].locationId == null) {
-      await PersistFunctions.persistTest(test.copyWith(
-        locations: await checkLocationDetail(tester, test.locations),
-        sequence: seq,
-      ));
+      await PersistFunctions.persistTest(
+        test.copyWith(
+          locations: await checkLocationDetail(tester, test.locations),
+          sequence: seq,
+        ),
+      );
     }
   }
 
   static Future<void> enterLocationData(
-      WidgetTester tester, List<Location> locations) async {
+    WidgetTester tester,
+    List<Location> locations,
+  ) async {
     for (Location location in locations) {
       if (location.locationId == null) {
         await CommonTest.tapByKey(tester, 'addNew');
       } else {
-        await CommonTest.doNewSearch(tester,
-            searchString: location.locationId!);
-        expect(CommonTest.getTextField('topHeader').split('#')[1],
-            location.locationId);
+        await CommonTest.doNewSearch(
+          tester,
+          searchString: location.locationId!,
+        );
+        expect(
+          CommonTest.getTextField('topHeader').split('#')[1],
+          location.locationId,
+        );
       }
       await CommonTest.checkWidgetKey(tester, 'LocationDialog');
       await CommonTest.tapByKey(
-          tester, 'name'); // required because keyboard come up
+        tester,
+        'name',
+      ); // required because keyboard come up
       await CommonTest.enterText(tester, 'name', location.locationName!);
       await CommonTest.tapByKey(tester, 'update');
       await CommonTest.waitForSnackbarToGo(tester);
@@ -58,15 +70,21 @@ class LocationTest {
   }
 
   static Future<List<Location>> checkLocationDetail(
-      WidgetTester tester, List<Location> locations) async {
+    WidgetTester tester,
+    List<Location> locations,
+  ) async {
     List<Location> newLocations = [];
     for (Location location in locations) {
-      await CommonTest.doNewSearch(tester,
-          searchString: location.locationName!);
+      await CommonTest.doNewSearch(
+        tester,
+        searchString: location.locationName!,
+      );
       // list
       expect(find.byKey(const Key('LocationDialog')), findsOneWidget);
       expect(
-          CommonTest.getTextFormField('name'), equals(location.locationName!));
+        CommonTest.getTextFormField('name'),
+        equals(location.locationName!),
+      );
       var id = CommonTest.getTextField('topHeader').split('#')[1];
       newLocations.add(location.copyWith(locationId: id));
       await CommonTest.tapByKey(tester, 'cancel');
@@ -75,13 +93,18 @@ class LocationTest {
   }
 
   static Future<void> deleteLocations(
-      WidgetTester tester, int numberOfDeletes) async {
+    WidgetTester tester,
+    int numberOfDeletes,
+  ) async {
     SaveTest test = await PersistFunctions.getTest();
     // delete locations
     for (int x = 0; x < test.locations.length; x++) {
       await CommonTest.tapByKey(tester, "delete0");
-      await CommonTest.tapByKey(tester, "continue",
-          seconds: CommonTest.waitTime);
+      await CommonTest.tapByKey(
+        tester,
+        "continue",
+        seconds: CommonTest.waitTime,
+      );
     }
 
     // check locations deleted
@@ -89,7 +112,9 @@ class LocationTest {
   }
 
   static Future<void> updateLocations(
-      WidgetTester tester, List<Location> newLocations) async {
+    WidgetTester tester,
+    List<Location> newLocations,
+  ) async {
     SaveTest test = await PersistFunctions.getTest();
     // check if already modified then skip
     if (test.locations[0].locationName == newLocations[0].locationName) {
@@ -98,9 +123,9 @@ class LocationTest {
     List<Location> updLocations = [];
     int index = 0;
     for (Location location in test.locations) {
-      updLocations.add(location.copyWith(
-        locationName: newLocations[index++].locationName!,
-      ));
+      updLocations.add(
+        location.copyWith(locationName: newLocations[index++].locationName!),
+      );
     }
     test = test.copyWith(locations: updLocations);
     await enterLocationData(tester, test.locations);

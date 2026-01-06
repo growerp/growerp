@@ -20,10 +20,7 @@ part 'country_model.g.dart';
 @freezed
 abstract class Country with _$Country {
   Country._();
-  factory Country({
-    required String id,
-    required String name,
-  }) = _Country;
+  factory Country({required String id, required String name}) = _Country;
 
   factory Country.fromJson(Map<String, dynamic> json) =>
       _$CountryFromJson(json['country'] ?? json);

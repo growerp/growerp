@@ -28,5 +28,5 @@ enum FileType {
   finDocShipmentOutgoing,
   finDocShipmentOutgoingItem,
   website,
-  unknown
+  unknown,
 }

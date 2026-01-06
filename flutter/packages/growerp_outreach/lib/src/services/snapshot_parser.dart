@@ -230,20 +230,21 @@ class SnapshotParser {
     // Extract YAML block from markdown
     final yamlMatch = RegExp(r'```yaml\n([\s\S]*?)```').firstMatch(text);
     final yamlContent = yamlMatch?.group(1) ?? text;
-    
-    final lines = yamlContent.split('\n').where((l) => l.trim().isNotEmpty).toList();
+
+    final lines =
+        yamlContent.split('\n').where((l) => l.trim().isNotEmpty).toList();
     if (lines.isEmpty) return null;
 
     // Parse the tree recursively starting at indent -2 (so first level at 0 works)
     final children = _parseChildren(lines, 0, -2);
-    
+
     if (children.isEmpty) return null;
-    
+
     // Return the first element as root, or wrap in a document
     if (children.length == 1) {
       return children.first;
     }
-    
+
     return SnapshotElement(
       ref: 'root',
       role: 'document',
@@ -280,7 +281,7 @@ class SnapshotParser {
         // Find children (lines with greater indent)
         final childStart = i + 1;
         final children = _parseChildren(lines, childStart, indent);
-        
+
         // Count how many lines the children consumed
         int childLines = 0;
         int j = childStart;
@@ -297,7 +298,7 @@ class SnapshotParser {
           attributes: element.attributes,
           children: children,
         ));
-        
+
         i = childStart + childLines;
       } else {
         i++;
@@ -319,7 +320,7 @@ class SnapshotParser {
     return indent;
   }
 
-  /// Parse a single line like: 
+  /// Parse a single line like:
   /// "- link \"Example\" [ref=s1e2]"
   /// "- heading \"Title\" [level=1] [ref=e3]"
   /// "- paragraph [ref=e4]: This is text content"
@@ -337,7 +338,7 @@ class SnapshotParser {
     final attributes = <String, dynamic>{};
     String? ref;
     var remaining = content;
-    
+
     final attrMatches = RegExp(r'\[([^\]]+)\]').allMatches(content);
     for (final match in attrMatches) {
       final attr = match.group(1)!;

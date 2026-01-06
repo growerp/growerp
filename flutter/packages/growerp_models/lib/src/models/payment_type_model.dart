@@ -36,7 +36,8 @@ abstract class PaymentType with _$PaymentType {
       _$PaymentTypeFromJson(json['paymentType'] ?? json);
 }
 
-String paymentTypeCsvFormat = "paymentTypeId, accountCode, "
+String paymentTypeCsvFormat =
+    "paymentTypeId, accountCode, "
     "isPayable(Y/N), isApplied(Y/N), \r\n";
 int paymentTypeCsvLength = paymentTypeCsvFormat.split(',').length;
 
@@ -46,12 +47,14 @@ List<PaymentType> csvToPaymentTypes(String csvFile) {
   final result = fast_csv.parse(csvFile);
   for (final row in result) {
     if (row == result.first) continue;
-    paymentTypes.add(PaymentType(
-      paymentTypeId: row[0],
-      accountCode: row[1],
-      isPayable: row[2] == "true" ? true : false,
-      isApplied: row[3] == "true" ? true : false,
-    ));
+    paymentTypes.add(
+      PaymentType(
+        paymentTypeId: row[0],
+        accountCode: row[1],
+        isPayable: row[2] == "true" ? true : false,
+        isApplied: row[3] == "true" ? true : false,
+      ),
+    );
   }
   return paymentTypes;
 }

@@ -21,15 +21,16 @@ abstract class CompanyUserEvent extends Equatable {
 }
 
 class CompanyUserFetch extends CompanyUserEvent {
-  const CompanyUserFetch(
-      {this.refresh = false,
-      this.searchString = '',
-      this.partyId,
-      this.type,
-      this.hasReachedMax = false,
-      this.limit = 20,
-      this.ownerPartyId = '',
-      this.isForDropDown = false});
+  const CompanyUserFetch({
+    this.refresh = false,
+    this.searchString = '',
+    this.partyId,
+    this.type,
+    this.hasReachedMax = false,
+    this.limit = 20,
+    this.ownerPartyId = '',
+    this.isForDropDown = false,
+  });
   final bool refresh;
   final String? partyId;
   final PartyType? type;

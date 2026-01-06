@@ -73,7 +73,9 @@ class PaymentTypeListState extends State<PaymentTypeList> {
         switch (state.status) {
           case FinDocStatus.failure:
             return Center(
-              child: Text('${_localizations.fetchPaymentTypesFail} ${state.message}'),
+              child: Text(
+                '${_localizations.fetchPaymentTypesFail} ${state.message}',
+              ),
             );
           case FinDocStatus.success:
             var newList = [];
@@ -130,7 +132,9 @@ class PaymentTypeListState extends State<PaymentTypeList> {
                         });
                       },
                       tooltip: _localizations.showAllUsed,
-                      label: showAll ? Text(_localizations.all) : Text(_localizations.onlyUsed),
+                      label: showAll
+                          ? Text(_localizations.all)
+                          : Text(_localizations.onlyUsed),
                     ),
                   ),
                 ),

@@ -503,16 +503,15 @@ class LandingPageDetailScreenState extends State<LandingPageDetailScreen> {
                                         ),
                                       ),
                                       dropdownDecoratorProps:
-                                          DropDownDecoratorProps(
+                                          const DropDownDecoratorProps(
                                         dropdownSearchDecoration:
                                             InputDecoration(
                                           labelText: 'CTA Assessment',
                                           hintText:
                                               'Select assessment to launch',
-                                          prefixIcon: const Icon(Icons.quiz),
+                                          prefixIcon: Icon(Icons.quiz),
                                           isDense: true,
-                                          contentPadding:
-                                              const EdgeInsets.symmetric(
+                                          contentPadding: EdgeInsets.symmetric(
                                             horizontal: 12,
                                             vertical: 8,
                                           ),
@@ -529,12 +528,12 @@ class LandingPageDetailScreenState extends State<LandingPageDetailScreen> {
                                 )
                               : TextFormField(
                                   key: const Key('ctaLink'),
-                                  decoration: InputDecoration(
+                                  decoration: const InputDecoration(
                                     labelText: 'CTA URL',
                                     hintText: 'https://example.com/page',
-                                    prefixIcon: const Icon(Icons.link),
+                                    prefixIcon: Icon(Icons.link),
                                     isDense: true,
-                                    contentPadding: const EdgeInsets.symmetric(
+                                    contentPadding: EdgeInsets.symmetric(
                                       horizontal: 12,
                                       vertical: 8,
                                     ),

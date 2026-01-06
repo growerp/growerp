@@ -43,6 +43,7 @@ class NotificationState extends Equatable {
   List<Object?> get props => [notifications, status];
 
   @override
-  String toString() => '$status { #notifications: ${notifications.length}, '
+  String toString() =>
+      '$status { #notifications: ${notifications.length}, '
       ' message $message}';
 }

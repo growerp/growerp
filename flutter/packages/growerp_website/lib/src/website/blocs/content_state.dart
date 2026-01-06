@@ -14,13 +14,7 @@
 
 part of 'content_bloc.dart';
 
-enum ContentStatus {
-  initial,
-  loading,
-  updating,
-  success,
-  failure,
-}
+enum ContentStatus { initial, loading, updating, success, failure }
 
 class ContentState extends Equatable {
   const ContentState({

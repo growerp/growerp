@@ -48,9 +48,6 @@ class _GlAccountListHeaderState extends State<GlAccountListHeader> {
                     textInputAction: TextInputAction.search,
                     autofocus: true,
                     decoration: InputDecoration(
-                      focusedBorder: const OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.transparent),
-                      ),
                       hintText: localizations.searchGlAccountHint,
                     ),
                     onChanged: ((value) => setState(() {

@@ -37,53 +37,65 @@ class _ItemTypeListHeaderState extends State<ItemTypeListHeader> {
     return Column(
       children: [
         ListTile(
-            leading: GestureDetector(
-                key: const Key('search'),
-                onTap: (() {
-                  setState(() => search = !search);
-                  if (!search) finDocBloc.add(const FinDocGetItemTypes());
-                }),
-                child: const Icon(Icons.search_sharp, size: 40)),
-            title: search
-                ? Row(children: <Widget>[
+          leading: GestureDetector(
+            key: const Key('search'),
+            onTap: (() {
+              setState(() => search = !search);
+              if (!search) finDocBloc.add(const FinDocGetItemTypes());
+            }),
+            child: const Icon(Icons.search_sharp, size: 40),
+          ),
+          title: search
+              ? Row(
+                  children: <Widget>[
                     Expanded(
-                        child: TextField(
-                      key: const Key('searchField'),
-                      textInputAction: TextInputAction.go,
-                      autofocus: true,
-                      decoration: const InputDecoration(
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.transparent),
+                      child: TextField(
+                        key: const Key('searchField'),
+                        textInputAction: TextInputAction.go,
+                        autofocus: true,
+                        decoration: const InputDecoration(
+                          hintText: "search item type or account",
                         ),
-                        hintText: "search item type or account",
+                        onChanged: ((value) => setState(() {
+                          searchString = value;
+                        })),
                       ),
-                      onChanged: ((value) => setState(() {
-                            searchString = value;
-                          })),
-                    )),
+                    ),
                     OutlinedButton(
-                        key: const Key('searchButton'),
-                        child: const Text('Search'),
-                        onPressed: () {
-                          finDocBloc.add(
-                              FinDocGetItemTypes(searchString: searchString));
-                        })
-                  ])
-                : Row(children: <Widget>[
+                      key: const Key('searchButton'),
+                      child: const Text('Search'),
+                      onPressed: () {
+                        finDocBloc.add(
+                          FinDocGetItemTypes(searchString: searchString),
+                        );
+                      },
+                    ),
+                  ],
+                )
+              : Row(
+                  children: <Widget>[
                     const Expanded(
-                        child: Text('Item Type  Dir: In/Out',
-                            textAlign: TextAlign.left)),
+                      child: Text(
+                        'Item Type  Dir: In/Out',
+                        textAlign: TextAlign.left,
+                      ),
+                    ),
                     if (ResponsiveBreakpoints.of(context).largerThan(MOBILE))
                       const Expanded(
-                          child: Text('Account Code Account Name',
-                              textAlign: TextAlign.left)),
+                        child: Text(
+                          'Account Code Account Name',
+                          textAlign: TextAlign.left,
+                        ),
+                      ),
                     if (ResponsiveBreakpoints.of(context).largerThan(MOBILE))
                       const Text('        ', textAlign: TextAlign.left),
-                  ]),
-            subtitle: ResponsiveBreakpoints.of(context).equals(MOBILE)
-                ? const Text('Account Code  Account Name')
-                : null,
-            trailing: const Text(' ')),
+                  ],
+                ),
+          subtitle: ResponsiveBreakpoints.of(context).equals(MOBILE)
+              ? const Text('Account Code  Account Name')
+              : null,
+          trailing: const Text(' '),
+        ),
         const Divider(),
       ],
     );

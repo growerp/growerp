@@ -70,7 +70,6 @@ class SearchCampaignListState extends State<SearchCampaignList> {
               autofocus: true,
               decoration: InputDecoration(
                 labelText: 'Search campaigns',
-                border: const OutlineInputBorder(),
                 suffixIcon: IconButton(
                   icon: const Icon(Icons.clear),
                   onPressed: () {

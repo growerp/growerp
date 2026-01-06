@@ -52,6 +52,7 @@ class ApplicationState extends Equatable {
   List<Object?> get props => [status, message, applications, hasReachedMax];
 
   @override
-  String toString() => '$status { #applications: ${applications.length}, '
+  String toString() =>
+      '$status { #applications: ${applications.length}, '
       'hasReachedMax: $hasReachedMax message $message}';
 }

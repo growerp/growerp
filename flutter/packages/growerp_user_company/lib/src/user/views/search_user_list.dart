@@ -39,25 +39,33 @@ class SearchUserState extends State<SearchUserList> {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<DataFetchBloc<Users>, DataFetchState<Users>>(
-        listener: (context, state) {
-      if (state.status == DataFetchStatus.failure) {
-        HelperFunctions.showMessage(context, '${state.message}', Colors.red);
-      }
-    }, builder: (context, state) {
-      if (state.status == DataFetchStatus.failure) {
-        return Center(
-            child: Text('failed to fetch search items: ${state.message}'));
-      }
-      if (state.status == DataFetchStatus.success) {
-        users = (state.data as Users).users;
-      }
-      return Stack(
-        children: [
-          UserSearchDialog(finDocBloc: _userBloc, widget: widget, users: users),
-          if (state.status == DataFetchStatus.loading) const LoadingIndicator(),
-        ],
-      );
-    });
+      listener: (context, state) {
+        if (state.status == DataFetchStatus.failure) {
+          HelperFunctions.showMessage(context, '${state.message}', Colors.red);
+        }
+      },
+      builder: (context, state) {
+        if (state.status == DataFetchStatus.failure) {
+          return Center(
+            child: Text('failed to fetch search items: ${state.message}'),
+          );
+        }
+        if (state.status == DataFetchStatus.success) {
+          users = (state.data as Users).users;
+        }
+        return Stack(
+          children: [
+            UserSearchDialog(
+              finDocBloc: _userBloc,
+              widget: widget,
+              users: users,
+            ),
+            if (state.status == DataFetchStatus.loading)
+              const LoadingIndicator(),
+          ],
+        );
+      },
+    );
   }
 }
 
@@ -77,67 +85,82 @@ class UserSearchDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     final ScrollController scrollController = ScrollController();
     return Dialog(
-        key: const Key('SearchDialog'),
-        insetPadding: const EdgeInsets.all(10),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
+      key: const Key('SearchDialog'),
+      insetPadding: const EdgeInsets.all(10),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      child: popUp(
+        context: context,
+        title: 'User Search ',
+        height: 500,
+        width: 350,
+        child: Column(
+          children: [
+            TextFormField(
+              key: const Key('searchField'),
+              textInputAction: TextInputAction.search,
+              autofocus: true,
+              decoration: const InputDecoration(labelText: "Search input"),
+              validator: (value) {
+                if (value!.isEmpty) {
+                  return 'Please enter a search value?';
+                }
+                return null;
+              },
+              onFieldSubmitted: (value) => _userBloc.add(
+                GetDataEvent(
+                  () => context.read<RestClient>().getUser(
+                    limit: 5,
+                    searchString: value,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            const Text('Search results'),
+            Expanded(
+              child: ListView.builder(
+                key: const Key('listView'),
+                shrinkWrap: true,
+                physics: const AlwaysScrollableScrollPhysics(),
+                itemCount: users.length + 2,
+                controller: scrollController,
+                itemBuilder: (BuildContext context, int index) {
+                  if (index == 0) {
+                    return Visibility(
+                      visible: users.isEmpty,
+                      child: const Center(
+                        heightFactor: 20,
+                        child: Text(
+                          'No search items found (yet)',
+                          key: Key('empty'),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    );
+                  }
+                  index--;
+                  return index >= users.length
+                      ? const Text('')
+                      : Dismissible(
+                          key: const Key('searchItem'),
+                          direction: DismissDirection.startToEnd,
+                          child: ListTile(
+                            title: Text(
+                              "ID: ${users[index].pseudoId}\n"
+                              "First Name: ${users[index].firstName}\n"
+                              "Last Name: ${users[index].lastName}",
+                              key: Key("searchResult$index"),
+                            ),
+                            onTap: () =>
+                                Navigator.of(context).pop(users[index]),
+                          ),
+                        );
+                },
+              ),
+            ),
+          ],
         ),
-        child: popUp(
-            context: context,
-            title: 'User Search ',
-            height: 500,
-            width: 350,
-            child: Column(children: [
-              TextFormField(
-                  key: const Key('searchField'),
-                  textInputAction: TextInputAction.search,
-                  autofocus: true,
-                  decoration: const InputDecoration(labelText: "Search input"),
-                  validator: (value) {
-                    if (value!.isEmpty) {
-                      return 'Please enter a search value?';
-                    }
-                    return null;
-                  },
-                  onFieldSubmitted: (value) => _userBloc.add(GetDataEvent(() =>
-                      context
-                          .read<RestClient>()
-                          .getUser(limit: 5, searchString: value)))),
-              const SizedBox(height: 20),
-              const Text('Search results'),
-              Expanded(
-                  child: ListView.builder(
-                      key: const Key('listView'),
-                      shrinkWrap: true,
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      itemCount: users.length + 2,
-                      controller: scrollController,
-                      itemBuilder: (BuildContext context, int index) {
-                        if (index == 0) {
-                          return Visibility(
-                              visible: users.isEmpty,
-                              child: const Center(
-                                  heightFactor: 20,
-                                  child: Text('No search items found (yet)',
-                                      key: Key('empty'),
-                                      textAlign: TextAlign.center)));
-                        }
-                        index--;
-                        return index >= users.length
-                            ? const Text('')
-                            : Dismissible(
-                                key: const Key('searchItem'),
-                                direction: DismissDirection.startToEnd,
-                                child: ListTile(
-                                  title: Text(
-                                      "ID: ${users[index].pseudoId}\n"
-                                      "First Name: ${users[index].firstName}\n"
-                                      "Last Name: ${users[index].lastName}",
-                                      key: Key("searchResult$index")),
-                                  onTap: () =>
-                                      Navigator.of(context).pop(users[index]),
-                                ));
-                      }))
-            ])));
+      ),
+    );
   }
 }

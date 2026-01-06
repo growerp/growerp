@@ -578,32 +578,26 @@ class WebsiteDialogState extends State<WebsiteDialog> {
                     key: const Key('landingPageDropdown'),
                     items: _landingPages,
                     itemAsString: (LandingPage p) => p.title,
-                    popupProps: PopupProps.menu(
+                    popupProps: const PopupProps.menu(
                       showSearchBox: true,
                       searchFieldProps: TextFieldProps(
                         decoration: InputDecoration(
                           hintText: 'Search...',
                           isDense: true,
-                          contentPadding: const EdgeInsets.symmetric(
+                          contentPadding: EdgeInsets.symmetric(
                             horizontal: 8,
                             vertical: 8,
-                          ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(5),
                           ),
                         ),
                       ),
                     ),
-                    dropdownDecoratorProps: DropDownDecoratorProps(
+                    dropdownDecoratorProps: const DropDownDecoratorProps(
                       dropdownSearchDecoration: InputDecoration(
                         hintText: 'Select Page',
                         isDense: true,
-                        contentPadding: const EdgeInsets.symmetric(
+                        contentPadding: EdgeInsets.symmetric(
                           horizontal: 8,
                           vertical: 8,
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(5),
                         ),
                       ),
                     ),
@@ -647,15 +641,12 @@ class WebsiteDialogState extends State<WebsiteDialog> {
                 Expanded(
                   child: TextField(
                     controller: _checkoutAmountController,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       hintText: 'Amount',
                       isDense: true,
-                      contentPadding: const EdgeInsets.symmetric(
+                      contentPadding: EdgeInsets.symmetric(
                         horizontal: 8,
                         vertical: 8,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(5),
                       ),
                     ),
                   ),
@@ -720,9 +711,6 @@ class WebsiteDialogState extends State<WebsiteDialog> {
                     dropdownSearchDecoration: InputDecoration(
                       labelText: category.categoryName,
                       isDense: true,
-                      border: const OutlineInputBorder(
-                        borderRadius: _borderRadius,
-                      ),
                     ),
                   ),
                   dropdownBuilder: (context, selectedItems) =>

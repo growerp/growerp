@@ -52,6 +52,7 @@ class LocationState extends Equatable {
   List<Object?> get props => [locations, hasReachedMax, status];
 
   @override
-  String toString() => '$status { #locations: ${locations.length}, '
+  String toString() =>
+      '$status { #locations: ${locations.length}, '
       'hasReachedMax: $hasReachedMax message $message}';
 }

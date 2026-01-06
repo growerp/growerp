@@ -59,11 +59,11 @@ List<Category> csvToCategories(String csvFile) {
     if (row == result.first) continue;
     categories.add(
       Category(
-          categoryId: row[0],
-          categoryName: row[1],
-          description: row[2],
-          image:
-              row[3].isNotEmpty ? Uint8List.fromList(row[3].codeUnits) : null),
+        categoryId: row[0],
+        categoryName: row[1],
+        description: row[2],
+        image: row[3].isNotEmpty ? Uint8List.fromList(row[3].codeUnits) : null,
+      ),
     );
   }
 
@@ -73,12 +73,14 @@ List<Category> csvToCategories(String csvFile) {
 String csvFromCategories(List<Category> categories) {
   var csv = [categoryCsvFormat];
   for (Category category in categories) {
-    csv.add(createCsvRow([
-      category.categoryId,
-      category.categoryName,
-      category.description,
-      category.image != null ? category.image!.toList().toString() : '',
-    ], categoryCsvLength));
+    csv.add(
+      createCsvRow([
+        category.categoryId,
+        category.categoryName,
+        category.description,
+        category.image != null ? category.image!.toList().toString() : '',
+      ], categoryCsvLength),
+    );
   }
   return csv.join();
 }

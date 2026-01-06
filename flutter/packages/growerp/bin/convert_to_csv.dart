@@ -32,27 +32,34 @@ Future<void> main(List<String> args) async {
   FileType? requestedFileType;
 
   if (args.isEmpty) {
-    logger.e("Need at least a directory name with the GrowERP CSV formatted "
-        "files, and optionally:\n -f a fileType\n -start start date in "
-        "format yyyy/mm/dd\n -end and enddate in the same format"
-        "The default output directory is 'growerpOutput' and should not exist"
-        "It is possble to specify an output directory with the -out parameter");
+    logger.e(
+      "Need at least a directory name with the GrowERP CSV formatted "
+      "files, and optionally:\n -f a fileType\n -start start date in "
+      "format yyyy/mm/dd\n -end and enddate in the same format"
+      "The default output directory is 'growerpOutput' and should not exist"
+      "It is possble to specify an output directory with the -out parameter",
+    );
     exit(1);
   } else {
     final modifiedArgs = <String>[];
     for (int i = 0; i < args.length; i++) {
       switch (args[i]) {
         case '-start':
-          startDate = DateTime.parse("${args[++i].substring(0, 4)}-"
-              "${args[i].substring(5, 7)}-${args[i].substring(8, 10)} 00:00:00.000");
+          startDate = DateTime.parse(
+            "${args[++i].substring(0, 4)}-"
+            "${args[i].substring(5, 7)}-${args[i].substring(8, 10)} 00:00:00.000",
+          );
         case '-end':
-          endDate = DateTime.parse("${args[++i].substring(0, 4)}-"
-              "${args[i].substring(5, 7)}-${args[i].substring(8, 10)} 00:00:00.000");
+          endDate = DateTime.parse(
+            "${args[++i].substring(0, 4)}-"
+            "${args[i].substring(5, 7)}-${args[i].substring(8, 10)} 00:00:00.000",
+          );
         case '-f':
           i++;
           requestedFileType = FileType.values.firstWhere(
-              (e) => e.name == args[i],
-              orElse: () => FileType.unknown);
+            (e) => e.name == args[i],
+            orElse: () => FileType.unknown,
+          );
           if (requestedFileType == FileType.unknown) {
             logger.e("Filetype: ${args[i]}  not recognized");
             exit(1);
@@ -70,16 +77,19 @@ Future<void> main(List<String> args) async {
       exit(1);
     }
     inputDirectory = modifiedArgs[0];
-    logger.i("convertToCsv command: "
-        "input directory: $inputDirectory "
-        "output directory: $outputDirectory "
-        "startDate: ${startDate.toString()}  "
-        "endDate: ${endDate.toString()} -f ${requestedFileType?.name}");
+    logger.i(
+      "convertToCsv command: "
+      "input directory: $inputDirectory "
+      "output directory: $outputDirectory "
+      "startDate: ${startDate.toString()}  "
+      "endDate: ${endDate.toString()} -f ${requestedFileType?.name}",
+    );
   }
 
   if (isDirectory(outputDirectory) && args.length == 1) {
     logger.e(
-        "output directory $outputDirectory already exists, cannot overwrite");
+      "output directory $outputDirectory already exists, cannot overwrite",
+    );
     exit(1);
   }
 
@@ -92,10 +102,16 @@ Future<void> main(List<String> args) async {
     if (!isDirectory('$outputDirectory/images')) {
       createDir('$outputDirectory/images');
     }
-    copyTree('$inputDirectory/images', '$outputDirectory/images',
-        overwrite: true);
-    copy('$inputDirectory/images.csv', '$outputDirectory/images.csv',
-        overwrite: true);
+    copyTree(
+      '$inputDirectory/images',
+      '$outputDirectory/images',
+      overwrite: true,
+    );
+    copy(
+      '$inputDirectory/images.csv',
+      '$outputDirectory/images.csv',
+      overwrite: true,
+    );
     // get images file
     String imagesCsv = File('$inputDirectory/images.csv').readAsStringSync();
     images = fast_csv.parse(imagesCsv);
@@ -115,7 +131,8 @@ Future<void> main(List<String> args) async {
     }
     if (files.isEmpty) {
       logger.e(
-          "No ${searchFiles.join()} files found in directory $inputDirectory, skipping");
+        "No ${searchFiles.join()} files found in directory $inputDirectory, skipping",
+      );
     }
 
     // convert from CSV or XLSX or ODF to CSV rows
@@ -154,12 +171,19 @@ Future<void> main(List<String> args) async {
         if (fileInput.endsWith('.csv') && row == inputCsvFile.first) {
           continue; // header line
         }
-        List<String> convertedRow =
-            convertRow(fileType, row, fileInput, images, startDate, endDate);
+        List<String> convertedRow = convertRow(
+          fileType,
+          row,
+          fileInput,
+          images,
+          startDate,
+          endDate,
+        );
         if (convertedRow.isNotEmpty) convertedRows.add(convertedRow);
       }
       logger.i(
-          "filetype: ${fileType.name} file: $fileInput $index records processed");
+        "filetype: ${fileType.name} file: $fileInput $index records processed",
+      );
     }
 
     // prepare output files and run post processing like mandatory sort
@@ -185,8 +209,9 @@ Future<void> main(List<String> args) async {
         csvFormat = productCsvFormat;
         csvLength = productCsvLength;
         // remove doubles in the file
-        convertedRows
-            .sort((a, b) => (a.asMap()[0] ?? '').compareTo(b.asMap()[0] ?? ''));
+        convertedRows.sort(
+          (a, b) => (a.asMap()[0] ?? '').compareTo(b.asMap()[0] ?? ''),
+        );
         List<List<String>> temp = [];
         var last = [];
         for (final convertedRow in convertedRows) {
@@ -203,8 +228,9 @@ Future<void> main(List<String> args) async {
         csvFormat = userCsvFormat;
         csvLength = userCsvLength;
         // remove doubles
-        convertedRows
-            .sort((a, b) => (a.asMap()[0] ?? '').compareTo(b.asMap()[0] ?? ''));
+        convertedRows.sort(
+          (a, b) => (a.asMap()[0] ?? '').compareTo(b.asMap()[0] ?? ''),
+        );
         List<List<String>> users = [];
         var lastUser = [];
         for (final convertedRow in convertedRows) {
@@ -225,8 +251,9 @@ Future<void> main(List<String> args) async {
       case FileType.finDocShipmentIncoming:
         csvFormat = finDocCsvFormat;
         csvLength = finDocCsvLength;
-        convertedRows
-            .sort((a, b) => (a.asMap()[0] ?? '').compareTo(b.asMap()[0] ?? ''));
+        convertedRows.sort(
+          (a, b) => (a.asMap()[0] ?? '').compareTo(b.asMap()[0] ?? ''),
+        );
         // remove detail lines & create sequence Id
         List<String> lastRow = [];
         List<List<String>> headerRows = [];
@@ -288,8 +315,9 @@ Future<void> main(List<String> args) async {
       case FileType.finDocShipmentOutgoingItem:
         csvFormat = finDocItemCsvFormat;
         csvLength = finDocItemCsvLength;
-        convertedRows
-            .sort((a, b) => (a.asMap()[0] ?? '').compareTo(b.asMap()[0] ?? ''));
+        convertedRows.sort(
+          (a, b) => (a.asMap()[0] ?? '').compareTo(b.asMap()[0] ?? ''),
+        );
         // replace id by sequential number
         List<List<String>> itemRows = [];
         List<String> lastRow = [];
@@ -338,10 +366,12 @@ Future<void> main(List<String> args) async {
         fileContent.insert(0, csvFormat);
         // create file
         final file = File(
-            "$outputDirectory/${fileType.name}-${(++fileIndex).toString().padLeft(3, '0')}.csv");
+          "$outputDirectory/${fileType.name}-${(++fileIndex).toString().padLeft(3, '0')}.csv",
+        );
         file.writeAsStringSync(fileContent.join());
         logger.i(
-            "Output file created: ${fileType.name}-${(fileIndex).toString().padLeft(3, '0')}.csv ${fileContent.length} records");
+          "Output file created: ${fileType.name}-${(fileIndex).toString().padLeft(3, '0')}.csv ${fileContent.length} records",
+        );
         // start new file
         fileContent = [];
       }
@@ -352,10 +382,12 @@ Future<void> main(List<String> args) async {
     if (fileContent.isNotEmpty) {
       fileContent.insert(0, csvFormat);
       final file = File(
-          "$outputDirectory/${fileType.name}-${(++fileIndex).toString().padLeft(3, '0')}.csv");
+        "$outputDirectory/${fileType.name}-${(++fileIndex).toString().padLeft(3, '0')}.csv",
+      );
       file.writeAsStringSync(fileContent.join());
       logger.i(
-          "Output file created: ${fileType.name}-${(fileIndex).toString().padLeft(3, '0')}.csv ${fileContent.length} records");
+        "Output file created: ${fileType.name}-${(fileIndex).toString().padLeft(3, '0')}.csv ${fileContent.length} records",
+      );
     }
   }
   exit(0);

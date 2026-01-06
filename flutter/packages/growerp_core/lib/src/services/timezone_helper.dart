@@ -45,15 +45,19 @@ class TimeZoneHelper {
   }
 
   /// Format a DateTime for display in local timezone
-  static String formatLocalDate(DateTime? dateTime,
-      {String format = 'yyyy/M/d'}) {
+  static String formatLocalDate(
+    DateTime? dateTime, {
+    String format = 'yyyy/M/d',
+  }) {
     if (dateTime == null) return '';
     return DateFormat(format).format(dateTime.toLocal());
   }
 
   /// Format a DateTime for display with time in local timezone
-  static String formatLocalDateTime(DateTime? dateTime,
-      {String format = 'yyyy/M/d HH:mm'}) {
+  static String formatLocalDateTime(
+    DateTime? dateTime, {
+    String format = 'yyyy/M/d HH:mm',
+  }) {
     if (dateTime == null) return '';
     return DateFormat(format).format(dateTime.toLocal());
   }

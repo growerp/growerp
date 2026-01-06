@@ -48,17 +48,17 @@ class FinDocFetch extends FinDocEvent {
 
   @override
   List<Object> get props => [
-        customerCompanyPartyId,
-        searchString,
-        refresh,
-        finDocId ?? '',
-        pseudoId ?? '',
-        docType ?? '',
-        sales ?? false,
-        journalId ?? '',
-        limit,
-        my
-      ];
+    customerCompanyPartyId,
+    searchString,
+    refresh,
+    finDocId ?? '',
+    pseudoId ?? '',
+    docType ?? '',
+    sales ?? false,
+    journalId ?? '',
+    limit,
+    my,
+  ];
 }
 
 class FinDocUpdate extends FinDocEvent {
@@ -85,8 +85,11 @@ class FinDocGetItemTypes extends FinDocEvent {
 }
 
 class FinDocUpdateItemType extends FinDocEvent {
-  const FinDocUpdateItemType(
-      {required this.itemType, this.update, this.delete});
+  const FinDocUpdateItemType({
+    required this.itemType,
+    this.update,
+    this.delete,
+  });
   final ItemType itemType;
   final bool? update;
   final bool? delete;
@@ -99,8 +102,11 @@ class FinDocGetPaymentTypes extends FinDocEvent {
 }
 
 class FinDocUpdatePaymentType extends FinDocEvent {
-  const FinDocUpdatePaymentType(
-      {required this.paymentType, this.update, this.delete});
+  const FinDocUpdatePaymentType({
+    required this.paymentType,
+    this.update,
+    this.delete,
+  });
   final PaymentType paymentType;
   final bool? update;
   final bool? delete;

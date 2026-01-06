@@ -282,7 +282,9 @@ class WebsiteContentState extends State<WebsiteContent> {
                   child: OutlinedButton(
                     key: const Key('update'),
                     child: Text(
-                      widget.content.path.isEmpty ? _localizations.create : _localizations.update,
+                      widget.content.path.isEmpty
+                          ? _localizations.create
+                          : _localizations.update,
                     ),
                     onPressed: () async {
                       if (_websiteContFormKey.currentState!.validate()) {
@@ -384,7 +386,11 @@ class WebsiteContentState extends State<WebsiteContent> {
         const SizedBox(height: 10),
         OutlinedButton(
           key: const Key('update'),
-          child: Text(widget.content.path.isEmpty ? _localizations.create : _localizations.update),
+          child: Text(
+            widget.content.path.isEmpty
+                ? _localizations.create
+                : _localizations.update,
+          ),
           onPressed: () async {
             if (newData != '') {
               _contentBloc.add(

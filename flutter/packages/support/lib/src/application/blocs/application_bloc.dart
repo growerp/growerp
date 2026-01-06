@@ -31,11 +31,11 @@ EventTransformer<E> applicationDroppable<E>(Duration duration) {
 }
 
 class ApplicationBloc extends Bloc<ApplicationEvent, ApplicationState> {
-  ApplicationBloc(
-    this.restClient,
-  ) : super(const ApplicationState()) {
-    on<ApplicationFetch>(_onApplicationFetch,
-        transformer: applicationDroppable(const Duration(milliseconds: 100)));
+  ApplicationBloc(this.restClient) : super(const ApplicationState()) {
+    on<ApplicationFetch>(
+      _onApplicationFetch,
+      transformer: applicationDroppable(const Duration(milliseconds: 100)),
+    );
     on<ApplicationUpdate>(_onApplicationUpdate);
     on<ApplicationDelete>(_onApplicationDelete);
   }
@@ -59,15 +59,21 @@ class ApplicationBloc extends Bloc<ApplicationEvent, ApplicationState> {
     }
     try {
       Applications appResult = await restClient.getApplication();
-      emit(state.copyWith(
-        status: ApplicationStatus.success,
-        applications: current..addAll(appResult.applications),
-        hasReachedMax: appResult.applications.length < event.limit,
-        searchString: '',
-      ));
+      emit(
+        state.copyWith(
+          status: ApplicationStatus.success,
+          applications: current..addAll(appResult.applications),
+          hasReachedMax: appResult.applications.length < event.limit,
+          searchString: '',
+        ),
+      );
     } on DioException catch (e) {
-      emit(state.copyWith(
-          status: ApplicationStatus.failure, message: await getDioError(e)));
+      emit(
+        state.copyWith(
+          status: ApplicationStatus.failure,
+          message: await getDioError(e),
+        ),
+      );
     }
   }
 
@@ -82,38 +88,49 @@ class ApplicationBloc extends Bloc<ApplicationEvent, ApplicationState> {
       if (event.application.applicationId.isNotEmpty) {
         // This is an update, but the API doesn't have an update method
         // We'll delete and re-add the application in the backend
-        Application appResult =
-            await restClient.createApplication(event.application);
+        Application appResult = await restClient.createApplication(
+          event.application,
+        );
 
-        int index = applications.indexWhere((element) =>
-            element.applicationId == event.application.applicationId);
+        int index = applications.indexWhere(
+          (element) => element.applicationId == event.application.applicationId,
+        );
         if (index != -1) {
           applications[index] = appResult;
         } else {
           applications.insert(0, appResult);
         }
 
-        emit(state.copyWith(
+        emit(
+          state.copyWith(
             status: ApplicationStatus.success,
             applications: applications,
-            message:
-                'Application ${event.application.applicationId} updated!'));
+            message: 'Application ${event.application.applicationId} updated!',
+          ),
+        );
       } else {
         // add
-        Application appResult =
-            await restClient.createApplication(event.application);
+        Application appResult = await restClient.createApplication(
+          event.application,
+        );
 
         applications.insert(0, appResult);
-        emit(state.copyWith(
+        emit(
+          state.copyWith(
             status: ApplicationStatus.success,
             applications: applications,
-            message: 'Application ${event.application.applicationId} added!'));
+            message: 'Application ${event.application.applicationId} added!',
+          ),
+        );
       }
     } on DioException catch (e) {
-      emit(state.copyWith(
+      emit(
+        state.copyWith(
           status: ApplicationStatus.failure,
           applications: [],
-          message: await getDioError(e)));
+          message: await getDioError(e),
+        ),
+      );
     }
   }
 
@@ -126,18 +143,25 @@ class ApplicationBloc extends Bloc<ApplicationEvent, ApplicationState> {
       List<Application> applications = List.from(state.applications);
 
       await restClient.deleteApplication(event.application);
-      int index = applications.indexWhere((element) =>
-          element.applicationId == event.application.applicationId);
+      int index = applications.indexWhere(
+        (element) => element.applicationId == event.application.applicationId,
+      );
       applications.removeAt(index);
-      emit(state.copyWith(
+      emit(
+        state.copyWith(
           status: ApplicationStatus.success,
           applications: applications,
-          message: 'Application ${event.application.applicationId} deleted!'));
+          message: 'Application ${event.application.applicationId} deleted!',
+        ),
+      );
     } on DioException catch (e) {
-      emit(state.copyWith(
+      emit(
+        state.copyWith(
           status: ApplicationStatus.failure,
           applications: [],
-          message: await getDioError(e)));
+          message: await getDioError(e),
+        ),
+      );
     }
   }
 }

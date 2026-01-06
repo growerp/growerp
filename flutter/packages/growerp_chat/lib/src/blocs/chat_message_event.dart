@@ -25,12 +25,13 @@ class ChatMessageFetch extends ChatMessageEvent {
   final bool refresh;
   final int limit;
   final String searchString;
-  ChatMessageFetch(
-      {required this.chatRoomId,
-      required this.chatRoomName,
-      this.refresh = false,
-      this.limit = 20,
-      this.searchString = ''});
+  ChatMessageFetch({
+    required this.chatRoomId,
+    required this.chatRoomName,
+    this.refresh = false,
+    this.limit = 20,
+    this.searchString = '',
+  });
   @override
   String toString() =>
       "ChatMessageFetch refresh: $refresh limit: $limit, search: $searchString";
