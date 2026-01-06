@@ -349,7 +349,7 @@ class FlutterMcpBrowserService {
 
     try {
       final result = await client.callTool(
-        CallToolRequestParams(name: tool, arguments: params),
+        CallToolRequest(name: tool, arguments: params),
       );
 
       // Parse the result content

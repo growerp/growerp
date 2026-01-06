@@ -83,16 +83,18 @@ class RestRequestDetailDialog extends StatelessWidget {
                 restRequest.wasError == true
                     ? localizations.error
                     : localizations.success,
-                valueColor:
-                    restRequest.wasError == true ? Colors.red : Colors.green,
+                valueColor: restRequest.wasError == true
+                    ? Colors.red
+                    : Colors.green,
               ),
               _buildDetailRow(
                 localizations.slowHit,
                 restRequest.isSlowHit == true
                     ? localizations.yes
                     : localizations.no,
-                valueColor:
-                    restRequest.isSlowHit == true ? Colors.orange : Colors.green,
+                valueColor: restRequest.isSlowHit == true
+                    ? Colors.orange
+                    : Colors.green,
               ),
               if (restRequest.errorMessage?.isNotEmpty == true) ...[
                 const SizedBox(height: 10),

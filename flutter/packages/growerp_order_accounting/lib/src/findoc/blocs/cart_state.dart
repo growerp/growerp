@@ -47,7 +47,8 @@ class CartState extends Equatable {
   List<Object?> get props => [status, finDoc, message];
 
   @override
-  String toString() => '$status { ${finDoc.sales ? "Sales" : "Purchase"} '
+  String toString() =>
+      '$status { ${finDoc.sales ? "Sales" : "Purchase"} '
       '${finDoc.docType} #items: ${finDoc.items.length}, '
       'message $message}';
 }

@@ -41,20 +41,23 @@ class CompanyUserTest {
   }
 
   static Future<void> updateUsers(
-      WidgetTester tester, List<User> newUsers) async {
+    WidgetTester tester,
+    List<User> newUsers,
+  ) async {
     SaveTest test = await PersistFunctions.getTest(backup: false);
 
-    expect(newUsers.length, greaterThanOrEqualTo(test.users.length),
-        reason:
-            'Number of Users to update (${newUsers.length}) should be at least the number of current users(${test.users.length})');
+    expect(
+      newUsers.length,
+      greaterThanOrEqualTo(test.users.length),
+      reason:
+          'Number of Users to update (${newUsers.length}) should be at least the number of current users(${test.users.length})',
+    );
     int start = newUsers.length - test.users.length;
     await UserTest.updateUsers(
-        tester,
-        newUsers.sublist(
-          start,
-          start + test.users.length,
-        ),
-        companyUser: true);
+      tester,
+      newUsers.sublist(start, start + test.users.length),
+      companyUser: true,
+    );
 
     // users with a company will now show in the list
     // as a company with an employee
@@ -74,20 +77,25 @@ class CompanyUserTest {
   }
 
   static Future<void> updateCompanies(
-      WidgetTester tester, List<Company> newCompanies) async {
+    WidgetTester tester,
+    List<Company> newCompanies,
+  ) async {
     SaveTest test = await PersistFunctions.getTest(backup: false);
 
-    expect(newCompanies.length, greaterThanOrEqualTo(test.companies.length),
-        reason:
-            'Number of Companies to update (${newCompanies.length}) should be at least the number of current companies(${test.companies.length}) ');
+    expect(
+      newCompanies.length,
+      greaterThanOrEqualTo(test.companies.length),
+      reason:
+          'Number of Companies to update (${newCompanies.length}) should be at least the number of current companies(${test.companies.length}) ',
+    );
     int start = newCompanies.length - test.companies.length;
     await CompanyTest.updateCompanies(
-        tester, newCompanies.sublist(start, start + test.companies.length));
+      tester,
+      newCompanies.sublist(start, start + test.companies.length),
+    );
   }
 
-  static Future<void> checkCompaniesUsers(
-    WidgetTester tester,
-  ) async {
+  static Future<void> checkCompaniesUsers(WidgetTester tester) async {
     await UserTest.checkUsers(tester);
     await CompanyTest.checkCompanies(tester);
   }

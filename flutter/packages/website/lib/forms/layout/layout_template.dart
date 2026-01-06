@@ -16,7 +16,7 @@ class LayoutTemplate extends StatelessWidget {
             children: <Widget>[
               const NavigationMenu(),
               const SizedBox(height: 20),
-              Expanded(child: form)
+              Expanded(child: form),
             ],
           ),
         ),

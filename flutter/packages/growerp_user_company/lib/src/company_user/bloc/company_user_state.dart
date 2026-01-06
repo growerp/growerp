@@ -39,7 +39,8 @@ class CompanyUserState extends Equatable {
   List<Object> get props => [status];
 
   @override
-  String toString() => '$status { #companiesUsers: ${companiesUsers.length}, '
+  String toString() =>
+      '$status { #companiesUsers: ${companiesUsers.length}, '
       'hasReachedMax: $hasReachedMax message $message} '
       'company: ${company?.name} user: ${user?.lastName}';
 

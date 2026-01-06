@@ -47,6 +47,7 @@ class LedgerState extends Equatable {
   List<Object?> get props => [status, ledgerReport, timePeriods];
 
   @override
-  String toString() => '$status { title: ${ledgerReport?.title}, '
+  String toString() =>
+      '$status { title: ${ledgerReport?.title}, '
       'message $message}';
 }

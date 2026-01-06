@@ -32,7 +32,9 @@ class PersistMarketingTest {
       String? result = prefs.getString(_testName);
       if (result != null) {
         return getJsonObject<MarketingTest>(
-            result, (json) => MarketingTest.fromJson(json));
+          result,
+          (json) => MarketingTest.fromJson(json),
+        );
       }
       return MarketingTest();
     } catch (_) {

@@ -35,7 +35,8 @@ class AppNavObserver extends NavigatorObserver {
     }
     super.didReplace(newRoute: newRoute, oldRoute: oldRoute);
   }
-/*
+
+  /*
   @override
   void didStartUserGesture(Route route, Route? previousRoute) {
     //  implement didStartUserGesture
@@ -54,10 +55,7 @@ class RouteStackItem {
   final String? name;
   final Object? args;
 
-  const RouteStackItem({
-    required this.name,
-    required this.args,
-  });
+  const RouteStackItem({required this.name, required this.args});
 
   factory RouteStackItem.fromRoute(Route route) =>
       RouteStackItem(name: route.settings.name, args: route.settings.arguments);

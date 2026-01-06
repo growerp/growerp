@@ -380,7 +380,6 @@ class SearchContentPlanDialogState extends State<SearchContentPlanDialog> {
               decoration: InputDecoration(
                 labelText: 'Search by ID or Theme',
                 hintText: 'Enter content plan ID or theme',
-                
                 suffixIcon: IconButton(
                   icon: const Icon(Icons.clear),
                   onPressed: () {
@@ -518,7 +517,6 @@ class GenerateContentPlanDialogState extends State<GenerateContentPlanDialog> {
                       decoration: const InputDecoration(
                         labelText: 'Select Persona *',
                         hintText: 'Choose a persona to generate content for',
-                        
                       ),
                       initialValue: _selectedPersona,
                       isExpanded: true,
@@ -551,7 +549,6 @@ class GenerateContentPlanDialogState extends State<GenerateContentPlanDialog> {
                   child: InputDecorator(
                     decoration: const InputDecoration(
                       labelText: 'Week Start Date (Optional)',
-                      
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,

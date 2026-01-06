@@ -27,10 +27,12 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m2(String screen) => "Screen ${screen} not found";
 
-  final Map<String, Function> messages = _notInlinedMessages(_notInlinedMessages);
+  final Map<String, Function> messages = _notInlinedMessages(
+    _notInlinedMessages,
+  );
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
-        "classificationNotDefined": m0,
-        "pageHomeWelcome": m1,
-        "screenNotFound": m2
-      };
+    "classificationNotDefined": m0,
+    "pageHomeWelcome": m1,
+    "screenNotFound": m2,
+  };
 }

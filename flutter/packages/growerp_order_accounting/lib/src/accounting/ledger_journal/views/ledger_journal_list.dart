@@ -64,7 +64,9 @@ class LedgerJournalsState extends State<LedgerJournalList> {
         switch (state.status) {
           case LedgerJournalStatus.failure:
             return Center(
-              child: Text('${_localizations.getLedgerJournalFail} ${state.message}'),
+              child: Text(
+                '${_localizations.getLedgerJournalFail} ${state.message}',
+              ),
             );
           case LedgerJournalStatus.success:
             return Stack(

@@ -5,8 +5,9 @@ Route<dynamic>? orderAccountingRoute(RouteSettings settings) {
   switch (settings.name) {
     case '/findoc/upload':
       return MaterialPageRoute(
-          settings: settings,
-          builder: (context) => const InvoiceUploadView());
+        settings: settings,
+        builder: (context) => const InvoiceUploadView(),
+      );
     default:
       return null;
   }

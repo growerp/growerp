@@ -172,7 +172,9 @@ class CompanyListState extends State<CompanyList> {
           if (state.status == CompanyStatus.success) {
             final translatedMessage = state.message != null
                 ? translateUserCompanyBlocMessage(
-                    _localizations, state.message!)
+                    _localizations,
+                    state.message!,
+                  )
                 : '';
             if (translatedMessage.isNotEmpty) {
               HelperFunctions.showMessage(

@@ -45,7 +45,8 @@ enum ActivityStatus {
   }
 
   static List<ActivityStatus> validActivityStatusList(
-      ActivityStatus? currentStatus) {
+    ActivityStatus? currentStatus,
+  ) {
     currentStatus ??= planning;
     switch (currentStatus) {
       case planning:

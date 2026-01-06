@@ -29,28 +29,40 @@ class PrintingForm extends StatelessWidget {
     late Authenticate authenticate;
 
     return BlocProvider<FinDocBloc>(
-        create: (context) => FinDocBloc(context.read<RestClient>(),
-            finDocIn.sales, finDocIn.docType!, context.read<String>())
-          ..add(FinDocFetch(
-              finDocId: finDocIn.id()!, docType: finDocIn.docType!)),
-        child: BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
+      create: (context) => FinDocBloc(
+        context.read<RestClient>(),
+        finDocIn.sales,
+        finDocIn.docType!,
+        context.read<String>(),
+      )..add(FinDocFetch(finDocId: finDocIn.id()!, docType: finDocIn.docType!)),
+      child: BlocBuilder<AuthBloc, AuthState>(
+        builder: (context, state) {
           if (state.status == AuthStatus.authenticated) {
             authenticate = state.authenticate!;
           }
-          return Stack(children: [
-            PdfPreview(
-              build: (format) =>
-                  PdfFormats.finDocPdf(format, authenticate.company!, finDocIn),
-            ),
-            SizedBox(
+          return Stack(
+            children: [
+              PdfPreview(
+                build: (format) => PdfFormats.finDocPdf(
+                  format,
+                  authenticate.company!,
+                  finDocIn,
+                ),
+              ),
+              SizedBox(
                 height: 100,
                 child: OutlinedButton(
-                    key: const Key('back'),
-                    child: const Icon(Icons.arrow_back),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    })),
-          ]);
-        }));
+                  key: const Key('back'),
+                  child: const Icon(Icons.arrow_back),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
   }
 }

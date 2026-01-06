@@ -52,6 +52,7 @@ class UserState extends Equatable {
   List<Object?> get props => [status, message, users, hasReachedMax];
 
   @override
-  String toString() => '$status { #users: ${users.length}, '
+  String toString() =>
+      '$status { #users: ${users.length}, '
       'hasReachedMax: $hasReachedMax message $message}';
 }

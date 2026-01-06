@@ -256,7 +256,6 @@ class ContentPlanDetailScreenState extends State<ContentPlanDetailScreen> {
                           child: InputDecorator(
                             decoration: const InputDecoration(
                               labelText: 'Week Start Date',
-                              
                             ),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,

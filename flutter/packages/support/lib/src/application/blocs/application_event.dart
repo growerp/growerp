@@ -21,8 +21,11 @@ abstract class ApplicationEvent extends Equatable {
 }
 
 class ApplicationFetch extends ApplicationEvent {
-  const ApplicationFetch(
-      {this.searchString = '', this.refresh = false, this.limit = 20});
+  const ApplicationFetch({
+    this.searchString = '',
+    this.refresh = false,
+    this.limit = 20,
+  });
 
   final String searchString;
   final bool refresh;

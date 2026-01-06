@@ -27,7 +27,8 @@ String timeEntryToJson(TimeEntry data) =>
     '{"timeEntry":' + json.encode(data.toJson()) + "}";
 
 List<TimeEntry> timeEntriesFromJson(String str) => List<TimeEntry>.from(
-    json.decode(str)["timeEntries"].map((x) => TimeEntry.fromJson(x)));
+  json.decode(str)["timeEntries"].map((x) => TimeEntry.fromJson(x)),
+);
 
 @freezed
 abstract class TimeEntry with _$TimeEntry {

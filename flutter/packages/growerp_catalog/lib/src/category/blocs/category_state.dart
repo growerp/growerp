@@ -53,10 +53,16 @@ class CategoryState extends Equatable {
   }
 
   @override
-  List<Object?> get props =>
-      [status, message, categories, companyPartyId, hasReachedMax];
+  List<Object?> get props => [
+    status,
+    message,
+    categories,
+    companyPartyId,
+    hasReachedMax,
+  ];
 
   @override
-  String toString() => '$status { #categories: ${categories.length}, '
+  String toString() =>
+      '$status { #categories: ${categories.length}, '
       'hasReachedMax: $hasReachedMax message $message}';
 }

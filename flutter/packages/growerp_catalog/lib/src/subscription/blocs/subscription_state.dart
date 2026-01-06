@@ -52,10 +52,16 @@ class SubscriptionState extends Equatable {
   }
 
   @override
-  List<Object?> get props =>
-      [status, message, subscriptions, searchResults, hasReachedMax];
+  List<Object?> get props => [
+    status,
+    message,
+    subscriptions,
+    searchResults,
+    hasReachedMax,
+  ];
 
   @override
-  String toString() => '$status { #subscriptions: ${subscriptions.length}, '
+  String toString() =>
+      '$status { #subscriptions: ${subscriptions.length}, '
       'hasReachedMax: $hasReachedMax message $message}';
 }

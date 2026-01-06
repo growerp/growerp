@@ -52,6 +52,7 @@ class LedgerJournalState extends Equatable {
   List<Object?> get props => [message, ledgerJournals, hasReachedMax];
 
   @override
-  String toString() => '$status { #ledgerJournals: ${ledgerJournals.length}, '
+  String toString() =>
+      '$status { #ledgerJournals: ${ledgerJournals.length}, '
       'hasReachedMax: $hasReachedMax message $message}';
 }

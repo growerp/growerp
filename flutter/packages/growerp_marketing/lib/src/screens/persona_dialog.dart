@@ -92,7 +92,6 @@ class PersonaDialogState extends State<PersonaDialog> {
                   decoration: const InputDecoration(
                     labelText: 'ID',
                     hintText: 'Leave empty to auto-generate',
-                    
                   ),
                   enabled:
                       widget.persona == null, // Only editable when creating
@@ -104,7 +103,6 @@ class PersonaDialogState extends State<PersonaDialog> {
                   decoration: const InputDecoration(
                     labelText: 'Persona Name *',
                     hintText: 'e.g., Alex Johnson',
-                    
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -120,7 +118,6 @@ class PersonaDialogState extends State<PersonaDialog> {
                   decoration: const InputDecoration(
                     labelText: 'Demographics',
                     hintText: 'Age, occupation, location, etc.',
-                    
                   ),
                   maxLines: 2,
                 ),
@@ -131,7 +128,6 @@ class PersonaDialogState extends State<PersonaDialog> {
                   decoration: const InputDecoration(
                     labelText: 'Pain Points',
                     hintText: 'What challenges does this persona face?',
-                    
                   ),
                   maxLines: 3,
                 ),
@@ -142,7 +138,6 @@ class PersonaDialogState extends State<PersonaDialog> {
                   decoration: const InputDecoration(
                     labelText: 'Goals',
                     hintText: 'What does this persona want to achieve?',
-                    
                   ),
                   maxLines: 3,
                 ),
@@ -153,7 +148,6 @@ class PersonaDialogState extends State<PersonaDialog> {
                   decoration: const InputDecoration(
                     labelText: 'Tone of Voice',
                     hintText: 'e.g., Professional yet approachable',
-                    
                   ),
                   maxLines: 2,
                 ),

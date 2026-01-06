@@ -49,7 +49,8 @@ abstract class FinDocItem with _$FinDocItem {
       _$FinDocItemFromJson(json['finDocItem'] ?? json);
 }
 
-String finDocItemCsvFormat = "finDoc Id, finDocType, reference, "
+String finDocItemCsvFormat =
+    "finDoc Id, finDocType, reference, "
     " productId, description, quantity, price/amount, accountCode, "
     " isDebit, itemType, paymentType, \r\n";
 List<String> finDocItemCsvTitles = finDocItemCsvFormat.split(',');
@@ -62,30 +63,34 @@ List<FinDocItem> csvToFinDocItems(String csvFile, Logger logger) {
   for (final row in result) {
     if (row == result.first || row[0].isEmpty) continue;
     try {
-      finDocItems.add(FinDocItem(
-        pseudoId: row[0],
-        docType: FinDocType.tryParse(row[1]),
-        itemSeqId: row[2],
-        product: Product(pseudoId: row[3]),
-        description: row[4],
-        quantity: row[5] != 'null' && row[5].isNotEmpty
-            ? Decimal.parse(row[5])
-            : null,
-        price: row[6] != 'null' && row[6].isNotEmpty
-            ? Decimal.parse(row[6].replaceAll(',', ''))
-            : null,
-        glAccount: GlAccount(accountCode: row[7]),
-        isDebit: row[8] == 'false' ? false : true,
-        itemType: ItemType(itemTypeId: row[9]),
-        paymentType: PaymentType(paymentTypeId: row[9]),
-      ));
+      finDocItems.add(
+        FinDocItem(
+          pseudoId: row[0],
+          docType: FinDocType.tryParse(row[1]),
+          itemSeqId: row[2],
+          product: Product(pseudoId: row[3]),
+          description: row[4],
+          quantity: row[5] != 'null' && row[5].isNotEmpty
+              ? Decimal.parse(row[5])
+              : null,
+          price: row[6] != 'null' && row[6].isNotEmpty
+              ? Decimal.parse(row[6].replaceAll(',', ''))
+              : null,
+          glAccount: GlAccount(accountCode: row[7]),
+          isDebit: row[8] == 'false' ? false : true,
+          itemType: ItemType(itemTypeId: row[9]),
+          paymentType: PaymentType(paymentTypeId: row[9]),
+        ),
+      );
     } catch (e) {
       String fieldList = '';
-      finDocItemCsvTitles
-          .asMap()
-          .forEach((index, value) => fieldList += "$value: ${row[index]}\n");
-      logger.e("Error processing findoc item csv line: $fieldList \n"
-          "error message: $e");
+      finDocItemCsvTitles.asMap().forEach(
+        (index, value) => fieldList += "$value: ${row[index]}\n",
+      );
+      logger.e(
+        "Error processing findoc item csv line: $fieldList \n"
+        "error message: $e",
+      );
       if (errors++ == 5) exit(1);
     }
   }
@@ -95,19 +100,21 @@ List<FinDocItem> csvToFinDocItems(String csvFile, Logger logger) {
 String csvFromFinDocItems(List<FinDocItem> finDocItems) {
   var csv = [finDocItemCsvFormat];
   for (FinDocItem finDocItem in finDocItems) {
-    csv.add(createCsvRow([
-      finDocItem.pseudoId ?? '',
-      finDocItem.docType.toString(),
-      finDocItem.itemSeqId.toString(),
-      finDocItem.product?.pseudoId ?? '',
-      finDocItem.description ?? '',
-      finDocItem.quantity?.toString() ?? '',
-      finDocItem.price?.toString() ?? '',
-      finDocItem.glAccount?.accountCode ?? '',
-      finDocItem.isDebit?.toString() ?? '',
-      finDocItem.itemType!.itemTypeId,
-      finDocItem.paymentType!.paymentTypeId,
-    ], finDocItemCsvLength));
+    csv.add(
+      createCsvRow([
+        finDocItem.pseudoId ?? '',
+        finDocItem.docType.toString(),
+        finDocItem.itemSeqId.toString(),
+        finDocItem.product?.pseudoId ?? '',
+        finDocItem.description ?? '',
+        finDocItem.quantity?.toString() ?? '',
+        finDocItem.price?.toString() ?? '',
+        finDocItem.glAccount?.accountCode ?? '',
+        finDocItem.isDebit?.toString() ?? '',
+        finDocItem.itemType!.itemTypeId,
+        finDocItem.paymentType!.paymentTypeId,
+      ], finDocItemCsvLength),
+    );
   }
   return csv.join();
 }

@@ -20,16 +20,22 @@ import 'package:growerp_inventory/growerp_inventory.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
 
-TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
-    Location item, int index,
-    {dynamic extra}) {
+TableData getTableData(
+  Bloc bloc,
+  String classificationId,
+  BuildContext context,
+  Location item,
+  int index, {
+  dynamic extra,
+}) {
   List<TableRowContent> rowContent = [];
   Decimal qohTotal = Decimal.zero;
   for (Asset asset in item.assets) {
     qohTotal += asset.quantityOnHand ?? Decimal.zero;
   }
   if (isPhone(context)) {
-    rowContent.add(TableRowContent(
+    rowContent.add(
+      TableRowContent(
         name: 'ShortId',
         width: 15,
         value: CircleAvatar(
@@ -39,54 +45,75 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
             item.pseudoId == null ? '' : item.pseudoId!.lastChar(3),
             style: TextStyle(color: Theme.of(context).colorScheme.onSecondary),
           ),
-        )));
+        ),
+      ),
+    );
   }
-  rowContent.add(TableRowContent(
+  rowContent.add(
+    TableRowContent(
       name: 'Loc Id',
       width: isPhone(context) ? 15 : 10,
-      value: Text(item.pseudoId ?? '', key: Key('id$index'))));
-  rowContent.add(TableRowContent(
+      value: Text(item.pseudoId ?? '', key: Key('id$index')),
+    ),
+  );
+  rowContent.add(
+    TableRowContent(
       name: 'Name',
       width: isPhone(context) ? 30 : 30,
-      value: Text(item.locationName ?? '', key: Key('name$index'))));
-  rowContent.add(TableRowContent(
-    name: const Text(
-      'Qty.',
-      textAlign: TextAlign.right,
+      value: Text(item.locationName ?? '', key: Key('name$index')),
     ),
-    width: isPhone(context) ? 16 : 15,
-    value: Text(
-      qohTotal.toString(),
-      key: Key('qoh$index'),
-      textAlign: TextAlign.right,
+  );
+  rowContent.add(
+    TableRowContent(
+      name: const Text('Qty.', textAlign: TextAlign.right),
+      width: isPhone(context) ? 16 : 15,
+      value: Text(
+        qohTotal.toString(),
+        key: Key('qoh$index'),
+        textAlign: TextAlign.right,
+      ),
     ),
-  ));
+  );
   if (!isPhone(context)) {
-    rowContent.add(TableRowContent(
+    rowContent.add(
+      TableRowContent(
         name: const Text('#Assets'),
         width: 10,
-        value: Text(item.assets.length.toString(),
-            key: Key('assetsCount$index'))));
+        value: Text(
+          item.assets.length.toString(),
+          key: Key('assetsCount$index'),
+        ),
+      ),
+    );
   }
-  rowContent.add(TableRowContent(
+  rowContent.add(
+    TableRowContent(
       width: isPhone(context) ? 15 : 15,
       name: ' ',
       value: IconButton(
-          visualDensity: VisualDensity.compact,
-          padding: EdgeInsets.zero,
-          key: Key('delete$index'),
-          icon: const Icon(Icons.delete_forever),
-          tooltip: 'remove item',
-          onPressed: () async {
-            bool? result = await confirmDialog(
-                context, "delete ${item.pseudoId ?? ''}?", "cannot be undone!");
-            if (result == true) {
-              bloc.add(LocationDelete(item));
-            }
-          })));
+        visualDensity: VisualDensity.compact,
+        padding: EdgeInsets.zero,
+        key: Key('delete$index'),
+        icon: const Icon(Icons.delete_forever),
+        tooltip: 'remove item',
+        onPressed: () async {
+          bool? result = await confirmDialog(
+            context,
+            "delete ${item.pseudoId ?? ''}?",
+            "cannot be undone!",
+          );
+          if (result == true) {
+            bloc.add(LocationDelete(item));
+          }
+        },
+      ),
+    ),
+  );
 
   return TableData(
-      rowHeight: isPhone(context) ? 36 : 20, rowContent: rowContent);
+    rowHeight: isPhone(context) ? 36 : 20,
+    rowContent: rowContent,
+  );
 }
 
 // general settings

@@ -43,30 +43,38 @@ class _FilesHeaderState extends State<GlAccountFilesDialog> {
   Widget build(BuildContext context) {
     _localizations = OrderAccountingLocalizations.of(context)!;
     return BlocConsumer<GlAccountBloc, GlAccountState>(
-        listener: (context, state) async {
-      if (state.status == GlAccountStatus.failure) {
-        HelperFunctions.showMessage(context, '${state.message}', Colors.red);
-      }
-      if (state.status == GlAccountStatus.success) {
-        HelperFunctions.showMessage(context, '${state.message}', Colors.green);
-        Navigator.of(context).pop();
-      }
-    }, builder: (context, state) {
-      return Stack(children: [
-        popUpDialog(
-            context: context,
-            title: _localizations.glAccountUpDown,
-            children: [
-              const SizedBox(height: 40),
-              Text(_localizations.downloadFirst),
-              const SizedBox(height: 10),
-              OutlinedButton(
+      listener: (context, state) async {
+        if (state.status == GlAccountStatus.failure) {
+          HelperFunctions.showMessage(context, '${state.message}', Colors.red);
+        }
+        if (state.status == GlAccountStatus.success) {
+          HelperFunctions.showMessage(
+            context,
+            '${state.message}',
+            Colors.green,
+          );
+          Navigator.of(context).pop();
+        }
+      },
+      builder: (context, state) {
+        return Stack(
+          children: [
+            popUpDialog(
+              context: context,
+              title: _localizations.glAccountUpDown,
+              children: [
+                const SizedBox(height: 40),
+                Text(_localizations.downloadFirst),
+                const SizedBox(height: 10),
+                OutlinedButton(
                   key: const Key('upload'),
                   child: Text(_localizations.uploadCsv),
                   onPressed: () async {
                     FilePickerResult? result = await FilePicker.platform
                         .pickFiles(
-                            allowedExtensions: ['csv'], type: FileType.custom);
+                          allowedExtensions: ['csv'],
+                          type: FileType.custom,
+                        );
                     if (result != null) {
                       String fileString = '';
                       if (foundation.kIsWeb) {
@@ -78,19 +86,25 @@ class _FilesHeaderState extends State<GlAccountFilesDialog> {
                       }
                       glAccountBloc.add(GlAccountUpload(fileString));
                     }
-                  }),
-              const SizedBox(height: 20),
-              OutlinedButton(
+                  },
+                ),
+                const SizedBox(height: 20),
+                OutlinedButton(
                   key: const Key('download'),
                   child: Text(_localizations.downloadEmail),
                   onPressed: () {
                     glAccountBloc.add(GlAccountDownload());
-                  }),
-              const SizedBox(height: 20),
-              Text(_localizations.dataFileSendEmail),
-            ]),
-        if (state.status == GlAccountStatus.loading) const LoadingIndicator(),
-      ]);
-    });
+                  },
+                ),
+                const SizedBox(height: 20),
+                Text(_localizations.dataFileSendEmail),
+              ],
+            ),
+            if (state.status == GlAccountStatus.loading)
+              const LoadingIndicator(),
+          ],
+        );
+      },
+    );
   }
 }

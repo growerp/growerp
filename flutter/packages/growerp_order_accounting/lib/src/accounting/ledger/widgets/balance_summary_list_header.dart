@@ -54,12 +54,7 @@ class _BalanceSummaryListHeaderState extends State<BalanceSummaryListHeader> {
                   child: TextField(
                     key: const Key('searchField'),
                     autofocus: true,
-                    decoration: InputDecoration(
-                      focusedBorder: const OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.transparent),
-                      ),
-                      hintText: localizations.search,
-                    ),
+                    decoration: InputDecoration(hintText: localizations.search),
                     onChanged: ((value) =>
                         setState(() => searchString = value)),
                   ),

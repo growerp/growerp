@@ -21,17 +21,29 @@ import 'package:growerp_models/growerp_models.dart';
 class InventoryTest {
   static Future<void> selectIncomingShipments(WidgetTester tester) async {
     await CommonTest.selectOption(
-        tester, 'dbInventory', 'FinDocListShipmentsIn', '2');
+      tester,
+      'dbInventory',
+      'FinDocListShipmentsIn',
+      '2',
+    );
   }
 
   static Future<void> selectOutgoingShipments(WidgetTester tester) async {
     await CommonTest.selectOption(
-        tester, 'dbInventory', 'FinDocListShipmentsOut', '1');
+      tester,
+      'dbInventory',
+      'FinDocListShipmentsOut',
+      '1',
+    );
   }
 
   static Future<void> selectWareHouseLocations(WidgetTester tester) async {
     await CommonTest.selectOption(
-        tester, 'dbInventory', 'LocationListLocations', '3');
+      tester,
+      'dbInventory',
+      'LocationListLocations',
+      '3',
+    );
   }
 
   static Future<void> checkIncomingShipments(WidgetTester tester) async {
@@ -44,9 +56,11 @@ class InventoryTest {
       finDocs.add(order.copyWith(shipmentId: CommonTest.getTextField('id0')));
       // check list
       await CommonTest.tapByKey(tester, 'id0'); // open items
-      expect(CommonTest.getTextField('itemLine0'),
-          contains(order.items[0].product?.productId),
-          reason: "checking productId");
+      expect(
+        CommonTest.getTextField('itemLine0'),
+        contains(order.items[0].product?.productId),
+        reason: "checking productId",
+      );
       await CommonTest.tapByKey(tester, 'id0'); // close items
     }
     await PersistFunctions.persistTest(test.copyWith(orders: finDocs));
@@ -55,12 +69,18 @@ class InventoryTest {
   static Future<void> acceptShipmentInInventory(WidgetTester tester) async {
     SaveTest test = await PersistFunctions.getTest();
     List<FinDoc> orders = test.orders;
-    expect(orders.isNotEmpty, true,
-        reason: 'This test needs orders created in previous steps');
+    expect(
+      orders.isNotEmpty,
+      true,
+      reason: 'This test needs orders created in previous steps',
+    );
     for (FinDoc order in orders) {
       await CommonTest.doSearch(tester, searchString: order.orderId!);
-      await CommonTest.tapByKey(tester, 'nextStatus0',
-          seconds: CommonTest.waitTime);
+      await CommonTest.tapByKey(
+        tester,
+        'nextStatus0',
+        seconds: CommonTest.waitTime,
+      );
       await CommonTest.checkWidgetKey(tester, 'ShipmentReceiveDialogPurchase');
       await CommonTest.tapByKey(tester, 'update', seconds: CommonTest.waitTime);
       await CommonTest.tapByKey(tester, 'update', seconds: CommonTest.waitTime);
@@ -71,16 +91,25 @@ class InventoryTest {
     SaveTest test = await PersistFunctions.getTest();
     List<FinDoc> orders = test.orders;
     List<FinDoc> finDocs = [];
-    expect(orders.isNotEmpty, true,
-        reason: 'This test needs orders created in previous steps');
+    expect(
+      orders.isNotEmpty,
+      true,
+      reason: 'This test needs orders created in previous steps',
+    );
     for (FinDoc order in orders) {
       await CommonTest.doSearch(tester, searchString: order.orderId!);
       // save shipment id with order
       finDocs.add(order.copyWith(shipmentId: CommonTest.getTextField('id0')));
-      await CommonTest.tapByKey(tester, 'nextStatus0',
-          seconds: CommonTest.waitTime);
-      await CommonTest.tapByKey(tester, 'nextStatus0',
-          seconds: CommonTest.waitTime);
+      await CommonTest.tapByKey(
+        tester,
+        'nextStatus0',
+        seconds: CommonTest.waitTime,
+      );
+      await CommonTest.tapByKey(
+        tester,
+        'nextStatus0',
+        seconds: CommonTest.waitTime,
+      );
       expect(CommonTest.getTextField('status0'), equals('Completed'));
     }
     await PersistFunctions.persistTest(test.copyWith(orders: finDocs));
@@ -92,7 +121,9 @@ class InventoryTest {
     for (FinDoc order in orders) {
       await CommonTest.doSearch(tester, searchString: order.shipmentId!);
       expect(
-          order.items[0].quantity.toString(), CommonTest.getTextField('qoh0'));
+        order.items[0].quantity.toString(),
+        CommonTest.getTextField('qoh0'),
+      );
     }
   }
 
@@ -103,18 +134,24 @@ class InventoryTest {
       for (final item in order.items) {
         // find asset for order product
         final asset = assets.firstWhere(
-            // from test data
-            (el) => el.product?.productName == item.description,
-            orElse: () => Asset());
-        expect(asset.location, isNotNull,
-            reason:
-                'Could not find product: ${item.description} in test data asset list');
+          // from test data
+          (el) => el.product?.productName == item.description,
+          orElse: () => Asset(),
+        );
+        expect(
+          asset.location,
+          isNotNull,
+          reason:
+              'Could not find product: ${item.description} in test data asset list',
+        );
         // find location (purchase order saved in receive shipments,
         // sales in asset list)
-        await CommonTest.doNewSearch(tester,
-            searchString: order.sales == false
-                ? item.asset!.location!.locationName!
-                : asset.location!.locationName!);
+        await CommonTest.doNewSearch(
+          tester,
+          searchString: order.sales == false
+              ? item.asset!.location!.locationName!
+              : asset.location!.locationName!,
+        );
         late Decimal newQoh;
         if (order.sales == false) {
           newQoh = asset.quantityOnHand! + item.quantity!;

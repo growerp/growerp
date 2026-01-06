@@ -5,9 +5,11 @@ import 'package:hive/hive.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
 /// https://kamaravichow.medium.com/caching-with-dio-hive-in-flutter-e630ac5fc777
-Future<Dio> buildDioClient(String? base,
-    {Duration timeout = const Duration(seconds: 5),
-    bool miniLog = false}) async {
+Future<Dio> buildDioClient(
+  String? base, {
+  Duration timeout = const Duration(seconds: 5),
+  bool miniLog = false,
+}) async {
   bool android = false;
   try {
     if (Platform.isAndroid) {
@@ -18,10 +20,12 @@ Future<Dio> buildDioClient(String? base,
 
   final dio = Dio()
     ..options = BaseOptions(
-        baseUrl: base ??
-            ((android == true)
-                ? 'http://10.0.2.2:8080/'
-                : 'http://localhost:8080/'))
+      baseUrl:
+          base ??
+          ((android == true)
+              ? 'http://10.0.2.2:8080/'
+              : 'http://localhost:8080/'),
+    )
     ..options.connectTimeout = const Duration(seconds: 5)
     ..options.receiveTimeout = timeout
     ..httpClientAdapter;
@@ -32,14 +36,17 @@ Future<Dio> buildDioClient(String? base,
   var box = await Hive.openBox('growerp');
   dio.interceptors.add(KeyInterceptor(box));
 
-  dio.interceptors.add(PrettyDioLogger(
+  dio.interceptors.add(
+    PrettyDioLogger(
       requestHeader: !miniLog,
       requestBody: !miniLog,
       responseBody: !miniLog,
       responseHeader: !miniLog,
       error: true,
       compact: true,
-      maxWidth: 133));
+      maxWidth: 133,
+    ),
+  );
 
   logger.i("accessing backend at ${dio.options.baseUrl}");
 
@@ -53,12 +60,15 @@ class KeyInterceptor extends Interceptor {
 
   @override
   void onRequest(
-      RequestOptions options, RequestInterceptorHandler handler) async {
+    RequestOptions options,
+    RequestInterceptorHandler handler,
+  ) async {
     if (options.extra['noApiKey'] == null) {
       options.headers['api_key'] = await _box?.get('apiKey');
       if (options.method != 'GET') {
-        options.headers['moquiSessionToken'] =
-            await _box?.get('moquiSessionToken');
+        options.headers['moquiSessionToken'] = await _box?.get(
+          'moquiSessionToken',
+        );
       }
     }
     return super.onRequest(options, handler);

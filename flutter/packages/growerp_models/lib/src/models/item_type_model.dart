@@ -44,11 +44,9 @@ List<ItemType> csvToItemTypes(String csvFile) {
   final result = fast_csv.parse(csvFile);
   for (final row in result) {
     if (row == result.first) continue;
-    itemTypes.add(ItemType(
-      itemTypeId: row[0],
-      accountCode: row[1],
-      direction: row[2],
-    ));
+    itemTypes.add(
+      ItemType(itemTypeId: row[0], accountCode: row[1], direction: row[2]),
+    );
   }
   return itemTypes;
 }

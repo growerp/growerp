@@ -19,9 +19,14 @@ import 'package:growerp_inventory/growerp_inventory.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
 
-TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
-    Asset item, int index,
-    {dynamic extra}) {
+TableData getTableData(
+  Bloc bloc,
+  String classificationId,
+  BuildContext context,
+  Asset item,
+  int index, {
+  dynamic extra,
+}) {
   String currencyId = context
       .read<AuthBloc>()
       .state
@@ -32,7 +37,8 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
 
   List<TableRowContent> rowContent = [];
   if (isPhone(context)) {
-    rowContent.add(TableRowContent(
+    rowContent.add(
+      TableRowContent(
         name: 'ShortId',
         width: isPhone(context) ? 15 : 15,
         value: CircleAvatar(
@@ -42,99 +48,131 @@ TableData getTableData(Bloc bloc, String classificationId, BuildContext context,
             item.pseudoId.lastChar(3),
             style: TextStyle(color: Theme.of(context).colorScheme.onSecondary),
           ),
-        )));
+        ),
+      ),
+    );
   }
   if (!isPhone(context)) {
-    rowContent.add(TableRowContent(
+    rowContent.add(
+      TableRowContent(
         name: classificationId == 'AppHotel' ? 'Room Nr' : 'AssetId',
         width: 5,
-        value: Text(item.pseudoId, key: Key('id$index'))));
+        value: Text(item.pseudoId, key: Key('id$index')),
+      ),
+    );
   }
 
   if (classificationId == 'AppHotel') {
-    rowContent.add(TableRowContent(
+    rowContent.add(
+      TableRowContent(
         name: const Text('Room name'),
         width: isPhone(context) ? 50 : 25,
-        value: Text(item.assetName ?? '')));
+        value: Text(item.assetName ?? ''),
+      ),
+    );
   }
 
-  rowContent.add(TableRowContent(
+  rowContent.add(
+    TableRowContent(
       name: classificationId == 'AppHotel' ? 'Room Type' : 'Product Name',
       width: isPhone(context) ? 35 : 20,
-      value: Text(item.product?.productName ?? '', key: Key('name$index'))));
+      value: Text(item.product?.productName ?? '', key: Key('name$index')),
+    ),
+  );
 
   if (classificationId != 'AppHotel') {
-    rowContent.add(TableRowContent(
-      name: const Text(
-        'Qty.',
-        textAlign: TextAlign.right,
-      ),
-      width: isPhone(context) ? 15 : 10,
-      value: Text(
-        item.quantityOnHand.toString(),
-        key: Key('qoh$index'),
-        textAlign: TextAlign.right,
-      ),
-    ));
-  }
-  if (!isPhone(context) && classificationId == 'AppHotel') {
-    rowContent.add(TableRowContent(
-        name: const Text(
-          'List Price',
+    rowContent.add(
+      TableRowContent(
+        name: const Text('Qty.', textAlign: TextAlign.right),
+        width: isPhone(context) ? 15 : 10,
+        value: Text(
+          item.quantityOnHand.toString(),
+          key: Key('qoh$index'),
           textAlign: TextAlign.right,
         ),
-        width: 10,
-        value: Text(item.product!.listPrice.currency(currencyId: currencyId),
-            textAlign: TextAlign.right)));
+      ),
+    );
   }
   if (!isPhone(context) && classificationId == 'AppHotel') {
-    rowContent.add(TableRowContent(
-        name: const Text(
-          'Price',
+    rowContent.add(
+      TableRowContent(
+        name: const Text('List Price', textAlign: TextAlign.right),
+        width: 10,
+        value: Text(
+          item.product!.listPrice.currency(currencyId: currencyId),
           textAlign: TextAlign.right,
         ),
+      ),
+    );
+  }
+  if (!isPhone(context) && classificationId == 'AppHotel') {
+    rowContent.add(
+      TableRowContent(
+        name: const Text('Price', textAlign: TextAlign.right),
         width: 10,
-        value: Text(item.product!.price.currency(currencyId: currencyId),
-            textAlign: TextAlign.right)));
+        value: Text(
+          item.product!.price.currency(currencyId: currencyId),
+          textAlign: TextAlign.right,
+        ),
+      ),
+    );
   }
   if (!isPhone(context) && classificationId != 'AppHotel') {
-    rowContent.add(TableRowContent(
+    rowContent.add(
+      TableRowContent(
         name: const Text('Cost'),
         width: 10,
-        value: Text(item.acquireCost.currency(currencyId: currencyId))));
+        value: Text(item.acquireCost.currency(currencyId: currencyId)),
+      ),
+    );
   }
   if (!isPhone(context) && classificationId != 'AppHotel') {
-    rowContent.add(TableRowContent(
+    rowContent.add(
+      TableRowContent(
         name: const Text('Loc Id'),
         width: 10,
-        value: Text(item.location?.locationId ?? '')));
+        value: Text(item.location?.locationId ?? ''),
+      ),
+    );
   }
-  rowContent.add(TableRowContent(
+  rowContent.add(
+    TableRowContent(
       name: const Text('Act.', textAlign: TextAlign.center),
       width: 8,
-      value: Text(item.statusId == 'Deactivated' ? 'N' : 'Y',
-          key: Key('status$index'), textAlign: TextAlign.center)));
-  rowContent.add(TableRowContent(
-    width: isPhone(context) ? 15 : 10,
-    name: ' ',
-    value: item.statusId == 'Available' || item.statusId == 'In Use'
-        ? IconButton(
-            key: Key('delete$index'),
-            icon: const Icon(Icons.delete_forever),
-            padding: EdgeInsets.zero,
-            onPressed: () {
-              bloc.add(AssetUpdate(item.copyWith(statusId: 'Deactivated')));
-            })
-        : IconButton(
-            key: Key('delete$index'),
-            icon: const Icon(Icons.event_available),
-            padding: EdgeInsets.zero,
-            onPressed: () {
-              bloc.add(AssetUpdate(item.copyWith(statusId: 'Available')));
-            }),
-  ));
+      value: Text(
+        item.statusId == 'Deactivated' ? 'N' : 'Y',
+        key: Key('status$index'),
+        textAlign: TextAlign.center,
+      ),
+    ),
+  );
+  rowContent.add(
+    TableRowContent(
+      width: isPhone(context) ? 15 : 10,
+      name: ' ',
+      value: item.statusId == 'Available' || item.statusId == 'In Use'
+          ? IconButton(
+              key: Key('delete$index'),
+              icon: const Icon(Icons.delete_forever),
+              padding: EdgeInsets.zero,
+              onPressed: () {
+                bloc.add(AssetUpdate(item.copyWith(statusId: 'Deactivated')));
+              },
+            )
+          : IconButton(
+              key: Key('delete$index'),
+              icon: const Icon(Icons.event_available),
+              padding: EdgeInsets.zero,
+              onPressed: () {
+                bloc.add(AssetUpdate(item.copyWith(statusId: 'Available')));
+              },
+            ),
+    ),
+  );
   return TableData(
-      rowHeight: isPhone(context) ? 35 : 20, rowContent: rowContent);
+    rowHeight: isPhone(context) ? 35 : 20,
+    rowContent: rowContent,
+  );
 }
 
 // general settings

@@ -69,7 +69,9 @@ class GlAccountsState extends State<GlAccountList> {
         switch (state.status) {
           case GlAccountStatus.failure:
             return Center(
-              child: Text('${_localizations.fetchGlAccountFail} ${state.message}'),
+              child: Text(
+                '${_localizations.fetchGlAccountFail} ${state.message}',
+              ),
             );
           case GlAccountStatus.success:
             return Stack(

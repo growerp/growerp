@@ -25,21 +25,28 @@ class SplashForm extends StatelessWidget {
     SystemChannels.textInput.invokeMethod('TextInput.hide'); // dismiss keyboard
     ThemeMode? themeMode = context.read<ThemeBloc>().state.themeMode;
     return SingleChildScrollView(
-      child: Column(crossAxisAlignment: CrossAxisAlignment.center, children: [
-        const SizedBox(height: 100),
-        Image(
-            image: AssetImage(themeMode == ThemeMode.light
-                ? 'packages/growerp_core/images/growerp.jpg'
-                : 'packages/growerp_core/images/growerpDark.jpg')),
-        const SizedBox(height: 20),
-        const SizedBox(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          const SizedBox(height: 100),
+          Image(
+            image: AssetImage(
+              themeMode == ThemeMode.light
+                  ? 'packages/growerp_core/images/growerp.jpg'
+                  : 'packages/growerp_core/images/growerpDark.jpg',
+            ),
+          ),
+          const SizedBox(height: 20),
+          const SizedBox(
             width: 300,
             child: LinearProgressIndicator(
               minHeight: 20,
               color: Color(0xFF4baa9b),
               backgroundColor: Colors.lightGreen,
-            )),
-      ]),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

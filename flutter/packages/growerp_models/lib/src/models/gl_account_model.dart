@@ -56,11 +56,12 @@ List<GlAccount> csvToGlAccounts(String csvFile) {
     if (row == result.first) continue;
     glAccounts.add(
       GlAccount(
-          accountCode: row[0],
-          accountName: row[1],
-          accountClass: row[2] != '' ? AccountClass(description: row[2]) : null,
-          accountType: row[3] != '' ? AccountType(description: row[3]) : null,
-          postedBalance: row[4] != '' ? Decimal.parse(row[4]) : null),
+        accountCode: row[0],
+        accountName: row[1],
+        accountClass: row[2] != '' ? AccountClass(description: row[2]) : null,
+        accountType: row[3] != '' ? AccountType(description: row[3]) : null,
+        postedBalance: row[4] != '' ? Decimal.parse(row[4]) : null,
+      ),
     );
   }
   return glAccounts;
@@ -70,13 +71,17 @@ List<GlAccount> csvToGlAccounts(String csvFile) {
 String csvFromGlAccounts(List<GlAccount> glAccounts) {
   var csv = [glAccountCsvFormat];
   for (GlAccount glAccount in glAccounts) {
-    csv.add(createCsvRow([
-      glAccount.accountCode ?? '',
-      glAccount.accountName ?? '',
-      glAccount.accountClass!.description ?? '',
-      glAccount.accountType!.description ?? '',
-      glAccount.postedBalance == null ? '' : glAccount.postedBalance.toString(),
-    ], glAccountCsvLength));
+    csv.add(
+      createCsvRow([
+        glAccount.accountCode ?? '',
+        glAccount.accountName ?? '',
+        glAccount.accountClass!.description ?? '',
+        glAccount.accountType!.description ?? '',
+        glAccount.postedBalance == null
+            ? ''
+            : glAccount.postedBalance.toString(),
+      ], glAccountCsvLength),
+    );
   }
   return csv.join();
 }

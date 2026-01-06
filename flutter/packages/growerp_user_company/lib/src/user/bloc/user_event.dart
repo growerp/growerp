@@ -27,12 +27,13 @@ class UserFetch extends UserEvent {
   final bool refresh;
   final int limit;
 
-  const UserFetch(
-      {this.limit = 20,
-      this.partyId,
-      this.userGroup,
-      this.searchString = '',
-      this.refresh = false});
+  const UserFetch({
+    this.limit = 20,
+    this.partyId,
+    this.userGroup,
+    this.searchString = '',
+    this.refresh = false,
+  });
 
   @override
   List<Object> get props => [searchString, refresh];

@@ -16,8 +16,11 @@ import 'package:flutter/material.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 class BalanceSheetItem extends StatelessWidget {
-  const BalanceSheetItem(
-      {super.key, required this.glAccount, required this.index});
+  const BalanceSheetItem({
+    super.key,
+    required this.glAccount,
+    required this.index,
+  });
 
   final GlAccount glAccount;
   final int index;
@@ -27,25 +30,45 @@ class BalanceSheetItem extends StatelessWidget {
     return ListTile(
       leading: CircleAvatar(
         child: Text(
-            glAccount.accountName!.isEmpty ? '?' : glAccount.accountName![0]),
+          glAccount.accountName!.isEmpty ? '?' : glAccount.accountName![0],
+        ),
       ),
       title: Row(
         children: <Widget>[
           Expanded(
-              child: Text("${glAccount.accountCode} ${glAccount.accountName}",
-                  key: Key("code$index"))),
+            child: Text(
+              "${glAccount.accountCode} ${glAccount.accountName}",
+              key: Key("code$index"),
+            ),
+          ),
           Expanded(
-              child: Text(glAccount.beginningBalance.toString(),
-                  key: Key("openBalance$index"), textAlign: TextAlign.center)),
+            child: Text(
+              glAccount.beginningBalance.toString(),
+              key: Key("openBalance$index"),
+              textAlign: TextAlign.center,
+            ),
+          ),
           Expanded(
-              child: Text(glAccount.postedDebits.toString(),
-                  key: Key("name$index"), textAlign: TextAlign.center)),
+            child: Text(
+              glAccount.postedDebits.toString(),
+              key: Key("name$index"),
+              textAlign: TextAlign.center,
+            ),
+          ),
           Expanded(
-              child: Text(glAccount.postedCredits.toString(),
-                  key: Key("name$index"), textAlign: TextAlign.center)),
+            child: Text(
+              glAccount.postedCredits.toString(),
+              key: Key("name$index"),
+              textAlign: TextAlign.center,
+            ),
+          ),
           Expanded(
-              child: Text(glAccount.postedBalance.toString(),
-                  key: Key("name$index"), textAlign: TextAlign.center)),
+            child: Text(
+              glAccount.postedBalance.toString(),
+              key: Key("name$index"),
+              textAlign: TextAlign.center,
+            ),
+          ),
         ],
       ),
     );

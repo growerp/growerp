@@ -526,7 +526,6 @@ class _LinkedInTabState extends State<_LinkedInTab> {
               hintText: widget.campaign.messageTemplate?.isNotEmpty == true
                   ? 'Campaign: ${widget.campaign.messageTemplate}'
                   : 'Use {name} for personalization',
-              border: const OutlineInputBorder(),
             ),
             maxLines: 3,
             onChanged: (_) => _saveSettings(),
@@ -560,7 +559,6 @@ class _LinkedInTabState extends State<_LinkedInTab> {
                       controller: _maxConnectionsController,
                       decoration: const InputDecoration(
                         labelText: 'Max Connections',
-                        border: OutlineInputBorder(),
                       ),
                       keyboardType: TextInputType.number,
                     ),
@@ -586,7 +584,6 @@ class _LinkedInTabState extends State<_LinkedInTab> {
                       decoration: const InputDecoration(
                         labelText:
                             'Search Keywords (e.g., "Flutter Developer")',
-                        border: OutlineInputBorder(),
                       ),
                       onChanged: (_) => _saveSettings(),
                     ),
@@ -963,7 +960,6 @@ class _TwitterTabState extends State<_TwitterTab> {
               hintText: widget.campaign.messageTemplate?.isNotEmpty == true
                   ? 'Campaign: ${widget.campaign.messageTemplate}'
                   : null,
-              border: const OutlineInputBorder(),
             ),
             maxLines: 3,
             onChanged: (_) => _saveSettings(),
@@ -996,7 +992,6 @@ class _TwitterTabState extends State<_TwitterTab> {
                       controller: _searchController,
                       decoration: const InputDecoration(
                         labelText: 'Search Profiles',
-                        border: OutlineInputBorder(),
                       ),
                       onChanged: (_) => _saveSettings(),
                     ),
@@ -1324,7 +1319,6 @@ class _SubstackTabState extends State<_SubstackTab> {
                 hintText: widget.campaign.messageTemplate?.isNotEmpty == true
                     ? 'Campaign: ${widget.campaign.messageTemplate}'
                     : null,
-                border: const OutlineInputBorder(),
               ),
               maxLines: 3,
               onChanged: (_) => _saveSettings(),
@@ -1356,7 +1350,6 @@ class _SubstackTabState extends State<_SubstackTab> {
                     controller: _searchController,
                     decoration: const InputDecoration(
                       labelText: 'Search Publications',
-                      border: OutlineInputBorder(),
                     ),
                     onChanged: (_) => _saveSettings(),
                   ),
@@ -1381,7 +1374,6 @@ class _SubstackTabState extends State<_SubstackTab> {
                 hintText: widget.campaign.messageTemplate?.isNotEmpty == true
                     ? 'Campaign: ${widget.campaign.messageTemplate}'
                     : 'Enter your comment',
-                border: const OutlineInputBorder(),
               ),
               maxLines: 3,
               onChanged: (_) => _saveSettings(),
@@ -1555,7 +1547,6 @@ class _EmailTabState extends State<_EmailTab> {
             decoration: const InputDecoration(
               labelText: 'Recipient Email',
               hintText: 'user@example.com',
-              border: OutlineInputBorder(),
             ),
             keyboardType: TextInputType.emailAddress,
           ),
@@ -1564,7 +1555,6 @@ class _EmailTabState extends State<_EmailTab> {
             controller: _subjectController,
             decoration: const InputDecoration(
               labelText: 'Subject',
-              border: OutlineInputBorder(),
             ),
           ),
           const SizedBox(height: 12),
@@ -1573,7 +1563,6 @@ class _EmailTabState extends State<_EmailTab> {
             decoration: const InputDecoration(
               labelText: 'Message Body',
               hintText: 'Use {name} for personalization',
-              border: OutlineInputBorder(),
             ),
             maxLines: 5,
           ),

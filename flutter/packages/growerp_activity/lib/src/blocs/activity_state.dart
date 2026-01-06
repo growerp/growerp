@@ -60,10 +60,10 @@ class ActivityState extends Equatable {
 
   @override
   List<Object> get props => [
-        status,
-        activities,
-        myactivities,
-        hasReachedMax,
-        searchString,
-      ];
+    status,
+    activities,
+    myactivities,
+    hasReachedMax,
+    searchString,
+  ];
 }

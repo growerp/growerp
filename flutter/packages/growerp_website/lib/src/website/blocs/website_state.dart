@@ -14,12 +14,7 @@
 
 part of 'website_bloc.dart';
 
-enum WebsiteStatus {
-  initial,
-  loading,
-  success,
-  failure,
-}
+enum WebsiteStatus { initial, loading, success, failure }
 
 class WebsiteState extends Equatable {
   const WebsiteState({

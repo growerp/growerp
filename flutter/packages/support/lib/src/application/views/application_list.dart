@@ -51,24 +51,31 @@ class ApplicationsListState extends State<ApplicationList> {
   Widget tableView() {
     if (applications.isEmpty) {
       return const Center(
-          child: Text("No applications yet, add one with '+'",
-              style: TextStyle(fontSize: 20.0)));
+        child: Text(
+          "No applications yet, add one with '+'",
+          style: TextStyle(fontSize: 20.0),
+        ),
+      );
     }
     var (
       List<List<TableViewCell>> tableViewCells,
       List<double> fieldWidths,
-      double? rowHeight
-    ) = get2dTableData<Application>(getApplicationTableData,
-        bloc: _applicationBloc,
-        context: context,
-        items: applications,
-        classificationId: 'AppAdmin');
+      double? rowHeight,
+    ) = get2dTableData<Application>(
+      getApplicationTableData,
+      bloc: _applicationBloc,
+      context: context,
+      items: applications,
+      classificationId: 'AppAdmin',
+    );
     return TableView.builder(
       diagonalDragBehavior: DiagonalDragBehavior.free,
-      verticalDetails:
-          ScrollableDetails.vertical(controller: _scrollController),
-      horizontalDetails:
-          ScrollableDetails.horizontal(controller: _horizontalController),
+      verticalDetails: ScrollableDetails.vertical(
+        controller: _scrollController,
+      ),
+      horizontalDetails: ScrollableDetails.horizontal(
+        controller: _horizontalController,
+      ),
       cellBuilder: (context, vicinity) =>
           tableViewCells[vicinity.row][vicinity.column],
       columnBuilder: (index) => index >= tableViewCells[0].length
@@ -86,24 +93,30 @@ class ApplicationsListState extends State<ApplicationList> {
               backgroundDecoration: getApplicationBackGround(context, index),
               extent: FixedTableSpanExtent(rowHeight!),
               recognizerFactories: <Type, GestureRecognizerFactory>{
-                  TapGestureRecognizer: GestureRecognizerFactoryWithHandlers<
-                          TapGestureRecognizer>(
+                TapGestureRecognizer:
+                    GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
                       () => TapGestureRecognizer(),
                       (TapGestureRecognizer t) => t.onTap = () => showDialog(
-                          barrierDismissible: true,
-                          context: context,
-                          builder: (BuildContext context) {
-                            return index > applications.length
-                                ? const BottomLoader()
-                                : Dismissible(
-                                    key: const Key('dummy'),
-                                    direction: DismissDirection.startToEnd,
-                                    child: BlocProvider.value(
-                                        value: _applicationBloc,
-                                        child: ApplicationDialog(
-                                            applications[index - 1])));
-                          }))
-                }),
+                        barrierDismissible: true,
+                        context: context,
+                        builder: (BuildContext context) {
+                          return index > applications.length
+                              ? const BottomLoader()
+                              : Dismissible(
+                                  key: const Key('dummy'),
+                                  direction: DismissDirection.startToEnd,
+                                  child: BlocProvider.value(
+                                    value: _applicationBloc,
+                                    child: ApplicationDialog(
+                                      applications[index - 1],
+                                    ),
+                                  ),
+                                );
+                        },
+                      ),
+                    ),
+              },
+            ),
       pinnedRowCount: 1,
     );
   }
@@ -112,32 +125,35 @@ class ApplicationsListState extends State<ApplicationList> {
   Widget build(BuildContext context) {
     right = right ?? (isAPhone(context) ? 20 : 50);
     return BlocConsumer<ApplicationBloc, ApplicationState>(
-        listenWhen: (previous, current) =>
-            previous.status == ApplicationStatus.loading,
-        listener: (context, state) {
-          if (state.status == ApplicationStatus.failure) {
-            HelperFunctions.showMessage(
-                context, '${state.message}', Colors.red);
-          }
-          if (state.status == ApplicationStatus.success) {
-            started = true;
-            HelperFunctions.showMessage(
-                context, '${state.message}', Colors.green);
-          }
-        },
-        builder: (context, state) {
-          switch (state.status) {
-            case ApplicationStatus.failure:
-              return Center(
-                  child:
-                      Text('failed to fetch applications: ${state.message}'));
-            case ApplicationStatus.success:
-              applications = state.applications;
-              return tableView();
-            default:
-              return const Center(child: LoadingIndicator());
-          }
-        });
+      listenWhen: (previous, current) =>
+          previous.status == ApplicationStatus.loading,
+      listener: (context, state) {
+        if (state.status == ApplicationStatus.failure) {
+          HelperFunctions.showMessage(context, '${state.message}', Colors.red);
+        }
+        if (state.status == ApplicationStatus.success) {
+          started = true;
+          HelperFunctions.showMessage(
+            context,
+            '${state.message}',
+            Colors.green,
+          );
+        }
+      },
+      builder: (context, state) {
+        switch (state.status) {
+          case ApplicationStatus.failure:
+            return Center(
+              child: Text('failed to fetch applications: ${state.message}'),
+            );
+          case ApplicationStatus.success:
+            applications = state.applications;
+            return tableView();
+          default:
+            return const Center(child: LoadingIndicator());
+        }
+      },
+    );
   }
 
   @override

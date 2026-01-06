@@ -79,23 +79,17 @@ class _AboutFormState extends State<AboutForm> {
                       MarkdownPageListTile(
                         filename:
                             '../../../../../../../../../../CONTRIBUTING.md',
-                        title: Text(
-                          _localizations!.contributing,
-                        ),
+                        title: Text(_localizations!.contributing),
                         icon: const Icon(Icons.share),
                       ),
                       MarkdownPageListTile(
                         filename:
                             '../../../../../../../../../../CODE_OF_CONDUCT.md',
-                        title: Text(
-                          _localizations!.privacyCodeOfConduct,
-                        ),
+                        title: Text(_localizations!.privacyCodeOfConduct),
                         icon: const Icon(Icons.sentiment_satisfied),
                       ),
                       LicensesPageListTile(
-                        title: Text(
-                          _localizations!.openSourceLicenses,
-                        ),
+                        title: Text(_localizations!.openSourceLicenses),
                         icon: const Icon(Icons.favorite),
                       ),
                     ],

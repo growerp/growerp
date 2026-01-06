@@ -53,7 +53,8 @@ class ShipmentReceiveState extends State<ShipmentReceiveDialog> {
     confirm = false;
     _locationBloc = context.read<DataFetchBloc<Locations>>()
       ..add(
-          GetDataEvent(() => context.read<RestClient>().getLocation(limit: 3)));
+        GetDataEvent(() => context.read<RestClient>().getLocation(limit: 3)),
+      );
   }
 
   @override
@@ -61,230 +62,290 @@ class ShipmentReceiveState extends State<ShipmentReceiveDialog> {
     isPhone = ResponsiveBreakpoints.of(context).isMobile;
     _localizations = OrderAccountingLocalizations.of(context)!;
     return Dialog(
-        key: Key(
-            "ShipmentReceiveDialog${widget.finDoc.sales ? 'Sales' : 'Purchase'}"),
-        insetPadding: const EdgeInsets.all(10),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: popUp(
-            context: context,
-            title: '${_localizations.incomingShipment} ${widget.finDoc.pseudoId}',
-            width: isPhone ? 400 : 800,
-            height: isPhone
-                ? 600
-                : 600, // not increase height otherwise tests will fail
-            child: shipmentItemList()));
+      key: Key(
+        "ShipmentReceiveDialog${widget.finDoc.sales ? 'Sales' : 'Purchase'}",
+      ),
+      insetPadding: const EdgeInsets.all(10),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      child: popUp(
+        context: context,
+        title: '${_localizations.incomingShipment} ${widget.finDoc.pseudoId}',
+        width: isPhone ? 400 : 800,
+        height: isPhone
+            ? 600
+            : 600, // not increase height otherwise tests will fail
+        child: shipmentItemList(),
+      ),
+    );
   }
 
   Widget shipmentItemList() {
     FinDocBloc finDocBloc = context.read<FinDocBloc>();
     String nowDate = DateTime.now().toString().substring(0, 10);
-    return Column(children: [
-      RelatedFinDocs(finDoc: widget.finDoc, context: context),
-      Expanded(
+    return Column(
+      children: [
+        RelatedFinDocs(finDoc: widget.finDoc, context: context),
+        Expanded(
           child: ListView.builder(
-              key: const Key('listView'),
-              itemCount: newItems.length + 1,
-              itemBuilder: (context, index) {
-                if (index == 0) {
-                  return Column(children: [
+            key: const Key('listView'),
+            itemCount: newItems.length + 1,
+            itemBuilder: (context, index) {
+              if (index == 0) {
+                return Column(
+                  children: [
                     ListTile(
                       leading: !isPhone
                           ? const CircleAvatar(
                               backgroundColor: Colors.transparent,
                             )
                           : null,
-                      title: Column(children: [
-                        Center(
+                      title: Column(
+                        children: [
+                          Center(
                             child: Text(
-                          _localizations.itemLocationInstructions,
-                        )),
-                        const SizedBox(height: 30),
-                        Row(children: <Widget>[
-                          Text('${_localizations.productId}  '),
-                          Expanded(child: Text(_localizations.description)),
-                          Text(_localizations.quantity),
-                        ]),
-                      ]),
-                      subtitle: Row(children: <Widget>[
-                        Expanded(
-                            child: Text(_localizations.location,
-                                textAlign: TextAlign.center)),
-                        Expanded(
-                            child: Text(_localizations.newLocation,
-                                textAlign: TextAlign.center)),
-                      ]),
+                              _localizations.itemLocationInstructions,
+                            ),
+                          ),
+                          const SizedBox(height: 30),
+                          Row(
+                            children: <Widget>[
+                              Text('${_localizations.productId}  '),
+                              Expanded(child: Text(_localizations.description)),
+                              Text(_localizations.quantity),
+                            ],
+                          ),
+                        ],
+                      ),
+                      subtitle: Row(
+                        children: <Widget>[
+                          Expanded(
+                            child: Text(
+                              _localizations.location,
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                          Expanded(
+                            child: Text(
+                              _localizations.newLocation,
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                     const Divider(),
-                  ]);
-                }
-                if (index == 1 && newItems.isEmpty) {
-                  return Center(
-                      heightFactor: 20,
-                      child: Text(_localizations.noItems,
-                          key: const Key('empty'), textAlign: TextAlign.center));
-                }
-                index--;
-                return ListTile(
-                  leading: !isPhone
-                      ? const CircleAvatar(
-                          backgroundColor: Colors.transparent,
-                        )
-                      : null,
-                  title: Column(children: [
-                    Row(children: <Widget>[
-                      Text(newItems[index].product?.productId ?? ''),
-                      const SizedBox(width: 10),
-                      Expanded(child: Text('${newItems[index].description}')),
-                      Text('${newItems[index].quantity}'),
-                    ]),
+                  ],
+                );
+              }
+              if (index == 1 && newItems.isEmpty) {
+                return Center(
+                  heightFactor: 20,
+                  child: Text(
+                    _localizations.noItems,
+                    key: const Key('empty'),
+                    textAlign: TextAlign.center,
+                  ),
+                );
+              }
+              index--;
+              return ListTile(
+                leading: !isPhone
+                    ? const CircleAvatar(backgroundColor: Colors.transparent)
+                    : null,
+                title: Column(
+                  children: [
+                    Row(
+                      children: <Widget>[
+                        Text(newItems[index].product?.productId ?? ''),
+                        const SizedBox(width: 10),
+                        Expanded(child: Text('${newItems[index].description}')),
+                        Text('${newItems[index].quantity}'),
+                      ],
+                    ),
                     const SizedBox(height: 10),
                     confirm
                         ? Text(
-                            '${_localizations.toLocation} ${newItems[index].asset?.location?.locationName}')
-                        : Row(children: <Widget>[
-                            Expanded(
+                            '${_localizations.toLocation} ${newItems[index].asset?.location?.locationName}',
+                          )
+                        : Row(
+                            children: <Widget>[
+                              Expanded(
                                 child: SizedBox(
-                                    height: 60,
-                                    child: DropdownSearch<Location>(
-                                        key: Key('locationDropDown$index'),
-                                        selectedItem: _selectedLocations[index],
-                                        popupProps: PopupProps.menu(
-                                          isFilterOnline: true,
-                                          showSearchBox: true,
-                                          searchFieldProps: TextFieldProps(
-                                            autofocus: true,
-                                            decoration: InputDecoration(
-                                                labelText: _localizations.locationName),
-                                            controller:
-                                                _locationSearchBoxControllers[
-                                                    index],
-                                          ),
-                                          menuProps: MenuProps(
-                                              borderRadius:
-                                                  BorderRadius.circular(20.0)),
-                                          title: popUp(
-                                            context: context,
-                                            title: _localizations.selectLocation,
-                                            height: 50,
-                                          ),
+                                  height: 60,
+                                  child: DropdownSearch<Location>(
+                                    key: Key('locationDropDown$index'),
+                                    selectedItem: _selectedLocations[index],
+                                    popupProps: PopupProps.menu(
+                                      isFilterOnline: true,
+                                      showSearchBox: true,
+                                      searchFieldProps: TextFieldProps(
+                                        autofocus: true,
+                                        decoration: InputDecoration(
+                                          labelText:
+                                              _localizations.locationName,
                                         ),
-                                        dropdownDecoratorProps:
-                                            DropDownDecoratorProps(
-                                                dropdownSearchDecoration:
-                                                    InputDecoration(
-                                                        labelText:
-                                                            _localizations.location)),
-                                        itemAsString: (Location? u) =>
-                                            " ${u?.locationName}",
-                                        asyncItems: (String filter) {
-                                          _locationBloc.add(GetDataEvent(() =>
-                                              context
-                                                  .read<RestClient>()
-                                                  .getLocation(
-                                                      searchString: filter,
-                                                      limit: 3)));
-                                          return Future.delayed(
-                                              const Duration(milliseconds: 250),
-                                              () {
-                                            return Future.value((_locationBloc
-                                                    .state.data as Locations)
-                                                .locations);
-                                          });
+                                        controller:
+                                            _locationSearchBoxControllers[index],
+                                      ),
+                                      menuProps: MenuProps(
+                                        borderRadius: BorderRadius.circular(
+                                          20.0,
+                                        ),
+                                      ),
+                                      title: popUp(
+                                        context: context,
+                                        title: _localizations.selectLocation,
+                                        height: 50,
+                                      ),
+                                    ),
+                                    dropdownDecoratorProps:
+                                        DropDownDecoratorProps(
+                                          dropdownSearchDecoration:
+                                              InputDecoration(
+                                                labelText:
+                                                    _localizations.location,
+                                              ),
+                                        ),
+                                    itemAsString: (Location? u) =>
+                                        " ${u?.locationName}",
+                                    asyncItems: (String filter) {
+                                      _locationBloc.add(
+                                        GetDataEvent(
+                                          () => context
+                                              .read<RestClient>()
+                                              .getLocation(
+                                                searchString: filter,
+                                                limit: 3,
+                                              ),
+                                        ),
+                                      );
+                                      return Future.delayed(
+                                        const Duration(milliseconds: 250),
+                                        () {
+                                          return Future.value(
+                                            (_locationBloc.state.data
+                                                    as Locations)
+                                                .locations,
+                                          );
                                         },
-                                        compareFn: (item, sItem) =>
-                                            item.locationId == sItem.locationId,
-                                        onChanged: (Location? newValue) {
-                                          _selectedLocations[index] = newValue!;
-                                          _newLocationControllers[index].text =
-                                              '';
-                                        }))),
-                            const SizedBox(width: 10),
-                            Expanded(
+                                      );
+                                    },
+                                    compareFn: (item, sItem) =>
+                                        item.locationId == sItem.locationId,
+                                    onChanged: (Location? newValue) {
+                                      _selectedLocations[index] = newValue!;
+                                      _newLocationControllers[index].text = '';
+                                    },
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
                                 child: TextFormField(
-                              key: Key('newLocation$index'),
-                              decoration: InputDecoration(
-                                  labelText: _localizations.newLocation),
-                              controller: _newLocationControllers[index],
-                              onChanged: (_) {
-                                setState(() {
-                                  _selectedLocations[index] =
-                                      Location(locationName: '');
-                                });
-                              },
-                            ))
-                          ])
-                  ]),
-                );
-              })),
-      SizedBox(
+                                  key: Key('newLocation$index'),
+                                  decoration: InputDecoration(
+                                    labelText: _localizations.newLocation,
+                                  ),
+                                  controller: _newLocationControllers[index],
+                                  onChanged: (_) {
+                                    setState(() {
+                                      _selectedLocations[index] = Location(
+                                        locationName: '',
+                                      );
+                                    });
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+        SizedBox(
           height: 50,
-          child: Row(children: [
-            Visibility(
+          child: Row(
+            children: [
+              Visibility(
                 visible: confirm,
                 child: OutlinedButton(
-                    key: const Key('back'),
-                    child: Text(_localizations.goBack),
-                    onPressed: () async {
-                      setState(() {
-                        confirm = false;
-                      });
-                      newItems.forEachIndexed((index, value) {
-                        final asset = value.asset!.copyWith(
-                            location: _selectedLocations[index].locationId !=
-                                    null
+                  key: const Key('back'),
+                  child: Text(_localizations.goBack),
+                  onPressed: () async {
+                    setState(() {
+                      confirm = false;
+                    });
+                    newItems.forEachIndexed((index, value) {
+                      final asset = value.asset!.copyWith(
+                        location: _selectedLocations[index].locationId != null
+                            ? _selectedLocations[index]
+                            : Location(
+                                locationName:
+                                    _newLocationControllers[index].text,
+                              ),
+                      );
+
+                      newItems[index] = value.copyWith(asset: asset);
+                    });
+                    finDocBloc.add(
+                      FinDocShipmentReceive(
+                        widget.finDoc.copyWith(items: newItems),
+                      ),
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: OutlinedButton(
+                  key: const Key('update'),
+                  child: Text(
+                    confirm
+                        ? _localizations.confirm
+                        : _localizations.receiveShipment,
+                  ),
+                  onPressed: () async {
+                    setState(() {
+                      if (confirm == false) {
+                        newItems.forEachIndexed((index, value) {
+                          final asset = Asset(
+                            location:
+                                _selectedLocations[index].locationId != null
                                 ? _selectedLocations[index]
+                                : _newLocationControllers[index].text.isNotEmpty
+                                ? Location(
+                                    locationName:
+                                        _newLocationControllers[index].text,
+                                  )
                                 : Location(
                                     locationName:
-                                        _newLocationControllers[index].text));
+                                        '${newItems[index].description}'
+                                        '($nowDate)',
+                                  ),
+                          );
 
-                        newItems[index] = value.copyWith(asset: asset);
-                      });
-                      finDocBloc.add(FinDocShipmentReceive(
-                          widget.finDoc.copyWith(items: newItems)));
-                    })),
-            const SizedBox(
-              width: 10,
-            ),
-            Expanded(
-                child: OutlinedButton(
-                    key: const Key('update'),
-                    child:
-                        Text(confirm ? _localizations.confirm : _localizations.receiveShipment),
-                    onPressed: () async {
-                      setState(() {
-                        if (confirm == false) {
-                          newItems.forEachIndexed((index, value) {
-                            final asset = Asset(
-                                location: _selectedLocations[index]
-                                            .locationId !=
-                                        null
-                                    ? _selectedLocations[index]
-                                    : _newLocationControllers[index]
-                                            .text
-                                            .isNotEmpty
-                                        ? Location(
-                                            locationName:
-                                                _newLocationControllers[index]
-                                                    .text)
-                                        : Location(
-                                            locationName:
-                                                '${newItems[index].description}'
-                                                '($nowDate)'));
-
-                            newItems[index] = value.copyWith(asset: asset);
-                            confirm = true;
-                          });
-                        } else {
-                          finDocBloc.add(FinDocShipmentReceive(
-                              widget.finDoc.copyWith(items: newItems)));
-                          Navigator.of(context).pop();
-                        }
-                      });
-                    }))
-          ])),
-      const SizedBox(height: 20)
-    ]);
+                          newItems[index] = value.copyWith(asset: asset);
+                          confirm = true;
+                        });
+                      } else {
+                        finDocBloc.add(
+                          FinDocShipmentReceive(
+                            widget.finDoc.copyWith(items: newItems),
+                          ),
+                        );
+                        Navigator.of(context).pop();
+                      }
+                    });
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 20),
+      ],
+    );
   }
 }

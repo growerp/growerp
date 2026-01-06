@@ -182,12 +182,18 @@ class LedgerTreeFormState extends State<LedgerTreeListForm> {
                 ),
                 SizedBox(
                   width: 100,
-                  child: Text(_localizations.thisAccount, textAlign: TextAlign.right),
+                  child: Text(
+                    _localizations.thisAccount,
+                    textAlign: TextAlign.right,
+                  ),
                 ),
                 if (isLargerThanPhone(context))
                   SizedBox(
                     width: 100,
-                    child: Text(_localizations.totalTree, textAlign: TextAlign.right),
+                    child: Text(
+                      _localizations.totalTree,
+                      textAlign: TextAlign.right,
+                    ),
                   ),
               ],
             ),
