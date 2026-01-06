@@ -96,6 +96,80 @@ class _TopAppState extends State<TopApp> {
     super.dispose();
   }
 
+  /// Shows a snackbar message with retry logic to wait for scaffold messenger
+  /// to become available after navigation transitions
+  void _showMessageWithRetry(String message, bool isError, [int attempt = 0]) {
+    final messenger = Constant.scaffoldMessengerKey.currentState;
+    if (messenger != null) {
+      // Use neutral colors that work in both light and dark modes
+      // Avoid context.read() as it may fail during navigation transitions
+      final backgroundColor = isError
+          ? Colors.red.shade700
+          : Colors.blueGrey.shade700;
+      const textColor = Colors.white;
+      final duration = Duration(milliseconds: isError ? 5000 : 2000);
+
+      try {
+        // Hide any existing snackbar first
+        try {
+          messenger.hideCurrentSnackBar();
+        } catch (_) {}
+
+        final controller = messenger.showSnackBar(
+          SnackBar(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            content: Text(message, style: const TextStyle(color: textColor)),
+            backgroundColor: backgroundColor,
+            duration: duration,
+            action: SnackBarAction(
+              key: const Key('dismiss'),
+              label: 'Dismiss',
+              textColor: textColor.withValues(alpha: 0.8),
+              onPressed: () => messenger.hideCurrentSnackBar(),
+            ),
+          ),
+        );
+
+        // Ensure snackbar disappears even if accessibility keeps it alive
+        var isClosed = false;
+        controller.closed.whenComplete(() => isClosed = true);
+        Future.delayed(duration + const Duration(milliseconds: 500), () {
+          if (!isClosed) {
+            try {
+              controller.close();
+            } catch (_) {}
+          }
+        });
+      } catch (e) {
+        // Scaffold not yet registered with the messenger, retry
+        debugPrint('SnackBar attempt $attempt failed: $e');
+        if (attempt < 10) {
+          Future.delayed(const Duration(milliseconds: 100), () {
+            if (mounted) {
+              _showMessageWithRetry(message, isError, attempt + 1);
+            }
+          });
+        } else {
+          debugPrint('SnackBar not shown after retries: $message - $e');
+        }
+      }
+    } else if (attempt < 10) {
+      // Retry after a short delay (scaffold messenger not ready yet)
+      Future.delayed(const Duration(milliseconds: 100), () {
+        if (mounted) {
+          _showMessageWithRetry(message, isError, attempt + 1);
+        }
+      });
+    } else {
+      // Give up after 10 attempts (1s total)
+      debugPrint(
+        'SnackBar not shown after retries - no Scaffold available: $message',
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return MultiRepositoryProvider(
@@ -124,139 +198,181 @@ class _TopAppState extends State<TopApp> {
             _localizationsDelegates.addAll(widget.extraDelegates);
             return BlocBuilder<LocaleBloc, LocaleState>(
               builder: (context, localeState) {
-                return GestureDetector(
-                  onTap: () {
-                    FocusScopeNode currentFocus = FocusScope.of(context);
-                    if (!currentFocus.hasPrimaryFocus) {
-                      currentFocus.unfocus();
+                return BlocListener<AuthBloc, AuthState>(
+                  listenWhen: (previous, current) =>
+                      current.message != null &&
+                      previous.message != current.message,
+                  listener: (context, authState) {
+                    if (authState.message != null &&
+                        authState.message!.isNotEmpty) {
+                      final isError = authState.status == AuthStatus.failure;
+                      final message = authState.message!;
+                      // Use a retry mechanism to wait for scaffold messenger
+                      // to become available after navigation
+                      _showMessageWithRetry(message, isError);
                     }
                   },
-                  child: MaterialApp.router(
-                    scaffoldMessengerKey: Constant.scaffoldMessengerKey,
-                    title: widget.title,
-                    locale: localeState.locale,
-                    supportedLocales: const [
-                      Locale('en'),
-                      Locale('th'),
-                      Locale('zh'),
-                      Locale('de'),
-                      Locale('fr'),
-                      Locale('nl'),
-                    ],
-                    scrollBehavior: const MaterialScrollBehavior().copyWith(
-                      dragDevices: {
-                        PointerDeviceKind.mouse,
-                        PointerDeviceKind.touch,
-                      },
-                    ),
-                    debugShowCheckedModeBanner: false,
-                    localizationsDelegates: _localizationsDelegates,
-                    builder: (context, child) => ResponsiveBreakpoints.builder(
-                      child: child!,
-                      breakpoints: [
-                        const Breakpoint(start: 0, end: 500, name: MOBILE),
-                        const Breakpoint(start: 451, end: 800, name: TABLET),
-                        const Breakpoint(start: 801, end: 1920, name: DESKTOP),
-                        const Breakpoint(
-                          start: 1921,
-                          end: double.infinity,
-                          name: '4K',
-                        ),
+                  child: GestureDetector(
+                    onTap: () {
+                      FocusScopeNode currentFocus = FocusScope.of(context);
+                      if (!currentFocus.hasPrimaryFocus) {
+                        currentFocus.unfocus();
+                      }
+                    },
+                    child: MaterialApp.router(
+                      scaffoldMessengerKey: Constant.scaffoldMessengerKey,
+                      title: widget.title,
+                      locale: localeState.locale,
+                      supportedLocales: const [
+                        Locale('en'),
+                        Locale('th'),
+                        Locale('zh'),
+                        Locale('de'),
+                        Locale('fr'),
+                        Locale('nl'),
                       ],
-                    ),
-                    themeMode: themeState.themeMode,
-                    theme: FlexThemeData.light(
-                      colors: themeState.colorScheme == FlexScheme.jungle
-                          ? growerpPremium.light
-                          : null,
-                      scheme: themeState.colorScheme,
-                      fontFamily: GoogleFonts.outfit().fontFamily,
-                      blendLevel: 10,
-                      subThemesData: const FlexSubThemesData(
-                        blendOnLevel: 10,
-                        blendOnColors: false,
-                        useM2StyleDividerInM3: true,
-                        dialogBackgroundSchemeColor: SchemeColor.surface,
-                        inputDecoratorBorderType: FlexInputBorderType.underline,
-                        inputDecoratorRadius: 25.0,
-                        defaultRadius: 25.0,
-                        useInputDecoratorThemeInDialogs: true,
-                        cardElevation: 2,
-                        dialogElevation: 3,
-                      ),
-                      useMaterial3: true,
-                      visualDensity: VisualDensity.adaptivePlatformDensity,
-                      pageTransitionsTheme: const PageTransitionsTheme(
-                        builders: {
-                          TargetPlatform
-                              .android: SharedAxisPageTransitionsBuilder(
-                            transitionType: SharedAxisTransitionType.horizontal,
-                          ),
-                          TargetPlatform.iOS: SharedAxisPageTransitionsBuilder(
-                            transitionType: SharedAxisTransitionType.horizontal,
-                          ),
-                          TargetPlatform
-                              .linux: SharedAxisPageTransitionsBuilder(
-                            transitionType: SharedAxisTransitionType.horizontal,
-                          ),
-                          TargetPlatform
-                              .macOS: SharedAxisPageTransitionsBuilder(
-                            transitionType: SharedAxisTransitionType.horizontal,
-                          ),
-                          TargetPlatform
-                              .windows: SharedAxisPageTransitionsBuilder(
-                            transitionType: SharedAxisTransitionType.horizontal,
-                          ),
+                      scrollBehavior: const MaterialScrollBehavior().copyWith(
+                        dragDevices: {
+                          PointerDeviceKind.mouse,
+                          PointerDeviceKind.touch,
                         },
                       ),
-                    ),
-                    darkTheme: FlexThemeData.dark(
-                      colors: themeState.colorScheme == FlexScheme.jungle
-                          ? growerpPremium.dark
-                          : null,
-                      scheme: themeState.colorScheme,
-                      fontFamily: GoogleFonts.outfit().fontFamily,
-                      blendLevel: 13,
-                      subThemesData: const FlexSubThemesData(
-                        blendOnLevel: 20,
-                        useM2StyleDividerInM3: true,
-                        dialogBackgroundSchemeColor: SchemeColor.surface,
-                        inputDecoratorBorderType: FlexInputBorderType.underline,
-                        inputDecoratorRadius: 25.0,
-                        defaultRadius: 25.0,
-                        useInputDecoratorThemeInDialogs: true,
-                        cardElevation: 2,
-                        dialogElevation: 3,
+                      debugShowCheckedModeBanner: false,
+                      localizationsDelegates: _localizationsDelegates,
+                      builder: (context, child) =>
+                          ResponsiveBreakpoints.builder(
+                            child: child!,
+                            breakpoints: [
+                              const Breakpoint(
+                                start: 0,
+                                end: 500,
+                                name: MOBILE,
+                              ),
+                              const Breakpoint(
+                                start: 451,
+                                end: 800,
+                                name: TABLET,
+                              ),
+                              const Breakpoint(
+                                start: 801,
+                                end: 1920,
+                                name: DESKTOP,
+                              ),
+                              const Breakpoint(
+                                start: 1921,
+                                end: double.infinity,
+                                name: '4K',
+                              ),
+                            ],
+                          ),
+                      themeMode: themeState.themeMode,
+                      theme: FlexThemeData.light(
+                        colors: themeState.colorScheme == FlexScheme.jungle
+                            ? growerpPremium.light
+                            : null,
+                        scheme: themeState.colorScheme,
+                        fontFamily: GoogleFonts.outfit().fontFamily,
+                        blendLevel: 10,
+                        subThemesData: const FlexSubThemesData(
+                          blendOnLevel: 10,
+                          blendOnColors: false,
+                          useM2StyleDividerInM3: true,
+                          dialogBackgroundSchemeColor: SchemeColor.surface,
+                          inputDecoratorBorderType:
+                              FlexInputBorderType.underline,
+                          inputDecoratorRadius: 25.0,
+                          defaultRadius: 25.0,
+                          useInputDecoratorThemeInDialogs: true,
+                          cardElevation: 2,
+                          dialogElevation: 3,
+                        ),
+                        useMaterial3: true,
+                        visualDensity: VisualDensity.adaptivePlatformDensity,
+                        pageTransitionsTheme: const PageTransitionsTheme(
+                          builders: {
+                            TargetPlatform.android:
+                                SharedAxisPageTransitionsBuilder(
+                                  transitionType:
+                                      SharedAxisTransitionType.horizontal,
+                                ),
+                            TargetPlatform.iOS:
+                                SharedAxisPageTransitionsBuilder(
+                                  transitionType:
+                                      SharedAxisTransitionType.horizontal,
+                                ),
+                            TargetPlatform.linux:
+                                SharedAxisPageTransitionsBuilder(
+                                  transitionType:
+                                      SharedAxisTransitionType.horizontal,
+                                ),
+                            TargetPlatform.macOS:
+                                SharedAxisPageTransitionsBuilder(
+                                  transitionType:
+                                      SharedAxisTransitionType.horizontal,
+                                ),
+                            TargetPlatform.windows:
+                                SharedAxisPageTransitionsBuilder(
+                                  transitionType:
+                                      SharedAxisTransitionType.horizontal,
+                                ),
+                          },
+                        ),
                       ),
-                      useMaterial3: true,
-                      visualDensity: VisualDensity.adaptivePlatformDensity,
-                      pageTransitionsTheme: const PageTransitionsTheme(
-                        builders: {
-                          TargetPlatform
-                              .android: SharedAxisPageTransitionsBuilder(
-                            transitionType: SharedAxisTransitionType.horizontal,
-                          ),
-                          TargetPlatform.iOS: SharedAxisPageTransitionsBuilder(
-                            transitionType: SharedAxisTransitionType.horizontal,
-                          ),
-                          TargetPlatform
-                              .linux: SharedAxisPageTransitionsBuilder(
-                            transitionType: SharedAxisTransitionType.horizontal,
-                          ),
-                          TargetPlatform
-                              .macOS: SharedAxisPageTransitionsBuilder(
-                            transitionType: SharedAxisTransitionType.horizontal,
-                          ),
-                          TargetPlatform
-                              .windows: SharedAxisPageTransitionsBuilder(
-                            transitionType: SharedAxisTransitionType.horizontal,
-                          ),
-                        },
+                      darkTheme: FlexThemeData.dark(
+                        colors: themeState.colorScheme == FlexScheme.jungle
+                            ? growerpPremium.dark
+                            : null,
+                        scheme: themeState.colorScheme,
+                        fontFamily: GoogleFonts.outfit().fontFamily,
+                        blendLevel: 13,
+                        subThemesData: const FlexSubThemesData(
+                          blendOnLevel: 20,
+                          useM2StyleDividerInM3: true,
+                          dialogBackgroundSchemeColor: SchemeColor.surface,
+                          inputDecoratorBorderType:
+                              FlexInputBorderType.underline,
+                          inputDecoratorRadius: 25.0,
+                          defaultRadius: 25.0,
+                          useInputDecoratorThemeInDialogs: true,
+                          cardElevation: 2,
+                          dialogElevation: 3,
+                        ),
+                        useMaterial3: true,
+                        visualDensity: VisualDensity.adaptivePlatformDensity,
+                        pageTransitionsTheme: const PageTransitionsTheme(
+                          builders: {
+                            TargetPlatform.android:
+                                SharedAxisPageTransitionsBuilder(
+                                  transitionType:
+                                      SharedAxisTransitionType.horizontal,
+                                ),
+                            TargetPlatform.iOS:
+                                SharedAxisPageTransitionsBuilder(
+                                  transitionType:
+                                      SharedAxisTransitionType.horizontal,
+                                ),
+                            TargetPlatform.linux:
+                                SharedAxisPageTransitionsBuilder(
+                                  transitionType:
+                                      SharedAxisTransitionType.horizontal,
+                                ),
+                            TargetPlatform.macOS:
+                                SharedAxisPageTransitionsBuilder(
+                                  transitionType:
+                                      SharedAxisTransitionType.horizontal,
+                                ),
+                            TargetPlatform.windows:
+                                SharedAxisPageTransitionsBuilder(
+                                  transitionType:
+                                      SharedAxisTransitionType.horizontal,
+                                ),
+                          },
+                        ),
                       ),
+                      routerConfig: widget.router,
                     ),
-                    routerConfig: widget.router,
-                  ),
-                );
+                  ), // Close GestureDetector
+                ); // Close BlocListener
               },
             );
           },

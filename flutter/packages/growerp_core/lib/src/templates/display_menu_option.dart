@@ -302,38 +302,8 @@ class DisplayMenuItemState extends State<DisplayMenuItem>
     try {
       return MultiBlocListener(
         listeners: [
-          // Listener for auth messages (login, logout, etc.)
-          BlocListener<AuthBloc, AuthState>(
-            listenWhen: (previous, current) =>
-                current.message != null && previous.message != current.message,
-            listener: (context, authState) {
-              if (authState.message != null && authState.message!.isNotEmpty) {
-                final isError = authState.status == AuthStatus.failure;
-                final message = authState.message!;
-                // Use post-frame callback to ensure we show message after navigation
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  // Use global scaffold messenger key for logout messages
-                  // since the current scaffold may be disposed during navigation
-                  final messenger = Constant.scaffoldMessengerKey.currentState;
-                  if (messenger != null) {
-                    // Create a simple snackbar without using the potentially deactivated context
-                    messenger.showSnackBar(
-                      SnackBar(
-                        content: Text(message),
-                        backgroundColor: isError ? Colors.red : Colors.green,
-                        duration: Duration(milliseconds: isError ? 5000 : 2000),
-                        action: SnackBarAction(
-                          label: 'Dismiss',
-                          textColor: Colors.white,
-                          onPressed: () => messenger.hideCurrentSnackBar(),
-                        ),
-                      ),
-                    );
-                  }
-                });
-              }
-            },
-          ),
+          // Note: Auth messages (login, logout, errors) are now handled
+          // at the TopApp level with retry logic for scaffold availability
           // Listener for authentication status changes
           BlocListener<AuthBloc, AuthState>(
             listenWhen: (previous, current) =>
