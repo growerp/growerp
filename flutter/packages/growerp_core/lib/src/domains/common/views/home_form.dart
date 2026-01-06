@@ -82,6 +82,8 @@ class HomeFormState extends State<HomeForm> with TickerProviderStateMixin {
     Future.delayed(const Duration(milliseconds: 200), () {
       if (mounted) _slideController.forward();
     });
+    // Note: Auth messages (including logout) are now handled at TopApp level
+    // with retry logic to ensure scaffold messenger is available
   }
 
   @override
