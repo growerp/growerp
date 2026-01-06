@@ -17,6 +17,18 @@ sed -i -e 's\overrideUrl: null\overrideUrl: "http://moqui"\g' packages/growerp_c
 #sed -i -e 's\"chatUrlDebug": "",\"chatUrlDebug": "ws://chat:8080",\g' assets/cfg/app_settings.json
 #flutter test integration_test -d emulator:5557
 
+# Run tests with optional package filter
+if [ -n "$PACKAGE_FILTER" ]; then
+  echo "Running tests for packages containing: $PACKAGE_FILTER"
+  # Melos 3.4.0 doesn't support --scope CLI flag, so we modify melos.yaml
+  # specifically in the test-headless section.
+  sed -i "/test-headless:/,\$ s/dirExists: \"integration_test\"/dirExists: \"integration_test\"\n      scope: \"*${PACKAGE_FILTER}*\"/" melos.yaml
+  echo "Modified test-headless section in melos.yaml:"
+  grep -A 10 "test-headless:" melos.yaml
+else
+  echo "Running all tests"
+fi
+
 melos test-headless --no-select
 
 # Take a screenshot of the Flutter app.
