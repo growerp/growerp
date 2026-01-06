@@ -4,6 +4,8 @@ services:
     # image: growerp/integration-test
     volumes:
       - ./test:/home/mobiledevops/growerp/test
+    environment:
+      - PACKAGE_FILTER=${PACKAGE_FILTER:-}
     depends_on:
       emulator:
         condition: service_started
