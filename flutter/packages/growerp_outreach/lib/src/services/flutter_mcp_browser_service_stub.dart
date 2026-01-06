@@ -8,7 +8,7 @@ class McpServerConfig {
 /// Stub implementation - should never be instantiated directly
 /// Used only for conditional imports
 class FlutterMcpBrowserServiceImpl {
-  Client? _client;
+  McpClient? _client;
   Transport? _transport;
   final bool _isInitialized = false;
 
@@ -20,7 +20,7 @@ class FlutterMcpBrowserServiceImpl {
 
   Future<void> cleanup() async {}
 
-  Client? get client => _client;
+  McpClient? get client => _client;
   Transport? get transport => _transport;
 }
 

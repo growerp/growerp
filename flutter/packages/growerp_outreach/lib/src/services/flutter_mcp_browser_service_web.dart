@@ -19,7 +19,7 @@ class FlutterMcpBrowserServiceImpl {
   static final logging.Logger _logger =
       logging.Logger('outreach.FlutterMcpBrowserServiceImpl.web');
 
-  Client? _client;
+  McpClient? _client;
   StreamableHttpClientTransport? _transport;
   bool _isInitialized = false;
 
@@ -32,7 +32,7 @@ class FlutterMcpBrowserServiceImpl {
   static const String defaultServerUrl = 'http://localhost:9223/mcp';
 
   bool get isInitialized => _isInitialized;
-  Client? get client => _client;
+  McpClient? get client => _client;
   Transport? get transport => _transport;
 
   /// Initialize the MCP client using HTTP transport
@@ -55,7 +55,7 @@ class FlutterMcpBrowserServiceImpl {
     );
 
     // Create and connect the MCP client
-    _client = Client(
+    _client = McpClient(
       const Implementation(
           name: 'GrowERP Browser Client (Web)', version: '1.0.0'),
     );
