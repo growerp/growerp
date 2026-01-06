@@ -58,22 +58,26 @@ class ChatEndpoint extends MoquiAbstractEndpoint {
                     " to chatRoomId: ${message.chatRoom['chatRoomId']}");
         message.fromUserId = users.get(session.getId());
 
-        // get member
+        // get member using direct service call instead of HTTP (avoids localhost issues in Docker)
         ExecutionContextImpl eci = super.ecfi.getEci()
-        RestClient restClient = eci.service.rest().method(RestClient.GET)
-                .uri("http://localhost:8080/rest/s1/growerp/100/ChatRoom?chatRoomId=${message.chatRoom['chatRoomId']}")
-                .addHeader("Content-Type", "application/json")
-                .addHeader("api_key", "${apiKey}")
-        RestClient.RestResponse restResponse = restClient.call()
-        Map result = (Map) restResponse.jsonObject()
-        if (restResponse.statusCode < 200 || restResponse.statusCode >= 300 ) {
-            logger.warn("Websocket Authorisation error: ${result}")
+        List userIds
+        try {
+            Map result = eci.service.sync().name("growerp.100.ChatServices100.get#ChatRoom")
+                .parameter("chatRoomId", message.chatRoom['chatRoomId'])
+                .parameter("apiKey", apiKey)
+                .call()
+            if (result == null || result.chatRooms == null || ((List)result.chatRooms).isEmpty()) {
+                logger.warn("Websocket ChatRoom lookup error: ${result}")
+                return
+            }
+            List chatRooms = (List) result.chatRooms
+            logger.info("====chatrooms; $chatRooms =======")
+            List members = (List) chatRooms[0]["members"]
+            userIds = (List) members["user"]["userId"]
+        } catch (Exception e) {
+            logger.warn("Websocket ChatRoom lookup error: ${e.message}")
             return
         }
-        List chatRooms = (List) result.chatRooms
-        logger.info("====chatrooms; $chatRooms =======")
-        List members = (List) chatRooms[0]["members"]
-        List userIds = (List) members["user"]["userId"]
 
         chatEndpoints.forEach(endpoint -> {
             var toUserId = users.get(endpoint.session.getId())

@@ -75,16 +75,20 @@ abstract class MoquiAbstractEndpoint extends Endpoint implements MessageHandler.
             if (session.getRequestParameterMap()["userId"] != null) {
                 userId = session.getRequestParameterMap()["userId"][0]
                 apiKey = session.getRequestParameterMap()["apiKey"][0]
-                RestClient restClient = eci.service.rest().method(RestClient.GET)
-                    .uri("http://localhost:8080/rest/s1/growerp/100/Authenticate?classificationId=token")
-                    .addHeader("Content-Type", "application/json")
-                    .addHeader("api_key", "${apiKey}")
-                RestClient.RestResponse restResponse = restClient.call()
-                if (restResponse.statusCode < 200 || restResponse.statusCode >= 300 ) {
-                    eci.logger.warn("Websocket Authorisation error: status=${restResponse.statusCode}, body=${restResponse.text()}")
+                // Use direct service call instead of HTTP to avoid localhost resolution issues in Docker
+                try {
+                    Map result = eci.service.sync().name("growerp.100.GeneralServices100.get#Authenticate")
+                        .parameter("classificationId", "token")
+                        .parameter("apiKey", apiKey)
+                        .call()
+                    if (result == null || result.containsKey("_error")) {
+                        eci.logger.warn("Websocket Authorisation error: ${result}")
+                        return
+                    }
+                } catch (Exception e) {
+                    eci.logger.warn("Websocket Authorisation error: ${e.message}")
                     return
                 }
-                Map result = (Map) restResponse.jsonObject()
             } else {
                 userId = eci.user.userId
                 username = eci.user.username

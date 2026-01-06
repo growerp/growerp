@@ -274,7 +274,6 @@ void main() {
       await CommonTest.enterText(tester, 'username', testUserEmail!);
       await CommonTest.enterText(tester, 'password', testUserPassword);
       await CommonTest.pressLogin(tester);
-      await CommonTest.waitForSnackbarToGo(tester);
 
       // Check what form is shown - should be payment form since evaluation expired
       // Use manual pump to avoid getting stuck on animations
