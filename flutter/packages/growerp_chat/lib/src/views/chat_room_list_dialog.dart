@@ -158,7 +158,7 @@ class ChatRoomListDialogsState extends State<ChatRoomListDialog> {
         return index >= chatRooms.length
             ? const BottomLoader()
             : Dismissible(
-                key: const Key('chatRoomItem'),
+                key: Key('chatRoomItem${chatRooms[index].chatRoomId}'),
                 direction: DismissDirection.startToEnd,
                 child: ListDetail(chatRoom: chatRooms[index], index: index),
               );
@@ -310,6 +310,11 @@ class ListDetail extends StatelessWidget {
             return ChatDialog(chatRoom);
           },
         );
+        // Refresh the chat room list to update the hasRead indicator
+        // after reading messages in the chat dialog
+        if (context.mounted) {
+          context.read<ChatRoomBloc>().add(const ChatRoomFetch(refresh: true));
+        }
       },
       trailing: IconButton(
         key: Key('delete$index'),
