@@ -18,7 +18,7 @@ dependencies:
   responsive_framework: ^1.1.0
   dio: ^5.3.3
   logging: ^1.2.0
-  mcp_dart: ^1.0.2
+  mcp_dart: ^1.2.0
 
 dev_dependencies:
   flutter_test:

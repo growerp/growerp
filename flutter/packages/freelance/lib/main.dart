@@ -114,6 +114,9 @@ class _FreelanceAppState extends State<FreelanceApp> {
 
   @override
   void dispose() {
+    // Close WebSocket connections gracefully to avoid backend ClosedChannelException
+    widget.chatClient.close();
+    widget.notificationClient.close();
     _menuConfigBloc.close();
     super.dispose();
   }

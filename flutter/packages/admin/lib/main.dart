@@ -123,6 +123,9 @@ class _AdminAppState extends State<AdminApp> {
 
   @override
   void dispose() {
+    // Close WebSocket connections gracefully to avoid backend ClosedChannelException
+    widget.chatClient.close();
+    widget.notificationClient.close();
     _menuConfigBloc.close();
     super.dispose();
   }

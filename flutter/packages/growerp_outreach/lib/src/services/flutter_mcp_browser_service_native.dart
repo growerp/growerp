@@ -80,12 +80,12 @@ class FlutterMcpBrowserServiceImpl {
   /// Current configuration (can be changed before initialize)
   static McpServerConfig config = McpServerConfig.fromEnvironment();
 
-  Client? _client;
+  McpClient? _client;
   StdioClientTransport? _transport;
   bool _isInitialized = false;
 
   bool get isInitialized => _isInitialized;
-  Client? get client => _client;
+  McpClient? get client => _client;
   Transport? get transport => _transport;
 
   /// Initialize the MCP client using STDIO transport (spawns Playwright MCP process)
@@ -127,7 +127,7 @@ class FlutterMcpBrowserServiceImpl {
     );
 
     // Create and connect the MCP client
-    _client = Client(
+    _client = McpClient(
       const Implementation(name: 'GrowERP Browser Client', version: '1.0.0'),
     );
 

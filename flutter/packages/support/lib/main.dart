@@ -107,6 +107,9 @@ class _SupportAppState extends State<SupportApp> {
 
   @override
   void dispose() {
+    // Close WebSocket connections gracefully to avoid backend ClosedChannelException
+    widget.chatClient.close();
+    widget.notificationClient.close();
     _menuConfigBloc.close();
     super.dispose();
   }
