@@ -165,9 +165,11 @@ class _DashboardCardState extends State<DashboardCard>
                             children: [
                               // Icon with circular gradient background
                               Flexible(
-                                flex: 2,
+                                flex: isAPhone(context) ? 1 : 2,
                                 child: Container(
-                                  padding: const EdgeInsets.all(12),
+                                  padding: EdgeInsets.all(
+                                    isAPhone(context) ? 8 : 12,
+                                  ),
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
                                     gradient: RadialGradient(
@@ -209,21 +211,25 @@ class _DashboardCardState extends State<DashboardCard>
                                       ),
                                     ],
                                   ).createShader(bounds),
-                                  child: Text(
-                                    widget.title,
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w600,
-                                      letterSpacing: 0.3,
-                                      color: colorScheme.onSurface,
+                                  child: FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    child: Text(
+                                      isAPhone(context)
+                                          ? widget.title.replaceFirst(' ', '\n')
+                                          : widget.title,
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        fontSize: isAPhone(context) ? 13 : 15,
+                                        fontWeight: FontWeight.w600,
+                                        letterSpacing: 0.3,
+                                        color: colorScheme.onSurface,
+                                      ),
                                     ),
-                                    overflow: TextOverflow.ellipsis,
-                                    maxLines: 2,
                                   ),
                                 ),
                               ),
-                              if (widget.stats != null) ...[
+                              if (widget.stats != null &&
+                                  !isAPhone(context)) ...[
                                 const SizedBox(height: 4),
                                 Flexible(
                                   child: Container(
