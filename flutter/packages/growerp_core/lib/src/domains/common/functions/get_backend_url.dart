@@ -67,6 +67,11 @@ Future<void> getBackendUrlOverride(
         "ws$secure://${jsonDecode(response.body)['backendUrl']}",
       );
       GlobalConfiguration().updateValue("test", true);
+    } else {
+      // always show in debug mode when backend url not provided
+      if (kDebugMode) {
+        GlobalConfiguration().updateValue("test", true);
+      }
     }
   } catch (error) {
     debugPrint('===get backend url: $backendUrl error: $error');
