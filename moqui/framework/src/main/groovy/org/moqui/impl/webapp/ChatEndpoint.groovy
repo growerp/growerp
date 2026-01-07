@@ -24,103 +24,123 @@ import org.moqui.util.*
 import javax.websocket.CloseReason
 import javax.websocket.EndpointConfig
 import javax.websocket.Session
-import javax.websocket.EncodeException;
-import javax.websocket.EncodeException;
+import javax.websocket.EncodeException
 
-
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
+import java.io.IOException
+import java.util.HashMap
+import java.util.Set
+import java.util.concurrent.CopyOnWriteArraySet
 
 @CompileStatic
 class ChatEndpoint extends MoquiAbstractEndpoint {
     private final static Logger logger = LoggerFactory.getLogger(ChatEndpoint.class)
 
-    private static final Set<ChatEndpoint> chatEndpoints = new CopyOnWriteArraySet<>();
-    private static HashMap<String, String> users = new HashMap<>();
-
-    Logger logger = LoggerFactory.getLogger(ChatEndpoint.class);
+    private static final Set<ChatEndpoint> chatEndpoints = new CopyOnWriteArraySet<>()
 
     @Override
     void onOpen(Session session, EndpointConfig config) {
         super.onOpen(session, config)
-        users.put(session.getId(), getUserId());
-        this.session = session;
+        this.session = session
         chatEndpoints.add(this)
+        logger.info("Opened chat websocket for user ${userId} session ${session.id}")
     }
 
     @Override
     void onMessage(String messageJson) {
-        Map message = (Map) new JsonSlurper().parseText(messageJson)
-        logger.info("receiving message from: ${message.fromUserId}" + 
-                    " content: ${message.content}" +
-                    " to chatRoomId: ${message.chatRoom['chatRoomId']}");
-        message.fromUserId = users.get(session.getId());
-
-        // get member using direct service call instead of HTTP (avoids localhost issues in Docker)
         ExecutionContextImpl eci = super.ecfi.getEci()
-        List userIds
         try {
-            Map result = eci.service.sync().name("growerp.100.ChatServices100.get#ChatRoom")
-                .parameter("chatRoomId", message.chatRoom['chatRoomId'])
-                .parameter("apiKey", apiKey)
-                .call()
-            if (result == null || result.chatRooms == null || ((List)result.chatRooms).isEmpty()) {
-                logger.warn("Websocket ChatRoom lookup error: ${result}")
+            if (userId) eci.user.loginUser(userId)
+            
+            Object parsed = new JsonSlurper().parseText(messageJson)
+            if (!(parsed instanceof Map)) {
+                logger.warn("Received non-map message: ${messageJson}")
                 return
             }
-            List chatRooms = (List) result.chatRooms
-            logger.info("====chatrooms; $chatRooms =======")
-            List members = (List) chatRooms[0]["members"]
-            userIds = (List) members["user"]["userId"]
-        } catch (Exception e) {
-            logger.warn("Websocket ChatRoom lookup error: ${e.message}")
-            return
-        }
+            Map message = (Map) parsed
+            
+            String chatRoomId = (String) ((Map) message.get("chatRoom"))?.get("chatRoomId")
+            logger.info("Receiving message from: ${userId} for chatRoomId: ${chatRoomId}")
+            
+            message.put("fromUserId", userId)
 
-        chatEndpoints.forEach(endpoint -> {
-            var toUserId = users.get(endpoint.session.getId())
-            if (toUserId != getUserId() && userIds.find{it == toUserId} != null) {
-                synchronized (endpoint) {
-                    try {
-                        logger.info("Sending chatmessage: ${message.content}" +
-                                " to: ${toUserId} roomId: ${message.chatRoom['chatRoomId']} " +
-                                "sessionId: ${endpoint.session.getId()}");
-                        endpoint.session.asyncRemote.sendText(JsonOutput.toJson(message))
-                    } catch (IOException | EncodeException e) {
-                        logger.warn("chat message send failed....");
-                    }
+            if (!chatRoomId) {
+                logger.warn("No chatRoomId in message: ${message}")
+                return
+            }
+
+            // get member using direct service call instead of HTTP (avoids localhost issues in Docker)
+            Map result = eci.service.sync().name("growerp.100.ChatServices100.get#ChatRoom")
+                .parameter("chatRoomId", chatRoomId)
+                .parameter("apiKey", apiKey)
+                .call()
+                
+            if (result == null || result.get("chatRooms") == null || ((List)result.get("chatRooms")).isEmpty()) {
+                logger.warn("Websocket ChatRoom lookup error for room ${chatRoomId}: ${result}")
+                return
+            }
+            
+            List chatRooms = (List) result.get("chatRooms")
+            Map chatRoom = (Map) chatRooms.get(0)
+            List members = (List) chatRoom.get("members")
+            if (!members) {
+                logger.warn("No members found for chatRoom ${chatRoomId}")
+                return
+            }
+            
+            // Extract userIds of members to broadcast to
+            List<String> memberUserIds = new ArrayList<>()
+            for (Object memberObj : members) {
+                Map member = (Map) memberObj
+                Map user = (Map) member.get("user")
+                if (user != null && user.get("userId") != null) {
+                    memberUserIds.add((String) user.get("userId"))
                 }
             }
-        });
+
+            String messageOutput = JsonOutput.toJson(message)
+            chatEndpoints.forEach(endpoint -> {
+                String toUserId = endpoint.getUserId()
+                if (toUserId != null && toUserId != userId && memberUserIds.contains(toUserId)) {
+                    synchronized (endpoint) {
+                        try {
+                            if (endpoint.session != null && endpoint.session.isOpen()) {
+                                logger.info("Sending chat message to: ${toUserId} roomId: ${chatRoomId} sessionId: ${endpoint.session.id}")
+                                endpoint.session.asyncRemote.sendText(messageOutput)
+                            }
+                        } catch (Exception e) {
+                            logger.warn("Chat message send failed to ${toUserId}: ${e.message}")
+                        }
+                    }
+                }
+            })
+        } catch (Exception e) {
+            logger.error("Error in ChatEndpoint.onMessage", e)
+        } finally {
+            eci.destroy()
+        }
     }
 
     @Override
-    void onClose(Session session, CloseReason closeReason) throws IOException, EncodeException {
-        logger.info("closing websocket for user: ${users.get(session.getId())} ${session.getId()} reason: ${closeReason}");
-        Map message = [
-            "fromUserId": users.get(session.getId()),
-            "content": "Disconnected: ${closeReason}"];
-        broadcast(JsonOutput.toJson(message));
-        users.remove(session.getId());
-        chatEndpoints.remove(this);
+    void onClose(Session session, CloseReason closeReason) {
+        logger.info("Closing websocket for user: ${userId} ${session.id} reason: ${closeReason}")
+        chatEndpoints.remove(this)
         super.onClose(session, closeReason)
     }
 
-    private static void broadcast(String message) throws IOException, EncodeException {
-        Logger logger = LoggerFactory.getLogger(ChatEndpoint.class);
+    private static void broadcast(String message) {
         chatEndpoints.forEach(endpoint -> {
             synchronized (endpoint) {
                 try {
-                    logger.info("chat broadcast message send: $message...");
-                    endpoint.session.getBasicRemote()
-                        .sendObject(message);
-                } catch (IOException | EncodeException e) {
-                    logger.info("chat broadcast message send failed....");
+                    if (endpoint.session != null && endpoint.session.isOpen()) {
+                        logger.info("Chat broadcast message send to ${endpoint.getUserId()}...")
+                        endpoint.session.asyncRemote.sendText(message)
+                    }
+                } catch (Exception e) {
+                    logger.warn("Chat broadcast message send failed: ${e.message}")
                 }
             }
-        });
+        })
     }
 }
+
 
