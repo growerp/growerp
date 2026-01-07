@@ -1,7 +1,7 @@
 # GrowERP - Open Source Modular ERP Platform
 
 [![License: CC0-1.0](https://img.shields.io/badge/License-CC0%201.0-lightgrey.svg)](http://creativecommons.org/publicdomain/zero/1.0/)
-[![Flutter](https://img.shields.io/badge/Flutter-3.35.1-blue.svg)](https://flutter.dev/)
+[![Flutter](https://img.shields.io/badge/Flutter-3.33.0-blue.svg)](https://flutter.dev/)
 [![Moqui](https://img.shields.io/badge/Moqui-Framework-green.svg)](https://www.moqui.org/)
 
 GrowERP is an open-source, multi-platform ERP application built with a modular architecture that allows for unprecedented extensibility and customization. Whether you're a small business or an enterprise, GrowERP adapts to your needs through its flexible building block system.
@@ -10,7 +10,7 @@ GrowERP is an open-source, multi-platform ERP application built with a modular a
 
 ### Try GrowERP Now
 
-**Production Applications:** Require credit card with 2 weeks trial
+**Production Applications:** Free trial 2 weeks period without credit card
 - **Admin App with complete functionality**: [Web](https://admin.growerp.com) | [Linux](https://snapcraft.io/growerp-admin) | [Windows](https://apps.microsoft.com/detail/9nwx6kftjnql?hl=en-US&gl=TH) | [MacOs](https://apps.apple.com/us/app/growerp-admin-open-source/id1545521755)  | [Android](https://play.google.com/store/apps/details?id=org.growerp.admin) | [iOS](https://apps.apple.com/us/app/growerp-admin-open-source/id1545521755)
 
 **Applications limited availability under test:** dummy credit card always approved 

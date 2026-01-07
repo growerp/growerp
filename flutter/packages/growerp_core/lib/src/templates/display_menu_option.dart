@@ -439,10 +439,9 @@ class DisplayMenuItemState extends State<DisplayMenuItem>
   }
 
   Widget _buildPage() {
-    if ((!kReleaseMode ||
-        GlobalConfiguration().get("test") &&
-            !Platform.isIOS &&
-            !Platform.isMacOS)) {
+    if (GlobalConfiguration().get("test") &&
+        !Platform.isIOS &&
+        !Platform.isMacOS) {
       return Banner(
         message: _localizations!.test,
         color: Colors.red,

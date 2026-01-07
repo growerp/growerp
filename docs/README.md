@@ -3,9 +3,9 @@
 
 This directory contains comprehensive documentation for extending and developing with GrowERP. GrowERP is designed with extensibility at its core, allowing developers to create custom applications and extend functionality through well-defined building blocks and configuration systems.
 
-**Last Updated:** November 11, 2025  
+**Last Updated:** January 5, 2026  
 **Status:** ✅ COMPLETE & PRODUCTION-READY  
-**Total Documentation:** 40+ Documents | 8,750+ Lines
+**Total Documentation:** 40+ Documents | 9,000+ Lines
 
 ## 📖 Quick Navigation
 
@@ -88,22 +88,40 @@ This directory contains comprehensive documentation for extending and developing
 - **[Management Summary: Open Source Extensibility](./Management_Summary_Open_Source_Extensibility.md)** - Executive overview
 - **[Examples](./examples/)** - Code examples and use cases
 
-## 🔥 What's New
+## 🔥 What's New (January 2026)
 
-### B2C and B2B Party Model Documentation (Latest)
+### Modern UI & Theme System ⭐ **NEW!**
 
-Comprehensive guide to GrowERP's flexible party model that elegantly handles both B2C (Business-to-Consumer) and B2B (Business-to-Business) relationships:
+GrowERP now features an enhanced UI system with:
+
+- **Flexible Color Theming** - Built with `flex_color_scheme` for beautiful, consistent themes
+- **Trial Welcome Flow** - Streamlined onboarding with improved trial welcome dialogs (2-week free trial, no credit card required)
+- **Tenant Setup Dialog** - Redesigned to match the modern login screen aesthetic
+- **GroupingDecorator Widget** - Theme-aware grouped input fields with consistent OutlineInputBorder styling
+- **Color Variations** - Enhanced navigation rail/drawer gradients and zebra striping in data tables
+
+**Quick Start:**
+1. Theme configuration via `flex_color_scheme` (see `growerp_core/lib/src/styles/`)
+2. New `trialWelcome` flow replaces legacy `evaluationWelcome`
+3. Use `GroupingDecorator` instead of `InputDecorator` for grouped fields
+
+### Dynamic Navigation with go_router ⭐ **NEW!**
+
+Rebuilt navigation system using `go_router` for:
+
+- **Dynamic Menu Configuration** - Backend-stored, user-customizable menus
+- **Static/Dynamic Router Patterns** - Choose based on app complexity
+- **Widget Registry** - AI-ready widget discovery with metadata
+- **See:** [Dynamic Menu System and Widget Repository](./Dynamic_Menu_System_And_Widget_Repository.md)
+
+### B2C and B2B Party Model Documentation
+
+Comprehensive guide to GrowERP's flexible party model:
 
 - **B2C Support** - Standalone persons/individuals with direct transactions
 - **B2B Support** - Companies with employees as representatives
 - **Smart UI** - Shows UserDialog for standalone persons, CompanyDialog for persons representing companies
 - **Accounting** - All records posted to companies (not employees) in B2B scenarios
-- **Real-world use cases** - E-commerce, SaaS, Manufacturing, Hybrid platforms
-
-**Quick Start:**
-1. Read: [B2C and B2B Party Model Documentation](./B2C_B2B_Party_Model_Documentation.md) ⭐ **Latest documentation**
-2. Understand the core rule: When a person has a company, accounting goes to the company
-3. See implementation in `growerp_user_company` package
 
 **Key Decision Matrix:**
 | Scenario | Display | Accounting Posts To |
@@ -383,16 +401,17 @@ GrowERP is released under the CC0 1.0 Universal license.
 
 ---
 
-**Last Updated:** November 11, 2025  
+**Last Updated:** January 5, 2026  
 **Maintained by:** GrowERP Community  
 **Status:** ✅ COMPLETE & PRODUCTION-READY
 
-**Phase 12 Summary:**
-- ✅ 12 specification documents with 8,750+ lines
-- ✅ Assessment Landing Page fully documented
-- ✅ FTL landing page + Flutter app integration complete
-- ✅ All deployment procedures verified
-- ✅ Bug fixes and troubleshooting included
+**Recent Updates Summary:**
+- ✅ Modern UI with flex_color_scheme theming
+- ✅ go_router navigation with dynamic menus
+- ✅ Trial welcome flow (replacing evaluation welcome)
+- ✅ Enhanced tenant setup and registration dialogs
+- ✅ GroupingDecorator for consistent form styling
+- ✅ Integration test improvements with animation handling
 
 ---
 
@@ -411,5 +430,5 @@ For questions or improvements to this documentation, please create an issue or s
 
 ---
 
-**Last Updated:** October 2025  
+**Last Updated:** January 5, 2026  
 **Maintained by:** GrowERP Community

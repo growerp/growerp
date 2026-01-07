@@ -12,7 +12,6 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:global_configuration/global_configuration.dart';
@@ -354,10 +353,9 @@ class HomeFormState extends State<HomeForm> with TickerProviderStateMixin {
     );
 
     // Wrap in test banner if in debug/test mode
-    if (!kReleaseMode ||
-        (GlobalConfiguration().get("test") == true &&
-            !Platform.isIOS &&
-            !Platform.isMacOS)) {
+    if (GlobalConfiguration().get("test") == true &&
+        !Platform.isIOS &&
+        !Platform.isMacOS) {
       return Banner(
         message: _localizations!.test,
         color: Colors.red,
