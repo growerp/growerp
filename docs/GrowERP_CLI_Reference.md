@@ -1,7 +1,7 @@
 # GrowERP CLI Command Reference
 
 **Version:** 1.10.5  
-**Last Updated:** December 12, 2024
+**Last Updated:** January 5, 2026
 
 ---
 

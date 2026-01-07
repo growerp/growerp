@@ -103,8 +103,9 @@ The login service (`growerp.100.GeneralServices100.login#User`) accepts payment-
 During login, the system checks for payment requirements:
 
 1. **Payment Gateway Check**: Verifies if Stripe is configured for owner `100000`
-2. **Existing Payment Check**: Looks for authorized payments from the company to GrowERP
-3. **Payment Screen Trigger**: Returns `apiKey: 'payment'` if payment is required
+2. **Trial Period Check**: New accounts receive a 2-week free trial without credit card. Payment is only required after the trial expires.
+3. **Existing Payment Check**: Looks for authorized payments from the company to GrowERP
+4. **Payment Screen Trigger**: Returns `apiKey: 'payment'` if payment is required
 
 ```xml
 <!-- Payment requirement check -->
