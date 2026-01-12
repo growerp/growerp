@@ -16,6 +16,7 @@ import 'package:animations/animations.dart';
 import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
@@ -79,6 +80,14 @@ class _TopAppState extends State<TopApp> {
   @override
   void initState() {
     super.initState();
+
+    // Hide Android system navigation bar (bottom bar) for immersive experience
+    // immersiveSticky mode hides bars but allows temporary access via edge swipe
+    SystemChrome.setEnabledSystemUIMode(
+      SystemUiMode.immersiveSticky,
+      overlays: [SystemUiOverlay.top], // Keep status bar, hide navigation bar
+    );
+
     for (final widgetMap in widget.widgetRegistrations) {
       WidgetRegistry.register(widgetMap);
     }

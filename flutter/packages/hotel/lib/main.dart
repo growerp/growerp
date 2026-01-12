@@ -86,7 +86,7 @@ Future main() async {
   }
   // Set date offset for testing (rental, subscription expiration, etc.)
   // Change to non-zero value to test time-dependent features, e.g., 15
-  setTestDaysOffset(15);
+  setTestDaysOffset(0);
 
   Bloc.observer = AppBlocObserver();
   debugPrint("=== current date: ${CustomizableDateTime.current}");

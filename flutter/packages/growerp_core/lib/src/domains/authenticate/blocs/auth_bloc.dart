@@ -184,11 +184,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         state.copyWith(
           status: AuthStatus.unAuthenticated,
           authenticate: result,
-          message: result.apiKey == 'trialWelcome'
-              ? 'Registration successful! Welcome to your 14-day free trial.\n'
-                    'Please login to continue setup.'
-              : 'Registration successful.\n'
-                    'You can now login with the password sent by email',
+          message:
+              'Registration successful.\n'
+              'You can now login with the password sent by email',
         ),
       );
     } on DioException catch (e) {

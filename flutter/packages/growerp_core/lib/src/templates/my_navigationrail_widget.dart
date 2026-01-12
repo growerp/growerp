@@ -144,6 +144,10 @@ Widget myNavigationRail(
         ),
         child: LayoutBuilder(
           builder: (context, constraint) {
+            // Check for smaller tablets
+            final screenHeight = MediaQuery.of(context).size.height;
+            final isSmallTablet = screenHeight < 700;
+
             return SingleChildScrollView(
               child: ConstrainedBox(
                 constraints: BoxConstraints(minHeight: constraint.maxHeight),
@@ -152,18 +156,20 @@ Widget myNavigationRail(
                     children: [
                       // Premium user profile card
                       SizedBox(
-                        height: ResponsiveBreakpoints.of(context).isTablet
-                            ? 25
-                            : 12,
+                        height: isSmallTablet
+                            ? 8
+                            : (ResponsiveBreakpoints.of(context).isTablet
+                                  ? 25
+                                  : 12),
                       ),
                       _buildUserProfileCard(context, auth, colorScheme, isDark),
-                      const SizedBox(height: 16),
+                      SizedBox(height: isSmallTablet ? 8 : 16),
                       Divider(
                         color: colorScheme.outline.withValues(alpha: 0.2),
                         indent: 16,
                         endIndent: 16,
                       ),
-                      const SizedBox(height: 8),
+                      SizedBox(height: isSmallTablet ? 4 : 8),
                       // Navigation items
                       Expanded(
                         child: NavigationRail(
@@ -190,7 +196,7 @@ Widget myNavigationRail(
                       ),
                       // Theme picker at bottom
                       _buildThemeButton(context, localizations, colorScheme),
-                      const SizedBox(height: 16),
+                      SizedBox(height: isSmallTablet ? 8 : 16),
                     ],
                   ),
                 ),
@@ -205,24 +211,29 @@ Widget myNavigationRail(
   );
 }
 
-/// Builds a premium user profile card with avatar ring and gradient background
+/// Builds a premium user profile card with avatar ring and gradient background.
+/// Adapts to available space - shows compact version on smaller tablets.
 Widget _buildUserProfileCard(
   BuildContext context,
   Authenticate? auth,
   ColorScheme colorScheme,
   bool isDark,
 ) {
+  // Check if we're on a smaller tablet (7-inch or similar) using screen height
+  final screenHeight = MediaQuery.of(context).size.height;
+  final isSmallTablet = screenHeight < 700;
+
   return Material(
     color: Colors.transparent,
     child: InkWell(
       key: const Key('tapUser'),
       onTap: () => context.go('/user', extra: auth?.user),
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(isSmallTablet ? 12 : 16),
       child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 8),
-        padding: const EdgeInsets.all(12),
+        margin: EdgeInsets.symmetric(horizontal: isSmallTablet ? 4 : 8),
+        padding: EdgeInsets.all(isSmallTablet ? 6 : 12),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(isSmallTablet ? 12 : 16),
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
@@ -236,73 +247,148 @@ Widget _buildUserProfileCard(
             width: 1,
           ),
         ),
-        child: Column(
-          children: [
-            // Avatar with gradient ring
-            Container(
-              padding: const EdgeInsets.all(3),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [colorScheme.primary, colorScheme.secondary],
-                ),
-              ),
-              child: CircleAvatar(
-                radius: 20,
-                backgroundColor: colorScheme.surface,
-                child: auth?.user?.image != null
-                    ? ClipOval(
-                        child: Image.memory(
-                          auth!.user!.image!,
-                          width: 36,
-                          height: 36,
-                          fit: BoxFit.cover,
-                        ),
-                      )
-                    : Text(
-                        auth?.user?.firstName?.substring(0, 1) ?? '',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: colorScheme.primary,
-                        ),
+        child: isSmallTablet
+            ? // Compact horizontal layout for small tablets
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Smaller avatar
+                  Container(
+                    padding: const EdgeInsets.all(2),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [colorScheme.primary, colorScheme.secondary],
                       ),
+                    ),
+                    child: CircleAvatar(
+                      radius: 14,
+                      backgroundColor: colorScheme.surface,
+                      child: auth?.user?.image != null
+                          ? ClipOval(
+                              child: Image.memory(
+                                auth!.user!.image!,
+                                width: 24,
+                                height: 24,
+                                fit: BoxFit.cover,
+                              ),
+                            )
+                          : Text(
+                              auth?.user?.firstName?.substring(0, 1) ?? '',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: colorScheme.primary,
+                              ),
+                            ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  // User name in column
+                  Flexible(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          auth?.user?.firstName ?? '',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: colorScheme.onSurface,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        Text(
+                          auth?.user?.lastName ?? '',
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: colorScheme.onSurface.withValues(alpha: 0.7),
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              )
+            : // Standard vertical layout for larger screens
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Avatar with gradient ring
+                  Container(
+                    padding: const EdgeInsets.all(3),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [colorScheme.primary, colorScheme.secondary],
+                      ),
+                    ),
+                    child: CircleAvatar(
+                      radius: 20,
+                      backgroundColor: colorScheme.surface,
+                      child: auth?.user?.image != null
+                          ? ClipOval(
+                              child: Image.memory(
+                                auth!.user!.image!,
+                                width: 36,
+                                height: 36,
+                                fit: BoxFit.cover,
+                              ),
+                            )
+                          : Text(
+                              auth?.user?.firstName?.substring(0, 1) ?? '',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: colorScheme.primary,
+                              ),
+                            ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  // User name
+                  Text(
+                    auth?.user?.firstName ?? '',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: colorScheme.onSurface,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  Text(
+                    auth?.user?.lastName ?? '',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: colorScheme.onSurface.withValues(alpha: 0.7),
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
               ),
-            ),
-            const SizedBox(height: 8),
-            // User name
-            Text(
-              auth?.user?.firstName ?? '',
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: colorScheme.onSurface,
-              ),
-              overflow: TextOverflow.ellipsis,
-            ),
-            Text(
-              auth?.user?.lastName ?? '',
-              style: TextStyle(
-                fontSize: 12,
-                color: colorScheme.onSurface.withValues(alpha: 0.7),
-              ),
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
-        ),
       ),
     ),
   );
 }
 
-/// Builds the theme picker button with icon and gradient background on hover
+/// Builds the theme picker button with icon and gradient background on hover.
+/// Adapts to available space on smaller tablets.
 Widget _buildThemeButton(
   BuildContext context,
   CoreLocalizations localizations,
   ColorScheme colorScheme,
 ) {
+  // Check if we're on a smaller tablet (7-inch or similar)
+  final screenHeight = MediaQuery.of(context).size.height;
+  final isSmallTablet = screenHeight < 700;
+
   return Material(
     color: Colors.transparent,
     child: InkWell(
@@ -315,11 +401,15 @@ Widget _buildThemeButton(
       },
       borderRadius: BorderRadius.circular(12),
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+        padding: EdgeInsets.symmetric(
+          vertical: isSmallTablet ? 6 : 12,
+          horizontal: isSmallTablet ? 8 : 16,
+        ),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              padding: const EdgeInsets.all(8),
+              padding: EdgeInsets.all(isSmallTablet ? 6 : 8),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
@@ -329,18 +419,24 @@ Widget _buildThemeButton(
                   ],
                 ),
               ),
-              child: Icon(Icons.palette, size: 24, color: colorScheme.tertiary),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              localizations.theme,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-                color: colorScheme.onSurface.withValues(alpha: 0.8),
+              child: Icon(
+                Icons.palette,
+                size: isSmallTablet ? 20 : 24,
+                color: colorScheme.tertiary,
               ),
-              textAlign: TextAlign.center,
             ),
+            if (!isSmallTablet) ...[
+              const SizedBox(height: 4),
+              Text(
+                localizations.theme,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  color: colorScheme.onSurface.withValues(alpha: 0.8),
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
           ],
         ),
       ),
