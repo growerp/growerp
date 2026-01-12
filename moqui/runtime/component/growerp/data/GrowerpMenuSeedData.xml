@@ -80,7 +80,7 @@ along with this software (see the LICENSE.md file). If not, see
     <growerp.menu.MenuItem menuItemId="ADMIN_ORG_COMPANY" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_ORG"
         title="company" iconName="home" widgetName="ShowCompanyDialog" sequenceNum="10"/>
     <growerp.menu.MenuItem menuItemId="ADMIN_ORG_USERS" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_ORG"
-        title="employees" iconName="school" widgetName="UserList" sequenceNum="20"/>
+        title="employees" iconName="school" widgetName="UserListEmployee" sequenceNum="20"/>
     <growerp.menu.MenuItem menuItemId="ADMIN_ORG_WEBSITE" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_ORG"
         title="Website" iconName="webhook" widgetName="WebsiteDialog" sequenceNum="30"/>
     
@@ -426,7 +426,7 @@ along with this software (see the LICENSE.md file). If not, see
     <growerp.menu.MenuItem menuItemId="SALES_EX_S_FIN" menuConfigurationId="SALES_EXAMPLE_DEFAULT" parentMenuItemId="SALES_EX_SALES"
         title="Outgoing Shipments" iconName="home" widgetName="FinDocList" sequenceNum="10"/>
     <growerp.menu.MenuItem menuItemId="SALES_EX_S_USERS" menuConfigurationId="SALES_EXAMPLE_DEFAULT" parentMenuItemId="SALES_EX_SALES"
-        title="employees" iconName="school" widgetName="UserList" sequenceNum="20"/>
+        title="employees" iconName="school" widgetName="UserListEmployee" sequenceNum="20"/>
 
     <!-- User Company Example -->
     <growerp.menu.MenuItem menuItemId="USERCO_EX_MAIN" menuConfigurationId="USER_COMPANY_EXAMPLE_DEFAULT" 
@@ -483,10 +483,10 @@ along with this software (see the LICENSE.md file). If not, see
     <growerp.menu.MenuItem menuItemId="CORE_EX_ORG_COMPANY" menuConfigurationId="CORE_EXAMPLE_DEFAULT" parentMenuItemId="CORE_EX_ORG"
         title="company" iconName="home" widgetName="ShowCompanyDialog" sequenceNum="10"/>
     <growerp.menu.MenuItem menuItemId="CORE_EX_ORG_USERS" menuConfigurationId="CORE_EXAMPLE_DEFAULT" parentMenuItemId="CORE_EX_ORG"
-        title="employees" iconName="school" widgetName="UserList" sequenceNum="20"/>
+        title="employees" iconName="school" widgetName="UserListEmployee" sequenceNum="20"/>
     <growerp.menu.MenuItem menuItemId="CORE_EX_CRM_COMPANY" menuConfigurationId="CORE_EXAMPLE_DEFAULT" parentMenuItemId="CORE_EX_CRM"
         title="company" iconName="home" widgetName="ShowCompanyDialog" sequenceNum="10"/>
     <growerp.menu.MenuItem menuItemId="CORE_EX_CRM_USERS" menuConfigurationId="CORE_EXAMPLE_DEFAULT" parentMenuItemId="CORE_EX_CRM"
-        title="employees" iconName="school" widgetName="UserList" sequenceNum="20"/>
+        title="employees" iconName="school" widgetName="UserListEmployee" sequenceNum="20"/>
 
 </entity-facade-xml>
