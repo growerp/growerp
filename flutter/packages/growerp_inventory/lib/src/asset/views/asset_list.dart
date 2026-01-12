@@ -125,34 +125,37 @@ class AssetListState extends State<AssetList> {
                         padding: padding,
                         backgroundDecoration: getBackGround(context, index),
                         extent: FixedTableSpanExtent(rowHeight!),
-                        recognizerFactories: <Type, GestureRecognizerFactory>{
-                          TapGestureRecognizer:
-                              GestureRecognizerFactoryWithHandlers<
-                                TapGestureRecognizer
-                              >(
-                                () => TapGestureRecognizer(),
-                                (TapGestureRecognizer t) =>
-                                    t.onTap = () => showDialog(
-                                      barrierDismissible: true,
-                                      context: context,
-                                      builder: (BuildContext context) {
-                                        return index > state.assets.length
-                                            ? const BottomLoader()
-                                            : Dismissible(
-                                                key: const Key('assetItem'),
-                                                direction:
-                                                    DismissDirection.startToEnd,
-                                                child: BlocProvider.value(
-                                                  value: _assetBloc,
-                                                  child: AssetDialog(
-                                                    state.assets[index - 1],
+                        recognizerFactories: index == 0
+                            ? <Type, GestureRecognizerFactory>{}
+                            : <Type, GestureRecognizerFactory>{
+                                TapGestureRecognizer:
+                                    GestureRecognizerFactoryWithHandlers<
+                                      TapGestureRecognizer
+                                    >(
+                                      () => TapGestureRecognizer(),
+                                      (
+                                        TapGestureRecognizer t,
+                                      ) => t.onTap = () => showDialog(
+                                        barrierDismissible: true,
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return index > state.assets.length
+                                              ? const BottomLoader()
+                                              : Dismissible(
+                                                  key: const Key('assetItem'),
+                                                  direction: DismissDirection
+                                                      .startToEnd,
+                                                  child: BlocProvider.value(
+                                                    value: _assetBloc,
+                                                    child: AssetDialog(
+                                                      state.assets[index - 1],
+                                                    ),
                                                   ),
-                                                ),
-                                              );
-                                      },
+                                                );
+                                        },
+                                      ),
                                     ),
-                              ),
-                        },
+                              },
                       ),
                 pinnedRowCount: 1,
               );

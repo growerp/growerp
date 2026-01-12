@@ -239,8 +239,11 @@ class FinDocListState extends State<FinDocList> {
           }
         }
 
-        builder(context, state) {
+        Widget builder(BuildContext context, FinDocState state) {
           switch (state.status) {
+            case FinDocStatus.initial:
+            case FinDocStatus.loading:
+              return const Center(child: LoadingIndicator());
             case FinDocStatus.failure:
             case FinDocStatus.success:
               finDocs = state.finDocs;
@@ -412,8 +415,6 @@ class FinDocListState extends State<FinDocList> {
                   ),
                 ],
               );
-            default:
-              return const Center(child: LoadingIndicator());
           }
         }
 

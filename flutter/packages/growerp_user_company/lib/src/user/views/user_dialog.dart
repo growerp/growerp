@@ -250,9 +250,7 @@ class UserDialogState extends State<UserDialogStateFull> {
         child: ScaffoldMessenger(
           child: Scaffold(
             backgroundColor: Colors.transparent,
-            floatingActionButton: isPhone ? null : updateButton(localizations),
-            floatingActionButtonLocation:
-                FloatingActionButtonLocation.centerFloat,
+
             body: Stack(
               children: [
                 BlocConsumer<UserBloc, UserState>(
@@ -918,6 +916,7 @@ class UserDialogState extends State<UserDialogStateFull> {
           ),
         ),
       );
+      rows.add(updateButton(localizations));
     }
 
     return Form(

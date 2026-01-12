@@ -69,7 +69,7 @@ Future<void> getBackendUrlOverride(
       GlobalConfiguration().updateValue("test", true);
     } else {
       // always show in debug mode when backend url not provided
-      if (kDebugMode) {
+      if (!kDebugMode) {
         GlobalConfiguration().updateValue("test", true);
       }
     }

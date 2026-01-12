@@ -389,7 +389,7 @@ class _GanttFormState extends State<GanttForm> {
       headerItems.add(
         Container(
           height: 30,
-          color: Colors.lightGreen.withAlpha(100),
+          color: scheme.tertiaryContainer,
           width: screenWidth / columnsOnScreen,
           child: Text(
             headerText,
@@ -417,7 +417,7 @@ class _GanttFormState extends State<GanttForm> {
       columnText = roomReservation.items[0].asset?.assetName ?? '';
     }
     return Container(
-      color: Colors.lightGreen.withAlpha(100),
+      color: scheme.tertiaryContainer,
       width: 80,
       height: 20,
       padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
@@ -539,7 +539,7 @@ class _GanttFormState extends State<GanttForm> {
               child: Container(
                 // bar on screen
                 decoration: BoxDecoration(
-                  color: Colors.lightGreen,
+                  color: scheme.primary,
                   borderRadius: borderRadius,
                 ),
                 height: 18.0,

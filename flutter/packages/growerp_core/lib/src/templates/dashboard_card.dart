@@ -13,6 +13,7 @@
  */
 
 import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:growerp_models/growerp_models.dart';
@@ -290,7 +291,7 @@ class _DashboardCardState extends State<DashboardCard>
 ///   ),
 /// )
 /// ```
-class DashboardGrid extends StatefulWidget {
+class DashboardGrid extends StatelessWidget {
   final int itemCount;
   final Widget Function(BuildContext, int) itemBuilder;
 
@@ -299,57 +300,6 @@ class DashboardGrid extends StatefulWidget {
     required this.itemCount,
     required this.itemBuilder,
   });
-
-  @override
-  State<DashboardGrid> createState() => _DashboardGridState();
-}
-
-class _DashboardGridState extends State<DashboardGrid>
-    with SingleTickerProviderStateMixin {
-  // Static flag to ensure overlay only shows once per app session
-  static bool _hasShownOverlay = false;
-
-  late AnimationController _fadeController;
-  late Animation<double> _fadeAnimation;
-  bool _showOverlay = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _fadeController = AnimationController(
-      duration: const Duration(milliseconds: 500),
-      vsync: this,
-    );
-    _fadeAnimation = Tween<double>(
-      begin: 1.0,
-      end: 0.0,
-    ).animate(CurvedAnimation(parent: _fadeController, curve: Curves.easeOut));
-
-    // Only show overlay if it hasn't been shown yet this session
-    if (!_hasShownOverlay) {
-      _hasShownOverlay = true;
-      _showOverlay = true;
-
-      // Start fade out after 5 seconds
-      Future.delayed(const Duration(seconds: 5), () {
-        if (mounted) {
-          _fadeController.forward().then((_) {
-            if (mounted) {
-              setState(() {
-                _showOverlay = false;
-              });
-            }
-          });
-        }
-      });
-    }
-  }
-
-  @override
-  void dispose() {
-    _fadeController.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -369,134 +319,18 @@ class _DashboardGridState extends State<DashboardGrid>
           stops: const [0.0, 0.5, 1.0],
         ),
       ),
-      child: Stack(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: GridView.builder(
-              gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                maxCrossAxisExtent: isAPhone(context) ? 160 : 200,
-                childAspectRatio: 1.0,
-                crossAxisSpacing: 16,
-                mainAxisSpacing: 16,
-              ),
-              itemCount: widget.itemCount,
-              itemBuilder: widget.itemBuilder,
-            ),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: GridView.builder(
+          gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+            maxCrossAxisExtent: isAPhone(context) ? 160 : 200,
+            childAspectRatio: 1.0,
+            crossAxisSpacing: 16,
+            mainAxisSpacing: 16,
           ),
-          // Premium instructional overlay with glassmorphism
-          if (_showOverlay)
-            Positioned(
-              left: 0,
-              right: 0,
-              bottom: 0,
-              height: MediaQuery.of(context).size.height * 0.28,
-              child: FadeTransition(
-                opacity: _fadeAnimation,
-                child: ClipRect(
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            Colors.black.withValues(alpha: 0.3),
-                            Colors.black.withValues(alpha: 0.6),
-                          ],
-                        ),
-                      ),
-                      child: Center(
-                        child: Container(
-                          margin: const EdgeInsets.symmetric(
-                            horizontal: 32,
-                            vertical: 16,
-                          ),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 24.0,
-                            vertical: 20.0,
-                          ),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(20),
-                            gradient: LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [
-                                colorScheme.surface.withValues(alpha: 0.95),
-                                colorScheme.surface.withValues(alpha: 0.85),
-                              ],
-                            ),
-                            border: Border.all(
-                              color: colorScheme.primary.withValues(alpha: 0.3),
-                              width: 1,
-                            ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: colorScheme.primary.withValues(
-                                  alpha: 0.2,
-                                ),
-                                blurRadius: 20,
-                                spreadRadius: 2,
-                              ),
-                            ],
-                          ),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(12),
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  gradient: RadialGradient(
-                                    colors: [
-                                      colorScheme.primary.withValues(
-                                        alpha: 0.2,
-                                      ),
-                                      colorScheme.primary.withValues(
-                                        alpha: 0.05,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                child: Icon(
-                                  Icons.menu,
-                                  size: 32,
-                                  color: colorScheme.primary,
-                                ),
-                              ),
-                              const SizedBox(height: 12),
-                              Text(
-                                'Add Your Own Items',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  letterSpacing: 0.3,
-                                  color: colorScheme.onSurface,
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                'With the ☰ menu button you can customize your dashboard with your own menu items',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  height: 1.4,
-                                  color: colorScheme.onSurface.withValues(
-                                    alpha: 0.7,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-        ],
+          itemCount: itemCount,
+          itemBuilder: itemBuilder,
+        ),
       ),
     );
   }
