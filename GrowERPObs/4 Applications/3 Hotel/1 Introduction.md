@@ -7,3 +7,5 @@ In general a hotel has a number of rooms in different classes or qualities with 
 When the start data is the same as the today date, the reservation will appear in the 'check-in' option where when the customer arrives, the registration can be check, the room keys are handed out the up arrow can be clicked the customer has successfully checked in.
 
 When the end data of the reservation has been reached the reservation appears in the checkout screen, where the invoice can be printed and paid, if everything OK, the up-arrow can be clicked again and the transaction will be added to the ledger.
+
+![[website.png]]

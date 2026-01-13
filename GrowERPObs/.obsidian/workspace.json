@@ -11,46 +11,15 @@
             "id": "cd2ba6fa8750f0f9",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "image",
               "state": {
-                "file": "End User Introduction.md",
-                "mode": "source",
-                "source": false
+                "file": "media/website.png"
               },
-              "icon": "lucide-file",
-              "title": "End User Introduction"
-            }
-          },
-          {
-            "id": "1af288ce7015b4ff",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "1 Introduction/3 Feature list.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "3 Feature list"
-            }
-          },
-          {
-            "id": "4f78e8f1d8a2cb6d",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "1 Introduction/5 Road Map.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "5 Road Map"
+              "icon": "lucide-image",
+              "title": "website"
             }
           }
-        ],
-        "currentTab": 2
+        ]
       }
     ],
     "direction": "vertical"
@@ -207,12 +176,16 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "4f78e8f1d8a2cb6d",
+  "active": "cd2ba6fa8750f0f9",
   "lastOpenFiles": [
-    "3 Technical documentation/3 Moqui Backend.md",
-    "1 Introduction/3 Feature list.md",
-    "GrowERP documentation.md",
     "End User Introduction.md",
+    "media/website.png",
+    "1 Introduction/3 Feature list.md",
+    "4 Applications/3 Hotel/1 Introduction.md",
+    "media/website.png",
+    "1 Introduction/5 Road Map.md",
+    "3 Technical documentation/3 Moqui Backend.md",
+    "GrowERP documentation.md",
     "3 Technical documentation/9 GrowERP Flutter Application and plugins.md",
     "3 Technical documentation/8 Deployment.md",
     "3 Technical documentation/7 Integration tests.md",
@@ -225,7 +198,6 @@
     "2 End User documentation/5 Accounting/6 Payment Type.md",
     "1 Introduction/2 GrowERP Introduction.md",
     "1 Introduction/6 Releases.md",
-    "1 Introduction/5 Road Map.md",
     "4 Applications/1 Introduction/1 Dynamic menu system.md",
     "4 Applications/1 Introduction",
     "1 Introduction/1 Overview.md",
@@ -236,8 +208,6 @@
     "4 Applications/4 workflow/Workflow data organization.md",
     "4 Applications/4 Freelance/1 Introduction.md",
     "4 Applications/4 workflow",
-    "4 Applications/4 Workflow.md",
-    "2 End User documentation/5 Accounting/9 Account Class reference.md",
     "media/growerp-overview.jpg",
     "2 End User documentation/6 Authentication & users",
     "2 End User documentation/3 Order management",
