@@ -18,6 +18,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import groovy.json.*
 import org.moqui.impl.context.ExecutionContextImpl
+import org.moqui.impl.context.UserFacadeImpl
 import org.moqui.entity.*
 import org.moqui.util.*
 
@@ -49,7 +50,7 @@ class ChatEndpoint extends MoquiAbstractEndpoint {
     void onMessage(String messageJson) {
         ExecutionContextImpl eci = super.ecfi.getEci()
         try {
-            if (userId) eci.user.loginUser(userId)
+            if (userId) ((UserFacadeImpl) eci.user).internalLoginUser(userId)
             
             Object parsed = new JsonSlurper().parseText(messageJson)
             if (!(parsed instanceof Map)) {
