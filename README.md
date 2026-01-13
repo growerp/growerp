@@ -315,7 +315,7 @@ We welcome contributions from developers of all skill levels! Here's how you can
 |------------------|
 | <img src="https://raw.githubusercontent.com/growerp/growerp/master/flutter/packages/admin/android/fastlane/metadata/android/en-US/images/tenInchScreenshots/Screenshot_orders.png" width="600"> |
 
-| Hotel Data |
+| Dynamic Menu System |
 |------------|
 | <img src="https://raw.githubusercontent.com/growerp/growerp/master/flutter/packages/admin/android/fastlane/metadata/android/en-US/images/tenInchScreenshots/Screenshot_accounting.png" width="600"> |
 
