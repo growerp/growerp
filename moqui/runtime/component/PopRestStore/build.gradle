@@ -33,10 +33,10 @@ def compsJsFiles = [compsPath + "/utilities.js", compsPath + "/ApiServices.js", 
 task combineBaseJs {
     doLast {
         def destFile = file("${compsPath}/combined.js")
-        destFile.write("")
+        destFile.write("", "UTF-8")
         compsJsFiles.each({
-            destFile.append(file(it).getText("UTF-8"))
-            destFile.append("\n")
+            destFile.append(file(it).getText("UTF-8"), "UTF-8")
+            destFile.append("\n", "UTF-8")
         })
     }
 }
