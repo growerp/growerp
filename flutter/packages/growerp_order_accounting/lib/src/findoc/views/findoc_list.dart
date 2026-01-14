@@ -319,7 +319,8 @@ class FinDocListState extends State<FinDocList> {
                                     );
                                   },
                                 ).then(
-                                  (value) async => value != null
+                                  (value) async =>
+                                      value != null && context.mounted
                                       ?
                                         // show detail page
                                         await showDialog(
