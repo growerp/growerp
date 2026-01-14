@@ -10,10 +10,8 @@
 
 
 ## general
-start emulators from command line:
-flutter emulators --launch pixel
 
-missing emulators can be added in xcode : devices and emulators
+missing emulators can be added in xcode : window -> devices and emulators
 
 install frameit-chrome:
 flutter pub global activate frameit_chrome
