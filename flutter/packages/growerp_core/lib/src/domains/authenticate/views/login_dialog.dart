@@ -90,12 +90,8 @@ class LoginDialogState extends State<LoginDialog> {
                   Theme.of(context).colorScheme.error,
                 );
               case AuthStatus.authenticated:
-                // Show trial welcome dialog for new tenants using consolidated helper
-                // This handles both the new TenantSetupDialog flow and legacy moreInfoForm case
-                await TrialWelcomeHelper.showTrialWelcomeIfNeeded(
-                  context: context,
-                  authenticate: state.authenticate,
-                );
+                // Trial welcome is now shown by TenantSetupDialog after setup completes
+                // No need to show it here on every authentication
                 // Close the login dialog and navigate to home
                 // LoginDialog is shown as a dialog, so we pop it and ensure we're at home
                 if (context.mounted) {

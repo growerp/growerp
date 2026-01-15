@@ -9,8 +9,8 @@ compile in the flutter app dir:
   flutter clean
   flutter build macos --config-only
 
-open xcode in the macos dir:
-  open Runner.xcworkspace
+open xcode:
+  open macos/Runner.xcworkspace
 
 in xcode: 
   product => archive

@@ -256,7 +256,8 @@ along with this software (see the LICENSE.md file). If not, see
         </out-parameters>
         <actions>
             <!-- Query subscriptions in GROWERP tenant where externalId = ownerPartyId -->
-            <entity-find entity-name="mantle.product.subscription.Subscription" list="subscriptions">
+            <!-- cache="false" ensures fresh data is read (important for multi-device login scenarios) -->
+            <entity-find entity-name="mantle.product.subscription.Subscription" list="subscriptions" cache="false">
                 <econdition field-name="ownerPartyId" value="GROWERP"/>
                 <econdition field-name="externalSubscriptionId" from="ownerPartyId"/>
                 <date-filter/>
@@ -274,11 +275,17 @@ along with this software (see the LICENSE.md file). If not, see
                         <set field="now" from="ec.user.nowTimestamp"/>
                         <set field="millisRemaining" from="expiryDate.time - now.time"/>
                         <set field="daysRemaining" from="(int)(millisRemaining / (1000 * 60 * 60 * 24))" type="Integer"/>
-                        <log message="check#TenantSubscription: expiryDate=${expiryDate}, now=${now}, daysRemaining=${daysRemaining}"/>
+                        <log message="check#TenantSubscription: expiryDate=${expiryDate}, now=${now}, daysRemaining=${daysRemaining}, millisRemaining=${millisRemaining}"/>
                         
-                        <if condition="daysRemaining > 0">
+                        <!-- Subscription is active if expiry date hasn't passed yet (millisRemaining >= 0) -->
+                        <!-- Using millisRemaining instead of daysRemaining to handle same-day scenarios correctly -->
+                        <if condition="millisRemaining >= 0">
                             <set field="hasActiveSubscription" value="true" type="Boolean"/>
                             <set field="subscriptionStatus" value="active"/>
+                            <!-- Ensure daysRemaining is at least 0 for display purposes -->
+                            <if condition="daysRemaining &lt; 0">
+                                <set field="daysRemaining" value="0" type="Integer"/>
+                            </if>
                         <else>
                             <set field="hasActiveSubscription" value="false" type="Boolean"/>
                             <set field="subscriptionStatus" value="expired"/>
