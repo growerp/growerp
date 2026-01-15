@@ -58,8 +58,12 @@ class TenantSetupDialogState extends State<TenantSetupDialog> {
       child: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) async {
           if (state.status == AuthStatus.authenticated) {
-            // Setup complete - close the dialog
-            // LoginDialog will handle showing trial welcome and navigation
+            // Setup complete - show trial welcome before closing
+            await TrialWelcomeHelper.showTrialWelcomeIfNeeded(
+              context: context,
+              authenticate: state.authenticate,
+            );
+            // Close the dialog - LoginDialog will handle navigation
             if (mounted) {
               Navigator.of(context).pop();
             }

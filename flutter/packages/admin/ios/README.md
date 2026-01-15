@@ -6,10 +6,17 @@
 1. in the app directory: flutter build ipa
 2. get Transporter MacOs application
 3. drop build/ios/ipa/*.ipa on to the Transporter
+4. upload screenshots for iPhone 16 pro and Ipad Pro with browser
 
 
+open related xcode project:
+    open ios/Runner.xcworkspace
 
-## general
+create certificates inside xcode easy!:
+    https://help.twixlmedia.com/hc/en-us/articles/115000790705-iOS-Manage-signing-certificates-for-your-apps
+
+
+## general(deprecated)
 
 missing emulators can be added in xcode : window -> devices and emulators
 
@@ -33,17 +40,6 @@ Build and upload Manual:
     https://docs.flutter.dev/deployment/cd#fastlane
 certicate access (rediculus!!)    
     https://stackoverflow.com/questions/10204320/mac-os-x-wants-to-use-system-keychain-when-compiling-the-project
-
-create certificates inside xcode easy!:
-    https://help.twixlmedia.com/hc/en-us/articles/115000790705-iOS-Manage-signing-certificates-for-your-apps
-
-to test for profile and certificate, provide proper messages:
-    flutter build ipa
-
-add this ipa to the transport utitlity
-
-short:
-export FLUTTER_ROOT=/Users/hans/flutter/bin
 
 
 ### Fastlane

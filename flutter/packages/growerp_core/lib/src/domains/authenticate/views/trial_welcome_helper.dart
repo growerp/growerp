@@ -28,13 +28,31 @@ class TrialWelcomeHelper {
   ///
   /// Returns true if:
   /// - The tenant is not GROWERP (system tenant)
-  /// - The trial welcome hasn't been shown yet for this tenant
+  /// - The trial welcome hasn't been shown yet for this tenant (local check)
+  /// - The trial is fresh (subscriptionDaysRemaining is close to evaluationDays)
+  ///
+  /// The fresh trial check prevents showing the welcome on a second device
+  /// when the trial was already started on another device.
   static Future<bool> shouldShowTrialWelcome(Authenticate? authenticate) async {
     if (authenticate?.ownerPartyId == null ||
         authenticate!.ownerPartyId == 'GROWERP') {
       return false;
     }
 
+    // Check if trial is fresh (started recently)
+    // If significant time has passed, the welcome was likely shown on another device
+    final evaluationDays = authenticate.evaluationDays ?? 14;
+    final daysRemaining = authenticate.subscriptionDaysRemaining ?? 0;
+
+    // Allow 1 day tolerance for timezone differences and same-day logins
+    // Only show welcome if we're within 1 day of the full evaluation period
+    if (daysRemaining < evaluationDays - 1) {
+      // Trial is not fresh - more than 1 day has passed since it started
+      // Don't show welcome even if not marked as shown on this device
+      return false;
+    }
+
+    // Check local storage for this device
     final prefs = await SharedPreferences.getInstance();
     final key = '$_keyPrefix${authenticate.ownerPartyId}';
     return !(prefs.getBool(key) ?? false);
