@@ -41,6 +41,8 @@ dev_dependencies:
   bloc_test: ^9.0.1
   flutter_lints: ^6.0.0
   flutter_launcher_icons: ^0.14.4
+  msix: ^3.16.12
+
   
 flutter_launcher_icons:
   android: launcher_icon
@@ -49,6 +51,16 @@ flutter_launcher_icons:
   macos:
     generate: true
     image_path: "assets/images/launcher_icon.png"
+
+msix_config:
+  display_name: GrowERP-Hotel
+  publisher: CN=68EEF479-7015-49FC-9C60-33E5A2EB731C
+  publisher_display_name: "AntWebsystems Co.,Ltd"
+  identity_name: AntWebsystemsCo.LTD.GrowERP-Hotel
+  msix_version: 1.12.1.0
+  logo_path: "assets/images/launcher_icon.png"
+  capabilities: internetClient
+  store: true
 
 flutter:
   uses-material-design: true
