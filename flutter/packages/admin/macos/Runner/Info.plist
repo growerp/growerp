@@ -36,5 +36,7 @@
 		<key>NSCameraUsageDescription</key>
 		<string>The app needs the camera to take pictures of persons and paper documents to show later
 			as reference in the app.</string>
+		<key>ITSAppUsesNonExemptEncryption</key>
+		<false/>
 	</dict>
 </plist>

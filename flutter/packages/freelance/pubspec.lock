@@ -964,10 +964,10 @@ packages:
     dependency: transitive
     description:
       name: mcp_dart
-      sha256: c3011200d0e35495effd6e8e635533f0c92d40c90a8a7f87f3cb61f715309170
+      sha256: "5b6c3b7085e02c085cc48efc77b560c2fb509dcdb57afc781bc2239eac9d8c7e"
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.2"
+    version: "1.2.1"
   meta:
     dependency: transitive
     description:
