@@ -1,5 +1,5 @@
 name: hotel
-version: 1.12.2+30
+version: 1.12.0+36
 repository: https://github.com/growerp/growerp
 homepage: https://www.growerp.com
 publish_to: none
@@ -40,10 +40,15 @@ dev_dependencies:
   mockito: ^5.0.3
   bloc_test: ^9.0.1
   flutter_lints: ^6.0.0
-flutter_icons:
+  flutter_launcher_icons: ^0.14.4
+  
+flutter_launcher_icons:
   android: launcher_icon
   ios: true
-  image_path: packages/growerp_core/images/hotel1.jpg
+  image_path: "assets/images/launcher_icon.png"
+  macos:
+    generate: true
+    image_path: "assets/images/launcher_icon.png"
 
 flutter:
   uses-material-design: true
