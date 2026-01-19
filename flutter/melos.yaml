@@ -77,8 +77,8 @@ scripts:
       fileExists: "l10n.yaml"
 
   test_package:
-    description: run all integration tests.
-    run: "flutter test integration_test"
+    description: run all integration tests. Set BACKEND_PORT env var to override default 8080.
+    run: "flutter test integration_test --dart-define=BACKEND_PORT=${BACKEND_PORT:-8080}"
     exec:
       orderDependents: true
       concurrency: 1
@@ -86,8 +86,8 @@ scripts:
       dirExists: "integration_test"
       scope: "*_example"
   test:
-    description: run all app and package tests.
-    run: "flutter test integration_test"
+    description: run all app and package tests. Set BACKEND_PORT env var to override default 8080.
+    run: "flutter test integration_test --dart-define=BACKEND_PORT=${BACKEND_PORT:-8080}"
     exec:
       orderDependents: true
       concurrency: 1

@@ -6,6 +6,13 @@ import 'package:growerp_models/growerp_models.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+/// Backend port can be overridden at compile time using:
+/// --dart-define=BACKEND_PORT=8080
+const String _backendPort = String.fromEnvironment(
+  'BACKEND_PORT',
+  defaultValue: '8080',
+);
+
 /// https://kamaravichow.medium.com/caching-with-dio-hive-in-flutter-e630ac5fc777
 Future<Dio> buildDioClient({
   Duration timeout = const Duration(seconds: 60),
@@ -54,8 +61,8 @@ Future<Dio> buildDioClient({
           : databaseUrlDebug.isNotEmpty
           ? '$databaseUrlDebug/'
           : android == true
-          ? 'http://10.0.2.2:8080/'
-          : 'http://localhost:8080/',
+          ? 'http://10.0.2.2:$_backendPort/'
+          : 'http://localhost:$_backendPort/',
     )
     ..options.connectTimeout = Duration(seconds: connectTimeoutSeconds)
     ..options.receiveTimeout = effectiveReceiveTimeout

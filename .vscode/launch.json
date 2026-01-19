@@ -1,4 +1,6 @@
 {
+    // Use --dart-define=BACKEND_PORT=XXXX to override the default 8080 backend port
+    // Example: "--dart-define=BACKEND_PORT=9090" in the args array
     "configurations": [
         {
             "name": "Support Web (lib/main.dart)",
