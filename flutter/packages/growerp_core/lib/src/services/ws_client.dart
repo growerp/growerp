@@ -23,6 +23,13 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:web_socket_channel/status.dart' as status;
 import 'dart:io' show Platform;
 
+/// Backend port can be overridden at compile time using:
+/// --dart-define=BACKEND_PORT=8080
+const String _backendPort = String.fromEnvironment(
+  'BACKEND_PORT',
+  defaultValue: '8080',
+);
+
 class WsClient {
   WebSocketChannel? _channel;
   late String wsUrl;
@@ -46,9 +53,9 @@ class WsClient {
       wsUrl = GlobalConfiguration().get("chatUrlDebug");
       if (wsUrl.isEmpty) {
         if (kIsWeb || Platform.isIOS || Platform.isMacOS || Platform.isLinux) {
-          wsUrl = 'ws://localhost:8080/$path';
+          wsUrl = 'ws://localhost:$_backendPort/$path';
         } else if (Platform.isAndroid) {
-          wsUrl = 'ws://10.0.2.2:8080/$path';
+          wsUrl = 'ws://10.0.2.2:$_backendPort/$path';
         }
       }
     }
