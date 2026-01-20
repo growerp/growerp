@@ -478,7 +478,7 @@ Future<String> buildDockerImage(
         moquiDir = '$workspaceDir/moqui';
       }
       run(
-        'docker build --build-arg DOCKER_TAG=$version --progress=plain --no-cache -t $dockerImage:latest .',
+        'docker build --build-arg DOCKER_TAG=$version --label version=$version --progress=plain --no-cache -t $dockerImage:latest .',
         workingDirectory: moquiDir,
       );
     } else {
@@ -496,6 +496,7 @@ Future<String> buildDockerImage(
       }
       run(
         'docker build -f $dockerfilePath --build-arg DOCKER_TAG=$version '
+        '--label version=$version '
         '--progress=plain --no-cache -t $dockerImage:latest .',
         workingDirectory: buildContext,
       );

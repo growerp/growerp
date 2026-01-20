@@ -6,5 +6,6 @@ echo "path: $DOCKERFILE_PATH tag: $DOCKER_TAG pwd: $PWD"
 cd ../../ # change to flutter dir
 docker build \
     --build-arg DOCKER_TAG=$DOCKER_TAG \
+    --label version=$DOCKER_TAG \
     -t $IMAGE_NAME \
     -f $DOCKERFILE_PATH .

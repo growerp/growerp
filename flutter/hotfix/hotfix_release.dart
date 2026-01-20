@@ -427,7 +427,8 @@ void main() async {
           // Build from moqui directory
           print("Building Moqui backend image...");
           run(
-            'docker build --progress=plain -t $dockerImage:$dockerTag ../moqui --no-cache',
+            'docker build --progress=plain -t $dockerImage:$dockerTag '
+            '--label version=$dockerTag ../moqui --no-cache',
             workingDirectory: currentDir,
           );
         } else {
@@ -443,7 +444,8 @@ void main() async {
 
           run(
             'docker build --file packages/$app/Dockerfile '
-            '--progress=plain -t $dockerImage:$dockerTag . --no-cache',
+            '--progress=plain -t $dockerImage:$dockerTag '
+            '--label version=$dockerTag . --no-cache',
             workingDirectory: currentDir,
           );
         }
