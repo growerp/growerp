@@ -525,6 +525,7 @@ Sylvester / warehouse technician
         parentResourceId="default_content_dir">
         <file mimeType="text/markdown" versionName="01" rootVersionName="01">
             <fileData><![CDATA[
+![](/getImage/growerp)
 # Home
 Welcome to the ${storeInfo.productStore.storeName} Shop!
             ]]></fileData>

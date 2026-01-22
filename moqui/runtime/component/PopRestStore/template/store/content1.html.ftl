@@ -1,4 +1,3 @@
-<#if ec.web.request.pathInfo != "/" && ec.web.request.pathInfo != "/home">
 <div class="container container-top">
     <div class="row mt-4">
         <!-- Sidebar Navigation -->
@@ -37,7 +36,6 @@
         
         <!-- Main Content Area -->
         <div class="col-lg-8 offset-lg-1 col-md-8 col-12">
-</#if>
 
 <#macro showPage page>
     <li>

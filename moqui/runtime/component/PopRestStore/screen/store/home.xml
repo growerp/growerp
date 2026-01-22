@@ -128,9 +128,13 @@ along with this software (see the LICENSE.md file). If not, see
         <section name="home" condition="homeLocation">
             <widgets>
                 <render-mode><text type="html" location="${template_server_header}"/></render-mode>
-                <render-mode><text type="html" location="component://PopRestStore/template/store/content1.html.ftl"/></render-mode>
-                <render-mode><text type="html" location="${homeLocation}"/></render-mode>
-                <render-mode><text type="html" location="component://PopRestStore/template/store/content2.html.ftl"/></render-mode>
+                <section name="HomeContentSection" condition="!promoProductList &amp;&amp; !featureProductList">
+                    <widgets>
+                        <render-mode><text type="html" location="component://PopRestStore/template/store/content1.html.ftl"/></render-mode>
+                        <render-mode><text type="html" location="${homeLocation}"/></render-mode>
+                        <render-mode><text type="html" location="component://PopRestStore/template/store/content2.html.ftl"/></render-mode>
+                    </widgets>
+                </section>
                 <render-mode><text type="html" location="${template_server_home}"/></render-mode>
                 <render-mode><text type="html" location="${template_server_footer}"/></render-mode>
             </widgets>
