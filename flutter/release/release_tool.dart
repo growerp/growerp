@@ -21,8 +21,34 @@ import 'package:dcli/dcli.dart';
 
 Map<String, dynamic> config = {};
 
-void main() async {
+const stateFile = 'release/release_state.json';
+Map<String, dynamic> releaseState = {};
+
+void main(List<String> args) async {
   print("=== GrowERP Production Release Tool ===\n");
+
+  bool isRestart = false;
+
+  if (exists(stateFile)) {
+    print("📋 An aborted release process was found.");
+    var resume = ask('Do you want to resume it? (Y/n)', defaultValue: 'Y');
+
+    if (resume.toUpperCase() == 'Y') {
+      print("🔄 Resuming aborted release...");
+      try {
+        releaseState = jsonDecode(File(stateFile).readAsStringSync());
+        isRestart = true;
+      } catch (e) {
+        print("❌ Error loading state: $e");
+        print("Starting a fresh release instead.");
+        isRestart = false;
+      }
+    } else {
+      print("🗑️ Discarding aborted release state.");
+      File(stateFile).deleteSync();
+      isRestart = false;
+    }
+  }
 
   // Load configuration
   await loadConfiguration();
@@ -30,35 +56,87 @@ void main() async {
   // Ensure we're in the right directory and git repo
   validateEnvironment();
 
-  // Get user preferences
-  var selectedApps = await selectApplications();
-  var versionConfig = await getVersionConfiguration();
-  var pushConfig = await getPushConfiguration(versionConfig);
+  List<String> selectedApps;
+  Map<String, dynamic> versionInfo;
+  Map<String, bool> pushConfig;
+  String workspaceDir;
 
-  // Determine workspace (local vs repository)
-  var workspaceDir = await determineWorkspace(
-    pushConfig['pushToGitHub'] ?? false,
-  );
+  if (isRestart) {
+    selectedApps = List<String>.from(releaseState['selectedApps']);
+    versionInfo = releaseState['versionInfo'];
+    pushConfig = Map<String, bool>.from(releaseState['pushConfig']);
+    workspaceDir = releaseState['workspaceDir'];
 
-  // Calculate version information
-  var versionInfo = await calculateVersions(
-    selectedApps,
-    versionConfig,
-    workspaceDir,
-  );
+    print("📋 Resumed Release Summary:");
+    print("   Applications: ${selectedApps.join(', ')}");
+    print("   New version: ${versionInfo['newBase']}");
+    print("   Step to resume: ${releaseState['currentStep']}");
 
-  // Display summary and get confirmation
-  await displaySummaryAndConfirm(
-    selectedApps,
-    versionInfo,
-    pushConfig,
-    workspaceDir,
-  );
+    var confirm = ask(
+      '\nContinue with resumed release? (Y/n)',
+      defaultValue: 'Y',
+    );
+    if (confirm.toUpperCase() != 'Y') {
+      print("Release cancelled.");
+      exit(0);
+    }
+  } else {
+    // Get user preferences
+    selectedApps = await selectApplications();
+    var versionConfig = await getVersionConfiguration();
+    pushConfig = await getPushConfiguration(versionConfig);
+
+    // Determine workspace (local vs repository)
+    workspaceDir = await determineWorkspace(
+      pushConfig['pushToGitHub'] ?? false,
+    );
+
+    // Calculate version information
+    versionInfo = await calculateVersions(
+      selectedApps,
+      versionConfig,
+      workspaceDir,
+    );
+
+    // Initial state
+    releaseState = {
+      'selectedApps': selectedApps,
+      'versionInfo': versionInfo,
+      'pushConfig': pushConfig,
+      'workspaceDir': workspaceDir,
+      'currentStep': 'initial',
+      'completedApps': [],
+      'versionUpdated': false,
+      'gitPushed': false,
+    };
+    saveState();
+
+    // Display summary and get confirmation
+    await displaySummaryAndConfirm(
+      selectedApps,
+      versionInfo,
+      pushConfig,
+      workspaceDir,
+    );
+  }
 
   // Execute the release process
   await executeRelease(selectedApps, versionInfo, pushConfig, workspaceDir);
 
+  // Clean up state on success
+  if (exists(stateFile)) {
+    File(stateFile).deleteSync();
+  }
+
   print("\n🎉 Release process completed successfully!");
+}
+
+void saveState() {
+  try {
+    File(stateFile).writeAsStringSync(jsonEncode(releaseState));
+  } catch (e) {
+    print("Warning: Could not save release state: $e");
+  }
 }
 
 Future<void> loadConfiguration() async {
@@ -368,40 +446,69 @@ Future<void> executeRelease(
   print("\n🚀 Starting release process...\n");
 
   var newVersions = <String, String>{};
-
-  // Step 1: Update version files in workspace
-  print("� Step 1: Updating version files in workspace...\n");
   for (var app in selectedApps) {
     var currentVersion = versionInfo['current'][app];
     var buildSuffix = currentVersion.contains('+')
         ? currentVersion.substring(currentVersion.indexOf('+'))
         : '+1';
-    var newVersion = "${versionInfo['newBase']}$buildSuffix";
-    newVersions[app] = newVersion;
+    newVersions[app] = "${versionInfo['newBase']}$buildSuffix";
+  }
 
-    await updateVersionFile(app, currentVersion, newVersion, workspaceDir);
+  // Step 1: Update version files in workspace
+  if (releaseState['versionUpdated'] != true) {
+    print("📁 Step 1: Updating version files in workspace...\n");
+    for (var app in selectedApps) {
+      var currentVersion = versionInfo['current'][app];
+      var newVersion = newVersions[app]!;
+      await updateVersionFile(app, currentVersion, newVersion, workspaceDir);
+    }
+    releaseState['versionUpdated'] = true;
+    releaseState['currentStep'] = 'versions_updated';
+    saveState();
+  } else {
+    print("⏭️ Step 1: Versions already updated, skipping.");
   }
 
   // Step 2: Commit, tag, and push to GitHub
   if (pushConfig['pushToGitHub'] == true) {
-    print("\n📤 Step 2: Committing and pushing to GitHub...\n");
-    await commitAndTag(
-      selectedApps,
-      newVersions,
-      versionInfo['newBase'],
-      workspaceDir,
-    );
+    if (releaseState['gitPushed'] != true) {
+      print("\n📤 Step 2: Committing and pushing to GitHub...\n");
+      await commitAndTag(
+        selectedApps,
+        newVersions,
+        versionInfo['newBase'],
+        workspaceDir,
+      );
 
-    // Wait a moment for GitHub to process the push
-    print("   Waiting for GitHub to process push...");
-    sleep(3);
+      // Wait a moment for GitHub to process the push
+      print("   Waiting for GitHub to process push...");
+      sleep(3);
+
+      releaseState['gitPushed'] = true;
+      releaseState['currentStep'] = 'git_pushed';
+      saveState();
+    } else {
+      print("⏭️ Step 2: Already pushed to GitHub, skipping.");
+    }
   }
 
   // Step 3: Build Docker images from repository
   print("\n🐳 Step 3: Building Docker images from repository...\n");
   var imageIds = <String, String>{};
 
+  // Restore previously completed images if any
+  if (releaseState['imageIds'] != null) {
+    imageIds = Map<String, String>.from(releaseState['imageIds']);
+  }
+
+  var completedApps = List<String>.from(releaseState['completedApps'] ?? []);
+
   for (var app in selectedApps) {
+    if (completedApps.contains(app)) {
+      print("⏭️ $app already built, skipping.");
+      continue;
+    }
+
     print("📦 Building $app...");
     var newVersion = newVersions[app]!;
 
@@ -413,6 +520,12 @@ Future<void> executeRelease(
     if (pushConfig['pushToDockerHub'] == true) {
       await pushDockerImage(app, versionInfo['newBase']);
     }
+
+    completedApps.add(app);
+    releaseState['completedApps'] = completedApps;
+    releaseState['imageIds'] = imageIds;
+    releaseState['currentStep'] = 'building_$app';
+    saveState();
 
     print("✓ $app completed\n");
   }

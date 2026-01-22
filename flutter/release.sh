@@ -102,7 +102,7 @@ run_release_tool() {
     fi
     
     echo "Starting release tool..."
-    dart "$script_path"
+    dart "$script_path" "$@"
 }
 
 # Main execution
@@ -110,7 +110,7 @@ main() {
     validate_environment
     install_dependencies
     echo ""
-    run_release_tool
+    run_release_tool "$@"
 }
 
 # Handle script interruption
