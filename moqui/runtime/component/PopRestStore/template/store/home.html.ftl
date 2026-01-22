@@ -1,37 +1,4 @@
 <!-- Hero Features Bar -->
-<div class="container-fluid features d-none d-md-block" style="background: linear-gradient(135deg, #00b4a2 0%, #00a394 100%); padding: 1.25rem 0;">
-    <div class="d-flex justify-content-around container">
-        <div class="feature">
-            <div class="feature-icon"><i class="fas fa-truck" aria-hidden="true"></i></div>
-            <div class="feature-info">
-                <div class="title text-left">FAST SHIPPING</div>
-                <div class="subtitle">Free delivery on orders over $50</div>
-            </div>
-        </div>
-        <div class="feature">
-            <div class="feature-icon"><i class="fas fa-percent" aria-hidden="true"></i></div>
-            <div class="feature-info">
-                <div class="title text-left">WEEKLY DEALS</div>
-                <div class="subtitle">New promotions every week</div>
-            </div>
-        </div>
-        <div class="feature">
-            <div class="feature-icon"><i class="fas fa-shield-alt" aria-hidden="true"></i></div>
-            <div class="feature-info">
-                <div class="title text-left">SECURE CHECKOUT</div>
-                <div class="subtitle">100% protected payments</div>
-            </div>
-        </div>
-        <div class="feature">
-            <div class="feature-icon"><i class="fas fa-headset" aria-hidden="true"></i></div>
-            <div class="feature-info">
-                <div class="title text-left">24/7 SUPPORT</div>
-                <div class="subtitle">Here to help anytime</div>
-            </div>
-        </div>
-    </div>
-</div>
-
 <div class="container" style="padding-top: 2rem;">
     <#-- This Week's Deals Section -->
     <#if promoProductList?has_content>
