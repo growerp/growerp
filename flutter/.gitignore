@@ -32,6 +32,7 @@ screenshots
 .history
 .svn/
 .cxx
+release/release_state.json
 
 # IntelliJ related
 *.iml
