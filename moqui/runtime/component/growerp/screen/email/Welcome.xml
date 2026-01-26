@@ -29,7 +29,7 @@ along with this software (see the LICENSE.md file). If not, see
                 
                 When you need any support, please let us know at
                 <a href="mailto:support@growerp.com?subject=Question%20about%20Growerp-${classification}">support@growerp.com</a><br/><br/>
-                <b>Your password to login is ${newPassword} Please Note you need a credit card to register in our production system</b> <br/><br/>
+                <b>Your password to login is ${newPassword}</b> <br/><br/>
 
                 If you just want to test, we also have a test system with limited availability and is cleared regularly: <br/>
                 Please register again at <a href="https://admin.growerp.org">https://admin.growerp.org</a><br/><br/>
