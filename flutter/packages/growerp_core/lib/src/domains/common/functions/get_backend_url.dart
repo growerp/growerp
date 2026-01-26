@@ -58,14 +58,14 @@ Future<void> getBackendUrlOverride(
     String? appBackendUrl = jsonDecode(response.body)['backendUrl'];
     if (response.statusCode == 200 && appBackendUrl != null) {
       if (appBackendUrl.contains('localhost')) secure = '';
+      if (appBackendUrl.endsWith('/')) {
+        appBackendUrl = appBackendUrl.substring(0, appBackendUrl.length - 1);
+      }
       GlobalConfiguration().updateValue(
         databaseUrl,
-        "http$secure://${jsonDecode(response.body)['backendUrl']}",
+        "http$secure://$appBackendUrl",
       );
-      GlobalConfiguration().updateValue(
-        chatUrl,
-        "ws$secure://${jsonDecode(response.body)['backendUrl']}",
-      );
+      GlobalConfiguration().updateValue(chatUrl, "ws$secure://$appBackendUrl");
       GlobalConfiguration().updateValue("test", true);
     } else {
       // always show in debug mode when backend url not provided

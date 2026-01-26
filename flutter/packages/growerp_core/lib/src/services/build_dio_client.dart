@@ -26,8 +26,26 @@ Future<Dio> buildDioClient({
     // ignore: empty_catches
   } catch (e) {}
 
-  String databaseUrl = GlobalConfiguration().get('databaseUrl');
-  String databaseUrlDebug = GlobalConfiguration().get('databaseUrlDebug');
+  String? databaseUrl = GlobalConfiguration().get('databaseUrl');
+  String? databaseUrlDebug = GlobalConfiguration().get('databaseUrlDebug');
+
+  String baseUrl;
+  if (overrideUrl != null) {
+    baseUrl = overrideUrl;
+  } else if (kReleaseMode) {
+    baseUrl = databaseUrl ?? 'https://backend.growerp.com';
+  } else if (databaseUrlDebug != null && databaseUrlDebug.isNotEmpty) {
+    baseUrl = databaseUrlDebug;
+  } else {
+    baseUrl = android == true
+        ? 'http://10.0.2.2:$_backendPort'
+        : 'http://localhost:$_backendPort';
+  }
+
+  // Ensure trailing slash only once
+  if (!baseUrl.endsWith('/')) {
+    baseUrl = '$baseUrl/';
+  }
 
   // Get timeout values from configuration
   int connectTimeoutSeconds;
@@ -53,17 +71,7 @@ Future<Dio> buildDioClient({
       : configReceiveTimeout;
 
   final dio = Dio()
-    ..options = BaseOptions(
-      baseUrl: overrideUrl != null
-          ? '$overrideUrl/'
-          : kReleaseMode
-          ? '$databaseUrl/'
-          : databaseUrlDebug.isNotEmpty
-          ? '$databaseUrlDebug/'
-          : android == true
-          ? 'http://10.0.2.2:$_backendPort/'
-          : 'http://localhost:$_backendPort/',
-    )
+    ..options = BaseOptions(baseUrl: baseUrl)
     ..options.connectTimeout = Duration(seconds: connectTimeoutSeconds)
     ..options.receiveTimeout = effectiveReceiveTimeout
     ..httpClientAdapter;

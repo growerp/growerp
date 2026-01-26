@@ -47,17 +47,28 @@ class WsClient {
   );
 
   WsClient(String path) {
+    String? baseUrl;
     if (kReleaseMode) {
-      wsUrl = GlobalConfiguration().get("chatUrl");
+      baseUrl = GlobalConfiguration().get("chatUrl");
     } else {
-      wsUrl = GlobalConfiguration().get("chatUrlDebug");
-      if (wsUrl.isEmpty) {
+      baseUrl = GlobalConfiguration().get("chatUrlDebug");
+      if (baseUrl == null || baseUrl.isEmpty) {
         if (kIsWeb || Platform.isIOS || Platform.isMacOS || Platform.isLinux) {
-          wsUrl = 'ws://localhost:$_backendPort/$path';
+          baseUrl = 'ws://localhost:$_backendPort';
         } else if (Platform.isAndroid) {
-          wsUrl = 'ws://10.0.2.2:$_backendPort/$path';
+          baseUrl = 'ws://10.0.2.2:$_backendPort';
         }
       }
+    }
+    // Fallback if still empty or null
+    if (baseUrl == null || baseUrl.isEmpty) {
+      baseUrl = 'wss://backend.growerp.com';
+    }
+    // Ensure no double slashes and add path
+    if (baseUrl.endsWith('/')) {
+      wsUrl = "$baseUrl$path";
+    } else {
+      wsUrl = "$baseUrl/$path";
     }
     logger.i('Using base websocket backend url: $wsUrl with path: $path');
   }

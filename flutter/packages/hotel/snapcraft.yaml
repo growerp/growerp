@@ -1,19 +1,19 @@
-name: growerp-admin
+name: growerp-hotel
 base: core22
 version: '1.12.2'
-summary: GrowERP Admin - Business Management System
+summary: GrowERP Hotel - Business Management System
 description: |
-  GrowERP Admin is a comprehensive ERP (Enterprise Resource Planning) application 
+  GrowERP Hotel is a comprehensive ERP (Enterprise Resource Planning) application 
   built with Flutter. It provides business management capabilities including:
   
-  - User and company management
-  - Inventory tracking and management
+  - Hotel room management
+  - check-in and check-out
   - Order processing and accounting
   - Marketing and website management
   - Activity tracking and reporting
   - Customer relationship management (CRM)
   
-  This snap packages the Linux desktop version of the GrowERP Admin application,
+  This snap packages the Linux desktop version of the GrowERP Hotel application,
   providing a complete business management solution for Linux systems.
 
 grade: stable
@@ -21,12 +21,12 @@ confinement: strict
 license: Apache-2.0
 website: https://www.growerp.com
 source-code: https://github.com/growerp/growerp
-icon: assets/icon/icon.png
+icon: assets/images/hotel.jpg
 
 apps:
-  growerp-admin:
+  growerp-hotel:
     command: bin/run
-    desktop: share/applications/growerp-admin.desktop
+    desktop: share/applications/growerp-hotel.desktop
     plugs:
       - network
       - network-bind
@@ -159,7 +159,7 @@ parts:
       
       # Change to snap directory and execute the application
       cd "$SNAP"
-      exec "$SNAP/admin" "$@"
+      exec "$SNAP/hotel" "$@"
       EOF
       chmod +x "$CRAFT_PRIME/bin/run"
       
@@ -184,24 +184,24 @@ parts:
       
       # Create desktop file
       mkdir -p "$CRAFT_PRIME/share/applications"
-      cat > "$CRAFT_PRIME/share/applications/growerp-admin.desktop" <<'EOF'
+      cat > "$CRAFT_PRIME/share/applications/growerp-hotel.desktop" <<'EOF'
       [Desktop Entry]
       Type=Application
-      Name=GrowERP Admin
+      Name=GrowERP Hotel
       Comment=Business Management System
-      Exec=growerp-admin.growerp-admin
-      Icon=${SNAP}/share/pixmaps/growerp-admin.png
+      Exec=growerp-hotel.growerp-hotel
+      Icon=${SNAP}/share/pixmaps/growerp-hotel.png
       Terminal=false
       Categories=Office;Finance;
       StartupNotify=true
-      StartupWMClass=admin
+      StartupWMClass=hotel
       MimeType=application/x-growerp;
       EOF
       
       # Create a simple icon (you can replace this with the actual app icon)
       mkdir -p "$CRAFT_PRIME/share/pixmaps"
       if [ -f "$CRAFT_PRIME/data/flutter_assets/assets/icon/icon.png" ]; then
-        cp "$CRAFT_PRIME/data/flutter_assets/assets/icon/icon.png" "$CRAFT_PRIME/share/pixmaps/growerp-admin.png"
+        cp "$CRAFT_PRIME/data/flutter_assets/assets/icon/icon.png" "$CRAFT_PRIME/share/pixmaps/growerp-hotel.png"
       else
         # Create a simple fallback icon if the app icon is not found
         echo "Creating fallback icon..."
