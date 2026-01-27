@@ -11,6 +11,30 @@ part 'rest_client.g.dart';
 abstract class RestClient {
   factory RestClient(Dio dio, {String baseUrl}) = _RestClient;
 
+  @GET("{path}")
+  Future<dynamic> get(
+    @Path("path") String path, {
+    @Queries() Map<String, dynamic>? queryParameters,
+  });
+
+  @POST("{path}")
+  Future<dynamic> post(
+    @Path("path") String path, {
+    @Body() Map<String, dynamic> data = const {},
+  });
+
+  @PATCH("{path}")
+  Future<dynamic> patch(
+    @Path("path") String path, {
+    @Body() Map<String, dynamic> data = const {},
+  });
+
+  @DELETE("{path}")
+  Future<dynamic> delete(
+    @Path("path") String path, {
+    @Queries() Map<String, dynamic>? queryParameters,
+  });
+
   @GET("rest/s1/growerp/100/CheckEmail")
   @Extra({'noApiKey': true})
   Future<Map<String, bool>> checkEmail({@Query('email') required String email});
@@ -1424,5 +1448,81 @@ abstract class RestClient {
   Future<RateLimitCheck> checkAgentRateLimit({
     @Query('instanceId') required String instanceId,
     @Query('platform') required String platform,
+  });
+
+  // Course Management
+  @GET("rest/s1/growerp/100/Courses")
+  Future<Courses> listCourses({
+    @Query('filter') String? filter,
+    @Query('start') int? start,
+    @Query('limit') int? limit,
+  });
+
+  @GET("rest/s1/growerp/100/Course")
+  Future<dynamic> getCourse({@Query('courseId') required String courseId});
+
+  @POST("rest/s1/growerp/100/Course")
+  Future<dynamic> createCourse({@Body() required Map<String, dynamic> data});
+
+  @PATCH("rest/s1/growerp/100/Course")
+  Future<dynamic> updateCourse({@Body() required Map<String, dynamic> data});
+
+  @DELETE("rest/s1/growerp/100/Course")
+  Future<dynamic> deleteCourse({@Query('courseId') required String courseId});
+
+  @POST("rest/s1/growerp/100/Course/Module")
+  Future<dynamic> createCourseModule({
+    @Body() required Map<String, dynamic> data,
+  });
+
+  @PATCH("rest/s1/growerp/100/Course/Module")
+  Future<dynamic> updateCourseModule({
+    @Body() required Map<String, dynamic> data,
+  });
+
+  @DELETE("rest/s1/growerp/100/Course/Module")
+  Future<dynamic> deleteCourseModule({
+    @Query('moduleId') required String moduleId,
+  });
+
+  @POST("rest/s1/growerp/100/Course/Lesson")
+  Future<dynamic> createCourseLesson({
+    @Body() required Map<String, dynamic> data,
+  });
+
+  @PATCH("rest/s1/growerp/100/Course/Lesson")
+  Future<dynamic> updateCourseLesson({
+    @Body() required Map<String, dynamic> data,
+  });
+
+  @DELETE("rest/s1/growerp/100/Course/Lesson")
+  Future<dynamic> deleteCourseLesson({
+    @Query('lessonId') required String lessonId,
+  });
+
+  @POST("rest/s1/growerp/100/Course/generateMediaWithAI")
+  Future<dynamic> generateCourseMedia({
+    @Body() required Map<String, dynamic> data,
+  });
+
+  @GET("rest/s1/growerp/100/CourseMedia")
+  Future<dynamic> listCourseMedia({
+    @Query('courseId') String? courseId,
+    @Query('platform') String? platform,
+  });
+
+  @PATCH("rest/s1/growerp/100/CourseMedia")
+  Future<dynamic> updateCourseMedia({
+    @Body() required Map<String, dynamic> data,
+  });
+
+  @GET("rest/s1/growerp/100/CourseProgress")
+  Future<dynamic> getCourseProgress({
+    @Query('courseId') required String courseId,
+  });
+
+  @PATCH("rest/s1/growerp/100/CourseProgress")
+  Future<dynamic> updateCourseProgress({
+    @Body() required Map<String, dynamic> data,
   });
 }

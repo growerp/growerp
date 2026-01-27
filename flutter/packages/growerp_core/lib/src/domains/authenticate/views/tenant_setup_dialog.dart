@@ -64,7 +64,7 @@ class TenantSetupDialogState extends State<TenantSetupDialog> {
               authenticate: state.authenticate,
             );
             // Close the dialog - LoginDialog will handle navigation
-            if (mounted) {
+            if (mounted && Navigator.canPop(context)) {
               Navigator.of(context).pop();
             }
           } else if (state.status == AuthStatus.failure) {
