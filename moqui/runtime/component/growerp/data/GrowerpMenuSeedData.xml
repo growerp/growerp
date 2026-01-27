@@ -44,6 +44,8 @@ along with this software (see the LICENSE.md file). If not, see
         name="Order Accounting Example Menu" description="Default menu for order accounting example app"/>
     <growerp.menu.MenuConfiguration menuConfigurationId="CORE_EXAMPLE_DEFAULT" appId="core_example" 
         name="Core Example Menu" description="Default menu for core example app"/>
+    <growerp.menu.MenuConfiguration menuConfigurationId="COURSES_EXAMPLE_DEFAULT" appId="courses_example" 
+        name="Courses Example Menu" description="Default menu for courses example app"/>
 
     <!-- ====================== ADMIN_DEFAULT Menu Items ====================== -->
     <!-- Top-level menu items -->
@@ -488,5 +490,16 @@ along with this software (see the LICENSE.md file). If not, see
         title="company" iconName="home" widgetName="ShowCompanyDialog" sequenceNum="10"/>
     <growerp.menu.MenuItem menuItemId="CORE_EX_CRM_USERS" menuConfigurationId="CORE_EXAMPLE_DEFAULT" parentMenuItemId="CORE_EX_CRM"
         title="employees" iconName="school" widgetName="UserListEmployee" sequenceNum="20"/>
+
+    <!-- ====================== COURSES_EXAMPLE_DEFAULT ====================== -->
+    <growerp.menu.MenuItem menuItemId="COURSES_EX_MAIN" menuConfigurationId="COURSES_EXAMPLE_DEFAULT" 
+        title="Main" route="/" widgetName="CoursesDashboard" image="packages/growerp_core/images/dashBoardGrey.png" selectedImage="packages/growerp_core/images/dashBoard.png" sequenceNum="10"/>
+    <growerp.menu.MenuItem menuItemId="COURSES_EX_COURSES" menuConfigurationId="COURSES_EXAMPLE_DEFAULT" 
+        title="Courses" route="/courses" widgetName="CourseList" image="packages/growerp_core/images/crmGrey.png" selectedImage="packages/growerp_core/images/crm.png" sequenceNum="20"/>
+    <!-- Courses children -->
+    <growerp.menu.MenuItem menuItemId="COURSES_EX_COURSES_LIST" menuConfigurationId="COURSES_EXAMPLE_DEFAULT" parentMenuItemId="COURSES_EX_COURSES"
+        title="Course List" iconName="list" widgetName="CourseList" sequenceNum="10"/>
+    <growerp.menu.MenuItem menuItemId="COURSES_EX_COURSES_VIEWER" menuConfigurationId="COURSES_EXAMPLE_DEFAULT" parentMenuItemId="COURSES_EX_COURSES"
+        title="Course Viewer" iconName="school" widgetName="CourseViewer" sequenceNum="20"/>
 
 </entity-facade-xml>

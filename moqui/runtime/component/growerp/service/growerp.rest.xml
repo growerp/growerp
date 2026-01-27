@@ -913,6 +913,70 @@ along with this software (see the LICENSE.md file). If not, see
                 </method>
             </resource>
         </resource>
+
+        <!-- Course Management -->
+        <resource name="Courses">
+            <method type="get">
+                <service name="growerp.100.CourseServices100.list#Courses" />
+            </method>
+        </resource>
+        <resource name="Course">
+            <method type="get">
+                <service name="growerp.100.CourseServices100.get#Course" />
+            </method>
+            <method type="post">
+                <service name="growerp.100.CourseServices100.create#Course" />
+            </method>
+            <method type="patch">
+                <service name="growerp.100.CourseServices100.update#Course" />
+            </method>
+            <method type="delete">
+                <service name="growerp.100.CourseServices100.delete#Course" />
+            </method>
+            <resource name="Module">
+                <method type="post">
+                    <service name="growerp.100.CourseServices100.create#CourseModule" />
+                </method>
+                <method type="patch">
+                    <service name="growerp.100.CourseServices100.update#CourseModule" />
+                </method>
+                <method type="delete">
+                    <service name="growerp.100.CourseServices100.delete#CourseModule" />
+                </method>
+            </resource>
+            <resource name="Lesson">
+                <method type="post">
+                    <service name="growerp.100.CourseServices100.create#CourseLesson" />
+                </method>
+                <method type="patch">
+                    <service name="growerp.100.CourseServices100.update#CourseLesson" />
+                </method>
+                <method type="delete">
+                    <service name="growerp.100.CourseServices100.delete#CourseLesson" />
+                </method>
+            </resource>
+            <resource name="generateMediaWithAI">
+                <method type="post">
+                    <service name="growerp.100.CourseServices100.generate#CourseMedia" />
+                </method>
+            </resource>
+        </resource>
+        <resource name="CourseMedia">
+            <method type="get">
+                <service name="growerp.100.CourseServices100.list#CourseMedia" />
+            </method>
+            <method type="patch">
+                <service name="growerp.100.CourseServices100.update#CourseMedia" />
+            </method>
+        </resource>
+        <resource name="CourseProgress">
+            <method type="get">
+                <service name="growerp.100.CourseServices100.get#CourseProgress" />
+            </method>
+            <method type="patch">
+                <service name="growerp.100.CourseServices100.update#CourseProgress" />
+            </method>
+        </resource>
     </resource>
     <!-- Antwebsystems website -->
     <resource name="storecontents" require-authentication="anonymous-view">

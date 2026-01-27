@@ -3806,6 +3806,44 @@ along with this software (see the LICENSE.md file). If not, see
                 </iterate>
             </if>
             <!-- CTA: Now embedded in LandingPage entity (ctaActionType, ctaAssessmentId, etc.) -->
+
+            <!-- load courses demo data -->
+            <entity-find entity-name="growerp.course.Course" list="courses">
+                <econdition field-name="ownerPartyId" value="_NA_" />
+            </entity-find>
+            <iterate list="courses" entry="course">
+                <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                    in-map="[ownerPartyId: ownerPartyId, seqName: 'course']" out-map="context" />
+                <service-call name="create#growerp.course.Course"
+                    in-map="[course + [courseId: null, ownerPartyId: ownerPartyId, pseudoId: seqNum]]"
+                    out-map="newCourse" />
+
+                <!-- modules -->
+                <entity-find entity-name="growerp.course.CourseModule" list="modules">
+                    <econdition field-name="courseId" from="course.courseId" />
+                </entity-find>
+                <iterate list="modules" entry="module">
+                    <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                        in-map="[ownerPartyId: ownerPartyId, seqName: 'courseModule']"
+                        out-map="context" />
+                    <service-call name="create#growerp.course.CourseModule"
+                        in-map="[module + [moduleId: null, courseId: newCourse.courseId, pseudoId: seqNum]]"
+                        out-map="newModule" />
+
+                    <!-- lessons -->
+                    <entity-find entity-name="growerp.course.CourseLesson" list="lessons">
+                        <econdition field-name="moduleId" from="module.moduleId" />
+                    </entity-find>
+                    <iterate list="lessons" entry="lesson">
+                        <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                            in-map="[ownerPartyId: ownerPartyId, seqName: 'courseLesson']"
+                            out-map="context" />
+                        <service-call name="create#growerp.course.CourseLesson"
+                            in-map="[lesson + [lessonId: null, moduleId: newModule.moduleId, 
+                                                courseId: newCourse.courseId, pseudoId: seqNum]]" />
+                    </iterate>
+                </iterate>
+            </iterate>
         </actions>
     </service>
 

@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entities xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/entity-definition-3.xsd">
+
+    <!-- ========================================================= -->
+    <!--  Course (Central Course Definition)                       -->
+    <!-- ========================================================= -->
+    <entity entity-name="Course" package="growerp.course">
+        <description>Central course definition with title, objectives, and target audience.</description>
+        <field name="courseId" type="id" is-pk="true" />
+        <field name="pseudoId" type="id" />
+        <field name="ownerPartyId" type="id" />
+        <field name="title" type="text-medium" />
+        <field name="description" type="text-very-long" />
+        <field name="objectives" type="text-very-long" />
+        <field name="targetPersonaId" type="id" />
+        <field name="difficulty" type="text-short" /> <!-- BEGINNER, INTERMEDIATE, ADVANCED -->
+        <field name="estimatedDuration" type="number-integer" /> <!-- in minutes -->
+        <field name="status" type="text-short" /> <!-- DRAFT, PUBLISHED, ARCHIVED -->
+        <field name="coverImageUrl" type="text-long" />
+
+        <field name="createdDate" type="date-time" />
+        <field name="lastModifiedDate" type="date-time" />
+        <field name="createdByUserLogin" type="text-short" />
+
+        <relationship type="one" related="mantle.party.Party">
+            <key-map field-name="ownerPartyId" related="partyId" />
+        </relationship>
+        <relationship type="one" related="growerp.marketing.MarketingPersona">
+            <key-map field-name="targetPersonaId" related="personaId" />
+        </relationship>
+        <relationship type="many" related="growerp.course.CourseModule">
+            <key-map field-name="courseId" />
+        </relationship>
+    </entity>
+
+    <!-- ========================================================= -->
+    <!--  Course Module (Logical Grouping of Lessons)              -->
+    <!-- ========================================================= -->
+    <entity entity-name="CourseModule" package="growerp.course">
+        <description>Module grouping related lessons within a course.</description>
+        <field name="moduleId" type="id" is-pk="true" />
+        <field name="pseudoId" type="id" />
+        <field name="courseId" type="id" />
+        <field name="title" type="text-medium" />
+        <field name="description" type="text-long" />
+        <field name="sequenceNum" type="number-integer" />
+        <field name="estimatedDuration" type="number-integer" /> <!-- in minutes -->
+
+        <field name="createdDate" type="date-time" />
+        <field name="lastModifiedDate" type="date-time" />
+
+        <relationship type="one" related="growerp.course.Course">
+            <key-map field-name="courseId" />
+        </relationship>
+        <relationship type="many" related="growerp.course.CourseLesson">
+            <key-map field-name="moduleId" />
+        </relationship>
+    </entity>
+
+    <!-- ========================================================= -->
+    <!--  Course Lesson (Individual Learning Content)               -->
+    <!-- ========================================================= -->
+    <entity entity-name="CourseLesson" package="growerp.course">
+        <description>Individual lesson with content, key points, and media.</description>
+        <field name="lessonId" type="id" is-pk="true" />
+        <field name="pseudoId" type="id" />
+        <field name="moduleId" type="id" />
+        <field name="courseId" type="id" />
+        <field name="title" type="text-medium" />
+        <field name="content" type="text-very-long" /> <!-- Markdown content -->
+        <field name="keyPoints" type="text-very-long" /> <!-- JSON array of key points -->
+        <field name="sequenceNum" type="number-integer" />
+        <field name="estimatedDuration" type="number-integer" /> <!-- in minutes -->
+        <field name="videoUrl" type="text-long" />
+        <field name="imageUrl" type="text-long" />
+
+        <field name="createdDate" type="date-time" />
+        <field name="lastModifiedDate" type="date-time" />
+
+        <relationship type="one" related="growerp.course.CourseModule">
+            <key-map field-name="moduleId" />
+        </relationship>
+        <relationship type="one" related="growerp.course.Course">
+            <key-map field-name="courseId" />
+        </relationship>
+    </entity>
+
+    <!-- ========================================================= -->
+    <!--  Course Media (AI-Generated Platform Content)             -->
+    <!-- ========================================================= -->
+    <entity entity-name="CourseMedia" package="growerp.course">
+        <description>AI-generated content for various platforms.</description>
+        <field name="mediaId" type="id" is-pk="true" />
+        <field name="pseudoId" type="id" />
+        <field name="ownerPartyId" type="id" />
+        <field name="courseId" type="id" />
+        <field name="moduleId" type="id" /> <!-- optional, for module-specific content -->
+        <field name="lessonId" type="id" /> <!-- optional, for lesson-specific content -->
+        <field name="platform" type="text-short" /> <!-- LINKEDIN, MEDIUM, EMAIL, YOUTUBE, TWITTER, SUBSTACK, INAPP -->
+        <field name="mediaType" type="text-short" /> <!-- POST, ARTICLE, SEQUENCE, SCRIPT, THREAD, TUTORIAL -->
+        <field name="title" type="text-medium" />
+        <field name="generatedContent" type="text-very-long" />
+        <field name="editedContent" type="text-very-long" />
+        <field name="status" type="text-short" /> <!-- DRAFT, REVIEWED, SCHEDULED, PUBLISHED -->
+        <field name="scheduledDate" type="date-time" />
+        <field name="publishedDate" type="date-time" />
+
+        <field name="createdDate" type="date-time" />
+        <field name="lastModifiedDate" type="date-time" />
+
+        <relationship type="one" related="growerp.course.Course">
+            <key-map field-name="courseId" />
+        </relationship>
+        <relationship type="one" related="growerp.course.CourseModule">
+            <key-map field-name="moduleId" />
+        </relationship>
+        <relationship type="one" related="growerp.course.CourseLesson">
+            <key-map field-name="lessonId" />
+        </relationship>
+        <relationship type="one" related="mantle.party.Party">
+            <key-map field-name="ownerPartyId" related="partyId" />
+        </relationship>
+    </entity>
+
+    <!-- ========================================================= -->
+    <!--  Course Progress (User Progress Tracking)                 -->
+    <!-- ========================================================= -->
+    <entity entity-name="CourseProgress" package="growerp.course">
+        <description>Tracks user progress through a course.</description>
+        <field name="progressId" type="id" is-pk="true" />
+        <field name="userId" type="id" />
+        <field name="courseId" type="id" />
+        <field name="currentLessonId" type="id" />
+        <field name="completedLessons" type="text-very-long" /> <!-- JSON array of lessonIds -->
+        <field name="progressPercent" type="number-integer" />
+        <field name="startedDate" type="date-time" />
+        <field name="lastAccessDate" type="date-time" />
+        <field name="completedDate" type="date-time" />
+
+        <relationship type="one" related="moqui.security.UserAccount">
+            <key-map field-name="userId" />
+        </relationship>
+        <relationship type="one" related="growerp.course.Course">
+            <key-map field-name="courseId" />
+        </relationship>
+        <relationship type="one" related="growerp.course.CourseLesson">
+            <key-map field-name="currentLessonId" related="lessonId" />
+        </relationship>
+    </entity>
+
+</entities>

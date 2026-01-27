@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-facade-xml type="seed" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/entity-facade-xml-3.xsd">
+
+    <growerp.course.Course courseId="CourseGrowerp" ownerPartyId="_NA_" title="How to Create a Course with GrowERP: The Curriculum" 
+        description="This curriculum outlines the process of building, validating, and selling a course using the GrowERP ecosystem. It combines industry best practices with the specific tools and strategies found in the GrowERP architecture (Assessments, Landing Pages, and Outreach)."
+        objectives="To take a course creator from &quot;Idea&quot; to &quot;Automated Sales Funnel&quot; using GrowERP."
+        status="PUBLISHED" difficulty="INTERMEDIATE" estimatedDuration="1200" />
+
+    <!-- Module 1: Strategy & Validation (The "Why") -->
+    <growerp.course.CourseModule moduleId="GrowerpMod01" courseId="CourseGrowerp" title="Strategy &amp; Validation (The &quot;Why&quot;)" 
+        description="Based on &quot;GrowERP Course Media Strategy.md&quot; and &quot;Marketing hooks.md&quot;" sequenceNum="1" />
+
+    <growerp.course.CourseLesson lessonId="GrowerpLess0101" moduleId="GrowerpMod01" courseId="CourseGrowerp" 
+        title="Identifying the Pain Point" 
+        content="
+*   **Objective**: Define a specific problem your course solves.
+*   **Case Study**: The **Field Service Efficiency Masterclass**.
+    *   *Bad*: &quot;A course about inventory software.&quot;
+    *   *Good*: &quot;Your HVAC fleet is losing $500 per van every week. Here’s how to stop it.&quot;
+*   **Action Project**: Write 3 &quot;Agitator&quot; hooks for your course topic."
+        sequenceNum="1" />
+
+    <growerp.course.CourseLesson lessonId="GrowerpLess0102" moduleId="GrowerpMod01" courseId="CourseGrowerp" 
+        title="The &quot;Why-What-How&quot; Framework" 
+        content="
+*   **Objective**: Structure your value proposition.
+    *   **Why**: Why does this problem exist? (e.g., &quot;Manual inventory tracking&quot;)
+    *   **What**: What is the solution? (e.g., &quot;Real-time Van Warehouses&quot;)
+    *   **How**: How do we implement it? (The Course Content).
+*   **Ref**: Solopreneur Mini-Course Strategy."
+        sequenceNum="2" />
+
+    <!-- Module 2: The Assessment Engine (The "Pre-Sell") -->
+    <growerp.course.CourseModule moduleId="GrowerpMod02" courseId="CourseGrowerp" title="The Assessment Engine (The &quot;Pre-Sell&quot;)" 
+        description="Based on `GrowerpSuggestedCourses.xml` - Assessment Entities" sequenceNum="2" />
+
+    <growerp.course.CourseLesson lessonId="GrowerpLess0201" moduleId="GrowerpMod02" courseId="CourseGrowerp" 
+        title="Why Assessments Beat Standard Opt-ins" 
+        content="
+*   **Theory**: People love learning about themselves. An &quot;Effective Score&quot; is more compelling than a &quot;Newsletter Signup&quot;.
+*   **Strategy**: Use the assessment to qualify leads *before* they buy."
+        sequenceNum="1" />
+
+    <growerp.course.CourseLesson lessonId="GrowerpLess0202" moduleId="GrowerpMod02" courseId="CourseGrowerp" 
+        title="Building the Assessment in XML" 
+        content="
+*   **Technical Skill**: Defining `growerp.assessment.Assessment`.
+*   **Key Components**:
+    *   `AssessmentQuestion`: The input (e.g., &quot;How do you track inventory?&quot;).
+    *   `AssessmentQuestionOption`: Scored answers (Score 1 for &quot;Paper&quot;, Score 10 for &quot;ERP&quot;).
+    *   `ScoringThreshold`: Determining user status (Hot vs. Warm lead).
+*   **Example Code Review**: Analyzing the `FS_EFFICIENCY` assessment structure."
+        sequenceNum="2" />
+
+    <!-- Module 3: Curriculum Design & Content -->
+    <growerp.course.CourseModule moduleId="GrowerpMod03" courseId="CourseGrowerp" title="Curriculum Design &amp; Content" 
+        description="Based on Digital Product Best Practices" sequenceNum="3" />
+
+    <growerp.course.CourseLesson lessonId="GrowerpLess0301" moduleId="GrowerpMod03" courseId="CourseGrowerp" 
+        title="Structuring for Success" 
+        content="
+*   **Rule of Thumb**: 3-5 Modules per Course.
+*   **Lesson Structure**:
+    1.  **The Concept** (Video/Text).
+    2.  **The Example** (Real-world scenario).
+    3.  **The Action Item** (Implementation).
+*   **Ref**: &quot;8 Steps to Your First Mini-Course.md&quot;."
+        sequenceNum="1" />
+
+    <growerp.course.CourseLesson lessonId="GrowerpLess0302" moduleId="GrowerpMod03" courseId="CourseGrowerp" 
+        title="Production Formats" 
+        content="
+*   **Video**: Keep under 6 minutes (Micro-learning).
+*   **Text/Guide**: For referencing complex configurations.
+*   **Quizzes**: Reinforce learning (GrowERP supports `Assessment` types for quizzes too)."
+        sequenceNum="2" />
+
+    <!-- Module 4: The Launch Funnel & Automation -->
+    <growerp.course.CourseModule moduleId="GrowerpMod04" courseId="CourseGrowerp" title="The Launch Funnel &amp; Automation" 
+        description="Based on Landing Pages and Marketing Service definitions" sequenceNum="4" />
+
+    <growerp.course.CourseLesson lessonId="GrowerpLess0401" moduleId="GrowerpMod04" courseId="CourseGrowerp" 
+        title="The Landing Page" 
+        content="
+*   **Technical Skill**: Defining `growerp.landing.LandingPage`.
+*   **Components**:
+    *   `hookType`: &quot;ResultsHook&quot; vs &quot;StoryHook&quot;.
+    *   `ctaAssessmentId`: Linking your Assessment from Module 2.
+    *   `headline`: The primary promise.
+*   **Example**: Analyzing `B2B_LANDING` (&quot;Scale Your Sales Team Without Scaling Your Software Bill&quot;)."
+        sequenceNum="1" />
+
+    <growerp.course.CourseLesson lessonId="GrowerpLess0402" moduleId="GrowerpMod04" courseId="CourseGrowerp" 
+        title="Automated Outreach" 
+        content="
+*   **Strategy**: Using `OutreachServices` to follow up.
+*   **Sequence**:
+    1.  **Hot Lead (Heigh Score)**: Direct personal email/call.
+    2.  **Warm Lead (Medium Score)**: Nurture sequence (Case Studies).
+*   **Ref**: &quot;20 emails to persuade people to buy.md&quot;."
+        sequenceNum="2" />
+
+    <!-- Final Project -->
+    <growerp.course.CourseModule moduleId="GrowerpModFinal" courseId="CourseGrowerp" title="Final Project" 
+        description="Build Your Prototype" sequenceNum="5" />
+
+    <growerp.course.CourseLesson lessonId="GrowerpLessFinal" moduleId="GrowerpModFinal" courseId="CourseGrowerp" 
+        title="Build Your Prototype" 
+        content="
+**Build Your Prototype**:
+1.  Define your **Hook**.
+2.  Write a simple 5-question **Assessment** in XML.
+3.  Create a **Landing Page** entry linking to it.
+4.  Outline your **Course Modules**."
+        sequenceNum="1" />
+
+</entity-facade-xml>

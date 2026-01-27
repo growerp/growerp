@@ -601,7 +601,15 @@ class DisplayMenuItemState extends State<DisplayMenuItem>
   }
 
   /// Build AI FAB button (and optional additional FAB above it)
+  /// Only shown on dashboard/home, not on specific module pages that have their own FABs
   Widget? _buildAiFab() {
+    // Only show AI FAB on dashboard/home route
+    // List pages and other modules have their own FABs and don't need AI navigation
+    if (currentRoute != '/') {
+      // Return only the custom FAB if provided
+      return widget.floatingActionButton;
+    }
+
     final aiFab = FloatingActionButton(
       key: const Key('aiFab'),
       heroTag: 'aiFab',

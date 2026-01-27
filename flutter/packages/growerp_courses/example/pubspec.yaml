@@ -1,0 +1,43 @@
+name: courses_example
+description: An example project for the GrowERP courses package.
+version: 1.0.0+1
+publish_to: none
+
+environment:
+  sdk: ^3.9.0
+  flutter: ^3.33.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  growerp_courses:
+    path: ../
+  growerp_core:
+    path: ../../growerp_core
+  growerp_models:
+    path: ../../growerp_models
+  growerp_user_company:
+    path: ../../growerp_user_company
+  global_configuration: ^2.0.0-nullsafety.1
+  flutter_test:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
+  flutter_bloc: ^8.1.4
+  go_router: ^14.6.2
+
+dev_dependencies:
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+  generate: true
+
+  assets:
+    - assets/cfg/
+    - packages/growerp_core/images/growerp.jpg
+    - packages/growerp_core/images/growerpDark.jpg
+    - packages/growerp_core/images/growerp100.png
+    - packages/growerp_core/images/growerpDark100.png

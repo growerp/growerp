@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+-->
+<entities xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/entity-definition-3.xsd">
+
+    <!-- ========================================================= -->
+    <!--  CourseAndCounts - Course with module and lesson counts   -->
+    <!-- ========================================================= -->
+    <view-entity entity-name="CourseAndCounts" package="growerp.course">
+        <description>View to retrieve courses with module and lesson counts for list display</description>
+        
+        <!-- Course entity (main) -->
+        <member-entity entity-alias="CRS" entity-name="growerp.course.Course" />
+        
+        <!-- Course modules (for count) -->
+        <member-entity entity-alias="MOD" entity-name="growerp.course.CourseModule"
+            join-from-alias="CRS" join-optional="true">
+            <key-map field-name="courseId" />
+        </member-entity>
+        
+        <!-- Course lessons (for count) -->
+        <member-entity entity-alias="LES" entity-name="growerp.course.CourseLesson"
+            join-from-alias="CRS" join-optional="true">
+            <key-map field-name="courseId" />
+        </member-entity>
+        
+        <!-- Course fields -->
+        <alias name="courseId" entity-alias="CRS" />
+        <alias name="pseudoId" entity-alias="CRS" />
+        <alias name="ownerPartyId" entity-alias="CRS" />
+        <alias name="title" entity-alias="CRS" />
+        <alias name="description" entity-alias="CRS" />
+        <alias name="objectives" entity-alias="CRS" />
+        <alias name="targetPersonaId" entity-alias="CRS" />
+        <alias name="difficulty" entity-alias="CRS" />
+        <alias name="estimatedDuration" entity-alias="CRS" />
+        <alias name="status" entity-alias="CRS" />
+        <alias name="coverImageUrl" entity-alias="CRS" />
+        <alias name="createdDate" entity-alias="CRS" />
+        <alias name="lastModifiedDate" entity-alias="CRS" />
+        
+        <!-- Module count (distinct to avoid duplicates from lesson join) -->
+        <alias name="moduleCount" entity-alias="MOD" field="moduleId" function="count-distinct" />
+        
+        <!-- Lesson count -->
+        <alias name="lessonCount" entity-alias="LES" field="lessonId" function="count-distinct" />
+    </view-entity>
+
+</entities>
