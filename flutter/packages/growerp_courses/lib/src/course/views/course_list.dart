@@ -8,6 +8,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_models/growerp_models.dart';
 import '../bloc/course_bloc.dart';
 import 'course_dialog.dart';
+import 'generate_media_dialog.dart';
 
 class CourseList extends StatelessWidget {
   const CourseList({super.key});
@@ -346,9 +347,12 @@ class _CourseListViewState extends State<CourseListView> {
   }
 
   void _showGenerateMediaDialog(BuildContext context, Course course) {
-    // TODO: Implement generate media dialog
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Generate Media dialog - coming soon!')),
+    showDialog(
+      context: context,
+      builder: (dialogContext) => BlocProvider.value(
+        value: context.read<CourseBloc>(),
+        child: GenerateMediaDialog(course: course),
+      ),
     );
   }
 }

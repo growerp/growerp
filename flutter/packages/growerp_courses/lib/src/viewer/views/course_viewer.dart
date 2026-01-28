@@ -8,6 +8,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:growerp_models/growerp_models.dart';
 import '../bloc/course_viewer_bloc.dart';
+import '../../media/views/media_preview.dart';
 
 /// In-app course viewer widget for presenting courses
 class CourseViewer extends StatelessWidget {
@@ -44,6 +45,10 @@ class CourseViewerContent extends StatelessWidget {
           return const Center(child: CircularProgressIndicator());
         }
 
+        if (state.status == ViewerStatus.selectingCourse) {
+          return _buildCourseSelector(context, state);
+        }
+
         if (state.status == ViewerStatus.failure) {
           return Center(
             child: Column(
@@ -58,6 +63,10 @@ class CourseViewerContent extends StatelessWidget {
                     if (state.course?.courseId != null) {
                       context.read<CourseViewerBloc>().add(
                             LoadCourse(state.course!.courseId!),
+                          );
+                    } else {
+                      context.read<CourseViewerBloc>().add(
+                            const FetchAvailableCourses(),
                           );
                     }
                   },
@@ -77,6 +86,155 @@ class CourseViewerContent extends StatelessWidget {
     );
   }
 
+  Widget _buildCourseSelector(BuildContext context, CourseViewerState state) {
+    final courses = state.availableCourses;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Select a Course'),
+        centerTitle: true,
+      ),
+      body: courses.isEmpty
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.school_outlined,
+                    size: 64,
+                    color: Colors.grey[400],
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'No courses available',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Create a course first to start learning',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ],
+              ),
+            )
+          : Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Choose a course to begin',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  const SizedBox(height: 16),
+                  Expanded(
+                    child: GridView.builder(
+                      gridDelegate:
+                          const SliverGridDelegateWithMaxCrossAxisExtent(
+                        maxCrossAxisExtent: 350,
+                        childAspectRatio: 1.3,
+                        crossAxisSpacing: 16,
+                        mainAxisSpacing: 16,
+                      ),
+                      itemCount: courses.length,
+                      itemBuilder: (context, index) {
+                        final course = courses[index];
+                        return _buildCourseCard(context, course);
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+    );
+  }
+
+  Widget _buildCourseCard(BuildContext context, Course course) {
+    final moduleCount = course.modules?.length ?? 0;
+    final lessonCount = course.modules
+            ?.fold<int>(0, (sum, m) => sum + (m.lessons?.length ?? 0)) ??
+        0;
+
+    return Card(
+      clipBehavior: Clip.antiAlias,
+      elevation: 2,
+      child: InkWell(
+        onTap: () {
+          if (course.courseId != null) {
+            context.read<CourseViewerBloc>().add(LoadCourse(course.courseId!));
+          }
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context)
+                          .colorScheme
+                          .primaryContainer
+                          .withValues(alpha: 0.5),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(
+                      Icons.school,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      course.title,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              if (course.description != null)
+                Expanded(
+                  child: Text(
+                    course.description!,
+                    style: Theme.of(context).textTheme.bodySmall,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              const Spacer(),
+              Row(
+                children: [
+                  Icon(Icons.view_module,
+                      size: 14, color: Theme.of(context).colorScheme.secondary),
+                  const SizedBox(width: 4),
+                  Text(
+                    '$moduleCount modules',
+                    style: Theme.of(context).textTheme.labelSmall,
+                  ),
+                  const SizedBox(width: 12),
+                  Icon(Icons.play_lesson,
+                      size: 14, color: Theme.of(context).colorScheme.secondary),
+                  const SizedBox(width: 4),
+                  Text(
+                    '$lessonCount lessons',
+                    style: Theme.of(context).textTheme.labelSmall,
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildViewer(BuildContext context, CourseViewerState state) {
     final isNarrow = MediaQuery.of(context).size.width < 800;
 
@@ -89,20 +247,33 @@ class CourseViewerContent extends StatelessWidget {
         SizedBox(width: 300, child: _buildSidebar(context, state)),
         const VerticalDivider(width: 1),
         Expanded(child: _buildContent(context, state)),
+        if (state.mediaList.isNotEmpty) ...[
+          const VerticalDivider(width: 1),
+          SizedBox(width: 280, child: _buildMediaPanel(context, state)),
+        ],
       ],
     );
   }
 
   Widget _buildMobileViewer(BuildContext context, CourseViewerState state) {
+    final hasMedia = state.mediaList.isNotEmpty;
     return DefaultTabController(
-      length: 2,
+      length: hasMedia ? 3 : 2,
       child: Scaffold(
         appBar: AppBar(
           title: Text(state.course!.title),
-          bottom: const TabBar(
+          bottom: TabBar(
             tabs: [
-              Tab(icon: Icon(Icons.menu_book), text: 'Content'),
-              Tab(icon: Icon(Icons.list), text: 'Outline'),
+              const Tab(icon: Icon(Icons.menu_book), text: 'Content'),
+              const Tab(icon: Icon(Icons.list), text: 'Outline'),
+              if (hasMedia)
+                Tab(
+                  icon: Badge(
+                    label: Text('${state.mediaList.length}'),
+                    child: const Icon(Icons.video_library),
+                  ),
+                  text: 'Media',
+                ),
             ],
           ),
         ),
@@ -110,6 +281,7 @@ class CourseViewerContent extends StatelessWidget {
           children: [
             _buildContent(context, state),
             _buildSidebar(context, state),
+            if (hasMedia) _buildMediaTab(context, state),
           ],
         ),
       ),
@@ -342,5 +514,278 @@ class CourseViewerContent extends StatelessWidget {
       lessons.addAll(module.lessons ?? []);
     }
     return lessons;
+  }
+
+  /// Build the media panel for desktop view (right sidebar)
+  Widget _buildMediaPanel(BuildContext context, CourseViewerState state) {
+    return Container(
+      color: Theme.of(context)
+          .colorScheme
+          .surfaceContainerHighest
+          .withValues(alpha: 0.3),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                const Icon(Icons.video_library, size: 20),
+                const SizedBox(width: 8),
+                Text(
+                  'Generated Media',
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
+                const Spacer(),
+                Text(
+                  '${state.mediaList.length}',
+                  style: Theme.of(context).textTheme.labelSmall,
+                ),
+              ],
+            ),
+          ),
+          const Divider(height: 1),
+          Expanded(
+            child: ListView.builder(
+              itemCount: state.mediaList.length,
+              itemBuilder: (context, index) {
+                final media = state.mediaList[index];
+                return _buildMediaListItem(context, media);
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Build the media tab for mobile view
+  Widget _buildMediaTab(BuildContext context, CourseViewerState state) {
+    if (state.mediaList.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.video_library, size: 64, color: Colors.grey[400]),
+            const SizedBox(height: 16),
+            Text(
+              'No media available',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+          ],
+        ),
+      );
+    }
+
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: state.mediaList.length,
+      itemBuilder: (context, index) {
+        final media = state.mediaList[index];
+        return _buildMediaCard(context, media);
+      },
+    );
+  }
+
+  /// Build a media list item for the sidebar
+  Widget _buildMediaListItem(BuildContext context, CourseMedia media) {
+    return ListTile(
+      leading: _getPlatformIcon(media.platform),
+      title: Text(
+        media.title ?? _getPlatformLabel(media.platform),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
+      subtitle: Row(
+        children: [
+          _buildStatusChip(media.status),
+          if (media.mediaType != null) ...[
+            const SizedBox(width: 4),
+            Text(
+              _getMediaTypeLabel(media.mediaType!),
+              style: Theme.of(context).textTheme.labelSmall,
+            ),
+          ],
+        ],
+      ),
+      onTap: () => _showMediaPreview(context, media),
+    );
+  }
+
+  /// Build a media card for the mobile tab
+  Widget _buildMediaCard(BuildContext context, CourseMedia media) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      child: InkWell(
+        onTap: () => _showMediaPreview(context, media),
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: _getPlatformColor(media.platform).withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: _getPlatformIcon(media.platform),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      media.title ?? _getPlatformLabel(media.platform),
+                      style: Theme.of(context).textTheme.titleSmall,
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        _buildStatusChip(media.status),
+                        const SizedBox(width: 8),
+                        if (media.mediaType != null)
+                          Text(
+                            _getMediaTypeLabel(media.mediaType!),
+                            style: Theme.of(context).textTheme.labelSmall,
+                          ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(Icons.chevron_right),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showMediaPreview(BuildContext context, CourseMedia media) {
+    showDialog(
+      context: context,
+      builder: (context) => MediaPreview(media: media),
+    );
+  }
+
+  Icon _getPlatformIcon(MediaPlatform? platform) {
+    switch (platform) {
+      case MediaPlatform.youtube:
+        return const Icon(Icons.play_circle_fill, color: Colors.red);
+      case MediaPlatform.linkedin:
+        return const Icon(Icons.work, color: Color(0xFF0077B5));
+      case MediaPlatform.twitter:
+        return const Icon(Icons.tag, color: Color(0xFF1DA1F2));
+      case MediaPlatform.medium:
+        return const Icon(Icons.article, color: Colors.black);
+      case MediaPlatform.email:
+        return const Icon(Icons.email, color: Colors.orange);
+      case MediaPlatform.substack:
+        return const Icon(Icons.newspaper, color: Colors.deepOrange);
+      case MediaPlatform.inapp:
+        return const Icon(Icons.phone_android, color: Colors.blue);
+      default:
+        return const Icon(Icons.content_copy);
+    }
+  }
+
+  String _getPlatformLabel(MediaPlatform? platform) {
+    switch (platform) {
+      case MediaPlatform.youtube:
+        return 'YouTube Script';
+      case MediaPlatform.linkedin:
+        return 'LinkedIn Post';
+      case MediaPlatform.twitter:
+        return 'Twitter Thread';
+      case MediaPlatform.medium:
+        return 'Medium Article';
+      case MediaPlatform.email:
+        return 'Email Sequence';
+      case MediaPlatform.substack:
+        return 'Substack Post';
+      case MediaPlatform.inapp:
+        return 'In-App Tutorial';
+      default:
+        return 'Content';
+    }
+  }
+
+  Color _getPlatformColor(MediaPlatform? platform) {
+    switch (platform) {
+      case MediaPlatform.youtube:
+        return Colors.red;
+      case MediaPlatform.linkedin:
+        return const Color(0xFF0077B5);
+      case MediaPlatform.twitter:
+        return const Color(0xFF1DA1F2);
+      case MediaPlatform.medium:
+        return Colors.black;
+      case MediaPlatform.email:
+        return Colors.orange;
+      case MediaPlatform.substack:
+        return Colors.deepOrange;
+      case MediaPlatform.inapp:
+        return Colors.blue;
+      default:
+        return Colors.grey;
+    }
+  }
+
+  String _getMediaTypeLabel(MediaType mediaType) {
+    switch (mediaType) {
+      case MediaType.post:
+        return 'Post';
+      case MediaType.article:
+        return 'Article';
+      case MediaType.sequence:
+        return 'Sequence';
+      case MediaType.script:
+        return 'Script';
+      case MediaType.thread:
+        return 'Thread';
+      case MediaType.tutorial:
+        return 'Tutorial';
+    }
+  }
+
+  Widget _buildStatusChip(MediaStatus? status) {
+    Color color;
+    String label;
+    switch (status) {
+      case MediaStatus.published:
+        color = Colors.green;
+        label = 'PUBLISHED';
+        break;
+      case MediaStatus.scheduled:
+        color = Colors.blue;
+        label = 'SCHEDULED';
+        break;
+      case MediaStatus.reviewed:
+        color = Colors.orange;
+        label = 'REVIEWED';
+        break;
+      default:
+        color = Colors.grey;
+        label = 'DRAFT';
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(color: color.withValues(alpha: 0.5)),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 10,
+          color: color,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
   }
 }

@@ -125,3 +125,24 @@ class CourseLessonDelete extends CourseEvent {
   @override
   List<Object?> get props => [lesson];
 }
+
+/// Generate AI media content from course
+class CourseMediaGenerate extends CourseEvent {
+  final String courseId;
+  final MediaPlatform platform;
+  final MediaType mediaType;
+  final String? moduleId;
+  final String? lessonId;
+
+  const CourseMediaGenerate({
+    required this.courseId,
+    required this.platform,
+    required this.mediaType,
+    this.moduleId,
+    this.lessonId,
+  });
+
+  @override
+  List<Object?> get props =>
+      [courseId, platform, mediaType, moduleId, lessonId];
+}

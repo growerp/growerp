@@ -122,7 +122,7 @@ Generate the content plan now.
     ec.logger.info("Calling Gemini API for content plan generation...")
     
     // Step 6: Call Gemini API
-    def geminiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}"
+    def geminiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}"
     def connection = new URL(geminiUrl).openConnection() as HttpURLConnection
     connection.setRequestMethod("POST")
     connection.setRequestProperty("Content-Type", "application/json")

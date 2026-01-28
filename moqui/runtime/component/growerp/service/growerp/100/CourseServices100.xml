@@ -12,42 +12,45 @@ Grant of Patent License.
 
     <service verb="list" noun="Courses">
         <in-parameters>
-            <parameter name="start" type="Integer" default="0"/>
-            <parameter name="limit" type="Integer" default="20"/>
-            <parameter name="filter" type="String"/>
-            <parameter name="status" type="String"/>
+            <parameter name="start" type="Integer" default="0" />
+            <parameter name="limit" type="Integer" default="20" />
+            <parameter name="filter" type="String" />
+            <parameter name="status" type="String" />
         </in-parameters>
         <out-parameters>
-            <parameter name="courses" type="List"/>
+            <parameter name="courses" type="List" />
         </out-parameters>
         <actions>
             <if condition="filter?.trim()">
-                <set field="filter" value="%${filter.trim()}%"/>
+                <set field="filter" value="%${filter.trim()}%" />
             </if>
-            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" out-map="weightContext"/>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="weightContext" />
             <entity-find entity-name="growerp.course.Course" list="courseList">
-                <econdition field-name="ownerPartyId" from="weightContext.ownerPartyId"/>
-                <econdition field-name="status" ignore-if-empty="true"/>
+                <econdition field-name="ownerPartyId" from="weightContext.ownerPartyId" />
+                <econdition field-name="status" ignore-if-empty="true" />
                 <econditions combine="or">
-                    <econdition field-name="title" operator="like" from="filter" ignore-if-empty="true"/>
-                    <econdition field-name="description" operator="like" from="filter" ignore-if-empty="true"/>
+                    <econdition field-name="title" operator="like" from="filter"
+                        ignore-if-empty="true" />
+                    <econdition field-name="description" operator="like" from="filter"
+                        ignore-if-empty="true" />
                 </econditions>
-                <order-by field-name="-lastModifiedDate"/>
+                <order-by field-name="-lastModifiedDate" />
             </entity-find>
             <!-- Build courses with nested modules and lessons -->
-            <set field="courses" from="[]"/>
+            <set field="courses" from="[]" />
             <iterate list="courseList" entry="courseEntity">
                 <!-- Get modules for this course -->
                 <entity-find entity-name="growerp.course.CourseModule" list="moduleList">
-                    <econdition field-name="courseId" from="courseEntity.courseId"/>
-                    <order-by field-name="sequenceNum"/>
+                    <econdition field-name="courseId" from="courseEntity.courseId" />
+                    <order-by field-name="sequenceNum" />
                 </entity-find>
                 <!-- Get lessons for each module -->
-                <set field="modulesWithLessons" from="[]"/>
+                <set field="modulesWithLessons" from="[]" />
                 <iterate list="moduleList" entry="module">
                     <entity-find entity-name="growerp.course.CourseLesson" list="lessonList">
-                        <econdition field-name="moduleId" from="module.moduleId"/>
-                        <order-by field-name="sequenceNum"/>
+                        <econdition field-name="moduleId" from="module.moduleId" />
+                        <order-by field-name="sequenceNum" />
                     </entity-find>
                     <script>
                         modulesWithLessons.add([
@@ -88,31 +91,32 @@ Grant of Patent License.
 
     <service verb="get" noun="Course">
         <in-parameters>
-            <parameter name="courseId" required="true"/>
+            <parameter name="courseId" required="true" />
         </in-parameters>
         <out-parameters>
-            <parameter name="course" type="Map"/>
+            <parameter name="course" type="Map" />
         </out-parameters>
         <actions>
-            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" out-map="context"/>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="context" />
             <entity-find-one entity-name="growerp.course.Course" value-field="courseEntity">
-                <field-map field-name="courseId"/>
+                <field-map field-name="courseId" />
             </entity-find-one>
             <if condition="courseEntity?.ownerPartyId != context.ownerPartyId">
                 <message error="true">Course not found or access denied</message>
-                <return/>
+                <return />
             </if>
             <!-- Get modules -->
             <entity-find entity-name="growerp.course.CourseModule" list="moduleList">
-                <econdition field-name="courseId"/>
-                <order-by field-name="sequenceNum"/>
+                <econdition field-name="courseId" />
+                <order-by field-name="sequenceNum" />
             </entity-find>
             <!-- Get lessons for each module -->
-            <set field="modulesWithLessons" from="[]"/>
+            <set field="modulesWithLessons" from="[]" />
             <iterate list="moduleList" entry="module">
                 <entity-find entity-name="growerp.course.CourseLesson" list="lessonList">
-                    <econdition field-name="moduleId" from="module.moduleId"/>
-                    <order-by field-name="sequenceNum"/>
+                    <econdition field-name="moduleId" from="module.moduleId" />
+                    <order-by field-name="sequenceNum" />
                 </entity-find>
                 <script>
                     modulesWithLessons.add([
@@ -126,7 +130,8 @@ Grant of Patent License.
                     ])
                 </script>
             </iterate>
-            <set field="course" from="[
+            <set field="course"
+                from="[
                 courseId: courseEntity.courseId,
                 pseudoId: courseEntity.pseudoId,
                 ownerPartyId: courseEntity.ownerPartyId,
@@ -141,29 +146,32 @@ Grant of Patent License.
                 createdDate: courseEntity.createdDate,
                 lastModifiedDate: courseEntity.lastModifiedDate,
                 modules: modulesWithLessons
-            ]"/>
+            ]" />
         </actions>
     </service>
 
     <service verb="create" noun="Course">
         <in-parameters>
-            <parameter name="title" required="true"/>
-            <parameter name="description"/>
-            <parameter name="objectives"/>
-            <parameter name="targetPersonaId"/>
-            <parameter name="difficulty" default-value="BEGINNER"/>
-            <parameter name="estimatedDuration" type="Integer"/>
-            <parameter name="coverImageUrl"/>
+            <parameter name="title" required="true" />
+            <parameter name="description" />
+            <parameter name="objectives" />
+            <parameter name="targetPersonaId" />
+            <parameter name="difficulty" default-value="BEGINNER" />
+            <parameter name="estimatedDuration" type="Integer" />
+            <parameter name="coverImageUrl" />
         </in-parameters>
         <out-parameters>
-            <parameter name="courseId"/>
-            <parameter name="pseudoId"/>
+            <parameter name="courseId" />
+            <parameter name="pseudoId" />
         </out-parameters>
         <actions>
-            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" out-map="context"/>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="context" />
             <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
-                in-map="[ownerPartyId: context.ownerPartyId, seqName: 'Course']" out-map="seqContext"/>
-            <service-call name="create#growerp.course.Course" in-map="[
+                in-map="[ownerPartyId: context.ownerPartyId, seqName: 'Course']"
+                out-map="seqContext" />
+            <service-call name="create#growerp.course.Course"
+                in-map="[
                 pseudoId: seqContext.seqNum,
                 ownerPartyId: context.ownerPartyId,
                 title: title,
@@ -177,37 +185,40 @@ Grant of Patent License.
                 createdDate: ec.user.nowTimestamp,
                 lastModifiedDate: ec.user.nowTimestamp,
                 createdByUserLogin: ec.user.username
-            ]" out-map="createContext"/>
-            <set field="courseId" from="createContext.courseId"/>
-            <set field="pseudoId" from="seqContext.seqNum"/>
+            ]"
+                out-map="createContext" />
+            <set field="courseId" from="createContext.courseId" />
+            <set field="pseudoId" from="seqContext.seqNum" />
         </actions>
     </service>
 
     <service verb="update" noun="Course">
         <in-parameters>
-            <parameter name="courseId" required="true"/>
-            <parameter name="title"/>
-            <parameter name="description"/>
-            <parameter name="objectives"/>
-            <parameter name="targetPersonaId"/>
-            <parameter name="difficulty"/>
-            <parameter name="estimatedDuration" type="Integer"/>
-            <parameter name="status"/>
-            <parameter name="coverImageUrl"/>
+            <parameter name="courseId" required="true" />
+            <parameter name="title" />
+            <parameter name="description" />
+            <parameter name="objectives" />
+            <parameter name="targetPersonaId" />
+            <parameter name="difficulty" />
+            <parameter name="estimatedDuration" type="Integer" />
+            <parameter name="status" />
+            <parameter name="coverImageUrl" />
         </in-parameters>
         <out-parameters>
-            <parameter name="courseId"/>
+            <parameter name="courseId" />
         </out-parameters>
         <actions>
-            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" out-map="context"/>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="context" />
             <entity-find-one entity-name="growerp.course.Course" value-field="courseEntity">
-                <field-map field-name="courseId"/>
+                <field-map field-name="courseId" />
             </entity-find-one>
             <if condition="courseEntity?.ownerPartyId != context.ownerPartyId">
                 <message error="true">Course not found or access denied</message>
-                <return/>
+                <return />
             </if>
-            <service-call name="update#growerp.course.Course" in-map="[
+            <service-call name="update#growerp.course.Course"
+                in-map="[
                 courseId: courseId,
                 title: title ?: courseEntity.title,
                 description: description ?: courseEntity.description,
@@ -218,41 +229,42 @@ Grant of Patent License.
                 status: status ?: courseEntity.status,
                 coverImageUrl: coverImageUrl ?: courseEntity.coverImageUrl,
                 lastModifiedDate: ec.user.nowTimestamp
-            ]"/>
+            ]" />
         </actions>
     </service>
 
     <service verb="delete" noun="Course">
         <in-parameters>
-            <parameter name="courseId" required="true"/>
+            <parameter name="courseId" required="true" />
         </in-parameters>
         <actions>
-            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" out-map="context"/>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="context" />
             <entity-find-one entity-name="growerp.course.Course" value-field="courseEntity">
-                <field-map field-name="courseId"/>
+                <field-map field-name="courseId" />
             </entity-find-one>
             <if condition="courseEntity?.ownerPartyId != context.ownerPartyId">
                 <message error="true">Course not found or access denied</message>
-                <return/>
+                <return />
             </if>
             <!-- Delete related media -->
             <entity-delete-by-condition entity-name="growerp.course.CourseMedia">
-                <econdition field-name="courseId"/>
+                <econdition field-name="courseId" />
             </entity-delete-by-condition>
             <!-- Delete progress -->
             <entity-delete-by-condition entity-name="growerp.course.CourseProgress">
-                <econdition field-name="courseId"/>
+                <econdition field-name="courseId" />
             </entity-delete-by-condition>
             <!-- Delete lessons -->
             <entity-delete-by-condition entity-name="growerp.course.CourseLesson">
-                <econdition field-name="courseId"/>
+                <econdition field-name="courseId" />
             </entity-delete-by-condition>
             <!-- Delete modules -->
             <entity-delete-by-condition entity-name="growerp.course.CourseModule">
-                <econdition field-name="courseId"/>
+                <econdition field-name="courseId" />
             </entity-delete-by-condition>
             <!-- Delete course -->
-            <entity-delete value-field="courseEntity"/>
+            <entity-delete value-field="courseEntity" />
         </actions>
     </service>
 
@@ -262,34 +274,37 @@ Grant of Patent License.
 
     <service verb="create" noun="CourseModule">
         <in-parameters>
-            <parameter name="courseId" required="true"/>
-            <parameter name="title" required="true"/>
-            <parameter name="description"/>
-            <parameter name="sequenceNum" type="Integer"/>
-            <parameter name="estimatedDuration" type="Integer"/>
+            <parameter name="courseId" required="true" />
+            <parameter name="title" required="true" />
+            <parameter name="description" />
+            <parameter name="sequenceNum" type="Integer" />
+            <parameter name="estimatedDuration" type="Integer" />
         </in-parameters>
         <out-parameters>
-            <parameter name="moduleId"/>
-            <parameter name="pseudoId"/>
+            <parameter name="moduleId" />
+            <parameter name="pseudoId" />
         </out-parameters>
         <actions>
-            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" out-map="context"/>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="context" />
             <entity-find-one entity-name="growerp.course.Course" value-field="courseEntity">
-                <field-map field-name="courseId"/>
+                <field-map field-name="courseId" />
             </entity-find-one>
             <if condition="courseEntity?.ownerPartyId != context.ownerPartyId">
                 <message error="true">Course not found or access denied</message>
-                <return/>
+                <return />
             </if>
             <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
-                in-map="[ownerPartyId: context.ownerPartyId, seqName: 'CourseModule']" out-map="seqContext"/>
+                in-map="[ownerPartyId: context.ownerPartyId, seqName: 'CourseModule']"
+                out-map="seqContext" />
             <if condition="!sequenceNum">
                 <entity-find entity-name="growerp.course.CourseModule" list="existingModules">
-                    <econdition field-name="courseId"/>
+                    <econdition field-name="courseId" />
                 </entity-find>
-                <set field="sequenceNum" from="(existingModules?.size() ?: 0) + 1"/>
+                <set field="sequenceNum" from="(existingModules?.size() ?: 0) + 1" />
             </if>
-            <service-call name="create#growerp.course.CourseModule" in-map="[
+            <service-call name="create#growerp.course.CourseModule"
+                in-map="[
                 pseudoId: seqContext.seqNum,
                 courseId: courseId,
                 title: title,
@@ -298,71 +313,75 @@ Grant of Patent License.
                 estimatedDuration: estimatedDuration,
                 createdDate: ec.user.nowTimestamp,
                 lastModifiedDate: ec.user.nowTimestamp
-            ]" out-map="createContext"/>
-            <set field="moduleId" from="createContext.moduleId"/>
-            <set field="pseudoId" from="seqContext.seqNum"/>
+            ]"
+                out-map="createContext" />
+            <set field="moduleId" from="createContext.moduleId" />
+            <set field="pseudoId" from="seqContext.seqNum" />
         </actions>
     </service>
 
     <service verb="update" noun="CourseModule">
         <in-parameters>
-            <parameter name="moduleId" required="true"/>
-            <parameter name="title"/>
-            <parameter name="description"/>
-            <parameter name="sequenceNum" type="Integer"/>
-            <parameter name="estimatedDuration" type="Integer"/>
+            <parameter name="moduleId" required="true" />
+            <parameter name="title" />
+            <parameter name="description" />
+            <parameter name="sequenceNum" type="Integer" />
+            <parameter name="estimatedDuration" type="Integer" />
         </in-parameters>
         <out-parameters>
-            <parameter name="moduleId"/>
+            <parameter name="moduleId" />
         </out-parameters>
         <actions>
-            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" out-map="context"/>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="context" />
             <entity-find-one entity-name="growerp.course.CourseModule" value-field="moduleEntity">
-                <field-map field-name="moduleId"/>
+                <field-map field-name="moduleId" />
             </entity-find-one>
             <entity-find-one entity-name="growerp.course.Course" value-field="courseEntity">
-                <field-map field-name="courseId" from="moduleEntity.courseId"/>
+                <field-map field-name="courseId" from="moduleEntity.courseId" />
             </entity-find-one>
             <if condition="courseEntity?.ownerPartyId != context.ownerPartyId">
                 <message error="true">Module not found or access denied</message>
-                <return/>
+                <return />
             </if>
-            <service-call name="update#growerp.course.CourseModule" in-map="[
+            <service-call name="update#growerp.course.CourseModule"
+                in-map="[
                 moduleId: moduleId,
                 title: title ?: moduleEntity.title,
                 description: description ?: moduleEntity.description,
                 sequenceNum: sequenceNum ?: moduleEntity.sequenceNum,
                 estimatedDuration: estimatedDuration ?: moduleEntity.estimatedDuration,
                 lastModifiedDate: ec.user.nowTimestamp
-            ]"/>
+            ]" />
         </actions>
     </service>
 
     <service verb="delete" noun="CourseModule">
         <in-parameters>
-            <parameter name="moduleId" required="true"/>
+            <parameter name="moduleId" required="true" />
         </in-parameters>
         <actions>
-            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" out-map="context"/>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="context" />
             <entity-find-one entity-name="growerp.course.CourseModule" value-field="moduleEntity">
-                <field-map field-name="moduleId"/>
+                <field-map field-name="moduleId" />
             </entity-find-one>
             <entity-find-one entity-name="growerp.course.Course" value-field="courseEntity">
-                <field-map field-name="courseId" from="moduleEntity.courseId"/>
+                <field-map field-name="courseId" from="moduleEntity.courseId" />
             </entity-find-one>
             <if condition="courseEntity?.ownerPartyId != context.ownerPartyId">
                 <message error="true">Module not found or access denied</message>
-                <return/>
+                <return />
             </if>
             <!-- Delete related lessons -->
             <entity-delete-by-condition entity-name="growerp.course.CourseLesson">
-                <econdition field-name="moduleId"/>
+                <econdition field-name="moduleId" />
             </entity-delete-by-condition>
             <!-- Delete related media -->
             <entity-delete-by-condition entity-name="growerp.course.CourseMedia">
-                <econdition field-name="moduleId"/>
+                <econdition field-name="moduleId" />
             </entity-delete-by-condition>
-            <entity-delete value-field="moduleEntity"/>
+            <entity-delete value-field="moduleEntity" />
         </actions>
     </service>
 
@@ -372,40 +391,43 @@ Grant of Patent License.
 
     <service verb="create" noun="CourseLesson">
         <in-parameters>
-            <parameter name="moduleId" required="true"/>
-            <parameter name="title" required="true"/>
-            <parameter name="content"/>
-            <parameter name="keyPoints"/> <!-- JSON array -->
-            <parameter name="sequenceNum" type="Integer"/>
-            <parameter name="estimatedDuration" type="Integer"/>
-            <parameter name="videoUrl"/>
-            <parameter name="imageUrl"/>
+            <parameter name="moduleId" required="true" />
+            <parameter name="title" required="true" />
+            <parameter name="content" />
+            <parameter name="keyPoints" /> <!-- JSON array -->
+            <parameter name="sequenceNum" type="Integer" />
+            <parameter name="estimatedDuration" type="Integer" />
+            <parameter name="videoUrl" />
+            <parameter name="imageUrl" />
         </in-parameters>
         <out-parameters>
-            <parameter name="lessonId"/>
-            <parameter name="pseudoId"/>
+            <parameter name="lessonId" />
+            <parameter name="pseudoId" />
         </out-parameters>
         <actions>
-            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" out-map="context"/>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="context" />
             <entity-find-one entity-name="growerp.course.CourseModule" value-field="moduleEntity">
-                <field-map field-name="moduleId"/>
+                <field-map field-name="moduleId" />
             </entity-find-one>
             <entity-find-one entity-name="growerp.course.Course" value-field="courseEntity">
-                <field-map field-name="courseId" from="moduleEntity.courseId"/>
+                <field-map field-name="courseId" from="moduleEntity.courseId" />
             </entity-find-one>
             <if condition="courseEntity?.ownerPartyId != context.ownerPartyId">
                 <message error="true">Module not found or access denied</message>
-                <return/>
+                <return />
             </if>
             <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
-                in-map="[ownerPartyId: context.ownerPartyId, seqName: 'CourseLesson']" out-map="seqContext"/>
+                in-map="[ownerPartyId: context.ownerPartyId, seqName: 'CourseLesson']"
+                out-map="seqContext" />
             <if condition="!sequenceNum">
                 <entity-find entity-name="growerp.course.CourseLesson" list="existingLessons">
-                    <econdition field-name="moduleId"/>
+                    <econdition field-name="moduleId" />
                 </entity-find>
-                <set field="sequenceNum" from="(existingLessons?.size() ?: 0) + 1"/>
+                <set field="sequenceNum" from="(existingLessons?.size() ?: 0) + 1" />
             </if>
-            <service-call name="create#growerp.course.CourseLesson" in-map="[
+            <service-call name="create#growerp.course.CourseLesson"
+                in-map="[
                 pseudoId: seqContext.seqNum,
                 moduleId: moduleId,
                 courseId: moduleEntity.courseId,
@@ -418,39 +440,42 @@ Grant of Patent License.
                 imageUrl: imageUrl,
                 createdDate: ec.user.nowTimestamp,
                 lastModifiedDate: ec.user.nowTimestamp
-            ]" out-map="createContext"/>
-            <set field="lessonId" from="createContext.lessonId"/>
-            <set field="pseudoId" from="seqContext.seqNum"/>
+            ]"
+                out-map="createContext" />
+            <set field="lessonId" from="createContext.lessonId" />
+            <set field="pseudoId" from="seqContext.seqNum" />
         </actions>
     </service>
 
     <service verb="update" noun="CourseLesson">
         <in-parameters>
-            <parameter name="lessonId" required="true"/>
-            <parameter name="title"/>
-            <parameter name="content"/>
-            <parameter name="keyPoints"/>
-            <parameter name="sequenceNum" type="Integer"/>
-            <parameter name="estimatedDuration" type="Integer"/>
-            <parameter name="videoUrl"/>
-            <parameter name="imageUrl"/>
+            <parameter name="lessonId" required="true" />
+            <parameter name="title" />
+            <parameter name="content" />
+            <parameter name="keyPoints" />
+            <parameter name="sequenceNum" type="Integer" />
+            <parameter name="estimatedDuration" type="Integer" />
+            <parameter name="videoUrl" />
+            <parameter name="imageUrl" />
         </in-parameters>
         <out-parameters>
-            <parameter name="lessonId"/>
+            <parameter name="lessonId" />
         </out-parameters>
         <actions>
-            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" out-map="context"/>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="context" />
             <entity-find-one entity-name="growerp.course.CourseLesson" value-field="lessonEntity">
-                <field-map field-name="lessonId"/>
+                <field-map field-name="lessonId" />
             </entity-find-one>
             <entity-find-one entity-name="growerp.course.Course" value-field="courseEntity">
-                <field-map field-name="courseId" from="lessonEntity.courseId"/>
+                <field-map field-name="courseId" from="lessonEntity.courseId" />
             </entity-find-one>
             <if condition="courseEntity?.ownerPartyId != context.ownerPartyId">
                 <message error="true">Lesson not found or access denied</message>
-                <return/>
+                <return />
             </if>
-            <service-call name="update#growerp.course.CourseLesson" in-map="[
+            <service-call name="update#growerp.course.CourseLesson"
+                in-map="[
                 lessonId: lessonId,
                 title: title ?: lessonEntity.title,
                 content: content ?: lessonEntity.content,
@@ -460,31 +485,32 @@ Grant of Patent License.
                 videoUrl: videoUrl ?: lessonEntity.videoUrl,
                 imageUrl: imageUrl ?: lessonEntity.imageUrl,
                 lastModifiedDate: ec.user.nowTimestamp
-            ]"/>
+            ]" />
         </actions>
     </service>
 
     <service verb="delete" noun="CourseLesson">
         <in-parameters>
-            <parameter name="lessonId" required="true"/>
+            <parameter name="lessonId" required="true" />
         </in-parameters>
         <actions>
-            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" out-map="context"/>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="context" />
             <entity-find-one entity-name="growerp.course.CourseLesson" value-field="lessonEntity">
-                <field-map field-name="lessonId"/>
+                <field-map field-name="lessonId" />
             </entity-find-one>
             <entity-find-one entity-name="growerp.course.Course" value-field="courseEntity">
-                <field-map field-name="courseId" from="lessonEntity.courseId"/>
+                <field-map field-name="courseId" from="lessonEntity.courseId" />
             </entity-find-one>
             <if condition="courseEntity?.ownerPartyId != context.ownerPartyId">
                 <message error="true">Lesson not found or access denied</message>
-                <return/>
+                <return />
             </if>
             <!-- Delete related media -->
             <entity-delete-by-condition entity-name="growerp.course.CourseMedia">
-                <econdition field-name="lessonId"/>
+                <econdition field-name="lessonId" />
             </entity-delete-by-condition>
-            <entity-delete value-field="lessonEntity"/>
+            <entity-delete value-field="lessonEntity" />
         </actions>
     </service>
 
@@ -494,53 +520,56 @@ Grant of Patent License.
 
     <service verb="list" noun="CourseMedia">
         <in-parameters>
-            <parameter name="courseId"/>
-            <parameter name="platform"/>
-            <parameter name="status"/>
+            <parameter name="courseId" />
+            <parameter name="platform" />
+            <parameter name="status" />
         </in-parameters>
         <out-parameters>
-            <parameter name="mediaList" type="List"/>
+            <parameter name="mediaList" type="List" />
         </out-parameters>
         <actions>
-            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" out-map="context"/>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="context" />
             <entity-find entity-name="growerp.course.CourseMedia" list="mediaList">
-                <econdition field-name="ownerPartyId" from="context.ownerPartyId"/>
-                <econdition field-name="courseId" ignore-if-empty="true"/>
-                <econdition field-name="platform" ignore-if-empty="true"/>
-                <econdition field-name="status" ignore-if-empty="true"/>
-                <order-by field-name="createdDate"/>
+                <econdition field-name="ownerPartyId" from="context.ownerPartyId" />
+                <econdition field-name="courseId" ignore-if-empty="true" />
+                <econdition field-name="platform" ignore-if-empty="true" />
+                <econdition field-name="status" ignore-if-empty="true" />
+                <order-by field-name="createdDate" />
             </entity-find>
         </actions>
     </service>
 
     <service verb="update" noun="CourseMedia">
         <in-parameters>
-            <parameter name="mediaId" required="true"/>
-            <parameter name="title"/>
-            <parameter name="editedContent"/>
-            <parameter name="status"/>
-            <parameter name="scheduledDate" type="Timestamp"/>
+            <parameter name="mediaId" required="true" />
+            <parameter name="title" />
+            <parameter name="editedContent" />
+            <parameter name="status" />
+            <parameter name="scheduledDate" type="Timestamp" />
         </in-parameters>
         <out-parameters>
-            <parameter name="mediaId"/>
+            <parameter name="mediaId" />
         </out-parameters>
         <actions>
-            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" out-map="context"/>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="context" />
             <entity-find-one entity-name="growerp.course.CourseMedia" value-field="mediaEntity">
-                <field-map field-name="mediaId"/>
+                <field-map field-name="mediaId" />
             </entity-find-one>
             <if condition="mediaEntity?.ownerPartyId != context.ownerPartyId">
                 <message error="true">Media not found or access denied</message>
-                <return/>
+                <return />
             </if>
-            <service-call name="update#growerp.course.CourseMedia" in-map="[
+            <service-call name="update#growerp.course.CourseMedia"
+                in-map="[
                 mediaId: mediaId,
                 title: title ?: mediaEntity.title,
                 editedContent: editedContent ?: mediaEntity.editedContent,
                 status: status ?: mediaEntity.status,
                 scheduledDate: scheduledDate ?: mediaEntity.scheduledDate,
                 lastModifiedDate: ec.user.nowTimestamp
-            ]"/>
+            ]" />
         </actions>
     </service>
 
@@ -550,76 +579,78 @@ Grant of Patent License.
 
     <service verb="get" noun="CourseProgress">
         <in-parameters>
-            <parameter name="courseId" required="true"/>
+            <parameter name="courseId" required="true" />
         </in-parameters>
         <out-parameters>
-            <parameter name="progress" type="Map"/>
+            <parameter name="progress" type="Map" />
         </out-parameters>
         <actions>
-            <entity-find-one entity-name="growerp.course.CourseProgress" value-field="progressEntity">
-                <field-map field-name="userId" from="ec.user.userId"/>
-                <field-map field-name="courseId"/>
+            <entity-find-one entity-name="growerp.course.CourseProgress"
+                value-field="progressEntity">
+                <field-map field-name="userId" from="ec.user.userId" />
+                <field-map field-name="courseId" />
             </entity-find-one>
             <if condition="progressEntity">
-                <set field="progress" from="progressEntity.getMap()"/>
-            <else>
-                <set field="progress" from="[courseId: courseId, progressPercent: 0, completedLessons: '[]']"/>
-            </else>
+                <set field="progress" from="progressEntity.getMap()" />
+                <else>
+                    <set field="progress"
+                        from="[courseId: courseId, progressPercent: 0, completedLessons: '[]']" />
+                </else>
             </if>
         </actions>
     </service>
 
     <service verb="update" noun="CourseProgress">
         <in-parameters>
-            <parameter name="courseId" required="true"/>
-            <parameter name="lessonId" required="true"/>
-            <parameter name="completed" type="Boolean" default="true"/>
+            <parameter name="courseId" required="true" />
+            <parameter name="lessonId" required="true" />
+            <parameter name="completed" type="Boolean" default="true" />
         </in-parameters>
         <out-parameters>
-            <parameter name="progressPercent" type="Integer"/>
+            <parameter name="progressPercent" type="Integer" />
         </out-parameters>
         <actions>
-            <entity-find-one entity-name="growerp.course.CourseProgress" value-field="progressEntity">
-                <field-map field-name="userId" from="ec.user.userId"/>
-                <field-map field-name="courseId"/>
+            <entity-find-one entity-name="growerp.course.CourseProgress"
+                value-field="progressEntity">
+                <field-map field-name="userId" from="ec.user.userId" />
+                <field-map field-name="courseId" />
             </entity-find-one>
             <!-- Get total lessons for progress calculation -->
             <entity-find entity-name="growerp.course.CourseLesson" list="allLessons">
-                <econdition field-name="courseId"/>
+                <econdition field-name="courseId" />
             </entity-find>
-            <set field="totalLessons" from="allLessons.size()"/>
-            
+            <set field="totalLessons" from="allLessons.size()" />
+
             <if condition="progressEntity">
                 <script>
-                    import groovy.json.JsonSlurper
-                    import groovy.json.JsonOutput
-                    def slurper = new JsonSlurper()
+                    def slurper = new groovy.json.JsonSlurper()
                     def completedList = slurper.parseText(progressEntity.completedLessons ?: '[]') as List
                     if (completed &amp;&amp; !completedList.contains(lessonId)) {
                         completedList.add(lessonId)
                     } else if (!completed) {
                         completedList.remove(lessonId)
                     }
-                    context.completedLessonsJson = JsonOutput.toJson(completedList)
+                    context.completedLessonsJson = groovy.json.JsonOutput.toJson(completedList)
                     context.progressPercent = totalLessons > 0 ? ((completedList.size() * 100) / totalLessons) as Integer : 0
                     context.isCompleted = completedList.size() == totalLessons
                 </script>
-                <service-call name="update#growerp.course.CourseProgress" in-map="[
+                <service-call name="update#growerp.course.CourseProgress"
+                    in-map="[
                     progressId: progressEntity.progressId,
                     currentLessonId: lessonId,
                     completedLessons: completedLessonsJson,
                     progressPercent: progressPercent,
                     lastAccessDate: ec.user.nowTimestamp,
                     completedDate: isCompleted ? ec.user.nowTimestamp : null
-                ]"/>
-            <else>
-                <script>
-                    import groovy.json.JsonOutput
+                ]" />
+                <else>
+                    <script>
                     def completedList = completed ? [lessonId] : []
-                    context.completedLessonsJson = JsonOutput.toJson(completedList)
+                    context.completedLessonsJson = groovy.json.JsonOutput.toJson(completedList)
                     context.progressPercent = totalLessons > 0 ? ((completedList.size() * 100) / totalLessons) as Integer : 0
                 </script>
-                <service-call name="create#growerp.course.CourseProgress" in-map="[
+                    <service-call name="create#growerp.course.CourseProgress"
+                        in-map="[
                     userId: ec.user.userId,
                     courseId: courseId,
                     currentLessonId: lessonId,
@@ -627,8 +658,8 @@ Grant of Patent License.
                     progressPercent: progressPercent,
                     startedDate: ec.user.nowTimestamp,
                     lastAccessDate: ec.user.nowTimestamp
-                ]"/>
-            </else>
+                ]" />
+                </else>
             </if>
         </actions>
     </service>
@@ -639,17 +670,59 @@ Grant of Patent License.
 
     <service verb="generate" noun="CourseMedia">
         <in-parameters>
-            <parameter name="courseId" required="true"/>
-            <parameter name="platform" required="true"/> <!-- LINKEDIN, MEDIUM, EMAIL, YOUTUBE, TWITTER, SUBSTACK, INAPP -->
-            <parameter name="moduleId"/>
-            <parameter name="lessonId"/>
+            <parameter name="courseId" required="true" />
+            <parameter name="platform" required="true" /> <!-- LINKEDIN, MEDIUM, EMAIL, YOUTUBE,
+            TWITTER, SUBSTACK, INAPP -->
+            <parameter name="moduleId" />
+            <parameter name="lessonId" />
         </in-parameters>
         <out-parameters>
-            <parameter name="mediaId"/>
-            <parameter name="generatedContent"/>
+            <parameter name="mediaId" />
+            <parameter name="generatedContent" />
         </out-parameters>
         <actions>
-            <script location="component://growerp/service/generateCourseMediaWithAI.groovy"/>
+            <script location="component://growerp/service/generateCourseMediaWithAI.groovy" />
+        </actions>
+    </service>
+
+    <!-- ========================================================= -->
+    <!--  Video Generation Service (from script)                   -->
+    <!-- ========================================================= -->
+
+    <service verb="generate" noun="VideoFromScript">
+        <description>Generate a video from a YouTube script using AI</description>
+        <in-parameters>
+            <parameter name="mediaId" required="true"/>
+            <parameter name="voiceStyle" default-value="alloy"/> <!-- alloy, echo, fable, onyx, nova, shimmer -->
+            <parameter name="videoStyle" default-value="professional"/> <!-- professional, casual, animated -->
+        </in-parameters>
+        <out-parameters>
+            <parameter name="videoUrl"/>
+            <parameter name="status"/>
+            <parameter name="message"/>
+        </out-parameters>
+        <actions>
+            <!-- Get the media content -->
+            <entity-find-one entity-name="growerp.course.CourseMedia" value-field="mediaEntity">
+                <field-map field-name="mediaId"/>
+            </entity-find-one>
+            
+            <if condition="!mediaEntity">
+                <return error="true" message="Media not found"/>
+            </if>
+            
+            <if condition="mediaEntity.platform != 'YOUTUBE'">
+                <return error="true" message="Video generation is only available for YouTube scripts"/>
+            </if>
+            
+            <set field="scriptContent" from="mediaEntity.editedContent ?: mediaEntity.generatedContent"/>
+            
+            <if condition="!scriptContent">
+                <return error="true" message="No script content available"/>
+            </if>
+
+            <!-- Call the Groovy script for video generation -->
+            <script location="component://growerp/service/generateVideoFromScript.groovy"/>
         </actions>
     </service>
 

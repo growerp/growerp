@@ -59,6 +59,8 @@ along with this software (see the LICENSE.md file). If not, see
         title="Marketing" route="/marketing" iconName="campaign" widgetName="ContentPlanList" sequenceNum="35"/>
     <growerp.menu.MenuItem menuItemId="ADMIN_OUTREACH" menuConfigurationId="ADMIN_DEFAULT" 
         title="Outreach" route="/outreach" iconName="send" widgetName="CampaignListScreen" sequenceNum="38"/>
+    <growerp.menu.MenuItem menuItemId="ADMIN_COURSES" menuConfigurationId="ADMIN_DEFAULT" 
+        title="Courses" route="/courses" iconName="school" widgetName="CourseList" sequenceNum="39"/>
     <growerp.menu.MenuItem menuItemId="ADMIN_CATALOG" menuConfigurationId="ADMIN_DEFAULT" itemKey="products"
         title="catalog" route="/catalog" iconName="category" widgetName="ProductList" sequenceNum="40"/>
     <growerp.menu.MenuItem menuItemId="ADMIN_ORDERS" menuConfigurationId="ADMIN_DEFAULT" itemKey="openSlsOrders"
@@ -117,6 +119,14 @@ along with this software (see the LICENSE.md file). If not, see
         title="Platforms" iconName="public" widgetName="PlatformConfigListScreen" sequenceNum="30"/>
     <growerp.menu.MenuItem menuItemId="ADMIN_OUT_MESSAGES" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_OUTREACH"
         title="Messages" iconName="message" widgetName="OutreachMessageList" sequenceNum="40"/>
+
+    <!-- ADMIN_COURSES children -->
+    <growerp.menu.MenuItem menuItemId="ADMIN_COURSES_LIST" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_COURSES"
+        title="Course List" iconName="list" widgetName="CourseList" sequenceNum="10"/>
+    <growerp.menu.MenuItem menuItemId="ADMIN_COURSES_VIEWER" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_COURSES"
+        title="Course Viewer" iconName="play_circle_outline" widgetName="CourseViewer" sequenceNum="20"/>
+    <growerp.menu.MenuItem menuItemId="ADMIN_COURSES_MEDIA" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_COURSES"
+        title="Course Media" iconName="auto_awesome" widgetName="CourseMediaList" sequenceNum="30"/>
 
     <!-- ADMIN_CATALOG children -->
     <growerp.menu.MenuItem menuItemId="ADMIN_CAT_PRODUCTS" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_CATALOG"
