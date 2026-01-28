@@ -1,6 +1,6 @@
 name: support
 description: System support app, for the GrowERP system
-version: 1.13.0+09
+version: 1.12.7+10
 repository: https://github.com/growerp/growerp
 homepage: https://www.growerp.com
 publish_to: none
@@ -33,7 +33,6 @@ dependencies:
   dropdown_search: ^5.0.6
   go_router: ^14.6.2
   web: ^1.0.0
-  
 
 dev_dependencies:
   flutter_test:
