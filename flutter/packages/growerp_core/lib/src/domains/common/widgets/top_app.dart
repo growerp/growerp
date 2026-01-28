@@ -23,13 +23,13 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:responsive_framework/responsive_framework.dart';
+import 'package:growerp_core/l10n/generated/core_localizations.dart';
 
 import '../../../get_core_bloc_providers.dart';
 import '../../../services/widget_registry.dart';
 import '../../../services/ws_client.dart';
 import '../../../styles/color_schemes.dart';
 import '../../domains.dart';
-import 'package:growerp_core/l10n/generated/core_localizations.dart';
 
 /// TopApp is the main application wrapper that provides all core functionality.
 class TopApp extends StatefulWidget {
@@ -46,6 +46,7 @@ class TopApp extends StatefulWidget {
     this.company,
     this.appId,
     this.widgetRegistrations = const [],
+    this.forceUpdateInfo,
   });
 
   final RestClient restClient;
@@ -62,6 +63,10 @@ class TopApp extends StatefulWidget {
 
   final String? appId;
   final List<Map<String, GrowerpWidgetBuilder>> widgetRegistrations;
+
+  /// Force update information from backend. If provided and forceUpdate is true,
+  /// a non-dismissible dialog will be shown prompting the user to update.
+  final ForceUpdateInfo? forceUpdateInfo;
 
   @override
   State<TopApp> createState() => _TopAppState();
@@ -248,32 +253,47 @@ class _TopAppState extends State<TopApp> {
                       ),
                       debugShowCheckedModeBanner: false,
                       localizationsDelegates: _localizationsDelegates,
-                      builder: (context, child) =>
-                          ResponsiveBreakpoints.builder(
-                            child: child!,
-                            breakpoints: [
-                              const Breakpoint(
-                                start: 0,
-                                end: 500,
-                                name: MOBILE,
-                              ),
-                              const Breakpoint(
-                                start: 451,
-                                end: 800,
-                                name: TABLET,
-                              ),
-                              const Breakpoint(
-                                start: 801,
-                                end: 1920,
-                                name: DESKTOP,
-                              ),
-                              const Breakpoint(
-                                start: 1921,
-                                end: double.infinity,
-                                name: '4K',
+                      builder: (context, child) {
+                        Widget appContent = ResponsiveBreakpoints.builder(
+                          child: child!,
+                          breakpoints: [
+                            const Breakpoint(start: 0, end: 500, name: MOBILE),
+                            const Breakpoint(
+                              start: 451,
+                              end: 800,
+                              name: TABLET,
+                            ),
+                            const Breakpoint(
+                              start: 801,
+                              end: 1920,
+                              name: DESKTOP,
+                            ),
+                            const Breakpoint(
+                              start: 1921,
+                              end: double.infinity,
+                              name: '4K',
+                            ),
+                          ],
+                        );
+
+                        // If force update is required, show blocking overlay
+                        if (widget.forceUpdateInfo != null &&
+                            widget.forceUpdateInfo!.forceUpdate) {
+                          return Stack(
+                            children: [
+                              appContent,
+                              // Full-screen blocking overlay
+                              Positioned.fill(
+                                child: ForceUpdateScreen(
+                                  forceUpdateInfo: widget.forceUpdateInfo!,
+                                ),
                               ),
                             ],
-                          ),
+                          );
+                        }
+
+                        return appContent;
+                      },
                       themeMode: themeState.themeMode,
                       theme: FlexThemeData.light(
                         colors: themeState.colorScheme == FlexScheme.jungle

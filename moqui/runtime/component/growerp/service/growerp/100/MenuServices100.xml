@@ -50,7 +50,6 @@ Service definitions for menu configuration and menu item management
         <set field="lookupOwnerPartyId" from="ownerPartyId" />
       </if>
 
-      <log message="======== get configuration app: $appId, userVersion: $userVersion, id: $menuConfigurationId, lookupUserId: $lookupUserId"/>
       <entity-find entity-name="growerp.menu.MenuConfiguration" list="userConfigs">
         <field-map field-name="menuConfigurationId" from="menuConfigurationId" ignore-if-empty="true"/>
         <econdition field-name="appId" from="appId" ignore-if-empty="true"/>
@@ -60,7 +59,6 @@ Service definitions for menu configuration and menu item management
 
       <!-- If user-specific config not found and userVersion was requested, fall back to seed data -->
       <if condition="!userConfigs">
-        <log message="======== User-specific config not found, falling back to seed data for appId: $appId"/>
         <entity-find entity-name="growerp.menu.MenuConfiguration" list="userConfigs">
           <econdition field-name="appId" from="appId"/>
         </entity-find>
@@ -262,7 +260,6 @@ Service definitions for menu configuration and menu item management
     <actions>
       <service-call out-map="context"
         name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
-      <log message="========create config: appId=$appId, userId=$userId, name=$name" />
       
       <service-call name="create#growerp.menu.MenuConfiguration" out-map="createOut"
         in-map="[

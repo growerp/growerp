@@ -49,7 +49,11 @@ Future main() async {
 
   String classificationId = GlobalConfiguration().get("classificationId");
   // check if there is override for the production(now test) backend url
-  await getBackendUrlOverride(classificationId, packageInfo.version);
+  // Also checks if force update is required
+  final forceUpdateInfo = await getBackendUrlOverride(
+    classificationId,
+    packageInfo.version,
+  );
 
   Bloc.observer = AppBlocObserver();
   RestClient restClient = RestClient(await buildDioClient());
@@ -78,6 +82,7 @@ Future main() async {
       chatClient: chatClient,
       notificationClient: notificationClient,
       company: company,
+      forceUpdateInfo: forceUpdateInfo,
     ),
   );
 }
@@ -90,6 +95,7 @@ class FreelanceApp extends StatefulWidget {
     required this.chatClient,
     required this.notificationClient,
     this.company,
+    this.forceUpdateInfo,
   });
 
   final RestClient restClient;
@@ -97,6 +103,7 @@ class FreelanceApp extends StatefulWidget {
   final WsClient chatClient;
   final WsClient notificationClient;
   final Company? company;
+  final ForceUpdateInfo? forceUpdateInfo;
 
   @override
   State<FreelanceApp> createState() => _FreelanceAppState();
@@ -193,6 +200,7 @@ class _FreelanceAppState extends State<FreelanceApp> {
               ...getOutreachBlocProviders(widget.restClient),
             ],
             widgetRegistrations: freelanceWidgetRegistrations,
+            forceUpdateInfo: widget.forceUpdateInfo,
           );
         },
       ),

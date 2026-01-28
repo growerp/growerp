@@ -44,7 +44,11 @@ Future main() async {
 
   String classificationId = GlobalConfiguration().get("classificationId");
 
-  await getBackendUrlOverride(classificationId, packageInfo.version);
+  // Also checks if force update is required
+  final forceUpdateInfo = await getBackendUrlOverride(
+    classificationId,
+    packageInfo.version,
+  );
 
   Bloc.observer = AppBlocObserver();
   RestClient restClient = RestClient(await buildDioClient());
@@ -75,6 +79,7 @@ Future main() async {
       notificationClient: notificationClient,
       extraDelegates: delegates,
       company: company,
+      forceUpdateInfo: forceUpdateInfo,
     ),
   );
 }
@@ -88,6 +93,7 @@ class HealthApp extends StatefulWidget {
     required this.notificationClient,
     required this.extraDelegates,
     this.company,
+    this.forceUpdateInfo,
   });
 
   final RestClient restClient;
@@ -96,6 +102,7 @@ class HealthApp extends StatefulWidget {
   final WsClient notificationClient;
   final List<LocalizationsDelegate> extraDelegates;
   final Company? company;
+  final ForceUpdateInfo? forceUpdateInfo;
 
   @override
   State<HealthApp> createState() => _HealthAppState();
@@ -167,6 +174,7 @@ class _HealthAppState extends State<HealthApp> {
             ),
             company: widget.company,
             widgetRegistrations: healthWidgetRegistrations,
+            forceUpdateInfo: widget.forceUpdateInfo,
           );
         },
       ),
