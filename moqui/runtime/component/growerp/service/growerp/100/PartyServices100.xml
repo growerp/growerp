@@ -692,10 +692,20 @@ along with this software (see the LICENSE.md file). If not, see
                 <field-map field-name="organizationPartyId" from="companyPartyId" />
             </entity-find-one>
             <if condition="company.hostName">
+                <!-- Transform hostname to regex pattern: xxx.domain.com -> (xxx\.)?domain\.com -->
+                <set field="hostNamePattern" from="company.hostName" />
+                <if condition="company.hostName.contains('.')">
+                    <set field="firstDotIndex" from="company.hostName.indexOf('.')" />
+                    <set field="subdomain" from="company.hostName.substring(0, firstDotIndex)" />
+                    <set field="remainingDomain" from="company.hostName.substring(firstDotIndex + 1)" />
+                    <!-- Escape dots in the remaining domain for regex -->
+                    <set field="escapedDomain" from="remainingDomain.replace('.', '\\.')" />
+                    <set field="hostNamePattern" value="(${subdomain}\\.)?${escapedDomain}" />
+                </if>
                 <service-call name="create#mantle.product.store.ProductStoreSetting"
                     in-map="[productStoreId: productStore.productStoreId,
                             settingTypeEnumId: PsstHostname,
-                            settingValue: company.hostName]" />
+                            settingValue: hostNamePattern]" />
             </if>
             <if condition="company.secondaryBackend">
                 <service-call name="create#mantle.product.store.ProductStoreSetting"
@@ -1091,10 +1101,20 @@ along with this software (see the LICENSE.md file). If not, see
                     <service-call name="update#mantle.product.store.ProductStoreSetting"
                         in-map="settings[0] + [thruDate: nowDate]" />
                 </if>
+                <!-- Transform hostname to regex pattern: xxx.domain.com -> (xxx\.)?domain\.com -->
+                <set field="hostNamePattern" from="company.hostName" />
+                <if condition="company.hostName?.contains('.')">
+                    <set field="firstDotIndex" from="company.hostName.indexOf('.')" />
+                    <set field="subdomain" from="company.hostName.substring(0, firstDotIndex)" />
+                    <set field="remainingDomain" from="company.hostName.substring(firstDotIndex + 1)" />
+                    <!-- Escape dots in the remaining domain for regex -->
+                    <set field="escapedDomain" from="remainingDomain.replace('.', '\\.')" />
+                    <set field="hostNamePattern" value="(${subdomain}\\.)?${escapedDomain}" />
+                </if>
                 <service-call name="create#mantle.product.store.ProductStoreSetting"
                     in-map="[productStoreId: productStore.productStoreId,
                             settingTypeEnumId: 'PsstHostname',
-                            settingValue: company.hostName,
+                            settingValue: hostNamePattern,
                             fromDate: nowDate]" />
             </if>
             <if condition="company.secondaryBackend != oldValue.companies[0].secondaryBackend">
