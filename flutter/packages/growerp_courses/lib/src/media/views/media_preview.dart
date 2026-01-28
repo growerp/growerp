@@ -3,8 +3,10 @@
  * Grant of Patent License.
  */
 
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:growerp_models/growerp_models.dart';
 
@@ -21,6 +23,8 @@ class MediaPreview extends StatefulWidget {
 class _MediaPreviewState extends State<MediaPreview> {
   late TextEditingController _contentController;
   bool _isEditing = false;
+  bool _isGeneratingVideo = false;
+  String? _videoGenerationMessage;
 
   @override
   void initState() {
@@ -167,38 +171,166 @@ class _MediaPreviewState extends State<MediaPreview> {
   }
 
   Widget _buildActionButtons() {
+    final isYouTube = widget.media.platform == MediaPlatform.youtube;
+    
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         border: Border(top: BorderSide(color: Theme.of(context).dividerColor)),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          OutlinedButton.icon(
-            icon: const Icon(Icons.refresh),
-            label: const Text('Regenerate'),
-            onPressed: () {
-              // TODO: Implement regeneration
-              Navigator.pop(context, 'regenerate');
-            },
-          ),
-          Row(
-            children: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Cancel'),
+          if (_videoGenerationMessage != null)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.blue.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.blue.withValues(alpha: 0.3)),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.info_outline, color: Colors.blue, size: 20),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        _videoGenerationMessage!,
+                        style: const TextStyle(color: Colors.blue),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              const SizedBox(width: 8),
-              ElevatedButton(
-                onPressed: _saveChanges,
-                child: const Text('Save'),
+            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  OutlinedButton.icon(
+                    icon: const Icon(Icons.refresh),
+                    label: const Text('Regenerate'),
+                    onPressed: () {
+                      Navigator.pop(context, 'regenerate');
+                    },
+                  ),
+                  if (isYouTube) ...[
+                    const SizedBox(width: 8),
+                    ElevatedButton.icon(
+                      icon: _isGeneratingVideo
+                          ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                          : const Icon(Icons.videocam),
+                      label: Text(_isGeneratingVideo ? 'Generating...' : 'Generate Video'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red,
+                        foregroundColor: Colors.white,
+                      ),
+                      onPressed: _isGeneratingVideo ? null : _generateVideo,
+                    ),
+                  ],
+                ],
+              ),
+              Row(
+                children: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('Cancel'),
+                  ),
+                  const SizedBox(width: 8),
+                  ElevatedButton(
+                    onPressed: _saveChanges,
+                    child: const Text('Save'),
+                  ),
+                ],
               ),
             ],
           ),
         ],
       ),
     );
+  }
+
+  Future<void> _generateVideo() async {
+    if (widget.media.mediaId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Cannot generate video: Media ID is missing'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      _isGeneratingVideo = true;
+      _videoGenerationMessage = null;
+    });
+
+    try {
+      final restClient = context.read<RestClient>();
+      dynamic response = await restClient.generateVideoFromScript(
+        data: {
+          'mediaId': widget.media.mediaId,
+          'voiceStyle': 'alloy',
+          'videoStyle': 'professional',
+        },
+      );
+
+      if (response is String) {
+        response = jsonDecode(response);
+      }
+
+      final status = response['status'] as String?;
+      final message = response['message'] as String?;
+      final videoUrl = response['videoUrl'] as String?;
+
+      setState(() {
+        _isGeneratingVideo = false;
+        _videoGenerationMessage = message ?? 'Video generation completed';
+      });
+
+      if (!mounted) return;
+
+      if (status == 'success' && videoUrl != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Video generated successfully!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } else if (status == 'pending') {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Video generation started. You will be notified when complete.'),
+            backgroundColor: Colors.blue,
+          ),
+        );
+      }
+    } catch (e) {
+      setState(() {
+        _isGeneratingVideo = false;
+        _videoGenerationMessage = 'Error: ${e.toString()}';
+      });
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to generate video: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   void _copyToClipboard() {

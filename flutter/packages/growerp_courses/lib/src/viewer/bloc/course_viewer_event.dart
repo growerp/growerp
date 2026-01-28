@@ -51,3 +51,23 @@ class NextLesson extends CourseViewerEvent {
 class PreviousLesson extends CourseViewerEvent {
   const PreviousLesson();
 }
+
+/// Fetch available courses for selection
+class FetchAvailableCourses extends CourseViewerEvent {
+  const FetchAvailableCourses();
+}
+
+/// Fetch media for the current course
+class FetchCourseMedia extends CourseViewerEvent {
+  const FetchCourseMedia();
+}
+
+/// Select a media item to view
+class SelectMedia extends CourseViewerEvent {
+  final CourseMedia? media;
+
+  const SelectMedia(this.media);
+
+  @override
+  List<Object?> get props => [media];
+}

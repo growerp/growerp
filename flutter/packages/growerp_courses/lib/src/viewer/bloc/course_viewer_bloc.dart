@@ -3,7 +3,8 @@
  * Grant of Patent License.
  */
 
-import 'package:bloc/bloc.dart';
+import 'dart:convert';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:growerp_models/growerp_models.dart';
 
@@ -20,30 +21,62 @@ class CourseViewerBloc extends Bloc<CourseViewerEvent, CourseViewerState> {
     on<MarkLessonComplete>(_onMarkLessonComplete);
     on<NextLesson>(_onNextLesson);
     on<PreviousLesson>(_onPreviousLesson);
+    on<FetchAvailableCourses>(_onFetchAvailableCourses);
+    on<FetchCourseMedia>(_onFetchCourseMedia);
+    on<SelectMedia>(_onSelectMedia);
   }
 
   Future<void> _onLoadCourse(
     LoadCourse event,
     Emitter<CourseViewerState> emit,
   ) async {
+    // If courseId is empty, fetch available courses instead
+    if (event.courseId.isEmpty) {
+      add(const FetchAvailableCourses());
+      return;
+    }
+
     try {
       emit(state.copyWith(status: ViewerStatus.loading));
 
       // Get course details
-      final courseResponse = await restClient.getCourse(
+      dynamic courseResponse = await restClient.getCourse(
         courseId: event.courseId,
       );
+      if (courseResponse is String) {
+        courseResponse = jsonDecode(courseResponse);
+      }
       final course = Course.fromJson(
         courseResponse['course'] as Map<String, dynamic>,
       );
 
       // Get user progress
-      final progressResponse = await restClient.getCourseProgress(
+      dynamic progressResponse = await restClient.getCourseProgress(
         courseId: event.courseId,
       );
+      if (progressResponse is String) {
+        progressResponse = jsonDecode(progressResponse);
+      }
       final progress = CourseProgress.fromJson(
         progressResponse['progress'] as Map<String, dynamic>,
       );
+
+      // Get course media
+      List<CourseMedia> mediaList = [];
+      try {
+        dynamic mediaResponse = await restClient.listCourseMedia(
+          courseId: event.courseId,
+        );
+        if (mediaResponse is String) {
+          mediaResponse = jsonDecode(mediaResponse);
+        }
+        final mediaListJson = mediaResponse['mediaList'] as List<dynamic>? ?? [];
+        mediaList = mediaListJson
+            .map((json) => CourseMedia.fromJson(json as Map<String, dynamic>))
+            .toList();
+      } catch (_) {
+        // Media is optional, continue without it
+      }
 
       // Set first lesson as current if none selected
       CourseLesson? firstLesson;
@@ -60,6 +93,7 @@ class CourseViewerBloc extends Bloc<CourseViewerEvent, CourseViewerState> {
           course: course,
           currentLesson: firstLesson,
           progress: progress,
+          mediaList: mediaList,
         ),
       );
     } catch (e) {
@@ -81,7 +115,7 @@ class CourseViewerBloc extends Bloc<CourseViewerEvent, CourseViewerState> {
     if (state.course?.courseId == null) return;
 
     try {
-      final response = await restClient.updateCourseProgress(
+      dynamic response = await restClient.updateCourseProgress(
         data: {
           'courseId': state.course!.courseId,
           'lessonId': event.lessonId,
@@ -89,8 +123,19 @@ class CourseViewerBloc extends Bloc<CourseViewerEvent, CourseViewerState> {
         },
       );
 
+      // Decode response if it's a String
+      if (response is String) {
+        response = jsonDecode(response);
+      }
+
+      // Handle progressPercent being returned as int or String
+      final progressValue = response['progressPercent'];
+      final progressPercent = progressValue is int
+          ? progressValue
+          : int.tryParse(progressValue?.toString() ?? '0') ?? 0;
+
       final newProgress = (state.progress ?? CourseProgress()).copyWith(
-        progressPercent: response['progressPercent'] as int?,
+        progressPercent: progressPercent,
         completedLessons: [
           ...?state.progress?.completedLessons,
           event.lessonId,
@@ -143,5 +188,63 @@ class CourseViewerBloc extends Bloc<CourseViewerEvent, CourseViewerState> {
       lessons.addAll(module.lessons ?? []);
     }
     return lessons;
+  }
+
+  Future<void> _onFetchAvailableCourses(
+    FetchAvailableCourses event,
+    Emitter<CourseViewerState> emit,
+  ) async {
+    try {
+      emit(state.copyWith(status: ViewerStatus.loading));
+
+      final response = await restClient.listCourses(
+        limit: 50,
+        start: 0,
+      );
+
+      emit(state.copyWith(
+        status: ViewerStatus.selectingCourse,
+        availableCourses: response.courses,
+      ));
+    } catch (e) {
+      emit(state.copyWith(
+        status: ViewerStatus.failure,
+        message: 'Failed to load courses: ${e.toString()}',
+      ));
+    }
+  }
+
+  Future<void> _onFetchCourseMedia(
+    FetchCourseMedia event,
+    Emitter<CourseViewerState> emit,
+  ) async {
+    if (state.course?.courseId == null) return;
+
+    try {
+      dynamic response = await restClient.listCourseMedia(
+        courseId: state.course!.courseId!,
+      );
+
+      if (response is String) {
+        response = jsonDecode(response);
+      }
+
+      final mediaListJson = response['mediaList'] as List<dynamic>? ?? [];
+      final mediaList = mediaListJson
+          .map((json) => CourseMedia.fromJson(json as Map<String, dynamic>))
+          .toList();
+
+      emit(state.copyWith(mediaList: mediaList));
+    } catch (e) {
+      // Silently fail - media is optional
+      emit(state.copyWith(mediaList: []));
+    }
+  }
+
+  Future<void> _onSelectMedia(
+    SelectMedia event,
+    Emitter<CourseViewerState> emit,
+  ) async {
+    emit(state.copyWith(selectedMedia: event.media));
   }
 }

@@ -256,6 +256,7 @@ class CourseLesson {
   final String? courseId;
   final String title;
   final String? content; // Markdown content
+  @StringListConverter()
   final List<String>? keyPoints;
   final int? sequenceNum;
   final int? estimatedDuration;
@@ -441,6 +442,7 @@ class CourseProgress {
   final String? userId;
   final String? courseId;
   final String? currentLessonId;
+  @StringListConverter()
   final List<String>? completedLessons;
   final int? progressPercent;
   @DateTimeConverter()

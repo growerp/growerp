@@ -13,10 +13,10 @@ packages:
     dependency: transitive
     description:
       name: about
-      sha256: f4e880d51b7263049914ea92e991f207075a0f93e45253ca2b91b626705446d5
+      sha256: "65e34364ac29adf7ed1b3c5e2a57da74a0694e23db1d713a3773f5e1f53c0b00"
       url: "https://pub.dev"
     source: hosted
-    version: "2.2.0"
+    version: "2.1.3"
   analyzer:
     dependency: transitive
     description:
@@ -532,10 +532,10 @@ packages:
     dependency: transitive
     description:
       name: flutter_markdown
-      sha256: "08fb8315236099ff8e90cb87bb2b935e0a724a3af1623000a9cec930468e0f27"
+      sha256: "04c4722cc36ec5af38acc38ece70d22d3c2123c61305d555750a091517bbe504"
       url: "https://pub.dev"
     source: hosted
-    version: "0.7.7+1"
+    version: "0.6.23"
   flutter_plugin_android_lifecycle:
     dependency: transitive
     description:
@@ -691,6 +691,13 @@ packages:
       relative: true
     source: path
     version: "1.10.5"
+  growerp_courses:
+    dependency: "direct main"
+    description:
+      path: "../growerp_courses"
+      relative: true
+    source: path
+    version: "0.0.1"
   growerp_inventory:
     dependency: "direct main"
     description:

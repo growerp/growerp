@@ -181,3 +181,34 @@ class CreditCardTypeConverter
     return object.toString();
   }
 }
+
+/// Converter for handling List<String> that may come as a JSON string or a List
+class StringListConverter implements JsonConverter<List<String>?, dynamic> {
+  const StringListConverter();
+
+  @override
+  List<String>? fromJson(dynamic json) {
+    if (json == null) return null;
+    if (json is List) {
+      return json.map((e) => e.toString()).toList();
+    }
+    if (json is String) {
+      try {
+        final decoded = jsonDecode(json);
+        if (decoded is List) {
+          return decoded.map((e) => e.toString()).toList();
+        }
+      } catch (_) {
+        // If it's not valid JSON, treat as a single-element list
+        return [json];
+      }
+    }
+    return null;
+  }
+
+  @override
+  dynamic toJson(List<String>? object) {
+    if (object == null) return null;
+    return object;
+  }
+}

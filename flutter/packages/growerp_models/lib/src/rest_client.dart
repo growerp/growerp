@@ -1525,4 +1525,9 @@ abstract class RestClient {
   Future<dynamic> updateCourseProgress({
     @Body() required Map<String, dynamic> data,
   });
+
+  @POST("rest/s1/growerp/100/GenerateVideo")
+  Future<dynamic> generateVideoFromScript({
+    @Body() required Map<String, dynamic> data,
+  });
 }

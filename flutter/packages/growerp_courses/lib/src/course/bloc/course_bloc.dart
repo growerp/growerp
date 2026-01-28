@@ -25,6 +25,13 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
     on<CourseLessonCreate>(_onLessonCreate);
     on<CourseLessonUpdate>(_onLessonUpdate);
     on<CourseLessonDelete>(_onLessonDelete);
+    on<CourseMediaGenerate>(_onMediaGenerate);
+  }
+
+  /// Helper to check if selectedCourse has a valid (non-null, non-empty) courseId
+  bool get _hasValidSelectedCourseId {
+    final courseId = state.selectedCourse?.courseId;
+    return courseId != null && courseId.isNotEmpty;
   }
 
   Future<void> _onCourseFetch(
@@ -61,6 +68,13 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
     CourseGetDetail event,
     Emitter<CourseState> emit,
   ) async {
+    // Guard against empty courseId
+    if (event.courseId.isEmpty) {
+      emit(state.copyWith(
+          status: CourseBlocStatus.failure, message: 'Course ID is required'));
+      return;
+    }
+
     try {
       emit(state.copyWith(status: CourseBlocStatus.loading));
 
@@ -194,7 +208,7 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
 
       await restClient.updateCourseModule(data: event.module.toJson());
 
-      if (state.selectedCourse?.courseId != null) {
+      if (_hasValidSelectedCourseId) {
         add(CourseGetDetail(state.selectedCourse!.courseId!));
       }
     } catch (e) {
@@ -214,7 +228,7 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
         moduleId: event.module.moduleId!,
       );
 
-      if (state.selectedCourse?.courseId != null) {
+      if (_hasValidSelectedCourseId) {
         add(CourseGetDetail(state.selectedCourse!.courseId!));
       }
     } catch (e) {
@@ -234,7 +248,7 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
         data: {'moduleId': event.moduleId, ...event.lesson.toJson()},
       );
 
-      if (state.selectedCourse?.courseId != null) {
+      if (_hasValidSelectedCourseId) {
         add(CourseGetDetail(state.selectedCourse!.courseId!));
       }
     } catch (e) {
@@ -252,7 +266,7 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
 
       await restClient.updateCourseLesson(data: event.lesson.toJson());
 
-      if (state.selectedCourse?.courseId != null) {
+      if (_hasValidSelectedCourseId) {
         add(CourseGetDetail(state.selectedCourse!.courseId!));
       }
     } catch (e) {
@@ -272,9 +286,39 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
         lessonId: event.lesson.lessonId!,
       );
 
-      if (state.selectedCourse?.courseId != null) {
+      if (_hasValidSelectedCourseId) {
         add(CourseGetDetail(state.selectedCourse!.courseId!));
       }
+    } catch (e) {
+      emit(state.copyWith(
+          status: CourseBlocStatus.failure, message: e.toString()));
+    }
+  }
+
+  Future<void> _onMediaGenerate(
+    CourseMediaGenerate event,
+    Emitter<CourseState> emit,
+  ) async {
+    try {
+      emit(state.copyWith(status: CourseBlocStatus.loading));
+
+      await restClient.generateCourseMedia(
+        data: {
+          'courseId': event.courseId,
+          'platform': event.platform.name.toUpperCase(),
+          'mediaType': event.mediaType.name.toUpperCase(),
+          if (event.moduleId != null) 'moduleId': event.moduleId,
+          if (event.lessonId != null) 'lessonId': event.lessonId,
+        },
+      );
+
+      emit(
+        state.copyWith(
+          status: CourseBlocStatus.success,
+          message:
+              'Media content generated successfully for ${event.platform.name}',
+        ),
+      );
     } catch (e) {
       emit(state.copyWith(
           status: CourseBlocStatus.failure, message: e.toString()));

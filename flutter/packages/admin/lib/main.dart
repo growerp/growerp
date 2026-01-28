@@ -25,6 +25,7 @@ import 'package:growerp_user_company/growerp_user_company.dart';
 import 'package:growerp_website/growerp_website.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 import 'package:growerp_outreach/growerp_outreach.dart';
+import 'package:growerp_courses/growerp_courses.dart';
 import 'package:flutter/material.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -234,6 +235,7 @@ List<Map<String, GrowerpWidgetBuilder>> adminWidgetRegistrations = [
   getOutreachWidgets(),
   getSalesWidgets(),
   getWebsiteWidgets(),
+  getCoursesWidgets(),
   // App-specific widgets
   {
     'AdminDashboard': (args) => const AdminDashboardContent(),
@@ -256,5 +258,6 @@ List<BlocProvider> getAdminBlocProviders(
     ...getMarketingBlocProviders(restClient),
     ...getOutreachBlocProviders(restClient),
     ...getWebsiteBlocProviders(restClient),
+    ...getCoursesBlocProviders(restClient),
   ];
 }
