@@ -29,6 +29,8 @@ dependencies:
   go_router: ^14.6.2
   dio: ^5.4.3
   web: ^1.0.0
+  flutter_bloc: ^8.1.6
+  growerp_models: ^1.11.6
 
 dev_dependencies:
   flutter_test:

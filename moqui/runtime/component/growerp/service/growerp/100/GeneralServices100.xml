@@ -16,13 +16,18 @@ along with this software (see the LICENSE.md file). If not, see
     xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-2.1.xsd">
 
     <service verb="get" noun="BackendUrl">
-        <description>Get the backend url (list) for a given applicationId and version</description>
+        <description>Get the backend url (list) for a given applicationId and version.
+            Also returns force update information when app version is below minimum required version.</description>
         <in-parameters>
             <parameter name="applicationId" /><!-- app name -->
             <parameter name="version" />
+            <parameter name="platform" /><!-- android, ios, macos, linux, windows, web -->
         </in-parameters>
         <out-parameters>
             <parameter name="backendUrl" />
+            <parameter name="forceUpdate" type="Boolean" />
+            <parameter name="minVersion" />
+            <parameter name="updateUrl" />
             <parameter name="applications" type="List">
                 <parameter name="application" type="Map">
                     <parameter name="applicationId" />
@@ -38,43 +43,94 @@ along with this software (see the LICENSE.md file). If not, see
                     ignore-if-empty="true" />
                 <econdition field-name="classificationTypeEnumId" value="PcltMobileApp" />
             </entity-find>
+            <log 
+                message="=========getBackendUrl: applicationId=$applicationId, version=$version, versionDb=${urls ? urls[0]?.standardCode?.split('#')?.getAt(0) : 'none'}" />
+            <set field="forceUpdate" from="false" type="Boolean" />
             <if condition="applicationId &amp;&amp; version">
                 <if condition="urls &amp;&amp; urls[0].standardCode?.contains('#')">
                     <set field="versionDb" from="urls[0].standardCode.split('#')[0]" />
-                    <set field="majorVersion" from="versionDb.split('\\.')[0]" type="Integer" />
-                    <set field="minorVersion" from="versionDb.split('\\.')[1]" type="Integer" />
-                    <set field="patchVersion" from="versionDb.split('\\.')[2]" type="Integer" />
-                    <set field="majorVersionIn" from="version.split('\\.')[0]"
-                        type="Integer" />
-                    <set field="minorVersionIn" from="version.split('\\.')[1]"
-                        type="Integer" />
-                    <set field="patchVersionIn" from="version.split('\\.')[2]"
-                        type="Integer" />
-                    <set field="less" from="false" type="Boolean" />
-                    <if condition="majorVersionIn &lt; majorVersion ">
-                        <set field="less" from="true" />
-                        <else>
-                            <if condition="minorVersionIn &lt; minorVersion">
-                                <set field="less" from="true" />
-                                <else>
-                                    <if condition="patchVersionIn &lt; patchVersion">
-                                        <set field="less" from="true" />
-                                    </if>
-                                </else>
-                            </if>
-                        </else>
+                    <!-- Safely parse version parts with null checks -->
+                    <set field="versionDbParts" from="versionDb?.split('\\.')"/>
+                    <set field="versionInParts" from="version?.split('\\.')"/>
+                    <if condition="!versionDbParts || versionDbParts.length &lt; 3 || !versionInParts || versionInParts.length &lt; 3">
+                        <log level="warn" message="Invalid version format - versionDb: $versionDb, version: $version"/>
+                        <return/>
                     </if>
-                    <!-- if incoming version equal or greater (new test version)
-                        then use override url in db-->
-                    <if condition="less == false">
-                        <set field="backendUrl"
-                            from="urls[0].standardCode.split('#')[1]" />
+                    <set field="majorVersion" from="versionDbParts[0]" type="Integer" />
+                    <set field="minorVersion" from="versionDbParts[1]" type="Integer" />
+                    <set field="patchVersion" from="versionDbParts[2]" type="Integer" />
+                    <set field="majorVersionIn" from="versionInParts[0]"
+                        type="Integer" />
+                    <set field="minorVersionIn" from="versionInParts[1]"
+                        type="Integer" />
+                    <set field="patchVersionIn" from="versionInParts[2]"
+                        type="Integer" />
+                    <!-- 
+                        Version Comparison Logic:
+                        - incomingVersion > dbVersion: App is newer (test/dev version) -> use override URL from db
+                        - incomingVersion == dbVersion: App is current -> use production (no override)  
+                        - incomingVersion < dbVersion: App is outdated -> force upgrade
+                    -->
+                    <log message="=========VersionIn: $majorVersionIn.$minorVersionIn.$patchVersionIn, VersionDb: $majorVersion.$minorVersion.$patchVersion" />
+                    
+                    <!-- Determine version comparison result -->
+                    <set field="incomingVersionIsGreater" from="false" type="Boolean" />
+                    <set field="incomingVersionIsLess" from="false" type="Boolean" />
+                    
+                    <if condition="majorVersionIn > majorVersion">
+                        <set field="incomingVersionIsGreater" from="true" />
+                    <else-if condition="majorVersionIn &lt; majorVersion">
+                        <set field="incomingVersionIsLess" from="true" />
+                    </else-if>
+                    <else-if condition="minorVersionIn > minorVersion">
+                        <set field="incomingVersionIsGreater" from="true" />
+                    </else-if>
+                    <else-if condition="minorVersionIn &lt; minorVersion">
+                        <set field="incomingVersionIsLess" from="true" />
+                    </else-if>
+                    <else-if condition="patchVersionIn > patchVersion">
+                        <set field="incomingVersionIsGreater" from="true" />
+                    </else-if>
+                    <else-if condition="patchVersionIn &lt; patchVersion">
+                        <set field="incomingVersionIsLess" from="true" />
+                    </else-if>
                     </if>
-                    <else>
-                        <log level="info"
-                            message="Could not find override backend url for $applicationId $version" />
-                    </else>
+                    <!-- Note: if neither flag is true, versions are equal -->
+                    
+                    <!-- CASE 1: Incoming version > DB version (test/dev version) - use override URL from db -->
+                    <if condition="incomingVersionIsGreater">
+                        <set field="backendUrl" from="urls[0].standardCode.split('#')[1]" />
+                        <log level="info" message="Incoming version is greater than DB version: using override URL: $backendUrl from database" />
+                    </if>
+                    
+                    <!-- CASE 2: Versions are equal - use production (no override needed, backendUrl stays null) -->
+                    <!-- No action needed - backendUrl remains unset, frontend uses production URL -->
+                    
+                    <!-- CASE 3: Incoming version < DB version - force upgrade required -->
+                    <if condition="incomingVersionIsLess">
+                        <set field="forceUpdate" from="true" />
+                        <set field="minVersion" from="versionDb" />
+                        <!-- Set update URLs based on platform -->
+                        <if condition="platform == 'android'">
+                            <set field="updateUrl" value="https://play.google.com/store/apps/details?id=org.growerp.admin" />
+                            <else-if condition="platform == 'ios' || platform == 'macos'">
+                                <set field="updateUrl" value="https://apps.apple.com/us/app/growerp-admin-open-source/id1545521755" />
+                            </else-if>
+                            <else-if condition="platform == 'linux'">
+                                <set field="updateUrl" value="https://snapcraft.io/growerp-admin" />
+                            </else-if>
+                            <else-if condition="platform == 'windows'">
+                                <set field="updateUrl" value="https://apps.microsoft.com/detail/9nwx6kftjnql" />
+                            </else-if>
+                            <else>
+                                <!-- Web platform: instruct user to refresh browser -->
+                                <set field="updateUrl" value="Press Ctrl+F5 to refresh and get the new version" />
+                            </else>
+                        </if>
+                        <log level="info" message="Force update required for $applicationId: app version $version is below minimum $versionDb" />
+                    </if>
                 </if>
+                <log message="=========getBackendUrl: forceupdate: $forceUpdate, version=$version, versionDb=${urls ? urls[0]?.standardCode?.split('#')?.getAt(0) : 'none'}" />
                 <else>
                     <set field="applications" from="[]" />
                     <iterate entry="url" list="urls">

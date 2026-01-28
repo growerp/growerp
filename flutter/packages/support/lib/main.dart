@@ -42,7 +42,11 @@ Future main() async {
   GlobalConfiguration().updateValue('build', packageInfo.buildNumber);
 
   String classificationId = GlobalConfiguration().get("classificationId");
-  await getBackendUrlOverride(classificationId, packageInfo.version);
+  // Also checks if force update is required
+  final forceUpdateInfo = await getBackendUrlOverride(
+    classificationId,
+    packageInfo.version,
+  );
 
   Bloc.observer = AppBlocObserver();
   RestClient restClient = RestClient(await buildDioClient());
@@ -72,6 +76,7 @@ Future main() async {
       chatClient: chatClient,
       notificationClient: notificationClient,
       company: company,
+      forceUpdateInfo: forceUpdateInfo,
     ),
   );
 }
@@ -84,6 +89,7 @@ class SupportApp extends StatefulWidget {
     required this.chatClient,
     required this.notificationClient,
     this.company,
+    this.forceUpdateInfo,
   });
 
   final RestClient restClient;
@@ -91,6 +97,7 @@ class SupportApp extends StatefulWidget {
   final WsClient chatClient;
   final WsClient notificationClient;
   final Company? company;
+  final ForceUpdateInfo? forceUpdateInfo;
 
   @override
   State<SupportApp> createState() => _SupportAppState();
@@ -161,6 +168,7 @@ class _SupportAppState extends State<SupportApp> {
             ),
             company: widget.company,
             widgetRegistrations: supportWidgetRegistrations,
+            forceUpdateInfo: widget.forceUpdateInfo,
           );
         },
       ),

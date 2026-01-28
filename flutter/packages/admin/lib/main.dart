@@ -41,7 +41,7 @@ Future main() async {
 
   // Set date offset for testing (rental, subscription expiration, etc.)
   // Change to non-zero value to test time-dependent features, e.g., 15
-  setTestDaysOffset(15);
+  setTestDaysOffset(0);
 
   await GlobalConfiguration().loadFromAsset('app_settings');
 
@@ -55,7 +55,11 @@ Future main() async {
 
   // check if there is override for the production backend url
   // if there is a overide we are in test mode: see the banner in the app
-  await getBackendUrlOverride(classificationId, packageInfo.version);
+  // Also checks if force update is required
+  final forceUpdateInfo = await getBackendUrlOverride(
+    classificationId,
+    packageInfo.version,
+  );
 
   Bloc.observer = AppBlocObserver();
   RestClient restClient = RestClient(await buildDioClient());
@@ -85,6 +89,7 @@ Future main() async {
       notificationClient: notificationClient,
       extraDelegates: delegates,
       company: company,
+      forceUpdateInfo: forceUpdateInfo,
     ),
   );
 }
@@ -98,6 +103,7 @@ class AdminApp extends StatefulWidget {
     required this.notificationClient,
     required this.extraDelegates,
     this.company,
+    this.forceUpdateInfo,
   });
 
   final RestClient restClient;
@@ -106,6 +112,7 @@ class AdminApp extends StatefulWidget {
   final WsClient notificationClient;
   final List<LocalizationsDelegate> extraDelegates;
   final Company? company;
+  final ForceUpdateInfo? forceUpdateInfo;
 
   @override
   State<AdminApp> createState() => _AdminAppState();
@@ -168,7 +175,6 @@ class _AdminAppState extends State<AdminApp> {
                   ),
                 ),
               ),
-              rootNavigatorKey: GlobalKey<NavigatorState>(),
             );
           } else {
             // Loading or error, show splash screen using shared component
@@ -199,6 +205,7 @@ class _AdminAppState extends State<AdminApp> {
             ),
             company: widget.company,
             widgetRegistrations: adminWidgetRegistrations,
+            forceUpdateInfo: widget.forceUpdateInfo,
           );
         },
       ),

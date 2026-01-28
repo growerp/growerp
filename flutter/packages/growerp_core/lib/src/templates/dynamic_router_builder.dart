@@ -71,7 +71,8 @@ GoRouter createDynamicAppRouter(
   required DynamicRouterConfig config,
   GlobalKey<NavigatorState>? rootNavigatorKey,
 }) {
-  final navKey = rootNavigatorKey ?? GlobalKey<NavigatorState>();
+  // Use the global navigatorKey from Constant for consistent access
+  final navKey = rootNavigatorKey ?? Constant.navigatorKey;
 
   // Find main config - use provided ID or first available
   final mainConfig = config.mainConfigId != null

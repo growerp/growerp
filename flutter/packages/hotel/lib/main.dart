@@ -49,7 +49,11 @@ Future main() async {
 
   String classificationId = GlobalConfiguration().get("classificationId");
   // check if there is override for the production(now test) backend url
-  await getBackendUrlOverride(classificationId, packageInfo.version);
+  // Also checks if force update is required
+  final forceUpdateInfo = await getBackendUrlOverride(
+    classificationId,
+    packageInfo.version,
+  );
 
   String ip = prefs.getString('ip') ?? '';
   String chat = prefs.getString('chat') ?? '';
@@ -89,6 +93,7 @@ Future main() async {
       classificationId: classificationId,
       chatClient: chatClient,
       notificationClient: notificationClient,
+      forceUpdateInfo: forceUpdateInfo,
     ),
   );
 }
@@ -100,12 +105,14 @@ class HotelApp extends StatefulWidget {
     required this.classificationId,
     required this.chatClient,
     required this.notificationClient,
+    this.forceUpdateInfo,
   });
 
   final RestClient restClient;
   final String classificationId;
   final WsClient chatClient;
   final WsClient notificationClient;
+  final ForceUpdateInfo? forceUpdateInfo;
 
   @override
   State<HotelApp> createState() => _HotelAppState();
@@ -179,6 +186,7 @@ class _HotelAppState extends State<HotelApp> {
               widget.classificationId,
             ),
             widgetRegistrations: hotelWidgetRegistrations,
+            forceUpdateInfo: widget.forceUpdateInfo,
           );
         },
       ),
