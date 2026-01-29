@@ -33,7 +33,7 @@ dependencies:
   bloc_concurrency: ^0.2.0
   image_picker: ^1.0.4
   global_configuration: ^2.0.0
-  file_picker: ^10.1.2
+  file_picker: ^10.3.10
   stream_transform: ^2.1.0
   decimal: ^3.2.4
   fast_csv: ^0.2.6
