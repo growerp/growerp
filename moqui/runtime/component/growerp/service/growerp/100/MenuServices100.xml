@@ -543,9 +543,12 @@ Service definitions for menu configuration and menu item management
         <return error="true" message="Menu configuration not found" />
       </if>
 
-      <!-- Seed data should NEVER be reset -->
+      <!-- If already on seed data, just return success - user is already using default -->
       <if condition="config.userId == null">
-        <return error="true" message="Cannot reset seed data configuration. Seed data is read-only." />
+        <set field="appId" from="config.appId" />
+        <set field="name" from="config.name" />
+        <set field="resetItemCount" value="0" type="Integer" />
+        <return message="Already using default configuration." />
       </if>
 
       <!-- Delete all menu items - children first to avoid FK constraint violations -->
