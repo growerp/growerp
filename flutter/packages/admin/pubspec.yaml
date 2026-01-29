@@ -73,7 +73,7 @@ msix_config:
   publisher: CN=68EEF479-7015-49FC-9C60-33E5A2EB731C
   publisher_display_name: "AntWebsystems Co.,Ltd"
   identity_name: AntWebsystemsCo.LTD.GrowERP
-  msix_version: 1.12.1.0
+  msix_version: 1.13.9.0
   logo_path: "assets/icon/icon.png"
   capabilities: internetClient
   store: true

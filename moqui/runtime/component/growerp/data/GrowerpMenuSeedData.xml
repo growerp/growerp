@@ -487,6 +487,8 @@ along with this software (see the LICENSE.md file). If not, see
         title="Organization" route="/companies" iconName="business" widgetName="ShowCompanyDialog" sequenceNum="20"/>
     <growerp.menu.MenuItem menuItemId="CORE_EX_CRM" menuConfigurationId="CORE_EXAMPLE_DEFAULT" 
         title="CRM" route="/crm" iconName="people" widgetName="UserList" sequenceNum="30"/>
+    <growerp.menu.MenuItem menuItemId="CORE_EX_TEST" menuConfigurationId="CORE_EXAMPLE_DEFAULT" 
+        title="CRM" route="/crm" iconName="people" widgetName="UserList" sequenceNum="30"/>
     <growerp.menu.MenuItem menuItemId="CORE_EX_ABOUT" menuConfigurationId="CORE_EXAMPLE_DEFAULT" 
         title="About" route="/about" iconName="info" widgetName="AboutForm" sequenceNum="40"/>
     <growerp.menu.MenuItem menuItemId="CORE_EX_SETUP" menuConfigurationId="CORE_EXAMPLE_DEFAULT" 
@@ -499,6 +501,10 @@ along with this software (see the LICENSE.md file). If not, see
     <growerp.menu.MenuItem menuItemId="CORE_EX_CRM_COMPANY" menuConfigurationId="CORE_EXAMPLE_DEFAULT" parentMenuItemId="CORE_EX_CRM"
         title="company" iconName="home" widgetName="ShowCompanyDialog" sequenceNum="10"/>
     <growerp.menu.MenuItem menuItemId="CORE_EX_CRM_USERS" menuConfigurationId="CORE_EXAMPLE_DEFAULT" parentMenuItemId="CORE_EX_CRM"
+        title="employees" iconName="school" widgetName="UserListEmployee" sequenceNum="20"/>
+    <growerp.menu.MenuItem menuItemId="CORE_EX_TEST_COMPANY" menuConfigurationId="CORE_EXAMPLE_DEFAULT" parentMenuItemId="CORE_EX_TEST"
+        title="company" iconName="home" widgetName="ShowCompanyDialog" sequenceNum="10"/>
+    <growerp.menu.MenuItem menuItemId="CORE_EX_TEST_USERS" menuConfigurationId="CORE_EXAMPLE_DEFAULT" parentMenuItemId="CORE_EX_TEST"
         title="employees" iconName="school" widgetName="UserListEmployee" sequenceNum="20"/>
 
     <!-- ====================== COURSES_EXAMPLE_DEFAULT ====================== -->
