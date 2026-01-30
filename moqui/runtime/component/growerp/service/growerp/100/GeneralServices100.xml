@@ -103,8 +103,20 @@ along with this software (see the LICENSE.md file). If not, see
                         <log level="info" message="Incoming version is greater than DB version: using override URL: $backendUrl from database" />
                     </if>
                     
-                    <!-- CASE 2: Versions are equal - use production (no override needed, backendUrl stays null) -->
-                    <!-- No action needed - backendUrl remains unset, frontend uses production URL -->
+                    <!-- CASE 2: Versions are equal - use override URL only if request comes from test system -->
+                    <!-- Detect test deployment from Origin header (e.g., https://admin.growerp.org) -->
+                    <if condition="!incomingVersionIsGreater &amp;&amp; !incomingVersionIsLess">
+                        <set field="originHeader" from="ec.web?.request?.getHeader('Origin')" />
+                        <set field="refererHeader" from="ec.web?.request?.getHeader('Referer')" />
+                        <set field="isTestDeployment" from="originHeader?.contains('.growerp.org') || refererHeader?.contains('.growerp.org')" type="Boolean" />
+                        <if condition="isTestDeployment">
+                            <set field="backendUrl" from="urls[0].standardCode.split('#')[1]" />
+                            <log level="info" message="Version equals DB version and request from test system (origin: $originHeader): using override URL: $backendUrl" />
+                        <else>
+                            <log level="info" message="Version equals DB version and request from production (origin: $originHeader): using production URL" />
+                        </else>
+                        </if>
+                    </if>
                     
                     <!-- CASE 3: Incoming version < DB version - force upgrade required -->
                     <if condition="incomingVersionIsLess">
