@@ -1,6 +1,6 @@
 name: growerp-hotel
 base: core22
-version: '1.12.2'
+version: '1.13.9'
 summary: GrowERP Hotel - Business Management System
 description: |
   GrowERP Hotel is a comprehensive ERP (Enterprise Resource Planning) application 
