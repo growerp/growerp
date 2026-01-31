@@ -60,16 +60,21 @@ void main(List<String> args) async {
   Map<String, dynamic> versionInfo;
   Map<String, bool> pushConfig;
   String workspaceDir;
+  String releaseComment;
 
   if (isRestart) {
     selectedApps = List<String>.from(releaseState['selectedApps']);
     versionInfo = releaseState['versionInfo'];
     pushConfig = Map<String, bool>.from(releaseState['pushConfig']);
     workspaceDir = releaseState['workspaceDir'];
+    releaseComment = releaseState['releaseComment'] ?? '';
 
     print("📋 Resumed Release Summary:");
     print("   Applications: ${selectedApps.join(', ')}");
     print("   New version: ${versionInfo['newBase']}");
+    if (releaseComment.isNotEmpty) {
+      print("   Comment: $releaseComment");
+    }
     print("   Step to resume: ${releaseState['currentStep']}");
 
     var confirm = ask(
@@ -85,6 +90,7 @@ void main(List<String> args) async {
     selectedApps = await selectApplications();
     var versionConfig = await getVersionConfiguration();
     pushConfig = await getPushConfiguration(versionConfig);
+    releaseComment = await getReleaseComment();
 
     // Determine workspace (local vs repository)
     workspaceDir = await determineWorkspace(
@@ -104,6 +110,7 @@ void main(List<String> args) async {
       'versionInfo': versionInfo,
       'pushConfig': pushConfig,
       'workspaceDir': workspaceDir,
+      'releaseComment': releaseComment,
       'currentStep': 'initial',
       'completedApps': [],
       'versionUpdated': false,
@@ -111,17 +118,23 @@ void main(List<String> args) async {
     };
     saveState();
 
-    // Display summary and get confirmation
     await displaySummaryAndConfirm(
       selectedApps,
       versionInfo,
       pushConfig,
       workspaceDir,
+      releaseComment,
     );
   }
 
   // Execute the release process
-  await executeRelease(selectedApps, versionInfo, pushConfig, workspaceDir);
+  await executeRelease(
+    selectedApps,
+    versionInfo,
+    pushConfig,
+    workspaceDir,
+    releaseComment,
+  );
 
   // Clean up state on success
   if (exists(stateFile)) {
@@ -295,6 +308,12 @@ Future<Map<String, bool>> getPushConfiguration(
   return {'pushToDockerHub': pushToDockerHub, 'pushToGitHub': pushToGitHub};
 }
 
+Future<String> getReleaseComment() async {
+  print("\n📝 Optional: Enter a comment to include in the git commit message.");
+  var comment = ask('Release comment (press Enter to skip):', required: false);
+  return comment.trim();
+}
+
 Future<String> determineWorkspace(bool pushToGitHub) async {
   // Always use temp directory for release builds to ensure clean state
   var tempDir = config['tempWorkspaceDir'] ?? '/tmp/growerp';
@@ -320,24 +339,40 @@ Future<Map<String, dynamic>> calculateVersions(
 ) async {
   print("\n📊 Calculating version information...");
 
-  // Get current versions for all apps
-  var currentVersions = <String, String>{};
-  var largestMajor = 0, largestMinor = 0, largestPatch = 0;
+  // Get all available apps from config to find highest version across ALL packages
+  var allApps = List<String>.from(config['defaultApps'] ?? []);
 
+  // Get current versions for selected apps (for display and build suffix)
+  var currentVersions = <String, String>{};
   for (var app in selectedApps) {
     var version = getVersion(app, workspaceDir);
     currentVersions[app] = version;
     print("   $app: $version");
-
-    // Parse version components
-    var versionParts = parseVersion(version);
-    var major = versionParts['major'] ?? 0;
-    var minor = versionParts['minor'] ?? 0;
-    var patch = versionParts['patch'] ?? 0;
-    if (major > largestMajor) largestMajor = major;
-    if (minor > largestMinor) largestMinor = minor;
-    if (patch > largestPatch) largestPatch = patch;
   }
+
+  // Find the highest version across ALL packages (not just selected ones)
+  var largestMajor = 0, largestMinor = 0, largestPatch = 0;
+  print("   Scanning all packages for highest version...");
+
+  for (var app in allApps) {
+    try {
+      var version = getVersion(app, workspaceDir);
+      var versionParts = parseVersion(version);
+      var major = versionParts['major'] ?? 0;
+      var minor = versionParts['minor'] ?? 0;
+      var patch = versionParts['patch'] ?? 0;
+      if (major > largestMajor) largestMajor = major;
+      if (minor > largestMinor) largestMinor = minor;
+      if (patch > largestPatch) largestPatch = patch;
+    } catch (e) {
+      // Skip apps that can't be read (e.g., missing package)
+      print("   Warning: Could not read version for $app: $e");
+    }
+  }
+
+  print(
+    "   Highest version across all packages: $largestMajor.$largestMinor.$largestPatch",
+  );
 
   // Calculate new version
   if (versionConfig['patch'] == true) {
@@ -416,6 +451,7 @@ Future<void> displaySummaryAndConfirm(
   Map<String, dynamic> versionInfo,
   Map<String, bool> pushConfig,
   String workspaceDir,
+  String releaseComment,
 ) async {
   print("\n📋 Release Summary:");
   print("   Applications: ${selectedApps.join(', ')}");
@@ -429,6 +465,9 @@ Future<void> displaySummaryAndConfirm(
   print(
     "   Push to GitHub: ${pushConfig['pushToGitHub'] == true ? 'Yes' : 'No'}",
   );
+  if (releaseComment.isNotEmpty) {
+    print("   Comment: $releaseComment");
+  }
 
   var confirm = ask('\nProceed with release? (y/N)', defaultValue: 'N');
   if (confirm.toUpperCase() != 'Y') {
@@ -442,6 +481,7 @@ Future<void> executeRelease(
   Map<String, dynamic> versionInfo,
   Map<String, bool> pushConfig,
   String workspaceDir,
+  String releaseComment,
 ) async {
   print("\n🚀 Starting release process...\n");
 
@@ -478,6 +518,7 @@ Future<void> executeRelease(
         newVersions,
         versionInfo['newBase'],
         workspaceDir,
+        releaseComment,
       );
 
       // Wait a moment for GitHub to process the push
@@ -647,6 +688,7 @@ Future<void> commitAndTag(
   Map<String, String> newVersions,
   String gitTag,
   String workspaceDir,
+  String releaseComment,
 ) async {
   print("📝 Committing version changes and creating git tag...");
 
@@ -678,6 +720,9 @@ Future<void> commitAndTag(
         .map((app) => '$app:${newVersions[app]}')
         .join(', ');
     var commitMessage = 'build: Release $gitTag - $appVersions';
+    if (releaseComment.isNotEmpty) {
+      commitMessage += '\n\n$releaseComment';
+    }
 
     // Commit and tag
     run('git commit -m "$commitMessage"', workingDirectory: gitWorkingDir);
