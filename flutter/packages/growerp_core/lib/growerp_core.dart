@@ -3,6 +3,7 @@ export 'src/domains/common/functions/functions.dart';
 export 'src/domains/domains.dart';
 export 'src/core_router.dart';
 export 'src/styles/color_schemes.dart';
+export 'src/styles/design_constants.dart';
 export 'src/extensions.dart';
 export 'src/date_format_extensions.dart';
 export 'l10n/generated/core_localizations.dart';

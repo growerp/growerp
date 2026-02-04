@@ -26,7 +26,6 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:responsive_framework/responsive_framework.dart';
-import 'package:flutter/rendering.dart';
 import 'package:growerp_user_company/l10n/generated/user_company_localizations.dart';
 
 import '../../common/common.dart';
@@ -103,9 +102,6 @@ class UserDialogState extends State<UserDialog> {
   late User currentUser;
   late bool isAdmin;
   late String _classificationId;
-  late double top;
-  double? right;
-  late bool isVisible;
 
   @override
   void initState() {
@@ -142,29 +138,6 @@ class UserDialogState extends State<UserDialog> {
     isAdmin =
         context.read<AuthBloc>().state.authenticate!.user!.userGroup ==
         UserGroup.admin;
-    top = -100;
-
-    isVisible = true;
-    _scrollController.addListener(() {
-      if (isVisible != false &&
-          _scrollController.position.userScrollDirection ==
-              ScrollDirection.reverse) {
-        if (mounted) {
-          setState(() {
-            isVisible = false;
-          });
-        }
-      }
-      if (isVisible != true &&
-          _scrollController.position.userScrollDirection ==
-              ScrollDirection.forward) {
-        if (mounted) {
-          setState(() {
-            isVisible = true;
-          });
-        }
-      }
-    });
   }
 
   @override
@@ -217,7 +190,6 @@ class UserDialogState extends State<UserDialog> {
   Widget build(BuildContext context) {
     _localizations = UserCompanyLocalizations.of(context)!;
     isPhone = ResponsiveBreakpoints.of(context).isMobile;
-    right = right ?? (isPhone ? 20 : 40);
     String title = '';
     if (_selectedRole == Role.company) {
       title =
@@ -240,130 +212,29 @@ class UserDialogState extends State<UserDialog> {
         child: ScaffoldMessenger(
           child: Scaffold(
             backgroundColor: Colors.transparent,
-            body: Stack(
-              children: [
-                BlocConsumer<CompanyUserBloc, CompanyUserState>(
-                  listener: (context, state) {
-                    if (state.status == CompanyUserStatus.failure) {
-                      HelperFunctions.showMessage(
-                        context,
-                        state.message,
-                        Colors.red,
-                      );
-                    }
-                    if (state.status == CompanyUserStatus.success) {
-                      Navigator.of(context).pop(
-                        state.companiesUsers.isNotEmpty
-                            ? state.companiesUsers.first
-                            : null,
-                      );
-                    }
-                  },
-                  builder: (context, state) {
-                    if (state.status == CompanyUserStatus.loading) {
-                      return const LoadingIndicator();
-                    }
-                    return listChild();
-                  },
-                ),
-                Positioned(
-                  right: right,
-                  top: top,
-                  child: GestureDetector(
-                    onPanUpdate: (details) {
-                      setState(() {
-                        top += details.delta.dy;
-                        right = right! - details.delta.dx;
-                      });
-                    },
-                    child: Visibility(
-                      visible: isVisible,
-                      child: Column(
-                        children: [
-                          ImageButtons(
-                            _scrollController,
-                            _onImageButtonPressed,
-                          ),
-                          /*
-                          SizedBox(height: isPhone ? 330 : 280),
-                          FloatingActionButton(
-                            key: const Key("events"),
-                            tooltip: 'Show user events',
-                            onPressed: () async => await showDialog(
-                              barrierDismissible: true,
-                              context: context,
-                              builder: (BuildContext context) {
-                                return Dialog(
-                                  child: popUp(
-                                    context: context,
-                                title: (_localizations.userEvents),
-                                    child: ActivityList(
-                                      ActivityType.event,
-                                      companyUser: CompanyUser.tryParse(
-                                        widget.user,
-                                      ),
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-                            child: const Icon(Icons.event_available),
-                          ),
-*/
-                          const SizedBox(height: 10),
-                          if (isPhone)
-                            Visibility(
-                              visible: isVisible,
-                              child: FloatingActionButton(
-                                key: const Key("updateFloat"),
-                                onPressed: () {
-                                  updatedUser = updatedUser.copyWith(
-                                    pseudoId: _idController.text,
-                                    firstName: _firstNameController.text,
-                                    lastName: _lastNameController.text,
-                                    email: _emailController.text,
-                                    url: _urlController.text,
-                                    loginName: _loginNameController.text,
-                                    telephoneNr: _telephoneController.text,
-                                    address: updatedUser.address,
-                                    paymentMethod: updatedUser.paymentMethod,
-                                    loginDisabled: _isLoginDisabled,
-                                    userGroup: _selectedUserGroup,
-                                    role: _selectedRole,
-                                    appsUsed: [_classificationId],
-                                    //                      language: Localizations.localeOf(context)
-                                    //                          .languageCode
-                                    //                          .toString(),
-                                    company: _selectedCompany.copyWith(
-                                      role: _selectedRole,
-                                    ),
-                                    image: _image,
-                                  );
-
-                                  _companyUserBloc.add(
-                                    CompanyUserUpdate(
-                                      CompanyUser.tryParse(updatedUser),
-                                    ),
-                                  );
-                                  // if logged-in user update authBloc
-                                  if (currentUser.partyId ==
-                                      updatedUser.partyId) {
-                                    _authBloc.add(AuthLoad());
-                                  }
-                                },
-                                child: Icon(
-                                  widget.user.partyId != null
-                                      ? Icons.update_sharp
-                                      : Icons.add_sharp,
-                                ),
-                              ),
-                            ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+            body: BlocConsumer<CompanyUserBloc, CompanyUserState>(
+              listener: (context, state) {
+                if (state.status == CompanyUserStatus.failure) {
+                  HelperFunctions.showMessage(
+                    context,
+                    state.message,
+                    Colors.red,
+                  );
+                }
+                if (state.status == CompanyUserStatus.success) {
+                  Navigator.of(context).pop(
+                    state.companiesUsers.isNotEmpty
+                        ? state.companiesUsers.first
+                        : null,
+                  );
+                }
+              },
+              builder: (context, state) {
+                if (state.status == CompanyUserStatus.loading) {
+                  return const LoadingIndicator();
+                }
+                return listChild();
+              },
             ),
           ),
         ),
@@ -1026,18 +897,29 @@ class UserDialogState extends State<UserDialog> {
         child: Column(
           children: <Widget>[
             const SizedBox(height: 10),
-            CircleAvatar(
-              radius: 60,
-              child: _imageFile != null
-                  ? kIsWeb
-                        ? Image.network(_imageFile!.path, scale: 0.3)
-                        : Image.file(File(_imageFile!.path), scale: 0.3)
-                  : widget.user.image != null
-                  ? Image.memory(widget.user.image!, scale: 0.3)
-                  : Text(
-                      widget.user.firstName?.substring(0, 1) ?? '',
-                      style: const TextStyle(fontSize: 30),
-                    ),
+            StyledImageUpload(
+              label: 'Profile Photo',
+              subtitle: 'Click to upload. JPG, PNG up to 2MB',
+              image: _imageFile != null
+                  ? (kIsWeb
+                        ? NetworkImage(_imageFile!.path)
+                        : FileImage(File(_imageFile!.path)))
+                  : null,
+              imageBytes: _imageFile == null ? widget.user.image : null,
+              fallbackText: widget.user.firstName?.substring(0, 1) ?? '',
+              onUploadTap: () {
+                if (Platform.isAndroid || Platform.isIOS) {
+                  _onImageButtonPressed(ImageSource.gallery, context: context);
+                }
+              },
+              onRemove: (_imageFile != null || widget.user.image != null)
+                  ? () {
+                      setState(() {
+                        _imageFile = null;
+                        _image = null;
+                      });
+                    }
+                  : null,
             ),
             Column(children: rows.isNotEmpty ? rows : column),
           ],

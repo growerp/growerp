@@ -12,15 +12,14 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:responsive_framework/responsive_framework.dart';
-import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 import '../../../growerp_user_company.dart';
+import 'user_list_styled_data.dart';
 
 class UserList extends StatefulWidget {
   const UserList({super.key, this.role});
@@ -32,7 +31,7 @@ class UserList extends StatefulWidget {
 
 class UserListState extends State<UserList> {
   final _scrollController = ScrollController();
-  final _horizontalController = ScrollController();
+  final _searchController = TextEditingController();
   final double _scrollThreshold = 100.0;
   late UserBloc _userBloc;
   late AuthBloc _authBloc;
@@ -41,6 +40,7 @@ class UserListState extends State<UserList> {
   bool showSearchField = false;
   String searchString = '';
   bool hasReachedMax = false;
+  bool _isLoading = true;
   late double bottom;
   double? right;
   double currentScroll = 0;
@@ -82,90 +82,43 @@ class UserListState extends State<UserList> {
     right = right ?? (isPhone ? 20 : 50);
     return Builder(
       builder: (BuildContext context) {
+        final isPhone = ResponsiveBreakpoints.of(context).isMobile;
+
         Widget tableView() {
-          if (users.isEmpty) {
-            return Center(
-              child: Text(
-                context.read<String>() == 'AppHealth'
-                    ? 'No clients found'
-                    : 'no ${widget.role?.name ?? ''} users found',
-                style: const TextStyle(fontSize: 20.0),
-              ),
+          // Build rows for StyledDataTable
+          final rows = users.map((user) {
+            final index = users.indexOf(user);
+            return getUserListRow(
+              context: context,
+              user: user,
+              index: index,
+              bloc: _userBloc,
+              role: widget.role,
             );
-          }
-          // get table data formatted for tableView
-          var (
-            List<List<TableViewCell>> tableViewCells,
-            List<double> fieldWidths,
-            double? rowHeight,
-          ) = get2dTableData<User>(
-            getUserListTableData,
-            bloc: _userBloc,
-            classificationId: 'AppAdmin',
-            context: context,
-            items: users,
-            extra: widget.role,
-          );
-          return TableView.builder(
-            diagonalDragBehavior: DiagonalDragBehavior.free,
-            verticalDetails: ScrollableDetails.vertical(
-              controller: _scrollController,
-            ),
-            horizontalDetails: ScrollableDetails.horizontal(
-              controller: _horizontalController,
-            ),
-            cellBuilder: (context, vicinity) =>
-                tableViewCells[vicinity.row][vicinity.column],
-            columnBuilder: (index) => index >= tableViewCells[0].length
-                ? null
-                : TableSpan(
-                    padding: companyUserPadding,
-                    backgroundDecoration: getCompanyUserBackGround(
-                      context,
-                      index,
+          }).toList();
+
+          return StyledDataTable(
+            columns: getUserListColumns(context, role: widget.role),
+            rows: rows,
+            isLoading: _isLoading && users.isEmpty,
+            scrollController: _scrollController,
+            rowHeight: isPhone ? 72 : 56,
+            onRowTap: (index) {
+              showDialog(
+                barrierDismissible: true,
+                context: context,
+                builder: (BuildContext context) {
+                  return Dismissible(
+                    key: const Key('userItem'),
+                    direction: DismissDirection.startToEnd,
+                    child: BlocProvider.value(
+                      value: _userBloc,
+                      child: UserDialogStateFull(user: users[index]),
                     ),
-                    extent: FixedTableSpanExtent(fieldWidths[index]),
-                  ),
-            pinnedColumnCount: 1,
-            rowBuilder: (index) => index >= tableViewCells.length
-                ? null
-                : TableSpan(
-                    padding: companyUserPadding,
-                    backgroundDecoration: getCompanyUserBackGround(
-                      context,
-                      index,
-                    ),
-                    extent: FixedTableSpanExtent(rowHeight!),
-                    recognizerFactories: <Type, GestureRecognizerFactory>{
-                      TapGestureRecognizer:
-                          GestureRecognizerFactoryWithHandlers<
-                            TapGestureRecognizer
-                          >(
-                            () => TapGestureRecognizer(),
-                            (TapGestureRecognizer t) => t.onTap = () =>
-                                showDialog(
-                                  barrierDismissible: true,
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return index > users.length
-                                        ? const BottomLoader()
-                                        : Dismissible(
-                                            key: const Key('xxxxxx'),
-                                            direction:
-                                                DismissDirection.startToEnd,
-                                            child: BlocProvider.value(
-                                              value: _userBloc,
-                                              child: UserDialogStateFull(
-                                                user: users[index - 1],
-                                              ),
-                                            ),
-                                          );
-                                  },
-                                ),
-                          ),
-                    },
-                  ),
-            pinnedRowCount: 1,
+                  );
+                },
+              );
+            },
           );
         }
 
@@ -195,126 +148,111 @@ class UserListState extends State<UserList> {
         }
 
         blocBuilder(context, state) {
+          // Update loading state
+          _isLoading = state.status == UserStatus.loading;
+
           if (state.status == UserStatus.failure) {
             return FatalErrorForm(
               message: "Could not load ${widget.role.toString()}s!",
             );
-          } else {
-            users = state.users;
-            if (users.isNotEmpty && _scrollController.hasClients) {
-              Future.delayed(const Duration(milliseconds: 100), () {
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  if (_scrollController.hasClients) {
-                    _scrollController.jumpTo(currentScroll);
-                  }
-                });
-              });
-            }
-            hasReachedMax = state.hasReachedMax;
-            return Stack(
-              children: [
-                tableView(),
-                Positioned(
-                  right: right,
-                  bottom: bottom,
-                  child: GestureDetector(
-                    onPanUpdate: (details) {
-                      setState(() {
-                        right = right! - details.delta.dx;
-                        bottom -= details.delta.dy;
-                      });
-                    },
-                    child: Column(
-                      children: [
-                        FloatingActionButton(
-                          key: const Key("search"),
-                          heroTag: "userBtn1",
-                          onPressed: () async {
-                            // find findoc id to show
-                            await showDialog(
-                              barrierDismissible: true,
-                              context: context,
-                              builder: (BuildContext context) {
-                                // search separate from finDocBloc
-                                return BlocProvider.value(
-                                  value: context.read<DataFetchBloc<Users>>(),
-                                  child: const SearchUserList(),
-                                );
-                              },
-                            ).then(
-                              (value) async => value != null
-                                  ?
-                                    // show detail page
-                                    await showDialog(
-                                      barrierDismissible: true,
-                                      context: context,
-                                      builder: (BuildContext context) {
-                                        return BlocProvider.value(
-                                          value: _userBloc,
-                                          child: UserDialog(value),
-                                        );
-                                      },
-                                    )
-                                  : const SizedBox.shrink(),
-                            );
-                          },
-                          child: const Icon(Icons.search),
-                        ),
-                        const SizedBox(height: 10),
-                        FloatingActionButton(
-                          key: const Key("addNewUser"),
-                          heroTag: "userBtn2",
-                          onPressed: () async {
-                            await showDialog(
-                              barrierDismissible: true,
-                              context: context,
-                              builder: (BuildContext context) {
-                                return BlocProvider.value(
-                                  value: _userBloc,
-                                  child: UserDialogStateFull(
-                                    user: User(
-                                      role: widget.role,
-                                      company: widget.role == Role.company
-                                          ? _authBloc
-                                                .state
-                                                .authenticate!
-                                                .company
-                                          : Company(role: widget.role),
-                                    ),
-                                  ),
-                                );
-                              },
-                            );
-                          },
-                          tooltip: _localizations.addNew,
-                          child: const Icon(Icons.add),
-                        ),
-                        const SizedBox(height: 10),
-                        FloatingActionButton(
-                          heroTag: 'companyUserFiles',
-                          key: const Key("upDownload"),
-                          onPressed: () async {
-                            await showDialog(
-                              barrierDismissible: true,
-                              context: context,
-                              builder: (BuildContext context) {
-                                return BlocProvider.value(
-                                  value: _userBloc,
-                                  child: const CompanyUserFilesDialog(),
-                                );
-                              },
-                            );
-                          },
-                          tooltip: 'companies/users up/download',
-                          child: const Icon(Icons.file_copy),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            );
           }
+
+          users = state.users;
+          if (users.isNotEmpty && _scrollController.hasClients) {
+            Future.delayed(const Duration(milliseconds: 100), () {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (_scrollController.hasClients) {
+                  _scrollController.jumpTo(currentScroll);
+                }
+              });
+            });
+          }
+          hasReachedMax = state.hasReachedMax;
+
+          return Column(
+            children: [
+              // Filter bar with search
+              ListFilterBar(
+                searchHint: 'Search ${widget.role?.name ?? 'users'}...',
+                searchController: _searchController,
+                onSearchChanged: (value) {
+                  searchString = value;
+                  _userBloc.add(UserFetch(refresh: true, searchString: value));
+                },
+              ),
+              // Main content area with StyledDataTable
+              Expanded(
+                child: Stack(
+                  children: [
+                    tableView(),
+                    Positioned(
+                      right: right,
+                      bottom: bottom,
+                      child: GestureDetector(
+                        onPanUpdate: (details) {
+                          setState(() {
+                            right = right! - details.delta.dx;
+                            bottom -= details.delta.dy;
+                          });
+                        },
+                        child: Column(
+                          children: [
+                            FloatingActionButton(
+                              key: const Key("addNewUser"),
+                              heroTag: "userBtn2",
+                              onPressed: () async {
+                                await showDialog(
+                                  barrierDismissible: true,
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return BlocProvider.value(
+                                      value: _userBloc,
+                                      child: UserDialogStateFull(
+                                        user: User(
+                                          role: widget.role,
+                                          company: widget.role == Role.company
+                                              ? _authBloc
+                                                    .state
+                                                    .authenticate!
+                                                    .company
+                                              : Company(role: widget.role),
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                );
+                              },
+                              tooltip: _localizations.addNew,
+                              child: const Icon(Icons.add),
+                            ),
+                            const SizedBox(height: 10),
+                            FloatingActionButton(
+                              heroTag: 'companyUserFiles',
+                              key: const Key("upDownload"),
+                              onPressed: () async {
+                                await showDialog(
+                                  barrierDismissible: true,
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return BlocProvider.value(
+                                      value: _userBloc,
+                                      child: const CompanyUserFilesDialog(),
+                                    );
+                                  },
+                                );
+                              },
+                              tooltip: 'companies/users up/download',
+                              child: const Icon(Icons.file_copy),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          );
         }
 
         switch (widget.role) {
@@ -351,6 +289,7 @@ class UserListState extends State<UserList> {
   @override
   void dispose() {
     _scrollController.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 

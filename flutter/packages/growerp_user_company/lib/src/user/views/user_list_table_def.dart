@@ -153,15 +153,17 @@ TableData getUserListTableData(
       ),
     );
   } else {
-    // all items so show role
+    // all items so show role with StatusChip
+    final roleType = _getRoleStatusType(item.role);
     rowContent.add(
       TableRowContent(
         name: 'Role',
         width: 30,
-        value: Text(
-          item.role != null ? item.role!.name : Role.unknown.name,
+        value: StatusChip(
+          label: item.role != null ? item.role!.name : Role.unknown.name,
+          type: roleType,
+          size: StatusChipSize.small,
           key: Key('role$index'),
-          textAlign: TextAlign.left,
         ),
       ),
     );
@@ -182,4 +184,21 @@ TableData getUserListTableData(
   );
 
   return TableData(rowHeight: isPhone ? 65 : 20, rowContent: rowContent);
+}
+
+/// Maps a Role to an appropriate StatusType for display
+StatusType _getRoleStatusType(Role? role) {
+  if (role == null) return StatusType.neutral;
+  switch (role) {
+    case Role.company:
+      return StatusType.info;
+    case Role.customer:
+      return StatusType.success;
+    case Role.lead:
+      return StatusType.warning;
+    case Role.supplier:
+      return StatusType.info;
+    case Role.unknown:
+      return StatusType.neutral;
+  }
 }

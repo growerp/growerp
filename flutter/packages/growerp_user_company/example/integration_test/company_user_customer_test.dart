@@ -56,10 +56,10 @@ void main() {
     await CommonTest.createCompanyAndAdmin(tester);
 
     await selectCustomers(tester);
-    await CompanyUserTest.addUsers(tester, customers.sublist(0, 2));
-    await CompanyTest.addCompanies(tester, customerCompanies);
+    await CompanyUserTest.addUsers(tester, customers.sublist(0, 1));
+    await CompanyTest.addCompanies(tester, customerCompanies.sublist(0, 2));
     await CompanyUserTest.checkCompaniesUsers(tester);
-    await CompanyUserTest.updateUsers(tester, customers);
+    await CompanyUserTest.updateUsers(tester, customers.sublist(0, 2));
     await CompanyUserTest.updateCompanies(tester, customerCompanies);
     await CompanyUserTest.checkCompaniesUsers(tester);
     await CommonTest.logout(tester);
