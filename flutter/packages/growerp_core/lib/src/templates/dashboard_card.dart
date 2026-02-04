@@ -21,12 +21,22 @@ import '../domains/domains.dart';
 
 /// Premium dashboard card widget with glassmorphism, gradients, and animations.
 /// Features hover effects, icon backgrounds, and smooth transitions.
+///
+/// Optionally supports:
+/// - [actionLabel] and [onAction] for action-oriented quick actions
+/// - [stats] for displaying metrics below the title
 class DashboardCard extends StatefulWidget {
   final String title;
   final String iconName;
   final String? route;
   final String? stats;
   final int animationIndex;
+
+  /// Optional label for a quick action button (e.g., "View All", "Add New")
+  final String? actionLabel;
+
+  /// Callback when the action button is pressed
+  final VoidCallback? onAction;
 
   const DashboardCard({
     super.key,
@@ -35,6 +45,8 @@ class DashboardCard extends StatefulWidget {
     this.route,
     this.stats,
     this.animationIndex = 0,
+    this.actionLabel,
+    this.onAction,
   });
 
   @override
@@ -257,6 +269,43 @@ class _DashboardCardState extends State<DashboardCard>
                                       textAlign: TextAlign.center,
                                       overflow: TextOverflow.ellipsis,
                                       maxLines: 2,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                              // Optional action button for quick actions
+                              if (widget.actionLabel != null &&
+                                  !isAPhone(context)) ...[
+                                const SizedBox(height: 8),
+                                Material(
+                                  color: Colors.transparent,
+                                  child: InkWell(
+                                    onTap: widget.onAction,
+                                    borderRadius: BorderRadius.circular(6),
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 10,
+                                        vertical: 4,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: colorScheme.primary.withValues(
+                                          alpha: 0.15,
+                                        ),
+                                        borderRadius: BorderRadius.circular(6),
+                                        border: Border.all(
+                                          color: colorScheme.primary.withValues(
+                                            alpha: 0.3,
+                                          ),
+                                        ),
+                                      ),
+                                      child: Text(
+                                        widget.actionLabel!,
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w600,
+                                          color: colorScheme.primary,
+                                        ),
+                                      ),
                                     ),
                                   ),
                                 ),

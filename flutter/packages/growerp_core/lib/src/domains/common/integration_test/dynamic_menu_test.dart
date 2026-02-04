@@ -265,11 +265,9 @@ class DynamicMenuTest {
 
   /// Close the menu options dialog
   static Future<void> closeMenuItems(WidgetTester tester) async {
-    // Try to close via cancel key or Navigator.pop
-    if (await CommonTest.doesExistKey(tester, 'MenuItemListDialog')) {
-      // Press Escape or tap outside to close
-      await tester.sendKeyEvent(LogicalKeyboardKey.escape);
-      await tester.pumpAndSettle();
+    // Close the dialog using the cancel button if it's visible
+    if (await CommonTest.doesExistKey(tester, 'cancel')) {
+      await CommonTest.tapByKey(tester, 'cancel');
     }
   }
 
@@ -373,8 +371,6 @@ class DynamicMenuTest {
     // currently adding a tab will always return to the main menu of the app
 
     // Update the first menu option with the new children
-    // Navigate to menu config list
-    await selectMenuItems(tester);
     final updatedFirstOption = firstOption.copyWith(
       children: [...(firstOption.children ?? []), ...childMenuItems],
     );
@@ -385,6 +381,9 @@ class DynamicMenuTest {
     await PersistFunctions.persistTest(
       test.copyWith(menuItems: updatedMenuItemsList),
     );
+
+    // Ensure we're back on the main menu (no dialogs open)
+    await CommonTest.gotoMainMenu(tester);
   }
 
   /// Check that child menu items (tabs) were added to the first menu item
@@ -411,7 +410,13 @@ class DynamicMenuTest {
       debugPrint('Verified menu item tab: ${menuItem.title}');
     }
 
-    // Close the main menu
+    // Close the detail dialog first
+    await CommonTest.tapByKey(tester, 'cancel');
+
+    // Close the menu list dialog
+    await closeMenuItems(tester);
+
+    // Ensure we're back on the main menu
     await CommonTest.gotoMainMenu(tester);
   }
 
@@ -446,5 +451,11 @@ class DynamicMenuTest {
 
     // Close the menu option detail dialog
     await CommonTest.tapByKey(tester, 'cancel');
+
+    // Close the menu list dialog
+    await closeMenuItems(tester);
+
+    // Ensure we're back on the main menu
+    await CommonTest.gotoMainMenu(tester);
   }
 }

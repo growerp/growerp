@@ -108,8 +108,6 @@ class CompanyFormState extends State<CompanyDialog> {
   late CompanyBloc companyBloc;
   late AuthBloc authBloc;
   late UserCompanyLocalizations _localizations;
-  late double top;
-  double? right;
 
   @override
   void initState() {
@@ -153,7 +151,6 @@ class CompanyFormState extends State<CompanyDialog> {
 
     user = authenticate.user!;
     isAdmin = authenticate.user!.userGroup == UserGroup.admin;
-    top = widget.dialog == true ? -40 : -90;
   }
 
   @override
@@ -204,42 +201,24 @@ class CompanyFormState extends State<CompanyDialog> {
   Widget build(BuildContext context) {
     _localizations = UserCompanyLocalizations.of(context)!;
     isPhone = isAPhone(context);
-    right = right ?? (isPhone ? 20 : 150);
     return Dialog(
       key: Key('CompanyDialog${company.role?.name ?? Role.unknown}'),
       insetPadding: const EdgeInsets.all(10),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      child: Stack(
-        children: [
-          widget.dialog == true
-              ? popUp(
-                  context: context,
-                  title: company.partyId == null
-                      ? _localizations.newCompany
-                      : _localizations.companyRoleDetail(
-                          _selectedRole.value,
-                          company.pseudoId ?? '',
-                        ),
-                  width: isPhone ? 400 : 900,
-                  height: isPhone ? 700 : 750,
-                  child: listChild(),
-                )
-              : listChild(),
-          Positioned(
-            right: right,
-            top: top,
-            child: GestureDetector(
-              onPanUpdate: (details) {
-                setState(() {
-                  top += details.delta.dy;
-                  right = right! - details.delta.dx;
-                });
-              },
-              child: ImageButtons(_scrollController, onImageButtonPressed),
-            ),
-          ),
-        ],
-      ),
+      child: widget.dialog == true
+          ? popUp(
+              context: context,
+              title: company.partyId == null
+                  ? _localizations.newCompany
+                  : _localizations.companyRoleDetail(
+                      _selectedRole.value,
+                      company.pseudoId ?? '',
+                    ),
+              width: isPhone ? 400 : 900,
+              height: isPhone ? 700 : 750,
+              child: listChild(),
+            )
+          : listChild(),
     );
   }
 
@@ -764,6 +743,7 @@ class CompanyFormState extends State<CompanyDialog> {
     }
 
     return CompanyForm(
+      key: const Key('CompanyForm'),
       companyDialogFormKey: _companyDialogFormKey,
       scrollController: _scrollController,
       company: company,
@@ -773,6 +753,18 @@ class CompanyFormState extends State<CompanyDialog> {
       updateButton: updateButton,
       widget: widget,
       employeeChips: employeeChips,
+      onUploadTap: () {
+        if (Platform.isAndroid || Platform.isIOS) {
+          onImageButtonPressed(ImageSource.gallery, context: context);
+        }
+      },
+      onRemove: (_imageFile != null || company.image != null)
+          ? () {
+              setState(() {
+                _imageFile = null;
+              });
+            }
+          : null,
     );
   }
 }
@@ -789,6 +781,8 @@ class CompanyForm extends StatelessWidget {
     required this.updateButton,
     required this.widget,
     required this.employeeChips,
+    this.onUploadTap,
+    this.onRemove,
   }) : _companyDialogFormKey = companyDialogFormKey,
        _scrollController = scrollController,
        _imageFile = imageFile;
@@ -802,6 +796,8 @@ class CompanyForm extends StatelessWidget {
   final Widget updateButton;
   final CompanyDialog widget;
   final List<Widget> employeeChips;
+  final VoidCallback? onUploadTap;
+  final VoidCallback? onRemove;
 
   @override
   Widget build(BuildContext context) {
@@ -817,23 +813,20 @@ class CompanyForm extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(5, 10, 5, 5),
           child: Column(
             children: [
-              CircleAvatar(
-                radius: 60,
-                child: _imageFile != null
-                    ? kIsWeb
-                          ? Image.network(_imageFile!.path, scale: 0.3)
-                          : Image.file(File(_imageFile!.path), scale: 0.3)
-                    : company.image != null
-                    ? Image.memory(company.image!, scale: 0.3)
-                    : Text(
-                        company.name != null
-                            ? company.name!.substring(0, 1)
-                            : '?',
-                        style: const TextStyle(
-                          fontSize: 30,
-                          color: Colors.black,
-                        ),
-                      ),
+              StyledImageUpload(
+                label: 'Company Logo',
+                subtitle: 'Click to upload. JPG, PNG up to 2MB',
+                image: _imageFile != null
+                    ? (kIsWeb
+                          ? NetworkImage(_imageFile!.path)
+                          : FileImage(File(_imageFile!.path)))
+                    : null,
+                imageBytes: _imageFile == null ? company.image : null,
+                fallbackText: company.name != null
+                    ? company.name!.substring(0, 1)
+                    : '?',
+                onUploadTap: onUploadTap,
+                onRemove: onRemove,
               ),
               const SizedBox(height: 10),
               Column(children: (rows.isEmpty ? column : rows)),

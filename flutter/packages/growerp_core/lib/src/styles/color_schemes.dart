@@ -89,3 +89,69 @@ const darkColorScheme = ColorScheme(
   outlineVariant: Color(0xFF3F4946),
   scrim: Color(0xFF000000),
 );
+
+// =============================================================================
+// Semantic Colors for Status Indicators
+// =============================================================================
+
+/// Semantic color tokens for status indicators throughout the app.
+/// Use these colors for consistent meaning across all screens.
+class SemanticColors {
+  // Light mode semantic colors
+  static const Color successLight = Color(0xFF10B981);
+  static const Color warningLight = Color(0xFFF59E0B);
+  static const Color dangerLight = Color(0xFFEF4444);
+  static const Color infoLight = Color(0xFF3B82F6);
+
+  // Dark mode semantic colors
+  static const Color successDark = Color(0xFF34D399);
+  static const Color warningDark = Color(0xFFFBBF24);
+  static const Color dangerDark = Color(0xFFF87171);
+  static const Color infoDark = Color(0xFF60A5FA);
+
+  // On-colors (text/icons on semantic backgrounds)
+  static const Color onSuccess = Color(0xFFFFFFFF);
+  static const Color onWarning = Color(0xFF000000);
+  static const Color onDanger = Color(0xFFFFFFFF);
+  static const Color onInfo = Color(0xFFFFFFFF);
+
+  /// Get the appropriate semantic color based on brightness
+  static Color success(Brightness brightness) =>
+      brightness == Brightness.dark ? successDark : successLight;
+
+  static Color warning(Brightness brightness) =>
+      brightness == Brightness.dark ? warningDark : warningLight;
+
+  static Color danger(Brightness brightness) =>
+      brightness == Brightness.dark ? dangerDark : dangerLight;
+
+  static Color info(Brightness brightness) =>
+      brightness == Brightness.dark ? infoDark : infoLight;
+}
+
+/// Extension on ColorScheme to provide semantic colors
+extension SemanticColorScheme on ColorScheme {
+  /// Success color - for completed, paid, shipped states
+  Color get success => SemanticColors.success(brightness);
+
+  /// Warning color - for pending, attention needed states
+  Color get warning => SemanticColors.warning(brightness);
+
+  /// Danger color - for overdue, cancelled, error states
+  Color get danger => SemanticColors.danger(brightness);
+
+  /// Info color - for informational, in-progress states
+  Color get info => SemanticColors.info(brightness);
+
+  /// Text color on success background
+  Color get onSuccess => SemanticColors.onSuccess;
+
+  /// Text color on warning background
+  Color get onWarning => SemanticColors.onWarning;
+
+  /// Text color on danger background
+  Color get onDanger => SemanticColors.onDanger;
+
+  /// Text color on info background
+  Color get onInfo => SemanticColors.onInfo;
+}

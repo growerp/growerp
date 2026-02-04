@@ -110,9 +110,6 @@ class UserDialogState extends State<UserDialogStateFull> {
   late User currentUser;
   late bool isAdmin;
   late String _classificationId;
-  late double bottom;
-  late double top;
-  double? right;
   late bool isVisible;
 
   @override
@@ -151,7 +148,6 @@ class UserDialogState extends State<UserDialogStateFull> {
     isAdmin =
         context.read<AuthBloc>().state.authenticate!.user!.userGroup ==
         UserGroup.admin;
-    top = -100;
 
     isVisible = true;
     _scrollController.addListener(() {
@@ -226,7 +222,6 @@ class UserDialogState extends State<UserDialogStateFull> {
   Widget build(BuildContext context) {
     var localizations = UserCompanyLocalizations.of(context)!;
     isPhone = ResponsiveBreakpoints.of(context).isMobile;
-    right = right ?? (isPhone ? 20 : 40);
     String title = '';
     if (_selectedRole == Role.company) {
       title =
@@ -251,96 +246,45 @@ class UserDialogState extends State<UserDialogStateFull> {
           child: Scaffold(
             backgroundColor: Colors.transparent,
 
-            body: Stack(
-              children: [
-                BlocConsumer<UserBloc, UserState>(
-                  listener: (context, state) {
-                    if (state.status == UserStatus.failure) {
-                      HelperFunctions.showMessage(
-                        context,
-                        state.message,
-                        Colors.red,
+            body: BlocConsumer<UserBloc, UserState>(
+              listener: (context, state) {
+                if (state.status == UserStatus.failure) {
+                  HelperFunctions.showMessage(
+                    context,
+                    state.message,
+                    Colors.red,
+                  );
+                }
+                if (state.status == UserStatus.success) {
+                  // Update AuthBloc if this is the logged-in user
+                  if (state.users.isNotEmpty) {
+                    final updatedUser = state.users.first;
+                    final authBloc = context.read<AuthBloc>();
+                    final currentAuth = authBloc.state.authenticate;
+                    if (currentAuth?.user?.partyId == updatedUser.partyId) {
+                      // Update the authenticate state with the new user data
+                      authBloc.add(
+                        AuthUpdateLocal(
+                          currentAuth!.copyWith(user: updatedUser),
+                        ),
                       );
                     }
-                    if (state.status == UserStatus.success) {
-                      // Update AuthBloc if this is the logged-in user
-                      if (state.users.isNotEmpty) {
-                        final updatedUser = state.users.first;
-                        final authBloc = context.read<AuthBloc>();
-                        final currentAuth = authBloc.state.authenticate;
-                        if (currentAuth?.user?.partyId == updatedUser.partyId) {
-                          // Update the authenticate state with the new user data
-                          authBloc.add(
-                            AuthUpdateLocal(
-                              currentAuth!.copyWith(user: updatedUser),
-                            ),
-                          );
-                        }
-                      }
-                      if (widget.dialog) {
-                        Navigator.of(context).pop(
-                          state.users.isNotEmpty ? state.users.first : null,
-                        );
-                      } else {
-                        context.go('/');
-                      }
-                    }
-                  },
-                  builder: (context, state) {
-                    if (state.status == UserStatus.loading) {
-                      return const LoadingIndicator();
-                    }
-                    return listChild(localizations);
-                  },
-                ),
-                Positioned(
-                  right: right,
-                  top: top,
-                  child: GestureDetector(
-                    onPanUpdate: (details) {
-                      setState(() {
-                        top += details.delta.dy;
-                        right = right! - details.delta.dx;
-                      });
-                    },
-                    child: Column(
-                      children: [
-                        ImageButtons(_scrollController, _onImageButtonPressed),
-                        /*                        SizedBox(height: isPhone ? 330 : 280),
-                        Visibility(
-                          visible: isVisible,
-                          child: FloatingActionButton(
-                            key: const Key("events"),
-                            tooltip: localizations.userEvents,
-                            heroTag: "userEvents",
-                            onPressed: () async => await showDialog(
-                              barrierDismissible: true,
-                              context: context,
-                              builder: (BuildContext context) {
-                                return Dialog(
-                                  child: popUp(
-                                    context: context,
-                                    title: (localizations.userEvents),
-                                    child: ActivityList(
-                                      ActivityType.event,
-                                      companyUser: CompanyUser.tryParse(
-                                        widget.user,
-                                      ),
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-                            child: const Icon(Icons.event_available),
-                          ),
-                        ),
-*/
-                        const SizedBox(height: 10),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
+                  }
+                  if (widget.dialog) {
+                    Navigator.of(
+                      context,
+                    ).pop(state.users.isNotEmpty ? state.users.first : null);
+                  } else {
+                    context.go('/');
+                  }
+                }
+              },
+              builder: (context, state) {
+                if (state.status == UserStatus.loading) {
+                  return const LoadingIndicator();
+                }
+                return listChild(localizations);
+              },
             ),
           ),
         ),
@@ -927,18 +871,30 @@ class UserDialogState extends State<UserDialogStateFull> {
         child: Column(
           children: <Widget>[
             const SizedBox(height: 10),
-            CircleAvatar(
-              radius: 60,
-              child: _imageFile != null
-                  ? kIsWeb
-                        ? Image.network(_imageFile!.path, scale: 0.3)
-                        : Image.file(File(_imageFile!.path), scale: 0.3)
-                  : widget.user.image != null
-                  ? Image.memory(widget.user.image!, scale: 0.3)
-                  : Text(
-                      widget.user.firstName?.substring(0, 1) ?? '',
-                      style: const TextStyle(fontSize: 30),
-                    ),
+            StyledImageUpload(
+              label: 'Profile Photo',
+              subtitle: 'Click to upload. JPG, PNG up to 2MB',
+              image: _imageFile != null
+                  ? (kIsWeb
+                        ? NetworkImage(_imageFile!.path)
+                        : FileImage(File(_imageFile!.path)))
+                  : null,
+              imageBytes: _imageFile == null ? widget.user.image : null,
+              fallbackText: widget.user.firstName?.substring(0, 1) ?? '',
+              onUploadTap: () {
+                // Trigger image picker
+                if (Platform.isAndroid || Platform.isIOS) {
+                  _onImageButtonPressed(ImageSource.gallery, context: context);
+                }
+              },
+              onRemove: (_imageFile != null || widget.user.image != null)
+                  ? () {
+                      setState(() {
+                        _imageFile = null;
+                        _image = null;
+                      });
+                    }
+                  : null,
             ),
             Column(children: rows.isNotEmpty ? rows : column),
           ],

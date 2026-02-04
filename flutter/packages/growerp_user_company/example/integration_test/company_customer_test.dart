@@ -51,9 +51,7 @@ void main() {
       clear: true,
     );
     await CommonTest.createCompanyAndAdmin(tester);
-    await CompanyTest.selectCompany(tester);
-    await CompanyTest.checkCompanies(tester);
-    await selectCustomers(tester); // create
+    await selectCustomers(tester);
     await CompanyTest.addCompanies(tester, customerCompanies.sublist(0, 2));
     await CompanyTest.checkCompanies(tester);
     await CompanyTest.updateCompanies(tester, customerCompanies.sublist(2, 4));

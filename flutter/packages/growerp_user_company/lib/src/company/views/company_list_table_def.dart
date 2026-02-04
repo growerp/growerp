@@ -106,7 +106,12 @@ TableData getTableData(
       TableRowContent(
         name: 'Role',
         width: 10,
-        value: Text(item.role!.value, key: Key('role$index')),
+        value: StatusChip(
+          label: item.role?.name ?? 'unknown',
+          type: _getCompanyRoleStatusType(item.role),
+          size: StatusChipSize.small,
+          key: Key('role$index'),
+        ),
       ),
     );
   }
@@ -161,4 +166,21 @@ TableData getTableData(
   );
 
   return TableData(rowHeight: isPhone ? 45 : 20, rowContent: rowContent);
+}
+
+/// Maps a Role to an appropriate StatusType for company display
+StatusType _getCompanyRoleStatusType(Role? role) {
+  if (role == null) return StatusType.neutral;
+  switch (role) {
+    case Role.company:
+      return StatusType.info;
+    case Role.customer:
+      return StatusType.success;
+    case Role.lead:
+      return StatusType.warning;
+    case Role.supplier:
+      return StatusType.info;
+    case Role.unknown:
+      return StatusType.neutral;
+  }
 }

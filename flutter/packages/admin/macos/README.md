@@ -30,5 +30,5 @@ pod repo update
 pod install --verbose
 cd ..
 flutter build macos --config-only
-open macos/Runner.xcodeproj
+open macos/Runner.xcworkspace
 

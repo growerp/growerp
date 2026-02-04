@@ -72,12 +72,29 @@ class TableRowContent {
     );
     if (rowIndex == 0) {
       for (final fieldContent in tableData.rowContent) {
-        // add header
+        // add header with styled text
         contentRow.add(
           TableViewCell(
             child: fieldContent.name is String
-                ? Text(fieldContent.name, textAlign: TextAlign.left)
-                : fieldContent.name as Widget,
+                ? Text(
+                    fieldContent.name,
+                    textAlign: TextAlign.left,
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      letterSpacing: 0.3,
+                    ),
+                  )
+                : DefaultTextStyle.merge(
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      letterSpacing: 0.3,
+                    ),
+                    child: fieldContent.name as Widget,
+                  ),
           ),
         );
       }

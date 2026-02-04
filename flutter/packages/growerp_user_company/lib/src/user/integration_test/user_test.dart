@@ -88,10 +88,15 @@ class UserTest {
     if (test.users.last.role == Role.company) {
       count++;
     }
+    // Clear any active search filter to show all users
+    await CommonTest.enterText(tester, 'searchField', '');
+    await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
     expect(
       find.byKey(const Key('userItem'), skipOffstage: false),
       findsNWidgets(count),
     );
+    // Scroll the delete button into view before tapping
+    await CommonTest.dragUntil(tester, key: 'delete${count - 1}');
     await CommonTest.tapByKey(
       tester,
       'delete${count - 1}',
@@ -249,6 +254,11 @@ class UserTest {
           loginName: user.loginName!.replaceFirst('XXX', '${seq++}'),
         );
         await CommonTest.enterText(tester, 'loginName', user.loginName!);
+        await CommonTest.dragUntil(
+          tester,
+          key: 'userGroup',
+          listViewName: 'userDialogListView',
+        );
         await CommonTest.enterDropDown(
           tester,
           'userGroup',

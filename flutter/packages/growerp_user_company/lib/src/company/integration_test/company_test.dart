@@ -36,21 +36,26 @@ class CompanyTest {
     List<Company> newCompanies,
   ) async {
     SaveTest old = await PersistFunctions.getTest();
+    // Create a deep copy of newCompanies to avoid reference issues
+    List<Company> updatedCompanies = [];
     // copy pseudo id to new data
     for (int x = 0; x < newCompanies.length; x++) {
-      newCompanies[x] = newCompanies[x].copyWith(
+      Company company = newCompanies[x].copyWith(
         pseudoId: old.companies[x].pseudoId,
       );
-      List<User> newEmployees = [];
-      for (int y = 0; y < newCompanies[x].employees.length; y++) {
-        User newEmployee = newCompanies[x].employees[y].copyWith(
+      List<User> updatedEmployees = [];
+      for (int y = 0; y < company.employees.length; y++) {
+        User newEmployee = company.employees[y].copyWith(
           pseudoId: old.companies[x].employees[y].pseudoId,
         );
-        newEmployees.add(newEmployee);
+        updatedEmployees.add(newEmployee);
       }
-      newCompanies[x] = newCompanies[x].copyWith(employees: newEmployees);
+      company = company.copyWith(employees: updatedEmployees);
+      updatedCompanies.add(company);
     }
-    await PersistFunctions.persistTest(old.copyWith(companies: newCompanies));
+    await PersistFunctions.persistTest(
+      old.copyWith(companies: updatedCompanies),
+    );
     await enterCompanyData(tester);
   }
 

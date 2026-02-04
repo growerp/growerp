@@ -13,18 +13,17 @@
  */
 
 // ignore_for_file: exhaustive_cases
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:growerp_models/growerp_models.dart';
-import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
 import 'package:growerp_user_company/l10n/generated/user_company_localizations.dart';
 
 import '../../common/common.dart';
 import '../company_user.dart';
 import 'company_dialog.dart';
+import 'company_user_list_styled_data.dart';
 import 'user_dialog.dart';
 
 class CompanyUserList extends StatefulWidget {
@@ -37,13 +36,14 @@ class CompanyUserList extends StatefulWidget {
 
 class CompanyUserListState extends State<CompanyUserList> {
   final _scrollController = ScrollController();
-  final _horizontalController = ScrollController();
+  final _searchController = TextEditingController();
   final double _scrollThreshold = 100.0;
   late CompanyUserBloc _companyUserBloc;
   List<CompanyUser> companiesUsers = const <CompanyUser>[];
   bool showSearchField = false;
   String searchString = '';
   bool hasReachedMax = false;
+  bool _isLoading = true;
   late bool isPhone;
   int limit =
       (WidgetsBinding
@@ -91,95 +91,43 @@ class CompanyUserListState extends State<CompanyUserList> {
     return Builder(
       builder: (BuildContext context) {
         Widget tableView() {
-          if (companiesUsers.isEmpty) {
-            return Center(
-              heightFactor: 20,
-              child: Text(
-                localizations.noCompaniesUsersFound,
-                style: const TextStyle(fontSize: 20.0),
-              ),
+          // Build rows for StyledDataTable
+          final rows = companiesUsers.map((companyUser) {
+            final index = companiesUsers.indexOf(companyUser);
+            return getCompanyUserListRow(
+              context: context,
+              companyUser: companyUser,
+              index: index,
+              bloc: _companyUserBloc,
             );
-          }
-          // get table data formatted for tableView
-          var (
-            List<List<TableViewCell>> tableViewCells,
-            List<double> fieldWidths,
-            double? rowHeight,
-          ) = get2dTableData<CompanyUser>(
-            getCompanyUserTableData,
-            bloc: _companyUserBloc,
-            classificationId: 'AppAdmin',
-            context: context,
-            items: companiesUsers,
-          );
-          return TableView.builder(
-            diagonalDragBehavior: DiagonalDragBehavior.free,
-            verticalDetails: ScrollableDetails.vertical(
-              controller: _scrollController,
-            ),
-            horizontalDetails: ScrollableDetails.horizontal(
-              controller: _horizontalController,
-            ),
-            cellBuilder: (context, vicinity) =>
-                tableViewCells[vicinity.row][vicinity.column],
-            columnBuilder: (index) => index >= tableViewCells[0].length
-                ? null
-                : TableSpan(
-                    padding: companyUserPadding,
-                    backgroundDecoration: getCompanyUserBackGround(
-                      context,
-                      index,
+          }).toList();
+
+          return StyledDataTable(
+            columns: getCompanyUserListColumns(context),
+            rows: rows,
+            isLoading: _isLoading && companiesUsers.isEmpty,
+            scrollController: _scrollController,
+            rowHeight: isPhone ? 64 : 56,
+            onRowTap: (index) {
+              showDialog(
+                barrierDismissible: true,
+                context: context,
+                builder: (BuildContext context) {
+                  return Dismissible(
+                    key: const Key('companyUserItem'),
+                    direction: DismissDirection.startToEnd,
+                    child: BlocProvider.value(
+                      value: _companyUserBloc,
+                      child: companiesUsers[index].type == PartyType.company
+                          ? ShowCompanyDialog(
+                              companiesUsers[index].getCompany()!,
+                            )
+                          : ShowUserDialog(companiesUsers[index].getUser()!),
                     ),
-                    extent: FixedTableSpanExtent(fieldWidths[index]),
-                  ),
-            pinnedColumnCount: 1,
-            rowBuilder: (index) => index >= tableViewCells.length
-                ? null
-                : TableSpan(
-                    padding: companyUserPadding,
-                    backgroundDecoration: getCompanyUserBackGround(
-                      context,
-                      index,
-                    ),
-                    extent: FixedTableSpanExtent(rowHeight!),
-                    recognizerFactories: <Type, GestureRecognizerFactory>{
-                      TapGestureRecognizer:
-                          GestureRecognizerFactoryWithHandlers<
-                            TapGestureRecognizer
-                          >(
-                            () => TapGestureRecognizer(),
-                            (
-                              TapGestureRecognizer t,
-                            ) => t.onTap = () => showDialog(
-                              barrierDismissible: true,
-                              context: context,
-                              builder: (BuildContext context) {
-                                return index > companiesUsers.length
-                                    ? const BottomLoader()
-                                    : Dismissible(
-                                        key: const Key('companyUserItem'),
-                                        direction: DismissDirection.startToEnd,
-                                        child: BlocProvider.value(
-                                          value: _companyUserBloc,
-                                          child:
-                                              companiesUsers[index - 1].type ==
-                                                  PartyType.company
-                                              ? ShowCompanyDialog(
-                                                  companiesUsers[index - 1]
-                                                      .getCompany()!,
-                                                )
-                                              : ShowUserDialog(
-                                                  companiesUsers[index - 1]
-                                                      .getUser()!,
-                                                ),
-                                        ),
-                                      );
-                              },
-                            ),
-                          ),
-                    },
-                  ),
-            pinnedRowCount: 1,
+                  );
+                },
+              );
+            },
           );
         }
 
@@ -210,152 +158,143 @@ class CompanyUserListState extends State<CompanyUserList> {
         }
 
         blocBuilder(context, state) {
+          // Update loading state
+          _isLoading = state.status == CompanyUserStatus.loading;
+
           if (state.status == CompanyUserStatus.failure) {
             return FatalErrorForm(
               message: localizations.couldNotLoad(widget.role.toString()),
             );
-          } else {
-            companiesUsers = state.companiesUsers;
-            // Only jump to scroll position if the list is not empty and controller is attached
-            if (companiesUsers.isNotEmpty) {
-              Future.delayed(const Duration(milliseconds: 100), () {
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  if (_scrollController.hasClients) {
-                    _scrollController.jumpTo(currentScroll);
-                  }
-                });
-              });
-            }
-            hasReachedMax = state.hasReachedMax;
-            return Stack(
-              children: [
-                tableView(),
-                Positioned(
-                  right: right,
-                  bottom: bottom,
-                  child: GestureDetector(
-                    onPanUpdate: (details) {
-                      setState(() {
-                        right = right! - details.delta.dx;
-                        bottom -= details.delta.dy;
-                      });
-                    },
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        FloatingActionButton(
-                          key: const Key("search"),
-                          heroTag: "companUserBtn1",
-                          onPressed: () async {
-                            await showDialog(
-                              barrierDismissible: true,
-                              context: context,
-                              builder: (BuildContext context) {
-                                return const SearchCompanyUserList();
-                              },
-                            ).then(
-                              (value) async => value == null
-                                  ? const SizedBox.shrink()
-                                  : await showDialog(
-                                      barrierDismissible: true,
-                                      context: context,
-                                      builder: (BuildContext context) {
-                                        return BlocProvider.value(
-                                          value: _companyUserBloc,
-                                          child: value.type == PartyType.company
-                                              ? ShowCompanyDialog(
-                                                  value.getCompany()!,
-                                                )
-                                              : ShowUserDialog(
-                                                  value.getUser()!,
-                                                ),
-                                        );
-                                      },
-                                    ),
-                            );
-                          },
-                          child: const Icon(Icons.search),
-                        ),
-                        const SizedBox(height: 10),
-                        FloatingActionButton(
-                          key: const Key("addNewCompany"),
-                          heroTag: "companUserBtn2",
-                          onPressed: () async {
-                            await showDialog(
-                              barrierDismissible: true,
-                              context: context,
-                              builder: (BuildContext context) {
-                                return BlocProvider.value(
-                                  value: _companyUserBloc,
-                                  child: CompanyDialog(
-                                    Company(
-                                      partyId: '_NEW_',
-                                      role: widget.role,
-                                    ),
-                                    dialog: true,
-                                  ),
-                                );
-                              },
-                            );
-                          },
-                          tooltip: localizations.addNew,
-                          child: Column(
-                            children: [
-                              const Icon(Icons.add),
-                              Text(localizations.org),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        FloatingActionButton(
-                          key: const Key("addNewUser"),
-                          heroTag: "companUserBtn3",
-                          onPressed: () async {
-                            await showDialog(
-                              barrierDismissible: true,
-                              context: context,
-                              builder: (BuildContext context) {
-                                return BlocProvider.value(
-                                  value: _companyUserBloc,
-                                  child: UserDialog(User(role: widget.role)),
-                                );
-                              },
-                            );
-                          },
-                          tooltip: localizations.addNew,
-                          child: Column(
-                            children: [
-                              const Icon(Icons.add),
-                              Text(localizations.person),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        FloatingActionButton(
-                          heroTag: 'companyUserFiles',
-                          key: const Key("upDownload"),
-                          onPressed: () async {
-                            await showDialog(
-                              barrierDismissible: true,
-                              context: context,
-                              builder: (BuildContext context) {
-                                return BlocProvider.value(
-                                  value: _companyUserBloc,
-                                  child: const CompanyUserFilesDialog(),
-                                );
-                              },
-                            );
-                          },
-                          tooltip: localizations.companyUserUpDown,
-                          child: const Icon(Icons.file_copy),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            );
           }
+
+          companiesUsers = state.companiesUsers;
+          // Only jump to scroll position if the list is not empty and controller is attached
+          if (companiesUsers.isNotEmpty && _scrollController.hasClients) {
+            Future.delayed(const Duration(milliseconds: 100), () {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (_scrollController.hasClients) {
+                  _scrollController.jumpTo(currentScroll);
+                }
+              });
+            });
+          }
+          hasReachedMax = state.hasReachedMax;
+
+          return Column(
+            children: [
+              // Filter bar with search
+              ListFilterBar(
+                searchHint:
+                    'Search ${widget.role?.name ?? 'companies/users'}...',
+                searchController: _searchController,
+                onSearchChanged: (value) {
+                  searchString = value;
+                  _companyUserBloc.add(
+                    CompanyUserFetch(refresh: true, searchString: value),
+                  );
+                },
+              ),
+              // Main content area with StyledDataTable
+              Expanded(
+                child: Stack(
+                  children: [
+                    tableView(),
+                    Positioned(
+                      right: right,
+                      bottom: bottom,
+                      child: GestureDetector(
+                        onPanUpdate: (details) {
+                          setState(() {
+                            right = right! - details.delta.dx;
+                            bottom -= details.delta.dy;
+                          });
+                        },
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            FloatingActionButton(
+                              key: const Key("addNewCompany"),
+                              heroTag: "companUserBtn2",
+                              onPressed: () async {
+                                await showDialog(
+                                  barrierDismissible: true,
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return BlocProvider.value(
+                                      value: _companyUserBloc,
+                                      child: CompanyDialog(
+                                        Company(
+                                          partyId: '_NEW_',
+                                          role: widget.role,
+                                        ),
+                                        dialog: true,
+                                      ),
+                                    );
+                                  },
+                                );
+                              },
+                              tooltip: localizations.addNew,
+                              child: Column(
+                                children: [
+                                  const Icon(Icons.add),
+                                  Text(localizations.org),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            FloatingActionButton(
+                              key: const Key("addNewUser"),
+                              heroTag: "companUserBtn3",
+                              onPressed: () async {
+                                await showDialog(
+                                  barrierDismissible: true,
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return BlocProvider.value(
+                                      value: _companyUserBloc,
+                                      child: UserDialog(
+                                        User(role: widget.role),
+                                      ),
+                                    );
+                                  },
+                                );
+                              },
+                              tooltip: localizations.addNew,
+                              child: Column(
+                                children: [
+                                  const Icon(Icons.add),
+                                  Text(localizations.person),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            FloatingActionButton(
+                              heroTag: 'companyUserFiles',
+                              key: const Key("upDownload"),
+                              onPressed: () async {
+                                await showDialog(
+                                  barrierDismissible: true,
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return BlocProvider.value(
+                                      value: _companyUserBloc,
+                                      child: const CompanyUserFilesDialog(),
+                                    );
+                                  },
+                                );
+                              },
+                              tooltip: localizations.companyUserUpDown,
+                              child: const Icon(Icons.file_copy),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          );
         }
 
         switch (widget.role) {
@@ -387,6 +326,7 @@ class CompanyUserListState extends State<CompanyUserList> {
   @override
   void dispose() {
     _scrollController.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 

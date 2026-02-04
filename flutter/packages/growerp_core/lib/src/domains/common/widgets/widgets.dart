@@ -13,3 +13,11 @@ export 'snack_bar.dart';
 export 'top_app.dart';
 export 'popup.dart';
 export 'ai_prompt_dialog.dart';
+
+// New design system widgets
+export 'status_chip.dart';
+export 'skeleton_loader.dart';
+export 'sparkline_chart.dart';
+export 'list_filter_bar.dart';
+export 'styled_data_table.dart';
+export 'styled_detail_card.dart';
