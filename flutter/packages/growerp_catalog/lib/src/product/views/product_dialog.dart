@@ -60,8 +60,6 @@ class ProductDialogState extends State<ProductDialog> {
   late String currencyId;
   late Currency _currencySelected;
   late String currencySymbol;
-  late double top;
-  double? right;
 
   @override
   void initState() {
@@ -87,7 +85,6 @@ class ProductDialogState extends State<ProductDialog> {
     currencyId = _currencySelected.currencyId!;
     _selectedProductTypeId = widget.product.productTypeId;
     _productDialogFormKey = GlobalKey<FormBuilderState>();
-    top = -100;
   }
 
   @override
@@ -138,7 +135,6 @@ class ProductDialogState extends State<ProductDialog> {
   Widget build(BuildContext context) {
     bool isPhone = ResponsiveBreakpoints.of(context).isMobile;
     var catalogLocalizations = CatalogLocalizations.of(context)!;
-    right = right ?? (isPhone ? 20 : 150);
     if (classificationId == 'AppHotel') {
       _selectedProductTypeId = catalogLocalizations.rental;
     }
@@ -312,48 +308,42 @@ class ProductDialogState extends State<ProductDialog> {
       );
     }
 
-    return Stack(
-      children: [
-        FormBuilder(
-          key: _productDialogFormKey,
-          child: SingleChildScrollView(
-            key: const Key('listView'),
-            controller: _scrollController,
-            child: Column(
-              children: <Widget>[
-                CircleAvatar(
-                  radius: 60,
-                  child: _imageFile != null
-                      ? foundation.kIsWeb
-                            ? Image.network(_imageFile!.path, scale: 0.3)
-                            : Image.file(File(_imageFile!.path), scale: 0.3)
-                      : widget.product.image != null
-                      ? Image.memory(widget.product.image!, scale: 0.3)
-                      : Text(
-                          widget.product.productName?.substring(0, 1) ?? '',
-                          style: const TextStyle(fontSize: 30),
-                        ),
-                ),
-                const SizedBox(height: 10),
-                Column(children: (rows.isEmpty ? column : rows)),
-              ],
+    return FormBuilder(
+      key: _productDialogFormKey,
+      child: SingleChildScrollView(
+        key: const Key('listView'),
+        controller: _scrollController,
+        child: Column(
+          children: <Widget>[
+            StyledImageUpload(
+              label: 'Product Image',
+              subtitle: 'Click to upload. JPG, PNG up to 2MB',
+              image: _imageFile != null
+                  ? (foundation.kIsWeb
+                        ? NetworkImage(_imageFile!.path)
+                        : FileImage(File(_imageFile!.path)))
+                  : null,
+              imageBytes: _imageFile == null ? widget.product.image : null,
+              fallbackText: widget.product.productName?.substring(0, 1) ?? 'P',
+              onUploadTap: () {
+                // Trigger image picker
+                if (Platform.isAndroid || Platform.isIOS) {
+                  _onImageButtonPressed(ImageSource.gallery, context: context);
+                }
+              },
+              onRemove: (_imageFile != null || widget.product.image != null)
+                  ? () {
+                      setState(() {
+                        _imageFile = null;
+                      });
+                    }
+                  : null,
             ),
-          ),
+            const SizedBox(height: 10),
+            Column(children: (rows.isEmpty ? column : rows)),
+          ],
         ),
-        Positioned(
-          right: right,
-          top: top,
-          child: GestureDetector(
-            onPanUpdate: (details) {
-              setState(() {
-                top += details.delta.dy;
-                right = right! - details.delta.dx;
-              });
-            },
-            child: ImageButtons(_scrollController, _onImageButtonPressed),
-          ),
-        ),
-      ],
+      ),
     );
   }
 

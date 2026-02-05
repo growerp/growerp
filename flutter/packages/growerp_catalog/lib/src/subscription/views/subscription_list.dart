@@ -12,14 +12,13 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_catalog/growerp_catalog.dart';
-import 'package:growerp_catalog/src/subscription/views/search_subscription_list.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
-import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
+
+import 'subscription_list_styled_data.dart';
 
 class SubscriptionList extends StatefulWidget {
   const SubscriptionList({super.key});
@@ -29,15 +28,14 @@ class SubscriptionList extends StatefulWidget {
 
 class SubscriptionListState extends State<SubscriptionList> {
   final _scrollController = ScrollController();
-  final _horizontalController = ScrollController();
+  final _searchController = TextEditingController();
   late SubscriptionBloc _subscriptionBloc;
   late List<Subscription> subscriptions;
   late String classificationId;
   late String entityName;
   late bool started;
   late int limit;
-  late double bottom;
-  double? right;
+  String _searchQuery = '';
 
   @override
   void initState() {
@@ -48,90 +46,14 @@ class SubscriptionListState extends State<SubscriptionList> {
       ..add(const SubscriptionFetch(refresh: true));
     classificationId = context.read<String>();
     entityName = 'Subscription';
-    bottom = 50;
   }
 
   @override
   Widget build(BuildContext context) {
     var catalogLocalizations = CatalogLocalizations.of(context)!;
+    var coreLocalizations = CoreLocalizations.of(context)!;
     limit = (MediaQuery.of(context).size.height / 100).round();
-    right = right ?? (isAPhone(context) ? 20 : 50);
-
-    Widget tableView() {
-      if (subscriptions.isEmpty) {
-        return Center(
-          child: Text(
-            catalogLocalizations.noSubscriptions(entityName),
-            style: const TextStyle(fontSize: 20.0),
-          ),
-        );
-      }
-      // get table data formatted for tableView
-      var (
-        List<List<TableViewCell>> tableViewCells,
-        List<double> fieldWidths,
-        double? rowHeight,
-      ) = get2dTableData<Subscription>(
-        getSubscriptionTableData,
-        bloc: _subscriptionBloc,
-        classificationId: classificationId,
-        context: context,
-        items: subscriptions,
-      );
-      return TableView.builder(
-        diagonalDragBehavior: DiagonalDragBehavior.free,
-        verticalDetails: ScrollableDetails.vertical(
-          controller: _scrollController,
-        ),
-        horizontalDetails: ScrollableDetails.horizontal(
-          controller: _horizontalController,
-        ),
-        cellBuilder: (context, vicinity) =>
-            tableViewCells[vicinity.row][vicinity.column],
-        columnBuilder: (index) => index >= tableViewCells[0].length
-            ? null
-            : TableSpan(
-                padding: padding,
-                backgroundDecoration: getBackGround(context, index),
-                extent: FixedTableSpanExtent(fieldWidths[index]),
-              ),
-        pinnedColumnCount: 1,
-        rowBuilder: (index) => index >= tableViewCells.length
-            ? null
-            : TableSpan(
-                padding: padding,
-                backgroundDecoration: getBackGround(context, index),
-                extent: FixedTableSpanExtent(rowHeight!),
-                recognizerFactories: <Type, GestureRecognizerFactory>{
-                  TapGestureRecognizer:
-                      GestureRecognizerFactoryWithHandlers<
-                        TapGestureRecognizer
-                      >(
-                        () => TapGestureRecognizer(),
-                        (TapGestureRecognizer t) => t.onTap = () => showDialog(
-                          barrierDismissible: true,
-                          context: context,
-                          builder: (BuildContext context) {
-                            return index > subscriptions.length
-                                ? const BottomLoader()
-                                : Dismissible(
-                                    key: const Key('subscriptionItem'),
-                                    direction: DismissDirection.startToEnd,
-                                    child: BlocProvider.value(
-                                      value: _subscriptionBloc,
-                                      child: SubscriptionDialog(
-                                        subscriptions[index - 1],
-                                      ),
-                                    ),
-                                  );
-                          },
-                        ),
-                      ),
-                },
-              ),
-        pinnedRowCount: 1,
-      );
-    }
+    bool isPhone = isAPhone(context);
 
     return BlocConsumer<SubscriptionBloc, SubscriptionState>(
       listener: (context, state) {
@@ -140,7 +62,6 @@ class SubscriptionListState extends State<SubscriptionList> {
         }
         if (state.status == SubscriptionStatus.success) {
           started = true;
-          final catalogLocalizations = CatalogLocalizations.of(context)!;
           final translatedMessage = state.message != null
               ? translateSubscriptionBlocMessage(
                   state.message!,
@@ -168,75 +89,82 @@ class SubscriptionListState extends State<SubscriptionList> {
             );
           case SubscriptionStatus.success:
             subscriptions = state.subscriptions;
-            return Stack(
-              children: [
-                tableView(),
-                Positioned(
-                  right: right,
-                  bottom: bottom,
-                  child: GestureDetector(
-                    onPanUpdate: (details) {
-                      setState(() {
-                        right = right! - details.delta.dx;
-                        bottom -= details.delta.dy;
-                      });
+            return Scaffold(
+              floatingActionButton: FloatingActionButton(
+                heroTag: 'subscriptionNew',
+                key: const Key('addNew'),
+                onPressed: () async {
+                  await showDialog(
+                    barrierDismissible: true,
+                    context: context,
+                    builder: (BuildContext context) {
+                      return BlocProvider.value(
+                        value: _subscriptionBloc,
+                        child: SubscriptionDialog(Subscription()),
+                      );
                     },
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        FloatingActionButton(
-                          key: const Key("search"),
-                          heroTag: "searchSubscription",
-                          onPressed: () async {
-                            await showDialog(
-                              barrierDismissible: true,
-                              context: context,
-                              builder: (BuildContext context) {
-                                return const SearchSubscriptionList();
-                              },
-                            ).then(
-                              (value) async => value != null && context.mounted
-                                  ?
-                                    // show detail page
-                                    await showDialog(
-                                      barrierDismissible: true,
-                                      context: context,
-                                      builder: (BuildContext context) {
-                                        return BlocProvider.value(
-                                          value: _subscriptionBloc,
-                                          child: SubscriptionDialog(value),
-                                        );
-                                      },
-                                    )
-                                  : const SizedBox.shrink(),
+                  );
+                },
+                tooltip: coreLocalizations.addNew,
+                child: const Icon(Icons.add),
+              ),
+              body: Column(
+                children: [
+                  ListFilterBar(
+                    searchHint: catalogLocalizations.subscriptionSearch,
+                    searchController: _searchController,
+                    onSearchChanged: (value) {
+                      setState(() {
+                        _searchQuery = value;
+                      });
+                      if (value.length > 2) {
+                        _subscriptionBloc.add(
+                          SubscriptionFetch(refresh: true, searchString: value),
+                        );
+                      } else if (value.isEmpty) {
+                        _subscriptionBloc.add(
+                          const SubscriptionFetch(refresh: true),
+                        );
+                      }
+                    },
+                  ),
+                  Expanded(
+                    child: StyledDataTable(
+                      scrollController: _scrollController,
+                      columns: getSubscriptionColumns(isPhone),
+                      rows: subscriptions.isEmpty
+                          ? []
+                          : subscriptions
+                                .asMap()
+                                .entries
+                                .map(
+                                  (entry) => buildSubscriptionRow(
+                                    context,
+                                    entry.value,
+                                    entry.key,
+                                    isPhone,
+                                  ),
+                                )
+                                .toList(),
+                      isLoading:
+                          state.status == SubscriptionStatus.loading &&
+                          subscriptions.isEmpty,
+                      onRowTap: (index) {
+                        showDialog(
+                          barrierDismissible: true,
+                          context: context,
+                          builder: (BuildContext context) {
+                            return BlocProvider.value(
+                              value: _subscriptionBloc,
+                              child: SubscriptionDialog(subscriptions[index]),
                             );
                           },
-                          child: const Icon(Icons.search),
-                        ),
-                        const SizedBox(height: 10),
-                        FloatingActionButton(
-                          heroTag: 'subscriptionNew',
-                          key: const Key("addNew"),
-                          onPressed: () async {
-                            await showDialog(
-                              barrierDismissible: true,
-                              context: context,
-                              builder: (BuildContext context) {
-                                return BlocProvider.value(
-                                  value: _subscriptionBloc,
-                                  child: SubscriptionDialog(Subscription()),
-                                );
-                              },
-                            );
-                          },
-                          tooltip: CoreLocalizations.of(context)!.addNew,
-                          child: const Icon(Icons.add),
-                        ),
-                      ],
+                        );
+                      },
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             );
           default:
             return const Center(child: LoadingIndicator());
@@ -250,12 +178,15 @@ class SubscriptionListState extends State<SubscriptionList> {
     _scrollController
       ..removeListener(_onScroll)
       ..dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
   void _onScroll() {
     if (_isBottom) {
-      _subscriptionBloc.add(SubscriptionFetch(limit: limit));
+      _subscriptionBloc.add(
+        SubscriptionFetch(limit: limit, searchString: _searchQuery),
+      );
     }
   }
 

@@ -12,17 +12,16 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
-import 'package:growerp_order_accounting/src/findoc/widgets/search_findoc_list.dart';
 import 'package:growerp_order_accounting/l10n/generated/order_accounting_localizations.dart';
-import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 
 import '../findoc.dart';
 import 'findoc_dialog/request_dialog.dart';
+import 'findoc_list_styled_data.dart';
 import 'invoice_upload_view.dart';
 
 class FinDocList extends StatefulWidget {
@@ -49,23 +48,15 @@ class FinDocList extends StatefulWidget {
   FinDocListState createState() => FinDocListState();
 }
 
-/*
-extension DateOnlyCompare on DateTime {
-  bool isSameDate(DateTime other) {
-    return year == other.year && month == other.month && day == other.day;
-  }
-}
-*/
 class FinDocListState extends State<FinDocList> {
   final _scrollController = ScrollController();
+  final _searchController = TextEditingController();
   List<FinDoc> finDocs = <FinDoc>[];
   int? tab;
   late int limit;
   late bool isPhone;
   bool hasReachedMax = false;
   late FinDocBloc _finDocBloc;
-  late final ScrollController _horizontalController = ScrollController();
-  List<List<TableViewCell>> tableViewRows = [];
   late String classificationId;
   String searchString = '';
   late FocusNode myFocusNode;
@@ -75,6 +66,8 @@ class FinDocListState extends State<FinDocList> {
   late double bottom;
   double? right;
   late OrderAccountingLocalizations _localizations;
+  bool _isLoading = true;
+  double currentScroll = 0;
 
   @override
   void initState() {
@@ -116,106 +109,58 @@ class FinDocListState extends State<FinDocList> {
   @override
   Widget build(BuildContext context) {
     _localizations = OrderAccountingLocalizations.of(context)!;
-    right = right ?? (isAPhone(context) ? 20 : 50);
+    isPhone = ResponsiveBreakpoints.of(context).isMobile;
+    right = right ?? (isPhone ? 20 : 50);
     limit = (MediaQuery.of(context).size.height / 100).round();
-    isPhone = isAPhone(context);
-    Widget finDocsPage(int length) {
-      if (finDocs.isEmpty) {
-        return Center(
-          heightFactor: 20,
-          child: Text(
-            widget.journalId != null
-                ? _localizations.noJournalEntries
-                : widget.docType == FinDocType.transaction
-                ? _localizations.noOpenTransactions
-                : widget.docType == FinDocType.order
-                ? (widget.sales
-                      ? _localizations.noOpenOrders
-                      : _localizations.noPurchaseOrders)
-                : widget.docType == FinDocType.invoice
-                ? (widget.sales
-                      ? _localizations.noOpenInvoices
-                      : _localizations.noPurchaseInvoices)
-                : widget.docType == FinDocType.payment
-                ? (widget.sales
-                      ? _localizations.noOpenPayments
-                      : _localizations.noPurchasePayments)
-                : widget.docType == FinDocType.shipment
-                ? (widget.sales
-                      ? _localizations.noOpenShipments
-                      : _localizations.noIncomingShipments)
-                : _localizations.noOpenRequests,
-            style: const TextStyle(fontSize: 20.0),
-          ),
+
+    Widget tableView() {
+      // Build rows for StyledDataTable
+      final rows = finDocs.map((finDoc) {
+        final index = finDocs.indexOf(finDoc);
+        return getFinDocListRow(
+          context: context,
+          finDoc: finDoc,
+          index: index,
+          bloc: _finDocBloc,
+          classificationId: classificationId,
         );
-      }
-      // get table data formatted for tableView
-      var (
-        List<List<TableViewCell>> tableViewCells,
-        List<double> fieldWidths,
-        double? rowHeight,
-      ) = get2dTableData<FinDoc>(
-        getTableData,
-        bloc: _finDocBloc,
-        classificationId: classificationId,
-        context: context,
-        items: finDocs,
-      );
-      // build the table
-      return TableView.builder(
-        diagonalDragBehavior: DiagonalDragBehavior.free,
-        verticalDetails: ScrollableDetails.vertical(
-          controller: _scrollController,
+      }).toList();
+
+      return StyledDataTable(
+        columns: getFinDocListColumns(
+          context,
+          docType: widget.docType,
+          classificationId: classificationId,
         ),
-        horizontalDetails: ScrollableDetails.horizontal(
-          controller: _horizontalController,
-        ),
-        cellBuilder: (context, vicinity) =>
-            tableViewCells[vicinity.row][vicinity.column],
-        columnBuilder: (index) => index >= tableViewCells[0].length
-            ? null
-            : TableSpan(
-                padding: padding,
-                backgroundDecoration: getBackGround(context, index),
-                extent: FixedTableSpanExtent(fieldWidths[index]),
-              ),
-        pinnedColumnCount: 1,
-        rowBuilder: (index) => index >= tableViewCells.length
-            ? null
-            : TableSpan(
-                padding: padding,
-                backgroundDecoration: getBackGround(context, index),
-                extent: FixedTableSpanExtent(rowHeight!),
-                recognizerFactories: <Type, GestureRecognizerFactory>{
-                  TapGestureRecognizer:
-                      GestureRecognizerFactoryWithHandlers<
-                        TapGestureRecognizer
-                      >(
-                        () => TapGestureRecognizer(),
-                        (TapGestureRecognizer t) => t.onTap = () => showDialog(
-                          barrierDismissible: true,
-                          context: context,
-                          builder: (BuildContext context) {
-                            return index > finDocs.length
-                                ? const BottomLoader()
-                                : Dismissible(
-                                    key: const Key('finDocItem'),
-                                    direction: DismissDirection.startToEnd,
-                                    child: BlocProvider.value(
-                                      value: _finDocBloc,
-                                      child: SelectFinDocDialog(
-                                        onlyRental: widget.onlyRental,
-                                        finDoc: finDocs[index - 1],
-                                      ),
-                                    ),
-                                  );
-                          },
-                        ),
-                      ),
-                },
-              ),
-        pinnedRowCount: 1,
+        rows: rows,
+        isLoading: _isLoading && finDocs.isEmpty,
+        scrollController: _scrollController,
+        rowHeight: isPhone ? 80 : 56,
+        onRowTap: (index) {
+          showDialog(
+            barrierDismissible: true,
+            context: context,
+            builder: (BuildContext context) {
+              return Dismissible(
+                key: const Key('finDocItem'),
+                direction: DismissDirection.startToEnd,
+                child: BlocProvider.value(
+                  value: _finDocBloc,
+                  child: SelectFinDocDialog(
+                    onlyRental: widget.onlyRental,
+                    finDoc: finDocs[index],
+                  ),
+                ),
+              );
+            },
+          );
+        },
       );
+    }
+
+    String getSearchHint() {
+      final docName = widget.docType.name.toLowerCase();
+      return 'Search ${widget.sales ? 'sales' : 'purchase'} ${docName}s...';
     }
 
     return Builder(
@@ -240,183 +185,175 @@ class FinDocListState extends State<FinDocList> {
         }
 
         Widget builder(BuildContext context, FinDocState state) {
-          switch (state.status) {
-            case FinDocStatus.initial:
-            case FinDocStatus.loading:
-              return const Center(child: LoadingIndicator());
-            case FinDocStatus.failure:
-            case FinDocStatus.success:
-              finDocs = state.finDocs;
-              hasReachedMax = state.hasReachedMax;
+          // Update loading state
+          _isLoading = state.status == FinDocStatus.loading;
 
-              // if rental (hotelroom) need to show checkin/out orders
-              if (widget.onlyRental && widget.status != null) {
-                if (widget.status == FinDocStatusVal.created) {
-                  finDocs = state.finDocs
-                      .where(
-                        (FinDoc el) =>
-                            el.items[0].rentalFromDate != null &&
-                            el.status == widget.status &&
-                            el.items[0].rentalFromDate!.isSameDate(
-                              CustomizableDateTime.current,
-                            ),
-                      )
-                      .toList();
-                }
-                if (widget.status == FinDocStatusVal.approved) {
-                  finDocs = state.finDocs
-                      .where(
-                        (FinDoc el) =>
-                            el.items[0].rentalThruDate != null &&
-                            el.status == widget.status &&
-                            el.items[0].rentalThruDate!.isSameDate(
-                              CustomizableDateTime.current,
-                            ),
-                      )
-                      .toList();
-                }
-              } else if (widget.onlyRental == true) {
-                finDocs = state.finDocs
-                    .where((el) => el.items[0].rentalFromDate != null)
-                    .toList();
-              }
+          if (state.status == FinDocStatus.failure) {
+            return FatalErrorForm(
+              message: state.message ?? 'An error occurred',
+            );
+          }
 
-              return Stack(
-                children: [
-                  finDocsPage(state.finDocs.length),
-                  Positioned(
-                    right: right,
-                    bottom: bottom,
-                    child: GestureDetector(
-                      onPanUpdate: (details) {
-                        setState(() {
-                          right = right! - details.delta.dx;
-                          bottom -= details.delta.dy;
-                        });
-                      },
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(0, 5, 0, 5),
-                            child: FloatingActionButton(
-                              key: const Key("search"),
-                              heroTag: "btn1",
-                              onPressed: () async {
-                                // find findoc id to show
-                                await showDialog(
-                                  barrierDismissible: true,
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    // search separate from finDocBloc
-                                    return BlocProvider.value(
-                                      value: context
-                                          .read<DataFetchBloc<FinDocs>>(),
-                                      child: SearchFinDocList(
-                                        docType: widget.docType,
-                                        sales: widget.sales,
-                                      ),
-                                    );
-                                  },
-                                ).then(
-                                  (value) async =>
-                                      value != null && context.mounted
-                                      ?
-                                        // show detail page
-                                        await showDialog(
-                                          barrierDismissible: true,
-                                          context: context,
-                                          builder: (BuildContext context) {
-                                            return BlocProvider.value(
-                                              value: _finDocBloc,
-                                              child: SelectFinDocDialog(
-                                                finDoc: value,
-                                              ),
-                                            );
-                                          },
-                                        )
-                                      : const SizedBox.shrink(),
-                                );
-                              },
-                              child: const Icon(Icons.search),
-                            ),
-                          ),
-                          if (widget.docType == FinDocType.invoice &&
-                              !widget.sales)
+          finDocs = state.finDocs;
+          hasReachedMax = state.hasReachedMax;
+
+          // if rental (hotelroom) need to show checkin/out orders
+          if (widget.onlyRental && widget.status != null) {
+            if (widget.status == FinDocStatusVal.created) {
+              finDocs = state.finDocs
+                  .where(
+                    (FinDoc el) =>
+                        el.items[0].rentalFromDate != null &&
+                        el.status == widget.status &&
+                        el.items[0].rentalFromDate!.isSameDate(
+                          CustomizableDateTime.current,
+                        ),
+                  )
+                  .toList();
+            }
+            if (widget.status == FinDocStatusVal.approved) {
+              finDocs = state.finDocs
+                  .where(
+                    (FinDoc el) =>
+                        el.items[0].rentalThruDate != null &&
+                        el.status == widget.status &&
+                        el.items[0].rentalThruDate!.isSameDate(
+                          CustomizableDateTime.current,
+                        ),
+                  )
+                  .toList();
+            }
+          } else if (widget.onlyRental == true) {
+            finDocs = state.finDocs
+                .where((el) => el.items[0].rentalFromDate != null)
+                .toList();
+          }
+
+          if (finDocs.isNotEmpty && _scrollController.hasClients) {
+            Future.delayed(const Duration(milliseconds: 100), () {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (_scrollController.hasClients) {
+                  _scrollController.jumpTo(currentScroll);
+                }
+              });
+            });
+          }
+
+          return Column(
+            children: [
+              // Filter bar with search
+              ListFilterBar(
+                searchHint: getSearchHint(),
+                searchController: _searchController,
+                onSearchChanged: (value) {
+                  searchString = value;
+                  _finDocBloc.add(
+                    FinDocFetch(
+                      refresh: true,
+                      searchString: value,
+                      my: my,
+                      status: widget.status,
+                    ),
+                  );
+                },
+              ),
+              // Main content area
+              Expanded(
+                child: Stack(
+                  children: [
+                    tableView(),
+                    Positioned(
+                      right: right,
+                      bottom: bottom,
+                      child: GestureDetector(
+                        onPanUpdate: (details) {
+                          setState(() {
+                            right = right! - details.delta.dx;
+                            bottom -= details.delta.dy;
+                          });
+                        },
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            if (widget.docType == FinDocType.invoice &&
+                                !widget.sales)
+                              Padding(
+                                padding: const EdgeInsets.fromLTRB(0, 5, 0, 5),
+                                child: FloatingActionButton(
+                                  key: const Key("upload"),
+                                  heroTag: "btn4",
+                                  onPressed: () async => showDialog(
+                                    barrierDismissible: true,
+                                    context: context,
+                                    builder: (BuildContext context) =>
+                                        const InvoiceUploadView(),
+                                  ),
+                                  tooltip: 'Upload Invoice',
+                                  child: const Icon(Icons.upload_file),
+                                ),
+                              ),
+                            if (widget.docType != FinDocType.shipment)
+                              Padding(
+                                padding: const EdgeInsets.fromLTRB(0, 5, 0, 5),
+                                child: FloatingActionButton(
+                                  key: const Key("addNew"),
+                                  heroTag: "btn2",
+                                  onPressed: () async => showDialog(
+                                    barrierDismissible: true,
+                                    context: context,
+                                    builder: (BuildContext context) =>
+                                        BlocProvider.value(
+                                          value: _finDocBloc,
+                                          child:
+                                              widget.docType ==
+                                                  FinDocType.payment
+                                              ? PaymentDialog(
+                                                  finDoc: FinDoc(
+                                                    sales: widget.sales,
+                                                    docType: widget.docType,
+                                                  ),
+                                                )
+                                              : widget.docType ==
+                                                    FinDocType.request
+                                              ? RequestDialog(
+                                                  finDoc: FinDoc(
+                                                    sales: widget.sales,
+                                                    docType: widget.docType,
+                                                  ),
+                                                )
+                                              : FinDocDialog(
+                                                  FinDoc(
+                                                    sales: widget.sales,
+                                                    docType: widget.docType,
+                                                  ),
+                                                ),
+                                        ),
+                                  ),
+                                  tooltip: _localizations.addNew,
+                                  child: const Icon(Icons.add),
+                                ),
+                              ),
                             Padding(
                               padding: const EdgeInsets.fromLTRB(0, 5, 0, 5),
                               child: FloatingActionButton(
-                                key: const Key("upload"),
-                                heroTag: "btn4",
-                                onPressed: () async => showDialog(
-                                  barrierDismissible: true,
-                                  context: context,
-                                  builder: (BuildContext context) =>
-                                      const InvoiceUploadView(),
+                                key: const Key("refresh"),
+                                heroTag: "btn3",
+                                onPressed: () async => _finDocBloc.add(
+                                  const FinDocFetch(refresh: true),
                                 ),
-                                tooltip: 'Upload Invoice',
-                                child: const Icon(Icons.upload_file),
+                                tooltip: _localizations.refresh,
+                                child: const Icon(Icons.refresh),
                               ),
                             ),
-                          if (widget.docType != FinDocType.shipment)
-                            Padding(
-                              padding: const EdgeInsets.fromLTRB(0, 5, 0, 5),
-                              child: FloatingActionButton(
-                                key: const Key("addNew"),
-                                heroTag: "btn2",
-                                onPressed: () async => showDialog(
-                                  barrierDismissible: true,
-                                  context: context,
-                                  builder: (BuildContext context) =>
-                                      BlocProvider.value(
-                                        value: _finDocBloc,
-                                        child:
-                                            widget.docType == FinDocType.payment
-                                            ? PaymentDialog(
-                                                finDoc: FinDoc(
-                                                  sales: widget.sales,
-                                                  docType: widget.docType,
-                                                ),
-                                              )
-                                            : widget.docType ==
-                                                  FinDocType.request
-                                            ? RequestDialog(
-                                                finDoc: FinDoc(
-                                                  sales: widget.sales,
-                                                  docType: widget.docType,
-                                                ),
-                                              )
-                                            : FinDocDialog(
-                                                FinDoc(
-                                                  sales: widget.sales,
-                                                  docType: widget.docType,
-                                                ),
-                                              ),
-                                      ),
-                                ),
-                                tooltip: _localizations.addNew,
-                                child: const Icon(Icons.add),
-                              ),
-                            ),
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(0, 5, 0, 5),
-                            child: FloatingActionButton(
-                              key: const Key("refresh"),
-                              heroTag: "btn3",
-                              onPressed: () async => _finDocBloc.add(
-                                const FinDocFetch(refresh: true),
-                              ),
-                              tooltip: _localizations.refresh,
-                              child: const Icon(Icons.refresh),
-                            ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                ],
-              );
-          }
+                  ],
+                ),
+              ),
+            ],
+          );
         }
 
         // finally create the BlocConsumer
@@ -490,11 +427,15 @@ class FinDocListState extends State<FinDocList> {
     _scrollController
       ..removeListener(_onScroll)
       ..dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
   void _onScroll() {
-    if (_isBottom) _finDocBloc.add(FinDocFetch(limit: limit));
+    currentScroll = _scrollController.offset;
+    if (_isBottom) {
+      _finDocBloc.add(FinDocFetch(limit: limit, searchString: searchString));
+    }
   }
 
   bool get _isBottom {

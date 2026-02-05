@@ -131,8 +131,6 @@ class WebsiteContentState extends State<WebsiteContent> {
               //                            ? _showMdTextForm(isPhone)
               //                            : _showHtmlTextForm(isPhone)));
             } else {
-              double top = 0;
-              double left = 250;
               return Dialog(
                 key: const Key('WebsiteContentImage'),
                 insetPadding: const EdgeInsets.all(20),
@@ -144,27 +142,7 @@ class WebsiteContentState extends State<WebsiteContent> {
                   width: isPhone ? 350 : 800,
                   height: 500,
                   title: _localizations.imageInformation(widget.content.title),
-                  child: Stack(
-                    children: [
-                      imageChild(isPhone),
-                      Positioned(
-                        left: left,
-                        top: top,
-                        child: GestureDetector(
-                          onPanUpdate: (details) {
-                            setState(() {
-                              left += details.delta.dx;
-                              top += details.delta.dy;
-                            });
-                          },
-                          child: ImageButtons(
-                            _scrollController,
-                            _onImageButtonPressed,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                  child: imageChild(isPhone),
                 ),
               );
             }
@@ -175,10 +153,7 @@ class WebsiteContentState extends State<WebsiteContent> {
     );
   }
 
-  void _onImageButtonPressed(
-    ImageSource source, {
-    BuildContext? context,
-  }) async {
+  void _onImageButtonPressed(ImageSource source) async {
     try {
       final pickedFile = await _picker.pickImage(source: source);
       setState(() {
@@ -253,18 +228,34 @@ class WebsiteContentState extends State<WebsiteContent> {
         key: const Key('listView'),
         child: Column(
           children: <Widget>[
-            const SizedBox(height: 40),
-            CircleAvatar(
-              radius: 60,
-              child: _imageFile != null
-                  ? foundation.kIsWeb
-                        ? Image.network(_imageFile!.path, scale: 0.3)
-                        : Image.file(File(_imageFile!.path), scale: 0.3)
-                  : newContent.image != null
-                  ? Image.memory(newContent.image!, scale: 0.3)
-                  : Text(newContent.title.isEmpty ? '?' : newContent.title[0]),
+            const SizedBox(height: 10),
+            StyledImageUpload(
+              label: 'Content Image',
+              subtitle: 'Click to upload. JPG, PNG up to 2MB',
+              image: _imageFile != null
+                  ? (foundation.kIsWeb
+                        ? NetworkImage(_imageFile!.path)
+                        : FileImage(File(_imageFile!.path)))
+                  : null,
+              imageBytes: _imageFile == null ? newContent.image : null,
+              fallbackText: newContent.title.isEmpty
+                  ? '?'
+                  : newContent.title[0],
+              onUploadTap: () {
+                // Trigger image picker
+                if (Platform.isAndroid || Platform.isIOS) {
+                  _onImageButtonPressed(ImageSource.gallery);
+                }
+              },
+              onRemove: (_imageFile != null || newContent.image != null)
+                  ? () {
+                      setState(() {
+                        _imageFile = null;
+                      });
+                    }
+                  : null,
             ),
-            const SizedBox(height: 30),
+            const SizedBox(height: 20),
             TextFormField(
               key: const Key('imageName'),
               decoration: InputDecoration(labelText: _localizations.name),

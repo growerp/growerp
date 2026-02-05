@@ -758,6 +758,8 @@ class CommonTest {
         throw StateError('Widget with key "$key" not found');
       }
     }
+    // Now enter the new text
+    await tester.tap(finder);
     await tester.enterText(finder, value);
     await tester.pumpAndSettle();
   }
@@ -813,38 +815,48 @@ class CommonTest {
     String value, {
     int seconds = 1,
   }) async {
+    // Ensure the dropdown button is visible before interacting
+    await dragUntil(tester, key: key);
+
+    // Tap to open the dropdown
     await tester.tap(find.byKey(Key(key)));
     await tester.pumpAndSettle(Duration(seconds: seconds));
 
-    final Finder itemFinder;
+    // Find the item in the dropdown
+    Finder itemFinder;
     if (value.isEmpty) {
-      itemFinder = find.text(value).last;
+      itemFinder = find.text(value);
     } else {
-      itemFinder = find.textContaining(value).last;
+      itemFinder = find.textContaining(value);
     }
 
+    // If item not found, scroll within the dropdown to find it
     if (itemFinder.evaluate().isEmpty) {
-      // Item not visible, need to scroll within dropdown
-      final dropdownFinder = find.byType(ListView).last; // Dropdown's ListView
-
-      // Scroll down until item is found
-      for (int i = 0; i < 10; i++) {
-        // Max 10 scroll attempts
-        await tester.drag(dropdownFinder, const Offset(0, -100));
-        await tester.pumpAndSettle();
-
-        if (itemFinder.evaluate().isNotEmpty) {
-          break;
+      // Look for the dropdown's ListView and scroll it
+      final dropdownFinder = find.byType(ListView);
+      if (tester.any(dropdownFinder)) {
+        // Scroll down until item is found
+        for (int i = 0; i < 10; i++) {
+          await tester.drag(dropdownFinder.last, const Offset(0, -100));
+          await tester.pumpAndSettle();
+          if (itemFinder.evaluate().isNotEmpty) {
+            break;
+          }
         }
       }
     }
 
-    // Ensure the item is visible and tap it
-    await tester.ensureVisible(itemFinder);
-    await tester.pumpAndSettle();
+    // Verify the item was found
+    expect(
+      itemFinder.evaluate().isNotEmpty,
+      true,
+      reason: 'Could not find dropdown item with value: $value',
+    );
 
-    // Try tapping at the center of the widget
-    await tester.tapAt(tester.getCenter(itemFinder));
+    // Ensure the item is visible and tap it
+    await tester.ensureVisible(itemFinder.last);
+    await tester.pumpAndSettle();
+    await tester.tap(itemFinder.last);
     await tester.pumpAndSettle();
   }
 

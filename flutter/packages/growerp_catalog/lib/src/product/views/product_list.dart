@@ -12,14 +12,14 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
-import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 
 import '../../../growerp_catalog.dart';
+import 'product_list_styled_data.dart';
 
 class ProductList extends StatefulWidget {
   const ProductList({super.key});
@@ -29,20 +29,21 @@ class ProductList extends StatefulWidget {
 
 class ProductListState extends State<ProductList> {
   final _scrollController = ScrollController();
-  final _horizontalController = ScrollController();
+  final _searchController = TextEditingController();
   late ProductBloc _productBloc;
-  late List<Product> products;
+  List<Product> products = const <Product>[];
   late String classificationId;
   late String entityName;
-  late bool started;
   late int limit;
   late double bottom;
   double? right;
+  String searchString = '';
+  bool _isLoading = true;
+  double currentScroll = 0;
 
   @override
   void initState() {
     super.initState();
-    started = false;
     _scrollController.addListener(_onScroll);
     _productBloc = context.read<ProductBloc>()
       ..add(const ProductFetch(refresh: true));
@@ -53,81 +54,49 @@ class ProductListState extends State<ProductList> {
 
   @override
   Widget build(BuildContext context) {
-    var catalogLocalizations = CatalogLocalizations.of(context)!;
+    final catalogLocalizations = CatalogLocalizations.of(context)!;
     limit = (MediaQuery.of(context).size.height / 100).round();
-    right = right ?? (isAPhone(context) ? 20 : 50);
+    final isPhone = ResponsiveBreakpoints.of(context).isMobile;
+    right = right ?? (isPhone ? 20 : 50);
 
     Widget tableView() {
-      if (products.isEmpty) {
-        return Center(
-          child: Text(
-            catalogLocalizations.noProducts(entityName),
-            style: const TextStyle(fontSize: 20.0),
-          ),
+      // Build rows for StyledDataTable
+      final rows = products.map((product) {
+        final index = products.indexOf(product);
+        return getProductListRow(
+          context: context,
+          product: product,
+          index: index,
+          bloc: _productBloc,
+          classificationId: classificationId,
         );
-      }
-      // get table data formatted for tableView
-      var (
-        List<List<TableViewCell>> tableViewCells,
-        List<double> fieldWidths,
-        double? rowHeight,
-      ) = get2dTableData<Product>(
-        getTableData,
-        bloc: _productBloc,
-        classificationId: classificationId,
-        context: context,
-        items: products,
-      );
-      return TableView.builder(
-        diagonalDragBehavior: DiagonalDragBehavior.free,
-        verticalDetails: ScrollableDetails.vertical(
-          controller: _scrollController,
+      }).toList();
+
+      return StyledDataTable(
+        columns: getProductListColumns(
+          context,
+          classificationId: classificationId,
         ),
-        horizontalDetails: ScrollableDetails.horizontal(
-          controller: _horizontalController,
-        ),
-        cellBuilder: (context, vicinity) =>
-            tableViewCells[vicinity.row][vicinity.column],
-        columnBuilder: (index) => index >= tableViewCells[0].length
-            ? null
-            : TableSpan(
-                padding: padding,
-                backgroundDecoration: getBackGround(context, index),
-                extent: FixedTableSpanExtent(fieldWidths[index]),
-              ),
-        pinnedColumnCount: 1,
-        rowBuilder: (index) => index >= tableViewCells.length
-            ? null
-            : TableSpan(
-                padding: padding,
-                backgroundDecoration: getBackGround(context, index),
-                extent: FixedTableSpanExtent(rowHeight!),
-                recognizerFactories: <Type, GestureRecognizerFactory>{
-                  TapGestureRecognizer:
-                      GestureRecognizerFactoryWithHandlers<
-                        TapGestureRecognizer
-                      >(
-                        () => TapGestureRecognizer(),
-                        (TapGestureRecognizer t) => t.onTap = () => showDialog(
-                          barrierDismissible: true,
-                          context: context,
-                          builder: (BuildContext context) {
-                            return index > products.length
-                                ? const BottomLoader()
-                                : Dismissible(
-                                    key: const Key('productItem'),
-                                    direction: DismissDirection.startToEnd,
-                                    child: BlocProvider.value(
-                                      value: _productBloc,
-                                      child: ProductDialog(products[index - 1]),
-                                    ),
-                                  );
-                          },
-                        ),
-                      ),
-                },
-              ),
-        pinnedRowCount: 1,
+        rows: rows,
+        isLoading: _isLoading && products.isEmpty,
+        scrollController: _scrollController,
+        rowHeight: isPhone ? 72 : 56,
+        onRowTap: (index) {
+          showDialog(
+            barrierDismissible: true,
+            context: context,
+            builder: (BuildContext context) {
+              return Dismissible(
+                key: const Key('productItem'),
+                direction: DismissDirection.startToEnd,
+                child: BlocProvider.value(
+                  value: _productBloc,
+                  child: ProductDialog(products[index]),
+                ),
+              );
+            },
+          );
+        },
       );
     }
 
@@ -137,8 +106,6 @@ class ProductListState extends State<ProductList> {
           HelperFunctions.showMessage(context, '${state.message}', Colors.red);
         }
         if (state.status == ProductStatus.success) {
-          started = true;
-          final catalogLocalizations = CatalogLocalizations.of(context)!;
           final translatedMessage = state.message != null
               ? translateProductBlocMessage(
                   state.message!,
@@ -155,113 +122,105 @@ class ProductListState extends State<ProductList> {
         }
       },
       builder: (context, state) {
-        switch (state.status) {
-          case ProductStatus.failure:
-            return Center(
-              child: Text(
-                catalogLocalizations.fetchProductError(state.message ?? ''),
-              ),
-            );
-          case ProductStatus.success:
-            products = state.products;
-            return Stack(
-              children: [
-                tableView(),
-                Positioned(
-                  right: right,
-                  bottom: bottom,
-                  child: GestureDetector(
-                    onPanUpdate: (details) {
-                      setState(() {
-                        right = right! - details.delta.dx;
-                        bottom -= details.delta.dy;
-                      });
-                    },
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        FloatingActionButton(
-                          key: const Key("search"),
-                          heroTag: "btn1",
-                          onPressed: () async {
-                            // find findoc id to show
-                            await showDialog(
-                              barrierDismissible: true,
-                              context: context,
-                              builder: (BuildContext context) {
-                                // search separate from finDocBloc
-                                return BlocProvider.value(
-                                  value: context
-                                      .read<DataFetchBloc<Locations>>(),
-                                  child: const SearchProductList(),
-                                );
-                              },
-                            ).then(
-                              (value) async => value != null && context.mounted
-                                  ?
-                                    // show detail page
-                                    await showDialog(
-                                      barrierDismissible: true,
-                                      context: context,
-                                      builder: (BuildContext context) {
-                                        return BlocProvider.value(
-                                          value: _productBloc,
-                                          child: ProductDialog(value),
-                                        );
-                                      },
-                                    )
-                                  : const SizedBox.shrink(),
-                            );
-                          },
-                          child: const Icon(Icons.search),
-                        ),
-                        const SizedBox(height: 10),
-                        FloatingActionButton(
-                          heroTag: 'productFiles',
-                          key: const Key("upDownload"),
-                          onPressed: () async {
-                            await showDialog(
-                              barrierDismissible: true,
-                              context: context,
-                              builder: (BuildContext context) {
-                                return BlocProvider.value(
-                                  value: _productBloc,
-                                  child: const ProductFilesDialog(),
-                                );
-                              },
-                            );
-                          },
-                          tooltip: catalogLocalizations.productUpDown,
-                          child: const Icon(Icons.file_copy),
-                        ),
-                        const SizedBox(height: 10),
-                        FloatingActionButton(
-                          heroTag: 'productNew',
-                          key: const Key("addNew"),
-                          onPressed: () async {
-                            await showDialog(
-                              barrierDismissible: true,
-                              context: context,
-                              builder: (BuildContext context) {
-                                return BlocProvider.value(
-                                  value: _productBloc,
-                                  child: const ProductDialog(Product()),
-                                );
-                              },
-                            );
-                          },
-                          tooltip: CoreLocalizations.of(context)!.addNew,
-                          child: const Icon(Icons.add),
-                        ),
-                      ],
+        // Update loading state
+        _isLoading = state.status == ProductStatus.loading;
+
+        if (state.status == ProductStatus.failure) {
+          return FatalErrorForm(
+            message: catalogLocalizations.fetchProductError(
+              state.message ?? '',
+            ),
+          );
+        }
+
+        products = state.products;
+        if (products.isNotEmpty && _scrollController.hasClients) {
+          Future.delayed(const Duration(milliseconds: 100), () {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (_scrollController.hasClients) {
+                _scrollController.jumpTo(currentScroll);
+              }
+            });
+          });
+        }
+
+        return Column(
+          children: [
+            // Filter bar with search
+            ListFilterBar(
+              searchHint: 'Search ${entityName.toLowerCase()}s...',
+              searchController: _searchController,
+              onSearchChanged: (value) {
+                searchString = value;
+                _productBloc.add(
+                  ProductFetch(refresh: true, searchString: value),
+                );
+              },
+            ),
+            // Main content area with StyledDataTable
+            Expanded(
+              child: Stack(
+                children: [
+                  tableView(),
+                  Positioned(
+                    right: right,
+                    bottom: bottom,
+                    child: GestureDetector(
+                      onPanUpdate: (details) {
+                        setState(() {
+                          right = right! - details.delta.dx;
+                          bottom -= details.delta.dy;
+                        });
+                      },
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          FloatingActionButton(
+                            heroTag: 'productFiles',
+                            key: const Key("upDownload"),
+                            onPressed: () async {
+                              await showDialog(
+                                barrierDismissible: true,
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return BlocProvider.value(
+                                    value: _productBloc,
+                                    child: const ProductFilesDialog(),
+                                  );
+                                },
+                              );
+                            },
+                            tooltip: catalogLocalizations.productUpDown,
+                            child: const Icon(Icons.file_copy),
+                          ),
+                          const SizedBox(height: 10),
+                          FloatingActionButton(
+                            heroTag: 'productNew',
+                            key: const Key("addNew"),
+                            onPressed: () async {
+                              await showDialog(
+                                barrierDismissible: true,
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return BlocProvider.value(
+                                    value: _productBloc,
+                                    child: const ProductDialog(Product()),
+                                  );
+                                },
+                              );
+                            },
+                            tooltip: CoreLocalizations.of(context)!.addNew,
+                            child: const Icon(Icons.add),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              ],
-            );
-          default:
-            return const Center(child: LoadingIndicator());
-        }
+                ],
+              ),
+            ),
+          ],
+        );
       },
     );
   }
@@ -271,12 +230,14 @@ class ProductListState extends State<ProductList> {
     _scrollController
       ..removeListener(_onScroll)
       ..dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
   void _onScroll() {
+    currentScroll = _scrollController.offset;
     if (_isBottom) {
-      _productBloc.add(ProductFetch(limit: limit));
+      _productBloc.add(ProductFetch(limit: limit, searchString: searchString));
     }
   }
 

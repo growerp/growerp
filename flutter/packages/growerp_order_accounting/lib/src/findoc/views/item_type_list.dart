@@ -28,13 +28,13 @@ class ItemTypeList extends StatefulWidget {
 
 class ItemTypeListState extends State<ItemTypeList> {
   final _scrollController = ScrollController();
+  final _searchController = TextEditingController();
   late FinDocBloc finDocBloc;
   late GlAccountBloc glAccountBloc;
   String classificationId = GlobalConfiguration().getValue("classificationId");
   late String entityName;
   late bool showAll;
-  double? top;
-  double? left;
+  String searchString = '';
   late OrderAccountingLocalizations _localizations;
 
   @override
@@ -50,10 +50,7 @@ class ItemTypeListState extends State<ItemTypeList> {
   @override
   Widget build(BuildContext context) {
     _localizations = OrderAccountingLocalizations.of(context)!;
-    double width = MediaQuery.of(context).size.width;
-    double height = MediaQuery.of(context).size.height;
-    top = top ?? (isAPhone(context) ? 500 : height - 200);
-    left = left ?? (isAPhone(context) ? 250 : width - 300);
+    bool isPhone = isAPhone(context);
 
     return BlocConsumer<FinDocBloc, FinDocState>(
       listenWhen: (previous, current) =>
@@ -79,81 +76,98 @@ class ItemTypeListState extends State<ItemTypeList> {
               ),
             );
           case FinDocStatus.success:
-            var newList = [];
+            // Filter list based on showAll toggle
+            var filteredList = <dynamic>[];
             for (var item in state.itemTypes) {
               if (showAll) {
-                newList.add(item);
+                filteredList.add(item);
               } else {
-                if (item.accountCode != '') newList.add(item);
+                if (item.accountCode != '') filteredList.add(item);
               }
             }
-            return Stack(
-              children: [
-                Column(
-                  children: [
-                    const ItemTypeListHeader(),
-                    Expanded(
-                      child: RefreshIndicator(
-                        onRefresh: (() async =>
-                            finDocBloc.add(const FinDocGetItemTypes())),
-                        child: ListView.builder(
-                          key: const Key('listView'),
-                          shrinkWrap: true,
-                          physics: const AlwaysScrollableScrollPhysics(),
-                          itemCount: newList.length,
-                          controller: _scrollController,
-                          itemBuilder: (BuildContext context, int index) {
-                            if (newList.isEmpty) {
-                              return Center(
-                                heightFactor: 20,
-                                child: Text(
-                                  _localizations.noItemTypes,
-                                  key: const Key('empty'),
-                                  textAlign: TextAlign.center,
-                                ),
-                              );
-                            }
-                            return ItemTypeListItem(
-                              itemType: newList[index],
-                              index: index,
-                            );
-                          },
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                Positioned(
-                  left: left,
-                  top: top,
-                  child: GestureDetector(
-                    onPanUpdate: (details) {
+
+            // Apply search filter
+            if (searchString.isNotEmpty) {
+              filteredList = filteredList.where((item) {
+                return item.itemTypeName.toLowerCase().contains(
+                      searchString.toLowerCase(),
+                    ) ||
+                    (item.accountName ?? '').toLowerCase().contains(
+                      searchString.toLowerCase(),
+                    ) ||
+                    (item.accountCode ?? '').toLowerCase().contains(
+                      searchString.toLowerCase(),
+                    );
+              }).toList();
+            }
+
+            // Build rows for StyledDataTable
+            final rows = filteredList.asMap().entries.map((entry) {
+              return getItemTypeListRow(
+                context: context,
+                itemType: entry.value,
+                index: entry.key,
+                finDocBloc: finDocBloc,
+                glAccountBloc: glAccountBloc,
+              );
+            }).toList();
+
+            return Scaffold(
+              floatingActionButton: FloatingActionButton.extended(
+                heroTag: 'showAll',
+                key: const Key("switchShow"),
+                onPressed: () {
+                  setState(() {
+                    showAll = !showAll;
+                  });
+                },
+                tooltip: _localizations.showAllUsed,
+                label: showAll
+                    ? Text(_localizations.all)
+                    : Text(_localizations.onlyUsed),
+              ),
+              body: Column(
+                children: [
+                  // Filter bar with search and showAll toggle
+                  ListFilterBar(
+                    searchHint: 'Search item type or account...',
+                    searchController: _searchController,
+                    onSearchChanged: (value) {
                       setState(() {
-                        left = left! + details.delta.dx;
-                        top = top! + details.delta.dy;
+                        searchString = value;
                       });
                     },
-                    child: FloatingActionButton.extended(
-                      heroTag: 'showAll',
-                      key: const Key("switchShow"),
-                      onPressed: () {
-                        setState(() {
-                          showAll = !showAll;
-                        });
-                      },
-                      tooltip: _localizations.showAllUsed,
-                      label: showAll
-                          ? Text(_localizations.all)
-                          : Text(_localizations.onlyUsed),
+                  ),
+                  // Main content with StyledDataTable
+                  Expanded(
+                    child: RefreshIndicator(
+                      onRefresh: () async =>
+                          finDocBloc.add(const FinDocGetItemTypes()),
+                      child: StyledDataTable(
+                        columns: getItemTypeListColumns(context),
+                        rows: rows,
+                        isLoading:
+                            state.status == FinDocStatus.loading &&
+                            filteredList.isEmpty,
+                        scrollController: _scrollController,
+                        rowHeight: isPhone ? 72 : 56,
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             );
           default:
             return const Center(child: LoadingIndicator());
         }
       },
     );
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    _searchController.dispose();
+    super.dispose();
   }
 }
