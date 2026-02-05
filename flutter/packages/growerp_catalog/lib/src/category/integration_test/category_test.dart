@@ -68,6 +68,9 @@ class CategoryTest {
       await CommonTest.tapByKey(tester, 'update');
       await CommonTest.waitForSnackbarToGo(tester);
     }
+    // Clear search filter to restore full list for subsequent operations
+    await CommonTest.enterText(tester, 'searchField', '');
+    await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
   }
 
   static Future<List<Category>> checkCategoryDetail(
@@ -76,20 +79,17 @@ class CategoryTest {
   ) async {
     List<Category> newCategories = [];
     for (Category category in categories) {
-      // list
-      for (final (index, _) in categories.indexed) {
-        if (CommonTest.getTextField('id$index') == category.pseudoId) {
-          expect(
-            CommonTest.getTextField('name$index'),
-            equals(category.categoryName),
-          );
-          expect(CommonTest.getTextField('products$index'), equals('0'));
-        }
-      }
       await CommonTest.doNewSearch(
         tester,
         searchString: category.categoryName,
         seconds: CommonTest.waitTime,
+      );
+      // After search, verify the item is found (at index 0 since search filters)
+      expect(CommonTest.getTextField('name0'), equals(category.categoryName));
+      // The products text format varies based on screen size (mobile: "0 products", desktop: "0")
+      expect(
+        CommonTest.getTextField('products0'),
+        anyOf(equals('0'), equals('0 products')),
       );
       // detail
       expect(find.byKey(const Key('CategoryDialog')), findsOneWidget);
@@ -105,19 +105,23 @@ class CategoryTest {
       newCategories.add(category.copyWith(categoryId: id));
       await CommonTest.tapByKey(tester, 'cancel');
     }
+    // Clear search filter after checking all categories
+    await CommonTest.enterText(tester, 'searchField', '');
     return newCategories;
   }
 
   static Future<void> deleteLastCategory(WidgetTester tester) async {
     SaveTest test = await PersistFunctions.getTest();
     int count = test.categories.length;
+    // Clear any active search filter to show all categories
+    await CommonTest.enterText(tester, 'searchField', '');
     expect(
       find.byKey(const Key('categoryItem')),
       findsNWidgets(count),
     ); // initial admin
     await CommonTest.tapByKey(
       tester,
-      'delete${count - 1}',
+      'delete${count - 3}', // other keys are covered by fab
       seconds: CommonTest.waitTime,
     );
     // replacement for refresh...
@@ -144,6 +148,9 @@ class CategoryTest {
     }
     await enterCategoryData(tester, updCategories);
     await checkCategoryDetail(tester, updCategories);
+    // Final search clear before returning to list view
+    await CommonTest.enterText(tester, 'searchField', '');
+    await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
     await PersistFunctions.persistTest(
       test.copyWith(categories: updCategories),
     );

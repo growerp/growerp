@@ -16,6 +16,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
+import 'package:growerp_order_accounting/l10n/generated/order_accounting_localizations.dart';
 
 import '../../accounting.dart';
 
@@ -36,12 +37,12 @@ class TimePeriodList extends StatefulWidget {
 
 class TimePeriodListState extends State<TimePeriodList> {
   final _scrollController = ScrollController();
+  final _searchController = TextEditingController();
   late LedgerBloc _ledgerBloc;
   String classificationId = GlobalConfiguration().getValue("classificationId");
   late String entityName;
   late String periodType;
-  double? top;
-  double? left;
+  String searchString = '';
 
   @override
   void initState() {
@@ -54,10 +55,9 @@ class TimePeriodListState extends State<TimePeriodList> {
 
   @override
   Widget build(BuildContext context) {
-    double width = MediaQuery.of(context).size.width;
-    double height = MediaQuery.of(context).size.height;
-    top = top ?? (isAPhone(context) ? 500 : height - 200);
-    left = left ?? (isAPhone(context) ? 300 : width - 250);
+    final localizations = OrderAccountingLocalizations.of(context)!;
+    bool isPhone = isAPhone(context);
+
     return BlocConsumer<LedgerBloc, LedgerState>(
       listenWhen: (previous, current) =>
           previous.status == LedgerStatus.loading,
@@ -80,84 +80,92 @@ class TimePeriodListState extends State<TimePeriodList> {
               child: Text('failed to fetch timePeriods: ${state.message}'),
             );
           case LedgerStatus.success:
-            return Stack(
-              children: [
-                Column(
-                  children: [
-                    const TimePeriodListHeader(),
-                    Expanded(
-                      child: RefreshIndicator(
-                        onRefresh: (() async =>
-                            _ledgerBloc.add(const LedgerTimePeriods())),
-                        child: ListView.builder(
-                          key: const Key('listView'),
-                          shrinkWrap: true,
-                          physics: const AlwaysScrollableScrollPhysics(),
-                          itemCount: state.timePeriods.length,
-                          controller: _scrollController,
-                          itemBuilder: (BuildContext context, int index) {
-                            if (state.timePeriods.isEmpty) {
-                              return Visibility(
-                                visible: state.timePeriods.isEmpty,
-                                child: Center(
-                                  heightFactor: 20,
-                                  child: Text(
-                                    "no ${entityName}s found!",
-                                    key: const Key('empty'),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ),
-                              );
-                            } else {
-                              return TimePeriodListItem(
-                                timePeriod: state.timePeriods[index],
-                                index: index,
-                              );
-                            }
-                          },
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                Positioned(
-                  left: left,
-                  top: top,
-                  child: GestureDetector(
-                    onPanUpdate: (details) {
+            // Filter list based on search
+            var filteredList = state.timePeriods;
+            if (searchString.isNotEmpty) {
+              filteredList = filteredList.where((item) {
+                return item.periodName.toLowerCase().contains(
+                  searchString.toLowerCase(),
+                );
+              }).toList();
+            }
+
+            // Build rows for StyledDataTable
+            final rows = filteredList.asMap().entries.map((entry) {
+              return getTimePeriodListRow(
+                context: context,
+                timePeriod: entry.value,
+                index: entry.key,
+                ledgerBloc: _ledgerBloc,
+                localizations: localizations,
+              );
+            }).toList();
+
+            return Scaffold(
+              floatingActionButton: FloatingActionButton.extended(
+                heroTag: "timePeriodNew",
+                key: const Key("changePeriod"),
+                onPressed: () async {
+                  setState(() {
+                    if (periodType == 'Y') {
+                      periodType = 'Q';
+                    } else if (periodType == 'Q') {
+                      periodType = 'M';
+                    } else if (periodType == 'M') {
+                      periodType = 'Y';
+                    }
+                  });
+                  _ledgerBloc.add(LedgerTimePeriods(periodType: periodType));
+                },
+                tooltip: 'Change period type(Y/Q/M)',
+                label: const Text('Y/Q/M'),
+              ),
+              body: Column(
+                children: [
+                  // Filter bar with search
+                  ListFilterBar(
+                    searchHint: 'Search time periods...',
+                    searchController: _searchController,
+                    onSearchChanged: (value) {
                       setState(() {
-                        left = left! + details.delta.dx;
-                        top = top! + details.delta.dy;
+                        searchString = value;
                       });
                     },
-                    child: FloatingActionButton.extended(
-                      heroTag: "timePeriodNew",
-                      key: const Key("changePeriod"),
-                      onPressed: () async {
-                        setState(() {
-                          if (periodType == 'Y') {
-                            periodType = 'Q';
-                          } else if (periodType == 'Q') {
-                            periodType = 'M';
-                          } else if (periodType == 'M') {
-                            periodType = 'Y';
-                          }
-                        });
-                        _ledgerBloc.add(
-                          LedgerTimePeriods(periodType: periodType),
-                        );
-                      },
-                      tooltip: 'Change period type(Y/Q/M)',
-                      label: const Text('Y/Q/M'),
+                  ),
+                  // Main content with StyledDataTable
+                  Expanded(
+                    child: RefreshIndicator(
+                      onRefresh: () async => _ledgerBloc.add(
+                        LedgerTimePeriods(periodType: periodType),
+                      ),
+                      child: StyledDataTable(
+                        columns: getTimePeriodListColumns(
+                          context,
+                          localizations,
+                        ),
+                        rows: rows,
+                        isLoading:
+                            state.status == LedgerStatus.loading &&
+                            filteredList.isEmpty,
+                        scrollController: _scrollController,
+                        rowHeight: isPhone ? 56 : 56,
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             );
           default:
             return const Center(child: LoadingIndicator());
         }
       },
     );
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    _searchController.dispose();
+    super.dispose();
   }
 }

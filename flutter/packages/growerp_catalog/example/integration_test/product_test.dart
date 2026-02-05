@@ -21,6 +21,7 @@ import 'package:growerp_catalog/growerp_catalog.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:catalog_example/main.dart';
 import 'package:growerp_catalog/src/product/integration_test/product_test.dart';
+import 'package:growerp_catalog/src/category/integration_test/category_test.dart';
 import 'package:growerp_core/test_data.dart';
 
 void main() {
@@ -45,12 +46,15 @@ void main() {
       clear: true,
     );
     await CommonTest.createCompanyAndAdmin(tester);
-    // Navigate to products
-    await CommonTest.selectOption(tester, '/products', 'ProductList');
-    await CommonTest.createCompanyAndAdmin(
+    // Create categories first via the UI
+    await CommonTest.selectOption(tester, '/categories', 'CategoryList');
+    await CategoryTest.addCategories(
       tester,
-      testData: {"categories": categories.sublist(0, 2)},
+      categories.sublist(0, 2),
+      check: false,
     );
+    // Now navigate to products
+    await CommonTest.selectOption(tester, '/products', 'ProductList');
     await ProductTest.selectProducts(tester);
     await ProductTest.addProducts(tester, products.sublist(0, 2));
     await ProductTest.updateProducts(tester, products.sublist(2, 4));

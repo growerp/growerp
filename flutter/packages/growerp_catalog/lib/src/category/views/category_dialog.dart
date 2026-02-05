@@ -46,8 +46,6 @@ class CategoryDialogState extends State<CategoryDialog> {
   late CategoryBloc _categoryBloc;
   final ImagePicker _picker = ImagePicker();
   final ScrollController _scrollController = ScrollController();
-  late double top;
-  double? right;
   CatalogLocalizations? _localizations;
 
   @override
@@ -59,8 +57,6 @@ class CategoryDialogState extends State<CategoryDialog> {
     _descrController.text = widget.category.description;
     _selectedProducts = List.of(widget.category.products);
     _categoryBloc = context.read<CategoryBloc>();
-    top = -100;
-    right = 20;
   }
 
   @override
@@ -253,115 +249,109 @@ class CategoryDialogState extends State<CategoryDialog> {
         },
       ),
     );
-    return Stack(
-      children: [
-        SingleChildScrollView(
-          controller: _scrollController,
-          key: const Key('listView'),
-          child: Form(
-            key: _categoryDialogFormKey,
-            child: Column(
-              children: [
-                const SizedBox(height: 30),
-                CircleAvatar(
-                  radius: 60,
-                  child: _imageFile != null
-                      ? foundation.kIsWeb
-                            ? Image.network(_imageFile!.path, scale: 0.3)
-                            : Image.file(File(_imageFile!.path), scale: 0.3)
-                      : widget.category.image != null
-                      ? Image.memory(widget.category.image!, scale: 0.3)
-                      : Text(
-                          widget.category.categoryName.isEmpty
-                              ? '?'
-                              : widget.category.categoryName.substring(0, 1),
-                          style: const TextStyle(fontSize: 30),
-                        ),
-                ),
-                const SizedBox(height: 10),
-                TextFormField(
-                  key: const Key('Id'),
-                  decoration: InputDecoration(
-                    labelText: _localizations!.categoryId,
-                  ),
-                  controller: _idController,
-                ),
-                TextFormField(
-                  key: const Key('name'),
-                  decoration: InputDecoration(
-                    labelText: _localizations!.categoryName,
-                  ),
-                  controller: _nameController,
-                  validator: (value) {
-                    return value!.isEmpty
-                        ? _localizations!.enterCategoryName
-                        : null;
-                  },
-                ),
-                TextFormField(
-                  key: const Key('description'),
-                  decoration: InputDecoration(
-                    labelText: _localizations!.description,
-                  ),
-                  controller: _descrController,
-                  maxLines: 3,
-                  validator: (value) {
-                    if (value!.isEmpty) {
-                      return _localizations!.enterCategoryDescription;
+    return SingleChildScrollView(
+      controller: _scrollController,
+      key: const Key('listView'),
+      child: Form(
+        key: _categoryDialogFormKey,
+        child: Column(
+          children: [
+            const SizedBox(height: 10),
+            StyledImageUpload(
+              label: 'Category Image',
+              subtitle: 'Click to upload. JPG, PNG up to 2MB',
+              image: _imageFile != null
+                  ? (foundation.kIsWeb
+                        ? NetworkImage(_imageFile!.path)
+                        : FileImage(File(_imageFile!.path)))
+                  : null,
+              imageBytes: _imageFile == null ? widget.category.image : null,
+              fallbackText: widget.category.categoryName.isEmpty
+                  ? '?'
+                  : widget.category.categoryName.substring(0, 1),
+              onUploadTap: () {
+                // Trigger image picker
+                if (Platform.isAndroid || Platform.isIOS) {
+                  _onImageButtonPressed(ImageSource.gallery, context: context);
+                }
+              },
+              onRemove: (_imageFile != null || widget.category.image != null)
+                  ? () {
+                      setState(() {
+                        _imageFile = null;
+                      });
                     }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 20),
-                GroupingDecorator(
-                  labelText:
-                      '${_localizations!.relatedProducts}${widget.category.nbrOfProducts > widget.category.products.length ? _localizations!.totalShown(widget.category.nbrOfProducts, widget.category.products.length) : ''}',
-                  child: Wrap(spacing: 10.0, children: relProducts),
-                ),
-                const SizedBox(height: 10),
-                OutlinedButton(
-                  key: const Key('update'),
-                  child: Text(
-                    widget.category.categoryId.isEmpty
-                        ? _localizations!.create
-                        : _localizations!.update,
-                  ),
-                  onPressed: () async {
-                    if (_categoryDialogFormKey.currentState!.validate()) {
-                      _categoryBloc.add(
-                        CategoryUpdate(
-                          Category(
-                            categoryId: widget.category.categoryId,
-                            categoryName: _nameController.text,
-                            description: _descrController.text,
-                            products: _selectedProducts,
-                            image: await HelperFunctions.getResizedImage(
-                              _imageFile?.path,
-                            ),
-                          ),
-                        ),
-                      );
-                    }
-                  },
-                ),
-              ],
+                  : null,
             ),
-          ),
+            const SizedBox(height: 10),
+            TextFormField(
+              key: const Key('Id'),
+              decoration: InputDecoration(
+                labelText: _localizations!.categoryId,
+              ),
+              controller: _idController,
+            ),
+            TextFormField(
+              key: const Key('name'),
+              decoration: InputDecoration(
+                labelText: _localizations!.categoryName,
+              ),
+              controller: _nameController,
+              validator: (value) {
+                return value!.isEmpty
+                    ? _localizations!.enterCategoryName
+                    : null;
+              },
+            ),
+            TextFormField(
+              key: const Key('description'),
+              decoration: InputDecoration(
+                labelText: _localizations!.description,
+              ),
+              controller: _descrController,
+              maxLines: 3,
+              validator: (value) {
+                if (value!.isEmpty) {
+                  return _localizations!.enterCategoryDescription;
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 20),
+            GroupingDecorator(
+              labelText:
+                  '${_localizations!.relatedProducts}${widget.category.nbrOfProducts > widget.category.products.length ? _localizations!.totalShown(widget.category.nbrOfProducts, widget.category.products.length) : ''}',
+              child: Wrap(spacing: 10.0, children: relProducts),
+            ),
+            const SizedBox(height: 10),
+            OutlinedButton(
+              key: const Key('update'),
+              child: Text(
+                widget.category.categoryId.isEmpty
+                    ? _localizations!.create
+                    : _localizations!.update,
+              ),
+              onPressed: () async {
+                if (_categoryDialogFormKey.currentState!.validate()) {
+                  _categoryBloc.add(
+                    CategoryUpdate(
+                      Category(
+                        categoryId: widget.category.categoryId,
+                        categoryName: _nameController.text,
+                        description: _descrController.text,
+                        products: _selectedProducts,
+                        image: await HelperFunctions.getResizedImage(
+                          _imageFile?.path,
+                        ),
+                      ),
+                    ),
+                  );
+                }
+              },
+            ),
+          ],
         ),
-        Positioned(
-          right: right,
-          top: top,
-          child: GestureDetector(
-            onPanUpdate: (details) {
-              setState(() {
-                top += details.delta.dy;
-                right = right! - details.delta.dx;
-              });
-            },
-            child: ImageButtons(_scrollController, _onImageButtonPressed),
-          ),
-        ),
-      ],
+      ),
     );
   }
 }

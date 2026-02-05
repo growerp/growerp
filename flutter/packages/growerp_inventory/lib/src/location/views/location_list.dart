@@ -11,16 +11,16 @@
  * along with this software (see the LICENSE.md file). If not, see
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
-import 'package:flutter/gestures.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
-import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
+import 'package:responsive_framework/responsive_framework.dart';
+import 'package:growerp_inventory/l10n/generated/inventory_localizations.dart';
 
 import '../location.dart';
-import '../widgets/widgets.dart';
-import 'package:growerp_inventory/l10n/generated/inventory_localizations.dart';
+import 'location_list_styled_data.dart';
 
 class LocationList extends StatefulWidget {
   const LocationList({super.key});
@@ -31,15 +31,16 @@ class LocationList extends StatefulWidget {
 
 class LocationListState extends State<LocationList> {
   final _scrollController = ScrollController();
-  final _horizontalController = ScrollController();
+  final _searchController = TextEditingController();
   late LocationBloc _locationBloc;
-  List<Location> locations = <Location>[];
-  late Authenticate authenticate;
+  List<Location> locations = const <Location>[];
   late int limit;
-  String? searchString;
   late double bottom;
   double? right;
   late InventoryLocalizations _localizations;
+  String searchString = '';
+  bool _isLoading = true;
+  double currentScroll = 0;
 
   @override
   void initState() {
@@ -53,178 +54,139 @@ class LocationListState extends State<LocationList> {
   @override
   Widget build(BuildContext context) {
     _localizations = InventoryLocalizations.of(context)!;
-    right = right ?? (isAPhone(context) ? 20 : 50);
+    final isPhone = ResponsiveBreakpoints.of(context).isMobile;
+    right = right ?? (isPhone ? 20 : 50);
     limit = (MediaQuery.of(context).size.height / 100).round();
-    return BlocBuilder<LocationBloc, LocationState>(
+
+    Widget tableView() {
+      // Build rows for StyledDataTable
+      final rows = locations.map((location) {
+        final index = locations.indexOf(location);
+        return getLocationListRow(
+          context: context,
+          location: location,
+          index: index,
+          bloc: _locationBloc,
+        );
+      }).toList();
+
+      return StyledDataTable(
+        columns: getLocationListColumns(context),
+        rows: rows,
+        isLoading: _isLoading && locations.isEmpty,
+        scrollController: _scrollController,
+        rowHeight: isPhone ? 72 : 56,
+        onRowTap: (index) {
+          showDialog(
+            barrierDismissible: true,
+            context: context,
+            builder: (BuildContext context) {
+              return Dismissible(
+                key: const Key('locationItem'),
+                direction: DismissDirection.startToEnd,
+                child: BlocProvider.value(
+                  value: _locationBloc,
+                  child: LocationDialog(locations[index]),
+                ),
+              );
+            },
+          );
+        },
+      );
+    }
+
+    return BlocConsumer<LocationBloc, LocationState>(
+      listener: (context, state) {
+        if (state.status == LocationStatus.failure) {
+          HelperFunctions.showMessage(
+            context,
+            _localizations.failedToFetchLocations(state.message ?? ''),
+            Colors.red,
+          );
+        }
+        if (state.status == LocationStatus.success && state.message != null) {
+          HelperFunctions.showMessage(context, state.message!, Colors.green);
+        }
+      },
       builder: (context, state) {
-        switch (state.status) {
-          case LocationStatus.failure:
-            return Center(
-              child: Text(
-                _localizations.failedToFetchLocations(state.message ?? ''),
-              ),
-            );
-          case LocationStatus.success:
-            locations = state.locations;
+        // Update loading state
+        _isLoading = state.status == LocationStatus.loading;
 
-            Widget tableView() {
-              if (locations.isEmpty) {
-                return Center(
-                  heightFactor: 20,
-                  child: Text(
-                    _localizations.noLocationsFound,
-                    style: const TextStyle(fontSize: 20.0),
-                  ),
-                );
+        if (state.status == LocationStatus.failure) {
+          return FatalErrorForm(
+            message: _localizations.failedToFetchLocations(state.message ?? ''),
+          );
+        }
+
+        locations = state.locations;
+        if (locations.isNotEmpty && _scrollController.hasClients) {
+          Future.delayed(const Duration(milliseconds: 100), () {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (_scrollController.hasClients) {
+                _scrollController.jumpTo(currentScroll);
               }
-              // get table data formatted for tableView
-              var (
-                List<List<TableViewCell>> tableViewCells,
-                List<double> fieldWidths,
-                double? rowHeight,
-              ) = get2dTableData<Location>(
-                getTableData,
-                bloc: _locationBloc,
-                classificationId: 'AppAdmin',
-                context: context,
-                items: locations,
-              );
-              return TableView.builder(
-                diagonalDragBehavior: DiagonalDragBehavior.free,
-                verticalDetails: ScrollableDetails.vertical(
-                  controller: _scrollController,
-                ),
-                horizontalDetails: ScrollableDetails.horizontal(
-                  controller: _horizontalController,
-                ),
-                cellBuilder: (context, vicinity) =>
-                    tableViewCells[vicinity.row][vicinity.column],
-                columnBuilder: (index) => index >= tableViewCells[0].length
-                    ? null
-                    : TableSpan(
-                        padding: padding,
-                        backgroundDecoration: getBackGround(context, index),
-                        extent: FixedTableSpanExtent(fieldWidths[index]),
-                      ),
-                pinnedColumnCount: 1,
-                rowBuilder: (index) => index >= tableViewCells.length
-                    ? null
-                    : TableSpan(
-                        padding: padding,
-                        backgroundDecoration: getBackGround(context, index),
-                        extent: FixedTableSpanExtent(rowHeight!),
-                        recognizerFactories: <Type, GestureRecognizerFactory>{
-                          TapGestureRecognizer:
-                              GestureRecognizerFactoryWithHandlers<
-                                TapGestureRecognizer
-                              >(
-                                () => TapGestureRecognizer(),
-                                (TapGestureRecognizer t) =>
-                                    t.onTap = () => showDialog(
-                                      barrierDismissible: true,
-                                      context: context,
-                                      builder: (BuildContext context) {
-                                        return index > state.locations.length
-                                            ? const BottomLoader()
-                                            : Dismissible(
-                                                key: const Key('locationItem'),
-                                                direction:
-                                                    DismissDirection.startToEnd,
-                                                child: BlocProvider.value(
-                                                  value: _locationBloc,
-                                                  child: LocationDialog(
-                                                    locations[index - 1],
-                                                  ),
-                                                ),
-                                              );
-                                      },
-                                    ),
-                              ),
-                        },
-                      ),
-                pinnedRowCount: 1,
-              );
-            }
+            });
+          });
+        }
 
-            return Stack(
-              children: [
-                tableView(),
-                Positioned(
-                  right: right,
-                  bottom: bottom,
-                  child: GestureDetector(
-                    onPanUpdate: (details) {
-                      setState(() {
-                        right = right! - details.delta.dx;
-                        bottom -= details.delta.dy;
-                      });
-                    },
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        FloatingActionButton(
-                          key: const Key("search"),
-                          heroTag: "btn1",
-                          onPressed: () async {
-                            // find findoc id to show
-                            await showDialog(
-                              barrierDismissible: true,
-                              context: context,
-                              builder: (BuildContext context) {
-                                // search separate from finDocBloc
-                                return BlocProvider.value(
-                                  value: context
-                                      .read<DataFetchBloc<Locations>>(),
-                                  child: const SearchLocationList(),
-                                );
-                              },
-                            ).then(
-                              (value) async => value != null && context.mounted
-                                  ?
-                                    // show detail page
-                                    await showDialog(
-                                      barrierDismissible: true,
-                                      context: context,
-                                      builder: (BuildContext context) {
-                                        return BlocProvider.value(
-                                          value: _locationBloc,
-                                          child: LocationDialog(value),
-                                        );
-                                      },
-                                    )
-                                  : const SizedBox.shrink(),
-                            );
-                          },
-                          child: const Icon(Icons.search),
-                        ),
-                        const SizedBox(height: 10),
-                        FloatingActionButton(
-                          key: const Key("addNew"),
-                          heroTag: "btn2",
-                          onPressed: () async {
-                            await showDialog(
-                              barrierDismissible: true,
-                              context: context,
-                              builder: (BuildContext context) {
-                                return BlocProvider.value(
-                                  value: _locationBloc,
-                                  child: LocationDialog(Location()),
-                                );
-                              },
-                            );
-                          },
-                          tooltip: _localizations.addNew,
-                          child: const Icon(Icons.add),
-                        ),
-                      ],
+        return Column(
+          children: [
+            // Filter bar with search
+            ListFilterBar(
+              searchHint: 'Search locations...',
+              searchController: _searchController,
+              onSearchChanged: (value) {
+                searchString = value;
+                _locationBloc.add(
+                  LocationFetch(refresh: true, searchString: value),
+                );
+              },
+            ),
+            // Main content area with StyledDataTable
+            Expanded(
+              child: Stack(
+                children: [
+                  tableView(),
+                  Positioned(
+                    right: right,
+                    bottom: bottom,
+                    child: GestureDetector(
+                      onPanUpdate: (details) {
+                        setState(() {
+                          right = right! - details.delta.dx;
+                          bottom -= details.delta.dy;
+                        });
+                      },
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          FloatingActionButton(
+                            key: const Key("addNew"),
+                            heroTag: "locationNew",
+                            onPressed: () async {
+                              await showDialog(
+                                barrierDismissible: true,
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return BlocProvider.value(
+                                    value: _locationBloc,
+                                    child: LocationDialog(Location()),
+                                  );
+                                },
+                              );
+                            },
+                            tooltip: _localizations.addNew,
+                            child: const Icon(Icons.add),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              ],
-            );
-          default:
-            return const Center(child: LoadingIndicator());
-        }
+                ],
+              ),
+            ),
+          ],
+        );
       },
     );
   }
@@ -234,11 +196,17 @@ class LocationListState extends State<LocationList> {
     _scrollController
       ..removeListener(_onScroll)
       ..dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
   void _onScroll() {
-    if (_isBottom) _locationBloc.add(LocationFetch(limit: limit));
+    currentScroll = _scrollController.offset;
+    if (_isBottom) {
+      _locationBloc.add(
+        LocationFetch(limit: limit, searchString: searchString),
+      );
+    }
   }
 
   bool get _isBottom {

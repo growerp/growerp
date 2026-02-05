@@ -13,6 +13,7 @@
  */
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:growerp_core/growerp_core.dart';
@@ -205,7 +206,9 @@ class SubscriptionTest {
         }
       }
 
-      await CommonTest.tapByKey(tester, 'cancel');
+      // Close the dialog by pressing escape key
+      await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+      await tester.pumpAndSettle();
       await CommonTest.checkWidgetKey(tester, 'SubscriptionList');
     }
   }

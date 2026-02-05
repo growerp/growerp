@@ -14,6 +14,7 @@
 
 // ignore_for_file: depend_on_referenced_packages
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:growerp_core/growerp_core.dart';
@@ -119,6 +120,9 @@ class ProductTest {
         newProducts.add(product);
       }
     }
+    // Clear search filter to restore full list for subsequent operations
+    await CommonTest.enterText(tester, 'searchField', '');
+    await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
     await PersistFunctions.persistTest(SaveTest(products: newProducts));
   }
 
@@ -131,7 +135,6 @@ class ProductTest {
     List<Product> newProducts = [];
     for (Product product in products) {
       await CommonTest.doNewSearch(tester, searchString: product.pseudoId);
-      var id = CommonTest.getTextField('topHeader').split('#')[1];
       // get formBuilder internal formState
       final formState = tester.state<FormBuilderState>(
         find.byType(FormBuilder),
@@ -149,11 +152,11 @@ class ProductTest {
         for (Category category in product.categories) {
           expect(find.byKey(Key(category.categoryName)), findsOneWidget);
         }
-        var errors = CommonTest.checkFormBuilderTextfields(formState, {
+        var errors2 = CommonTest.checkFormBuilderTextfields(formState, {
           'productType': product.productTypeId,
           'amount': product.amount.toString(),
         });
-        expect(errors.isEmpty, isTrue, reason: errors.toString());
+        expect(errors2.isEmpty, isTrue, reason: errors2.toString());
         if (product.productTypeId != 'Service') {
           expect(formState.value['useWarehouse'], product.useWarehouse);
         }
@@ -166,8 +169,11 @@ class ProductTest {
           product.amountUom!.description,
         );
       }
+      // Close the dialog by pressing escape key
+      await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+      await tester.pumpAndSettle();
+      String id = CommonTest.getTextField('id0');
       newProducts.add(product.copyWith(pseudoId: id));
-      await CommonTest.tapByKey(tester, 'cancel');
     }
     await PersistFunctions.persistTest(SaveTest(products: newProducts));
   }
