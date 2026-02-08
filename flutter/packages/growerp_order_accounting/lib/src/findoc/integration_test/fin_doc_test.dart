@@ -109,7 +109,7 @@ class FinDocTest {
         "FinDocDialog${finDoc.sales ? 'Sales' : 'Purchase'}${finDoc.docType!.toString()}",
       );
       // enter supplier/customer
-      await CommonTest.enterDropDownSearch(
+      await CommonTest.enterAutocompleteValue(
         tester,
         finDoc.sales ? 'customer' : 'supplier',
         // in the case of a person just use last name
@@ -133,7 +133,7 @@ class FinDocTest {
       for (FinDocItem item in finDoc.items) {
         await CommonTest.tapByKey(tester, 'addProduct', seconds: 1);
         await CommonTest.checkWidgetKey(tester, 'addProductItemDialog');
-        await CommonTest.enterDropDownSearch(
+        await CommonTest.enterAutocompleteValue(
           tester,
           'product',
           item.description!,
@@ -196,23 +196,25 @@ class FinDocTest {
       if (finDoc.otherUser != null) {
         if (finDoc.otherUser?.company != null) {
           expect(
-            CommonTest.getDropdownSearch(
-              finDoc.sales ? 'customer' : 'supplier',
+            CommonTest.getTextFormField(
+              finDoc.sales ? 'customerField' : 'supplierField',
             ),
             contains(finDoc.otherUser?.company!.name),
           );
         } else {
           expect(
-            CommonTest.getDropdownSearch(
-              finDoc.sales ? 'customer' : 'supplier',
+            CommonTest.getTextFormField(
+              finDoc.sales ? 'customerField' : 'supplierField',
             ),
             contains(finDoc.otherUser?.lastName!),
           );
         }
       } else {
         expect(
-          CommonTest.getDropdownSearch(finDoc.sales ? 'customer' : 'supplier'),
-          finDoc.otherCompany?.name!,
+          CommonTest.getTextFormField(
+            finDoc.sales ? 'customerField' : 'supplierField',
+          ),
+          contains(finDoc.otherCompany?.name!),
         );
       }
       if ((finDoc.docType == FinDocType.order ||
@@ -289,20 +291,26 @@ class FinDocTest {
       );
 
       // get transaction id's
+      // Cache the transaction pseudoId to avoid navigating to the related
+      // transaction detail more than once.  Navigating via relTransaction
+      // pushes a GoRouter route which dismisses the currently-open dialog,
+      // so a second getRelatedFindoc call would no longer find the button.
+      String? transactionPseudoId;
+
       if (type == FinDocType.invoice || subType == FinDocType.invoice) {
-        String? pseudoId = await CommonTest.getRelatedFindoc(
+        transactionPseudoId ??= await CommonTest.getRelatedFindoc(
           tester,
           FinDocType.transaction,
         );
         expect(
-          pseudoId,
+          transactionPseudoId,
           isNot(equals(isNull)),
           reason: "pseudoId should not be null!",
         );
         newFinDocs.add(
           FinDoc(
             docType: FinDocType.transaction,
-            pseudoId: pseudoId,
+            pseudoId: transactionPseudoId,
             invoiceId: finDoc.invoiceId,
             sales: true,
           ),
@@ -310,19 +318,22 @@ class FinDocTest {
       }
 
       if (type == FinDocType.payment || subType == FinDocType.payment) {
-        String? pseudoId = await CommonTest.getRelatedFindoc(
+        transactionPseudoId ??= await CommonTest.getRelatedFindoc(
           tester,
           FinDocType.transaction,
         );
         expect(
-          pseudoId,
+          transactionPseudoId,
           isNot(equals(isNull)),
-          reason: "pseudoId should not be null!",
+          reason:
+              "pseudoId should not be null! "
+              "The UI should show a related transaction button after update. "
+              "Check if 'relTransaction' button key exists in payment detail view.",
         );
         newFinDocs.add(
           FinDoc(
             docType: FinDocType.transaction,
-            pseudoId: pseudoId,
+            pseudoId: transactionPseudoId,
             paymentId: finDoc.paymentId,
             sales: true,
           ),
@@ -330,26 +341,32 @@ class FinDocTest {
       }
 
       if (type == FinDocType.shipment || subType == FinDocType.shipment) {
-        String? pseudoId = await CommonTest.getRelatedFindoc(
+        transactionPseudoId ??= await CommonTest.getRelatedFindoc(
           tester,
           FinDocType.transaction,
         );
         expect(
-          pseudoId,
+          transactionPseudoId,
           isNot(equals(isNull)),
           reason: "shipment does not have a related transaction!",
         );
         newFinDocs.add(
           FinDoc(
             docType: FinDocType.transaction,
-            pseudoId: pseudoId,
+            pseudoId: transactionPseudoId,
             shipmentId: finDoc.shipmentId,
             sales: true,
           ),
         );
       }
 
-      await CommonTest.tapByKey(tester, 'cancel');
+      // If we navigated to a related transaction, the dialog may have been
+      // dismissed by the GoRouter push. Only tap cancel if a dialog is still
+      // open (i.e. the cancel key is present).
+      if (transactionPseudoId == null ||
+          tester.any(find.byKey(const Key('cancel')))) {
+        await CommonTest.tapByKey(tester, 'cancel');
+      }
     }
     await saveFinDocs(newFinDocs);
   }
@@ -468,14 +485,29 @@ class FinDocTest {
           searchString: id ?? finDoc.pseudoId!,
         );
         // get order related documents
+        // Re-open the dialog before each getRelatedFindoc call because
+        // GoRouter push/pop from within a showDialog can corrupt the
+        // dialog overlay, causing subsequent relXxx buttons to disappear.
         if (type == FinDocType.order && subType == null) {
           String? paymentId = await CommonTest.getRelatedFindoc(
             tester,
             FinDocType.payment,
           );
+          // close and re-open the order dialog
+          await CommonTest.tapByKey(tester, 'cancel');
+          await CommonTest.doNewSearch(
+            tester,
+            searchString: id ?? finDoc.pseudoId!,
+          );
           String? invoiceId = await CommonTest.getRelatedFindoc(
             tester,
             FinDocType.invoice,
+          );
+          // close and re-open the order dialog
+          await CommonTest.tapByKey(tester, 'cancel');
+          await CommonTest.doNewSearch(
+            tester,
+            searchString: id ?? finDoc.pseudoId!,
           );
           String? shipmentId = await CommonTest.getRelatedFindoc(
             tester,

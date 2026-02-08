@@ -96,7 +96,7 @@ class TransactionTest {
       for (FinDocItem item in transaction.items) {
         await CommonTest.tapByKey(tester, 'addItem', seconds: 1);
         await CommonTest.checkWidgetKey(tester, 'addTransactionItemDialog');
-        await CommonTest.enterDropDownSearch(
+        await CommonTest.enterAutocompleteValue(
           tester,
           'glAccount',
           item.glAccount!.accountCode!,
@@ -173,13 +173,37 @@ class TransactionTest {
   static Future<void> checkTransactionsComplete(WidgetTester tester) async {
     SaveTest test = await PersistFunctions.getTest();
     for (FinDoc transaction in test.transactions) {
-      await CommonTest.doNewSearch(tester, searchString: transaction.pseudoId!);
+      // Enter search text
+      await CommonTest.enterText(tester, 'searchField', transaction.pseudoId!);
+      // Wait for HTTP search response with retry
+      var found = false;
+      for (var i = 0; i < 10; i++) {
+        await tester.pump(const Duration(seconds: 1));
+        await tester.pumpAndSettle();
+        if (tester.any(find.byKey(const Key('id0')))) {
+          found = true;
+          break;
+        }
+      }
+      expect(
+        found,
+        true,
+        reason:
+            "Transaction ${transaction.pseudoId} not found in search results",
+      );
+      // Tap the first search result to open the detail dialog
+      await tester.tap(find.byKey(const Key('id0')));
+      await tester.pumpAndSettle(const Duration(seconds: 3));
       expect(
         CommonTest.getSwitchField('isPosted'),
         true,
         reason: "posted field should be true now",
       );
       await CommonTest.tapByKey(tester, 'cancel');
+      await tester.pumpAndSettle();
+      // Clear search for next iteration
+      await CommonTest.enterText(tester, 'searchField', '');
+      await tester.pumpAndSettle();
     }
   }
 }

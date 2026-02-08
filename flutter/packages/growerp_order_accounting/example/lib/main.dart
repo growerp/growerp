@@ -145,9 +145,9 @@ GoRouter createOrderAccountingExampleRouter() {
         sales: true,
         docType: FinDocType.shipment,
       ),
-      '/inventory' => const LocationList(key: Key('LocationList')),
+      '/inventory' => const LocationList(),
       '/requests' => const FinDocList(
-        key: Key('Request'),
+        key: Key('FinDocListRequest'),
         sales: false,
         docType: FinDocType.request,
       ),
@@ -212,6 +212,11 @@ GoRouter createOrderAccountingExampleRouter() {
         ),
       ),
       GoRoute(
+        path: '/accounting/ledger-accounts',
+        builder: (context, state) =>
+            const GlAccountList(key: Key('GlAccountList')),
+      ),
+      GoRoute(
         path: '/accounting/ledger-journal',
         builder: (context, state) =>
             const LedgerJournalList(key: Key('LedgerJournalListLedgerJournal')),
@@ -222,7 +227,29 @@ GoRouter createOrderAccountingExampleRouter() {
       ),
       GoRoute(
         path: '/accounting/setup',
-        builder: (context, state) => const Center(child: Text("Setup")),
+        builder: (context, state) =>
+            const PaymentTypeList(key: Key('PaymentTypeList')),
+      ),
+      GoRoute(
+        path: '/accounting/setup/item-types',
+        builder: (context, state) =>
+            const ItemTypeList(key: Key('ItemTypeList')),
+      ),
+      GoRoute(
+        path: '/purchase-orders',
+        builder: (context, state) => const FinDocList(
+          key: Key('PurchaseOrder'),
+          sales: false,
+          docType: FinDocType.order,
+        ),
+      ),
+      GoRoute(
+        path: '/incoming-shipments',
+        builder: (context, state) => const FinDocList(
+          key: Key('ShipmentsIn'),
+          sales: false,
+          docType: FinDocType.shipment,
+        ),
       ),
     ],
   );
@@ -242,7 +269,7 @@ class OrderAccountingDashboard extends StatelessWidget {
 
         final authenticate = state.authenticate!;
         return DashboardGrid(
-          itemCount: 5,
+          itemCount: 7,
           itemBuilder: (context, index) {
             switch (index) {
               case 0:
@@ -256,6 +283,13 @@ class OrderAccountingDashboard extends StatelessWidget {
                 );
               case 1:
                 return DashboardCard(
+                  title: 'Purchase\nOrders',
+                  iconName: 'shopping_cart',
+                  route: '/purchase-orders',
+                  stats: 'Open: ${authenticate.stats?.openPurOrders ?? 0}',
+                );
+              case 2:
+                return DashboardCard(
                   title: 'Accounting',
                   iconName: 'account_balance',
                   route: '/accounting',
@@ -263,7 +297,7 @@ class OrderAccountingDashboard extends StatelessWidget {
                       'Sales Invoices: ${authenticate.stats?.salesInvoicesNotPaidCount ?? 0}\n'
                       'Purchase: ${authenticate.stats?.purchInvoicesNotPaidCount ?? 0}',
                 );
-              case 2:
+              case 3:
                 return DashboardCard(
                   title: 'Shipments',
                   iconName: 'local_shipping',
@@ -272,7 +306,15 @@ class OrderAccountingDashboard extends StatelessWidget {
                       'Incoming: ${authenticate.stats?.incomingShipments ?? 0}\n'
                       'Outgoing: ${authenticate.stats?.outgoingShipments ?? 0}',
                 );
-              case 3:
+              case 4:
+                return DashboardCard(
+                  title: 'Incoming\nShipments',
+                  iconName: 'local_shipping',
+                  route: '/incoming-shipments',
+                  stats:
+                      'Incoming: ${authenticate.stats?.incomingShipments ?? 0}',
+                );
+              case 5:
                 return DashboardCard(
                   title: 'Inventory',
                   iconName: 'inventory',

@@ -13,7 +13,6 @@
  */
 
 import 'package:decimal/decimal.dart';
-import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:global_configuration/global_configuration.dart';
@@ -35,8 +34,6 @@ class ReservationDialog extends StatefulWidget {
 }
 
 class ReservationDialogState extends State<ReservationDialog> {
-  final _userSearchBoxController = TextEditingController();
-  late DataFetchBloc<CompaniesUsers> _companyUserBloc;
   CompanyUser? _selectedCompanyUser;
   bool loading = false;
   late DataFetchBloc<Products> _productBloc;
@@ -49,8 +46,6 @@ class ReservationDialogState extends State<ReservationDialog> {
   final TextEditingController _priceController = TextEditingController();
   final TextEditingController _quantityController = TextEditingController();
   final TextEditingController _daysController = TextEditingController();
-  final TextEditingController _productSearchBoxController =
-      TextEditingController();
   final _formKey = GlobalKey<FormState>();
   late OrderAccountingLocalizations _localizations;
 
@@ -60,20 +55,19 @@ class ReservationDialogState extends State<ReservationDialog> {
     _selectedCompanyUser = CompanyUser.tryParse(
       widget.finDoc.otherCompany ?? widget.finDoc.otherUser,
     );
-    _companyUserBloc = context.read<DataFetchBloc<CompaniesUsers>>()
-      ..add(
-        GetDataEvent(
-          () => context.read<RestClient>().getCompanyUser(
-            limit: 3,
-            role: widget.finDoc.sales ? Role.customer : Role.supplier,
-          ),
+    context.read<DataFetchBloc<CompaniesUsers>>().add(
+      GetDataEvent(
+        () => context.read<RestClient>().getCompanyUser(
+          limit: 100,
+          role: widget.finDoc.sales ? Role.customer : Role.supplier,
         ),
-      );
+      ),
+    );
     _productBloc = context.read<DataFetchBloc<Products>>()
       ..add(
         GetDataEvent(
           () => context.read<RestClient>().getProduct(
-            limit: 3,
+            limit: 100,
             isForDropDown: true,
             //          assetClassId: classificationId == 'AppHotel' ? 'Hotel Room' : '',
             classificationId: classificationId,
@@ -227,65 +221,81 @@ class ReservationDialogState extends State<ReservationDialog> {
                       return const LoadingIndicator();
                     case DataFetchStatus.failure:
                     case DataFetchStatus.success:
-                      return DropdownSearch<CompanyUser>(
-                        selectedItem: _selectedCompanyUser,
-                        popupProps: PopupProps.menu(
-                          isFilterOnline: true,
-                          showSearchBox: true,
-                          searchFieldProps: TextFieldProps(
-                            autofocus: true,
-                            decoration: InputDecoration(
-                              labelText: _localizations.customerSearch,
-                            ),
-                            controller: _userSearchBoxController,
-                          ),
-                          menuProps: MenuProps(
-                            borderRadius: BorderRadius.circular(20.0),
-                          ),
-                          title: popUp(
-                            context: context,
-                            title: _localizations.selectCustomer,
-                            height: 50,
-                          ),
-                        ),
-                        dropdownDecoratorProps: DropDownDecoratorProps(
-                          dropdownSearchDecoration: InputDecoration(
-                            labelText: _localizations.customer,
-                          ),
-                        ),
+                      final companyUsers =
+                          (state.data as CompaniesUsers).companiesUsers;
+                      return Autocomplete<CompanyUser>(
                         key: const Key('customer'),
-                        itemAsString: (CompanyUser? u) => " ${u!.name ?? ''}",
-                        asyncItems: (String filter) {
-                          _companyUserBloc.add(
-                            GetDataEvent(
-                              () => context.read<RestClient>().getCompanyUser(
-                                searchString: filter,
-                                limit: 3,
-                                role: widget.finDoc.sales
-                                    ? Role.customer
-                                    : Role.supplier,
+                        initialValue: TextEditingValue(
+                          text: _selectedCompanyUser != null
+                              ? " ${_selectedCompanyUser!.name ?? ''}"
+                              : '',
+                        ),
+                        displayStringForOption: (CompanyUser u) =>
+                            " ${u.name ?? ''}",
+                        optionsBuilder: (TextEditingValue textEditingValue) {
+                          final query = textEditingValue.text
+                              .toLowerCase()
+                              .trim();
+                          if (query.isEmpty) return companyUsers;
+                          return companyUsers.where((cu) {
+                            final display = " ${cu.name ?? ''}".toLowerCase();
+                            return display.contains(query);
+                          }).toList();
+                        },
+                        fieldViewBuilder:
+                            (
+                              context,
+                              textController,
+                              focusNode,
+                              onFieldSubmitted,
+                            ) {
+                              return TextFormField(
+                                key: const Key('customerField'),
+                                controller: textController,
+                                focusNode: focusNode,
+                                decoration: InputDecoration(
+                                  labelText: _localizations.customer,
+                                ),
+                                onFieldSubmitted: (_) => onFieldSubmitted(),
+                                validator: (value) =>
+                                    (value == null || value.isEmpty)
+                                    ? 'field required'
+                                    : null,
+                              );
+                            },
+                        optionsViewBuilder: (context, onSelected, options) {
+                          return Align(
+                            alignment: Alignment.topLeft,
+                            child: Material(
+                              elevation: 4,
+                              borderRadius: BorderRadius.circular(12),
+                              child: ConstrainedBox(
+                                constraints: const BoxConstraints(
+                                  maxHeight: 250,
+                                  maxWidth: 400,
+                                ),
+                                child: ListView.builder(
+                                  padding: EdgeInsets.zero,
+                                  shrinkWrap: true,
+                                  itemCount: options.length,
+                                  itemBuilder: (context, idx) {
+                                    final cu = options.elementAt(idx);
+                                    return ListTile(
+                                      dense: true,
+                                      title: Text(" ${cu.name ?? ''}"),
+                                      onTap: () => onSelected(cu),
+                                    );
+                                  },
+                                ),
                               ),
                             ),
                           );
-                          return Future.delayed(
-                            const Duration(milliseconds: 150),
-                            () {
-                              return Future.value(
-                                (_companyUserBloc.state.data as CompaniesUsers)
-                                    .companiesUsers,
-                              );
-                            },
-                          );
                         },
-                        compareFn: (item, sItem) =>
-                            item.partyId == sItem.partyId,
-                        onChanged: (CompanyUser? newValue) {
+                        onSelected: (CompanyUser newValue) {
                           setState(() {
                             _selectedCompanyUser = newValue;
                           });
                         },
-                        validator: (value) =>
-                            value == null ? 'field required' : null,
                       );
                     default:
                       return const Center(child: LoadingIndicator());
@@ -293,61 +303,71 @@ class ReservationDialogState extends State<ReservationDialog> {
                 },
               ),
               const SizedBox(height: 20),
-              DropdownSearch<Product>(
-                selectedItem: _selectedProduct,
-                popupProps: PopupProps.menu(
-                  showSelectedItems: true,
-                  isFilterOnline: true,
-                  showSearchBox: true,
-                  searchFieldProps: TextFieldProps(
-                    autofocus: true,
-                    decoration: InputDecoration(
-                      labelText: classificationId == 'AppHotel'
-                          ? _localizations.roomType
-                          : _localizations.product,
-                    ),
-                    controller: _productSearchBoxController,
-                  ),
-                  menuProps: MenuProps(
-                    borderRadius: BorderRadius.circular(20.0),
-                  ),
-                  title: popUp(
-                    context: context,
-                    title: _localizations.selectProduct,
-                    height: 50,
-                  ),
-                ),
-                dropdownDecoratorProps: DropDownDecoratorProps(
-                  dropdownSearchDecoration: InputDecoration(
-                    labelText: _localizations.product,
-                  ),
-                ),
+              Autocomplete<Product>(
                 key: const Key('product'),
-                itemAsString: (Product? u) =>
-                    " ${u!.productName}[${u.pseudoId}]",
-                asyncItems: (String filter) {
-                  _productBloc.add(
-                    GetDataEvent(
-                      () => context.read<RestClient>().getProduct(
-                        searchString: filter,
-                        limit: 3,
-                        isForDropDown: true,
-                        //                                      assetClassId:
-                        //                                          classificationId == 'AppHotel'
-                        //                                              ? 'Hotel Room'
-                        //                                              : '',
+                initialValue: TextEditingValue(
+                  text: _selectedProduct != null
+                      ? " ${_selectedProduct!.productName}[${_selectedProduct!.pseudoId}]"
+                      : '',
+                ),
+                displayStringForOption: (Product u) =>
+                    " ${u.productName}[${u.pseudoId}]",
+                optionsBuilder: (TextEditingValue textEditingValue) {
+                  final products =
+                      (_productBloc.state.data as Products).products;
+                  final query = textEditingValue.text.toLowerCase().trim();
+                  if (query.isEmpty) return products;
+                  return products.where((p) {
+                    final display = " ${p.productName}[${p.pseudoId}]"
+                        .toLowerCase();
+                    return display.contains(query);
+                  }).toList();
+                },
+                fieldViewBuilder:
+                    (context, textController, focusNode, onFieldSubmitted) {
+                      return TextFormField(
+                        key: const Key('productField'),
+                        controller: textController,
+                        focusNode: focusNode,
+                        decoration: InputDecoration(
+                          labelText: _localizations.product,
+                        ),
+                        onFieldSubmitted: (_) => onFieldSubmitted(),
+                        validator: (value) => (value == null || value.isEmpty)
+                            ? "Select a product?"
+                            : null,
+                      );
+                    },
+                optionsViewBuilder: (context, onSelected, options) {
+                  return Align(
+                    alignment: Alignment.topLeft,
+                    child: Material(
+                      elevation: 4,
+                      borderRadius: BorderRadius.circular(12),
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(
+                          maxHeight: 250,
+                          maxWidth: 400,
+                        ),
+                        child: ListView.builder(
+                          padding: EdgeInsets.zero,
+                          shrinkWrap: true,
+                          itemCount: options.length,
+                          itemBuilder: (context, idx) {
+                            final p = options.elementAt(idx);
+                            return ListTile(
+                              dense: true,
+                              title: Text(" ${p.productName}[${p.pseudoId}]"),
+                              onTap: () => onSelected(p),
+                            );
+                          },
+                        ),
                       ),
                     ),
                   );
-                  return Future.delayed(const Duration(milliseconds: 150), () {
-                    return Future.value(
-                      (_productBloc.state.data as Products).products,
-                    );
-                  });
                 },
-                compareFn: (item, sItem) => item.productId == sItem.productId,
-                onChanged: (Product? newValue) async {
-                  _priceController.text = newValue!.price.toString();
+                onSelected: (Product newValue) async {
+                  _priceController.text = newValue.price.toString();
                   _finDocBloc.add(FinDocProductRentalDates(newValue.productId));
                   await Future.delayed(
                     const Duration(milliseconds: 800),
@@ -361,8 +381,6 @@ class ReservationDialogState extends State<ReservationDialog> {
                     _selectedDate = firstFreeDate();
                   });
                 },
-                validator: (value) =>
-                    value == null ? "Select a product?" : null,
               ),
               TextFormField(
                 key: const Key('price'),

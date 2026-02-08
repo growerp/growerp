@@ -13,7 +13,6 @@
  */
 
 import 'package:decimal/decimal.dart';
-import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
@@ -67,7 +66,6 @@ class PaymentDialogState extends State<PaymentDialog> {
   GlAccount? _selectedGlAccount;
   CompanyUser? _selectedCompanyUser;
   PaymentType? _selectedPaymentType;
-  late DataFetchBloc<CompaniesUsers> _companyUserBloc;
   // ignore: unused_field
   late GlAccountBloc _accountBloc; // needed for accountlist
   late FinDocStatusVal _updatedStatus;
@@ -127,19 +125,18 @@ class PaymentDialogState extends State<PaymentDialog> {
         ? PaymentInstrument.cash
         : finDocUpdated.paymentInstrument!;
     _finDocBloc = context.read<FinDocBloc>();
-    _companyUserBloc = context.read<DataFetchBloc<CompaniesUsers>>()
-      ..add(
-        GetDataEvent(
-          () => context.read<RestClient>().getCompanyUser(
-            limit: 3,
-            role: finDoc.sales && finDoc.docType != FinDocType.transaction
-                ? Role.customer
-                : Role.supplier,
-          ),
+    context.read<DataFetchBloc<CompaniesUsers>>().add(
+      GetDataEvent(
+        () => context.read<RestClient>().getCompanyUser(
+          limit: 100,
+          role: finDoc.sales && finDoc.docType != FinDocType.transaction
+              ? Role.customer
+              : Role.supplier,
         ),
-      );
+      ),
+    );
     _accountBloc = context.read<GlAccountBloc>()
-      ..add(const GlAccountFetch(limit: 3));
+      ..add(const GlAccountFetch(limit: 100));
     _authBloc = context.read<AuthBloc>();
   }
 
@@ -323,71 +320,89 @@ class PaymentDialogState extends State<PaymentDialog> {
                     builder: (context, state) {
                       switch (state.status) {
                         case DataFetchStatus.success:
-                          return DropdownSearch<CompanyUser>(
-                            enabled: !readOnly,
-                            selectedItem: _selectedCompanyUser,
-                            popupProps: PopupProps.menu(
-                              isFilterOnline: true,
-                              showSelectedItems: true,
-                              showSearchBox: true,
-                              searchFieldProps: TextFieldProps(
-                                autofocus: true,
-                                decoration: InputDecoration(
-                                  labelText: companyLabel,
-                                ),
-                              ),
-                              menuProps: MenuProps(
-                                borderRadius: BorderRadius.circular(20.0),
-                              ),
-                              title: popUp(
-                                context: context,
-                                title: companyLabel,
-                                height: 50,
-                              ),
-                            ),
-                            dropdownDecoratorProps: DropDownDecoratorProps(
-                              dropdownSearchDecoration: InputDecoration(
-                                labelText: companyLabel,
-                              ),
-                            ),
+                          final companyUsers =
+                              (state.data as CompaniesUsers).companiesUsers;
+                          return Autocomplete<CompanyUser>(
                             key: Key(
                               finDocUpdated.sales ? 'customer' : 'supplier',
                             ),
-                            itemAsString: (CompanyUser? u) => " ${u!.name}",
-                            asyncItems: (String filter) {
-                              _companyUserBloc.add(
-                                GetDataEvent(
-                                  () =>
-                                      context.read<RestClient>().getCompanyUser(
-                                        searchString: filter,
-                                        limit: 3,
-                                        role: widget.finDoc.sales
-                                            ? Role.customer
-                                            : Role.supplier,
-                                      ),
-                                ),
-                              );
-                              return Future.delayed(
-                                const Duration(milliseconds: 250),
-                                () {
-                                  return Future<List<CompanyUser>>.value(
-                                    (_companyUserBloc.state.data
-                                            as CompaniesUsers)
-                                        .companiesUsers,
+                            initialValue: TextEditingValue(
+                              text: _selectedCompanyUser != null
+                                  ? " ${_selectedCompanyUser!.name}"
+                                  : '',
+                            ),
+                            displayStringForOption: (CompanyUser u) =>
+                                " ${u.name}",
+                            optionsBuilder:
+                                (TextEditingValue textEditingValue) {
+                                  final query = textEditingValue.text
+                                      .toLowerCase()
+                                      .trim();
+                                  if (query.isEmpty) return companyUsers;
+                                  return companyUsers.where((cu) {
+                                    final display = " ${cu.name}".toLowerCase();
+                                    return display.contains(query);
+                                  }).toList();
+                                },
+                            fieldViewBuilder:
+                                (
+                                  context,
+                                  textController,
+                                  focusNode,
+                                  onFieldSubmitted,
+                                ) {
+                                  return TextFormField(
+                                    key: Key(
+                                      finDocUpdated.sales
+                                          ? 'customerField'
+                                          : 'supplierField',
+                                    ),
+                                    enabled: !readOnly,
+                                    controller: textController,
+                                    focusNode: focusNode,
+                                    decoration: InputDecoration(
+                                      labelText: companyLabel,
+                                    ),
+                                    onFieldSubmitted: (_) => onFieldSubmitted(),
+                                    validator: (value) =>
+                                        (value == null || value.isEmpty)
+                                        ? "Select ${finDocUpdated.sales ? _localizations!.customer : _localizations!.supplier}"
+                                        : null,
                                   );
                                 },
+                            optionsViewBuilder: (context, onSelected, options) {
+                              return Align(
+                                alignment: Alignment.topLeft,
+                                child: Material(
+                                  elevation: 4,
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: ConstrainedBox(
+                                    constraints: const BoxConstraints(
+                                      maxHeight: 250,
+                                      maxWidth: 400,
+                                    ),
+                                    child: ListView.builder(
+                                      padding: EdgeInsets.zero,
+                                      shrinkWrap: true,
+                                      itemCount: options.length,
+                                      itemBuilder: (context, idx) {
+                                        final cu = options.elementAt(idx);
+                                        return ListTile(
+                                          dense: true,
+                                          title: Text(" ${cu.name}"),
+                                          onTap: () => onSelected(cu),
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                ),
                               );
                             },
-                            compareFn: (item, sItem) =>
-                                item.partyId == sItem.partyId,
-                            onChanged: (CompanyUser? newValue) {
+                            onSelected: (CompanyUser newValue) {
                               setState(() {
                                 _selectedCompanyUser = newValue;
                               });
                             },
-                            validator: (value) => value == null
-                                ? "Select ${finDocUpdated.sales ? _localizations!.customer : _localizations!.supplier}"
-                                : null,
                           );
                         case DataFetchStatus.failure:
                           return const FatalErrorForm(
@@ -507,51 +522,77 @@ class PaymentDialogState extends State<PaymentDialog> {
                       message: 'server connection problem',
                     );
                   case GlAccountStatus.success:
-                    return DropdownSearch<GlAccount>(
-                      enabled: !readOnly,
-                      selectedItem: _selectedGlAccount,
-                      popupProps: PopupProps.menu(
-                        isFilterOnline: true,
-                        showSelectedItems: true,
-                        showSearchBox: true,
-                        searchFieldProps: TextFieldProps(
-                          autofocus: true,
-                          decoration: InputDecoration(
-                            labelText: _localizations!.glAccount,
-                          ),
-                        ),
-                        menuProps: MenuProps(
-                          borderRadius: BorderRadius.circular(20.0),
-                        ),
-                        title: popUp(
-                          context: context,
-                          title: _localizations!.selectGlAccount,
-                          height: 50,
-                        ),
-                      ),
-                      dropdownDecoratorProps: DropDownDecoratorProps(
-                        dropdownSearchDecoration: InputDecoration(
-                          labelText: _localizations!.glAccount,
-                        ),
-                      ),
+                    return Autocomplete<GlAccount>(
                       key: const Key('glAccount'),
-                      itemAsString: (GlAccount? u) =>
-                          " ${u?.accountCode ?? ''} ${u?.accountName ?? ''} ",
-                      asyncItems: (String filter) async {
-                        _accountBloc.add(
-                          GlAccountFetch(searchString: filter, limit: 3),
-                        );
-                        return Future.delayed(
-                          const Duration(milliseconds: 100),
-                          () {
-                            return Future.value(_accountBloc.state.glAccounts);
+                      initialValue: TextEditingValue(
+                        text: _selectedGlAccount != null
+                            ? " ${_selectedGlAccount?.accountCode ?? ''} ${_selectedGlAccount?.accountName ?? ''} "
+                            : '',
+                      ),
+                      displayStringForOption: (GlAccount u) =>
+                          " ${u.accountCode ?? ''} ${u.accountName ?? ''} ",
+                      optionsBuilder: (TextEditingValue textEditingValue) {
+                        final query = textEditingValue.text
+                            .toLowerCase()
+                            .trim();
+                        if (query.isEmpty) return state.glAccounts;
+                        return state.glAccounts.where((gl) {
+                          final display =
+                              " ${gl.accountCode ?? ''} ${gl.accountName ?? ''} "
+                                  .toLowerCase();
+                          return display.contains(query);
+                        }).toList();
+                      },
+                      fieldViewBuilder:
+                          (
+                            context,
+                            textController,
+                            focusNode,
+                            onFieldSubmitted,
+                          ) {
+                            return TextFormField(
+                              key: const Key('glAccountField'),
+                              enabled: !readOnly,
+                              controller: textController,
+                              focusNode: focusNode,
+                              decoration: InputDecoration(
+                                labelText: _localizations!.glAccount,
+                              ),
+                              onFieldSubmitted: (_) => onFieldSubmitted(),
+                            );
                           },
+                      optionsViewBuilder: (context, onSelected, options) {
+                        return Align(
+                          alignment: Alignment.topLeft,
+                          child: Material(
+                            elevation: 4,
+                            borderRadius: BorderRadius.circular(12),
+                            child: ConstrainedBox(
+                              constraints: const BoxConstraints(
+                                maxHeight: 250,
+                                maxWidth: 400,
+                              ),
+                              child: ListView.builder(
+                                padding: EdgeInsets.zero,
+                                shrinkWrap: true,
+                                itemCount: options.length,
+                                itemBuilder: (context, idx) {
+                                  final gl = options.elementAt(idx);
+                                  return ListTile(
+                                    dense: true,
+                                    title: Text(
+                                      " ${gl.accountCode ?? ''} ${gl.accountName ?? ''} ",
+                                    ),
+                                    onTap: () => onSelected(gl),
+                                  );
+                                },
+                              ),
+                            ),
+                          ),
                         );
                       },
-                      compareFn: (item, sItem) =>
-                          item.accountCode == sItem.accountCode,
-                      onChanged: (GlAccount? newValue) {
-                        _selectedGlAccount = newValue!;
+                      onSelected: (GlAccount newValue) {
+                        _selectedGlAccount = newValue;
                       },
                     );
                   default:

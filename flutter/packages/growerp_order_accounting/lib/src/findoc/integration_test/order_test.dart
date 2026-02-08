@@ -19,9 +19,9 @@ import 'integration_test.dart';
 
 class OrderTest {
   static Future<void> selectPurchaseOrders(WidgetTester tester) async {
-    // Purchase orders are currently not separately routed in the example app
-    // Navigate to orders first, then the test can filter if needed
-    await CommonTest.selectOption(tester, '/orders', 'SalesOrder');
+    // Navigate to main dashboard first (the purchase-orders card is there)
+    await CommonTest.gotoMainMenu(tester);
+    await CommonTest.selectOption(tester, '/purchase-orders', 'PurchaseOrder');
   }
 
   static Future<void> selectSalesOrders(WidgetTester tester) async {
@@ -127,7 +127,7 @@ class OrderTest {
         'quantity',
         finDoc.items[0].quantity.toString(),
       );
-      await CommonTest.tapByKey(tester, 'update');
+      await CommonTest.tapByKey(tester, 'okRental');
       await CommonTest.drag(tester);
       await CommonTest.tapByKey(tester, 'update', seconds: CommonTest.waitTime);
       // tap orderId added at the top to get detail

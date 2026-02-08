@@ -100,7 +100,7 @@ class PaymentTest {
         tester,
         "PaymentDialog${payment.sales ? 'Sales' : 'Purchase'}",
       );
-      await CommonTest.enterDropDownSearch(
+      await CommonTest.enterAutocompleteValue(
         tester,
         payment.sales ? 'customer' : 'supplier',
         payment.otherCompany!.name!,
@@ -113,7 +113,7 @@ class PaymentTest {
       await CommonTest.enterDropDown(
         tester,
         'paymentType',
-        payment.items[0].paymentType!.accountCode,
+        payment.items[0].paymentType!.paymentTypeName,
       );
       switch (payment.paymentInstrument) {
         case PaymentInstrument.bank:
@@ -150,8 +150,10 @@ class PaymentTest {
         seconds: CommonTest.waitTime,
       );
       expect(
-        CommonTest.getDropdownSearch(payment.sales ? 'customer' : 'supplier'),
-        equals(payment.otherCompany!.name),
+        CommonTest.getTextFormField(
+          payment.sales ? 'customerField' : 'supplierField',
+        ),
+        contains(payment.otherCompany!.name),
       );
       expect(
         CommonTest.getDropdown('statusDropDown'),

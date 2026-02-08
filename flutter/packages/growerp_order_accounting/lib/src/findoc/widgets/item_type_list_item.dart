@@ -14,7 +14,6 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
@@ -36,7 +35,6 @@ class ItemTypeListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    GlAccountBloc glAccountBloc = context.read<GlAccountBloc>();
     FinDocBloc finDocBloc = context.read<FinDocBloc>();
 
     var accountSelect = BlocBuilder<GlAccountBloc, GlAccountState>(
@@ -45,46 +43,74 @@ class ItemTypeListItem extends StatelessWidget {
           case GlAccountStatus.failure:
             return const FatalErrorForm(message: 'server connection problem');
           case GlAccountStatus.success:
-            return DropdownSearch<GlAccount>(
-              selectedItem: GlAccount(
-                accountCode: itemType.accountCode,
-                accountName: itemType.accountName,
+            return Autocomplete<GlAccount>(
+              key: Key(
+                'glAccount_${itemType.itemTypeName}_${itemType.direction}',
               ),
-              popupProps: PopupProps.menu(
-                isFilterOnline: true,
-                showSelectedItems: true,
-                showSearchBox: true,
-                searchFieldProps: const TextFieldProps(
-                  autofocus: true,
-                  decoration: InputDecoration(labelText: 'Gl Account'),
-                ),
-                menuProps: MenuProps(borderRadius: BorderRadius.circular(20.0)),
-                title: popUp(
-                  context: context,
-                  title: 'Select GL Account',
-                  height: 50,
-                ),
+              initialValue: TextEditingValue(
+                text: itemType.accountCode.isNotEmpty
+                    ? " ${itemType.accountCode} ${itemType.accountName} "
+                    : '',
               ),
-              dropdownDecoratorProps: const DropDownDecoratorProps(
-                dropdownSearchDecoration: InputDecoration(),
-              ),
-              key: Key('glAccount$index'),
-              itemAsString: (GlAccount? u) =>
-                  " ${u?.accountCode ?? ''} ${u?.accountName ?? ''} ",
-              asyncItems: (String filter) async {
-                glAccountBloc.add(
-                  GlAccountFetch(searchString: filter, limit: 3),
-                );
-                return Future.delayed(const Duration(milliseconds: 100), () {
-                  return Future.value(glAccountBloc.state.glAccounts);
-                });
+              displayStringForOption: (GlAccount u) =>
+                  " ${u.accountCode ?? ''} ${u.accountName ?? ''} ",
+              optionsBuilder: (TextEditingValue textEditingValue) {
+                final query = textEditingValue.text.toLowerCase().trim();
+                if (query.isEmpty) return state.glAccounts;
+                return state.glAccounts.where((gl) {
+                  final display =
+                      " ${gl.accountCode ?? ''} ${gl.accountName ?? ''} "
+                          .toLowerCase();
+                  return display.contains(query);
+                }).toList();
               },
-              compareFn: (item, sItem) => item.accountCode == sItem.accountCode,
-              onChanged: (GlAccount? newValue) {
+              fieldViewBuilder:
+                  (context, textController, focusNode, onFieldSubmitted) {
+                    return TextFormField(
+                      key: Key(
+                        'glAccountField_${itemType.itemTypeName}_${itemType.direction}',
+                      ),
+                      controller: textController,
+                      focusNode: focusNode,
+                      decoration: const InputDecoration(),
+                      onFieldSubmitted: (_) => onFieldSubmitted(),
+                    );
+                  },
+              optionsViewBuilder: (context, onSelected, options) {
+                return Align(
+                  alignment: Alignment.topLeft,
+                  child: Material(
+                    elevation: 4,
+                    borderRadius: BorderRadius.circular(12),
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(
+                        maxHeight: 250,
+                        maxWidth: 400,
+                      ),
+                      child: ListView.builder(
+                        padding: EdgeInsets.zero,
+                        shrinkWrap: true,
+                        itemCount: options.length,
+                        itemBuilder: (context, idx) {
+                          final gl = options.elementAt(idx);
+                          return ListTile(
+                            dense: true,
+                            title: Text(
+                              " ${gl.accountCode ?? ''} ${gl.accountName ?? ''} ",
+                            ),
+                            onTap: () => onSelected(gl),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                );
+              },
+              onSelected: (GlAccount newValue) {
                 finDocBloc.add(
                   FinDocUpdateItemType(
                     itemType: itemType.copyWith(
-                      accountCode: newValue!.accountCode!,
+                      accountCode: newValue.accountCode!,
                       accountName: newValue.accountName!,
                     ),
                     update: true,

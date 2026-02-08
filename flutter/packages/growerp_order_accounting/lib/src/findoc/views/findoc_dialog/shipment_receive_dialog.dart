@@ -13,7 +13,6 @@
  */
 
 import 'package:collection/collection.dart';
-import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
@@ -53,7 +52,7 @@ class ShipmentReceiveState extends State<ShipmentReceiveDialog> {
     confirm = false;
     _locationBloc = context.read<DataFetchBloc<Locations>>()
       ..add(
-        GetDataEvent(() => context.read<RestClient>().getLocation(limit: 3)),
+        GetDataEvent(() => context.read<RestClient>().getLocation(limit: 100)),
       );
   }
 
@@ -170,73 +169,97 @@ class ShipmentReceiveState extends State<ShipmentReceiveDialog> {
                         : Row(
                             children: <Widget>[
                               Expanded(
-                                child: SizedBox(
-                                  height: 60,
-                                  child: DropdownSearch<Location>(
-                                    key: Key('locationDropDown$index'),
-                                    selectedItem: _selectedLocations[index],
-                                    popupProps: PopupProps.menu(
-                                      isFilterOnline: true,
-                                      showSearchBox: true,
-                                      searchFieldProps: TextFieldProps(
-                                        autofocus: true,
-                                        decoration: InputDecoration(
-                                          labelText:
-                                              _localizations.locationName,
-                                        ),
-                                        controller:
-                                            _locationSearchBoxControllers[index],
-                                      ),
-                                      menuProps: MenuProps(
-                                        borderRadius: BorderRadius.circular(
-                                          20.0,
-                                        ),
-                                      ),
-                                      title: popUp(
-                                        context: context,
-                                        title: _localizations.selectLocation,
-                                        height: 50,
-                                      ),
-                                    ),
-                                    dropdownDecoratorProps:
-                                        DropDownDecoratorProps(
-                                          dropdownSearchDecoration:
-                                              InputDecoration(
-                                                labelText:
-                                                    _localizations.location,
-                                              ),
-                                        ),
-                                    itemAsString: (Location? u) =>
-                                        " ${u?.locationName}",
-                                    asyncItems: (String filter) {
-                                      _locationBloc.add(
-                                        GetDataEvent(
-                                          () => context
-                                              .read<RestClient>()
-                                              .getLocation(
-                                                searchString: filter,
-                                                limit: 3,
-                                              ),
-                                        ),
-                                      );
-                                      return Future.delayed(
-                                        const Duration(milliseconds: 250),
-                                        () {
-                                          return Future.value(
+                                child: Autocomplete<Location>(
+                                  key: Key('locationDropDown$index'),
+                                  initialValue: TextEditingValue(
+                                    text:
+                                        _selectedLocations[index]
+                                                .locationName !=
+                                            'Select'
+                                        ? _selectedLocations[index]
+                                                  .locationName ??
+                                              ''
+                                        : '',
+                                  ),
+                                  displayStringForOption: (Location u) =>
+                                      u.locationName ?? '',
+                                  optionsBuilder:
+                                      (TextEditingValue textEditingValue) {
+                                        final locations =
                                             (_locationBloc.state.data
                                                     as Locations)
-                                                .locations,
-                                          );
-                                        },
-                                      );
-                                    },
-                                    compareFn: (item, sItem) =>
-                                        item.locationId == sItem.locationId,
-                                    onChanged: (Location? newValue) {
-                                      _selectedLocations[index] = newValue!;
-                                      _newLocationControllers[index].text = '';
-                                    },
-                                  ),
+                                                .locations;
+                                        final query = textEditingValue.text
+                                            .toLowerCase()
+                                            .trim();
+                                        if (query.isEmpty) return locations;
+                                        return locations.where((loc) {
+                                          final display =
+                                              (loc.locationName ?? '')
+                                                  .toLowerCase();
+                                          return display.contains(query);
+                                        }).toList();
+                                      },
+                                  fieldViewBuilder:
+                                      (
+                                        context,
+                                        textController,
+                                        focusNode,
+                                        onFieldSubmitted,
+                                      ) {
+                                        return TextFormField(
+                                          key: Key(
+                                            'locationDropDownField$index',
+                                          ),
+                                          controller: textController,
+                                          focusNode: focusNode,
+                                          decoration: InputDecoration(
+                                            labelText: _localizations.location,
+                                          ),
+                                          onFieldSubmitted: (_) =>
+                                              onFieldSubmitted(),
+                                        );
+                                      },
+                                  optionsViewBuilder:
+                                      (context, onSelected, options) {
+                                        return Align(
+                                          alignment: Alignment.topLeft,
+                                          child: Material(
+                                            elevation: 4,
+                                            borderRadius: BorderRadius.circular(
+                                              12,
+                                            ),
+                                            child: ConstrainedBox(
+                                              constraints: const BoxConstraints(
+                                                maxHeight: 250,
+                                                maxWidth: 400,
+                                              ),
+                                              child: ListView.builder(
+                                                padding: EdgeInsets.zero,
+                                                shrinkWrap: true,
+                                                itemCount: options.length,
+                                                itemBuilder: (context, idx) {
+                                                  final loc = options.elementAt(
+                                                    idx,
+                                                  );
+                                                  return ListTile(
+                                                    dense: true,
+                                                    title: Text(
+                                                      loc.locationName ?? '',
+                                                    ),
+                                                    onTap: () =>
+                                                        onSelected(loc),
+                                                  );
+                                                },
+                                              ),
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                  onSelected: (Location newValue) {
+                                    _selectedLocations[index] = newValue;
+                                    _newLocationControllers[index].text = '';
+                                  },
                                 ),
                               ),
                               const SizedBox(width: 10),
@@ -307,6 +330,9 @@ class ShipmentReceiveState extends State<ShipmentReceiveDialog> {
                         : _localizations.receiveShipment,
                   ),
                   onPressed: () async {
+                    debugPrint(
+                      'DEBUG ShipmentReceiveDialog update pressed, confirm=$confirm',
+                    );
                     setState(() {
                       if (confirm == false) {
                         newItems.forEachIndexed((index, value) {

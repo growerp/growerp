@@ -29,11 +29,16 @@ class DialogCloseButton extends StatelessWidget {
         child: InkWell(
           key: const Key('cancel'),
           onTap: () {
-            // Check if we can pop, otherwise go to home
+            // For dialogs (opened via showDialog), Navigator.canPop() is true
+            // and Navigator.pop() correctly closes the dialog overlay.
+            // For GoRouter-pushed routes (e.g. /findoc inside a ShellRoute),
+            // the ShellRoute's Navigator may only have one page, so canPop()
+            // returns false.  Fall back to GoRouter's context.pop() which
+            // correctly pops the GoRouter route back to the previous location.
             if (Navigator.of(context).canPop()) {
               Navigator.of(context).pop();
             } else {
-              context.go('/');
+              context.pop();
             }
           },
           borderRadius: BorderRadius.circular(12),

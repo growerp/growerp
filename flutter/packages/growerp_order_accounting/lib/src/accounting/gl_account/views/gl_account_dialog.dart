@@ -12,7 +12,6 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:responsive_framework/responsive_framework.dart';
@@ -33,6 +32,8 @@ class GlAccountDialogState extends State<GlAccountDialog> {
   final _accountNameController = TextEditingController();
   final _accountCodeController = TextEditingController();
   final _postedBalanceController = TextEditingController();
+  final _classController = TextEditingController();
+  final _typeController = TextEditingController();
   bool? debitSelected;
   AccountClass? classSelected;
   AccountType? typeSelected;
@@ -42,9 +43,10 @@ class GlAccountDialogState extends State<GlAccountDialog> {
   @override
   void initState() {
     super.initState();
-    _glAccountBloc = context.read<GlAccountBloc>()
-      ..add(const GlAccountTypesFetch())
-      ..add(const GlAccountClassesFetch());
+    _glAccountBloc = context.read<GlAccountBloc>();
+    // Fetch all classes and types via BLoC
+    _glAccountBloc.add(const GlAccountClassesFetch(limit: 100));
+    _glAccountBloc.add(const GlAccountTypesFetch(limit: 100));
     if (widget.glAccount.glAccountId != null) {
       _accountCodeController.text = widget.glAccount.accountCode ?? '';
       _accountNameController.text = widget.glAccount.accountName ?? '';
@@ -54,6 +56,10 @@ class GlAccountDialogState extends State<GlAccountDialog> {
       debitSelected = widget.glAccount.isDebit;
       classSelected = widget.glAccount.accountClass;
       typeSelected = widget.glAccount.accountType;
+      _classController.text = classSelected != null
+          ? _classDisplayString(classSelected!)
+          : '';
+      _typeController.text = typeSelected?.description ?? '';
     } else {
       debitSelected = true; // default to debit for new accounts
     }
@@ -111,6 +117,13 @@ class GlAccountDialogState extends State<GlAccountDialog> {
     );
   }
 
+  String _classDisplayString(AccountClass ac) {
+    return '${ac.topDescription?.substring(0, 1) ?? ''}-'
+        '${ac.parentDescription ?? ''}-'
+        '${ac.description ?? ''}-'
+        '${ac.detailDescription ?? ''}';
+  }
+
   Widget _glAccountForm(GlAccountState state) {
     List<Widget> widgets = [
       TextFormField(
@@ -151,86 +164,127 @@ class GlAccountDialogState extends State<GlAccountDialog> {
           ],
         ),
       ),
-      DropdownSearch<AccountClass>(
+      Autocomplete<AccountClass>(
         key: const Key('class'),
-        selectedItem: classSelected,
-        popupProps: PopupProps.menu(
-          isFilterOnline: true,
-          showSelectedItems: true,
-          showSearchBox: true,
-          searchFieldProps: TextFieldProps(
-            autofocus: true,
-            decoration: InputDecoration(labelText: _localizations.accountClass),
-          ),
-          menuProps: MenuProps(borderRadius: BorderRadius.circular(20.0)),
-          title: popUp(
-            context: context,
-            title: _localizations.selectGlAccountClass,
-            height: 50,
-          ),
-        ),
-        dropdownDecoratorProps: DropDownDecoratorProps(
-          dropdownSearchDecoration: InputDecoration(
-            labelText: _localizations.accountClass,
-          ),
-        ),
-        itemAsString: (AccountClass? u) =>
-            " ${u!.topDescription!.substring(0, 1)}-${u.parentDescription}-"
-            "${u.description}-${u.detailDescription}",
-        asyncItems: (String filter) async {
-          _glAccountBloc.add(
-            GlAccountClassesFetch(searchString: filter, limit: 3),
+        initialValue: TextEditingValue(text: _classController.text),
+        displayStringForOption: (AccountClass ac) => _classDisplayString(ac),
+        optionsBuilder: (TextEditingValue textEditingValue) {
+          final query = textEditingValue.text.toLowerCase();
+          if (query.isEmpty) return _glAccountBloc.state.accountClasses;
+          return _glAccountBloc.state.accountClasses.where((ac) {
+            return _classDisplayString(ac).toLowerCase().contains(query);
+          }).toList();
+        },
+        fieldViewBuilder:
+            (context, textController, focusNode, onFieldSubmitted) {
+              // Sync the external controller for test readability
+              _classController.text = textController.text;
+              textController.addListener(() {
+                _classController.text = textController.text;
+              });
+              return TextFormField(
+                key: const Key('classField'),
+                controller: textController,
+                focusNode: focusNode,
+                decoration: InputDecoration(
+                  labelText: _localizations.accountClass,
+                ),
+                onFieldSubmitted: (_) => onFieldSubmitted(),
+                validator: (value) =>
+                    classSelected == null ? _localizations.fieldRequired : null,
+              );
+            },
+        optionsViewBuilder: (context, onSelected, options) {
+          return Align(
+            alignment: Alignment.topLeft,
+            child: Material(
+              elevation: 4,
+              borderRadius: BorderRadius.circular(12),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(
+                  maxHeight: 250,
+                  maxWidth: 400,
+                ),
+                child: ListView.builder(
+                  padding: EdgeInsets.zero,
+                  shrinkWrap: true,
+                  itemCount: options.length,
+                  itemBuilder: (context, index) {
+                    final ac = options.elementAt(index);
+                    return ListTile(
+                      dense: true,
+                      title: Text(_classDisplayString(ac)),
+                      onTap: () => onSelected(ac),
+                    );
+                  },
+                ),
+              ),
+            ),
           );
-          return Future.delayed(const Duration(milliseconds: 100), () {
-            return Future.value(_glAccountBloc.state.accountClasses);
-          });
         },
-        compareFn: (item, sItem) =>
-            item.topClassId == sItem.topClassId &&
-            item.parentClassId == sItem.parentClassId &&
-            item.classId == sItem.classId &&
-            item.detailClassId == sItem.detailClassId,
-        onChanged: (AccountClass? newValue) {
-          classSelected = newValue!;
+        onSelected: (AccountClass selection) {
+          classSelected = selection;
+          _classController.text = _classDisplayString(selection);
         },
-        validator: (value) =>
-            value == null ? _localizations.fieldRequired : null,
       ),
-      DropdownSearch<AccountType>(
+      Autocomplete<AccountType>(
         key: const Key('type'),
-        selectedItem: typeSelected,
-        popupProps: PopupProps.menu(
-          isFilterOnline: true,
-          showSelectedItems: true,
-          showSearchBox: true,
-          searchFieldProps: TextFieldProps(
-            autofocus: true,
-            decoration: InputDecoration(labelText: _localizations.accountType),
-          ),
-          menuProps: MenuProps(borderRadius: BorderRadius.circular(20.0)),
-          title: popUp(
-            context: context,
-            title: _localizations.selectGlAccountType,
-            height: 50,
-          ),
-        ),
-        dropdownDecoratorProps: DropDownDecoratorProps(
-          dropdownSearchDecoration: InputDecoration(
-            labelText: _localizations.accountType,
-          ),
-        ),
-        itemAsString: (AccountType? u) => " ${u!.description}",
-        asyncItems: (String filter) async {
-          _glAccountBloc.add(
-            GlAccountTypesFetch(searchString: filter, limit: 3),
-          );
-          return Future.delayed(const Duration(milliseconds: 100), () {
-            return Future.value(_glAccountBloc.state.accountTypes);
-          });
+        initialValue: TextEditingValue(text: _typeController.text),
+        displayStringForOption: (AccountType at) => at.description ?? '',
+        optionsBuilder: (TextEditingValue textEditingValue) {
+          final query = textEditingValue.text.toLowerCase();
+          if (query.isEmpty) return _glAccountBloc.state.accountTypes;
+          return _glAccountBloc.state.accountTypes.where((at) {
+            return (at.description ?? '').toLowerCase().contains(query);
+          }).toList();
         },
-        compareFn: (item, sItem) => item.accountTypeId == sItem.accountTypeId,
-        onChanged: (AccountType? newValue) {
-          typeSelected = newValue!;
+        fieldViewBuilder:
+            (context, textController, focusNode, onFieldSubmitted) {
+              _typeController.text = textController.text;
+              textController.addListener(() {
+                _typeController.text = textController.text;
+              });
+              return TextFormField(
+                key: const Key('typeField'),
+                controller: textController,
+                focusNode: focusNode,
+                decoration: InputDecoration(
+                  labelText: _localizations.accountType,
+                ),
+                onFieldSubmitted: (_) => onFieldSubmitted(),
+              );
+            },
+        optionsViewBuilder: (context, onSelected, options) {
+          return Align(
+            alignment: Alignment.topLeft,
+            child: Material(
+              elevation: 4,
+              borderRadius: BorderRadius.circular(12),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(
+                  maxHeight: 250,
+                  maxWidth: 400,
+                ),
+                child: ListView.builder(
+                  padding: EdgeInsets.zero,
+                  shrinkWrap: true,
+                  itemCount: options.length,
+                  itemBuilder: (context, index) {
+                    final at = options.elementAt(index);
+                    return ListTile(
+                      dense: true,
+                      title: Text(at.description ?? ''),
+                      onTap: () => onSelected(at),
+                    );
+                  },
+                ),
+              ),
+            ),
+          );
+        },
+        onSelected: (AccountType selection) {
+          typeSelected = selection;
+          _typeController.text = selection.description ?? '';
         },
       ),
       TextFormField(

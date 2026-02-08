@@ -171,7 +171,19 @@ class AccountingDashboard extends StatelessWidget {
         title: "Ledger",
         iconName: 'account_balance_wallet',
         route: '/accounting/ledger',
-        stats: "Accounts, Trans, Journals",
+        stats: "Transactions",
+      ),
+      const DashboardCard(
+        title: "Ledger Accounts",
+        iconName: 'account_tree',
+        route: '/accounting/ledger-accounts',
+        stats: "GL Accounts",
+      ),
+      const DashboardCard(
+        title: "Ledger Journal",
+        iconName: 'receipt_long',
+        route: '/accounting/ledger-journal',
+        stats: "Journal Entries",
       ),
       const DashboardCard(
         title: "Reports",
@@ -183,7 +195,13 @@ class AccountingDashboard extends StatelessWidget {
         title: "Setup",
         iconName: 'settings',
         route: '/accounting/setup',
-        stats: "Periods, Item types, Payment types",
+        stats: "Periods, Payment types",
+      ),
+      const DashboardCard(
+        title: "Item Types",
+        iconName: 'list',
+        route: '/accounting/setup/item-types',
+        stats: "Item type GL accounts",
       ),
     ];
 

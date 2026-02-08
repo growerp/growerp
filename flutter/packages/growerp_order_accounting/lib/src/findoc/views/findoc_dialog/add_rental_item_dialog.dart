@@ -13,7 +13,6 @@
  */
 
 import 'package:decimal/decimal.dart';
-import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
@@ -31,7 +30,6 @@ Future addRentalItemDialog(
   final priceController = TextEditingController();
   final itemDescriptionController = TextEditingController();
   final quantityController = TextEditingController();
-  final productSearchBoxController = TextEditingController();
   Product? selectedProduct;
   DateTime startDate = CustomizableDateTime.current;
   List<DateTime> rentalDays = [];
@@ -145,73 +143,96 @@ Future addRentalItemDialog(
                                 case DataFetchStatus.loading:
                                   return const LoadingIndicator();
                                 case DataFetchStatus.success:
-                                  return DropdownSearch<Product>(
-                                    selectedItem: selectedProduct,
-                                    popupProps: PopupProps.menu(
-                                      showSelectedItems: true,
-                                      isFilterOnline: true,
-                                      showSearchBox: true,
-                                      searchFieldProps: TextFieldProps(
-                                        autofocus: true,
-                                        decoration: InputDecoration(
-                                          labelText:
-                                              classificationId == 'AppHotel'
-                                              ? 'Room Type'
-                                              : 'Product',
-                                        ),
-                                        controller: productSearchBoxController,
-                                      ),
-                                      menuProps: MenuProps(
-                                        borderRadius: BorderRadius.circular(
-                                          20.0,
-                                        ),
-                                      ),
-                                      title: popUp(
-                                        context: context,
-                                        title: 'Select product',
-                                        height: 50,
-                                      ),
-                                    ),
-                                    dropdownDecoratorProps:
-                                        const DropDownDecoratorProps(
-                                          dropdownSearchDecoration:
-                                              InputDecoration(
-                                                labelText: 'Product',
-                                              ),
-                                        ),
+                                  return Autocomplete<Product>(
                                     key: const Key('product'),
-                                    itemAsString: (Product? u) =>
-                                        " ${u!.productName}[${u.pseudoId}]",
-                                    asyncItems: (String filter) {
-                                      productBloc.add(
-                                        GetDataEvent(
-                                          () => context.read<RestClient>().getProduct(
-                                            searchString: filter,
-                                            limit: 3,
-                                            isForDropDown: true,
-                                            //                                                          assetClassId:
-                                            //                                                              classificationId ==
-                                            //                                                                      'AppHotel'
-                                            //                                                                  ? 'Hotel Room'
-                                            //                                                                  : '',
-                                          ),
-                                        ),
-                                      );
-                                      return Future.delayed(
-                                        const Duration(milliseconds: 150),
-                                        () {
-                                          return Future.value(
-                                            (productBloc.state.data as Products)
-                                                .products,
+                                    initialValue: TextEditingValue(
+                                      text: selectedProduct != null
+                                          ? '${selectedProduct!.productName}[${selectedProduct!.pseudoId}]'
+                                          : '',
+                                    ),
+                                    displayStringForOption: (Product u) =>
+                                        '${u.productName}[${u.pseudoId}]',
+                                    optionsBuilder:
+                                        (TextEditingValue textEditingValue) {
+                                          final products =
+                                              (productBloc.state.data
+                                                      as Products)
+                                                  .products;
+                                          final query = textEditingValue.text
+                                              .toLowerCase()
+                                              .trim();
+                                          if (query.isEmpty) return products;
+                                          return products.where((p) {
+                                            final display =
+                                                '${p.productName}[${p.pseudoId}]'
+                                                    .toLowerCase();
+                                            return display.contains(query);
+                                          }).toList();
+                                        },
+                                    fieldViewBuilder:
+                                        (
+                                          context,
+                                          textController,
+                                          focusNode,
+                                          onFieldSubmitted,
+                                        ) {
+                                          return TextFormField(
+                                            key: const Key('productField'),
+                                            controller: textController,
+                                            focusNode: focusNode,
+                                            decoration: InputDecoration(
+                                              labelText:
+                                                  classificationId == 'AppHotel'
+                                                  ? 'Room Type'
+                                                  : 'Product',
+                                            ),
+                                            onFieldSubmitted: (_) =>
+                                                onFieldSubmitted(),
+                                            validator: (value) =>
+                                                (value == null || value.isEmpty)
+                                                ? "Select a product?"
+                                                : null,
                                           );
                                         },
-                                      );
-                                    },
-                                    compareFn: (item, sItem) =>
-                                        item.productId == sItem.productId,
-                                    onChanged: (Product? newValue) async {
+                                    optionsViewBuilder:
+                                        (context, onSelected, options) {
+                                          return Align(
+                                            alignment: Alignment.topLeft,
+                                            child: Material(
+                                              elevation: 4,
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
+                                              child: ConstrainedBox(
+                                                constraints:
+                                                    const BoxConstraints(
+                                                      maxHeight: 250,
+                                                      maxWidth: 400,
+                                                    ),
+                                                child: ListView.builder(
+                                                  padding: EdgeInsets.zero,
+                                                  shrinkWrap: true,
+                                                  itemCount: options.length,
+                                                  itemBuilder: (context, idx) {
+                                                    final p = options.elementAt(
+                                                      idx,
+                                                    );
+                                                    return ListTile(
+                                                      dense: true,
+                                                      title: Text(
+                                                        '${p.productName}[${p.pseudoId}]',
+                                                      ),
+                                                      onTap: () =>
+                                                          onSelected(p),
+                                                    );
+                                                  },
+                                                ),
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                    onSelected: (Product newValue) async {
                                       selectedProduct = newValue;
-                                      priceController.text = newValue!.price
+                                      priceController.text = newValue.price
                                           .toString();
                                       itemDescriptionController.text =
                                           newValue.productName ?? '';
@@ -238,9 +259,6 @@ Future addRentalItemDialog(
                                         startDate = firstFreeDate();
                                       });
                                     },
-                                    validator: (value) => value == null
-                                        ? "Select a product?"
-                                        : null,
                                   );
                                 default:
                                   return const Center(

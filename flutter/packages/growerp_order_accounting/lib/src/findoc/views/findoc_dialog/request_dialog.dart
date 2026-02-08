@@ -16,7 +16,6 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:growerp_core/growerp_core.dart';
-import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_models/growerp_models.dart';
@@ -60,7 +59,6 @@ class RequestDialogState extends State<RequestDialog> {
   late FinDocBloc _finDocBloc;
   CompanyUser? _selectedCompanyUser;
   RequestType? _selectedRequestType;
-  late DataFetchBloc<CompaniesUsers> _companyUserBloc;
   // ignore: unused_field
   late GlAccountBloc _accountBloc; // needed for accountlist
   late FinDocStatusVal _updatedStatus;
@@ -98,12 +96,14 @@ class RequestDialogState extends State<RequestDialog> {
         ? ''
         : finDoc.pseudoId.toString();
     _selectedRequestType = finDocUpdated.requestType;
-    _companyUserBloc = context.read<DataFetchBloc<CompaniesUsers>>()
-      ..add(
-        GetDataEvent<CompaniesUsers>(
-          () => Future<CompaniesUsers>.value(CompaniesUsers()),
+    context.read<DataFetchBloc<CompaniesUsers>>().add(
+      GetDataEvent<CompaniesUsers>(
+        () => context.read<RestClient>().getCompanyUser(
+          limit: 100,
+          role: Role.unknown,
         ),
-      );
+      ),
+    );
     _finDocBloc = context.read<FinDocBloc>();
     classificationId = context.read<String>();
     _authBloc = context.read<AuthBloc>();
@@ -208,66 +208,85 @@ class RequestDialogState extends State<RequestDialog> {
                 builder: (context, state) {
                   switch (state.status) {
                     case DataFetchStatus.success:
-                      return DropdownSearch<CompanyUser>(
-                        enabled: !readOnly,
+                      final companyUsers =
+                          (state.data as CompaniesUsers).companiesUsers;
+                      return Autocomplete<CompanyUser>(
                         key: const Key('otherCompanyUser'),
-                        selectedItem: _selectedCompanyUser,
-                        popupProps: PopupProps.menu(
-                          isFilterOnline: true,
-                          showSelectedItems: true,
-                          showSearchBox: true,
-                          searchFieldProps: TextFieldProps(
-                            autofocus: true,
-                            decoration: InputDecoration(
-                              labelText: companyLabel,
-                            ),
-                          ),
-                          menuProps: MenuProps(
-                            borderRadius: BorderRadius.circular(20.0),
-                          ),
-                          title: popUp(
-                            context: context,
-                            title: companyLabel,
-                            height: 50,
-                          ),
+                        initialValue: TextEditingValue(
+                          text: _selectedCompanyUser != null
+                              ? ' ${_selectedCompanyUser!.name}[${_selectedCompanyUser!.pseudoId}]'
+                              : '',
                         ),
-                        dropdownDecoratorProps: DropDownDecoratorProps(
-                          dropdownSearchDecoration: InputDecoration(
-                            labelText: companyLabel,
-                          ),
-                        ),
-                        itemAsString: (CompanyUser? u) =>
-                            " ${u!.name}[${u.pseudoId}]",
-                        asyncItems: (String filter) async {
-                          _companyUserBloc.add(
-                            GetDataEvent(
-                              () => context.read<RestClient>().getCompanyUser(
-                                searchString: filter,
-                                limit: 4,
-                                role: Role.unknown,
+                        displayStringForOption: (CompanyUser u) =>
+                            ' ${u.name}[${u.pseudoId}]',
+                        optionsBuilder: (TextEditingValue textEditingValue) {
+                          final query = textEditingValue.text
+                              .toLowerCase()
+                              .trim();
+                          if (query.isEmpty) return companyUsers;
+                          return companyUsers.where((cu) {
+                            final display = ' ${cu.name}[${cu.pseudoId}]'
+                                .toLowerCase();
+                            return display.contains(query);
+                          }).toList();
+                        },
+                        fieldViewBuilder:
+                            (
+                              context,
+                              textController,
+                              focusNode,
+                              onFieldSubmitted,
+                            ) {
+                              return TextFormField(
+                                key: const Key('otherCompanyUserField'),
+                                enabled: !readOnly,
+                                controller: textController,
+                                focusNode: focusNode,
+                                decoration: InputDecoration(
+                                  labelText: companyLabel,
+                                ),
+                                onFieldSubmitted: (_) => onFieldSubmitted(),
+                                validator: (value) =>
+                                    (value == null || value.isEmpty)
+                                    ? _localizations.selectRequester
+                                    : null,
+                              );
+                            },
+                        optionsViewBuilder: (context, onSelected, options) {
+                          return Align(
+                            alignment: Alignment.topLeft,
+                            child: Material(
+                              elevation: 4,
+                              borderRadius: BorderRadius.circular(12),
+                              child: ConstrainedBox(
+                                constraints: const BoxConstraints(
+                                  maxHeight: 250,
+                                  maxWidth: 400,
+                                ),
+                                child: ListView.builder(
+                                  padding: EdgeInsets.zero,
+                                  shrinkWrap: true,
+                                  itemCount: options.length,
+                                  itemBuilder: (context, idx) {
+                                    final cu = options.elementAt(idx);
+                                    return ListTile(
+                                      dense: true,
+                                      title: Text(
+                                        ' ${cu.name}[${cu.pseudoId}]',
+                                      ),
+                                      onTap: () => onSelected(cu),
+                                    );
+                                  },
+                                ),
                               ),
                             ),
                           );
-                          return Future.delayed(
-                            const Duration(milliseconds: 150),
-                            () {
-                              return Future.value(
-                                (_companyUserBloc.state.data as CompaniesUsers)
-                                    .companiesUsers,
-                              );
-                            },
-                          );
                         },
-                        compareFn: (item, sItem) =>
-                            item.partyId == sItem.partyId,
-                        onChanged: (CompanyUser? newValue) {
+                        onSelected: (CompanyUser newValue) {
                           setState(() {
                             _selectedCompanyUser = newValue;
                           });
                         },
-                        validator: (value) => value == null
-                            ? _localizations.selectRequester
-                            : null,
                       );
                     case DataFetchStatus.failure:
                       return FatalErrorForm(
@@ -633,62 +652,83 @@ class RequestDialogState extends State<RequestDialog> {
               builder: (context, state) {
                 switch (state.status) {
                   case DataFetchStatus.success:
-                    return DropdownSearch<CompanyUser>(
-                      enabled: !readOnly,
+                    final companyUsers =
+                        (state.data as CompaniesUsers).companiesUsers;
+                    return Autocomplete<CompanyUser>(
                       key: const Key('otherCompanyUser'),
-                      selectedItem: _selectedCompanyUser,
-                      popupProps: PopupProps.menu(
-                        isFilterOnline: true,
-                        showSelectedItems: true,
-                        showSearchBox: true,
-                        searchFieldProps: TextFieldProps(
-                          autofocus: true,
-                          decoration: InputDecoration(labelText: companyLabel),
-                        ),
-                        menuProps: MenuProps(
-                          borderRadius: BorderRadius.circular(20.0),
-                        ),
-                        title: popUp(
-                          context: context,
-                          title: companyLabel,
-                          height: 50,
-                        ),
+                      initialValue: TextEditingValue(
+                        text: _selectedCompanyUser != null
+                            ? ' ${_selectedCompanyUser!.name}[${_selectedCompanyUser!.pseudoId}]'
+                            : '',
                       ),
-                      dropdownDecoratorProps: DropDownDecoratorProps(
-                        dropdownSearchDecoration: InputDecoration(
-                          labelText: companyLabel,
-                        ),
-                      ),
-                      itemAsString: (CompanyUser? u) =>
-                          " ${u!.name}[${u.pseudoId}]",
-                      asyncItems: (String filter) async {
-                        _companyUserBloc.add(
-                          GetDataEvent(
-                            () => context.read<RestClient>().getCompanyUser(
-                              searchString: filter,
-                              limit: 4,
-                              role: Role.unknown,
+                      displayStringForOption: (CompanyUser u) =>
+                          ' ${u.name}[${u.pseudoId}]',
+                      optionsBuilder: (TextEditingValue textEditingValue) {
+                        final query = textEditingValue.text
+                            .toLowerCase()
+                            .trim();
+                        if (query.isEmpty) return companyUsers;
+                        return companyUsers.where((cu) {
+                          final display = ' ${cu.name}[${cu.pseudoId}]'
+                              .toLowerCase();
+                          return display.contains(query);
+                        }).toList();
+                      },
+                      fieldViewBuilder:
+                          (
+                            context,
+                            textController,
+                            focusNode,
+                            onFieldSubmitted,
+                          ) {
+                            return TextFormField(
+                              key: const Key('otherCompanyUserField'),
+                              enabled: !readOnly,
+                              controller: textController,
+                              focusNode: focusNode,
+                              decoration: InputDecoration(
+                                labelText: companyLabel,
+                              ),
+                              onFieldSubmitted: (_) => onFieldSubmitted(),
+                              validator: (value) =>
+                                  (value == null || value.isEmpty)
+                                  ? _localizations.selectRequester
+                                  : null,
+                            );
+                          },
+                      optionsViewBuilder: (context, onSelected, options) {
+                        return Align(
+                          alignment: Alignment.topLeft,
+                          child: Material(
+                            elevation: 4,
+                            borderRadius: BorderRadius.circular(12),
+                            child: ConstrainedBox(
+                              constraints: const BoxConstraints(
+                                maxHeight: 250,
+                                maxWidth: 400,
+                              ),
+                              child: ListView.builder(
+                                padding: EdgeInsets.zero,
+                                shrinkWrap: true,
+                                itemCount: options.length,
+                                itemBuilder: (context, idx) {
+                                  final cu = options.elementAt(idx);
+                                  return ListTile(
+                                    dense: true,
+                                    title: Text(' ${cu.name}[${cu.pseudoId}]'),
+                                    onTap: () => onSelected(cu),
+                                  );
+                                },
+                              ),
                             ),
                           ),
                         );
-                        return Future.delayed(
-                          const Duration(milliseconds: 150),
-                          () {
-                            return Future.value(
-                              (_companyUserBloc.state.data as CompaniesUsers)
-                                  .companiesUsers,
-                            );
-                          },
-                        );
                       },
-                      compareFn: (item, sItem) => item.partyId == sItem.partyId,
-                      onChanged: (CompanyUser? newValue) {
+                      onSelected: (CompanyUser newValue) {
                         setState(() {
                           _selectedCompanyUser = newValue;
                         });
                       },
-                      validator: (value) =>
-                          value == null ? _localizations.selectRequester : null,
                     );
                   case DataFetchStatus.failure:
                     return FatalErrorForm(

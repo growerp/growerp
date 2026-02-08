@@ -44,7 +44,7 @@ class PaymentTypeListState extends State<PaymentTypeList> {
     entityName = classificationId == 'AppHotel' ? 'Room' : 'PaymentType';
     finDocBloc = context.read<FinDocBloc>()..add(const FinDocGetPaymentTypes());
     glAccountBloc = context.read<GlAccountBloc>()
-      ..add(const GlAccountFetch(refresh: true, limit: 3));
+      ..add(const GlAccountFetch(refresh: true, limit: 100));
   }
 
   @override
@@ -89,15 +89,15 @@ class PaymentTypeListState extends State<PaymentTypeList> {
             // Apply search filter
             if (searchString.isNotEmpty) {
               filteredList = filteredList.where((item) {
-                return item.paymentTypeName.toLowerCase().contains(
-                      searchString.toLowerCase(),
-                    ) ||
-                    (item.accountName ?? '').toLowerCase().contains(
-                      searchString.toLowerCase(),
-                    ) ||
-                    (item.accountCode ?? '').toLowerCase().contains(
-                      searchString.toLowerCase(),
-                    );
+                final displayName =
+                    '${item.paymentTypeName} -- '
+                    '${item.isPayable ? 'Outgoing' : 'Incoming'} -- '
+                    '${item.isApplied ? 'Y' : 'N'}';
+                final query = searchString.toLowerCase();
+                return displayName.toLowerCase().contains(query) ||
+                    item.paymentTypeName.toLowerCase().contains(query) ||
+                    (item.accountName ?? '').toLowerCase().contains(query) ||
+                    (item.accountCode ?? '').toLowerCase().contains(query);
               }).toList();
             }
 

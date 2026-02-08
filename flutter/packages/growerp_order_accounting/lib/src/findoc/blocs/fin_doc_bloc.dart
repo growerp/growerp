@@ -120,7 +120,10 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
         finDocId: event.finDocId,
         start: start,
         limit: event.limit,
-        sales: event.sales ?? sales,
+        // Transactions are universal ledger entries, not filtered by sales direction
+        sales: (event.docType ?? docType) == FinDocType.transaction
+            ? null
+            : (event.sales ?? sales),
         docType: event.docType ?? docType,
         searchString: event.searchString,
         journalId: event.journalId,

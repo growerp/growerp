@@ -76,18 +76,20 @@ class PaymentTypeTest {
     List<PaymentType> paymentTypes,
   ) async {
     for (PaymentType paymentType in paymentTypes) {
-      await CommonTest.doSearch(
+      await CommonTest.enterText(
         tester,
-        searchString:
-            "${paymentType.paymentTypeName} -- "
+        'searchField',
+        "${paymentType.paymentTypeName} -- "
             "${paymentType.isPayable ? 'Outgoing' : 'Incoming'} -- "
             "${paymentType.isApplied ? 'Y' : 'N'}",
       );
-      await CommonTest.enterDropDownSearch(
+      await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
+      final ptKey =
+          '${paymentType.paymentTypeId}_${paymentType.isPayable ? 1 : 0}_${paymentType.isApplied ? 1 : 0}';
+      await CommonTest.enterAutocompleteValue(
         tester,
-        'glAccount0',
+        'glAccount_$ptKey',
         paymentType.accountCode,
-        seconds: CommonTest.waitTime,
       );
       await CommonTest.waitForSnackbarToGo(tester);
     }
@@ -99,19 +101,22 @@ class PaymentTypeTest {
   ) async {
     List<PaymentType> newPaymentTypes = [];
     for (PaymentType paymentType in paymentTypes) {
-      await CommonTest.doSearch(
+      await CommonTest.enterText(
         tester,
-        searchString:
-            "${paymentType.paymentTypeName} -- "
+        'searchField',
+        "${paymentType.paymentTypeName} -- "
             "${paymentType.isPayable ? 'Outgoing' : 'Incoming'} -- "
             "${paymentType.isApplied ? 'Y' : 'N'}",
       );
+      await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
       expect(
         CommonTest.getTextField('name0'),
         contains(paymentType.paymentTypeName),
       );
+      final ptKey =
+          '${paymentType.paymentTypeId}_${paymentType.isPayable ? 1 : 0}_${paymentType.isApplied ? 1 : 0}';
       expect(
-        CommonTest.getDropdownSearch('glAccount0'),
+        CommonTest.getTextFormField('glAccountField_$ptKey'),
         contains(paymentType.accountCode),
       );
       newPaymentTypes.add(paymentType);

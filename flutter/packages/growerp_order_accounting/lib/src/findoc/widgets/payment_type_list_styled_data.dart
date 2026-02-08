@@ -12,7 +12,6 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
@@ -71,54 +70,80 @@ List<Widget> getPaymentTypeListRow({
     ),
   );
 
-  // Account dropdown widget
+  // Account Autocomplete widget
   Widget accountSelect = BlocBuilder<GlAccountBloc, GlAccountState>(
     builder: (context, state) {
       switch (state.status) {
         case GlAccountStatus.failure:
           return const Text('Error');
         case GlAccountStatus.success:
-          return DropdownSearch<GlAccount>(
-            selectedItem: GlAccount(
-              accountCode: paymentType.accountCode,
-              accountName: paymentType.accountName,
-            ),
-            popupProps: PopupProps.menu(
-              isFilterOnline: true,
-              showSelectedItems: true,
-              showSearchBox: true,
-              searchFieldProps: const TextFieldProps(
-                autofocus: true,
-                decoration: InputDecoration(labelText: 'GL Account'),
-              ),
-              menuProps: MenuProps(borderRadius: BorderRadius.circular(20.0)),
-              title: popUp(
-                context: context,
-                title: 'Select GL Account',
-                height: 50,
-              ),
-            ),
-            dropdownDecoratorProps: const DropDownDecoratorProps(
-              dropdownSearchDecoration: InputDecoration(
-                isDense: true,
-                contentPadding: EdgeInsets.symmetric(horizontal: 8),
-              ),
-            ),
-            key: Key('glAccount$index'),
-            itemAsString: (GlAccount? u) =>
-                "${u?.accountCode ?? ''} ${u?.accountName ?? ''}",
-            asyncItems: (String filter) async {
-              glAccountBloc.add(GlAccountFetch(searchString: filter, limit: 3));
-              return Future.delayed(const Duration(milliseconds: 100), () {
-                return Future.value(glAccountBloc.state.glAccounts);
-              });
+          final initialText =
+              '${paymentType.accountCode} ${paymentType.accountName}'.trim();
+          final ptKey =
+              '${paymentType.paymentTypeId}_${paymentType.isPayable ? 1 : 0}_${paymentType.isApplied ? 1 : 0}';
+          return Autocomplete<GlAccount>(
+            key: Key('glAccount_$ptKey'),
+            initialValue: TextEditingValue(text: initialText),
+            displayStringForOption: (GlAccount u) =>
+                '${u.accountCode ?? ''} ${u.accountName ?? ''}',
+            optionsBuilder: (TextEditingValue textEditingValue) {
+              final query = textEditingValue.text.toLowerCase();
+              if (query.isEmpty) return glAccountBloc.state.glAccounts;
+              return glAccountBloc.state.glAccounts.where((gl) {
+                return '${gl.accountCode ?? ''} ${gl.accountName ?? ''}'
+                    .toLowerCase()
+                    .contains(query);
+              }).toList();
             },
-            compareFn: (item, sItem) => item.accountCode == sItem.accountCode,
-            onChanged: (GlAccount? newValue) {
+            fieldViewBuilder:
+                (context, textController, focusNode, onFieldSubmitted) {
+                  return TextFormField(
+                    key: Key('glAccountField_$ptKey'),
+                    controller: textController,
+                    focusNode: focusNode,
+                    decoration: const InputDecoration(
+                      isDense: true,
+                      contentPadding: EdgeInsets.symmetric(horizontal: 8),
+                    ),
+                    onFieldSubmitted: (_) => onFieldSubmitted(),
+                    style: const TextStyle(fontSize: 14),
+                  );
+                },
+            optionsViewBuilder: (context, onSelected, options) {
+              return Align(
+                alignment: Alignment.topLeft,
+                child: Material(
+                  elevation: 4,
+                  borderRadius: BorderRadius.circular(12),
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(
+                      maxHeight: 250,
+                      maxWidth: 400,
+                    ),
+                    child: ListView.builder(
+                      padding: EdgeInsets.zero,
+                      shrinkWrap: true,
+                      itemCount: options.length,
+                      itemBuilder: (context, idx) {
+                        final gl = options.elementAt(idx);
+                        return ListTile(
+                          dense: true,
+                          title: Text(
+                            '${gl.accountCode ?? ''} ${gl.accountName ?? ''}',
+                          ),
+                          onTap: () => onSelected(gl),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              );
+            },
+            onSelected: (GlAccount newValue) {
               finDocBloc.add(
                 FinDocUpdatePaymentType(
                   paymentType: paymentType.copyWith(
-                    accountCode: newValue!.accountCode!,
+                    accountCode: newValue.accountCode!,
                     accountName: newValue.accountName!,
                   ),
                   update: true,
@@ -172,7 +197,7 @@ List<Widget> getPaymentTypeListRow({
     );
 
     // Account dropdown
-    cells.add(Expanded(child: accountSelect));
+    cells.add(accountSelect);
   } else {
     // Payment type name
     cells.add(Text(paymentType.paymentTypeName, key: Key('name$index')));
@@ -194,7 +219,7 @@ List<Widget> getPaymentTypeListRow({
     cells.add(Text(paymentType.accountCode, key: Key('accountCode$index')));
 
     // Account dropdown
-    cells.add(Expanded(child: accountSelect));
+    cells.add(accountSelect);
   }
 
   // Delete action

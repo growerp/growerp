@@ -674,7 +674,9 @@ class CommonTest {
     await tester.pumpAndSettle();
   }
 
-  /// Enter value into an Autocomplete field
+  /// Enter value into an Autocomplete field and select a matching option.
+  /// [key] is the Key of the Autocomplete widget.
+  /// [value] is the search text; the first option containing this text is tapped.
   static Future<void> enterAutocompleteValue(
     WidgetTester tester,
     String key,
@@ -686,60 +688,82 @@ class CommonTest {
       return;
     }
 
+    // Dismiss any existing keyboard / focus to avoid interference
+    FocusManager.instance.primaryFocus?.unfocus();
+    await tester.pumpAndSettle();
+
     // Find the text field within the autocomplete
     final textField = find.descendant(
       of: autocomplete,
       matching: find.byType(TextFormField),
     );
 
-    if (tester.any(textField)) {
-      // Tap to focus the field first
-      await tester.tap(textField.first);
-      await tester.pumpAndSettle();
+    if (!tester.any(textField)) {
+      debugPrint('Warning: TextFormField not found in Autocomplete $key');
+      return;
+    }
 
-      // Clear the field and enter new text
-      await tester.enterText(textField.first, '');
-      await tester.pumpAndSettle();
-      await tester.enterText(textField.first, value);
-      await tester.pump(const Duration(milliseconds: 200));
-      await tester.pumpAndSettle();
+    // Tap to focus the field
+    await tester.tap(textField.first);
+    await tester.pumpAndSettle();
 
-      // Wait for the dropdown overlay to appear
-      await tester.pump(const Duration(milliseconds: 800));
-      await tester.pumpAndSettle();
+    // Clear the field and enter new text
+    await tester.enterText(textField.first, '');
+    await tester.pumpAndSettle();
+    await tester.enterText(textField.first, value);
 
-      // Try multiple approaches to select the suggestion:
+    // Wait generously for optionsBuilder to complete
+    await tester.pump(const Duration(seconds: waitTime));
+    await tester.pumpAndSettle();
 
-      // Approach 1: Try to find a ListTile with our value (custom optionsViewBuilder)
-      final listTileFinder = find.widgetWithText(ListTile, value);
-      if (tester.any(listTileFinder)) {
-        await tester.tap(listTileFinder.first);
-        await tester.pumpAndSettle();
-        return;
-      }
-
-      // Approach 2: Find Text widget with value and tap it (default Autocomplete uses InkWell > Text)
-      final textFinder = find.text(value);
-      if (tester.any(textFinder)) {
-        // Try to tap from last to first (overlay is rendered after input, so last is most likely the dropdown)
-        final matchCount = textFinder.evaluate().length;
-        for (int i = matchCount - 1; i >= 0; i--) {
-          try {
-            await tester.tap(textFinder.at(i));
+    // Find a ListTile containing the value text that is a dropdown option,
+    // not the form row that contains the autocomplete field.
+    // Dropdown option ListTiles do NOT have a TextFormField descendant,
+    // while the form row ListTile DOES (it contains the autocomplete input).
+    final allContaining = find.textContaining(value);
+    if (tester.any(allContaining)) {
+      for (int i = 0; i < allContaining.evaluate().length; i++) {
+        final element = allContaining.evaluate().elementAt(i);
+        // Walk up to the nearest ListTile
+        Element? listTileElement;
+        element.visitAncestorElements((ancestor) {
+          if (ancestor.widget is ListTile) {
+            listTileElement = ancestor;
+            return false;
+          }
+          return true;
+        });
+        if (listTileElement != null) {
+          // Check if this ListTile also contains a TextFormField
+          // (which would mean it's the form row, not a dropdown option)
+          final listTileFinder = find.byElementPredicate(
+            (el) => el == listTileElement,
+          );
+          final formFieldInListTile = find.descendant(
+            of: listTileFinder,
+            matching: find.byType(TextFormField),
+          );
+          if (!tester.any(formFieldInListTile)) {
+            // This ListTile is a dropdown option, not a form row
+            debugPrint(
+              'DEBUG enterAutocompleteValue($key, $value): found dropdown ListTile',
+            );
+            await tester.tap(listTileFinder.first);
             await tester.pumpAndSettle();
             return;
-          } catch (e) {
-            // Continue to next index
           }
         }
       }
-
-      // Approach 3: Use keyboard navigation (fallback)
-      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
-      await tester.pumpAndSettle();
-      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
-      await tester.pumpAndSettle();
     }
+
+    // Approach 3: Keyboard navigation fallback
+    debugPrint(
+      'DEBUG enterAutocompleteValue($key, $value): Approach 3 - keyboard fallback',
+    );
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pumpAndSettle();
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.pumpAndSettle();
   }
 
   static Future<void> enterText(
@@ -1177,10 +1201,20 @@ class CommonTest {
     WidgetTester tester,
     FinDocType type,
   ) async {
-    if (tester.any(find.byKey(Key("rel$type"))) == false) return null;
+    if (tester.any(find.byKey(Key("rel$type"))) == false) {
+      debugPrint('DEBUG getRelatedFindoc: rel$type NOT found');
+      return null;
+    }
+    debugPrint('DEBUG getRelatedFindoc: rel$type FOUND, tapping...');
     await tapByKey(tester, "rel$type");
-    String id = getTextField('topHeader').split('#')[1];
+    String id = getTextField('topHeader').split('#')[1].trim();
+    debugPrint('DEBUG getRelatedFindoc: got id=$id, tapping cancel...');
+    // Tapping relXxx calls context.push('/findoc') which pushes a GoRouter
+    // route showing a full-page dialog.  Tap the cancel button which uses
+    // context.pop() to pop the GoRouter route and return to the previous page.
     await tapByKey(tester, 'cancel');
+    await tester.pumpAndSettle(const Duration(seconds: 2));
+    debugPrint('DEBUG getRelatedFindoc: returned from rel$type with id=$id');
     return id;
   }
 

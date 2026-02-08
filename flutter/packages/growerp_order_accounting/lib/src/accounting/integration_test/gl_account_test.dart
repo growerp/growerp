@@ -28,7 +28,7 @@ class GlAccountTest {
     await CommonTest.selectOption(tester, '/accounting', 'AcctDashBoard');
     await CommonTest.selectOption(
       tester,
-      '/accounting/ledger',
+      '/accounting/ledger-accounts',
       'GlAccountList',
     );
   }
@@ -103,7 +103,14 @@ class GlAccountTest {
       if (glAccount.glAccountId == null) {
         await CommonTest.tapByKey(tester, 'addNew');
       } else {
-        await CommonTest.doSearch(tester, searchString: glAccount.glAccountId!);
+        await CommonTest.enterText(
+          tester,
+          'searchField',
+          glAccount.glAccountId!,
+        );
+        await tester.pumpAndSettle(
+          const Duration(seconds: CommonTest.waitTime),
+        );
         await CommonTest.tapByKey(tester, 'code0');
         expect(
           CommonTest.getTextField('topHeader').split('#')[1],
@@ -113,13 +120,14 @@ class GlAccountTest {
       await CommonTest.checkWidgetKey(tester, 'GlAccountDialog');
       await CommonTest.enterText(tester, 'code', glAccount.accountCode!);
       await CommonTest.enterText(tester, 'name', glAccount.accountName!);
-      await CommonTest.enterDropDownSearch(
+      // Select account class via Autocomplete
+      await CommonTest.enterAutocompleteValue(
         tester,
         'class',
         glAccount.accountClass!.description!,
       );
       if (glAccount.accountType != null) {
-        await CommonTest.enterDropDownSearch(
+        await CommonTest.enterAutocompleteValue(
           tester,
           'type',
           glAccount.accountType!.description!,
@@ -144,7 +152,8 @@ class GlAccountTest {
   ) async {
     List<GlAccount> newGlAccounts = [];
     for (GlAccount glAccount in glAccounts) {
-      await CommonTest.doSearch(tester, searchString: glAccount.accountCode!);
+      await CommonTest.enterText(tester, 'searchField', glAccount.accountCode!);
+      await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
       expect(CommonTest.getTextField('code0'), equals(glAccount.accountCode));
       expect(CommonTest.getTextField('name0'), equals(glAccount.accountName));
       if (!CommonTest.isPhone()) {
@@ -172,18 +181,19 @@ class GlAccountTest {
       );
       if (glAccount.accountType != null) {
         expect(
-          CommonTest.getDropdownSearch('type'),
+          CommonTest.getTextFormField('typeField'),
           equals(glAccount.accountType?.description!),
         );
       }
       expect(
-        CommonTest.getDropdownSearch('class'),
+        CommonTest.getTextFormField('classField'),
         contains(glAccount.accountClass!.description!),
       );
       newGlAccounts.add(glAccount.copyWith(glAccountId: id));
       await CommonTest.tapByKey(tester, 'cancel');
     }
-    await CommonTest.closeSearch(tester);
+    await CommonTest.enterText(tester, 'searchField', '');
+    await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
     return newGlAccounts;
   }
 }

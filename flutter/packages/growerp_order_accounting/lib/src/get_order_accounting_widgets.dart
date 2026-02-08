@@ -3,6 +3,7 @@
  * Grant of Patent License.
  */
 
+import 'package:flutter/material.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import '../growerp_order_accounting.dart';
@@ -92,14 +93,15 @@ Map<String, GrowerpWidgetBuilder> getOrderAccountingWidgets() {
 
     // Accounting
     'LedgerTreeForm': (args) => const LedgerTreeForm(),
-    'GlAccountList': (args) => const GlAccountList(),
+    'GlAccountList': (args) => const GlAccountList(key: Key('GlAccountList')),
     'LedgerJournalList': (args) => LedgerJournalList(key: getKeyFromArgs(args)),
     'RevenueExpenseChart': (args) => const RevenueExpenseChart(),
     'BalanceSheetForm': (args) => const BalanceSheetForm(),
     'BalanceSummaryList': (args) => const BalanceSummaryList(),
     'TimePeriodListForm': (args) => const TimePeriodListForm(),
     'ItemTypeList': (args) => const ItemTypeList(),
-    'PaymentTypeList': (args) => const PaymentTypeList(),
+    'PaymentTypeList': (args) =>
+        const PaymentTypeList(key: Key('PaymentTypeList')),
   };
 }
 
@@ -263,7 +265,7 @@ List<WidgetMetadata> getOrderAccountingWidgetsWithMetadata() {
       description: 'List of general ledger accounts',
       iconName: 'account_balance',
       keywords: ['accounts', 'GL', 'general ledger', 'COA'],
-      builder: (args) => const GlAccountList(),
+      builder: (args) => const GlAccountList(key: Key('GlAccountList')),
     ),
     WidgetMetadata(
       widgetName: 'TransactionList',

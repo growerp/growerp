@@ -2363,6 +2363,14 @@ along with this software (see the LICENSE.md file). If not, see
                     </if>
                     <service-call name="growerp.100.FinDocServices100.update#Payment"
                         in-map="[payment: finDoc]" />
+                    <!-- fetch related transaction if it exists -->
+                    <entity-find entity-name="mantle.ledger.transaction.AcctgTrans"
+                        list="transactions" limit="1">
+                        <econdition field-name="paymentId" from="finDoc.paymentId" />
+                    </entity-find>
+                    <if condition="transactions">
+                        <set field="finDoc.transactionId" from="transactions[0].acctgTransId" />
+                    </if>
                     <set field="inMap"
                         from="[finDocId: finDoc.paymentId,
                         docType: 'payment', sales: finDoc.sales]" />

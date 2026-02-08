@@ -35,7 +35,6 @@ dependencies:
   image_picker: ^1.0.4
   responsive_framework: ^1.4.0
   flutter_simple_treeview: ^3.0.2
-  dropdown_search: ^5.0.6
   printing: ^5.14.0
   pdf: ^3.10.8
   image: ^4.0.17

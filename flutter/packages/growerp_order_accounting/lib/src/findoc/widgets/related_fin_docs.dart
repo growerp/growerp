@@ -23,6 +23,37 @@ class RelatedFinDocs extends StatelessWidget {
       child: Wrap(
         spacing: 5,
         children: [
+          // Hidden text widgets for test access to related IDs
+          if (finDoc.orderId != null)
+            Text(
+              finDoc.orderId!,
+              key: const Key('relOrderId'),
+              style: const TextStyle(fontSize: 0),
+            ),
+          if (finDoc.invoiceId != null)
+            Text(
+              finDoc.invoiceId!,
+              key: const Key('relInvoiceId'),
+              style: const TextStyle(fontSize: 0),
+            ),
+          if (finDoc.paymentId != null)
+            Text(
+              finDoc.paymentId!,
+              key: const Key('relPaymentId'),
+              style: const TextStyle(fontSize: 0),
+            ),
+          if (finDoc.shipmentId != null)
+            Text(
+              finDoc.shipmentId!,
+              key: const Key('relShipmentId'),
+              style: const TextStyle(fontSize: 0),
+            ),
+          if (finDoc.transactionId != null)
+            Text(
+              finDoc.transactionId!,
+              key: const Key('relTransactionId'),
+              style: const TextStyle(fontSize: 0),
+            ),
           if (finDoc.docType != FinDocType.order && finDoc.orderId != null)
             OutlinedButton(
               key: const Key('relOrder'),

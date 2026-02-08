@@ -44,7 +44,7 @@ class ItemTypeListState extends State<ItemTypeList> {
     entityName = classificationId == 'AppHotel' ? 'Room' : 'ItemType';
     finDocBloc = context.read<FinDocBloc>()..add(const FinDocGetItemTypes());
     glAccountBloc = context.read<GlAccountBloc>()
-      ..add(const GlAccountFetch(refresh: true, limit: 3));
+      ..add(const GlAccountFetch(refresh: true, limit: 100));
   }
 
   @override
@@ -89,15 +89,11 @@ class ItemTypeListState extends State<ItemTypeList> {
             // Apply search filter
             if (searchString.isNotEmpty) {
               filteredList = filteredList.where((item) {
-                return item.itemTypeName.toLowerCase().contains(
-                      searchString.toLowerCase(),
-                    ) ||
-                    (item.accountName ?? '').toLowerCase().contains(
-                      searchString.toLowerCase(),
-                    ) ||
-                    (item.accountCode ?? '').toLowerCase().contains(
-                      searchString.toLowerCase(),
-                    );
+                final combined =
+                    '${item.itemTypeName} ${item.direction} '
+                            '${item.accountName ?? ''} ${item.accountCode ?? ''}'
+                        .toLowerCase();
+                return combined.contains(searchString.toLowerCase());
               }).toList();
             }
 

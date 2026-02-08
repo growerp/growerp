@@ -78,11 +78,10 @@ class RequestTest {
         );
       }
       await CommonTest.checkWidgetKey(tester, "RequestDialog");
-      await CommonTest.enterDropDownSearch(
+      await CommonTest.enterAutocompleteValue(
         tester,
         'otherCompanyUser',
         toCompanyUser(request.otherCompany ?? request.otherUser)!.name!,
-        seconds: CommonTest.waitTime,
       );
       await CommonTest.enterText(tester, 'description', request.description!);
       await CommonTest.enterDropDown(
@@ -110,7 +109,7 @@ class RequestTest {
         seconds: CommonTest.waitTime,
       );
       expect(
-        CommonTest.getDropdownSearch('otherCompanyUser'),
+        CommonTest.getTextFormField('otherCompanyUserField'),
         contains(
           toCompanyUser(request.otherUser ?? request.otherCompany)!.name,
         ),
