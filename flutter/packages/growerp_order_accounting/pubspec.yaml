@@ -1,4 +1,5 @@
 name: growerp_order_accounting
+resolution: workspace
 description:
   A package providing order and accounting functions such as order, invoice,
   payments and ledger for the GrowERP system both for sales and purchase.
@@ -50,7 +51,7 @@ dependencies:
   path_provider: ^2.0.11
   file_picker: ^10.3.10
   fast_csv: ^0.2.6
-  archive: ^4.0.7
+  archive: ^3.6.1
   scrollable_positioned_list: ^0.3.8
   two_dimensional_scrollables: ^0.3.1
   universal_io: ^2.2.2

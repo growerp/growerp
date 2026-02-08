@@ -1,4 +1,5 @@
 name: growerp_catalog
+resolution: workspace
 description: >
   A catalog component for the Growerp ERP System containing, products, categories and assets
 version: 1.10.5
@@ -25,7 +26,7 @@ dependencies:
   flutter_bloc: ^8.1.4
   equatable: ^2.0.5
   responsive_framework: ^1.4.0
-  archive: ^4.0.7
+  archive: ^3.6.1
   path_provider: ^2.0.11
   url_launcher: ^6.1.4
   flutter_colorpicker: ^1.1.0

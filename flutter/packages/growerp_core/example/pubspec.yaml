@@ -1,4 +1,5 @@
 name: core_example
+resolution: workspace
 description: A example project.
 version: 1.0.0+1
 publish_to: none
@@ -12,12 +13,9 @@ dependencies:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
-  growerp_core:
-    path: ..
-  growerp_user_company:
-    path: ../../growerp_user_company
-  growerp_models:
-    path: ../../growerp_models
+  growerp_core: ^1.9.0
+  growerp_user_company: ^1.9.0
+  growerp_models: ^1.11.6
   global_configuration: ^2.0.0-nullsafety.1
   flutter_test:
     sdk: flutter
@@ -27,7 +25,7 @@ dependencies:
   go_router: ^14.6.2
 
 dev_dependencies:
-  flutter_lints: ^5.0.0
+  flutter_lints: ^6.0.0
 
 flutter:
   uses-material-design: true

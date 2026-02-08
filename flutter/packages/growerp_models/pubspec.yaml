@@ -1,4 +1,5 @@
 name: growerp_models
+resolution: workspace
 version: 1.11.6
 description: GrowERP models and Moqui backend REST interface
 homepage: https://www.growerp.com
@@ -27,7 +28,7 @@ dependencies:
   json_annotation: ^4.9.0
 
 dev_dependencies:
-  lints: ^5.1.0
+  lints: ^6.0.0
   build_runner: ^2.4.12
   json_serializable: ^6.8.0
   freezed: ^3.2.0

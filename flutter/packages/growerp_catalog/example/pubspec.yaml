@@ -1,4 +1,5 @@
 name: catalog_example
+resolution: workspace
 description: A example project.
 version: 1.0.0+1
 publish_to: none
@@ -8,8 +9,7 @@ environment:
 dependencies: 
   flutter: 
     sdk: flutter
-  growerp_catalog:
-    path: ../
+  growerp_catalog: ^1.9.0
 
 dev_dependencies:
   flutter_test:

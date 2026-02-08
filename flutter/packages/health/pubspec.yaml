@@ -1,4 +1,5 @@
 name: health
+resolution: workspace
 version: 1.13.9+1
 repository: https://github.com/growerp/growerp
 homepage: https://www.growerp.com

@@ -1,4 +1,5 @@
 name: growerp_activity_example
+resolution: workspace
 version: 0.0.1+1
 repository: https://github.com/growerp/growerp
 homepage: https://www.growerp.com
@@ -11,8 +12,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  growerp_activity:
-    path: ../
+  growerp_activity: ^1.8.1
   growerp_core: ^1.9.0
   growerp_models: ^1.11.6
   growerp_order_accounting: ^1.9.0

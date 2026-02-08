@@ -1,4 +1,5 @@
 name: growerp_chat
+resolution: workspace
 description: "Internal chat within the growerp system."
 version: 1.10.5
 repository: https://github.com/growerp/growerp

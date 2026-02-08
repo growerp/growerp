@@ -1,4 +1,5 @@
 name: user_company_example
+resolution: workspace
 description: A example project.
 version: 1.0.0+1
 publish_to: none
@@ -10,8 +11,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  growerp_user_company:
-    path: ../
+  growerp_user_company: ^1.9.0
 
 dev_dependencies:
   flutter_test:

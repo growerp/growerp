@@ -1,4 +1,5 @@
 name: growerp
+resolution: workspace
 version: 1.11.6
 description: GrowERP installation and tools such as import and export.
 homepage: https://www.growerp.com

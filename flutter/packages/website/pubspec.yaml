@@ -1,4 +1,5 @@
 name: website
+resolution: workspace
 description: The Growerp.org website.
 version: 1.10.5+1
 publish_to: none
