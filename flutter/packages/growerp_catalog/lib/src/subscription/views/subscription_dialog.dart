@@ -15,7 +15,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:responsive_framework/responsive_framework.dart';
-import 'package:dropdown_search/dropdown_search.dart';
+
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
@@ -135,73 +135,38 @@ class SubscriptionDialogState extends State<SubscriptionDialog> {
                 const SizedBox(width: 16),
                 Flexible(
                   flex: 3,
-                  child: FormBuilderField<CompanyUser>(
-                    name: 'subscriber',
+                  child: AutocompleteLabel<CompanyUser>(
+                    key: const Key('subscriber'),
+                    label: catalogLocalizations.subscriberLabel,
                     initialValue: _selectedSubscriber,
-                    builder: (FormFieldState<CompanyUser> field) {
-                      return DropdownSearch<CompanyUser>(
-                        selectedItem: field.value,
-                        popupProps: PopupProps.menu(
-                          isFilterOnline: true,
-                          showSearchBox: true,
-                          searchFieldProps: TextFieldProps(
-                            autofocus: true,
-                            decoration: InputDecoration(
-                              labelText: catalogLocalizations.subscriberName,
-                            ),
-                          ),
-                          menuProps: MenuProps(
-                            borderRadius: BorderRadius.circular(20.0),
-                          ),
-                          title: popUp(
-                            context: context,
-                            title: catalogLocalizations.selectSubscriber,
-                            height: 50,
-                          ),
-                        ),
-                        dropdownDecoratorProps: DropDownDecoratorProps(
-                          dropdownSearchDecoration: InputDecoration(
-                            labelText: catalogLocalizations.subscriberLabel,
-                            errorText: field.errorText,
-                          ),
-                        ),
-                        key: const Key('subscriber'),
-                        itemAsString: (CompanyUser? u) =>
-                            " ${u?.name} "
-                            "${u?.company?.name ?? ''}",
-                        asyncItems: (String filter) {
-                          _companyUserBloc.add(
-                            GetDataEvent(
-                              () => context.read<RestClient>().getCompanyUser(
-                                searchString: filter,
-                                limit: 3,
-                              ),
-                            ),
-                          );
-                          return Future.delayed(
-                            const Duration(milliseconds: 150),
-                            () {
-                              return Future.value(
-                                (_companyUserBloc.state.data as CompaniesUsers)
-                                    .companiesUsers,
-                              );
-                            },
-                          );
-                        },
-                        compareFn: (item, sItem) =>
-                            item.partyId == sItem.partyId,
-                        onChanged: (CompanyUser? newValue) {
-                          setState(() {
-                            _selectedSubscriber = newValue;
-                          });
-                          field.didChange(newValue);
-                        },
-                      );
-                    },
                     validator: (CompanyUser? value) {
                       return value == null
                           ? catalogLocalizations.subscriberRequired
                           : null;
+                    },
+                    optionsBuilder: (TextEditingValue textEditingValue) {
+                      _companyUserBloc.add(
+                        GetDataEvent(
+                          () => context.read<RestClient>().getCompanyUser(
+                            searchString: textEditingValue.text,
+                            limit: 3,
+                          ),
+                        ),
+                      );
+                      return Future.delayed(
+                        const Duration(milliseconds: 150),
+                        () {
+                          return (_companyUserBloc.state.data as CompaniesUsers)
+                              .companiesUsers;
+                        },
+                      );
+                    },
+                    displayStringForOption: (CompanyUser u) =>
+                        " ${u.name ?? ''} ${u.company?.name ?? ''}",
+                    onSelected: (CompanyUser? newValue) {
+                      setState(() {
+                        _selectedSubscriber = newValue;
+                      });
                     },
                   ),
                 ),
@@ -281,72 +246,35 @@ class SubscriptionDialogState extends State<SubscriptionDialog> {
               ],
             ),
             // Product dropdown
-            FormBuilderField<Product>(
-              name: 'product',
+            AutocompleteLabel<Product>(
+              key: const Key('product'),
+              label: catalogLocalizations.product,
               initialValue: _selectedProduct,
-              builder: (FormFieldState<Product> field) {
-                return DropdownSearch<Product>(
-                  selectedItem: field.value,
-                  popupProps: PopupProps.menu(
-                    isFilterOnline: true,
-                    showSearchBox: true,
-                    searchFieldProps: TextFieldProps(
-                      autofocus: true,
-                      decoration: InputDecoration(
-                        labelText: catalogLocalizations.searchProducts,
-                      ),
-                    ),
-                    menuProps: MenuProps(
-                      borderRadius: BorderRadius.circular(20.0),
-                    ),
-                    title: popUp(
-                      context: context,
-                      title: catalogLocalizations.selectProduct,
-                      height: 50,
-                    ),
-                  ),
-                  dropdownDecoratorProps: DropDownDecoratorProps(
-                    dropdownSearchDecoration: InputDecoration(
-                      labelText: catalogLocalizations.product,
-                      errorText: field.errorText,
-                    ),
-                  ),
-                  key: const Key('product'),
-                  itemAsString: (Product? p) =>
-                      "${p?.productName ?? ''} "
-                      "(${p?.pseudoId ?? ''})",
-                  asyncItems: (String filter) {
-                    _productBloc.add(
-                      GetDataEvent(
-                        () => context.read<RestClient>().getProduct(
-                          searchString: filter,
-                          limit: 3,
-                          isForDropDown: true,
-                        ),
-                      ),
-                    );
-                    return Future.delayed(
-                      const Duration(milliseconds: 150),
-                      () {
-                        return Future.value(
-                          (_productBloc.state.data as Products).products,
-                        );
-                      },
-                    );
-                  },
-                  compareFn: (item, sItem) => item.productId == sItem.productId,
-                  onChanged: (Product? newValue) {
-                    setState(() {
-                      _selectedProduct = newValue;
-                    });
-                    field.didChange(newValue);
-                  },
-                );
-              },
               validator: (Product? value) {
                 return value == null
                     ? catalogLocalizations.productRequired
                     : null;
+              },
+              optionsBuilder: (TextEditingValue textEditingValue) {
+                _productBloc.add(
+                  GetDataEvent(
+                    () => context.read<RestClient>().getProduct(
+                      searchString: textEditingValue.text,
+                      limit: 3,
+                      isForDropDown: true,
+                    ),
+                  ),
+                );
+                return Future.delayed(const Duration(milliseconds: 150), () {
+                  return (_productBloc.state.data as Products).products;
+                });
+              },
+              displayStringForOption: (Product p) =>
+                  "${p.productName ?? ''} (${p.pseudoId})",
+              onSelected: (Product? newValue) {
+                setState(() {
+                  _selectedProduct = newValue;
+                });
               },
             ),
             const SizedBox(height: 16),
@@ -365,9 +293,8 @@ class SubscriptionDialogState extends State<SubscriptionDialog> {
                         final formData = _formKey.currentState!.value;
                         DateTime? fromDate = formData['fromDate'] as DateTime?;
                         DateTime? thruDate = formData['thruDate'] as DateTime?;
-                        CompanyUser? subscriber =
-                            formData['subscriber'] as CompanyUser?;
-                        Product? product = formData['product'] as Product?;
+                        CompanyUser? subscriber = _selectedSubscriber;
+                        Product? product = _selectedProduct;
 
                         _subscriptionBloc.add(
                           SubscriptionUpdate(
