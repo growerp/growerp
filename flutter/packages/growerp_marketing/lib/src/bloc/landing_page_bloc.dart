@@ -8,10 +8,8 @@ class LandingPageBloc extends Bloc<LandingPageEvent, LandingPageState> {
   final RestClient restClient;
   final String classificationId;
 
-  LandingPageBloc({
-    required this.restClient,
-    required this.classificationId,
-  }) : super(const LandingPageState()) {
+  LandingPageBloc({required this.restClient, required this.classificationId})
+    : super(const LandingPageState()) {
     on<LandingPageLoad>(_onLandingPageLoad);
     on<LandingPageFetch>(_onLandingPageFetch);
     on<LandingPageCreate>(_onLandingPageCreate);
@@ -30,37 +28,42 @@ class LandingPageBloc extends Bloc<LandingPageEvent, LandingPageState> {
 
     try {
       if (event.start == 0) {
-        emit(state.copyWith(
-          status: LandingPageStatus.loading,
-          landingPages: [],
-          hasReachedMax: false,
-        ));
+        emit(
+          state.copyWith(
+            status: LandingPageStatus.loading,
+            landingPages: [],
+            hasReachedMax: false,
+          ),
+        );
       }
 
       final result = await restClient.getLandingPages(
         start: event.start,
         limit: event.limit,
-        searchString:
-            event.searchString.isNotEmpty ? event.searchString : null,
+        searchString: event.searchString.isNotEmpty ? event.searchString : null,
       );
 
       final landingPages = event.start == 0
           ? List<LandingPage>.from(result.landingPages)
           : (List<LandingPage>.from(state.landingPages)
-            ..addAll(result.landingPages));
+              ..addAll(result.landingPages));
 
-      emit(state.copyWith(
-        status: LandingPageStatus.success,
-        landingPages: landingPages,
-        hasReachedMax: result.landingPages.length < event.limit,
-        start: event.start,
-        limit: event.limit,
-      ));
+      emit(
+        state.copyWith(
+          status: LandingPageStatus.success,
+          landingPages: landingPages,
+          hasReachedMax: result.landingPages.length < event.limit,
+          start: event.start,
+          limit: event.limit,
+        ),
+      );
     } catch (error) {
-      emit(state.copyWith(
-        status: LandingPageStatus.failure,
-        message: await getDioError(error),
-      ));
+      emit(
+        state.copyWith(
+          status: LandingPageStatus.failure,
+          message: await getDioError(error),
+        ),
+      );
     }
   }
 
@@ -70,19 +73,23 @@ class LandingPageBloc extends Bloc<LandingPageEvent, LandingPageState> {
   ) async {
     final query = event.query.trim();
     if (query.isEmpty) {
-      emit(state.copyWith(
-        searchStatus: LandingPageStatus.success,
-        searchResults: const [],
-        searchError: null,
-      ));
+      emit(
+        state.copyWith(
+          searchStatus: LandingPageStatus.success,
+          searchResults: const [],
+          searchError: null,
+        ),
+      );
       return;
     }
 
-    emit(state.copyWith(
-      searchStatus: LandingPageStatus.loading,
-      searchResults: const [],
-      searchError: null,
-    ));
+    emit(
+      state.copyWith(
+        searchStatus: LandingPageStatus.loading,
+        searchResults: const [],
+        searchError: null,
+      ),
+    );
 
     try {
       final result = await restClient.getLandingPages(
@@ -91,17 +98,21 @@ class LandingPageBloc extends Bloc<LandingPageEvent, LandingPageState> {
         searchString: query,
       );
 
-      emit(state.copyWith(
-        searchStatus: LandingPageStatus.success,
-        searchResults: result.landingPages,
-        searchError: null,
-      ));
+      emit(
+        state.copyWith(
+          searchStatus: LandingPageStatus.success,
+          searchResults: result.landingPages,
+          searchError: null,
+        ),
+      );
     } catch (error) {
-      emit(state.copyWith(
-        searchStatus: LandingPageStatus.failure,
-        searchResults: const [],
-        searchError: await getDioError(error),
-      ));
+      emit(
+        state.copyWith(
+          searchStatus: LandingPageStatus.failure,
+          searchResults: const [],
+          searchError: await getDioError(error),
+        ),
+      );
     }
   }
 
@@ -117,15 +128,19 @@ class LandingPageBloc extends Bloc<LandingPageEvent, LandingPageState> {
         pseudoId: event.pseudoId,
         ownerPartyId: event.ownerPartyId,
       );
-      emit(state.copyWith(
-        status: LandingPageStatus.success,
-        selectedLandingPage: landingPage,
-      ));
+      emit(
+        state.copyWith(
+          status: LandingPageStatus.success,
+          selectedLandingPage: landingPage,
+        ),
+      );
     } catch (error) {
-      emit(state.copyWith(
-        status: LandingPageStatus.failure,
-        message: await getDioError(error),
-      ));
+      emit(
+        state.copyWith(
+          status: LandingPageStatus.failure,
+          message: await getDioError(error),
+        ),
+      );
     }
   }
 
@@ -152,17 +167,21 @@ class LandingPageBloc extends Bloc<LandingPageEvent, LandingPageState> {
       final updatedLandingPages = List<LandingPage>.from(state.landingPages)
         ..insert(0, newLandingPage);
 
-      emit(state.copyWith(
-        status: LandingPageStatus.success,
-        landingPages: updatedLandingPages,
-        selectedLandingPage: newLandingPage,
-        message: 'Landing page created successfully',
-      ));
+      emit(
+        state.copyWith(
+          status: LandingPageStatus.success,
+          landingPages: updatedLandingPages,
+          selectedLandingPage: newLandingPage,
+          message: 'Landing page created successfully',
+        ),
+      );
     } catch (error) {
-      emit(state.copyWith(
-        status: LandingPageStatus.failure,
-        message: await getDioError(error),
-      ));
+      emit(
+        state.copyWith(
+          status: LandingPageStatus.failure,
+          message: await getDioError(error),
+        ),
+      );
     }
   }
 
@@ -188,23 +207,30 @@ class LandingPageBloc extends Bloc<LandingPageEvent, LandingPageState> {
       );
 
       final updatedLandingPages = state.landingPages
-          .map<LandingPage>((page) => (page.landingPageId ?? '') ==
-                  (updatedLandingPage.landingPageId ?? '')
-              ? updatedLandingPage
-              : page)
+          .map<LandingPage>(
+            (page) =>
+                (page.landingPageId ?? '') ==
+                    (updatedLandingPage.landingPageId ?? '')
+                ? updatedLandingPage
+                : page,
+          )
           .toList();
 
-      emit(state.copyWith(
-        status: LandingPageStatus.success,
-        landingPages: updatedLandingPages,
-        selectedLandingPage: updatedLandingPage,
-        message: 'Landing page updated successfully',
-      ));
+      emit(
+        state.copyWith(
+          status: LandingPageStatus.success,
+          landingPages: updatedLandingPages,
+          selectedLandingPage: updatedLandingPage,
+          message: 'Landing page updated successfully',
+        ),
+      );
     } catch (error) {
-      emit(state.copyWith(
-        status: LandingPageStatus.failure,
-        message: await getDioError(error),
-      ));
+      emit(
+        state.copyWith(
+          status: LandingPageStatus.failure,
+          message: await getDioError(error),
+        ),
+      );
     }
   }
 
@@ -221,17 +247,21 @@ class LandingPageBloc extends Bloc<LandingPageEvent, LandingPageState> {
           .where((page) => (page.landingPageId ?? '') != event.landingPageId)
           .toList();
 
-      emit(state.copyWith(
-        status: LandingPageStatus.success,
-        landingPages: updatedLandingPages,
-        message: 'Landing page deleted successfully',
-        clearSelectedLandingPage: true,
-      ));
+      emit(
+        state.copyWith(
+          status: LandingPageStatus.success,
+          landingPages: updatedLandingPages,
+          message: 'Landing page deleted successfully',
+          clearSelectedLandingPage: true,
+        ),
+      );
     } catch (error) {
-      emit(state.copyWith(
-        status: LandingPageStatus.failure,
-        message: await getDioError(error),
-      ));
+      emit(
+        state.copyWith(
+          status: LandingPageStatus.failure,
+          message: await getDioError(error),
+        ),
+      );
     }
   }
 

@@ -73,6 +73,7 @@ void main() {
       title: 'GrowERP landing page section test',
       clear: false,
     );
+    await CommonTest.login(tester);
     await LandingPageTest.selectLandingPages(tester);
     await LandingPageTest.addPageSections(
       tester,

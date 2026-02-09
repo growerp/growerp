@@ -48,20 +48,25 @@ class CredibilityInfoDetailScreenState
   @override
   void initState() {
     super.initState();
-    _bioController =
-        TextEditingController(text: widget.credibilityInfo.creatorBio ?? '');
+    _bioController = TextEditingController(
+      text: widget.credibilityInfo.creatorBio ?? '',
+    );
     _backgroundController = TextEditingController(
-        text: widget.credibilityInfo.backgroundText ?? '');
+      text: widget.credibilityInfo.backgroundText ?? '',
+    );
     _imageUrlController = TextEditingController(
-        text: widget.credibilityInfo.creatorImageUrl ?? '');
+      text: widget.credibilityInfo.creatorImageUrl ?? '',
+    );
 
     // Initialize statistics list with existing data
     _statistics = (widget.credibilityInfo.statistics ?? [])
-        .map((stat) => {
-              'id': stat.credibilityStatisticId,
-              'controller': TextEditingController(text: stat.statistic ?? ''),
-              'sequence': stat.sequence ?? 0,
-            })
+        .map(
+          (stat) => {
+            'id': stat.credibilityStatisticId,
+            'controller': TextEditingController(text: stat.statistic ?? ''),
+            'sequence': stat.sequence ?? 0,
+          },
+        )
         .toList();
   }
 
@@ -107,18 +112,22 @@ class CredibilityInfoDetailScreenState
 
     if (isNew) {
       // For new credibility info, serialize statistics with the creation
-      final statsJsonList = _statistics.where((stat) {
-        final controller = stat['controller'] as TextEditingController;
-        return controller.text.isNotEmpty;
-      }).map((stat) {
-        final controller = stat['controller'] as TextEditingController;
-        return {
-          'statistic': controller.text,
-          'sequence': stat['sequence'] ?? 1,
-        };
-      }).toList();
-      final statsJson =
-          statsJsonList.isNotEmpty ? jsonEncode(statsJsonList) : null;
+      final statsJsonList = _statistics
+          .where((stat) {
+            final controller = stat['controller'] as TextEditingController;
+            return controller.text.isNotEmpty;
+          })
+          .map((stat) {
+            final controller = stat['controller'] as TextEditingController;
+            return {
+              'statistic': controller.text,
+              'sequence': stat['sequence'] ?? 1,
+            };
+          })
+          .toList();
+      final statsJson = statsJsonList.isNotEmpty
+          ? jsonEncode(statsJsonList)
+          : null;
 
       credibilityBloc.add(
         CredibilityInfoCreate(
@@ -131,16 +140,19 @@ class CredibilityInfoDetailScreenState
       );
     } else {
       // For updates, serialize ALL current statistics (replaces all existing)
-      final statsJsonList = _statistics.where((stat) {
-        final controller = stat['controller'] as TextEditingController;
-        return controller.text.isNotEmpty;
-      }).map((stat) {
-        final controller = stat['controller'] as TextEditingController;
-        return {
-          'statistic': controller.text,
-          'sequence': stat['sequence'] ?? 1,
-        };
-      }).toList();
+      final statsJsonList = _statistics
+          .where((stat) {
+            final controller = stat['controller'] as TextEditingController;
+            return controller.text.isNotEmpty;
+          })
+          .map((stat) {
+            final controller = stat['controller'] as TextEditingController;
+            return {
+              'statistic': controller.text,
+              'sequence': stat['sequence'] ?? 1,
+            };
+          })
+          .toList();
       // Always send statistics JSON (empty array if no statistics) to signal deletion
       final statsJson = jsonEncode(statsJsonList);
 
@@ -188,7 +200,12 @@ class CredibilityInfoDetailScreenState
             }
           },
           builder: (context, state) {
-            if (state.status == CredibilityStatus.loading) {
+            // Only show loading if the form hasn't been initialized yet
+            // This prevents form fields from disappearing during background
+            // credibility list reloads while the detail screen is open
+            if (state.status == CredibilityStatus.loading &&
+                _bioController.text.isEmpty &&
+                _statistics.isEmpty) {
               return const LoadingIndicator();
             }
 
@@ -308,8 +325,9 @@ class CredibilityInfoDetailScreenState
                                 Expanded(
                                   child: TextFormField(
                                     key: Key('statistic$index'),
-                                    controller: stat['controller']
-                                        as TextEditingController,
+                                    controller:
+                                        stat['controller']
+                                            as TextEditingController,
                                     decoration: InputDecoration(
                                       labelText: 'Statistic ${index + 1}',
                                       hintText: 'e.g., 100+ customers',
@@ -324,8 +342,10 @@ class CredibilityInfoDetailScreenState
                                 ),
                                 const SizedBox(width: 8),
                                 IconButton(
-                                  icon: const Icon(Icons.delete,
-                                      color: Colors.red),
+                                  icon: const Icon(
+                                    Icons.delete,
+                                    color: Colors.red,
+                                  ),
                                   onPressed: () => _removeStatistic(index),
                                   tooltip: 'Remove',
                                 ),
@@ -341,9 +361,10 @@ class CredibilityInfoDetailScreenState
                         children: [
                           Expanded(
                             child: OutlinedButton(
-                              onPressed: () =>
-                                  Navigator.of(context, rootNavigator: false)
-                                      .pop(),
+                              onPressed: () => Navigator.of(
+                                context,
+                                rootNavigator: false,
+                              ).pop(),
                               child: const Text('Cancel'),
                             ),
                           ),

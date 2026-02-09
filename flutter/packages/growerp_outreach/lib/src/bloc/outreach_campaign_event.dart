@@ -7,14 +7,20 @@ abstract class OutreachCampaignEvent extends Equatable {
 }
 
 class OutreachCampaignFetch extends OutreachCampaignEvent {
-  const OutreachCampaignFetch({this.status, this.start = 0, this.limit = 20});
+  const OutreachCampaignFetch({
+    this.status,
+    this.start = 0,
+    this.limit = 20,
+    this.searchString,
+  });
 
   final String? status;
   final int start;
   final int limit;
+  final String? searchString;
 
   @override
-  List<Object?> get props => [status, start, limit];
+  List<Object?> get props => [status, start, limit, searchString];
 }
 
 class OutreachCampaignCreate extends OutreachCampaignEvent {

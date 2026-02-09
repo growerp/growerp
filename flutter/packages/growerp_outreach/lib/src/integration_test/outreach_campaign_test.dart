@@ -157,6 +157,7 @@ class OutreachCampaignTest {
 
       // Enter target audience
       if (campaign.targetAudience != null) {
+        await tester.ensureVisible(find.byKey(const Key('targetAudience')));
         await CommonTest.enterText(
           tester,
           'targetAudience',
@@ -166,6 +167,7 @@ class OutreachCampaignTest {
 
       // Enter message template
       if (campaign.messageTemplate != null) {
+        await tester.ensureVisible(find.byKey(const Key('messageTemplate')));
         await CommonTest.enterText(
           tester,
           'messageTemplate',
@@ -175,6 +177,7 @@ class OutreachCampaignTest {
 
       // Enter email subject
       if (campaign.emailSubject != null) {
+        await tester.ensureVisible(find.byKey(const Key('emailSubject')));
         await CommonTest.enterText(
           tester,
           'emailSubject',
@@ -183,6 +186,7 @@ class OutreachCampaignTest {
       }
 
       // Enter daily limit
+      await tester.ensureVisible(find.byKey(const Key('dailyLimit')));
       await CommonTest.enterText(
         tester,
         'dailyLimit',
@@ -210,6 +214,7 @@ class OutreachCampaignTest {
       }
 
       // Save the campaign using key (more reliable than text)
+      await tester.ensureVisible(find.byKey(const Key('update')));
       await CommonTest.tapByKey(tester, 'update');
       // Wait for dialog to close and list to refresh
       await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));

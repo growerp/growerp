@@ -102,19 +102,11 @@ class ContentPlanListState extends State<ContentPlanList> {
     return BlocConsumer<ContentPlanBloc, ContentPlanState>(
       listener: (context, state) {
         if (state.status == ContentPlanStatus.failure) {
-          HelperFunctions.showMessage(
-            context,
-            '${state.message}',
-            Colors.red,
-          );
+          HelperFunctions.showMessage(context, '${state.message}', Colors.red);
         }
         if (state.status == ContentPlanStatus.success) {
           if ((state.message ?? '').isNotEmpty) {
-            HelperFunctions.showMessage(
-              context,
-              state.message!,
-              Colors.green,
-            );
+            HelperFunctions.showMessage(context, state.message!, Colors.green);
           }
         }
       },
@@ -123,9 +115,7 @@ class ContentPlanListState extends State<ContentPlanList> {
         _isLoading = state.status == ContentPlanStatus.loading;
 
         if (state.status == ContentPlanStatus.failure && contentPlans.isEmpty) {
-          return const FatalErrorForm(
-            message: 'Could not load content plans!',
-          );
+          return const FatalErrorForm(message: 'Could not load content plans!');
         }
 
         contentPlans = state.contentPlans;
@@ -182,7 +172,8 @@ class ContentPlanListState extends State<ContentPlanList> {
                                   return BlocProvider.value(
                                     value: _contentPlanBloc,
                                     child: const ContentPlanDetailScreen(
-                                        contentPlan: null),
+                                      contentPlan: null,
+                                    ),
                                   );
                                 },
                               );
@@ -236,7 +227,10 @@ class ContentPlanListState extends State<ContentPlanList> {
     currentScroll = _scrollController.offset;
     if (_isBottom && !hasReachedMax) {
       _contentPlanBloc.add(
-        ContentPlanFetch(start: contentPlans.length, searchString: searchString),
+        ContentPlanFetch(
+          start: contentPlans.length,
+          searchString: searchString,
+        ),
       );
     }
   }
@@ -269,9 +263,9 @@ class GenerateContentPlanDialogState extends State<GenerateContentPlanDialog> {
     super.initState();
     _contentPlanBloc = context.read<ContentPlanBloc>();
     // Fetch personas for dropdown
-    context
-        .read<PersonaBloc>()
-        .add(const PersonaFetch(refresh: true, limit: 100));
+    context.read<PersonaBloc>().add(
+      const PersonaFetch(refresh: true, limit: 100),
+    );
   }
 
   Future<void> _selectDate(BuildContext context) async {

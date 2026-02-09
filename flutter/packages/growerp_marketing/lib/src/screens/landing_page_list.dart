@@ -102,19 +102,11 @@ class LandingPageListState extends State<LandingPageList> {
     return BlocConsumer<LandingPageBloc, LandingPageState>(
       listener: (context, state) {
         if (state.status == LandingPageStatus.failure) {
-          HelperFunctions.showMessage(
-            context,
-            '${state.message}',
-            Colors.red,
-          );
+          HelperFunctions.showMessage(context, '${state.message}', Colors.red);
         }
         if (state.status == LandingPageStatus.success) {
           if ((state.message ?? '').isNotEmpty) {
-            HelperFunctions.showMessage(
-              context,
-              state.message!,
-              Colors.green,
-            );
+            HelperFunctions.showMessage(context, state.message!, Colors.green);
           }
         }
       },
@@ -123,9 +115,7 @@ class LandingPageListState extends State<LandingPageList> {
         _isLoading = state.status == LandingPageStatus.loading;
 
         if (state.status == LandingPageStatus.failure && landingPages.isEmpty) {
-          return const FatalErrorForm(
-            message: 'Could not load landing pages!',
-          );
+          return const FatalErrorForm(message: 'Could not load landing pages!');
         }
 
         landingPages = state.landingPages;
@@ -148,9 +138,7 @@ class LandingPageListState extends State<LandingPageList> {
               searchController: _searchController,
               onSearchChanged: (value) {
                 searchString = value;
-                _landingPageBloc.add(
-                  LandingPageLoad(searchString: value),
-                );
+                _landingPageBloc.add(LandingPageLoad(searchString: value));
               },
             ),
             // Main content area with StyledDataTable
@@ -222,8 +210,9 @@ class LandingPageListState extends State<LandingPageList> {
                                   return GenerateLandingPageDialog(
                                     onSuccess: (landingPage) {
                                       // Refresh the list
-                                      _landingPageBloc
-                                          .add(const LandingPageLoad());
+                                      _landingPageBloc.add(
+                                        const LandingPageLoad(),
+                                      );
 
                                       // Show success message
                                       if (mounted) {
@@ -267,8 +256,7 @@ class LandingPageListState extends State<LandingPageList> {
     currentScroll = _scrollController.offset;
     if (_isBottom && !hasReachedMax) {
       _landingPageBloc.add(
-        LandingPageLoad(
-            start: landingPages.length, searchString: searchString),
+        LandingPageLoad(start: landingPages.length, searchString: searchString),
       );
     }
   }

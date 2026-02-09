@@ -103,15 +103,15 @@ class AssessmentSubmit extends AssessmentEvent {
 
   @override
   List<Object?> get props => [
-        assessmentId,
-        answers,
-        respondentName,
-        respondentEmail,
-        respondentPhone,
-        respondentCompany,
-        ownerPartyId,
-        campaignId,
-      ];
+    assessmentId,
+    answers,
+    respondentName,
+    respondentEmail,
+    respondentPhone,
+    respondentCompany,
+    ownerPartyId,
+    campaignId,
+  ];
 }
 
 final class AssessmentFetchResults extends AssessmentEvent {
@@ -132,9 +132,7 @@ final class AssessmentFetchResults extends AssessmentEvent {
 }
 
 final class AssessmentFetchQuestions extends AssessmentEvent {
-  const AssessmentFetchQuestions({
-    required this.assessmentId,
-  });
+  const AssessmentFetchQuestions({required this.assessmentId});
 
   final String assessmentId;
 
@@ -156,9 +154,7 @@ final class AssessmentFetchQuestionOptions extends AssessmentEvent {
 }
 
 final class AssessmentFetchThresholds extends AssessmentEvent {
-  const AssessmentFetchThresholds({
-    required this.assessmentId,
-  });
+  const AssessmentFetchThresholds({required this.assessmentId});
 
   final String assessmentId;
 
@@ -184,10 +180,7 @@ final class AssessmentFetchLeads extends AssessmentEvent {
 }
 
 final class AssessmentSearchRequested extends AssessmentEvent {
-  const AssessmentSearchRequested({
-    required this.query,
-    this.limit = 20,
-  });
+  const AssessmentSearchRequested({required this.query, this.limit = 20});
 
   final String query;
   final int limit;

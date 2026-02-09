@@ -88,7 +88,6 @@ class _PlatformConfigListScreenState extends State<PlatformConfigListScreen> {
     }
 
     return Scaffold(
-      key: const Key('PlatformConfigListScreen'),
       body: BlocConsumer<PlatformConfigBloc, PlatformConfigState>(
         listener: (context, state) {
           if (state.status == PlatformConfigStatus.failure) {

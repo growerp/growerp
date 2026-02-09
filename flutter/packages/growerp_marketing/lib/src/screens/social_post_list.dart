@@ -85,9 +85,7 @@ class SocialPostListState extends State<SocialPostList> {
                 direction: DismissDirection.startToEnd,
                 child: BlocProvider.value(
                   value: _socialPostBloc,
-                  child: SocialPostDetailScreen(
-                    socialPost: socialPosts[index],
-                  ),
+                  child: SocialPostDetailScreen(socialPost: socialPosts[index]),
                 ),
               );
             },
@@ -99,19 +97,11 @@ class SocialPostListState extends State<SocialPostList> {
     return BlocConsumer<SocialPostBloc, SocialPostState>(
       listener: (context, state) {
         if (state.status == SocialPostStatus.failure) {
-          HelperFunctions.showMessage(
-            context,
-            '${state.message}',
-            Colors.red,
-          );
+          HelperFunctions.showMessage(context, '${state.message}', Colors.red);
         }
         if (state.status == SocialPostStatus.success) {
           if ((state.message ?? '').isNotEmpty) {
-            HelperFunctions.showMessage(
-              context,
-              state.message!,
-              Colors.green,
-            );
+            HelperFunctions.showMessage(context, state.message!, Colors.green);
           }
         }
       },
@@ -120,9 +110,7 @@ class SocialPostListState extends State<SocialPostList> {
         _isLoading = state.status == SocialPostStatus.loading;
 
         if (state.status == SocialPostStatus.failure && socialPosts.isEmpty) {
-          return const FatalErrorForm(
-            message: 'Could not load social posts!',
-          );
+          return const FatalErrorForm(message: 'Could not load social posts!');
         }
 
         socialPosts = state.socialPosts;
@@ -179,7 +167,8 @@ class SocialPostListState extends State<SocialPostList> {
                                   return BlocProvider.value(
                                     value: _socialPostBloc,
                                     child: const SocialPostDetailScreen(
-                                        socialPost: null),
+                                      socialPost: null,
+                                    ),
                                   );
                                 },
                               );

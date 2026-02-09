@@ -139,12 +139,10 @@ class CampaignListScreenState extends State<CampaignListScreen> {
               searchHint: 'Search campaigns...',
               searchController: _searchController,
               onSearchChanged: (value) {
-                if (value.isEmpty) {
-                  _campaignBloc.add(const OutreachCampaignFetch(start: 0));
-                } else {
-                  _campaignBloc
-                      .add(OutreachCampaignSearchRequested(query: value));
-                }
+                _campaignBloc.add(OutreachCampaignFetch(
+                  start: 0,
+                  searchString: value.isEmpty ? null : value,
+                ));
               },
             ),
             // Main content area with StyledDataTable

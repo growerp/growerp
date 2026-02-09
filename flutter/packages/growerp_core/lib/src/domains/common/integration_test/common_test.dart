@@ -176,8 +176,21 @@ class CommonTest {
   }) async {
     CustomizableDateTime.customTime = DateTime.now().add(Duration(days: days));
 
+    // Wait for app to reach authenticated or login state
+    // (needed when startTestApp uses clear: false and auth check is async)
+    for (int i = 0; i < 15; i++) {
+      if (tester.any(find.byKey(const Key('HomeFormAuth'))) ||
+          tester.any(find.byKey(const Key('logoutButton'))) ||
+          tester.any(find.byKey(const Key('loginButton')))) {
+        break;
+      }
+      await tester.pump(const Duration(seconds: 1));
+    }
+
     // Skip if already authenticated
-    if (tester.any(find.byKey(const Key('HomeFormAuth')))) {
+    // Check both HomeFormAuth (dynamic router) and logoutButton (static router)
+    if (tester.any(find.byKey(const Key('HomeFormAuth'))) ||
+        tester.any(find.byKey(const Key('logoutButton')))) {
       debugPrint('Login: Already authenticated, skipping login');
       return;
     }

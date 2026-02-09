@@ -83,9 +83,7 @@ class AssessmentListState extends State<AssessmentList> {
                 direction: DismissDirection.startToEnd,
                 child: BlocProvider.value(
                   value: _assessmentBloc,
-                  child: AssessmentDetailScreen(
-                    assessment: assessments[index],
-                  ),
+                  child: AssessmentDetailScreen(assessment: assessments[index]),
                 ),
               );
             },
@@ -97,19 +95,11 @@ class AssessmentListState extends State<AssessmentList> {
     return BlocConsumer<AssessmentBloc, AssessmentState>(
       listener: (context, state) {
         if (state.status == AssessmentStatus.failure) {
-          HelperFunctions.showMessage(
-            context,
-            '${state.message}',
-            Colors.red,
-          );
+          HelperFunctions.showMessage(context, '${state.message}', Colors.red);
         }
         if (state.status == AssessmentStatus.success) {
           if ((state.message ?? '').isNotEmpty) {
-            HelperFunctions.showMessage(
-              context,
-              state.message!,
-              Colors.green,
-            );
+            HelperFunctions.showMessage(context, state.message!, Colors.green);
           }
         }
       },
@@ -118,9 +108,7 @@ class AssessmentListState extends State<AssessmentList> {
         _isLoading = state.status == AssessmentStatus.loading;
 
         if (state.status == AssessmentStatus.failure && assessments.isEmpty) {
-          return const FatalErrorForm(
-            message: 'Could not load assessments!',
-          );
+          return const FatalErrorForm(message: 'Could not load assessments!');
         }
 
         assessments = state.assessments;

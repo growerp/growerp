@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:growerp_outreach_example/main.dart' as app;
@@ -43,32 +44,68 @@ void main() {
 
     // Navigate to Platform Configuration
     await CommonTest.selectOption(
-        tester, 'Platforms', 'PlatformConfigListScreen');
+        tester, '/platforms', 'PlatformConfigListScreen');
 
-    // Create new configuration
-    await CommonTest.tapByKey(tester, 'add');
-    await CommonTest.checkWidgetKey(tester, 'PlatformConfigDetailScreen');
+    // Tap the first platform row (email at index 0) to open detail dialog
+    await CommonTest.tapByKey(tester, 'platform0');
+    await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
 
-    // Fill form
-    await CommonTest.tapByKey(tester, 'Platform');
-    await CommonTest.tapByText(tester, 'Email');
+    // Verify detail dialog opened
+    expect(
+      find.byKey(const Key('PlatformConfigDetail_email')),
+      findsOneWidget,
+      reason: 'Platform config detail dialog for email should be open',
+    );
+
+    // Fill form fields
     await CommonTest.enterText(tester, 'Daily Limit', '100');
-    await CommonTest.enterText(
-        tester, 'Credentials (JSON)', '{"test": "data"}');
+    await tester.ensureVisible(find.byKey(const Key('API Key')));
+    await CommonTest.enterText(tester, 'API Key', 'test-api-key');
+
+    // Tap Create button (no existing config)
+    await tester.ensureVisible(find.byKey(const Key('Create')));
     await CommonTest.tapByKey(tester, 'Create');
+    await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
 
-    // Verify creation
-    await CommonTest.checkText(tester, 'Configuration created successfully');
-    await CommonTest.checkText(tester, 'EMAIL');
-    await CommonTest.checkText(tester, 'Daily Limit: 100');
+    // Dialog should have closed after successful create
+    // Verify we're back on the list screen
+    await CommonTest.checkWidgetKey(tester, 'PlatformConfigListScreen');
 
-    // Update configuration
-    await CommonTest.tapByText(tester, 'EMAIL');
+    // Re-open the email config to verify and update
+    await CommonTest.tapByKey(tester, 'platform0');
+    await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
+
+    // Verify the saved values
+    expect(
+      CommonTest.getTextFormField('Daily Limit'),
+      equals('100'),
+    );
+
+    // Update the daily limit
     await CommonTest.enterText(tester, 'Daily Limit', '200');
-    await CommonTest.tapByKey(tester, 'Update');
 
-    // Verify update
-    await CommonTest.checkText(tester, 'Configuration updated successfully');
-    await CommonTest.checkText(tester, 'Daily Limit: 200');
+    // Tap Update button (existing config)
+    await tester.ensureVisible(find.byKey(const Key('Update')));
+    await CommonTest.tapByKey(tester, 'Update');
+    await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
+
+    // Verify we're back on the list screen
+    await CommonTest.checkWidgetKey(tester, 'PlatformConfigListScreen');
+
+    // Verify the update by re-opening the email config
+    await CommonTest.tapByKey(tester, 'platform0');
+    await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
+
+    expect(
+      CommonTest.getTextFormField('Daily Limit'),
+      equals('200'),
+      reason: 'Daily limit should be updated to 200',
+    );
+
+    // Close dialog
+    await CommonTest.tapByKey(tester, 'cancel');
+    await tester.pumpAndSettle();
+
+    await CommonTest.logout(tester);
   });
 }

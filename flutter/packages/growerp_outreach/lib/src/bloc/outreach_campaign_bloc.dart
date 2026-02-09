@@ -47,6 +47,7 @@ class OutreachCampaignBloc
         status: event.status,
         start: event.start,
         limit: event.limit,
+        searchString: event.searchString,
       );
 
       final campaigns = event.start == 0

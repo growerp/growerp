@@ -70,22 +70,25 @@ class AssessmentBloc extends Bloc<AssessmentEvent, AssessmentState> {
         start: start,
         limit: event.limit,
         statusId: event.statusId,
-        searchString:
-            event.searchString.isNotEmpty ? event.searchString : null,
+        searchString: event.searchString.isNotEmpty ? event.searchString : null,
       );
 
-      emit(state.copyWith(
-        status: AssessmentStatus.success,
-        assessments: start == 0
-            ? response.assessments
-            : (List.of(state.assessments)..addAll(response.assessments)),
-        hasReachedMax: response.assessments.length < event.limit,
-      ));
+      emit(
+        state.copyWith(
+          status: AssessmentStatus.success,
+          assessments: start == 0
+              ? response.assessments
+              : (List.of(state.assessments)..addAll(response.assessments)),
+          hasReachedMax: response.assessments.length < event.limit,
+        ),
+      );
     } on DioException catch (e) {
-      emit(state.copyWith(
-        status: AssessmentStatus.failure,
-        message: await getDioError(e),
-      ));
+      emit(
+        state.copyWith(
+          status: AssessmentStatus.failure,
+          message: await getDioError(e),
+        ),
+      );
     }
   }
 
@@ -102,20 +105,23 @@ class AssessmentBloc extends Bloc<AssessmentEvent, AssessmentState> {
         ownerPartyId: event.ownerPartyId,
       );
 
-      emit(state.copyWith(
-        status: AssessmentStatus.success,
-        selectedAssessment: assessment,
-      ));
+      emit(
+        state.copyWith(
+          status: AssessmentStatus.success,
+          selectedAssessment: assessment,
+        ),
+      );
     } on DioException catch (e) {
-      emit(state.copyWith(
-        status: AssessmentStatus.failure,
-        message: await getDioError(e),
-      ));
+      emit(
+        state.copyWith(
+          status: AssessmentStatus.failure,
+          message: await getDioError(e),
+        ),
+      );
     } catch (e) {
-      emit(state.copyWith(
-        status: AssessmentStatus.failure,
-        message: e.toString(),
-      ));
+      emit(
+        state.copyWith(status: AssessmentStatus.failure, message: e.toString()),
+      );
     }
   }
 
@@ -138,16 +144,20 @@ class AssessmentBloc extends Bloc<AssessmentEvent, AssessmentState> {
         status: event.assessment.status,
       );
 
-      emit(state.copyWith(
-        status: AssessmentStatus.success,
-        selectedAssessment: assessment,
-        assessments: [assessment, ...state.assessments],
-      ));
+      emit(
+        state.copyWith(
+          status: AssessmentStatus.success,
+          selectedAssessment: assessment,
+          assessments: [assessment, ...state.assessments],
+        ),
+      );
     } on DioException catch (e) {
-      emit(state.copyWith(
-        status: AssessmentStatus.failure,
-        message: await getDioError(e),
-      ));
+      emit(
+        state.copyWith(
+          status: AssessmentStatus.failure,
+          message: await getDioError(e),
+        ),
+      );
     }
   }
 
@@ -180,36 +190,41 @@ class AssessmentBloc extends Bloc<AssessmentEvent, AssessmentState> {
       // Fallback if backend returns empty name (e.g. if backend service wasn't updated yet)
       final fixedAssessment =
           assessment.assessmentName == 'Unnamed Assessment' &&
-                  event.assessment.assessmentName != 'Unnamed Assessment'
-              ? assessment.copyWith(
-                  assessmentName: event.assessment.assessmentName,
-                  description:
-                      event.assessment.description ?? assessment.description,
-                  status: event.assessment.status,
-                )
-              : assessment;
+              event.assessment.assessmentName != 'Unnamed Assessment'
+          ? assessment.copyWith(
+              assessmentName: event.assessment.assessmentName,
+              description:
+                  event.assessment.description ?? assessment.description,
+              status: event.assessment.status,
+            )
+          : assessment;
 
       final updatedAssessments = state.assessments
-          .map((a) => a.assessmentId == fixedAssessment.assessmentId
-              ? fixedAssessment
-              : a)
+          .map(
+            (a) => a.assessmentId == fixedAssessment.assessmentId
+                ? fixedAssessment
+                : a,
+          )
           .toList();
 
-      emit(state.copyWith(
-        status: AssessmentStatus.success,
-        selectedAssessment: fixedAssessment,
-        assessments: updatedAssessments,
-      ));
+      emit(
+        state.copyWith(
+          status: AssessmentStatus.success,
+          selectedAssessment: fixedAssessment,
+          assessments: updatedAssessments,
+        ),
+      );
     } on DioException catch (e) {
-      emit(state.copyWith(
-        status: AssessmentStatus.failure,
-        message: await getDioError(e),
-      ));
+      emit(
+        state.copyWith(
+          status: AssessmentStatus.failure,
+          message: await getDioError(e),
+        ),
+      );
     } catch (e) {
-      emit(state.copyWith(
-        status: AssessmentStatus.failure,
-        message: e.toString(),
-      ));
+      emit(
+        state.copyWith(status: AssessmentStatus.failure, message: e.toString()),
+      );
     }
   }
 
@@ -228,19 +243,24 @@ class AssessmentBloc extends Bloc<AssessmentEvent, AssessmentState> {
           .where((a) => a.assessmentId != event.assessment.assessmentId)
           .toList();
 
-      emit(state.copyWith(
-        status: AssessmentStatus.success,
-        assessments: updatedAssessments,
-        selectedAssessment: state.selectedAssessment?.assessmentId ==
-                event.assessment.assessmentId
-            ? null
-            : state.selectedAssessment,
-      ));
+      emit(
+        state.copyWith(
+          status: AssessmentStatus.success,
+          assessments: updatedAssessments,
+          selectedAssessment:
+              state.selectedAssessment?.assessmentId ==
+                  event.assessment.assessmentId
+              ? null
+              : state.selectedAssessment,
+        ),
+      );
     } on DioException catch (e) {
-      emit(state.copyWith(
-        status: AssessmentStatus.failure,
-        message: await getDioError(e),
-      ));
+      emit(
+        state.copyWith(
+          status: AssessmentStatus.failure,
+          message: await getDioError(e),
+        ),
+      );
     }
   }
 
@@ -272,29 +292,33 @@ class AssessmentBloc extends Bloc<AssessmentEvent, AssessmentState> {
 
       // Backend now returns enriched answersData, no need for local fallback
 
-      emit(state.copyWith(
-        status: AssessmentStatus.success,
-        results: [result, ...state.results],
-        scoreResult: AssessmentScoreResponse(
-          score: result.score ?? 0,
-          leadStatus: result.leadStatus ?? 'Unknown',
-          details: {
-            'resultId': result.assessmentResultId,
-            'pseudoId': result.pseudoId,
-            'respondentName': result.respondentName,
-            'respondentEmail': result.respondentEmail,
-            'respondentPhone': result.respondentPhone,
-            'respondentCompany': result.respondentCompany,
-            'answersData': result.answersData,
-            'createdDate': result.createdDate,
-          },
+      emit(
+        state.copyWith(
+          status: AssessmentStatus.success,
+          results: [result, ...state.results],
+          scoreResult: AssessmentScoreResponse(
+            score: result.score ?? 0,
+            leadStatus: result.leadStatus ?? 'Unknown',
+            details: {
+              'resultId': result.assessmentResultId,
+              'pseudoId': result.pseudoId,
+              'respondentName': result.respondentName,
+              'respondentEmail': result.respondentEmail,
+              'respondentPhone': result.respondentPhone,
+              'respondentCompany': result.respondentCompany,
+              'answersData': result.answersData,
+              'createdDate': result.createdDate,
+            },
+          ),
         ),
-      ));
+      );
     } on DioException catch (e) {
-      emit(state.copyWith(
-        status: AssessmentStatus.failure,
-        message: await getDioError(e),
-      ));
+      emit(
+        state.copyWith(
+          status: AssessmentStatus.failure,
+          message: await getDioError(e),
+        ),
+      );
     }
   }
 
@@ -328,15 +352,19 @@ class AssessmentBloc extends Bloc<AssessmentEvent, AssessmentState> {
         );
       }
 
-      emit(state.copyWith(
-        status: AssessmentStatus.success,
-        results: current..addAll(response.results),
-      ));
+      emit(
+        state.copyWith(
+          status: AssessmentStatus.success,
+          results: current..addAll(response.results),
+        ),
+      );
     } on DioException catch (e) {
-      emit(state.copyWith(
-        status: AssessmentStatus.failure,
-        message: await getDioError(e),
-      ));
+      emit(
+        state.copyWith(
+          status: AssessmentStatus.failure,
+          message: await getDioError(e),
+        ),
+      );
     }
   }
 
@@ -351,15 +379,19 @@ class AssessmentBloc extends Bloc<AssessmentEvent, AssessmentState> {
         assessmentId: event.assessmentId,
       );
 
-      emit(state.copyWith(
-        status: AssessmentStatus.success,
-        questions: questionsResponse.questions,
-      ));
+      emit(
+        state.copyWith(
+          status: AssessmentStatus.success,
+          questions: questionsResponse.questions,
+        ),
+      );
     } on DioException catch (e) {
-      emit(state.copyWith(
-        status: AssessmentStatus.failure,
-        message: await getDioError(e),
-      ));
+      emit(
+        state.copyWith(
+          status: AssessmentStatus.failure,
+          message: await getDioError(e),
+        ),
+      );
     }
   }
 
@@ -382,19 +414,24 @@ class AssessmentBloc extends Bloc<AssessmentEvent, AssessmentState> {
       );
 
       // Update the options map with the options for this question
-      final updatedOptions =
-          Map<String, List<AssessmentQuestionOption>>.from(state.options);
+      final updatedOptions = Map<String, List<AssessmentQuestionOption>>.from(
+        state.options,
+      );
       updatedOptions[event.assessmentQuestionId] = question.options ?? [];
 
-      emit(state.copyWith(
-        status: AssessmentStatus.success,
-        options: updatedOptions,
-      ));
+      emit(
+        state.copyWith(
+          status: AssessmentStatus.success,
+          options: updatedOptions,
+        ),
+      );
     } on DioException catch (e) {
-      emit(state.copyWith(
-        status: AssessmentStatus.failure,
-        message: await getDioError(e),
-      ));
+      emit(
+        state.copyWith(
+          status: AssessmentStatus.failure,
+          message: await getDioError(e),
+        ),
+      );
     }
   }
 
@@ -409,15 +446,19 @@ class AssessmentBloc extends Bloc<AssessmentEvent, AssessmentState> {
         assessmentId: event.assessmentId,
       );
 
-      emit(state.copyWith(
-        status: AssessmentStatus.success,
-        thresholds: thresholdsResponse.thresholds,
-      ));
+      emit(
+        state.copyWith(
+          status: AssessmentStatus.success,
+          thresholds: thresholdsResponse.thresholds,
+        ),
+      );
     } on DioException catch (e) {
-      emit(state.copyWith(
-        status: AssessmentStatus.failure,
-        message: await getDioError(e),
-      ));
+      emit(
+        state.copyWith(
+          status: AssessmentStatus.failure,
+          message: await getDioError(e),
+        ),
+      );
     }
   }
 
@@ -441,15 +482,19 @@ class AssessmentBloc extends Bloc<AssessmentEvent, AssessmentState> {
         limit: event.limit,
       );
 
-      emit(state.copyWith(
-        status: AssessmentStatus.success,
-        results: current..addAll(response.results),
-      ));
+      emit(
+        state.copyWith(
+          status: AssessmentStatus.success,
+          results: current..addAll(response.results),
+        ),
+      );
     } on DioException catch (e) {
-      emit(state.copyWith(
-        status: AssessmentStatus.failure,
-        message: await getDioError(e),
-      ));
+      emit(
+        state.copyWith(
+          status: AssessmentStatus.failure,
+          message: await getDioError(e),
+        ),
+      );
     }
   }
 
@@ -459,19 +504,23 @@ class AssessmentBloc extends Bloc<AssessmentEvent, AssessmentState> {
   ) async {
     final query = event.query.trim();
     if (query.isEmpty) {
-      emit(state.copyWith(
-        searchStatus: AssessmentStatus.success,
-        searchResults: const [],
-        searchError: null,
-      ));
+      emit(
+        state.copyWith(
+          searchStatus: AssessmentStatus.success,
+          searchResults: const [],
+          searchError: null,
+        ),
+      );
       return;
     }
 
-    emit(state.copyWith(
-      searchStatus: AssessmentStatus.loading,
-      searchResults: const [],
-      searchError: null,
-    ));
+    emit(
+      state.copyWith(
+        searchStatus: AssessmentStatus.loading,
+        searchResults: const [],
+        searchError: null,
+      ),
+    );
 
     try {
       final result = await restClient.searchAssessments(
@@ -480,17 +529,21 @@ class AssessmentBloc extends Bloc<AssessmentEvent, AssessmentState> {
         searchString: query,
       );
 
-      emit(state.copyWith(
-        searchStatus: AssessmentStatus.success,
-        searchResults: result.assessments,
-        searchError: null,
-      ));
+      emit(
+        state.copyWith(
+          searchStatus: AssessmentStatus.success,
+          searchResults: result.assessments,
+          searchError: null,
+        ),
+      );
     } catch (error) {
-      emit(state.copyWith(
-        searchStatus: AssessmentStatus.failure,
-        searchResults: const [],
-        searchError: await getDioError(error),
-      ));
+      emit(
+        state.copyWith(
+          searchStatus: AssessmentStatus.failure,
+          searchResults: const [],
+          searchError: await getDioError(error),
+        ),
+      );
     }
   }
 }

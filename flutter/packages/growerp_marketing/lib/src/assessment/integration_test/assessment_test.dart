@@ -45,9 +45,7 @@ class AssessmentTest {
     List<Assessment> updatedAssessments = [];
     for (int x = 0; x < newAssessments.length; x++) {
       updatedAssessments.add(
-        newAssessments[x].copyWith(
-          pseudoId: old.assessments[x].pseudoId,
-        ),
+        newAssessments[x].copyWith(pseudoId: old.assessments[x].pseudoId),
       );
     }
     await PersistFunctions.persistTest(
@@ -66,6 +64,11 @@ class AssessmentTest {
     await CommonTest.tapByKey(
       tester,
       'delete${count - 1}',
+      seconds: CommonTest.waitTime,
+    );
+    await CommonTest.tapByKey(
+      tester,
+      'deleteConfirm${count - 1}',
       seconds: CommonTest.waitTime,
     );
     expect(
@@ -87,23 +90,23 @@ class AssessmentTest {
         await CommonTest.tapByKey(tester, 'addNewAssessment');
       } else {
         // Update existing assessment
-        await CommonTest.doNewSearch(tester,
-            searchString: assessment.pseudoId!);
+        await CommonTest.doNewSearch(
+          tester,
+          searchString: assessment.pseudoId!,
+        );
         expect(
           CommonTest.getTextField('topHeader').contains(assessment.pseudoId!),
           true,
         );
       }
 
-      expect(find.byKey(Key('AssessmentDetail${assessment.pseudoId}')),
-          findsOneWidget);
+      expect(
+        find.byKey(Key('AssessmentDetail${assessment.pseudoId}')),
+        findsOneWidget,
+      );
 
       // Enter basic info
-      await CommonTest.enterText(
-        tester,
-        'name',
-        assessment.assessmentName,
-      );
+      await CommonTest.enterText(tester, 'name', assessment.assessmentName);
 
       if (assessment.description != null) {
         await CommonTest.enterText(
@@ -130,8 +133,11 @@ class AssessmentTest {
 
       // Get allocated ID for new assessments
       if (assessment.pseudoId == null) {
-        await CommonTest.tapByKey(tester, 'name0',
-            seconds: CommonTest.waitTime);
+        await CommonTest.tapByKey(
+          tester,
+          'name0',
+          seconds: CommonTest.waitTime,
+        );
         var id = CommonTest.getTextField('topHeader').split('#')[1].trim();
         assessment = assessment.copyWith(pseudoId: id);
         await CommonTest.tapByKey(tester, 'cancel');
@@ -156,14 +162,13 @@ class AssessmentTest {
     SaveTest test = await PersistFunctions.getTest(backup: false);
 
     for (Assessment assessment in test.assessments) {
-      await CommonTest.doNewSearch(
-        tester,
-        searchString: assessment.pseudoId!,
-      );
+      await CommonTest.doNewSearch(tester, searchString: assessment.pseudoId!);
 
       // Check detail
-      expect(find.byKey(Key('AssessmentDetail${assessment.pseudoId}')),
-          findsOneWidget);
+      expect(
+        find.byKey(Key('AssessmentDetail${assessment.pseudoId}')),
+        findsOneWidget,
+      );
       expect(
         CommonTest.getTextFormField('name'),
         equals(assessment.assessmentName),
@@ -176,10 +181,7 @@ class AssessmentTest {
         );
       }
 
-      expect(
-        CommonTest.getDropdown('status'),
-        equals(assessment.status),
-      );
+      expect(CommonTest.getDropdown('status'), equals(assessment.status));
 
       await CommonTest.tapByKey(tester, 'cancel');
     }

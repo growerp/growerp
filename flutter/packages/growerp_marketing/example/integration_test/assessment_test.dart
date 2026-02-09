@@ -73,6 +73,7 @@ void main() {
     // Go back to assessment list
     await CommonTest.tapByKey(tester, 'cancel'); // Close questions dialog
     await CommonTest.tapByKey(tester, 'cancel'); // Close assessment detail
+    await AssessmentTest.clearSearch(tester); // Clear search from doNewSearch
 
     await AssessmentTest.deleteAssessments(tester);
     await CommonTest.logout(tester);

@@ -33,7 +33,8 @@ class LandingPageTest {
   ) async {
     SaveTest test = await PersistFunctions.getTest();
     await PersistFunctions.persistTest(
-        test.copyWith(landingPages: landingPages));
+      test.copyWith(landingPages: landingPages),
+    );
     await enterLandingPageData(tester);
   }
 
@@ -53,7 +54,8 @@ class LandingPageTest {
       );
     }
     await PersistFunctions.persistTest(
-        old.copyWith(landingPages: updatedPages));
+      old.copyWith(landingPages: updatedPages),
+    );
     await enterLandingPageData(tester);
   }
 
@@ -64,11 +66,7 @@ class LandingPageTest {
       find.byKey(const Key('landingPageItem'), skipOffstage: false),
       findsNWidgets(count),
     );
-    await CommonTest.tapByKey(
-      tester,
-      'delete0',
-      seconds: CommonTest.waitTime,
-    );
+    await CommonTest.tapByKey(tester, 'delete0', seconds: CommonTest.waitTime);
     await CommonTest.tapByKey(
       tester,
       'deleteConfirm0',
@@ -116,7 +114,10 @@ class LandingPageTest {
 
       if (page.privacyPolicyUrl != null) {
         await CommonTest.enterText(
-            tester, 'privacyPolicyUrl', page.privacyPolicyUrl!);
+          tester,
+          'privacyPolicyUrl',
+          page.privacyPolicyUrl!,
+        );
       }
 
       if (page.headline != null) {
@@ -134,7 +135,10 @@ class LandingPageTest {
           listViewName: 'landingPageDialogListView',
         );
         await CommonTest.enterDropDown(
-            tester, 'ctaActionType', page.ctaActionType!);
+          tester,
+          'ctaActionType',
+          page.ctaActionType!,
+        );
       }
 
       // Save the landing page
@@ -151,8 +155,11 @@ class LandingPageTest {
 
       // Get allocated ID for new pages
       if (page.pseudoId == null) {
-        await CommonTest.tapByKey(tester, 'title0',
-            seconds: CommonTest.waitTime);
+        await CommonTest.tapByKey(
+          tester,
+          'title0',
+          seconds: CommonTest.waitTime,
+        );
         var id = CommonTest.getTextField('topHeader').split('#')[1].trim();
         page = page.copyWith(pseudoId: id);
         await CommonTest.tapByKey(tester, 'cancel');
@@ -179,14 +186,13 @@ class LandingPageTest {
 
       // Check detail - the dialog key is LandingPageDetail${pseudoId}
       expect(
-          find.byKey(Key('LandingPageDetail${page.pseudoId}')), findsOneWidget);
+        find.byKey(Key('LandingPageDetail${page.pseudoId}')),
+        findsOneWidget,
+      );
       expect(CommonTest.getTextFormField('title'), equals(page.title));
 
       if (page.headline != null) {
-        expect(
-          CommonTest.getTextFormField('headline'),
-          equals(page.headline!),
-        );
+        expect(CommonTest.getTextFormField('headline'), equals(page.headline!));
       }
 
       if (page.subheading != null) {
@@ -197,10 +203,7 @@ class LandingPageTest {
       }
 
       if (page.hookType != null) {
-        expect(
-          CommonTest.getDropdown('hookType'),
-          equals(page.hookType!),
-        );
+        expect(CommonTest.getDropdown('hookType'), equals(page.hookType!));
       }
 
       if (page.ctaActionType != null) {
@@ -210,10 +213,7 @@ class LandingPageTest {
         );
       }
 
-      expect(
-        CommonTest.getDropdown('status'),
-        equals(page.status),
-      );
+      expect(CommonTest.getDropdown('status'), equals(page.status));
 
       if (page.privacyPolicyUrl != null) {
         expect(
@@ -238,13 +238,17 @@ class LandingPageTest {
     }
 
     // Open the first landing page
-    await CommonTest.doNewSearch(tester,
-        searchString: test.landingPages[0].pseudoId!);
+    await CommonTest.doNewSearch(
+      tester,
+      searchString: test.landingPages[0].pseudoId!,
+    );
     await tester.pumpAndSettle();
 
     // Navigate to sections tab if exists, or sections button
     final sectionsKey = find.byKey(const Key('mobileSections'));
     if (sectionsKey.evaluate().isNotEmpty) {
+      await tester.ensureVisible(sectionsKey);
+      await tester.pumpAndSettle();
       await tester.tap(sectionsKey);
       await tester.pumpAndSettle();
     }
@@ -252,30 +256,45 @@ class LandingPageTest {
     List<LandingPageSection> newSections = [];
     for (LandingPageSection section in sections) {
       // Add new section
-      await CommonTest.tapByKey(tester, 'addSection',
-          seconds: CommonTest.waitTime);
+      await CommonTest.tapByKey(
+        tester,
+        'addSection',
+        seconds: CommonTest.waitTime,
+      );
 
       // Fill in section details
       await CommonTest.enterText(tester, 'sectionTitle', section.sectionTitle!);
 
       if (section.sectionDescription != null) {
         await CommonTest.enterText(
-            tester, 'sectionDescription', section.sectionDescription!);
+          tester,
+          'sectionDescription',
+          section.sectionDescription!,
+        );
       }
 
       if (section.sectionImageUrl != null) {
         await CommonTest.enterText(
-            tester, 'sectionImageUrl', section.sectionImageUrl!);
+          tester,
+          'sectionImageUrl',
+          section.sectionImageUrl!,
+        );
       }
 
       if (section.sectionSequence != null) {
         await CommonTest.enterText(
-            tester, 'sectionSequence', section.sectionSequence.toString());
+          tester,
+          'sectionSequence',
+          section.sectionSequence.toString(),
+        );
       }
 
       // Save section
-      await CommonTest.tapByKey(tester, 'saveSection',
-          seconds: CommonTest.waitTime);
+      await CommonTest.tapByKey(
+        tester,
+        'saveSection',
+        seconds: CommonTest.waitTime,
+      );
 
       newSections.add(section);
     }
@@ -289,7 +308,8 @@ class LandingPageTest {
     List<LandingPage> updatedPages = List.from(test.landingPages);
     updatedPages[0] = updatedPages[0].copyWith(sections: newSections);
     await PersistFunctions.persistTest(
-        test.copyWith(landingPages: updatedPages));
+      test.copyWith(landingPages: updatedPages),
+    );
   }
 
   static Future<void> updatePageSections(
@@ -299,13 +319,17 @@ class LandingPageTest {
     SaveTest test = await PersistFunctions.getTest();
 
     // Open the first landing page
-    await CommonTest.doNewSearch(tester,
-        searchString: test.landingPages[0].pseudoId!);
+    await CommonTest.doNewSearch(
+      tester,
+      searchString: test.landingPages[0].pseudoId!,
+    );
     await tester.pumpAndSettle();
 
     // Navigate to sections tab if exists
     final sectionsKey = find.byKey(const Key('mobileSections'));
     if (sectionsKey.evaluate().isNotEmpty) {
+      await tester.ensureVisible(sectionsKey);
+      await tester.pumpAndSettle();
       await tester.tap(sectionsKey);
       await tester.pumpAndSettle();
     }
@@ -314,31 +338,48 @@ class LandingPageTest {
     for (int x = 0; x < newSections.length; x++) {
       // Tap on section to edit
       await CommonTest.tapByKey(
-          tester, 'section${newSections[x].sectionSequence}',
-          seconds: CommonTest.waitTime);
+        tester,
+        'section${newSections[x].sectionSequence}',
+        seconds: CommonTest.waitTime,
+      );
 
       // Update section details
       await CommonTest.enterText(
-          tester, 'sectionTitle', newSections[x].sectionTitle!);
+        tester,
+        'sectionTitle',
+        newSections[x].sectionTitle!,
+      );
 
       if (newSections[x].sectionDescription != null) {
         await CommonTest.enterText(
-            tester, 'sectionDescription', newSections[x].sectionDescription!);
+          tester,
+          'sectionDescription',
+          newSections[x].sectionDescription!,
+        );
       }
 
       if (newSections[x].sectionImageUrl != null) {
         await CommonTest.enterText(
-            tester, 'sectionImageUrl', newSections[x].sectionImageUrl!);
+          tester,
+          'sectionImageUrl',
+          newSections[x].sectionImageUrl!,
+        );
       }
 
       if (newSections[x].sectionSequence != null) {
-        await CommonTest.enterText(tester, 'sectionSequence',
-            newSections[x].sectionSequence.toString());
+        await CommonTest.enterText(
+          tester,
+          'sectionSequence',
+          newSections[x].sectionSequence.toString(),
+        );
       }
 
       // Save section
-      await CommonTest.tapByKey(tester, 'saveSection',
-          seconds: CommonTest.waitTime);
+      await CommonTest.tapByKey(
+        tester,
+        'saveSection',
+        seconds: CommonTest.waitTime,
+      );
 
       updatedSections.add(newSections[x]);
     }
@@ -352,7 +393,8 @@ class LandingPageTest {
     List<LandingPage> updatedPages = List.from(test.landingPages);
     updatedPages[0] = updatedPages[0].copyWith(sections: updatedSections);
     await PersistFunctions.persistTest(
-        test.copyWith(landingPages: updatedPages));
+      test.copyWith(landingPages: updatedPages),
+    );
   }
 
   static Future<void> checkPageSections(WidgetTester tester) async {
@@ -365,13 +407,17 @@ class LandingPageTest {
     }
 
     // Open the first landing page
-    await CommonTest.doNewSearch(tester,
-        searchString: test.landingPages[0].pseudoId!);
+    await CommonTest.doNewSearch(
+      tester,
+      searchString: test.landingPages[0].pseudoId!,
+    );
     await tester.pumpAndSettle();
 
     // Navigate to sections tab if exists
     final sectionsKey = find.byKey(const Key('mobileSections'));
     if (sectionsKey.evaluate().isNotEmpty) {
+      await tester.ensureVisible(sectionsKey);
+      await tester.pumpAndSettle();
       await tester.tap(sectionsKey);
       await tester.pumpAndSettle();
     }
@@ -384,21 +430,30 @@ class LandingPageTest {
       expect(find.text(section.sectionTitle!), findsOneWidget);
 
       // Tap to open detail
-      await CommonTest.tapByKey(tester, 'section${section.sectionSequence}',
-          seconds: CommonTest.waitTime);
+      await CommonTest.tapByKey(
+        tester,
+        'section${section.sectionSequence}',
+        seconds: CommonTest.waitTime,
+      );
 
       // Verify section details
-      expect(CommonTest.getTextFormField('sectionTitle'),
-          equals(section.sectionTitle!));
+      expect(
+        CommonTest.getTextFormField('sectionTitle'),
+        equals(section.sectionTitle!),
+      );
 
       if (section.sectionDescription != null) {
-        expect(CommonTest.getTextFormField('sectionDescription'),
-            equals(section.sectionDescription!));
+        expect(
+          CommonTest.getTextFormField('sectionDescription'),
+          equals(section.sectionDescription!),
+        );
       }
 
       if (section.sectionImageUrl != null) {
-        expect(CommonTest.getTextFormField('sectionImageUrl'),
-            equals(section.sectionImageUrl!));
+        expect(
+          CommonTest.getTextFormField('sectionImageUrl'),
+          equals(section.sectionImageUrl!),
+        );
       }
 
       // Close section detail
@@ -422,13 +477,17 @@ class LandingPageTest {
     }
 
     // Open the first landing page
-    await CommonTest.doNewSearch(tester,
-        searchString: test.landingPages[0].pseudoId!);
+    await CommonTest.doNewSearch(
+      tester,
+      searchString: test.landingPages[0].pseudoId!,
+    );
     await tester.pumpAndSettle();
 
     // Navigate to sections tab if exists
     final sectionsKey = find.byKey(const Key('mobileSections'));
     if (sectionsKey.evaluate().isNotEmpty) {
+      await tester.ensureVisible(sectionsKey);
+      await tester.pumpAndSettle();
       await tester.tap(sectionsKey);
       await tester.pumpAndSettle();
     }
@@ -446,10 +505,7 @@ class LandingPageTest {
     await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
 
     // Verify section was deleted
-    expect(
-      find.text(lastSection.sectionTitle!),
-      findsNothing,
-    );
+    expect(find.text(lastSection.sectionTitle!), findsNothing);
 
     // Close the section page
     await CommonTest.tapByKey(tester, 'cancel');
@@ -476,35 +532,51 @@ class LandingPageTest {
     }
 
     // Open the first landing page
-    await CommonTest.doNewSearch(tester,
-        searchString: test.landingPages[0].pseudoId!);
+    await CommonTest.doNewSearch(
+      tester,
+      searchString: test.landingPages[0].pseudoId!,
+    );
     await tester.pumpAndSettle();
 
     // Navigate to credibility tab if exists
     final credibilityKey = find.byKey(const Key('mobileCredibility'));
     if (credibilityKey.evaluate().isNotEmpty) {
+      await tester.ensureVisible(credibilityKey);
+      await tester.pumpAndSettle();
       await tester.tap(credibilityKey);
       await tester.pumpAndSettle();
     }
 
     // Add credibility info
-    await CommonTest.tapByKey(tester, 'addCredibility',
-        seconds: CommonTest.waitTime);
+    await CommonTest.tapByKey(
+      tester,
+      'addCredibility',
+      seconds: CommonTest.waitTime,
+    );
 
     // Fill in credibility details
     if (credibilityInfo.creatorBio != null) {
       await CommonTest.enterText(
-          tester, 'creatorBio', credibilityInfo.creatorBio!);
+        tester,
+        'creatorBio',
+        credibilityInfo.creatorBio!,
+      );
     }
 
     if (credibilityInfo.backgroundText != null) {
       await CommonTest.enterText(
-          tester, 'backgroundText', credibilityInfo.backgroundText!);
+        tester,
+        'backgroundText',
+        credibilityInfo.backgroundText!,
+      );
     }
 
     if (credibilityInfo.creatorImageUrl != null) {
       await CommonTest.enterText(
-          tester, 'creatorImageUrl', credibilityInfo.creatorImageUrl!);
+        tester,
+        'creatorImageUrl',
+        credibilityInfo.creatorImageUrl!,
+      );
     }
 
     // Save credibility info
@@ -513,8 +585,11 @@ class LandingPageTest {
       key: 'saveCredibility',
       listViewName: 'credibilityInfoScrollView',
     );
-    await CommonTest.tapByKey(tester, 'saveCredibility',
-        seconds: CommonTest.waitTime);
+    await CommonTest.tapByKey(
+      tester,
+      'saveCredibility',
+      seconds: CommonTest.waitTime,
+    );
 
     // Get allocated ID for new credibility info
     await CommonTest.tapByKey(tester, 'item0', seconds: CommonTest.waitTime);
@@ -533,7 +608,8 @@ class LandingPageTest {
     List<LandingPage> updatedPages = List.from(test.landingPages);
     updatedPages[0] = updatedPages[0].copyWith(credibility: credibilityInfo);
     await PersistFunctions.persistTest(
-        test.copyWith(landingPages: updatedPages));
+      test.copyWith(landingPages: updatedPages),
+    );
   }
 
   static Future<void> updateCredibilityInfo(
@@ -544,39 +620,55 @@ class LandingPageTest {
 
     // copy pseudoId from current object
     newCredibilityInfo = newCredibilityInfo.copyWith(
-        pseudoId: test.landingPages[0].credibility!.pseudoId);
+      pseudoId: test.landingPages[0].credibility!.pseudoId,
+    );
 
     // Open the first landing page
-    await CommonTest.doNewSearch(tester,
-        searchString: test.landingPages[0].pseudoId!);
+    await CommonTest.doNewSearch(
+      tester,
+      searchString: test.landingPages[0].pseudoId!,
+    );
     await tester.pumpAndSettle();
 
     // Navigate to credibility tab if exists
     final credibilityKey = find.byKey(const Key('mobileCredibility'));
     if (credibilityKey.evaluate().isNotEmpty) {
+      await tester.ensureVisible(credibilityKey);
+      await tester.pumpAndSettle();
       await tester.tap(credibilityKey);
       await tester.pumpAndSettle();
     }
 
     // Tap on credibility info to edit
     await CommonTest.tapByKey(
-        tester, 'credibilityItem${newCredibilityInfo.pseudoId}',
-        seconds: CommonTest.waitTime);
+      tester,
+      'credibilityItem${newCredibilityInfo.pseudoId}',
+      seconds: CommonTest.waitTime,
+    );
 
     // Update credibility details
     if (newCredibilityInfo.creatorBio != null) {
       await CommonTest.enterText(
-          tester, 'creatorBio', newCredibilityInfo.creatorBio!);
+        tester,
+        'creatorBio',
+        newCredibilityInfo.creatorBio!,
+      );
     }
 
     if (newCredibilityInfo.backgroundText != null) {
       await CommonTest.enterText(
-          tester, 'backgroundText', newCredibilityInfo.backgroundText!);
+        tester,
+        'backgroundText',
+        newCredibilityInfo.backgroundText!,
+      );
     }
 
     if (newCredibilityInfo.creatorImageUrl != null) {
       await CommonTest.enterText(
-          tester, 'creatorImageUrl', newCredibilityInfo.creatorImageUrl!);
+        tester,
+        'creatorImageUrl',
+        newCredibilityInfo.creatorImageUrl!,
+      );
     }
 
     // Handle statistics: with consolidated architecture, all statistics are replaced atomically
@@ -590,8 +682,11 @@ class LandingPageTest {
       if (newCount > existingCount) {
         // Add new statistic rows
         for (int i = existingCount; i < newCount; i++) {
-          await CommonTest.tapByKey(tester, 'addStatistic',
-              seconds: CommonTest.waitTime);
+          await CommonTest.tapByKey(
+            tester,
+            'addStatistic',
+            seconds: CommonTest.waitTime,
+          );
         }
       } else if (newCount < existingCount) {
         // Remove excess statistic rows from the end
@@ -606,11 +701,12 @@ class LandingPageTest {
       for (int i = 0; i < newCredibilityInfo.statistics!.length; i++) {
         final stat = newCredibilityInfo.statistics![i];
         if (stat.statistic != null) {
-          await CommonTest.enterText(
+          await CommonTest.dragUntil(
             tester,
-            'statistic$i',
-            stat.statistic!,
+            key: 'statistic$i',
+            listViewName: 'credibilityInfoScrollView',
           );
+          await CommonTest.enterText(tester, 'statistic$i', stat.statistic!);
         }
       }
     }
@@ -621,8 +717,11 @@ class LandingPageTest {
       key: 'saveCredibility',
       listViewName: 'credibilityInfoScrollView',
     );
-    await CommonTest.tapByKey(tester, 'saveCredibility',
-        seconds: CommonTest.waitTime);
+    await CommonTest.tapByKey(
+      tester,
+      'saveCredibility',
+      seconds: CommonTest.waitTime,
+    );
 
     // Close the credibility list page
     await CommonTest.tapByKey(tester, 'cancel');
@@ -633,7 +732,8 @@ class LandingPageTest {
     List<LandingPage> updatedPages = List.from(test.landingPages);
     updatedPages[0] = updatedPages[0].copyWith(credibility: newCredibilityInfo);
     await PersistFunctions.persistTest(
-        test.copyWith(landingPages: updatedPages));
+      test.copyWith(landingPages: updatedPages),
+    );
   }
 
   static Future<void> checkCredibilityInfo(WidgetTester tester) async {
@@ -644,13 +744,17 @@ class LandingPageTest {
     }
 
     // Open the first landing page
-    await CommonTest.doNewSearch(tester,
-        searchString: test.landingPages[0].pseudoId!);
+    await CommonTest.doNewSearch(
+      tester,
+      searchString: test.landingPages[0].pseudoId!,
+    );
     await tester.pumpAndSettle();
 
     // Navigate to credibility tab if exists
     final credibilityKey = find.byKey(const Key('mobileCredibility'));
     if (credibilityKey.evaluate().isNotEmpty) {
+      await tester.ensureVisible(credibilityKey);
+      await tester.pumpAndSettle();
       await tester.tap(credibilityKey);
       await tester.pumpAndSettle();
     }
@@ -658,23 +762,32 @@ class LandingPageTest {
     final credibility = test.landingPages[0].credibility!;
 
     // Tap to open detail
-    await CommonTest.tapByKey(tester, 'credibilityItem${credibility.pseudoId}',
-        seconds: CommonTest.waitTime);
+    await CommonTest.tapByKey(
+      tester,
+      'credibilityItem${credibility.pseudoId}',
+      seconds: CommonTest.waitTime,
+    );
 
     // Verify credibility details
     if (credibility.creatorBio != null) {
-      expect(CommonTest.getTextFormField('creatorBio'),
-          equals(credibility.creatorBio!));
+      expect(
+        CommonTest.getTextFormField('creatorBio'),
+        equals(credibility.creatorBio!),
+      );
     }
 
     if (credibility.backgroundText != null) {
-      expect(CommonTest.getTextFormField('backgroundText'),
-          equals(credibility.backgroundText!));
+      expect(
+        CommonTest.getTextFormField('backgroundText'),
+        equals(credibility.backgroundText!),
+      );
     }
 
     if (credibility.creatorImageUrl != null) {
-      expect(CommonTest.getTextFormField('creatorImageUrl'),
-          equals(credibility.creatorImageUrl!));
+      expect(
+        CommonTest.getTextFormField('creatorImageUrl'),
+        equals(credibility.creatorImageUrl!),
+      );
     }
 
     // Verify statistics are present in the form
@@ -712,27 +825,36 @@ class LandingPageTest {
     }
 
     // Open the first landing page
-    await CommonTest.doNewSearch(tester,
-        searchString: test.landingPages[0].pseudoId!);
+    await CommonTest.doNewSearch(
+      tester,
+      searchString: test.landingPages[0].pseudoId!,
+    );
     await tester.pumpAndSettle();
 
     // Navigate to credibility tab if exists
     final credibilityKey = find.byKey(const Key('mobileCredibility'));
     if (credibilityKey.evaluate().isNotEmpty) {
+      await tester.ensureVisible(credibilityKey);
+      await tester.pumpAndSettle();
       await tester.tap(credibilityKey);
       await tester.pumpAndSettle();
     }
     // Open the credibility info to edit
     await CommonTest.tapByKey(
-        tester, 'credibilityItem${test.landingPages[0].credibility!.pseudoId}',
-        seconds: CommonTest.waitTime);
+      tester,
+      'credibilityItem${test.landingPages[0].credibility!.pseudoId}',
+      seconds: CommonTest.waitTime,
+    );
 
     List<CredibilityStatistic> newStatistics = [];
     for (int i = 0; i < statistics.length; i++) {
       CredibilityStatistic statistic = statistics[i];
       // Add new statistic
-      await CommonTest.tapByKey(tester, 'addStatistic',
-          seconds: CommonTest.waitTime);
+      await CommonTest.tapByKey(
+        tester,
+        'addStatistic',
+        seconds: CommonTest.waitTime,
+      );
 
       // Fill in statistic details
       if (statistic.statistic != null) {
@@ -753,8 +875,11 @@ class LandingPageTest {
       key: 'saveCredibility',
       listViewName: 'credibilityInfoScrollView',
     );
-    await CommonTest.tapByKey(tester, 'saveCredibility',
-        seconds: CommonTest.waitTime);
+    await CommonTest.tapByKey(
+      tester,
+      'saveCredibility',
+      seconds: CommonTest.waitTime,
+    );
 
     // Close credibility detail
     await CommonTest.tapByKey(tester, 'cancel');
@@ -769,7 +894,8 @@ class LandingPageTest {
     );
     updatedPages[0] = updatedPages[0].copyWith(credibility: updatedCredibility);
     await PersistFunctions.persistTest(
-        test.copyWith(landingPages: updatedPages));
+      test.copyWith(landingPages: updatedPages),
+    );
   }
 
   static Future<void> checkCredibilityStatistics(WidgetTester tester) async {
@@ -783,26 +909,35 @@ class LandingPageTest {
     }
 
     // Open the first landing page
-    await CommonTest.doNewSearch(tester,
-        searchString: test.landingPages[0].pseudoId!);
+    await CommonTest.doNewSearch(
+      tester,
+      searchString: test.landingPages[0].pseudoId!,
+    );
     await tester.pumpAndSettle();
 
     // Navigate to credibility tab if exists
     final credibilityKey = find.byKey(const Key('mobileCredibility'));
     if (credibilityKey.evaluate().isNotEmpty) {
+      await tester.ensureVisible(credibilityKey);
+      await tester.pumpAndSettle();
       await tester.tap(credibilityKey);
       await tester.pumpAndSettle();
     }
 
     // Open credibility info to verify statistics are persisted
-    await CommonTest.tapByKey(tester, 'credibilityItem100000',
-        seconds: CommonTest.waitTime);
+    await CommonTest.tapByKey(
+      tester,
+      'credibilityItem100000',
+      seconds: CommonTest.waitTime,
+    );
     await tester.pumpAndSettle();
 
     // Verify each statistic is present and has correct value
-    for (int i = 0;
-        i < test.landingPages[0].credibility!.statistics!.length;
-        i++) {
+    for (
+      int i = 0;
+      i < test.landingPages[0].credibility!.statistics!.length;
+      i++
+    ) {
       final statistic = test.landingPages[0].credibility!.statistics![i];
 
       if (statistic.statistic != null) {
@@ -836,21 +971,27 @@ class LandingPageTest {
     }
 
     // Open the first landing page
-    await CommonTest.doNewSearch(tester,
-        searchString: test.landingPages[0].pseudoId!);
+    await CommonTest.doNewSearch(
+      tester,
+      searchString: test.landingPages[0].pseudoId!,
+    );
     await tester.pumpAndSettle();
 
     // Navigate to credibility tab if exists
     final credibilityKey = find.byKey(const Key('mobileCredibility'));
     if (credibilityKey.evaluate().isNotEmpty) {
+      await tester.ensureVisible(credibilityKey);
+      await tester.pumpAndSettle();
       await tester.tap(credibilityKey);
       await tester.pumpAndSettle();
     }
 
     // Open the credibility info to edit
     await CommonTest.tapByKey(
-        tester, 'credibilityItem${test.landingPages[0].credibility!.pseudoId}',
-        seconds: CommonTest.waitTime);
+      tester,
+      'credibilityItem${test.landingPages[0].credibility!.pseudoId}',
+      seconds: CommonTest.waitTime,
+    );
 
     int count = test.landingPages[0].credibility!.statistics!.length;
 
@@ -860,8 +1001,11 @@ class LandingPageTest {
     await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
 
     // Save credibility info
-    await CommonTest.tapByKey(tester, 'saveCredibility',
-        seconds: CommonTest.waitTime);
+    await CommonTest.tapByKey(
+      tester,
+      'saveCredibility',
+      seconds: CommonTest.waitTime,
+    );
 
     // Close credibility list
     await CommonTest.tapByKey(tester, 'cancel');
@@ -872,8 +1016,10 @@ class LandingPageTest {
     // Update landing page with remaining statistics
     List<LandingPage> updatedPages = List.from(test.landingPages);
     final updatedCredibility = test.landingPages[0].credibility!.copyWith(
-      statistics:
-          test.landingPages[0].credibility!.statistics!.sublist(0, count - 1),
+      statistics: test.landingPages[0].credibility!.statistics!.sublist(
+        0,
+        count - 1,
+      ),
     );
     updatedPages[0] = updatedPages[0].copyWith(credibility: updatedCredibility);
     await PersistFunctions.persistTest(
