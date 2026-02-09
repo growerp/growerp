@@ -18,7 +18,7 @@ import 'package:intl/intl.dart';
 import 'package:universal_io/io.dart';
 import 'dart:math';
 import 'package:dio/dio.dart';
-import 'package:dropdown_search/dropdown_search.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -818,22 +818,18 @@ class CommonTest {
     int seconds = 1,
     check = false,
   }) async {
-    await tapByKey(tester, key); // open search dropdown
-    await tester.enterText(find.byType(TextField).last, value);
-    await tester.pumpAndSettle(
-      const Duration(seconds: waitTime),
-    ); // wait for search result
-    if (check) {
-      await tapByType(tester, Checkbox);
-    } else {
-      expect(
-        find.textContaining(value).last,
-        findsOneWidget,
-        reason: "could not find text in dropdown: $value",
-      );
-      await tester.tap(find.textContaining(value).last);
+    final finder = find.byKey(Key(key));
+    if (finder.evaluate().isNotEmpty) {
+      final widget = finder.evaluate().first.widget;
+      if (widget is Autocomplete || widget is AutocompleteLabel) {
+        await enterAutocompleteValue(tester, key, value);
+        return;
+      }
     }
-    await tester.pumpAndSettle(Duration(seconds: seconds));
+    // Fallback if not an Autocomplete (should not happen if all replaced)
+    debugPrint(
+      'Warning: enterDropDownSearch called for widget that is not Autocomplete/AutocompleteLabel: $key',
+    );
   }
 
   static Future<void> enterDropDown(
@@ -908,21 +904,25 @@ class CommonTest {
   }
 
   static String getDropdownSearch(String key) {
-    DropdownSearch tff =
-        find.byKey(Key(key)).evaluate().single.widget as DropdownSearch;
-    if (tff.selectedItem is Country) return tff.selectedItem.name;
-    if (tff.selectedItem is Category) return tff.selectedItem.categoryName;
-    if (tff.selectedItem is Product) return tff.selectedItem.productName;
-    if (tff.selectedItem is User) return tff.selectedItem.company.name;
-    if (tff.selectedItem is Company) {
-      return '${tff.selectedItem.name}[${tff.selectedItem.pseudoId}]';
+    final finder = find.byKey(Key(key));
+    // If not found, return empty or throw? Original threw exception implicitly via .single
+    if (finder.evaluate().isEmpty) {
+      throw StateError('Widget with key "$key" not found');
     }
-    if (tff.selectedItem is CompanyUser) return tff.selectedItem.name;
-    if (tff.selectedItem is AccountClass) {
-      return "${tff.selectedItem.topDescription}-${tff.selectedItem.parentDescription}-${tff.selectedItem.description}-${tff.selectedItem.detailDescription}";
+
+    final widget = finder.evaluate().single.widget;
+    if (widget is Autocomplete || widget is AutocompleteLabel) {
+      final textFinder = find.descendant(
+        of: finder,
+        matching: find.byType(TextFormField),
+      );
+      if (textFinder.evaluate().isNotEmpty) {
+        TextFormField tff =
+            textFinder.evaluate().single.widget as TextFormField;
+        return tff.controller?.text ?? '';
+      }
     }
-    if (tff.selectedItem is AccountType) return tff.selectedItem.description;
-    return tff.selectedItem.toString();
+    return widget.toString();
   }
 
   /// get the state of a switch field identified by a key

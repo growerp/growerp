@@ -15,7 +15,7 @@
  */
 
 import 'package:universal_io/io.dart';
-import 'package:dropdown_search/dropdown_search.dart';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -88,7 +88,6 @@ class UserDialogState extends State<UserDialogStateFull> {
   final _emailController = TextEditingController();
   final _urlController = TextEditingController();
   final _companyController = TextEditingController();
-  final _companySearchBoxController = TextEditingController();
 
   late List<UserGroup> localUserGroups;
   late UserGroup _selectedUserGroup;
@@ -603,64 +602,37 @@ class UserDialogState extends State<UserDialogStateFull> {
                               message: localizations.serverConnectionProblem,
                             );
                           case CompanyStatus.success:
-                            return DropdownSearch<Company>(
+                            return AutocompleteLabel<Company>(
                               key: const Key('userCompanyName'),
-                              selectedItem: _selectedCompany.name == null
+                              label: localizations.companyName,
+                              initialValue: _selectedCompany.name == null
                                   ? Company(name: '')
                                   : _selectedCompany,
-                              popupProps: PopupProps.menu(
-                                showSelectedItems: true,
-                                isFilterOnline: true,
-                                showSearchBox: true,
-                                searchFieldProps: TextFieldProps(
-                                  autofocus: true,
-                                  decoration: InputDecoration(
-                                    labelText: localizations.companyName,
-                                  ),
-                                  controller: _companySearchBoxController,
-                                ),
-                                menuProps: MenuProps(
-                                  borderRadius: BorderRadius.circular(20.0),
-                                ),
-                                title: popUp(
-                                  context: context,
-                                  title: localizations.selectCompany,
-                                  height: 50,
-                                  width: 450,
-                                ),
-                              ),
-                              dropdownDecoratorProps: DropDownDecoratorProps(
-                                dropdownSearchDecoration: InputDecoration(
-                                  labelText: localizations.companyName,
-                                ),
-                              ),
-                              itemAsString: (Company? u) => u?.pseudoId == null
-                                  ? ''
-                                  : " ${u!.name}[${u.pseudoId ?? ''}]",
-                              asyncItems: (String filter) {
-                                _companyBloc.add(
-                                  CompanyFetch(
-                                    ownerPartyId: _authBloc
-                                        .state
-                                        .authenticate!
-                                        .ownerPartyId!,
-                                    searchString: filter,
-                                    limit: 3,
-                                    isForDropDown: true,
-                                  ),
-                                );
-                                return Future.delayed(
-                                  const Duration(milliseconds: 100),
-                                  () {
-                                    return Future.value(
-                                      _companyBloc.state.companies,
+                              optionsBuilder:
+                                  (TextEditingValue textEditingValue) {
+                                    _companyBloc.add(
+                                      CompanyFetch(
+                                        ownerPartyId: _authBloc
+                                            .state
+                                            .authenticate!
+                                            .ownerPartyId!,
+                                        searchString: textEditingValue.text,
+                                        limit: 3,
+                                        isForDropDown: true,
+                                      ),
+                                    );
+                                    return Future.delayed(
+                                      const Duration(milliseconds: 100),
+                                      () {
+                                        return _companyBloc.state.companies;
+                                      },
                                     );
                                   },
-                                );
-                              },
-                              compareFn: (item, sItem) =>
-                                  item.partyId == sItem.partyId,
-                              onChanged: (Company? newValue) {
+                              displayStringForOption: (Company u) =>
+                                  u.pseudoId == null
+                                  ? ''
+                                  : " ${u.name}[${u.pseudoId ?? ''}]",
+                              onSelected: (Company? newValue) {
                                 setState(() {
                                   _selectedCompany = newValue ?? Company();
                                 });

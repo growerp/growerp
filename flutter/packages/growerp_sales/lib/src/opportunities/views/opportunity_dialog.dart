@@ -17,7 +17,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:responsive_framework/responsive_framework.dart';
-import 'package:dropdown_search/dropdown_search.dart';
+
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_sales/l10n/generated/sales_localizations.dart';
@@ -38,8 +38,6 @@ class OpportunityDialogState extends State<OpportunityDialog> {
   final _estAmountController = TextEditingController();
   final _estProbabilityController = TextEditingController();
   final _estNextStepController = TextEditingController();
-  final _leadSearchBoxController = TextEditingController();
-  final _accountSearchBoxController = TextEditingController();
 
   String? _selectedStageId;
   User? _selectedAccount;
@@ -202,41 +200,15 @@ class OpportunityDialogState extends State<OpportunityDialog> {
             case DataFetchStatus.loading:
               return const LoadingIndicator();
             case DataFetchStatus.success:
-              return DropdownSearch<User>(
-                selectedItem: _selectedLead,
-                popupProps: PopupProps.menu(
-                  isFilterOnline: true,
-                  showSearchBox: true,
-                  searchFieldProps: TextFieldProps(
-                    autofocus: true,
-                    decoration: InputDecoration(
-                      labelText: _localizations.leadSearch,
-                    ),
-                    controller: _leadSearchBoxController,
-                  ),
-                  menuProps: MenuProps(
-                    borderRadius: BorderRadius.circular(20.0),
-                  ),
-                  title: popUp(
-                    context: context,
-                    title: _localizations.selectLead,
-                    height: 50,
-                  ),
-                ),
-                dropdownDecoratorProps: DropDownDecoratorProps(
-                  dropdownSearchDecoration: InputDecoration(
-                    labelText: _localizations.lead,
-                  ),
-                ),
+              return AutocompleteLabel<User>(
                 key: const Key('lead'),
-                itemAsString: (User? u) =>
-                    " ${u?.firstName} ${u?.lastName} "
-                    "${u?.company?.name ?? ''}",
-                asyncItems: (String filter) {
+                label: _localizations.lead,
+                initialValue: _selectedLead,
+                optionsBuilder: (TextEditingValue textEditingValue) {
                   _leadBloc.add(
                     GetDataEvent(
                       () => context.read<RestClient>().getUser(
-                        searchString: filter,
+                        searchString: textEditingValue.text,
                         limit: 3,
                         isForDropDown: true,
                         role: Role.lead,
@@ -244,11 +216,13 @@ class OpportunityDialogState extends State<OpportunityDialog> {
                     ),
                   );
                   return Future.delayed(const Duration(milliseconds: 150), () {
-                    return Future.value((_leadBloc.state.data as Users).users);
+                    return (_leadBloc.state.data as Users).users;
                   });
                 },
-                compareFn: (item, sItem) => item.partyId == sItem.partyId,
-                onChanged: (User? newValue) {
+                displayStringForOption: (User u) =>
+                    " ${u.firstName} ${u.lastName} "
+                    "${u.company?.name ?? ''}",
+                onSelected: (User? newValue) {
                   setState(() {
                     _selectedLead = newValue;
                   });
@@ -267,41 +241,15 @@ class OpportunityDialogState extends State<OpportunityDialog> {
             case DataFetchStatus.loading:
               return const LoadingIndicator();
             case DataFetchStatus.success:
-              return DropdownSearch<User>(
-                selectedItem: _selectedAccount,
-                popupProps: PopupProps.menu(
-                  isFilterOnline: true,
-                  showSearchBox: true,
-                  searchFieldProps: TextFieldProps(
-                    autofocus: true,
-                    decoration: InputDecoration(
-                      labelText: _localizations.employeeSearch,
-                    ),
-                    controller: _accountSearchBoxController,
-                  ),
-                  menuProps: MenuProps(
-                    borderRadius: BorderRadius.circular(20.0),
-                  ),
-                  title: popUp(
-                    context: context,
-                    title: _localizations.selectEmployee,
-                    height: 50,
-                  ),
-                ),
-                dropdownDecoratorProps: DropDownDecoratorProps(
-                  dropdownSearchDecoration: InputDecoration(
-                    labelText: _localizations.accountEmployee,
-                  ),
-                ),
+              return AutocompleteLabel<User>(
                 key: const Key('employee'),
-                itemAsString: (User? u) =>
-                    " ${u?.firstName} ${u?.lastName} "
-                    "${u?.company?.name ?? ''}",
-                asyncItems: (String filter) {
+                label: _localizations.accountEmployee,
+                initialValue: _selectedAccount,
+                optionsBuilder: (TextEditingValue textEditingValue) {
                   _employeeBloc.add(
                     GetDataEvent(
                       () => context.read<RestClient>().getUser(
-                        searchString: filter,
+                        searchString: textEditingValue.text,
                         limit: 3,
                         isForDropDown: true,
                         role: Role.company,
@@ -309,13 +257,13 @@ class OpportunityDialogState extends State<OpportunityDialog> {
                     ),
                   );
                   return Future.delayed(const Duration(milliseconds: 150), () {
-                    return Future.value(
-                      (_employeeBloc.state.data as Users).users,
-                    );
+                    return (_employeeBloc.state.data as Users).users;
                   });
                 },
-                compareFn: (item, sItem) => item.partyId == sItem.partyId,
-                onChanged: (User? newValue) {
+                displayStringForOption: (User u) =>
+                    " ${u.firstName} ${u.lastName} "
+                    "${u.company?.name ?? ''}",
+                onSelected: (User? newValue) {
                   setState(() {
                     _selectedAccount = newValue;
                   });

@@ -20,7 +20,6 @@ dependencies:
   equatable: ^2.0.5
   responsive_framework: ^1.4.0
   global_configuration: ^2.0.0
-  dropdown_search: ^5.0.6
   flutter_flow_chart: ^2.2.0
   decimal: ^3.2.4
   star_menu: ^4.0.1

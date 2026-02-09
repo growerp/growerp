@@ -14,7 +14,7 @@
 
 import 'package:growerp_models/growerp_models.dart';
 import 'package:responsive_framework/responsive_framework.dart';
-import 'package:dropdown_search/dropdown_search.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
@@ -32,8 +32,6 @@ class ChatRoomDialog extends StatefulWidget {
 class ChatRoomDialogState extends State<ChatRoomDialog> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _userSearchBoxController =
-      TextEditingController();
 
   bool loading = false;
   User? _selectedUser;
@@ -112,41 +110,15 @@ class ChatRoomDialogState extends State<ChatRoomDialog> {
               ),
             ),
             const SizedBox(height: 30),
-            DropdownSearch<User>(
+            AutocompleteLabel<User>(
               key: const Key('userDropDown'),
-              popupProps: PopupProps.menu(
-                isFilterOnline: true,
-                showSearchBox: true,
-                searchFieldProps: TextFieldProps(
-                  autofocus: true,
-                  decoration: InputDecoration(
-                    labelText:
-                        _localizations?.selectChatPartner ??
-                        'Select Chat Partner',
-                  ),
-                  controller: _userSearchBoxController,
-                ),
-                menuProps: MenuProps(borderRadius: BorderRadius.circular(20.0)),
-                title: popUp(
-                  context: context,
-                  title:
-                      _localizations?.selectChatPartner ??
-                      'Select Chat Partner',
-                  height: 50,
-                ),
-              ),
-              selectedItem: _selectedUser,
-              dropdownDecoratorProps: DropDownDecoratorProps(
-                dropdownSearchDecoration: InputDecoration(
-                  labelText: _localizations?.chatPartner ?? 'Chat Partner',
-                ),
-              ),
-              itemAsString: (User? u) => " ${u!.firstName} ${u.lastName}",
-              asyncItems: (String filter) {
+              label: _localizations?.chatPartner ?? 'Chat Partner',
+              initialValue: _selectedUser,
+              optionsBuilder: (TextEditingValue textEditingValue) {
                 _userBloc.add(
                   GetDataEvent(
                     () => context.read<RestClient>().getUser(
-                      searchString: filter,
+                      searchString: textEditingValue.text,
                       limit: 3,
                       isForDropDown: true,
                       loginOnly: true,
@@ -154,17 +126,18 @@ class ChatRoomDialogState extends State<ChatRoomDialog> {
                   ),
                 );
                 return Future.delayed(const Duration(milliseconds: 150), () {
-                  return Future.value((_userBloc.state.data as Users).users);
+                  return (_userBloc.state.data as Users).users;
                 });
               },
-              compareFn: (item, sItem) => item.partyId == sItem.partyId,
+              displayStringForOption: (User u) =>
+                  " ${u.firstName} ${u.lastName}",
+              onSelected: (User? newValue) {
+                _selectedUser = newValue;
+              },
               validator: (value) =>
                   _nameController.text.isEmpty && value == null
                   ? _localizations?.fieldRequired ?? 'Field required'
                   : null,
-              onChanged: (User? newValue) {
-                _selectedUser = newValue;
-              },
             ),
             const SizedBox(height: 20),
             OutlinedButton(

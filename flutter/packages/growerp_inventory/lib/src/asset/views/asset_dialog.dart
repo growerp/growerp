@@ -16,7 +16,7 @@
 
 import 'package:universal_io/io.dart';
 import 'package:decimal/decimal.dart';
-import 'package:dropdown_search/dropdown_search.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -43,10 +43,7 @@ class AssetDialogState extends State<AssetDialog> {
       TextEditingController();
   final TextEditingController _atpController = TextEditingController();
   final TextEditingController _acquireCostController = TextEditingController();
-  final TextEditingController _productSearchBoxController =
-      TextEditingController();
-  final TextEditingController _locationSearchBoxController =
-      TextEditingController();
+
   late String classificationId;
   late AssetBloc _assetBloc;
   late DataFetchBloc<Products> _productBloc;
@@ -251,45 +248,17 @@ class AssetDialogState extends State<AssetDialog> {
                       message: _localizations.serverProblem,
                     );
                   case DataFetchStatus.success:
-                    return DropdownSearch<Product>(
+                    return AutocompleteLabel<Product>(
                       key: const Key('productDropDown'),
-                      selectedItem: _selectedProduct,
-                      popupProps: PopupProps.menu(
-                        showSelectedItems: true,
-                        isFilterOnline: true,
-                        showSearchBox: true,
-                        searchFieldProps: TextFieldProps(
-                          autofocus: true,
-                          decoration: InputDecoration(
-                            labelText:
-                                "${classificationId == 'AppHotel' ? _localizations.roomTypeName : _localizations.productIdName} name",
-                          ),
-                          controller: _productSearchBoxController,
-                        ),
-                        menuProps: MenuProps(
-                          borderRadius: BorderRadius.circular(20.0),
-                        ),
-                        title: popUp(
-                          context: context,
-                          title:
-                              '${_localizations.select} ${classificationId == 'AppHotel' ? _localizations.roomTypeName : _localizations.product}',
-                          height: 50,
-                        ),
-                      ),
-                      dropdownDecoratorProps: DropDownDecoratorProps(
-                        dropdownSearchDecoration: InputDecoration(
-                          labelText: classificationId == 'AppHotel'
-                              ? _localizations.roomTypeId
-                              : _localizations.productId,
-                        ),
-                      ),
-                      itemAsString: (Product? u) =>
-                          " ${u!.productName} [${u.pseudoId}]", // invisible char for test
-                      asyncItems: (String filter) {
+                      initialValue: _selectedProduct,
+                      label: classificationId == 'AppHotel'
+                          ? _localizations.roomTypeId
+                          : _localizations.productId,
+                      optionsBuilder: (TextEditingValue textEditingValue) {
                         _productBloc.add(
                           GetDataEvent(
                             () => context.read<RestClient>().getProduct(
-                              searchString: filter,
+                              searchString: textEditingValue.text,
                               limit: 3,
                               isForDropDown: true,
                             ),
@@ -298,15 +267,14 @@ class AssetDialogState extends State<AssetDialog> {
                         return Future.delayed(
                           const Duration(milliseconds: 150),
                           () {
-                            return Future.value(
-                              (_productBloc.state.data as Products).products,
-                            );
+                            return (_productBloc.state.data as Products)
+                                .products;
                           },
                         );
                       },
-                      compareFn: (item, sItem) =>
-                          item.productId == sItem.productId,
-                      onChanged: (Product? newValue) {
+                      displayStringForOption: (Product u) =>
+                          " ${u.productName} [${u.pseudoId}]",
+                      onSelected: (Product? newValue) {
                         setState(() {
                           _selectedProduct = newValue;
                         });
@@ -363,65 +331,37 @@ class AssetDialogState extends State<AssetDialog> {
                                   message: _localizations.serverProblem,
                                 );
                               case DataFetchStatus.success:
-                                return DropdownSearch<Location>(
+                                return AutocompleteLabel<Location>(
                                   key: const Key('locationDropDown'),
-                                  selectedItem: _selectedLocation,
-                                  popupProps: PopupProps.menu(
-                                    isFilterOnline: true,
-                                    showSearchBox: true,
-                                    searchFieldProps: TextFieldProps(
-                                      autofocus: true,
-                                      decoration: InputDecoration(
-                                        labelText: _localizations.locationName,
-                                      ),
-                                      controller: _locationSearchBoxController,
-                                    ),
-                                    menuProps: MenuProps(
-                                      borderRadius: BorderRadius.circular(20.0),
-                                    ),
-                                    title: popUp(
-                                      context: context,
-                                      title: _localizations.selectLocation,
-                                      height: 50,
-                                    ),
-                                  ),
-                                  dropdownDecoratorProps:
-                                      DropDownDecoratorProps(
-                                        dropdownSearchDecoration:
-                                            InputDecoration(
-                                              labelText:
-                                                  _localizations.location,
-                                            ),
-                                      ),
-                                  itemAsString: (Location? u) =>
-                                      " ${u?.locationName ?? ''}",
-                                  asyncItems: (String filter) {
-                                    _locationBloc.add(
-                                      GetDataEvent(
-                                        () => context
-                                            .read<RestClient>()
-                                            .getLocation(
-                                              searchString: filter,
-                                              limit: 3,
-                                            ),
-                                      ),
-                                    );
-                                    return Future.delayed(
-                                      const Duration(milliseconds: 250),
-                                      () {
-                                        return Future.value(
-                                          (_locationBloc.state.data
-                                                  as Locations)
-                                              .locations,
+                                  initialValue: _selectedLocation,
+                                  label: _localizations.location,
+                                  optionsBuilder:
+                                      (TextEditingValue textEditingValue) {
+                                        _locationBloc.add(
+                                          GetDataEvent(
+                                            () => context
+                                                .read<RestClient>()
+                                                .getLocation(
+                                                  searchString:
+                                                      textEditingValue.text,
+                                                  limit: 3,
+                                                ),
+                                          ),
+                                        );
+                                        return Future.delayed(
+                                          const Duration(milliseconds: 250),
+                                          () {
+                                            return (_locationBloc.state.data
+                                                    as Locations)
+                                                .locations;
+                                          },
                                         );
                                       },
-                                    );
-                                  },
-                                  compareFn: (item, sItem) =>
-                                      item.locationId == sItem.locationId,
-                                  onChanged: (Location? newValue) {
+                                  displayStringForOption: (Location u) =>
+                                      " ${u.locationName}",
+                                  onSelected: (Location? newValue) {
                                     setState(() {
-                                      _selectedLocation = newValue!;
+                                      _selectedLocation = newValue;
                                     });
                                   },
                                 );

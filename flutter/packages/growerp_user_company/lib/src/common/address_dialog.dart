@@ -12,7 +12,6 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
@@ -32,8 +31,7 @@ class AddressDialogState extends State<AddressDialog> {
   final TextEditingController _postalCodeController = TextEditingController();
   final TextEditingController _cityController = TextEditingController();
   final TextEditingController _provinceController = TextEditingController();
-  final TextEditingController _countrySearchBoxController =
-      TextEditingController();
+
   Country? _selectedCountry;
 
   final _formKey = GlobalKey<FormState>();
@@ -137,39 +135,27 @@ class AddressDialogState extends State<AddressDialog> {
               },
             ),
             const SizedBox(height: 20),
-            DropdownSearch<Country>(
+            AutocompleteLabel<Country>(
               key: const Key('country'),
-              selectedItem: _selectedCountry,
-              popupProps: PopupProps.menu(
-                isFilterOnline: true,
-                showSearchBox: true,
-                searchFieldProps: TextFieldProps(
-                  autofocus: true,
-                  decoration: InputDecoration(labelText: localizations.country),
-                  controller: _countrySearchBoxController,
-                ),
-                menuProps: MenuProps(borderRadius: BorderRadius.circular(20.0)),
-                title: popUp(
-                  context: context,
-                  title: localizations.selectCountry,
-                  height: 50,
-                ),
-              ),
-              dropdownDecoratorProps: DropDownDecoratorProps(
-                dropdownSearchDecoration: InputDecoration(
-                  labelText: localizations.country,
-                ),
-              ),
-              itemAsString: (Country? u) => " ${u!.name}",
-              items: countries,
+              label: localizations.country,
+              initialValue: _selectedCountry,
+              optionsBuilder: (TextEditingValue textEditingValue) {
+                if (textEditingValue.text.isEmpty) return countries;
+                return countries.where(
+                  (Country c) => c.name.toLowerCase().contains(
+                    textEditingValue.text.toLowerCase(),
+                  ),
+                );
+              },
+              displayStringForOption: (Country u) => " ${u.name}",
+              onSelected: (Country? newValue) {
+                _selectedCountry = newValue;
+              },
               validator: (value) {
                 if (value == null) {
                   return localizations.countryError;
                 }
                 return null;
-              },
-              onChanged: (Country? newValue) {
-                _selectedCountry = newValue;
               },
             ),
             const SizedBox(height: 20),

@@ -13,7 +13,7 @@
  */
 
 import 'dart:convert';
-import 'package:dropdown_search/dropdown_search.dart';
+
 import 'package:growerp_core/growerp_core.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart' as foundation;
@@ -45,8 +45,7 @@ class WebsiteDialogState extends State<WebsiteDialog> {
   final _obsidianController = TextEditingController();
   final _measurementIdController = TextEditingController();
   final _stripeApiKeyController = TextEditingController();
-  final _productSearchBoxController = TextEditingController();
-  final _categorySearchBoxController = TextEditingController();
+
   final _landingPageIdController = TextEditingController();
   final _checkoutAmountController = TextEditingController();
   final _websiteFormKey1 = GlobalKey<FormState>();
@@ -574,44 +573,31 @@ class WebsiteDialogState extends State<WebsiteDialog> {
                 ),
                 const SizedBox(width: 10),
                 Expanded(
-                  child: DropdownSearch<LandingPage>(
+                  child: AutocompleteLabel<LandingPage>(
                     key: const Key('landingPageDropdown'),
-                    items: _landingPages,
-                    itemAsString: (LandingPage p) => p.title,
-                    popupProps: const PopupProps.menu(
-                      showSearchBox: true,
-                      searchFieldProps: TextFieldProps(
-                        decoration: InputDecoration(
-                          hintText: 'Search...',
-                          isDense: true,
-                          contentPadding: EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 8,
-                          ),
+                    label: 'Select Page',
+                    initialValue: _landingPages
+                        .where(
+                          (p) => p.pseudoId == _landingPageIdController.text,
+                        )
+                        .firstOrNull,
+                    optionsBuilder: (TextEditingValue textEditingValue) {
+                      if (textEditingValue.text.isEmpty) {
+                        return _landingPages;
+                      }
+                      return _landingPages.where(
+                        (p) => p.title.toLowerCase().contains(
+                          textEditingValue.text.toLowerCase(),
                         ),
-                      ),
-                    ),
-                    dropdownDecoratorProps: const DropDownDecoratorProps(
-                      dropdownSearchDecoration: InputDecoration(
-                        hintText: 'Select Page',
-                        isDense: true,
-                        contentPadding: EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 8,
-                        ),
-                      ),
-                    ),
-                    onChanged: (LandingPage? selected) {
+                      );
+                    },
+                    displayStringForOption: (LandingPage p) => p.title,
+                    onSelected: (LandingPage? selected) {
                       setState(() {
                         _landingPageIdController.text =
                             selected?.pseudoId ?? '';
                       });
                     },
-                    selectedItem: _landingPages
-                        .where(
-                          (p) => p.pseudoId == _landingPageIdController.text,
-                        )
-                        .firstOrNull,
                   ),
                 ),
               ],
@@ -705,18 +691,19 @@ class WebsiteDialogState extends State<WebsiteDialog> {
               case DataFetchStatus.loading:
                 return const LoadingIndicator();
               case DataFetchStatus.success:
-                return DropdownSearch<Product>.multiSelection(
-                  key: Key("addProduct${category.categoryName}"),
-                  dropdownDecoratorProps: DropDownDecoratorProps(
-                    dropdownSearchDecoration: InputDecoration(
-                      labelText: category.categoryName,
-                      isDense: true,
+                return InputDecorator(
+                  decoration: InputDecoration(
+                    labelText: category.categoryName,
+                    isDense: true,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
                     ),
                   ),
-                  dropdownBuilder: (context, selectedItems) =>
-                      selectedItems.isEmpty
-                      ? Text(_localizations.noRecords)
-                      : Wrap(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (category.products.isNotEmpty)
+                        Wrap(
                           spacing: 10,
                           children: catButtons.firstWhere(
                             (element) =>
@@ -724,68 +711,77 @@ class WebsiteDialogState extends State<WebsiteDialog> {
                                 element["categoryName"],
                           )["products"],
                         ),
-                  popupProps: PopupPropsMultiSelection.menu(
-                    showSelectedItems: false,
-                    isFilterOnline: true,
-                    showSearchBox: true,
-                    searchFieldProps: TextFieldProps(
-                      autofocus: true,
-                      decoration: InputDecoration(
-                        labelText: _localizations.select,
+                      Autocomplete<Product>(
+                        key: Key("addProduct${category.categoryName}"),
+                        optionsBuilder: (TextEditingValue textEditingValue) {
+                          _productBloc.add(
+                            GetDataEvent(
+                              () => restClient.getProduct(
+                                searchString: textEditingValue.text,
+                                limit: 3,
+                                isForDropDown: true,
+                              ),
+                            ),
+                          );
+                          return Future.delayed(
+                            const Duration(milliseconds: 250),
+                            () {
+                              return (_productBloc.state.data as Products)
+                                  .products;
+                            },
+                          );
+                        },
+                        displayStringForOption: (Product u) =>
+                            " ${u.productName}[${u.pseudoId}]",
+                        fieldViewBuilder:
+                            (
+                              context,
+                              textController,
+                              focusNode,
+                              onFieldSubmitted,
+                            ) {
+                              return TextFormField(
+                                controller: textController,
+                                focusNode: focusNode,
+                                decoration: InputDecoration(
+                                  labelText: _localizations.select,
+                                  border: InputBorder.none,
+                                ),
+                                onFieldSubmitted: (String value) {
+                                  onFieldSubmitted();
+                                },
+                              );
+                            },
+                        onSelected: (Product newValue) {
+                          List<Category> newCats = List.of(
+                            state.website!.websiteCategories,
+                          );
+                          int index = newCats.indexWhere(
+                            (el) => el.categoryName == category.categoryName,
+                          );
+                          List<Product> currentProducts = List.of(
+                            newCats[index].products,
+                          );
+                          if (!currentProducts.any(
+                            (p) => p.productId == newValue.productId,
+                          )) {
+                            currentProducts.add(newValue);
+                            newCats[index] = newCats[index].copyWith(
+                              products: currentProducts,
+                            );
+                            _websiteBloc.add(
+                              WebsiteUpdate(
+                                Website(
+                                  id: state.website!.id,
+                                  websiteCategories: newCats,
+                                ),
+                              ),
+                            );
+                          }
+                        },
                       ),
-                      controller: _productSearchBoxController,
-                    ),
-                    title: popUp(
-                      context: context,
-                      title: _localizations.select,
-                      height: 50,
-                      width: 500,
-                    ),
+                    ],
                   ),
-                  selectedItems: category.products,
-                  itemAsString: (Product? u) =>
-                      " ${u!.productName}[${u.pseudoId}]",
-                  asyncItems: (String filter) {
-                    _productBloc.add(
-                      GetDataEvent(
-                        () => restClient.getProduct(
-                          searchString: filter,
-                          limit: 3,
-                          isForDropDown: true,
-                          //                        assetClassId:
-                          //                            classificationId == 'AppHotel' ? 'Hotel Room' : '',
-                        ),
-                      ),
-                    );
-                    return Future.delayed(
-                      const Duration(milliseconds: 250),
-                      () {
-                        return Future.value(
-                          (_productBloc.state.data as Products).products,
-                        );
-                      },
-                    );
-                  },
-                  compareFn: (item, sItem) => item.productId == sItem.productId,
-                  onChanged: (List<Product>? newValue) {
-                    List<Category> newCats = List.of(
-                      state.website!.websiteCategories,
-                    );
-                    int index = newCats.indexWhere(
-                      (el) => el.categoryName == category.categoryName,
-                    );
-                    newCats[index] = newCats[index].copyWith(
-                      products: newValue ?? [],
-                    );
-                    _websiteBloc.add(
-                      WebsiteUpdate(
-                        Website(
-                          id: state.website!.id,
-                          websiteCategories: newCats,
-                        ),
-                      ),
-                    );
-                  },
                 );
               default:
                 return const Center(child: LoadingIndicator());
@@ -800,76 +796,78 @@ class WebsiteDialogState extends State<WebsiteDialog> {
             case DataFetchStatus.loading:
               return const LoadingIndicator();
             case DataFetchStatus.success:
-              return DropdownSearch<Category>.multiSelection(
-                key: const Key("addShopCategory}"),
-                dropdownDecoratorProps: DropDownDecoratorProps(
-                  dropdownSearchDecoration: InputDecoration(
-                    isDense: true,
-                    labelText: _localizations.websiteProductCategories,
-                    border: const OutlineInputBorder(
-                      borderRadius: _borderRadius,
-                    ),
-                  ),
+              return InputDecorator(
+                decoration: InputDecoration(
+                  isDense: true,
+                  labelText: _localizations.websiteProductCategories,
+                  border: const OutlineInputBorder(borderRadius: _borderRadius),
                 ),
-                dropdownBuilder: (context, selectedItems) =>
-                    selectedItems.isEmpty
-                    ? Text(_localizations.noRecords)
-                    : Wrap(spacing: 10, children: browseCatButtons),
-                dropdownButtonProps: const DropdownButtonProps(
-                  // for autom test
-                  icon: Icon(
-                    Icons.arrow_drop_down,
-                    size: 24,
-                    key: Key("addShopCategory"),
-                  ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (_selectedCategories.isNotEmpty)
+                      Wrap(spacing: 10, children: browseCatButtons),
+                    Autocomplete<Category>(
+                      key: const Key("addShopCategory}"),
+                      optionsBuilder: (TextEditingValue textEditingValue) {
+                        _categoryBloc.add(
+                          GetDataEvent(
+                            () => restClient.getCategory(
+                              searchString: textEditingValue.text,
+                              limit: 3,
+                              isForDropDown: true,
+                            ),
+                          ),
+                        );
+                        return Future.delayed(
+                          const Duration(milliseconds: 100),
+                          () {
+                            return (_categoryBloc.state.data as Categories)
+                                .categories;
+                          },
+                        );
+                      },
+                      displayStringForOption: (Category item) =>
+                          item.categoryName.truncate(15),
+                      fieldViewBuilder:
+                          (
+                            context,
+                            textController,
+                            focusNode,
+                            onFieldSubmitted,
+                          ) {
+                            return TextFormField(
+                              controller: textController,
+                              focusNode: focusNode,
+                              decoration: InputDecoration(
+                                labelText: _localizations.select,
+                                border: InputBorder.none,
+                              ),
+                              onFieldSubmitted: (String value) {
+                                onFieldSubmitted();
+                              },
+                            );
+                          },
+                      onSelected: (Category newValue) {
+                        if (!_selectedCategories.any(
+                          (c) => c.categoryId == newValue.categoryId,
+                        )) {
+                          List<Category> newCategories = List.of(
+                            _selectedCategories,
+                          )..add(newValue);
+                          _websiteBloc.add(
+                            WebsiteUpdate(
+                              Website(
+                                id: state.website!.id,
+                                productCategories: newCategories,
+                              ),
+                            ),
+                          );
+                        }
+                      },
+                    ),
+                  ],
                 ),
-                popupProps: PopupPropsMultiSelection.menu(
-                  showSelectedItems: false,
-                  isFilterOnline: true,
-                  showSearchBox: true,
-                  searchFieldProps: TextFieldProps(
-                    autofocus: true,
-                    decoration: InputDecoration(
-                      labelText: _localizations.select,
-                    ),
-                    controller: _categorySearchBoxController,
-                  ),
-                  title: popUp(
-                    context: context,
-                    title: _localizations.select,
-                    height: 50,
-                    width: 400,
-                  ),
-                ),
-                itemAsString: (Category item) => item.categoryName.truncate(15),
-                selectedItems: _selectedCategories,
-                asyncItems: (String filter) {
-                  _categoryBloc.add(
-                    GetDataEvent(
-                      () => restClient.getCategory(
-                        searchString: filter,
-                        limit: 3,
-                        isForDropDown: true,
-                      ),
-                    ),
-                  );
-                  return Future.delayed(const Duration(milliseconds: 100), () {
-                    return Future.value(
-                      (_categoryBloc.state.data as Categories).categories,
-                    );
-                  });
-                },
-                compareFn: (item, sItem) => item.categoryId == sItem.categoryId,
-                onChanged: (List<Category>? newValue) {
-                  _websiteBloc.add(
-                    WebsiteUpdate(
-                      Website(
-                        id: state.website!.id,
-                        productCategories: newValue ?? [],
-                      ),
-                    ),
-                  );
-                },
               );
             default:
               return const Center(child: LoadingIndicator());

@@ -12,7 +12,6 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import 'package:dropdown_search/dropdown_search.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:flutter/material.dart';
@@ -34,8 +33,7 @@ class ActivityDialogState extends State<ActivityDialog> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _pseudoIdController = TextEditingController();
-  final TextEditingController _assigneeSearchBoxController =
-      TextEditingController();
+
   late ActivityBloc _activityBloc;
   late AuthBloc _authBloc;
   late ActivityLocalizations _localizations;
@@ -267,41 +265,15 @@ class ActivityDialogState extends State<ActivityDialog> {
                     case DataFetchStatus.loading:
                       return const LoadingIndicator();
                     case DataFetchStatus.success:
-                      return DropdownSearch<User>(
-                        selectedItem: _selectedAssignee,
-                        popupProps: PopupProps.menu(
-                          isFilterOnline: true,
-                          showSearchBox: true,
-                          searchFieldProps: TextFieldProps(
-                            autofocus: true,
-                            decoration: InputDecoration(
-                              labelText: _localizations.activity_employeeName,
-                            ),
-                            controller: _assigneeSearchBoxController,
-                          ),
-                          menuProps: MenuProps(
-                            borderRadius: BorderRadius.circular(20.0),
-                          ),
-                          title: popUp(
-                            context: context,
-                            title: _localizations.activity_selectEmployee,
-                            height: 50,
-                          ),
-                        ),
-                        dropdownDecoratorProps: DropDownDecoratorProps(
-                          dropdownSearchDecoration: InputDecoration(
-                            labelText: _localizations.activity_assignee,
-                          ),
-                        ),
+                      return AutocompleteLabel<User>(
                         key: const Key('assignee'),
-                        itemAsString: (User? u) =>
-                            " ${u?.firstName} ${u?.lastName} "
-                            "${u?.company?.name ?? ''}",
-                        asyncItems: (String filter) {
+                        label: _localizations.activity_assignee,
+                        initialValue: _selectedAssignee,
+                        optionsBuilder: (TextEditingValue textEditingValue) {
                           _assigneeBloc.add(
                             GetDataEvent(
                               () => context.read<RestClient>().getUser(
-                                searchString: filter,
+                                searchString: textEditingValue.text,
                                 limit: 3,
                                 isForDropDown: true,
                                 role: Role.company,
@@ -311,15 +283,14 @@ class ActivityDialogState extends State<ActivityDialog> {
                           return Future.delayed(
                             const Duration(milliseconds: 150),
                             () {
-                              return Future.value(
-                                (_assigneeBloc.state.data as Users).users,
-                              );
+                              return (_assigneeBloc.state.data as Users).users;
                             },
                           );
                         },
-                        compareFn: (item, sItem) =>
-                            item.partyId == sItem.partyId,
-                        onChanged: (User? newValue) {
+                        displayStringForOption: (User u) =>
+                            " ${u.firstName} ${u.lastName} "
+                            "${u.company?.name ?? ''}",
+                        onSelected: (User? newValue) {
                           setState(() {
                             _selectedAssignee = newValue ?? _originator;
                           });
@@ -347,41 +318,15 @@ class ActivityDialogState extends State<ActivityDialog> {
                     case DataFetchStatus.loading:
                       return const LoadingIndicator();
                     case DataFetchStatus.success:
-                      return DropdownSearch<User>(
-                        selectedItem: _selectedThirdParty,
-                        popupProps: PopupProps.menu(
-                          isFilterOnline: true,
-                          showSearchBox: true,
-                          searchFieldProps: TextFieldProps(
-                            autofocus: true,
-                            decoration: InputDecoration(
-                              labelText: _localizations.activity_thirdPartyName,
-                            ),
-                            controller: _assigneeSearchBoxController,
-                          ),
-                          menuProps: MenuProps(
-                            borderRadius: BorderRadius.circular(20.0),
-                          ),
-                          title: popUp(
-                            context: context,
-                            title: _localizations.activity_selectThirdParty,
-                            height: 50,
-                          ),
-                        ),
-                        dropdownDecoratorProps: DropDownDecoratorProps(
-                          dropdownSearchDecoration: InputDecoration(
-                            labelText: _localizations.activity_thirdParty,
-                          ),
-                        ),
+                      return AutocompleteLabel<User>(
                         key: const Key('thirdParty'),
-                        itemAsString: (User? u) =>
-                            " ${u?.firstName} ${u?.lastName} "
-                            "${u?.company?.name ?? ''}",
-                        asyncItems: (String filter) {
+                        label: _localizations.activity_thirdParty,
+                        initialValue: _selectedThirdParty,
+                        optionsBuilder: (TextEditingValue textEditingValue) {
                           _thirdPartyBloc.add(
                             GetDataEvent(
                               () => context.read<RestClient>().getUser(
-                                searchString: filter,
+                                searchString: textEditingValue.text,
                                 limit: 3,
                                 isForDropDown: true,
                                 role: Role.unknown,
@@ -391,15 +336,15 @@ class ActivityDialogState extends State<ActivityDialog> {
                           return Future.delayed(
                             const Duration(milliseconds: 150),
                             () {
-                              return Future.value(
-                                (_thirdPartyBloc.state.data as Users).users,
-                              );
+                              return (_thirdPartyBloc.state.data as Users)
+                                  .users;
                             },
                           );
                         },
-                        compareFn: (item, sItem) =>
-                            item.partyId == sItem.partyId,
-                        onChanged: (User? newValue) {
+                        displayStringForOption: (User u) =>
+                            " ${u.firstName} ${u.lastName} "
+                            "${u.company?.name ?? ''}",
+                        onSelected: (User? newValue) {
                           setState(() {
                             _selectedThirdParty = newValue;
                           });
