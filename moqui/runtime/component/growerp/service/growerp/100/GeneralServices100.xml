@@ -1236,15 +1236,8 @@ along with this software (see the LICENSE.md file). If not, see
             </parameter>
         </out-parameters>
         <actions>
-            <!-- Get related company and owner -->
-            <service-call out-map="context"
-                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
 
-            <!-- Use provided ownerPartyId or fallback to current user's owner -->
-            <!--if
-            condition="!ownerPartyId">
-                <set field="ownerPartyId" from="context.ownerPartyId" />
-            </if-->
+            <if condition="search"> <set field="search" value="%${search}%" /> </if>
 
             <!-- Query OwnerPersonRestRequest entity -->
             <entity-find entity-name="growerp.party.OwnerPersonRestRequest" list="restRequestData"
@@ -1257,10 +1250,13 @@ along with this software (see the LICENSE.md file). If not, see
                 <econdition field-name="startDateTime" operator="less-equals"
                     from="endDateTime" ignore-if-empty="true" />
                 <!-- Search by user name or company name -->
-                <econditions combine="or" ignore-if-empty="true" ignore="!search">
-                    <econdition field-name="firstName" operator="like" value="%${search}%" ignore-case="true" />
-                    <econdition field-name="lastName" operator="like" value="%${search}%" ignore-case="true" />
-                    <econdition field-name="companyName" operator="like" value="%${search}%" ignore-case="true" />
+                <econditions combine="or">
+                    <econdition field-name="firstName" operator="like"
+                        from="search" ignore-case="true" ignore-if-empty="true" />
+                    <econdition field-name="lastName" operator="like"
+                        from="search" ignore-case="true" ignore-if-empty="true" />
+                    <econdition field-name="companyName" operator="like"
+                        from="search" ignore-case="true" ignore-if-empty="true" />
                 </econditions>
                 <order-by field-name="-startDateTime" />
             </entity-find>
