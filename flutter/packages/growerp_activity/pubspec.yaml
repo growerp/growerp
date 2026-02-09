@@ -33,7 +33,6 @@ dependencies:
   star_menu: ^4.0.1
   flutter_test:
     sdk: flutter
-  two_dimensional_scrollables: ^0.3.1
   dio: ^5.4.3
   bloc_concurrency: ^0.2.0
   stream_transform: ^2.1.0

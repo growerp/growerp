@@ -182,7 +182,7 @@ class CreditCardTypeConverter
   }
 }
 
-/// Converter for handling List<String> that may come as a JSON string or a List
+/// Converter for handling `List<String>` that may come as a JSON string or a List
 class StringListConverter implements JsonConverter<List<String>?, dynamic> {
   const StringListConverter();
 

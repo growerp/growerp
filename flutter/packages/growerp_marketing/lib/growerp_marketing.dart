@@ -1,5 +1,3 @@
-library growerp_marketing;
-
 // Re-export assessment and landing page models from growerp_models for convenience
 export 'package:growerp_models/growerp_models.dart'
     show

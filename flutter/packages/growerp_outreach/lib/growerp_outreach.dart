@@ -1,5 +1,3 @@
-library growerp_outreach;
-
 // BLoC exports
 export 'src/bloc/outreach_campaign_bloc.dart';
 export 'src/bloc/outreach_message_bloc.dart';

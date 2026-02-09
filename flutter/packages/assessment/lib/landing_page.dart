@@ -12,8 +12,6 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-library landing_page;
-
 // Re-export from growerp_assessment package
 export 'package:growerp_marketing/growerp_marketing.dart'
     show PublicLandingPageScreen, LandingPageAssessmentFlowScreen;

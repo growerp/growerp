@@ -14,4 +14,3 @@
 
 export 'rest_request_list.dart';
 export 'rest_request_detail.dart';
-export 'rest_request_list_table_def.dart';

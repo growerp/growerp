@@ -3,8 +3,6 @@
  * Grant of Patent License.
  */
 
-library growerp_courses;
-
 // Models - exported from growerp_models
 export 'package:growerp_models/growerp_models.dart'
     show

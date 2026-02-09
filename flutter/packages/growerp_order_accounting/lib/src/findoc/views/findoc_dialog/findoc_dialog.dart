@@ -18,7 +18,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
-import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
+import 'findoc_item_list_styled_data.dart';
 
 import 'add_another_item_dialog.dart';
 import 'add_product_item_dialog.dart';
@@ -806,483 +806,97 @@ class MyFinDocState extends State<FinDocPage> {
 
   Widget finDocItemList(CartState state) {
     List<FinDocItem> items = finDocUpdated.items;
-    late final ScrollController verticalController = ScrollController();
-    late final ScrollController horizontalController = ScrollController();
+    String currencyId = context
+        .read<AuthBloc>()
+        .state
+        .authenticate!
+        .company!
+        .currency!
+        .currencyId!;
 
-    TableData getTableData(
-      Bloc bloc,
-      String classificationId,
-      BuildContext context,
-      FinDocItem item,
-      int index, {
-      dynamic extra,
-    }) {
-      String currencyId = context
-          .read<AuthBloc>()
-          .state
-          .authenticate!
-          .company!
-          .currency!
-          .currencyId!;
-      var itemType = item.itemType != null && state.itemTypes.isNotEmpty
+    final rows = items.map((item) {
+      final index = items.indexOf(item);
+      final itemType = item.itemType != null && state.itemTypes.isNotEmpty
           ? state.itemTypes.firstWhere(
               (e) => e.itemTypeId == item.itemType!.itemTypeId,
               orElse: () => ItemType(),
             )
           : ItemType();
-      List<TableRowContent> rowContent = [];
-      rowContent.add(
-        TableRowContent(
-          width: isPhone ? 6 : 3,
-          name: '#',
-          value: CircleAvatar(child: Text(item.itemSeqId.toString())),
-        ),
+      return getFinDocItemListRow(
+        context: context,
+        item: item,
+        index: index,
+        currencyId: currencyId,
+        itemType: itemType,
+        readOnly: readOnly,
+        onDelete: () => _cartBloc.add(CartDeleteItem(index)),
       );
-      rowContent.add(
-        TableRowContent(
-          width: isPhone ? 14 : 8,
-          name: _localizations.productId,
-          value: Text(
-            "${item.product?.pseudoId}",
-            textAlign: TextAlign.center,
-            key: Key('itemProductId$index'),
-          ),
-        ),
-      );
-      rowContent.add(
-        TableRowContent(
-          width: isPhone ? 35 : 27,
-          name: _localizations.description,
-          value: Text(
-            item.description ?? '',
-            key: Key('itemDescription$index'),
-            textAlign: TextAlign.left,
-          ),
-        ),
-      );
-      if (!isPhone) {
-        rowContent.add(
-          TableRowContent(
-            width: 8,
-            name: _localizations.item,
-            value: Text(
-              itemType.itemTypeName,
-              textAlign: TextAlign.left,
-              key: Key('itemType$index'),
-            ),
-          ),
-        );
-      }
-      rowContent.add(
-        TableRowContent(
-          width: 12,
-          name: Text(_localizations.quantity, textAlign: TextAlign.right),
-          value: Text(
-            item.quantity == null
-                ? Decimal.zero.toString()
-                : item.quantity.toString(),
-            textAlign: TextAlign.right,
-            key: Key('itemQuantity$index'),
-          ),
-        ),
-      );
-      if (!isPhone && item.product?.productTypeId != 'Rental') {
-        rowContent.add(
-          TableRowContent(
-            width: 12,
-            name: Text(_localizations.price, textAlign: TextAlign.right),
-            value: Text(
-              item.price == null
-                  ? Decimal.fromInt(0).currency(currencyId: currencyId)
-                  : item.price.currency(currencyId: currencyId),
-              textAlign: TextAlign.right,
-              key: Key('itemPrice$index'),
-            ),
-          ),
-        );
-      }
-      if (item.product?.productTypeId == 'Rental') {
-        rowContent.add(
-          TableRowContent(
-            width: 20,
-            name: _localizations.date,
-            value: Text(
-              item.rentalFromDate.toLocalizedDateOnly(context),
-              textAlign: TextAlign.right,
-              key: Key('fromDate$index'),
-            ),
-          ),
-        );
-      }
-      if (!isPhone) {
-        rowContent.add(
-          TableRowContent(
-            width: 10,
-            name: Text(_localizations.subTotal, textAlign: TextAlign.right),
-            value: Text(
-              item.price == null
-                  ? Decimal.zero.currency(currencyId: currencyId).toString()
-                  : (item.price! * (item.quantity ?? Decimal.one))
-                        .currency(currencyId: currencyId)
-                        .toString(),
-              textAlign: TextAlign.right,
-            ),
-          ),
-        );
-      }
-      if (!readOnly) {
-        rowContent.add(
-          TableRowContent(
-            width: isPhone ? 5 : 8,
-            name: '',
-            value: IconButton(
-              visualDensity: VisualDensity.compact,
-              icon: const Icon(Icons.delete_forever),
-              padding: EdgeInsets.zero,
-              key: Key("itemDelete$index"),
-              onPressed: () {
-                _cartBloc.add(CartDeleteItem(index));
-              },
-            ),
-          ),
-        );
-      }
+    }).toList();
 
-      return TableData(rowHeight: 40, rowContent: rowContent);
-    }
-
-    var padding = const SpanPadding(trailing: 8, leading: 8);
-    SpanDecoration? getBackGround(BuildContext context, int index) {
-      return index == 0
-          ? SpanDecoration(
-              color: Theme.of(context).colorScheme.tertiaryContainer,
-            )
-          : null;
-    } // field content
-
-    // get table data formatted for tableView
-    var (
-      List<List<TableViewCell>> tableViewCells,
-      List<double> fieldWidths,
-      double? rowHeight,
-    ) = get2dTableData<FinDocItem>(
-      getTableData,
-      bloc: _finDocBloc,
-      classificationId: 'AppAdmin',
-      context: context,
-      items: items,
-      screenWidth: screenWidth,
-    );
     return Flexible(
       child: items.isEmpty
           ? Text(_localizations.noItems)
-          : TableView.builder(
-              diagonalDragBehavior: DiagonalDragBehavior.free,
-              verticalDetails: ScrollableDetails.vertical(
-                controller: verticalController,
-              ),
-              horizontalDetails: ScrollableDetails.horizontal(
-                controller: horizontalController,
-              ),
-              cellBuilder: (context, vicinity) =>
-                  tableViewCells[vicinity.row][vicinity.column],
-              // height of table cell
-              columnBuilder: (index) => index >= tableViewCells[0].length
-                  ? null
-                  : TableSpan(
-                      padding: padding,
-                      backgroundDecoration: getBackGround(context, index),
-                      extent: FixedTableSpanExtent(fieldWidths[index]),
-                    ),
-              pinnedColumnCount: 1,
-              // width of table cell
-              rowBuilder: (index) => index >= tableViewCells.length
-                  ? null
-                  : TableSpan(
-                      padding: padding,
-                      backgroundDecoration: getBackGround(context, index),
-                      extent: FixedTableSpanExtent(rowHeight!),
-                    ),
-              pinnedRowCount: 1,
+          : StyledDataTable(
+              columns: getFinDocItemListColumns(context),
+              rows: rows,
             ),
     );
   }
 
   Widget finDocItemListShipment(CartState state) {
     List<FinDocItem> items = finDocUpdated.items;
-    late final ScrollController verticalController = ScrollController();
-    late final ScrollController horizontalController = ScrollController();
-
-    TableData getTableData(
-      Bloc bloc,
-      String classificationId,
-      BuildContext context,
-      FinDocItem item,
-      int index, {
-      dynamic extra,
-    }) {
-      List<TableRowContent> rowContent = [];
-
-      rowContent.add(
-        TableRowContent(
-          name: '#',
-          width: isPhone ? 6 : 4,
-          value: CircleAvatar(child: Text((index + 1).toString())),
-        ),
+    final rows = items.map((item) {
+      final index = items.indexOf(item);
+      return getFinDocItemListShipmentRow(
+        context: context,
+        item: item,
+        index: index,
+        readOnly: readOnly,
+        finDocStatus: finDoc.status,
+        onDelete: () => _cartBloc.add(CartDeleteItem(index)),
       );
-      rowContent.add(
-        TableRowContent(
-          name: _localizations.productId,
-          width: isPhone ? 14 : 8,
-          value: Text(
-            "${item.product?.pseudoId}",
-            textAlign: TextAlign.center,
-            key: Key('itemProductId$index'),
-          ),
-        ),
-      );
-      rowContent.add(
-        TableRowContent(
-          name: _localizations.description,
-          width: isPhone ? 25 : 28,
-          value: Text(
-            item.description ?? '',
-            key: Key('itemDescription$index'),
-            textAlign: TextAlign.left,
-          ),
-        ),
-      );
-      rowContent.add(
-        TableRowContent(
-          name: _localizations.quantity,
-          width: isPhone ? 15 : 10,
-          value: Text(
-            item.quantity == null
-                ? Decimal.zero.toString()
-                : item.quantity.toString(),
-            textAlign: TextAlign.center,
-            key: Key('itemQuantity$index'),
-          ),
-        ),
-      );
-      if (finDoc.status == FinDocStatusVal.completed) {
-        rowContent.add(
-          TableRowContent(
-            name: _localizations.location,
-            width: isPhone ? 20 : 20,
-            value: Text(
-              "${item.asset?.location?.locationName}",
-              textAlign: TextAlign.center,
-              key: Key('itemLocation$index'),
-            ),
-          ),
-        );
-      }
-      if (!readOnly) {
-        rowContent.add(
-          TableRowContent(
-            name: ' ',
-            width: isPhone ? 15 : 20,
-            value: IconButton(
-              visualDensity: VisualDensity.compact,
-              icon: const Icon(Icons.delete_forever),
-              padding: EdgeInsets.zero,
-              key: Key("itemDelete$index"),
-              onPressed: () {
-                _cartBloc.add(CartDeleteItem(index));
-              },
-            ),
-          ),
-        );
-      }
-      return TableData(rowHeight: isPhone ? 35 : 20, rowContent: rowContent);
-    }
+    }).toList();
 
-    var padding = const SpanPadding(trailing: 8, leading: 8);
-    SpanDecoration? getBackGround(BuildContext context, int index) {
-      return index == 0
-          ? SpanDecoration(
-              color: Theme.of(context).colorScheme.tertiaryContainer,
-            )
-          : null;
-    }
-
-    // get table data formatted for tableView
-    var (
-      List<List<TableViewCell>> tableViewCells,
-      List<double> fieldWidths,
-      double? rowHeight,
-    ) = get2dTableData<FinDocItem>(
-      getTableData,
-      bloc: _finDocBloc,
-      classificationId: 'AppAdmin',
-      context: context,
-      items: items,
-      screenWidth: screenWidth,
-    );
     return Flexible(
       child: items.isEmpty
           ? Text(_localizations.noItems)
-          : TableView.builder(
-              diagonalDragBehavior: DiagonalDragBehavior.free,
-              verticalDetails: ScrollableDetails.vertical(
-                controller: verticalController,
-              ),
-              horizontalDetails: ScrollableDetails.horizontal(
-                controller: horizontalController,
-              ),
-              cellBuilder: (context, vicinity) =>
-                  tableViewCells[vicinity.row][vicinity.column],
-              // height of table cell
-              columnBuilder: (index) => index >= tableViewCells[0].length
-                  ? null
-                  : TableSpan(
-                      padding: padding,
-                      backgroundDecoration: getBackGround(context, index),
-                      extent: FixedTableSpanExtent(fieldWidths[index]),
-                    ),
-              pinnedColumnCount: 1,
-              // width of table cell
-              rowBuilder: (index) => index >= tableViewCells.length
-                  ? null
-                  : TableSpan(
-                      padding: padding,
-                      backgroundDecoration: getBackGround(context, index),
-                      extent: FixedTableSpanExtent(rowHeight!),
-                    ),
-              pinnedRowCount: 1,
+          : StyledDataTable(
+              columns: getFinDocItemListShipmentColumns(context, finDoc),
+              rows: rows,
             ),
     );
   }
 
   Widget finDocItemListTransaction(CartState state) {
     List<FinDocItem> items = finDocUpdated.items;
-    late final ScrollController verticalController = ScrollController();
-    late final ScrollController horizontalController = ScrollController();
+    String currencyId = context
+        .read<AuthBloc>()
+        .state
+        .authenticate!
+        .company!
+        .currency!
+        .currencyId!;
 
-    TableData getTableData(
-      Bloc bloc,
-      String classificationId,
-      BuildContext context,
-      FinDocItem item,
-      int index, {
-      dynamic extra,
-    }) {
-      List<TableRowContent> rowContent = [];
-      rowContent.add(
-        TableRowContent(
-          name: _localizations.glAccount,
-          width: 12,
-          value: Text(
-            item.glAccount!.accountCode ?? '??',
-            key: Key('accountCode$index'),
-          ),
-        ),
+    final rows = items.map((item) {
+      final index = items.indexOf(item);
+      return getFinDocItemListTransactionRow(
+        context: context,
+        item: item,
+        index: index,
+        currencyId: currencyId,
+        readOnly: readOnly,
+        onDelete: () => _cartBloc.add(CartDeleteItem(index)),
       );
-      rowContent.add(
-        TableRowContent(
-          name: _localizations.debit,
-          width: 15,
-          value: Text(
-            (item.isDebit! ? item.price.currency(currencyId: currencyId) : ''),
-            key: Key('debit$index'),
-          ),
-        ),
-      );
-      rowContent.add(
-        TableRowContent(
-          name: _localizations.credit,
-          width: 15,
-          value: Text(
-            !item.isDebit! ? item.price.currency(currencyId: currencyId) : '',
-            key: Key('credit$index'),
-          ),
-        ),
-      );
-      rowContent.add(
-        TableRowContent(
-          name: _localizations.productId,
-          width: 10,
-          value: Text(
-            item.product?.pseudoId ?? '',
-            key: Key('itemProductId$index'),
-          ),
-        ),
-      );
-      if (!readOnly) {
-        rowContent.add(
-          TableRowContent(
-            name: ' ',
-            width: 15,
-            value: IconButton(
-              padding: EdgeInsets.zero,
-              icon: const Icon(Icons.delete_forever, size: 20),
-              key: Key("itemDelete$index"),
-              onPressed: () {
-                _cartBloc.add(CartDeleteItem(index));
-              },
-            ),
-          ),
-        );
-      }
-      return TableData(rowHeight: 15, rowContent: rowContent);
-    }
+    }).toList();
 
-    var padding = const SpanPadding(trailing: 10, leading: 10);
-    SpanDecoration? getBackGround(BuildContext context, int index) {
-      return index == 0
-          ? SpanDecoration(
-              color: Theme.of(context).colorScheme.tertiaryContainer,
-            )
-          : null;
-    } // field content
-
-    // get table data formatted for tableView
-    var (
-      List<List<TableViewCell>> tableViewCells,
-      List<double> fieldWidths,
-      double? rowHeight,
-    ) = get2dTableData<FinDocItem>(
-      getTableData,
-      bloc: _finDocBloc,
-      classificationId: 'AppAdmin',
-      context: context,
-      items: items,
-      screenWidth: screenWidth,
-    );
     return items.isEmpty
         ? Text(_localizations.noItems)
         : Flexible(
             child: Padding(
               padding: const EdgeInsets.only(left: 10.0),
-              child: TableView.builder(
-                diagonalDragBehavior: DiagonalDragBehavior.free,
-                verticalDetails: ScrollableDetails.vertical(
-                  controller: verticalController,
-                ),
-                horizontalDetails: ScrollableDetails.horizontal(
-                  controller: horizontalController,
-                ),
-                cellBuilder: (context, vicinity) =>
-                    tableViewCells[vicinity.row][vicinity.column],
-                // height of table cell
-                columnBuilder: (index) => index >= tableViewCells[0].length
-                    ? null
-                    : TableSpan(
-                        padding: padding,
-                        backgroundDecoration: getBackGround(context, index),
-                        extent: FixedTableSpanExtent(fieldWidths[index]),
-                      ),
-                pinnedColumnCount: 1,
-                // width of table cell
-                rowBuilder: (index) => index >= tableViewCells.length
-                    ? null
-                    : TableSpan(
-                        padding: padding,
-                        backgroundDecoration: getBackGround(context, index),
-                        extent: FixedTableSpanExtent(rowHeight!),
-                      ),
-                pinnedRowCount: 1,
+              child: StyledDataTable(
+                columns: getFinDocItemListTransactionColumns(context),
+                rows: rows,
               ),
             ),
           );

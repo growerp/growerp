@@ -12,14 +12,12 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
-import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
-
 import '../../growerp_activity.dart';
+import 'activity_list_styled_data.dart';
 
 class ActivityList extends StatefulWidget {
   final ActivityType activityType;
@@ -33,12 +31,12 @@ class ActivityList extends StatefulWidget {
 
 class ActivityListState extends State<ActivityList> {
   final _scrollController = ScrollController();
-  final _horizontalController = ScrollController();
   late ActivityBloc _activityBloc;
   late ActivityLocalizations _localizations;
   late List<Activity> activities = [];
   late double bottom;
   double? right;
+  bool _isLoading = true;
 
   @override
   void initState() {
@@ -58,82 +56,42 @@ class ActivityListState extends State<ActivityList> {
   @override
   Widget build(BuildContext context) {
     _localizations = ActivityLocalizations.of(context)!;
-    right = right ?? (isAPhone(context) ? 20 : 50);
+    final isPhone = isAPhone(context);
+    right = right ?? (isPhone ? 20 : 50);
 
     Widget tableView() {
-      if (activities.isEmpty) {
-        return Center(
-          child: Text(
-            _localizations.activity_notFound(widget.activityType.toString()),
-            style: const TextStyle(fontSize: 20.0),
-          ),
+      final rows = activities.map((activity) {
+        final index = activities.indexOf(activity);
+        return getActivityListRow(
+          context: context,
+          activity: activity,
+          index: index,
+          bloc: _activityBloc,
         );
-      }
-      // get table data formatted for tableView
-      var (
-        List<List<TableViewCell>> tableViewCells,
-        List<double> fieldWidths,
-        double? rowHeight,
-      ) = get2dTableData<Activity>(
-        getTableData,
-        bloc: _activityBloc,
-        classificationId: '',
-        context: context,
-        items: activities,
-      );
-      return TableView.builder(
-        diagonalDragBehavior: DiagonalDragBehavior.free,
-        verticalDetails: ScrollableDetails.vertical(
-          controller: _scrollController,
-        ),
-        horizontalDetails: ScrollableDetails.horizontal(
-          controller: _horizontalController,
-        ),
-        cellBuilder: (context, vicinity) =>
-            tableViewCells[vicinity.row][vicinity.column],
-        columnBuilder: (index) => index >= tableViewCells[0].length
-            ? null
-            : TableSpan(
-                padding: padding,
-                backgroundDecoration: getBackGround(context, index),
-                extent: FixedTableSpanExtent(fieldWidths[index]),
-              ),
-        pinnedColumnCount: 1,
-        rowBuilder: (index) => index >= tableViewCells.length
-            ? null
-            : TableSpan(
-                padding: padding,
-                backgroundDecoration: getBackGround(context, index),
-                extent: FixedTableSpanExtent(rowHeight!),
-                recognizerFactories: <Type, GestureRecognizerFactory>{
-                  TapGestureRecognizer:
-                      GestureRecognizerFactoryWithHandlers<
-                        TapGestureRecognizer
-                      >(
-                        () => TapGestureRecognizer(),
-                        (TapGestureRecognizer t) => t.onTap = () => showDialog(
-                          barrierDismissible: true,
-                          context: context,
-                          builder: (BuildContext context) {
-                            return index > activities.length
-                                ? const BottomLoader()
-                                : Dismissible(
-                                    key: const Key('activityItem'),
-                                    direction: DismissDirection.startToEnd,
-                                    child: BlocProvider.value(
-                                      value: _activityBloc,
-                                      child: ActivityDialog(
-                                        activities[index - 1],
-                                        null,
-                                      ),
-                                    ),
-                                  );
-                          },
-                        ),
-                      ),
-                },
-              ),
-        pinnedRowCount: 1,
+      }).toList();
+
+      return StyledDataTable(
+        columns: getActivityListColumns(context, widget.activityType),
+        rows: rows,
+        isLoading: _isLoading && activities.isEmpty,
+        scrollController: _scrollController,
+        rowHeight: isPhone ? 72 : 56,
+        onRowTap: (index) {
+          showDialog(
+            barrierDismissible: true,
+            context: context,
+            builder: (BuildContext context) {
+              return Dismissible(
+                key: const Key('activityItem'),
+                direction: DismissDirection.startToEnd,
+                child: BlocProvider.value(
+                  value: _activityBloc,
+                  child: ActivityDialog(activities[index], null),
+                ),
+              );
+            },
+          );
+        },
       );
     }
 
@@ -148,6 +106,7 @@ class ActivityListState extends State<ActivityList> {
         }
       },
       builder: (context, state) {
+        _isLoading = state.status == ActivityBlocStatus.loading;
         if (state.status == ActivityBlocStatus.failure) {
           return Center(
             child: Text(
@@ -180,12 +139,10 @@ class ActivityListState extends State<ActivityList> {
                         key: const Key("search"),
                         heroTag: "btn1",
                         onPressed: () async {
-                          // find findoc id to show
                           await showDialog(
                             barrierDismissible: true,
                             context: context,
                             builder: (BuildContext context) {
-                              // search separate from finDocBloc
                               return BlocProvider.value(
                                 value: context
                                     .read<DataFetchBloc<Activities>>(),
@@ -194,9 +151,7 @@ class ActivityListState extends State<ActivityList> {
                             },
                           ).then(
                             (value) async => value != null && context.mounted
-                                ?
-                                  // show detail page
-                                  await showDialog(
+                                ? await showDialog(
                                     barrierDismissible: true,
                                     context: context,
                                     builder: (BuildContext context) {

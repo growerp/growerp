@@ -165,7 +165,7 @@ class StyledInfoRow extends StatelessWidget {
               ],
             ),
           ),
-          if (trailing != null) trailing!,
+          trailing ?? const SizedBox.shrink(),
         ],
       ),
     );
@@ -292,8 +292,8 @@ class StyledDetailHeader extends StatelessWidget {
                   spacing: 8,
                   runSpacing: 8,
                   children: [
-                    if (statusBadge != null) statusBadge!,
-                    if (roleBadge != null) roleBadge!,
+                    statusBadge ?? const SizedBox.shrink(),
+                    roleBadge ?? const SizedBox.shrink(),
                   ],
                 ),
               ],

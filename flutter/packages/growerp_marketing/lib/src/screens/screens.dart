@@ -17,7 +17,6 @@ export 'assessment_detail_screen.dart';
 export 'assessment_flow_screen.dart';
 export 'assessment_leads_screen.dart';
 export 'assessment_list.dart';
-export 'assessment_list_table_def.dart';
 export 'assessment_questions_screen.dart';
 export 'assessment_results_screen.dart';
 export 'assessment_confirmation_screen.dart';
@@ -26,7 +25,6 @@ export 'assessment_confirmation_screen.dart';
 export 'landing_page_detail_screen.dart';
 export 'landing_page_dialog.dart';
 export 'landing_page_list.dart';
-export 'landing_page_list_table_def.dart';
 export 'landing_page_assessment_flow_screen.dart';
 export 'public_landing_page_screen.dart';
 
@@ -49,16 +47,13 @@ export 'lead_capture_screen.dart';
 
 // Persona screens
 export 'persona_list.dart';
-export 'persona_list_table_def.dart';
 export 'persona_detail_screen.dart';
 export 'persona_dialog.dart';
 
 // Content Plan screens
 export 'content_plan_list.dart';
-export 'content_plan_list_table_def.dart';
 export 'content_plan_detail_screen.dart';
 
 // Social Post screens
 export 'social_post_list.dart';
-export 'social_post_list_table_def.dart';
 export 'social_post_detail_screen.dart';
