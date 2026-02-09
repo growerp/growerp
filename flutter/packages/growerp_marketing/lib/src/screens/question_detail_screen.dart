@@ -20,6 +20,7 @@ import 'package:growerp_models/growerp_models.dart';
 import '../bloc/question_bloc.dart';
 import '../bloc/question_event.dart';
 import '../bloc/question_state.dart';
+import 'answer_option_list_styled_data.dart';
 
 class QuestionDetailScreen extends StatefulWidget {
   final String assessmentId;
@@ -297,7 +298,7 @@ class QuestionDetailScreenState extends State<QuestionDetailScreen> {
                       ),
                       const SizedBox(height: 16),
 
-                      // Options List
+                      // Options Table using StyledDataTable
                       if (_options.isEmpty)
                         Center(
                           child: Padding(
@@ -309,82 +310,26 @@ class QuestionDetailScreenState extends State<QuestionDetailScreen> {
                           ),
                         )
                       else
-                        ..._options.asMap().entries.map((entry) {
-                          final index = entry.key;
-                          final opt = entry.value;
-                          // Use unique ID if available, otherwise generate from index
-                          final uniqueId = opt['id'] ?? 'new_$index';
-                          return Card(
-                            key: Key(uniqueId),
-                            margin: const EdgeInsets.only(bottom: 12),
-                            child: Padding(
-                              padding: const EdgeInsets.all(12),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  // Option number badge
-                                  CircleAvatar(
-                                    radius: 16,
-                                    child: Text('${index + 1}'),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  // Option text field
-                                  Expanded(
-                                    flex: 3,
-                                    child: TextFormField(
-                                      key: Key('${uniqueId}_text'),
-                                      controller: opt['textController']
-                                          as TextEditingController,
-                                      decoration: const InputDecoration(
-                                        labelText: 'Option Text',
-                                        isDense: true,
-                                      ),
-                                      validator: (value) {
-                                        if (value == null || value.isEmpty) {
-                                          return 'Required';
-                                        }
-                                        return null;
-                                      },
-                                    ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  // Score field
-                                  Expanded(
-                                    flex: 1,
-                                    child: TextFormField(
-                                      key: Key('${uniqueId}_score'),
-                                      controller: opt['scoreController']
-                                          as TextEditingController,
-                                      decoration: const InputDecoration(
-                                        labelText: 'Score',
-                                        isDense: true,
-                                      ),
-                                      keyboardType:
-                                          const TextInputType.numberWithOptions(
-                                              decimal: true),
-                                      validator: (value) {
-                                        if (value == null || value.isEmpty) {
-                                          return 'Required';
-                                        }
-                                        if (double.tryParse(value) == null) {
-                                          return 'Number';
-                                        }
-                                        return null;
-                                      },
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  // Delete button
-                                  IconButton(
-                                    icon: const Icon(Icons.delete,
-                                        color: Colors.red),
-                                    onPressed: () => _removeOption(index),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-                        }),
+                        SizedBox(
+                          height: (_options.length * 56.0) + 40,
+                          child: StyledDataTable(
+                            columns: getAnswerOptionListColumns(context),
+                            rows: _options.asMap().entries.map((entry) {
+                              final index = entry.key;
+                              final opt = entry.value;
+                              return getAnswerOptionListRow(
+                                context: context,
+                                index: index,
+                                textController: opt['textController']
+                                    as TextEditingController,
+                                scoreController: opt['scoreController']
+                                    as TextEditingController,
+                                onDelete: () => _removeOption(index),
+                              );
+                            }).toList(),
+                            rowHeight: 56,
+                          ),
+                        ),
                       const SizedBox(height: 24),
                     ],
 

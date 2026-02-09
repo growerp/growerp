@@ -81,15 +81,20 @@ class PersonaTest {
     );
   }
 
-  /// Custom search for personas - opens the search dialog and finds a persona by ID
+  /// Search for personas using ListFilterBar and tap the first result
   static Future<void> doPersonaSearch(
     WidgetTester tester, {
     required String searchString,
   }) async {
-    await CommonTest.tapByKey(tester, 'search');
     await CommonTest.enterText(tester, 'searchField', searchString);
     await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
-    await CommonTest.tapByKey(tester, 'personaSearchItem0');
+    await CommonTest.tapByKey(tester, 'name0');
+    await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
+  }
+
+  /// Clear the search field to show all items
+  static Future<void> clearSearch(WidgetTester tester) async {
+    await CommonTest.enterText(tester, 'searchField', '');
     await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
   }
 
@@ -165,7 +170,7 @@ class PersonaTest {
 
       // Get allocated ID for new personas
       if (persona.pseudoId == null) {
-        await CommonTest.tapByKey(tester, 'item0',
+        await CommonTest.tapByKey(tester, 'name0',
             seconds: CommonTest.waitTime);
         var id = CommonTest.getTextField('topHeader').split('#')[1].trim();
         persona = persona.copyWith(pseudoId: id);
@@ -175,6 +180,7 @@ class PersonaTest {
       newPersonas.add(persona);
     }
 
+    await clearSearch(tester);
     await PersistFunctions.persistTest(test.copyWith(personas: newPersonas));
   }
 
@@ -234,5 +240,6 @@ class PersonaTest {
 
       await CommonTest.tapByKey(tester, 'cancel');
     }
+    await clearSearch(tester);
   }
 }

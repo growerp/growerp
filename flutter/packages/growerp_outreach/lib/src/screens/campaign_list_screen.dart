@@ -12,27 +12,14 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
-import 'package:responsive_framework/responsive_framework.dart';
-import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
 
 import '../bloc/outreach_campaign_bloc.dart';
 import 'campaign_detail_screen.dart';
-import 'campaign_list_table_def.dart';
-import 'search_campaign_list.dart';
-
-// Table padding and background decoration
-const campaignPadding = SpanPadding(trailing: 5, leading: 5);
-
-SpanDecoration? getCampaignBackGround(BuildContext context, int index) {
-  return index == 0
-      ? SpanDecoration(color: Theme.of(context).colorScheme.tertiaryContainer)
-      : null;
-}
+import 'campaign_list_styled_data.dart';
 
 class CampaignListScreen extends StatefulWidget {
   const CampaignListScreen({super.key});
@@ -43,13 +30,14 @@ class CampaignListScreen extends StatefulWidget {
 
 class CampaignListScreenState extends State<CampaignListScreen> {
   final _scrollController = ScrollController();
-  final _horizontalController = ScrollController();
+  final _searchController = TextEditingController();
   late OutreachCampaignBloc _campaignBloc;
   List<OutreachCampaign> campaigns = const <OutreachCampaign>[];
   bool hasReachedMax = false;
   late double bottom;
   double? right;
   double currentScroll = 0;
+  bool _isLoading = true;
 
   @override
   void initState() {
@@ -62,229 +50,159 @@ class CampaignListScreenState extends State<CampaignListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isPhone = ResponsiveBreakpoints.of(context).isMobile;
+    final isPhone = isAPhone(context);
     right = right ?? (isPhone ? 20 : 50);
 
-    return Builder(
-      builder: (BuildContext context) {
-        Widget tableView() {
-          if (campaigns.isEmpty) {
-            return const Center(
-              child: Text(
-                'No campaigns found',
-                style: TextStyle(fontSize: 20.0),
-              ),
+    Widget tableView() {
+      // Build rows for StyledDataTable
+      final rows = campaigns.map((campaign) {
+        final index = campaigns.indexOf(campaign);
+        return getCampaignListRow(
+          context: context,
+          campaign: campaign,
+          index: index,
+          bloc: _campaignBloc,
+        );
+      }).toList();
+
+      return StyledDataTable(
+        columns: getCampaignListColumns(context),
+        rows: rows,
+        isLoading: _isLoading && campaigns.isEmpty,
+        scrollController: _scrollController,
+        rowHeight: isPhone ? 80 : 56,
+        onRowTap: (index) {
+          showDialog(
+            barrierDismissible: true,
+            context: context,
+            builder: (BuildContext context) {
+              return Dismissible(
+                key: Key('campaign_${campaigns[index].campaignId}'),
+                direction: DismissDirection.startToEnd,
+                child: BlocProvider.value(
+                  value: _campaignBloc,
+                  child: CampaignDetailScreen(campaign: campaigns[index]),
+                ),
+              );
+            },
+          );
+        },
+      );
+    }
+
+    return BlocConsumer<OutreachCampaignBloc, OutreachCampaignState>(
+      listener: (context, state) {
+        if (state.status == OutreachCampaignStatus.failure) {
+          HelperFunctions.showMessage(
+            context,
+            '${state.message}',
+            Colors.red,
+          );
+        }
+        if (state.status == OutreachCampaignStatus.success) {
+          if ((state.message ?? '').isNotEmpty) {
+            HelperFunctions.showMessage(
+              context,
+              state.message!,
+              Colors.green,
             );
           }
+        }
+      },
+      builder: (context, state) {
+        // Update loading state
+        _isLoading = state.status == OutreachCampaignStatus.loading;
 
-          // get table data formatted for tableView
-          var (
-            List<List<TableViewCell>> tableViewCells,
-            List<double> fieldWidths,
-            double? rowHeight,
-          ) = get2dTableData<OutreachCampaign>(
-            getCampaignListTableData,
-            bloc: _campaignBloc,
-            classificationId: 'AppAdmin',
-            context: context,
-            items: campaigns,
+        if (state.status == OutreachCampaignStatus.failure &&
+            campaigns.isEmpty) {
+          return const FatalErrorForm(
+            message: 'Could not load campaigns!',
           );
+        }
 
-          return TableView.builder(
-            diagonalDragBehavior: DiagonalDragBehavior.free,
-            verticalDetails: ScrollableDetails.vertical(
-              controller: _scrollController,
+        campaigns = state.campaigns;
+        if (campaigns.isNotEmpty && _scrollController.hasClients) {
+          Future.delayed(const Duration(milliseconds: 100), () {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (_scrollController.hasClients) {
+                _scrollController.jumpTo(currentScroll);
+              }
+            });
+          });
+        }
+        hasReachedMax = state.hasReachedMax;
+
+        return Column(
+          children: [
+            // Filter bar with search
+            ListFilterBar(
+              searchHint: 'Search campaigns...',
+              searchController: _searchController,
+              onSearchChanged: (value) {
+                if (value.isEmpty) {
+                  _campaignBloc.add(const OutreachCampaignFetch(start: 0));
+                } else {
+                  _campaignBloc
+                      .add(OutreachCampaignSearchRequested(query: value));
+                }
+              },
             ),
-            horizontalDetails: ScrollableDetails.horizontal(
-              controller: _horizontalController,
-            ),
-            cellBuilder: (context, vicinity) =>
-                tableViewCells[vicinity.row][vicinity.column],
-            columnBuilder: (index) => index >= tableViewCells[0].length
-                ? null
-                : TableSpan(
-                    padding: campaignPadding,
-                    backgroundDecoration: getCampaignBackGround(
-                      context,
-                      index,
-                    ),
-                    extent: FixedTableSpanExtent(fieldWidths[index]),
-                  ),
-            pinnedColumnCount: 1,
-            rowBuilder: (index) => index >= tableViewCells.length
-                ? null
-                : TableSpan(
-                    padding: campaignPadding,
-                    backgroundDecoration: getCampaignBackGround(
-                      context,
-                      index,
-                    ),
-                    extent: FixedTableSpanExtent(rowHeight!),
-                    recognizerFactories: <Type, GestureRecognizerFactory>{
-                      TapGestureRecognizer:
-                          GestureRecognizerFactoryWithHandlers<
-                              TapGestureRecognizer>(
-                        () => TapGestureRecognizer(),
-                        (TapGestureRecognizer t) => t.onTap = () {
-                          if (index == 0) return;
-                          showDialog(
+            // Main content area with StyledDataTable
+            Expanded(
+              child: Stack(
+                children: [
+                  tableView(),
+                  Positioned(
+                    right: right,
+                    bottom: bottom,
+                    child: GestureDetector(
+                      onPanUpdate: (details) {
+                        setState(() {
+                          right = right! - details.delta.dx;
+                          bottom -= details.delta.dy;
+                        });
+                      },
+                      child: FloatingActionButton(
+                        key: const Key('addNew'),
+                        heroTag: 'campaignBtn1',
+                        onPressed: () async {
+                          await showDialog(
                             barrierDismissible: true,
                             context: context,
                             builder: (BuildContext context) {
-                              return index > campaigns.length
-                                  ? const BottomLoader()
-                                  : Dismissible(
-                                      key: Key(
-                                          'campaign_${campaigns[index - 1].campaignId}'),
-                                      direction: DismissDirection.startToEnd,
-                                      child: BlocProvider.value(
-                                        value: _campaignBloc,
-                                        child: CampaignDetailScreen(
-                                          campaign: campaigns[index - 1],
-                                        ),
-                                      ),
-                                    );
+                              return BlocProvider.value(
+                                value: _campaignBloc,
+                                child: const CampaignDetailScreen(
+                                  campaign: OutreachCampaign(
+                                    name: '',
+                                    platforms: '[]',
+                                    status: 'MKTG_CAMP_PLANNED',
+                                  ),
+                                ),
+                              );
                             },
                           );
                         },
+                        tooltip: 'Add new campaign',
+                        child: const Icon(Icons.add),
                       ),
-                    },
-                  ),
-            pinnedRowCount: 1,
-          );
-        }
-
-        blocListener(context, state) {
-          if (state.status == OutreachCampaignStatus.failure) {
-            HelperFunctions.showMessage(
-              context,
-              '${state.message}',
-              Colors.red,
-            );
-          }
-          if (state.status == OutreachCampaignStatus.success) {
-            if ((state.message ?? '').isNotEmpty) {
-              HelperFunctions.showMessage(
-                context,
-                state.message!,
-                Colors.green,
-              );
-            }
-          }
-        }
-
-        blocBuilder(context, state) {
-          if (state.status == OutreachCampaignStatus.failure) {
-            return const FatalErrorForm(
-              message: "Could not load campaigns!",
-            );
-          } else {
-            campaigns = state.campaigns;
-            if (campaigns.isNotEmpty && _scrollController.hasClients) {
-              Future.delayed(const Duration(milliseconds: 100), () {
-                WidgetsBinding.instance.addPostFrameCallback(
-                  (_) {
-                    if (_scrollController.hasClients) {
-                      _scrollController.jumpTo(currentScroll);
-                    }
-                  },
-                );
-              });
-            }
-            hasReachedMax = state.hasReachedMax;
-            return Stack(
-              children: [
-                tableView(),
-                Positioned(
-                  right: right,
-                  bottom: bottom,
-                  child: GestureDetector(
-                    onPanUpdate: (details) {
-                      setState(() {
-                        right = right! - details.delta.dx;
-                        bottom -= details.delta.dy;
-                      });
-                    },
-                    child: Column(
-                      children: [
-                        FloatingActionButton(
-                          key: const Key("search"),
-                          heroTag: "campaignBtn0",
-                          onPressed: () async {
-                            // find campaign to show
-                            await showDialog(
-                              barrierDismissible: true,
-                              context: context,
-                              builder: (BuildContext context) {
-                                return BlocProvider.value(
-                                  value: _campaignBloc,
-                                  child: const SearchCampaignList(),
-                                );
-                              },
-                            ).then(
-                              (value) async => value != null
-                                  ? await showDialog(
-                                      barrierDismissible: true,
-                                      context: context,
-                                      builder: (BuildContext context) {
-                                        return BlocProvider.value(
-                                          value: _campaignBloc,
-                                          child: CampaignDetailScreen(
-                                            campaign: value,
-                                          ),
-                                        );
-                                      },
-                                    )
-                                  : const SizedBox.shrink(),
-                            );
-                          },
-                          child: const Icon(Icons.search),
-                        ),
-                        const SizedBox(height: 10),
-                        FloatingActionButton(
-                          key: const Key("addNew"),
-                          heroTag: "campaignBtn1",
-                          onPressed: () async {
-                            await showDialog(
-                              barrierDismissible: true,
-                              context: context,
-                              builder: (BuildContext context) {
-                                return BlocProvider.value(
-                                  value: _campaignBloc,
-                                  child: const CampaignDetailScreen(
-                                    campaign: OutreachCampaign(
-                                      name: '',
-                                      platforms: '[]',
-                                      status: 'MKTG_CAMP_PLANNED',
-                                    ),
-                                  ),
-                                );
-                              },
-                            );
-                          },
-                          tooltip: 'Add new campaign',
-                          child: const Icon(Icons.add),
-                        ),
-                      ],
                     ),
                   ),
-                ),
-              ],
-            );
-          }
-        }
-
-        return BlocConsumer<OutreachCampaignBloc, OutreachCampaignState>(
-          listener: blocListener,
-          builder: blocBuilder,
+                ],
+              ),
+            ),
+          ],
         );
       },
     );
   }
 
   void _onScroll() {
-    if (_isBottom) {
-      _campaignBloc.add(OutreachCampaignFetch(start: campaigns.length));
+    currentScroll = _scrollController.offset;
+    if (_isBottom && !hasReachedMax) {
+      _campaignBloc.add(
+        OutreachCampaignFetch(start: campaigns.length),
+      );
     }
   }
 
@@ -297,8 +215,10 @@ class CampaignListScreenState extends State<CampaignListScreen> {
 
   @override
   void dispose() {
-    _scrollController.dispose();
-    _horizontalController.dispose();
+    _scrollController
+      ..removeListener(_onScroll)
+      ..dispose();
+    _searchController.dispose();
     super.dispose();
   }
 }

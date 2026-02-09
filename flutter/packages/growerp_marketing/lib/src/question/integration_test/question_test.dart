@@ -89,7 +89,6 @@ class QuestionTest {
 
           // After adding an option, the key will be based on the current number of options
           // The new option will have index i (0-based)
-          final optionKey = 'new_$i';
 
           // Scroll to the option fields
           await tester.pumpAndSettle();
@@ -97,14 +96,14 @@ class QuestionTest {
           // Enter option text
           await CommonTest.enterText(
             tester,
-            '${optionKey}_text',
+            'optionText$i',
             option.optionText!,
           );
 
           // Enter score
           await CommonTest.enterText(
             tester,
-            '${optionKey}_score',
+            'optionScore$i',
             option.optionScore.toString(),
           );
         }
@@ -137,7 +136,7 @@ class QuestionTest {
     // Tap on first question to verify details
     await CommonTest.tapByKey(
       tester,
-      'question0',
+      'name0',
       seconds: CommonTest.waitTime,
     );
 
@@ -178,7 +177,7 @@ class QuestionTest {
     // confirm deletion
     await CommonTest.tapByKey(
       tester,
-      'deleteConfirm',
+      'deleteConfirm${count - 1}',
       seconds: CommonTest.waitTime,
     );
     // Verify deletion

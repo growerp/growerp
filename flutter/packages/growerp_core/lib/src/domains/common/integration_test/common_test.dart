@@ -475,19 +475,22 @@ class CommonTest {
     int? seconds,
   }) async {
     seconds ??= waitTime;
-    await tapByKey(tester, 'search');
     await enterText(tester, 'searchField', searchString);
-    await tester.testTextInput.receiveAction(TextInputAction.done);
-    await tester.pumpAndSettle(const Duration(seconds: waitTime));
+    await tester.pumpAndSettle(Duration(seconds: seconds));
 
-    // Try to tap by key first (for landing pages), then by text as fallback
-    try {
-      await tapByKey(tester, 'landingPageSearchItem0');
-    } catch (_) {
-      // Fallback to tapping by text
-      await tapByText(tester, searchString);
+    // Tap first filtered result in StyledDataTable
+    // Try common row cell keys used across different list screens
+    for (final key in ['name0', 'title0', 'theme0', 'headline0', 'id0']) {
+      if (tester.any(find.byKey(Key(key)))) {
+        await tester.ensureVisible(find.byKey(Key(key)).last);
+        await tester.tap(find.byKey(Key(key)).last);
+        await tester.pumpAndSettle(Duration(seconds: seconds));
+        return;
+      }
     }
-    await tester.pumpAndSettle(const Duration(seconds: waitTime));
+    // Fallback to tapping by text
+    await tapByText(tester, searchString);
+    await tester.pumpAndSettle(Duration(seconds: seconds));
   }
 
   static Future<void> doSearch(

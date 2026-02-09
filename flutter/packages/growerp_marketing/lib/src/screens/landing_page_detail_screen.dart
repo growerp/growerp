@@ -18,7 +18,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:responsive_framework/responsive_framework.dart';
-import 'package:dropdown_search/dropdown_search.dart';
 
 import '../bloc/landing_page_bloc.dart';
 import '../bloc/landing_page_event.dart';
@@ -475,52 +474,124 @@ class LandingPageDetailScreenState extends State<LandingPageDetailScreen> {
                                       }
                                     }
 
-                                    return DropdownSearch<Assessment>(
+                                    return Autocomplete<Assessment>(
                                       key: const Key('ctaAssessmentDropdown'),
-                                      selectedItem: selectedCtaAssessment,
-                                      items: state.assessments,
-                                      itemAsString: (Assessment a) =>
+                                      initialValue: TextEditingValue(
+                                        text: selectedCtaAssessment != null
+                                            ? '${selectedCtaAssessment.pseudoId} - ${selectedCtaAssessment.assessmentName}'
+                                            : '',
+                                      ),
+                                      optionsBuilder:
+                                          (TextEditingValue textEditingValue) {
+                                        final query =
+                                            textEditingValue.text.toLowerCase();
+                                        if (query.isEmpty) {
+                                          return state.assessments;
+                                        }
+                                        return state.assessments.where(
+                                          (a) =>
+                                              '${a.pseudoId} - ${a.assessmentName}'
+                                                  .toLowerCase()
+                                                  .contains(query),
+                                        );
+                                      },
+                                      displayStringForOption: (Assessment a) =>
                                           '${a.pseudoId} - ${a.assessmentName}',
-                                      popupProps: PopupProps.menu(
-                                        showSearchBox: true,
-                                        searchFieldProps: const TextFieldProps(
-                                          autofocus: true,
+                                      fieldViewBuilder: (context,
+                                          textController,
+                                          focusNode,
+                                          onFieldSubmitted) {
+                                        return TextFormField(
+                                          controller: textController,
+                                          focusNode: focusNode,
                                           decoration: InputDecoration(
-                                            labelText: 'Search assessments...',
-                                            prefixIcon: Icon(Icons.search),
+                                            labelText: 'CTA Assessment',
+                                            hintText:
+                                                'Select assessment to launch',
+                                            prefixIcon: const Icon(Icons.quiz),
                                             isDense: true,
                                             contentPadding:
-                                                EdgeInsets.symmetric(
+                                                const EdgeInsets.symmetric(
                                               horizontal: 12,
                                               vertical: 8,
                                             ),
+                                            suffixIcon: textController
+                                                    .text.isNotEmpty
+                                                ? IconButton(
+                                                    icon: const Icon(
+                                                        Icons.clear,
+                                                        size: 18),
+                                                    onPressed: () {
+                                                      textController.clear();
+                                                      setState(() {
+                                                        _selectedCtaAssessmentId =
+                                                            null;
+                                                      });
+                                                    },
+                                                  )
+                                                : const Icon(Icons.search,
+                                                    size: 18),
                                           ),
-                                        ),
-                                        menuProps: MenuProps(
-                                          borderRadius:
-                                              BorderRadius.circular(8),
-                                          elevation: 8,
-                                        ),
-                                      ),
-                                      dropdownDecoratorProps:
-                                          const DropDownDecoratorProps(
-                                        dropdownSearchDecoration:
-                                            InputDecoration(
-                                          labelText: 'CTA Assessment',
-                                          hintText:
-                                              'Select assessment to launch',
-                                          prefixIcon: Icon(Icons.quiz),
-                                          isDense: true,
-                                          contentPadding: EdgeInsets.symmetric(
-                                            horizontal: 12,
-                                            vertical: 8,
+                                          onFieldSubmitted: (_) =>
+                                              onFieldSubmitted(),
+                                        );
+                                      },
+                                      optionsViewBuilder:
+                                          (context, onSelected, options) {
+                                        return Align(
+                                          alignment: Alignment.topLeft,
+                                          child: Material(
+                                            elevation: 4,
+                                            borderRadius:
+                                                BorderRadius.circular(8),
+                                            child: ConstrainedBox(
+                                              constraints: const BoxConstraints(
+                                                maxHeight: 200,
+                                                maxWidth: 400,
+                                              ),
+                                              child: options.isEmpty
+                                                  ? const Padding(
+                                                      padding:
+                                                          EdgeInsets.all(16.0),
+                                                      child: Text(
+                                                        'No assessments found',
+                                                        style: TextStyle(
+                                                            color: Colors.grey),
+                                                      ),
+                                                    )
+                                                  : ListView.builder(
+                                                      padding: EdgeInsets.zero,
+                                                      shrinkWrap: true,
+                                                      itemCount: options.length,
+                                                      itemBuilder:
+                                                          (context, index) {
+                                                        final option = options
+                                                            .elementAt(index);
+                                                        return ListTile(
+                                                          dense: true,
+                                                          leading: const Icon(
+                                                              Icons.quiz,
+                                                              size: 20),
+                                                          title: Text(
+                                                            '${option.pseudoId} - ${option.assessmentName}',
+                                                            overflow:
+                                                                TextOverflow
+                                                                    .ellipsis,
+                                                          ),
+                                                          onTap: () =>
+                                                              onSelected(
+                                                                  option),
+                                                        );
+                                                      },
+                                                    ),
+                                            ),
                                           ),
-                                        ),
-                                      ),
-                                      onChanged: (Assessment? newValue) {
+                                        );
+                                      },
+                                      onSelected: (Assessment selection) {
                                         setState(() {
                                           _selectedCtaAssessmentId =
-                                              newValue?.assessmentId;
+                                              selection.assessmentId;
                                         });
                                       },
                                     );
@@ -546,7 +617,7 @@ class LandingPageDetailScreenState extends State<LandingPageDetailScreen> {
                   if (ResponsiveBreakpoints.of(context).isMobile)
                     const SizedBox(height: 10),
                   if (ResponsiveBreakpoints.of(context).isMobile &&
-                      _selectedCtaActionType == 'assessment')
+                      _selectedCtaActionType == 'Assessment')
                     Row(
                       children: [
                         Expanded(
@@ -570,52 +641,105 @@ class LandingPageDetailScreenState extends State<LandingPageDetailScreen> {
                                 }
                               }
 
-                              return DropdownSearch<Assessment>(
-                                key: const Key('ctaAssessmentDropdown'),
-                                selectedItem: selectedCtaAssessment,
-                                items: state.assessments,
-                                itemAsString: (Assessment a) =>
+                              return Autocomplete<Assessment>(
+                                key: const Key('ctaAssessmentDropdownMobile'),
+                                initialValue: TextEditingValue(
+                                  text: selectedCtaAssessment != null
+                                      ? '${selectedCtaAssessment.pseudoId} - ${selectedCtaAssessment.assessmentName}'
+                                      : '',
+                                ),
+                                optionsBuilder:
+                                    (TextEditingValue textEditingValue) {
+                                  final query =
+                                      textEditingValue.text.toLowerCase();
+                                  if (query.isEmpty) {
+                                    return state.assessments;
+                                  }
+                                  return state.assessments.where(
+                                    (a) => '${a.pseudoId} - ${a.assessmentName}'
+                                        .toLowerCase()
+                                        .contains(query),
+                                  );
+                                },
+                                displayStringForOption: (Assessment a) =>
                                     '${a.pseudoId} - ${a.assessmentName}',
-                                popupProps: PopupProps.menu(
-                                  showSearchBox: true,
-                                  searchFieldProps: const TextFieldProps(
-                                    autofocus: true,
+                                fieldViewBuilder: (context, textController,
+                                    focusNode, onFieldSubmitted) {
+                                  return TextFormField(
+                                    controller: textController,
+                                    focusNode: focusNode,
                                     decoration: InputDecoration(
-                                      labelText: 'Search assessments...',
-                                      prefixIcon: Icon(Icons.search),
+                                      labelText: 'CTA Assessment',
+                                      hintText: 'Select assessment to launch',
+                                      prefixIcon: const Icon(Icons.quiz),
+                                      suffixIcon: textController.text.isNotEmpty
+                                          ? IconButton(
+                                              icon: const Icon(Icons.clear,
+                                                  size: 18),
+                                              onPressed: () {
+                                                textController.clear();
+                                                setState(() {
+                                                  _selectedCtaAssessmentId =
+                                                      null;
+                                                });
+                                              },
+                                            )
+                                          : const Icon(Icons.search, size: 18),
                                     ),
-                                  ),
-                                  menuProps: MenuProps(
-                                    borderRadius: BorderRadius.circular(20.0),
-                                  ),
-                                  title: popUp(
-                                    context: context,
-                                    title: 'Select CTA Assessment',
-                                    height: 50,
-                                  ),
-                                  emptyBuilder: (context, searchEntry) =>
-                                      const Center(
-                                    child: Padding(
-                                      padding: EdgeInsets.all(16.0),
-                                      child: Text(
-                                        'No assessments found',
-                                        style: TextStyle(color: Colors.grey),
+                                    onFieldSubmitted: (_) => onFieldSubmitted(),
+                                  );
+                                },
+                                optionsViewBuilder:
+                                    (context, onSelected, options) {
+                                  return Align(
+                                    alignment: Alignment.topLeft,
+                                    child: Material(
+                                      elevation: 4,
+                                      borderRadius: BorderRadius.circular(8),
+                                      child: ConstrainedBox(
+                                        constraints: const BoxConstraints(
+                                          maxHeight: 200,
+                                          maxWidth: 300,
+                                        ),
+                                        child: options.isEmpty
+                                            ? const Padding(
+                                                padding: EdgeInsets.all(16.0),
+                                                child: Text(
+                                                  'No assessments found',
+                                                  style: TextStyle(
+                                                      color: Colors.grey),
+                                                ),
+                                              )
+                                            : ListView.builder(
+                                                padding: EdgeInsets.zero,
+                                                shrinkWrap: true,
+                                                itemCount: options.length,
+                                                itemBuilder: (context, index) {
+                                                  final option =
+                                                      options.elementAt(index);
+                                                  return ListTile(
+                                                    dense: true,
+                                                    leading: const Icon(
+                                                        Icons.quiz,
+                                                        size: 20),
+                                                    title: Text(
+                                                      '${option.pseudoId} - ${option.assessmentName}',
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                    ),
+                                                    onTap: () =>
+                                                        onSelected(option),
+                                                  );
+                                                },
+                                              ),
                                       ),
                                     ),
-                                  ),
-                                ),
-                                dropdownDecoratorProps:
-                                    const DropDownDecoratorProps(
-                                  dropdownSearchDecoration: InputDecoration(
-                                    labelText: 'CTA Assessment',
-                                    hintText: 'Select assessment to launch',
-                                    prefixIcon: Icon(Icons.quiz),
-                                  ),
-                                ),
-                                onChanged: (Assessment? newValue) {
+                                  );
+                                },
+                                onSelected: (Assessment selection) {
                                   setState(() {
                                     _selectedCtaAssessmentId =
-                                        newValue?.assessmentId;
+                                        selection.assessmentId;
                                   });
                                 },
                               );

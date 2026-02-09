@@ -12,29 +12,18 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
-import 'package:responsive_framework/responsive_framework.dart';
-import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
 
 import '../bloc/outreach_message_bloc.dart';
 import '../bloc/outreach_message_event.dart';
 import '../bloc/outreach_message_state.dart';
 import 'outreach_message_detail_screen.dart';
-import 'outreach_message_list_table_def.dart';
+import 'outreach_message_list_styled_data.dart';
 
-// Table padding and background decoration
-const outreachMessagePadding = SpanPadding(trailing: 5, leading: 5);
-
-SpanDecoration? getOutreachMessageBackGround(BuildContext context, int index) {
-  return index == 0
-      ? SpanDecoration(color: Theme.of(context).colorScheme.tertiaryContainer)
-      : null;
-}
-
+/// List screen for Outreach Messages
 class OutreachMessageList extends StatefulWidget {
   const OutreachMessageList({super.key});
 
@@ -44,14 +33,15 @@ class OutreachMessageList extends StatefulWidget {
 
 class OutreachMessageListState extends State<OutreachMessageList> {
   final _scrollController = ScrollController();
-  final _horizontalController = ScrollController();
-  final double _scrollThreshold = 100.0;
+  final _searchController = TextEditingController();
   late OutreachMessageBloc _messageBloc;
   List<OutreachMessage> messages = const <OutreachMessage>[];
   bool hasReachedMax = false;
   late double bottom;
   double? right;
   double currentScroll = 0;
+  String searchString = '';
+  bool _isLoading = true;
 
   @override
   void initState() {
@@ -64,219 +54,150 @@ class OutreachMessageListState extends State<OutreachMessageList> {
 
   @override
   Widget build(BuildContext context) {
-    final isPhone = ResponsiveBreakpoints.of(context).isMobile;
+    final isPhone = isAPhone(context);
     right = right ?? (isPhone ? 20 : 50);
 
-    return Builder(
-      builder: (BuildContext context) {
-        Widget tableView() {
-          if (messages.isEmpty) {
-            return const Center(
-              child: Text(
-                'No messages found',
-                style: TextStyle(fontSize: 20.0),
-              ),
-            );
-          }
+    Widget tableView() {
+      // Build rows for StyledDataTable
+      final rows = messages.map((message) {
+        final index = messages.indexOf(message);
+        return getOutreachMessageListRow(
+          context: context,
+          message: message,
+          index: index,
+          bloc: _messageBloc,
+        );
+      }).toList();
 
-          // get table data formatted for tableView
-          var (
-            List<List<TableViewCell>> tableViewCells,
-            List<double> fieldWidths,
-            double? rowHeight,
-          ) = get2dTableData<OutreachMessage>(
-            getOutreachMessageListTableData,
-            bloc: _messageBloc,
-            classificationId: 'AppAdmin',
+      return StyledDataTable(
+        columns: getOutreachMessageListColumns(context),
+        rows: rows,
+        isLoading: _isLoading && messages.isEmpty,
+        scrollController: _scrollController,
+        rowHeight: isPhone ? 72 : 56,
+        onRowTap: (index) {
+          showDialog(
+            barrierDismissible: true,
             context: context,
-            items: messages,
+            builder: (BuildContext context) {
+              return Dismissible(
+                key: Key('messageDetailScreen${messages[index].messageId}'),
+                direction: DismissDirection.startToEnd,
+                child: BlocProvider.value(
+                  value: _messageBloc,
+                  child: OutreachMessageDetailScreen(message: messages[index]),
+                ),
+              );
+            },
           );
+        },
+      );
+    }
 
-          return TableView.builder(
-            diagonalDragBehavior: DiagonalDragBehavior.free,
-            verticalDetails: ScrollableDetails.vertical(
-              controller: _scrollController,
-            ),
-            horizontalDetails: ScrollableDetails.horizontal(
-              controller: _horizontalController,
-            ),
-            cellBuilder: (context, vicinity) =>
-                tableViewCells[vicinity.row][vicinity.column],
-            columnBuilder: (index) => index >= tableViewCells[0].length
-                ? null
-                : TableSpan(
-                    padding: outreachMessagePadding,
-                    backgroundDecoration: getOutreachMessageBackGround(
-                      context,
-                      index,
-                    ),
-                    extent: FixedTableSpanExtent(fieldWidths[index]),
-                  ),
-            pinnedColumnCount: 1,
-            rowBuilder: (index) => index >= tableViewCells.length
-                ? null
-                : TableSpan(
-                    padding: outreachMessagePadding,
-                    backgroundDecoration: getOutreachMessageBackGround(
-                      context,
-                      index,
-                    ),
-                    extent: FixedTableSpanExtent(rowHeight!),
-                    recognizerFactories: <Type, GestureRecognizerFactory>{
-                      TapGestureRecognizer:
-                          GestureRecognizerFactoryWithHandlers<
-                              TapGestureRecognizer>(
-                        () => TapGestureRecognizer(),
-                        (TapGestureRecognizer t) => t.onTap = () => showDialog(
-                              barrierDismissible: true,
-                              context: context,
-                              builder: (BuildContext context) {
-                                return index > messages.length
-                                    ? const BottomLoader()
-                                    : Dismissible(
-                                        key: Key(
-                                            'message_${messages[index - 1].messageId}'),
-                                        direction: DismissDirection.startToEnd,
-                                        child: BlocProvider.value(
-                                          value: _messageBloc,
-                                          child: OutreachMessageDetailScreen(
-                                            message: messages[index - 1],
-                                          ),
-                                        ),
-                                      );
-                              },
-                            ),
-                      ),
-                    },
-                  ),
-            pinnedRowCount: 1,
+    return BlocConsumer<OutreachMessageBloc, OutreachMessageState>(
+      listener: (context, state) {
+        if (state.status == OutreachMessageStatus.failure) {
+          HelperFunctions.showMessage(
+            context,
+            '${state.message}',
+            Colors.red,
           );
         }
-
-        blocListener(context, state) {
-          if (state.status == OutreachMessageStatus.failure) {
+        if (state.status == OutreachMessageStatus.success) {
+          if ((state.message ?? '').isNotEmpty) {
             HelperFunctions.showMessage(
               context,
-              '${state.message}',
-              Colors.red,
+              state.message!,
+              Colors.green,
             );
-          }
-          if (state.status == OutreachMessageStatus.success) {
-            if ((state.message ?? '').isNotEmpty) {
-              HelperFunctions.showMessage(
-                context,
-                state.message!,
-                Colors.green,
-              );
-            }
           }
         }
+      },
+      builder: (context, state) {
+        // Update loading state
+        _isLoading = state.status == OutreachMessageStatus.loading;
 
-        blocBuilder(context, state) {
-          if (state.status == OutreachMessageStatus.failure) {
-            return const FatalErrorForm(
-              message: "Could not load outreach messages!",
-            );
-          } else {
-            messages = state.messages;
-            if (messages.isNotEmpty && _scrollController.hasClients) {
-              Future.delayed(const Duration(milliseconds: 100), () {
-                WidgetsBinding.instance.addPostFrameCallback(
-                  (_) {
-                    if (_scrollController.hasClients) {
-                      _scrollController.jumpTo(currentScroll);
-                    }
-                  },
+        if (state.status == OutreachMessageStatus.failure && messages.isEmpty) {
+          return const FatalErrorForm(
+            message: 'Could not load outreach messages!',
+          );
+        }
+
+        messages = state.messages;
+        if (messages.isNotEmpty && _scrollController.hasClients) {
+          Future.delayed(const Duration(milliseconds: 100), () {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (_scrollController.hasClients) {
+                _scrollController.jumpTo(currentScroll);
+              }
+            });
+          });
+        }
+        hasReachedMax = state.hasReachedMax;
+
+        return Column(
+          children: [
+            // Filter bar with search
+            ListFilterBar(
+              searchHint: 'Search messages...',
+              searchController: _searchController,
+              onSearchChanged: (value) {
+                searchString = value;
+                _messageBloc.add(
+                  OutreachMessageSearchRequested(query: value),
                 );
-              });
-            }
-            hasReachedMax = state.hasReachedMax;
-            return Stack(
-              children: [
-                tableView(),
-                Positioned(
-                  right: right,
-                  bottom: bottom,
-                  child: GestureDetector(
-                    onPanUpdate: (details) {
-                      setState(() {
-                        right = right! - details.delta.dx;
-                        bottom -= details.delta.dy;
-                      });
-                    },
-                    child: Column(
-                      children: [
-                        FloatingActionButton(
-                          key: const Key("search"),
-                          heroTag: "messageBtn1",
-                          onPressed: () async {
-                            // find message to show
-                            await showDialog(
-                              barrierDismissible: true,
-                              context: context,
-                              builder: (BuildContext context) {
-                                return BlocProvider.value(
-                                  value: _messageBloc,
-                                  child: const SearchOutreachMessageList(),
-                                );
-                              },
-                            ).then(
-                              (value) async => value != null
-                                  ? await showDialog(
-                                      barrierDismissible: true,
-                                      context: context,
-                                      builder: (BuildContext context) {
-                                        return BlocProvider.value(
-                                          value: _messageBloc,
-                                          child: OutreachMessageDetailScreen(
-                                            message: value,
-                                          ),
-                                        );
-                                      },
-                                    )
-                                  : const SizedBox.shrink(),
-                            );
-                          },
-                          child: const Icon(Icons.search),
-                        ),
-                        const SizedBox(height: 10),
-                        FloatingActionButton(
-                          key: const Key("addNewMessage"),
-                          heroTag: "messageBtn2",
-                          onPressed: () async {
-                            await showDialog(
-                              barrierDismissible: true,
-                              context: context,
-                              builder: (BuildContext context) {
-                                return BlocProvider.value(
-                                  value: _messageBloc,
-                                  child: const OutreachMessageDetailScreen(
-                                    message: OutreachMessage(
-                                      platform: 'EMAIL',
-                                      messageContent: '',
-                                      status: 'PENDING',
+              },
+            ),
+            // Main content area with StyledDataTable
+            Expanded(
+              child: Stack(
+                children: [
+                  tableView(),
+                  Positioned(
+                    right: right,
+                    bottom: bottom,
+                    child: GestureDetector(
+                      onPanUpdate: (details) {
+                        setState(() {
+                          right = right! - details.delta.dx;
+                          bottom -= details.delta.dy;
+                        });
+                      },
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          FloatingActionButton(
+                            key: const Key('addNewMessage'),
+                            heroTag: 'messageBtn1',
+                            onPressed: () async {
+                              await showDialog(
+                                barrierDismissible: true,
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return BlocProvider.value(
+                                    value: _messageBloc,
+                                    child: const OutreachMessageDetailScreen(
+                                      message: OutreachMessage(
+                                        platform: 'EMAIL',
+                                        messageContent: '',
+                                        status: 'PENDING',
+                                      ),
                                     ),
-                                  ),
-                                );
-                              },
-                            );
-                          },
-                          tooltip: 'Add new message',
-                          child: const Icon(Icons.add),
-                        ),
-                        const SizedBox(height: 10),
-                      ],
+                                  );
+                                },
+                              );
+                            },
+                            tooltip: 'Add new message',
+                            child: const Icon(Icons.add),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              ],
-            );
-          }
-        }
-
-        return BlocConsumer<OutreachMessageBloc, OutreachMessageState>(
-          listener: blocListener,
-          builder: blocBuilder,
+                ],
+              ),
+            ),
+          ],
         );
       },
     );
@@ -284,28 +205,31 @@ class OutreachMessageListState extends State<OutreachMessageList> {
 
   @override
   void dispose() {
-    _scrollController.dispose();
+    _scrollController
+      ..removeListener(_onScroll)
+      ..dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
   void _onScroll() {
-    // Check if the controller is attached before accessing position properties
-    if (!_scrollController.hasClients) return;
-
-    final maxScroll = _scrollController.position.maxScrollExtent;
-    currentScroll = _scrollController.position.pixels;
-    if (!hasReachedMax &&
-        currentScroll > 0 &&
-        maxScroll - currentScroll <= _scrollThreshold) {
+    currentScroll = _scrollController.offset;
+    if (_isBottom && !hasReachedMax) {
       _messageBloc.add(
-        OutreachMessageLoad(
-          start: messages.length,
-        ),
+        OutreachMessageLoad(start: messages.length),
       );
     }
   }
+
+  bool get _isBottom {
+    if (!_scrollController.hasClients) return false;
+    final maxScroll = _scrollController.position.maxScrollExtent;
+    final currentScroll = _scrollController.offset;
+    return currentScroll >= (maxScroll * 0.9);
+  }
 }
 
+/// Search dialog for outreach messages
 class SearchOutreachMessageList extends StatefulWidget {
   const SearchOutreachMessageList({super.key});
 

@@ -14,7 +14,6 @@ export 'src/screens/platform_config_list_screen.dart';
 export 'src/screens/platform_config_detail_screen.dart';
 export 'src/screens/outreach_message_list.dart';
 export 'src/screens/outreach_message_detail_screen.dart';
-export 'src/screens/search_campaign_list.dart';
 
 // Widget exports
 export 'src/widgets/campaign_metrics_card.dart';

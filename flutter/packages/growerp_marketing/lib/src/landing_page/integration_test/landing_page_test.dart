@@ -151,7 +151,7 @@ class LandingPageTest {
 
       // Get allocated ID for new pages
       if (page.pseudoId == null) {
-        await CommonTest.tapByKey(tester, 'item0',
+        await CommonTest.tapByKey(tester, 'title0',
             seconds: CommonTest.waitTime);
         var id = CommonTest.getTextField('topHeader').split('#')[1].trim();
         page = page.copyWith(pseudoId: id);
@@ -161,7 +161,14 @@ class LandingPageTest {
       newPages.add(page);
     }
 
+    await clearSearch(tester);
     await PersistFunctions.persistTest(test.copyWith(landingPages: newPages));
+  }
+
+  /// Clear the search field to show all items
+  static Future<void> clearSearch(WidgetTester tester) async {
+    await CommonTest.enterText(tester, 'searchField', '');
+    await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
   }
 
   static Future<void> checkLandingPages(WidgetTester tester) async {
@@ -217,6 +224,7 @@ class LandingPageTest {
 
       await CommonTest.tapByKey(tester, 'cancel');
     }
+    await clearSearch(tester);
   }
 
   static Future<void> addPageSections(

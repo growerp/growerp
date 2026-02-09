@@ -70,6 +70,8 @@ class AssessmentBloc extends Bloc<AssessmentEvent, AssessmentState> {
         start: start,
         limit: event.limit,
         statusId: event.statusId,
+        searchString:
+            event.searchString.isNotEmpty ? event.searchString : null,
       );
 
       emit(state.copyWith(

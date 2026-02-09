@@ -12,30 +12,19 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
-import 'package:responsive_framework/responsive_framework.dart';
-import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
 
 import '../bloc/landing_page_bloc.dart';
 import '../bloc/landing_page_event.dart';
 import '../bloc/landing_page_state.dart';
 import 'generate_landing_page_dialog.dart';
 import 'landing_page_detail_screen.dart';
-import 'landing_page_list_table_def.dart';
+import 'landing_page_list_styled_data.dart';
 
-// Table padding and background decoration
-const landingPagePadding = SpanPadding(trailing: 5, leading: 5);
-
-SpanDecoration? getLandingPageBackGround(BuildContext context, int index) {
-  return index == 0
-      ? SpanDecoration(color: Theme.of(context).colorScheme.tertiaryContainer)
-      : null;
-}
-
+/// List screen for Landing Pages
 class LandingPageList extends StatefulWidget {
   const LandingPageList({super.key});
 
@@ -45,15 +34,16 @@ class LandingPageList extends StatefulWidget {
 
 class LandingPageListState extends State<LandingPageList> {
   final _scrollController = ScrollController();
-  final _horizontalController = ScrollController();
-  final double _scrollThreshold = 100.0;
+  final _searchController = TextEditingController();
   late LandingPageBloc _landingPageBloc;
+  late AuthBloc _authBloc;
   List<LandingPage> landingPages = const <LandingPage>[];
   bool hasReachedMax = false;
   late double bottom;
   double? right;
   double currentScroll = 0;
-  late AuthBloc _authBloc;
+  String searchString = '';
+  bool _isLoading = true;
 
   @override
   void initState() {
@@ -67,264 +57,198 @@ class LandingPageListState extends State<LandingPageList> {
 
   @override
   Widget build(BuildContext context) {
-    final isPhone = ResponsiveBreakpoints.of(context).isMobile;
+    final isPhone = isAPhone(context);
     right = right ?? (isPhone ? 20 : 50);
 
-    return Builder(
-      builder: (BuildContext context) {
-        Widget tableView() {
-          if (landingPages.isEmpty) {
-            return const Center(
-              child: Text(
-                'No landing pages found',
-                style: TextStyle(fontSize: 20.0),
-              ),
-            );
-          }
+    Widget tableView() {
+      // Build rows for StyledDataTable
+      final rows = landingPages.map((page) {
+        final index = landingPages.indexOf(page);
+        return getLandingPageListRow(
+          context: context,
+          page: page,
+          index: index,
+          bloc: _landingPageBloc,
+        );
+      }).toList();
 
-          // get table data formatted for tableView
-          var (
-            List<List<TableViewCell>> tableViewCells,
-            List<double> fieldWidths,
-            double? rowHeight,
-          ) = get2dTableData<LandingPage>(
-            getLandingPageListTableData,
-            bloc: _landingPageBloc,
-            classificationId: 'AppAdmin',
+      return StyledDataTable(
+        columns: getLandingPageListColumns(context),
+        rows: rows,
+        isLoading: _isLoading && landingPages.isEmpty,
+        scrollController: _scrollController,
+        rowHeight: isPhone ? 72 : 56,
+        onRowTap: (index) {
+          showDialog(
+            barrierDismissible: true,
             context: context,
-            items: landingPages,
-          );
-
-          return TableView.builder(
-            diagonalDragBehavior: DiagonalDragBehavior.free,
-            verticalDetails: ScrollableDetails.vertical(
-              controller: _scrollController,
-            ),
-            horizontalDetails: ScrollableDetails.horizontal(
-              controller: _horizontalController,
-            ),
-            cellBuilder: (context, vicinity) =>
-                tableViewCells[vicinity.row][vicinity.column],
-            columnBuilder: (index) => index >= tableViewCells[0].length
-                ? null
-                : TableSpan(
-                    padding: landingPagePadding,
-                    backgroundDecoration: getLandingPageBackGround(
-                      context,
-                      index,
-                    ),
-                    extent: FixedTableSpanExtent(fieldWidths[index]),
-                  ),
-            pinnedColumnCount: 1,
-            rowBuilder: (index) => index >= tableViewCells.length
-                ? null
-                : TableSpan(
-                    padding: landingPagePadding,
-                    backgroundDecoration: getLandingPageBackGround(
-                      context,
-                      index,
-                    ),
-                    extent: FixedTableSpanExtent(rowHeight!),
-                    recognizerFactories: <Type, GestureRecognizerFactory>{
-                      TapGestureRecognizer:
-                          GestureRecognizerFactoryWithHandlers<
-                              TapGestureRecognizer>(
-                        () => TapGestureRecognizer(),
-                        (TapGestureRecognizer t) => t.onTap = () => showDialog(
-                              barrierDismissible: true,
-                              context: context,
-                              builder: (BuildContext context) {
-                                return index > landingPages.length
-                                    ? const BottomLoader()
-                                    : Dismissible(
-                                        key: const Key('xxxxxx'),
-                                        direction: DismissDirection.startToEnd,
-                                        child: BlocProvider.value(
-                                          value: _landingPageBloc,
-                                          child: LandingPageDetailScreen(
-                                            landingPage:
-                                                landingPages[index - 1],
-                                          ),
-                                        ),
-                                      );
-                              },
-                            ),
-                      ),
-                    },
-                  ),
-            pinnedRowCount: 1,
-          );
-        }
-
-        blocListener(context, state) {
-          if (state.status == LandingPageStatus.failure) {
-            HelperFunctions.showMessage(
-              context,
-              '${state.message}',
-              Colors.red,
-            );
-          }
-          if (state.status == LandingPageStatus.success) {
-            if ((state.message ?? '').isNotEmpty) {
-              HelperFunctions.showMessage(
-                context,
-                state.message!,
-                Colors.green,
-              );
-            }
-          }
-        }
-
-        blocBuilder(context, state) {
-          if (state.status == LandingPageStatus.failure) {
-            return const FatalErrorForm(
-              message: "Could not load landing pages!",
-            );
-          } else {
-            landingPages = state.landingPages;
-            if (landingPages.isNotEmpty && _scrollController.hasClients) {
-              Future.delayed(const Duration(milliseconds: 100), () {
-                WidgetsBinding.instance.addPostFrameCallback(
-                  (_) {
-                    if (_scrollController.hasClients) {
-                      _scrollController.jumpTo(currentScroll);
-                    }
-                  },
-                );
-              });
-            }
-            hasReachedMax = state.hasReachedMax;
-            return Stack(
-              children: [
-                tableView(),
-                Positioned(
-                  right: right,
-                  bottom: bottom,
-                  child: GestureDetector(
-                    onPanUpdate: (details) {
-                      setState(() {
-                        right = right! - details.delta.dx;
-                        bottom -= details.delta.dy;
-                      });
-                    },
-                    child: Column(
-                      children: [
-                        FloatingActionButton(
-                          key: const Key("search"),
-                          heroTag: "landingPageBtn1",
-                          onPressed: () async {
-                            // find landing page id to show
-                            await showDialog(
-                              barrierDismissible: true,
-                              context: context,
-                              builder: (BuildContext context) {
-                                return BlocProvider.value(
-                                  value: _landingPageBloc,
-                                  child: const SearchLandingPageList(),
-                                );
-                              },
-                            ).then(
-                              (value) async => value != null
-                                  ? await showDialog(
-                                      barrierDismissible: true,
-                                      context: context,
-                                      builder: (BuildContext context) {
-                                        return BlocProvider.value(
-                                          value: _landingPageBloc,
-                                          child: LandingPageDetailScreen(
-                                            landingPage: value,
-                                          ),
-                                        );
-                                      },
-                                    )
-                                  : const SizedBox.shrink(),
-                            );
-                          },
-                          child: const Icon(Icons.search),
-                        ),
-                        const SizedBox(height: 10),
-                        FloatingActionButton(
-                          key: const Key("addNewLandingPage"),
-                          heroTag: "landingPageBtn2",
-                          onPressed: () async {
-                            await showDialog(
-                              barrierDismissible: true,
-                              context: context,
-                              builder: (BuildContext context) {
-                                return BlocProvider.value(
-                                  value: _landingPageBloc,
-                                  child: const LandingPageDetailScreen(
-                                    landingPage: LandingPage(
-                                      title: '',
-                                      status: 'DRAFT',
-                                    ),
-                                  ),
-                                );
-                              },
-                            );
-                          },
-                          tooltip: 'Add new landing page',
-                          child: const Icon(Icons.add),
-                        ),
-                        const SizedBox(height: 10),
-                        FloatingActionButton(
-                          key: const Key("generateAILandingPage"),
-                          heroTag: "landingPageBtn3",
-                          onPressed: () async {
-                            // Get ownerPartyId from the stored auth bloc
-                            final authState = _authBloc.state;
-
-                            if (authState.status != AuthStatus.authenticated) {
-                              if (mounted) {
-                                HelperFunctions.showMessage(
-                                  context,
-                                  'Error: Authentication required. Please log in.',
-                                  Colors.red,
-                                );
-                              }
-                              return;
-                            }
-
-                            if (!mounted) return;
-                            await showDialog(
-                              barrierDismissible: false,
-                              context: context,
-                              builder: (BuildContext dialogContext) {
-                                return GenerateLandingPageDialog(
-                                  onSuccess: (landingPage) {
-                                    // Refresh the list
-                                    _landingPageBloc
-                                        .add(const LandingPageLoad());
-
-                                    // Show success message
-                                    if (mounted) {
-                                      HelperFunctions.showMessage(
-                                        context,
-                                        'Landing page "${landingPage.title}" created successfully!',
-                                        Colors.green,
-                                      );
-                                    }
-                                  },
-                                );
-                              },
-                            );
-                          },
-                          tooltip: 'Generate Landing Page with AI',
-                          child: const Icon(Icons.auto_awesome),
-                        ),
-                        const SizedBox(height: 10),
-                      ],
-                    ),
+            builder: (BuildContext context) {
+              return Dismissible(
+                key: const Key('landingPageDetailScreen'),
+                direction: DismissDirection.startToEnd,
+                child: BlocProvider.value(
+                  value: _landingPageBloc,
+                  child: LandingPageDetailScreen(
+                    landingPage: landingPages[index],
                   ),
                 ),
-              ],
+              );
+            },
+          );
+        },
+      );
+    }
+
+    return BlocConsumer<LandingPageBloc, LandingPageState>(
+      listener: (context, state) {
+        if (state.status == LandingPageStatus.failure) {
+          HelperFunctions.showMessage(
+            context,
+            '${state.message}',
+            Colors.red,
+          );
+        }
+        if (state.status == LandingPageStatus.success) {
+          if ((state.message ?? '').isNotEmpty) {
+            HelperFunctions.showMessage(
+              context,
+              state.message!,
+              Colors.green,
             );
           }
         }
+      },
+      builder: (context, state) {
+        // Update loading state
+        _isLoading = state.status == LandingPageStatus.loading;
 
-        return BlocConsumer<LandingPageBloc, LandingPageState>(
-          listener: blocListener,
-          builder: blocBuilder,
+        if (state.status == LandingPageStatus.failure && landingPages.isEmpty) {
+          return const FatalErrorForm(
+            message: 'Could not load landing pages!',
+          );
+        }
+
+        landingPages = state.landingPages;
+        if (landingPages.isNotEmpty && _scrollController.hasClients) {
+          Future.delayed(const Duration(milliseconds: 100), () {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (_scrollController.hasClients) {
+                _scrollController.jumpTo(currentScroll);
+              }
+            });
+          });
+        }
+        hasReachedMax = state.hasReachedMax;
+
+        return Column(
+          children: [
+            // Filter bar with search
+            ListFilterBar(
+              searchHint: 'Search landing pages...',
+              searchController: _searchController,
+              onSearchChanged: (value) {
+                searchString = value;
+                _landingPageBloc.add(
+                  LandingPageLoad(searchString: value),
+                );
+              },
+            ),
+            // Main content area with StyledDataTable
+            Expanded(
+              child: Stack(
+                children: [
+                  tableView(),
+                  Positioned(
+                    right: right,
+                    bottom: bottom,
+                    child: GestureDetector(
+                      onPanUpdate: (details) {
+                        setState(() {
+                          right = right! - details.delta.dx;
+                          bottom -= details.delta.dy;
+                        });
+                      },
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          FloatingActionButton(
+                            key: const Key('addNewLandingPage'),
+                            heroTag: 'landingPageBtn1',
+                            onPressed: () async {
+                              await showDialog(
+                                barrierDismissible: true,
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return BlocProvider.value(
+                                    value: _landingPageBloc,
+                                    child: const LandingPageDetailScreen(
+                                      landingPage: LandingPage(
+                                        title: '',
+                                        status: 'DRAFT',
+                                      ),
+                                    ),
+                                  );
+                                },
+                              );
+                            },
+                            tooltip: 'Add new landing page',
+                            child: const Icon(Icons.add),
+                          ),
+                          const SizedBox(height: 10),
+                          FloatingActionButton(
+                            key: const Key('generateAILandingPage'),
+                            heroTag: 'landingPageBtn2',
+                            onPressed: () async {
+                              // Get ownerPartyId from the stored auth bloc
+                              final authState = _authBloc.state;
+
+                              if (authState.status !=
+                                  AuthStatus.authenticated) {
+                                if (mounted) {
+                                  HelperFunctions.showMessage(
+                                    context,
+                                    'Error: Authentication required. Please log in.',
+                                    Colors.red,
+                                  );
+                                }
+                                return;
+                              }
+
+                              if (!mounted) return;
+                              await showDialog(
+                                barrierDismissible: false,
+                                context: context,
+                                builder: (BuildContext dialogContext) {
+                                  return GenerateLandingPageDialog(
+                                    onSuccess: (landingPage) {
+                                      // Refresh the list
+                                      _landingPageBloc
+                                          .add(const LandingPageLoad());
+
+                                      // Show success message
+                                      if (mounted) {
+                                        HelperFunctions.showMessage(
+                                          context,
+                                          'Landing page "${landingPage.title}" created successfully!',
+                                          Colors.green,
+                                        );
+                                      }
+                                    },
+                                  );
+                                },
+                              );
+                            },
+                            tooltip: 'Generate Landing Page with AI',
+                            child: const Icon(Icons.auto_awesome),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         );
       },
     );
@@ -332,134 +256,27 @@ class LandingPageListState extends State<LandingPageList> {
 
   @override
   void dispose() {
-    _scrollController.dispose();
+    _scrollController
+      ..removeListener(_onScroll)
+      ..dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
   void _onScroll() {
-    // Check if the controller is attached before accessing position properties
-    if (!_scrollController.hasClients) return;
-
-    final maxScroll = _scrollController.position.maxScrollExtent;
-    currentScroll = _scrollController.position.pixels;
-    if (!hasReachedMax &&
-        currentScroll > 0 &&
-        maxScroll - currentScroll <= _scrollThreshold) {
+    currentScroll = _scrollController.offset;
+    if (_isBottom && !hasReachedMax) {
       _landingPageBloc.add(
         LandingPageLoad(
-          start: landingPages.length,
-        ),
+            start: landingPages.length, searchString: searchString),
       );
     }
   }
-}
 
-class SearchLandingPageList extends StatefulWidget {
-  const SearchLandingPageList({super.key});
-
-  @override
-  SearchLandingPageListState createState() => SearchLandingPageListState();
-}
-
-class SearchLandingPageListState extends State<SearchLandingPageList> {
-  final TextEditingController searchBoxController = TextEditingController();
-  final FocusNode searchFocusNode = FocusNode();
-  late LandingPageBloc _landingPageBloc;
-
-  @override
-  void initState() {
-    super.initState();
-    _landingPageBloc = context.read<LandingPageBloc>();
-  }
-
-  @override
-  void dispose() {
-    searchBoxController.dispose();
-    searchFocusNode.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Dialog(
-      key: const Key('SearchLandingPageDialog'),
-      insetPadding: const EdgeInsets.all(20),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-      child: popUp(
-        context: context,
-        title: 'Search Landing Pages',
-        child: Column(
-          children: [
-            TextFormField(
-              key: const Key('searchField'),
-              controller: searchBoxController,
-              focusNode: searchFocusNode,
-              textInputAction: TextInputAction.search,
-              autofocus: true,
-              decoration: InputDecoration(
-                labelText: 'Search landing pages',
-                suffixIcon: IconButton(
-                  icon: const Icon(Icons.clear),
-                  onPressed: () {
-                    searchBoxController.clear();
-                    _landingPageBloc.add(
-                      const LandingPageSearchRequested(query: ''),
-                    );
-                  },
-                ),
-              ),
-              onFieldSubmitted: (value) {
-                _landingPageBloc.add(
-                  LandingPageSearchRequested(query: value),
-                );
-              },
-            ),
-            const SizedBox(height: 20),
-            Expanded(
-              child: BlocBuilder<LandingPageBloc, LandingPageState>(
-                builder: (context, state) {
-                  final searchStatus = state.searchStatus;
-                  if (searchStatus == LandingPageStatus.loading) {
-                    return const LoadingIndicator();
-                  }
-                  if (searchStatus == LandingPageStatus.failure) {
-                    return Center(
-                      child: Text(
-                        state.searchError ?? 'Search failed, please try again.',
-                        textAlign: TextAlign.center,
-                      ),
-                    );
-                  }
-                  if (state.searchResults.isEmpty) {
-                    final message = searchStatus == LandingPageStatus.initial
-                        ? 'Enter a search term to begin.'
-                        : 'No landing pages matched your search.';
-                    return Center(
-                      child: Text(message),
-                    );
-                  }
-                  return ListView.builder(
-                    itemCount: state.searchResults.length,
-                    itemBuilder: (context, index) {
-                      final landingPage = state.searchResults[index];
-                      return ListTile(
-                        key: Key('landingPageSearchItem$index'),
-                        title: Text(landingPage.title),
-                        subtitle: Text(
-                          landingPage.pseudoId ?? 'N/A',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        onTap: () => Navigator.of(context).pop(landingPage),
-                      );
-                    },
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+  bool get _isBottom {
+    if (!_scrollController.hasClients) return false;
+    final maxScroll = _scrollController.position.maxScrollExtent;
+    final currentScroll = _scrollController.offset;
+    return currentScroll >= (maxScroll * 0.9);
   }
 }

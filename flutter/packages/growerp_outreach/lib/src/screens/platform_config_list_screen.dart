@@ -12,26 +12,16 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
-import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
 
 import '../bloc/platform_config_bloc.dart';
 import 'platform_config_detail_screen.dart';
-import 'platform_config_list_table_def.dart';
+import 'platform_config_list_styled_data.dart';
 
-// Table padding and background decoration
-const platformConfigPadding = SpanPadding(trailing: 5, leading: 5);
-
-SpanDecoration? getPlatformConfigBackGround(BuildContext context, int index) {
-  return index == 0
-      ? SpanDecoration(color: Theme.of(context).colorScheme.tertiaryContainer)
-      : null;
-}
-
+/// List screen for Platform Configurations
 class PlatformConfigListScreen extends StatefulWidget {
   const PlatformConfigListScreen({super.key});
 
@@ -42,9 +32,9 @@ class PlatformConfigListScreen extends StatefulWidget {
 
 class _PlatformConfigListScreenState extends State<PlatformConfigListScreen> {
   final _scrollController = ScrollController();
-  final _horizontalController = ScrollController();
   late PlatformConfigBloc _platformConfigBloc;
   List<PlatformConfigData> platformData = [];
+  bool _isLoading = true;
 
   @override
   void initState() {
@@ -55,6 +45,48 @@ class _PlatformConfigListScreenState extends State<PlatformConfigListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isPhone = isAPhone(context);
+
+    Widget tableView() {
+      // Build rows for StyledDataTable
+      final rows = platformData.map((data) {
+        final index = platformData.indexOf(data);
+        return getPlatformConfigListRow(
+          context: context,
+          data: data,
+          index: index,
+          bloc: _platformConfigBloc,
+        );
+      }).toList();
+
+      return StyledDataTable(
+        columns: getPlatformConfigListColumns(context),
+        rows: rows,
+        isLoading: _isLoading && platformData.isEmpty,
+        scrollController: _scrollController,
+        rowHeight: isPhone ? 72 : 56,
+        onRowTap: (index) async {
+          final data = platformData[index];
+          await showDialog(
+            barrierDismissible: true,
+            context: context,
+            builder: (BuildContext dialogContext) {
+              return BlocProvider.value(
+                value: _platformConfigBloc,
+                child: PlatformConfigDetailScreen(
+                  platform: data.platform,
+                  config: data.config,
+                ),
+              );
+            },
+          );
+          if (mounted) {
+            _platformConfigBloc.add(const PlatformConfigFetch());
+          }
+        },
+      );
+    }
+
     return Scaffold(
       key: const Key('PlatformConfigListScreen'),
       body: BlocConsumer<PlatformConfigBloc, PlatformConfigState>(
@@ -76,9 +108,8 @@ class _PlatformConfigListScreenState extends State<PlatformConfigListScreen> {
           }
         },
         builder: (context, state) {
-          if (state.status == PlatformConfigStatus.loading) {
-            return const Center(child: CircularProgressIndicator());
-          }
+          // Update loading state
+          _isLoading = state.status == PlatformConfigStatus.loading;
 
           // Build platform data list
           platformData = OutreachPlatform.values.map((platform) {
@@ -90,101 +121,27 @@ class _PlatformConfigListScreenState extends State<PlatformConfigListScreen> {
             return PlatformConfigData(platform: platform, config: config);
           }).toList();
 
-          return _buildTableView(context);
+          return Column(
+            children: [
+              // Header bar
+              const ListFilterBar(
+                searchHint: 'Platform configurations',
+                showSearch: false,
+              ),
+              // Main content area with StyledDataTable
+              Expanded(
+                child: tableView(),
+              ),
+            ],
+          );
         },
       ),
-    );
-  }
-
-  Widget _buildTableView(BuildContext context) {
-    if (platformData.isEmpty) {
-      return const Center(
-        child: Text(
-          'No platforms found',
-          style: TextStyle(fontSize: 20.0),
-        ),
-      );
-    }
-
-    // Get table data formatted for tableView
-    var (
-      List<List<TableViewCell>> tableViewCells,
-      List<double> fieldWidths,
-      double? rowHeight,
-    ) = get2dTableData<PlatformConfigData>(
-      getPlatformConfigListTableData,
-      bloc: _platformConfigBloc,
-      classificationId: 'AppAdmin',
-      context: context,
-      items: platformData,
-    );
-
-    return TableView.builder(
-      diagonalDragBehavior: DiagonalDragBehavior.free,
-      verticalDetails: ScrollableDetails.vertical(
-        controller: _scrollController,
-      ),
-      horizontalDetails: ScrollableDetails.horizontal(
-        controller: _horizontalController,
-      ),
-      cellBuilder: (context, vicinity) =>
-          tableViewCells[vicinity.row][vicinity.column],
-      columnBuilder: (index) => index >= tableViewCells[0].length
-          ? null
-          : TableSpan(
-              padding: platformConfigPadding,
-              backgroundDecoration: getPlatformConfigBackGround(
-                context,
-                index,
-              ),
-              extent: FixedTableSpanExtent(fieldWidths[index]),
-            ),
-      pinnedColumnCount: 1,
-      rowBuilder: (index) => index >= tableViewCells.length
-          ? null
-          : TableSpan(
-              padding: platformConfigPadding,
-              backgroundDecoration: getPlatformConfigBackGround(
-                context,
-                index,
-              ),
-              extent: FixedTableSpanExtent(rowHeight!),
-              recognizerFactories: <Type, GestureRecognizerFactory>{
-                TapGestureRecognizer:
-                    GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
-                  () => TapGestureRecognizer(),
-                  (TapGestureRecognizer t) => t.onTap = () async {
-                    if (index > 0 && index <= platformData.length) {
-                      final data = platformData[index - 1];
-                      await showDialog(
-                        barrierDismissible: true,
-                        context: context,
-                        builder: (BuildContext dialogContext) {
-                          return BlocProvider.value(
-                            value: _platformConfigBloc,
-                            child: PlatformConfigDetailScreen(
-                              platform: data.platform,
-                              config: data.config,
-                            ),
-                          );
-                        },
-                      );
-                      if (mounted) {
-                        _platformConfigBloc.add(const PlatformConfigFetch());
-                      }
-                    }
-                  },
-                ),
-              },
-            ),
-      pinnedRowCount: 1,
     );
   }
 
   @override
   void dispose() {
     _scrollController.dispose();
-    _horizontalController.dispose();
     super.dispose();
   }
 }

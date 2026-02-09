@@ -103,26 +103,25 @@ class OutreachCampaignTest {
     );
   }
 
-  /// Opens the search dialog and searches for a campaign by name.
-  /// Then clicks on the first search result to open the detail dialog.
+  /// Searches for a campaign using the inline ListFilterBar search
+  /// and taps the first result to open the detail dialog.
   static Future<void> searchAndOpenCampaign(
     WidgetTester tester,
     String searchString,
   ) async {
-    // Tap on search FAB
+    // Enter search text in ListFilterBar's search field
     await CommonTest.tapByKey(tester, 'search');
-    await tester.pumpAndSettle();
-
-    // Enter search text in search field
     await CommonTest.enterText(tester, 'searchField', searchString);
-    await tester.pumpAndSettle();
-
-    // Submit the search (press Enter)
-    await tester.testTextInput.receiveAction(TextInputAction.search);
     await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
 
-    // Tap on the first search result
-    await CommonTest.tapByKey(tester, 'campaignSearchItem0');
+    // Tap on the first result row's name to open the detail dialog
+    await CommonTest.tapByKey(tester, 'name0');
+    await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
+  }
+
+  /// Clears the search field to reset the list to show all campaigns.
+  static Future<void> clearSearch(WidgetTester tester) async {
+    await CommonTest.enterText(tester, 'searchField', '');
     await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
   }
 
@@ -215,6 +214,11 @@ class OutreachCampaignTest {
       // Wait for dialog to close and list to refresh
       await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
 
+      // Clear search to show full list
+      if (isExisting) {
+        await clearSearch(tester);
+      }
+
       // Get allocated pseudoId from the list for new campaigns
       if (!isExisting) {
         // The new campaign should be at index 0 in the list (newest first by -fromDate)
@@ -296,6 +300,9 @@ class OutreachCampaignTest {
       // Close dialog by tapping cancel button
       await CommonTest.tapByKey(tester, 'cancel');
       await tester.pumpAndSettle();
+
+      // Clear search to reset list for next campaign
+      await clearSearch(tester);
     }
   }
 }

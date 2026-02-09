@@ -130,7 +130,7 @@ class AssessmentTest {
 
       // Get allocated ID for new assessments
       if (assessment.pseudoId == null) {
-        await CommonTest.tapByKey(tester, 'item0',
+        await CommonTest.tapByKey(tester, 'name0',
             seconds: CommonTest.waitTime);
         var id = CommonTest.getTextField('topHeader').split('#')[1].trim();
         assessment = assessment.copyWith(pseudoId: id);
@@ -140,9 +140,16 @@ class AssessmentTest {
       newAssessments.add(assessment);
     }
 
+    await clearSearch(tester);
     await PersistFunctions.persistTest(
       test.copyWith(assessments: newAssessments),
     );
+  }
+
+  /// Clear the search field to show all items
+  static Future<void> clearSearch(WidgetTester tester) async {
+    await CommonTest.enterText(tester, 'searchField', '');
+    await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
   }
 
   static Future<void> checkAssessments(WidgetTester tester) async {
@@ -176,5 +183,6 @@ class AssessmentTest {
 
       await CommonTest.tapByKey(tester, 'cancel');
     }
+    await clearSearch(tester);
   }
 }

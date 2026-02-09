@@ -26,14 +26,16 @@ class AssessmentFetch extends AssessmentEvent {
     this.statusId,
     this.refresh = false,
     this.limit = 20,
+    this.searchString = '',
   });
 
   final String? statusId;
   final bool refresh;
   final int limit;
+  final String searchString;
 
   @override
-  List<Object?> get props => [statusId, refresh, limit];
+  List<Object?> get props => [statusId, refresh, limit, searchString];
 }
 
 class AssessmentFetchAll extends AssessmentEvent {

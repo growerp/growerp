@@ -7,14 +7,17 @@ abstract class LandingPageEvent {
 class LandingPageLoad extends LandingPageEvent {
   final int start;
   final int limit;
+  final String searchString;
 
   const LandingPageLoad({
     this.start = 0,
     this.limit = 20,
+    this.searchString = '',
   });
 
   @override
-  String toString() => 'LandingPageLoad(start: $start, limit: $limit)';
+  String toString() =>
+      'LandingPageLoad(start: $start, limit: $limit, searchString: $searchString)';
 }
 
 class LandingPageSearchRequested extends LandingPageEvent {

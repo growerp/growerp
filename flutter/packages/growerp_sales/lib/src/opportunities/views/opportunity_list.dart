@@ -16,11 +16,10 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_models/growerp_models.dart';
-import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
-import 'package:flutter/gestures.dart';
 import 'package:growerp_sales/l10n/generated/sales_localizations.dart';
+
 import '../bloc/opportunity_bloc.dart';
-import '../widgets/widgets.dart';
+import '../widgets/opportunity_list_styled_data.dart';
 import 'views.dart';
 
 class OpportunityList extends StatefulWidget {
@@ -32,12 +31,16 @@ class OpportunityList extends StatefulWidget {
 
 class OpportunitiesState extends State<OpportunityList> {
   final _scrollController = ScrollController();
-  final _horizontalScrollController = ScrollController();
+  final _searchController = TextEditingController();
   late OpportunityBloc _opportunityBloc;
-  late List<Opportunity> opportunities;
+  List<Opportunity> opportunities = const <Opportunity>[];
   late double bottom;
   double? right;
   late SalesLocalizations _localizations;
+  String searchString = '';
+  bool _isLoading = true;
+  bool hasReachedMax = false;
+  double currentScroll = 0;
 
   @override
   void initState() {
@@ -51,184 +54,136 @@ class OpportunitiesState extends State<OpportunityList> {
   @override
   Widget build(BuildContext context) {
     _localizations = SalesLocalizations.of(context)!;
-    right = right ?? (isAPhone(context) ? 20 : 50);
+    final isPhone = isAPhone(context);
+    right = right ?? (isPhone ? 20 : 50);
+
+    Widget tableView() {
+      // Build rows for StyledDataTable
+      final rows = opportunities.map((opportunity) {
+        final index = opportunities.indexOf(opportunity);
+        return getOpportunityListRow(
+          context: context,
+          opportunity: opportunity,
+          index: index,
+          bloc: _opportunityBloc,
+          localizations: _localizations,
+        );
+      }).toList();
+
+      return StyledDataTable(
+        columns: getOpportunityListColumns(context, _localizations),
+        rows: rows,
+        isLoading: _isLoading && opportunities.isEmpty,
+        scrollController: _scrollController,
+        rowHeight: isPhone ? 60 : 56,
+        onRowTap: (index) {
+          showDialog(
+            barrierDismissible: true,
+            context: context,
+            builder: (BuildContext context) {
+              return Dismissible(
+                key: const Key('opportunityItem'),
+                direction: DismissDirection.startToEnd,
+                child: BlocProvider.value(
+                  value: _opportunityBloc,
+                  child: OpportunityDialog(opportunities[index]),
+                ),
+              );
+            },
+          );
+        },
+      );
+    }
+
     return BlocConsumer<OpportunityBloc, OpportunityState>(
       listener: (context, state) {
         if (state.status == OpportunityStatus.failure) {
           HelperFunctions.showMessage(context, '${state.message}', Colors.red);
         }
         if (state.status == OpportunityStatus.success) {
-          HelperFunctions.showMessage(
-            context,
-            '${state.message}',
-            Colors.green,
-          );
+          if ((state.message ?? '').isNotEmpty) {
+            HelperFunctions.showMessage(
+              context,
+              '${state.message}',
+              Colors.green,
+            );
+          }
         }
       },
       builder: (context, state) {
-        switch (state.status) {
-          case OpportunityStatus.failure:
-            return Center(
-              child: Text(_localizations.fetchError(state.message!)),
-            );
-          case OpportunityStatus.success:
-            opportunities = state.opportunities;
+        // Update loading state
+        _isLoading = state.status == OpportunityStatus.loading;
 
-            Widget tableView() {
-              if (opportunities.isEmpty) {
-                return Center(
-                  heightFactor: 20,
-                  child: Text(
-                    _localizations.noOpportunities,
-                    style: const TextStyle(fontSize: 20.0),
-                  ),
-                );
+        if (state.status == OpportunityStatus.failure &&
+            opportunities.isEmpty) {
+          return Center(
+            child: Text(_localizations.fetchError(state.message ?? '')),
+          );
+        }
+
+        opportunities = state.opportunities;
+        hasReachedMax = state.hasReachedMax;
+        if (opportunities.isNotEmpty && _scrollController.hasClients) {
+          Future.delayed(const Duration(milliseconds: 100), () {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (_scrollController.hasClients) {
+                _scrollController.jumpTo(currentScroll);
               }
-              // get table data formatted for tableView
-              var (
-                List<List<TableViewCell>> tableViewCells,
-                List<double> fieldWidths,
-                double? rowHeight,
-              ) = get2dTableData<Opportunity>(
-                getTableData,
-                bloc: _opportunityBloc,
-                classificationId: 'AppAdmin',
-                context: context,
-                items: opportunities,
-              );
-              return TableView.builder(
-                diagonalDragBehavior: DiagonalDragBehavior.free,
-                verticalDetails: ScrollableDetails.vertical(
-                  controller: _scrollController,
-                ),
-                horizontalDetails: ScrollableDetails.horizontal(
-                  controller: _horizontalScrollController,
-                ),
-                cellBuilder: (context, vicinity) =>
-                    tableViewCells[vicinity.row][vicinity.column],
-                columnBuilder: (index) => index >= tableViewCells[0].length
-                    ? null
-                    : TableSpan(
-                        padding: padding,
-                        backgroundDecoration: getBackGround(context, index),
-                        extent: FixedTableSpanExtent(fieldWidths[index]),
-                      ),
-                pinnedColumnCount: 1,
-                rowBuilder: (index) => index >= tableViewCells.length
-                    ? null
-                    : TableSpan(
-                        padding: padding,
-                        backgroundDecoration: getBackGround(context, index),
-                        extent: FixedTableSpanExtent(rowHeight!),
-                        recognizerFactories: <Type, GestureRecognizerFactory>{
-                          TapGestureRecognizer:
-                              GestureRecognizerFactoryWithHandlers<
-                                TapGestureRecognizer
-                              >(
-                                () => TapGestureRecognizer(),
-                                (
-                                  TapGestureRecognizer t,
-                                ) => t.onTap = () => showDialog(
-                                  barrierDismissible: true,
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return index > state.opportunities.length
-                                        ? const BottomLoader()
-                                        : Dismissible(
-                                            key: const Key('opportunityItem'),
-                                            direction:
-                                                DismissDirection.startToEnd,
-                                            child: BlocProvider.value(
-                                              value: _opportunityBloc,
-                                              child: OpportunityDialog(
-                                                opportunities[index - 1],
-                                              ),
-                                            ),
-                                          );
-                                  },
-                                ),
-                              ),
-                        },
-                      ),
-                pinnedRowCount: 1,
-              );
-            }
-            return Stack(
-              children: [
-                tableView(),
-                Positioned(
-                  right: right,
-                  bottom: bottom,
-                  child: GestureDetector(
-                    onPanUpdate: (details) {
-                      setState(() {
-                        right = right! - details.delta.dx;
-                        bottom -= details.delta.dy;
-                      });
-                    },
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        FloatingActionButton(
-                          key: const Key("search"),
-                          heroTag: "btn1",
-                          onPressed: () async {
-                            // find findoc id to show
-                            await showDialog(
-                              barrierDismissible: true,
-                              context: context,
-                              builder: (BuildContext context) {
-                                // search separate from finDocBloc
-                                return BlocProvider.value(
+            });
+          });
+        }
+
+        return Column(
+          children: [
+            // Filter bar with search
+            ListFilterBar(
+              searchHint: _localizations.opportunitySearch,
+              searchController: _searchController,
+              onSearchChanged: (value) {
+                searchString = value;
+                _opportunityBloc.add(
+                  OpportunityFetch(refresh: true, searchString: value),
+                );
+              },
+            ),
+            // Main content area with StyledDataTable
+            Expanded(
+              child: Stack(
+                children: [
+                  tableView(),
+                  Positioned(
+                    right: right,
+                    bottom: bottom,
+                    child: GestureDetector(
+                      onPanUpdate: (details) {
+                        setState(() {
+                          right = right! - details.delta.dx;
+                          bottom -= details.delta.dy;
+                        });
+                      },
+                      child: FloatingActionButton(
+                        key: const Key('addNew'),
+                        onPressed: () async {
+                          await showDialog(
+                            barrierDismissible: true,
+                            context: context,
+                            builder: (BuildContext context) =>
+                                BlocProvider.value(
                                   value: _opportunityBloc,
-                                  child: const SearchOpportunityList(),
-                                );
-                              },
-                            ).then(
-                              (value) async => value != null && context.mounted
-                                  ?
-                                    // show detail page
-                                    await showDialog(
-                                      barrierDismissible: true,
-                                      context: context,
-                                      builder: (BuildContext context) {
-                                        return BlocProvider.value(
-                                          value: _opportunityBloc,
-                                          child: OpportunityDialog(value),
-                                        );
-                                      },
-                                    )
-                                  : const SizedBox.shrink(),
-                            );
-                          },
-                          child: const Icon(Icons.search),
-                        ),
-                        const SizedBox(height: 10),
-                        FloatingActionButton(
-                          key: const Key("addNew"),
-                          onPressed: () async {
-                            await showDialog(
-                              barrierDismissible: true,
-                              context: context,
-                              builder: (BuildContext context) =>
-                                  BlocProvider.value(
-                                    value: _opportunityBloc,
-                                    child: OpportunityDialog(Opportunity()),
-                                  ),
-                            );
-                          },
-                          tooltip: _localizations.addNew,
-                          child: const Icon(Icons.add),
-                        ),
-                      ],
+                                  child: OpportunityDialog(Opportunity()),
+                                ),
+                          );
+                        },
+                        tooltip: _localizations.addNew,
+                        child: const Icon(Icons.add),
+                      ),
                     ),
                   ),
-                ),
-              ],
-            );
-          default:
-            return const Center(child: LoadingIndicator());
-        }
+                ],
+              ),
+            ),
+          ],
+        );
       },
     );
   }
@@ -238,11 +193,15 @@ class OpportunitiesState extends State<OpportunityList> {
     _scrollController
       ..removeListener(_onScroll)
       ..dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
   void _onScroll() {
-    if (_isBottom) _opportunityBloc.add(const OpportunityFetch());
+    currentScroll = _scrollController.offset;
+    if (_isBottom && !hasReachedMax) {
+      _opportunityBloc.add(OpportunityFetch(searchString: searchString));
+    }
   }
 
   bool get _isBottom {

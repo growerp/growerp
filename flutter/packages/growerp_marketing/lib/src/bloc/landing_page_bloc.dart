@@ -40,6 +40,8 @@ class LandingPageBloc extends Bloc<LandingPageEvent, LandingPageState> {
       final result = await restClient.getLandingPages(
         start: event.start,
         limit: event.limit,
+        searchString:
+            event.searchString.isNotEmpty ? event.searchString : null,
       );
 
       final landingPages = event.start == 0

@@ -82,15 +82,20 @@ class SocialPostTest {
     );
   }
 
-  /// Custom search for social posts - opens the search dialog and finds a post by ID
+  /// Search for social posts using ListFilterBar and tap the first result
   static Future<void> doSocialPostSearch(
     WidgetTester tester, {
     required String searchString,
   }) async {
-    await CommonTest.tapByKey(tester, 'search');
     await CommonTest.enterText(tester, 'searchField', searchString);
     await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
-    await CommonTest.tapByKey(tester, 'socialPostSearchItem0');
+    await CommonTest.tapByKey(tester, 'headline0');
+    await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
+  }
+
+  /// Clear the search field to show all items
+  static Future<void> clearSearch(WidgetTester tester) async {
+    await CommonTest.enterText(tester, 'searchField', '');
     await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
   }
 
@@ -164,7 +169,7 @@ class SocialPostTest {
 
       // Get allocated ID for new social posts
       if (socialPost.pseudoId == null) {
-        await CommonTest.tapByKey(tester, 'item0',
+        await CommonTest.tapByKey(tester, 'headline0',
             seconds: CommonTest.waitTime);
         var id = CommonTest.getTextField('topHeader').split('#')[1].trim();
         socialPost = socialPost.copyWith(pseudoId: id);
@@ -174,6 +179,7 @@ class SocialPostTest {
       newSocialPosts.add(socialPost);
     }
 
+    await clearSearch(tester);
     await PersistFunctions.persistTest(
         test.copyWith(socialPosts: newSocialPosts));
   }
@@ -195,5 +201,6 @@ class SocialPostTest {
 
       await CommonTest.tapByKey(tester, 'cancel');
     }
+    await clearSearch(tester);
   }
 }
