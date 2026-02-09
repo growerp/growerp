@@ -107,6 +107,7 @@ abstract class RestClient {
     @Query('ownerPartyId') String? ownerPartyId,
     @Query('startDateTime') String? startDateTime,
     @Query('endDateTime') String? endDateTime,
+    @Query('search') String? searchString,
     @Query('start') int? start,
     @Query('limit') int? limit,
   });

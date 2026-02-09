@@ -24,6 +24,7 @@ abstract class RestRequest with _$RestRequest {
   RestRequest._();
   factory RestRequest({
     User? user,
+    String? companyName,
     @DateTimeConverter() DateTime? dateTime,
     String? restRequestName,
     String? serverIp,

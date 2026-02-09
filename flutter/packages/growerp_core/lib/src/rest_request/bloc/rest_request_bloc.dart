@@ -63,6 +63,7 @@ class RestRequestBloc extends Bloc<RestRequestEvent, RestRequestState> {
         ownerPartyId: event.ownerPartyId,
         startDateTime: event.startDateTime,
         endDateTime: event.endDateTime,
+        searchString: event.searchString,
         start: start,
         limit: event.limit,
       );

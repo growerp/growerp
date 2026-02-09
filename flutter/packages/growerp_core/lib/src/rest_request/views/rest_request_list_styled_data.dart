@@ -21,6 +21,7 @@ List<StyledColumn> getRestRequestListColumns(BuildContext context) {
   return [
     StyledColumn(header: localizations.dateTime, flex: 2),
     StyledColumn(header: localizations.user, flex: 2),
+    const StyledColumn(header: 'Company Name', flex: 2),
     const StyledColumn(header: 'Request Name', flex: 3),
     const StyledColumn(header: 'Status', flex: 1),
     const StyledColumn(header: 'Time (ms)', flex: 1),
@@ -107,6 +108,7 @@ List<Widget> getRestRequestListRow({
       '${request.user?.firstName ?? ''} ${request.user?.lastName ?? ''}',
       key: Key('user$index'),
     ),
+    Text(request.companyName ?? '', key: Key('company$index')),
     Text(
       request.restRequestName ?? '',
       key: Key('request$index'),

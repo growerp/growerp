@@ -1206,6 +1206,7 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="ownerPartyId" /><!-- filter by owner party ID -->
             <parameter name="startDateTime" /><!-- filter by start date -->
             <parameter name="endDateTime" /><!-- filter by end date -->
+            <parameter name="search" /><!-- search by user name or company name -->
             <parameter name="start" type="Integer" default-value="0" />
             <parameter name="limit" type="Integer" default-value="20" />
         </in-parameters>
@@ -1219,6 +1220,7 @@ along with this software (see the LICENSE.md file). If not, see
                         <parameter name="email" />
                         <parameter name="loginName" />
                     </parameter>
+                    <parameter name="companyName" />
                     <parameter name="dateTime" />
                     <parameter name="restRequestName" />
                     <parameter name="serverIp" />
@@ -1254,6 +1256,12 @@ along with this software (see the LICENSE.md file). If not, see
                     from="startDateTime" ignore-if-empty="true" />
                 <econdition field-name="startDateTime" operator="less-equals"
                     from="endDateTime" ignore-if-empty="true" />
+                <!-- Search by user name or company name -->
+                <econditions combine="or" ignore-if-empty="true" ignore="!search">
+                    <econdition field-name="firstName" operator="like" value="%${search}%" ignore-case="true" />
+                    <econdition field-name="lastName" operator="like" value="%${search}%" ignore-case="true" />
+                    <econdition field-name="companyName" operator="like" value="%${search}%" ignore-case="true" />
+                </econditions>
                 <order-by field-name="-startDateTime" />
             </entity-find>
 
@@ -1271,6 +1279,7 @@ along with this software (see the LICENSE.md file). If not, see
                         email: restData.emailAddress,
                         loginName: restData.loginName
                     ],
+                    companyName: restData.companyName,
                     dateTime: restData.startDateTime ? ec.l10n.format(restData.startDateTime,'yyyy-MM-dd HH:mm:ssZ') : null,
                     restRequestName: restData.artifactName ? restData.artifactName.substring(restData.artifactName.lastIndexOf('.') + 1) : null,
                     serverIp: restData.serverIpAddress,

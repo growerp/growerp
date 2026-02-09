@@ -20,6 +20,7 @@ class RestRequestList extends StatefulWidget {
 
 class RestRequestListState extends State<RestRequestList> {
   final _scrollController = ScrollController();
+  final _searchController = TextEditingController();
   final double _scrollThreshold = 100.0;
   late RestRequestBloc _restRequestBloc;
   List<RestRequest> restRequests = const <RestRequest>[];
@@ -29,6 +30,7 @@ class RestRequestListState extends State<RestRequestList> {
   double currentScroll = 0;
   CoreLocalizations? _localizations;
   bool _isLoading = true;
+  String _searchString = '';
 
   @override
   void initState() {
@@ -106,7 +108,45 @@ class RestRequestListState extends State<RestRequestList> {
           hasReachedMax = state.hasReachedMax;
           return Stack(
             children: [
-              tableView(),
+              Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: TextField(
+                      key: const Key('searchField'),
+                      controller: _searchController,
+                      decoration: InputDecoration(
+                        labelText: 'Search by user or company',
+                        prefixIcon: const Icon(Icons.search),
+                        border: const OutlineInputBorder(),
+                        suffixIcon: _searchString.isNotEmpty
+                            ? IconButton(
+                                icon: const Icon(Icons.clear),
+                                onPressed: () {
+                                  _searchController.clear();
+                                  setState(() {
+                                    _searchString = '';
+                                  });
+                                  _restRequestBloc.add(
+                                    const RestRequestFetch(refresh: true),
+                                  );
+                                },
+                              )
+                            : null,
+                      ),
+                      onChanged: (value) {
+                        setState(() {
+                          _searchString = value;
+                        });
+                        _restRequestBloc.add(
+                          RestRequestFetch(refresh: true, searchString: value),
+                        );
+                      },
+                    ),
+                  ),
+                  Expanded(child: tableView()),
+                ],
+              ),
               Positioned(
                 right: right,
                 bottom: bottom,
@@ -122,7 +162,10 @@ class RestRequestListState extends State<RestRequestList> {
                     heroTag: "restRequestBtn1",
                     onPressed: () {
                       _restRequestBloc.add(
-                        const RestRequestFetch(refresh: true),
+                        RestRequestFetch(
+                          refresh: true,
+                          searchString: _searchString,
+                        ),
                       );
                     },
                     tooltip: _localizations!.refresh,
@@ -140,6 +183,7 @@ class RestRequestListState extends State<RestRequestList> {
   @override
   void dispose() {
     _scrollController.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
