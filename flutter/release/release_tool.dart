@@ -189,8 +189,8 @@ Future<void> loadConfiguration() async {
 }
 
 void validateEnvironment() {
-  var isInFlutterDir = exists('melos.yaml');
-  var isInReleaseDir = exists('../melos.yaml');
+  var isInFlutterDir = exists('melos.yaml') || exists('pubspec.yaml');
+  var isInReleaseDir = exists('../melos.yaml') || exists('../pubspec.yaml');
 
   if (!isInFlutterDir && !isInReleaseDir) {
     print(

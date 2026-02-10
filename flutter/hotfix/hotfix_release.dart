@@ -30,8 +30,8 @@ void main() async {
   print("=== GrowERP Hot Fix Release Tool ===\n");
 
   // Ensure we're in the right directory and git repo
-  var isInFlutterDir = exists('melos.yaml');
-  var isInHotfixDir = exists('../melos.yaml');
+  var isInFlutterDir = exists('melos.yaml') || exists('pubspec.yaml');
+  var isInHotfixDir = exists('../melos.yaml') || exists('../pubspec.yaml');
 
   if (!isInFlutterDir && !isInHotfixDir) {
     print(

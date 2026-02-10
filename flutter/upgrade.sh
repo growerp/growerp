@@ -33,11 +33,18 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 print_info "Starting major version upgrade for all packages..."
 
-# Get list of packages from melos.yaml
-mapfile -t packages < <(yq eval '.packages[]' "$SCRIPT_DIR/melos.yaml")
+# Get list of packages from melos.yaml or pubspec.yaml
+if [ -f "$SCRIPT_DIR/melos.yaml" ]; then
+    mapfile -t packages < <(yq eval '.packages[]' "$SCRIPT_DIR/melos.yaml")
+elif [ -f "$SCRIPT_DIR/pubspec.yaml" ]; then
+    mapfile -t packages < <(yq eval '.melos.packages[]' "$SCRIPT_DIR/pubspec.yaml")
+else
+    print_error "No melos.yaml or pubspec.yaml with melos config found"
+    exit 1
+fi
 
 if [ ${#packages[@]} -eq 0 ]; then
-    print_error "No packages found in melos.yaml"
+    print_error "No packages found in melos.yaml or pubspec.yaml"
     exit 1
 fi
 

@@ -89,7 +89,9 @@ melos:
       description: Analyse all packages for possible problems.
     build:
       description: build_runner build all modules.
-      exec: dart run build_runner build --delete-conflicting-outputs
+      run: dart run build_runner build --delete-conflicting-outputs
+      exec:
+        concurrency: 1
       packageFilters:
         dependsOn: build_runner
     buildclean:

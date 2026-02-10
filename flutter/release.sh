@@ -33,9 +33,9 @@ validate_environment() {
     echo "Validating environment..."
     
     # Check if we're in the right directory
-    if [[ -f "melos.yaml" ]]; then
+    if [[ -f "melos.yaml" || -f "pubspec.yaml" ]]; then
         print_status "Running from flutter directory"
-    elif [[ -f "../melos.yaml" && -f "release_tool.dart" ]]; then
+    elif [[ (-f "../melos.yaml" || -f "../pubspec.yaml") && -f "release_tool.dart" ]]; then
         print_status "Running from release directory"
         cd ..
     else

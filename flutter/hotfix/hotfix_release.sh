@@ -9,10 +9,10 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DART_SCRIPT="$SCRIPT_DIR/hotfix_release.dart"
 
 # Check if we're in the flutter directory or hotfix subdirectory
-if [[ -f "../melos.yaml" ]]; then
+if [[ -f "../melos.yaml" || -f "../pubspec.yaml" ]]; then
     # We're in the hotfix subdirectory, move to flutter directory
     cd ..
-elif [[ ! -f "melos.yaml" ]]; then
+elif [[ ! -f "melos.yaml" && ! -f "pubspec.yaml" ]]; then
     echo "Error: This script must be run from the flutter directory or flutter/hotfix directory"
     echo "Current directory: $(pwd)"
     echo "Expected to find: melos.yaml (in flutter dir) or ../melos.yaml (in hotfix dir)"
