@@ -1,7 +1,7 @@
 name: support
 resolution: workspace
 description: System support app, for the GrowERP system
-version: 1.13.12+11
+version: 1.14.0+11
 repository: https://github.com/growerp/growerp
 homepage: https://www.growerp.com
 publish_to: none
