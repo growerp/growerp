@@ -40,9 +40,6 @@ PODS:
     - Flutter
   - package_info_plus (0.4.5):
     - Flutter
-  - path_provider_foundation (0.0.1):
-    - Flutter
-    - FlutterMacOS
   - printing (1.0.0):
     - Flutter
   - SDWebImage (5.13.2):
@@ -61,7 +58,6 @@ DEPENDENCIES:
   - image_picker_ios (from `.symlinks/plugins/image_picker_ios/ios`)
   - integration_test (from `.symlinks/plugins/integration_test/ios`)
   - package_info_plus (from `.symlinks/plugins/package_info_plus/ios`)
-  - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
   - printing (from `.symlinks/plugins/printing/ios`)
   - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
   - url_launcher_ios (from `.symlinks/plugins/url_launcher_ios/ios`)
@@ -84,8 +80,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/integration_test/ios"
   package_info_plus:
     :path: ".symlinks/plugins/package_info_plus/ios"
-  path_provider_foundation:
-    :path: ".symlinks/plugins/path_provider_foundation/darwin"
   printing:
     :path: ".symlinks/plugins/printing/ios"
   shared_preferences_foundation:
@@ -101,7 +95,6 @@ SPEC CHECKSUMS:
   image_picker_ios: 4f2f91b01abdb52842a8e277617df877e40f905b
   integration_test: 252f60fa39af5e17c3aa9899d35d908a0721b573
   package_info_plus: c0502532a26c7662a62a356cebe2692ec5fe4ec4
-  path_provider_foundation: 0b743cbb62d8e47eab856f09262bb8c1ddcfe6ba
   printing: 233e1b73bd1f4a05615548e9b5a324c98588640b
   SDWebImage: 72f86271a6f3139cc7e4a89220946489d4b9a866
   shared_preferences_foundation: 5086985c1d43c5ba4d5e69a4e8083a389e2909e6
