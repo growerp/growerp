@@ -105,6 +105,7 @@ class SupportApp extends StatefulWidget {
 
 class _SupportAppState extends State<SupportApp> {
   late MenuConfigBloc _menuConfigBloc;
+  final DeepLinkService _deepLinkService = DeepLinkService();
 
   @override
   void initState() {
@@ -118,6 +119,7 @@ class _SupportAppState extends State<SupportApp> {
     widget.chatClient.close();
     widget.notificationClient.close();
     _menuConfigBloc.close();
+    _deepLinkService.dispose();
     super.dispose();
   }
 
@@ -137,6 +139,7 @@ class _SupportAppState extends State<SupportApp> {
               config: DynamicRouterConfig(
                 widgetLoader: WidgetRegistry.getWidget,
                 appTitle: 'GrowERP Support',
+                deepLinkService: _deepLinkService,
               ),
             );
           } else {

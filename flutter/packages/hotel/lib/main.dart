@@ -120,6 +120,7 @@ class HotelApp extends StatefulWidget {
 
 class _HotelAppState extends State<HotelApp> {
   late MenuConfigBloc _menuConfigBloc;
+  final DeepLinkService _deepLinkService = DeepLinkService();
 
   @override
   void initState() {
@@ -134,6 +135,7 @@ class _HotelAppState extends State<HotelApp> {
     widget.chatClient.close();
     widget.notificationClient.close();
     _menuConfigBloc.close();
+    _deepLinkService.dispose();
     super.dispose();
   }
 
@@ -155,6 +157,7 @@ class _HotelAppState extends State<HotelApp> {
                 dashboardBuilder: () => const GanttForm(),
                 widgetLoader: WidgetRegistry.getWidget,
                 appTitle: 'GrowERP Hotel',
+                deepLinkService: _deepLinkService,
               ),
               rootNavigatorKey: GlobalKey<NavigatorState>(),
             );

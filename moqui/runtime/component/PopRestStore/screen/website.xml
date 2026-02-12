@@ -33,6 +33,28 @@ along with this software (see the LICENSE.md file). If not, see
     </always-actions>
 
     <actions></actions>
+    
+    <transition name=".well-known" read-only="true">
+        <actions>
+            <set field="fileName" from="sri.screenUrlInfo.extraPathNameList[0]"/>
+            <if condition="fileName == 'assetlinks.json' || fileName == 'apple-app-site-association'">
+                <entity-find-one entity-name="moqui.resource.wiki.WikiSpace" value-field="wikiSpace">
+                    <field-map field-name="wikiSpaceId"/>
+                </entity-find-one>
+                <if condition="wikiSpace">
+                    <set field="resourceLocation" value="${wikiSpace.rootPageLocation}/.well-known/${fileName}"/>
+                    <set field="resourceRef" from="ec.resource.getLocationReference(resourceLocation)"/>
+                    <if condition="resourceRef != null">
+                        <script>ec.web.sendTextResponse(resourceRef.getText(), "application/json", null)</script>
+                        <else>
+                            <script>ec.web.sendError(404, "File not found: ${fileName}", null)</script>
+                        </else>
+                    </if>
+                </if>
+            </if>
+        </actions>
+        <default-response type="none"/>
+    </transition>
 
     <widgets>
         <!-- top path name is defined in MoquiConf.xml -->

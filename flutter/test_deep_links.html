@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GrowERP Deep Link Test Page</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 800px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2em;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+        
+        .app-section {
+            margin-bottom: 40px;
+        }
+        
+        .app-section h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .link-group {
+            margin-bottom: 20px;
+        }
+        
+        .link-group h3 {
+            color: #555;
+            font-size: 1em;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        .links {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+        }
+        
+        a {
+            display: block;
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            text-align: center;
+            font-weight: 500;
+        }
+        
+        a:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        a:active {
+            transform: translateY(0);
+        }
+        
+        .scheme-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75em;
+            margin-left: 8px;
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .info-box {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin-bottom: 30px;
+            border-radius: 4px;
+        }
+        
+        .info-box p {
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 8px;
+        }
+        
+        .info-box p:last-child {
+            margin-bottom: 0;
+        }
+        
+        code {
+            background: #e9ecef;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔗 GrowERP Deep Link Tester</h1>
+        <p class="subtitle">Click any link below to test deep linking in GrowERP apps</p>
+        
+        <div class="info-box">
+            <p><strong>📱 How to use:</strong></p>
+            <p>1. Make sure the GrowERP app is installed on your device</p>
+            <p>2. Open this page on your mobile device or emulator</p>
+            <p>3. Click any link to test deep linking</p>
+            <p>4. Custom scheme links (<code>growerp://</code>) work immediately</p>
+            <p>5. HTTPS links require server configuration (see docs)</p>
+        </div>
+        
+        <!-- Admin App -->
+        <div class="app-section">
+            <h2>📊 Admin App</h2>
+            
+            <div class="link-group">
+                <h3>Custom Scheme (growerp://)</h3>
+                <div class="links">
+                    <a href="growerp://admin/">Dashboard</a>
+                    <a href="growerp://admin/user">User Profile</a>
+                    <a href="growerp://admin/catalog/products">Products</a>
+                    <a href="growerp://admin/catalog/categories">Categories</a>
+                    <a href="growerp://admin/orders">Orders</a>
+                    <a href="growerp://admin/customers">Customers</a>
+                    <a href="growerp://admin/companies">Companies</a>
+                    <a href="growerp://admin/accounting">Accounting</a>
+                </div>
+            </div>
+            
+            <div class="link-group">
+                <h3>HTTPS Links (Requires Server Setup)</h3>
+                <div class="links">
+                    <a href="https://admin.growerp.com/">Dashboard</a>
+                    <a href="https://admin.growerp.com/user">User Profile</a>
+                    <a href="https://admin.growerp.com/catalog/products">Products</a>
+                    <a href="https://admin.growerp.com/orders">Orders</a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Support App -->
+        <div class="app-section">
+            <h2>🎫 Support App</h2>
+            
+            <div class="link-group">
+                <h3>Custom Scheme (growerp://)</h3>
+                <div class="links">
+                    <a href="growerp://support/">Dashboard</a>
+                    <a href="growerp://support/user">User Profile</a>
+                    <a href="growerp://support/customers">Customers</a>
+                    <a href="growerp://support/companies">Companies</a>
+                    <a href="growerp://support/tasks">Tasks</a>
+                </div>
+            </div>
+            
+            <div class="link-group">
+                <h3>HTTPS Links (Requires Server Setup)</h3>
+                <div class="links">
+                    <a href="https://support.growerp.com/">Dashboard</a>
+                    <a href="https://support.growerp.com/user">User Profile</a>
+                    <a href="https://support.growerp.com/customers">Customers</a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Hotel App -->
+        <div class="app-section">
+            <h2>🏨 Hotel App</h2>
+            
+            <div class="link-group">
+                <h3>Custom Scheme (growerp://)</h3>
+                <div class="links">
+                    <a href="growerp://hotel/">Dashboard</a>
+                    <a href="growerp://hotel/user">User Profile</a>
+                    <a href="growerp://hotel/catalog/products">Rooms</a>
+                    <a href="growerp://hotel/orders">Bookings</a>
+                    <a href="growerp://hotel/customers">Guests</a>
+                    <a href="growerp://hotel/accounting">Accounting</a>
+                </div>
+            </div>
+            
+            <div class="link-group">
+                <h3>HTTPS Links (Requires Server Setup)</h3>
+                <div class="links">
+                    <a href="https://hotel.growerp.com/">Dashboard</a>
+                    <a href="https://hotel.growerp.com/user">User Profile</a>
+                    <a href="https://hotel.growerp.com/orders">Bookings</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="info-box">
+            <p><strong>🔧 Troubleshooting:</strong></p>
+            <p>• If links don't work, ensure the app is installed</p>
+            <p>• Custom scheme links work without any server setup</p>
+            <p>• HTTPS links need Digital Asset Links (Android) or AASA (iOS)</p>
+            <p>• See <code>docs/deep_linking.md</code> for complete setup instructions</p>
+        </div>
+    </div>
+</body>
+</html>

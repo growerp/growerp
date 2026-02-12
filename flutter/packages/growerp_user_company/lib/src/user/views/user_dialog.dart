@@ -42,11 +42,18 @@ class UserDialog extends StatelessWidget {
   const UserDialog(this.user, {super.key, this.dialog = true});
   @override
   Widget build(BuildContext context) {
+    // If no partyId provided, use the authenticated user's partyId
+    final effectiveUser = user.partyId == null
+        ? User(
+            partyId: context.read<AuthBloc>().state.authenticate?.user?.partyId,
+          )
+        : user;
+
     DataFetchBloc userBloc = context.read<DataFetchBloc<Users>>()
       ..add(
         GetDataEvent(
           () => context.read<RestClient>().getUser(
-            partyId: user.partyId,
+            partyId: effectiveUser.partyId,
             limit: 1,
           ),
         ),
@@ -56,7 +63,9 @@ class UserDialog extends StatelessWidget {
         if (state.status == DataFetchStatus.success ||
             state.status == DataFetchStatus.failure) {
           if ((userBloc.state.data as Users).users.isEmpty) {
-            return FatalErrorForm(message: 'User ${user.partyId} not found');
+            return FatalErrorForm(
+              message: 'User ${effectiveUser.partyId} not found',
+            );
           }
           return UserDialogStateFull(
             user: (userBloc.state.data as Users).users[0],

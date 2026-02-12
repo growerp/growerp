@@ -273,9 +273,68 @@ along with this software (see the LICENSE.md file). If not, see
             <histories versionName="01" versionDate="1485028800000" isDiff="N" />
         </file>
     </moqui.resource.DbResource>
-    <!-- this is the directory to put all site content under -->
     <moqui.resource.DbResource filename="content" isFile="N" resourceId="default_content_dir"
         parentResourceId="DEFAULT_ROOT" />
+    <!-- Deep linking configuration -->
+    <moqui.resource.DbResource filename=".well-known" isFile="N" resourceId="DEFAULT_WELL_KNOWN"
+        parentResourceId="DEFAULT_ROOT" />
+    <moqui.resource.DbResource filename="assetlinks.json" isFile="Y" resourceId="DEFAULT_ASSETLINKS"
+        parentResourceId="DEFAULT_WELL_KNOWN">
+        <file mimeType="application/json" versionName="01" rootVersionName="01">
+            <fileData><![CDATA[[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "org.growerp.admin",
+      "sha256_cert_fingerprints": ["FA:C6:17:45:DC:09:03:78:6F:B9:ED:E6:2A:96:2B:39:9F:73:48:F0:BB:6F:89:9B:83:32:66:75:91:03:3B:9C"]
+    }
+  },
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "org.growerp.support",
+      "sha256_cert_fingerprints": ["FA:C6:17:45:DC:09:03:78:6F:B9:ED:E6:2A:96:2B:39:9F:73:48:F0:BB:6F:89:9B:83:32:66:75:91:03:3B:9C"]
+    }
+  },
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "org.growerp.hotel",
+      "sha256_cert_fingerprints": ["FA:C6:17:45:DC:09:03:78:6F:B9:ED:E6:2A:96:2B:39:9F:73:48:F0:BB:6F:89:9B:83:32:66:75:91:03:3B:9C"]
+    }
+  }
+]]]></fileData>
+            <histories versionName="01" versionDate="1700000000000" isDiff="N" />
+        </file>
+    </moqui.resource.DbResource>
+    <moqui.resource.DbResource filename="apple-app-site-association" isFile="Y" resourceId="DEFAULT_AASA"
+        parentResourceId="DEFAULT_WELL_KNOWN">
+        <file mimeType="application/json" versionName="01" rootVersionName="01">
+            <fileData><![CDATA[{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "P64T65C668.org.growerp.admin",
+        "paths": ["*"]
+      },
+      {
+        "appID": "P64T65C668.org.growerp.support",
+        "paths": ["*"]
+      },
+      {
+        "appID": "P64T65C668.org.growerp.hotel",
+        "paths": ["*"]
+      }
+    ]
+  }
+}]]></fileData>
+            <histories versionName="01" versionDate="1700000000000" isDiff="N" />
+        </file>
+    </moqui.resource.DbResource>
     <!-- default setup for wiki productstore, categories etc -->
     <moqui.resource.wiki.WikiSpace wikiSpaceId="DEFAULT_WS" description="Default Content"
         restrictView="N" allowAnyHtml="Y"

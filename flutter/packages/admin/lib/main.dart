@@ -121,6 +121,7 @@ class AdminApp extends StatefulWidget {
 
 class _AdminAppState extends State<AdminApp> {
   late MenuConfigBloc _menuConfigBloc;
+  final DeepLinkService _deepLinkService = DeepLinkService();
 
   @override
   void initState() {
@@ -135,6 +136,7 @@ class _AdminAppState extends State<AdminApp> {
     widget.chatClient.close();
     widget.notificationClient.close();
     _menuConfigBloc.close();
+    _deepLinkService.dispose();
     super.dispose();
   }
 
@@ -175,6 +177,7 @@ class _AdminAppState extends State<AdminApp> {
                     child: const Icon(Icons.menu),
                   ),
                 ),
+                deepLinkService: _deepLinkService,
               ),
             );
           } else {

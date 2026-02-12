@@ -49,6 +49,9 @@ class DynamicRouterConfig {
   /// Used to add additional FABs that appear above the AI FAB
   final Widget Function(MenuConfiguration)? dashboardFabBuilder;
 
+  /// Optional deep link service for handling incoming deep links
+  final DeepLinkService? deepLinkService;
+
   const DynamicRouterConfig({
     this.mainConfigId,
     this.dashboardBuilder,
@@ -57,6 +60,7 @@ class DynamicRouterConfig {
     this.initialLocation = '/',
     this.splashScreen,
     this.dashboardFabBuilder,
+    this.deepLinkService,
   });
 }
 
@@ -109,7 +113,7 @@ GoRouter createDynamicAppRouter(
     return config.widgetLoader(mainOption.widgetName ?? 'Unknown', {});
   }
 
-  return GoRouter(
+  final router = GoRouter(
     navigatorKey: navKey,
     initialLocation: config.initialLocation,
     onException: (context, state, router) {
@@ -258,6 +262,13 @@ GoRouter createDynamicAppRouter(
       ),
     ],
   );
+
+  // Initialize deep link service if provided
+  if (config.deepLinkService != null) {
+    config.deepLinkService!.initialize(router: router);
+  }
+
+  return router;
 }
 
 List<RouteBase> _generateRoutes(

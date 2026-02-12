@@ -2,14 +2,29 @@
 <!--
 Flutter Admin Web Application Screen
 Serves the Flutter admin app and its assets
+If not deployed, shows setup instructions
 -->
 <screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-2.1.xsd"
-  standalone="true" require-authentication="anonymous-view">
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-2.1.xsd"
+    standalone="true" require-authentication="anonymous-view">
+
+    <actions>
+        <script><![CDATA[
+            // Check if the Flutter admin build has been deployed
+            def indexResource = ec.resource.getLocationReference("component://PopRestStore/screen/store/admin/index.html")
+            context.adminDeployed = indexResource != null && indexResource.exists
+        ]]></script>
+    </actions>
 
     <widgets>
         <render-mode>
-            <text type="html" location="component://PopRestStore/screen/store/admin/index.html"/>
+            <text type="html"><![CDATA[
+                <#if adminDeployed!false>
+                    ${ec.resource.getLocationText("component://PopRestStore/screen/store/admin/index.html", false)}
+                <#else>
+                    ${ec.resource.getLocationText("component://PopRestStore/screen/store/admin_setup_notice.html", false)}
+                </#if>
+            ]]></text>
         </render-mode>
     </widgets>
 </screen>
