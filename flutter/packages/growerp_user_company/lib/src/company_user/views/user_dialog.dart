@@ -145,32 +145,6 @@ class UserDialogState extends State<UserDialog> {
     super.dispose();
   }
 
-  void _onImageButtonPressed(
-    dynamic sourceOrPath, {
-    BuildContext? context,
-  }) async {
-    try {
-      if (sourceOrPath is String) {
-        // Desktop: file path from file_picker
-        setState(() {
-          _imageFile = XFile(sourceOrPath);
-        });
-        _image = await HelperFunctions.getResizedImage(sourceOrPath);
-      } else if (sourceOrPath is ImageSource) {
-        // Mobile/web: use image_picker
-        final pickedFile = await _picker.pickImage(source: sourceOrPath);
-        _image = await HelperFunctions.getResizedImage(pickedFile?.path);
-        setState(() {
-          _imageFile = pickedFile;
-        });
-      }
-    } catch (e) {
-      setState(() {
-        _pickImageError = e;
-      });
-    }
-  }
-
   Future<void> retrieveLostData() async {
     final LostDataResponse response = await _picker.retrieveLostData();
     if (response.isEmpty) {
@@ -879,9 +853,15 @@ class UserDialogState extends State<UserDialog> {
                   : null,
               imageBytes: _imageFile == null ? widget.user.image : null,
               fallbackText: widget.user.firstName?.substring(0, 1) ?? '',
-              onUploadTap: () {
-                if (Platform.isAndroid || Platform.isIOS) {
-                  _onImageButtonPressed(ImageSource.gallery, context: context);
+              onUploadTap: () async {
+                final pickedFile = await HelperFunctions.pickImage();
+                if (pickedFile != null) {
+                  _image = await HelperFunctions.getResizedImage(
+                    pickedFile.path,
+                  );
+                  setState(() {
+                    _imageFile = pickedFile;
+                  });
                 }
               },
               onRemove: (_imageFile != null || widget.user.image != null)

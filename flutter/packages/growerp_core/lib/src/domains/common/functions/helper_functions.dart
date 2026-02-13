@@ -19,6 +19,8 @@ import 'package:image/image.dart' as image;
 import 'package:universal_io/io.dart';
 import 'package:http/http.dart' show get;
 import 'package:growerp_core/l10n/generated/core_localizations.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:file_picker/file_picker.dart';
 import '../../domains.dart';
 
 class HelperFunctions {
@@ -140,6 +142,20 @@ class HelperFunctions {
     } else {
       return null;
     }
+  }
+
+  static Future<XFile?> pickImage() async {
+    if (kIsWeb || Platform.isAndroid || Platform.isIOS) {
+      return await ImagePicker().pickImage(source: ImageSource.gallery);
+    } else {
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.image,
+      );
+      if (result != null && result.files.single.path != null) {
+        return XFile(result.files.single.path!);
+      }
+    }
+    return null;
   }
 
   static String translateMenuTitle(

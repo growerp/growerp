@@ -162,30 +162,6 @@ class CompanyFormState extends State<CompanyDialog> {
     super.dispose();
   }
 
-  void _onImageButtonPressed(
-    dynamic sourceOrPath, {
-    BuildContext? context,
-  }) async {
-    try {
-      if (sourceOrPath is String) {
-        // Desktop: file path from file_picker
-        setState(() {
-          _imageFile = XFile(sourceOrPath);
-        });
-      } else if (sourceOrPath is ImageSource) {
-        // Mobile/web: use image_picker
-        final pickedFile = await _picker.pickImage(source: sourceOrPath);
-        setState(() {
-          _imageFile = pickedFile;
-        });
-      }
-    } catch (e) {
-      setState(() {
-        _pickImageError = e;
-      });
-    }
-  }
-
   Future<void> retrieveLostData() async {
     final LostDataResponse response = await _picker.retrieveLostData();
     if (response.isEmpty) {
@@ -766,9 +742,12 @@ class CompanyFormState extends State<CompanyDialog> {
       widget: widget,
       employeeChips: employeeChips,
       localizations: localizations,
-      onUploadTap: () {
-        if (Platform.isAndroid || Platform.isIOS) {
-          _onImageButtonPressed(ImageSource.gallery, context: context);
+      onUploadTap: () async {
+        final pickedFile = await HelperFunctions.pickImage();
+        if (pickedFile != null) {
+          setState(() {
+            _imageFile = pickedFile;
+          });
         }
       },
       onRemove: (_imageFile != null || company.image != null)

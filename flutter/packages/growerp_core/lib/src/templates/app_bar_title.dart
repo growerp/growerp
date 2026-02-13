@@ -20,6 +20,7 @@ import 'package:growerp_models/growerp_models.dart';
 Widget appBarTitle(BuildContext context, String title, bool isPhone) {
   AuthBloc authBloc = context.read<AuthBloc>();
   Authenticate? auth = authBloc.state.authenticate;
+  final colorScheme = Theme.of(context).colorScheme;
   return Row(
     children: [
       InkWell(
@@ -27,16 +28,49 @@ Widget appBarTitle(BuildContext context, String title, bool isPhone) {
         onTap: () {
           Navigator.pushNamed(context, '/company', arguments: auth?.company);
         },
-        child: CircleAvatar(
-          radius: 15,
-          child: auth?.company?.image != null
-              ? Image.memory(auth!.company!.image!)
-              : Text(
-                  auth?.company?.name != null && auth?.company?.name! != ''
-                      ? auth!.company!.name!.substring(0, 1)
-                      : '',
-                  key: const Key('appBarAvatarText'),
-                ),
+        child: Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: colorScheme.surfaceContainerHighest,
+            border: Border.all(
+              color: colorScheme.primary.withValues(alpha: 0.5),
+              width: 1.5,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: colorScheme.primary.withValues(alpha: 0.1),
+                blurRadius: 4,
+                spreadRadius: 1,
+              ),
+            ],
+          ),
+          child: ClipOval(
+            child: auth?.company?.image != null
+                ? Image.memory(
+                    auth!.company!.image!,
+                    fit: BoxFit.cover,
+                    width: 40,
+                    height: 40,
+                  )
+                : Container(
+                    color: colorScheme.surfaceContainerHighest,
+                    child: Center(
+                      child: Text(
+                        auth?.company?.name?.isNotEmpty == true
+                            ? auth!.company!.name!.substring(0, 1)
+                            : '',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                        key: const Key('appBarAvatarText'),
+                      ),
+                    ),
+                  ),
+          ),
         ),
       ),
       const SizedBox(width: 5),

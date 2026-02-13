@@ -9,11 +9,15 @@
 set -x
 clear
 
+# Resolve absolute paths regardless of where the script is invoked from
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(dirname "$SCRIPT_DIR")"
+
 # Export package filter for docker-compose to pick up
 export PACKAGE_FILTER="${1:-}"
 echo "Package filter: ${PACKAGE_FILTER:-<none - running all tests>}"
 ## run selenium tests
-cd ~/growerp/moqui/runtime/component/PopRestStore/selenium && \
+cd "$REPO_ROOT/moqui/runtime/component/PopRestStore/selenium" && \
     npm run  testHotel && \
     npm run testAdmin1 && \
     npm run testAdmin2 && \
@@ -25,15 +29,9 @@ docker image rm flutter-sut:latest -f
 docker image rm flutter-moqui:latest -f
 docker system prune -f
 # docker volume prune -af
-cd /tmp
 rm -rf /tmp/growerp
-cp ~/growerp1 /tmp/growerp -r && cd growerp
-#if [ -d growerp ]; then
-#  cd growerp && git pull
-#else
-#  git clone git@github.com:growerp/growerp.git && cd growerp
-#fi
-cd flutter
+cp -r "$REPO_ROOT" /tmp/growerp
+cd /tmp/growerp/flutter || { echo "ERROR: /tmp/growerp/flutter not found after copy"; exit 1; }
 PACKAGE_FILTER="$PACKAGE_FILTER" docker compose -f docker-compose-test.yml up
 
 
