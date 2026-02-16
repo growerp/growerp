@@ -340,7 +340,7 @@ along with this software (see the LICENSE.md file). If not, see
                 productName: product.productName,
                 description: product.description,
                 salesIntroductionDate: ec.user.nowTimestamp,
-                amountFixed: product.amount,
+                amountFixed: product.amount ? new BigDecimal(product.amount.toString()) : null,
                 amountUomId: product.amountUom?.uomId,
                 ownerPartyId: ownerPartyId,
                 productTypeEnumId: prodConvert.convertedStatusId,
@@ -511,7 +511,8 @@ along with this software (see the LICENSE.md file). If not, see
                 <set field="oldProduct.productTypeEnumId" from="prodConvert.convertedStatusId" />
                 <set field="oldProduct.requireInventory" from="requireInventory" />
                 <set field="oldProduct.amountUomId" from="product.amountUom?.uomId" />
-                <set field="oldProduct.amountFixed" from="product.amount" />
+                <set field="oldProduct.amountFixed"
+                    from="product.amount ? new BigDecimal(product.amount.toString()) : null" />
                 <entity-update value-field="oldProduct" />
             </if>
             <!-- prices -->

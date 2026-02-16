@@ -519,6 +519,8 @@ class UserDialogState extends State<UserDialog> {
                 children: [
                   Expanded(
                     child: BlocBuilder<CompanyBloc, CompanyState>(
+                      buildWhen: (previous, current) =>
+                          current.status != CompanyStatus.loading,
                       builder: (context, state) {
                         switch (state.status) {
                           case CompanyStatus.failure:

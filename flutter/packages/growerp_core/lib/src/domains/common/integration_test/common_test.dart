@@ -121,7 +121,7 @@ class CommonTest {
     int seq = test.sequence + 1;
     if (test.admin != null) return; // company already created
     // check if email address already exist
-    final restClient = RestClient(await buildDioClient(overrideUrl: null));
+    final restClient = RestClient(await buildDioClient(overrideUrl: "http://moqui"));
     var exist = true;
     var times = 0;
     while (exist) {
@@ -489,6 +489,9 @@ class CommonTest {
   }) async {
     seconds ??= waitTime;
     await enterText(tester, 'searchField', searchString);
+    // Allow time for the async API call triggered by onChanged to complete.
+    // pumpAndSettle alone won't wait for real HTTP requests.
+    await tester.pump(Duration(seconds: seconds));
     await tester.pumpAndSettle(Duration(seconds: seconds));
 
     // Tap first filtered result in StyledDataTable
@@ -704,6 +707,10 @@ class CommonTest {
       return;
     }
 
+    // Ensure the autocomplete widget is visible before interacting
+    await tester.ensureVisible(autocomplete.first);
+    await tester.pumpAndSettle();
+
     // Dismiss any existing keyboard / focus to avoid interference
     FocusManager.instance.primaryFocus?.unfocus();
     await tester.pumpAndSettle();
@@ -732,10 +739,10 @@ class CommonTest {
     await tester.pump(const Duration(seconds: waitTime));
     await tester.pumpAndSettle();
 
-    // Find a ListTile containing the value text that is a dropdown option,
-    // not the form row that contains the autocomplete field.
-    // Dropdown option ListTiles do NOT have a TextFormField descendant,
-    // while the form row ListTile DOES (it contains the autocomplete input).
+    // Approach 1: Find dropdown option ListTiles in the Overlay.
+    // Autocomplete renders its options in an Overlay, so look for ListTiles
+    // that contain the search text but live outside the form (no TextFormField
+    // ancestor within the same ListTile).
     final allContaining = find.textContaining(value);
     if (tester.any(allContaining)) {
       for (int i = 0; i < allContaining.evaluate().length; i++) {
@@ -772,6 +779,30 @@ class CommonTest {
       }
     }
 
+    // Approach 2: Try tapping a matching item in any visible ListView
+    // that isn't the main form list.
+    final listTiles = find.byType(ListTile);
+    for (int i = 0; i < listTiles.evaluate().length; i++) {
+      final tile = listTiles.evaluate().elementAt(i);
+      final tileFinder = find.byElementPredicate((el) => el == tile);
+      final textInTile = find.descendant(
+        of: tileFinder,
+        matching: find.textContaining(value),
+      );
+      final formFieldInTile = find.descendant(
+        of: tileFinder,
+        matching: find.byType(TextFormField),
+      );
+      if (tester.any(textInTile) && !tester.any(formFieldInTile)) {
+        debugPrint(
+          'DEBUG enterAutocompleteValue($key, $value): found via ListTile scan',
+        );
+        await tester.tap(tileFinder.first);
+        await tester.pumpAndSettle();
+        return;
+      }
+    }
+
     // Approach 3: Keyboard navigation fallback
     debugPrint(
       'DEBUG enterAutocompleteValue($key, $value): Approach 3 - keyboard fallback',
@@ -798,6 +829,9 @@ class CommonTest {
         throw StateError('Widget with key "$key" not found');
       }
     }
+    // Ensure the widget is visible before interacting
+    await tester.ensureVisible(finder);
+    await tester.pumpAndSettle();
     // Now enter the new text
     await tester.tap(finder);
     await tester.enterText(finder, value);
@@ -831,12 +865,22 @@ class CommonTest {
     int seconds = 1,
     check = false,
   }) async {
+    // Ensure the autocomplete widget is scrolled into view first
     final finder = find.byKey(Key(key));
     if (finder.evaluate().isNotEmpty) {
-      final widget = finder.evaluate().first.widget;
-      if (widget is Autocomplete || widget is AutocompleteLabel) {
-        await enterAutocompleteValue(tester, key, value);
-        return;
+      await tester.ensureVisible(finder.first);
+      await tester.pumpAndSettle();
+      // Re-evaluate after scrolling since the widget tree may have changed
+      final finderAfterScroll = find.byKey(Key(key));
+      if (finderAfterScroll.evaluate().isNotEmpty) {
+        final widget = finderAfterScroll.evaluate().first.widget;
+        debugPrint(
+          'DEBUG enterDropDownSearch($key): widget type = ${widget.runtimeType}',
+        );
+        if (widget is Autocomplete || widget is AutocompleteLabel) {
+          await enterAutocompleteValue(tester, key, value);
+          return;
+        }
       }
     }
     // Fallback if not an Autocomplete (should not happen if all replaced)

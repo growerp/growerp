@@ -78,97 +78,94 @@ class SubscriptionListState extends State<SubscriptionList> {
         }
       },
       builder: (context, state) {
-        switch (state.status) {
-          case SubscriptionStatus.failure:
-            return Center(
-              child: Text(
-                catalogLocalizations.fetchSubscriptionError(
-                  state.message ?? '',
-                ),
-              ),
-            );
-          case SubscriptionStatus.success:
-            subscriptions = state.subscriptions;
-            return Scaffold(
-              floatingActionButton: FloatingActionButton(
-                heroTag: 'subscriptionNew',
-                key: const Key('addNew'),
-                onPressed: () async {
-                  await showDialog(
-                    barrierDismissible: true,
-                    context: context,
-                    builder: (BuildContext context) {
-                      return BlocProvider.value(
-                        value: _subscriptionBloc,
-                        child: SubscriptionDialog(Subscription()),
-                      );
-                    },
+        if (state.status == SubscriptionStatus.failure) {
+          return Center(
+            child: Text(
+              catalogLocalizations.fetchSubscriptionError(state.message ?? ''),
+            ),
+          );
+        }
+
+        subscriptions = state.subscriptions;
+        final isLoading = state.status == SubscriptionStatus.loading;
+
+        return Scaffold(
+          floatingActionButton: FloatingActionButton(
+            heroTag: 'subscriptionNew',
+            key: const Key('addNew'),
+            onPressed: () async {
+              await showDialog(
+                barrierDismissible: true,
+                context: context,
+                builder: (BuildContext context) {
+                  return BlocProvider.value(
+                    value: _subscriptionBloc,
+                    child: SubscriptionDialog(Subscription()),
                   );
                 },
-                tooltip: coreLocalizations.addNew,
-                child: const Icon(Icons.add),
+              );
+            },
+            tooltip: coreLocalizations.addNew,
+            child: const Icon(Icons.add),
+          ),
+          body: Column(
+            children: [
+              ListFilterBar(
+                searchHint: catalogLocalizations.subscriptionSearch,
+                searchController: _searchController,
+                onSearchChanged: (value) {
+                  setState(() {
+                    _searchQuery = value;
+                  });
+                  if (value.length > 2) {
+                    _subscriptionBloc.add(
+                      SubscriptionFetch(refresh: true, searchString: value),
+                    );
+                  } else if (value.isEmpty) {
+                    _subscriptionBloc.add(
+                      const SubscriptionFetch(refresh: true),
+                    );
+                  }
+                },
               ),
-              body: Column(
-                children: [
-                  ListFilterBar(
-                    searchHint: catalogLocalizations.subscriptionSearch,
-                    searchController: _searchController,
-                    onSearchChanged: (value) {
-                      setState(() {
-                        _searchQuery = value;
-                      });
-                      if (value.length > 2) {
-                        _subscriptionBloc.add(
-                          SubscriptionFetch(refresh: true, searchString: value),
-                        );
-                      } else if (value.isEmpty) {
-                        _subscriptionBloc.add(
-                          const SubscriptionFetch(refresh: true),
-                        );
-                      }
-                    },
-                  ),
-                  Expanded(
-                    child: StyledDataTable(
-                      scrollController: _scrollController,
-                      columns: getSubscriptionColumns(isPhone),
-                      rows: subscriptions.isEmpty
-                          ? []
-                          : subscriptions
-                                .asMap()
-                                .entries
-                                .map(
-                                  (entry) => buildSubscriptionRow(
-                                    context,
-                                    entry.value,
-                                    entry.key,
-                                    isPhone,
-                                  ),
-                                )
-                                .toList(),
-                      isLoading:
-                          state.status == SubscriptionStatus.loading &&
-                          subscriptions.isEmpty,
-                      onRowTap: (index) {
-                        showDialog(
-                          barrierDismissible: true,
-                          context: context,
-                          builder: (BuildContext context) {
-                            return BlocProvider.value(
-                              value: _subscriptionBloc,
-                              child: SubscriptionDialog(subscriptions[index]),
-                            );
-                          },
-                        );
-                      },
-                    ),
-                  ),
-                ],
+              Expanded(
+                child: isLoading && subscriptions.isEmpty
+                    ? const Center(child: LoadingIndicator())
+                    : StyledDataTable(
+                        scrollController: _scrollController,
+                        columns: getSubscriptionColumns(isPhone),
+                        rows: subscriptions.isEmpty
+                            ? []
+                            : subscriptions
+                                  .asMap()
+                                  .entries
+                                  .map(
+                                    (entry) => buildSubscriptionRow(
+                                      context,
+                                      entry.value,
+                                      entry.key,
+                                      isPhone,
+                                    ),
+                                  )
+                                  .toList(),
+                        isLoading: isLoading,
+                        onRowTap: (index) {
+                          showDialog(
+                            barrierDismissible: true,
+                            context: context,
+                            builder: (BuildContext context) {
+                              return BlocProvider.value(
+                                value: _subscriptionBloc,
+                                child: SubscriptionDialog(subscriptions[index]),
+                              );
+                            },
+                          );
+                        },
+                      ),
               ),
-            );
-          default:
-            return const Center(child: LoadingIndicator());
-        }
+            ],
+          ),
+        );
       },
     );
   }

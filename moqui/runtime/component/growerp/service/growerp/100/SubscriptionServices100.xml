@@ -98,7 +98,7 @@
 
     <service verb="create" noun="Subscription">
         <in-parameters>
-            <parameter name="ownerPartyId"/><!-- optional: override owner for subscription -->
+            <parameter name="ownerPartyId" /><!-- optional: override owner for subscription -->
             <parameter name="subscription" type="Map" required="true">
                 <parameter name="pseudoId" />
                 <parameter name="description" />
@@ -124,10 +124,10 @@
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <!-- Use provided ownerPartyId (from subscription or top-level) or get from current user -->
             <if condition="subscription.ownerPartyId">
-                <set field="ownerPartyId" from="subscription.ownerPartyId"/>
-            <else-if condition="!ownerPartyId">
-                <set field="ownerPartyId" from="parties.ownerPartyId"/>
-            </else-if>
+                <set field="ownerPartyId" from="subscription.ownerPartyId" />
+                <else-if condition="!ownerPartyId">
+                    <set field="ownerPartyId" from="parties.ownerPartyId" />
+                </else-if>
             </if>
             <!-- generate pseudoId -->
             <if condition="!subscription.pseudoId || subscription.pseudoId == ''">
@@ -138,16 +138,28 @@
             </if>
             <!-- create subscription -->
             <log message="Creating subscription  ${subscription} for ownerPartyId ${ownerPartyId}." />
+            <script><![CDATA[
+                def parseTs = { val ->
+                    if (val == null) return null
+                    def s = val.toString()
+                    if (s.contains('T')) return java.sql.Timestamp.from(java.time.Instant.parse(s))
+                    return java.sql.Timestamp.valueOf(s)
+                }
+                def parsedFromDate = subscription.fromDate ? parseTs(subscription.fromDate) : null
+                def parsedThruDate = subscription.thruDate ? parseTs(subscription.thruDate) : null
+                def parsedPurchaseFromDate = subscription.purchaseFromDate ? parseTs(subscription.purchaseFromDate) : ec.user.nowTimestamp
+                def parsedPurchaseThruDate = subscription.purchaseThruDate ? parseTs(subscription.purchaseThruDate) : null
+            ]]></script>
             <service-call name="create#mantle.product.subscription.Subscription"
                 in-map="[
                     ownerPartyId: ownerPartyId,
                     pseudoId: subscription.pseudoId,
                     subscriptionTypeEnumId: 'StProduct',
                     description: subscription.description ?: '',
-                    fromDate: subscription.fromDate ?: null,
-                    thruDate: subscription.thruDate ?: null,
-                    purchaseFromDate: subscription.purchaseFromDate ?: ec.user.nowTimestamp,
-                    purchaseThruDate: subscription.purchaseThruDate ?: null,
+                    fromDate: parsedFromDate,
+                    thruDate: parsedThruDate,
+                    purchaseFromDate: parsedPurchaseFromDate,
+                    purchaseThruDate: parsedPurchaseThruDate,
                     productId: subscription.product?.productId,
                     subscriberPartyId: subscription.subscriber?.partyId,
                     subscriptionTypeId: 'StProduct',
@@ -212,17 +224,23 @@
                 <set field="subscription.pseudoId" from="seqNum" />
             </if>
 
-            <script>
+            <script><![CDATA[
+                def parseTs = { val ->
+                    if (val == null) return null
+                    def s = val.toString()
+                    if (s.contains('T')) return java.sql.Timestamp.from(java.time.Instant.parse(s))
+                    return java.sql.Timestamp.valueOf(s)
+                }
                 lookupEntity.pseudoId = subscription.pseudoId ?: lookupEntity.pseudoId;
                 lookupEntity.description = subscription.description ?: lookupEntity.description;
                 lookupEntity.externalSubscriptionId = subscription.externalId ?: lookupEntity.externalSubscriptionId;
-                lookupEntity.fromDate = subscription.fromDate ?: lookupEntity.fromDate;
-                lookupEntity.thruDate = subscription.thruDate ?: lookupEntity.thruDate;
-                lookupEntity.purchaseFromDate = subscription.purchaseFromDate ?: lookupEntity.purchaseFromDate;
-                lookupEntity.purchaseThruDate = subscription.purchaseThruDate ?: lookupEntity.purchaseThruDate;
+                lookupEntity.fromDate = subscription.fromDate ? parseTs(subscription.fromDate) : lookupEntity.fromDate;
+                lookupEntity.thruDate = subscription.thruDate ? parseTs(subscription.thruDate) : lookupEntity.thruDate;
+                lookupEntity.purchaseFromDate = subscription.purchaseFromDate ? parseTs(subscription.purchaseFromDate) : lookupEntity.purchaseFromDate;
+                lookupEntity.purchaseThruDate = subscription.purchaseThruDate ? parseTs(subscription.purchaseThruDate) : lookupEntity.purchaseThruDate;
                 lookupEntity.productId = subscription.product.productId ?: lookupEntity.productId;
                 lookupEntity.subscriberPartyId = subscription.subscriber.partyId ?: lookupEntity.subscriberPartyId;
-            </script>
+            ]]></script>
             <entity-update value-field="lookupEntity" />
             <service-call name="growerp.100.SubscriptionServices100.get#Subscription"
                 in-map="[subscriptionId: subscription.subscriptionId]"

@@ -66,6 +66,11 @@ class SubscriptionDialogState extends State<SubscriptionDialog> {
     bool isPhone = isAPhone(context);
     var catalogLocalizations = CatalogLocalizations.of(context)!;
     return BlocListener<SubscriptionBloc, SubscriptionState>(
+      listenWhen: (previous, current) =>
+          current.status == SubscriptionStatus.failure ||
+          (current.status == SubscriptionStatus.success &&
+              current.message != null &&
+              current.message!.isNotEmpty),
       listener: (context, state) async {
         switch (state.status) {
           case SubscriptionStatus.success:

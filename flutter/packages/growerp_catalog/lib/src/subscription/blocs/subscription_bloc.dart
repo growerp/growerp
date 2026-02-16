@@ -36,27 +36,17 @@ class SubscriptionBloc extends Bloc<SubscriptionEvent, SubscriptionState> {
         start: start,
       );
 
-      if (event.searchString.isEmpty) {
-        return emit(
-          state.copyWith(
-            status: SubscriptionStatus.success,
-            subscriptions: start == 0
-                ? subscriptions.subscriptions
-                : (List.of(state.subscriptions)
-                    ..addAll(subscriptions.subscriptions)),
-            hasReachedMax: subscriptions.subscriptions.length < 20,
-            searchString: '',
-          ),
-        );
-      } else {
-        return emit(
-          state.copyWith(
-            status: SubscriptionStatus.success,
-            searchResults: subscriptions.subscriptions,
-            hasReachedMax: false,
-          ),
-        );
-      }
+      return emit(
+        state.copyWith(
+          status: SubscriptionStatus.success,
+          subscriptions: start == 0
+              ? subscriptions.subscriptions
+              : (List.of(state.subscriptions)
+                  ..addAll(subscriptions.subscriptions)),
+          hasReachedMax: subscriptions.subscriptions.length < 20,
+          searchString: event.searchString,
+        ),
+      );
     } catch (e) {
       emit(
         state.copyWith(

@@ -241,6 +241,8 @@ class AssetDialogState extends State<AssetDialog> {
               ),
             const SizedBox(height: 10),
             BlocBuilder<DataFetchBloc<Products>, DataFetchState<Products>>(
+              buildWhen: (previous, current) =>
+                  current.status != DataFetchStatus.loading,
               builder: (context, state) {
                 switch (state.status) {
                   case DataFetchStatus.failure:
@@ -324,6 +326,8 @@ class AssetDialogState extends State<AssetDialog> {
                           DataFetchBloc<Locations>,
                           DataFetchState<Locations>
                         >(
+                          buildWhen: (previous, current) =>
+                              current.status != DataFetchStatus.loading,
                           builder: (context, state) {
                             switch (state.status) {
                               case DataFetchStatus.failure:

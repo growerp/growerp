@@ -83,6 +83,11 @@ class CategoryDialogState extends State<CategoryDialog> {
   Widget build(BuildContext context) {
     _localizations = CatalogLocalizations.of(context);
     return BlocConsumer<CategoryBloc, CategoryState>(
+      listenWhen: (previous, current) =>
+          current.status == CategoryStatus.failure ||
+          (current.status == CategoryStatus.success &&
+              current.message != null &&
+              current.message!.isNotEmpty),
       listener: (context, state) async {
         switch (state.status) {
           case CategoryStatus.success:

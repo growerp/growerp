@@ -6,7 +6,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 
-class AutocompleteLabel<T extends Object> extends StatelessWidget {
+class AutocompleteLabel<T extends Object> extends StatefulWidget {
   final String label;
   final String? hintText;
   final T? initialValue;
@@ -29,20 +29,40 @@ class AutocompleteLabel<T extends Object> extends StatelessWidget {
   });
 
   @override
+  State<AutocompleteLabel<T>> createState() => _AutocompleteLabelState<T>();
+}
+
+class _AutocompleteLabelState<T extends Object>
+    extends State<AutocompleteLabel<T>> {
+  /// Wraps the user-provided [optionsBuilder] so that if this widget is
+  /// unmounted while the async builder is in flight, the returned Future
+  /// never completes. This prevents Flutter's [RawAutocomplete] from
+  /// accessing [State.context] on a defunct State in `_announceSemantics`.
+  Future<Iterable<T>> _safeOptionsBuilder(TextEditingValue value) async {
+    final results = await widget.optionsBuilder(value);
+    if (!mounted) {
+      return Completer<Iterable<T>>().future;
+    }
+    return results;
+  }
+
+  @override
   Widget build(BuildContext context) {
     return FormField<T>(
-      initialValue: initialValue,
-      validator: validator,
+      initialValue: widget.initialValue,
+      validator: widget.validator,
       builder: (FormFieldState<T> field) {
         return Autocomplete<T>(
-          initialValue: initialValue != null
-              ? TextEditingValue(text: displayStringForOption(initialValue!))
+          initialValue: widget.initialValue != null
+              ? TextEditingValue(
+                  text: widget.displayStringForOption(widget.initialValue!),
+                )
               : null,
-          optionsBuilder: optionsBuilder,
-          displayStringForOption: displayStringForOption,
+          optionsBuilder: _safeOptionsBuilder,
+          displayStringForOption: widget.displayStringForOption,
           onSelected: (T value) {
             field.didChange(value);
-            onSelected(value);
+            widget.onSelected(value);
           },
           fieldViewBuilder:
               (context, textController, focusNode, onFieldSubmitted) {
@@ -50,8 +70,8 @@ class AutocompleteLabel<T extends Object> extends StatelessWidget {
                   controller: textController,
                   focusNode: focusNode,
                   decoration: InputDecoration(
-                    labelText: label,
-                    hintText: hintText,
+                    labelText: widget.label,
+                    hintText: widget.hintText,
                     errorText: field.errorText,
                     suffixIcon: textController.text.isNotEmpty
                         ? IconButton(
@@ -59,7 +79,7 @@ class AutocompleteLabel<T extends Object> extends StatelessWidget {
                             onPressed: () {
                               textController.clear();
                               field.didChange(null);
-                              onSelected(null);
+                              widget.onSelected(null);
                             },
                           )
                         : const Icon(Icons.search, size: 20),
@@ -76,7 +96,10 @@ class AutocompleteLabel<T extends Object> extends StatelessWidget {
                 elevation: 4,
                 borderRadius: BorderRadius.circular(8),
                 child: ConstrainedBox(
-                  constraints: BoxConstraints(maxHeight: 200, maxWidth: width),
+                  constraints: BoxConstraints(
+                    maxHeight: 200,
+                    maxWidth: widget.width,
+                  ),
                   child: ListView.builder(
                     padding: EdgeInsets.zero,
                     shrinkWrap: true,
@@ -85,7 +108,7 @@ class AutocompleteLabel<T extends Object> extends StatelessWidget {
                       final option = options.elementAt(index);
                       return ListTile(
                         dense: true,
-                        title: Text(displayStringForOption(option)),
+                        title: Text(widget.displayStringForOption(option)),
                         onTap: () => onSelected(option),
                       );
                     },

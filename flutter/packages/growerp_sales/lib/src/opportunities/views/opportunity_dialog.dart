@@ -193,6 +193,8 @@ class OpportunityDialogState extends State<OpportunityDialog> {
         isExpanded: true,
       ),
       BlocBuilder<DataFetchBlocOther<Users>, DataFetchState>(
+        buildWhen: (previous, current) =>
+            current.status != DataFetchStatus.loading,
         builder: (context, state) {
           switch (state.status) {
             case DataFetchStatus.failure:
@@ -234,6 +236,8 @@ class OpportunityDialogState extends State<OpportunityDialog> {
         },
       ),
       BlocBuilder<DataFetchBloc<Users>, DataFetchState<Users>>(
+        buildWhen: (previous, current) =>
+            current.status != DataFetchStatus.loading,
         builder: (context, state) {
           switch (state.status) {
             case DataFetchStatus.failure:

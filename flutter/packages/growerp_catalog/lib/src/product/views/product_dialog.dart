@@ -115,6 +115,11 @@ class ProductDialogState extends State<ProductDialog> {
       _selectedProductTypeId = catalogLocalizations.rental;
     }
     return BlocConsumer<ProductBloc, ProductState>(
+      listenWhen: (previous, current) =>
+          current.status == ProductStatus.failure ||
+          (current.status == ProductStatus.success &&
+              current.message != null &&
+              current.message!.isNotEmpty),
       listener: (context, state) async {
         switch (state.status) {
           case ProductStatus.success:

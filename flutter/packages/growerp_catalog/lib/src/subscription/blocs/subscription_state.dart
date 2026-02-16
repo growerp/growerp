@@ -20,7 +20,6 @@ class SubscriptionState extends Equatable {
   const SubscriptionState({
     this.status = SubscriptionStatus.initial,
     this.subscriptions = const <Subscription>[],
-    this.searchResults = const <Subscription>[],
     this.hasReachedMax = false,
     this.message,
     this.searchString = '',
@@ -28,7 +27,6 @@ class SubscriptionState extends Equatable {
 
   final SubscriptionStatus status;
   final List<Subscription> subscriptions;
-  final List<Subscription>? searchResults;
   final bool hasReachedMax;
   final String? message;
   final String searchString;
@@ -36,7 +34,6 @@ class SubscriptionState extends Equatable {
   SubscriptionState copyWith({
     SubscriptionStatus? status,
     List<Subscription>? subscriptions,
-    List<Subscription>? searchResults,
     bool? hasReachedMax,
     String? message,
     String? searchString,
@@ -44,7 +41,6 @@ class SubscriptionState extends Equatable {
     return SubscriptionState(
       status: status ?? this.status,
       subscriptions: subscriptions ?? this.subscriptions,
-      searchResults: searchResults ?? this.searchResults,
       hasReachedMax: hasReachedMax ?? this.hasReachedMax,
       message: message ?? this.message,
       searchString: searchString ?? this.searchString,
@@ -52,13 +48,7 @@ class SubscriptionState extends Equatable {
   }
 
   @override
-  List<Object?> get props => [
-    status,
-    message,
-    subscriptions,
-    searchResults,
-    hasReachedMax,
-  ];
+  List<Object?> get props => [status, message, subscriptions, hasReachedMax];
 
   @override
   String toString() =>

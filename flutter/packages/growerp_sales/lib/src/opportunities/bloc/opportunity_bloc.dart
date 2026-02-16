@@ -66,7 +66,7 @@ class OpportunityBloc extends Bloc<OpportunityEvent, OpportunityState> {
         limit: event.limit,
       );
 
-      if (event.searchString.isEmpty) {
+      if (event.searchString.isEmpty || event.refresh) {
         return emit(
           state.copyWith(
             status: OpportunityStatus.success,
