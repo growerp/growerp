@@ -111,17 +111,23 @@ melos:
         fileExists: "l10n.yaml"
     test_package:
       description: run all integration tests. Set BACKEND_PORT env var to override default 8080.
-      exec: flutter test integration_test --dart-define=BACKEND_PORT=${BACKEND_PORT:-8080}
+      exec:
+        concurrency: 1
+      run: flutter test integration_test --dart-define=BACKEND_PORT=${BACKEND_PORT:-8080}
       packageFilters:
         dirExists: "integration_test"
         scope: "*_example"
     test:
       description: run all app and package tests. Set BACKEND_PORT env var to override default 8080.
-      exec: flutter test integration_test --dart-define=BACKEND_PORT=${BACKEND_PORT:-8080}
+      exec:
+        concurrency: 1
+      run: flutter test integration_test --dart-define=BACKEND_PORT=${BACKEND_PORT:-8080}
       packageFilters:
         dirExists: "integration_test"
     test-headless:
       description: run all app and package tests in headless mode using flutter/docker-compose-test.yml.
-      exec: $MELOS_ROOT_PATH/test/set_app_settings.sh && flutter test integration_test
+      exec:
+        concurrency: 1
+      run: $MELOS_ROOT_PATH/test/set_app_settings.sh && flutter test integration_test -d emulator:5557
       packageFilters:
         dirExists: "integration_test"

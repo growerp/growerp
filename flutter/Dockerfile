@@ -38,6 +38,9 @@ RUN dart pub global activate melos 3.4.0
 ENV PATH="$PATH":"$HOME/.pub-cache/bin"
 ENV FLUTTER_HOME="/home/mobiledevops/.flutter-sdk"
 ENV PATH="$PATH:$FLUTTER_HOME/bin"
+# Limit memory during Docker build: disable Gradle daemon, cap Dart VM heap
+ENV GRADLE_OPTS="-Dorg.gradle.daemon=false -Xmx2g"
+ENV DART_VM_OPTIONS="--old_gen_heap_size=1024"
 
 # get growerp repos
 #RUN git clone --depth 1 -b $BRANCH https://github.com/growerp/growerp.git /opt/growerp

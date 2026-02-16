@@ -1,11 +1,16 @@
 services:
   sut:
-    build: .
-    # image: growerp/integration-test
+    image: growerp/flutter-sdk-image:latest
+    mem_limit: 6g
+    memswap_limit: 6g
+    working_dir: /home/mobiledevops/growerp
+    user: root
     volumes:
-      - ./test:/home/mobiledevops/growerp/test
+      - .:/home/mobiledevops/growerp
     environment:
       - PACKAGE_FILTER=${PACKAGE_FILTER:-}
+      # Disable Gradle daemon to prevent memory accumulation across test runs
+      - GRADLE_OPTS=-Dorg.gradle.daemon=false -Xmx2g -Dkotlin.compiler.execution.strategy=in-process
     depends_on:
       emulator:
         condition: service_started
@@ -14,6 +19,8 @@ services:
   emulator:
     image: growerp/android-emulator
     container_name: emulator
+    mem_limit: 4g
+    memswap_limit: 4g
     ports:
       - 5556:5556
       - 5557:5557
@@ -21,23 +28,25 @@ services:
       - moqui
     privileged: true
     devices:
-      - '/dev/kvm:/dev/kvm'
+      - "/dev/kvm:/dev/kvm"
     command: bash -c "/entrypoint.sh 5556 5557"
 
   moqui:
-    # image: growerp/growerp-moqui
-    build: ../moqui
+    image: growerp/growerp-moqui
+    # build: ../moqui
     container_name: moqui
     restart: always
+    mem_limit: 1536m
+    memswap_limit: 1536m
     ports:
       - 127.0.0.1:80:80
     depends_on:
       - moqui-database
-      #volumes:
+    volumes:
       #- ./MoquiProductionConf.xml:/opt/moqui/runtime/conf/MoquiProductionConf.xml
       #- ./runtime/lib:/opt/moqui/runtime/lib
       #- ./runtime/classes:/opt/moqui/runtime/classes
-      #- ../moqui/runtime/component:/opt/moqui/runtime/component
+      - ../moqui/runtime/component/growerp:/opt/moqui/runtime/component/growerp
       #- ./runtime/log:/opt/moqui/runtime/log
       #- ./runtime/txlog:/opt/moqui/runtime/txlog
       #- ../docker/runtime/sessions:/opt/moqui/runtime/sessions
@@ -53,6 +62,8 @@ services:
       - entity_ds_user=moqui
       - entity_ds_password=moqui
       - entity_ds_crypt_pass='MoquiDefaultPassword:CHANGEME'
+      # Limit Moqui JVM heap to prevent unbounded memory growth
+      - JAVA_TOOL_OPTIONS=-Xmx768m -XX:MaxMetaspaceSize=256m
       # CHANGE ME - note that VIRTUAL_HOST is for nginx-proxy so it picks up this container as one it should reverse proxy
       # this can be a comma separate list of hosts like 'example.com,www.example.com'
       - webapp_allow_origins=*
@@ -74,6 +85,8 @@ services:
     image: postgres:17.2
     container_name: postgres
     restart: always
+    mem_limit: 512m
+    memswap_limit: 512m
     ports:
       # change this as needed to bind to any address or even comment to not expose port outside containers
       - 127.0.0.1:5432:5432
@@ -86,4 +99,5 @@ services:
       - POSTGRES_USER=moqui
       - POSTGRES_PASSWORD=moqui
     # PGDATA, POSTGRES_INITDB_ARGS
-
+    # Limit PostgreSQL shared memory and work memory for testing
+    command: postgres -c shared_buffers=128MB -c work_mem=4MB -c maintenance_work_mem=64MB
