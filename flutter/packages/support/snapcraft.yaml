@@ -1,6 +1,6 @@
 name: growerp-support
 base: core22
-version: '1.13.9'
+version: '1.14.0'
 summary: GrowERP support - Business Management System
 description: |
   GrowERP support is the system support package and provides management capabilities including:

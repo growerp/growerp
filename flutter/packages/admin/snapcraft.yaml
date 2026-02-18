@@ -1,6 +1,6 @@
 name: growerp-admin
 base: core22
-version: '1.13.9'
+version: '1.14.0'
 summary: GrowERP Admin - Business Management System
 description: |
   GrowERP Admin is a comprehensive ERP (Enterprise Resource Planning) application 
