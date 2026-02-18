@@ -18,6 +18,8 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../functions/get_backend_url.dart';
 import '../constant.dart';
+import 'reload_web_stub.dart'
+    if (dart.library.js_interop) 'reload_web_web.dart';
 
 bool get _isLinux {
   if (kIsWeb) return false;
@@ -364,7 +366,50 @@ class ForceUpdateScreen extends StatelessWidget {
                           ),
                         ),
                       ],
-                      if (!_isLinux) ...[
+                      if (kIsWeb) ...[
+                        const SizedBox(height: 16),
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: theme.colorScheme.primaryContainer,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.refresh,
+                                size: 22,
+                                color: theme.colorScheme.onPrimaryContainer,
+                              ),
+                              const SizedBox(width: 8),
+                              Flexible(
+                                child: Text(
+                                  'Press CTRL-F5 to update\nor tap the button below.',
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: theme.colorScheme.onPrimaryContainer,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        FilledButton.icon(
+                          key: const Key('updateNowButton'),
+                          onPressed: () => reloadPage(),
+                          icon: const Icon(Icons.refresh),
+                          label: const Text('Reload Now'),
+                          style: FilledButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 32,
+                              vertical: 16,
+                            ),
+                          ),
+                        ),
+                      ] else if (!_isLinux) ...[
                         const SizedBox(height: 24),
                         FilledButton.icon(
                           key: const Key('updateNowButton'),
