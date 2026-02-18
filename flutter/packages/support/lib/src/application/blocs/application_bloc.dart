@@ -146,7 +146,10 @@ class ApplicationBloc extends Bloc<ApplicationEvent, ApplicationState> {
       int index = applications.indexWhere(
         (element) => element.applicationId == event.application.applicationId,
       );
-      applications.removeAt(index);
+      // Keep the entry in the list but clear its content
+      applications[index] = Application(
+        applicationId: event.application.applicationId,
+      );
       emit(
         state.copyWith(
           status: ApplicationStatus.success,
