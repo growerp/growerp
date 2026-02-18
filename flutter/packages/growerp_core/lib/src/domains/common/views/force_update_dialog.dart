@@ -12,10 +12,21 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../functions/get_backend_url.dart';
 import '../constant.dart';
+
+bool get _isLinux {
+  if (kIsWeb) return false;
+  try {
+    return Platform.isLinux;
+  } catch (_) {
+    return false;
+  }
+}
 
 /// A non-dismissible dialog that prompts the user to update the app
 /// when a force update is required.
@@ -136,15 +147,56 @@ class ForceUpdateDialog extends StatelessWidget {
                 color: theme.colorScheme.onSurfaceVariant,
               ),
             ),
+            if (_isLinux) ...[
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.primaryContainer,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.terminal,
+                      size: 20,
+                      color: theme.colorScheme.onPrimaryContainer,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text.rich(
+                        TextSpan(
+                          text: 'Run ',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: theme.colorScheme.onPrimaryContainer,
+                          ),
+                          children: [
+                            TextSpan(
+                              text: 'snap refresh',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'monospace',
+                              ),
+                            ),
+                            const TextSpan(text: ' in the terminal.'),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ],
         ),
         actions: [
-          FilledButton.icon(
-            key: const Key('updateNowButton'),
-            onPressed: () => _launchUpdateUrl(),
-            icon: const Icon(Icons.download),
-            label: const Text('Update Now'),
-          ),
+          if (!_isLinux)
+            FilledButton.icon(
+              key: const Key('updateNowButton'),
+              onPressed: () => _launchUpdateUrl(),
+              icon: const Icon(Icons.download),
+              label: const Text('Update Now'),
+            ),
         ],
       ),
     );
@@ -269,19 +321,64 @@ class ForceUpdateScreen extends StatelessWidget {
                         ),
                         textAlign: TextAlign.center,
                       ),
-                      const SizedBox(height: 24),
-                      FilledButton.icon(
-                        key: const Key('updateNowButton'),
-                        onPressed: () => _launchUpdateUrl(),
-                        icon: const Icon(Icons.download),
-                        label: const Text('Update Now'),
-                        style: FilledButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 32,
-                            vertical: 16,
+                      if (_isLinux) ...[
+                        const SizedBox(height: 16),
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: theme.colorScheme.primaryContainer,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.terminal,
+                                size: 22,
+                                color: theme.colorScheme.onPrimaryContainer,
+                              ),
+                              const SizedBox(width: 8),
+                              Flexible(
+                                child: Text.rich(
+                                  TextSpan(
+                                    text: 'Run ',
+                                    style: theme.textTheme.bodyMedium?.copyWith(
+                                      color:
+                                          theme.colorScheme.onPrimaryContainer,
+                                    ),
+                                    children: [
+                                      TextSpan(
+                                        text: 'snap refresh',
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontFamily: 'monospace',
+                                        ),
+                                      ),
+                                      const TextSpan(text: ' in the terminal.'),
+                                    ],
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                      ),
+                      ],
+                      if (!_isLinux) ...[
+                        const SizedBox(height: 24),
+                        FilledButton.icon(
+                          key: const Key('updateNowButton'),
+                          onPressed: () => _launchUpdateUrl(),
+                          icon: const Icon(Icons.download),
+                          label: const Text('Update Now'),
+                          style: FilledButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 32,
+                              vertical: 16,
+                            ),
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),
