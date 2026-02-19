@@ -32,11 +32,11 @@ done
 if [ -n "$EMULATOR_IP" ]; then
   echo "Connecting to emulator at $EMULATOR_IP:5557"
   adb connect "$EMULATOR_IP":5557 || true
-  DEVICE_ID="$EMULATOR_IP:5557"
+  export DEVICE_ID="$EMULATOR_IP:5557"
 else
   echo "Failed to resolve emulator via getent, trying direct hostname..."
   adb connect emulator:5557 || true
-  DEVICE_ID="emulator:5557"
+  export DEVICE_ID="emulator:5557"
 fi
 
 echo "Using DEVICE_ID: $DEVICE_ID"
@@ -176,7 +176,7 @@ elif [ -n "$PACKAGE_FILTER" ]; then
     flutter test integration_test -d "$DEVICE_ID"
 else
   echo "Running all tests"
-  melos run test-headless --no-select
+  DEVICE_ID="$DEVICE_ID" melos run test-headless --no-select
 fi
 
 # Take a screenshot of the Flutter app.
