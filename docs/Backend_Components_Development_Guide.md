@@ -356,7 +356,7 @@ if (ip.isNotEmpty) {
 For automated testing, the system includes:
 
 ```bash
-# flutter/test/set_app_settings.sh
+# flutter/ci/test/set_app_settings.sh
 sed -i -e 's"databaseUrlDebug": "","databaseUrlDebug": "http://moqui",g' assets/cfg/app_settings.json
 sed -i -e 's"chatUrlDebug": "","chatUrlDebug": "ws://moqui/chat",g' assets/cfg/app_settings.json
 ```

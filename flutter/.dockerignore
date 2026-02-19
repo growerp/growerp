@@ -1,0 +1,48 @@
+# Flutter/Dart build artifacts that should not be copied into Docker images
+**/.dart_tool/
+**/build/
+**/.flutter-plugins
+**/.flutter-plugins-dependencies
+**/.packages
+**/.pub-cache/
+**/.pub/
+**/linux/
+**/macos/
+**/windows/
+**/ios/
+**/*.g.dart.bak
+**/*.freezed.dart.bak
+
+# Android build outputs
+**/android/.gradle/
+**/android/app/build/
+**/android/app/.cxx/
+**/android/.cxx/
+**/android/build/
+**/android/local.properties
+**/android/captures/
+**/android/.externalNativeBuild/
+**/android/.idea/
+
+# Web build
+**/web/build/
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Temporary files
+*.log
+*.tmp
+*.temp
+
+# Test results
+**/coverage/
+**/test-results/

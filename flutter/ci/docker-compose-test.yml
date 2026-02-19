@@ -1,24 +1,30 @@
 services:
   sut:
-    image: growerp/flutter-sdk-image:latest
+    build:
+      context: ..
+      dockerfile: ci/Dockerfile
+    image: growerp/flutter-test-runner:latest
+    # pull_policy: never
     mem_limit: 6g
     memswap_limit: 6g
     working_dir: /home/mobiledevops/growerp
     user: root
     volumes:
-      - .:/home/mobiledevops/growerp
+      - ..:/home/mobiledevops/growerp
     environment:
       - PACKAGE_FILTER=${PACKAGE_FILTER:-}
+      - TEST_FILE=${TEST_FILE:-}
       # Disable Gradle daemon to prevent memory accumulation across test runs
       - GRADLE_OPTS=-Dorg.gradle.daemon=false -Xmx2g -Dkotlin.compiler.execution.strategy=in-process
     depends_on:
       emulator:
-        condition: service_started
-    command: bash -c "test/run_tests.sh"
+        condition: service_healthy
+    command: bash -c "ci/test/run_tests.sh"
 
   emulator:
     image: growerp/android-emulator
     container_name: emulator
+    restart: unless-stopped
     mem_limit: 4g
     memswap_limit: 4g
     ports:
@@ -29,10 +35,20 @@ services:
     privileged: true
     devices:
       - "/dev/kvm:/dev/kvm"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "adb devices | grep -q 'emulator.*device' && adb shell getprop sys.boot_completed | grep -q 1",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 120s
     command: bash -c "/entrypoint.sh 5556 5557"
 
   moqui:
-    image: growerp/growerp-moqui
+    image: growerp/growerp-moqui:latest
     # build: ../moqui
     container_name: moqui
     restart: always
@@ -46,7 +62,7 @@ services:
       #- ./MoquiProductionConf.xml:/opt/moqui/runtime/conf/MoquiProductionConf.xml
       #- ./runtime/lib:/opt/moqui/runtime/lib
       #- ./runtime/classes:/opt/moqui/runtime/classes
-      - ../moqui/runtime/component/growerp:/opt/moqui/runtime/component/growerp
+      - ../../moqui/runtime/component:/opt/moqui/runtime/component
       #- ./runtime/log:/opt/moqui/runtime/log
       #- ./runtime/txlog:/opt/moqui/runtime/txlog
       #- ../docker/runtime/sessions:/opt/moqui/runtime/sessions

@@ -125,9 +125,9 @@ melos:
       packageFilters:
         dirExists: "integration_test"
     test-headless:
-      description: run all app and package tests in headless mode using flutter/docker-compose-test.yml.
+      description: run all app and package tests in headless mode using flutter/ci/docker-compose-test.yml.
       exec:
         concurrency: 1
-      run: $MELOS_ROOT_PATH/test/set_app_settings.sh && flutter test integration_test -d emulator:5557
+      run: $MELOS_ROOT_PATH/ci/test/set_app_settings.sh && flutter test integration_test -d emulator:5557
       packageFilters:
         dirExists: "integration_test"
