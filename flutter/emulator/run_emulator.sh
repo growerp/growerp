@@ -39,7 +39,13 @@ else
     emulator_arguments+=(-no-snapshot)
 fi
 
-emulator_arguments+=(-no-boot-anim -no-audio -partition-size 2048 -port 5556)
+emulator_arguments+=(-no-boot-anim -no-audio -partition-size 6144 -port 5556)
+
+# Point Vulkan loader to the correct Swiftshader ICD file
+export VK_ICD_FILENAMES=/opt/android-sdk/emulator/lib64/vulkan/vk_swiftshader_icd.json
+# Disable Vulkan to prevent segfault in headless mode with newer system images
+export ANDROID_EMU_VK_NO_CLEANUP=1
+emulator_arguments+=(-feature -Vulkan)
 
 # emulator uses adb so we make sure that server is running
 adb start-server
