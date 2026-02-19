@@ -1,13 +1,17 @@
 {
-    "appName": "", "packageName":"", "version": "", "build": "",
+    "appName": "",
+    "packageName": "",
+    "version": "",
+    "build": "",
     "classificationId": "AppAdmin",
     "_________________comment__backend": "moqui / ofbiz",
     "backend": "moqui",
     "_________________comment__production url NOT _end forwardslash!": "https://rest.example.com",
     "databaseUrl": "https://backend.growerp.local",
     "chatUrl": "wss://chat.growerp.local",
-    "__________________leave empty for local system, use https://test.growerp.org for our test system":"",
+    "__________________leave empty for local system, use https://backend.growerp.org for our test system": "",
     "databaseUrlDebug": "",
+    "__________________leave empty for local system, use ws://backend.growerp.org for our test system": "",
     "chatUrlDebug": "",
     "____________": "show debug banner on top right ",
     "test": false,
@@ -21,5 +25,5 @@
     "_________________comment_restRequestsLogs": "show logging of requests",
     "restRequestLogs": false,
     "_________________comment_restResponseLogs": "show logging of responses",
-    "restResponseLogs": false 
+    "restResponseLogs": false
 }

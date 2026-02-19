@@ -92,8 +92,9 @@ void main() {
 
     // Check that menu option cards are displayed on the dashboard
     // CoreDashboard shows cards for each menu option (excluding '/' and '/about')
-    expect(find.text('Organization'), findsOneWidget);
-    expect(find.text('Logged in User'), findsOneWidget);
+    // Use key-based finders since DashboardCard applies text transformations in phone mode
+    expect(find.byKey(const Key('tap/company')), findsOneWidget);
+    expect(find.byKey(const Key('tap/user')), findsOneWidget);
 
     // Verify we're authenticated (HomeFormAuth key should be present in logout button icon)
     expect(find.byKey(const Key('HomeFormAuth')), findsOneWidget);

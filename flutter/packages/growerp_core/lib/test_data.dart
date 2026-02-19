@@ -40,7 +40,7 @@ Company company = Company(
     country: countries[50].name,
   ),
   paymentMethod: PaymentMethod(
-    ccDescription: 'Visa**********1881 10/2026',
+    ccDescription: 'Visa************1881 10/2026',
     creditCardNumber: '4012888888881881',
     creditCardType: CreditCardType.visa,
     expireMonth: '10',
@@ -293,7 +293,7 @@ List<Company> customerCompanies = [
       country: countries[12].name,
     ),
     paymentMethod: PaymentMethod(
-      ccDescription: 'Master Card**********3222 4/2029',
+      ccDescription: 'Master Card************3222 4/2029',
       creditCardNumber: '2223003122003222',
       creditCardType: CreditCardType.mc,
       expireMonth: '4',
@@ -306,7 +306,7 @@ List<Company> customerCompanies = [
     name: 'customer company3',
     role: Role.customer,
     paymentMethod: PaymentMethod(
-      ccDescription: 'Master Card**********4444 11/2032',
+      ccDescription: 'Master Card************4444 11/2032',
       creditCardNumber: '5555555555554444',
       creditCardType: CreditCardType.mc,
       expireMonth: '11',
@@ -335,7 +335,7 @@ List<Company> customerCompanies = [
       country: countries[12].name,
     ),
     paymentMethod: PaymentMethod(
-      ccDescription: 'Master Card**********3222 4/2029',
+      ccDescription: 'Master Card************3222 4/2029',
       creditCardNumber: '2223003122003222',
       creditCardType: CreditCardType.mc,
       expireMonth: '4',
@@ -442,7 +442,7 @@ List<User> customers = [
     url: 'https://nXXX.example.org',
     telephoneNr: '111111111111',
     paymentMethod: PaymentMethod(
-      ccDescription: 'Master Card**********4444 11/2032',
+      ccDescription: 'Master Card************4444 11/2032',
       creditCardNumber: '5555555555554444',
       creditCardType: CreditCardType.mc,
       expireMonth: '11',

@@ -65,7 +65,7 @@ class AddressDialogState extends State<AddressDialog> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: popUp(
         context: context,
-        title: address == null
+        title: address == null || address!.addressId == null
             ? localizations.newCompanyAddress
             : localizations.companyAddressDetail(address!.addressId!),
         height: 700,
@@ -147,7 +147,7 @@ class AddressDialogState extends State<AddressDialog> {
                   ),
                 );
               },
-              displayStringForOption: (Country u) => " ${u.name}",
+              displayStringForOption: (Country u) => u.name,
               onSelected: (Country? newValue) {
                 _selectedCountry = newValue;
               },

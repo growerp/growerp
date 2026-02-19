@@ -157,8 +157,7 @@ class _TopAppState extends State<TopApp> {
           }
         });
       } catch (e) {
-        // Scaffold not yet registered with the messenger, retry
-        debugPrint('SnackBar attempt $attempt failed: $e');
+        // Scaffold not yet in tree or messenger disposed, retry
         if (attempt < 10) {
           Future.delayed(const Duration(milliseconds: 100), () {
             if (mounted) {
@@ -166,7 +165,9 @@ class _TopAppState extends State<TopApp> {
             }
           });
         } else {
-          debugPrint('SnackBar not shown after retries: $message - $e');
+          // Give up silently - message will not be shown if Scaffold is unavailable
+          // during app initialization. This is safe behavior.
+          debugPrint('SnackBar not shown - Scaffold unavailable: $message');
         }
       }
     } else if (attempt < 10) {
@@ -177,10 +178,8 @@ class _TopAppState extends State<TopApp> {
         }
       });
     } else {
-      // Give up after 10 attempts (1s total)
-      debugPrint(
-        'SnackBar not shown after retries - no Scaffold available: $message',
-      );
+      // Give up after 10 attempts (1s total) - this is safe, message just won't display
+      // if Scaffold is never available, which shouldn't happen in normal operation
     }
   }
 
@@ -279,20 +278,22 @@ class _TopAppState extends State<TopApp> {
                         // If force update is required, show blocking overlay
                         if (widget.forceUpdateInfo != null &&
                             widget.forceUpdateInfo!.forceUpdate) {
-                          return Stack(
-                            children: [
-                              appContent,
-                              // Full-screen blocking overlay
-                              Positioned.fill(
-                                child: ForceUpdateScreen(
-                                  forceUpdateInfo: widget.forceUpdateInfo!,
+                          return Scaffold(
+                            body: Stack(
+                              children: [
+                                appContent,
+                                // Full-screen blocking overlay
+                                Positioned.fill(
+                                  child: ForceUpdateScreen(
+                                    forceUpdateInfo: widget.forceUpdateInfo!,
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           );
                         }
 
-                        return appContent;
+                        return Scaffold(body: appContent);
                       },
                       themeMode: themeState.themeMode,
                       theme: FlexThemeData.light(

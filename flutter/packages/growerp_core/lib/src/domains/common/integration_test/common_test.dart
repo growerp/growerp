@@ -121,7 +121,7 @@ class CommonTest {
     int seq = test.sequence + 1;
     if (test.admin != null) return; // company already created
     // check if email address already exist
-    final restClient = RestClient(await buildDioClient(overrideUrl: "http://moqui"));
+    final restClient = RestClient(await buildDioClient());
     var exist = true;
     var times = 0;
     while (exist) {
@@ -142,6 +142,12 @@ class CommonTest {
     }
     // check if logged in, if yes logout first
     await logout(tester);
+    // Wait for unauthenticated home screen with newUserButton to appear
+    for (int i = 0; i < 150; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+      if (tester.any(find.byKey(const Key('newUserButton')))) break;
+    }
+    await tester.pumpAndSettle(const Duration(milliseconds: 500));
     // create admin
     await tapByKey(tester, 'newUserButton');
     await enterText(tester, 'firstName', admin.firstName!);

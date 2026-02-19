@@ -87,6 +87,9 @@ class _CoreAppState extends State<CoreApp> {
 
           if (state.status == MenuConfigStatus.success &&
               state.menuConfiguration != null) {
+            // Capture bloc reference here to avoid looking it up
+            // from a deactivated widget context during router rebuilds
+            final menuConfigBloc = context.read<MenuConfigBloc>();
             // Use simplified config - no accounting submenu
             router = createDynamicAppRouter(
               [state.menuConfiguration!],
@@ -102,7 +105,7 @@ class _CoreAppState extends State<CoreApp> {
                       showDialog(
                         context: fabContext,
                         builder: (dialogContext) => BlocProvider.value(
-                          value: fabContext.read<MenuConfigBloc>(),
+                          value: menuConfigBloc,
                           child: MenuItemListDialog(
                             menuConfiguration: menuConfig,
                           ),

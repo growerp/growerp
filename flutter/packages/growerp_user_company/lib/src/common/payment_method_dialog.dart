@@ -188,11 +188,16 @@ class PaymentMethodDialogState extends State<PaymentMethodDialog> {
                     ),
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
+                        final cardNumber = _creditCardNumberController.text;
+                        final maskedNumber =
+                            '${'*' * (cardNumber.length - 4)}${cardNumber.substring(cardNumber.length - 4)}';
+                        final description =
+                            '$_cardType$maskedNumber ${_expireMonthController.text}/${_expireYearController.text}';
                         Navigator.of(context).pop(
                           PaymentMethod(
-                            ccDescription: _cardType.toString(),
+                            ccDescription: description,
                             creditCardType: _cardType,
-                            creditCardNumber: _creditCardNumberController.text,
+                            creditCardNumber: cardNumber,
                             expireMonth: _expireMonthController.text,
                             expireYear: _expireYearController.text,
                           ),
