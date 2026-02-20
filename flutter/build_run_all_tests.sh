@@ -33,7 +33,7 @@ Examples:
 Steps performed:
   1. Run Selenium hotel/admin tests (PopRestStore)
   2. Tear down any previous Docker test containers
-  3. Copy the repo to /tmp/growerp for an isolated build
+  3. Copy the repo to /tmp/growerp for an isolated build (release uses /tmp/growerpRelease, so both can run in parallel)
   4. Start Docker Compose test environment and run Flutter integration tests
 EOF
 }
@@ -123,6 +123,7 @@ fi
 # docker volume prune -af
 
 # Copy the flutter directory to /tmp/growerp for an isolated test run
+# (release uses /tmp/growerpRelease, so CI and release can run in parallel)
 # This prevents test scripts (e.g. sed on app_settings.json) from modifying source files
 TMP_DIR="/tmp/growerp"
 echo "Copying flutter directory to $TMP_DIR for isolated test run..."

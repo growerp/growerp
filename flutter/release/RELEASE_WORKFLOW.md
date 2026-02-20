@@ -4,7 +4,7 @@
 
 The release process follows a **repository-first** approach to ensure consistency and reproducibility:
 
-1. **Clone** current repository to temp directory (`/tmp/growerp`)
+1. **Clone** current repository to temp directory (`/tmp/growerpRelease`)
 2. **Update** versions in temp workspace
 3. **Commit & Tag** changes, push to GitHub
 4. **Build** Docker images from repository (not local files)
@@ -19,7 +19,7 @@ The release process follows a **repository-first** approach to ensure consistenc
 
 ## Workflow Steps
 
-### Step 1: Version Updates (in `/tmp/growerp`)
+### Step 1: Version Updates (in `/tmp/growerpRelease`)
 - Calculate new version based on user input (patch/minor/major)
 - Update `pubspec.yaml` files for Flutter apps
 - Update `component.xml` for growerp-moqui

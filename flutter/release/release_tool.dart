@@ -69,6 +69,16 @@ void main(List<String> args) async {
     workspaceDir = releaseState['workspaceDir'];
     releaseComment = releaseState['releaseComment'] ?? '';
 
+    // Re-clone if the workspace was lost (e.g. machine reboot cleared /tmp)
+    if (!exists(workspaceDir)) {
+      print("⚠️  Workspace directory '$workspaceDir' not found. Re-cloning...");
+      workspaceDir = await determineWorkspace(
+        pushConfig['pushToGitHub'] ?? false,
+      );
+      releaseState['workspaceDir'] = workspaceDir;
+      saveState();
+    }
+
     print("📋 Resumed Release Summary:");
     print("   Applications: ${selectedApps.join(', ')}");
     print("   New version: ${versionInfo['newBase']}");
@@ -316,7 +326,7 @@ Future<String> getReleaseComment() async {
 
 Future<String> determineWorkspace(bool pushToGitHub) async {
   // Always use temp directory for release builds to ensure clean state
-  var tempDir = config['tempWorkspaceDir'] ?? '/tmp/growerp';
+  var tempDir = config['tempWorkspaceDir'] ?? '/tmp/growerpRelease';
   print("📁 Setting up repository workspace at: $tempDir");
 
   if (exists(tempDir)) {
@@ -328,6 +338,33 @@ Future<String> determineWorkspace(bool pushToGitHub) async {
   var repoUrl = config['repositoryUrl'] ?? 'git@github.com:growerp/growerp.git';
   var branch = config['defaultBranch'] ?? 'master';
   run('git clone -b $branch "$repoUrl" "$tempDir"');
+
+  // Overlay local Dockerfiles so uncommitted changes (e.g. base image updates)
+  // are used for the build rather than the cloned committed versions.
+  print("   Overlaying local Dockerfiles...");
+  final localFlutterDir = Directory.current.path;
+  final clonedFlutterDir = '$tempDir/flutter';
+  for (final file
+      in Directory(localFlutterDir)
+          .listSync(recursive: true)
+          .whereType<File>()
+          .where((f) => f.uri.pathSegments.last == 'Dockerfile')) {
+    final rel = file.path.substring(localFlutterDir.length + 1);
+    final dest = File('$clonedFlutterDir/$rel');
+    dest.parent.createSync(recursive: true);
+    file.copySync(dest.path);
+    print("      → flutter/$rel");
+  }
+  // Also overlay the moqui Dockerfile
+  final localMoquiDockerfile = File(
+    '${Directory.current.parent.path}/moqui/Dockerfile',
+  );
+  if (localMoquiDockerfile.existsSync()) {
+    final destMoqui = File('$tempDir/moqui/Dockerfile');
+    destMoqui.parent.createSync(recursive: true);
+    localMoquiDockerfile.copySync(destMoqui.path);
+    print("      → moqui/Dockerfile");
+  }
 
   return tempDir;
 }
@@ -749,7 +786,5 @@ void displayFinalSummary(
     print("     • $app (${imageIds[app]})");
   }
   print("\n💡 Next steps:");
-  print("   • Update production docker-compose.yaml with version $version");
-  print("   • Deploy to production: docker-compose up -d");
-  print("   • Monitor application startup and logs");
+  print("   • Update test/production with version $version");
 }

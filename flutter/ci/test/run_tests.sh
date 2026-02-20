@@ -10,6 +10,10 @@ git config --global --add safe.directory '*'
 dart pub global activate melos
 export PATH="$PATH":"$HOME/.pub-cache/bin"
 
+# Re-bootstrap workspace to pick up any new packages added since the image was built
+# (e.g. packages with 'resolution: workspace' not present in the pre-built image)
+melos bootstrap --no-select
+
 # Disable Gradle daemon and run Kotlin compiler in-process to prevent memory issues
 export GRADLE_OPTS="-Dorg.gradle.daemon=false -Xmx2g -Dkotlin.compiler.execution.strategy=in-process"
 

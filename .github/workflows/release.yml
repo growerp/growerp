@@ -1,0 +1,123 @@
+name: Release
+
+# Manually trigger a production release from GitHub Actions.
+# Required secrets:
+#   DOCKERHUB_USERNAME  — Docker Hub account name
+#   DOCKERHUB_TOKEN     — Docker Hub access token (read/write)
+# The built-in GITHUB_TOKEN is used for git push (needs Contents: write permission).
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: 'Version bump type'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+      apps:
+        description: 'Apps to release (comma-separated). Leave empty for all.'
+        required: false
+        default: ''
+      comment:
+        description: 'Optional release comment added to the git commit'
+        required: false
+        default: ''
+      push_docker:
+        description: 'Push images to Docker Hub'
+        required: true
+        default: 'true'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+
+# Only one release at a time — never cancel a running release.
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+permissions:
+  contents: write   # required for git push / tag
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+
+    steps:
+      # -----------------------------------------------------------------------
+      # 1. Checkout — full history so version scanning works across all tags
+      # -----------------------------------------------------------------------
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          # Use the default GITHUB_TOKEN; git remote is patched below.
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      # -----------------------------------------------------------------------
+      # 2. Dart SDK
+      # -----------------------------------------------------------------------
+      - name: Set up Dart
+        uses: dart-lang/setup-dart@v1
+
+      - name: Install dcli
+        run: dart pub global activate dcli
+
+      # -----------------------------------------------------------------------
+      # 3. Docker — Buildx + layer cache via GitHub Actions cache backend
+      # -----------------------------------------------------------------------
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        if: ${{ inputs.push_docker == 'true' }}
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # -----------------------------------------------------------------------
+      # 4. Git — allow push back via GITHUB_TOKEN over HTTPS
+      # -----------------------------------------------------------------------
+      - name: Configure git
+        run: |
+          git config user.email "github-actions@growerp.com"
+          git config user.name "GitHub Actions"
+          git remote set-url origin \
+            https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+
+      # -----------------------------------------------------------------------
+      # 5. Run the release tool in CI mode
+      #    --workspace=local  → skip repo clone, use this checkout directly
+      #    --parallel         → build all selected apps simultaneously
+      #    --push-github      → commit version bump + tag and push
+      # -----------------------------------------------------------------------
+      - name: Run release tool
+        working-directory: flutter
+        env:
+          DOCKER_BUILDKIT: '1'
+        run: |
+          ARGS="--ci --bump=${{ inputs.bump }} --parallel --workspace=local"
+
+          if [ -n "${{ inputs.apps }}" ]; then
+            ARGS="$ARGS --apps=${{ inputs.apps }}"
+          fi
+
+          if [ -n "${{ inputs.comment }}" ]; then
+            # Wrap in quotes so spaces are preserved
+            ARGS="$ARGS --comment=${{ inputs.comment }}"
+          fi
+
+          if [ "${{ inputs.push_docker }}" = "true" ]; then
+            ARGS="$ARGS --push-docker --push-github"
+          else
+            ARGS="$ARGS --no-push-docker --no-push-github"
+          fi
+
+          echo "Running: dart release/release_tool.dart $ARGS"
+          dart release/release_tool.dart $ARGS

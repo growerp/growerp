@@ -9,7 +9,7 @@
   ],
   "dockerRegistry": "growerp",
   "repositoryUrl": "git@github.com:growerp/growerp.git",
-  "tempWorkspaceDir": "/tmp/growerp",
+  "tempWorkspaceDir": "/tmp/growerpRelease",
   "defaultPushToDockerHub": true,
   "defaultPushToGitHub": false,
   "versionTagPrefix": "",

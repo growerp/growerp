@@ -2,6 +2,24 @@
 
 A comprehensive, automated tool for creating production releases of GrowERP applications. This tool manages version increments, Docker image creation, and deployment coordination with proper Git tagging and Docker Hub integration.
 
+## 🔄 Release Philosophy
+
+The release process follows a **repository-first** approach to ensure consistency and reproducibility:
+
+1. **Clone** current repository to temp directory (`/tmp/growerpRelease`)
+2. **Overlay** local Dockerfiles over the cloned workspace (so uncommitted changes are always used)
+3. **Update** versions in the temp workspace
+4. **Commit & Tag** changes, push to GitHub
+5. **Build** Docker images from the temp workspace
+6. **Push** Docker images to Docker Hub
+
+### Why This Approach?
+
+- **Consistency** — Docker images are always built from a clean, known state
+- **Traceability** — Git tags match Docker image versions exactly
+- **Reproducibility** — Anyone can rebuild the exact same image from the tagged commit
+- **Local Changes** — Uncommitted Dockerfile changes (e.g. base image updates) are automatically applied before building
+
 ## 🚀 Quick Start
 
 ### Prerequisites
@@ -62,7 +80,7 @@ cd release && dart release_tool.dart
   ],
   "dockerRegistry": "growerp",
   "repositoryUrl": "git@github.com:growerp/growerp.git",
-  "tempWorkspaceDir": "/tmp/growerp",
+  "tempWorkspaceDir": "/tmp/growerpRelease",
   "defaultPushToDockerHub": true,
   "defaultPushToGitHub": false,
   "versionTagPrefix": "",
@@ -90,7 +108,7 @@ cd release && dart release_tool.dart
 | `defaultApps` | List of applications to build | All available apps |
 | `dockerRegistry` | Docker registry/organization name | `growerp` |
 | `repositoryUrl` | Git repository URL | GrowERP GitHub repo |
-| `tempWorkspaceDir` | Temporary directory for repository mode | `/tmp/growerp` |
+| `tempWorkspaceDir` | Temporary directory for repository mode | `/tmp/growerpRelease` |
 | `defaultPushToDockerHub` | Push images to Docker Hub by default | `true` |
 | `defaultPushToGitHub` | Use repository mode by default | `false` |
 | `versionTagPrefix` | Prefix for version tags | `` (none) |
@@ -145,19 +163,24 @@ cd release && dart release_tool.dart
 2. **User Input Collection**
    - Select applications to build
    - Choose version increment type
-   - Configure push options
-   - Determine workspace mode
+   - Configure push options (Docker Hub / GitHub)
 
-3. **Version Calculation**
-   - Scan current versions across all apps
-   - Calculate next version numbers
+3. **Workspace Setup**
+   - Clone the repository to `/tmp/growerpRelease`
+   - Overlay all local `Dockerfile`s over the clone so uncommitted changes are used
+   - This applies to both `flutter/packages/*/Dockerfile` and `moqui/Dockerfile`
+
+4. **Version Calculation**
+   - Scan current versions across all packages
+   - Calculate next version number
    - Display summary for confirmation
 
-4. **Release Execution**
-   - Update version files (if configured)
-   - Build Docker images
+5. **Release Execution**
+   - Update `pubspec.yaml` / `component.xml` version files
+   - Commit version changes and create a Git tag
+   - Push commit and tag to GitHub
+   - Build Docker images from the temp workspace
    - Push to Docker Hub (if configured)
-   - Create Git tags and commit
    - Display final summary
 
 ### Version Management
@@ -166,17 +189,27 @@ The tool uses a **unified versioning approach**:
 - Build numbers remain application-specific
 - Version increments affect all selected applications
 
-### Workspace Modes
+### Resume Support
+If the release process is interrupted, a `release_state.json` file preserves progress. On the next run you will be prompted to resume.
+- If `/tmp/growerpRelease` no longer exists (e.g. after a reboot), it is automatically re-cloned
+- Dockerfiles are overlaid again after re-cloning
 
-#### Local Mode (Default)
-- Uses current working directory
-- Faster for development builds
-- Preserves local changes and branches
+## 🐳 Docker Build Details
 
-#### Repository Mode
-- Clones/updates from Git repository
-- Ensures clean build environment
-- Required for production releases to test server
+### Base Image
+All Flutter build stages use `ghcr.io/cirruslabs/flutter:stable` and run as `root`.
+
+### Flutter App Dockerfiles (`packages/*/Dockerfile`)
+- **Stage 1** — installs dependencies, activates melos, builds Flutter web app
+- **Stage 2** — copies build output into `nginx`
+
+### growerp-moqui Dockerfile (`moqui/Dockerfile`)
+- **Stage 1 (`build-flutter`)** — clones the GrowERP repo, builds Flutter web apps with `--wasm`
+- **Stage 2 (`build-env`)** — copies from stage 1, builds the Moqui WAR with Gradle
+- **Stage 3 (final)** — `eclipse-temurin:11-jdk` runtime image
+
+### Important: Local Dockerfile Overlay
+Because the release tool clones from GitHub, uncommitted Dockerfile changes would normally be lost. The tool automatically copies all local `Dockerfile`s into the cloned workspace before building, ensuring your local versions are always used.
 
 ## 🧪 Testing
 
@@ -275,6 +308,14 @@ Selected: admin, hotel
 - **Cause**: Unexpected version format in pubspec.yaml files
 - **Solution**: Ensure versions follow semantic versioning (major.minor.patch+build)
 
+#### Docker build uses wrong base image
+- **Cause**: Committed Dockerfiles on GitHub differ from local
+- **Solution**: The tool automatically overlays local Dockerfiles; ensure you run from the `flutter/` directory so paths resolve correctly
+
+#### Resume re-clones but still fails
+- **Cause**: `/tmp/growerpRelease` was cleaned but state file references old step
+- **Solution**: The tool re-clones and re-overlays Dockerfiles automatically; if it still fails, delete `release/release_state.json` and start fresh
+
 ### Debug Mode
 For detailed debugging, modify the script to enable verbose output:
 ```dart
@@ -349,6 +390,18 @@ jobs:
 - [GrowERP Version Management and Release Process](../../docs/GrowERP_Version_Management_and_Release_Process.md)
 - [Hotfix Documentation](../hotfix/README.md)
 - [GrowERP Extensibility Guide](../../docs/GrowERP_Extensibility_Guide.md)
+
+## 📁 Key Files
+
+| File | Purpose |
+|------|---------|
+| `release.sh` | Entry point — validates environment and launches the tool |
+| `release/release_tool.dart` | Full release automation logic |
+| `release/release_config.json` | Configuration (registry, apps, temp dir, etc.) |
+| `release/release_state.json` | Auto-generated resume state (deleted on success) |
+| `release/test_release.dart` | Unit tests |
+| `../packages/*/Dockerfile` | Flutter web app Docker build definitions |
+| `../../moqui/Dockerfile` | Backend (Moqui + Flutter web) Docker build definition |
 
 ## 🤝 Contributing
 
