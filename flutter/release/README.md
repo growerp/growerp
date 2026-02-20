@@ -2,6 +2,17 @@
 
 A comprehensive, automated tool for creating production releases of GrowERP applications. This tool manages version increments, Docker image creation, and deployment coordination with proper Git tagging and Docker Hub integration.
 
+## � Directory Structure
+
+```
+release/
+├── README.md              # This file — comprehensive documentation
+├── release_tool.dart      # Core release automation tool
+├── release_config.json    # Configuration file
+├── test_release.dart      # Dependency and functionality tests
+└── gce-setup.sh           # GCE setup script
+```
+
 ## 🔄 Release Philosophy
 
 The release process follows a **repository-first** approach to ensure consistency and reproducibility:
@@ -18,6 +29,7 @@ The release process follows a **repository-first** approach to ensure consistenc
 - **Consistency** — Docker images are always built from a clean, known state
 - **Traceability** — Git tags match Docker image versions exactly
 - **Reproducibility** — Anyone can rebuild the exact same image from the tagged commit
+- **Clean State** — Fresh clone ensures no local artifacts
 - **Local Changes** — Uncommitted Dockerfile changes (e.g. base image updates) are automatically applied before building
 
 ## 🚀 Quick Start
@@ -61,6 +73,14 @@ cd release && dart release_tool.dart
 - **Error Handling**: Robust error detection and recovery
 - **Progress Tracking**: Clear status updates throughout the process
 - **Cleanup**: Automatic cleanup of temporary resources
+
+### 🎯 Key Benefits
+1. **Reliability**: Comprehensive validation and error handling
+2. **Usability**: Clear prompts, status updates, and summaries
+3. **Flexibility**: Local vs repository modes, selective builds
+4. **Maintainability**: Configuration-driven, well-documented
+5. **Testability**: Automated testing of dependencies
+6. **Safety**: Confirmation steps and detailed summaries
 
 ### 📦 Supported Applications
 - `admin` - Full-featured ERP application
@@ -284,7 +304,24 @@ Selected: admin, hotel
 🎉 Release process completed successfully!
 ```
 
-## 🔍 Troubleshooting
+## � Migration Guide
+
+### For Existing Users
+- The original script location (`flutter/createPushDockerImages.dart`) now shows a migration notice
+- All original functionality is preserved and enhanced
+- The original script is backed up as `createPushDockerImages_original.dart`
+
+### CI/CD Integration
+Update your automation scripts to use:
+```bash
+# Old
+dart createPushDockerImages.dart
+
+# New (from flutter directory)
+./release.sh
+```
+
+## �🔍 Troubleshooting
 
 ### Common Issues
 
@@ -315,6 +352,18 @@ Selected: admin, hotel
 #### Resume re-clones but still fails
 - **Cause**: `/tmp/growerpRelease` was cleaned but state file references old step
 - **Solution**: The tool re-clones and re-overlays Dockerfiles automatically; if it still fails, delete `release/release_state.json` and start fresh
+
+#### Docker image has old code
+- **Cause**: Git push did not succeed before Docker build
+- **Solution**: Verify git push succeeded before Docker build (check GitHub)
+
+#### Build fails with "branch not found"
+- **Cause**: Changes not pushed or tag doesn't exist on GitHub
+- **Solution**: Ensure changes are pushed and tag exists on GitHub
+
+#### Version mismatch between tag and image
+- **Cause**: Versions were not committed before building
+- **Solution**: Release workflow now enforces matching — versions are committed before building
 
 ### Debug Mode
 For detailed debugging, modify the script to enable verbose output:
@@ -400,6 +449,7 @@ jobs:
 | `release/release_config.json` | Configuration (registry, apps, temp dir, etc.) |
 | `release/release_state.json` | Auto-generated resume state (deleted on success) |
 | `release/test_release.dart` | Unit tests |
+| `release/gce-setup.sh` | GCE setup script |
 | `../packages/*/Dockerfile` | Flutter web app Docker build definitions |
 | `../../moqui/Dockerfile` | Backend (Moqui + Flutter web) Docker build definition |
 
