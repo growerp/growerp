@@ -16,39 +16,28 @@
 # with: docker build --build-arg DOCKER_TAG=1.3.0 -f packages/health/Dockerfile -t growerp/health . --progress=plain
 #
 #Stage 1 - Install dependencies and build the app
-FROM growerp/flutter-sdk-image:latest AS build-env
+FROM ghcr.io/cirruslabs/flutter:stable AS build-env
 
 ARG BRANCH=master # currently either master or development we need to add existing
 ARG DOCKER_TAG=1.0.0+1
 USER root
 # Install linux dependencies
 RUN apt-get update && \
-    apt-get install -y git zip libgconf-2-4 gdb libstdc++6 \
+    apt-get install -y git zip gdb libstdc++6 \
     fonts-droid-fallback nano sed && \
     apt-get clean
 
 # git security
 RUN git config --system --add safe.directory '*'
-RUN git config --global --add safe.directory /home/mobiledevops/.flutter-sdk
 
 # activate melos
 RUN dart pub global activate melos
-ENV PATH="$PATH":"$HOME/.pub-cache/bin"
-
-# Clear pub cache to ensure fresh packages (as root since it was created by root)
-RUN rm -rf /home/mobiledevops/.pub-cache
-# Also clear Flutter's pub cache
-RUN rm -rf /home/mobiledevops/.flutter-sdk/.pub-cache 2>/dev/null || true
+ENV PATH="$PATH:/root/.pub-cache/bin"
 
 # get growerp repos
-USER mobiledevops
-WORKDIR /home/mobiledevops
-# Reinstall melos after clearing cache
-RUN dart pub global activate melos
-ENV PATH="$PATH":"/home/mobiledevops/.pub-cache/bin"
 # RUN git clone --depth 1 -b $BRANCH https://github.com/growerp/growerp.git
-COPY --chown=mobiledevops:mobiledevops . /home/mobiledevops/flutter
-WORKDIR /home/mobiledevops/flutter
+COPY . /root/flutter
+WORKDIR /root/flutter
 RUN echo "pwd: $PWD"
 RUN sed -i 's\//webactivate \\' packages/health/lib/main.dart
 RUN flutter --version
@@ -61,10 +50,10 @@ RUN melos l10n --no-select
 # build
 RUN melos build --no-select
 # build flutter app
-WORKDIR /home/mobiledevops/flutter/packages/health
+WORKDIR /root/flutter/packages/health
 RUN sed -i 's/version: .*/version: '"${DOCKER_TAG}"'/' pubspec.yaml
 RUN flutter build web --release
 # Stage 2 - Create the run-time image
 FROM nginx
-COPY --from=build-env /home/mobiledevops/flutter/packages/health/build/web /usr/share/nginx/html
+COPY --from=build-env /root/flutter/packages/health/build/web /usr/share/nginx/html
 EXPOSE 80

@@ -14,37 +14,27 @@
 # to be build from any directory
 
 #Stage 1 - Install dependencies and build the app
-FROM growerp/flutter-sdk-image:latest AS build-flutter
+FROM ghcr.io/cirruslabs/flutter:stable AS build-flutter
 
 ARG BRANCH=master # currently either master or development we need to add existing
 USER root
 # Install linux dependencies
 RUN apt-get update && \
-    apt-get install -y git zip libgconf-2-4 gdb libstdc++6 \
+    apt-get install -y git zip gdb libstdc++6 \
     fonts-droid-fallback nano sed && \
     apt-get clean
 
 # git security
 RUN git config --system --add safe.directory '*'
-RUN git config --global --add safe.directory /home/mobiledevops/.flutter-sdk
 
 # activate melos
 RUN dart pub global activate melos
-ENV PATH="$PATH":"$HOME/.pub-cache/bin"
-
-# Clear pub cache to ensure fresh packages (as root since it was created by root)
-RUN rm -rf /home/mobiledevops/.pub-cache
-# Also clear Flutter's pub cache
-RUN rm -rf /home/mobiledevops/.flutter-sdk/.pub-cache 2>/dev/null || true
+ENV PATH="$PATH:/root/.pub-cache/bin"
 
 # get growerp repos
-USER mobiledevops
-WORKDIR /home/mobiledevops
-# Reinstall melos after clearing cache
-RUN dart pub global activate melos
-ENV PATH="$PATH":"/home/mobiledevops/.pub-cache/bin"
+WORKDIR /root
 RUN git clone --depth 1 -b $BRANCH https://github.com/growerp/growerp.git
-WORKDIR /home/mobiledevops/growerp/flutter
+WORKDIR /root/growerp/flutter
 RUN echo "pwd: $PWD"
 RUN sed -i 's\//webactivate \\' packages/admin/lib/main.dart
 # Clean any existing dart tool caches
@@ -56,9 +46,9 @@ RUN melos l10n --no-select
 # build
 RUN melos build --no-select
 # build flutter app
-WORKDIR /home/mobiledevops/growerp/flutter/packages/admin
+WORKDIR /root/growerp/flutter/packages/admin
 RUN flutter build web --release --wasm
-WORKDIR /home/mobiledevops/growerp/flutter/packages/assessment
+WORKDIR /root/growerp/flutter/packages/assessment
 RUN flutter build web --release --wasm
 
 #stage 2 -get files and build
@@ -72,7 +62,7 @@ RUN apt-get update && \
     apt-get install -y curl git wget zip unzip apt-transport-https perl && \
     apt-get clean
 #RUN git clone --depth 1 https://github.com/growerp/growerp.git /root/growerp
-COPY --from=build-flutter /home/mobiledevops/growerp /root/growerp
+COPY --from=build-flutter /root/growerp /root/growerp
 WORKDIR /root/growerp/moqui/runtime/component/PopRestStore/screen/store
 # Copy Flutter web build files
 RUN echo -e "Copying Flutter web files..."
