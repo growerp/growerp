@@ -80,6 +80,7 @@ class ProductDialogState extends State<ProductDialog> {
     _currencySelected = widget.product.currency != null
         ? currencies.firstWhere(
             (x) => x.currencyId == widget.product.currency?.currencyId,
+            orElse: () => widget.product.currency!,
           )
         : currency;
     currencyId = _currencySelected.currencyId!;
@@ -497,29 +498,29 @@ class ProductDialogState extends State<ProductDialog> {
             ),
             Expanded(
               flex: 1,
-              child: FormBuilderDropdown<Currency>(
-                name: 'currency',
+              child: AutocompleteLabel<Currency>(
                 key: const Key('currency'),
+                label: catalogLocalizations.currency,
                 initialValue: _currencySelected,
-                decoration: InputDecoration(
-                  labelText: catalogLocalizations.currency,
-                ),
-                hint: Text(catalogLocalizations.currency),
-                validator: FormBuilderValidators.compose([
-                  FormBuilderValidators.required(
-                    errorText: catalogLocalizations.currencyRequired,
-                  ),
-                ]),
-                items: currencies.map((item) {
-                  return DropdownMenuItem<Currency>(
-                    value: item,
-                    child: Text(item.currencyId!),
+                optionsBuilder: (TextEditingValue textEditingValue) {
+                  if (textEditingValue.text.isEmpty) return currencies;
+                  return currencies.where(
+                    (Currency c) => '${c.description} [${c.currencyId}]'
+                        .toLowerCase()
+                        .contains(textEditingValue.text.toLowerCase()),
                   );
-                }).toList(),
-                onChanged: (Currency? newValue) {
+                },
+                displayStringForOption: (Currency c) => c.currencyId ?? '',
+                onSelected: (Currency? newValue) {
                   setState(() {
-                    _currencySelected = newValue!;
+                    _currencySelected = newValue ?? _currencySelected;
                   });
+                },
+                validator: (value) {
+                  if (value == null) {
+                    return catalogLocalizations.currencyRequired;
+                  }
+                  return null;
                 },
               ),
             ),

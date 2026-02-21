@@ -35,15 +35,32 @@ class TenantSetupDialog extends StatefulWidget {
 
 class TenantSetupDialogState extends State<TenantSetupDialog> {
   final _formKey = GlobalKey<FormBuilderState>();
-  late Currency _currencySelected;
+  Currency? _currencySelected;
   late bool _demoData;
   bool _isSubmitting = false;
+  bool _isLoadingCurrencies = true;
 
   @override
   void initState() {
     super.initState();
-    _currencySelected = currencies[1]; // Default to USD
     _demoData = kReleaseMode ? false : true; // Demo data in debug mode
+    _loadCurrencies();
+  }
+
+  Future<void> _loadCurrencies() async {
+    try {
+      final restClient = context.read<RestClient>();
+      await loadCurrencies(restClient);
+      if (mounted) {
+        setState(() {
+          _isLoadingCurrencies = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() => _isLoadingCurrencies = false);
+      }
+    }
   }
 
   @override
@@ -113,30 +130,43 @@ class TenantSetupDialogState extends State<TenantSetupDialog> {
                       const SizedBox(height: 20),
 
                       // Currency Selection
-                      FormBuilderDropdown<Currency>(
-                        key: const Key('currency'),
-                        name: 'currency',
-                        decoration: InputDecoration(
-                          labelText: localizations?.currency ?? 'Currency',
+                      if (_isLoadingCurrencies)
+                        const Padding(
+                          padding: EdgeInsets.all(16.0),
+                          child: CircularProgressIndicator(),
+                        )
+                      else
+                        AutocompleteLabel<Currency>(
+                          key: const Key('currency'),
+                          label: localizations?.currency ?? 'Currency',
+                          initialValue: _currencySelected,
+                          optionsBuilder: (TextEditingValue textEditingValue) {
+                            if (textEditingValue.text.isEmpty) {
+                              return currencies;
+                            }
+                            return currencies.where(
+                              (Currency c) =>
+                                  '${c.description} [${c.currencyId}]'
+                                      .toLowerCase()
+                                      .contains(
+                                        textEditingValue.text.toLowerCase(),
+                                      ),
+                            );
+                          },
+                          displayStringForOption: (Currency c) =>
+                              '${c.description} [${c.currencyId}]',
+                          onSelected: (Currency? value) {
+                            if (value != null) {
+                              setState(() => _currencySelected = value);
+                            }
+                          },
+                          validator: (value) {
+                            if (value == null) {
+                              return 'Currency is required';
+                            }
+                            return null;
+                          },
                         ),
-                        initialValue: _currencySelected,
-                        items: currencies
-                            .map(
-                              (currency) => DropdownMenuItem(
-                                value: currency,
-                                child: Text(
-                                  '${currency.description} [${currency.currencyId}]',
-                                ),
-                              ),
-                            )
-                            .toList(),
-                        onChanged: (Currency? value) {
-                          if (value != null) {
-                            setState(() => _currencySelected = value);
-                          }
-                        },
-                        validator: FormBuilderValidators.required(),
-                      ),
                       const SizedBox(height: 20),
 
                       // Demo Data Checkbox (only in debug mode or if explicitly shown)
@@ -212,7 +242,7 @@ class TenantSetupDialogState extends State<TenantSetupDialog> {
 
       final formData = _formKey.currentState!.value;
       final companyName = formData['companyName'] as String;
-      final currency = formData['currency'] as Currency;
+      final currency = _currencySelected;
       final demoData = formData['demoData'] as bool? ?? false;
 
       // Send setup data through login endpoint

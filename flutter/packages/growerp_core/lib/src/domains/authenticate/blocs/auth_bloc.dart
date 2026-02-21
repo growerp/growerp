@@ -84,6 +84,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       classificationId: classificationId,
     );
     try {
+      // load currencies from backend
+      await loadCurrencies(restClient);
       // check connection with default company
       Companies? companies = await restClient.getCompanies(
         searchString: company?.partyId,

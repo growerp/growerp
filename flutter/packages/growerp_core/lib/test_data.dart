@@ -19,14 +19,14 @@ import 'package:growerp_models/growerp_models.dart';
 Company initialCompany = Company(
   name: "Main Company",
   role: Role.company,
-  currency: currencies[1],
+  currency: currencies[0],
   email: "testXXX@example.com",
 );
 
 Company company = Company(
   name: "Updated Main Company",
   role: Role.company,
-  currency: currencies[2],
+  currency: currencies[1],
   salesPerc: Decimal.parse("5"),
   vatPerc: Decimal.parse("20"),
   email: "testXXX@example.com",

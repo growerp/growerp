@@ -99,7 +99,7 @@ class CompanyFormState extends State<CompanyDialog> {
   final _salesPercController = TextEditingController();
   final _hostNameController = TextEditingController();
   final _backendController = TextEditingController();
-  Currency _selectedCurrency = currencies[0];
+  Currency? _selectedCurrency;
   late bool isAdmin;
   late final GlobalKey<FormState> _companyDialogFormKey;
   XFile? _imageFile;
@@ -133,6 +133,7 @@ class CompanyFormState extends State<CompanyDialog> {
     if (company.currency != null && currencies.isNotEmpty) {
       _selectedCurrency = currencies.firstWhere(
         (element) => element.currencyId == company.currency?.currencyId,
+        orElse: () => company.currency!,
       );
     }
     _idController.text = company.pseudoId ?? '';
@@ -402,25 +403,27 @@ class CompanyFormState extends State<CompanyDialog> {
           ),
           const SizedBox(width: 10),
           Expanded(
-            child: DropdownButtonFormField<Currency>(
+            child: AutocompleteLabel<Currency>(
               key: const Key('currency'),
-              decoration: InputDecoration(labelText: localizations.currency),
-              hint: Text(localizations.currency),
+              label: localizations.currency,
               initialValue: _selectedCurrency,
-              validator: (value) =>
-                  value == null ? localizations.currencyError : null,
-              items: currencies.map((item) {
-                return DropdownMenuItem<Currency>(
-                  value: item,
-                  child: Text(item.description!),
+              optionsBuilder: (TextEditingValue textEditingValue) {
+                if (textEditingValue.text.isEmpty) return currencies;
+                return currencies.where(
+                  (Currency c) => '${c.description} [${c.currencyId}]'
+                      .toLowerCase()
+                      .contains(textEditingValue.text.toLowerCase()),
                 );
-              }).toList(),
-              onChanged: (Currency? newValue) {
+              },
+              displayStringForOption: (Currency c) =>
+                  '${c.description} [${c.currencyId}]',
+              onSelected: (Currency? newValue) {
                 setState(() {
-                  _selectedCurrency = newValue!;
+                  _selectedCurrency = newValue ?? _selectedCurrency;
                 });
               },
-              isExpanded: true,
+              validator: (value) =>
+                  value == null ? localizations.currencyError : null,
             ),
           ),
         ],
