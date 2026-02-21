@@ -24,5 +24,7 @@
     "_________________comment_restRequestsLogs": "show logging of requests",
     "restRequestLogs": false,
     "_________________comment_restResponseLogs": "show logging of responses",
-    "restResponseLogs": false
+    "restResponseLogs": false,
+    "_________________comment_cacheMaxStaleMinutes": "maximum age of cached GET responses in minutes, 0 to disable caching",
+    "cacheMaxStaleMinutes": 10
 }

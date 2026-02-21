@@ -209,6 +209,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     try {
       emit(state.copyWith(status: AuthStatus.loading));
       await restClient.logout();
+      await clearRestCache();
       notification.close();
       chat.close();
       emit(
