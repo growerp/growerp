@@ -20,17 +20,17 @@ dependencies:
   growerp_order_accounting: ^1.9.0
   growerp_user_company: ^1.9.0
   growerp_activity: ^1.8.1
-  package_info_plus: ^8.0.2
+  package_info_plus: ^9.0.0
   horizontal_data_table: ^4.3.1
   flutter_localizations:
     sdk: flutter
   universal_io: ^2.2.2
   intl: ^0.20.2
   fl_chart: ^1.1.0
-  go_router: ^14.6.2
+  go_router: ^17.1.0
   dio: ^5.4.3
   web: ^1.0.0
-  flutter_bloc: ^8.1.6
+  flutter_bloc: ^9.1.1
   growerp_models: ^1.11.6
 
 dev_dependencies:
@@ -41,7 +41,7 @@ dev_dependencies:
   flutter_driver:
     sdk: flutter
   mockito: ^5.0.3
-  bloc_test: ^9.0.1
+  bloc_test: ^10.0.0
   flutter_lints: ^6.0.0
   flutter_launcher_icons: ^0.14.4
   msix: ^3.16.12

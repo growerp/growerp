@@ -18,18 +18,18 @@ dependencies:
   growerp_core: ^1.9.0
   growerp_models: ^1.11.6
   decimal: ^3.2.4
-  flutter_bloc: ^8.1.4
+  flutter_bloc: ^9.1.1
   flutter_localizations:
     sdk: flutter
   global_configuration: ^2.0.0
   intl: ^0.20.2
   shared_preferences: ^2.3.2
-  package_info_plus: ^8.0.2
+  package_info_plus: ^9.0.0
   hive_flutter: ^1.1.0
   web: ^1.0.0
   dio: ^5.4.3
   http: ^1.1.2
-  go_router: ^14.8.1
+  go_router: ^17.1.0
 
 dev_dependencies:
   flutter_test:

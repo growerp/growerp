@@ -11,13 +11,13 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  flutter_bloc: ^8.1.3
+  flutter_bloc: ^9.1.1
   equatable: ^2.0.5
   growerp_core: ^1.9.0
   growerp_models: ^1.11.6
-  flutter_markdown: ^0.6.18
+  flutter_markdown_plus: ^1.0.7
   url_launcher: ^6.2.1
-  bloc: ^8.1.4
+  bloc: ^9.2.0
 
 dev_dependencies:
   flutter_test:

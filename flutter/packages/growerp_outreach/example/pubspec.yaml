@@ -16,8 +16,8 @@ dependencies:
   growerp_user_company: ^1.9.0
   growerp_marketing: ^1.9.0
   global_configuration: ^2.0.0
-  flutter_bloc: ^8.1.3
-  go_router: ^14.6.2
+  flutter_bloc: ^9.1.1
+  go_router: ^17.1.0
 
 dev_dependencies:
   flutter_test:
