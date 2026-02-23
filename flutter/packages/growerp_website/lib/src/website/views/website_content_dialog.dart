@@ -34,8 +34,6 @@ class WebsiteContent extends StatefulWidget {
 class WebsiteContentState extends State<WebsiteContent> {
   final TextEditingController _nameController = TextEditingController();
   final _websiteContFormKey = GlobalKey<FormState>();
-  dynamic _pickImageError;
-  String? _retrieveDataError;
   XFile? _imageFile;
   late Content newContent;
   String data = '';
@@ -48,7 +46,6 @@ class WebsiteContentState extends State<WebsiteContent> {
   MethodChannel channel = const MethodChannel(
     'plugins.flutter.io/url_launcher',
   );
-  final ImagePicker _picker = ImagePicker();
   final ScrollController _scrollController = ScrollController();
 
   @override
@@ -86,7 +83,12 @@ class WebsiteContentState extends State<WebsiteContent> {
           case ContentStatus.success:
             //      HelperFunctions.showMessage(
             //          context, "${state.message}", Colors.green);
-            Navigator.of(context).pop(newContent);
+            // Pop with locally-known content (including the new name the user
+            // typed) rather than state.content!, which may reflect stale cached
+            // backend data for the title field after a rename.
+            Navigator.of(
+              context,
+            ).pop(newContent.copyWith(title: _nameController.text));
             break;
           case ContentStatus.failure:
             HelperFunctions.showMessage(
@@ -153,75 +155,11 @@ class WebsiteContentState extends State<WebsiteContent> {
     );
   }
 
-  void _onImageButtonPressed(ImageSource source) async {
-    try {
-      final pickedFile = await _picker.pickImage(source: source);
-      setState(() {
-        _imageFile = pickedFile;
-      });
-    } catch (e) {
-      setState(() {
-        _pickImageError = e;
-      });
-    }
-  }
-
-  Future<void> retrieveLostData() async {
-    final LostDataResponse response = await _picker.retrieveLostData();
-    if (response.isEmpty) {
-      return;
-    }
-    if (response.file != null) {
-      setState(() {
-        _imageFile = response.file;
-      });
-    } else {
-      _retrieveDataError = response.exception!.code;
-    }
-  }
-
   Widget imageChild(bool isPhone) {
-    return Builder(
-      builder: (BuildContext context) {
-        return !foundation.kIsWeb &&
-                foundation.defaultTargetPlatform == TargetPlatform.android
-            ? FutureBuilder<void>(
-                future: retrieveLostData(),
-                builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
-                  if (snapshot.hasError) {
-                    return Text(
-                      '${_localizations.errorTitle}: ${snapshot.error}}',
-                      textAlign: TextAlign.center,
-                    );
-                  }
-                  return _showImageForm(isPhone);
-                },
-              )
-            : _showImageForm(isPhone);
-      },
-    );
-  }
-
-  Text? _getRetrieveErrorWidget() {
-    if (_retrieveDataError != null) {
-      final Text result = Text(_retrieveDataError!);
-      _retrieveDataError = null;
-      return result;
-    }
-    return null;
+    return _showImageForm(isPhone);
   }
 
   Widget _showImageForm(bool isPhone) {
-    final Text? retrieveError = _getRetrieveErrorWidget();
-    if (retrieveError != null) {
-      return retrieveError;
-    }
-    if (_pickImageError != null) {
-      return Text(
-        '${_localizations.errorTitle}: $_pickImageError',
-        textAlign: TextAlign.center,
-      );
-    }
     return Form(
       key: _websiteContFormKey,
       child: SingleChildScrollView(
@@ -241,19 +179,14 @@ class WebsiteContentState extends State<WebsiteContent> {
               fallbackText: newContent.title.isEmpty
                   ? '?'
                   : newContent.title[0],
-              onUploadTap: () {
-                // Trigger image picker
-                if (Platform.isAndroid || Platform.isIOS) {
-                  _onImageButtonPressed(ImageSource.gallery);
+              onUploadTap: () async {
+                final pickedFile = await HelperFunctions.pickImage();
+                if (pickedFile != null) {
+                  setState(() {
+                    _imageFile = pickedFile;
+                  });
                 }
               },
-              onRemove: (_imageFile != null || newContent.image != null)
-                  ? () {
-                      setState(() {
-                        _imageFile = null;
-                      });
-                    }
-                  : null,
             ),
             const SizedBox(height: 20),
             TextFormField(

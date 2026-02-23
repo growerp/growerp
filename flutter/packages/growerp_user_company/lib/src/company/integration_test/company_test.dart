@@ -173,8 +173,12 @@ class CompanyTest {
         equals(c.telephoneNr ?? ''),
       );
       expect(
-        CommonTest.getDropdown('currency'),
-        equals(c.currency?.description ?? ''),
+        CommonTest.getDropdownSearch('currency'),
+        equals(
+          c.currency != null
+              ? '${c.currency!.description} [${c.currency!.currencyId}]'
+              : '',
+        ),
       );
       if (c.role == Role.company) {
         expect(

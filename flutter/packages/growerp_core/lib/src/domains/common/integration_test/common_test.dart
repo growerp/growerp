@@ -774,9 +774,6 @@ class CommonTest {
           );
           if (!tester.any(formFieldInListTile)) {
             // This ListTile is a dropdown option, not a form row
-            debugPrint(
-              'DEBUG enterAutocompleteValue($key, $value): found dropdown ListTile',
-            );
             await tester.tap(listTileFinder.first);
             await tester.pumpAndSettle();
             return;
@@ -800,9 +797,6 @@ class CommonTest {
         matching: find.byType(TextFormField),
       );
       if (tester.any(textInTile) && !tester.any(formFieldInTile)) {
-        debugPrint(
-          'DEBUG enterAutocompleteValue($key, $value): found via ListTile scan',
-        );
         await tester.tap(tileFinder.first);
         await tester.pumpAndSettle();
         return;
@@ -810,9 +804,6 @@ class CommonTest {
     }
 
     // Approach 3: Keyboard navigation fallback
-    debugPrint(
-      'DEBUG enterAutocompleteValue($key, $value): Approach 3 - keyboard fallback',
-    );
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     await tester.pumpAndSettle();
     await tester.sendKeyEvent(LogicalKeyboardKey.enter);
@@ -871,28 +862,12 @@ class CommonTest {
     int seconds = 1,
     check = false,
   }) async {
-    // Ensure the autocomplete widget is scrolled into view first
     final finder = find.byKey(Key(key));
     if (finder.evaluate().isNotEmpty) {
       await tester.ensureVisible(finder.first);
       await tester.pumpAndSettle();
-      // Re-evaluate after scrolling since the widget tree may have changed
-      final finderAfterScroll = find.byKey(Key(key));
-      if (finderAfterScroll.evaluate().isNotEmpty) {
-        final widget = finderAfterScroll.evaluate().first.widget;
-        debugPrint(
-          'DEBUG enterDropDownSearch($key): widget type = ${widget.runtimeType}',
-        );
-        if (widget is Autocomplete || widget is AutocompleteLabel) {
-          await enterAutocompleteValue(tester, key, value);
-          return;
-        }
-      }
     }
-    // Fallback if not an Autocomplete (should not happen if all replaced)
-    debugPrint(
-      'Warning: enterDropDownSearch called for widget that is not Autocomplete/AutocompleteLabel: $key',
-    );
+    await enterAutocompleteValue(tester, key, value);
   }
 
   static Future<void> enterDropDown(

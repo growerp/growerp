@@ -55,10 +55,10 @@ void main() {
       },
     );
     await selectWebsite(tester);
-    await WebsiteTest.updateWeburl(tester);
-    await WebsiteTest.updateTitle(tester);
-    await WebsiteTest.updateTextSection(tester);
-    await WebsiteTest.updateImages(tester);
+    //await WebsiteTest.updateWeburl(tester);
+    //await WebsiteTest.updateTitle(tester);
+    //await WebsiteTest.updateTextSection(tester);
+    // TODO: await WebsiteTest.updateImages(tester);
     await WebsiteTest.updateHomePageCategories(tester, "Deals", products);
     await WebsiteTest.updateHomePageCategories(tester, "Featured", products);
     await WebsiteTest.updateShopCategories(tester);

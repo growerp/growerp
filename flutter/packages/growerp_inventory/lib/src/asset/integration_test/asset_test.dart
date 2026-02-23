@@ -132,6 +132,9 @@ class AssetTest {
   static Future<void> deleteLastAsset(WidgetTester tester) async {
     SaveTest test = await PersistFunctions.getTest();
     int count = test.assets.length;
+    // Clear any active search filter so all assets are displayed
+    await CommonTest.enterText(tester, 'searchField', '');
+    await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
     // find the asset count from the UI
     // The delete button in AssetList uses the statusId toggle pattern
     // (Available/Deactivated), so we tap delete to deactivate the last asset
@@ -143,7 +146,11 @@ class AssetTest {
     // Wait for update to complete
     await CommonTest.waitForSnackbarToGo(tester);
     // Check that the asset is now deactivated (status shows 'N')
-    expect(CommonTest.getTextField('status${count - 1}'), equals('N'));
+    // The status widget is a StatusChip, not a Text widget
+    final statusFinder = find.byKey(Key('status${count - 1}'));
+    expect(statusFinder, findsOneWidget);
+    final statusChip = statusFinder.evaluate().single.widget as StatusChip;
+    expect(statusChip.label, equals('N'));
     await PersistFunctions.persistTest(
       test.copyWith(assets: test.assets.sublist(0, test.assets.length - 1)),
     );

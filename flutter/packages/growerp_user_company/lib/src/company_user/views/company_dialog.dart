@@ -422,8 +422,7 @@ class CompanyFormState extends State<CompanyDialog> {
                   _selectedCurrency = newValue ?? _selectedCurrency;
                 });
               },
-              validator: (value) =>
-                  value == null ? localizations.currencyError : null,
+              validator: (value) => null,
             ),
           ),
         ],

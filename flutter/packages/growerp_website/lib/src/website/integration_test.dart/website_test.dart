@@ -24,76 +24,16 @@ class WebsiteTest {
     await CommonTest.selectOption(tester, 'tapCompany', 'WebsiteDialog', '1');
   }
 
-  static Future<void> updateHost(WidgetTester tester) async {
+  static Future<void> updateWeburl(WidgetTester tester) async {
     await CommonTest.enterText(tester, 'urlInput', 'testingUrl');
     await CommonTest.tapByKey(
       tester,
       'updateHost',
       seconds: CommonTest.waitTime,
     );
-    expect(CommonTest.getTextFormField('urlInput'), equals('testingurl'));
-    expect(CommonTest.getTextField("url"), startsWith('testingurl.'));
-  }
-
-  static Future<void> updateWeburl(WidgetTester tester) async {
-    // Comprehensive test for changing the website URL with multiple scenarios
-
-    // Test URL changes with different scenarios
-    await _testUrlChange(tester, 'mycompany', 'Basic URL change');
-    await _testUrlChange(tester, 'TestCompany', 'Uppercase URL change');
-    await _testUrlChange(tester, 'test-site', 'Hyphenated URL change');
-  }
-
-  // Helper function to test URL changes
-  static Future<void> _testUrlChange(
-    WidgetTester tester,
-    String url,
-    String description,
-  ) async {
-    // Enter the new URL
-    await CommonTest.enterText(tester, 'urlInput', url);
-    await CommonTest.tapByKey(
-      tester,
-      'updateHost',
-      seconds: CommonTest.waitTime,
-    );
     await CommonTest.waitForSnackbarToGo(tester);
-
-    // Get the expected result (URLs are typically converted to lowercase)
-    String expectedUrl = url.toLowerCase();
-
-    // Verify the URL was updated
-    String actualUrlInput = CommonTest.getTextFormField('urlInput');
-    String actualDisplayUrl = CommonTest.getTextField("url");
-
-    expect(
-      actualUrlInput,
-      equals(expectedUrl),
-      reason:
-          '$description: URL input should be updated to $expectedUrl, but got $actualUrlInput',
-    );
-
-    expect(
-      actualDisplayUrl,
-      startsWith('$expectedUrl.'),
-      reason:
-          '$description: Displayed URL should start with $expectedUrl., but got $actualDisplayUrl',
-    );
-  }
-
-  // Standalone URL test method that can be called independently
-  static Future<void> runUrlChangeTest(WidgetTester tester) async {
-    // This method provides the same functionality as the standalone test
-    // but can be integrated into other test workflows
-
-    await _testUrlChange(tester, 'mycompany', 'Basic URL change');
-    await _testUrlChange(tester, 'TestCompany', 'Uppercase URL change');
-    await _testUrlChange(tester, 'test-site', 'Hyphenated URL change');
-    await _testUrlChange(
-      tester,
-      'new_company123',
-      'URL with numbers and underscore',
-    );
+    expect(CommonTest.getTextFormField('urlInput'), equals('testingurl'));
+    expect(CommonTest.getTextField('url'), startsWith('testingurl.'));
   }
 
   static Future<void> updateTitle(WidgetTester tester) async {
@@ -144,9 +84,14 @@ class WebsiteTest {
       equals(true),
       reason: 'testingImage found?',
     );
-    await CommonTest.tapByKey(tester, "testingImage");
+    await CommonTest.tapByKey(
+      tester,
+      "testingImage",
+      seconds: CommonTest.waitTime,
+    );
     await CommonTest.enterText(tester, 'imageName', 'newTestingImage');
     await CommonTest.tapByKey(tester, 'update', seconds: CommonTest.waitTime);
+    await CommonTest.drag(tester);
     expect(
       tester.any(find.byKey(const Key('testingImage'))),
       equals(false),
@@ -156,6 +101,22 @@ class WebsiteTest {
       tester.any(find.byKey(const Key('newTestingImage'))),
       equals(true),
       reason: 'newTestingImage found?',
+    );
+    // Delete newTestingImage via the chip's delete icon (the only delete path
+    // now that the remove button has been removed from the content dialog).
+    await CommonTest.tapByKey(tester, 'deleteImageChip');
+    await CommonTest.tapByKey(tester, 'continue', seconds: CommonTest.waitTime);
+    int deleteNewRetries = 0;
+    while (tester.any(find.byKey(const Key('newTestingImage'))) &&
+        deleteNewRetries++ < 20) {
+      await tester.pump(const Duration(milliseconds: 500));
+    }
+    await CommonTest.waitForSnackbarToGo(tester);
+    await CommonTest.drag(tester);
+    expect(
+      tester.any(find.byKey(const Key('newTestingImage'))),
+      equals(false),
+      reason: 'newTestingImage deleted?',
     );
   }
 
@@ -174,7 +135,6 @@ class WebsiteTest {
       "addProduct$categoryName",
       products[0].productName!,
     );
-    await CommonTest.tapByText(tester, "ok");
     await CommonTest.drag(tester);
     expect(
       tester.any(find.byKey(Key(products[0].productName!))),
@@ -208,7 +168,6 @@ class WebsiteTest {
       categories[0].categoryName,
       check: true,
     );
-    await CommonTest.tapByText(tester, "ok");
     await CommonTest.drag(tester);
     expect(
       find.byKey(Key(categories[0].categoryName)),

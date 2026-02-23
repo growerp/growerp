@@ -5,7 +5,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:growerp_models/growerp_models.dart';
 import '../bloc/course_viewer_bloc.dart';
 import '../../media/views/media_preview.dart';
@@ -62,12 +62,12 @@ class CourseViewerContent extends StatelessWidget {
                   onPressed: () {
                     if (state.course?.courseId != null) {
                       context.read<CourseViewerBloc>().add(
-                            LoadCourse(state.course!.courseId!),
-                          );
+                        LoadCourse(state.course!.courseId!),
+                      );
                     } else {
                       context.read<CourseViewerBloc>().add(
-                            const FetchAvailableCourses(),
-                          );
+                        const FetchAvailableCourses(),
+                      );
                     }
                   },
                   child: const Text('Retry'),
@@ -90,10 +90,7 @@ class CourseViewerContent extends StatelessWidget {
     final courses = state.availableCourses;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Select a Course'),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: const Text('Select a Course'), centerTitle: true),
       body: courses.isEmpty
           ? Center(
               child: Column(
@@ -131,11 +128,11 @@ class CourseViewerContent extends StatelessWidget {
                     child: GridView.builder(
                       gridDelegate:
                           const SliverGridDelegateWithMaxCrossAxisExtent(
-                        maxCrossAxisExtent: 350,
-                        childAspectRatio: 1.3,
-                        crossAxisSpacing: 16,
-                        mainAxisSpacing: 16,
-                      ),
+                            maxCrossAxisExtent: 350,
+                            childAspectRatio: 1.3,
+                            crossAxisSpacing: 16,
+                            mainAxisSpacing: 16,
+                          ),
                       itemCount: courses.length,
                       itemBuilder: (context, index) {
                         final course = courses[index];
@@ -151,8 +148,11 @@ class CourseViewerContent extends StatelessWidget {
 
   Widget _buildCourseCard(BuildContext context, Course course) {
     final moduleCount = course.modules?.length ?? 0;
-    final lessonCount = course.modules
-            ?.fold<int>(0, (sum, m) => sum + (m.lessons?.length ?? 0)) ??
+    final lessonCount =
+        course.modules?.fold<int>(
+          0,
+          (sum, m) => sum + (m.lessons?.length ?? 0),
+        ) ??
         0;
 
     return Card(
@@ -174,10 +174,9 @@ class CourseViewerContent extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: Theme.of(context)
-                          .colorScheme
-                          .primaryContainer
-                          .withValues(alpha: 0.5),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.primaryContainer.withValues(alpha: 0.5),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Icon(
@@ -190,8 +189,8 @@ class CourseViewerContent extends StatelessWidget {
                     child: Text(
                       course.title,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                        fontWeight: FontWeight.bold,
+                      ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -211,16 +210,22 @@ class CourseViewerContent extends StatelessWidget {
               const Spacer(),
               Row(
                 children: [
-                  Icon(Icons.view_module,
-                      size: 14, color: Theme.of(context).colorScheme.secondary),
+                  Icon(
+                    Icons.view_module,
+                    size: 14,
+                    color: Theme.of(context).colorScheme.secondary,
+                  ),
                   const SizedBox(width: 4),
                   Text(
                     '$moduleCount modules',
                     style: Theme.of(context).textTheme.labelSmall,
                   ),
                   const SizedBox(width: 12),
-                  Icon(Icons.play_lesson,
-                      size: 14, color: Theme.of(context).colorScheme.secondary),
+                  Icon(
+                    Icons.play_lesson,
+                    size: 14,
+                    color: Theme.of(context).colorScheme.secondary,
+                  ),
                   const SizedBox(width: 4),
                   Text(
                     '$lessonCount lessons',
@@ -293,10 +298,9 @@ class CourseViewerContent extends StatelessWidget {
     final modules = course.modules ?? [];
 
     return Container(
-      color: Theme.of(context)
-          .colorScheme
-          .surfaceContainerHighest
-          .withValues(alpha: 0.3),
+      color: Theme.of(
+        context,
+      ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -324,7 +328,7 @@ class CourseViewerContent extends StatelessWidget {
                         state.currentLesson?.lessonId == lesson.lessonId;
                     final isCompleted =
                         state.progress?.isLessonCompleted(lesson.lessonId!) ??
-                            false;
+                        false;
 
                     return ListTile(
                       selected: isSelected,
@@ -340,8 +344,8 @@ class CourseViewerContent extends StatelessWidget {
                           : null,
                       onTap: () {
                         context.read<CourseViewerBloc>().add(
-                              SelectLesson(lesson),
-                            );
+                          SelectLesson(lesson),
+                        );
                       },
                     );
                   }).toList(),
@@ -464,8 +468,8 @@ class CourseViewerContent extends StatelessWidget {
               ? null
               : () {
                   context.read<CourseViewerBloc>().add(
-                        MarkLessonComplete(lesson.lessonId!),
-                      );
+                    MarkLessonComplete(lesson.lessonId!),
+                  );
                 },
         ),
         if (_getNextLesson(state) != null)
@@ -519,10 +523,9 @@ class CourseViewerContent extends StatelessWidget {
   /// Build the media panel for desktop view (right sidebar)
   Widget _buildMediaPanel(BuildContext context, CourseViewerState state) {
     return Container(
-      color: Theme.of(context)
-          .colorScheme
-          .surfaceContainerHighest
-          .withValues(alpha: 0.3),
+      color: Theme.of(
+        context,
+      ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -626,7 +629,9 @@ class CourseViewerContent extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: _getPlatformColor(media.platform).withValues(alpha: 0.1),
+                  color: _getPlatformColor(
+                    media.platform,
+                  ).withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: _getPlatformIcon(media.platform),

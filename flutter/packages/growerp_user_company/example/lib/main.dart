@@ -387,32 +387,35 @@ class _DashboardCard extends StatelessWidget {
         onTap: () => context.go(route),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              getIconFromRegistry(iconName) ??
-                  const Icon(Icons.dashboard, size: 28),
-              const SizedBox(height: 4),
-              Text(
-                title,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 2),
-              ...stats.map(
-                (stat) => Text(
-                  stat,
-                  style: Theme.of(context).textTheme.bodySmall,
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                getIconFromRegistry(iconName) ??
+                    const Icon(Icons.dashboard, size: 28),
+                const SizedBox(height: 4),
+                Text(
+                  title,
                   textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
                   overflow: TextOverflow.ellipsis,
                 ),
-              ),
-            ],
+                const SizedBox(height: 2),
+                ...stats.map(
+                  (stat) => Text(
+                    stat,
+                    style: Theme.of(context).textTheme.bodySmall,
+                    textAlign: TextAlign.center,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

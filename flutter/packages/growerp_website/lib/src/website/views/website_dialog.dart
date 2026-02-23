@@ -12,6 +12,7 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:growerp_core/growerp_core.dart';
@@ -713,7 +714,7 @@ class WebsiteDialogState extends State<WebsiteDialog> {
                         ),
                       Autocomplete<Product>(
                         key: Key("addProduct${category.categoryName}"),
-                        optionsBuilder: (TextEditingValue textEditingValue) {
+                        optionsBuilder: (TextEditingValue textEditingValue) async {
                           _productBloc.add(
                             GetDataEvent(
                               () => restClient.getProduct(
@@ -723,13 +724,9 @@ class WebsiteDialogState extends State<WebsiteDialog> {
                               ),
                             ),
                           );
-                          return Future.delayed(
-                            const Duration(milliseconds: 250),
-                            () {
-                              return (_productBloc.state.data as Products)
-                                  .products;
-                            },
-                          );
+                          await Future.delayed(const Duration(milliseconds: 250));
+                          if (!mounted) return Completer<Iterable<Product>>().future;
+                          return (_productBloc.state.data as Products).products;
                         },
                         displayStringForOption: (Product u) =>
                             " ${u.productName}[${u.pseudoId}]",
@@ -809,7 +806,7 @@ class WebsiteDialogState extends State<WebsiteDialog> {
                       Wrap(spacing: 10, children: browseCatButtons),
                     Autocomplete<Category>(
                       key: const Key("addShopCategory}"),
-                      optionsBuilder: (TextEditingValue textEditingValue) {
+                      optionsBuilder: (TextEditingValue textEditingValue) async {
                         _categoryBloc.add(
                           GetDataEvent(
                             () => restClient.getCategory(
@@ -819,13 +816,9 @@ class WebsiteDialogState extends State<WebsiteDialog> {
                             ),
                           ),
                         );
-                        return Future.delayed(
-                          const Duration(milliseconds: 100),
-                          () {
-                            return (_categoryBloc.state.data as Categories)
-                                .categories;
-                          },
-                        );
+                        await Future.delayed(const Duration(milliseconds: 100));
+                        if (!mounted) return Completer<Iterable<Category>>().future;
+                        return (_categoryBloc.state.data as Categories).categories;
                       },
                       displayStringForOption: (Category item) =>
                           item.categoryName.truncate(15),

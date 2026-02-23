@@ -4,7 +4,7 @@
  */
 
 import 'package:flutter/material.dart';
-import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 
 /// Position for help overlay
 enum TooltipPosition { topLeft, topRight, bottomLeft, bottomRight, center }
