@@ -6,7 +6,7 @@ If not deployed, shows setup instructions
 -->
 <screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-2.1.xsd"
-    standalone="true" require-authentication="anonymous-view">
+    standalone="true" require-authentication="anonymous-view" allow-extra-path="true">
 
     <actions>
         <script><![CDATA[
