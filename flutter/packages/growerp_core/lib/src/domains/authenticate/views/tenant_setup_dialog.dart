@@ -54,6 +54,15 @@ class TenantSetupDialogState extends State<TenantSetupDialog> {
       if (mounted) {
         setState(() {
           _isLoadingCurrencies = false;
+          if (kDebugMode && _currencySelected == null) {
+            _currencySelected = currencies.firstWhere(
+              (c) => c.currencyId == 'USD',
+              orElse: () => Currency(
+                currencyId: 'USD',
+                description: 'United States Dollar',
+              ),
+            );
+          }
         });
       }
     } catch (_) {
@@ -170,9 +179,10 @@ class TenantSetupDialogState extends State<TenantSetupDialog> {
                       const SizedBox(height: 20),
 
                       // Demo Data Checkbox (only in debug mode or if explicitly shown)
-                      if (!kReleaseMode ||
-                          widget.authenticate.user?.userGroup ==
-                              UserGroup.admin)
+                      if ((!kReleaseMode ||
+                              widget.authenticate.user?.userGroup ==
+                                  UserGroup.admin) &&
+                          widget.authenticate.ownerPartyId != 'GROWERP')
                         FormBuilderCheckbox(
                           key: const Key('demoData'),
                           name: 'demoData',

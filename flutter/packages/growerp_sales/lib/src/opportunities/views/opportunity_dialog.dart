@@ -93,6 +93,13 @@ class OpportunityDialogState extends State<OpportunityDialog> {
       listener: (context, state) async {
         switch (state.status) {
           case OpportunityStatus.success:
+            if (state.convertedOrderId != null) {
+              HelperFunctions.showMessage(
+                context,
+                'Quote #${state.convertedPseudoId ?? state.convertedOrderId} created successfully',
+                Colors.green,
+              );
+            }
             Navigator.of(context).pop();
             break;
           case OpportunityStatus.failure:
@@ -314,6 +321,41 @@ class OpportunityDialogState extends State<OpportunityDialog> {
           ),
         ],
       ),
+      if (widget.opportunity.opportunityId.isNotEmpty)
+        Row(
+          children: [
+            Expanded(
+              child: ElevatedButton.icon(
+                key: const Key('convertToOrder'),
+                icon: const Icon(Icons.receipt_long),
+                label: const Text('Convert to Quote'),
+                onPressed: () {
+                  _opportunityBloc.add(
+                    OpportunityConvertToOrder(
+                      Opportunity(
+                        opportunityId: widget.opportunity.opportunityId,
+                        opportunityName: _nameController.text,
+                        pseudoId: _pseudoIdController.text,
+                        description: _descriptionController.text,
+                        estAmount: _estAmountController.text.isNotEmpty
+                            ? Decimal.tryParse(_estAmountController.text)
+                            : null,
+                        estProbability:
+                            _estProbabilityController.text.isNotEmpty
+                            ? Decimal.tryParse(_estProbabilityController.text)
+                            : null,
+                        stageId: _selectedStageId,
+                        nextStep: _estNextStepController.text,
+                        employeeUser: _selectedAccount,
+                        leadUser: _selectedLead,
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
     ];
 
     List<Widget> rows = [];

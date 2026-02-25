@@ -31,6 +31,7 @@ try {
     def ownerResult = ec.service.sync().name("growerp.100.GeneralServices100.get#RelatedCompanyAndOwner")
         .call()
     def ownerPartyId = ownerResult.ownerPartyId
+    def companyPartyId = ownerResult.companyPartyId
     
     if (!ownerPartyId) {
         ec.message.addError("Unable to determine owner party ID from authenticated user")
@@ -148,7 +149,7 @@ RETURN FORMAT: Return ONLY valid JSON (no markdown, no code blocks) with this ex
 """
     
     // Step 4: Call Gemini API
-    def modelName = "gemini-2.0-flash"
+    def modelName = "gemini-2.5-flash"
     def apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}"
     
     def requestBody = [
@@ -163,6 +164,11 @@ RETURN FORMAT: Return ONLY valid JSON (no markdown, no code blocks) with this ex
     
     ec.logger.info("Calling Gemini API for landing page generation...")
     
+    def jsonRequest = JsonOutput.toJson(requestBody)
+    int maxRetries = 3
+    boolean apiSuccess = false
+
+    for (int attempt = 0; attempt <= maxRetries; attempt++) {
     URL url = new URL(apiUrl)
     HttpURLConnection conn = (HttpURLConnection) url.openConnection()
     conn.setRequestMethod("POST")
@@ -176,15 +182,23 @@ RETURN FORMAT: Return ONLY valid JSON (no markdown, no code blocks) with this ex
     conn.setConnectTimeout(30000)  // 30 seconds to establish connection
     conn.setReadTimeout(90000)     // 90 seconds to read response
     
-    def jsonRequest = JsonOutput.toJson(requestBody)
     conn.outputStream.withWriter { writer ->
         writer.write(jsonRequest)
     }
     
     def responseCode = conn.responseCode
-    ec.logger.info("Gemini API Response Code: ${responseCode}")
-    
+    ec.logger.info("Gemini API Response Code: ${responseCode}${attempt > 0 ? ' (attempt ' + (attempt + 1) + ')' : ''}")
+
+    if (responseCode == 429 && attempt < maxRetries) {
+        def waitSeconds = (attempt + 1) * 10  // 10s, 20s, 30s
+        ec.logger.warn("Gemini API rate limited (429), waiting ${waitSeconds}s before retry ${attempt + 1}/${maxRetries}...")
+        conn.disconnect()
+        Thread.sleep(waitSeconds * 1000L)
+        continue
+    }
+
     if (responseCode == 200) {
+        apiSuccess = true
         def responseText = conn.inputStream.text
         def jsonSlurper = new JsonSlurper()
         def response = jsonSlurper.parseText(responseText)
@@ -428,15 +442,18 @@ RETURN FORMAT: Return ONLY valid JSON (no markdown, no code blocks) with this ex
         context.sectionsCreated = sectionCount
         
         ec.logger.info("Service complete - returning landing page with ${sectionCount} sections")
-        
+        conn.disconnect()
+        break
+
     } else {
         def errorText = conn.errorStream?.text ?: "Unknown error"
         ec.logger.error("Gemini API error (${responseCode}): ${errorText}")
         ec.message.addError("Failed to generate landing page content: ${errorText}")
+        conn.disconnect()
+        break
     }
-    
-    conn.disconnect()
-    
+    } // end retry loop
+
 } catch (Exception e) {
     ec.logger.error("Error in landing page AI generation", e)
     ec.message.addError("Error generating landing page: ${e.message}")

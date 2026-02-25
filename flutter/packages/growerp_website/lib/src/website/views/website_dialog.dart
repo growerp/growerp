@@ -561,12 +561,17 @@ class WebsiteDialogState extends State<WebsiteDialog> {
                     icon: const Icon(Icons.language),
                     label: const Text('/assessmentLanding'),
                     onPressed: () {
-                      final pseudoId = _landingPageIdController.text.isNotEmpty
-                          ? _landingPageIdController.text
-                          : 'erp-landing-page';
+                      if (_landingPageIdController.text.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Please select a page first'),
+                          ),
+                        );
+                        return;
+                      }
                       launchUrl(
                         Uri.parse(
-                          'http://${state.website!.hostName}/assessmentLanding?pseudoId=$pseudoId',
+                          'http://${state.website!.hostName}/assessmentLanding?landingPageId=${_landingPageIdController.text}',
                         ),
                       );
                     },
@@ -579,7 +584,7 @@ class WebsiteDialogState extends State<WebsiteDialog> {
                     label: 'Select Page',
                     initialValue: _landingPages
                         .where(
-                          (p) => p.pseudoId == _landingPageIdController.text,
+                          (p) => p.landingPageId == _landingPageIdController.text,
                         )
                         .firstOrNull,
                     optionsBuilder: (TextEditingValue textEditingValue) {
@@ -596,7 +601,7 @@ class WebsiteDialogState extends State<WebsiteDialog> {
                     onSelected: (LandingPage? selected) {
                       setState(() {
                         _landingPageIdController.text =
-                            selected?.pseudoId ?? '';
+                            selected?.landingPageId ?? '';
                       });
                     },
                   ),
@@ -714,20 +719,26 @@ class WebsiteDialogState extends State<WebsiteDialog> {
                         ),
                       Autocomplete<Product>(
                         key: Key("addProduct${category.categoryName}"),
-                        optionsBuilder: (TextEditingValue textEditingValue) async {
-                          _productBloc.add(
-                            GetDataEvent(
-                              () => restClient.getProduct(
-                                searchString: textEditingValue.text,
-                                limit: 3,
-                                isForDropDown: true,
-                              ),
-                            ),
-                          );
-                          await Future.delayed(const Duration(milliseconds: 250));
-                          if (!mounted) return Completer<Iterable<Product>>().future;
-                          return (_productBloc.state.data as Products).products;
-                        },
+                        optionsBuilder:
+                            (TextEditingValue textEditingValue) async {
+                              _productBloc.add(
+                                GetDataEvent(
+                                  () => restClient.getProduct(
+                                    searchString: textEditingValue.text,
+                                    limit: 3,
+                                    isForDropDown: true,
+                                  ),
+                                ),
+                              );
+                              await Future.delayed(
+                                const Duration(milliseconds: 250),
+                              );
+                              if (!mounted) {
+                                return Completer<Iterable<Product>>().future;
+                              }
+                              return (_productBloc.state.data as Products)
+                                  .products;
+                            },
                         displayStringForOption: (Product u) =>
                             " ${u.productName}[${u.pseudoId}]",
                         fieldViewBuilder:
@@ -806,20 +817,26 @@ class WebsiteDialogState extends State<WebsiteDialog> {
                       Wrap(spacing: 10, children: browseCatButtons),
                     Autocomplete<Category>(
                       key: const Key("addShopCategory}"),
-                      optionsBuilder: (TextEditingValue textEditingValue) async {
-                        _categoryBloc.add(
-                          GetDataEvent(
-                            () => restClient.getCategory(
-                              searchString: textEditingValue.text,
-                              limit: 3,
-                              isForDropDown: true,
-                            ),
-                          ),
-                        );
-                        await Future.delayed(const Duration(milliseconds: 100));
-                        if (!mounted) return Completer<Iterable<Category>>().future;
-                        return (_categoryBloc.state.data as Categories).categories;
-                      },
+                      optionsBuilder:
+                          (TextEditingValue textEditingValue) async {
+                            _categoryBloc.add(
+                              GetDataEvent(
+                                () => restClient.getCategory(
+                                  searchString: textEditingValue.text,
+                                  limit: 3,
+                                  isForDropDown: true,
+                                ),
+                              ),
+                            );
+                            await Future.delayed(
+                              const Duration(milliseconds: 100),
+                            );
+                            if (!mounted) {
+                              return Completer<Iterable<Category>>().future;
+                            }
+                            return (_categoryBloc.state.data as Categories)
+                                .categories;
+                          },
                       displayStringForOption: (Category item) =>
                           item.categoryName.truncate(15),
                       fieldViewBuilder:

@@ -1,117 +1,918 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<entity-facade-xml type="seed" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/entity-facade-xml-3.xsd">
 
-    <growerp.course.Course courseId="CourseGrowerp" ownerPartyId="_NA_" title="How to Create a Course with GrowERP: The Curriculum" 
+<entity-facade-xml type="seed">
+    <growerp.course.Course courseId="CourseGrowerp" ownerPartyId="_NA_"
+        title="How to Create a Course with GrowERP: The Curriculum"
         description="This curriculum outlines the process of building, validating, and selling a course using the GrowERP ecosystem. It combines industry best practices with the specific tools and strategies found in the GrowERP architecture (Assessments, Landing Pages, and Outreach)."
         objectives="To take a course creator from &quot;Idea&quot; to &quot;Automated Sales Funnel&quot; using GrowERP."
         status="PUBLISHED" difficulty="INTERMEDIATE" estimatedDuration="1200" />
 
     <!-- Module 1: Strategy & Validation (The "Why") -->
-    <growerp.course.CourseModule moduleId="GrowerpMod01" courseId="CourseGrowerp" title="Strategy &amp; Validation (The &quot;Why&quot;)" 
-        description="Based on &quot;GrowERP Course Media Strategy.md&quot; and &quot;Marketing hooks.md&quot;" sequenceNum="1" />
+    <growerp.course.CourseModule moduleId="GrowerpMod01" courseId="CourseGrowerp"
+        title="Strategy &amp; Validation (The &quot;Why&quot;)"
+        description="Based on &quot;GrowERP Course Media Strategy.md&quot; and &quot;Marketing hooks.md&quot;"
+        sequenceNum="1" />
 
-    <growerp.course.CourseLesson lessonId="GrowerpLess0101" moduleId="GrowerpMod01" courseId="CourseGrowerp" 
-        title="Identifying the Pain Point" 
-        content="
+    <growerp.course.CourseLesson lessonId="GrowerpLess0101" moduleId="GrowerpMod01"
+        courseId="CourseGrowerp"
+        title="Identifying the Pain Point"
+        sequenceNum="1">
+        <content><![CDATA[
 *   **Objective**: Define a specific problem your course solves.
 *   **Case Study**: The **Field Service Efficiency Masterclass**.
     *   *Bad*: &quot;A course about inventory software.&quot;
     *   *Good*: &quot;Your HVAC fleet is losing $500 per van every week. Here’s how to stop it.&quot;
-*   **Action Project**: Write 3 &quot;Agitator&quot; hooks for your course topic."
-        sequenceNum="1" />
+*   **Action Project**: Write 3 &quot;Agitator&quot; hooks for your course topic.]]></content>
+    </growerp.course.CourseLesson>
 
-    <growerp.course.CourseLesson lessonId="GrowerpLess0102" moduleId="GrowerpMod01" courseId="CourseGrowerp" 
-        title="The &quot;Why-What-How&quot; Framework" 
-        content="
+    <growerp.course.CourseLesson lessonId="GrowerpLess0102" moduleId="GrowerpMod01"
+        courseId="CourseGrowerp"
+        title="The &quot;Why-What-How&quot; Framework"
+        sequenceNum="2">
+        <content><![CDATA[
 *   **Objective**: Structure your value proposition.
     *   **Why**: Why does this problem exist? (e.g., &quot;Manual inventory tracking&quot;)
     *   **What**: What is the solution? (e.g., &quot;Real-time Van Warehouses&quot;)
     *   **How**: How do we implement it? (The Course Content).
-*   **Ref**: Solopreneur Mini-Course Strategy."
-        sequenceNum="2" />
+*   **Ref**: Solopreneur Mini-Course Strategy.]]></content>
+    </growerp.course.CourseLesson>
 
     <!-- Module 2: The Assessment Engine (The "Pre-Sell") -->
-    <growerp.course.CourseModule moduleId="GrowerpMod02" courseId="CourseGrowerp" title="The Assessment Engine (The &quot;Pre-Sell&quot;)" 
+    <growerp.course.CourseModule moduleId="GrowerpMod02" courseId="CourseGrowerp"
+        title="The Assessment Engine (The &quot;Pre-Sell&quot;)"
         description="Based on `GrowerpSuggestedCourses.xml` - Assessment Entities" sequenceNum="2" />
 
-    <growerp.course.CourseLesson lessonId="GrowerpLess0201" moduleId="GrowerpMod02" courseId="CourseGrowerp" 
-        title="Why Assessments Beat Standard Opt-ins" 
-        content="
+    <growerp.course.CourseLesson lessonId="GrowerpLess0201" moduleId="GrowerpMod02"
+        courseId="CourseGrowerp"
+        title="Why Assessments Beat Standard Opt-ins"
+        sequenceNum="1">
+        <content><![CDATA[
 *   **Theory**: People love learning about themselves. An &quot;Effective Score&quot; is more compelling than a &quot;Newsletter Signup&quot;.
-*   **Strategy**: Use the assessment to qualify leads *before* they buy."
-        sequenceNum="1" />
+*   **Strategy**: Use the assessment to qualify leads *before* they buy.]]></content>
+    </growerp.course.CourseLesson>
 
-    <growerp.course.CourseLesson lessonId="GrowerpLess0202" moduleId="GrowerpMod02" courseId="CourseGrowerp" 
-        title="Building the Assessment in XML" 
-        content="
+    <growerp.course.CourseLesson lessonId="GrowerpLess0202" moduleId="GrowerpMod02"
+        courseId="CourseGrowerp"
+        title="Building the Assessment in XML"
+        sequenceNum="2">
+        <content><![CDATA[
 *   **Technical Skill**: Defining `growerp.assessment.Assessment`.
 *   **Key Components**:
     *   `AssessmentQuestion`: The input (e.g., &quot;How do you track inventory?&quot;).
     *   `AssessmentQuestionOption`: Scored answers (Score 1 for &quot;Paper&quot;, Score 10 for &quot;ERP&quot;).
     *   `ScoringThreshold`: Determining user status (Hot vs. Warm lead).
-*   **Example Code Review**: Analyzing the `FS_EFFICIENCY` assessment structure."
-        sequenceNum="2" />
+*   **Example Code Review**: Analyzing the `FS_EFFICIENCY` assessment structure.]]></content>
+    </growerp.course.CourseLesson>
 
     <!-- Module 3: Curriculum Design & Content -->
-    <growerp.course.CourseModule moduleId="GrowerpMod03" courseId="CourseGrowerp" title="Curriculum Design &amp; Content" 
+    <growerp.course.CourseModule moduleId="GrowerpMod03" courseId="CourseGrowerp"
+        title="Curriculum Design &amp; Content"
         description="Based on Digital Product Best Practices" sequenceNum="3" />
 
-    <growerp.course.CourseLesson lessonId="GrowerpLess0301" moduleId="GrowerpMod03" courseId="CourseGrowerp" 
-        title="Structuring for Success" 
-        content="
+    <growerp.course.CourseLesson lessonId="GrowerpLess0301" moduleId="GrowerpMod03"
+        courseId="CourseGrowerp"
+        title="Structuring for Success"
+        sequenceNum="1">
+        <content><![CDATA[
 *   **Rule of Thumb**: 3-5 Modules per Course.
 *   **Lesson Structure**:
     1.  **The Concept** (Video/Text).
     2.  **The Example** (Real-world scenario).
     3.  **The Action Item** (Implementation).
-*   **Ref**: &quot;8 Steps to Your First Mini-Course.md&quot;."
-        sequenceNum="1" />
+*   **Ref**: &quot;8 Steps to Your First Mini-Course.md&quot;.]]></content>
+    </growerp.course.CourseLesson>
 
-    <growerp.course.CourseLesson lessonId="GrowerpLess0302" moduleId="GrowerpMod03" courseId="CourseGrowerp" 
-        title="Production Formats" 
-        content="
+    <growerp.course.CourseLesson lessonId="GrowerpLess0302" moduleId="GrowerpMod03"
+        courseId="CourseGrowerp"
+        title="Production Formats"
+        sequenceNum="2">
+        <content><![CDATA[
 *   **Video**: Keep under 6 minutes (Micro-learning).
 *   **Text/Guide**: For referencing complex configurations.
-*   **Quizzes**: Reinforce learning (GrowERP supports `Assessment` types for quizzes too)."
-        sequenceNum="2" />
+*   **Quizzes**: Reinforce learning (GrowERP supports `Assessment` types for quizzes too).]]></content>
+    </growerp.course.CourseLesson>
 
     <!-- Module 4: The Launch Funnel & Automation -->
-    <growerp.course.CourseModule moduleId="GrowerpMod04" courseId="CourseGrowerp" title="The Launch Funnel &amp; Automation" 
+    <growerp.course.CourseModule moduleId="GrowerpMod04" courseId="CourseGrowerp"
+        title="The Launch Funnel &amp; Automation"
         description="Based on Landing Pages and Marketing Service definitions" sequenceNum="4" />
 
-    <growerp.course.CourseLesson lessonId="GrowerpLess0401" moduleId="GrowerpMod04" courseId="CourseGrowerp" 
-        title="The Landing Page" 
-        content="
+    <growerp.course.CourseLesson lessonId="GrowerpLess0401" moduleId="GrowerpMod04"
+        courseId="CourseGrowerp"
+        title="The Landing Page"
+        sequenceNum="1">
+        <content><![CDATA[
 *   **Technical Skill**: Defining `growerp.landing.LandingPage`.
 *   **Components**:
     *   `hookType`: &quot;ResultsHook&quot; vs &quot;StoryHook&quot;.
     *   `ctaAssessmentId`: Linking your Assessment from Module 2.
     *   `headline`: The primary promise.
-*   **Example**: Analyzing `B2B_LANDING` (&quot;Scale Your Sales Team Without Scaling Your Software Bill&quot;)."
-        sequenceNum="1" />
+*   **Example**: Analyzing `B2B_LANDING` (&quot;Scale Your Sales Team Without Scaling Your Software Bill&quot;).]]></content>
+    </growerp.course.CourseLesson>
 
-    <growerp.course.CourseLesson lessonId="GrowerpLess0402" moduleId="GrowerpMod04" courseId="CourseGrowerp" 
-        title="Automated Outreach" 
-        content="
+    <growerp.course.CourseLesson lessonId="GrowerpLess0402" moduleId="GrowerpMod04"
+        courseId="CourseGrowerp"
+        title="Automated Outreach"
+        sequenceNum="2">
+        <content><![CDATA[
 *   **Strategy**: Using `OutreachServices` to follow up.
 *   **Sequence**:
     1.  **Hot Lead (Heigh Score)**: Direct personal email/call.
     2.  **Warm Lead (Medium Score)**: Nurture sequence (Case Studies).
-*   **Ref**: &quot;20 emails to persuade people to buy.md&quot;."
-        sequenceNum="2" />
+*   **Ref**: &quot;20 emails to persuade people to buy.md&quot;.]]></content>
+    </growerp.course.CourseLesson>
 
     <!-- Final Project -->
-    <growerp.course.CourseModule moduleId="GrowerpModFinal" courseId="CourseGrowerp" title="Final Project" 
+    <growerp.course.CourseModule moduleId="GrowerpModFinal" courseId="CourseGrowerp"
+        title="Final Project"
         description="Build Your Prototype" sequenceNum="5" />
 
-    <growerp.course.CourseLesson lessonId="GrowerpLessFinal" moduleId="GrowerpModFinal" courseId="CourseGrowerp" 
-        title="Build Your Prototype" 
-        content="
+    <growerp.course.CourseLesson lessonId="GrowerpLessFinal" moduleId="GrowerpModFinal"
+        courseId="CourseGrowerp"
+        title="Build Your Prototype"
+        sequenceNum="1">
+        <content><![CDATA[
 **Build Your Prototype**:
 1.  Define your **Hook**.
 2.  Write a simple 5-question **Assessment** in XML.
 3.  Create a **Landing Page** entry linking to it.
-4.  Outline your **Course Modules**."
+4.  Outline your **Course Modules**.]]></content>
+    </growerp.course.CourseLesson>
+
+    <growerp.course.Course courseId="CourseMarketingSales" ownerPartyId="_NA_"
+        title="Marketing, Outreach and Sales: Your Complete GrowERP Growth Pipeline"
+        description="A comprehensive guide for marketers and sales reps covering every screen, workflow, and integration point across the growerp_marketing, growerp_outreach, and growerp_sales packages. By the end you will have a fully operational funnel: from a public landing page that captures leads, through an automated outreach sequence that warms them up, to a closed sales opportunity with a quote ready for the customer."
+        objectives="Build a complete automated sales funnel in GrowERP: create a persona and landing page, capture leads via an assessment, nurture them with an outreach campaign, manage the pipeline through to Closed Won, and convert the opportunity to a quote."
+        status="PUBLISHED" difficulty="BEGINNER" estimatedDuration="2400" />
+
+    <!-- ═══════════════════════════════════════════════════
+         MODULE 1: THE FOUNDATION
+    ═══════════════════════════════════════════════════ -->
+    <growerp.course.CourseModule moduleId="MarketMod01" courseId="CourseMarketingSales"
+        title="The Foundation: Understanding the Pipeline"
+        description="Understand how Marketing, Outreach, and Sales work together as a single coordinated funnel before touching any configuration."
         sequenceNum="1" />
+
+    <growerp.course.CourseLesson lessonId="MarketLess0101" moduleId="MarketMod01"
+        courseId="CourseMarketingSales"
+        title="The GrowERP Growth Ecosystem"
+        keyPoints="[&quot;Marketing owns Top-of-Funnel: landing pages, lead capture, assessments&quot;, &quot;Outreach owns Middle-of-Funnel: warm lead campaigns AND cold lead scraping (PENDING→CONTACTED→RESPONDED→CONVERTED)&quot;, &quot;Sales owns Bottom-of-Funnel: opportunities, pipeline stages, quote conversion&quot;, &quot;Warm track: landing page assessment → campaign → opportunity; Cold track: scraper → OutreachMessage → Convert to Lead → opportunity&quot;]"
+        sequenceNum="1">
+        <content><![CDATA[## The Three-Package Growth Model
+
+Every paying customer passes through three stages. GrowERP maps each stage to a dedicated package so your team always knows where a lead is and what to do next.
+
+### Top of Funnel (ToFu) - growerp_marketing
+The marketing package is responsible for making strangers aware of your offer and capturing their contact details. It provides:
+- **Personas** - define the ideal customer profiles you are targeting
+- **Landing Pages** - public-facing pages with a value proposition and call-to-action
+- **Assessments** - interactive questionnaires that qualify a lead while delivering value
+- **Content Plans and Social Posts** - coordinate the content that drives traffic to your landing pages
+
+A visitor who enters his email on the landingpage or completes an assessment becomes a *lead* in the system with a score and a persona tag.
+
+### Middle of Funnel (MoFu) - growerp_outreach
+The outreach package takes over once a lead exists. It automates the follow-up communication across multiple channels until the lead is warm enough for a direct sales conversation. It provides:
+- **Platform Configurations** - connect your email account, LinkedIn profile, or other channels
+- **Campaigns** - groups of leads targeted by a specific message strategy
+- **Message Sequences** - step-by-step timed messages sent automatically
+- **Automation Service** - background service that executes sequences without manual effort
+
+### Bottom of Funnel (BoFu) - growerp_sales
+The sales package manages each high-value deal from first contact to signed order. It provides:
+- **Opportunities** - a record for each deal with its own pipeline stage, estimated value, and assigned rep
+- **Stage Progression** - move a deal from Prospecting through Qualification, Proposal, Quote, and on to Closed Won or Closed Lost
+- **Convert to Quote** - one-click creation of a sales order in preparation status, linked back to the opportunity
+
+### The Data Flow — Two Entry Points
+
+**Warm-lead track (inbound):**
+A visitor completes a landing page assessment in Marketing → becomes a lead → is enrolled in an Outreach campaign → receives automated messages → when engaged, a rep creates an Opportunity in Sales → pipeline progresses to Quote → Convert to Quote creates a sales order.
+
+**Cold-lead track (outbound):**
+The Outreach scraping service discovers prospects from external sources → creates OutreachMessages in PENDING status → a rep contacts them (CONTACTED) → prospect replies (RESPONDED) → rep taps Convert to Lead which calls `createUser(role: lead)` and stamps the OutreachMessage with `convertedPartyId` + CONVERTED status → the new lead enters the same CRM flow: create Opportunity → work pipeline → Convert to Quote.
+
+No data is duplicated. The same User record for the lead appears in all three packages regardless of which entry point was used.]]></content>
+    </growerp.course.CourseLesson>
+
+    <growerp.course.CourseLesson lessonId="MarketLess0102" moduleId="MarketMod01"
+        courseId="CourseMarketingSales"
+        title="Navigating the Three Packages"
+        keyPoints="[&quot;Marketing menu: Content Plans, Landing Pages, Assessments, Personas, Social Posts&quot;, &quot;Outreach menu: Campaigns, Messages, Platform Configs, Automation&quot;, &quot;Sales menu: Opportunities (under CRM)&quot;, &quot;All three packages must be included in your app build and menu config&quot;]"
+        sequenceNum="2">
+        <content><![CDATA[## Finding Your Way Around
+
+Open the admin app and look at the left-hand navigation. You should see three relevant sections.
+
+### Marketing Section
+Navigate to **Marketing** in the sidebar. You will find tabs or menu items for:
+- **Content Plans** - this is the default landing screen for the Marketing section
+- **Landing Pages** - tap to manage your public capture pages
+- **Assessments** - tap to manage questionnaires
+- **Personas** - tap to manage ideal customer profiles
+- **Social Posts** - tap to see AI-drafted social content
+
+If any of these tabs are missing your administrator needs to add the menu items from the backend menu seed data (widgetNames: ContentPlanList, LandingPageList, AssessmentList, PersonaList, SocialPostList).
+
+### Outreach Section
+Navigate to **Outreach** in the sidebar. You will find:
+- **Campaigns** - the default screen showing all outreach campaigns
+- **Messages** - individual outreach messages across all campaigns
+- **Platform Config** - connection settings for email, LinkedIn, and other channels
+- **Automation** - the background automation control center
+
+### CRM Section
+Navigate to **CRM** (or **Sales**) in the sidebar. You will find:
+- **Opportunities** - the pipeline list
+
+### Quick Check
+Before continuing, confirm you can open all three sections without a blank screen or error. If you have a problem, enter a message in the chat or report by email at support@groerp.com.]]></content>
+    </growerp.course.CourseLesson>
+
+    <!-- ═══════════════════════════════════════════════════
+         MODULE 2: THE MARKETING PACKAGE
+    ═══════════════════════════════════════════════════ -->
+    <growerp.course.CourseModule moduleId="MarketMod02" courseId="CourseMarketingSales"
+        title="Capturing Interest: The Marketing Package"
+        description="Set up the top-of-funnel infrastructure: personas, landing pages, assessments, content plans and social posts."
+        sequenceNum="2" />
+
+    <growerp.course.CourseLesson lessonId="MarketLess0201" moduleId="MarketMod02"
+        courseId="CourseMarketingSales"
+        title="Creating Personas"
+        keyPoints="[&quot;A Persona represents your ideal customer profile&quot;, &quot;Each persona can have a name, description, pain points, goals, and demographics&quot;, &quot;Landing pages and courses can be targeted to a specific persona&quot;, &quot;Use AI generation to draft a persona from a short description&quot;]"
+        sequenceNum="1">
+        <content><![CDATA[## Creating Your First Persona
+
+A Persona is a semi-fictional representation of your ideal customer. In GrowERP every landing page and course can be linked to a persona so your messaging is always consistent.
+
+### Opening Personas
+1. Navigate to **Marketing** in the sidebar
+2. Tap the **Personas** tab
+3. The persona list screen opens (PersonaList widget)
+
+### Creating a New Persona
+1. Tap the **+** floating action button in the bottom right
+2. The Persona Detail Screen opens
+3. Fill in the fields:
+   - **Name** - a memorable label such as &quot;The Overwhelmed Founder&quot; or &quot;The B2B Procurement Manager&quot;
+   - **Description** - one paragraph describing who this person is
+   - **Pain Points** - bullet the top 3-5 frustrations this persona faces
+   - **Goals** - bullet what success looks like for them
+   - **Demographics** - industry, company size, job title, location if relevant
+4. Tap **Save**
+
+### Using AI Generation
+If you are unsure where to start, tap **Generate with AI** on the persona form. Type a one-sentence description such as &quot;A founder of a 5-person SaaS company struggling with customer churn&quot; and tap Generate. The AI will fill in pain points, goals, and a description. Review and edit before saving.
+
+### Best Practices
+- Create one persona per distinct audience segment. Most businesses need 2-4 personas.
+- Give each persona a human first name in addition to a role label - this makes it easier to refer to them in team conversations.
+- Return and update personas quarterly as your understanding of customers deepens.]]></content>
+    </growerp.course.CourseLesson>
+
+    <growerp.course.CourseLesson lessonId="MarketLess0202" moduleId="MarketMod02"
+        courseId="CourseMarketingSales"
+        title="Building a Landing Page"
+        keyPoints="[&quot;A landing page has a headline, subheading, page sections, credibility info, and a CTA&quot;, &quot;Link the page to an assessment to capture qualified leads&quot;, &quot;Use Generate with AI to draft the full page from a brief&quot;, &quot;Preview the public page before publishing&quot;]"
+        sequenceNum="2">
+        <content><![CDATA[## Building a High-Converting Landing Page
+
+A Landing Page is the public-facing entry point to your funnel. Visitors land here, read your value proposition, and either leave or take your call-to-action (usually completing an assessment).
+
+### Opening Landing Pages
+1. Navigate to **Marketing** then **Landing Pages**
+2. The LandingPageList screen shows all pages with their status (DRAFT / ACTIVE / ARCHIVED)
+
+### Creating a Landing Page
+1. Tap **+** to open the Landing Page Dialog
+2. Fill in the core fields:
+   - **Title** - internal name for your team
+   - **Hook Type** - choose from Problem, Results, or Frustration to frame the messaging angle
+   - **Headline** - the large bold text visitors see first (keep under 12 words)
+   - **Subheading** - one or two sentences expanding the headline promise
+   - **Privacy Policy URL** - required for lead capture compliance
+   - **Assessment** - link to the assessment that will serve as your CTA
+
+### Adding Page Sections
+After saving the core record, open the page and tap **Page Sections**.
+Each section has:
+- **Section Title** - a short benefit headline
+- **Section Description** - 2-4 sentences of detail
+- **Image URL** - an image reinforcing the section point
+- **Sequence** - order the sections appear (1, 2, 3...)
+
+Aim for 3 sections covering: the Problem, the Solution, and the Proof/Results.
+
+### Adding Credibility Info
+Tap **Credibility** to add the creator bio and supporting statistics.
+- **Creator Bio** - 2-3 sentences on your background and why you are credible
+- **Background Text** - methodology or track record paragraph
+- **Statistics** - add 2-4 statistics such as &quot;1,200+ clients served&quot; or &quot;Average 28% revenue increase&quot;
+
+### Setting the Call-to-Action
+Tap **Primary CTA** to configure:
+- **Button Text** - action-oriented, e.g. &quot;Start Your Free Assessment&quot;
+- **Estimated Time** - reassures visitors, e.g. &quot;5 minutes&quot;
+- **Cost** - e.g. &quot;Completely Free&quot;
+- **Value Promise** - one sentence on what the visitor gets
+
+### Generate with AI
+Tap **Generate Landing Page** from the list screen to use AI. Provide:
+- Your target persona (select from dropdown)
+- Your core offer in one sentence
+- The AI drafts the headline, subheading, and all page sections as a starting point.
+
+### Preview and Publish
+1. Open the landing page record and tap **Preview** to see the public view
+2. When satisfied, change Status from DRAFT to ACTIVE
+3. The page is now accessible at the public landing page URL]]></content>
+    </growerp.course.CourseLesson>
+
+    <growerp.course.CourseLesson lessonId="MarketLess0203" moduleId="MarketMod02"
+        courseId="CourseMarketingSales"
+        title="Running an Assessment"
+        keyPoints="[&quot;An assessment qualifies leads by scoring their answers&quot;, &quot;Define questions, answer options, and scoring thresholds&quot;, &quot;View captured leads and their scores in the Leads screen&quot;, &quot;Scoring thresholds segment leads into Hot, Warm, or Cold buckets&quot;]"
+        sequenceNum="3">
+        <content><![CDATA[## Running an Assessment to Capture Qualified Leads
+
+An assessment is a short questionnaire that delivers value to the visitor (they learn something about their business) while capturing their contact details and qualifying them with a score. Leads who score highly are automatically your best prospects.
+
+### Opening Assessments
+1. Navigate to **Marketing** then **Assessments**
+2. The AssessmentList screen shows all assessments
+
+### Creating an Assessment
+1. Tap **+** to open the Assessment Detail Screen
+2. Fill in:
+   - **Title** - short and outcome-focused, e.g. &quot;Business Operations Health Check&quot;
+   - **Description** - what the visitor will learn from completing it
+   - **Intro Message** - text shown on the first screen before questions start
+   - **Thank You Message** - text shown after submission
+   - **Status** - set to ACTIVE to make it live
+
+### Adding Questions
+From the Assessment detail screen, tap **Questions** then **+**:
+- **Question Text** - the question itself, keep it specific
+- **Question Type** - typically MULTIPLE_CHOICE for scored assessments
+- **Sequence** - the order questions appear
+
+For each question, tap **Options** to add answer choices:
+- **Option Text** - the visible answer text
+- **Score** - a numeric value (e.g. 0-10) awarded when the visitor selects this option
+
+### Configuring Scoring Thresholds
+Tap **Thresholds** on the assessment to define what a score means:
+- **Label** - e.g. &quot;High Priority&quot;, &quot;Medium Priority&quot;, &quot;Low Priority&quot;
+- **Min Score / Max Score** - the score range for this bucket
+- **Recommendation** - the message shown to the visitor in their results
+- **Sequence** - display order
+
+Example setup for a 5-question assessment with max 50 points:
+- 40-50: High Priority (hot lead - recommend immediate consultation)
+- 25-39: Medium Priority (warm lead - recommend free resource)
+- 0-24: Low Priority (nurture with content)
+
+### Viewing Captured Leads
+After visitors complete the assessment, tap **Leads** from the Assessment detail screen to see:
+- Visitor name and email
+- Score achieved
+- Threshold bucket they fall into
+- Submission date
+
+These leads can be exported or directly linked to an Outreach campaign.]]></content>
+    </growerp.course.CourseLesson>
+
+    <growerp.course.CourseLesson lessonId="MarketLess0204" moduleId="MarketMod02"
+        courseId="CourseMarketingSales"
+        title="Content Planning and Social Posts"
+        keyPoints="[&quot;Content Plans organise what to publish and when across all channels&quot;, &quot;Social Posts are the individual pieces of content tied to a plan&quot;, &quot;Use AI drafting to generate platform-specific post text&quot;, &quot;Track status from DRAFT through SCHEDULED to PUBLISHED&quot;]"
+        sequenceNum="4">
+        <content><![CDATA[## Content Planning and Social Posts
+
+The Content Plan and Social Post screens help you coordinate the marketing content that drives traffic to your landing pages and keeps your audience engaged between active campaigns.
+
+### Content Plans
+A Content Plan is an editorial calendar entry - it describes a content theme, target persona, and time window.
+
+1. Navigate to **Marketing** then **Content Plans**
+2. Tap **+** to create a plan:
+   - **Title** - theme of the content period, e.g. &quot;Q1 Lead Generation Blitz&quot;
+   - **Description** - what topics will be covered and why
+   - **Target Persona** - select the persona this content speaks to
+   - **Start Date / End Date** - the duration of the plan
+3. Tap **Generate with AI** on an existing plan to have the AI suggest a full content calendar with post ideas for the selected persona.
+
+### Social Posts
+Social Posts are the individual pieces of content - a LinkedIn article, a tweet thread, an email newsletter etc - linked to a content plan.
+
+1. From within a Content Plan, tap **Social Posts**, or navigate to **Marketing** then **Social Posts**
+2. Tap **+** to create a post:
+   - **Platform** - select LINKEDIN, TWITTER, EMAIL, MEDIUM, YOUTUBE, SUBSTACK or INAPP
+   - **Media Type** - POST, ARTICLE, SEQUENCE, SCRIPT, THREAD, or TUTORIAL
+   - **Title** - internal label
+   - **Scheduled Date** - when you intend to publish
+3. Tap **Draft with AI** to generate the post body. The AI uses the content plan context and target persona to write platform-appropriate copy. Review and edit in the Edited Content field before the generated content is used.
+
+### Status Workflow
+Posts move through statuses:
+- **DRAFT** - created but not yet reviewed
+- **REVIEWED** - approved internally
+- **SCHEDULED** - queued for a specific publish date
+- **PUBLISHED** - live
+
+Change the status by tapping the status chip on the post detail screen.]]></content>
+    </growerp.course.CourseLesson>
+
+    <!-- ═══════════════════════════════════════════════════
+         MODULE 3: THE OUTREACH PACKAGE
+    ═══════════════════════════════════════════════════ -->
+    <growerp.course.CourseModule moduleId="MarketMod03" courseId="CourseMarketingSales"
+        title="Nurturing the Relationship: The Outreach Package"
+        description="Connect your communication channels, build campaigns targeting warm inbound leads, create automated message sequences, monitor execution, and use the cold-lead scraping service to find and convert new prospects directly into the CRM."
+        sequenceNum="3" />
+
+    <growerp.course.CourseLesson lessonId="MarketLess0301" moduleId="MarketMod03"
+        courseId="CourseMarketingSales"
+        title="Platform Configuration"
+        keyPoints="[&quot;Configure one platform before sending any messages&quot;, &quot;Email requires SMTP host, port, username, and password&quot;, &quot;LinkedIn requires the MCP browser extension to be installed&quot;, &quot;Each platform config has an Active/Inactive toggle&quot;]"
+        sequenceNum="1">
+        <content><![CDATA[## Configuring Your Outreach Platforms
+
+Before you can send any outreach messages you must connect at least one communication platform. GrowERP supports email, LinkedIn, and other channels via a platform adapter system.
+
+### Opening Platform Configurations
+1. Navigate to **Outreach** then **Platform Config**
+2. The PlatformConfigListScreen shows all configured platforms and their Active status
+
+### Adding an Email Platform
+Email is the most reliable starting point.
+
+1. Tap **+** to add a new platform
+2. Select **Platform Type: EMAIL**
+3. Fill in the SMTP settings from your email provider:
+   - **SMTP Host** - e.g. smtp.gmail.com or smtp.office365.com
+   - **SMTP Port** - typically 587 (TLS) or 465 (SSL)
+   - **Username** - your email address
+   - **Password** - your app password (for Gmail: create one in Google Account settings under Security)
+   - **From Name** - the sender name recipients will see
+   - **From Address** - the reply-to address
+4. Toggle **Active** to ON
+5. Tap **Save** then use **Test Connection** to verify the settings work
+
+### Adding LinkedIn (requires MCP browser extension)
+LinkedIn automation in GrowERP uses a browser extension (the MCP bridge) that controls your LinkedIn session in the browser. This is necessary because LinkedIn does not offer a public API for messaging.
+
+Requirements:
+- Install the GrowERP MCP browser extension in your Chrome or Edge browser
+- Be logged into LinkedIn in that same browser
+- The extension must be running when campaigns execute
+
+Configuration:
+1. Tap **+** and select **Platform Type: LINKEDIN**
+2. Enter your LinkedIn profile URL
+3. Toggle **Active** to ON
+4. The extension handles authentication automatically via the browser session
+
+Important: LinkedIn automation must run in a browser window that remains open. Schedule LinkedIn campaigns during business hours when your computer is on.
+
+### Other Platforms
+TWITTER, MEDIUM, SUBSTACK, and YOUTUBE follow the same pattern - select the platform type and follow the connection instructions shown in the form.]]></content>
+    </growerp.course.CourseLesson>
+
+    <growerp.course.CourseLesson lessonId="MarketLess0302" moduleId="MarketMod03"
+        courseId="CourseMarketingSales"
+        title="Creating an Outreach Campaign"
+        keyPoints="[&quot;A campaign groups leads targeted by one message strategy&quot;, &quot;Link a campaign to a landing page to auto-enroll assessment completions&quot;, &quot;Set campaign type, target persona, and assigned platform config&quot;, &quot;Approve a campaign to hand it to the automation service&quot;]"
+        sequenceNum="2">
+        <content><![CDATA[## Creating an Outreach Campaign
+
+A campaign is a container for a group of leads and the message sequence you intend to send them. One campaign per audience segment and offer keeps things manageable.
+
+### Opening Campaigns
+1. Navigate to **Outreach** then **Campaigns**
+2. The CampaignListScreen shows all campaigns with their status chips
+
+### Creating a New Campaign
+1. Tap **+** to open the Campaign Detail Screen
+2. Fill in:
+   - **Campaign Name** - a descriptive internal label, e.g. &quot;Q1 High-Score Leads - Email Nurture&quot;
+   - **Description** - what this campaign is trying to achieve
+   - **Campaign Type** - typically EMAIL_SEQUENCE or LINKEDIN_SEQUENCE
+   - **Platform Config** - select the email or LinkedIn config you set up in the previous lesson
+   - **Target Persona** - select the persona this campaign targets (optional but recommended)
+   - **Landing Page** - if you link a landing page here, GrowERP will automatically enroll leads who complete that page&apos;s assessment into this campaign
+
+### Campaign Statuses
+Campaigns move through these statuses:
+- **DRAFT** - being configured, not yet running
+- **MKTG_CAMP_APPROVED** - approved; the automation service will pick it up and start execution
+- **ACTIVE** - currently executing message sequences
+- **PAUSED** - temporarily stopped; can be resumed
+- **COMPLETED** - all sequences finished
+
+### Adding Leads Manually
+From the Campaign Detail Screen you can tap **Add Lead** and search for an existing User to enroll them directly, without requiring them to complete an assessment first.
+
+### Approving a Campaign
+When your sequences are ready (next lesson), change the Status to **MKTG_CAMP_APPROVED**. The CampaignAutomationService will detect the status change and begin executing the first step of the sequence for each enrolled lead.]]></content>
+    </growerp.course.CourseLesson>
+
+    <growerp.course.CourseLesson lessonId="MarketLess0303" moduleId="MarketMod03"
+        courseId="CourseMarketingSales"
+        title="Building a Message Sequence"
+        keyPoints="[&quot;Each message in a sequence has a step number, delay, platform, and body template&quot;, &quot;Use {{firstName}}, {{companyName}} etc. as template variables&quot;, &quot;OutreachMessage status lifecycle: PENDING → CONTACTED → RESPONDED → CONVERTED&quot;, &quot;Keep step 1 short and personal - no more than 3 sentences&quot;, &quot;Add a minimum of 2 steps: initial outreach and one follow-up&quot;]"
+        sequenceNum="3">
+        <content><![CDATA[## Building a Message Sequence
+
+A message sequence is the series of touchpoints your campaign will execute for each lead. Think of it as a scripted conversation played out automatically over days or weeks.
+
+### Opening Messages
+1. From the Campaign Detail Screen, tap **Messages**
+2. The OutreachMessageList shows the sequence steps for this campaign
+
+### Adding a Message Step
+1. Tap **+** to add a new step
+2. Fill in:
+   - **Step Number** - the position in the sequence (1, 2, 3...)
+   - **Delay Days** - how many days after the previous step before this message sends (use 0 for immediate, 3 for a 3-day gap)
+   - **Platform** - select EMAIL or LINKEDIN (must match the campaign&apos;s platform config)
+   - **Subject** - email subject line (not used for LinkedIn)
+   - **Body** - the message text. Supports template variables (see below)
+
+### Template Variables
+The message body supports these placeholders that are replaced with real data when the message sends:
+- {{firstName}} - lead&apos;s first name
+- {{lastName}} - lead&apos;s last name
+- {{companyName}} - lead&apos;s company name
+- {{assessmentScore}} - the score from the linked assessment
+- {{landingPageUrl}} - the URL of the linked landing page
+
+### A Proven 3-Step Sequence Structure
+Step 1 (Day 0) - Personal and short:
+&quot;Hi {{firstName}}, I noticed you completed our assessment and scored {{assessmentScore}} out of 50. That puts you in our High Priority group - I&apos;d love to share a quick insight that could help. Is 15 minutes this week possible?&quot;
+
+Step 2 (Day 3) - Value-add follow-up:
+Share one specific insight, case study, or resource that is relevant to the lead&apos;s pain points based on their persona. End with a soft question.
+
+Step 3 (Day 7) - Final check-in:
+A brief message acknowledging this is your last automated touchpoint and providing a direct calendar link or contact method.
+
+### Editing and Reordering
+Tap any message step to edit it. To reorder steps change the Step Number values - the automation service always executes in step number order.
+
+### OutreachMessage Status Lifecycle
+Every OutreachMessage — whether created by the automation service for a campaign or by the scraping service for a cold lead — moves through the same status lifecycle:
+
+| Status | Meaning |
+|---|---|
+| **PENDING** | Message created and queued; not yet sent |
+| **CONTACTED** | The message was sent; awaiting a reply |
+| **RESPONDED** | The lead replied or otherwise engaged |
+| **CONVERTED** | The lead has been created as a CRM contact (see Lesson 5) |
+
+For automated campaign messages the automation service advances status from PENDING to CONTACTED automatically after delivery. For cold-lead scraping messages you advance status manually as you work through your prospect list. RESPONDED and CONVERTED are always set manually to reflect real-world outcomes.]]></content>
+    </growerp.course.CourseLesson>
+
+    <growerp.course.CourseLesson lessonId="MarketLess0304" moduleId="MarketMod03"
+        courseId="CourseMarketingSales"
+        title="Automation and Monitoring"
+        keyPoints="[&quot;The Automation screen shows live execution status for all active campaigns&quot;, &quot;Use Pause/Resume to temporarily halt a campaign without losing progress&quot;, &quot;The Campaign Execution Dialog shows per-lead delivery status&quot;, &quot;Emails for non-growerp.com deployments may need the base URL updated in OutreachServices100.xml&quot;]"
+        sequenceNum="4">
+        <content><![CDATA[## Automation and Monitoring
+
+Once a campaign is approved the CampaignAutomationService runs in the background. This lesson covers monitoring and controlling that execution.
+
+### The Automation Screen
+1. Navigate to **Outreach** then **Automation**
+2. The AutomationScreen shows all active campaigns with:
+   - Total leads enrolled
+   - Messages sent so far
+   - Messages pending
+   - Any delivery errors
+
+### Campaign Execution Dialog
+From the Campaign Detail Screen, tap **Execution** to open the CampaignExecutionDialog. This shows a per-lead breakdown:
+- Which step each lead is currently on
+- Whether the last message was delivered successfully
+- The scheduled date for the next message
+
+### Pausing and Resuming
+To temporarily stop a campaign:
+1. Open the Campaign Detail Screen
+2. Tap **Pause Campaign**
+3. Status changes to PAUSED. No new messages will be sent.
+
+To resume:
+1. Open the paused campaign
+2. Tap **Resume Campaign**
+3. Status returns to ACTIVE. Pending messages resume from where they stopped.
+
+### Known Limitation: Landing Page URLs in Emails
+If you are running GrowERP on your own domain (not growerp.com), outreach emails that include landing page links will currently use a hardcoded growerp.com base URL. This is a known issue in OutreachServices100.xml line 1016. To fix it, edit that line in the Moqui backend and replace the hardcoded URL with your deployment&apos;s base URL, then restart the server.
+
+### Monitoring Delivery Errors
+If a lead shows a delivery error:
+- For email: verify the SMTP credentials in Platform Config are still valid (passwords expire)
+- For LinkedIn: verify the browser extension is running and you are logged into LinkedIn
+
+Resolve the issue in Platform Config then use the Campaign Execution Dialog to retry the failed step for affected leads.]]></content>
+    </growerp.course.CourseLesson>
+
+    <growerp.course.CourseLesson lessonId="MarketLess0305" moduleId="MarketMod03"
+        courseId="CourseMarketingSales"
+        title="Cold Lead Scraping: Finding and Converting Prospects"
+        keyPoints="[&quot;The scraping service creates OutreachMessages in PENDING status — one per discovered prospect&quot;, &quot;Work the list: send a message (CONTACTED), wait for a reply (RESPONDED), then convert&quot;, &quot;Conversion calls createUser(role: lead) and stamps the OutreachMessage with convertedPartyId + CONVERTED status&quot;, &quot;After conversion the lead enters the standard CRM flow: create an Opportunity and work the pipeline&quot;]"
+        sequenceNum="5">
+        <content><![CDATA[## Cold Lead Scraping: Finding and Converting Prospects
+
+The cold-lead scraping track is fundamentally different from the warm-lead campaign track. Instead of waiting for visitors to find your landing page, the scraping service proactively discovers potential leads from external sources and loads them into the outreach queue as **OutreachMessages**.
+
+### How the Scraping Service Works
+The scraping service runs in the background (like the CampaignAutomationService) and discovers prospect data from configured sources. For each prospect found it creates an **OutreachMessage** record with:
+- **status: PENDING** — the message has not been sent yet
+- The prospect&apos;s available contact information (name, company, email or LinkedIn URL)
+- A reference to the campaign or template that defines the initial outreach text
+
+You work this queue manually or in combination with the automation service.
+
+### The Cold Lead Workflow
+The lifecycle for each cold prospect follows four stages:
+
+**Stage 1 — PENDING**
+The scraper has found the prospect. Review their profile. You can edit the message body to personalise it before sending. When ready, tap **Send** to dispatch the message.
+
+**Stage 2 — CONTACTED**
+The message has been sent. The status advances to CONTACTED automatically after delivery (email) or manually (LinkedIn). Note the date. There is nothing more to do until the prospect replies.
+
+**Stage 3 — RESPONDED**
+The prospect replied or otherwise engaged (clicked a link, accepted a connection request, attended a call). Update the status to RESPONDED manually to signal that a human conversation has started. Record a note in the message body if needed.
+
+**Stage 4 — CONVERTED**
+The prospect is worth bringing into the CRM as a proper lead. Tap the **Convert to Lead** button on the OutreachMessage detail screen. Behind the scenes the system performs two actions:
+
+```
+final newUser = await restClient.createUser(
+  User(
+    role: Role.lead,
+    firstName: message.firstName,
+    lastName:  message.lastName,
+    email:     message.email,
+    // ... other available fields
+  )
+);
+await restClient.updateOutreachMessage(
+  message.copyWith(
+    convertedPartyId: newUser.partyId,
+    status: OutreachMessageStatus.converted,
+  )
+);
+```
+
+After conversion the OutreachMessage record shows **CONVERTED** and the new lead&apos;s partyId is stored in `convertedPartyId` for traceability.
+
+### After Conversion: Entering the Standard CRM Flow
+Once a cold prospect has been converted to a lead User they are indistinguishable from a warm inbound lead captured via a landing page assessment. From this point the standard flow applies:
+
+1. **Create an Opportunity** — navigate to CRM → Opportunities → + and link the newly created lead User to the opportunity
+2. **Work the pipeline** — advance through Prospecting → Qualification → Demo → Proposal → Quote
+3. **Convert to Quote** — when the deal is ready tap Convert to Quote on the opportunity to create a sales order in preparation status
+
+### Tips for High-Volume Scraping
+- **Filter before sending**: review PENDING messages and delete or skip prospects that clearly do not match your target persona. Quality beats quantity.
+- **Personalise step 1**: the scraper provides a template; always edit the first message to include one specific detail about the prospect&apos;s company or role.
+- **Batch by campaign**: group scraped prospects into campaigns by industry or persona so you can apply the correct message template and track conversion rates per segment.
+- **Track the funnel**: use the Messages list filtered by status to see how many prospects are at each stage. A healthy cold-lead funnel typically has 60–70% at CONTACTED, 15–25% at RESPONDED, and 5–10% CONVERTED.]]></content>
+    </growerp.course.CourseLesson>
+
+    <!-- ═══════════════════════════════════════════════════
+         MODULE 4: THE SALES PACKAGE
+    ═══════════════════════════════════════════════════ -->
+    <growerp.course.CourseModule moduleId="MarketMod04" courseId="CourseMarketingSales"
+        title="Closing the Deal: The Sales Package"
+        description="Create opportunities, work them through the pipeline, and convert winning deals to sales quotes."
+        sequenceNum="4" />
+
+    <growerp.course.CourseLesson lessonId="MarketLess0401" moduleId="MarketMod04"
+        courseId="CourseMarketingSales"
+        title="Creating Opportunities"
+        keyPoints="[&quot;An opportunity tracks one potential deal from first conversation to close&quot;, &quot;Link the lead contact and an assigned employee rep to the opportunity&quot;, &quot;Set an estimated amount and probability to forecast revenue&quot;, &quot;Start at Prospecting stage even if the lead is already warm&quot;]"
+        sequenceNum="1">
+        <content><![CDATA[## Creating a Sales Opportunity
+
+An Opportunity is a record for a specific deal with a specific person. It is the handoff point between Outreach (nurturing) and Sales (closing).
+
+### Opening Opportunities
+1. Navigate to **CRM** (or **Sales**) then **Opportunities**
+2. The OpportunityList screen shows all open deals with their stage, estimated amount, and assigned lead
+
+### When to Create an Opportunity
+Create an opportunity when you have had a qualifying conversation (or the Outreach automation has scored the lead highly) and there is a realistic chance of a sale. Do not create opportunities for every lead - only those worth tracking individually.
+
+### Creating a New Opportunity
+1. Tap **+** to open the Opportunity Dialog
+2. Fill in the required fields:
+   - **Name** - a descriptive deal title, e.g. &quot;Greenfield Software: ERP Rollout Q2&quot;
+   - **Expected Revenue** - your best estimate of the deal value in your default currency
+   - **Expected Probability (%)** - how likely you think this deal is to close (0-100)
+   - **Stage** - select Prospecting as the starting point
+   - **Next Step** - a note to yourself on the immediate action required
+3. Link the people involved:
+   - **Lead** - search and select the contact from your lead list (this connects back to the Marketing and Outreach data for this person)
+   - **Employee** - search and select the sales rep responsible
+4. Tap **Create**
+
+### The ID Field
+The system auto-generates a pseudoId (short reference number). You can override this with your own reference code if your organisation uses a deal numbering system.]]></content>
+    </growerp.course.CourseLesson>
+
+    <growerp.course.CourseLesson lessonId="MarketLess0402" moduleId="MarketMod04"
+        courseId="CourseMarketingSales"
+        title="Working the Pipeline"
+        keyPoints="[&quot;Move the stage forward after each meaningful milestone&quot;, &quot;Update Next Step after every interaction&quot;, &quot;Closed Lost is not a failure - update it quickly so the lead can re-enter nurture&quot;, &quot;Probability drives your revenue forecast - keep it honest&quot;]"
+        sequenceNum="2">
+        <content><![CDATA[## Working the Opportunity Pipeline
+
+The pipeline stages represent the agreed milestones in your sales process. Moving deals forward deliberately prevents pipeline stagnation.
+
+### The Seven Stages
+1. **Prospecting** - you have identified this person as a potential buyer but not yet confirmed their need or budget
+2. **Qualification** - you have had an initial conversation and confirmed they have the problem, budget, and authority to buy
+3. **Demo/Meeting** - you have delivered a demonstration or discovery meeting and confirmed fit
+4. **Proposal** - you have sent a formal written proposal
+5. **Quote** - you have sent a specific priced quotation and are awaiting a decision
+6. **Closed Won** - the deal is confirmed; move to Convert to Quote to create the order
+7. **Closed Lost** - the deal did not proceed; record the reason in the Description field
+
+### Moving a Stage
+1. Open the opportunity by tapping its row in the list
+2. The Opportunity Dialog opens
+3. Change the **Stage** dropdown to the current stage
+4. Update **Next Step** to reflect what needs to happen next
+5. Tap **Update**
+
+### Tracking a Deal in Practice
+After each call or email:
+1. Open the opportunity
+2. Update **Next Step** immediately while the conversation is fresh
+3. Advance the stage if a milestone was reached
+4. Update **Probability** upward (or downward) to reflect new information
+
+### Revenue Forecasting
+The opportunity list shows the sum of (Expected Revenue x Probability) for all open deals. Keep your probability estimates honest - an inflated pipeline gives management false confidence and leads to under-resourcing of delivery.
+
+### Handling Closed Lost
+Do not skip recording Closed Lost deals. Use the Description field to note the reason (e.g. &quot;Lost to competitor on price&quot; or &quot;Budget frozen until next fiscal year&quot;). This data is invaluable for improving your process. The lead contact remains in the system and can be enrolled in an Outreach campaign to nurture for future opportunities.]]></content>
+    </growerp.course.CourseLesson>
+
+    <growerp.course.CourseLesson lessonId="MarketLess0403" moduleId="MarketMod04"
+        courseId="CourseMarketingSales"
+        title="Converting an Opportunity to a Quote"
+        keyPoints="[&quot;Tap Convert to Quote on any existing opportunity to create a sales order&quot;, &quot;The order is created in Preparation status linked to the lead contact&quot;, &quot;The opportunity stage automatically advances to Quote&quot;, &quot;Open the new order in the Orders section to add line items and a grand total&quot;]"
+        sequenceNum="3">
+        <content><![CDATA[## Converting an Opportunity to a Quote
+
+When a deal reaches the point where you need to send a formal priced quotation, use Convert to Quote to create a sales order in one click.
+
+### What Convert to Quote Does
+Tapping the button performs two actions simultaneously:
+1. Creates a new sales order (FinDoc type Order, sales=true) in Preparation status, with the lead contact pre-filled from the opportunity
+2. Updates the opportunity stage from its current value to &quot;Quote&quot;
+
+The order starts in Preparation status so your finance or operations team can add line items and review before sending to the customer.
+
+### How to Convert
+1. Open the opportunity by tapping its row in the OpportunityList
+2. The Opportunity Dialog opens
+3. Scroll to the bottom - you will see a blue **Convert to Quote** button (only visible on existing opportunities, not on the new opportunity form)
+4. Tap it
+5. A green confirmation message appears: &quot;Quote #[pseudoId] created successfully&quot;
+6. The dialog closes and the opportunity stage is now &quot;Quote&quot;
+
+### Finding the Created Order
+The new order lives in the Orders section:
+1. Navigate to **Orders** (under the Order/Accounting module)
+2. Filter by Sales = true and Status = Preparation
+3. Find the order matching the pseudoId from the confirmation message
+4. Open it to add:
+   - **Line items** - products or services from your catalog
+   - **Quantities and prices**
+   - **Shipping method** if applicable
+
+### Order Status Progression
+After adding line items:
+1. Change status to **Created** when the quote is ready to send
+2. Send the quote document to the customer (use the Print/PDF option)
+3. When the customer accepts, change status to **Approved**
+4. When fulfilled, change to **Completed**
+
+### If the Deal is Lost After Quoting
+Return to the opportunity and change the stage to **Closed Lost**. The order in Preparation status should be cancelled (change its status to Cancelled in the Orders section) to keep your books clean.]]></content>
+    </growerp.course.CourseLesson>
+
+    <!-- ═══════════════════════════════════════════════════
+         MODULE 5: END-TO-END WALKTHROUGH
+    ═══════════════════════════════════════════════════ -->
+    <growerp.course.CourseModule moduleId="MarketModFinal" courseId="CourseMarketingSales"
+        title="End-to-End Walkthrough: Build Your Complete Funnel"
+        description="A single guided session that connects every package together from persona to closed order."
+        sequenceNum="5" />
+
+    <growerp.course.CourseLesson lessonId="MarketLessFinal" moduleId="MarketModFinal"
+        courseId="CourseMarketingSales"
+        title="Your Capstone: The Complete Funnel in One Session"
+        keyPoints="[&quot;Step 1: Create a Persona in Marketing&quot;, &quot;Step 2: Create a Landing Page with an Assessment linked to that Persona&quot;, &quot;Step 3: Configure an Email platform and create a 2-step Campaign&quot;, &quot;Step 4: Submit the assessment as a test lead then create and close an Opportunity&quot;]"
+        sequenceNum="1">
+        <content><![CDATA[## The Complete Funnel: Step-by-Step Guided Session
+
+This is your capstone exercise. Work through each step in order. By the end you will have a live end-to-end funnel on your GrowERP instance.
+
+---
+
+### STEP 1 - Create a Persona (5 minutes)
+1. Marketing &gt; Personas &gt; **+**
+2. Name: &quot;Test Persona&quot;
+3. Description: &quot;A small business owner evaluating ERP software&quot;
+4. Save
+
+---
+
+### STEP 2 - Create an Assessment (10 minutes)
+1. Marketing &gt; Assessments &gt; **+**
+2. Title: &quot;ERP Readiness Check&quot;
+3. Status: ACTIVE. Save.
+4. Open the assessment, tap Questions &gt; **+**
+   - Q1: &quot;How many employees do you have?&quot; - add options: Under 10 (score 5), 10-50 (score 8), 50+ (score 10)
+   - Q2: &quot;Are your current systems integrated?&quot; - options: Not at all (score 10), Partially (score 6), Fully (score 2)
+5. Tap Thresholds &gt; **+**
+   - High: 15-20, label &quot;Ready to Buy&quot;
+   - Low: 0-14, label &quot;Needs Nurture&quot;
+
+---
+
+### STEP 3 - Create a Landing Page (10 minutes)
+1. Marketing &gt; Landing Pages &gt; **+**
+2. Title: &quot;ERP Readiness Assessment&quot;
+3. Headline: &quot;Is Your Business Ready for an ERP?&quot;
+4. Hook Type: Problem
+5. Link Assessment: ERP Readiness Check
+6. Status: ACTIVE. Save.
+7. Add one Page Section: &quot;Find Out in 2 Minutes&quot;
+
+---
+
+### STEP 4 - Configure Email Platform (5 minutes, skip if already done)
+1. Outreach &gt; Platform Config &gt; **+**
+2. Platform Type: EMAIL
+3. Enter your SMTP settings. Activate and test.
+
+---
+
+### STEP 5 - Create a Campaign with 2-Step Sequence (10 minutes)
+1. Outreach &gt; Campaigns &gt; **+**
+2. Name: &quot;ERP Readiness - High Score Leads&quot;
+3. Type: EMAIL_SEQUENCE. Link your email platform config. Link the ERP Readiness Assessment landing page. Save.
+4. Open the campaign &gt; Messages &gt; **+**
+   - Step 1, Delay 0 days: &quot;Hi {{firstName}}, you scored {{assessmentScore}}/20 on our ERP readiness check. I&apos;d love to share one insight. Reply to book 15 minutes.&quot;
+   - Step 2, Delay 3 days: &quot;Hi {{firstName}}, just following up on my last note. We have helped dozens of businesses in your situation. Worth a quick chat?&quot;
+5. Change campaign Status to **MKTG_CAMP_APPROVED**
+
+---
+
+### STEP 6 - Submit the Assessment as a Test Lead (3 minutes)
+1. Navigate to the public landing page URL (copy from Landing Page detail screen)
+2. Complete the assessment with answers that give a High score
+3. Enter a test name and email address you control
+4. Submit
+
+---
+
+### STEP 7 - Verify the Lead and Outreach (2 minutes)
+1. Marketing &gt; Assessments &gt; ERP Readiness Check &gt; Leads - confirm your test submission appears
+2. Outreach &gt; Campaigns &gt; ERP Readiness - High Score Leads &gt; Execution - confirm the test lead is enrolled and Step 1 is queued or sent
+
+---
+
+### STEP 8 - Create and Close an Opportunity (5 minutes)
+1. CRM &gt; Opportunities &gt; **+**
+2. Name: &quot;Test Lead ERP Deal&quot;
+3. Expected Revenue: 5000. Probability: 60%. Stage: Qualification.
+4. Lead: search and select your test lead contact. Save.
+5. Open the opportunity, advance stage to Proposal, then to Quote.
+6. Tap **Convert to Quote**
+7. Confirm the success message shows a Quote pseudoId.
+
+---
+
+### STEP 9 - Complete the Order (5 minutes)
+1. Navigate to Orders. Find the new order in Preparation status.
+2. Add one line item (any product from your catalog, quantity 1).
+3. Change status to Created.
+
+---
+
+### Congratulations
+You now have a fully operational Marketing to Outreach to Sales funnel in GrowERP. Return to each module to deepen your knowledge of the advanced features in each package.]]></content>
+    </growerp.course.CourseLesson>
 
 </entity-facade-xml>

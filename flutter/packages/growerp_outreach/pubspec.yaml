@@ -1,7 +1,7 @@
 name: growerp_outreach
 resolution: workspace
 description: Multi-platform outreach campaign management for GrowERP
-version: 0.0.1
+version: 1.9.0
 publish_to: "none"
 
 environment:
@@ -19,6 +19,8 @@ dependencies:
   dio: ^5.3.3
   logging: ^1.2.0
   mcp_dart: ^1.2.0
+  bloc_concurrency: ^0.3.0
+  stream_transform: ^2.1.0
 
 dev_dependencies:
   flutter_test:

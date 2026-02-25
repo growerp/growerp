@@ -135,6 +135,12 @@ class CompanyFormState extends State<CompanyDialog> {
         (element) => element.currencyId == company.currency?.currencyId,
         orElse: () => company.currency!,
       );
+    } else if (kDebugMode && currencies.isNotEmpty) {
+      _selectedCurrency = currencies.firstWhere(
+        (element) => element.currencyId == 'USD',
+        orElse: () =>
+            Currency(currencyId: 'USD', description: 'United States Dollar'),
+      );
     }
     _idController.text = company.pseudoId ?? '';
     _nameController.text = company.name ?? '';

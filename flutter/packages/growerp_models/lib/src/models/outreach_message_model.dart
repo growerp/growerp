@@ -43,6 +43,17 @@ class OutreachMessage {
   /// Error message if failed
   final String? errorMessage;
 
+  /// GrowERP partyId of the User(role: lead) created when this prospect was
+  /// converted.  Null until status reaches CONVERTED.
+  ///
+  /// Status lifecycle:
+  ///   PENDING    – discovered by scraper, not yet messaged
+  ///   SENT       – outreach message delivered
+  ///   RESPONDED  – prospect replied / accepted connection
+  ///   CONVERTED  – promoted to User(role: lead); see [convertedPartyId]
+  ///   FAILED     – send / scrape error
+  final String? convertedPartyId;
+
   const OutreachMessage({
     this.messageId,
     this.campaignId,
@@ -56,6 +67,7 @@ class OutreachMessage {
     this.responseDate,
     required this.status,
     this.errorMessage,
+    this.convertedPartyId,
   });
 
   factory OutreachMessage.fromJson(Map<String, dynamic> json) =>

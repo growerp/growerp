@@ -30,6 +30,15 @@ export 'src/services/automation_orchestrator.dart';
 export 'src/services/campaign_automation_service.dart';
 export 'src/utils/rate_limiter.dart';
 
+// Prospecting exports
+export 'src/services/prospecting/prospect_query.dart';
+export 'src/services/prospecting/prospect_scrape_result.dart';
+export 'src/services/prospecting/prospect_scraper.dart';
+export 'src/services/prospecting/generic_web_scraper.dart';
+export 'src/services/prospecting/linkedin_scraper.dart';
+export 'src/services/prospecting/apollo_scraper.dart';
+export 'src/services/prospecting/prospect_aggregator_service.dart';
+
 // Model exports
 export 'src/models/platform_settings.dart';
 

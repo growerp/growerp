@@ -35,6 +35,8 @@ String translateOpportunityBlocMessage(
         return localizations.opportunityAddSuccess(param);
       case 'opportunityDeleteSuccess':
         return localizations.opportunityDeleteSuccess(param);
+      case 'opportunityConvertSuccess':
+        return 'Quote #$param created successfully';
       default:
         break;
     }

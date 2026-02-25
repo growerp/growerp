@@ -34,8 +34,9 @@ along with this software (see the LICENSE.md file). If not, see
             <field-map field-name="partyId" from="companyPartyId"/></entity-find-one>
         <log message="===== Owner Party ID: ${party.ownerPartyId}"/>
         <!-- Get query parameters -->
-        <set field="pseudoId" from="ec.web.parameters.pseudoId ?: ec.web.parameters.pseudoId ?: 'erp-landing-page'"/>
         <set field="landingPageId" from="ec.web.parameters.landingPageId"/>
+        <!-- Only use pseudoId fallback when no landingPageId is supplied -->
+        <set field="pseudoId" from="ec.web.parameters.pseudoId ?: (landingPageId ? null : 'erp-landing-page')"/>
 
         <log message="===== Assessment Landing Page: pseudoId=$pseudoId, landingPageId=$landingPageId, ownerPartyId=${party.ownerPartyId} companyPartyId: $companyPartyId"/>
 

@@ -41,6 +41,7 @@ class OutreachMessageBloc
     on<OutreachMessageUpdateStatus>(_onUpdateStatus);
     on<OutreachMessageDelete>(_onDelete);
     on<OutreachMessageSearchRequested>(_onSearchRequested);
+    on<OutreachMessageConvertToLead>(_onConvertToLead);
   }
 
   final RestClient restClient;
@@ -54,11 +55,13 @@ class OutreachMessageBloc
       if (state.hasReachedMax && event.start != 0) return;
 
       if (event.start == 0) {
-        emit(state.copyWith(
-          status: OutreachMessageStatus.loading,
-          messages: [],
-          hasReachedMax: false,
-        ));
+        emit(
+          state.copyWith(
+            status: OutreachMessageStatus.loading,
+            messages: [],
+            hasReachedMax: false,
+          ),
+        );
       }
 
       final result = await restClient.listOutreachMessages(
@@ -70,20 +73,24 @@ class OutreachMessageBloc
 
       final messages = result.messages;
 
-      emit(state.copyWith(
-        status: OutreachMessageStatus.success,
-        messages: event.start == 0
-            ? messages
-            : (List.of(state.messages)..addAll(messages)),
-        hasReachedMax: messages.length < event.limit,
-      ));
+      emit(
+        state.copyWith(
+          status: OutreachMessageStatus.success,
+          messages: event.start == 0
+              ? messages
+              : (List.of(state.messages)..addAll(messages)),
+          hasReachedMax: messages.length < event.limit,
+        ),
+      );
 
       start = event.start + messages.length;
     } catch (error) {
-      emit(state.copyWith(
-        status: OutreachMessageStatus.failure,
-        message: await getDioError(error),
-      ));
+      emit(
+        state.copyWith(
+          status: OutreachMessageStatus.failure,
+          message: await getDioError(error),
+        ),
+      );
     }
   }
 
@@ -107,16 +114,20 @@ class OutreachMessageBloc
       final updatedMessages = List<OutreachMessage>.from(state.messages)
         ..insert(0, newMessage);
 
-      emit(state.copyWith(
-        status: OutreachMessageStatus.success,
-        messages: updatedMessages,
-        message: 'Message created successfully',
-      ));
+      emit(
+        state.copyWith(
+          status: OutreachMessageStatus.success,
+          messages: updatedMessages,
+          message: 'Message created successfully',
+        ),
+      );
     } catch (error) {
-      emit(state.copyWith(
-        status: OutreachMessageStatus.failure,
-        message: await getDioError(error),
-      ));
+      emit(
+        state.copyWith(
+          status: OutreachMessageStatus.failure,
+          message: await getDioError(error),
+        ),
+      );
     }
   }
 
@@ -137,16 +148,20 @@ class OutreachMessageBloc
         return message.messageId == event.messageId ? updatedMessage : message;
       }).toList();
 
-      emit(state.copyWith(
-        status: OutreachMessageStatus.success,
-        messages: updatedMessages,
-        message: 'Message status updated',
-      ));
+      emit(
+        state.copyWith(
+          status: OutreachMessageStatus.success,
+          messages: updatedMessages,
+          message: 'Message status updated',
+        ),
+      );
     } catch (error) {
-      emit(state.copyWith(
-        status: OutreachMessageStatus.failure,
-        message: await getDioError(error),
-      ));
+      emit(
+        state.copyWith(
+          status: OutreachMessageStatus.failure,
+          message: await getDioError(error),
+        ),
+      );
     }
   }
 
@@ -163,16 +178,20 @@ class OutreachMessageBloc
           .where((message) => message.messageId != event.messageId)
           .toList();
 
-      emit(state.copyWith(
-        status: OutreachMessageStatus.success,
-        messages: updatedMessages,
-        message: 'Message deleted successfully',
-      ));
+      emit(
+        state.copyWith(
+          status: OutreachMessageStatus.success,
+          messages: updatedMessages,
+          message: 'Message deleted successfully',
+        ),
+      );
     } catch (error) {
-      emit(state.copyWith(
-        status: OutreachMessageStatus.failure,
-        message: await getDioError(error),
-      ));
+      emit(
+        state.copyWith(
+          status: OutreachMessageStatus.failure,
+          message: await getDioError(error),
+        ),
+      );
     }
   }
 
@@ -182,18 +201,22 @@ class OutreachMessageBloc
   ) async {
     try {
       if (event.query.isEmpty) {
-        emit(state.copyWith(
-          searchStatus: OutreachMessageStatus.initial,
-          searchResults: [],
-          searchError: null,
-        ));
+        emit(
+          state.copyWith(
+            searchStatus: OutreachMessageStatus.initial,
+            searchResults: [],
+            searchError: null,
+          ),
+        );
         return;
       }
 
-      emit(state.copyWith(
-        searchStatus: OutreachMessageStatus.loading,
-        searchError: null,
-      ));
+      emit(
+        state.copyWith(
+          searchStatus: OutreachMessageStatus.loading,
+          searchError: null,
+        ),
+      );
 
       final result = await restClient.listOutreachMessages(
         start: 0,
@@ -201,16 +224,82 @@ class OutreachMessageBloc
         search: event.query,
       );
 
-      emit(state.copyWith(
-        searchStatus: OutreachMessageStatus.success,
-        searchResults: result.messages,
-        searchError: null,
-      ));
+      emit(
+        state.copyWith(
+          searchStatus: OutreachMessageStatus.success,
+          searchResults: result.messages,
+          searchError: null,
+        ),
+      );
     } catch (error) {
-      emit(state.copyWith(
-        searchStatus: OutreachMessageStatus.failure,
-        searchError: await getDioError(error),
-      ));
+      emit(
+        state.copyWith(
+          searchStatus: OutreachMessageStatus.failure,
+          searchError: await getDioError(error),
+        ),
+      );
+    }
+  }
+
+  /// Convert a cold-outreach prospect into a GrowERP lead.
+  ///
+  /// Lifecycle:
+  ///   OutreachMessage(status: PENDING|RESPONDED)
+  ///     ↓  create User(role: lead)   via POST /User
+  ///     ↓  stamp convertedPartyId    via PATCH /OutreachMessage
+  ///   OutreachMessage(status: CONVERTED, convertedPartyId: `<partyId>`)
+  ///     ↓  standard CRM pipeline
+  ///   Opportunity(stage: Prospecting, leadUser: `<partyId>`)
+  Future<void> _onConvertToLead(
+    OutreachMessageConvertToLead event,
+    Emitter<OutreachMessageState> emit,
+  ) async {
+    try {
+      emit(state.copyWith(status: OutreachMessageStatus.loading));
+
+      // 1. Create the GrowERP lead record
+      final newLead = await restClient.createUser(
+        user: User(
+          firstName: event.firstName,
+          lastName: event.lastName ?? '',
+          email: event.email ?? '',
+          loginName: event.email ?? '',
+          role: Role.lead,
+          company: event.companyName != null
+              ? Company(name: event.companyName!, role: Role.lead)
+              : null,
+        ),
+      );
+
+      final partyId = newLead.partyId;
+
+      // 2. Stamp the OutreachMessage with CONVERTED + the new partyId
+      final updated = await restClient.updateOutreachMessageStatus(
+        messageId: event.messageId,
+        status: 'CONVERTED',
+        convertedPartyId: partyId,
+      );
+
+      final updatedMessages = state.messages.map((m) {
+        return m.messageId == event.messageId ? updated : m;
+      }).toList();
+
+      emit(
+        state.copyWith(
+          status: OutreachMessageStatus.success,
+          messages: updatedMessages,
+          message:
+              'Prospect converted to lead'
+              '${partyId != null ? " ($partyId)" : ""}',
+        ),
+      );
+    } catch (error) {
+      emit(
+        state.copyWith(
+          status: OutreachMessageStatus.failure,
+          message: await getDioError(error),
+        ),
+      );
     }
   }
 }

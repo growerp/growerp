@@ -786,7 +786,6 @@ abstract class RestClient {
   });
 
   @POST("rest/s1/growerp/100/Assessment/Question")
-  @POST("rest/s1/growerp/100/Assessment/Question")
   Future<AssessmentQuestion> createAssessmentQuestion({
     @Field() required String assessmentId,
     @Field() required String questionText,
@@ -859,7 +858,7 @@ abstract class RestClient {
   @DELETE("rest/s1/growerp/100/MarketingPersona")
   Future<void> deleteMarketingPersona({@Field() required String personaId});
 
-  @POST("rest/s1/growerp/100/MarketingPersona/generate")
+  @POST("rest/s1/growerp/100/MarketingPersona/generateWithAI")
   Future<Persona> generateMarketingPersonaWithAI({
     @Field() required String businessDescription,
     @Field() String? targetMarket,
@@ -1192,6 +1191,10 @@ abstract class RestClient {
     @Field() required String status,
     @Field() int? responseDate,
     @Field() String? errorMessage,
+
+    /// Set when status == 'CONVERTED'; the partyId of the newly created
+    /// User(role: lead) that this cold prospect was promoted to.
+    @Field() String? convertedPartyId,
   });
 
   // Campaign Metrics endpoints
@@ -1507,7 +1510,7 @@ abstract class RestClient {
   });
 
   @GET("rest/s1/growerp/100/CourseMedia")
-  Future<dynamic> listCourseMedia({
+  Future<CourseMediaList> listCourseMedia({
     @Query('courseId') String? courseId,
     @Query('platform') String? platform,
   });

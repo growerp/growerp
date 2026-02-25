@@ -7,16 +7,29 @@ import 'adapters/linkedin_automation_adapter.dart';
 import 'adapters/x_automation_adapter.dart';
 import 'adapters/substack_automation_adapter.dart';
 import '../utils/rate_limiter.dart';
+import 'prospecting/prospect_aggregator_service.dart';
+import 'prospecting/prospect_query.dart';
+import 'prospecting/prospect_scrape_result.dart';
 
 /// Orchestrates automation across multiple platforms
 ///
 /// This class manages the execution of outreach campaigns across
 /// different platforms, handling platform-specific adapters and
 /// coordinating the automation workflow.
+///
+/// Prospect discovery is delegated to [ProspectAggregatorService] which
+/// dispatches searches to the appropriate scraper (LinkedIn, Apollo, generic
+/// web) based on the query's [ProspectQuery.sourceHint].  Pass a custom
+/// [prospectAggregator] to override the default configuration (e.g. for
+/// testing or to inject a pre-authenticated scraper).
 class AutomationOrchestrator {
-  AutomationOrchestrator(this.restClient);
+  AutomationOrchestrator(
+    this.restClient, {
+    ProspectAggregatorService? prospectAggregator,
+  }) : _prospectAggregator = prospectAggregator ?? ProspectAggregatorService();
 
   final RestClient restClient;
+  final ProspectAggregatorService _prospectAggregator;
   final Map<String, PlatformAutomationAdapter> _adapters = {};
   final Map<String, RateLimiter> _rateLimiters = {};
 
@@ -64,7 +77,8 @@ class AutomationOrchestrator {
     });
   }
 
-  /// Initialize adapters for the specified platforms
+  /// Initialize adapters for the specified platforms and the prospect
+  /// aggregator (scrapers are initialised lazily when first used).
   Future<void> initialize(List<String> platforms) async {
     for (final platform in platforms) {
       final adapter = _createAdapter(platform);
@@ -73,6 +87,8 @@ class AutomationOrchestrator {
         _adapters[platform] = adapter;
       }
     }
+    // Initialise scrapers (each one no-ops if already initialised)
+    await _prospectAggregator.initialize();
   }
 
   /// Run automation for a specific platform
@@ -128,6 +144,9 @@ class AutomationOrchestrator {
         searchCriteria: searchCriteria,
         campaignId: campaignId,
         dailyLimit: dailyLimit,
+        // Route to the matching scraper when the platform name aligns with a
+        // known scraper hint, otherwise use all scrapers.
+        sourceHint: _platformToScraperHint(platform),
       );
       return;
     }
@@ -224,7 +243,7 @@ class AutomationOrchestrator {
     debugPrint('Rate limiter stats: ${rateLimiter.getStats()}');
   }
 
-  /// Cleanup all adapters and reset rate limiters
+  /// Cleanup all adapters, scrapers and reset rate limiters
   Future<void> cleanup() async {
     for (final adapter in _adapters.values) {
       await adapter.cleanup();
@@ -235,6 +254,8 @@ class AutomationOrchestrator {
       limiter.reset();
     }
     _rateLimiters.clear();
+
+    await _prospectAggregator.cleanup();
   }
 
   /// Get rate limiter stats for a platform
@@ -262,6 +283,21 @@ class AutomationOrchestrator {
         .replaceAll('{name}', profile.name)
         .replaceAll('{company}', profile.company ?? '')
         .replaceAll('{title}', profile.title ?? '');
+  }
+
+  /// Map a messaging-platform name to the scraper source hint used by the
+  /// [ProspectAggregatorService].  Returns null for platforms without a
+  /// dedicated scraper so the aggregator tries all of them.
+  String? _platformToScraperHint(String platform) {
+    switch (platform.toUpperCase()) {
+      case 'LINKEDIN':
+        return 'linkedin';
+      case 'APOLLO':
+        return 'apollo';
+      default:
+        // EMAIL, TWITTER, SUBSTACK → no scraper restriction
+        return null;
+    }
   }
 
   /// Check if an action is a broadcast (doesn't target specific profiles)
@@ -397,44 +433,142 @@ class AutomationOrchestrator {
     return ['send_dms'].contains(actionType);
   }
 
-  /// Run search and save results as PENDING leads
+  /// Discover cold prospects and save them as PENDING leads.
+  ///
+  /// Delegates to [ProspectAggregatorService] which dispatches to the correct
+  /// scraper (LinkedIn, Apollo, generic) based on [sourceHint]:
+  ///
+  ///   - `'linkedin'`  → LinkedIn people-search scraper
+  ///   - `'apollo'`    → Apollo.io search scraper
+  ///   - `'generic'` or any `'http…'` URL → general web scraper
+  ///   - `null`        → all registered scrapers tried in priority order
+  ///
+  /// Results are deduplicated and ranked by the aggregator before the top
+  /// [dailyLimit] records are persisted as `PENDING` outreach messages.
   Future<void> _runSearchAndSaveLeads({
-    required PlatformAutomationAdapter adapter,
+    // ignore: unused_element
+    required PlatformAutomationAdapter adapter, // kept for interface compat
     required String platform,
     required String searchCriteria,
     required String campaignId,
     required int dailyLimit,
+    String? sourceHint,
   }) async {
     if (searchCriteria.isEmpty) {
-      debugPrint('No search criteria for $platform');
+      debugPrint('[AutomationOrchestrator] No search criteria for $platform');
       return;
     }
 
-    final profiles = await adapter.searchProfiles(searchCriteria);
-    debugPrint('Found ${profiles.length} profiles via search for $platform');
+    // Build a structured query from the free-text search criteria.
+    // Criteria may be a plain keyword string or 'title:X company:Y location:Z'
+    // encoded as key:value pairs separated by spaces.
+    final query = _buildProspectQuery(
+      searchCriteria: searchCriteria,
+      maxResults: dailyLimit,
+      sourceHint: sourceHint,
+    );
+
+    final prospects = await _prospectAggregator.scrape(query);
+    debugPrint(
+      '[AutomationOrchestrator] Aggregator found ${prospects.length} '
+      'prospects for $platform',
+    );
 
     int saved = 0;
-    for (final profile in profiles) {
+    for (final prospect in prospects) {
       if (saved >= dailyLimit) break;
 
       try {
         await restClient.createOutreachMessage(
           marketingCampaignId: campaignId,
           platform: platform,
-          recipientName: profile.name,
-          recipientHandle: profile.handle,
-          recipientProfileUrl: profile.profileUrl,
-          recipientEmail: profile.email,
-          messageContent: '', // Will be personalized when sending
+          recipientName: prospect.name,
+          recipientHandle: prospect.handle,
+          recipientProfileUrl: prospect.profileUrl,
+          recipientEmail: prospect.email,
+          messageContent: '', // Personalised at send time
           status: 'PENDING',
         );
         saved++;
       } catch (e) {
-        debugPrint('Error saving lead ${profile.name}: $e');
+        debugPrint(
+          '[AutomationOrchestrator] Error saving prospect ${prospect.name}: $e',
+        );
       }
     }
 
-    debugPrint('✓ Saved $saved leads as PENDING for $platform');
+    debugPrint(
+      '[AutomationOrchestrator] ✓ Saved $saved prospects as PENDING '
+      'for $platform (source: ${query.sourceHint ?? "all scrapers"}).',
+    );
+  }
+
+  /// Parse a search-criteria string into a [ProspectQuery].
+  ///
+  /// Supports optional structured prefix notation:
+  ///
+  ///   `title:"VP Engineering" company:Acme location:"San Francisco"`
+  ///
+  /// Any tokens without a recognised prefix are treated as plain [keywords].
+  ProspectQuery _buildProspectQuery({
+    required String searchCriteria,
+    required int maxResults,
+    String? sourceHint,
+  }) {
+    // Regex to extract key:"quoted value" or key:value pairs
+    final tagRe = RegExp(
+      r'(title|company|location|industry|seniority):(?:"([^"]+)"|([^\s]+))',
+      caseSensitive: false,
+    );
+
+    String? title;
+    String? company;
+    String? location;
+    String? industry;
+    final extras = <String, String>{};
+    var remaining = searchCriteria;
+
+    for (final m in tagRe.allMatches(searchCriteria)) {
+      final key = m.group(1)!.toLowerCase();
+      final value = (m.group(2) ?? m.group(3))!;
+      switch (key) {
+        case 'title':
+          title = value;
+          break;
+        case 'company':
+          company = value;
+          break;
+        case 'location':
+          location = value;
+          break;
+        case 'industry':
+          industry = value;
+          break;
+        default:
+          extras[key] = value;
+      }
+      remaining = remaining.replaceFirst(m.group(0)!, '').trim();
+    }
+
+    return ProspectQuery(
+      keywords: remaining.isEmpty ? searchCriteria : remaining,
+      title: title,
+      companyName: company,
+      location: location,
+      industry: industry,
+      maxResults: maxResults,
+      sourceHint: sourceHint,
+      extraFilters: extras,
+    );
+  }
+
+  /// Expose direct prospecting so callers (e.g. [CampaignAutomationService])
+  /// can run a standalone scrape without executing a full campaign send.
+  Future<List<ProspectScrapeResult>> discoverProspects(
+    ProspectQuery query,
+  ) async {
+    await _prospectAggregator.initialize();
+    return _prospectAggregator.scrape(query);
   }
 
   /// Fetch PENDING leads from backend for a campaign
@@ -450,12 +584,14 @@ class AutomationOrchestrator {
 
       return messages.messages
           .where((m) => m.platform.toUpperCase() == platform.toUpperCase())
-          .map((m) => ProfileData(
-                name: m.recipientName ?? '',
-                handle: m.recipientHandle,
-                profileUrl: m.recipientProfileUrl,
-                email: m.recipientEmail,
-              ))
+          .map(
+            (m) => ProfileData(
+              name: m.recipientName ?? '',
+              handle: m.recipientHandle,
+              profileUrl: m.recipientProfileUrl,
+              email: m.recipientEmail,
+            ),
+          )
           .toList();
     } catch (e) {
       debugPrint('Error fetching pending leads: $e');

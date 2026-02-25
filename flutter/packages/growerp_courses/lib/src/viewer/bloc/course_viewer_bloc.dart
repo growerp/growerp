@@ -64,27 +64,33 @@ class CourseViewerBloc extends Bloc<CourseViewerEvent, CourseViewerState> {
       // Get course media
       List<CourseMedia> mediaList = [];
       try {
-        dynamic mediaResponse = await restClient.listCourseMedia(
+        final mediaResponse = await restClient.listCourseMedia(
           courseId: event.courseId,
         );
-        if (mediaResponse is String) {
-          mediaResponse = jsonDecode(mediaResponse);
-        }
-        final mediaListJson = mediaResponse['mediaList'] as List<dynamic>? ?? [];
-        mediaList = mediaListJson
-            .map((json) => CourseMedia.fromJson(json as Map<String, dynamic>))
-            .toList();
+        mediaList = mediaResponse.mediaList;
       } catch (_) {
         // Media is optional, continue without it
       }
 
-      // Set first lesson as current if none selected
+      // Select the first not-yet-completed lesson; fall back to the first lesson
       CourseLesson? firstLesson;
-      if (course.modules != null && course.modules!.isNotEmpty) {
-        final firstModule = course.modules!.first;
-        if (firstModule.lessons != null && firstModule.lessons!.isNotEmpty) {
-          firstLesson = firstModule.lessons!.first;
+      if (course.modules != null) {
+        final completed = progress.completedLessons ?? [];
+        outer:
+        for (final module in course.modules!) {
+          for (final lesson in module.lessons ?? []) {
+            if (lesson.lessonId != null &&
+                !completed.contains(lesson.lessonId)) {
+              firstLesson = lesson;
+              break outer;
+            }
+          }
         }
+        // All lessons completed (or no progress yet) – open the first lesson
+        firstLesson ??= course.modules!.isNotEmpty &&
+                (course.modules!.first.lessons?.isNotEmpty ?? false)
+            ? course.modules!.first.lessons!.first
+            : null;
       }
 
       emit(

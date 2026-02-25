@@ -23,7 +23,7 @@ dependencies:
   growerp_user_company: ^1.9.0
   growerp_activity: ^1.8.1
   growerp_marketing: ^1.9.0
-  growerp_outreach: ^0.0.1
+  growerp_outreach: ^1.9.0
   universal_io: ^2.2.2
   global_configuration: ^2.0.0
   responsive_framework: ^1.4.0

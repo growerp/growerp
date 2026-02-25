@@ -4,4 +4,6 @@ List<String> opportunityStages = [
   'Demo/Meeting',
   'Proposal',
   'Quote',
+  'Closed Won',
+  'Closed Lost',
 ];

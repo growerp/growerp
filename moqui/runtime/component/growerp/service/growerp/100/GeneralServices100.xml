@@ -343,7 +343,7 @@ along with this software (see the LICENSE.md file). If not, see
                         allTasks: st.allTasks,
                         notInvoicedHours: st.notInvoicedHours,
                         outgoingShipments: st.outgoingShipments,
-                        incomngShipments: st.incomingShipments,
+                        incomingShipments: st.incomingShipments,
                         whLocations: st.whLocations,
                         requests: st.requests,
                     ]" />
@@ -369,7 +369,7 @@ along with this software (see the LICENSE.md file). If not, see
                         allTasks: 0,
                         notInvoicedHours: 0,
                         outgoingShipments: 0,
-                        incomngShipments: 0,
+                        incomingShipments: 0,
                         whLocations: 0,
                         requests: 0,
                         notReadChatRooms: chatRooms
@@ -411,20 +411,32 @@ along with this software (see the LICENSE.md file). If not, see
                     <econdition field-name="userGroupId" value="GROWERP_M_ADMIN" />
                 </entity-find-count>
                 <entity-find-count count-field="leads"
-                    entity-name="mantle.party.PartyDetailAndRole">
+                    entity-name="growerp.party.OwnerPersonDetailAndCompany">
                     <econdition field-name="ownerPartyId" />
-                    <econdition field-name="disabled" value="N" or-null="true" />
-                    <econdition field-name="roleTypeId" value="Customer" />
-                    <econdition field-name="customerStatusId" value="CUSTOMER_ASSIGNED" />
-                    <econdition field-name="partyTypeEnumId" value="PtyOrganization" />
+                    <econdition field-name="userDisabled" value="N" or-null="true" />
+                    <econdition field-name="ownerDisabled" value="N" or-null="true" />
+                    <econditions combine="or">
+                        <econdition field-name="role" value="Customer" />
+                        <econdition field-name="companyRole" value="Customer" />
+                    </econditions>
+                    <econditions combine="or">
+                        <econdition field-name="customerStatusId" value="CUSTOMER_ASSIGNED" />
+                        <econdition field-name="companyCustomerStatusId" value="CUSTOMER_ASSIGNED" />
+                    </econditions>
                 </entity-find-count>
                 <entity-find-count count-field="customers"
-                    entity-name="mantle.party.PartyDetailAndRole">
+                    entity-name="growerp.party.OwnerPersonDetailAndCompany">
                     <econdition field-name="ownerPartyId" />
-                    <econdition field-name="disabled" value="N" or-null="true" />
-                    <econdition field-name="roleTypeId" value="Customer" />
-                    <econdition field-name="customerStatusId" value="CUSTOMER_QUALIFIED" />
-                    <econdition field-name="partyTypeEnumId" value="PtyOrganization" />
+                    <econdition field-name="userDisabled" value="N" or-null="true" />
+                    <econdition field-name="ownerDisabled" value="N" or-null="true" />
+                    <econditions combine="or">
+                        <econdition field-name="role" value="Customer" />
+                        <econdition field-name="companyRole" value="Customer" />
+                    </econditions>
+                    <econditions combine="or">
+                        <econdition field-name="customerStatusId" value="CUSTOMER_QUALIFIED" />
+                        <econdition field-name="companyCustomerStatusId" value="CUSTOMER_QUALIFIED" />
+                    </econditions>
                 </entity-find-count>
                 <entity-find-count count-field="suppliers"
                     entity-name="mantle.party.PartyDetailAndRole">
@@ -667,7 +679,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <parameter name="allTasks" />
                     <parameter name="notInvoicedHours" />
                     <parameter name="outgoingShipments" />
-                    <parameter name="incomngShipments" />
+                    <parameter name="incomingShipments" />
                     <parameter name="whLocations" />
                     <parameter name="requests" />
                     <parameter name="notReadChatRooms" />
@@ -1179,7 +1191,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <parameter name="allTasks" />
                     <parameter name="notInvoicedHours" />
                     <parameter name="outgoingShipments" />
-                    <parameter name="incomngShipments" />
+                    <parameter name="incomingShipments" />
                     <parameter name="whLocations" />
                     <parameter name="requests" />
                     <parameter name="notReadChatRooms" />

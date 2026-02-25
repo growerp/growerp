@@ -32,14 +32,78 @@ class CourseViewer extends StatelessWidget {
   }
 }
 
-class CourseViewerContent extends StatelessWidget {
+class CourseViewerContent extends StatefulWidget {
   final bool showProgress;
 
   const CourseViewerContent({super.key, required this.showProgress});
 
   @override
+  State<CourseViewerContent> createState() => _CourseViewerContentState();
+}
+
+class _CourseViewerContentState extends State<CourseViewerContent> {
+  final ScrollController _sidebarScrollController = ScrollController();
+  final Map<String, GlobalKey> _lessonKeys = {};
+  final Map<int, ExpansibleController> _moduleControllers = {};
+
+  @override
+  void dispose() {
+    _sidebarScrollController.dispose();
+    super.dispose();
+  }
+
+  GlobalKey _getLessonKey(String lessonId) =>
+      _lessonKeys.putIfAbsent(lessonId, () => GlobalKey());
+
+  ExpansibleController _getModuleController(int index) =>
+      _moduleControllers.putIfAbsent(index, () => ExpansibleController());
+
+  /// Expands the module that contains the current lesson, then scrolls to it.
+  void _ensureLessonVisible(CourseViewerState state) {
+    final lesson = state.currentLesson;
+    if (lesson?.lessonId == null || state.course?.modules == null) return;
+
+    final modules = state.course!.modules!;
+    for (int i = 0; i < modules.length; i++) {
+      final lessons = modules[i].lessons ?? [];
+      if (lessons.any((l) => l.lessonId == lesson!.lessonId)) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          try {
+            _moduleControllers[i]?.expand();
+          } catch (_) {}
+          // Defer the scroll until after expand()'s layout + semantics pass
+          // have fully completed. A nested addPostFrameCallback fires during
+          // the semantics update of the same frame, which causes a layout
+          // assertion on dirty render objects. Future.delayed(Duration.zero)
+          // schedules the scroll on the *next* event-loop turn, after the
+          // current frame (including layout, paint, and semantics) is done.
+          Future.delayed(Duration.zero, () {
+            if (!mounted) return;
+            final key = _lessonKeys[lesson!.lessonId];
+            final ctx = key?.currentContext;
+            if (ctx != null) {
+              // ignore: use_build_context_synchronously
+              Scrollable.ensureVisible(
+                ctx,
+                alignment: 0.3,
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeInOut,
+              );
+            }
+          });
+        });
+        break;
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return BlocBuilder<CourseViewerBloc, CourseViewerState>(
+    return BlocConsumer<CourseViewerBloc, CourseViewerState>(
+      listenWhen: (prev, curr) =>
+          prev.currentLesson?.lessonId != curr.currentLesson?.lessonId,
+      listener: (context, state) => _ensureLessonVisible(state),
       builder: (context, state) {
         if (state.status == ViewerStatus.loading) {
           return const Center(child: CircularProgressIndicator());
@@ -296,6 +360,7 @@ class CourseViewerContent extends StatelessWidget {
   Widget _buildSidebar(BuildContext context, CourseViewerState state) {
     final course = state.course!;
     final modules = course.modules ?? [];
+    final currentLessonId = state.currentLesson?.lessonId;
 
     return Container(
       color: Theme.of(
@@ -304,14 +369,24 @@ class CourseViewerContent extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (showProgress) _buildProgressHeader(context, state),
+          if (widget.showProgress) _buildProgressHeader(context, state),
           Expanded(
             child: ListView.builder(
+              controller: _sidebarScrollController,
               itemCount: modules.length,
               itemBuilder: (context, moduleIndex) {
                 final module = modules[moduleIndex];
+                final isCurrentModule =
+                    currentLessonId != null &&
+                    (module.lessons?.any(
+                          (l) => l.lessonId == currentLessonId,
+                        ) ??
+                        false);
                 return ExpansionTile(
-                  initiallyExpanded: moduleIndex == 0,
+                  controller: _getModuleController(moduleIndex),
+                  initiallyExpanded:
+                      isCurrentModule ||
+                      (currentLessonId == null && moduleIndex == 0),
                   leading: CircleAvatar(
                     radius: 14,
                     child: Text(
@@ -331,6 +406,9 @@ class CourseViewerContent extends StatelessWidget {
                         false;
 
                     return ListTile(
+                      key: lesson.lessonId != null
+                          ? _getLessonKey(lesson.lessonId!)
+                          : null,
                       selected: isSelected,
                       leading: Icon(
                         isCompleted

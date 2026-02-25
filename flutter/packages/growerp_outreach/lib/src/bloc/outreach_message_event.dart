@@ -60,14 +60,14 @@ class OutreachMessageCreate extends OutreachMessageEvent {
 
   @override
   List<Object?> get props => [
-        campaignId,
-        platform,
-        recipientName,
-        recipientProfileUrl,
-        recipientHandle,
-        recipientEmail,
-        messageContent,
-      ];
+    campaignId,
+    platform,
+    recipientName,
+    recipientProfileUrl,
+    recipientHandle,
+    recipientEmail,
+    messageContent,
+  ];
 }
 
 /// Update outreach message status
@@ -104,4 +104,52 @@ class OutreachMessageSearchRequested extends OutreachMessageEvent {
 
   @override
   List<Object?> get props => [query];
+}
+
+/// Convert a PENDING/RESPONDED outreach message into a GrowERP lead.
+///
+/// The BLoC handler will:
+///   1. Call `POST /User` with `role = Role.lead` using the prospect's details.
+///   2. Call `PATCH /OutreachMessage` with `status = CONVERTED` and
+///      `convertedPartyId` set to the newly created user's partyId.
+///
+/// After conversion the returned [OutreachMessage] carries [convertedPartyId]
+/// so the UI can navigate directly to the CRM lead record.
+class OutreachMessageConvertToLead extends OutreachMessageEvent {
+  /// ID of the OutreachMessage staging row to promote.
+  final String messageId;
+
+  /// Prospect's first name (required by User model).
+  final String firstName;
+
+  /// Prospect's last name.
+  final String? lastName;
+
+  /// Prospect's email address.
+  final String? email;
+
+  /// Prospect's company name (creates / links a Company party).
+  final String? companyName;
+
+  /// Prospect's job title (stored on the User record).
+  final String? title;
+
+  const OutreachMessageConvertToLead({
+    required this.messageId,
+    required this.firstName,
+    this.lastName,
+    this.email,
+    this.companyName,
+    this.title,
+  });
+
+  @override
+  List<Object?> get props => [
+    messageId,
+    firstName,
+    lastName,
+    email,
+    companyName,
+    title,
+  ];
 }

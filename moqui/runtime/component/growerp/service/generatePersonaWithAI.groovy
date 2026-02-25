@@ -60,13 +60,14 @@ REQUIREMENTS:
 4. Goals: 3-5 aspirations or desired outcomes this persona wants to achieve
 5. Tone of Voice: How this persona prefers to be communicated with (e.g., "Professional yet approachable", "Direct and data-driven")
 
-RETURN FORMAT: Return ONLY valid JSON (no markdown, no code blocks) with this exact structure:
+RETURN FORMAT: Return ONLY valid JSON (no markdown, no code blocks) with this exact structure.
+ALL field values MUST be plain strings - never use JSON arrays or lists:
 {
   "name": "Persona Name",
-  "demographics": "Detailed demographics description",
-  "painPoints": "Bullet-pointed list of pain points",
-  "goals": "Bullet-pointed list of goals and aspirations",
-  "toneOfVoice": "Communication style description"
+  "demographics": "Detailed demographics description as a single string",
+  "painPoints": "Pain point 1. Pain point 2. Pain point 3. (all in one string, period-separated)",
+  "goals": "Goal 1. Goal 2. Goal 3. (all in one string, period-separated)",
+  "toneOfVoice": "Communication style description as a single string"
 }
 
 Generate the persona now.
@@ -125,7 +126,17 @@ Generate the persona now.
     
     // Step 6: Parse the JSON response
     def personaData = jsonSlurper.parseText(generatedText)
-    
+
+    // Normalize any fields that Gemini may return as arrays into newline-separated strings
+    def normalizeField = { val ->
+        if (val instanceof List) return val.join('\n')
+        return val?.toString() ?: ''
+    }
+    personaData.painPoints  = normalizeField(personaData.painPoints)
+    personaData.goals       = normalizeField(personaData.goals)
+    personaData.demographics = normalizeField(personaData.demographics)
+    personaData.toneOfVoice = normalizeField(personaData.toneOfVoice)
+
     // Step 7: Create the MarketingPersona entity
     def pseudoIdResult = ec.service.sync().name("growerp.100.GeneralServices100.getNext#PseudoId")
         .parameters([ownerPartyId: ownerPartyId, seqName: 'MarketingPersona'])

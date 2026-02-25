@@ -40,6 +40,7 @@ class OpportunityBloc extends Bloc<OpportunityEvent, OpportunityState> {
     );
     on<OpportunityUpdate>(_onOpportunityUpdate);
     on<OpportunityDelete>(_onOpportunityDelete);
+    on<OpportunityConvertToOrder>(_onOpportunityConvertToOrder);
   }
 
   final RestClient restClient;
@@ -172,6 +173,52 @@ class OpportunityBloc extends Bloc<OpportunityEvent, OpportunityState> {
         state.copyWith(
           status: OpportunityStatus.failure,
           opportunities: [],
+          message: await getDioError(e),
+        ),
+      );
+    }
+  }
+
+  Future<void> _onOpportunityConvertToOrder(
+    OpportunityConvertToOrder event,
+    Emitter<OpportunityState> emit,
+  ) async {
+    try {
+      emit(state.copyWith(status: OpportunityStatus.loading));
+      // Create a sales order (quote) in inPreparation status
+      final FinDoc newOrder = await restClient.createFinDoc(
+        finDoc: FinDoc(
+          docType: FinDocType.order,
+          sales: true,
+          status: FinDocStatusVal.inPreparation,
+          description: 'Quote for: ${event.opportunity.opportunityName}',
+          otherUser: event.opportunity.leadUser,
+          otherCompany: event.opportunity.leadUser?.company,
+          grandTotal: event.opportunity.estAmount,
+        ),
+      );
+      // Advance opportunity stage to Quote
+      final Opportunity updatedOpportunity = await restClient.updateOpportunity(
+        opportunity: event.opportunity.copyWith(stageId: 'Quote'),
+      );
+      List<Opportunity> opportunities = List.from(state.opportunities);
+      final int index = opportunities.indexWhere(
+        (e) => e.opportunityId == event.opportunity.opportunityId,
+      );
+      if (index >= 0) opportunities[index] = updatedOpportunity;
+      return emit(
+        state.copyWith(
+          status: OpportunityStatus.success,
+          opportunities: opportunities,
+          convertedOrderId: newOrder.orderId,
+          convertedPseudoId: newOrder.pseudoId,
+          message: 'opportunityConvertSuccess:${newOrder.pseudoId}',
+        ),
+      );
+    } on DioException catch (e) {
+      emit(
+        state.copyWith(
+          status: OpportunityStatus.failure,
           message: await getDioError(e),
         ),
       );

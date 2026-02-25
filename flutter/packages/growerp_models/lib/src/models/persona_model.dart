@@ -5,6 +5,14 @@ import 'assessment_model.dart';
 
 part 'persona_model.g.dart';
 
+/// Converts a value that may be a String or a `List<dynamic>` to a String.
+/// Lists are joined with newlines; nulls return null.
+String? _dynamicToString(dynamic value) {
+  if (value == null) return null;
+  if (value is List) return value.join('\n');
+  return value.toString();
+}
+
 /// Marketing Persona model representing a customer avatar
 ///
 /// Supports dual-ID strategy:
@@ -23,15 +31,19 @@ class Persona extends Equatable {
   final String name;
 
   /// Demographics description
+  @JsonKey(fromJson: _dynamicToString)
   final String? demographics;
 
   /// Pain points description
+  @JsonKey(fromJson: _dynamicToString)
   final String? painPoints;
 
   /// Goals and aspirations
+  @JsonKey(fromJson: _dynamicToString)
   final String? goals;
 
   /// Preferred tone of voice for communication
+  @JsonKey(fromJson: _dynamicToString)
   final String? toneOfVoice;
 
   /// Timestamp when created

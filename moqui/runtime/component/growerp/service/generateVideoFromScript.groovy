@@ -266,8 +266,8 @@ def callGeminiApiDirect(def ec, String prompt, int retryCount = 0) {
         throw new Exception("GEMINI_API_KEY not configured. Set it as environment variable or user preference.")
     }
     
-    // Use gemini-2.0-flash (confirmed available Jan 2026)
-    def model = "gemini-2.0-flash"
+    // Use gemini-2.5-flash
+    def model = "gemini-2.5-flash"
     def apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}"
     
     ec.logger.info("Calling Gemini API (${model}) - attempt ${retryCount + 1}")

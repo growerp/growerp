@@ -32,13 +32,11 @@ class CourseMediaBloc extends Bloc<CourseMediaEvent, CourseMediaState> {
         platform: event.platform,
       );
 
-      final List<dynamic> mediaListJson = response['mediaList'] ?? [];
-      final mediaList = mediaListJson
-          .map((json) => CourseMedia.fromJson(json as Map<String, dynamic>))
-          .toList();
-
       emit(
-        state.copyWith(status: MediaBlocStatus.success, mediaList: mediaList),
+        state.copyWith(
+          status: MediaBlocStatus.success,
+          mediaList: response.mediaList,
+        ),
       );
     } catch (e) {
       emit(

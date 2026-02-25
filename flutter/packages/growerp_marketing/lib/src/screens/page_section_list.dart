@@ -114,27 +114,12 @@ class PageSectionListState extends State<PageSectionList> {
             );
           }
 
-          return ReorderableListView.builder(
-            onReorder: (oldIndex, newIndex) {
-              // Handle reordering
-              if (oldIndex < newIndex) {
-                newIndex -= 1;
-              }
-              final sections = List<LandingPageSection>.from(state.sections);
-              final item = sections.removeAt(oldIndex);
-              sections.insert(newIndex, item);
-
-              // Update sequence numbers
-              for (int i = 0; i < sections.length; i++) {
-                // Here you would dispatch update events with new sequence
-                // For now, just showing the pattern
-              }
-            },
+          return ListView.builder(
             itemCount: state.sections.length,
             itemBuilder: (context, index) {
               final section = state.sections[index];
               return Card(
-                key: Key('section${section.sectionSequence}'),
+                key: Key('section${section.sectionSequence ?? index}'),
                 margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 child: ListTile(
                   leading: CircleAvatar(
@@ -149,6 +134,58 @@ class PageSectionListState extends State<PageSectionList> {
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
+                      // Move up
+                      if (index > 0)
+                        IconButton(
+                          icon: const Icon(Icons.arrow_upward),
+                          onPressed: () {
+                            final prev = state.sections[index - 1];
+                            _sectionBloc.add(PageSectionUpdate(
+                              pageSectionId:
+                                  section.landingPageSectionId ?? '',
+                              sectionTitle: section.sectionTitle,
+                              sectionDescription: section.sectionDescription,
+                              sectionImageUrl: section.sectionImageUrl,
+                              sectionSequence:
+                                  prev.sectionSequence ?? index,
+                            ));
+                            _sectionBloc.add(PageSectionUpdate(
+                              pageSectionId:
+                                  prev.landingPageSectionId ?? '',
+                              sectionTitle: prev.sectionTitle,
+                              sectionDescription: prev.sectionDescription,
+                              sectionImageUrl: prev.sectionImageUrl,
+                              sectionSequence:
+                                  section.sectionSequence ?? index + 1,
+                            ));
+                          },
+                        ),
+                      // Move down
+                      if (index < state.sections.length - 1)
+                        IconButton(
+                          icon: const Icon(Icons.arrow_downward),
+                          onPressed: () {
+                            final next = state.sections[index + 1];
+                            _sectionBloc.add(PageSectionUpdate(
+                              pageSectionId:
+                                  section.landingPageSectionId ?? '',
+                              sectionTitle: section.sectionTitle,
+                              sectionDescription: section.sectionDescription,
+                              sectionImageUrl: section.sectionImageUrl,
+                              sectionSequence:
+                                  next.sectionSequence ?? index + 2,
+                            ));
+                            _sectionBloc.add(PageSectionUpdate(
+                              pageSectionId:
+                                  next.landingPageSectionId ?? '',
+                              sectionTitle: next.sectionTitle,
+                              sectionDescription: next.sectionDescription,
+                              sectionImageUrl: next.sectionImageUrl,
+                              sectionSequence:
+                                  section.sectionSequence ?? index + 1,
+                            ));
+                          },
+                        ),
                       IconButton(
                         icon: const Icon(Icons.delete, color: Colors.red),
                         onPressed: () async {

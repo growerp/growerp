@@ -1,7 +1,7 @@
 name: growerp_courses
 resolution: workspace
 description: Course management package with AI-powered content generation for GrowERP
-version: 0.0.1
+version: 1.9.0
 homepage: https://github.com/growerp/growerp
 
 environment:

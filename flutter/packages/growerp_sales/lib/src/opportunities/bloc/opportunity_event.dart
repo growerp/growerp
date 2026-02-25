@@ -42,3 +42,8 @@ class OpportunityDelete extends OpportunityEvent {
   const OpportunityDelete(this.opportunity);
   final Opportunity opportunity;
 }
+
+class OpportunityConvertToOrder extends OpportunityEvent {
+  const OpportunityConvertToOrder(this.opportunity);
+  final Opportunity opportunity;
+}
