@@ -244,7 +244,7 @@ class CommonTest {
           await doesExistKey(tester, 'companyName')) {
         debugPrint('Login: TenantSetupDialog detected, completing...');
         await enterText(tester, 'companyName', companyName);
-        await enterDropDown(
+        await enterDropDownSearch(
           tester,
           'currency',
           initialCompany.currency!.description!,

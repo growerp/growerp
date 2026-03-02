@@ -26,19 +26,40 @@ class WebsiteTest {
 
   static Future<void> updateWeburl(WidgetTester tester) async {
     await CommonTest.enterText(tester, 'urlInput', 'testingUrl');
+    await CommonTest.drag(tester);
     await CommonTest.tapByKey(
       tester,
-      'updateHost',
+      'updateWebsite',
       seconds: CommonTest.waitTime,
     );
     await CommonTest.waitForSnackbarToGo(tester);
     expect(CommonTest.getTextFormField('urlInput'), equals('testingurl'));
-    expect(CommonTest.getTextField('url'), startsWith('testingurl.'));
+  }
+
+  static Future<void> updateFollowUs(WidgetTester tester) async {
+    await CommonTest.dragUntil(tester, key: 'substackUrl');
+    await CommonTest.enterText(
+      tester,
+      'substackUrl',
+      'https://test.substack.com',
+    );
+    await CommonTest.drag(tester);
+    await CommonTest.tapByKey(
+      tester,
+      'updateWebsite',
+      seconds: CommonTest.waitTime,
+    );
+    await CommonTest.waitForSnackbarToGo(tester);
+    expect(
+      CommonTest.getTextFormField('substackUrl'),
+      equals('https://test.substack.com'),
+    );
   }
 
   static Future<void> updateTitle(WidgetTester tester) async {
     await CommonTest.enterText(tester, 'title', 'Test Company');
-    await CommonTest.tapByKey(tester, 'updateTitle', seconds: 2);
+    await CommonTest.drag(tester);
+    await CommonTest.tapByKey(tester, 'updateWebsite', seconds: 2);
     expect(CommonTest.getTextFormField('title'), equals('Test Company'));
   }
 
@@ -95,12 +116,12 @@ class WebsiteTest {
     expect(
       tester.any(find.byKey(const Key('testingImage'))),
       equals(false),
-      reason: 'testingImage NOT found?',
+      reason: 'testingImage should not be found!',
     );
     expect(
       tester.any(find.byKey(const Key('newTestingImage'))),
       equals(true),
-      reason: 'newTestingImage found?',
+      reason: 'newTestingImage not found!?',
     );
     // Delete newTestingImage via the chip's delete icon (the only delete path
     // now that the remove button has been removed from the content dialog).
@@ -135,7 +156,7 @@ class WebsiteTest {
       "addProduct$categoryName",
       products[0].productName!,
     );
-    await CommonTest.drag(tester);
+    await CommonTest.drag(tester, seconds: CommonTest.waitTime);
     expect(
       tester.any(find.byKey(Key(products[0].productName!))),
       equals(true),
@@ -168,7 +189,7 @@ class WebsiteTest {
       categories[0].categoryName,
       check: true,
     );
-    await CommonTest.drag(tester);
+    await CommonTest.drag(tester, seconds: CommonTest.waitTime);
     expect(
       find.byKey(Key(categories[0].categoryName)),
       findsOneWidget,

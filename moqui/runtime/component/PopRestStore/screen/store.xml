@@ -12,8 +12,10 @@ You should have received a copy of the CC0 Public Domain Dedication
 along with this software (see the LICENSE.md file). If not, see
 <http://creativecommons.org/publicdomain/zero/1.0/>.
 -->
+<!-- Local XSD is used instead of the upstream http://moqui.org/xsd/xml-screen-2.1.xsd because
+     it has been patched to allow '.' at the first position and '-' anywhere in transition names. -->
 <screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-2.1.xsd"
+    xsi:noNamespaceSchemaLocation="../../../../framework/xsd/xml-screen-3.xsd"
     standalone="true" require-authentication="anonymous-view" allow-extra-path="true">
 
     <always-actions>
@@ -184,6 +186,38 @@ var storeInfo = ${storeInfoJson};
             css.render(location, fw)
             fw.close()
       </script>
+
+        <!-- get company contact info for footer -->
+        <entity-find entity-name="mantle.party.contact.PartyContactMech" list="postalContactList" limit="1">
+            <econdition field-name="partyId" from="productStore.organizationPartyId"/>
+            <econdition field-name="contactMechPurposeId" value="PostalPrimary"/>
+            <date-filter/>
+        </entity-find>
+        <if condition="postalContactList">
+            <entity-find-one entity-name="mantle.party.contact.PostalAddress" value-field="companyPostalAddress">
+                <field-map field-name="contactMechId" from="postalContactList[0].contactMechId"/>
+            </entity-find-one>
+        </if>
+        <entity-find entity-name="mantle.party.contact.PartyContactMech" list="phoneContactList" limit="1">
+            <econdition field-name="partyId" from="productStore.organizationPartyId"/>
+            <econdition field-name="contactMechPurposeId" value="PhonePrimary"/>
+            <date-filter/>
+        </entity-find>
+        <if condition="phoneContactList">
+            <entity-find-one entity-name="mantle.party.contact.TelecomNumber" value-field="companyPhone">
+                <field-map field-name="contactMechId" from="phoneContactList[0].contactMechId"/>
+            </entity-find-one>
+        </if>
+        <entity-find entity-name="mantle.party.contact.PartyContactMech" list="emailContactList" limit="1">
+            <econdition field-name="partyId" from="productStore.organizationPartyId"/>
+            <econdition field-name="contactMechPurposeId" value="EmailPrimary"/>
+            <date-filter/>
+        </entity-find>
+        <if condition="emailContactList">
+            <entity-find-one entity-name="mantle.party.contact.ContactMech" value-field="companyEmailMech">
+                <field-map field-name="contactMechId" from="emailContactList[0].contactMechId"/>
+            </entity-find-one>
+        </if>
 
         <!-- get settings used in subscreens -->
         <set field="template_server_root" from="storeInfo.settings.template_server_root" default-value="component://PopRestStore/template/store/root.html.ftl"/>

@@ -127,25 +127,12 @@ class GroupingDecorator extends StatelessWidget {
   }
 
   Widget _buildLegacyStyle(BuildContext context) {
-    final borderColor = Theme.of(context).colorScheme.outline;
-    final focusColor = Theme.of(context).colorScheme.primary;
-
     return InputDecorator(
       key: decoratorKey,
       decoration: InputDecoration(
         labelText: labelText,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(25.0),
-          borderSide: BorderSide(color: borderColor),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(25.0),
-          borderSide: BorderSide(color: borderColor),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(25.0),
-          borderSide: BorderSide(color: focusColor, width: 2),
-        ),
+        isDense: true,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(25.0)),
       ),
       child: child,
     );

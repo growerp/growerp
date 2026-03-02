@@ -28,6 +28,19 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="name" />
                 <parameter name="email" />
                 <parameter name="role" />
+                <parameter name="telephoneNr" />
+                <parameter name="url" />
+                <parameter name="address" type="Map">
+                    <parameter name="addressId" />
+                    <parameter name="address1" />
+                    <parameter name="address2" />
+                    <parameter name="city" />
+                    <parameter name="postalCode" />
+                    <parameter name="province" />
+                    <parameter name="provinceId" />
+                    <parameter name="country" />
+                    <parameter name="countryId" />
+                </parameter>
             </parameter>
         </out-parameters>
         <actions>
@@ -53,6 +66,65 @@ along with this software (see the LICENSE.md file). If not, see
                     <econdition field-name="partyId" from="stores[0].organizationPartyId" />
                 </entity-find>
                 <set field="company" from="companies[0]" />
+                <set field="orgPartyId" from="stores[0].organizationPartyId" />
+                <!-- postal address -->
+                <entity-find entity-name="mantle.party.contact.PartyContactMech" list="postalList"
+                    limit="1">
+                    <econdition field-name="partyId" from="orgPartyId" />
+                    <econdition field-name="contactMechPurposeId" value="PostalPrimary" />
+                    <date-filter />
+                </entity-find>
+                <if condition="postalList">
+                    <entity-find-one entity-name="mantle.party.contact.PostalAddress"
+                        value-field="postalAddress">
+                        <field-map field-name="contactMechId" from="postalList[0].contactMechId" />
+                    </entity-find-one>
+                    <if condition="postalAddress">
+                        <set field="company.address"
+                            from="[
+                                addressId: postalAddress.contactMechId,
+                                address1: postalAddress.address1,
+                                address2: postalAddress.address2,
+                                city: postalAddress.city,
+                                postalCode: postalAddress.postalCode,
+                                provinceId: postalAddress.stateProvinceGeoId,
+                                countryId: postalAddress.countryGeoId,
+                            ]" />
+                    </if>
+                </if>
+                <!-- telephone -->
+                <entity-find entity-name="mantle.party.contact.PartyContactMech" list="phoneList"
+                    limit="1">
+                    <econdition field-name="partyId" from="orgPartyId" />
+                    <econdition field-name="contactMechPurposeId" value="PhonePrimary" />
+                    <date-filter />
+                </entity-find>
+                <if condition="phoneList">
+                    <entity-find-one entity-name="mantle.party.contact.TelecomNumber"
+                        value-field="telecomNumber">
+                        <field-map field-name="contactMechId" from="phoneList[0].contactMechId" />
+                    </entity-find-one>
+                    <if condition="telecomNumber">
+                        <set field="company.telephoneNr"
+                            value="${telecomNumber.countryCode?:''}${telecomNumber.areaCode?:''}${telecomNumber.contactNumber?:''}" />
+                    </if>
+                </if>
+                <!-- url -->
+                <entity-find entity-name="mantle.party.contact.PartyContactMech" list="urlList"
+                    limit="1">
+                    <econdition field-name="partyId" from="orgPartyId" />
+                    <econdition field-name="contactMechPurposeId" value="WebUrlPrimary" />
+                    <date-filter />
+                </entity-find>
+                <if condition="urlList">
+                    <entity-find-one entity-name="mantle.party.contact.ContactMech"
+                        value-field="urlMech">
+                        <field-map field-name="contactMechId" from="urlList[0].contactMechId" />
+                    </entity-find-one>
+                    <if condition="urlMech">
+                        <set field="company.url" from="urlMech.infoString" />
+                    </if>
+                </if>
             </if>
         </actions>
     </service>
@@ -697,7 +769,8 @@ along with this software (see the LICENSE.md file). If not, see
                 <if condition="company.hostName.contains('.')">
                     <set field="firstDotIndex" from="company.hostName.indexOf('.')" />
                     <set field="subdomain" from="company.hostName.substring(0, firstDotIndex)" />
-                    <set field="remainingDomain" from="company.hostName.substring(firstDotIndex + 1)" />
+                    <set field="remainingDomain"
+                        from="company.hostName.substring(firstDotIndex + 1)" />
                     <!-- Escape dots in the remaining domain for regex -->
                     <set field="escapedDomain" from="remainingDomain.replace('.', '\\.')" />
                     <set field="hostNamePattern" value="(${subdomain}\\.)?${escapedDomain}" />
@@ -1106,7 +1179,8 @@ along with this software (see the LICENSE.md file). If not, see
                 <if condition="company.hostName?.contains('.')">
                     <set field="firstDotIndex" from="company.hostName.indexOf('.')" />
                     <set field="subdomain" from="company.hostName.substring(0, firstDotIndex)" />
-                    <set field="remainingDomain" from="company.hostName.substring(firstDotIndex + 1)" />
+                    <set field="remainingDomain"
+                        from="company.hostName.substring(firstDotIndex + 1)" />
                     <!-- Escape dots in the remaining domain for regex -->
                     <set field="escapedDomain" from="remainingDomain.replace('.', '\\.')" />
                     <set field="hostNamePattern" value="(${subdomain}\\.)?${escapedDomain}" />
@@ -2710,33 +2784,36 @@ along with this software (see the LICENSE.md file). If not, see
             - If no companyPartyId and admin: Create new tenant using create#Tenant service
         </description>
         <in-parameters>
-            <parameter name="classificationId" required="true"/>
-            <parameter name="firstName" required="true"/>
-            <parameter name="lastName" required="true"/>
-            <parameter name="email" required="true"/>
-            <parameter name="companyPartyId"/><!-- If provided, user joins existing company -->
-            <parameter name="ownerPartyId"/><!-- If provided with companyPartyId, used for existing company registration -->
-            <parameter name="newPassword" default="org.moqui.util.StringUtilities.getRandomString(6) + '9!'"/>
-            <parameter name="userGroupId"/><!-- If GROWERP_M_ADMIN and no company, creates new tenant -->
-            <parameter name="timeZoneOffset"/>
-            <parameter name="locale"/>
+            <parameter name="classificationId" required="true" />
+            <parameter name="firstName" required="true" />
+            <parameter name="lastName" required="true" />
+            <parameter name="email" required="true" />
+            <parameter name="companyPartyId" /><!-- If provided, user joins existing company -->
+            <parameter name="ownerPartyId" /><!-- If provided with companyPartyId, used for existing
+            company registration -->
+            <parameter name="newPassword"
+                default="org.moqui.util.StringUtilities.getRandomString(6) + '9!'" />
+            <parameter name="userGroupId" /><!-- If GROWERP_M_ADMIN and no company, creates new
+            tenant -->
+            <parameter name="timeZoneOffset" />
+            <parameter name="locale" />
         </in-parameters>
         <out-parameters>
             <parameter name="authenticate" type="Map">
-                <parameter name="ownerPartyId"/>
-                <parameter name="classificationId"/>
-                <parameter name="apiKey"/><!-- 'registered', 'trialWelcome' -->
+                <parameter name="ownerPartyId" />
+                <parameter name="classificationId" />
+                <parameter name="apiKey" /><!-- 'registered', 'trialWelcome' -->
                 <parameter name="user" type="Map">
-                    <parameter name="partyId"/>
-                    <parameter name="pseudoId"/>
-                    <parameter name="email"/>
-                    <parameter name="loginName"/>
-                    <parameter name="firstName"/>
-                    <parameter name="lastName"/>
-                    <parameter name="userGroupId"/>
+                    <parameter name="partyId" />
+                    <parameter name="pseudoId" />
+                    <parameter name="email" />
+                    <parameter name="loginName" />
+                    <parameter name="firstName" />
+                    <parameter name="lastName" />
+                    <parameter name="userGroupId" />
                     <parameter name="company" type="Map">
-                        <parameter name="partyId"/>
-                        <parameter name="name"/>
+                        <parameter name="partyId" />
+                        <parameter name="name" />
                     </parameter>
                 </parameter>
             </parameter>
@@ -2748,35 +2825,37 @@ along with this software (see the LICENSE.md file). If not, see
             </if>
 
             <!-- Validate classification -->
-            <entity-find-one entity-name="mantle.party.PartyClassification" value-field="classification">
-                <field-map field-name="partyClassificationId" from="classificationId"/>
+            <entity-find-one entity-name="mantle.party.PartyClassification"
+                value-field="classification">
+                <field-map field-name="partyClassificationId" from="classificationId" />
             </entity-find-one>
             <if condition="!classification">
-                <return error="true" message="Not a valid classificationId: ${classificationId}"/>
+                <return error="true" message="Not a valid classificationId: ${classificationId}" />
             </if>
 
             <if condition="companyPartyId">
                 <!-- Scenario: User registering for existing company (hostname-based) -->
                 <then>
                     <!-- Validate company exists and is a main company -->
-                    <entity-find-one entity-name="growerp.party.CompanyPreferenceAndRole" value-field="party">
-                        <field-map field-name="partyId" from="companyPartyId"/>
-                        <field-map field-name="roleTypeId" value="OrgInternal"/>
+                    <entity-find-one entity-name="growerp.party.CompanyPreferenceAndRole"
+                        value-field="party">
+                        <field-map field-name="partyId" from="companyPartyId" />
+                        <field-map field-name="roleTypeId" value="OrgInternal" />
                     </entity-find-one>
                     <if condition="!party">
-                        <return error="true" message="Not a valid main company: $companyPartyId"/>
+                        <return error="true" message="Not a valid main company: $companyPartyId" />
                     </if>
 
                     <!-- Get ownerPartyId from company if not provided -->
                     <if condition="!ownerPartyId">
                         <entity-find-one entity-name="mantle.party.Party" value-field="companyParty">
-                            <field-map field-name="partyId" from="companyPartyId"/>
+                            <field-map field-name="partyId" from="companyPartyId" />
                         </entity-find-one>
-                        <set field="ownerPartyId" from="companyParty.ownerPartyId"/>
+                        <set field="ownerPartyId" from="companyParty.ownerPartyId" />
                     </if>
 
                     <!-- Create user with minimal access -->
-                    <set field="company" from="[partyId: companyPartyId]"/>
+                    <set field="company" from="[partyId: companyPartyId]" />
                     <service-call name="growerp.100.PartyServices100.create#User"
                         in-map="[
                             user: [
@@ -2794,15 +2873,16 @@ along with this software (see the LICENSE.md file). If not, see
                             ownerPartyId: ownerPartyId,
                             classificationId: classificationId
                         ]"
-                        out-map="context"/>
+                        out-map="context" />
 
                     <!-- Return with 'registered' status -->
-                    <set field="authenticate" from="[
+                    <set field="authenticate"
+                        from="[
                         ownerPartyId: ownerPartyId,
                         user: user,
                         classificationId: classificationId,
                         apiKey: 'registered'
-                    ]"/>
+                    ]" />
                 </then>
 
                 <else-if condition="!companyPartyId &amp;&amp; userGroupId == 'GROWERP_M_ADMIN'">
@@ -2819,29 +2899,31 @@ along with this software (see the LICENSE.md file). If not, see
                             timeZoneOffset: timeZoneOffset,
                             locale: locale
                         ]"
-                        out-map="tenantResult"/>
+                        out-map="tenantResult" />
 
                     <!-- Get created user info -->
                     <service-call name="growerp.100.PartyServices100.get#User"
                         in-map="[userPartyId: tenantResult.adminPartyId, ownerPartyId: tenantResult.ownerPartyId]"
-                        out-map="userInfo"/>
+                        out-map="userInfo" />
 
                     <!-- Add to mailing list -->
                     <service-call name="growerp.100.BirdSendServices100.registerAdd#UserToGroup"
-                        in-map="[email: email, firstName: firstName, lastName: lastName]"/>
+                        in-map="[email: email, firstName: firstName, lastName: lastName]" />
 
                     <!-- Return with 'trialWelcome' to show trial period welcome screen -->
-                    <set field="authenticate" from="[
+                    <set field="authenticate"
+                        from="[
                         ownerPartyId: tenantResult.ownerPartyId,
                         user: userInfo.users[0],
                         classificationId: classificationId,
                         apiKey: 'trialWelcome'
-                    ]"/>
+                    ]" />
                 </else-if>
 
                 <else>
                     <!-- Invalid registration attempt -->
-                    <return error="true" message="Invalid registration: must provide companyPartyId or be an admin user"/>
+                    <return error="true"
+                        message="Invalid registration: must provide companyPartyId or be an admin user" />
                 </else>
             </if>
         </actions>
@@ -3180,9 +3262,9 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="userPartyId" required="true" />
             <parameter name="companyPartyId" />
             <parameter name="classificationId" required="true" />
-            <parameter name="demoData" type="Boolean" default="false"/>
-            <parameter name="currencyId"/>
-            <parameter name="timeZoneOffset"/>
+            <parameter name="demoData" type="Boolean" default="false" />
+            <parameter name="currencyId" />
+            <parameter name="timeZoneOffset" />
         </in-parameters>
         <out-parameters>
             <parameter name="partyClassification" />
@@ -3226,11 +3308,11 @@ along with this software (see the LICENSE.md file). If not, see
 
                 <!-- Load demo data if requested -->
                 <if condition="demoData">
-                    <log message="Loading demo data for ownerPartyId: ${ownerPartyId}"/>
+                    <log message="Loading demo data for ownerPartyId: ${ownerPartyId}" />
                     <service-call name="growerp.100.PartyServices100.load#DemoData"
                         in-map="[ownerPartyId: ownerPartyId, companyPartyId: companyPartyId, 
                                  userPartyId: userPartyId, classificationId: classificationId,
-                                 currencyId: currencyId, timeZoneOffset: timeZoneOffset]"/>
+                                 currencyId: currencyId, timeZoneOffset: timeZoneOffset]" />
                 </if>
 
                 <!-- any other specific app setup here -->

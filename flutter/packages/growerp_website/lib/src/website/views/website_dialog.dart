@@ -49,16 +49,19 @@ class WebsiteDialogState extends State<WebsiteDialog> {
 
   final _landingPageIdController = TextEditingController();
   final _checkoutAmountController = TextEditingController();
+  final _twitterController = TextEditingController();
+  final _facebookController = TextEditingController();
+  final _instagramController = TextEditingController();
+  final _youtubeController = TextEditingController();
+  final _linkedinController = TextEditingController();
+  final _substackController = TextEditingController();
   final _websiteFormKey1 = GlobalKey<FormState>();
-  final _websiteFormKey2 = GlobalKey<FormState>();
-  final _websiteFormKey3 = GlobalKey<FormState>();
-  final _websiteFormKey4 = GlobalKey<FormState>();
+  final _websiteFormKey5 = GlobalKey<FormState>();
   ScrollController myScrollController = ScrollController();
   late String classificationId;
   late RestClient restClient;
   late WebsiteLocalizations _localizations;
   List<LandingPage> _landingPages = [];
-  static const _borderRadius = BorderRadius.all(Radius.circular(25));
 
   @override
   void initState() {
@@ -127,6 +130,22 @@ class WebsiteDialogState extends State<WebsiteDialog> {
             _selectedCategories = List.of(
               websiteState.website!.productCategories,
             );
+            if (websiteState.website!.colorJson.isNotEmpty) {
+              final socialJson =
+                  jsonDecode(websiteState.website!.colorJson) as Map;
+              _twitterController.text =
+                  (socialJson['TwitterUrl'] ?? '') as String;
+              _facebookController.text =
+                  (socialJson['FacebookUrl'] ?? '') as String;
+              _instagramController.text =
+                  (socialJson['InstagramUrl'] ?? '') as String;
+              _youtubeController.text =
+                  (socialJson['YouTubeUrl'] ?? '') as String;
+              _linkedinController.text =
+                  (socialJson['LinkedInUrl'] ?? '') as String;
+              _substackController.text =
+                  (socialJson['SubstackUrl'] ?? '') as String;
+            }
             return _showForm(websiteState);
           case WebsiteStatus.failure:
             return Center(child: Text(_localizations.errorTitle));
@@ -358,8 +377,9 @@ class WebsiteDialogState extends State<WebsiteDialog> {
     websiteColor['HeaderFooterText'] = websiteColor['HeaderFooterText'] == ''
         ? '#ff5722'
         : websiteColor['HeaderFooterText'] ?? '#ff5722';
-    websiteColor.forEach(
-      (key, value) => colorCatButtons.add(
+    websiteColor.forEach((key, value) {
+      if (key.toString().endsWith('Url')) return;
+      colorCatButtons.add(
         InputChip(
           backgroundColor: fromCssColor(websiteColor[key]),
           label: Text(
@@ -422,8 +442,8 @@ class WebsiteDialogState extends State<WebsiteDialog> {
             }
           },
         ),
-      ),
-    );
+      );
+    });
 
     final Uri url = Uri.parse(
       foundation.kReleaseMode
@@ -437,109 +457,183 @@ class WebsiteDialogState extends State<WebsiteDialog> {
 
     List<Widget> widgets = [
       GroupingDecorator(
-        labelText: _localizations.websiteUrl,
+        useCardStyle: false,
+        labelText: 'Website Info',
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            InkWell(
-              onTap: doLlaunchUrl,
-              child: Text(
-                "${state.website?.hostName}",
-                key: const Key('url'),
-                style: const TextStyle(
-                  fontSize: 20,
-                  color: Colors.blue,
-                  decoration: TextDecoration.underline,
-                ),
-              ),
-            ),
             Form(
               key: _websiteFormKey1,
-              child: Row(
+              child: Column(
                 children: [
-                  Expanded(
-                    child: TextFormField(
-                      key: const Key('urlInput'),
-                      controller: _urlController,
-                      decoration: InputDecoration(
-                        labelText: _localizations.websiteUrl,
-                      ),
-                      validator: (value) {
-                        if (value!.isEmpty) {
-                          return '${_localizations.websiteUrl} ${_localizations.errorTitle}';
-                        }
-                        return null;
-                      },
-                    ),
-                  ),
-                  Text(
-                    state.website!.hostName.contains('.')
-                        ? state.website!.hostName.substring(
-                            state.website!.hostName.indexOf('.'),
-                          )
-                        : '',
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  OutlinedButton(
-                    key: const Key('updateHost'),
-                    child: Text(_localizations.update),
-                    onPressed: () async {
-                      if (_websiteFormKey1.currentState!.validate()) {
-                        _websiteBloc.add(
-                          WebsiteUpdate(
-                            Website(
-                              id: state.website!.id,
-                              hostName: _urlController.text,
-                            ),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Expanded(
+                        child: TextFormField(
+                          key: const Key('urlInput'),
+                          controller: _urlController,
+                          decoration: InputDecoration(
+                            labelText: _localizations.websiteUrl,
                           ),
-                        );
-                      }
-                    },
+                          validator: (value) {
+                            if (value!.isEmpty) {
+                              return '${_localizations.websiteUrl} ${_localizations.errorTitle}';
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
+                      Text(
+                        state.website!.hostName.contains('.')
+                            ? state.website!.hostName.substring(
+                                state.website!.hostName.indexOf('.'),
+                              )
+                            : '',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      IconButton(
+                        key: const Key('launchUrl'),
+                        icon: const Icon(Icons.open_in_new),
+                        tooltip: 'Open website',
+                        onPressed: doLlaunchUrl,
+                      ),
+                    ],
+                  ),
+                  TextFormField(
+                    key: const Key('title'),
+                    controller: _titleController,
+                    decoration: InputDecoration(
+                      labelText: _localizations.title,
+                    ),
+                  ),
+                  TextFormField(
+                    key: const Key('measurementId'),
+                    controller: _measurementIdController,
+                    decoration: InputDecoration(
+                      labelText: _localizations.websiteMeasurementId,
+                    ),
+                  ),
+                  TextFormField(
+                    key: const Key('stripeApi'),
+                    controller: _stripeApiKeyController,
+                    decoration: InputDecoration(
+                      labelText: _localizations.websiteStripeApiKey,
+                    ),
                   ),
                 ],
               ),
             ),
+            const SizedBox(height: 16),
+            Text(
+              _localizations.websiteColor,
+              style: TextStyle(
+                fontSize: 12,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Wrap(spacing: 10, children: colorCatButtons),
+            const SizedBox(height: 16),
+            Text(
+              _localizations.websiteObsidian,
+              style: TextStyle(
+                fontSize: 12,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    key: const Key('obsTitle'),
+                    controller: _obsidianController,
+                    decoration: InputDecoration(
+                      labelText: _localizations.title,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                OutlinedButton(
+                  key: const Key('upload'),
+                  child: Text(_localizations.upload),
+                  onPressed: () async {
+                    FilePickerResult? result;
+                    String? path;
+                    // Note: Using FileType.any because file_picker 10.1.2 has a
+                    // known bug where FileType.custom with allowedExtensions
+                    // prevents file selection. We validate the extension manually.
+                    result = await FilePicker.platform.pickFiles(
+                      type: FileType.any,
+                      withData:
+                          true, // Ensure bytes are available on all platforms
+                    );
+
+                    // Cancelled by user
+                    if (result == null || result.files.isEmpty) {
+                      return;
+                    }
+
+                    // Validate that the selected file is a .zip file
+                    if (!result.files.first.name.toLowerCase().endsWith(
+                      '.zip',
+                    )) {
+                      if (mounted) {
+                        HelperFunctions.showMessage(
+                          context,
+                          'Please select a .zip file',
+                          Colors.red,
+                        );
+                      }
+                      return;
+                    }
+
+                    // On desktop platforms, get the path from the file
+                    if (!foundation.kIsWeb) {
+                      path = result.files.first.path;
+                    }
+
+                    _websiteBloc.add(
+                      WebsiteObsUpload(
+                        Obsidian(
+                          title: _obsidianController.text,
+                          zip: result.files.first.bytes,
+                        ),
+                        path,
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(width: 10),
+                Visibility(
+                  visible: _obsidianController.text.isNotEmpty,
+                  child: OutlinedButton(
+                    key: const Key('obsidianDelete'),
+                    style: ButtonStyle(
+                      backgroundColor: WidgetStateProperty.all(Colors.red),
+                    ),
+                    onPressed: () async {
+                      _websiteBloc.add(
+                        WebsiteObsUpload(
+                          Obsidian(title: _obsidianController.text),
+                          null,
+                        ),
+                      );
+                    },
+                    child: Text(_localizations.deleteButton),
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
       ),
-      Form(
-        key: _websiteFormKey2,
-        child: GroupingDecorator(
-          labelText: _localizations.websiteTitle,
-          child: Row(
-            children: [
-              Expanded(
-                child: TextFormField(
-                  key: const Key('title'),
-                  controller: _titleController,
-                  decoration: InputDecoration(labelText: _localizations.title),
-                ),
-              ),
-              const SizedBox(width: 10),
-              OutlinedButton(
-                key: const Key('updateTitle'),
-                child: Text(_localizations.update),
-                onPressed: () async {
-                  if (_websiteFormKey2.currentState!.validate()) {
-                    _websiteBloc.add(
-                      WebsiteUpdate(
-                        Website(
-                          id: state.website!.id,
-                          title: _titleController.text,
-                        ),
-                      ),
-                    );
-                  }
-                },
-              ),
-            ],
-          ),
-        ),
-      ),
       GroupingDecorator(
+        useCardStyle: false,
         labelText: 'Quick Links',
         child: Column(
           children: [
@@ -584,7 +678,8 @@ class WebsiteDialogState extends State<WebsiteDialog> {
                     label: 'Select Page',
                     initialValue: _landingPages
                         .where(
-                          (p) => p.landingPageId == _landingPageIdController.text,
+                          (p) =>
+                              p.landingPageId == _landingPageIdController.text,
                         )
                         .firstOrNull,
                     optionsBuilder: (TextEditingValue textEditingValue) {
@@ -649,10 +744,10 @@ class WebsiteDialogState extends State<WebsiteDialog> {
         ),
       ),
       GroupingDecorator(
+        useCardStyle: false,
         labelText: _localizations.content,
         child: Column(
           children: [
-            Text(_localizations.page, style: const TextStyle(fontSize: 10)),
             PrimaryScrollController(
               controller: myScrollController,
               child: ReorderableWrap(
@@ -685,7 +780,9 @@ class WebsiteDialogState extends State<WebsiteDialog> {
         ),
       ),
       GroupingDecorator(
-        labelText: _localizations.images,
+        useCardStyle: false,
+        labelText:
+            '${_localizations.images} (can be included in content text with: ![](/getimage/imagename))',
         child: Wrap(runSpacing: 10, spacing: 10, children: imageButtons),
       ),
       for (Category category in state.website!.websiteCategories)
@@ -695,16 +792,16 @@ class WebsiteDialogState extends State<WebsiteDialog> {
               case DataFetchStatus.failure:
                 return FatalErrorForm(message: _localizations.errorTitle);
               case DataFetchStatus.loading:
-                return const LoadingIndicator();
               case DataFetchStatus.success:
-                return InputDecorator(
-                  decoration: InputDecoration(
-                    labelText: category.categoryName,
-                    isDense: true,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(25),
-                    ),
-                  ),
+                // During a reload, DataFetchBloc preserves data via copyWith,
+                // so keep the Autocomplete mounted. Replacing with
+                // LoadingIndicator disposes _RawAutocompleteState and causes
+                // it to access a defunct context in _announceSemantics.
+                if (productState.data == null) return const LoadingIndicator();
+                return GroupingDecorator(
+                  useCardStyle: false,
+                  labelText:
+                      '${category.categoryName} (remove all to remove section from website)',
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -741,6 +838,36 @@ class WebsiteDialogState extends State<WebsiteDialog> {
                             },
                         displayStringForOption: (Product u) =>
                             " ${u.productName}[${u.pseudoId}]",
+                        optionsViewBuilder: (context, onSelected, options) {
+                          return Align(
+                            alignment: Alignment.topLeft,
+                            child: Material(
+                              elevation: 4,
+                              child: ConstrainedBox(
+                                constraints: const BoxConstraints(
+                                  maxHeight: 200,
+                                  maxWidth: 400,
+                                ),
+                                child: ListView.builder(
+                                  padding: EdgeInsets.zero,
+                                  shrinkWrap: true,
+                                  itemCount: options.length,
+                                  itemBuilder: (context, index) {
+                                    final option = options.elementAt(index);
+                                    return ListTile(
+                                      key: Key(option.productName ?? ''),
+                                      dense: true,
+                                      title: Text(
+                                        " ${option.productName}[${option.pseudoId}]",
+                                      ),
+                                      onTap: () => onSelected(option),
+                                    );
+                                  },
+                                ),
+                              ),
+                            ),
+                          );
+                        },
                         fieldViewBuilder:
                             (
                               context,
@@ -802,21 +929,21 @@ class WebsiteDialogState extends State<WebsiteDialog> {
             case DataFetchStatus.failure:
               return FatalErrorForm(message: _localizations.errorTitle);
             case DataFetchStatus.loading:
-              return const LoadingIndicator();
             case DataFetchStatus.success:
-              return InputDecorator(
-                decoration: InputDecoration(
-                  isDense: true,
-                  labelText: _localizations.websiteProductCategories,
-                  border: const OutlineInputBorder(borderRadius: _borderRadius),
-                ),
+              // During a reload, DataFetchBloc preserves data via copyWith,
+              // so keep the Autocomplete mounted (see Products BlocBuilder above).
+              if (categoryState.data == null) return const LoadingIndicator();
+              return GroupingDecorator(
+                useCardStyle: false,
+                labelText:
+                    '${_localizations.websiteProductCategories} (remove all to remove the category dropdown)',
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     if (_selectedCategories.isNotEmpty)
                       Wrap(spacing: 10, children: browseCatButtons),
                     Autocomplete<Category>(
-                      key: const Key("addShopCategory}"),
+                      key: const Key("addShopCategory"),
                       optionsBuilder:
                           (TextEditingValue textEditingValue) async {
                             _categoryBloc.add(
@@ -839,6 +966,36 @@ class WebsiteDialogState extends State<WebsiteDialog> {
                           },
                       displayStringForOption: (Category item) =>
                           item.categoryName.truncate(15),
+                      optionsViewBuilder: (context, onSelected, options) {
+                        return Align(
+                          alignment: Alignment.topLeft,
+                          child: Material(
+                            elevation: 4,
+                            child: ConstrainedBox(
+                              constraints: const BoxConstraints(
+                                maxHeight: 200,
+                                maxWidth: 400,
+                              ),
+                              child: ListView.builder(
+                                padding: EdgeInsets.zero,
+                                shrinkWrap: true,
+                                itemCount: options.length,
+                                itemBuilder: (context, index) {
+                                  final option = options.elementAt(index);
+                                  return ListTile(
+                                    key: Key(option.categoryName),
+                                    dense: true,
+                                    title: Text(
+                                      option.categoryName.truncate(15),
+                                    ),
+                                    onTap: () => onSelected(option),
+                                  );
+                                },
+                              ),
+                            ),
+                          ),
+                        );
+                      },
                       fieldViewBuilder:
                           (
                             context,
@@ -884,154 +1041,60 @@ class WebsiteDialogState extends State<WebsiteDialog> {
           }
         },
       ),
-      GroupingDecorator(
-        labelText: _localizations.websiteColor,
-        child: Column(children: [Wrap(spacing: 10, children: colorCatButtons)]),
-      ),
-      GroupingDecorator(
-        labelText: _localizations.websiteObsidian,
-        child: Row(
-          children: [
-            Expanded(
-              child: TextField(
-                key: const Key('obsTitle'),
-                controller: _obsidianController,
-                decoration: InputDecoration(labelText: _localizations.title),
-              ),
-            ),
-            const SizedBox(width: 10),
-            OutlinedButton(
-              key: const Key('upload'),
-              child: Text(_localizations.upload),
-              onPressed: () async {
-                FilePickerResult? result;
-                String? path;
-                // Note: Using FileType.any because file_picker 10.1.2 has a
-                // known bug where FileType.custom with allowedExtensions
-                // prevents file selection. We validate the extension manually.
-                result = await FilePicker.platform.pickFiles(
-                  type: FileType.any,
-                  withData: true, // Ensure bytes are available on all platforms
-                );
-
-                // Cancelled by user
-                if (result == null || result.files.isEmpty) {
-                  return;
-                }
-
-                // Validate that the selected file is a .zip file
-                if (!result.files.first.name.toLowerCase().endsWith('.zip')) {
-                  if (mounted) {
-                    HelperFunctions.showMessage(
-                      context,
-                      'Please select a .zip file',
-                      Colors.red,
-                    );
-                  }
-                  return;
-                }
-
-                // On desktop platforms, get the path from the file
-                if (!foundation.kIsWeb) {
-                  path = result.files.first.path;
-                }
-
-                _websiteBloc.add(
-                  WebsiteObsUpload(
-                    Obsidian(
-                      title: _obsidianController.text,
-                      zip: result.files.first.bytes,
-                    ),
-                    path,
-                  ),
-                );
-              },
-            ),
-            const SizedBox(width: 10),
-            Visibility(
-              visible: _obsidianController.text.isNotEmpty,
-              child: OutlinedButton(
-                key: const Key('obsidianDelete'),
-                style: ButtonStyle(
-                  backgroundColor: WidgetStateProperty.all(Colors.red),
-                ),
-                onPressed: () async {
-                  _websiteBloc.add(
-                    WebsiteObsUpload(
-                      Obsidian(title: _obsidianController.text),
-                      null,
-                    ),
-                  );
-                },
-                child: Text(_localizations.deleteButton),
-              ),
-            ),
-          ],
-        ),
-      ),
       Form(
-        key: _websiteFormKey3,
+        key: _websiteFormKey5,
         child: GroupingDecorator(
-          labelText: _localizations.websiteMeasurementId,
-          child: Row(
+          useCardStyle: false,
+          labelText: 'Follow Us Links',
+          child: Column(
             children: [
-              Expanded(
-                child: TextFormField(
-                  key: const Key('measurementId'),
-                  controller: _measurementIdController,
-                  decoration: InputDecoration(labelText: _localizations.id),
+              TextFormField(
+                key: const Key('twitterUrl'),
+                controller: _twitterController,
+                decoration: const InputDecoration(
+                  labelText: 'Twitter / X URL',
+                  hintText: 'https://twitter.com/yourhandle',
                 ),
               ),
-              const SizedBox(width: 10),
-              OutlinedButton(
-                key: const Key('measurementId'),
-                child: Text(_localizations.update),
-                onPressed: () async {
-                  if (_websiteFormKey3.currentState!.validate()) {
-                    _websiteBloc.add(
-                      WebsiteUpdate(
-                        Website(
-                          id: state.website!.id,
-                          measurementId: _measurementIdController.text,
-                        ),
-                      ),
-                    );
-                  }
-                },
-              ),
-            ],
-          ),
-        ),
-      ),
-      Form(
-        key: _websiteFormKey4,
-        child: GroupingDecorator(
-          labelText: _localizations.websiteStripeApiKey,
-          child: Row(
-            children: [
-              Expanded(
-                child: TextFormField(
-                  key: const Key('stripeApi'),
-                  controller: _stripeApiKeyController,
-                  decoration: InputDecoration(labelText: _localizations.key),
+              TextFormField(
+                key: const Key('facebookUrl'),
+                controller: _facebookController,
+                decoration: const InputDecoration(
+                  labelText: 'Facebook URL',
+                  hintText: 'https://facebook.com/yourpage',
                 ),
               ),
-              const SizedBox(width: 10),
-              OutlinedButton(
-                key: const Key('stripeApiButton'),
-                child: Text(_localizations.update),
-                onPressed: () async {
-                  if (_websiteFormKey4.currentState!.validate()) {
-                    _websiteBloc.add(
-                      WebsiteUpdate(
-                        Website(
-                          id: state.website!.id,
-                          stripeApiKey: _stripeApiKeyController.text,
-                        ),
-                      ),
-                    );
-                  }
-                },
+              TextFormField(
+                key: const Key('instagramUrl'),
+                controller: _instagramController,
+                decoration: const InputDecoration(
+                  labelText: 'Instagram URL',
+                  hintText: 'https://instagram.com/yourhandle',
+                ),
+              ),
+              TextFormField(
+                key: const Key('youtubeUrl'),
+                controller: _youtubeController,
+                decoration: const InputDecoration(
+                  labelText: 'YouTube URL',
+                  hintText: 'https://youtube.com/yourchannel',
+                ),
+              ),
+              TextFormField(
+                key: const Key('linkedinUrl'),
+                controller: _linkedinController,
+                decoration: const InputDecoration(
+                  labelText: 'LinkedIn URL',
+                  hintText: 'https://linkedin.com/company/yourcompany',
+                ),
+              ),
+              TextFormField(
+                key: const Key('substackUrl'),
+                controller: _substackController,
+                decoration: const InputDecoration(
+                  labelText: 'Substack URL',
+                  hintText: 'https://yourname.substack.com',
+                ),
               ),
             ],
           ),
@@ -1074,18 +1137,41 @@ class WebsiteDialogState extends State<WebsiteDialog> {
         key: const Key('listView'),
         child: Column(
           children: [
-            Center(
-              child: Text(
-                '${_localizations.id}:#${state.website?.id}',
-                style: const TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.bold,
-                ),
-                key: const Key('header'),
-              ),
-            ),
-            const SizedBox(height: 10),
             Column(children: (rows.isEmpty ? column : rows)),
+            const SizedBox(height: 20),
+            OutlinedButton(
+              key: const Key('updateWebsite'),
+              child: Text(_localizations.update),
+              onPressed: () {
+                if (_websiteFormKey1.currentState!.validate()) {
+                  Map updatedColor = {};
+                  if (state.website!.colorJson.isNotEmpty) {
+                    updatedColor = Map.from(
+                      jsonDecode(state.website!.colorJson) as Map,
+                    );
+                  }
+                  updatedColor['TwitterUrl'] = _twitterController.text;
+                  updatedColor['FacebookUrl'] = _facebookController.text;
+                  updatedColor['InstagramUrl'] = _instagramController.text;
+                  updatedColor['YouTubeUrl'] = _youtubeController.text;
+                  updatedColor['LinkedInUrl'] = _linkedinController.text;
+                  updatedColor['SubstackUrl'] = _substackController.text;
+                  _websiteBloc.add(
+                    WebsiteUpdate(
+                      Website(
+                        id: state.website!.id,
+                        hostName: _urlController.text,
+                        title: _titleController.text,
+                        measurementId: _measurementIdController.text,
+                        stripeApiKey: _stripeApiKeyController.text,
+                        colorJson: jsonEncode(updatedColor),
+                      ),
+                    ),
+                  );
+                }
+              },
+            ),
+            const SizedBox(height: 20),
           ],
         ),
       ),

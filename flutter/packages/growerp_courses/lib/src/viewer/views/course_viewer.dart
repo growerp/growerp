@@ -82,15 +82,13 @@ class _CourseViewerContentState extends State<CourseViewerContent> {
             if (!mounted) return;
             final key = _lessonKeys[lesson!.lessonId];
             final ctx = key?.currentContext;
-            if (ctx != null) {
-              // ignore: use_build_context_synchronously
-              Scrollable.ensureVisible(
-                ctx,
-                alignment: 0.3,
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeInOut,
-              );
-            }
+            if (ctx == null || !ctx.mounted) return;
+            Scrollable.ensureVisible(
+              ctx,
+              alignment: 0.3,
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+            );
           });
         });
         break;

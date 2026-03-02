@@ -12,8 +12,9 @@ You should have received a copy of the CC0 Public Domain Dedication
 along with this software (see the LICENSE.md file). If not, see
 <http://creativecommons.org/publicdomain/zero/1.0/>.
 -->
-<screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-2.1.xsd"
-        require-authentication="anonymous-view" allow-extra-path="true">
+<screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-2.1.xsd"
+    require-authentication="anonymous-view" allow-extra-path="true">
 
     <transition name="attachment" read-only="true"><actions>
         <set field="extraPathNameList" from="new ArrayList(sri.screenUrlInfo.extraPathNameList)"/>
@@ -33,7 +34,7 @@ along with this software (see the LICENSE.md file). If not, see
             <entity-find-one entity-name="mantle.product.ProductContent" value-field="productContent" cache="true">
                 <field-map field-name="productContentId"/></entity-find-one>
             <if condition="productContent == null"><then>
-                <!-- NOTE: consider returning a default image instead of 404 -->
+                    <!-- NOTE: consider returning a default image instead of 404 -->
                 <script>ec.web.sendError(404, null, null)</script>
             </then><else>
                 <script>ec.web.sendResourceResponse(productContent.contentLocation, true)</script>
@@ -45,7 +46,8 @@ along with this software (see the LICENSE.md file). If not, see
     <!-- get store wiki page content based on 'store space type' (spaceTypeEnumId) and path -->
     <transition name="sst">
         <actions>
-            <!-- FUTURE: consider adding optional locale to path to avoid issues with browser cache and locale changes during use, see also StoreServices.get#StoreInfo service -->
+            <!-- FUTURE: consider adding optional locale to path to avoid issues with browser cache
+            and locale changes during use, see also StoreServices.get#StoreInfo service -->
             <set field="extraPathNameList" from="new ArrayList(sri.screenUrlInfo.extraPathNameList)"/>
             <if condition="!extraPathNameList"><script>ec.web.sendError(404, "No page specified", null)</script><return/></if>
             <!-- is the first path element a spaceTypeEnumId? -->
@@ -69,12 +71,14 @@ along with this software (see the LICENSE.md file). If not, see
             <!-- get the page content -->
             <service-call name="org.moqui.impl.WikiServices.get#PublishedWikiPageText" out-map="pageTextOut" out-map-add-to-existing="false"
                     in-map="[wikiSpaceId:spaceOut.wikiSpaceId, pagePath:extraPathNameList?.join('/'), versionName:ver]"/>
-            <!-- NOTE: could pass filename (pageTextOut.pageReference.getFileName()) but want inline Content-Disposition -->
+            <!-- NOTE: could pass filename (pageTextOut.pageReference.getFileName()) but want inline
+            Content-Disposition -->
             <script>ec.web.sendTextResponse(pageTextOut.pageText, pageTextOut.pageReference.getContentType(), null)</script>
         </actions>
         <default-response type="none"/>
     </transition>
-    <!-- FUTURE: (if needed...) get store wiki content based on store content type (contentTypeEnumId) with ProductStoreWikiContent lookup -->
+    <!-- FUTURE: (if needed...) get store wiki content based on store content type
+    (contentTypeEnumId) with ProductStoreWikiContent lookup -->
 
     <transition name="createRequest">
         <actions>
@@ -91,7 +95,8 @@ along with this software (see the LICENSE.md file). If not, see
 
         <!-- create content menu -->
         <set field="location" value="${storeInfo.settings.PsstContentLocation}${ec.web.getPathInfo()}.md"/>
-        <if condition="extraPathNameList[0] != 'obsidian' "><!-- cater for old filenames -->
+        <if condition="extraPathNameList[0] != 'obsidian' "><!--
+            cater for old filenames -->
             <set field="location" from="location + '.ftl'"/></if>
         <if condition="extraPathNameList[0] == 'obsidian' ">
             <entity-find entity-name="moqui.resource.wiki.WikiPage" list="obsidianList">
@@ -154,15 +159,30 @@ along with this software (see the LICENSE.md file). If not, see
                 </script>
             </else>
         </if>
+        <!-- convert markdown to HTML for non-obsidian content pages -->
+        <if condition="pageText &amp;&amp; extraPathNameList[0] != 'obsidian'">
+            <script>
+                def document = org.moqui.impl.context.renderer.MarkdownTemplateRenderer.PARSER.parse(pageText)
+                markdownHtml = org.moqui.impl.context.renderer.MarkdownTemplateRenderer.RENDERER.render(document)
+            </script>
+        </if>
     </actions>
     <widgets>
         <render-mode><text type="html" location="${template_server_header}"/></render-mode>
         <section name="PageTextSection" condition="pageText">
             <widgets>
                 <render-mode><text type="html" location="component://PopRestStore/template/store/content1.html.ftl"/></render-mode>
-                <render-mode><text type="html" location="${location}"/></render-mode>
+                <section name="MarkdownHtmlSection" condition="markdownHtml">
+                    <widgets>
+                        <render-mode><text type="html">${markdownHtml!}</text></render-mode>
+                    </widgets>
+                    <fail-widgets>
+                        <!-- obsidian or fallback: render location directly -->
+                        <render-mode><text type="html" location="${location}"/></render-mode>
+                    </fail-widgets>
+                </section>
                 <render-mode><text type="html" location="component://PopRestStore/template/store/content2.html.ftl"/></render-mode>
-            </widgets> 
+            </widgets>
             <fail-widgets>
                 <render-mode><text type="html" location="component://PopRestStore/template/store/error.html.ftl"/></render-mode>
             </fail-widgets>
