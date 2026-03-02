@@ -797,7 +797,6 @@ class WebsiteDialogState extends State<WebsiteDialog> {
                 // so keep the Autocomplete mounted. Replacing with
                 // LoadingIndicator disposes _RawAutocompleteState and causes
                 // it to access a defunct context in _announceSemantics.
-                if (productState.data == null) return const LoadingIndicator();
                 return GroupingDecorator(
                   useCardStyle: false,
                   labelText:
@@ -932,7 +931,6 @@ class WebsiteDialogState extends State<WebsiteDialog> {
             case DataFetchStatus.success:
               // During a reload, DataFetchBloc preserves data via copyWith,
               // so keep the Autocomplete mounted (see Products BlocBuilder above).
-              if (categoryState.data == null) return const LoadingIndicator();
               return GroupingDecorator(
                 useCardStyle: false,
                 labelText:
