@@ -77,3 +77,13 @@ class SocialPostSearchRequested extends SocialPostEvent {
   @override
   List<Object> get props => [searchString];
 }
+
+/// Event to publish a social post to its configured platform (SUBSTACK, LINKEDIN)
+class SocialPostPublish extends SocialPostEvent {
+  final String postId;
+
+  const SocialPostPublish({required this.postId});
+
+  @override
+  List<Object> get props => [postId];
+}

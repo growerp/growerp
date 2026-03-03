@@ -64,7 +64,8 @@ class SocialPostDetailScreenState extends State<SocialPostDetailScreen> {
     'LINKEDIN',
     'TWITTER',
     'FACEBOOK',
-    'INSTAGRAM'
+    'INSTAGRAM',
+    'SUBSTACK',
   ];
 
   @override
@@ -321,10 +322,13 @@ class SocialPostDetailScreenState extends State<SocialPostDetailScreen> {
                   TextFormField(
                     key: const Key('headline'),
                     decoration: const InputDecoration(
-                      labelText: 'Headline',
+                      labelText: 'Headline *',
                       hintText: 'Enter a catchy headline',
                     ),
                     controller: _headlineController,
+                    validator: (value) => (value == null || value.isEmpty)
+                        ? 'Headline is required'
+                        : null,
                   ),
                   const SizedBox(height: 10),
                   TextFormField(
@@ -403,6 +407,56 @@ class SocialPostDetailScreenState extends State<SocialPostDetailScreen> {
                 ),
               ],
             ),
+            if (widget.socialPost?.postId != null &&
+                (_selectedPlatform == 'SUBSTACK' ||
+                    _selectedPlatform == 'LINKEDIN')) ...[
+              const SizedBox(height: 10),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  key: const Key('publishButton'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: _selectedPlatform == 'SUBSTACK'
+                        ? const Color(0xFFFF6719)
+                        : const Color(0xFF0A66C2),
+                    foregroundColor: Colors.white,
+                  ),
+                  icon: const Icon(Icons.send),
+                  label: Text(
+                    _selectedStatus == 'PUBLISHED'
+                        ? 'Re-publish to $_selectedPlatform'
+                        : 'Publish to $_selectedPlatform',
+                  ),
+                  onPressed: _finalContentController.text.isEmpty
+                      ? null
+                      : () => _socialPostBloc.add(
+                            SocialPostPublish(
+                                postId: widget.socialPost!.postId!),
+                          ),
+                ),
+              ),
+              if (widget.socialPost?.publishedUrl != null) ...[
+                const SizedBox(height: 6),
+                Text(
+                  'Published: ${widget.socialPost!.publishedUrl}',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Colors.green[700],
+                      ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+              if (widget.socialPost?.publishError != null &&
+                  widget.socialPost!.publishError!.isNotEmpty) ...[
+                const SizedBox(height: 6),
+                Text(
+                  'Last error: ${widget.socialPost!.publishError}',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Colors.red[700],
+                      ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ],
             const SizedBox(height: 20),
           ],
         ),
@@ -449,21 +503,19 @@ class SocialPostDetailScreenState extends State<SocialPostDetailScreen> {
             labelText: 'Marketing Plan',
           ),
           initialValue: value,
-          validator: (value) {
-            if (value == null || value.isEmpty) {
-              return 'Please select a marketing plan';
-            }
-            return null;
-          },
-          items: state.contentPlans.map((plan) {
-            return DropdownMenuItem<String>(
-              value: plan.planId,
-              child: Text(
-                '${plan.pseudoId} - ${plan.theme?.truncate(isPhone ? 25 : 40) ?? "No Theme"}',
-                overflow: TextOverflow.ellipsis,
-              ),
-            );
-          }).toList(),
+          items: [
+            const DropdownMenuItem<String>(
+              value: null,
+              child: Text('None'),
+            ),
+            ...state.contentPlans.map((plan) => DropdownMenuItem<String>(
+                  value: plan.planId,
+                  child: Text(
+                    '${plan.pseudoId} - ${plan.theme?.truncate(isPhone ? 25 : 40) ?? "No Theme"}',
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                )),
+          ],
           onChanged: (String? newValue) {
             setState(() {
               _selectedPlanId = newValue;

@@ -1,0 +1,320 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
+
+    <!-- ========================================================= -->
+    <!--  Social Post Publishing Services                          -->
+    <!--  Supports: SUBSTACK (direct API), LINKEDIN (OAuth v2)    -->
+    <!-- ========================================================= -->
+
+    <service verb="publish" noun="SocialPost" authenticate="true">
+        <description>
+            Publish a social post to its configured platform.
+            Routes to platform-specific service based on post.platform.
+            On success updates status to PUBLISHED and sets publishedDate/publishedUrl.
+            On failure sets publishError and leaves status unchanged.
+        </description>
+        <in-parameters>
+            <parameter name="postId" required="true"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="postId"/>
+            <parameter name="status"/>
+            <parameter name="publishedUrl"/>
+            <parameter name="publishError"/>
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="context"/>
+
+            <entity-find-one entity-name="growerp.marketing.SocialPost" value-field="post">
+                <field-map field-name="postId"/>
+            </entity-find-one>
+            <if condition="!post">
+                <return error="true" message="Social post not found: ${postId}"/>
+            </if>
+
+            <if condition="!post.platform">
+                <return error="true" message="No platform set on social post ${postId}"/>
+            </if>
+            <if condition="!post.finalContent">
+                <return error="true" message="finalContent is required before publishing"/>
+            </if>
+
+            <!-- Load platform credentials -->
+            <entity-find-one entity-name="growerp.marketing.PlatformConfiguration"
+                value-field="platformConfig">
+                <field-map field-name="ownerPartyId"/>
+                <field-map field-name="platform" from="post.platform"/>
+            </entity-find-one>
+            <if condition="!platformConfig">
+                <return error="true"
+                    message="No PlatformConfiguration found for platform ${post.platform}. Please configure credentials first."/>
+            </if>
+            <if condition="platformConfig.isEnabled != 'Y'">
+                <return error="true" message="Platform ${post.platform} is disabled in configuration"/>
+            </if>
+
+            <!-- Dispatch to platform-specific service -->
+            <if condition="post.platform == 'SUBSTACK'">
+                <service-call
+                    name="growerp.100.SocialPostPublishingServices100.publish#SocialPostToSubstack"
+                    in-map="[post: post, platformConfig: platformConfig]"
+                    out-map="publishResult"/>
+            </if>
+            <else-if condition="post.platform == 'LINKEDIN'">
+                <service-call
+                    name="growerp.100.SocialPostPublishingServices100.publish#SocialPostToLinkedIn"
+                    in-map="[post: post, platformConfig: platformConfig]"
+                    out-map="publishResult"/>
+            </else-if>
+            <else>
+                <return error="true" message="Publishing not supported for platform ${post.platform}"/>
+            </else>
+
+            <!-- Update entity based on result -->
+            <if condition="publishResult.success">
+                <service-call name="update#growerp.marketing.SocialPost"
+                    in-map="[
+                        postId: postId,
+                        status: 'PUBLISHED',
+                        publishedDate: ec.user.nowTimestamp,
+                        publishedUrl: publishResult.publishedUrl,
+                        publishError: null,
+                        lastModifiedDate: ec.user.nowTimestamp
+                    ]"/>
+                <set field="status" value="PUBLISHED"/>
+                <set field="publishedUrl" from="publishResult.publishedUrl"/>
+                <set field="publishError" value=""/>
+            </if>
+            <else>
+                <service-call name="update#growerp.marketing.SocialPost"
+                    in-map="[
+                        postId: postId,
+                        publishError: publishResult.errorMessage,
+                        lastModifiedDate: ec.user.nowTimestamp
+                    ]"/>
+                <set field="status" from="post.status"/>
+                <set field="publishError" from="publishResult.errorMessage"/>
+                <return error="true" message="${publishResult.errorMessage}"/>
+            </else>
+        </actions>
+    </service>
+
+    <!-- ========================================================= -->
+    <!--  Substack: POST {publicationUrl}/api/v1/drafts            -->
+    <!--  Auth: Cookie substack.sid + connect.sid                  -->
+    <!--  PlatformConfiguration fields used:                       -->
+    <!--    apiKey   = substack.sid session cookie value           -->
+    <!--    username = publication URL (https://pub.substack.com)  -->
+    <!-- ========================================================= -->
+
+    <service verb="publish" noun="SocialPostToSubstack">
+        <description>Create a draft post on Substack via private API</description>
+        <in-parameters>
+            <parameter name="post" type="org.moqui.entity.EntityValue" required="true"/>
+            <parameter name="platformConfig" type="org.moqui.entity.EntityValue" required="true"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="success" type="Boolean"/>
+            <parameter name="publishedUrl"/>
+            <parameter name="errorMessage"/>
+        </out-parameters>
+        <actions>
+            <script><![CDATA[
+                import groovy.json.JsonOutput
+                import groovy.json.JsonSlurper
+                import java.net.http.HttpClient
+                import java.net.http.HttpRequest
+                import java.net.http.HttpResponse
+                import java.time.Duration
+
+                success = false
+                publishedUrl = null
+                errorMessage = null
+
+                try {
+                    def sessionToken = platformConfig.apiKey
+                    def publicationUrl = platformConfig.username?.replaceAll('/+$', '')
+
+                    if (!sessionToken) {
+                        errorMessage = "Substack session token (apiKey) not configured"
+                        return
+                    }
+                    if (!publicationUrl) {
+                        errorMessage = "Substack publication URL (username) not configured"
+                        return
+                    }
+
+                    // Build Prosemirror document from finalContent (split on blank lines = paragraphs)
+                    def paragraphs = (post.finalContent as String).split(/\n\n+/).collect { para ->
+                        def lines = para.trim()
+                        if (!lines) return null
+                        [
+                            type: "paragraph",
+                            content: [[type: "text", text: lines]]
+                        ]
+                    }.findAll { it != null }
+
+                    if (!paragraphs) {
+                        paragraphs = [[type: "paragraph", content: [[type: "text", text: post.finalContent as String]]]]
+                    }
+
+                    def prosemirrorDoc = [type: "doc", content: paragraphs]
+
+                    def requestBody = [
+                        draft_title:    post.headline ?: "",
+                        draft_subtitle: post.draftContent ?: "",
+                        draft_body:     JsonOutput.toJson(prosemirrorDoc),
+                        draft_bylines:  [],
+                        audience:       "everyone"
+                    ]
+
+                    def hostname = new URL(publicationUrl).host
+                    def apiUrl = "${publicationUrl}/api/v1/drafts"
+                    def cookieHeader = "substack.sid=${sessionToken}; connect.sid=${sessionToken}"
+
+                    def httpClient = HttpClient.newBuilder()
+                        .connectTimeout(Duration.ofSeconds(15))
+                        .build()
+
+                    def request = HttpRequest.newBuilder()
+                        .uri(URI.create(apiUrl))
+                        .header("Content-Type", "application/json")
+                        .header("Cookie", cookieHeader)
+                        .header("Referer", "${publicationUrl}/publish/post")
+                        .header("Origin", publicationUrl)
+                        .POST(HttpRequest.BodyPublishers.ofString(JsonOutput.toJson(requestBody)))
+                        .timeout(Duration.ofSeconds(30))
+                        .build()
+
+                    def response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
+                    def responseBody = response.body()
+
+                    ec.logger.info("Substack API response [${response.statusCode()}]: ${responseBody?.take(500)}")
+
+                    if (response.statusCode() in [200, 201]) {
+                        def parsed = new JsonSlurper().parseText(responseBody)
+                        def draftId = parsed?.id
+                        publishedUrl = draftId ? "${publicationUrl}/publish/post/${draftId}" : "${publicationUrl}/publish"
+                        success = true
+                    } else {
+                        errorMessage = "Substack API error ${response.statusCode()}: ${responseBody?.take(300)}"
+                    }
+
+                } catch (Exception e) {
+                    errorMessage = "Substack publishing failed: ${e.message}"
+                    ec.logger.error("Substack publish error", e)
+                }
+            ]]></script>
+        </actions>
+    </service>
+
+    <!-- ========================================================= -->
+    <!--  LinkedIn: POST https://api.linkedin.com/v2/ugcPosts      -->
+    <!--  Auth: OAuth 2.0 Bearer token                             -->
+    <!--  PlatformConfiguration fields used:                       -->
+    <!--    apiKey   = OAuth 2.0 access token                      -->
+    <!--    username = LinkedIn person URN (urn:li:person:XXXXX)   -->
+    <!-- ========================================================= -->
+
+    <service verb="publish" noun="SocialPostToLinkedIn">
+        <description>Publish a post to LinkedIn via UGC Posts API v2</description>
+        <in-parameters>
+            <parameter name="post" type="org.moqui.entity.EntityValue" required="true"/>
+            <parameter name="platformConfig" type="org.moqui.entity.EntityValue" required="true"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="success" type="Boolean"/>
+            <parameter name="publishedUrl"/>
+            <parameter name="errorMessage"/>
+        </out-parameters>
+        <actions>
+            <script><![CDATA[
+                import groovy.json.JsonOutput
+                import groovy.json.JsonSlurper
+                import java.net.http.HttpClient
+                import java.net.http.HttpRequest
+                import java.net.http.HttpResponse
+                import java.time.Duration
+
+                success = false
+                publishedUrl = null
+                errorMessage = null
+
+                try {
+                    def accessToken = platformConfig.apiKey
+                    def personUrn   = platformConfig.username
+
+                    if (!accessToken) {
+                        errorMessage = "LinkedIn access token (apiKey) not configured"
+                        return
+                    }
+                    if (!personUrn) {
+                        errorMessage = "LinkedIn person URN (username) not configured — expected format: urn:li:person:XXXXX"
+                        return
+                    }
+
+                    // Build post text: headline + finalContent
+                    def postText = new StringBuilder()
+                    if (post.headline) postText.append(post.headline).append("\n\n")
+                    postText.append(post.finalContent ?: "")
+
+                    def requestBody = [
+                        author: personUrn,
+                        lifecycleState: "PUBLISHED",
+                        specificContent: [
+                            "com.linkedin.ugc.ShareContent": [
+                                shareCommentary: [
+                                    text: postText.toString()
+                                ],
+                                shareMediaCategory: "NONE"
+                            ]
+                        ],
+                        visibility: [
+                            "com.linkedin.ugc.MemberNetworkVisibility": "PUBLIC"
+                        ]
+                    ]
+
+                    def httpClient = HttpClient.newBuilder()
+                        .connectTimeout(Duration.ofSeconds(15))
+                        .build()
+
+                    def request = HttpRequest.newBuilder()
+                        .uri(URI.create("https://api.linkedin.com/v2/ugcPosts"))
+                        .header("Authorization", "Bearer ${accessToken}")
+                        .header("Content-Type", "application/json")
+                        .header("X-Restli-Protocol-Version", "2.0.0")
+                        .POST(HttpRequest.BodyPublishers.ofString(JsonOutput.toJson(requestBody)))
+                        .timeout(Duration.ofSeconds(30))
+                        .build()
+
+                    def response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
+                    def responseBody = response.body()
+
+                    ec.logger.info("LinkedIn API response [${response.statusCode()}]: ${responseBody?.take(500)}")
+
+                    if (response.statusCode() == 201) {
+                        // LinkedIn returns the post URN in X-RestLi-Id header
+                        def postUrn = response.headers().firstValue("X-RestLi-Id").orElse(null)
+                        if (postUrn) {
+                            // URN format: urn:li:ugcPost:XXXXXXXXXX
+                            def postId = postUrn.tokenize(':').last()
+                            publishedUrl = "https://www.linkedin.com/feed/update/${postUrn}/"
+                        } else {
+                            publishedUrl = "https://www.linkedin.com/feed/"
+                        }
+                        success = true
+                    } else {
+                        errorMessage = "LinkedIn API error ${response.statusCode()}: ${responseBody?.take(300)}"
+                    }
+
+                } catch (Exception e) {
+                    errorMessage = "LinkedIn publishing failed: ${e.message}"
+                    ec.logger.error("LinkedIn publish error", e)
+                }
+            ]]></script>
+        </actions>
+    </service>
+
+</services>

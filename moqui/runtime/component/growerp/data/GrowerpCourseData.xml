@@ -386,7 +386,7 @@ These leads can be exported or directly linked to an Outreach campaign.]]></cont
     <growerp.course.CourseLesson lessonId="MarketLess0204" moduleId="MarketMod02"
         courseId="CourseMarketingSales"
         title="Content Planning and Social Posts"
-        keyPoints="[&quot;Content Plans organise what to publish and when across all channels&quot;, &quot;Social Posts are the individual pieces of content tied to a plan&quot;, &quot;Use AI drafting to generate platform-specific post text&quot;, &quot;Track status from DRAFT through SCHEDULED to PUBLISHED&quot;]"
+        keyPoints="[&quot;Content Plans organise what to publish and when across all channels&quot;, &quot;Social Posts are the individual pieces of content tied to a plan&quot;, &quot;Use AI drafting to generate platform-specific post text&quot;, &quot;Track status from DRAFT through READY to PUBLISHED&quot;, &quot;GrowERP can publish directly to Substack (creates a draft) and LinkedIn (posts live) — no copy-paste needed&quot;, &quot;Platform credentials are stored once in Platform Configuration and reused for every post&quot;]"
         sequenceNum="4">
         <content><![CDATA[## Content Planning and Social Posts
 
@@ -404,24 +404,65 @@ A Content Plan is an editorial calendar entry - it describes a content theme, ta
 3. Tap **Generate with AI** on an existing plan to have the AI suggest a full content calendar with post ideas for the selected persona.
 
 ### Social Posts
-Social Posts are the individual pieces of content - a LinkedIn article, a tweet thread, an email newsletter etc - linked to a content plan.
+Social Posts are the individual pieces of content - a LinkedIn article, a Substack newsletter, a tweet thread etc - linked to a content plan.
 
 1. From within a Content Plan, tap **Social Posts**, or navigate to **Marketing** then **Social Posts**
 2. Tap **+** to create a post:
-   - **Platform** - select LINKEDIN, TWITTER, EMAIL, MEDIUM, YOUTUBE, SUBSTACK or INAPP
-   - **Media Type** - POST, ARTICLE, SEQUENCE, SCRIPT, THREAD, or TUTORIAL
-   - **Title** - internal label
+   - **Platform** - select LINKEDIN, SUBSTACK, TWITTER, FACEBOOK, INSTAGRAM or INAPP
+   - **Post Type** - PAIN (problem-awareness), NEWS (insight), PRIZE (offer), or OTHER
+   - **Headline** - the title of the post
    - **Scheduled Date** - when you intend to publish
-3. Tap **Draft with AI** to generate the post body. The AI uses the content plan context and target persona to write platform-appropriate copy. Review and edit in the Edited Content field before the generated content is used.
+3. Tap **Draft with AI** to generate the post body. The AI uses the content plan context and target persona to write platform-appropriate copy.
+4. Review and refine the generated text in the **Draft Content** and **Final Content** fields:
+   - **Draft Content** — used as the subtitle or teaser (shown in previews)
+   - **Final Content** — the full body that gets published
 
 ### Status Workflow
 Posts move through statuses:
 - **DRAFT** - created but not yet reviewed
-- **REVIEWED** - approved internally
-- **SCHEDULED** - queued for a specific publish date
-- **PUBLISHED** - live
+- **READY** - content approved and ready to send
+- **PUBLISHED** - successfully pushed to the platform
 
-Change the status by tapping the status chip on the post detail screen.]]></content>
+### Publishing Directly from GrowERP
+
+For **Substack** and **LinkedIn**, GrowERP can publish in one tap — no copy-paste into another tool needed.
+
+#### Step 1 — Configure your platform credentials (one-time)
+
+Go to **Outreach** → **Platform Configuration** and add a record for each platform:
+
+**For Substack:**
+- **Platform** — select SUBSTACK
+- **API Key** — paste your `substack.sid` session cookie value
+  - To find it: log in to Substack in your browser, open DevTools (F12) → Application → Cookies → copy the value of `substack.sid`
+- **Username** — your full publication URL, e.g. `https://yourname.substack.com`
+- Toggle **Active** to ON
+
+**For LinkedIn:**
+- **Platform** — select LINKEDIN
+- **API Key** — paste your OAuth 2.0 access token
+  - Obtain one from the LinkedIn Developer Portal under your app's Auth tab, or use the OAuth token exchange flow
+- **Username** — your LinkedIn person URN, e.g. `urn:li:person:AbCdEfGhIj`
+  - Find your URN: call `https://api.linkedin.com/v2/me` with your token; the `id` field gives the last part
+- Toggle **Active** to ON
+
+#### Step 2 — Write and finalise your post
+
+Open a Social Post with **Platform** set to SUBSTACK or LINKEDIN. Make sure:
+- **Final Content** is filled in (this is the body that gets sent — the Publish button is disabled until it is)
+- **Headline** is set (used as the post title on Substack, prepended to the body on LinkedIn)
+
+#### Step 3 — Publish
+
+Tap the **Publish to SUBSTACK** (orange) or **Publish to LINKEDIN** (blue) button at the bottom of the post detail screen.
+
+What happens:
+- **Substack** — GrowERP creates a *draft* in your Substack dashboard. You can review it at the link shown under the button, then hit Publish inside Substack when ready.
+- **LinkedIn** — GrowERP posts *immediately* as a public update on your profile. A link to the live post appears under the button.
+
+If the publish fails (expired token, wrong URL etc.) the error is shown in red under the button and the post status is not changed, so you can fix the credentials and retry.
+
+> **Tip:** The Substack session cookie expires when you log out of Substack. If publishing suddenly fails, log back in to Substack and copy a fresh `substack.sid` value into Platform Configuration.]]></content>
     </growerp.course.CourseLesson>
 
     <!-- ═══════════════════════════════════════════════════
@@ -435,49 +476,80 @@ Change the status by tapping the status chip on the post detail screen.]]></cont
     <growerp.course.CourseLesson lessonId="MarketLess0301" moduleId="MarketMod03"
         courseId="CourseMarketingSales"
         title="Platform Configuration"
-        keyPoints="[&quot;Configure one platform before sending any messages&quot;, &quot;Email requires SMTP host, port, username, and password&quot;, &quot;LinkedIn requires the MCP browser extension to be installed&quot;, &quot;Each platform config has an Active/Inactive toggle&quot;]"
+        keyPoints="[&quot;Configure one platform before sending any messages or publishing posts&quot;, &quot;Email requires SMTP host, port, username, and password&quot;, &quot;LinkedIn outreach uses the MCP browser extension; LinkedIn publishing uses an OAuth token&quot;, &quot;Substack publishing uses your substack.sid session cookie and publication URL&quot;, &quot;Each platform config has an Active/Inactive toggle&quot;]"
         sequenceNum="1">
-        <content><![CDATA[## Configuring Your Outreach Platforms
+        <content><![CDATA[## Configuring Your Platforms
 
-Before you can send any outreach messages you must connect at least one communication platform. GrowERP supports email, LinkedIn, and other channels via a platform adapter system.
+Platform Configuration is a shared credential store used by two features:
 
-### Opening Platform Configurations
-1. Navigate to **Outreach** then **Platform Config**
-2. The PlatformConfigListScreen shows all configured platforms and their Active status
+1. **Outreach campaigns** — automated message sequences sent to leads via email or LinkedIn
+2. **Social post publishing** — one-tap publishing of Marketing Social Posts to Substack and LinkedIn
 
-### Adding an Email Platform
-Email is the most reliable starting point.
+Go to **Outreach** → **Platform Config** to manage all platform records. Each record stores the credentials for one platform and one company.
 
-1. Tap **+** to add a new platform
-2. Select **Platform Type: EMAIL**
-3. Fill in the SMTP settings from your email provider:
-   - **SMTP Host** - e.g. smtp.gmail.com or smtp.office365.com
-   - **SMTP Port** - typically 587 (TLS) or 465 (SSL)
-   - **Username** - your email address
-   - **Password** - your app password (for Gmail: create one in Google Account settings under Security)
-   - **From Name** - the sender name recipients will see
-   - **From Address** - the reply-to address
-4. Toggle **Active** to ON
-5. Tap **Save** then use **Test Connection** to verify the settings work
+---
 
-### Adding LinkedIn (requires MCP browser extension)
-LinkedIn automation in GrowERP uses a browser extension (the MCP bridge) that controls your LinkedIn session in the browser. This is necessary because LinkedIn does not offer a public API for messaging.
+### Email (for Outreach campaigns)
+Email is the most reliable starting point for outreach.
+
+1. Tap **+** → select **Platform Type: EMAIL**
+2. Fill in your SMTP settings:
+   - **API Key field** — SMTP password (or app password for Gmail)
+   - **Username field** — your email address / SMTP username
+   - **SMTP Host / Port** — e.g. smtp.gmail.com:587
+3. Toggle **Active** to ON
+4. Tap **Save**, then use **Test Connection** to verify
+
+> Gmail tip: create an App Password under Google Account → Security → 2-Step Verification → App passwords.
+
+---
+
+### LinkedIn — two separate use cases, two configurations
+
+#### A) LinkedIn Outreach (automated DMs via browser extension)
+LinkedIn does not offer a public API for direct messaging, so outreach campaigns use a browser extension (the MCP bridge) that drives your LinkedIn session.
 
 Requirements:
-- Install the GrowERP MCP browser extension in your Chrome or Edge browser
+- Install the GrowERP MCP browser extension in Chrome or Edge
 - Be logged into LinkedIn in that same browser
-- The extension must be running when campaigns execute
+- The browser window must remain open while campaigns run
 
 Configuration:
-1. Tap **+** and select **Platform Type: LINKEDIN**
-2. Enter your LinkedIn profile URL
-3. Toggle **Active** to ON
-4. The extension handles authentication automatically via the browser session
+1. Tap **+** → select **Platform Type: LINKEDIN**
+2. Enter your LinkedIn profile URL in the Username field
+3. Toggle **Active** to ON — the extension handles authentication via the browser session
 
-Important: LinkedIn automation must run in a browser window that remains open. Schedule LinkedIn campaigns during business hours when your computer is on.
+Schedule LinkedIn campaigns during business hours when your computer is on.
+
+#### B) LinkedIn Publishing (direct post to your feed from Social Posts)
+Publishing a Social Post to LinkedIn uses the official LinkedIn API v2 — no browser extension needed.
+
+1. Tap **+** → select **Platform Type: LINKEDIN** (create a second record, or reuse the existing one if you add the API token to it)
+2. Fill in:
+   - **API Key** — your LinkedIn OAuth 2.0 access token
+     - Get one from the LinkedIn Developer Portal → your app → Auth → OAuth 2.0 tools → Generate token (scopes needed: `w_member_social`)
+   - **Username** — your LinkedIn person URN, format: `urn:li:person:AbCdEfGhIj`
+     - To find your URN: call `https://api.linkedin.com/v2/me` with your access token; the `id` field is the last segment of the URN
+3. Toggle **Active** to ON
+
+---
+
+### Substack (direct draft creation from Social Posts)
+GrowERP can push a Social Post directly into your Substack draft queue using Substack&apos;s internal API authenticated by your browser session cookie.
+
+1. Tap **+** → select **Platform Type: SUBSTACK**
+2. Fill in:
+   - **API Key** — your `substack.sid` session cookie value
+     - To find it: log in to Substack → open DevTools (F12) → Application tab → Cookies → copy the value of `substack.sid`
+   - **Username** — your full publication URL, e.g. `https://yourname.substack.com`
+3. Toggle **Active** to ON
+
+> **Note:** The `substack.sid` cookie is invalidated when you log out of Substack. If publishing fails with an authentication error, log back in and paste a fresh cookie value here.
+
+---
 
 ### Other Platforms
-TWITTER, MEDIUM, SUBSTACK, and YOUTUBE follow the same pattern - select the platform type and follow the connection instructions shown in the form.]]></content>
+TWITTER, FACEBOOK, INSTAGRAM, and YOUTUBE records can be added using the same form. Select the platform type and fill in whatever API credentials that platform requires. These platforms are not yet wired to one-tap publishing but the configuration records will be used as that support is added.]]></content>
     </growerp.course.CourseLesson>
 
     <growerp.course.CourseLesson lessonId="MarketLess0302" moduleId="MarketMod03"

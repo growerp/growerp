@@ -47,6 +47,12 @@ class SocialPost {
   @NullableTimestampConverter()
   final DateTime? publishedDate;
 
+  /// URL of the published post (draft URL for Substack, feed URL for LinkedIn)
+  final String? publishedUrl;
+
+  /// Error message from last publish attempt (null when successful)
+  final String? publishError;
+
   /// Timestamp when created
   @NullableTimestampConverter()
   final DateTime? createdDate;
@@ -67,6 +73,8 @@ class SocialPost {
     required this.status,
     this.scheduledDate,
     this.publishedDate,
+    this.publishedUrl,
+    this.publishError,
     this.createdDate,
     this.lastModifiedDate,
   });
@@ -84,6 +92,8 @@ class SocialPost {
     String? status,
     DateTime? scheduledDate,
     DateTime? publishedDate,
+    String? publishedUrl,
+    String? publishError,
     DateTime? createdDate,
     DateTime? lastModifiedDate,
   }) {
@@ -99,6 +109,8 @@ class SocialPost {
       status: status ?? this.status,
       scheduledDate: scheduledDate ?? this.scheduledDate,
       publishedDate: publishedDate ?? this.publishedDate,
+      publishedUrl: publishedUrl ?? this.publishedUrl,
+      publishError: publishError ?? this.publishError,
       createdDate: createdDate ?? this.createdDate,
       lastModifiedDate: lastModifiedDate ?? this.lastModifiedDate,
     );

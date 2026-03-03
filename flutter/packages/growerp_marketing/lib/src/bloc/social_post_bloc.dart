@@ -16,6 +16,7 @@ class SocialPostBloc extends Bloc<SocialPostEvent, SocialPostState> {
     on<SocialPostDelete>(_onSocialPostDelete);
     on<SocialPostDraftWithAI>(_onSocialPostDraftWithAI);
     on<SocialPostSearchRequested>(_onSocialPostSearchRequested);
+    on<SocialPostPublish>(_onSocialPostPublish);
   }
 
   Future<void> _onSocialPostFetch(
@@ -247,6 +248,40 @@ class SocialPostBloc extends Bloc<SocialPostEvent, SocialPostState> {
       emit(state.copyWith(
         searchStatus: SocialPostStatus.failure,
         searchError: e.toString(),
+      ));
+    }
+  }
+
+  Future<void> _onSocialPostPublish(
+    SocialPostPublish event,
+    Emitter<SocialPostState> emit,
+  ) async {
+    try {
+      emit(state.copyWith(status: SocialPostStatus.loading));
+
+      final publishedPost = await restClient.publishSocialPost(
+        postId: event.postId,
+      );
+
+      final updatedSocialPosts = state.socialPosts.map((p) {
+        if (p.postId == event.postId) return publishedPost;
+        return p;
+      }).toList();
+
+      emit(state.copyWith(
+        status: SocialPostStatus.success,
+        socialPosts: updatedSocialPosts,
+        message: 'Post published successfully',
+      ));
+    } on DioException catch (e) {
+      emit(state.copyWith(
+        status: SocialPostStatus.failure,
+        message: await getDioError(e),
+      ));
+    } catch (e) {
+      emit(state.copyWith(
+        status: SocialPostStatus.failure,
+        message: e.toString(),
       ));
     }
   }

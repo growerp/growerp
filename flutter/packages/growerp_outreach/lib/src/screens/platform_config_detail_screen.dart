@@ -192,9 +192,9 @@ class _PlatformConfigDetailScreenState
                   TextFormField(
                     key: const Key('API Key'),
                     controller: _apiKeyController,
-                    decoration: const InputDecoration(
-                      labelText: 'API Key',
-                      hintText: 'Platform API key',
+                    decoration: InputDecoration(
+                      labelText: _apiKeyLabel,
+                      hintText: _apiKeyHint,
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -211,9 +211,9 @@ class _PlatformConfigDetailScreenState
                   TextFormField(
                     key: const Key('Username'),
                     controller: _usernameController,
-                    decoration: const InputDecoration(
-                      labelText: 'Username',
-                      hintText: 'Platform username',
+                    decoration: InputDecoration(
+                      labelText: _usernameLabel,
+                      hintText: _usernameHint,
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -229,10 +229,160 @@ class _PlatformConfigDetailScreenState
                 ],
               ),
             ),
+            if (_helpSteps != null) ...[
+              const SizedBox(height: 16),
+              _buildHelpCard(),
+            ],
             const SizedBox(height: 24),
             _buildButtons(),
           ],
         ),
+      ),
+    );
+  }
+
+  // ── Platform-specific field labels ──────────────────────────────────────
+
+  String get _apiKeyLabel => switch (widget.platform) {
+        OutreachPlatform.substack => 'Session Cookie (substack.sid)',
+        OutreachPlatform.linkedIn => 'OAuth 2.0 Access Token',
+        _ => 'API Key',
+      };
+
+  String get _apiKeyHint => switch (widget.platform) {
+        OutreachPlatform.substack => 'Paste value of substack.sid cookie',
+        OutreachPlatform.linkedIn =>
+          'Bearer token from LinkedIn developer portal',
+        _ => 'Platform API key',
+      };
+
+  String get _usernameLabel => switch (widget.platform) {
+        OutreachPlatform.substack => 'Publication URL',
+        OutreachPlatform.linkedIn => 'Person URN',
+        _ => 'Username',
+      };
+
+  String get _usernameHint => switch (widget.platform) {
+        OutreachPlatform.substack => 'https://yourname.substack.com',
+        OutreachPlatform.linkedIn => 'urn:li:person:AbCdEfGhIj',
+        _ => 'Platform username',
+      };
+
+  // ── Help steps (null = no help card shown) ──────────────────────────────
+
+  List<_HelpStep>? get _helpSteps => switch (widget.platform) {
+        OutreachPlatform.substack => const [
+            _HelpStep(
+              icon: Icons.login,
+              title: 'Log in to Substack',
+              body:
+                  'Open substack.com in your browser and sign in to your account.',
+            ),
+            _HelpStep(
+              icon: Icons.developer_mode,
+              title: 'Open DevTools → Cookies',
+              body:
+                  'Press F12 (or right-click → Inspect). Go to Application → Storage → Cookies → https://substack.com.',
+            ),
+            _HelpStep(
+              icon: Icons.key,
+              title: 'Copy substack.sid',
+              body:
+                  'Find the row named substack.sid. Click its Value cell, select all, and copy. Paste it into the Session Cookie field above.',
+            ),
+            _HelpStep(
+              icon: Icons.link,
+              title: 'Enter your publication URL',
+              body:
+                  'This is the base URL of your newsletter, e.g. https://yourname.substack.com. Find it on your Substack dashboard.',
+            ),
+            _HelpStep(
+              icon: Icons.warning_amber,
+              title: 'Cookie expires on logout',
+              body:
+                  'The substack.sid cookie is invalidated when you log out. If publishing fails with an auth error, repeat these steps to get a fresh cookie.',
+            ),
+          ],
+        OutreachPlatform.linkedIn => const [
+            _HelpStep(
+              icon: Icons.app_registration,
+              title: 'Create a LinkedIn developer app',
+              body:
+                  'Go to linkedin.com/developers → My Apps → Create app. Request the "Share on LinkedIn" product to unlock the w_member_social scope.',
+            ),
+            _HelpStep(
+              icon: Icons.vpn_key,
+              title: 'Generate an access token',
+              body:
+                  'Inside your app go to Auth → OAuth 2.0 tools → Generate access token. Select the w_member_social scope and authorise with your LinkedIn account.',
+            ),
+            _HelpStep(
+              icon: Icons.key,
+              title: 'Paste the token',
+              body:
+                  'Copy the generated access token and paste it into the OAuth 2.0 Access Token field above. Tokens typically expire after 60 days.',
+            ),
+            _HelpStep(
+              icon: Icons.person,
+              title: 'Find your Person URN',
+              body:
+                  'Call https://api.linkedin.com/v2/me with your token (use the OAuth tools page or curl -H "Authorization: Bearer {token}" https://api.linkedin.com/v2/me). The "id" value gives the last segment — your URN is urn:li:person:{id}.',
+            ),
+          ],
+        _ => null,
+      };
+
+  Widget _buildHelpCard() {
+    final steps = _helpSteps!;
+    final color = widget.platform == OutreachPlatform.substack
+        ? const Color(0xFFFF6719)
+        : const Color(0xFF0A66C2);
+
+    return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: color.withValues(alpha: 0.4)),
+      ),
+      child: ExpansionTile(
+        key: const Key('credentialHelp'),
+        leading: Icon(Icons.help_outline, color: color),
+        title: Text(
+          'How to get ${widget.platform.name} credentials',
+          style: TextStyle(
+              color: color, fontWeight: FontWeight.w600, fontSize: 14),
+        ),
+        childrenPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        children: [
+          for (int i = 0; i < steps.length; i++) ...[
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                CircleAvatar(
+                  radius: 14,
+                  backgroundColor: color.withValues(alpha: 0.12),
+                  child: Icon(steps[i].icon, size: 16, color: color),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(steps[i].title,
+                          style: const TextStyle(fontWeight: FontWeight.w600)),
+                      const SizedBox(height: 2),
+                      Text(steps[i].body,
+                          style: Theme.of(context).textTheme.bodySmall),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            if (i < steps.length - 1) const Divider(height: 20),
+          ],
+          const SizedBox(height: 8),
+        ],
       ),
     );
   }
@@ -321,4 +471,16 @@ class _PlatformConfigDetailScreenState
       ],
     );
   }
+}
+
+class _HelpStep {
+  final IconData icon;
+  final String title;
+  final String body;
+
+  const _HelpStep({
+    required this.icon,
+    required this.title,
+    required this.body,
+  });
 }

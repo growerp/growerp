@@ -62,8 +62,11 @@
         <field name="headline" type="text-medium" />
         <field name="draftContent" type="text-very-long" />
         <field name="finalContent" type="text-very-long" />
-        <field name="status" type="text-short" /> <!-- DRAFT, SCHEDULED, PUBLISHED -->
+        <field name="status" type="text-short" /> <!-- DRAFT, READY, PUBLISHED -->
         <field name="scheduledDate" type="date-time" />
+        <field name="publishedDate" type="date-time" />
+        <field name="publishedUrl" type="text-medium" />
+        <field name="publishError" type="text-long" />
 
         <field name="createdDate" type="date-time" />
         <field name="lastModifiedDate" type="date-time" />
