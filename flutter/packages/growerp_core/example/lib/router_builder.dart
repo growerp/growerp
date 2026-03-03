@@ -13,6 +13,7 @@
  */
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
@@ -22,9 +23,12 @@ import 'views/core_dashboard.dart';
 /// Create the dynamic router for Core example app
 ///
 /// This is used by integration tests to create a router with test configurations.
+/// Pass [menuConfigBloc] to enable the dashboard FAB that opens the menu
+/// management dialog (required by the dynamic menu CRUD test).
 GoRouter createDynamicCoreRouter(
   List<MenuConfiguration> configurations, {
   GlobalKey<NavigatorState>? rootNavigatorKey,
+  MenuConfigBloc? menuConfigBloc,
 }) {
   // Register widgets before creating router
   for (final widgets in coreWidgetRegistrations) {
@@ -37,6 +41,31 @@ GoRouter createDynamicCoreRouter(
     config: DynamicRouterConfig(
       widgetLoader: WidgetRegistry.getWidget,
       appTitle: 'Core Example',
+      dashboardFabBuilder: menuConfigBloc == null
+          ? null
+          : (menuConfig) => Builder(
+                builder: (fabContext) => FloatingActionButton(
+                  key: const Key('coreFab'),
+                  heroTag: 'menuFab',
+                  tooltip: 'Manage Menu Items',
+                  onPressed: () {
+                    // Use backend-loaded config from bloc when available (has
+                    // correct menuConfigurationId); fall back to static config.
+                    final currentConfig =
+                        menuConfigBloc.state.menuConfiguration ?? menuConfig;
+                    showDialog(
+                      context: fabContext,
+                      builder: (dialogContext) => BlocProvider.value(
+                        value: menuConfigBloc,
+                        child: MenuItemListDialog(
+                          menuConfiguration: currentConfig,
+                        ),
+                      ),
+                    );
+                  },
+                  child: const Icon(Icons.menu),
+                ),
+              ),
     ),
   );
 }

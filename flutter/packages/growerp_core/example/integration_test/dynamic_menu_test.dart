@@ -1,25 +1,26 @@
 /*
  * This GrowERP software is in the public domain under CC0 1.0 Universal plus a
  * Grant of Patent License.
- * 
+ *
  * To the extent possible under law, the author(s) have dedicated all
  * copyright and related and neighboring rights to this software to the
  * public domain worldwide. This software is distributed without any
  * warranty.
- * 
+ *
  * You should have received a copy of the CC0 Public Domain Dedication
  * along with this software (see the LICENSE.md file). If not, see
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import 'package:flutter_bloc/flutter_bloc.dart' show Bloc;
+// ignore_for_file: depend_on_referenced_packages
+import 'package:core_example/router_builder.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
-import 'package:core_example/main.dart';
-import 'dart:math';
 
 /// Test data for top-level menu items
 final testMenuItems = [
@@ -76,51 +77,79 @@ final testChildMenuItems = [
   ),
 ];
 
+const coreMenuConfig = MenuConfiguration(
+  menuConfigurationId: 'CORE_EXAMPLE',
+  appId: 'core_example',
+  name: 'Core Example Menu',
+  menuItems: [
+    MenuItem(
+      menuItemId: 'CORE_MAIN',
+      title: 'Main',
+      route: '/',
+      iconName: 'dashboard',
+      sequenceNum: 10,
+      widgetName: 'CoreDashboard',
+      isActive: true,
+    ),
+    MenuItem(
+      menuItemId: 'CORE_COMPANY',
+      title: 'Organization',
+      route: '/company',
+      iconName: 'business',
+      sequenceNum: 20,
+      widgetName: 'CoreDashboard',
+      isActive: true,
+    ),
+    MenuItem(
+      menuItemId: 'CORE_USER',
+      title: 'Logged in User',
+      route: '/user',
+      iconName: 'person',
+      sequenceNum: 30,
+      widgetName: 'CoreDashboard',
+      isActive: true,
+    ),
+  ],
+);
+
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   setUpAll(() async {
-    await PersistFunctions.removeAuthenticate();
-    await PersistFunctions.persistTest(SaveTest());
     await GlobalConfiguration().loadFromAsset("app_settings");
-    // Ensure no stale cached REST responses bleed in from a prior run.
-    await clearRestCache();
   });
 
   testWidgets('GrowERP dynamic menu CRUD test', (tester) async {
     final restClient = RestClient(await buildDioClient());
-
-    bool clear = true;
-    int seq = Random.secure().nextInt(1024);
-    if (clear == true) {
-      await PersistFunctions.persistTest(SaveTest(sequence: seq));
-      // Also clear any stored authentication
-      await PersistFunctions.removeAuthenticate();
-    } else {
-      SaveTest test = await PersistFunctions.getTest();
-      await PersistFunctions.persistTest(test.copyWith(sequence: seq));
-    }
-    Bloc.observer = AppBlocObserver();
-
-    await tester.pumpWidget(
-      CoreApp(
-        restClient: restClient,
-        classificationId: 'AppAdmin',
-        chatClient: WsClient('chat'),
-        notificationClient: WsClient('notws'),
-      ),
+    final menuConfigBloc = MenuConfigBloc(restClient, 'core_example')
+      ..add(MenuConfigUpdateLocal(coreMenuConfig));
+    final router = createDynamicCoreRouter(
+      [coreMenuConfig],
+      rootNavigatorKey: GlobalKey<NavigatorState>(),
+      menuConfigBloc: menuConfigBloc,
     );
 
-    await tester.pump();
+    await CommonTest.startTestApp(
+      tester,
+      router,
+      coreMenuConfig,
+      CoreLocalizations.localizationsDelegates,
+      restClient: restClient,
+      clear: true,
+      title: 'Dynamic Menu Test',
+      blocProviders: [
+        BlocProvider<MenuConfigBloc>.value(value: menuConfigBloc),
+      ],
+    );
 
-    // Wait for menu to load
-    for (int i = 0; i < 50; i++) {
-      await tester.pump(const Duration(milliseconds: 100));
-      if (find.byType(LoadingIndicator).evaluate().isEmpty) break;
-    }
-
-    // Login
+    // Login — exercises the GrowERP tenant detection if backend is fresh
     await CommonTest.createCompanyAndAdmin(tester);
+
+    // Load the backend menu config so the FAB uses the correct
+    // menuConfigurationId (e.g. CORE_EXAMPLE_DEFAULT) rather than the
+    // local static ID (CORE_EXAMPLE) that was pre-loaded before auth.
+    menuConfigBloc.add(const MenuConfigLoad(userVersion: true));
+    await tester.pumpAndSettle(const Duration(seconds: 5));
 
     // Add menu items
     await DynamicMenuTest.addMenuItems(tester, testMenuItems);

@@ -248,6 +248,40 @@ class CommonTest {
       if (await doesExistKey(tester, 'submit') &&
           await doesExistKey(tester, 'companyName')) {
         debugPrint('Login: TenantSetupDialog detected, completing...');
+
+        // If the company name is already filled with 'GrowERP', this is the
+        // initial master-tenant setup. Complete it, log off to ensure the
+        // GrowERP company is created, then re-login to continue normally.
+        final existingCompanyName = getFormBuilderTextFieldByName(
+          tester,
+          'companyName',
+        );
+        if (existingCompanyName == 'GrowERP') {
+          debugPrint(
+            'Login: GrowERP tenant detected - clicking Complete Setup then logging off...',
+          );
+          await tester.tap(find.byKey(const Key('submit')));
+          await tester.pump();
+          int gWaitAttempts = 0;
+          while (
+            await doesExistKey(tester, 'submit') && gWaitAttempts < 120
+          ) {
+            await tester.pump(const Duration(seconds: 1));
+            gWaitAttempts++;
+          }
+          // Log off so the initial GrowERP company is fully persisted
+          await logout(tester);
+          await tester.pumpAndSettle(const Duration(seconds: 2));
+          // Re-login with the same credentials to continue the test flow
+          await pressLoginButton(tester);
+          await enterText(tester, 'username', loginUsername);
+          await enterText(tester, 'password', password ?? 'qqqqqq9!');
+          await pressLogin(tester);
+          await waitForSnackbarToGo(tester);
+          await tester.pumpAndSettle(const Duration(seconds: 2));
+          continue;
+        }
+
         await enterText(tester, 'companyName', companyName);
         await enterDropDownSearch(
           tester,

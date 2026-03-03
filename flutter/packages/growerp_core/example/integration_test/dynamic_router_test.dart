@@ -1,58 +1,84 @@
 // ignore_for_file: depend_on_referenced_packages
+import 'package:core_example/router_builder.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart' show Bloc;
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
-import 'package:core_example/main.dart';
 
 /// Integration test for dynamic router functionality.
 ///
-/// Uses CoreApp directly so the menu configuration is loaded from the backend
-/// (CORE_EXAMPLE_DEFAULT), matching the real-app behaviour of admin/freelance/etc.
-///
-/// Tests that the dynamic router correctly:
-/// - Generates routes from menu configuration
-/// - Handles authentication redirects
-/// - Displays logout button on main route only
-/// - Navigates between routes
+/// Uses CommonTest.startTestApp so the GrowERP initial-tenant detection
+/// (company name pre-filled with 'GrowERP') is exercised on fresh backends.
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   setUpAll(() async {
-    await PersistFunctions.removeAuthenticate();
-    await PersistFunctions.persistTest(SaveTest());
     await GlobalConfiguration().loadFromAsset("app_settings");
   });
 
-  Future<void> startCoreApp(WidgetTester tester, RestClient restClient) async {
-    Bloc.observer = AppBlocObserver();
-    await tester.pumpWidget(
-      CoreApp(
-        restClient: restClient,
-        classificationId: 'AppAdmin',
-        chatClient: WsClient('chat'),
-        notificationClient: WsClient('notws'),
+  const coreMenuConfig = MenuConfiguration(
+    menuConfigurationId: 'CORE_EXAMPLE',
+    appId: 'core_example',
+    name: 'Core Example Menu',
+    menuItems: [
+      MenuItem(
+        menuItemId: 'CORE_MAIN',
+        title: 'Main',
+        route: '/',
+        iconName: 'dashboard',
+        sequenceNum: 10,
+        widgetName: 'CoreDashboard',
+        isActive: true,
       ),
-    );
-    await tester.pump();
-    // Wait for initial load
-    for (int i = 0; i < 50; i++) {
-      await tester.pump(const Duration(milliseconds: 100));
-      if (find.byType(LoadingIndicator).evaluate().isEmpty) break;
-    }
-  }
+      MenuItem(
+        menuItemId: 'CORE_COMPANY',
+        title: 'Organization',
+        route: '/company',
+        iconName: 'business',
+        sequenceNum: 20,
+        widgetName: 'CoreDashboard',
+        isActive: true,
+      ),
+      MenuItem(
+        menuItemId: 'CORE_USER',
+        title: 'Logged in User',
+        route: '/user',
+        iconName: 'person',
+        sequenceNum: 30,
+        widgetName: 'CoreDashboard',
+        isActive: true,
+      ),
+    ],
+  );
 
   testWidgets('Dynamic Router - Auth Redirect Test', (
     WidgetTester tester,
   ) async {
     final restClient = RestClient(await buildDioClient());
-    await startCoreApp(tester, restClient);
+    final router = createDynamicCoreRouter(
+      [coreMenuConfig],
+      rootNavigatorKey: GlobalKey<NavigatorState>(),
+    );
+    final menuConfigBloc = MenuConfigBloc(restClient, 'core_example')
+      ..add(MenuConfigUpdateLocal(coreMenuConfig));
+
+    await CommonTest.startTestApp(
+      tester,
+      router,
+      coreMenuConfig,
+      CoreLocalizations.localizationsDelegates,
+      restClient: restClient,
+      clear: true,
+      title: 'Dynamic Router Test',
+      blocProviders: [
+        BlocProvider<MenuConfigBloc>.value(value: menuConfigBloc),
+      ],
+    );
 
     // Before login, we should see the home form (login screen)
-    // The dynamic router should redirect unauthenticated users to '/'
     expect(find.byType(HomeForm), findsOneWidget);
     debugPrint('✓ Unauthenticated user redirected to HomeForm');
   });
@@ -61,35 +87,41 @@ void main() {
     WidgetTester tester,
   ) async {
     final restClient = RestClient(await buildDioClient());
-    await startCoreApp(tester, restClient);
+    final router = createDynamicCoreRouter(
+      [coreMenuConfig],
+      rootNavigatorKey: GlobalKey<NavigatorState>(),
+    );
+    final menuConfigBloc = MenuConfigBloc(restClient, 'core_example')
+      ..add(MenuConfigUpdateLocal(coreMenuConfig));
 
-    // Login — creates company and admin, seeding CORE_EXAMPLE_DEFAULT menu items
-    await CommonTest.createCompanyAndAdmin(tester);
-
-    // After login CoreApp rebuilds: AppSplashScreen fires MenuConfigLoad, then
-    // CoreApp swaps to the full dynamic router. Wait for a dashboard card to
-    // appear (up to 20 s) instead of pumpAndSettle which hangs on WsClient timers.
-    for (int i = 0; i < 100; i++) {
-      await tester.pump(const Duration(milliseconds: 200));
-      if (find.byKey(const Key('tap/companies')).evaluate().isNotEmpty) break;
-    }
-
-    // Verify dashboard cards exist for backend-seeded CORE_EXAMPLE_DEFAULT items.
-    // DashboardCard uses keys in the format Key('tap<route>'), e.g. Key('tap/companies').
-    // findsWidgets is used because the navigation rail and the dashboard card
-    // both carry the same key on tablet/desktop layouts.
-    expect(find.byKey(const Key('tap/companies')), findsWidgets);
-    expect(find.byKey(const Key('tap/crm')), findsWidgets);
-    debugPrint(
-      '✓ Dynamic menu routes generated from CORE_EXAMPLE_DEFAULT backend config',
+    await CommonTest.startTestApp(
+      tester,
+      router,
+      coreMenuConfig,
+      CoreLocalizations.localizationsDelegates,
+      restClient: restClient,
+      clear: true,
+      title: 'Dynamic Router Test',
+      blocProviders: [
+        BlocProvider<MenuConfigBloc>.value(value: menuConfigBloc),
+      ],
     );
 
-    // Verify logout/auth button is present on main route
+    // Creates company and admin — exercises the GrowERP tenant detection if
+    // the backend is fresh (company name pre-filled with 'GrowERP').
+    await CommonTest.createCompanyAndAdmin(tester);
+
+    // Verify dashboard cards exist for the static menu configuration.
+    expect(find.byKey(const Key('tap/company')), findsWidgets);
+    expect(find.byKey(const Key('tap/user')), findsWidgets);
+    debugPrint('✓ Dynamic menu routes generated from static config');
+
+    // Verify auth button is present on main route
     expect(find.byKey(const Key('HomeFormAuth')), findsOneWidget);
     debugPrint('✓ Auth button visible on main route');
 
     // Navigate to Organization route via dashboard card
-    await tester.tap(find.byKey(const Key('tap/companies')));
+    await tester.tap(find.byKey(const Key('tap/company')));
     for (int i = 0; i < 30; i++) {
       await tester.pump(const Duration(milliseconds: 100));
       if (find.byKey(const Key('HomeFormAuth')).evaluate().isEmpty) break;
