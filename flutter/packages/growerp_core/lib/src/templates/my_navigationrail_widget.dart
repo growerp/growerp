@@ -1,12 +1,12 @@
 /*
  * This GrowERP software is in the public domain under CC0 1.0 Universal plus a
  * Grant of Patent License.
- * 
+ *
  * To the extent possible under law, the author(s) have dedicated all
  * copyright and related and neighboring rights to this software to the
  * public domain worldwide. This software is distributed without any
  * warranty.
- * 
+ *
  * You should have received a copy of the CC0 Public Domain Dedication
  * along with this software (see the LICENSE.md file). If not, see
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
@@ -31,91 +31,10 @@ Widget myNavigationRail(
   final localizations = CoreLocalizations.of(context)!;
   final colorScheme = Theme.of(context).colorScheme;
   final isDark = Theme.of(context).brightness == Brightness.dark;
-  List<NavigationRailDestination> items = [];
   AuthBloc authBloc = context.read<AuthBloc>();
   Authenticate? auth = authBloc.state.authenticate;
 
-  for (var option in menu) {
-    // Try iconName first, then fall back to image paths (for top-level items)
-    Widget iconWidget;
-    Widget selectedIconWidget;
-
-    if (option.iconName != null) {
-      iconWidget = Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          color: Colors.transparent,
-        ),
-        child:
-            getIconFromRegistry(option.iconName) ??
-            const Icon(Icons.circle, size: 28, key: Key('defaultIcon')),
-      );
-      selectedIconWidget = Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          gradient: RadialGradient(
-            colors: [
-              colorScheme.primary.withValues(alpha: 0.2),
-              colorScheme.primary.withValues(alpha: 0.05),
-            ],
-          ),
-        ),
-        child: IconTheme(
-          data: IconThemeData(color: colorScheme.primary, size: 28),
-          child:
-              getIconFromRegistry(option.iconName) ??
-              const Icon(Icons.circle, size: 28),
-        ),
-      );
-    } else if (option.image != null) {
-      // Use image assets for top-level menu items
-      iconWidget = Image.asset(
-        option.image!,
-        width: 40,
-        height: 40,
-        key: Key('icon_${option.menuItemId}'),
-        errorBuilder: (context, error, stackTrace) =>
-            const Icon(Icons.circle, size: 40),
-      );
-      selectedIconWidget = option.selectedImage != null
-          ? Image.asset(
-              option.selectedImage!,
-              width: 40,
-              height: 40,
-              errorBuilder: (context, error, stackTrace) =>
-                  const Icon(Icons.circle, size: 40),
-            )
-          : iconWidget;
-    } else {
-      iconWidget = const Icon(Icons.circle, size: 40, key: Key('defaultIcon'));
-      selectedIconWidget = const Icon(Icons.circle, size: 40);
-    }
-
-    items.add(
-      NavigationRailDestination(
-        icon: Container(key: Key('tap${option.route}'), child: iconWidget),
-        selectedIcon: selectedIconWidget,
-        label: SizedBox(
-          width: 80,
-          child: Text(
-            HelperFunctions.translateMenuTitle(localizations, option.title),
-            style: const TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w500,
-              letterSpacing: 0.2,
-            ),
-            textAlign: TextAlign.center,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-      ),
-    );
-  }
-
-  if (items.isEmpty) {
+  if (menu.isEmpty) {
     return FatalErrorForm(message: localizations.noAccessHere);
   }
 
@@ -144,62 +63,66 @@ Widget myNavigationRail(
         ),
         child: LayoutBuilder(
           builder: (context, constraint) {
-            // Check for smaller tablets
             final screenHeight = MediaQuery.of(context).size.height;
             final isSmallTablet = screenHeight < 700;
 
-            return SingleChildScrollView(
-              child: ConstrainedBox(
-                constraints: BoxConstraints(minHeight: constraint.maxHeight),
-                child: IntrinsicHeight(
-                  child: Column(
-                    children: [
-                      // Premium user profile card
-                      SizedBox(
-                        height: isSmallTablet
-                            ? 8
-                            : (ResponsiveBreakpoints.of(context).isTablet
-                                  ? 25
-                                  : 12),
-                      ),
-                      _buildUserProfileCard(context, auth, colorScheme, isDark),
-                      SizedBox(height: isSmallTablet ? 8 : 16),
-                      Divider(
-                        color: colorScheme.outline.withValues(alpha: 0.2),
-                        indent: 16,
-                        endIndent: 16,
-                      ),
-                      SizedBox(height: isSmallTablet ? 4 : 8),
-                      // Navigation items
-                      Expanded(
-                        child: NavigationRail(
-                          backgroundColor: Colors.transparent,
-                          key: const Key('navigationrail'),
-                          selectedIndex: menuIndex,
-                          onDestinationSelected: (int index) {
-                            if (index < menu.length &&
-                                menu[index].route != null) {
-                              context.go(menu[index].route!);
-                            }
-                          },
-                          labelType: NavigationRailLabelType.all,
-                          destinations: items,
-                          groupAlignment: -1.0,
-                          indicatorColor: colorScheme.primary.withValues(
-                            alpha: 0.15,
-                          ),
-                          indicatorShape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          useIndicator: true,
-                        ),
-                      ),
-                      // Theme picker at bottom
-                      _buildThemeButton(context, localizations, colorScheme),
-                      SizedBox(height: isSmallTablet ? 8 : 16),
-                    ],
+            return SizedBox(
+              height: constraint.maxHeight,
+              child: Column(
+                children: [
+                  // Premium user profile card (fixed at top)
+                  SizedBox(
+                    height: isSmallTablet
+                        ? 8
+                        : (ResponsiveBreakpoints.of(context).isTablet
+                              ? 25
+                              : 12),
                   ),
-                ),
+                  _buildUserProfileCard(context, auth, colorScheme, isDark),
+                  SizedBox(height: isSmallTablet ? 8 : 16),
+                  Divider(
+                    color: colorScheme.outline.withValues(alpha: 0.2),
+                    indent: 16,
+                    endIndent: 16,
+                  ),
+                  SizedBox(height: isSmallTablet ? 4 : 8),
+                  // Scrollable destinations + pinned theme button at bottom.
+                  // Using a custom Column+SingleChildScrollView avoids the
+                  // NavigationRail internal RenderFlex overflow that occurs
+                  // when there are more items than fit the available height.
+                  Expanded(
+                    child: Column(
+                      children: [
+                        Expanded(
+                          child: SingleChildScrollView(
+                            key: const Key('navigationrail'),
+                            child: Column(
+                              children: List.generate(menu.length, (index) {
+                                return _buildNavDestination(
+                                  context,
+                                  menu[index],
+                                  index == menuIndex,
+                                  colorScheme,
+                                  localizations,
+                                );
+                              }),
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.only(
+                            bottom: isSmallTablet ? 8 : 16,
+                          ),
+                          child: _buildThemeButton(
+                            context,
+                            localizations,
+                            colorScheme,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             );
           },
@@ -208,6 +131,113 @@ Widget myNavigationRail(
       // Main content area
       Expanded(child: child),
     ],
+  );
+}
+
+/// Builds a single scrollable nav destination that mimics NavigationRail
+/// appearance with animated selection indicator.
+Widget _buildNavDestination(
+  BuildContext context,
+  MenuItem option,
+  bool isSelected,
+  ColorScheme colorScheme,
+  CoreLocalizations localizations,
+) {
+  Widget iconWidget;
+  Widget selectedIconWidget;
+
+  if (option.iconName != null) {
+    iconWidget = Container(
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        color: Colors.transparent,
+      ),
+      child:
+          getIconFromRegistry(option.iconName) ??
+          const Icon(Icons.circle, size: 28, key: Key('defaultIcon')),
+    );
+    selectedIconWidget = Container(
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        gradient: RadialGradient(
+          colors: [
+            colorScheme.primary.withValues(alpha: 0.2),
+            colorScheme.primary.withValues(alpha: 0.05),
+          ],
+        ),
+      ),
+      child: IconTheme(
+        data: IconThemeData(color: colorScheme.primary, size: 28),
+        child:
+            getIconFromRegistry(option.iconName) ??
+            const Icon(Icons.circle, size: 28),
+      ),
+    );
+  } else if (option.image != null) {
+    iconWidget = Image.asset(
+      option.image!,
+      width: 40,
+      height: 40,
+      key: Key('icon_${option.menuItemId}'),
+      errorBuilder: (context, error, stackTrace) =>
+          const Icon(Icons.circle, size: 40),
+    );
+    selectedIconWidget = option.selectedImage != null
+        ? Image.asset(
+            option.selectedImage!,
+            width: 40,
+            height: 40,
+            errorBuilder: (context, error, stackTrace) =>
+                const Icon(Icons.circle, size: 40),
+          )
+        : iconWidget;
+  } else {
+    iconWidget = const Icon(Icons.circle, size: 40, key: Key('defaultIcon'));
+    selectedIconWidget = const Icon(Icons.circle, size: 40);
+  }
+
+  return InkWell(
+    key: Key('tap${option.route}'),
+    onTap: () {
+      if (option.route != null) context.go(option.route!);
+    },
+    child: Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            decoration: isSelected
+                ? BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    color: colorScheme.primary.withValues(alpha: 0.15),
+                  )
+                : null,
+            child: isSelected ? selectedIconWidget : iconWidget,
+          ),
+          const SizedBox(height: 2),
+          SizedBox(
+            width: 80,
+            child: Text(
+              HelperFunctions.translateMenuTitle(localizations, option.title),
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+                letterSpacing: 0.2,
+                color: isSelected ? colorScheme.primary : colorScheme.onSurface,
+              ),
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+    ),
   );
 }
 
@@ -227,7 +257,7 @@ Widget _buildUserProfileCard(
     color: Colors.transparent,
     child: InkWell(
       key: const Key('tapUser'),
-      onTap: () => context.go('/user', extra: auth?.user),
+      onTap: () => context.push('/user', extra: auth?.user),
       borderRadius: BorderRadius.circular(isSmallTablet ? 12 : 16),
       child: Container(
         margin: EdgeInsets.symmetric(horizontal: isSmallTablet ? 4 : 8),

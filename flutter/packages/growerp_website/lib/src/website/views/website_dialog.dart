@@ -793,10 +793,13 @@ class WebsiteDialogState extends State<WebsiteDialog> {
                 return FatalErrorForm(message: _localizations.errorTitle);
               case DataFetchStatus.loading:
               case DataFetchStatus.success:
+<<<<<<< HEAD
                 // During a reload, DataFetchBloc preserves data via copyWith,
                 // so keep the Autocomplete mounted. Replacing with
                 // LoadingIndicator disposes _RawAutocompleteState and causes
                 // it to access a defunct context in _announceSemantics.
+=======
+>>>>>>> 59b85f7b (fix: core package automated tests)
                 return GroupingDecorator(
                   useCardStyle: false,
                   labelText:
@@ -929,8 +932,11 @@ class WebsiteDialogState extends State<WebsiteDialog> {
               return FatalErrorForm(message: _localizations.errorTitle);
             case DataFetchStatus.loading:
             case DataFetchStatus.success:
+<<<<<<< HEAD
               // During a reload, DataFetchBloc preserves data via copyWith,
               // so keep the Autocomplete mounted (see Products BlocBuilder above).
+=======
+>>>>>>> 59b85f7b (fix: core package automated tests)
               return GroupingDecorator(
                 useCardStyle: false,
                 labelText:

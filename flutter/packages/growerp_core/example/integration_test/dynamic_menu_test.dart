@@ -70,7 +70,7 @@ final testChildMenuItems = [
   ),
   const MenuItem(
     menuItemId: 'COMPANYUSERLIST',
-    title: 'Companies Tab',
+    title: 'Company User List',
     widgetName: 'CompanyUserList',
     iconName: 'business',
   ),
@@ -83,6 +83,8 @@ void main() {
     await PersistFunctions.removeAuthenticate();
     await PersistFunctions.persistTest(SaveTest());
     await GlobalConfiguration().loadFromAsset("app_settings");
+    // Ensure no stale cached REST responses bleed in from a prior run.
+    await clearRestCache();
   });
 
   testWidgets('GrowERP dynamic menu CRUD test', (tester) async {
@@ -139,7 +141,7 @@ void main() {
     await DynamicMenuTest.verifyMenuPersistence(tester);
 
     // Delete menu items
-    await DynamicMenuTest.deleteLastMenuItem(tester);
+    await DynamicMenuTest.deleteMenuItem(tester);
 
     // Reset to default
     await DynamicMenuTest.resetMenuToDefault(tester);

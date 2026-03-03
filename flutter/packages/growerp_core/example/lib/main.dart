@@ -82,6 +82,39 @@ class _CoreAppState extends State<CoreApp> {
     return BlocProvider.value(
       value: _menuConfigBloc,
       child: BlocBuilder<MenuConfigBloc, MenuConfigState>(
+        buildWhen: (previous, current) {
+          // Always build on the first successful config load
+          if (previous.menuConfiguration == null &&
+              current.menuConfiguration != null) {
+            return true;
+          }
+          // Rebuild when the config itself changes (different ID = different user/app)
+          if (previous.menuConfiguration?.menuConfigurationId !=
+              current.menuConfiguration?.menuConfigurationId) {
+            return true;
+          }
+          // Rebuild when the number of top-level items changes (add/delete)
+          if ((previous.menuConfiguration?.menuItems.length ?? 0) !=
+              (current.menuConfiguration?.menuItems.length ?? 0)) {
+            return true;
+          }
+          // Rebuild when any top-level item's routing-relevant data changes
+          // (route, widget, active state, id order) — but NOT when only
+          // children (tabs) change, so that tab CRUD does not reset navigation.
+          final prevItems = previous.menuConfiguration?.menuItems ?? [];
+          final currItems = current.menuConfiguration?.menuItems ?? [];
+          for (int i = 0; i < prevItems.length && i < currItems.length; i++) {
+            if (prevItems[i].menuItemId != currItems[i].menuItemId ||
+                prevItems[i].route != currItems[i].route ||
+                prevItems[i].widgetName != currItems[i].widgetName ||
+                prevItems[i].isActive != currItems[i].isActive ||
+                prevItems[i].title != currItems[i].title) {
+              return true;
+            }
+          }
+          // No routing-relevant change — keep the existing router/navigation
+          return false;
+        },
         builder: (context, state) {
           GoRouter router;
 

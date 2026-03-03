@@ -144,6 +144,8 @@ if [ -n "$TEST_FILE" ]; then
     echo "Running test from package directory: $PACKAGE_DIR"
     cd "$PACKAGE_DIR" || exit 1
     
+    # Clean stale Gradle build artifacts (prevents duplicate zip entry errors on incremental builds)
+    flutter clean
     # Ensure dependencies are resolved for this package
     flutter pub get
     
@@ -177,9 +179,11 @@ if [ -n "$TEST_FILE" ]; then
 elif [ -n "$PACKAGE_FILTER" ]; then
   echo "Running tests for packages matching: *${PACKAGE_FILTER}*"
   melos exec --scope="*${PACKAGE_FILTER}*" --dir-exists="integration_test" --concurrency=1 -- \
-    flutter test integration_test -d "$DEVICE_ID"
+    bash -c "flutter clean && flutter test integration_test -d $DEVICE_ID"
 else
   echo "Running all tests"
+  echo "Cleaning stale build artifacts before full test run..."
+  melos exec --dir-exists="integration_test" --concurrency=4 -- flutter clean
   DEVICE_ID="$DEVICE_ID" melos run test-headless --no-select
 fi
 

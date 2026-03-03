@@ -20,7 +20,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:growerp_core/l10n/generated/core_localizations.dart';
@@ -301,7 +300,7 @@ class _TopAppState extends State<TopApp> {
                             ? growerpPremium.light
                             : null,
                         scheme: themeState.colorScheme,
-                        fontFamily: GoogleFonts.outfit().fontFamily,
+                        fontFamily: 'Outfit',
                         blendLevel: 10,
                         subThemesData: const FlexSubThemesData(
                           blendOnLevel: 10,
@@ -353,7 +352,7 @@ class _TopAppState extends State<TopApp> {
                             ? growerpPremium.dark
                             : null,
                         scheme: themeState.colorScheme,
-                        fontFamily: GoogleFonts.outfit().fontFamily,
+                        fontFamily: 'Outfit',
                         blendLevel: 13,
                         subThemesData: const FlexSubThemesData(
                           blendOnLevel: 20,

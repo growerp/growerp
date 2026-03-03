@@ -100,15 +100,23 @@ class DynamicMenuTest {
       // Enter menu option data
       await _enterMenuItemData(tester, option);
 
-      // Save
+      // Save — same reasoning as updateMenuItems: avoid pumpAndSettle so the
+      // HTTP backend round-trip has time to complete before we proceed.
       await CommonTest.tapByKey(
         tester,
         'menuItemUpdate',
-        seconds: CommonTest.waitTime,
+        settle: false,
+        seconds: 1,
       );
 
-      // Wait for dialog to close and list to update
-      await tester.pumpAndSettle(const Duration(seconds: 2));
+      // Wait for the MenuItemDialog to close (up to 15 s for backend round-trip)
+      for (int i = 0; i < 150; i++) {
+        await tester.pump(const Duration(milliseconds: 100));
+        if (!tester.any(find.byKey(const Key('MenuItemDialog')))) break;
+      }
+
+      // Wait for the new item to appear in the list
+      await _waitForText(tester, option.title, tries: 100);
 
       createdOptions.add(option);
     }
@@ -267,15 +275,30 @@ class DynamicMenuTest {
       // Clear and update the data
       await _enterMenuItemData(tester, newOption);
 
-      // Save by tapping update button
+      // Save by tapping update button. Do NOT pumpAndSettle here — HTTP
+      // responses are not tracked by the scheduler, so pumpAndSettle can
+      // settle before the backend round-trip completes and the dialog closes.
       await CommonTest.tapByKey(
         tester,
         'menuItemUpdate',
-        seconds: CommonTest.waitTime,
+        settle: false,
+        seconds: 1,
       );
 
-      // Wait for dialogs to close and BLoC to update
-      await tester.pumpAndSettle(const Duration(seconds: 2));
+      // Wait for the MenuItemDialog to close (up to 15 s for backend round-trip)
+      for (int i = 0; i < 150; i++) {
+        await tester.pump(const Duration(milliseconds: 100));
+        if (!tester.any(find.byKey(const Key('MenuItemDialog')))) break;
+      }
+
+      // Explicitly clear the REST cache so the next getMenuConfiguration
+      // GET is guaranteed to hit the backend and not a stale cached entry.
+      // The CacheInvalidationInterceptor fires on PATCH but its async void
+      // clean() may race against the immediately-following GET in the BLoC.
+      await clearRestCache();
+
+      // Wait for the updated title to appear in the list
+      await _waitForText(tester, newOption.title, tries: 100);
 
       // Update test data
       test = test.copyWith(
@@ -313,13 +336,12 @@ class DynamicMenuTest {
     }
   }
 
-  /// Delete the first menu option
-  /// Deletes from the top of the list to avoid FABs positioned at the bottom
-  /// covering the delete buttons of lower items.
+  /// Delete a menu option
+  /// Deletes the second item from the top of the list
   /// Calls selectMenuItems first since list may be closed
-  static Future<void> deleteLastMenuItem(WidgetTester tester) async {
+  static Future<void> deleteMenuItem(WidgetTester tester) async {
     SaveTest test = await PersistFunctions.getTest();
-    if (test.menuItems.isEmpty) return;
+    if (test.menuItems.length < 2) return;
 
     // Navigate to menu config list first to ensure it's open
     await selectMenuItems(tester);
@@ -331,31 +353,87 @@ class DynamicMenuTest {
     }
     await tester.pumpAndSettle(const Duration(milliseconds: 500));
 
-    // Delete the first item (at the top) to avoid FAB overlap at the bottom
-    final firstOption = test.menuItems.first;
-
     // Find delete buttons
     final deleteButtons = find.byIcon(Icons.delete_outline);
     expect(deleteButtons, findsWidgets, reason: 'Should find delete buttons');
 
-    // Tap the first delete button (top of list, away from FABs)
-    await tester.tap(deleteButtons.first);
+    // Before tapping, capture the actual title displayed in the second card row
+    // so we verify the right item is gone — regardless of whether the UI order
+    // matches the persisted test.menuItems order.
+    String? uiTargetTitle;
+    {
+      final secondDeleteElement = tester.element(deleteButtons.at(1));
+      Element? cardElement;
+      secondDeleteElement.visitAncestorElements((ancestor) {
+        if (ancestor.widget is Card) {
+          cardElement = ancestor;
+          return false;
+        }
+        return true;
+      });
+      if (cardElement != null) {
+        final cardFinder = find.byElementPredicate((el) => el == cardElement);
+        // The title Text has fontWeight bold; collect all Text descendants and
+        // pick the first one with non-empty data (skipping icon-label texts).
+        final texts = find.descendant(
+          of: cardFinder,
+          matching: find.byType(Text),
+        );
+        for (int i = 0; i < texts.evaluate().length; i++) {
+          final t = tester.widget<Text>(texts.at(i));
+          if (t.data != null && t.data!.isNotEmpty) {
+            uiTargetTitle = t.data;
+            break;
+          }
+        }
+      }
+    }
+    // Fall back to persisted data if we couldn't read the UI title.
+    uiTargetTitle ??= test.menuItems[1].title;
+
+    // Tap the second delete button
+    await tester.tap(deleteButtons.at(1));
     await tester.pumpAndSettle();
 
-    // Confirm deletion
+    // Confirm deletion — use settle:false so the HTTP DELETE + reload has time
+    // to complete before we pump to settled (same pattern as addMenuItems/updateMenuItems).
     await CommonTest.tapByText(tester, 'Delete');
-    await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
+    // Clear the REST cache so the next GET bypasses any stale cached entry,
+    // just like updateMenuItems does after a PATCH round-trip.
+    await clearRestCache();
+    // Wait up to 15 s for the backend to process the delete and the list to refresh.
+    // Scope the check to the MenuItemListDialog so the navigation rail (which
+    // still shows the old menu until a full reload) does not cause a false
+    // "still found" result.
+    final listDialogFinder = find.byKey(const Key('MenuItemListDialog'));
+    for (int i = 0; i < 150; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+      final inDialog = tester.any(listDialogFinder)
+          ? tester.any(
+              find.descendant(
+                of: listDialogFinder,
+                matching: find.text(uiTargetTitle),
+              ),
+            )
+          : false;
+      if (!inDialog) break;
+    }
+    await tester.pumpAndSettle(const Duration(milliseconds: 500));
 
-    // Verify option is gone
+    // Verify the item that was actually shown in slot 2 is now gone from the list.
     expect(
-      find.text(firstOption.title),
+      find.descendant(
+        of: find.byKey(const Key('MenuItemListDialog')),
+        matching: find.text(uiTargetTitle),
+      ),
       findsNothing,
-      reason: 'Deleted option should no longer be visible',
+      reason:
+          'Deleted option "$uiTargetTitle" should no longer be visible in the list',
     );
 
     // Update persisted test data
     await PersistFunctions.persistTest(
-      test.copyWith(menuItems: test.menuItems.sublist(1)),
+      test.copyWith(menuItems: [test.menuItems[0], ...test.menuItems.skip(2)]),
     );
   }
 
@@ -437,15 +515,12 @@ class DynamicMenuTest {
     WidgetTester tester,
     MenuItem option,
   ) async {
-    // Title - clear first then enter
+    // Title
     await CommonTest.enterText(tester, 'menuItemTitle', option.title);
 
-    // Route
-    if (option.route != null) {
-      await CommonTest.enterText(tester, 'menuItemRoute', option.route!);
-    }
-
-    // Icon (now Autocomplete, not dropdown)
+    // Icon (Autocomplete). Note: the widget-name autocomplete's onSelected
+    // auto-fills the route field from the widget name when route is empty.
+    // We therefore enter route LAST, after all autocomplete interactions.
     if (option.iconName != null) {
       await CommonTest.enterAutocompleteValue(
         tester,
@@ -454,7 +529,7 @@ class DynamicMenuTest {
       );
     }
 
-    // Widget name (Autocomplete)
+    // Widget name (Autocomplete). onSelected may overwrite route if empty.
     if (option.widgetName != null) {
       await CommonTest.enterAutocompleteValue(
         tester,
@@ -463,7 +538,8 @@ class DynamicMenuTest {
       );
     }
 
-    // Sequence
+    // Sequence — entered before route so the route field is the very last
+    // thing touched and cannot be overwritten by subsequent autocomplete events.
     await CommonTest.enterText(
       tester,
       'menuItemSequence',
@@ -473,6 +549,19 @@ class DynamicMenuTest {
     // Active toggle - only toggle if different from default (true)
     if (!option.isActive) {
       await CommonTest.tapByKey(tester, 'menuItemActive');
+    }
+
+    // Route — entered LAST so the widget autocomplete's onSelected auto-fill
+    // (which sets route from widget name when route is empty) cannot overwrite
+    // it.  Use CommonTest.enterText (which calls pumpAndSettle) so the
+    // TextEditingController is reliably updated before the form is saved.
+    if (option.route != null) {
+      await CommonTest.enterText(tester, 'menuItemRoute', option.route!);
+      // Verify the route was set correctly; re-enter once if still wrong.
+      final actual = CommonTest.getTextFormField('menuItemRoute');
+      if (actual != option.route) {
+        await CommonTest.enterText(tester, 'menuItemRoute', option.route!);
+      }
     }
   }
 
@@ -515,29 +604,50 @@ class DynamicMenuTest {
       );
 
       // Enter widget name via autocomplete - must select from suggestions
-      // to trigger onSelected and set selectedWidget
+      // to trigger onSelected and set selectedWidget.
       await CommonTest.enterAutocompleteValue(
         tester,
         'tabWidgetSelector',
         menuItem.widgetName!,
       );
 
-      // Enter/confirm the tab title
+      // Enter/confirm the tab title AFTER the autocomplete so that even if
+      // onSelected auto-filled the title from the widget name, we overwrite
+      // it with the correct value — same pattern as the route field.
       await CommonTest.enterText(tester, 'tabTitle', menuItem.title);
 
-      // add by tapping Add button
+      // add by tapping Add button. Use settle:false — HTTP responses are not
+      // tracked by the scheduler, so pumpAndSettle can settle before the
+      // backend POST completes and the tab appears in the parent item.
       await CommonTest.tapByKey(
         tester,
         'addTabConfirm',
-        seconds: CommonTest.waitTime,
+        settle: false,
+        seconds: 1,
       );
+
+      // Wait for the add tab dialog to close (navigator pops it synchronously
+      // after tapping confirm, but we still need pumps for the frame to render).
+      for (int i = 0; i < 50; i++) {
+        await tester.pump(const Duration(milliseconds: 100));
+        if (!tester.any(find.byKey(const Key('addTabDialog')))) break;
+      }
+
+      // Wait for the MenuItemLink BLoC event to complete (POST + backend reload).
+      // With the buildWhen fix in CoreApp the router is no longer recreated on
+      // every BLoC emission, so the dialogs stay open.  We simply wait until the
+      // CircularProgressIndicator (loading state) disappears (up to 15 s).
+      for (int i = 0; i < 150; i++) {
+        await tester.pump(const Duration(milliseconds: 100));
+        if (!tester.any(find.byType(CircularProgressIndicator))) break;
+      }
 
       debugPrint('Added menu item tab: ${menuItem.title}');
     }
 
-    // currently adding a tab will always return to the main menu of the app
-
-    // Update the first menu option with the new children
+    // After all tabs are added the dialogs are still open (the buildWhen fix
+    // in CoreApp prevents router recreation on tab CRUD, so navigation is not
+    // reset).  Update persisted test state with the expected children.
     final updatedFirstOption = firstOption.copyWith(
       children: [...(firstOption.children ?? []), ...childMenuItems],
     );
@@ -567,11 +677,38 @@ class DynamicMenuTest {
     // Navigate to menu config list
     await selectMenuItems(tester);
 
-    // Tap on the first menu option to open detail
-    final firstOption = test.menuItems.first;
-    await CommonTest.tapByText(tester, firstOption.title);
+    // Close any MenuItemDialog left open by a previous step (e.g. addChildMenuItems
+    // leaves it open).  Tapping its title text did nothing; we need a fresh open so
+    // the dialog rebuilds with the current BLoC state (all tabs present).
+    if (tester.any(find.byKey(const Key('MenuItemDialog')))) {
+      await CommonTest.tapByKey(tester, 'cancel');
+      for (int i = 0; i < 50; i++) {
+        await tester.pump(const Duration(milliseconds: 100));
+        if (!tester.any(find.byKey(const Key('MenuItemDialog')))) break;
+      }
+    }
 
-    // Verify each expected menu item appears as a chip
+    // Tap on the first menu option to open the dialog fresh.
+    final firstOption = test.menuItems.first;
+    await CommonTest.tapByText(tester, firstOption.title, seconds: 1);
+
+    // Wait for any loading state to finish before checking tabs.
+    for (int i = 0; i < 100; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+      if (!tester.any(find.byType(CircularProgressIndicator)) &&
+          !tester.any(find.byType(LoadingIndicator))) {
+        break;
+      }
+    }
+    await tester.pumpAndSettle(const Duration(milliseconds: 500));
+
+    // Wait up to 10 s for the first expected tab to appear in the form.
+    if (expectedItems.isNotEmpty) {
+      await _waitForText(tester, expectedItems.first.title, tries: 100);
+    }
+
+    // Verify each expected menu item appears as a list tile in the dialog
+    await CommonTest.drag(tester);
     for (final menuItem in expectedItems) {
       await CommonTest.checkText(tester, menuItem.title);
       debugPrint('Verified menu item tab: ${menuItem.title}');

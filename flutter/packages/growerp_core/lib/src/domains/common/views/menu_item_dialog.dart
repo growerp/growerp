@@ -47,6 +47,11 @@ class MenuItemDialogState extends State<MenuItemDialog> {
   late MenuConfigBloc _menuConfigBloc;
   late bool isPhone;
 
+  /// Set to true once the user (or test) has explicitly edited the route field.
+  /// Prevents the widget-name onSelected auto-fill from overwriting a
+  /// route that was intentionally entered.
+  bool _routeUserTouched = false;
+
   /// Track when the user explicitly saves the menu item.
   /// This prevents the dialog from closing when a child tab is added/modified.
   bool _pendingClose = false;
@@ -83,6 +88,10 @@ class MenuItemDialogState extends State<MenuItemDialog> {
     // Initialize form fields from existing menu option
     _titleController.text = widget.menuOption.title;
     _routeController.text = widget.menuOption.route ?? '';
+    // Mark route as already touched when editing an existing item so that
+    // selecting a different widget name never overwrites the existing route.
+    _routeUserTouched =
+        widget.menuOption.route != null && widget.menuOption.route!.isNotEmpty;
     _sequenceNumController.text = widget.menuOption.sequenceNum.toString();
 
     _selectedIconName = widget.menuOption.iconName;
@@ -161,6 +170,7 @@ class MenuItemDialogState extends State<MenuItemDialog> {
     return Form(
       key: _formKey,
       child: SingleChildScrollView(
+        key: const Key('listView'),
         padding: const EdgeInsets.only(
           left: 16,
           right: 16,
@@ -184,6 +194,8 @@ class MenuItemDialogState extends State<MenuItemDialog> {
             TextFormField(
               key: const Key('menuItemRoute'),
               controller: _routeController,
+              onTap: () => _routeUserTouched = true,
+              onChanged: (_) => _routeUserTouched = true,
               decoration: const InputDecoration(
                 labelText: 'Route (e.g., /users)',
               ),
@@ -349,8 +361,10 @@ class MenuItemDialogState extends State<MenuItemDialog> {
                         )
                         .trim();
                   }
-                  if (_routeController.text.isEmpty) {
-                    // Convert to route format
+                  // Only auto-fill route when it is empty AND the user has
+                  // not explicitly edited the field (prevents overwriting
+                  // a route entered before selecting the widget).
+                  if (!_routeUserTouched && _routeController.text.isEmpty) {
                     _routeController.text =
                         '/${value[0].toLowerCase()}${value.substring(1)}';
                   }
@@ -781,7 +795,18 @@ class MenuItemDialogState extends State<MenuItemDialog> {
 
   /// Update an existing tab's properties
   void _updateTab(MenuItem tab, String widgetName, String title) {
-    final updatedTab = tab.copyWith(title: title, widgetName: widgetName);
+    // Always preserve (or restore) parentMenuItemId.  When children are loaded
+    // from getMenuConfiguration after a refresh the child MenuItem objects come
+    // back with parentMenuItemId == null (the relationship is implicit in the
+    // nested JSON).  Passing null to updateMenuItem tells the backend to *remove*
+    // the parent association, which effectively unlinks the tab.  We fall back to
+    // widget.menuOption.menuItemId (the current parent) so the link is always kept.
+    final updatedTab = tab.copyWith(
+      title: title,
+      widgetName: widgetName,
+      parentMenuItemId:
+          tab.parentMenuItemId ?? widget.menuOption.menuItemId,
+    );
 
     _menuConfigBloc.add(
       MenuItemUpdate(menuItemId: tab.menuItemId!, menuOption: updatedTab),

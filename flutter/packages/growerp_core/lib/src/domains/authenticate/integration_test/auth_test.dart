@@ -126,7 +126,11 @@ class AuthTest {
     // Check for TenantSetupDialog (new flow) or moreInfo form (legacy)
     if (await CommonTest.doesExistKey(tester, 'companyName')) {
       await CommonTest.enterText(tester, 'companyName', companyName);
-      await CommonTest.enterDropDown(tester, 'currency', currency.description!);
+      await CommonTest.enterDropDownSearch(
+        tester,
+        'currency',
+        currency.description!,
+      );
 
       // Toggle demo data if currently different from desired state
       // (checkbox starts as true in debug mode)

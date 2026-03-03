@@ -154,7 +154,7 @@ void main() {
             'companyName',
             'EvalTest Company ${test.sequence}',
           );
-          await CommonTest.enterDropDown(tester, 'currency', 'Euro');
+          await CommonTest.enterDropDownSearch(tester, 'currency', 'Euro');
           await CommonTest.tapByKey(tester, 'demoData'); // no demo data
           await CommonTest.tapByKey(
             tester,
@@ -352,7 +352,7 @@ void main() {
           'companyName',
           'EvalExpired Company ${test.sequence}',
         );
-        await CommonTest.enterDropDown(tester, 'currency', 'Euro');
+        await CommonTest.enterDropDownSearch(tester, 'currency', 'Euro');
         await CommonTest.tapByKey(tester, 'demoData'); // no demo data
         await CommonTest.tapByKey(
           tester,

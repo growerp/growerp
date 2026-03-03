@@ -20,6 +20,7 @@ import 'package:growerp_models/growerp_models.dart';
 import 'package:stream_transform/stream_transform.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 
+import '../../../services/build_dio_client.dart';
 import '../../../services/get_dio_error.dart';
 
 part 'menu_config_event.dart';
@@ -127,6 +128,9 @@ class MenuConfigBloc extends Bloc<MenuConfigEvent, MenuConfigState> {
         isActive: event.menuOption.isActive ? 'Y' : 'N',
       );
 
+      // Clear REST cache before reloading so the GET is not served from a
+      // stale in-memory entry that predates the mutation above.
+      await clearRestCache();
       // Reload menu configuration with userVersion=true to get user-specific config
       // (backend may have cloned seed data to a new user-specific config)
       final menuConfig = await restClient.getMenuConfiguration(
@@ -174,6 +178,9 @@ class MenuConfigBloc extends Bloc<MenuConfigEvent, MenuConfigState> {
         isActive: event.menuOption.isActive ? 'Y' : 'N',
       );
 
+      // Clear REST cache before reloading so the GET is not served from a
+      // stale in-memory entry that predates the mutation above.
+      await clearRestCache();
       // Reload menu configuration with userVersion=true to get user-specific config
       final menuConfig = await restClient.getMenuConfiguration(
         appId: appId,
@@ -207,6 +214,9 @@ class MenuConfigBloc extends Bloc<MenuConfigEvent, MenuConfigState> {
 
       await restClient.deleteMenuItem(menuItemId: event.menuItemId);
 
+      // Clear REST cache before reloading so the GET is not served from a
+      // stale in-memory entry that predates the mutation above.
+      await clearRestCache();
       // Reload menu configuration with userVersion=true to get user-specific config
       final menuConfig = await restClient.getMenuConfiguration(
         appId: appId,
@@ -243,6 +253,9 @@ class MenuConfigBloc extends Bloc<MenuConfigEvent, MenuConfigState> {
         itemSequences: event.optionSequences,
       );
 
+      // Clear REST cache before reloading so the GET is not served from a
+      // stale in-memory entry that predates the mutation above.
+      await clearRestCache();
       // Reload menu configuration with userVersion=true to get user-specific config
       final menuConfig = await restClient.getMenuConfiguration(
         appId: appId,
@@ -276,6 +289,9 @@ class MenuConfigBloc extends Bloc<MenuConfigEvent, MenuConfigState> {
 
       await restClient.toggleMenuItemActive(menuItemId: event.menuItemId);
 
+      // Clear REST cache before reloading so the GET is not served from a
+      // stale in-memory entry that predates the mutation above.
+      await clearRestCache();
       // Reload menu configuration with userVersion=true to get user-specific config
       final menuConfig = await restClient.getMenuConfiguration(
         appId: appId,
@@ -316,6 +332,9 @@ class MenuConfigBloc extends Bloc<MenuConfigEvent, MenuConfigState> {
         sequenceNum: event.sequenceNum,
       );
 
+      // Clear REST cache before reloading so the GET is not served from a
+      // stale in-memory entry that predates the mutation above.
+      await clearRestCache();
       // Reload menu configuration with userVersion=true to get user-specific config
       final menuConfig = await restClient.getMenuConfiguration(
         appId: appId,
@@ -350,6 +369,9 @@ class MenuConfigBloc extends Bloc<MenuConfigEvent, MenuConfigState> {
 
       await restClient.deleteMenuItem(menuItemId: event.childMenuItemId);
 
+      // Clear REST cache before reloading so the GET is not served from a
+      // stale in-memory entry that predates the mutation above.
+      await clearRestCache();
       // Reload menu configuration with userVersion=true to get user-specific config
       final menuConfig = await restClient.getMenuConfiguration(
         appId: appId,
@@ -465,6 +487,9 @@ class MenuConfigBloc extends Bloc<MenuConfigEvent, MenuConfigState> {
         menuConfigurationId: event.menuConfigurationId,
       );
 
+      // Clear REST cache before reloading so the GET is not served from a
+      // stale in-memory entry that predates the mutation above.
+      await clearRestCache();
       // Reload menu configuration by appId to get the seed data after reset
       // (user config was deleted, so we need seed data)
       final menuConfig = await restClient.getMenuConfiguration(appId: appId);

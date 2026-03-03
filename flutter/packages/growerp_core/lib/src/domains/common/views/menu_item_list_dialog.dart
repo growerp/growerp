@@ -186,6 +186,13 @@ class MenuItemListDialogState extends State<MenuItemListDialog> {
       );
     }
 
+    // Capture the BLoC and a stable BuildContext before handing off to
+    // itemBuilder, whose own 'context' parameter may become deactivated when
+    // the widget tree rebuilds while a dialog is open (which triggers the
+    // "Looking up a deactivated widget's ancestor is unsafe" assertion).
+    final menuConfigBloc = context.read<MenuConfigBloc>();
+    final stableContext = context;
+
     return ReorderableListView.builder(
       padding: const EdgeInsets.only(bottom: 120),
       buildDefaultDragHandles: false,
@@ -204,9 +211,9 @@ class MenuItemListDialogState extends State<MenuItemListDialog> {
           child: InkWell(
             onTap: () async {
               await showDialog<bool>(
-                context: context,
+                context: stableContext,
                 builder: (dialogContext) => BlocProvider.value(
-                  value: context.read<MenuConfigBloc>(),
+                  value: menuConfigBloc,
                   child: MenuItemDialog(
                     menuOption: option,
                     menuConfigurationId: menuConfig.menuConfigurationId ?? '',
@@ -277,7 +284,7 @@ class MenuItemListDialogState extends State<MenuItemListDialog> {
                     key: Key('toggleActive_${option.menuItemId}'),
                     borderRadius: BorderRadius.circular(12),
                     onTap: () {
-                      context.read<MenuConfigBloc>().add(
+                      menuConfigBloc.add(
                         MenuItemToggleActive(option.menuItemId!),
                       );
                     },
@@ -315,7 +322,7 @@ class MenuItemListDialogState extends State<MenuItemListDialog> {
                     constraints: const BoxConstraints(),
                     onPressed: () async {
                       final confirmed = await showDialog<bool>(
-                        context: context,
+                        context: stableContext,
                         builder: (dialogContext) => AlertDialog(
                           title: const Text('Delete Menu Option'),
                           content: Text(
@@ -339,9 +346,8 @@ class MenuItemListDialogState extends State<MenuItemListDialog> {
                           ],
                         ),
                       );
-                      if (confirmed == true && context.mounted) {
-                        final bloc = context.read<MenuConfigBloc>();
-                        bloc.add(MenuItemDelete(option.menuItemId!));
+                      if (confirmed == true) {
+                        menuConfigBloc.add(MenuItemDelete(option.menuItemId!));
                       }
                     },
                   ),

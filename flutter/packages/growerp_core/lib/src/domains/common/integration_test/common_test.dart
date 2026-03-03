@@ -14,6 +14,7 @@
 
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:universal_io/io.dart';
 import 'dart:math';
@@ -70,6 +71,10 @@ class CommonTest {
     String title = "Growerp testing...",
     String classificationId = 'AppAdmin',
   }) async {
+    // Disable Google Fonts runtime fetching to prevent network failures in
+    // headless/offline test environments (e.g., Docker CI).
+    GoogleFonts.config.allowRuntimeFetching = false;
+
     // Suppress RenderFlex overflow errors during tests.
     // These are layout issues that should be fixed separately but should not
     // cause test failures when the business logic is working correctly.
