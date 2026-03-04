@@ -85,10 +85,10 @@ class CompanyTest {
 
       await CommonTest.enterText(tester, 'companyName', c.name!);
       if (c.currency != null) {
-        await CommonTest.enterDropDown(
+        await CommonTest.enterDropDownSearch(
           tester,
           'currency',
-          c.currency?.description ?? '',
+          c.currency!.description ?? '',
         );
       }
       await CommonTest.enterText(tester, 'telephoneNr', c.telephoneNr ?? '');
@@ -172,14 +172,12 @@ class CompanyTest {
         CommonTest.getTextFormField('telephoneNr'),
         equals(c.telephoneNr ?? ''),
       );
-      expect(
-        CommonTest.getDropdownSearch('currency'),
-        equals(
-          c.currency != null
-              ? '${c.currency!.description} [${c.currency!.currencyId}]'
-              : '',
-        ),
-      );
+      if (c.currency != null) {
+        expect(
+          CommonTest.getDropdownSearch('currency'),
+          equals('${c.currency!.description} [${c.currency!.currencyId}]'),
+        );
+      }
       if (c.role == Role.company) {
         expect(
           CommonTest.getTextFormField('vatPerc'),

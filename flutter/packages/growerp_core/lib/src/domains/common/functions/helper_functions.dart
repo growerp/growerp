@@ -55,7 +55,7 @@ class HelperFunctions {
         final duration = snackBarDuration(color, seconds: seconds);
         // Ensure snackbars still disappear when accessibility keeps them alive.
         Future.delayed(duration, () {
-          if (!isClosed) {
+          if (!isClosed && messenger.mounted) {
             try {
               controller.close();
             } catch (e) {

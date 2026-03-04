@@ -421,7 +421,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <if condition="item.paymentMethodId">
                         <set field="nrLength" from="item.cardNumber.length()" />
                         <set field="ccDescription"
-                            value="${item.cardType}**********${item.cardNumber.substring(nrLength-4,nrLength)} ${item.expireDate}" />
+                            value="${item.cardType}${'*' * (nrLength-4)}${item.cardNumber.substring(nrLength-4,nrLength)} ${item.expireDate}" />
                         <set field="paymentMethod"
                             from="[ ccPaymentMethodId: item.paymentMethodId,
                                     ccDescription: ccDescription]" />
@@ -1405,7 +1405,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <if condition="userInfo.paymentMethodId">
                     <set field="nrLength" from="userInfo.cardNumber.length()" />
                     <set field="ccDescription"
-                        value="${userInfo.cardType}**********${userInfo.cardNumber.substring(nrLength-4,nrLength)} ${userInfo.expireDate}" />
+                        value="${userInfo.cardType}${'*' * (nrLength-4)}${userInfo.cardNumber.substring(nrLength-4,nrLength)} ${userInfo.expireDate}" />
                     <set field="paymentMethod"
                         from="[ ccPaymentMethodId: userInfo.paymentMethodId,
                                 ccDescription: ccDescription]" />
@@ -2592,7 +2592,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <if condition="item.paymentMethodId">
                     <set field="nrLength" from="item.cardNumber.length()" />
                     <set field="ccDescription"
-                        value="${item.cardType}**********${item.cardNumber.substring(nrLength-4,nrLength)} ${item.expireDate}" />
+                        value="${item.cardType}${'*' * (nrLength-4)}${item.cardNumber.substring(nrLength-4,nrLength)} ${item.expireDate}" />
                     <set field="paymentMethod"
                         from="[ ccPaymentMethodId: item.paymentMethodId,
                                     ccDescription: ccDescription]" />

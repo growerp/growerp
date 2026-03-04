@@ -14,6 +14,22 @@ export PATH="$PATH":"$HOME/.pub-cache/bin"
 # (e.g. packages with 'resolution: workspace' not present in the pre-built image)
 melos bootstrap
 
+# Fix: shared_preferences_android 2.4.x moved SharedPreferencesPlugin from Java to
+# Kotlin, but flutter pub get still adds it to GeneratedPluginRegistrant.java based on
+# the plugin's pubspec.yaml pluginClass field. Java cannot resolve the Kotlin class
+# during Gradle compilation. The plugin is registered via dartPluginClass (Dart-side),
+# so the Java registration entry is not needed and must be removed.
+find packages -name "GeneratedPluginRegistrant.java" | while read f; do
+  awk '
+    /^    try \{$/ { buf=$0; state=1; next }
+    state==1 { buf=buf"\n"$0; if (/SharedPreferencesPlugin\(\)\);/) state=2; else { print buf; buf=""; state=0 }; next }
+    state==2 { buf=buf"\n"$0; if (/^    \} catch \(Exception e\) \{$/) state=3; else { print buf; buf=""; state=0 }; next }
+    state==3 { buf=buf"\n"$0; if (/SharedPreferencesPlugin/) state=4; else { print buf; buf=""; state=0 }; next }
+    state==4 { if (/^    \}$/) { buf=""; state=0 } else { print buf"\n"$0; buf=""; state=0 }; next }
+    { print }
+  ' "$f" > "$f.tmp" && mv "$f.tmp" "$f"
+done
+
 # Disable Gradle daemon and run Kotlin compiler in-process to prevent memory issues
 export GRADLE_OPTS="-Dorg.gradle.daemon=false -Xmx2g -Dkotlin.compiler.execution.strategy=in-process"
 
@@ -179,7 +195,7 @@ if [ -n "$TEST_FILE" ]; then
 elif [ -n "$PACKAGE_FILTER" ]; then
   echo "Running tests for packages matching: *${PACKAGE_FILTER}*"
   melos exec --scope="*${PACKAGE_FILTER}*" --dir-exists="integration_test" --concurrency=1 -- \
-    bash -c "flutter clean && flutter test integration_test -d $DEVICE_ID"
+    "flutter clean && flutter test integration_test -d $DEVICE_ID"
 else
   echo "Running all tests"
   echo "Cleaning stale build artifacts before full test run..."
