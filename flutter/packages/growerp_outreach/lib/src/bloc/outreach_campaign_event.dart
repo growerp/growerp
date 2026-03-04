@@ -155,3 +155,9 @@ class OutreachCampaignSearchRequested extends OutreachCampaignEvent {
   @override
   List<Object> get props => [query, limit];
 }
+
+/// Triggers the backend to publish all READY social posts whose scheduled
+/// time has arrived. Fire-and-forget: errors are silently logged per post.
+class OutreachPublishScheduledSocialPosts extends OutreachCampaignEvent {
+  const OutreachPublishScheduledSocialPosts();
+}

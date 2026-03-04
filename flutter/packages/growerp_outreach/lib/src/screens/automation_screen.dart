@@ -35,6 +35,9 @@ class _AutomationScreenState extends State<AutomationScreen> {
     context.read<OutreachCampaignBloc>().add(
       const OutreachRecentMessagesFetch(),
     );
+    context
+        .read<OutreachCampaignBloc>()
+        .add(const OutreachPublishScheduledSocialPosts());
   }
 
   @override

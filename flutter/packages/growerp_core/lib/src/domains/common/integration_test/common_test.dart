@@ -543,6 +543,16 @@ class CommonTest {
     // Try common row cell keys used across different list screens
     for (final key in ['name0', 'title0', 'theme0', 'headline0', 'id0']) {
       if (tester.any(find.byKey(Key(key)))) {
+        // For id0 (pseudoId column), poll until the filter has applied and
+        // the first visible result matches the search string. This avoids
+        // tapping the wrong row when the backend hasn't responded yet and
+        // the list still shows the previous (unfiltered) ascending results.
+        if (key == 'id0') {
+          for (int i = 0; i < 30; i++) {
+            if (getTextField('id0') == searchString) break;
+            await tester.pump(const Duration(milliseconds: 200));
+          }
+        }
         await tester.ensureVisible(find.byKey(Key(key)).last);
         await tester.tap(find.byKey(Key(key)).last);
         await tester.pumpAndSettle(Duration(seconds: seconds));

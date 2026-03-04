@@ -21,6 +21,14 @@ along with this software (see the LICENSE.md file). If not, see
         paused="N"
         transactionTimeout="1800" />
 
+    <!-- Service Job: Publish scheduled social posts - every 15 minutes -->
+    <moqui.service.job.ServiceJob jobName="publish_scheduled_social_posts"
+        description="Publish READY social posts whose scheduled time has arrived (Substack, LinkedIn)"
+        serviceName="growerp.100.SocialPostPublishingServices100.publish#ScheduledSocialPosts"
+        cronExpression="0 0/15 * * * ?"
+        paused="N"
+        transactionTimeout="300" />
+
     <!-- format time period name -->
     <moqui.basic.LocalizedMessage locale="default" original="TimePeriodBaseNameTemplate"
         localized="Y${fromLocalDate.getYear()}${timePeriodType?.lengthUomId!='TF_yr'?(timePeriodType.description.split('(?=[A-Z])')[1][0].toLowerCase())+(periodNum as String).padLeft(2,'0'):''}" />

@@ -7,6 +7,79 @@
     <!--  Supports: SUBSTACK (direct API), LINKEDIN (OAuth v2)    -->
     <!-- ========================================================= -->
 
+    <service verb="publish" noun="ScheduledSocialPosts" authenticate="false" allow-remote="false">
+        <description>
+            Backend job: publish all READY social posts across all tenants whose scheduledDate
+            is in the past (or unset). Designed to run as a Moqui ServiceJob — no user context
+            required. Credentials are looked up per post using the post's own ownerPartyId.
+            Errors per post are recorded but do not abort the batch.
+        </description>
+        <out-parameters>
+            <parameter name="publishedCount" type="Integer"/>
+            <parameter name="failedCount" type="Integer"/>
+        </out-parameters>
+        <actions>
+            <entity-find entity-name="growerp.marketing.SocialPost" list="readyPosts">
+                <econdition field-name="status" value="READY"/>
+                <econdition field-name="platform" operator="in" value="SUBSTACK,LINKEDIN"/>
+                <order-by field-name="scheduledDate"/>
+            </entity-find>
+
+            <set field="publishedCount" value="0" type="Integer"/>
+            <set field="failedCount" value="0" type="Integer"/>
+            <set field="nowMs" from="ec.user.nowTimestamp.time" type="Long"/>
+
+            <iterate list="readyPosts" entry="post">
+                <if condition="post.scheduledDate != null &amp;&amp; post.scheduledDate.time > nowMs">
+                    <continue/>
+                </if>
+                <if condition="!post.finalContent">
+                    <continue/>
+                </if>
+
+                <!-- Load credentials using the post's own ownerPartyId -->
+                <entity-find-one entity-name="growerp.marketing.PlatformConfiguration"
+                    value-field="platformConfig">
+                    <field-map field-name="ownerPartyId" from="post.ownerPartyId"/>
+                    <field-map field-name="platform" from="post.platform"/>
+                </entity-find-one>
+                <if condition="!platformConfig || platformConfig.isEnabled != 'Y'">
+                    <continue/>
+                </if>
+
+                <set field="publishResult" from="[:]"/>
+                <if condition="post.platform == 'SUBSTACK'">
+                    <service-call
+                        name="growerp.100.SocialPostPublishingServices100.publish#SocialPostToSubstack"
+                        in-map="[post: post, platformConfig: platformConfig]"
+                        out-map="publishResult" ignore-error="true"/>
+                </if>
+                <else-if condition="post.platform == 'LINKEDIN'">
+                    <service-call
+                        name="growerp.100.SocialPostPublishingServices100.publish#SocialPostToLinkedIn"
+                        in-map="[post: post, platformConfig: platformConfig]"
+                        out-map="publishResult" ignore-error="true"/>
+                </else-if>
+
+                <if condition="publishResult.success">
+                    <service-call name="update#growerp.marketing.SocialPost"
+                        in-map="[postId: post.postId, status: 'PUBLISHED',
+                                 publishedDate: ec.user.nowTimestamp,
+                                 publishedUrl: publishResult.publishedUrl,
+                                 publishError: null,
+                                 lastModifiedDate: ec.user.nowTimestamp]"/>
+                    <set field="publishedCount" from="publishedCount + 1" type="Integer"/>
+                <else/>
+                    <service-call name="update#growerp.marketing.SocialPost"
+                        in-map="[postId: post.postId,
+                                 publishError: publishResult.errorMessage ?: 'Unknown error',
+                                 lastModifiedDate: ec.user.nowTimestamp]"/>
+                    <set field="failedCount" from="failedCount + 1" type="Integer"/>
+                </if>
+            </iterate>
+        </actions>
+    </service>
+
     <service verb="publish" noun="SocialPost" authenticate="true">
         <description>
             Publish a social post to its configured platform.

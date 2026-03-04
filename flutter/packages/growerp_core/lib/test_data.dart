@@ -19,7 +19,7 @@ import 'package:growerp_models/growerp_models.dart';
 Company initialCompany = Company(
   name: "Main Company",
   role: Role.company,
-  currency: currencies[0],
+  currency: Currency(currencyId: 'USD', description: 'United States Dollar'),
   email: "testXXX@example.com",
 );
 

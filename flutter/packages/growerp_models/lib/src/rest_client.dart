@@ -943,6 +943,9 @@ abstract class RestClient {
   @POST("rest/s1/growerp/100/SocialPost/publish")
   Future<SocialPost> publishSocialPost({@Field() required String postId});
 
+  @POST("rest/s1/growerp/100/SocialPost/publishScheduled")
+  Future<void> publishScheduledSocialPosts();
+
   // Assessment Result endpoints
   @GET("rest/s1/growerp/100/Assessment/Results")
   Future<AssessmentResults> getAssessmentResults({

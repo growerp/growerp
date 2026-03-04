@@ -23,6 +23,7 @@ class OutreachCampaignBloc
     on<OutreachCampaignStart>(_onStart);
     on<OutreachRecentMessagesFetch>(_onRecentMessagesFetch);
     on<OutreachCampaignSearchRequested>(_onSearch);
+    on<OutreachPublishScheduledSocialPosts>(_onPublishScheduledSocialPosts);
   }
 
   final RestClient restClient;
@@ -345,6 +346,18 @@ class OutreachCampaignBloc
           message: await getDioError(error),
         ),
       );
+    }
+  }
+
+  Future<void> _onPublishScheduledSocialPosts(
+    OutreachPublishScheduledSocialPosts event,
+    Emitter<OutreachCampaignState> emit,
+  ) async {
+    try {
+      await restClient.publishScheduledSocialPosts();
+    } catch (_) {
+      // Fire-and-forget: swallow errors so the automation screen
+      // is not disrupted by a publish failure.
     }
   }
 
