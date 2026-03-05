@@ -37,13 +37,19 @@ List<Widget> getFinDocItemListRow({
     Text("${item.product?.pseudoId}", key: Key('itemProductId$index')),
     Text(item.description ?? '', key: Key('itemDescription$index')),
     if (!isPhone) Text(itemType.itemTypeName, key: Key('itemType$index')),
-    Text(
-      item.quantity == null
-          ? Decimal.zero.toString()
-          : item.quantity.toString(),
-      textAlign: TextAlign.right,
-      key: Key('itemQuantity$index'),
-    ),
+    if (item.rentalFromDate != null)
+      Text(
+        item.rentalFromDate.toLocalizedDateOnly(context),
+        key: Key('fromDate$index'),
+      )
+    else
+      Text(
+        item.quantity == null
+            ? Decimal.zero.toString()
+            : item.quantity.toString(),
+        textAlign: TextAlign.right,
+        key: Key('itemQuantity$index'),
+      ),
     if (!isPhone)
       Text(
         item.price == null

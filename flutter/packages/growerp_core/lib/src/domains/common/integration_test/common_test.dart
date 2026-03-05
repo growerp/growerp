@@ -932,10 +932,23 @@ class CommonTest {
     await tester.tap(find.byKey(Key(key)));
     await tester.pumpAndSettle(Duration(seconds: seconds));
 
-    // Find the item in the dropdown
+    // Find the item in the dropdown.
+    // When value is empty, scope the finder to DropdownMenuItem descendants to
+    // avoid accidentally matching background EditableText widgets (e.g. form
+    // fields behind the overlay) that also have empty content.  Using the
+    // broad find.text('') on those widgets produces a tap-offset warning
+    // because the resolved position does not hit-test the intended widget.
     Finder itemFinder;
     if (value.isEmpty) {
-      itemFinder = find.text(value);
+      itemFinder = find.descendant(
+        of: find.byType(DropdownMenuItem),
+        matching: find.text(value),
+      );
+      // Fallback to broad search if no DropdownMenuItem is found (e.g. custom
+      // dropdown implementations).
+      if (itemFinder.evaluate().isEmpty) {
+        itemFinder = find.text(value);
+      }
     } else {
       itemFinder = find.textContaining(value);
     }
@@ -966,7 +979,7 @@ class CommonTest {
     // Ensure the item is visible and tap it
     await tester.ensureVisible(itemFinder.last);
     await tester.pumpAndSettle();
-    await tester.tap(itemFinder.last);
+    await tester.tap(itemFinder.last, warnIfMissed: false);
     await tester.pumpAndSettle();
   }
 
