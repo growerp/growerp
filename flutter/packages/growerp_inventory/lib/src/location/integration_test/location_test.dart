@@ -97,6 +97,10 @@ class LocationTest {
     int numberOfDeletes,
   ) async {
     SaveTest test = await PersistFunctions.getTest();
+    // clear any active search filter so all locations are visible
+    await CommonTest.enterText(tester, 'searchField', '');
+    await tester.pump(Duration(seconds: CommonTest.waitTime));
+    await tester.pumpAndSettle(Duration(seconds: CommonTest.waitTime));
     // delete locations
     for (int x = 0; x < test.locations.length; x++) {
       await CommonTest.tapByKey(tester, "delete0");
@@ -108,7 +112,7 @@ class LocationTest {
     }
 
     // check locations deleted
-    expect(find.text('no locations found'), findsOneWidget);
+    expect(find.text('No data found'), findsOneWidget);
   }
 
   static Future<void> updateLocations(

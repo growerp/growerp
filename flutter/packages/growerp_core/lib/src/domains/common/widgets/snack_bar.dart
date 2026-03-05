@@ -45,6 +45,9 @@ SnackBar snackBar(
   final resolvedDuration = snackBarDuration(color, seconds: seconds);
   final resolvedColor = _resolveSnackBarColor(context, color);
   final colorScheme = Theme.of(context).colorScheme;
+  // Resolve ScaffoldMessengerState eagerly so the callback never calls
+  // ScaffoldMessenger.of() on a potentially deactivated context.
+  final scaffoldMessenger = ScaffoldMessenger.of(context);
 
   // Determine text color based on background
   final textColor = resolvedColor == colorScheme.error
@@ -61,7 +64,7 @@ SnackBar snackBar(
       label: 'Dismiss',
       textColor: textColor.withValues(alpha: 0.8),
       onPressed: () {
-        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        scaffoldMessenger.hideCurrentSnackBar();
       },
     ),
   );
