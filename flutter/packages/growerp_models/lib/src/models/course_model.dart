@@ -3,6 +3,7 @@
  * Grant of Patent License.
  */
 
+import 'package:decimal/decimal.dart';
 import 'package:json_annotation/json_annotation.dart';
 import '../json_converters.dart';
 
@@ -80,6 +81,8 @@ class Course {
   final String? courseId;
   final String? pseudoId;
   final String? ownerPartyId;
+  final String? productId;
+  final String? productPseudoId;
   final String title;
   final String? description;
   final String? objectives;
@@ -100,10 +103,19 @@ class Course {
   /// Count of lessons (from view entity for list display)
   final int? lessonCount;
 
+  /// Progress percentage for the current user (0–100), returned by
+  /// get#MyCourseSubscriptions for the learner dashboard.
+  final int? progressPercent;
+
+  /// Price of the course (from associated product). Null means free.
+  final Decimal? price;
+
   Course({
     this.courseId,
     this.pseudoId,
     this.ownerPartyId,
+    this.productId,
+    this.productPseudoId,
     required this.title,
     this.description,
     this.objectives,
@@ -117,6 +129,8 @@ class Course {
     this.modules,
     this.moduleCount,
     this.lessonCount,
+    this.progressPercent,
+    this.price,
   });
 
   factory Course.fromJson(Map<String, dynamic> json) => _$CourseFromJson(json);
@@ -126,6 +140,8 @@ class Course {
     String? courseId,
     String? pseudoId,
     String? ownerPartyId,
+    String? productId,
+    String? productPseudoId,
     String? title,
     String? description,
     String? objectives,
@@ -139,10 +155,14 @@ class Course {
     List<CourseModule>? modules,
     int? moduleCount,
     int? lessonCount,
+    int? progressPercent,
+    Decimal? price,
   }) => Course(
     courseId: courseId ?? this.courseId,
     pseudoId: pseudoId ?? this.pseudoId,
     ownerPartyId: ownerPartyId ?? this.ownerPartyId,
+    productId: productId ?? this.productId,
+    productPseudoId: productPseudoId ?? this.productPseudoId,
     title: title ?? this.title,
     description: description ?? this.description,
     objectives: objectives ?? this.objectives,
@@ -156,6 +176,8 @@ class Course {
     modules: modules ?? this.modules,
     moduleCount: moduleCount ?? this.moduleCount,
     lessonCount: lessonCount ?? this.lessonCount,
+    progressPercent: progressPercent ?? this.progressPercent,
+    price: price ?? this.price,
   );
 
   @override
@@ -497,4 +519,62 @@ class CourseProgress {
 
   @override
   String toString() => 'CourseProgress($courseId - $progressPercent%)';
+}
+
+/// Course Participant model (admin view of a student's progress in a course)
+@JsonSerializable()
+class CourseParticipant {
+  final String? courseId;
+  final String? courseTitle;
+  final String? userId;
+  final String? partyId;
+  final String? firstName;
+  final String? lastName;
+  final String? username;
+  final int? progressPercent;
+  @StringListConverter()
+  final List<String>? completedLessons;
+  @DateTimeConverter()
+  final DateTime? startedDate;
+  @DateTimeConverter()
+  final DateTime? lastAccessDate;
+  @DateTimeConverter()
+  final DateTime? completedDate;
+
+  CourseParticipant({
+    this.courseId,
+    this.courseTitle,
+    this.userId,
+    this.partyId,
+    this.firstName,
+    this.lastName,
+    this.username,
+    this.progressPercent = 0,
+    this.completedLessons,
+    this.startedDate,
+    this.lastAccessDate,
+    this.completedDate,
+  });
+
+  String get fullName =>
+      [firstName, lastName].where((s) => s != null && s.isNotEmpty).join(' ');
+
+  factory CourseParticipant.fromJson(Map<String, dynamic> json) =>
+      _$CourseParticipantFromJson(json);
+  Map<String, dynamic> toJson() => _$CourseParticipantToJson(this);
+
+  @override
+  String toString() => 'CourseParticipant($fullName - $progressPercent%)';
+}
+
+/// List wrapper for course participants
+@JsonSerializable()
+class CourseParticipants {
+  final List<CourseParticipant> participants;
+
+  CourseParticipants({required this.participants});
+
+  factory CourseParticipants.fromJson(Map<String, dynamic> json) =>
+      _$CourseParticipantsFromJson(json);
+  Map<String, dynamic> toJson() => _$CourseParticipantsToJson(this);
 }

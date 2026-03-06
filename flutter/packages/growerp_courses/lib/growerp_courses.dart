@@ -15,6 +15,8 @@ export 'package:growerp_models/growerp_models.dart'
         CourseMedia,
         // CourseMediaList is hidden to avoid collision with view
         CourseProgress,
+        CourseParticipant,
+        CourseParticipants,
         MediaPlatform,
         MediaType,
         CourseDifficulty;
@@ -28,6 +30,10 @@ export 'src/viewer/bloc/course_viewer_bloc.dart';
 export 'src/course/views/course_list.dart';
 export 'src/course/views/course_dialog.dart';
 export 'src/course/views/course_detail.dart';
+export 'src/course/views/course_participants_view.dart';
+export 'src/course/views/all_course_participants_view.dart';
+export 'src/course/views/course_catalog_view.dart';
+export 'src/course/views/course_payment_dialog.dart';
 
 export 'src/media/views/course_media_list.dart';
 export 'src/media/views/generate_media_dialog.dart';

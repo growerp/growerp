@@ -39,6 +39,7 @@ Grant of Patent License.
         <alias name="estimatedDuration" entity-alias="CRS" />
         <alias name="status" entity-alias="CRS" />
         <alias name="coverImageUrl" entity-alias="CRS" />
+        <alias name="productId" entity-alias="CRS" />
         <alias name="createdDate" entity-alias="CRS" />
         <alias name="lastModifiedDate" entity-alias="CRS" />
         

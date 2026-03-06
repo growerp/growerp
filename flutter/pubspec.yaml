@@ -35,6 +35,7 @@ workspace:
   - packages/health
   - packages/hotel
   - packages/support
+  - packages/elearner
   - packages/website
 dev_dependencies:
   melos: ^7.4.0
@@ -78,6 +79,7 @@ melos:
     - packages/assessment
     - packages/health
     - packages/support
+    - packages/elearner
 
   command:
     bootstrap:

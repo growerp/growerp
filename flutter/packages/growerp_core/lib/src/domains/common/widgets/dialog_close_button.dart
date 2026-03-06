@@ -35,10 +35,14 @@ class DialogCloseButton extends StatelessWidget {
             // the ShellRoute's Navigator may only have one page, so canPop()
             // returns false.  Fall back to GoRouter's context.pop() which
             // correctly pops the GoRouter route back to the previous location.
+            // If GoRouter also has nothing to pop (e.g. a top-level page like
+            // a profile view), navigate to the root instead.
             if (Navigator.of(context).canPop()) {
               Navigator.of(context).pop();
-            } else {
+            } else if (GoRouter.of(context).canPop()) {
               context.pop();
+            } else {
+              context.go('/');
             }
           },
           borderRadius: BorderRadius.circular(12),

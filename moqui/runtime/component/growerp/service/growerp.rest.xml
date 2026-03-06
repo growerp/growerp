@@ -992,6 +992,26 @@ along with this software (see the LICENSE.md file). If not, see
                 <service name="growerp.100.CourseServices100.update#CourseProgress" />
             </method>
         </resource>
+        <resource name="CourseParticipants">
+            <method type="get">
+                <service name="growerp.100.CourseServices100.list#CourseParticipants" />
+            </method>
+        </resource>
+        <resource name="MyCourseSubscriptions">
+            <method type="get">
+                <service name="growerp.100.CourseServices100.get#MyCourseSubscriptions" />
+            </method>
+        </resource>
+        <resource name="AllCourseParticipants">
+            <method type="get">
+                <service name="growerp.100.CourseServices100.list#AllCourseParticipants" />
+            </method>
+        </resource>
+        <resource name="CourseSubscription">
+            <method type="post">
+                <service name="growerp.100.CourseServices100.subscribe#Course" />
+            </method>
+        </resource>
     </resource>
     <!-- Antwebsystems website -->
     <resource name="storecontents" require-authentication="anonymous-view">

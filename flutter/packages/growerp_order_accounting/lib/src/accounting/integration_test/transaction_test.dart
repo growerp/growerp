@@ -172,8 +172,35 @@ class TransactionTest {
 
   static Future<void> checkTransactionsComplete(WidgetTester tester) async {
     SaveTest test = await PersistFunctions.getTest();
+    // Wait for initial list load before searching
+    for (var i = 0; i < 20; i++) {
+      await tester.pump(const Duration(seconds: 1));
+      await tester.pumpAndSettle();
+      if (tester.any(find.byKey(const Key('id0')))) break;
+    }
     for (FinDoc transaction in test.transactions) {
-      await CommonTest.doNewSearch(tester, searchString: transaction.pseudoId!);
+      // Enter search text
+      await CommonTest.enterText(tester, 'searchField', transaction.pseudoId!);
+      // Wait for HTTP search response with retry, verifying result matches
+      var found = false;
+      for (var i = 0; i < 30; i++) {
+        await tester.pump(const Duration(milliseconds: 500));
+        await tester.pumpAndSettle();
+        if (tester.any(find.byKey(const Key('id0'))) &&
+            CommonTest.getTextField('id0') == transaction.pseudoId) {
+          found = true;
+          break;
+        }
+      }
+      expect(
+        found,
+        true,
+        reason:
+            "Transaction ${transaction.pseudoId} not found in search results",
+      );
+      // Tap the first search result to open the detail dialog
+      await tester.tap(find.byKey(const Key('id0')));
+      await tester.pumpAndSettle(const Duration(seconds: 3));
       expect(
         CommonTest.getSwitchField('isPosted'),
         true,

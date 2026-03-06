@@ -19,12 +19,16 @@
         <field name="status" type="text-short" /> <!-- DRAFT, PUBLISHED, ARCHIVED -->
         <field name="coverImageUrl" type="text-long" />
 
+        <field name="productId" type="id" />
         <field name="createdDate" type="date-time" />
         <field name="lastModifiedDate" type="date-time" />
         <field name="createdByUserLogin" type="text-short" />
 
         <relationship type="one" related="mantle.party.Party">
             <key-map field-name="ownerPartyId" related="partyId" />
+        </relationship>
+        <relationship type="one" related="mantle.product.Product" title="Course">
+            <key-map field-name="productId" />
         </relationship>
         <relationship type="one" related="growerp.marketing.MarketingPersona">
             <key-map field-name="targetPersonaId" related="personaId" />

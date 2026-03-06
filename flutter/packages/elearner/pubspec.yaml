@@ -1,0 +1,84 @@
+name: elearner
+resolution: workspace
+description: Course reader app for students - GrowERP eLearner
+version: 1.0.0+1
+repository: https://github.com/growerp/growerp
+homepage: https://www.growerp.com
+publish_to: none
+environment:
+  sdk: ^3.9.0
+  flutter: ^3.33.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  growerp_user_company: ^1.9.0
+  growerp_website: ^1.9.0
+  growerp_courses: ^1.9.0
+  growerp_catalog: ^1.9.0
+  growerp_core: ^1.9.0
+  flutter_form_builder: ^10.1.0
+  form_builder_validators: ^11.2.0
+  growerp_models: ^1.11.6
+  flutter_localizations:
+    sdk: flutter
+  global_configuration: ^2.0.0
+  intl: ^0.20.2
+  shared_preferences: ^2.3.2
+  package_info_plus: ^9.0.0
+  universal_io: ^2.2.2
+  cupertino_icons: ^1.0.8
+  flutter_bloc: ^9.1.1
+  dio: ^5.4.3
+  http: ^1.1.2
+  bloc_concurrency: ^0.3.0
+  equatable: ^2.0.7
+  stream_transform: ^2.1.1
+  go_router: ^17.1.0
+  web: ^1.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_driver:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
+  webdriver: ^3.0.2
+  test: ^1.19.5
+  flutter_lints: ^6.0.0
+  flutter_launcher_icons: "^0.14.4"
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/icon/icon.png"
+  min_sdk_android: 21
+  web:
+    generate: true
+    image_path: "assets/icon/icon.png"
+    background_color: "#hexcode"
+    theme_color: "#hexcode"
+  windows:
+    generate: true
+    image_path: "assets/icon/icon.png"
+    icon_size: 48
+  macos:
+    generate: true
+    image_path: "assets/icon/icon.png"
+
+flutter:
+  uses-material-design: true
+  generate: true
+
+  assets:
+    - assets/cfg/
+    - assets/icon/
+    - packages/growerp_core/images/growerp.png
+    - packages/growerp_core/images/crm.png
+    - packages/growerp_core/images/growerp.jpg
+    - packages/growerp_core/images/growerpDark.jpg
+    - packages/growerp_core/images/growerp100.png
+    - packages/growerp_core/images/growerpDark100.png
+flutter_intl:
+  enabled: true

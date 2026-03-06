@@ -203,10 +203,8 @@ class CourseViewerBloc extends Bloc<CourseViewerEvent, CourseViewerState> {
     try {
       emit(state.copyWith(status: ViewerStatus.loading));
 
-      final response = await restClient.listCourses(
-        limit: 50,
-        start: 0,
-      );
+      // Fetch only courses the current user has active subscriptions for
+      final response = await restClient.getMyCourseSubscriptions();
 
       emit(state.copyWith(
         status: ViewerStatus.selectingCourse,

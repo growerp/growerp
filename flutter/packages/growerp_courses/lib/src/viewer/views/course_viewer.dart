@@ -209,13 +209,15 @@ class _CourseViewerContentState extends State<CourseViewerContent> {
   }
 
   Widget _buildCourseCard(BuildContext context, Course course) {
-    final moduleCount = course.modules?.length ?? 0;
+    final moduleCount = course.moduleCount ?? course.modules?.length ?? 0;
     final lessonCount =
+        course.lessonCount ??
         course.modules?.fold<int>(
           0,
           (sum, m) => sum + (m.lessons?.length ?? 0),
         ) ??
         0;
+    final progress = course.progressPercent ?? 0;
 
     return Card(
       clipBehavior: Clip.antiAlias,
@@ -270,6 +272,26 @@ class _CourseViewerContentState extends State<CourseViewerContent> {
                   ),
                 ),
               const Spacer(),
+              // Progress bar
+              Row(
+                children: [
+                  Expanded(
+                    child: LinearProgressIndicator(
+                      value: progress / 100,
+                      backgroundColor: Colors.grey[200],
+                      minHeight: 6,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    '$progress%',
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 6),
               Row(
                 children: [
                   Icon(

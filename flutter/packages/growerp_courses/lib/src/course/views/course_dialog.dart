@@ -3,10 +3,12 @@
  * Grant of Patent License.
  */
 
+import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_models/growerp_models.dart';
 import '../bloc/course_bloc.dart';
+import 'course_participants_view.dart';
 
 class CourseDialog extends StatefulWidget {
   final Course? course;
@@ -23,6 +25,7 @@ class _CourseDialogState extends State<CourseDialog> {
   late TextEditingController _descriptionController;
   late TextEditingController _objectivesController;
   late TextEditingController _durationController;
+  late TextEditingController _priceController;
   CourseDifficulty _selectedDifficulty = CourseDifficulty.beginner;
 
   bool get isEdit => widget.course?.courseId != null;
@@ -40,6 +43,9 @@ class _CourseDialogState extends State<CourseDialog> {
     _durationController = TextEditingController(
       text: widget.course?.estimatedDuration?.toString() ?? '',
     );
+    _priceController = TextEditingController(
+      text: widget.course?.price?.toStringAsFixed(2) ?? '',
+    );
     _selectedDifficulty =
         widget.course?.difficulty ?? CourseDifficulty.beginner;
   }
@@ -50,58 +56,96 @@ class _CourseDialogState extends State<CourseDialog> {
     _descriptionController.dispose();
     _objectivesController.dispose();
     _durationController.dispose();
+    _priceController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Dialog(
-      child: Container(
-        width: 600,
-        constraints: BoxConstraints(
-          maxHeight: MediaQuery.of(context).size.height * 0.8,
-        ),
-        child: Scaffold(
-          appBar: AppBar(
-            title: Text(isEdit ? 'Edit Course' : 'New Course'),
-            automaticallyImplyLeading: false,
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.close),
-                onPressed: () => Navigator.pop(context),
-              ),
-            ],
-          ),
-          body: Form(
-            key: _formKey,
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildTitleField(),
-                  const SizedBox(height: 16),
-                  _buildDescriptionField(),
-                  const SizedBox(height: 16),
-                  _buildObjectivesField(),
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Expanded(child: _buildDifficultyDropdown()),
-                      const SizedBox(width: 16),
-                      Expanded(child: _buildDurationField()),
+    final container = Container(
+      width: 600,
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height * 0.85,
+      ),
+      child: isEdit
+          ? DefaultTabController(
+              length: 2,
+              child: Scaffold(
+                appBar: AppBar(
+                  title: const Text('Edit Course'),
+                  automaticallyImplyLeading: false,
+                  actions: [
+                    IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                  ],
+                  bottom: const TabBar(
+                    tabs: [
+                      Tab(icon: Icon(Icons.edit_note), text: 'Details'),
+                      Tab(icon: Icon(Icons.group), text: 'Participants'),
                     ],
                   ),
-                  const SizedBox(height: 24),
-                  if (isEdit) ...[
-                    _buildModulesSection(),
-                    const SizedBox(height: 16),
+                ),
+                body: TabBarView(
+                  children: [
+                    _buildDetailsTab(),
+                    CourseParticipantsView(
+                      courseId: widget.course!.courseId!,
+                    ),
                   ],
+                ),
+                bottomNavigationBar: _buildActionButtons(),
+              ),
+            )
+          : Scaffold(
+              appBar: AppBar(
+                title: const Text('New Course'),
+                automaticallyImplyLeading: false,
+                actions: [
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.pop(context),
+                  ),
                 ],
               ),
+              body: _buildDetailsTab(),
+              bottomNavigationBar: _buildActionButtons(),
             ),
-          ),
-          bottomNavigationBar: _buildActionButtons(),
+    );
+
+    return Dialog(child: container);
+  }
+
+  Widget _buildDetailsTab() {
+    return Form(
+      key: _formKey,
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildTitleField(),
+            const SizedBox(height: 16),
+            _buildDescriptionField(),
+            const SizedBox(height: 16),
+            _buildObjectivesField(),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(child: _buildDifficultyDropdown()),
+                const SizedBox(width: 16),
+                Expanded(child: _buildDurationField()),
+              ],
+            ),
+            const SizedBox(height: 16),
+            _buildProductPriceRow(),
+            const SizedBox(height: 24),
+            if (isEdit) ...[
+              _buildModulesSection(),
+              const SizedBox(height: 16),
+            ],
+          ],
         ),
       ),
     );
@@ -193,6 +237,50 @@ class _CourseDialogState extends State<CourseDialog> {
         border: OutlineInputBorder(),
       ),
       keyboardType: TextInputType.number,
+    );
+  }
+
+  Widget _buildProductPriceRow() {
+    final productPseudoId = widget.course?.productPseudoId;
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: TextFormField(
+            key: const Key('courseProductPseudoId'),
+            readOnly: true,
+            initialValue: productPseudoId ?? '',
+            decoration: const InputDecoration(
+              labelText: 'Product ID',
+              border: OutlineInputBorder(),
+            ),
+          ),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: TextFormField(
+            key: const Key('coursePrice'),
+            controller: _priceController,
+            decoration: const InputDecoration(
+              labelText: 'Price',
+              hintText: '0.00',
+              prefixText: '\$',
+              border: OutlineInputBorder(),
+              helperText: 'Leave empty for free',
+            ),
+            keyboardType:
+                const TextInputType.numberWithOptions(decimal: true),
+            validator: (value) {
+              if (value != null && value.isNotEmpty) {
+                if (Decimal.tryParse(value) == null) {
+                  return 'Enter a valid price';
+                }
+              }
+              return null;
+            },
+          ),
+        ),
+      ],
     );
   }
 
@@ -322,9 +410,11 @@ class _CourseDialogState extends State<CourseDialog> {
   void _saveCourse() {
     if (!_formKey.currentState!.validate()) return;
 
+    final priceText = _priceController.text.trim();
     final course = Course(
       courseId: widget.course?.courseId,
       pseudoId: widget.course?.pseudoId,
+      productId: widget.course?.productId,
       title: _titleController.text,
       description: _descriptionController.text.isNotEmpty
           ? _descriptionController.text
@@ -336,6 +426,7 @@ class _CourseDialogState extends State<CourseDialog> {
       estimatedDuration: _durationController.text.isNotEmpty
           ? int.tryParse(_durationController.text)
           : null,
+      price: priceText.isNotEmpty ? Decimal.parse(priceText) : null,
     );
 
     if (isEdit) {

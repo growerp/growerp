@@ -5,6 +5,8 @@
 
 import 'package:growerp_core/growerp_core.dart';
 import 'course/views/course_list.dart';
+import 'course/views/all_course_participants_view.dart';
+import 'course/views/course_catalog_view.dart';
 import 'media/views/course_media_list.dart';
 import 'viewer/views/course_viewer.dart';
 
@@ -16,6 +18,8 @@ Map<String, GrowerpWidgetBuilder> getCoursesWidgets() {
         CourseViewer(courseId: args?['courseId'] as String? ?? ''),
     'CourseMediaList': (args) =>
         CourseMediaList(courseId: args?['courseId'] as String?),
+    'AllCourseParticipantsView': (args) => const AllCourseParticipantsView(),
+    'CourseCatalogView': (args) => const CourseCatalogView(),
   };
 }
 

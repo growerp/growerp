@@ -22,8 +22,12 @@ along with this software (see the LICENSE.md file). If not, see
         name="Health Menu" description="Default health application menu structure"/>
     <growerp.menu.MenuConfiguration menuConfigurationId="HOTEL_DEFAULT" appId="hotel" 
         name="Hotel Menu" description="Default hotel application menu structure"/>
-    <growerp.menu.MenuConfiguration menuConfigurationId="SUPPORT_DEFAULT" appId="support" 
+    <growerp.menu.MenuConfiguration menuConfigurationId="SUPPORT_DEFAULT" appId="support"
         name="Support Menu" description="Default support application menu structure"/>
+    <growerp.menu.MenuConfiguration menuConfigurationId="ELEARNER_DEFAULT" appId="elearner"
+        name="eLearner Customer Menu" description="eLearner menu for students/customers"/>
+    <growerp.menu.MenuConfiguration menuConfigurationId="ELEARNER_ADMIN_DEFAULT" appId="elearner_admin"
+        name="eLearner Admin Menu" description="eLearner menu for admin and employee users"/>
     <growerp.menu.MenuConfiguration menuConfigurationId="CATALOG_EXAMPLE_DEFAULT" appId="catalog_example" 
         name="Catalog Example Menu" description="Default menu for catalog example app"/>
     <growerp.menu.MenuConfiguration menuConfigurationId="INVENTORY_EXAMPLE_DEFAULT" appId="inventory_example" 
@@ -407,6 +411,28 @@ along with this software (see the LICENSE.md file). If not, see
     <growerp.menu.MenuItem menuItemId="SUPPORT_ABOUT" menuConfigurationId="SUPPORT_DEFAULT" 
         title="About" route="/about" iconName="info" widgetName="AboutForm" sequenceNum="40"/>
 
+    <!-- ====================== ELEARNER_DEFAULT (Customer/Student menu) ====================== -->
+    <growerp.menu.MenuItem menuItemId="ELEARNER_MY_COURSES" menuConfigurationId="ELEARNER_DEFAULT"
+        title="Take a Course" route="/" iconName="play_circle_outline" widgetName="ElearnerDashboard" sequenceNum="10"/>
+    <growerp.menu.MenuItem menuItemId="ELEARNER_ALL_COURSES" menuConfigurationId="ELEARNER_DEFAULT"
+        title="All Courses" route="/catalog" iconName="explore" widgetName="CourseCatalogView" sequenceNum="20"/>
+    <growerp.menu.MenuItem menuItemId="ELEARNER_PROFILE" menuConfigurationId="ELEARNER_DEFAULT"
+        title="Profile" route="/profile" iconName="person" widgetName="UserDialog" sequenceNum="30"/>
+
+    <!-- ====================== ELEARNER_ADMIN_DEFAULT (Admin/Employee menu) ====================== -->
+    <growerp.menu.MenuItem menuItemId="ELEARNER_ADM_SUBSCRIPTIONS" menuConfigurationId="ELEARNER_ADMIN_DEFAULT"
+        title="Participants" route="/participants" iconName="group" widgetName="ElearnerParticipantList" sequenceNum="10"/>
+    <growerp.menu.MenuItem menuItemId="ELEARNER_ADM_COURSES" menuConfigurationId="ELEARNER_ADMIN_DEFAULT"
+        title="Courses" route="/courses" iconName="school" widgetName="CourseList" sequenceNum="20"/>
+    <growerp.menu.MenuItem menuItemId="ELEARNER_ADM_VIEWER" menuConfigurationId="ELEARNER_ADMIN_DEFAULT"
+        title="Take a Course" route="/viewer" iconName="play_circle_outline" widgetName="CourseViewer" sequenceNum="30"/>
+    <growerp.menu.MenuItem menuItemId="ELEARNER_ADM_WEBSITE" menuConfigurationId="ELEARNER_ADMIN_DEFAULT"
+        title="Website" route="/website" iconName="webhook" widgetName="WebsiteDialog" sequenceNum="40"/>
+    <growerp.menu.MenuItem menuItemId="ELEARNER_ADM_COMPANY" menuConfigurationId="ELEARNER_ADMIN_DEFAULT"
+        title="Company" route="/company" iconName="home" widgetName="ShowCompanyDialog" sequenceNum="50"/>
+    <growerp.menu.MenuItem menuItemId="ELEARNER_ADM_ABOUT" menuConfigurationId="ELEARNER_ADMIN_DEFAULT"
+        title="About" route="/about" iconName="info" widgetName="AboutForm" sequenceNum="60"/>
+
     <!-- ====================== EXAMPLE APP MENUS ====================== -->
     <!-- Catalog Example -->
     <growerp.menu.MenuItem menuItemId="CATALOG_EX_MAIN" menuConfigurationId="CATALOG_EXAMPLE_DEFAULT" 
@@ -510,6 +536,6 @@ along with this software (see the LICENSE.md file). If not, see
     <growerp.menu.MenuItem menuItemId="COURSES_EX_COURSES_LIST" menuConfigurationId="COURSES_EXAMPLE_DEFAULT" parentMenuItemId="COURSES_EX_COURSES"
         title="Course List" iconName="list" widgetName="CourseList" sequenceNum="10"/>
     <growerp.menu.MenuItem menuItemId="COURSES_EX_COURSES_VIEWER" menuConfigurationId="COURSES_EXAMPLE_DEFAULT" parentMenuItemId="COURSES_EX_COURSES"
-        title="Course Viewer" iconName="school" widgetName="CourseViewer" sequenceNum="20"/>
+        title="Take a Course" iconName="school" widgetName="CourseViewer" sequenceNum="20"/>
 
 </entity-facade-xml>

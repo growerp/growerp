@@ -15,9 +15,13 @@ dependencies:
   equatable: ^2.0.5
   growerp_core: ^1.9.0
   growerp_models: ^1.11.6
+  decimal: ^3.0.2
   flutter_markdown_plus: ^1.0.7
   url_launcher: ^6.2.1
   bloc: ^9.2.0
+  flutter_form_builder: ^10.0.1
+  form_builder_validators: ^11.0.0
+  global_configuration: ^2.0.0
 
 dev_dependencies:
   flutter_test:

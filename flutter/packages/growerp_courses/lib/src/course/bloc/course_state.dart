@@ -11,6 +11,8 @@ class CourseState extends Equatable {
   final CourseBlocStatus status;
   final List<Course> courses;
   final Course? selectedCourse;
+  final List<CourseParticipant> participants;
+  final List<CourseParticipant> allParticipants;
   final String? message;
   final bool hasReachedMax;
 
@@ -18,6 +20,8 @@ class CourseState extends Equatable {
     this.status = CourseBlocStatus.initial,
     this.courses = const [],
     this.selectedCourse,
+    this.participants = const [],
+    this.allParticipants = const [],
     this.message,
     this.hasReachedMax = false,
   });
@@ -26,6 +30,8 @@ class CourseState extends Equatable {
     CourseBlocStatus? status,
     List<Course>? courses,
     Course? selectedCourse,
+    List<CourseParticipant>? participants,
+    List<CourseParticipant>? allParticipants,
     String? message,
     bool? hasReachedMax,
   }) {
@@ -33,6 +39,8 @@ class CourseState extends Equatable {
       status: status ?? this.status,
       courses: courses ?? this.courses,
       selectedCourse: selectedCourse ?? this.selectedCourse,
+      participants: participants ?? this.participants,
+      allParticipants: allParticipants ?? this.allParticipants,
       message: message,
       hasReachedMax: hasReachedMax ?? this.hasReachedMax,
     );
@@ -43,6 +51,8 @@ class CourseState extends Equatable {
         status,
         courses,
         selectedCourse,
+        participants,
+        allParticipants,
         message,
         hasReachedMax,
       ];

@@ -1,7 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <entity-facade-xml type="seed">
+    <!-- Service products backing each course (required for subscriptions) -->
+    <mantle.product.Product productId="ProductCourseGrowerp" productTypeEnumId="PtService"
+        productName="How to Create a Course with GrowERP: The Curriculum"
+        ownerPartyId="_NA_" requireInventory="N" />
+    <mantle.product.Product productId="ProductCourseMarketingSales" productTypeEnumId="PtService"
+        productName="Marketing, Outreach and Sales: Your Complete GrowERP Growth Pipeline"
+        ownerPartyId="_NA_" requireInventory="N" />
+
     <growerp.course.Course courseId="CourseGrowerp" ownerPartyId="_NA_"
+        productId="ProductCourseGrowerp"
         title="How to Create a Course with GrowERP: The Curriculum"
         description="This curriculum outlines the process of building, validating, and selling a course using the GrowERP ecosystem. It combines industry best practices with the specific tools and strategies found in the GrowERP architecture (Assessments, Landing Pages, and Outreach)."
         objectives="To take a course creator from &quot;Idea&quot; to &quot;Automated Sales Funnel&quot; using GrowERP."
@@ -140,6 +149,7 @@
     </growerp.course.CourseLesson>
 
     <growerp.course.Course courseId="CourseMarketingSales" ownerPartyId="_NA_"
+        productId="ProductCourseMarketingSales"
         title="Marketing, Outreach and Sales: Your Complete GrowERP Growth Pipeline"
         description="A comprehensive guide for marketers and sales reps covering every screen, workflow, and integration point across the growerp_marketing, growerp_outreach, and growerp_sales packages. By the end you will have a fully operational funnel: from a public landing page that captures leads, through an automated outreach sequence that warms them up, to a closed sales opportunity with a quote ready for the customer."
         objectives="Build a complete automated sales funnel in GrowERP: create a persona and landing page, capture leads via an assessment, nurture them with an outreach campaign, manage the pipeline through to Closed Won, and convert the opportunity to a quote."

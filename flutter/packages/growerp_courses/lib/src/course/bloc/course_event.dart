@@ -126,6 +126,50 @@ class CourseLessonDelete extends CourseEvent {
   List<Object?> get props => [lesson];
 }
 
+/// Fetch all participants' progress for a course (admin)
+class CourseParticipantsFetch extends CourseEvent {
+  final String courseId;
+
+  const CourseParticipantsFetch(this.courseId);
+
+  @override
+  List<Object?> get props => [courseId];
+}
+
+/// Fetch participants across ALL courses (admin overview, searchable)
+class CourseAllParticipantsFetch extends CourseEvent {
+  final String? searchString;
+  final bool refresh;
+
+  const CourseAllParticipantsFetch({this.searchString, this.refresh = false});
+
+  @override
+  List<Object?> get props => [searchString, refresh];
+}
+
+/// Subscribe current user to a course (with optional payment)
+class CourseSubscribe extends CourseEvent {
+  final String courseId;
+  final String? creditCardNumber;
+  final String? nameOnCard;
+  final String? expireMonth;
+  final String? expireYear;
+  final String? cVC;
+
+  const CourseSubscribe({
+    required this.courseId,
+    this.creditCardNumber,
+    this.nameOnCard,
+    this.expireMonth,
+    this.expireYear,
+    this.cVC,
+  });
+
+  @override
+  List<Object?> get props =>
+      [courseId, creditCardNumber, nameOnCard, expireMonth, expireYear, cVC];
+}
+
 /// Generate AI media content from course
 class CourseMediaGenerate extends CourseEvent {
   final String courseId;

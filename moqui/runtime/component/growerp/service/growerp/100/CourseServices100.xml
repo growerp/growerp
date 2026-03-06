@@ -16,6 +16,7 @@ Grant of Patent License.
             <parameter name="limit" type="Integer" default="20" />
             <parameter name="filter" type="String" />
             <parameter name="status" type="String" />
+            <parameter name="productId" type="String" />
         </in-parameters>
         <out-parameters>
             <parameter name="courses" type="List" />
@@ -29,6 +30,7 @@ Grant of Patent License.
             <entity-find entity-name="growerp.course.Course" list="courseList">
                 <econdition field-name="ownerPartyId" from="weightContext.ownerPartyId" />
                 <econdition field-name="status" ignore-if-empty="true" />
+                <econdition field-name="productId" ignore-if-empty="true" />
                 <econditions combine="or">
                     <econdition field-name="title" operator="like" from="filter"
                         ignore-if-empty="true" />
@@ -67,11 +69,30 @@ Grant of Patent License.
                         ])
                     </script>
                 </iterate>
+                <!-- Look up product price and pseudoId -->
+                <set field="coursePrice" from="null" />
+                <set field="productPseudoId" from="null" />
+                <if condition="courseEntity.productId">
+                    <entity-find entity-name="mantle.product.ProductPrice" list="priceList">
+                        <econdition field-name="productId" from="courseEntity.productId" />
+                        <date-filter />
+                        <order-by field-name="-fromDate" />
+                    </entity-find>
+                    <if condition="priceList">
+                        <set field="coursePrice" from="priceList[0].price" />
+                    </if>
+                    <entity-find-one entity-name="mantle.product.Product" value-field="productEntity">
+                        <field-map field-name="productId" from="courseEntity.productId" />
+                    </entity-find-one>
+                    <set field="productPseudoId" from="productEntity?.pseudoId" />
+                </if>
                 <script>
                     courses.add([
                         courseId: courseEntity.courseId,
                         pseudoId: courseEntity.pseudoId,
                         ownerPartyId: courseEntity.ownerPartyId,
+                        productId: courseEntity.productId,
+                        productPseudoId: productPseudoId,
                         title: courseEntity.title,
                         description: courseEntity.description,
                         objectives: courseEntity.objectives,
@@ -82,7 +103,8 @@ Grant of Patent License.
                         coverImageUrl: courseEntity.coverImageUrl,
                         createdDate: courseEntity.createdDate,
                         lastModifiedDate: courseEntity.lastModifiedDate,
-                        modules: modulesWithLessons
+                        modules: modulesWithLessons,
+                        price: coursePrice
                     ])
                 </script>
             </iterate>
@@ -130,11 +152,30 @@ Grant of Patent License.
                     ])
                 </script>
             </iterate>
+            <!-- Look up product price and pseudoId -->
+            <set field="coursePrice" from="null" />
+            <set field="productPseudoId" from="null" />
+            <if condition="courseEntity.productId">
+                <entity-find entity-name="mantle.product.ProductPrice" list="priceList">
+                    <econdition field-name="productId" from="courseEntity.productId" />
+                    <date-filter />
+                    <order-by field-name="-fromDate" />
+                </entity-find>
+                <if condition="priceList">
+                    <set field="coursePrice" from="priceList[0].price" />
+                </if>
+                <entity-find-one entity-name="mantle.product.Product" value-field="productEntity">
+                    <field-map field-name="productId" from="courseEntity.productId" />
+                </entity-find-one>
+                <set field="productPseudoId" from="productEntity?.pseudoId" />
+            </if>
             <set field="course"
                 from="[
                 courseId: courseEntity.courseId,
                 pseudoId: courseEntity.pseudoId,
                 ownerPartyId: courseEntity.ownerPartyId,
+                productId: courseEntity.productId,
+                productPseudoId: productPseudoId,
                 title: courseEntity.title,
                 description: courseEntity.description,
                 objectives: courseEntity.objectives,
@@ -145,7 +186,8 @@ Grant of Patent License.
                 coverImageUrl: courseEntity.coverImageUrl,
                 createdDate: courseEntity.createdDate,
                 lastModifiedDate: courseEntity.lastModifiedDate,
-                modules: modulesWithLessons
+                modules: modulesWithLessons,
+                price: coursePrice
             ]" />
         </actions>
     </service>
@@ -159,10 +201,12 @@ Grant of Patent License.
             <parameter name="difficulty" default-value="BEGINNER" />
             <parameter name="estimatedDuration" type="Integer" />
             <parameter name="coverImageUrl" />
+            <parameter name="productId" />
         </in-parameters>
         <out-parameters>
             <parameter name="courseId" />
             <parameter name="pseudoId" />
+            <parameter name="productId" />
         </out-parameters>
         <actions>
             <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
@@ -170,10 +214,29 @@ Grant of Patent License.
             <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
                 in-map="[ownerPartyId: context.ownerPartyId, seqName: 'Course']"
                 out-map="seqContext" />
+            <!-- Auto-create a service product when no productId is provided -->
+            <if condition="!productId">
+                <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                    in-map="[ownerPartyId: context.ownerPartyId, seqName: 'product']"
+                    out-map="prodSeq" />
+                <service-call name="create#mantle.product.Product"
+                    in-map="[
+                        pseudoId: prodSeq.seqNum,
+                        productName: title,
+                        description: description,
+                        ownerPartyId: context.ownerPartyId,
+                        productTypeEnumId: 'PtService',
+                        requireInventory: 'N',
+                        salesIntroductionDate: ec.user.nowTimestamp
+                    ]"
+                    out-map="productContext" />
+                <set field="productId" from="productContext.productId" />
+            </if>
             <service-call name="create#growerp.course.Course"
                 in-map="[
                 pseudoId: seqContext.seqNum,
                 ownerPartyId: context.ownerPartyId,
+                productId: productId,
                 title: title,
                 description: description,
                 objectives: objectives,
@@ -203,6 +266,8 @@ Grant of Patent License.
             <parameter name="estimatedDuration" type="Integer" />
             <parameter name="status" />
             <parameter name="coverImageUrl" />
+            <parameter name="productId" />
+            <parameter name="price" type="BigDecimal" />
         </in-parameters>
         <out-parameters>
             <parameter name="courseId" />
@@ -220,6 +285,7 @@ Grant of Patent License.
             <service-call name="update#growerp.course.Course"
                 in-map="[
                 courseId: courseId,
+                productId: productId ?: courseEntity.productId,
                 title: title ?: courseEntity.title,
                 description: description ?: courseEntity.description,
                 objectives: objectives ?: courseEntity.objectives,
@@ -230,6 +296,31 @@ Grant of Patent License.
                 coverImageUrl: coverImageUrl ?: courseEntity.coverImageUrl,
                 lastModifiedDate: ec.user.nowTimestamp
             ]" />
+            <!-- Update product price when price is provided -->
+            <if condition="price != null &amp;&amp; courseEntity.productId">
+                <set field="effectiveProductId" from="courseEntity.productId" />
+                <!-- Expire existing active prices -->
+                <entity-find entity-name="mantle.product.ProductPrice" list="existingPrices">
+                    <econdition field-name="productId" from="effectiveProductId" />
+                    <date-filter />
+                </entity-find>
+                <iterate list="existingPrices" entry="existingPrice">
+                    <service-call name="update#mantle.product.ProductPrice"
+                        in-map="[productPriceId: existingPrice.productPriceId, thruDate: ec.user.nowTimestamp]" />
+                </iterate>
+                <!-- Create new price record if price > 0 -->
+                <if condition="price > 0">
+                    <service-call name="create#mantle.product.ProductPrice"
+                        in-map="[
+                        productId: effectiveProductId,
+                        priceTypeEnumId: 'PptCurrent',
+                        pricePurposeEnumId: 'PppPurchase',
+                        currencyUomId: 'USD',
+                        price: price,
+                        fromDate: ec.user.nowTimestamp
+                    ]" />
+                </if>
+            </if>
         </actions>
     </service>
 
@@ -664,6 +755,211 @@ Grant of Patent License.
         </actions>
     </service>
 
+    <service verb="get" noun="MyCourseSubscriptions">
+        <description>Returns courses the current user has active subscriptions for (elearner app)</description>
+        <out-parameters>
+            <parameter name="courses" type="List" />
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="context" />
+            <!-- Find the current user's partyId -->
+            <entity-find-one entity-name="moqui.security.UserAccount" value-field="userAccount">
+                <field-map field-name="userId" from="ec.user.userId" />
+            </entity-find-one>
+            <set field="currentPartyId" from="userAccount?.partyId" />
+            <!-- Find active subscriptions for this subscriber and owner -->
+            <entity-find entity-name="mantle.product.subscription.Subscription" list="subscriptionList">
+                <econdition field-name="ownerPartyId" from="context.ownerPartyId" />
+                <econdition field-name="subscriberPartyId" from="currentPartyId" />
+                <econdition field-name="thruDate" operator="greater" from="ec.user.nowTimestamp"
+                    ignore-if-empty="true" or-null="true" />
+            </entity-find>
+            <set field="courses" from="[]" />
+            <iterate list="subscriptionList" entry="subscription">
+                <if condition="subscription.productId">
+                    <!-- Find the course linked to this product -->
+                    <entity-find entity-name="growerp.course.Course" list="courseList">
+                        <econdition field-name="ownerPartyId" from="context.ownerPartyId" />
+                        <econdition field-name="productId" from="subscription.productId" />
+                        <econdition field-name="status" value="PUBLISHED" />
+                    </entity-find>
+                    <iterate list="courseList" entry="courseEntity">
+                        <!-- Count modules and lessons -->
+                        <entity-find entity-name="growerp.course.CourseModule" list="moduleList">
+                            <econdition field-name="courseId" from="courseEntity.courseId" />
+                        </entity-find>
+                        <set field="lessonCount" from="0" />
+                        <iterate list="moduleList" entry="mod">
+                            <entity-find entity-name="growerp.course.CourseLesson" list="lessonList">
+                                <econdition field-name="moduleId" from="mod.moduleId" />
+                            </entity-find>
+                            <set field="lessonCount" from="lessonCount + lessonList.size()" />
+                        </iterate>
+                        <!-- Look up progress for the current user -->
+                        <entity-find-one entity-name="growerp.course.CourseProgress"
+                            value-field="courseProgress">
+                            <field-map field-name="courseId" from="courseEntity.courseId" />
+                            <field-map field-name="userId" from="ec.user.userId" />
+                        </entity-find-one>
+                        <script>
+                            courses.add([
+                                courseId: courseEntity.courseId,
+                                pseudoId: courseEntity.pseudoId,
+                                ownerPartyId: courseEntity.ownerPartyId,
+                                productId: courseEntity.productId,
+                                title: courseEntity.title,
+                                description: courseEntity.description,
+                                objectives: courseEntity.objectives,
+                                difficulty: courseEntity.difficulty,
+                                estimatedDuration: courseEntity.estimatedDuration,
+                                status: courseEntity.status,
+                                coverImageUrl: courseEntity.coverImageUrl,
+                                moduleCount: moduleList.size(),
+                                lessonCount: lessonCount,
+                                progressPercent: courseProgress?.progressPercent ?: 0
+                            ])
+                        </script>
+                    </iterate>
+                </if>
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="list" noun="CourseParticipants">
+        <description>Returns all users' progress for a course (admin use)</description>
+        <in-parameters>
+            <parameter name="courseId" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="participants" type="List" />
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="context" />
+            <entity-find-one entity-name="growerp.course.Course" value-field="courseEntity">
+                <field-map field-name="courseId" />
+            </entity-find-one>
+            <if condition="courseEntity?.ownerPartyId != context.ownerPartyId">
+                <message error="true">Course not found or access denied</message>
+                <return />
+            </if>
+            <entity-find entity-name="growerp.course.CourseProgress" list="progressList">
+                <econdition field-name="courseId" />
+                <order-by field-name="-lastAccessDate" />
+            </entity-find>
+            <set field="participants" from="[]" />
+            <iterate list="progressList" entry="prog">
+                <entity-find-one entity-name="moqui.security.UserAccount" value-field="userAccount">
+                    <field-map field-name="userId" from="prog.userId" />
+                </entity-find-one>
+                <entity-find-one entity-name="mantle.party.Person" value-field="person"
+                    cache="true">
+                    <field-map field-name="partyId" from="userAccount?.partyId" />
+                </entity-find-one>
+                <script>
+                    participants.add([
+                        userId: prog.userId,
+                        partyId: userAccount?.partyId,
+                        firstName: person?.firstName,
+                        lastName: person?.lastName,
+                        username: userAccount?.username,
+                        progressPercent: prog.progressPercent,
+                        completedLessons: prog.completedLessons,
+                        startedDate: prog.startedDate,
+                        lastAccessDate: prog.lastAccessDate,
+                        completedDate: prog.completedDate
+                    ])
+                </script>
+            </iterate>
+        </actions>
+    </service>
+
+    <!-- ========================================================= -->
+    <!--  All Course Participants (admin: across all courses)      -->
+    <!-- ========================================================= -->
+
+    <service verb="list" noun="AllCourseParticipants">
+        <description>Returns participants across all courses for the company (admin use), with optional search on name, email or course title.
+            Source is subscriptions so newly enrolled participants appear immediately even before they start a course.</description>
+        <in-parameters>
+            <parameter name="start" type="Integer" default="0" />
+            <parameter name="limit" type="Integer" default="50" />
+            <parameter name="filter" type="String" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="participants" type="List" />
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="context" />
+            <!-- Get all courses for this company that have a productId (required for subscriptions) -->
+            <entity-find entity-name="growerp.course.Course" list="courseList">
+                <econdition field-name="ownerPartyId" from="context.ownerPartyId" />
+                <econdition field-name="productId" operator="is-not-null" />
+                <order-by field-name="title" />
+            </entity-find>
+            <set field="participants" from="[]" />
+            <iterate list="courseList" entry="course">
+                <!-- Find active subscriptions for this course's product -->
+                <entity-find entity-name="mantle.product.subscription.Subscription" list="subscriptionList">
+                    <econdition field-name="productId" from="course.productId" />
+                    <econdition field-name="ownerPartyId" from="context.ownerPartyId" />
+                    <order-by field-name="-purchaseFromDate" />
+                </entity-find>
+                <iterate list="subscriptionList" entry="subscription">
+                    <!-- Look up subscriber party -->
+                    <entity-find-one entity-name="mantle.party.Person" value-field="person" cache="true">
+                        <field-map field-name="partyId" from="subscription.subscriberPartyId" />
+                    </entity-find-one>
+                    <entity-find-one entity-name="moqui.security.UserAccount" value-field="userAccount" cache="true">
+                        <field-map field-name="partyId" from="subscription.subscriberPartyId" />
+                    </entity-find-one>
+                    <!-- Look up progress if the participant has started the course -->
+                    <entity-find entity-name="growerp.course.CourseProgress" list="progressList">
+                        <econdition field-name="courseId" from="course.courseId" />
+                        <econdition field-name="userId" from="userAccount?.userId" ignore-if-empty="true" />
+                        <order-by field-name="-lastAccessDate" />
+                    </entity-find>
+                    <set field="prog" from="progressList ? progressList[0] : null" />
+                    <script>
+                        def firstName = person?.firstName ?: ''
+                        def lastName = person?.lastName ?: ''
+                        def fullName = (firstName + ' ' + lastName).trim()
+                        def username = userAccount?.username ?: ''
+                        def courseTitle = course.title ?: ''
+                        // Apply search filter on name, email/username or course title
+                        def matchesFilter = true
+                        if (filter?.trim()) {
+                            def q = filter.trim().toLowerCase()
+                            matchesFilter = fullName.toLowerCase().contains(q) ||
+                                           username.toLowerCase().contains(q) ||
+                                           courseTitle.toLowerCase().contains(q)
+                        }
+                        if (matchesFilter) {
+                            participants.add([
+                                courseId: course.courseId,
+                                courseTitle: courseTitle,
+                                userId: userAccount?.userId,
+                                partyId: subscription.subscriberPartyId,
+                                firstName: firstName,
+                                lastName: lastName,
+                                username: username,
+                                progressPercent: prog?.progressPercent ?: 0,
+                                completedLessons: prog?.completedLessons,
+                                startedDate: prog?.startedDate,
+                                lastAccessDate: prog?.lastAccessDate,
+                                completedDate: prog?.completedDate
+                            ])
+                        }
+                    </script>
+                </iterate>
+            </iterate>
+            <!-- Apply pagination after filtering -->
+            <set field="participants" from="participants.drop(start).take(limit)" />
+        </actions>
+    </service>
+
     <!-- ========================================================= -->
     <!--  AI Media Generation Service (delegates to Groovy)       -->
     <!-- ========================================================= -->
@@ -723,6 +1019,131 @@ Grant of Patent License.
 
             <!-- Call the Groovy script for video generation -->
             <script location="component://growerp/service/generateVideoFromScript.groovy"/>
+        </actions>
+    </service>
+
+    <!-- ========================================================= -->
+    <!--  Self-service Course Subscription (with optional payment) -->
+    <!-- ========================================================= -->
+
+    <service verb="subscribe" noun="Course">
+        <description>Subscribe the current authenticated user to a course, processing Stripe payment if the course has a price.</description>
+        <in-parameters>
+            <parameter name="courseId" required="true" />
+            <parameter name="creditCardNumber" />
+            <parameter name="nameOnCard" />
+            <parameter name="expireMonth" />
+            <parameter name="expireYear" />
+            <parameter name="cVC" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="subscriptionId" />
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="context" />
+            <set field="ownerPartyId" from="context.ownerPartyId" />
+            <set field="companyPartyId" from="context.companyPartyId" />
+
+            <!-- Get current user's partyId -->
+            <entity-find-one entity-name="moqui.security.UserAccount" value-field="userAccount">
+                <field-map field-name="userId" from="ec.user.userId" />
+            </entity-find-one>
+            <set field="subscriberPartyId" from="userAccount.partyId" />
+
+            <!-- Get course -->
+            <entity-find-one entity-name="growerp.course.Course" value-field="courseEntity">
+                <field-map field-name="courseId" />
+            </entity-find-one>
+            <if condition="!courseEntity">
+                <return error="true" message="Course not found" />
+            </if>
+            <set field="productId" from="courseEntity.productId" />
+
+            <!-- Check already subscribed -->
+            <entity-find entity-name="mantle.product.subscription.Subscription" list="existingSubs">
+                <econdition field-name="ownerPartyId" from="ownerPartyId" />
+                <econdition field-name="subscriberPartyId" />
+                <econdition field-name="productId" />
+                <econdition field-name="thruDate" operator="greater" from="ec.user.nowTimestamp"
+                    ignore-if-empty="true" or-null="true" />
+            </entity-find>
+            <if condition="existingSubs">
+                <return error="true" message="Already subscribed to this course" />
+            </if>
+
+            <!-- Look up product price -->
+            <set field="coursePrice" from="null" />
+            <if condition="productId">
+                <entity-find entity-name="mantle.product.ProductPrice" list="priceList">
+                    <econdition field-name="productId" />
+                    <date-filter />
+                    <order-by field-name="-fromDate" />
+                </entity-find>
+                <if condition="priceList">
+                    <set field="coursePrice" from="priceList[0].price" />
+                </if>
+            </if>
+
+            <!-- Process payment if price > 0 -->
+            <if condition="coursePrice != null &amp;&amp; coursePrice > 0">
+                <if condition="!creditCardNumber">
+                    <return error="true" message="Payment information required for paid courses" />
+                </if>
+                <!-- Find or create payment method -->
+                <entity-find entity-name="mantle.account.method.PaymentMethod" list="pms">
+                    <econdition field-name="ownerPartyId" from="subscriberPartyId" />
+                </entity-find>
+                <if condition="pms">
+                    <set field="paymentMethodId" from="pms[0].paymentMethodId" />
+                    <else>
+                        <set field="expireDate" value="${expireMonth}/20${expireYear}" />
+                        <service-call name="mantle.account.PaymentMethodServices.create#CreditCard"
+                            in-map="[
+                                paymentMethodTypeEnumId: 'PmtCreditCard',
+                                ownerPartyId: subscriberPartyId,
+                                cardNumber: creditCardNumber,
+                                expireDate: expireDate,
+                                firstNameOnAccount: nameOnCard,
+                                lastNameOnAccount: '',
+                                paymentGatewayConfigId: System.getProperty('paymentGatewayConfigId')
+                            ]" out-map="ccOut" />
+                        <set field="paymentMethodId" from="ccOut.paymentMethodId" />
+                    </else>
+                </if>
+                <!-- Create payment record -->
+                <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                    in-map="[ownerPartyId: ownerPartyId, seqName: 'payment']" out-map="paySeq" />
+                <service-call name="create#mantle.account.payment.Payment"
+                    in-map="[
+                        statusId: 'PmntPromised',
+                        pseudoId: paySeq.seqNum,
+                        paymentMethodId: paymentMethodId,
+                        amount: coursePrice,
+                        amountUomId: 'USD',
+                        paymentInstrumentEnumId: 'PiCreditCard',
+                        effectiveDate: ec.user.nowTimestamp,
+                        paymentTypeEnumId: 'PmtCreditCard',
+                        fromPartyId: subscriberPartyId,
+                        toPartyId: companyPartyId
+                    ]" out-map="paymentInfo" />
+                <!-- Process via Stripe -->
+                <if condition="System.getProperty('paymentGatewayConfigId') == 'STRIPE'">
+                    <service-call name="Stripe.StripePaymentServices.authorizeAndCapture#Payment"
+                        in-map="[paymentId: paymentInfo.paymentId,
+                                 paymentGatewayConfigId: System.getProperty('paymentGatewayConfigId')]" />
+                </if>
+            </if>
+
+            <!-- Create subscription -->
+            <service-call name="create#mantle.product.subscription.Subscription"
+                in-map="[
+                    ownerPartyId: ownerPartyId,
+                    subscriberPartyId: subscriberPartyId,
+                    productId: productId,
+                    fromDate: ec.user.nowTimestamp
+                ]" out-map="subOut" />
+            <set field="subscriptionId" from="subOut.subscriptionId" />
         </actions>
     </service>
 

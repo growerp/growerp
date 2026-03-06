@@ -1464,6 +1464,8 @@ abstract class RestClient {
   @GET("rest/s1/growerp/100/Courses")
   Future<Courses> listCourses({
     @Query('filter') String? filter,
+    @Query('status') String? status,
+    @Query('productId') String? productId,
     @Query('start') int? start,
     @Query('limit') int? limit,
   });
@@ -1540,4 +1542,22 @@ abstract class RestClient {
   Future<dynamic> generateVideoFromScript({
     @Body() required Map<String, dynamic> data,
   });
+
+  @GET("rest/s1/growerp/100/CourseParticipants")
+  Future<CourseParticipants> getCourseParticipants({
+    @Query('courseId') required String courseId,
+  });
+
+  @GET("rest/s1/growerp/100/MyCourseSubscriptions")
+  Future<Courses> getMyCourseSubscriptions();
+
+  @GET("rest/s1/growerp/100/AllCourseParticipants")
+  Future<CourseParticipants> getAllCourseParticipants({
+    @Query('filter') String? filter,
+    @Query('start') int? start,
+    @Query('limit') int? limit,
+  });
+
+  @POST("rest/s1/growerp/100/CourseSubscription")
+  Future<dynamic> subscribeCourse({@Body() required Map<String, dynamic> data});
 }

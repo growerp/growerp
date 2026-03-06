@@ -92,6 +92,8 @@ along with this software (see the LICENSE.md file). If not, see
         classificationTypeEnumId="PcltMobileApp" description="Health/hospital/clinic application" />
     <mantle.party.PartyClassification partyClassificationId="AppLandingPage"
         classificationTypeEnumId="PcltMobileApp" description="Marketing landing page application" />
+    <mantle.party.PartyClassification partyClassificationId="AppElearner"
+        classificationTypeEnumId="PcltMobileApp" description="eLearner app for students to read subscribed courses" />
 
     <!-- sales opportunity stage -->
     <mantle.sales.opportunity.SalesOpportunityStage opportunityStageId="Prospecting" sequenceNum="1" />

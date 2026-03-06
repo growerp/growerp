@@ -107,6 +107,37 @@
             ]
         },
         {
+            "name": "E-Learner mobile (lib/main.dart)",
+            "type": "dart",
+            "request": "launch",
+            "cwd": "flutter/packages/elearner",
+            "program": "lib/main.dart"
+        },
+        {
+            "name": "E-Learner linux (lib/main.dart)",
+            "type": "dart",
+            "request": "launch",
+            "cwd": "flutter/packages/elearner",
+            "program": "lib/main.dart",
+            "args": [
+                "-d",
+                "linux"
+            ]
+        },
+        {
+            "name": "E-Learner Web (lib/main.dart)",
+            "type": "dart",
+            "request": "launch",
+            "cwd": "flutter/packages/elearner",
+            "program": "lib/main.dart",
+            "args": [
+                "-d",
+                "chrome",
+                "--web-port",
+                "55555"
+            ]
+        },
+        {
             "name": "Freelance mobile (lib/main.dart)",
             "type": "dart",
             "request": "launch",

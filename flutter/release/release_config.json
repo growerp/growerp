@@ -1,6 +1,7 @@
 {
   "defaultApps": [
     "admin",
+    "elearner",
     "freelance",
     "health",
     "hotel",

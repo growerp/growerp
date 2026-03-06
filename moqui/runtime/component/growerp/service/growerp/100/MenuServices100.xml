@@ -84,6 +84,16 @@ Service definitions for menu configuration and menu item management
         import java.text.SimpleDateFormat
         def isoFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
         
+        import groovy.json.JsonSlurper
+        def jsonSlurper = new JsonSlurper()
+
+        // Parse userGroupsJson string into a proper list for Flutter model
+        def parseUserGroups = { jsonStr ->
+            if (!jsonStr) return null
+            try { return jsonSlurper.parseText(jsonStr.toString()) }
+            catch (e) { return null }
+        }
+
         // Recursive function to build menu item tree
         def buildMenuItem
         buildMenuItem = { item ->
@@ -92,20 +102,20 @@ Service definitions for menu configuration and menu item management
               .condition("parentMenuItemId", item.menuItemId)
               .orderBy("sequenceNum")
               .list()
-          
+
           List children = []
           childItems.each { child ->
             children.add(buildMenuItem(child))
           }
           // Sort children by sequence
           children.sort { a, b -> ((a.sequenceNum ?: 0) as Integer).compareTo((b.sequenceNum ?: 0) as Integer) }
-          
+
           String title = (item.title != null ? item.title.toString() : '')
           // Capitalize first letter of title
           if (title.length() > 0) {
               title = title.substring(0, 1).toUpperCase() + title.substring(1)
           }
-          
+
           return [
             menuItemId: item.menuItemId,
             menuConfigurationId: item.menuConfigurationId,
@@ -117,7 +127,7 @@ Service definitions for menu configuration and menu item management
             widgetName: item.widgetName,
             image: item.image,
             selectedImage: item.selectedImage,
-            userGroupsJson: item.userGroupsJson,
+            userGroups: parseUserGroups(item.userGroupsJson),
             sequenceNum: item.sequenceNum,
             isActive: item.isActive == 'Y',
             children: children
