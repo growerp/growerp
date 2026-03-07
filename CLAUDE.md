@@ -1,77 +1,105 @@
-# GrowERP AI Coding Agent Instructions
+# CLAUDE.md
 
-This guide provides essential knowledge for AI coding agents working in the GrowERP codebase. It covers architecture, workflows, conventions, and integration points to maximize productivity and code quality.
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## 🏛️ Big Picture Architecture
-GrowERP is an open-source, multi-platform ERP system designed to streamline business operations. It runs on Android, iOS, Web, Linux, and Windows, using Flutter for the frontend and Moqui for the backend. Comprehensive documentation and support are available at [https://www.growerp.com](https://www.growerp.com).
-  1. Packages starting with `growerp_` are domain-related building blocks (e.g., `growerp_core`, `growerp_models`, `growerp_user_company`). These implement business logic and can be composed into applications.
-  2. Other packages are complete applications for end users, built by composing building blocks. These can be built and deployed directly.
-  State management uses BLoC (`flutter_bloc`).
-**Backend**: Backend components are located in `moqui/runtime/component/`. This includes the `growerp` component, which contains GrowERP-specific functions and provides multi-company functionality. Other Moqui components in this directory provide entities, services, and REST APIs. Data flows via REST between frontend and backend.
-**Integration**: Communication is via REST APIs (see `docs/basic_explanation_of_the_frontend_REST_Backend_data_models.md`).
+## Architecture
 
-## 🛠️ Developer Workflows
-  ```bash
-  dart pub global activate melos # one-time setup
-  melos clean
-  melos bootstrap
-  melos build
-  melos l10n
-  ```
-  - Locally: `melos test`
-  - Headless (Docker): `./build_run_all_tests.sh`
-  - Emulator and backend services are started via Docker Compose for headless runs.
-**Backend (Moqui)**: All commands run from the `moqui` directory:
-  - Initial setup:
-    ```bash
-    ./gradlew build
-    java -jar moqui.war load types=seed,seed-initial,install no-run-es
-    ```
-  - Clean and rebuild database:
-    ```bash
-    ./gradlew cleandb
-    java -jar moqui.war load types=seed,seed-initial,install no-run-es
-    ```
-  - Start backend:
-    ```bash
-    java -jar moqui.war no-run-es
-    ```
-## missing flutter and or dart execute:
-```sh
-  #!/bin/bash
-        FLUTTER_DIR="/tmp/flutter_install"
-        mkdir -p "$FLUTTER_DIR"
-        cd "$FLUTTER_DIR"
-        wget -q --show-progress https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.35.4-stable.tar.xz # Replace with desired version
-        tar xf flutter_linux_3.19.6-stable.tar.xz
-        export FLUTTER_ROOT="$FLUTTER_DIR/flutter"
-        export PATH="$FLUTTER_ROOT/bin:$PATH"
+GrowERP is a multi-platform ERP system (Android, iOS, Web, Linux, Windows) using Flutter for the frontend and Moqui for the backend. All frontend-backend communication is via REST APIs.
+
+**Two categories of Flutter packages** (all under `flutter/packages/`):
+1. **Building blocks** (`growerp_*`) — domain-specific reusable packages (e.g., `growerp_core`, `growerp_models`, `growerp_catalog`). Lower-level packages are dependencies of higher-level ones; `growerp_models` is the base.
+2. **Applications** — end-user apps composed from building blocks (e.g., `admin`, `hotel`, `freelance`, `elearner`).
+
+**State management**: BLoC (`flutter_bloc`) throughout. Each domain entity follows this structure:
+```
+growerp_[domain]/lib/src/[entity]/
+├── blocs/        # [Entity]Bloc, [Entity]Event, [Entity]State
+├── views/        # [Entity]List, [Entity]Dialog
+├── widgets/      # [Entity]_list_styled_data.dart
+└── integration_test/  # [Entity]Test
 ```
 
-## 📦 Project-Specific Conventions
-- **Package Hierarchy**: Lower-level packages (e.g., `growerp_models`) are dependencies for higher-level domain packages.
-- **State Management**: Use BLoC for all business logic and UI state. Events and states are defined per domain.
-- **UI Composition**: Use shared templates/components from `growerp_core`.
-- **Testing**: Integration tests are in each package's `example/integration_test/` directory. Emulator setup is standardized.
-- **Configuration**: App-wide config via `global_configuration` package and JSON files.
-- **Menu System**: Menus are configured per app via building block composition (see `GrowERP_Extensibility_Guide.md`).
+**Code generation**: Data models use `freezed` + `json_serializable`. API clients use `retrofit`. Run `melos build` after changing annotated files.
 
-## 🔗 Integration Points & External Dependencies
-- **REST API**: All frontend-backend communication is via REST. Data models are defined in `growerp_models` and mapped to backend entities.
-- **Stripe**: Payment integration documented in `docs/Stripe_Payment_Processing_Documentation.md`.
-- **Chat/Notification**: Integrated via dedicated packages and backend services.
+**Backend**: Moqui components in `moqui/runtime/component/`. The `growerp` component provides multi-company ERP functionality. See `docs/Flutter_Moqui_REST_Backend_Interface.md` for REST API details.
 
-## 📚 Key Files & Directories
-- `README.md`, `docs/README.md`: High-level and extensibility documentation
-- `flutter/packages/`: All Flutter building blocks
-- `moqui/`: Backend components and configuration
-- `docker/`: Docker Compose files for local/dev/test environments
-- `docs/`: Architecture, extensibility, and integration guides
+## Key Docs
 
-## 📝 Example Patterns
-- **Adding a Domain Package**: Create in `flutter/packages/`, depend on `growerp_core` and `growerp_models`, implement BLoC, UI, and tests.
-- **Extending Backend**: Add a Moqui component in `moqui/`, define entities/services, expose REST endpoints.
-- **Integration Test**: Add tests in `example/integration_test/`, run via Docker emulator.
+- `docs/GrowERP_Design_Patterns.md` — canonical patterns and naming conventions
+- `docs/GrowERP_Code_Templates.md` — ready-to-use code templates
+- `docs/GrowERP_AI_Instructions.md` — detailed AI development guidance
+- `docs/Building_Blocks_Development_Guide.md` — creating new building blocks
+- `docs/basic_explanation_of_the_frontend_REST_Backend_data_models.md` — data model integration
 
----
-For more details, see the guides in `docs/`, package-level `README.md` files, and the Obsidian vault at `GrowERPObs/`.
+## Flutter Commands
+
+All melos commands run from the `flutter/` directory. The workspace is defined in `flutter/pubspec.yaml`.
+
+```bash
+cd flutter
+
+# One-time setup
+dart pub global activate melos
+export PATH="$PATH":"$HOME/.pub-cache/bin"
+
+# Bootstrap (run after cloning or adding packages)
+melos clean && melos bootstrap
+
+# Code generation (Freezed, Retrofit — run after model changes)
+melos build
+
+# Localization
+melos l10n
+
+# Lint
+melos analyze
+
+# Run all integration tests (requires running backend on port 8080)
+melos test
+
+# Run tests for a single package
+cd packages/growerp_catalog/example
+flutter test integration_test --dart-define=BACKEND_PORT=8080
+
+# Headless tests via Docker
+./build_run_all_tests.sh  # from repo root
+```
+
+## Backend (Moqui)
+
+All commands from the `moqui/` directory:
+
+```bash
+# First-time setup
+./gradlew build
+java -jar moqui.war load types=seed,seed-initial,install no-run-es
+
+# Reset database
+./gradlew cleandb
+java -jar moqui.war load types=seed,seed-initial,install no-run-es
+
+# Start backend (admin at http://localhost:8080/vapps, user: SystemSupport, pass: moqui)
+java -jar moqui.war no-run-es
+```
+
+## Conventions
+
+- **Models**: Use `@freezed` with `Equatable`. `fromJson` handles both wrapped (`json['entity']`) and unwrapped JSON.
+- **Forms**: Use `FormBuilder` with `FormBuilderValidators`. All interactive widgets need a `Key`.
+- **BLoC events**: Standard set is `Fetch`, `Update`, `Delete`. Status enum: `initial`, `loading`, `success`, `failure`.
+- **Error display**: `HelperFunctions.showMessage(context, message, Colors.red)` in BLoC listener.
+- **Integration tests**: In `example/integration_test/`. Use `CommonTest` utilities. Test class has `add`, `update`, `delete`, `check` static methods.
+- **Menu**: Configured per app via building block composition — see `docs/GrowERP_Extensibility_Guide.md`.
+
+## Missing Flutter/Dart
+
+If `flutter` or `dart` is not on PATH:
+
+```bash
+FLUTTER_DIR="/tmp/flutter_install"
+mkdir -p "$FLUTTER_DIR" && cd "$FLUTTER_DIR"
+wget -q https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.33.0-stable.tar.xz
+tar xf flutter_linux_3.33.0-stable.tar.xz
+export FLUTTER_ROOT="$FLUTTER_DIR/flutter"
+export PATH="$FLUTTER_ROOT/bin:$PATH"
+```
