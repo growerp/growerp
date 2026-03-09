@@ -3242,10 +3242,6 @@ along with this software (see the LICENSE.md file). If not, see
 
     <mantle.ledger.config.ItemTypeGlAccount glAccountId="52200" direction="O"
     itemTypeEnumId="ItemReplacement" organizationPartyId="DefaultSettings"/>
-    <mantle.ledger.config.ItemTypeGlAccount glAccountId="52220" direction="O"
-    itemTypeEnumId="ItemDiscount" organizationPartyId="DefaultSettings"/>
-    <mantle.ledger.config.ItemTypeGlAccount glAccountId="86500" direction="I"
-    itemTypeEnumId="ItemDiscount" organizationPartyId="DefaultSettings"/>
     <mantle.ledger.config.ItemTypeGlAccount glAccountId="52230" direction="O"
     itemTypeEnumId="ItemDiscountAppease" organizationPartyId="DefaultSettings"/>
     <mantle.ledger.config.ItemTypeGlAccount glAccountId="86500" direction="I"
@@ -3264,6 +3260,10 @@ along with this software (see the LICENSE.md file). If not, see
     itemTypeEnumId="ItemMiscCharge" organizationPartyId="DefaultSettings"/>
     <mantle.ledger.config.ItemTypeGlAccount glAccountId="79800" direction="I"
     itemTypeEnumId="ItemMiscCharge" organizationPartyId="DefaultSettings"/-->
+    <mantle.ledger.config.ItemTypeGlAccount glAccountId="52220" direction="O"
+        itemTypeEnumId="ItemDiscount" organizationPartyId="DefaultSettings" />
+    <mantle.ledger.config.ItemTypeGlAccount glAccountId="86500" direction="I"
+        itemTypeEnumId="ItemDiscount" organizationPartyId="DefaultSettings" />
     <mantle.ledger.config.ItemTypeGlAccount glAccountId="22400" direction="O"
         itemTypeEnumId="ItemSalesTax" organizationPartyId="DefaultSettings" />
     <mantle.ledger.config.ItemTypeGlAccount glAccountId="74500" direction="I"

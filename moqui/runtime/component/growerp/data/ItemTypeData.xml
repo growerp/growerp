@@ -22,8 +22,8 @@ along with this software (see the LICENSE.md file). If not, see
     <moqui.basic.Enumeration description="Shipping and Handling" enumId="ItemShipping" enumTypeId="ItemType"/>
     <!--moqui.basic.Enumeration description="Other Shipping (Non-Inventory)" enumId="ItemShippingOther" enumTypeId="ItemType"/-->
 
-    <!--moqui.basic.Enumeration description="Discount - Promotional" enumId="ItemDiscount" enumTypeId="ItemType"/>
-    <moqui.basic.Enumeration description="Discount - Appeasement" enumId="ItemDiscountAppease" enumTypeId="ItemType"/-->
+    <moqui.basic.Enumeration description="Discount - Promotional" enumId="ItemDiscount" enumTypeId="ItemType"/>
+    <!--moqui.basic.Enumeration description="Discount - Appeasement" enumId="ItemDiscountAppease" enumTypeId="ItemType"/-->
     <!-- for manufacturer/distributor/other supplier discounts, generally handled differently from other discounts for sales tax, GL posting, etc -->
     <!--moqui.basic.Enumeration description="Discount - Supplier" enumId="ItemSupplierDiscount" enumTypeId="ItemType"/>
     <moqui.basic.Enumeration description="Fee" enumId="ItemFee" enumTypeId="ItemType"/>
@@ -230,8 +230,8 @@ along with this software (see the LICENSE.md file). If not, see
     <moqui.basic.EnumGroupMember enumId="ItemSalesTax" enumGroupEnumId="EngItemsSales"/>
     <moqui.basic.EnumGroupMember enumId="ItemVatTax" enumGroupEnumId="EngItemsSales"/>
     <moqui.basic.EnumGroupMember enumId="ItemShipping" enumGroupEnumId="EngItemsSales"/>
-    <!--moqui.basic.EnumGroupMember enumId="ItemDiscount" enumGroupEnumId="EngItemsSales"/>
-    <moqui.basic.EnumGroupMember enumId="ItemDiscountAppease" enumGroupEnumId="EngItemsSales"/>
+    <moqui.basic.EnumGroupMember enumId="ItemDiscount" enumGroupEnumId="EngItemsSales"/>
+    <!--moqui.basic.EnumGroupMember enumId="ItemDiscountAppease" enumGroupEnumId="EngItemsSales"/>
     <moqui.basic.EnumGroupMember enumId="ItemSupplierDiscount" enumGroupEnumId="EngItemsSales"/>
     <moqui.basic.EnumGroupMember enumId="ItemFee" enumGroupEnumId="EngItemsSales"/>
     <moqui.basic.EnumGroupMember enumId="ItemMiscCharge" enumGroupEnumId="EngItemsSales"/-->
@@ -273,9 +273,9 @@ along with this software (see the LICENSE.md file). If not, see
     <moqui.basic.EnumGroupMember enumId="ItemSalesTax" enumGroupEnumId="EngItemsPurchase"/>
     <moqui.basic.EnumGroupMember enumId="ItemVatTax" enumGroupEnumId="EngItemsPurchase"/>
     <moqui.basic.EnumGroupMember enumId="ItemShipping" enumGroupEnumId="EngItemsPurchase"/>
-    <!--moqui.basic.EnumGroupMember enumId="ItemShippingOther" enumGroupEnumId="EngItemsPurchase"/>
+    <!--moqui.basic.EnumGroupMember enumId="ItemShippingOther" enumGroupEnumId="EngItemsPurchase"/-->
     <moqui.basic.EnumGroupMember enumId="ItemDiscount" enumGroupEnumId="EngItemsPurchase"/>
-    <moqui.basic.EnumGroupMember enumId="ItemFee" enumGroupEnumId="EngItemsPurchase"/>
+    <!--moqui.basic.EnumGroupMember enumId="ItemFee" enumGroupEnumId="EngItemsPurchase"/>
     <moqui.basic.EnumGroupMember enumId="ItemMiscCharge" enumGroupEnumId="EngItemsPurchase"/>
     <moqui.basic.EnumGroupMember enumId="ItemRentalDeposit" enumGroupEnumId="EngItemsPurchase"/>
 
