@@ -12,6 +12,7 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+import 'package:flutter/material.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:growerp_models/growerp_models.dart';
@@ -91,5 +92,12 @@ class InvoiceTest {
   /// check if the purchase process has been completed successfuly
   static Future<void> checkInvoicesComplete(WidgetTester tester) async {
     await FinDocTest.checkFinDocsComplete(tester, FinDocType.invoice);
+  }
+
+  static Future<void> checkPdf(WidgetTester tester) async {
+    await CommonTest.tapByKey(tester, 'print0');
+    await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
+    expect(find.byKey(const Key('back')), findsOneWidget);
+    await CommonTest.tapByKey(tester, 'back');
   }
 }

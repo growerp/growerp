@@ -37,8 +37,14 @@ class StaticRouterConfig {
   /// If null, uses widgetBuilder('/')
   final Widget? dashboard;
 
-  /// Additional routes not defined in menuConfig
-  /// These will be added inside the ShellRoute
+  /// Additional routes not defined in menuConfig that need the shell
+  /// (nav rail / drawer) wrapper. These are added inside the ShellRoute so
+  /// the navigation UI remains visible while viewing them.
+  final List<RouteBase> shellRoutes;
+
+  /// Additional routes that are added at the top level (outside the ShellRoute).
+  /// Use this for dialog-style full-screen routes (e.g. /findoc, /printer)
+  /// that should not show the nav rail / drawer.
   final List<RouteBase> additionalRoutes;
 
   /// Optional actions for the main route (e.g., logout button)
@@ -55,6 +61,7 @@ class StaticRouterConfig {
     required this.appTitle,
     required this.widgetBuilder,
     this.dashboard,
+    this.shellRoutes = const [],
     this.additionalRoutes = const [],
     this.mainRouteActions,
     this.tabWidgetLoader,
@@ -86,6 +93,7 @@ GoRouter createStaticAppRouter({
   required String appTitle,
   required Widget Function(String route) widgetBuilder,
   Widget? dashboard,
+  List<RouteBase> shellRoutes = const [],
   List<RouteBase> additionalRoutes = const [],
   List<Widget>? mainRouteActions,
   Widget Function(String widgetName, Map<String, dynamic> args)?
@@ -96,6 +104,7 @@ GoRouter createStaticAppRouter({
     appTitle: appTitle,
     widgetBuilder: widgetBuilder,
     dashboard: dashboard,
+    shellRoutes: shellRoutes,
     additionalRoutes: additionalRoutes,
     mainRouteActions: mainRouteActions,
     tabWidgetLoader: tabWidgetLoader,
@@ -196,15 +205,25 @@ GoRouter _buildStaticRouter(StaticRouterConfig config) {
         },
       ),
       // Shell route for sub-routes with consistent menu
-      if (generateRoutes().isNotEmpty)
+      if (generateRoutes().isNotEmpty || config.shellRoutes.isNotEmpty)
         ShellRoute(
           builder: (context, state, child) {
             int menuIndex = 0;
             final path = state.uri.path;
+            // First try exact match, then longest-prefix match so that
+            // sub-routes like /accounting/purchase correctly highlight the
+            // parent /accounting nav-rail item.
+            int bestPrefixLength = 0;
             for (int i = 0; i < config.menuConfig.menuItems.length; i++) {
-              if (config.menuConfig.menuItems[i].route == path) {
+              final route = config.menuConfig.menuItems[i].route;
+              if (route == null || route == '/') continue;
+              if (route == path) {
                 menuIndex = i;
                 break;
+              }
+              if (path.startsWith(route) && route.length > bestPrefixLength) {
+                bestPrefixLength = route.length;
+                menuIndex = i;
               }
             }
             return DisplayMenuItem(
@@ -214,9 +233,9 @@ GoRouter _buildStaticRouter(StaticRouterConfig config) {
               child: child,
             );
           },
-          routes: generateRoutes(),
+          routes: [...generateRoutes(), ...config.shellRoutes],
         ),
-      // Additional routes are top-level (no shell wrapper)
+      // Top-level routes without the shell wrapper (e.g. dialog-style screens)
       ...config.additionalRoutes,
     ],
   );

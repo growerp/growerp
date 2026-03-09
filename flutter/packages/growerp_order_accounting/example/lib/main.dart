@@ -154,7 +154,7 @@ GoRouter createOrderAccountingExampleRouter() {
       _ => const OrderAccountingDashboard(),
     },
     additionalRoutes: [
-      // FinDoc dialog route
+      // Dialog-style routes that should NOT show the nav rail
       GoRoute(
         path: '/findoc',
         builder: (context, state) {
@@ -162,7 +162,6 @@ GoRouter createOrderAccountingExampleRouter() {
           return ShowFinDocDialog(finDoc ?? FinDoc());
         },
       ),
-      // Printer route
       GoRoute(
         path: '/printer',
         builder: (context, state) {
@@ -170,7 +169,9 @@ GoRouter createOrderAccountingExampleRouter() {
           return PrintingForm(finDocIn: finDoc ?? FinDoc());
         },
       ),
-      // Nested accounting routes
+    ],
+    shellRoutes: [
+      // Accounting sub-routes — need the shell so the nav rail stays visible
       GoRoute(
         path: '/accounting/sales',
         builder: (context, state) => const FinDocList(

@@ -163,10 +163,16 @@ class TransactionTest {
   static Future<void> postTransactions(WidgetTester tester) async {
     SaveTest test = await PersistFunctions.getTest();
     for (FinDoc transaction in test.transactions) {
-      await CommonTest.doNewSearch(tester, searchString: transaction.pseudoId!);
-      await CommonTest.tapByKey(tester, 'isPosted');
-      await CommonTest.tapByKey(tester, 'header');
-      await CommonTest.tapByKey(tester, 'update');
+      await CommonTest.enterText(tester, 'searchField', transaction.pseudoId!);
+      await tester.pump(const Duration(seconds: CommonTest.waitTime));
+      await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
+      // Wait until the filtered row shows the expected pseudoId
+      for (int i = 0; i < 30; i++) {
+        if (CommonTest.getTextField('id0') == transaction.pseudoId!) break;
+        await tester.pump(const Duration(milliseconds: 200));
+      }
+      await CommonTest.tapByKey(tester, 'isPosted0');
+      await CommonTest.waitForSnackbarToGo(tester);
     }
   }
 

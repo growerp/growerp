@@ -62,6 +62,7 @@ void main() {
     await InvoiceTest.completeInvoicePayments(tester);
     await InvoiceTest.checkInvoicePaymentsComplete(tester);
     await InvoiceTest.selectSalesInvoices(tester);
+    await InvoiceTest.checkPdf(tester);
     await InvoiceTest.checkInvoicesComplete(tester);
     await TransactionTest.selectTransactions(tester);
     await TransactionTest.checkTransactionsComplete(tester);

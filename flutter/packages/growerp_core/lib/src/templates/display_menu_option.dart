@@ -108,7 +108,16 @@ class DisplayMenuItemState extends State<DisplayMenuItem>
     super.didUpdateWidget(oldWidget);
     if (widget.menuIndex != oldWidget.menuIndex ||
         widget.menuConfiguration != oldWidget.menuConfiguration) {
-      _initialize(context, widget.menuConfiguration);
+      // Defer to post-frame to avoid disposing/creating TabControllers (and
+      // firing their animation listeners) while the widget tree is locked
+      // during a build or route-transition animation frame.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          setState(() {
+            _initialize(context, widget.menuConfiguration);
+          });
+        }
+      });
     }
   }
 
@@ -208,9 +217,11 @@ class DisplayMenuItemState extends State<DisplayMenuItem>
         initialIndex: tabIndex.clamp(0, tabItems.length - 1),
       );
       _controller!.addListener(() {
-        setState(() {
-          tabIndex = _controller!.index;
-        });
+        if (mounted) {
+          setState(() {
+            tabIndex = _controller!.index;
+          });
+        }
       });
     }
   }
@@ -278,9 +289,25 @@ class DisplayMenuItemState extends State<DisplayMenuItem>
 
           if (!_isInitialized || effectiveConfig != _lastMenuConfig) {
             _localizations = CoreLocalizations.of(context)!;
-            _initialize(context, effectiveConfig);
-            _isInitialized = true;
-            _lastMenuConfig = effectiveConfig;
+            if (!_isInitialized) {
+              // First initialization must happen synchronously so the page
+              // renders correctly on the first build.
+              _initialize(context, effectiveConfig);
+              _isInitialized = true;
+              _lastMenuConfig = effectiveConfig;
+            } else {
+              // Config changed: defer to post-frame to avoid disposing/
+              // recreating TabControllers while the tree is locked.
+              final capturedConfig = effectiveConfig;
+              _lastMenuConfig = effectiveConfig; // prevent repeated scheduling
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (mounted) {
+                  setState(() {
+                    _initialize(context, capturedConfig);
+                  });
+                }
+              });
+            }
           }
 
           return _buildWithChatBloc();

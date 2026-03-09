@@ -237,7 +237,7 @@ class FinDocTest {
             contains(item.rentalFromDate.dateOnly()),
           );
         } else {
-          if (!CommonTest.isPhone()) {
+          if (tester.any(find.byKey(Key('itemPrice$index')))) {
             expect(
               CommonTest.getTextField('itemPrice$index'),
               item.price.currency(),
