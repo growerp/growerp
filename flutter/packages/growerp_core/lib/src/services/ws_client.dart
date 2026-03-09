@@ -58,6 +58,10 @@ class WsClient {
         } else if (Platform.isAndroid) {
           baseUrl = 'ws://10.0.2.2:$_backendPort';
         }
+      } else if (Platform.isAndroid) {
+        // On Android emulators, 'localhost' refers to the emulator's own
+        // loopback. Translate it to 10.0.2.2 to reach the host machine.
+        baseUrl = baseUrl.replaceAll('localhost', '10.0.2.2');
       }
     }
     // Fallback if still empty or null

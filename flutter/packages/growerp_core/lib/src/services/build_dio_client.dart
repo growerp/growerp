@@ -71,7 +71,12 @@ Future<Dio> buildDioClient({
   } else if (kReleaseMode) {
     baseUrl = databaseUrl ?? 'https://backend.growerp.com';
   } else if (databaseUrlDebug != null && databaseUrlDebug.isNotEmpty) {
-    baseUrl = databaseUrlDebug;
+    // On Android emulators, 'localhost' refers to the emulator's own loopback,
+    // not the host machine. Translate localhost → 10.0.2.2 so the emulator can
+    // reach a backend running on the developer's host.
+    baseUrl = android
+        ? databaseUrlDebug.replaceAll('localhost', '10.0.2.2')
+        : databaseUrlDebug;
   } else {
     baseUrl = android == true
         ? 'http://10.0.2.2:$_backendPort'
