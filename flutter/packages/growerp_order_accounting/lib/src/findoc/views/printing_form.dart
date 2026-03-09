@@ -36,30 +36,39 @@ class PrintingForm extends StatelessWidget {
         context.read<String>(),
       )..add(FinDocFetch(finDocId: finDocIn.id()!, docType: finDocIn.docType!)),
       child: BlocBuilder<AuthBloc, AuthState>(
-        builder: (context, state) {
-          if (state.status == AuthStatus.authenticated) {
-            authenticate = state.authenticate!;
+        builder: (context, authState) {
+          if (authState.status == AuthStatus.authenticated) {
+            authenticate = authState.authenticate!;
           }
-          return Stack(
-            children: [
-              PdfPreview(
-                build: (format) => PdfFormats.finDocPdf(
-                  format,
-                  authenticate.company!,
-                  finDocIn,
-                ),
-              ),
-              SizedBox(
-                height: 100,
-                child: OutlinedButton(
-                  key: const Key('back'),
-                  child: const Icon(Icons.arrow_back),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                ),
-              ),
-            ],
+          return BlocBuilder<FinDocBloc, FinDocState>(
+            builder: (context, finDocState) {
+              if (finDocState.status == FinDocStatus.loading ||
+                  finDocState.status == FinDocStatus.initial) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              final finDoc = finDocState.finDoc ?? finDocIn;
+              return Stack(
+                children: [
+                  PdfPreview(
+                    build: (format) => PdfFormats.finDocPdf(
+                      format,
+                      authenticate.company!,
+                      finDoc,
+                    ),
+                  ),
+                  SizedBox(
+                    height: 100,
+                    child: OutlinedButton(
+                      key: const Key('back'),
+                      child: const Icon(Icons.arrow_back),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  ),
+                ],
+              );
+            },
           );
         },
       ),

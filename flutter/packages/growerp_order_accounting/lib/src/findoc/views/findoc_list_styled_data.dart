@@ -14,6 +14,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
@@ -249,7 +250,20 @@ List<Widget> getFinDocListRow({
             icon: const Icon(Icons.print, size: 20),
             tooltip: 'PDF/Print ${finDoc.docType}',
             onPressed: () async {
-              await Navigator.pushNamed(context, '/printer', arguments: finDoc);
+              await context.push('/printer', extra: finDoc);
+            },
+          ),
+        if (finDoc.docType == FinDocType.transaction &&
+            finDoc.isPosted != true)
+          IconButton(
+            visualDensity: VisualDensity.compact,
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
+            key: Key('isPosted$index'),
+            icon: const Icon(Icons.check_circle_outline, size: 20),
+            tooltip: 'Post transaction',
+            onPressed: () {
+              bloc.add(FinDocUpdate(finDoc.copyWith(isPosted: true)));
             },
           ),
         if (finDoc.status != FinDocStatusVal.cancelled &&
