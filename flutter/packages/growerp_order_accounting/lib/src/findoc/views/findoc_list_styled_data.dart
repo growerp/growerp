@@ -253,8 +253,7 @@ List<Widget> getFinDocListRow({
               await context.push('/printer', extra: finDoc);
             },
           ),
-        if (finDoc.docType == FinDocType.transaction &&
-            finDoc.isPosted != true)
+        if (finDoc.docType == FinDocType.transaction && finDoc.isPosted != true)
           IconButton(
             visualDensity: VisualDensity.compact,
             padding: EdgeInsets.zero,

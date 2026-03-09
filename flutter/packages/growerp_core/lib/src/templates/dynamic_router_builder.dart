@@ -205,6 +205,16 @@ GoRouter createDynamicAppRouter(
           routes: _generateRoutes(mainConfig, config.widgetLoader),
         ),
 
+      // Printer route - full screen, no shell wrapper
+      GoRoute(
+        path: '/printer',
+        builder: (context, state) {
+          Map<String, dynamic> args = {};
+          if (state.extra != null) args['finDoc'] = state.extra;
+          return config.widgetLoader('PrintingForm', args);
+        },
+      ),
+
       // Dynamic fallback route - catches routes for dynamically created menu options
       // This allows new menu options added after app startup to work
       ShellRoute(

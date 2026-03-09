@@ -160,9 +160,6 @@ GoRouter _buildStaticRouter(StaticRouterConfig config) {
       );
     }
 
-    // Add any additional routes
-    routes.addAll(config.additionalRoutes);
-
     return routes;
   }
 
@@ -219,6 +216,8 @@ GoRouter _buildStaticRouter(StaticRouterConfig config) {
           },
           routes: generateRoutes(),
         ),
+      // Additional routes are top-level (no shell wrapper)
+      ...config.additionalRoutes,
     ],
   );
 }

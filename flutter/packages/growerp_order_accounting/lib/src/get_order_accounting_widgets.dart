@@ -102,9 +102,8 @@ Map<String, GrowerpWidgetBuilder> getOrderAccountingWidgets() {
     'ItemTypeList': (args) => const ItemTypeList(),
     'PaymentTypeList': (args) =>
         const PaymentTypeList(key: Key('PaymentTypeList')),
-    'PrintingForm': (args) => PrintingForm(
-      finDocIn: args?['finDoc'] as FinDoc? ?? FinDoc(),
-    ),
+    'PrintingForm': (args) =>
+        PrintingForm(finDocIn: args?['finDoc'] as FinDoc? ?? FinDoc()),
   };
 }
 
