@@ -60,6 +60,10 @@ Map<String, GrowerpWidgetBuilder> getUserCompanyWidgets() {
     'CompanyUserListSupplier': (args) =>
         CompanyUserList(key: getKeyFromArgs(args), role: Role.supplier),
 
+    // Company list (main/owner companies)
+    'CompanyListMainOnly': (args) =>
+        const CompanyList(role: null, mainOnly: true),
+
     // System settings
     'SystemSetupDialog': (args) => const SystemSetupDialog(),
   };
@@ -161,6 +165,13 @@ List<WidgetMetadata> getUserCompanyWidgetsWithMetadata() {
       keywords: ['supplier', 'company', 'vendor'],
       builder: (args) =>
           CompanyUserList(key: getKeyFromArgs(args), role: Role.supplier),
+    ),
+    WidgetMetadata(
+      widgetName: 'CompanyListMainOnly',
+      description: 'List of all installed owner companies',
+      iconName: 'business',
+      keywords: ['owner', 'company', 'installed', 'tenant'],
+      builder: (args) => const CompanyList(role: null, mainOnly: true),
     ),
     WidgetMetadata(
       widgetName: 'SystemSetupDialog',
