@@ -104,6 +104,8 @@ Map<String, GrowerpWidgetBuilder> getOrderAccountingWidgets() {
         const PaymentTypeList(key: Key('PaymentTypeList')),
     'PrintingForm': (args) =>
         PrintingForm(finDocIn: args?['finDoc'] as FinDoc? ?? FinDoc()),
+    'ShowFinDocDialog': (args) =>
+        ShowFinDocDialog(args?['finDoc'] as FinDoc? ?? FinDoc()),
   };
 }
 

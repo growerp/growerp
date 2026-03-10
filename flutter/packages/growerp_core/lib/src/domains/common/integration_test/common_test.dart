@@ -348,8 +348,11 @@ class CommonTest {
 
       // Check if we're authenticated (dashboard visible and no dialogs on top)
       if (tester.any(find.byKey(const Key('HomeFormAuth')))) {
-        // Wait a bit more for any dialog to appear on top
-        await tester.pump(const Duration(seconds: 2));
+        // Poll briefly for any post-auth dialog (e.g. TrialWelcomeHelper)
+        for (int i = 0; i < 5; i++) {
+          await tester.pump(const Duration(milliseconds: 100));
+          if (tester.any(find.byKey(const Key('startTrial')))) break;
+        }
 
         // Double-check no dialog appeared
         if (await doesExistKey(tester, 'startTrial')) {
@@ -376,7 +379,10 @@ class CommonTest {
     }
 
     // Final check for any lingering TrialWelcomeHelper dialog
-    await tester.pump(const Duration(seconds: 2));
+    for (int i = 0; i < 5; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+      if (tester.any(find.byKey(const Key('getStarted')))) break;
+    }
     if (await doesExistKey(tester, 'getStarted')) {
       debugPrint('Login: Final cleanup - dismissing TrialWelcomeHelper...');
       await tapByKey(tester, 'getStarted', settle: false);
@@ -547,14 +553,26 @@ class CommonTest {
         // the first visible result matches the search string. This avoids
         // tapping the wrong row when the backend hasn't responded yet and
         // the list still shows the previous (unfiltered) ascending results.
+        String targetKey = key;
         if (key == 'id0') {
+          bool found = false;
           for (int i = 0; i < 30; i++) {
-            if (getTextField('id0') == searchString) break;
+            for (int j = 0; j < 10; j++) {
+              String currentKey = 'id$j';
+              if (tester.any(find.byKey(Key(currentKey)))) {
+                if (getTextField(currentKey) == searchString) {
+                  targetKey = currentKey;
+                  found = true;
+                  break;
+                }
+              }
+            }
+            if (found) break;
             await tester.pump(const Duration(milliseconds: 200));
           }
         }
-        await tester.ensureVisible(find.byKey(Key(key)).last);
-        await tester.tap(find.byKey(Key(key)).last);
+        await tester.ensureVisible(find.byKey(Key(targetKey)).last);
+        await tester.tap(find.byKey(Key(targetKey)).last);
         await tester.pumpAndSettle(Duration(seconds: seconds));
         return;
       }
@@ -878,9 +896,12 @@ class CommonTest {
     // Ensure the widget is visible before interacting
     await tester.ensureVisible(finder);
     await tester.pumpAndSettle();
-    // Now enter the new text
-    await tester.tap(finder);
-    await tester.enterText(finder, value);
+    // Tap to focus, clear existing content, then enter new text
+    await tester.tap(finder.last);
+    await tester.pump();
+    await tester.enterText(finder.last, '');
+    await tester.pump();
+    await tester.enterText(finder.last, value);
     await tester.pumpAndSettle();
   }
 

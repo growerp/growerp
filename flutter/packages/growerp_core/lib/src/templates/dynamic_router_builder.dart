@@ -205,6 +205,16 @@ GoRouter createDynamicAppRouter(
           routes: _generateRoutes(mainConfig, config.widgetLoader),
         ),
 
+      // FinDoc dialog route - full screen, no shell wrapper
+      GoRoute(
+        path: '/findoc',
+        builder: (context, state) {
+          Map<String, dynamic> args = {};
+          if (state.extra != null) args['finDoc'] = state.extra;
+          return config.widgetLoader('ShowFinDocDialog', args);
+        },
+      ),
+
       // Printer route - full screen, no shell wrapper
       GoRoute(
         path: '/printer',

@@ -232,8 +232,10 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
             status: FinDocStatus.success,
             finDocs: finDocs,
             message:
-                "$docType ${compResult.pseudoId!} "
-                "${docType == FinDocType.transaction && event.finDoc.status == FinDocStatusVal.cancelled ? 'Deleted' : 'updated'}",
+                docType == FinDocType.transaction &&
+                        event.finDoc.status == FinDocStatusVal.cancelled
+                    ? 'finDocDeleteSuccess'
+                    : 'finDocUpdateSuccess',
           ),
         );
       }

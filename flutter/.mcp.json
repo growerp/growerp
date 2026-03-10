@@ -7,6 +7,10 @@
         "mcp-server"
       ],
       "env": {}
+    },
+    "jcodemunch-mcp": {
+      "type": "stdio",
+      "command": "/home/hans/.local/bin/jcodemunch-mcp"
     }
   }
 }

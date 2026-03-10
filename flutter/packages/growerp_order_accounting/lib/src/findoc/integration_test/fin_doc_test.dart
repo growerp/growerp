@@ -131,29 +131,58 @@ class FinDocTest {
       // add new items
       List<FinDocItem> newItems = [];
       for (FinDocItem item in finDoc.items) {
-        await CommonTest.tapByKey(tester, 'addProduct', seconds: 1);
-        await CommonTest.checkWidgetKey(tester, 'addProductItemDialog');
-        await CommonTest.enterAutocompleteValue(
-          tester,
-          'product',
-          item.description!,
-        );
-        await CommonTest.enterText(tester, 'itemPrice', item.price.toString());
-        await CommonTest.enterText(
-          tester,
-          'itemQuantity',
-          item.quantity.toString(),
-        );
-        await CommonTest.drag(tester);
-        await CommonTest.tapByKey(tester, 'ok');
-        // item added at the top, get productid
-        newItems.add(
-          item.copyWith(
-            product: Product(
-              pseudoId: CommonTest.getTextField('itemProductId0'),
+        final isOtherItem =
+            item.itemType != null &&
+            item.itemType!.itemTypeId != 'ItemProduct' &&
+            item.itemType!.itemTypeId.isNotEmpty;
+        if (isOtherItem) {
+          // Non-product items (e.g. discounts) go through the addItem dialog
+          await CommonTest.tapByKey(tester, 'addItem', seconds: 1);
+          await CommonTest.checkWidgetKey(tester, 'addOtherItemDialog');
+          await CommonTest.tapByKey(tester, 'itemType');
+          await CommonTest.tapByText(tester, item.itemType!.itemTypeName);
+          await CommonTest.enterText(
+            tester,
+            'itemDescription',
+            item.description!,
+          );
+          await CommonTest.enterText(tester, 'price', item.price.toString());
+          await CommonTest.enterText(
+            tester,
+            'quantity',
+            item.quantity.toString(),
+          );
+          await CommonTest.tapByKey(tester, 'ok');
+          newItems.add(item);
+        } else {
+          await CommonTest.tapByKey(tester, 'addProduct', seconds: 1);
+          await CommonTest.checkWidgetKey(tester, 'addProductItemDialog');
+          await CommonTest.enterAutocompleteValue(
+            tester,
+            'product',
+            item.description!,
+          );
+          await CommonTest.enterText(
+            tester,
+            'itemPrice',
+            item.price.toString(),
+          );
+          await CommonTest.enterText(
+            tester,
+            'itemQuantity',
+            item.quantity.toString(),
+          );
+          await CommonTest.drag(tester);
+          await CommonTest.tapByKey(tester, 'ok');
+          // item added at the top, get productid
+          newItems.add(
+            item.copyWith(
+              product: Product(
+                pseudoId: CommonTest.getTextField('itemProductId0'),
+              ),
             ),
-          ),
-        );
+          );
+        }
       }
       await CommonTest.drag(tester, seconds: 2);
       // update/create finDoc

@@ -286,10 +286,29 @@ class MyFinDocState extends State<FinDocPage> {
           context: context,
           child: BlocListener<FinDocBloc, FinDocState>(
             listener: (context, finDocState) {
+              if (finDocState.status == FinDocStatus.failure) {
+                _shouldCloseOnFinDocSuccess = false;
+                HelperFunctions.showMessage(
+                  context,
+                  translateFinDocBlocMessage(
+                    finDocState.message,
+                    _localizations,
+                  ),
+                  Colors.red,
+                );
+              }
               // Close dialog when FinDocBloc successfully updates and we're waiting for it
               if (finDocState.status == FinDocStatus.success &&
                   _shouldCloseOnFinDocSuccess) {
                 _shouldCloseOnFinDocSuccess = false;
+                HelperFunctions.showMessage(
+                  context,
+                  translateFinDocBlocMessage(
+                    finDocState.message,
+                    _localizations,
+                  ),
+                  Colors.green,
+                );
                 Navigator.of(context).pop(finDocUpdated);
               }
             },

@@ -176,7 +176,7 @@ class PdfFormats {
     final netTotal = finDoc.items
         .map(
           (item) =>
-              item.price ?? Decimal.zero * (item.quantity ?? Decimal.zero),
+              (item.price ?? Decimal.zero) * (item.quantity ?? Decimal.zero),
         )
         .reduce((item1, item2) => item1 + item2);
     //final vatPercent = finDoc.items.first.vat;

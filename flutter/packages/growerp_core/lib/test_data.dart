@@ -967,7 +967,7 @@ List<FinDoc> salesInvoices = [
     docType: FinDocType.invoice,
     description: 'The first sales invoice',
     otherCompany: customerCompanies[0],
-    grandTotal: Decimal.parse('3439.4'),
+    grandTotal: Decimal.parse('3389.4'),
     items: [
       FinDocItem(
         description: products[0].productName,
@@ -978,6 +978,15 @@ List<FinDoc> salesInvoices = [
         description: products[1].productName,
         price: products[1].price,
         quantity: Decimal.parse('40'),
+      ),
+      FinDocItem(
+        description: 'Loyalty discount',
+        price: Decimal.parse('-50.00'),
+        quantity: Decimal.parse('1'),
+        itemType: ItemType(
+          itemTypeId: 'ItemDiscount',
+          itemTypeName: 'Discount - Promotional',
+        ),
       ),
     ],
   ),
@@ -1022,7 +1031,7 @@ List<FinDoc> salesInvoices = [
   FinDoc(
     sales: true,
     docType: FinDocType.invoice,
-    description: 'The forthg sales invoice',
+    description: 'The fourth sales invoice',
     otherCompany: customerCompanies[0],
     grandTotal: Decimal.parse('3439.4'),
     items: [

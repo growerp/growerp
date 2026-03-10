@@ -73,7 +73,6 @@ flutter:
 
   assets:
     - assets/cfg/
-    - assets/icon/
     - packages/growerp_core/images/growerp.png
     - packages/growerp_core/images/crm.png
     - packages/growerp_core/images/growerp.jpg

@@ -41,6 +41,24 @@ String translateFinDocBlocMessage(
     }
   }
 
+  // Handle non-parameterized finDoc keys
+  switch (messageKey) {
+    case 'finDocUpdateSuccess':
+      return localizations.finDocUpdateSuccess;
+    case 'finDocUpdateFailure':
+      return localizations.finDocUpdateFailure;
+    case 'finDocDeleteSuccess':
+      return localizations.finDocDeleteSuccess;
+    case 'finDocDeleteFailure':
+      return localizations.finDocDeleteFailure;
+    case 'finDocAddFailure':
+      return localizations.finDocAddFailure;
+    case 'finDocFetchFailure':
+      return localizations.finDocFetchFailure;
+    default:
+      break;
+  }
+
   // Fallback: return the key itself
   return messageKey;
 }

@@ -117,8 +117,16 @@ Future addProductItemDialog(BuildContext context) async {
                                             key: const Key('productField'),
                                             controller: textController,
                                             focusNode: focusNode,
-                                            decoration: const InputDecoration(
+                                            decoration: InputDecoration(
                                               labelText: 'Product',
+                                              suffixIcon: IconButton(
+                                                icon: const Icon(
+                                                  Icons.arrow_drop_down,
+                                                ),
+                                                onPressed: () {
+                                                  focusNode.requestFocus();
+                                                },
+                                              ),
                                             ),
                                             onFieldSubmitted: (_) =>
                                                 onFieldSubmitted(),
@@ -277,8 +285,16 @@ Future addProductItemDialog(BuildContext context) async {
                                             key: const Key('glAccountField'),
                                             controller: textController,
                                             focusNode: focusNode,
-                                            decoration: const InputDecoration(
+                                            decoration: InputDecoration(
                                               labelText: 'GL Account',
+                                              suffixIcon: IconButton(
+                                                icon: const Icon(
+                                                  Icons.arrow_drop_down,
+                                                ),
+                                                onPressed: () {
+                                                  focusNode.requestFocus();
+                                                },
+                                              ),
                                             ),
                                             onFieldSubmitted: (_) =>
                                                 onFieldSubmitted(),

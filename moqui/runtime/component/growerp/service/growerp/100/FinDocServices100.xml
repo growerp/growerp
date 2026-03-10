@@ -735,8 +735,6 @@ along with this software (see the LICENSE.md file). If not, see
                                 <econditions combine="or">
                                     <econdition field-name="pseudoId" ignore-case="true"
                                         operator="like" from="search" ignore-if-empty="true" />
-                                    <econdition field-name="invoiceId" ignore-case="true"
-                                        operator="like" from="search" ignore-if-empty="true" />
                                     <econdition field-name="orderId" ignore-case="true"
                                         operator="like" from="search" ignore-if-empty="true" />
                                     <econdition field-name="vendorCompanyName" ignore-case="true"
@@ -755,7 +753,7 @@ along with this software (see the LICENSE.md file). If not, see
                                         operator="like" from="search" ignore-if-empty="true" />
                                 </econditions>
                                 <order-by
-                                    field-name="invoiceDate,invoiceId,invoiceItemSeqId,rentalFromDate" />
+                                    field-name="-invoiceDate,-invoiceId,invoiceItemSeqId,rentalFromDate" />
                                 <!--use-iterator/-->
                             </entity-find>
                             <else>
@@ -2161,7 +2159,7 @@ along with this software (see the LICENSE.md file). If not, see
             <iterate list="invoiceItems" entry="item">
                 <service-call name="mantle.account.InvoiceServices.create#InvoiceItem"
                     in-map="context + [ itemTypeEnumId: item.itemType.itemTypeId,
-                                        productId: item.product.productId,
+                                        productId: item.product?.productId,
                                         quantity: item.quantity,
                                         description: item.description,
                                         overrideGlAccountId: item.glAccount?.glAccountId,
