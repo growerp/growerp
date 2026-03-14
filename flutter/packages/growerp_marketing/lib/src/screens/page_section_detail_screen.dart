@@ -46,12 +46,15 @@ class PageSectionDetailScreenState extends State<PageSectionDetailScreen> {
   @override
   void initState() {
     super.initState();
-    _titleController =
-        TextEditingController(text: widget.section.sectionTitle ?? '');
-    _descriptionController =
-        TextEditingController(text: widget.section.sectionDescription ?? '');
-    _imageUrlController =
-        TextEditingController(text: widget.section.sectionImageUrl ?? '');
+    _titleController = TextEditingController(
+      text: widget.section.sectionTitle ?? '',
+    );
+    _descriptionController = TextEditingController(
+      text: widget.section.sectionDescription ?? '',
+    );
+    _imageUrlController = TextEditingController(
+      text: widget.section.sectionImageUrl ?? '',
+    );
     _sequenceController = TextEditingController(
       text: widget.section.sectionSequence?.toString() ?? '',
     );
@@ -79,6 +82,10 @@ class PageSectionDetailScreenState extends State<PageSectionDetailScreen> {
         width: 600,
         height: 500,
         child: BlocConsumer<PageSectionBloc, PageSectionState>(
+          listenWhen: (previous, current) =>
+              previous.status == PageSectionStatus.loading &&
+              (current.status == PageSectionStatus.success ||
+                  current.status == PageSectionStatus.failure),
           listener: (context, state) {
             if (state.status == PageSectionStatus.failure) {
               HelperFunctions.showMessage(
@@ -87,7 +94,10 @@ class PageSectionDetailScreenState extends State<PageSectionDetailScreen> {
                 Colors.red,
               );
             }
-            if (state.status == PageSectionStatus.success) {
+            // Only pop after a save (create/update), not after a section load.
+            // Create/update success always includes a non-null message.
+            if (state.status == PageSectionStatus.success &&
+                state.message != null) {
               Navigator.of(context).pop();
             }
           },
@@ -175,38 +185,41 @@ class PageSectionDetailScreenState extends State<PageSectionDetailScreen> {
                                         sectionTitle: _titleController.text,
                                         sectionDescription:
                                             _descriptionController.text.isEmpty
-                                                ? null
-                                                : _descriptionController.text,
+                                            ? null
+                                            : _descriptionController.text,
                                         sectionImageUrl:
                                             _imageUrlController.text.isEmpty
-                                                ? null
-                                                : _imageUrlController.text,
+                                            ? null
+                                            : _imageUrlController.text,
                                         sectionSequence:
                                             _sequenceController.text.isEmpty
-                                                ? null
-                                                : int.tryParse(
-                                                    _sequenceController.text),
+                                            ? null
+                                            : int.tryParse(
+                                                _sequenceController.text,
+                                              ),
                                       ),
                                     );
                                   } else {
                                     _sectionBloc.add(
                                       PageSectionUpdate(
                                         pageSectionId: widget
-                                            .section.landingPageSectionId!,
+                                            .section
+                                            .landingPageSectionId!,
                                         sectionTitle: _titleController.text,
                                         sectionDescription:
                                             _descriptionController.text.isEmpty
-                                                ? null
-                                                : _descriptionController.text,
+                                            ? null
+                                            : _descriptionController.text,
                                         sectionImageUrl:
                                             _imageUrlController.text.isEmpty
-                                                ? null
-                                                : _imageUrlController.text,
+                                            ? null
+                                            : _imageUrlController.text,
                                         sectionSequence:
                                             _sequenceController.text.isEmpty
-                                                ? null
-                                                : int.tryParse(
-                                                    _sequenceController.text),
+                                            ? null
+                                            : int.tryParse(
+                                                _sequenceController.text,
+                                              ),
                                       ),
                                     );
                                   }

@@ -47,6 +47,17 @@ EventTransformer<E> finDocItemDroppable<E>(Duration duration) {
   };
 }
 
+const _finDocSearchDebounceDuration = Duration(milliseconds: 300);
+EventTransformer<FinDocSearchChanged> finDocSearchDebounce() {
+  return (events, mapper) {
+    final clearStream = events.where((e) => e.searchString.isEmpty);
+    final searchStream = events
+        .where((e) => e.searchString.length >= 3)
+        .debounce(_finDocSearchDebounceDuration);
+    return clearStream.merge(searchStream).switchMap(mapper);
+  };
+}
+
 List<ItemType> saveItemTypes = [];
 List<PaymentType> savePaymentTypes = [];
 
@@ -83,6 +94,10 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
     on<FinDocGatewayPaymentAuthorize>(_onFinDocGatewayPaymentAuthorize);
     on<FinDocGatewayPaymentCapture>(_onFinDocGatewayPaymentCapture);
     on<FinDocGatewayPaymentRelease>(_onFinDocGatewayPaymentRelease);
+    on<FinDocSearchChanged>(
+      _onFinDocSearchChanged,
+      transformer: finDocSearchDebounce(),
+    );
   }
 
   final RestClient restClient;
@@ -91,6 +106,22 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
   final FinDocType docType;
   final String journalId;
   int start = 0;
+
+  Future<void> _onFinDocSearchChanged(
+    FinDocSearchChanged event,
+    Emitter<FinDocState> emit,
+  ) async {
+    return _onFinDocFetch(
+      FinDocFetch(
+        refresh: true,
+        searchString: event.searchString,
+        my: event.my,
+        status: event.status,
+        limit: event.limit,
+      ),
+      emit,
+    );
+  }
 
   Future<void> _onFinDocFetch(
     FinDocFetch event,
@@ -233,9 +264,9 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
             finDocs: finDocs,
             message:
                 docType == FinDocType.transaction &&
-                        event.finDoc.status == FinDocStatusVal.cancelled
-                    ? 'finDocDeleteSuccess'
-                    : 'finDocUpdateSuccess',
+                    event.finDoc.status == FinDocStatusVal.cancelled
+                ? 'finDocDeleteSuccess'
+                : 'finDocUpdateSuccess',
           ),
         );
       }

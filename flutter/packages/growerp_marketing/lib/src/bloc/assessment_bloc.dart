@@ -31,6 +31,17 @@ EventTransformer<E> assessmentDroppable<E>(Duration duration) {
   };
 }
 
+const _assessmentSearchDebounceDuration = Duration(milliseconds: 300);
+EventTransformer<AssessmentSearchRequested> assessmentSearchDebounce() {
+  return (events, mapper) {
+    final clearStream = events.where((e) => e.query.isEmpty);
+    final searchStream = events
+        .where((e) => e.query.length >= 3)
+        .debounce(_assessmentSearchDebounceDuration);
+    return clearStream.merge(searchStream).switchMap(mapper);
+  };
+}
+
 class AssessmentBloc extends Bloc<AssessmentEvent, AssessmentState> {
   final RestClient restClient;
   int start = 0;
@@ -50,7 +61,10 @@ class AssessmentBloc extends Bloc<AssessmentEvent, AssessmentState> {
     on<AssessmentFetchQuestionOptions>(_onAssessmentFetchQuestionOptions);
     on<AssessmentFetchThresholds>(_onAssessmentFetchThresholds);
     on<AssessmentFetchLeads>(_onAssessmentFetchLeads);
-    on<AssessmentSearchRequested>(_onAssessmentSearch);
+    on<AssessmentSearchRequested>(
+      _onAssessmentSearch,
+      transformer: assessmentSearchDebounce(),
+    );
   }
 
   Future<void> _onAssessmentFetch(
@@ -502,48 +516,9 @@ class AssessmentBloc extends Bloc<AssessmentEvent, AssessmentState> {
     AssessmentSearchRequested event,
     Emitter<AssessmentState> emit,
   ) async {
-    final query = event.query.trim();
-    if (query.isEmpty) {
-      emit(
-        state.copyWith(
-          searchStatus: AssessmentStatus.success,
-          searchResults: const [],
-          searchError: null,
-        ),
-      );
-      return;
-    }
-
-    emit(
-      state.copyWith(
-        searchStatus: AssessmentStatus.loading,
-        searchResults: const [],
-        searchError: null,
-      ),
+    return _onAssessmentFetch(
+      AssessmentFetch(refresh: true, searchString: event.query),
+      emit,
     );
-
-    try {
-      final result = await restClient.searchAssessments(
-        start: 0,
-        limit: event.limit,
-        searchString: query,
-      );
-
-      emit(
-        state.copyWith(
-          searchStatus: AssessmentStatus.success,
-          searchResults: result.assessments,
-          searchError: null,
-        ),
-      );
-    } catch (error) {
-      emit(
-        state.copyWith(
-          searchStatus: AssessmentStatus.failure,
-          searchResults: const [],
-          searchError: await getDioError(error),
-        ),
-      );
-    }
   }
 }

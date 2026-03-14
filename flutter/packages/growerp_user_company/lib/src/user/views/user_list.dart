@@ -32,6 +32,7 @@ class UserList extends StatefulWidget {
 class UserListState extends State<UserList> {
   final _scrollController = ScrollController();
   final _searchController = TextEditingController();
+  final _searchFocusNode = FocusNode();
   final double _scrollThreshold = 100.0;
   late UserBloc _userBloc;
   late AuthBloc _authBloc;
@@ -73,6 +74,9 @@ class UserListState extends State<UserList> {
           ..add(const UserFetch(refresh: true));
     }
     bottom = 50;
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _searchFocusNode.requestFocus(),
+    );
   }
 
   @override
@@ -103,8 +107,8 @@ class UserListState extends State<UserList> {
             isLoading: _isLoading && users.isEmpty,
             scrollController: _scrollController,
             rowHeight: isPhone ? 72 : 56,
-            onRowTap: (index) {
-              showDialog(
+            onRowTap: (index) async {
+              await showDialog(
                 barrierDismissible: true,
                 context: context,
                 builder: (BuildContext context) {
@@ -118,6 +122,7 @@ class UserListState extends State<UserList> {
                   );
                 },
               );
+              _searchFocusNode.requestFocus();
             },
           );
         }
@@ -129,6 +134,7 @@ class UserListState extends State<UserList> {
               '${state.message}',
               Colors.red,
             );
+            _searchFocusNode.requestFocus();
           }
           if (state.status == UserStatus.success) {
             final translatedMessage = state.message != null
@@ -144,6 +150,7 @@ class UserListState extends State<UserList> {
                 Colors.green,
               );
             }
+            _searchFocusNode.requestFocus();
           }
         }
 
@@ -175,9 +182,16 @@ class UserListState extends State<UserList> {
               ListFilterBar(
                 searchHint: 'Search ${widget.role?.name ?? 'users'}...',
                 searchController: _searchController,
+                focusNode: _searchFocusNode,
                 onSearchChanged: (value) {
                   searchString = value;
-                  _userBloc.add(UserFetch(refresh: true, searchString: value));
+                  _userBloc.add(
+                    UserSearchChanged(
+                      searchString: value,
+                      userGroup: null,
+                      partyId: null,
+                    ),
+                  );
                 },
               ),
               // Main content area with StyledDataTable
@@ -221,6 +235,7 @@ class UserListState extends State<UserList> {
                                     );
                                   },
                                 );
+                                _searchFocusNode.requestFocus();
                               },
                               tooltip: _localizations.addNew,
                               child: const Icon(Icons.add),
@@ -240,6 +255,7 @@ class UserListState extends State<UserList> {
                                     );
                                   },
                                 );
+                                _searchFocusNode.requestFocus();
                               },
                               tooltip: 'companies/users up/download',
                               child: const Icon(Icons.file_copy),
@@ -290,6 +306,7 @@ class UserListState extends State<UserList> {
   void dispose() {
     _scrollController.dispose();
     _searchController.dispose();
+    _searchFocusNode.dispose();
     super.dispose();
   }
 

@@ -58,6 +58,9 @@ class ListFilterBar extends StatelessWidget {
   /// Whether to show the search field
   final bool showSearch;
 
+  /// Optional focus node for the search field
+  final FocusNode? focusNode;
+
   const ListFilterBar({
     super.key,
     this.searchHint = 'Search...',
@@ -67,6 +70,7 @@ class ListFilterBar extends StatelessWidget {
     this.filters,
     this.actions,
     this.showSearch = true,
+    this.focusNode,
   });
 
   @override
@@ -142,19 +146,93 @@ class ListFilterBar extends StatelessWidget {
   }
 
   Widget _buildSearchField(ColorScheme colorScheme) {
+    return _SearchField(
+      searchHint: searchHint,
+      searchController: searchController,
+      onSearchChanged: onSearchChanged,
+      colorScheme: colorScheme,
+      focusNode: focusNode,
+    );
+  }
+}
+
+class _SearchField extends StatefulWidget {
+  final String searchHint;
+  final TextEditingController? searchController;
+  final ValueChanged<String>? onSearchChanged;
+  final ColorScheme colorScheme;
+  final FocusNode? focusNode;
+
+  const _SearchField({
+    required this.searchHint,
+    required this.colorScheme,
+    this.searchController,
+    this.onSearchChanged,
+    this.focusNode,
+  });
+
+  @override
+  State<_SearchField> createState() => _SearchFieldState();
+}
+
+class _SearchFieldState extends State<_SearchField> {
+  late final TextEditingController _controller;
+  bool _hasText = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = widget.searchController ?? TextEditingController();
+    _hasText = _controller.text.isNotEmpty;
+    _controller.addListener(_onControllerChanged);
+  }
+
+  void _onControllerChanged() {
+    final hasText = _controller.text.isNotEmpty;
+    if (hasText != _hasText) {
+      setState(() => _hasText = hasText);
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.removeListener(_onControllerChanged);
+    // Only dispose if we created it internally
+    if (widget.searchController == null) _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = widget.colorScheme;
     return GestureDetector(
       key: const Key('search'),
       child: TextField(
         key: const Key('searchField'),
-        controller: searchController,
-        onChanged: onSearchChanged,
+        controller: _controller,
+        focusNode: widget.focusNode,
+        onChanged: widget.onSearchChanged,
         decoration: InputDecoration(
-          hintText: searchHint,
+          hintText: widget.searchHint,
           prefixIcon: Icon(
             Icons.search,
             color: colorScheme.onSurfaceVariant,
             size: 20,
           ),
+          suffixIcon: _hasText
+              ? IconButton(
+                  key: const Key('clearSearch'),
+                  icon: Icon(
+                    Icons.clear,
+                    color: colorScheme.onSurfaceVariant,
+                    size: 18,
+                  ),
+                  onPressed: () {
+                    _controller.clear();
+                    widget.onSearchChanged?.call('');
+                  },
+                )
+              : null,
           filled: true,
           fillColor: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
           contentPadding: const EdgeInsets.symmetric(

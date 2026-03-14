@@ -102,26 +102,21 @@ class ActivitySearchDialog extends StatelessWidget {
         width: 350,
         child: Column(
           children: [
-            TextFormField(
-              key: const Key('searchField'),
-              textInputAction: TextInputAction.search,
-              autofocus: true,
-              decoration: const InputDecoration(labelText: "Search input"),
-              validator: (value) {
-                if (value!.isEmpty) {
-                  return 'Please enter a search value?';
+            ListFilterBar(
+              searchHint: 'Search input',
+              onSearchChanged: (value) {
+                if (value.isNotEmpty) {
+                  _activityBloc.add(
+                    GetDataEvent(
+                      () => context.read<RestClient>().getActivity(
+                        limit: 5,
+                        searchString: value,
+                        activityType: widget.type,
+                      ),
+                    ),
+                  );
                 }
-                return null;
               },
-              onFieldSubmitted: (value) => _activityBloc.add(
-                GetDataEvent(
-                  () => context.read<RestClient>().getActivity(
-                    limit: 5,
-                    searchString: value,
-                    activityType: widget.type,
-                  ),
-                ),
-              ),
             ),
             const SizedBox(height: 20),
             const Text('Search results'),

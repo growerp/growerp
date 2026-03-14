@@ -90,6 +90,7 @@ class UserTest {
     }
     // Clear any active search filter to show all users
     await CommonTest.enterText(tester, 'searchField', '');
+    await tester.pump(const Duration(seconds: CommonTest.waitTime));
     await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
     expect(
       find.byKey(const Key('userItem'), skipOffstage: false),

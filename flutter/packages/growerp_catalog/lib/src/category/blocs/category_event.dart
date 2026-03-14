@@ -55,3 +55,16 @@ class CategoryUpload extends CategoryEvent {
   const CategoryUpload(this.file);
   final String file;
 }
+
+class CategorySearchChanged extends CategoryEvent {
+  const CategorySearchChanged({
+    required this.searchString,
+    this.companyPartyId = '',
+    this.limit = 20,
+  });
+  final String searchString;
+  final String companyPartyId;
+  final int limit;
+  @override
+  List<Object> get props => [searchString, companyPartyId];
+}

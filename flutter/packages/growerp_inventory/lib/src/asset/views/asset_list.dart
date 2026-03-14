@@ -31,6 +31,7 @@ class AssetList extends StatefulWidget {
 class AssetListState extends State<AssetList> {
   final _scrollController = ScrollController();
   final _searchController = TextEditingController();
+  final _searchFocusNode = FocusNode();
   late AssetBloc _assetBloc;
   List<Asset> assets = const <Asset>[];
   late String classificationId;
@@ -51,6 +52,9 @@ class AssetListState extends State<AssetList> {
     _assetBloc = context.read<AssetBloc>()
       ..add(const AssetFetch(refresh: true));
     bottom = 50;
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _searchFocusNode.requestFocus(),
+    );
   }
 
   @override
@@ -81,8 +85,8 @@ class AssetListState extends State<AssetList> {
         isLoading: _isLoading && assets.isEmpty,
         scrollController: _scrollController,
         rowHeight: isPhone ? 72 : 56,
-        onRowTap: (index) {
-          showDialog(
+        onRowTap: (index) async {
+          await showDialog(
             barrierDismissible: true,
             context: context,
             builder: (BuildContext context) {
@@ -96,6 +100,7 @@ class AssetListState extends State<AssetList> {
               );
             },
           );
+          _searchFocusNode.requestFocus();
         },
       );
     }
@@ -109,11 +114,17 @@ class AssetListState extends State<AssetList> {
             _localizations.error(state.message ?? ''),
             Colors.red,
           );
+          WidgetsBinding.instance.addPostFrameCallback(
+            (_) => _searchFocusNode.requestFocus(),
+          );
         }
         if (state.status == AssetStatus.success) {
           if (state.message != null && state.message!.isNotEmpty) {
             HelperFunctions.showMessage(context, state.message!, Colors.green);
           }
+          WidgetsBinding.instance.addPostFrameCallback(
+            (_) => _searchFocusNode.requestFocus(),
+          );
         }
       },
       builder: (context, state) {
@@ -143,9 +154,10 @@ class AssetListState extends State<AssetList> {
             ListFilterBar(
               searchHint: 'Search ${entityName.toLowerCase()}s...',
               searchController: _searchController,
+              focusNode: _searchFocusNode,
               onSearchChanged: (value) {
                 searchString = value;
-                _assetBloc.add(AssetFetch(refresh: true, searchString: value));
+                _assetBloc.add(AssetSearchChanged(searchString: value));
               },
             ),
             // Main content area with StyledDataTable
@@ -180,6 +192,7 @@ class AssetListState extends State<AssetList> {
                                   );
                                 },
                               );
+                              _searchFocusNode.requestFocus();
                             },
                             tooltip: _localizations.addNew,
                             child: const Icon(Icons.add),
@@ -203,6 +216,7 @@ class AssetListState extends State<AssetList> {
       ..removeListener(_onScroll)
       ..dispose();
     _searchController.dispose();
+    _searchFocusNode.dispose();
     super.dispose();
   }
 

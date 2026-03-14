@@ -29,6 +29,7 @@ class PaymentTypeList extends StatefulWidget {
 class PaymentTypeListState extends State<PaymentTypeList> {
   final _scrollController = ScrollController();
   final _searchController = TextEditingController();
+  final _searchFocusNode = FocusNode();
   late FinDocBloc finDocBloc;
   late GlAccountBloc glAccountBloc;
   String classificationId = GlobalConfiguration().getValue("classificationId");
@@ -42,9 +43,12 @@ class PaymentTypeListState extends State<PaymentTypeList> {
     super.initState();
     showAll = false;
     entityName = classificationId == 'AppHotel' ? 'Room' : 'PaymentType';
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _searchFocusNode.requestFocus();
+    });
     finDocBloc = context.read<FinDocBloc>()..add(const FinDocGetPaymentTypes());
     glAccountBloc = context.read<GlAccountBloc>()
-      ..add(const GlAccountFetch(refresh: true, limit: 100));
+      ..add(const GlAccountFetch(refresh: true, limit: 500));
   }
 
   @override
@@ -132,6 +136,7 @@ class PaymentTypeListState extends State<PaymentTypeList> {
                   ListFilterBar(
                     searchHint: 'Search payment type or account...',
                     searchController: _searchController,
+                    focusNode: _searchFocusNode,
                     onSearchChanged: (value) {
                       setState(() {
                         searchString = value;
@@ -168,6 +173,7 @@ class PaymentTypeListState extends State<PaymentTypeList> {
   void dispose() {
     _scrollController.dispose();
     _searchController.dispose();
+    _searchFocusNode.dispose();
     super.dispose();
   }
 }

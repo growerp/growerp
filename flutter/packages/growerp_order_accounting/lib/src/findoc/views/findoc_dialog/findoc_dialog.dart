@@ -177,7 +177,7 @@ class MyFinDocState extends State<FinDocPage> {
       ),
     );
     _glAccountBloc = context.read<GlAccountBloc>();
-    _glAccountBloc.add(const GlAccountFetch(limit: 100));
+    _glAccountBloc.add(const GlAccountFetch(limit: 500));
     _productBloc = context.read<DataFetchBloc<Products>>()
       ..add(
         GetDataEvent(

@@ -64,6 +64,19 @@ class CourseDelete extends CourseEvent {
   List<Object?> get props => [course];
 }
 
+class CourseSearchChanged extends CourseEvent {
+  const CourseSearchChanged({
+    required this.searchString,
+    this.refresh = true,
+    this.limit = 20,
+  });
+  final String searchString;
+  final bool refresh;
+  final int limit;
+  @override
+  List<Object?> get props => [searchString];
+}
+
 /// Create module in course
 class CourseModuleCreate extends CourseEvent {
   final String courseId;
@@ -166,8 +179,14 @@ class CourseSubscribe extends CourseEvent {
   });
 
   @override
-  List<Object?> get props =>
-      [courseId, creditCardNumber, nameOnCard, expireMonth, expireYear, cVC];
+  List<Object?> get props => [
+    courseId,
+    creditCardNumber,
+    nameOnCard,
+    expireMonth,
+    expireYear,
+    cVC,
+  ];
 }
 
 /// Generate AI media content from course
@@ -187,6 +206,11 @@ class CourseMediaGenerate extends CourseEvent {
   });
 
   @override
-  List<Object?> get props =>
-      [courseId, platform, mediaType, moduleId, lessonId];
+  List<Object?> get props => [
+    courseId,
+    platform,
+    mediaType,
+    moduleId,
+    lessonId,
+  ];
 }

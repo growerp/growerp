@@ -62,25 +62,11 @@ class SearchCampaignListState extends State<SearchCampaignList> {
         title: 'Search Campaigns',
         child: Column(
           children: [
-            TextFormField(
-              key: const Key('searchField'),
-              controller: searchBoxController,
+            ListFilterBar(
+              searchHint: 'Search campaigns',
+              searchController: searchBoxController,
               focusNode: searchFocusNode,
-              textInputAction: TextInputAction.search,
-              autofocus: true,
-              decoration: InputDecoration(
-                labelText: 'Search campaigns',
-                suffixIcon: IconButton(
-                  icon: const Icon(Icons.clear),
-                  onPressed: () {
-                    searchBoxController.clear();
-                    _campaignBloc.add(
-                      const OutreachCampaignSearchRequested(query: ''),
-                    );
-                  },
-                ),
-              ),
-              onFieldSubmitted: (value) {
+              onSearchChanged: (value) {
                 _campaignBloc.add(
                   OutreachCampaignSearchRequested(query: value),
                 );

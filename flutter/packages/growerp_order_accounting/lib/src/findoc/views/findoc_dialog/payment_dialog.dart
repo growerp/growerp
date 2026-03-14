@@ -136,7 +136,7 @@ class PaymentDialogState extends State<PaymentDialog> {
       ),
     );
     _accountBloc = context.read<GlAccountBloc>()
-      ..add(const GlAccountFetch(limit: 100));
+      ..add(const GlAccountFetch(limit: 500));
     _authBloc = context.read<AuthBloc>();
   }
 

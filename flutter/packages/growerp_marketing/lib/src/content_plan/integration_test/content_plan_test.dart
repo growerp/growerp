@@ -33,7 +33,8 @@ class ContentPlanTest {
   ) async {
     SaveTest test = await PersistFunctions.getTest();
     await PersistFunctions.persistTest(
-        test.copyWith(contentPlans: contentPlans));
+      test.copyWith(contentPlans: contentPlans),
+    );
     await enterContentPlanData(tester);
   }
 
@@ -53,7 +54,8 @@ class ContentPlanTest {
       );
     }
     await PersistFunctions.persistTest(
-        old.copyWith(contentPlans: updatedContentPlans));
+      old.copyWith(contentPlans: updatedContentPlans),
+    );
     await enterContentPlanData(tester);
   }
 
@@ -64,11 +66,7 @@ class ContentPlanTest {
       find.byKey(const Key('contentPlanItem'), skipOffstage: false),
       findsNWidgets(count),
     );
-    await CommonTest.tapByKey(
-      tester,
-      'delete0',
-      seconds: CommonTest.waitTime,
-    );
+    await CommonTest.tapByKey(tester, 'delete0', seconds: CommonTest.waitTime);
     await CommonTest.tapByKey(
       tester,
       'deleteConfirm0',
@@ -88,15 +86,13 @@ class ContentPlanTest {
     WidgetTester tester, {
     required String searchString,
   }) async {
-    await CommonTest.enterText(tester, 'searchField', searchString);
-    await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
-    await CommonTest.tapByKey(tester, 'theme0');
-    await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
+    await CommonTest.doNewSearch(tester, searchString: searchString);
   }
 
   /// Clear the search field to show all items
   static Future<void> clearSearch(WidgetTester tester) async {
     await CommonTest.enterText(tester, 'searchField', '');
+    await tester.pump(const Duration(seconds: CommonTest.waitTime));
     await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
   }
 
@@ -146,8 +142,11 @@ class ContentPlanTest {
 
       // Get allocated ID for new content plans
       if (contentPlan.pseudoId == null) {
-        await CommonTest.tapByKey(tester, 'theme0',
-            seconds: CommonTest.waitTime);
+        await CommonTest.tapByKey(
+          tester,
+          'theme0',
+          seconds: CommonTest.waitTime,
+        );
         var id = CommonTest.getTextField('topHeader').split('#')[1].trim();
         contentPlan = contentPlan.copyWith(pseudoId: id);
         await CommonTest.tapByKey(tester, 'cancel');
@@ -158,7 +157,8 @@ class ContentPlanTest {
 
     await clearSearch(tester);
     await PersistFunctions.persistTest(
-        test.copyWith(contentPlans: newContentPlans));
+      test.copyWith(contentPlans: newContentPlans),
+    );
   }
 
   static Future<void> checkContentPlans(WidgetTester tester) async {
@@ -168,8 +168,10 @@ class ContentPlanTest {
       await doContentPlanSearch(tester, searchString: contentPlan.pseudoId!);
 
       // Check detail - the dialog key is ContentPlanDetail${pseudoId}
-      expect(find.byKey(Key('ContentPlanDetail${contentPlan.pseudoId}')),
-          findsOneWidget);
+      expect(
+        find.byKey(Key('ContentPlanDetail${contentPlan.pseudoId}')),
+        findsOneWidget,
+      );
 
       if (contentPlan.theme != null) {
         expect(CommonTest.getTextFormField('theme'), equals(contentPlan.theme));

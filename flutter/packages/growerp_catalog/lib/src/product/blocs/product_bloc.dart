@@ -27,9 +27,21 @@ import 'package:fast_csv/fast_csv.dart' as fast_csv;
 part 'product_event.dart';
 part 'product_state.dart';
 
+const _productSearchDebounceDuration = Duration(milliseconds: 300);
+
 EventTransformer<E> productDroppable<E>(Duration duration) {
   return (events, mapper) {
     return droppable<E>().call(events.throttle(duration), mapper);
+  };
+}
+
+EventTransformer<ProductSearchChanged> productSearchDebounce() {
+  return (events, mapper) {
+    final clearStream = events.where((e) => e.searchString.isEmpty);
+    final searchStream = events
+        .where((e) => e.searchString.length >= 3)
+        .debounce(_productSearchDebounceDuration);
+    return clearStream.merge(searchStream).switchMap(mapper);
   };
 }
 
@@ -46,6 +58,10 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     on<ProductUpload>(_onProductUpload);
     on<ProductDownload>(_onProductDownload);
     on<ProductUom>(_onProductUom);
+    on<ProductSearchChanged>(
+      _onProductSearchChanged,
+      transformer: productSearchDebounce(),
+    );
   }
 
   final RestClient restClient;
@@ -102,6 +118,23 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
         ),
       );
     }
+  }
+
+  Future<void> _onProductSearchChanged(
+    ProductSearchChanged event,
+    Emitter<ProductState> emit,
+  ) async {
+    return _onProductFetch(
+      ProductFetch(
+        searchString: event.searchString,
+        categoryId: event.categoryId,
+        assetClassId: event.assetClassId,
+        companyPartyId: event.companyPartyId,
+        refresh: true,
+        limit: event.limit,
+      ),
+      emit,
+    );
   }
 
   Future<void> _onProductUpdate(

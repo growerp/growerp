@@ -82,11 +82,7 @@ class OutreachCampaignTest {
       find.byKey(const Key('campaignItem'), skipOffstage: false),
       findsNWidgets(count),
     );
-    await CommonTest.tapByKey(
-      tester,
-      'delete0',
-      seconds: CommonTest.waitTime,
-    );
+    await CommonTest.tapByKey(tester, 'delete0', seconds: CommonTest.waitTime);
     await CommonTest.tapByKey(
       tester,
       'deleteConfirm0',
@@ -109,19 +105,14 @@ class OutreachCampaignTest {
     WidgetTester tester,
     String searchString,
   ) async {
-    // Enter search text in ListFilterBar's search field
-    await CommonTest.tapByKey(tester, 'search');
-    await CommonTest.enterText(tester, 'searchField', searchString);
-    await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
-
-    // Tap on the first result row's name to open the detail dialog
-    await CommonTest.tapByKey(tester, 'name0');
+    await CommonTest.doNewSearch(tester, searchString: searchString);
     await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
   }
 
   /// Clears the search field to reset the list to show all campaigns.
   static Future<void> clearSearch(WidgetTester tester) async {
     await CommonTest.enterText(tester, 'searchField', '');
+    await tester.pump(const Duration(seconds: CommonTest.waitTime));
     await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
   }
 
@@ -261,10 +252,7 @@ class OutreachCampaignTest {
       );
 
       // Verify campaign name
-      expect(
-        CommonTest.getTextFormField('name'),
-        equals(campaign.name),
-      );
+      expect(CommonTest.getTextFormField('name'), equals(campaign.name));
 
       // Verify target audience
       if (campaign.targetAudience != null) {

@@ -33,8 +33,9 @@ class BalanceSummaryList extends StatefulWidget {
 class BalanceSummaryListState extends State<BalanceSummaryList> {
   final _itemScrollController = ItemScrollController();
   final _itemPositionsListener = ItemPositionsListener.create();
+  final _searchController = TextEditingController();
+  final _searchFocusNode = FocusNode();
   NumberFormat formatter = NumberFormat("00");
-  late bool search;
   late LedgerBloc _ledgerBloc;
   late bool started;
   late TimePeriod _selectedPeriod;
@@ -46,7 +47,9 @@ class BalanceSummaryListState extends State<BalanceSummaryList> {
   void initState() {
     super.initState();
     started = false;
-    search = false;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _searchFocusNode.requestFocus();
+    });
     _selectedPeriod = TimePeriod(
       periodName: 'Y${DateTime.now().year}',
       periodType: 'Y',
@@ -282,10 +285,86 @@ class BalanceSummaryListState extends State<BalanceSummaryList> {
                     ],
                   ),
                 ),
-                BalanceSummaryListHeader(
-                  _itemScrollController,
-                  state.ledgerReport!,
-                  isPhone(context),
+                ListFilterBar(
+                  searchHint: 'Search account code or name...',
+                  searchController: _searchController,
+                  focusNode: _searchFocusNode,
+                  onSearchChanged: (value) {
+                    if (value.isNotEmpty) {
+                      int index = 0;
+                      for (var el in state.ledgerReport!.glAccounts) {
+                        if ((el.accountCode ?? '').contains(value) ||
+                            (el.accountName ?? '').contains(value)) {
+                          break;
+                        }
+                        index++;
+                      }
+                      _itemScrollController.scrollTo(
+                        index: index + 1,
+                        duration: const Duration(seconds: 1),
+                        curve: Curves.linear,
+                      );
+                    }
+                  },
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16.0,
+                    vertical: 4.0,
+                  ),
+                  child: Column(
+                    children: [
+                      if (isPhone(context))
+                        Text(
+                          _localizations.glAccountName,
+                          textAlign: TextAlign.center,
+                        ),
+                      Row(
+                        children: <Widget>[
+                          Expanded(
+                            child: Text(
+                              _localizations.code,
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                          if (!isPhone(context))
+                            Expanded(
+                              child: Text(
+                                _localizations.name,
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          Expanded(
+                            child: Text(
+                              _localizations.begin,
+                              textAlign: TextAlign.right,
+                            ),
+                          ),
+                          if (!isPhone(context))
+                            Expanded(
+                              child: Text(
+                                _localizations.postedDebit,
+                                textAlign: TextAlign.right,
+                              ),
+                            ),
+                          if (!isPhone(context))
+                            Expanded(
+                              child: Text(
+                                _localizations.postedCredit,
+                                textAlign: TextAlign.right,
+                              ),
+                            ),
+                          Expanded(
+                            child: Text(
+                              _localizations.endBalance,
+                              textAlign: TextAlign.right,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const Divider(),
+                    ],
+                  ),
                 ),
                 Expanded(
                   child: Stack(
@@ -469,5 +548,12 @@ class BalanceSummaryListState extends State<BalanceSummaryList> {
     }
 
     return false;
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _searchFocusNode.dispose();
+    super.dispose();
   }
 }

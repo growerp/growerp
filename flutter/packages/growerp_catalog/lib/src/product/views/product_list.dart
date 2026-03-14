@@ -30,6 +30,7 @@ class ProductList extends StatefulWidget {
 class ProductListState extends State<ProductList> {
   final _scrollController = ScrollController();
   final _searchController = TextEditingController();
+  final _searchFocusNode = FocusNode();
   late ProductBloc _productBloc;
   List<Product> products = const <Product>[];
   late String classificationId;
@@ -50,6 +51,9 @@ class ProductListState extends State<ProductList> {
     classificationId = context.read<String>();
     entityName = classificationId == 'AppHotel' ? 'Room Type' : 'Product';
     bottom = 50;
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _searchFocusNode.requestFocus(),
+    );
   }
 
   @override
@@ -81,8 +85,8 @@ class ProductListState extends State<ProductList> {
         isLoading: _isLoading && products.isEmpty,
         scrollController: _scrollController,
         rowHeight: isPhone ? 72 : 56,
-        onRowTap: (index) {
-          showDialog(
+        onRowTap: (index) async {
+          await showDialog(
             barrierDismissible: true,
             context: context,
             builder: (BuildContext context) {
@@ -96,6 +100,7 @@ class ProductListState extends State<ProductList> {
               );
             },
           );
+          _searchFocusNode.requestFocus();
         },
       );
     }
@@ -104,6 +109,9 @@ class ProductListState extends State<ProductList> {
       listener: (context, state) {
         if (state.status == ProductStatus.failure) {
           HelperFunctions.showMessage(context, '${state.message}', Colors.red);
+          WidgetsBinding.instance.addPostFrameCallback(
+            (_) => _searchFocusNode.requestFocus(),
+          );
         }
         if (state.status == ProductStatus.success) {
           final translatedMessage = state.message != null
@@ -119,6 +127,9 @@ class ProductListState extends State<ProductList> {
               Colors.green,
             );
           }
+          WidgetsBinding.instance.addPostFrameCallback(
+            (_) => _searchFocusNode.requestFocus(),
+          );
         }
       },
       builder: (context, state) {
@@ -150,11 +161,10 @@ class ProductListState extends State<ProductList> {
             ListFilterBar(
               searchHint: 'Search ${entityName.toLowerCase()}s...',
               searchController: _searchController,
+              focusNode: _searchFocusNode,
               onSearchChanged: (value) {
                 searchString = value;
-                _productBloc.add(
-                  ProductFetch(refresh: true, searchString: value),
-                );
+                _productBloc.add(ProductSearchChanged(searchString: value));
               },
             ),
             // Main content area with StyledDataTable
@@ -189,6 +199,7 @@ class ProductListState extends State<ProductList> {
                                   );
                                 },
                               );
+                              _searchFocusNode.requestFocus();
                             },
                             tooltip: catalogLocalizations.productUpDown,
                             child: const Icon(Icons.file_copy),
@@ -208,6 +219,7 @@ class ProductListState extends State<ProductList> {
                                   );
                                 },
                               );
+                              _searchFocusNode.requestFocus();
                             },
                             tooltip: CoreLocalizations.of(context)!.addNew,
                             child: const Icon(Icons.add),
@@ -231,6 +243,7 @@ class ProductListState extends State<ProductList> {
       ..removeListener(_onScroll)
       ..dispose();
     _searchController.dispose();
+    _searchFocusNode.dispose();
     super.dispose();
   }
 

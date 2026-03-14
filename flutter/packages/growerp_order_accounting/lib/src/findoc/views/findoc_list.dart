@@ -76,6 +76,9 @@ class FinDocListState extends State<FinDocList> {
     my = _authBloc.state.authenticate?.user?.userGroup == UserGroup.other;
     classificationId = context.read<String>();
     myFocusNode = FocusNode();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      myFocusNode.requestFocus();
+    });
     _scrollController.addListener(_onScroll);
     switch (widget.docType) {
       case FinDocType.order:
@@ -174,6 +177,7 @@ class FinDocListState extends State<FinDocList> {
               '${state.message}',
               Colors.red,
             );
+            myFocusNode.requestFocus();
           }
           if (state.status == FinDocStatus.success) {
             HelperFunctions.showMessage(
@@ -181,6 +185,7 @@ class FinDocListState extends State<FinDocList> {
               '${state.message}',
               Colors.green,
             );
+            myFocusNode.requestFocus();
           }
         }
 
@@ -245,11 +250,11 @@ class FinDocListState extends State<FinDocList> {
               ListFilterBar(
                 searchHint: getSearchHint(),
                 searchController: _searchController,
+                focusNode: myFocusNode,
                 onSearchChanged: (value) {
                   searchString = value;
                   _finDocBloc.add(
-                    FinDocFetch(
-                      refresh: true,
+                    FinDocSearchChanged(
                       searchString: value,
                       my: my,
                       status: widget.status,
@@ -428,6 +433,7 @@ class FinDocListState extends State<FinDocList> {
       ..removeListener(_onScroll)
       ..dispose();
     _searchController.dispose();
+    myFocusNode.dispose();
     super.dispose();
   }
 

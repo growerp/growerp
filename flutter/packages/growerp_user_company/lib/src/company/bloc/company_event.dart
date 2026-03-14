@@ -57,3 +57,16 @@ class CompanyDelete extends CompanyEvent {
   @override
   String toString() => "UpdateCompany: $company";
 }
+
+class CompanySearchChanged extends CompanyEvent {
+  const CompanySearchChanged({
+    required this.searchString,
+    this.mainOnly = false,
+    this.limit = 20,
+  });
+  final String searchString;
+  final bool mainOnly;
+  final int limit;
+  @override
+  List<Object> get props => [searchString];
+}

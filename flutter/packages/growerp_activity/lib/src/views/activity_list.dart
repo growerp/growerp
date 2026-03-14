@@ -31,6 +31,8 @@ class ActivityList extends StatefulWidget {
 
 class ActivityListState extends State<ActivityList> {
   final _scrollController = ScrollController();
+  final _searchController = TextEditingController();
+  final _searchFocusNode = FocusNode();
   late ActivityBloc _activityBloc;
   late ActivityLocalizations _localizations;
   late List<Activity> activities = [];
@@ -51,6 +53,9 @@ class ActivityListState extends State<ActivityList> {
       ),
     );
     bottom = 50;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _searchFocusNode.requestFocus();
+    });
   }
 
   @override
@@ -117,85 +122,73 @@ class ActivityListState extends State<ActivityList> {
             ),
           );
         }
-        if (state.status == ActivityBlocStatus.success) {
-          activities = state.activities;
-          return Stack(
-            children: [
-              tableView(),
-              Positioned(
-                right: right,
-                bottom: bottom,
-                child: GestureDetector(
-                  onPanUpdate: (details) {
-                    setState(() {
-                      right = right! - details.delta.dx;
-                      bottom -= details.delta.dy;
-                    });
-                  },
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      FloatingActionButton(
-                        key: const Key("search"),
-                        heroTag: "btn1",
-                        onPressed: () async {
-                          await showDialog(
-                            barrierDismissible: true,
-                            context: context,
-                            builder: (BuildContext context) {
-                              return BlocProvider.value(
-                                value: context
-                                    .read<DataFetchBloc<Activities>>(),
-                                child: SearchActivityList(widget.activityType),
-                              );
-                            },
-                          ).then(
-                            (value) async => value != null && context.mounted
-                                ? await showDialog(
-                                    barrierDismissible: true,
-                                    context: context,
-                                    builder: (BuildContext context) {
-                                      return BlocProvider.value(
-                                        value: _activityBloc,
-                                        child: ActivityDialog(value, null),
-                                      );
-                                    },
-                                  )
-                                : const SizedBox.shrink(),
-                          );
-                        },
-                        child: const Icon(Icons.search),
-                      ),
-                      const SizedBox(height: 10),
-                      FloatingActionButton(
-                        heroTag: 'activityNew',
-                        key: const Key("addNew"),
-                        onPressed: () async {
-                          await showDialog(
-                            barrierDismissible: true,
-                            context: context,
-                            builder: (BuildContext context) {
-                              return BlocProvider.value(
-                                value: _activityBloc,
-                                child: ActivityDialog(
-                                  Activity(activityType: widget.activityType),
-                                  widget.companyUser,
-                                ),
-                              );
-                            },
-                          );
-                        },
-                        tooltip: _localizations.activity_addNew,
-                        child: const Icon(Icons.add),
-                      ),
-                    ],
+        activities = state.activities;
+        return Column(
+          children: [
+            ListFilterBar(
+              searchHint: 'Search by ID...',
+              searchController: _searchController,
+              focusNode: _searchFocusNode,
+              onSearchChanged: (value) {
+                _activityBloc.add(
+                  ActivityFetch(
+                    refresh: true,
+                    searchString: value,
+                    activityType: widget.activityType,
+                    companyUser: widget.companyUser,
                   ),
-                ),
-              ),
-            ],
-          );
-        }
-        return const LoadingIndicator();
+                );
+              },
+            ),
+            Expanded(
+              child:
+                  state.status == ActivityBlocStatus.loading &&
+                      activities.isEmpty
+                  ? const LoadingIndicator()
+                  : Stack(
+                      children: [
+                        tableView(),
+                        Positioned(
+                          right: right,
+                          bottom: bottom,
+                          child: GestureDetector(
+                            onPanUpdate: (details) {
+                              setState(() {
+                                right = right! - details.delta.dx;
+                                bottom -= details.delta.dy;
+                              });
+                            },
+                            child: FloatingActionButton(
+                              heroTag: 'activityNew',
+                              key: const Key('addNew'),
+                              onPressed: () async {
+                                await showDialog(
+                                  barrierDismissible: true,
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return BlocProvider.value(
+                                      value: _activityBloc,
+                                      child: ActivityDialog(
+                                        Activity(
+                                          activityType: widget.activityType,
+                                        ),
+                                        widget.companyUser,
+                                      ),
+                                    );
+                                  },
+                                );
+                                if (mounted) _searchFocusNode.requestFocus();
+                              },
+                              tooltip: _localizations.activity_addNew,
+                              child: const Icon(Icons.add),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+            ),
+          ],
+        );
       },
     );
   }
@@ -205,6 +198,8 @@ class ActivityListState extends State<ActivityList> {
     _scrollController
       ..removeListener(_onScroll)
       ..dispose();
+    _searchController.dispose();
+    _searchFocusNode.dispose();
     super.dispose();
   }
 

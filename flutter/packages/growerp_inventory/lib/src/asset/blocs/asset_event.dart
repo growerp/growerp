@@ -40,3 +40,14 @@ class AssetUpdate extends AssetEvent {
   const AssetUpdate(this.asset);
   final Asset asset;
 }
+
+class AssetSearchChanged extends AssetEvent {
+  const AssetSearchChanged({
+    required this.searchString,
+    this.assetClassId = '',
+  });
+  final String searchString;
+  final String assetClassId;
+  @override
+  List<Object> get props => [searchString, assetClassId];
+}

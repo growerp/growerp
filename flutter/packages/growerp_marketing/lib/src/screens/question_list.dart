@@ -26,10 +26,7 @@ import 'question_list_styled_data.dart';
 class QuestionListScreen extends StatefulWidget {
   final String assessmentId;
 
-  const QuestionListScreen({
-    super.key,
-    required this.assessmentId,
-  });
+  const QuestionListScreen({super.key, required this.assessmentId});
 
   @override
   QuestionListScreenState createState() => QuestionListScreenState();
@@ -38,6 +35,7 @@ class QuestionListScreen extends StatefulWidget {
 class QuestionListScreenState extends State<QuestionListScreen> {
   final _scrollController = ScrollController();
   final _searchController = TextEditingController();
+  final _searchFocusNode = FocusNode();
   late QuestionBloc _questionBloc;
   List<AssessmentQuestion> questions = const <AssessmentQuestion>[];
   bool _isLoading = true;
@@ -48,12 +46,16 @@ class QuestionListScreenState extends State<QuestionListScreen> {
     super.initState();
     _questionBloc = context.read<QuestionBloc>()
       ..add(QuestionLoad(widget.assessmentId));
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _searchFocusNode.requestFocus();
+    });
   }
 
   @override
   void dispose() {
     _scrollController.dispose();
     _searchController.dispose();
+    _searchFocusNode.dispose();
     super.dispose();
   }
 
@@ -66,14 +68,16 @@ class QuestionListScreenState extends State<QuestionListScreen> {
       final filtered = searchString.isEmpty
           ? questions
           : questions
-              .where((q) =>
-                  (q.questionText ?? '')
-                      .toLowerCase()
-                      .contains(searchString.toLowerCase()) ||
-                  (q.questionType ?? '')
-                      .toLowerCase()
-                      .contains(searchString.toLowerCase()))
-              .toList();
+                .where(
+                  (q) =>
+                      (q.questionText ?? '').toLowerCase().contains(
+                        searchString.toLowerCase(),
+                      ) ||
+                      (q.questionType ?? '').toLowerCase().contains(
+                        searchString.toLowerCase(),
+                      ),
+                )
+                .toList();
 
       final rows = filtered.map((question) {
         final index = filtered.indexOf(question);
@@ -91,9 +95,9 @@ class QuestionListScreenState extends State<QuestionListScreen> {
         isLoading: _isLoading && questions.isEmpty,
         scrollController: _scrollController,
         rowHeight: isPhone ? 72 : 56,
-        onRowTap: (index) {
+        onRowTap: (index) async {
           final question = filtered[index];
-          showDialog(
+          await showDialog(
             barrierDismissible: true,
             context: context,
             builder: (BuildContext context) {
@@ -106,6 +110,7 @@ class QuestionListScreenState extends State<QuestionListScreen> {
               );
             },
           );
+          if (mounted) _searchFocusNode.requestFocus();
         },
       );
     }
@@ -120,14 +125,12 @@ class QuestionListScreenState extends State<QuestionListScreen> {
               state.message ?? 'Error loading questions',
               Colors.red,
             );
+            _searchFocusNode.requestFocus();
           }
           if (state.status == QuestionStatus.success &&
               (state.message ?? '').isNotEmpty) {
-            HelperFunctions.showMessage(
-              context,
-              state.message!,
-              Colors.green,
-            );
+            HelperFunctions.showMessage(context, state.message!, Colors.green);
+            _searchFocusNode.requestFocus();
           }
         },
         builder: (context, state) {
@@ -139,6 +142,7 @@ class QuestionListScreenState extends State<QuestionListScreen> {
               ListFilterBar(
                 searchHint: 'Search questions...',
                 searchController: _searchController,
+                focusNode: _searchFocusNode,
                 onSearchChanged: (value) {
                   setState(() {
                     searchString = value;
@@ -168,6 +172,7 @@ class QuestionListScreenState extends State<QuestionListScreen> {
                               );
                             },
                           );
+                          if (mounted) _searchFocusNode.requestFocus();
                         },
                         tooltip: 'Add Question',
                         child: const Icon(Icons.add),

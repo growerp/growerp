@@ -30,6 +30,18 @@ EventTransformer<E> throttleDroppable<E>(Duration duration) {
   };
 }
 
+const _outreachSearchDebounceDuration = Duration(milliseconds: 300);
+EventTransformer<OutreachMessageSearchRequested>
+outreachMessageSearchDebounce() {
+  return (events, mapper) {
+    final clearStream = events.where((e) => e.query.isEmpty);
+    final searchStream = events
+        .where((e) => e.query.length >= 3)
+        .debounce(_outreachSearchDebounceDuration);
+    return clearStream.merge(searchStream).switchMap(mapper);
+  };
+}
+
 class OutreachMessageBloc
     extends Bloc<OutreachMessageEvent, OutreachMessageState> {
   OutreachMessageBloc(this.restClient) : super(const OutreachMessageState()) {
@@ -40,7 +52,10 @@ class OutreachMessageBloc
     on<OutreachMessageCreate>(_onCreate);
     on<OutreachMessageUpdateStatus>(_onUpdateStatus);
     on<OutreachMessageDelete>(_onDelete);
-    on<OutreachMessageSearchRequested>(_onSearchRequested);
+    on<OutreachMessageSearchRequested>(
+      _onSearchRequested,
+      transformer: outreachMessageSearchDebounce(),
+    );
     on<OutreachMessageConvertToLead>(_onConvertToLead);
   }
 

@@ -42,3 +42,11 @@ class LocationDelete extends LocationEvent {
   const LocationDelete(this.location);
   final Location location;
 }
+
+class LocationSearchChanged extends LocationEvent {
+  const LocationSearchChanged({required this.searchString, this.limit = 20});
+  final String searchString;
+  final int limit;
+  @override
+  List<Object> get props => [searchString];
+}

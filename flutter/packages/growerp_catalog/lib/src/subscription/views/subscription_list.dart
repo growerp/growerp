@@ -29,6 +29,7 @@ class SubscriptionList extends StatefulWidget {
 class SubscriptionListState extends State<SubscriptionList> {
   final _scrollController = ScrollController();
   final _searchController = TextEditingController();
+  final _searchFocusNode = FocusNode();
   late SubscriptionBloc _subscriptionBloc;
   late List<Subscription> subscriptions;
   late String classificationId;
@@ -36,6 +37,8 @@ class SubscriptionListState extends State<SubscriptionList> {
   late bool started;
   late int limit;
   String _searchQuery = '';
+  late double bottom;
+  double? right;
 
   @override
   void initState() {
@@ -46,6 +49,10 @@ class SubscriptionListState extends State<SubscriptionList> {
       ..add(const SubscriptionFetch(refresh: true));
     classificationId = context.read<String>();
     entityName = 'Subscription';
+    bottom = 50;
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _searchFocusNode.requestFocus(),
+    );
   }
 
   @override
@@ -54,11 +61,15 @@ class SubscriptionListState extends State<SubscriptionList> {
     var coreLocalizations = CoreLocalizations.of(context)!;
     limit = (MediaQuery.of(context).size.height / 100).round();
     bool isPhone = isAPhone(context);
+    right = right ?? (isPhone ? 20 : 50);
 
     return BlocConsumer<SubscriptionBloc, SubscriptionState>(
       listener: (context, state) {
         if (state.status == SubscriptionStatus.failure) {
           HelperFunctions.showMessage(context, '${state.message}', Colors.red);
+          WidgetsBinding.instance.addPostFrameCallback(
+            (_) => _searchFocusNode.requestFocus(),
+          );
         }
         if (state.status == SubscriptionStatus.success) {
           started = true;
@@ -75,6 +86,9 @@ class SubscriptionListState extends State<SubscriptionList> {
               Colors.green,
             );
           }
+          WidgetsBinding.instance.addPostFrameCallback(
+            (_) => _searchFocusNode.requestFocus(),
+          );
         }
       },
       builder: (context, state) {
@@ -89,82 +103,95 @@ class SubscriptionListState extends State<SubscriptionList> {
         subscriptions = state.subscriptions;
         final isLoading = state.status == SubscriptionStatus.loading;
 
-        return Scaffold(
-          floatingActionButton: FloatingActionButton(
-            heroTag: 'subscriptionNew',
-            key: const Key('addNew'),
-            onPressed: () async {
-              await showDialog(
-                barrierDismissible: true,
-                context: context,
-                builder: (BuildContext context) {
-                  return BlocProvider.value(
-                    value: _subscriptionBloc,
-                    child: SubscriptionDialog(Subscription()),
-                  );
-                },
-              );
-            },
-            tooltip: coreLocalizations.addNew,
-            child: const Icon(Icons.add),
-          ),
-          body: Column(
-            children: [
-              ListFilterBar(
-                searchHint: catalogLocalizations.subscriptionSearch,
-                searchController: _searchController,
-                onSearchChanged: (value) {
-                  setState(() {
-                    _searchQuery = value;
-                  });
-                  if (value.length > 2) {
-                    _subscriptionBloc.add(
-                      SubscriptionFetch(refresh: true, searchString: value),
-                    );
-                  } else if (value.isEmpty) {
-                    _subscriptionBloc.add(
-                      const SubscriptionFetch(refresh: true),
-                    );
-                  }
-                },
-              ),
-              Expanded(
-                child: isLoading && subscriptions.isEmpty
-                    ? const Center(child: LoadingIndicator())
-                    : StyledDataTable(
-                        scrollController: _scrollController,
-                        columns: getSubscriptionColumns(isPhone),
-                        rows: subscriptions.isEmpty
-                            ? []
-                            : subscriptions
-                                  .asMap()
-                                  .entries
-                                  .map(
-                                    (entry) => buildSubscriptionRow(
-                                      context,
-                                      entry.value,
-                                      entry.key,
-                                      isPhone,
-                                    ),
-                                  )
-                                  .toList(),
-                        isLoading: isLoading,
-                        onRowTap: (index) {
-                          showDialog(
+        return Column(
+          children: [
+            ListFilterBar(
+              searchHint: catalogLocalizations.subscriptionSearch,
+              searchController: _searchController,
+              focusNode: _searchFocusNode,
+              onSearchChanged: (value) {
+                setState(() {
+                  _searchQuery = value;
+                });
+                _subscriptionBloc.add(
+                  SubscriptionSearchChanged(searchString: value),
+                );
+              },
+            ),
+            Expanded(
+              child: Stack(
+                children: [
+                  isLoading && subscriptions.isEmpty
+                      ? const Center(child: LoadingIndicator())
+                      : StyledDataTable(
+                          scrollController: _scrollController,
+                          columns: getSubscriptionColumns(isPhone),
+                          rows: subscriptions.isEmpty
+                              ? []
+                              : subscriptions
+                                    .asMap()
+                                    .entries
+                                    .map(
+                                      (entry) => buildSubscriptionRow(
+                                        context,
+                                        entry.value,
+                                        entry.key,
+                                        isPhone,
+                                      ),
+                                    )
+                                    .toList(),
+                          isLoading: isLoading,
+                          onRowTap: (index) async {
+                            await showDialog(
+                              barrierDismissible: true,
+                              context: context,
+                              builder: (BuildContext context) {
+                                return BlocProvider.value(
+                                  value: _subscriptionBloc,
+                                  child: SubscriptionDialog(
+                                    subscriptions[index],
+                                  ),
+                                );
+                              },
+                            );
+                            _searchFocusNode.requestFocus();
+                          },
+                        ),
+                  Positioned(
+                    right: right,
+                    bottom: bottom,
+                    child: GestureDetector(
+                      onPanUpdate: (details) {
+                        setState(() {
+                          right = right! - details.delta.dx;
+                          bottom -= details.delta.dy;
+                        });
+                      },
+                      child: FloatingActionButton(
+                        heroTag: 'subscriptionNew',
+                        key: const Key('addNew'),
+                        onPressed: () async {
+                          await showDialog(
                             barrierDismissible: true,
                             context: context,
                             builder: (BuildContext context) {
                               return BlocProvider.value(
                                 value: _subscriptionBloc,
-                                child: SubscriptionDialog(subscriptions[index]),
+                                child: SubscriptionDialog(Subscription()),
                               );
                             },
                           );
+                          _searchFocusNode.requestFocus();
                         },
+                        tooltip: coreLocalizations.addNew,
+                        child: const Icon(Icons.add),
                       ),
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         );
       },
     );
@@ -176,6 +203,7 @@ class SubscriptionListState extends State<SubscriptionList> {
       ..removeListener(_onScroll)
       ..dispose();
     _searchController.dispose();
+    _searchFocusNode.dispose();
     super.dispose();
   }
 

@@ -32,6 +32,7 @@ class AssessmentList extends StatefulWidget {
 class AssessmentListState extends State<AssessmentList> {
   final _scrollController = ScrollController();
   final _searchController = TextEditingController();
+  final _searchFocusNode = FocusNode();
   late AssessmentBloc _assessmentBloc;
   List<Assessment> assessments = const <Assessment>[];
   bool hasReachedMax = false;
@@ -48,6 +49,9 @@ class AssessmentListState extends State<AssessmentList> {
     _assessmentBloc = context.read<AssessmentBloc>()
       ..add(const AssessmentFetch(refresh: true));
     bottom = 50;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _searchFocusNode.requestFocus();
+    });
   }
 
   @override
@@ -73,8 +77,8 @@ class AssessmentListState extends State<AssessmentList> {
         isLoading: _isLoading && assessments.isEmpty,
         scrollController: _scrollController,
         rowHeight: isPhone ? 80 : 56,
-        onRowTap: (index) {
-          showDialog(
+        onRowTap: (index) async {
+          await showDialog(
             barrierDismissible: true,
             context: context,
             builder: (BuildContext context) {
@@ -88,6 +92,7 @@ class AssessmentListState extends State<AssessmentList> {
               );
             },
           );
+          if (mounted) _searchFocusNode.requestFocus();
         },
       );
     }
@@ -96,11 +101,13 @@ class AssessmentListState extends State<AssessmentList> {
       listener: (context, state) {
         if (state.status == AssessmentStatus.failure) {
           HelperFunctions.showMessage(context, '${state.message}', Colors.red);
+          _searchFocusNode.requestFocus();
         }
         if (state.status == AssessmentStatus.success) {
           if ((state.message ?? '').isNotEmpty) {
             HelperFunctions.showMessage(context, state.message!, Colors.green);
           }
+          _searchFocusNode.requestFocus();
         }
       },
       builder: (context, state) {
@@ -129,11 +136,10 @@ class AssessmentListState extends State<AssessmentList> {
             ListFilterBar(
               searchHint: 'Search assessments...',
               searchController: _searchController,
+              focusNode: _searchFocusNode,
               onSearchChanged: (value) {
                 searchString = value;
-                _assessmentBloc.add(
-                  AssessmentFetch(refresh: true, searchString: value),
-                );
+                _assessmentBloc.add(AssessmentSearchRequested(query: value));
               },
             ),
             // Main content area with StyledDataTable
@@ -173,6 +179,7 @@ class AssessmentListState extends State<AssessmentList> {
                                   );
                                 },
                               );
+                              if (mounted) _searchFocusNode.requestFocus();
                             },
                             tooltip: 'Add new assessment',
                             child: const Icon(Icons.add),
@@ -196,6 +203,7 @@ class AssessmentListState extends State<AssessmentList> {
       ..removeListener(_onScroll)
       ..dispose();
     _searchController.dispose();
+    _searchFocusNode.dispose();
     super.dispose();
   }
 

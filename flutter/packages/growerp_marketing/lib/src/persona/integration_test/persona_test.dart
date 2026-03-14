@@ -19,12 +19,7 @@ import 'package:growerp_models/growerp_models.dart';
 
 class PersonaTest {
   static Future<void> selectPersonas(WidgetTester tester) async {
-    await CommonTest.selectOption(
-      tester,
-      '/personas',
-      'PersonaList',
-      null,
-    );
+    await CommonTest.selectOption(tester, '/personas', 'PersonaList', null);
   }
 
   static Future<void> addPersonas(
@@ -62,11 +57,7 @@ class PersonaTest {
       find.byKey(const Key('personaItem'), skipOffstage: false),
       findsNWidgets(count),
     );
-    await CommonTest.tapByKey(
-      tester,
-      'delete0',
-      seconds: CommonTest.waitTime,
-    );
+    await CommonTest.tapByKey(tester, 'delete0', seconds: CommonTest.waitTime);
     await CommonTest.tapByKey(
       tester,
       'deleteConfirm0',
@@ -86,15 +77,13 @@ class PersonaTest {
     WidgetTester tester, {
     required String searchString,
   }) async {
-    await CommonTest.enterText(tester, 'searchField', searchString);
-    await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
-    await CommonTest.tapByKey(tester, 'name0');
-    await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
+    await CommonTest.doNewSearch(tester, searchString: searchString);
   }
 
   /// Clear the search field to show all items
   static Future<void> clearSearch(WidgetTester tester) async {
     await CommonTest.enterText(tester, 'searchField', '');
+    await tester.pump(const Duration(seconds: CommonTest.waitTime));
     await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
   }
 
@@ -126,7 +115,10 @@ class PersonaTest {
 
       if (persona.demographics != null) {
         await CommonTest.enterText(
-            tester, 'demographics', persona.demographics!);
+          tester,
+          'demographics',
+          persona.demographics!,
+        );
       }
 
       if (persona.painPoints != null) {
@@ -170,8 +162,11 @@ class PersonaTest {
 
       // Get allocated ID for new personas
       if (persona.pseudoId == null) {
-        await CommonTest.tapByKey(tester, 'name0',
-            seconds: CommonTest.waitTime);
+        await CommonTest.tapByKey(
+          tester,
+          'name0',
+          seconds: CommonTest.waitTime,
+        );
         var id = CommonTest.getTextField('topHeader').split('#')[1].trim();
         persona = persona.copyWith(pseudoId: id);
         await CommonTest.tapByKey(tester, 'cancel');
@@ -192,7 +187,9 @@ class PersonaTest {
 
       // Check detail - the dialog key is PersonaDetail${pseudoId}
       expect(
-          find.byKey(Key('PersonaDetail${persona.pseudoId}')), findsOneWidget);
+        find.byKey(Key('PersonaDetail${persona.pseudoId}')),
+        findsOneWidget,
+      );
       expect(CommonTest.getTextFormField('name'), equals(persona.name));
 
       if (persona.demographics != null) {
@@ -220,10 +217,7 @@ class PersonaTest {
           key: 'goals',
           listViewName: 'personaDetailListView',
         );
-        expect(
-          CommonTest.getTextFormField('goals'),
-          equals(persona.goals!),
-        );
+        expect(CommonTest.getTextFormField('goals'), equals(persona.goals!));
       }
 
       if (persona.toneOfVoice != null) {

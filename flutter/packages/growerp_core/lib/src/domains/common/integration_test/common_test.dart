@@ -263,9 +263,7 @@ class CommonTest {
           await tester.tap(find.byKey(const Key('submit')));
           await tester.pump();
           int gWaitAttempts = 0;
-          while (
-            await doesExistKey(tester, 'submit') && gWaitAttempts < 120
-          ) {
+          while (await doesExistKey(tester, 'submit') && gWaitAttempts < 120) {
             await tester.pump(const Duration(seconds: 1));
             gWaitAttempts++;
           }
@@ -348,11 +346,8 @@ class CommonTest {
 
       // Check if we're authenticated (dashboard visible and no dialogs on top)
       if (tester.any(find.byKey(const Key('HomeFormAuth')))) {
-        // Poll briefly for any post-auth dialog (e.g. TrialWelcomeHelper)
-        for (int i = 0; i < 5; i++) {
-          await tester.pump(const Duration(milliseconds: 100));
-          if (tester.any(find.byKey(const Key('startTrial')))) break;
-        }
+        // Wait a bit more for any dialog to appear on top
+        await tester.pump(const Duration(seconds: 2));
 
         // Double-check no dialog appeared
         if (await doesExistKey(tester, 'startTrial')) {
@@ -379,10 +374,7 @@ class CommonTest {
     }
 
     // Final check for any lingering TrialWelcomeHelper dialog
-    for (int i = 0; i < 5; i++) {
-      await tester.pump(const Duration(milliseconds: 100));
-      if (tester.any(find.byKey(const Key('getStarted')))) break;
-    }
+    await tester.pump(const Duration(seconds: 2));
     if (await doesExistKey(tester, 'getStarted')) {
       debugPrint('Login: Final cleanup - dismissing TrialWelcomeHelper...');
       await tapByKey(tester, 'getStarted', settle: false);
@@ -553,26 +545,14 @@ class CommonTest {
         // the first visible result matches the search string. This avoids
         // tapping the wrong row when the backend hasn't responded yet and
         // the list still shows the previous (unfiltered) ascending results.
-        String targetKey = key;
         if (key == 'id0') {
-          bool found = false;
           for (int i = 0; i < 30; i++) {
-            for (int j = 0; j < 10; j++) {
-              String currentKey = 'id$j';
-              if (tester.any(find.byKey(Key(currentKey)))) {
-                if (getTextField(currentKey) == searchString) {
-                  targetKey = currentKey;
-                  found = true;
-                  break;
-                }
-              }
-            }
-            if (found) break;
+            if (getTextField('id0') == searchString) break;
             await tester.pump(const Duration(milliseconds: 200));
           }
         }
-        await tester.ensureVisible(find.byKey(Key(targetKey)).last);
-        await tester.tap(find.byKey(Key(targetKey)).last);
+        await tester.ensureVisible(find.byKey(Key(key)).last);
+        await tester.tap(find.byKey(Key(key)).last);
         await tester.pumpAndSettle(Duration(seconds: seconds));
         return;
       }

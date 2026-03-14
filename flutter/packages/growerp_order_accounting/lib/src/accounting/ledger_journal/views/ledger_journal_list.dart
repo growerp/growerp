@@ -28,6 +28,7 @@ class LedgerJournalList extends StatefulWidget {
 class LedgerJournalsState extends State<LedgerJournalList> {
   final _scrollController = ScrollController();
   final _searchController = TextEditingController();
+  final _searchFocusNode = FocusNode();
   late LedgerJournalBloc _ledgerJournalBloc;
   late double bottom;
   double? right;
@@ -42,6 +43,9 @@ class LedgerJournalsState extends State<LedgerJournalList> {
       ..add(const LedgerJournalFetch(refresh: true));
     _scrollController.addListener(_onScroll);
     bottom = 50;
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _searchFocusNode.requestFocus(),
+    );
   }
 
   @override
@@ -67,8 +71,8 @@ class LedgerJournalsState extends State<LedgerJournalList> {
         isLoading: _isLoading && ledgerJournals.isEmpty,
         scrollController: _scrollController,
         rowHeight: isPhone ? 56 : 56,
-        onRowTap: (index) {
-          showDialog(
+        onRowTap: (index) async {
+          await showDialog(
             barrierDismissible: true,
             context: context,
             builder: (BuildContext context) {
@@ -82,6 +86,7 @@ class LedgerJournalsState extends State<LedgerJournalList> {
               );
             },
           );
+          _searchFocusNode.requestFocus();
         },
       );
     }
@@ -90,6 +95,7 @@ class LedgerJournalsState extends State<LedgerJournalList> {
       listener: (context, state) {
         if (state.status == LedgerJournalStatus.failure) {
           HelperFunctions.showMessage(context, '${state.message}', Colors.red);
+          _searchFocusNode.requestFocus();
         }
         if (state.status == LedgerJournalStatus.success) {
           HelperFunctions.showMessage(
@@ -97,6 +103,7 @@ class LedgerJournalsState extends State<LedgerJournalList> {
             '${state.message}',
             Colors.green,
           );
+          _searchFocusNode.requestFocus();
         }
       },
       builder: (context, state) {
@@ -130,10 +137,11 @@ class LedgerJournalsState extends State<LedgerJournalList> {
                 ListFilterBar(
                   searchHint: 'Search in ID, name...',
                   searchController: _searchController,
+                  focusNode: _searchFocusNode,
                   onSearchChanged: (value) {
                     searchString = value;
                     _ledgerJournalBloc.add(
-                      LedgerJournalFetch(refresh: true, searchString: value),
+                      LedgerJournalSearchChanged(searchString: value),
                     );
                   },
                 ),
@@ -175,6 +183,7 @@ class LedgerJournalsState extends State<LedgerJournalList> {
                                       ),
                                     ),
                               );
+                              _searchFocusNode.requestFocus();
                             },
                             tooltip: localizations.addNew,
                             child: const Icon(Icons.add),
@@ -199,6 +208,7 @@ class LedgerJournalsState extends State<LedgerJournalList> {
       ..removeListener(_onScroll)
       ..dispose();
     _searchController.dispose();
+    _searchFocusNode.dispose();
     super.dispose();
   }
 

@@ -1195,6 +1195,8 @@ along with this software (see the LICENSE.md file). If not, see
                     <order-by field-name="accountCode" />
                 </entity-find>
                 <else>
+                    <log
+                        message="====search by: $search and glAccountId: $glAccountId and accountCode: $accountCode companyPartyId: $companyPartyId" />
                     <entity-find entity-name="growerp.ledger.account.GlAccountAndOrganization"
                         limit="limit" offset="start" list="glAccountList">
                         <econdition field-name="organizationPartyId" from="companyPartyId" />
@@ -1208,7 +1210,7 @@ along with this software (see the LICENSE.md file). If not, see
                         </econditions>
                         <order-by field-name="accountCode" />
                     </entity-find>
-
+                    <log message="====records found: ${glAccountList?.size()}" />
                 </else>
             </if>
             <set field="glAccounts" from="[]" />

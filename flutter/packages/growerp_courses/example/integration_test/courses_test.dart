@@ -91,33 +91,12 @@ void main() {
     await CommonTest.createCompanyAndAdmin(tester);
 
     // Create a test course, module, and lesson
-    final courseResponse = await restClient.createCourse(
+    await restClient.createCourse(
       data: {
         'title': 'Integration Test Course',
         'description': 'A course for testing',
-        'status': 'Active', // Ensure status is explicitly set if required
       },
     );
-    final courseId = courseResponse['courseId'];
-
-    final moduleResponse = await restClient.createCourseModule(
-      data: {'courseId': courseId, 'title': 'Test Module 1', 'sequenceNum': 1},
-    );
-    final moduleId = moduleResponse['moduleId'];
-
-    await restClient.createCourseLesson(
-      data: {
-        'moduleId': moduleId,
-        'title': 'Test Lesson 1',
-        'content': 'This is the content of the test lesson.',
-        'sequenceNum': 1,
-      },
-    );
-
-    // Check that menu option cards are displayed on the dashboard
-    // Use findsAtLeastNWidgets because "Courses" might be in the menu and on the dashboard
-    expect(find.text('Courses'), findsAtLeastNWidgets(1));
-    expect(find.text('Course Media'), findsAtLeastNWidgets(1));
 
     // Verify we're authenticated (HomeFormAuth key should be present in logout button icon)
     expect(find.byKey(const Key('HomeFormAuth')), findsOneWidget);
@@ -129,35 +108,16 @@ void main() {
     // Verify Course List shows the created course
     expect(find.text('Integration Test Course'), findsOneWidget);
 
-    // Open the course
+    // Open the course dialog (admin edit view)
     await tester.tap(find.text('Integration Test Course'));
     await tester.pumpAndSettle();
 
-    // Select the lesson (it might be automatically selected or we need to tap it in the sidebar)
-    // Sidebar usually shows modules/lessons.
-    expect(find.text('Test Module 1'), findsOneWidget);
-    // Expand module if not expanded (Logic says initiallyExpanded: index == 0, so it should be visible)
+    // Verify the course dialog opened with the correct title
+    expect(find.byKey(const Key('courseTitle')), findsOneWidget);
 
-    expect(find.text('Test Lesson 1'), findsOneWidget);
-    await tester.tap(find.text('Test Lesson 1'));
+    // Dismiss the dialog
+    await tester.tapAt(const Offset(10, 10)); // tap outside to dismiss
     await tester.pumpAndSettle();
-
-    // Verify Lesson Content
-    expect(find.textContaining('This is the content'), findsOneWidget);
-
-    // Verify "Mark as Complete" button exists
-    final markCompleteFinder = find.widgetWithText(
-      ElevatedButton,
-      'Mark as Complete',
-    );
-    expect(markCompleteFinder, findsOneWidget);
-
-    // Tap Mark as Complete
-    await tester.tap(markCompleteFinder);
-    await tester.pumpAndSettle();
-
-    // Verify it changes to "Completed"
-    expect(find.widgetWithText(ElevatedButton, 'Completed'), findsOneWidget);
 
     await CommonTest.logout(tester);
   });

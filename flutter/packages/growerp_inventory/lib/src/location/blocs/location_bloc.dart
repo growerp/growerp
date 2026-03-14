@@ -24,9 +24,21 @@ import 'package:equatable/equatable.dart';
 part 'location_event.dart';
 part 'location_state.dart';
 
+const _locationSearchDebounceDuration = Duration(milliseconds: 300);
+
 EventTransformer<E> locationDroppable<E>(Duration duration) {
   return (events, mapper) {
     return droppable<E>().call(events.throttle(duration), mapper);
+  };
+}
+
+EventTransformer<LocationSearchChanged> locationSearchDebounce() {
+  return (events, mapper) {
+    final clearStream = events.where((e) => e.searchString.isEmpty);
+    final searchStream = events
+        .where((e) => e.searchString.length >= 3)
+        .debounce(_locationSearchDebounceDuration);
+    return clearStream.merge(searchStream).switchMap(mapper);
   };
 }
 
@@ -38,6 +50,10 @@ class LocationBloc extends Bloc<LocationEvent, LocationState> {
     );
     on<LocationUpdate>(_onLocationUpdate);
     on<LocationDelete>(_onLocationDelete);
+    on<LocationSearchChanged>(
+      _onLocationSearchChanged,
+      transformer: locationSearchDebounce(),
+    );
   }
 
   final RestClient restClient;
@@ -85,6 +101,20 @@ class LocationBloc extends Bloc<LocationEvent, LocationState> {
         ),
       );
     }
+  }
+
+  Future<void> _onLocationSearchChanged(
+    LocationSearchChanged event,
+    Emitter<LocationState> emit,
+  ) async {
+    return _onLocationFetch(
+      LocationFetch(
+        searchString: event.searchString,
+        refresh: true,
+        limit: event.limit,
+      ),
+      emit,
+    );
   }
 
   Future<void> _onLocationUpdate(

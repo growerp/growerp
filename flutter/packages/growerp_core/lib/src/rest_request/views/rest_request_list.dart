@@ -110,39 +110,18 @@ class RestRequestListState extends State<RestRequestList> {
             children: [
               Column(
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: TextField(
-                      key: const Key('searchField'),
-                      controller: _searchController,
-                      decoration: InputDecoration(
-                        labelText: 'Search by user or company',
-                        prefixIcon: const Icon(Icons.search),
-                        border: const OutlineInputBorder(),
-                        suffixIcon: _searchString.isNotEmpty
-                            ? IconButton(
-                                icon: const Icon(Icons.clear),
-                                onPressed: () {
-                                  _searchController.clear();
-                                  setState(() {
-                                    _searchString = '';
-                                  });
-                                  _restRequestBloc.add(
-                                    const RestRequestFetch(refresh: true),
-                                  );
-                                },
-                              )
-                            : null,
-                      ),
-                      onChanged: (value) {
-                        setState(() {
-                          _searchString = value;
-                        });
-                        _restRequestBloc.add(
-                          RestRequestFetch(refresh: true, searchString: value),
-                        );
-                      },
-                    ),
+                  ListFilterBar(
+                    searchHint: 'Search by user or company',
+                    searchController: _searchController,
+                    onSearchChanged: (value) {
+                      _searchString = value;
+                      _restRequestBloc.add(
+                        RestRequestFetch(
+                          refresh: true,
+                          searchString: value,
+                        ),
+                      );
+                    },
                   ),
                   Expanded(child: tableView()),
                 ],

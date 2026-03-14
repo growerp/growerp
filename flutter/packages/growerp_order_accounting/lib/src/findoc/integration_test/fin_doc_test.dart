@@ -298,8 +298,6 @@ class FinDocTest {
       switch (subType) {
         case FinDocType.order:
           id = finDoc.orderId;
-        case FinDocType.invoice:
-          id = finDoc.invoiceId;
         case FinDocType.payment:
           id = finDoc.paymentId;
         case FinDocType.shipment:
@@ -455,8 +453,6 @@ class FinDocTest {
       switch (subType) {
         case FinDocType.order:
           id = finDoc.orderId;
-        case FinDocType.invoice:
-          id = finDoc.invoiceId;
         case FinDocType.payment:
           id = finDoc.paymentId;
         case FinDocType.shipment:

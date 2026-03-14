@@ -37,6 +37,7 @@ class ContentPlanList extends StatefulWidget {
 class ContentPlanListState extends State<ContentPlanList> {
   final _scrollController = ScrollController();
   final _searchController = TextEditingController();
+  final _searchFocusNode = FocusNode();
   late ContentPlanBloc _contentPlanBloc;
   List<ContentPlan> contentPlans = const <ContentPlan>[];
   bool hasReachedMax = false;
@@ -53,6 +54,9 @@ class ContentPlanListState extends State<ContentPlanList> {
     _contentPlanBloc = context.read<ContentPlanBloc>()
       ..add(const ContentPlanFetch(refresh: true));
     bottom = 50;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _searchFocusNode.requestFocus();
+    });
   }
 
   @override
@@ -78,8 +82,8 @@ class ContentPlanListState extends State<ContentPlanList> {
         isLoading: _isLoading && contentPlans.isEmpty,
         scrollController: _scrollController,
         rowHeight: isPhone ? 72 : 56,
-        onRowTap: (index) {
-          showDialog(
+        onRowTap: (index) async {
+          await showDialog(
             barrierDismissible: true,
             context: context,
             builder: (BuildContext context) {
@@ -95,6 +99,7 @@ class ContentPlanListState extends State<ContentPlanList> {
               );
             },
           );
+          if (mounted) _searchFocusNode.requestFocus();
         },
       );
     }
@@ -103,11 +108,13 @@ class ContentPlanListState extends State<ContentPlanList> {
       listener: (context, state) {
         if (state.status == ContentPlanStatus.failure) {
           HelperFunctions.showMessage(context, '${state.message}', Colors.red);
+          _searchFocusNode.requestFocus();
         }
         if (state.status == ContentPlanStatus.success) {
           if ((state.message ?? '').isNotEmpty) {
             HelperFunctions.showMessage(context, state.message!, Colors.green);
           }
+          _searchFocusNode.requestFocus();
         }
       },
       builder: (context, state) {
@@ -136,10 +143,11 @@ class ContentPlanListState extends State<ContentPlanList> {
             ListFilterBar(
               searchHint: 'Search content plans...',
               searchController: _searchController,
+              focusNode: _searchFocusNode,
               onSearchChanged: (value) {
                 searchString = value;
                 _contentPlanBloc.add(
-                  ContentPlanFetch(refresh: true, searchString: value),
+                  ContentPlanSearchRequested(searchString: value),
                 );
               },
             ),
@@ -177,6 +185,7 @@ class ContentPlanListState extends State<ContentPlanList> {
                                   );
                                 },
                               );
+                              if (mounted) _searchFocusNode.requestFocus();
                             },
                             tooltip: 'Add new content plan',
                             child: const Icon(Icons.add),
@@ -197,6 +206,7 @@ class ContentPlanListState extends State<ContentPlanList> {
                                   );
                                 },
                               );
+                              if (mounted) _searchFocusNode.requestFocus();
                             },
                             tooltip: 'Generate Content Plan with AI',
                             child: const Icon(Icons.auto_awesome),
@@ -220,6 +230,7 @@ class ContentPlanListState extends State<ContentPlanList> {
       ..removeListener(_onScroll)
       ..dispose();
     _searchController.dispose();
+    _searchFocusNode.dispose();
     super.dispose();
   }
 

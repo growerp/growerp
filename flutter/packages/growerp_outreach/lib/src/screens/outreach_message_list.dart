@@ -34,6 +34,7 @@ class OutreachMessageList extends StatefulWidget {
 class OutreachMessageListState extends State<OutreachMessageList> {
   final _scrollController = ScrollController();
   final _searchController = TextEditingController();
+  final _searchFocusNode = FocusNode();
   late OutreachMessageBloc _messageBloc;
   List<OutreachMessage> messages = const <OutreachMessage>[];
   bool hasReachedMax = false;
@@ -49,6 +50,9 @@ class OutreachMessageListState extends State<OutreachMessageList> {
     _scrollController.addListener(_onScroll);
     _messageBloc = context.read<OutreachMessageBloc>()
       ..add(const OutreachMessageLoad(start: 0));
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _searchFocusNode.requestFocus();
+    });
     bottom = 50;
   }
 
@@ -75,8 +79,8 @@ class OutreachMessageListState extends State<OutreachMessageList> {
         isLoading: _isLoading && messages.isEmpty,
         scrollController: _scrollController,
         rowHeight: isPhone ? 72 : 56,
-        onRowTap: (index) {
-          showDialog(
+        onRowTap: (index) async {
+          await showDialog(
             barrierDismissible: true,
             context: context,
             builder: (BuildContext context) {
@@ -90,6 +94,7 @@ class OutreachMessageListState extends State<OutreachMessageList> {
               );
             },
           );
+          _searchFocusNode.requestFocus();
         },
       );
     }
@@ -97,20 +102,14 @@ class OutreachMessageListState extends State<OutreachMessageList> {
     return BlocConsumer<OutreachMessageBloc, OutreachMessageState>(
       listener: (context, state) {
         if (state.status == OutreachMessageStatus.failure) {
-          HelperFunctions.showMessage(
-            context,
-            '${state.message}',
-            Colors.red,
-          );
+          HelperFunctions.showMessage(context, '${state.message}', Colors.red);
+          _searchFocusNode.requestFocus();
         }
         if (state.status == OutreachMessageStatus.success) {
           if ((state.message ?? '').isNotEmpty) {
-            HelperFunctions.showMessage(
-              context,
-              state.message!,
-              Colors.green,
-            );
+            HelperFunctions.showMessage(context, state.message!, Colors.green);
           }
+          _searchFocusNode.requestFocus();
         }
       },
       builder: (context, state) {
@@ -141,11 +140,10 @@ class OutreachMessageListState extends State<OutreachMessageList> {
             ListFilterBar(
               searchHint: 'Search messages...',
               searchController: _searchController,
+              focusNode: _searchFocusNode,
               onSearchChanged: (value) {
                 searchString = value;
-                _messageBloc.add(
-                  OutreachMessageSearchRequested(query: value),
-                );
+                _messageBloc.add(OutreachMessageSearchRequested(query: value));
               },
             ),
             // Main content area with StyledDataTable
@@ -186,6 +184,7 @@ class OutreachMessageListState extends State<OutreachMessageList> {
                                   );
                                 },
                               );
+                              _searchFocusNode.requestFocus();
                             },
                             tooltip: 'Add new message',
                             child: const Icon(Icons.add),
@@ -209,15 +208,14 @@ class OutreachMessageListState extends State<OutreachMessageList> {
       ..removeListener(_onScroll)
       ..dispose();
     _searchController.dispose();
+    _searchFocusNode.dispose();
     super.dispose();
   }
 
   void _onScroll() {
     currentScroll = _scrollController.offset;
     if (_isBottom && !hasReachedMax) {
-      _messageBloc.add(
-        OutreachMessageLoad(start: messages.length),
-      );
+      _messageBloc.add(OutreachMessageLoad(start: messages.length));
     }
   }
 
@@ -267,28 +265,12 @@ class SearchOutreachMessageListState extends State<SearchOutreachMessageList> {
         title: 'Search Outreach Messages',
         child: Column(
           children: [
-            TextFormField(
-              key: const Key('searchField'),
-              controller: searchBoxController,
+            ListFilterBar(
+              searchHint: 'Search messages',
+              searchController: searchBoxController,
               focusNode: searchFocusNode,
-              textInputAction: TextInputAction.search,
-              autofocus: true,
-              decoration: InputDecoration(
-                labelText: 'Search messages',
-                suffixIcon: IconButton(
-                  icon: const Icon(Icons.clear),
-                  onPressed: () {
-                    searchBoxController.clear();
-                    _messageBloc.add(
-                      const OutreachMessageSearchRequested(query: ''),
-                    );
-                  },
-                ),
-              ),
-              onFieldSubmitted: (value) {
-                _messageBloc.add(
-                  OutreachMessageSearchRequested(query: value),
-                );
+              onSearchChanged: (value) {
+                _messageBloc.add(OutreachMessageSearchRequested(query: value));
               },
             ),
             const SizedBox(height: 20),
@@ -310,11 +292,9 @@ class SearchOutreachMessageListState extends State<SearchOutreachMessageList> {
                   if (state.searchResults.isEmpty) {
                     final message =
                         searchStatus == OutreachMessageStatus.initial
-                            ? 'Enter a search term to begin.'
-                            : 'No messages matched your search.';
-                    return Center(
-                      child: Text(message),
-                    );
+                        ? 'Enter a search term to begin.'
+                        : 'No messages matched your search.';
+                    return Center(child: Text(message));
                   }
                   return ListView.builder(
                     itemCount: state.searchResults.length,

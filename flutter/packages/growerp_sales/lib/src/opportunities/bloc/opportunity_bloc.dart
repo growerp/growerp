@@ -32,6 +32,17 @@ EventTransformer<E> opportunityDroppable<E>(Duration duration) {
   };
 }
 
+const _opportunitySearchDebounceDuration = Duration(milliseconds: 300);
+EventTransformer<OpportunitySearchChanged> opportunitySearchDebounce() {
+  return (events, mapper) {
+    final clearStream = events.where((e) => e.searchString.isEmpty);
+    final searchStream = events
+        .where((e) => e.searchString.length >= 3)
+        .debounce(_opportunitySearchDebounceDuration);
+    return clearStream.merge(searchStream).switchMap(mapper);
+  };
+}
+
 class OpportunityBloc extends Bloc<OpportunityEvent, OpportunityState> {
   OpportunityBloc(this.restClient) : super(const OpportunityState()) {
     on<OpportunityFetch>(
@@ -41,10 +52,28 @@ class OpportunityBloc extends Bloc<OpportunityEvent, OpportunityState> {
     on<OpportunityUpdate>(_onOpportunityUpdate);
     on<OpportunityDelete>(_onOpportunityDelete);
     on<OpportunityConvertToOrder>(_onOpportunityConvertToOrder);
+    on<OpportunitySearchChanged>(
+      _onOpportunitySearchChanged,
+      transformer: opportunitySearchDebounce(),
+    );
   }
 
   final RestClient restClient;
   int start = 0;
+
+  Future<void> _onOpportunitySearchChanged(
+    OpportunitySearchChanged event,
+    Emitter<OpportunityState> emit,
+  ) async {
+    return _onOpportunityFetch(
+      OpportunityFetch(
+        refresh: true,
+        searchString: event.searchString,
+        limit: event.limit,
+      ),
+      emit,
+    );
+  }
 
   Future<void> _onOpportunityFetch(
     OpportunityFetch event,

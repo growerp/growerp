@@ -3,12 +3,26 @@
  * Grant of Patent License.
  */
 
+import 'dart:convert';
+
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:growerp_models/growerp_models.dart';
+import 'package:stream_transform/stream_transform.dart';
 
 part 'course_event.dart';
 part 'course_state.dart';
+
+const _courseSearchDebounceDuration = Duration(milliseconds: 300);
+EventTransformer<CourseSearchChanged> courseSearchDebounce() {
+  return (events, mapper) {
+    final clearStream = events.where((e) => e.searchString.isEmpty);
+    final searchStream = events
+        .where((e) => e.searchString.length >= 3)
+        .debounce(_courseSearchDebounceDuration);
+    return clearStream.merge(searchStream).switchMap(mapper);
+  };
+}
 
 class CourseBloc extends Bloc<CourseEvent, CourseState> {
   final RestClient restClient;
@@ -29,12 +43,30 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
     on<CourseMediaGenerate>(_onMediaGenerate);
     on<CourseParticipantsFetch>(_onParticipantsFetch);
     on<CourseAllParticipantsFetch>(_onAllParticipantsFetch);
+    on<CourseSearchChanged>(
+      _onCourseSearchChanged,
+      transformer: courseSearchDebounce(),
+    );
   }
 
   /// Helper to check if selectedCourse has a valid (non-null, non-empty) courseId
   bool get _hasValidSelectedCourseId {
     final courseId = state.selectedCourse?.courseId;
     return courseId != null && courseId.isNotEmpty;
+  }
+
+  Future<void> _onCourseSearchChanged(
+    CourseSearchChanged event,
+    Emitter<CourseState> emit,
+  ) async {
+    return _onCourseFetch(
+      CourseFetch(
+        refresh: event.refresh,
+        searchString: event.searchString,
+        limit: event.limit,
+      ),
+      emit,
+    );
   }
 
   Future<void> _onCourseFetch(
@@ -62,8 +94,9 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
         ),
       );
     } catch (e) {
-      emit(state.copyWith(
-          status: CourseBlocStatus.failure, message: e.toString()));
+      emit(
+        state.copyWith(status: CourseBlocStatus.failure, message: e.toString()),
+      );
     }
   }
 
@@ -73,29 +106,33 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
   ) async {
     // Guard against empty courseId
     if (event.courseId.isEmpty) {
-      emit(state.copyWith(
-          status: CourseBlocStatus.failure, message: 'Course ID is required'));
+      emit(
+        state.copyWith(
+          status: CourseBlocStatus.failure,
+          message: 'Course ID is required',
+        ),
+      );
       return;
     }
 
     try {
       emit(state.copyWith(status: CourseBlocStatus.loading));
 
-      final response = await restClient.getCourse(
-        courseId: event.courseId,
-      );
+      final response = await restClient.getCourse(courseId: event.courseId);
+      final decoded = json.decode(response as String) as Map<String, dynamic>;
 
-      final course = Course.fromJson(
-        response['course'] as Map<String, dynamic>,
-      );
+      final course = Course.fromJson(decoded['course'] as Map<String, dynamic>);
 
       emit(
         state.copyWith(
-            status: CourseBlocStatus.success, selectedCourse: course),
+          status: CourseBlocStatus.success,
+          selectedCourse: course,
+        ),
       );
     } catch (e) {
-      emit(state.copyWith(
-          status: CourseBlocStatus.failure, message: e.toString()));
+      emit(
+        state.copyWith(status: CourseBlocStatus.failure, message: e.toString()),
+      );
     }
   }
 
@@ -109,11 +146,12 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
       final response = await restClient.createCourse(
         data: event.course.toJson(),
       );
+      final decoded = json.decode(response as String) as Map<String, dynamic>;
 
       final newCourse = event.course.copyWith(
-        courseId: response['courseId'] as String?,
-        pseudoId: response['pseudoId'] as String?,
-        productId: response['productId'] as String?,
+        courseId: decoded['courseId'] as String?,
+        pseudoId: decoded['pseudoId'] as String?,
+        productId: decoded['productId'] as String?,
       );
 
       emit(
@@ -124,8 +162,9 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
         ),
       );
     } catch (e) {
-      emit(state.copyWith(
-          status: CourseBlocStatus.failure, message: e.toString()));
+      emit(
+        state.copyWith(status: CourseBlocStatus.failure, message: e.toString()),
+      );
     }
   }
 
@@ -151,8 +190,9 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
         ),
       );
     } catch (e) {
-      emit(state.copyWith(
-          status: CourseBlocStatus.failure, message: e.toString()));
+      emit(
+        state.copyWith(status: CourseBlocStatus.failure, message: e.toString()),
+      );
     }
   }
 
@@ -163,9 +203,7 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
     try {
       emit(state.copyWith(status: CourseBlocStatus.loading));
 
-      await restClient.deleteCourse(
-        courseId: event.course.courseId!,
-      );
+      await restClient.deleteCourse(courseId: event.course.courseId!);
 
       final updatedCourses = state.courses
           .where((c) => c.courseId != event.course.courseId)
@@ -179,8 +217,9 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
         ),
       );
     } catch (e) {
-      emit(state.copyWith(
-          status: CourseBlocStatus.failure, message: e.toString()));
+      emit(
+        state.copyWith(status: CourseBlocStatus.failure, message: e.toString()),
+      );
     }
   }
 
@@ -198,8 +237,9 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
       // Refresh the course detail
       add(CourseGetDetail(event.courseId));
     } catch (e) {
-      emit(state.copyWith(
-          status: CourseBlocStatus.failure, message: e.toString()));
+      emit(
+        state.copyWith(status: CourseBlocStatus.failure, message: e.toString()),
+      );
     }
   }
 
@@ -216,8 +256,9 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
         add(CourseGetDetail(state.selectedCourse!.courseId!));
       }
     } catch (e) {
-      emit(state.copyWith(
-          status: CourseBlocStatus.failure, message: e.toString()));
+      emit(
+        state.copyWith(status: CourseBlocStatus.failure, message: e.toString()),
+      );
     }
   }
 
@@ -228,16 +269,15 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
     try {
       emit(state.copyWith(status: CourseBlocStatus.loading));
 
-      await restClient.deleteCourseModule(
-        moduleId: event.module.moduleId!,
-      );
+      await restClient.deleteCourseModule(moduleId: event.module.moduleId!);
 
       if (_hasValidSelectedCourseId) {
         add(CourseGetDetail(state.selectedCourse!.courseId!));
       }
     } catch (e) {
-      emit(state.copyWith(
-          status: CourseBlocStatus.failure, message: e.toString()));
+      emit(
+        state.copyWith(status: CourseBlocStatus.failure, message: e.toString()),
+      );
     }
   }
 
@@ -256,8 +296,9 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
         add(CourseGetDetail(state.selectedCourse!.courseId!));
       }
     } catch (e) {
-      emit(state.copyWith(
-          status: CourseBlocStatus.failure, message: e.toString()));
+      emit(
+        state.copyWith(status: CourseBlocStatus.failure, message: e.toString()),
+      );
     }
   }
 
@@ -274,8 +315,9 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
         add(CourseGetDetail(state.selectedCourse!.courseId!));
       }
     } catch (e) {
-      emit(state.copyWith(
-          status: CourseBlocStatus.failure, message: e.toString()));
+      emit(
+        state.copyWith(status: CourseBlocStatus.failure, message: e.toString()),
+      );
     }
   }
 
@@ -286,16 +328,15 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
     try {
       emit(state.copyWith(status: CourseBlocStatus.loading));
 
-      await restClient.deleteCourseLesson(
-        lessonId: event.lesson.lessonId!,
-      );
+      await restClient.deleteCourseLesson(lessonId: event.lesson.lessonId!);
 
       if (_hasValidSelectedCourseId) {
         add(CourseGetDetail(state.selectedCourse!.courseId!));
       }
     } catch (e) {
-      emit(state.copyWith(
-          status: CourseBlocStatus.failure, message: e.toString()));
+      emit(
+        state.copyWith(status: CourseBlocStatus.failure, message: e.toString()),
+      );
     }
   }
 
@@ -310,13 +351,16 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
         courseId: event.courseId,
       );
 
-      emit(state.copyWith(
-        status: CourseBlocStatus.success,
-        participants: response.participants,
-      ));
+      emit(
+        state.copyWith(
+          status: CourseBlocStatus.success,
+          participants: response.participants,
+        ),
+      );
     } catch (e) {
-      emit(state.copyWith(
-          status: CourseBlocStatus.failure, message: e.toString()));
+      emit(
+        state.copyWith(status: CourseBlocStatus.failure, message: e.toString()),
+      );
     }
   }
 
@@ -333,15 +377,18 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
         limit: 50,
       );
 
-      emit(state.copyWith(
-        status: CourseBlocStatus.success,
-        allParticipants: event.refresh
-            ? response.participants
-            : [...state.allParticipants, ...response.participants],
-      ));
+      emit(
+        state.copyWith(
+          status: CourseBlocStatus.success,
+          allParticipants: event.refresh
+              ? response.participants
+              : [...state.allParticipants, ...response.participants],
+        ),
+      );
     } catch (e) {
-      emit(state.copyWith(
-          status: CourseBlocStatus.failure, message: e.toString()));
+      emit(
+        state.copyWith(status: CourseBlocStatus.failure, message: e.toString()),
+      );
     }
   }
 
@@ -352,23 +399,28 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
     try {
       emit(state.copyWith(status: CourseBlocStatus.loading));
 
-      await restClient.subscribeCourse(data: {
-        'courseId': event.courseId,
-        if (event.creditCardNumber != null)
-          'creditCardNumber': event.creditCardNumber,
-        if (event.nameOnCard != null) 'nameOnCard': event.nameOnCard,
-        if (event.expireMonth != null) 'expireMonth': event.expireMonth,
-        if (event.expireYear != null) 'expireYear': event.expireYear,
-        if (event.cVC != null) 'cVC': event.cVC,
-      });
+      await restClient.subscribeCourse(
+        data: {
+          'courseId': event.courseId,
+          if (event.creditCardNumber != null)
+            'creditCardNumber': event.creditCardNumber,
+          if (event.nameOnCard != null) 'nameOnCard': event.nameOnCard,
+          if (event.expireMonth != null) 'expireMonth': event.expireMonth,
+          if (event.expireYear != null) 'expireYear': event.expireYear,
+          if (event.cVC != null) 'cVC': event.cVC,
+        },
+      );
 
-      emit(state.copyWith(
-        status: CourseBlocStatus.success,
-        message: 'Successfully subscribed to course',
-      ));
+      emit(
+        state.copyWith(
+          status: CourseBlocStatus.success,
+          message: 'Successfully subscribed to course',
+        ),
+      );
     } catch (e) {
-      emit(state.copyWith(
-          status: CourseBlocStatus.failure, message: e.toString()));
+      emit(
+        state.copyWith(status: CourseBlocStatus.failure, message: e.toString()),
+      );
     }
   }
 
@@ -397,8 +449,9 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
         ),
       );
     } catch (e) {
-      emit(state.copyWith(
-          status: CourseBlocStatus.failure, message: e.toString()));
+      emit(
+        state.copyWith(status: CourseBlocStatus.failure, message: e.toString()),
+      );
     }
   }
 }

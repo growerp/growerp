@@ -26,9 +26,21 @@ import 'package:fast_csv/fast_csv.dart' as fast_csv;
 part 'category_event.dart';
 part 'category_state.dart';
 
+const _categorySearchDebounceDuration = Duration(milliseconds: 300);
+
 EventTransformer<E> categoryDroppable<E>(Duration duration) {
   return (events, mapper) {
     return droppable<E>().call(events.throttle(duration), mapper);
+  };
+}
+
+EventTransformer<CategorySearchChanged> categorySearchDebounce() {
+  return (events, mapper) {
+    final clearStream = events.where((e) => e.searchString.isEmpty);
+    final searchStream = events
+        .where((e) => e.searchString.length >= 3)
+        .debounce(_categorySearchDebounceDuration);
+    return clearStream.merge(searchStream).switchMap(mapper);
   };
 }
 
@@ -43,6 +55,10 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
     on<CategoryDelete>(_onCategoryDelete);
     on<CategoryUpload>(_onCategoryUpload);
     on<CategoryDownload>(_onCategoryDownload);
+    on<CategorySearchChanged>(
+      _onCategorySearchChanged,
+      transformer: categorySearchDebounce(),
+    );
   }
 
   final RestClient restClient;
@@ -87,6 +103,21 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
         ),
       );
     }
+  }
+
+  Future<void> _onCategorySearchChanged(
+    CategorySearchChanged event,
+    Emitter<CategoryState> emit,
+  ) async {
+    return _onCategoryFetch(
+      CategoryFetch(
+        searchString: event.searchString,
+        companyPartyId: event.companyPartyId,
+        refresh: true,
+        limit: event.limit,
+      ),
+      emit,
+    );
   }
 
   Future<void> _onCategoryUpdate(

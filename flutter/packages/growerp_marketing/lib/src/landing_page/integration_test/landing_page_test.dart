@@ -175,6 +175,7 @@ class LandingPageTest {
   /// Clear the search field to show all items
   static Future<void> clearSearch(WidgetTester tester) async {
     await CommonTest.enterText(tester, 'searchField', '');
+    await tester.pump(const Duration(seconds: CommonTest.waitTime));
     await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
   }
 

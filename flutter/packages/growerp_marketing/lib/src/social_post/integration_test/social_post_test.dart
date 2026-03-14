@@ -52,7 +52,8 @@ class SocialPostTest {
       );
     }
     await PersistFunctions.persistTest(
-        old.copyWith(socialPosts: updatedSocialPosts));
+      old.copyWith(socialPosts: updatedSocialPosts),
+    );
     await enterSocialPostData(tester);
   }
 
@@ -63,11 +64,7 @@ class SocialPostTest {
       find.byKey(const Key('socialPostItem'), skipOffstage: false),
       findsNWidgets(count),
     );
-    await CommonTest.tapByKey(
-      tester,
-      'delete0',
-      seconds: CommonTest.waitTime,
-    );
+    await CommonTest.tapByKey(tester, 'delete0', seconds: CommonTest.waitTime);
     await CommonTest.tapByKey(
       tester,
       'deleteConfirm0',
@@ -87,15 +84,13 @@ class SocialPostTest {
     WidgetTester tester, {
     required String searchString,
   }) async {
-    await CommonTest.enterText(tester, 'searchField', searchString);
-    await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
-    await CommonTest.tapByKey(tester, 'headline0');
-    await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
+    await CommonTest.doNewSearch(tester, searchString: searchString);
   }
 
   /// Clear the search field to show all items
   static Future<void> clearSearch(WidgetTester tester) async {
     await CommonTest.enterText(tester, 'searchField', '');
+    await tester.pump(const Duration(seconds: CommonTest.waitTime));
     await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
   }
 
@@ -128,7 +123,10 @@ class SocialPostTest {
       // Select plan from dropdown (mandatory)
       if (test.contentPlans.isNotEmpty) {
         await CommonTest.selectDropDown(
-            tester, 'planId', test.contentPlans[0].pseudoId!);
+          tester,
+          'planId',
+          test.contentPlans[0].pseudoId!,
+        );
       }
 
       // Enter headline
@@ -144,7 +142,10 @@ class SocialPostTest {
           listViewName: 'socialPostDetailListView',
         );
         await CommonTest.enterText(
-            tester, 'draftContent', socialPost.draftContent!);
+          tester,
+          'draftContent',
+          socialPost.draftContent!,
+        );
       }
 
       // Select status from dropdown
@@ -169,8 +170,11 @@ class SocialPostTest {
 
       // Get allocated ID for new social posts
       if (socialPost.pseudoId == null) {
-        await CommonTest.tapByKey(tester, 'headline0',
-            seconds: CommonTest.waitTime);
+        await CommonTest.tapByKey(
+          tester,
+          'headline0',
+          seconds: CommonTest.waitTime,
+        );
         var id = CommonTest.getTextField('topHeader').split('#')[1].trim();
         socialPost = socialPost.copyWith(pseudoId: id);
         await CommonTest.tapByKey(tester, 'cancel');
@@ -181,7 +185,8 @@ class SocialPostTest {
 
     await clearSearch(tester);
     await PersistFunctions.persistTest(
-        test.copyWith(socialPosts: newSocialPosts));
+      test.copyWith(socialPosts: newSocialPosts),
+    );
   }
 
   static Future<void> checkSocialPosts(WidgetTester tester) async {
@@ -191,12 +196,16 @@ class SocialPostTest {
       await doSocialPostSearch(tester, searchString: socialPost.pseudoId!);
 
       // Check detail - the dialog key is SocialPostDetail${pseudoId}
-      expect(find.byKey(Key('SocialPostDetail${socialPost.pseudoId}')),
-          findsOneWidget);
+      expect(
+        find.byKey(Key('SocialPostDetail${socialPost.pseudoId}')),
+        findsOneWidget,
+      );
 
       if (socialPost.headline != null) {
-        expect(CommonTest.getTextFormField('headline'),
-            equals(socialPost.headline));
+        expect(
+          CommonTest.getTextFormField('headline'),
+          equals(socialPost.headline),
+        );
       }
 
       await CommonTest.tapByKey(tester, 'cancel');

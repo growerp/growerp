@@ -34,6 +34,7 @@ class CompanyList extends StatefulWidget {
 class CompanyListState extends State<CompanyList> {
   final _scrollController = ScrollController();
   final _searchController = TextEditingController();
+  final _searchFocusNode = FocusNode();
   final double _scrollThreshold = 200.0;
   late CompanyBloc _companyBloc;
   late UserCompanyLocalizations _localizations;
@@ -74,6 +75,9 @@ class CompanyListState extends State<CompanyList> {
       }
     }
     bottom = 50;
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _searchFocusNode.requestFocus(),
+    );
   }
 
   @override
@@ -101,8 +105,8 @@ class CompanyListState extends State<CompanyList> {
             isLoading: _isLoading && companies.isEmpty,
             scrollController: _scrollController,
             rowHeight: isPhone ? 64 : 56,
-            onRowTap: (index) {
-              showDialog(
+                            onRowTap: (index) async {
+              await showDialog(
                 barrierDismissible: true,
                 context: context,
                 builder: (BuildContext context) {
@@ -116,6 +120,7 @@ class CompanyListState extends State<CompanyList> {
                   );
                 },
               );
+              _searchFocusNode.requestFocus();
             },
           );
         }
@@ -135,6 +140,7 @@ class CompanyListState extends State<CompanyList> {
                 Colors.green,
               );
             }
+            _searchFocusNode.requestFocus();
           }
         }
 
@@ -164,11 +170,11 @@ class CompanyListState extends State<CompanyList> {
               ListFilterBar(
                 searchHint: 'Search ${widget.role?.name ?? 'companies'}...',
                 searchController: _searchController,
+                focusNode: _searchFocusNode,
                 onSearchChanged: (value) {
                   searchString = value;
                   _companyBloc.add(
-                    CompanyFetch(
-                      refresh: true,
+                    CompanySearchChanged(
                       searchString: value,
                       mainOnly: widget.mainOnly,
                     ),
@@ -212,6 +218,7 @@ class CompanyListState extends State<CompanyList> {
                                     );
                                   },
                                 );
+                                _searchFocusNode.requestFocus();
                               },
                               tooltip: _localizations.addNew,
                               child: const Icon(Icons.add),
@@ -278,6 +285,7 @@ class CompanyListState extends State<CompanyList> {
   void dispose() {
     _scrollController.dispose();
     _searchController.dispose();
+    _searchFocusNode.dispose();
     super.dispose();
   }
 

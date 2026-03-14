@@ -1,8 +1,20 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_core/growerp_core.dart';
+import 'package:stream_transform/stream_transform.dart';
 import 'landing_page_event.dart';
 import 'landing_page_state.dart';
+
+const _landingPageSearchDebounceDuration = Duration(milliseconds: 300);
+EventTransformer<LandingPageSearchRequested> landingPageSearchDebounce() {
+  return (events, mapper) {
+    final clearStream = events.where((e) => e.query.isEmpty);
+    final searchStream = events
+        .where((e) => e.query.length >= 3)
+        .debounce(_landingPageSearchDebounceDuration);
+    return clearStream.merge(searchStream).switchMap(mapper);
+  };
+}
 
 class LandingPageBloc extends Bloc<LandingPageEvent, LandingPageState> {
   final RestClient restClient;
@@ -16,7 +28,10 @@ class LandingPageBloc extends Bloc<LandingPageEvent, LandingPageState> {
     on<LandingPageUpdate>(_onLandingPageUpdate);
     on<LandingPageDelete>(_onLandingPageDelete);
     on<LandingPageClear>(_onLandingPageClear);
-    on<LandingPageSearchRequested>(_onLandingPageSearch);
+    on<LandingPageSearchRequested>(
+      _onLandingPageSearch,
+      transformer: landingPageSearchDebounce(),
+    );
   }
 
   // get a single or a list of landingpages
@@ -71,49 +86,10 @@ class LandingPageBloc extends Bloc<LandingPageEvent, LandingPageState> {
     LandingPageSearchRequested event,
     Emitter<LandingPageState> emit,
   ) async {
-    final query = event.query.trim();
-    if (query.isEmpty) {
-      emit(
-        state.copyWith(
-          searchStatus: LandingPageStatus.success,
-          searchResults: const [],
-          searchError: null,
-        ),
-      );
-      return;
-    }
-
-    emit(
-      state.copyWith(
-        searchStatus: LandingPageStatus.loading,
-        searchResults: const [],
-        searchError: null,
-      ),
+    return _onLandingPageLoad(
+      LandingPageLoad(start: 0, searchString: event.query),
+      emit,
     );
-
-    try {
-      final result = await restClient.getLandingPages(
-        start: 0,
-        limit: event.limit,
-        searchString: query,
-      );
-
-      emit(
-        state.copyWith(
-          searchStatus: LandingPageStatus.success,
-          searchResults: result.landingPages,
-          searchError: null,
-        ),
-      );
-    } catch (error) {
-      emit(
-        state.copyWith(
-          searchStatus: LandingPageStatus.failure,
-          searchResults: const [],
-          searchError: await getDioError(error),
-        ),
-      );
-    }
   }
 
   // Fetch a single landing page by ID/pseudoId and related data

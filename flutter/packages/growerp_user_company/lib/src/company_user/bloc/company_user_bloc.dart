@@ -39,6 +39,18 @@ EventTransformer<E> companyUserDroppable<E>(Duration duration) {
   };
 }
 
+const _companyUserSearchDebounceDuration = Duration(milliseconds: 300);
+
+EventTransformer<CompanyUserSearchChanged> companyUserSearchDebounce() {
+  return (events, mapper) {
+    final clearStream = events.where((e) => e.searchString.isEmpty);
+    final searchStream = events
+        .where((e) => e.searchString.length >= 3)
+        .debounce(_companyUserSearchDebounceDuration);
+    return clearStream.merge(searchStream).switchMap(mapper);
+  };
+}
+
 class CompanyUserBloc extends Bloc<CompanyUserEvent, CompanyUserState>
     with CompanyUserLeadBloc, CompanyUserCustomerBloc, CompanyUserSupplierBloc {
   CompanyUserBloc(this.restClient, this.role)
@@ -46,6 +58,10 @@ class CompanyUserBloc extends Bloc<CompanyUserEvent, CompanyUserState>
     on<CompanyUserFetch>(
       _onCompanyUserFetch,
       transformer: companyUserDroppable(const Duration(milliseconds: 100)),
+    );
+    on<CompanyUserSearchChanged>(
+      _onCompanyUserSearchChanged,
+      transformer: companyUserSearchDebounce(),
     );
     on<CompanyUserUpdate>(_onCompanyUserUpdate);
     on<CompanyUserDelete>(_onCompanyUserDelete);
@@ -118,6 +134,20 @@ class CompanyUserBloc extends Bloc<CompanyUserEvent, CompanyUserState>
         ),
       );
     }
+  }
+
+  Future<void> _onCompanyUserSearchChanged(
+    CompanyUserSearchChanged event,
+    Emitter<CompanyUserState> emit,
+  ) async {
+    return _onCompanyUserFetch(
+      CompanyUserFetch(
+        refresh: true,
+        searchString: event.searchString,
+        limit: event.limit,
+      ),
+      emit,
+    );
   }
 
   Future<void> _onCompanyUserUpdate(

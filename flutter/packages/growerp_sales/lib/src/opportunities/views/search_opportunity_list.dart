@@ -99,20 +99,15 @@ class OpportunitySearchDialog extends StatelessWidget {
         width: 350,
         child: Column(
           children: [
-            TextFormField(
-              key: const Key('searchField'),
-              textInputAction: TextInputAction.search,
-              autofocus: true,
-              decoration: InputDecoration(labelText: localizations.searchInput),
-              validator: (value) {
-                if (value!.isEmpty) {
-                  return localizations.enterSearchValue;
+            ListFilterBar(
+              searchHint: localizations.searchInput,
+              onSearchChanged: (value) {
+                if (value.isNotEmpty) {
+                  _opportunityBloc.add(
+                    OpportunityFetch(limit: 5, searchString: value),
+                  );
                 }
-                return null;
               },
-              onFieldSubmitted: (value) => _opportunityBloc.add(
-                OpportunityFetch(limit: 5, searchString: value),
-              ),
             ),
             const SizedBox(height: 20),
             Text(localizations.searchResults),

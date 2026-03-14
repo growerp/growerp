@@ -69,3 +69,14 @@ class CompanyUserUpload extends CompanyUserEvent {
   const CompanyUserUpload(this.file);
   final String file;
 }
+
+class CompanyUserSearchChanged extends CompanyUserEvent {
+  const CompanyUserSearchChanged({
+    required this.searchString,
+    this.limit = 20,
+  });
+  final String searchString;
+  final int limit;
+  @override
+  List<Object> get props => [searchString];
+}

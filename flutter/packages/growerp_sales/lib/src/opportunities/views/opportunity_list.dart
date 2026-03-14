@@ -32,6 +32,7 @@ class OpportunityList extends StatefulWidget {
 class OpportunitiesState extends State<OpportunityList> {
   final _scrollController = ScrollController();
   final _searchController = TextEditingController();
+  final _searchFocusNode = FocusNode();
   late OpportunityBloc _opportunityBloc;
   List<Opportunity> opportunities = const <Opportunity>[];
   late double bottom;
@@ -48,6 +49,9 @@ class OpportunitiesState extends State<OpportunityList> {
     _opportunityBloc = context.read<OpportunityBloc>()
       ..add(const OpportunityFetch(refresh: true, limit: 15));
     _scrollController.addListener(_onScroll);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _searchFocusNode.requestFocus();
+    });
     bottom = 50;
   }
 
@@ -76,8 +80,8 @@ class OpportunitiesState extends State<OpportunityList> {
         isLoading: _isLoading && opportunities.isEmpty,
         scrollController: _scrollController,
         rowHeight: isPhone ? 60 : 56,
-        onRowTap: (index) {
-          showDialog(
+        onRowTap: (index) async {
+          await showDialog(
             barrierDismissible: true,
             context: context,
             builder: (BuildContext context) {
@@ -91,6 +95,7 @@ class OpportunitiesState extends State<OpportunityList> {
               );
             },
           );
+          _searchFocusNode.requestFocus();
         },
       );
     }
@@ -99,6 +104,7 @@ class OpportunitiesState extends State<OpportunityList> {
       listener: (context, state) {
         if (state.status == OpportunityStatus.failure) {
           HelperFunctions.showMessage(context, '${state.message}', Colors.red);
+          _searchFocusNode.requestFocus();
         }
         if (state.status == OpportunityStatus.success) {
           if ((state.message ?? '').isNotEmpty) {
@@ -108,6 +114,7 @@ class OpportunitiesState extends State<OpportunityList> {
               Colors.green,
             );
           }
+          _searchFocusNode.requestFocus();
         }
       },
       builder: (context, state) {
@@ -139,10 +146,11 @@ class OpportunitiesState extends State<OpportunityList> {
             ListFilterBar(
               searchHint: _localizations.opportunitySearch,
               searchController: _searchController,
+              focusNode: _searchFocusNode,
               onSearchChanged: (value) {
                 searchString = value;
                 _opportunityBloc.add(
-                  OpportunityFetch(refresh: true, searchString: value),
+                  OpportunitySearchChanged(searchString: value),
                 );
               },
             ),
@@ -173,6 +181,7 @@ class OpportunitiesState extends State<OpportunityList> {
                                   child: OpportunityDialog(Opportunity()),
                                 ),
                           );
+                          _searchFocusNode.requestFocus();
                         },
                         tooltip: _localizations.addNew,
                         child: const Icon(Icons.add),
@@ -194,6 +203,7 @@ class OpportunitiesState extends State<OpportunityList> {
       ..removeListener(_onScroll)
       ..dispose();
     _searchController.dispose();
+    _searchFocusNode.dispose();
     super.dispose();
   }
 

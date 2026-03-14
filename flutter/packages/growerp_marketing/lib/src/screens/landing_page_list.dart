@@ -35,6 +35,7 @@ class LandingPageList extends StatefulWidget {
 class LandingPageListState extends State<LandingPageList> {
   final _scrollController = ScrollController();
   final _searchController = TextEditingController();
+  final _searchFocusNode = FocusNode();
   late LandingPageBloc _landingPageBloc;
   late AuthBloc _authBloc;
   List<LandingPage> landingPages = const <LandingPage>[];
@@ -53,6 +54,9 @@ class LandingPageListState extends State<LandingPageList> {
       ..add(const LandingPageLoad(start: 0));
     _authBloc = context.read<AuthBloc>();
     bottom = 50;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _searchFocusNode.requestFocus();
+    });
   }
 
   @override
@@ -78,8 +82,8 @@ class LandingPageListState extends State<LandingPageList> {
         isLoading: _isLoading && landingPages.isEmpty,
         scrollController: _scrollController,
         rowHeight: isPhone ? 72 : 56,
-        onRowTap: (index) {
-          showDialog(
+        onRowTap: (index) async {
+          await showDialog(
             barrierDismissible: true,
             context: context,
             builder: (BuildContext context) {
@@ -95,6 +99,7 @@ class LandingPageListState extends State<LandingPageList> {
               );
             },
           );
+          if (mounted) _searchFocusNode.requestFocus();
         },
       );
     }
@@ -103,11 +108,13 @@ class LandingPageListState extends State<LandingPageList> {
       listener: (context, state) {
         if (state.status == LandingPageStatus.failure) {
           HelperFunctions.showMessage(context, '${state.message}', Colors.red);
+          _searchFocusNode.requestFocus();
         }
         if (state.status == LandingPageStatus.success) {
           if ((state.message ?? '').isNotEmpty) {
             HelperFunctions.showMessage(context, state.message!, Colors.green);
           }
+          _searchFocusNode.requestFocus();
         }
       },
       builder: (context, state) {
@@ -136,9 +143,10 @@ class LandingPageListState extends State<LandingPageList> {
             ListFilterBar(
               searchHint: 'Search landing pages...',
               searchController: _searchController,
+              focusNode: _searchFocusNode,
               onSearchChanged: (value) {
                 searchString = value;
-                _landingPageBloc.add(LandingPageLoad(searchString: value));
+                _landingPageBloc.add(LandingPageSearchRequested(query: value));
               },
             ),
             // Main content area with StyledDataTable
@@ -178,6 +186,7 @@ class LandingPageListState extends State<LandingPageList> {
                                   );
                                 },
                               );
+                              if (mounted) _searchFocusNode.requestFocus();
                             },
                             tooltip: 'Add new landing page',
                             child: const Icon(Icons.add),
@@ -226,6 +235,7 @@ class LandingPageListState extends State<LandingPageList> {
                                   );
                                 },
                               );
+                              if (mounted) _searchFocusNode.requestFocus();
                             },
                             tooltip: 'Generate Landing Page with AI',
                             child: const Icon(Icons.auto_awesome),
@@ -249,6 +259,7 @@ class LandingPageListState extends State<LandingPageList> {
       ..removeListener(_onScroll)
       ..dispose();
     _searchController.dispose();
+    _searchFocusNode.dispose();
     super.dispose();
   }
 

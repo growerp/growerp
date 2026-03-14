@@ -164,6 +164,8 @@ class TransactionTest {
     SaveTest test = await PersistFunctions.getTest();
     for (FinDoc transaction in test.transactions) {
       await CommonTest.enterText(tester, 'searchField', transaction.pseudoId!);
+      // Fire the 300ms debounce timer before the longer wait
+      await tester.pump(const Duration(milliseconds: 350));
       await tester.pump(const Duration(seconds: CommonTest.waitTime));
       await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
       // Wait until the filtered row shows the expected pseudoId
@@ -185,27 +187,9 @@ class TransactionTest {
       if (tester.any(find.byKey(const Key('id0')))) break;
     }
     for (FinDoc transaction in test.transactions) {
-      // Enter search text
-      await CommonTest.enterText(tester, 'searchField', transaction.pseudoId!);
-      // Wait for HTTP search response with retry, verifying result matches
-      var found = false;
-      for (var i = 0; i < 30; i++) {
-        await tester.pump(const Duration(milliseconds: 500));
-        await tester.pumpAndSettle();
-        if (tester.any(find.byKey(const Key('id0'))) &&
-            CommonTest.getTextField('id0') == transaction.pseudoId) {
-          found = true;
-          break;
-        }
-      }
-      expect(
-        found,
-        true,
-        reason:
-            "Transaction ${transaction.pseudoId} not found in search results",
-      );
-      // Tap the first search result to open the detail dialog
-      await tester.tap(find.byKey(const Key('id0')));
+      // doNewSearch enters the text, fires debounce, polls until id0 matches,
+      // then taps the row to open the detail dialog
+      await CommonTest.doNewSearch(tester, searchString: transaction.pseudoId!);
       await tester.pumpAndSettle(const Duration(seconds: 3));
       expect(
         CommonTest.getSwitchField('isPosted'),

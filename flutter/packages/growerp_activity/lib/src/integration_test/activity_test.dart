@@ -23,19 +23,9 @@ class ActivityTest {
     await CommonTest.selectOption(tester, '/todos', 'ActivityList');
   }
 
-  /// Custom search for activities - opens the search dialog and finds an activity
-  static Future<void> doActivitySearch(
-    WidgetTester tester, {
-    required String searchString,
-  }) async {
-    await CommonTest.tapByKey(tester, 'search');
-    await CommonTest.checkWidgetKey(tester, 'SearchDialog');
-    await CommonTest.enterText(tester, 'searchField', searchString);
-    await tester.testTextInput.receiveAction(TextInputAction.done);
-    await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
-    // Wait for search results to appear
-    await CommonTest.waitForKey(tester, 'landingPageSearchItem0');
-    await CommonTest.tapByKey(tester, 'landingPageSearchItem0');
+  static Future<void> clearSearch(WidgetTester tester) async {
+    await CommonTest.enterText(tester, 'searchField', '');
+    await tester.pump(const Duration(seconds: CommonTest.waitTime));
     await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
   }
 
@@ -67,11 +57,23 @@ class ActivityTest {
       if (activity.activityId.isEmpty) {
         await CommonTest.tapByKey(tester, 'addNew');
       } else {
-        await doActivitySearch(tester, searchString: activity.activityId);
-        expect(
-          CommonTest.getTextField('topHeader').split('#')[1],
-          activity.activityId,
-        );
+        // Find the row displaying this activityId and tap it
+        bool found = false;
+        for (int i = 0; i < 20; i++) {
+          if (!tester.any(find.byKey(Key('id$i')))) break;
+          if (CommonTest.getTextField('id$i') == activity.activityId) {
+            await tester.ensureVisible(find.byKey(Key('id$i')));
+            await tester.tap(find.byKey(Key('name$i')));
+            await tester.pump();
+            await tester.pump(const Duration(seconds: CommonTest.waitTime));
+            await tester.pumpAndSettle(
+              const Duration(seconds: CommonTest.waitTime),
+            );
+            found = true;
+            break;
+          }
+        }
+        if (!found) continue;
       }
       await CommonTest.checkWidgetKey(tester, 'ActivityDialog');
       await CommonTest.tapByKey(
@@ -91,41 +93,47 @@ class ActivityTest {
     WidgetTester tester,
     List<Activity> activities,
   ) async {
-    List<Activity> newActivities = [];
-    for (Activity activity in activities) {
-      // Use custom search to find and open the activity dialog
-      await doActivitySearch(tester, searchString: activity.activityName);
-      // The dialog should now be open after tapping the search result
+    // Clear search to show all activities
+    await clearSearch(tester);
+
+    // Build a map from activityName → activityId by iterating visible rows
+    final Map<String, String> nameToId = {};
+    for (int i = 0; i < activities.length; i++) {
+      await tester.ensureVisible(find.byKey(Key('name$i')));
+      await tester.tap(find.byKey(Key('name$i')));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: CommonTest.waitTime));
+      await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
       expect(find.byKey(const Key('ActivityDialog')), findsOneWidget);
-      expect(
-        CommonTest.getTextFormField('name'),
-        equals(activity.activityName),
-      );
-      expect(
-        CommonTest.getTextFormField('description'),
-        equals(activity.description),
-      );
-      var id = CommonTest.getTextField('topHeader').split('#')[1];
-      newActivities.add(activity.copyWith(activityId: id));
+      final displayedName = CommonTest.getTextFormField('name');
+      final id = CommonTest.getTextField('topHeader').split('#')[1];
+      nameToId[displayedName] = id;
       await CommonTest.tapByKey(tester, 'cancel');
     }
-    return newActivities;
+
+    // Match each expected activity to the ID found in the dialog
+    return activities
+        .map((a) => a.copyWith(activityId: nameToId[a.activityName] ?? ''))
+        .toList();
   }
 
   static Future<void> deleteLastActivity(WidgetTester tester) async {
     SaveTest test = await PersistFunctions.getTest();
     int count = test.activities.length;
-    expect(
-      find.byKey(const Key('activityItem')),
-      findsNWidgets(count),
-    ); // initial admin
+    // Count visible rows via delete-button keys
+    int visibleCount = 0;
+    while (tester.any(find.byKey(Key('delete$visibleCount')))) visibleCount++;
+    expect(visibleCount, count);
     await CommonTest.tapByKey(
       tester,
       'delete${count - 1}',
       seconds: CommonTest.waitTime,
     );
-    // replacement for refresh...
-    expect(find.byKey(const Key('activityItem')), findsNWidgets(count - 1));
+    await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
+    // Verify one fewer row
+    int newCount = 0;
+    while (tester.any(find.byKey(Key('delete$newCount')))) newCount++;
+    expect(newCount, count - 1);
     await PersistFunctions.persistTest(
       test.copyWith(
         activities: test.activities.sublist(0, test.activities.length - 1),

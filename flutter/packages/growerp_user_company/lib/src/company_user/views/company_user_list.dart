@@ -37,6 +37,7 @@ class CompanyUserList extends StatefulWidget {
 class CompanyUserListState extends State<CompanyUserList> {
   final _scrollController = ScrollController();
   final _searchController = TextEditingController();
+  final _searchFocusNode = FocusNode();
   final double _scrollThreshold = 100.0;
   late CompanyUserBloc _companyUserBloc;
   List<CompanyUser> companiesUsers = const <CompanyUser>[];
@@ -81,6 +82,9 @@ class CompanyUserListState extends State<CompanyUserList> {
           ..add(const CompanyUserFetch(refresh: true));
     }
     bottom = 50;
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _searchFocusNode.requestFocus(),
+    );
   }
 
   @override
@@ -108,8 +112,8 @@ class CompanyUserListState extends State<CompanyUserList> {
             isLoading: _isLoading && companiesUsers.isEmpty,
             scrollController: _scrollController,
             rowHeight: isPhone ? 64 : 56,
-            onRowTap: (index) {
-              showDialog(
+            onRowTap: (index) async {
+              await showDialog(
                 barrierDismissible: true,
                 context: context,
                 builder: (BuildContext context) {
@@ -127,6 +131,7 @@ class CompanyUserListState extends State<CompanyUserList> {
                   );
                 },
               );
+              _searchFocusNode.requestFocus();
             },
           );
         }
@@ -138,6 +143,7 @@ class CompanyUserListState extends State<CompanyUserList> {
               '${state.message}',
               Colors.red,
             );
+            _searchFocusNode.requestFocus();
           }
           if (state.status == CompanyUserStatus.success) {
             final localizations = UserCompanyLocalizations.of(context)!;
@@ -154,6 +160,7 @@ class CompanyUserListState extends State<CompanyUserList> {
                 seconds: 5,
               );
             }
+            _searchFocusNode.requestFocus();
           }
         }
 
@@ -187,10 +194,11 @@ class CompanyUserListState extends State<CompanyUserList> {
                 searchHint:
                     'Search ${widget.role?.name ?? 'companies/users'}...',
                 searchController: _searchController,
+                focusNode: _searchFocusNode,
                 onSearchChanged: (value) {
                   searchString = value;
                   _companyUserBloc.add(
-                    CompanyUserFetch(refresh: true, searchString: value),
+                    CompanyUserSearchChanged(searchString: value),
                   );
                 },
               ),
@@ -232,6 +240,7 @@ class CompanyUserListState extends State<CompanyUserList> {
                                     );
                                   },
                                 );
+                                _searchFocusNode.requestFocus();
                               },
                               tooltip: localizations.addNew,
                               child: Column(
@@ -258,6 +267,7 @@ class CompanyUserListState extends State<CompanyUserList> {
                                     );
                                   },
                                 );
+                                _searchFocusNode.requestFocus();
                               },
                               tooltip: localizations.addNew,
                               child: Column(
@@ -282,6 +292,7 @@ class CompanyUserListState extends State<CompanyUserList> {
                                     );
                                   },
                                 );
+                                _searchFocusNode.requestFocus();
                               },
                               tooltip: localizations.companyUserUpDown,
                               child: const Icon(Icons.file_copy),
@@ -327,6 +338,7 @@ class CompanyUserListState extends State<CompanyUserList> {
   void dispose() {
     _scrollController.dispose();
     _searchController.dispose();
+    _searchFocusNode.dispose();
     super.dispose();
   }
 

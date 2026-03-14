@@ -34,6 +34,7 @@ class PersonaList extends StatefulWidget {
 class PersonaListState extends State<PersonaList> {
   final _scrollController = ScrollController();
   final _searchController = TextEditingController();
+  final _searchFocusNode = FocusNode();
   late PersonaBloc _personaBloc;
   List<Persona> personas = const <Persona>[];
   bool hasReachedMax = false;
@@ -50,6 +51,9 @@ class PersonaListState extends State<PersonaList> {
     _personaBloc = context.read<PersonaBloc>()
       ..add(const PersonaFetch(refresh: true));
     bottom = 50;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _searchFocusNode.requestFocus();
+    });
   }
 
   @override
@@ -75,8 +79,8 @@ class PersonaListState extends State<PersonaList> {
         isLoading: _isLoading && personas.isEmpty,
         scrollController: _scrollController,
         rowHeight: isPhone ? 72 : 56,
-        onRowTap: (index) {
-          showDialog(
+        onRowTap: (index) async {
+          await showDialog(
             barrierDismissible: true,
             context: context,
             builder: (BuildContext context) {
@@ -90,6 +94,7 @@ class PersonaListState extends State<PersonaList> {
               );
             },
           );
+          if (mounted) _searchFocusNode.requestFocus();
         },
       );
     }
@@ -97,20 +102,14 @@ class PersonaListState extends State<PersonaList> {
     return BlocConsumer<PersonaBloc, PersonaState>(
       listener: (context, state) {
         if (state.status == PersonaStatus.failure) {
-          HelperFunctions.showMessage(
-            context,
-            '${state.message}',
-            Colors.red,
-          );
+          HelperFunctions.showMessage(context, '${state.message}', Colors.red);
+          _searchFocusNode.requestFocus();
         }
         if (state.status == PersonaStatus.success) {
           if ((state.message ?? '').isNotEmpty) {
-            HelperFunctions.showMessage(
-              context,
-              state.message!,
-              Colors.green,
-            );
+            HelperFunctions.showMessage(context, state.message!, Colors.green);
           }
+          _searchFocusNode.requestFocus();
         }
       },
       builder: (context, state) {
@@ -118,9 +117,7 @@ class PersonaListState extends State<PersonaList> {
         _isLoading = state.status == PersonaStatus.loading;
 
         if (state.status == PersonaStatus.failure && personas.isEmpty) {
-          return const FatalErrorForm(
-            message: 'Could not load personas!',
-          );
+          return const FatalErrorForm(message: 'Could not load personas!');
         }
 
         personas = state.personas;
@@ -141,11 +138,10 @@ class PersonaListState extends State<PersonaList> {
             ListFilterBar(
               searchHint: 'Search personas...',
               searchController: _searchController,
+              focusNode: _searchFocusNode,
               onSearchChanged: (value) {
                 searchString = value;
-                _personaBloc.add(
-                  PersonaFetch(refresh: true, searchString: value),
-                );
+                _personaBloc.add(PersonaSearchRequested(searchString: value));
               },
             ),
             // Main content area with StyledDataTable
@@ -177,10 +173,12 @@ class PersonaListState extends State<PersonaList> {
                                   return BlocProvider.value(
                                     value: _personaBloc,
                                     child: const PersonaDetailScreen(
-                                        persona: null),
+                                      persona: null,
+                                    ),
                                   );
                                 },
                               );
+                              if (mounted) _searchFocusNode.requestFocus();
                             },
                             tooltip: 'Add new persona',
                             child: const Icon(Icons.add),
@@ -201,6 +199,7 @@ class PersonaListState extends State<PersonaList> {
                                   );
                                 },
                               );
+                              if (mounted) _searchFocusNode.requestFocus();
                             },
                             tooltip: 'Generate Persona with AI',
                             child: const Icon(Icons.auto_awesome),
@@ -224,6 +223,7 @@ class PersonaListState extends State<PersonaList> {
       ..removeListener(_onScroll)
       ..dispose();
     _searchController.dispose();
+    _searchFocusNode.dispose();
     super.dispose();
   }
 
@@ -323,12 +323,14 @@ class GeneratePersonaDialogState extends State<GeneratePersonaDialog> {
                     key: const Key('generateButton'),
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
-                        _personaBloc.add(PersonaGenerateWithAI(
-                          businessDescription: _businessController.text,
-                          targetMarket: _targetMarketController.text.isEmpty
-                              ? null
-                              : _targetMarketController.text,
-                        ));
+                        _personaBloc.add(
+                          PersonaGenerateWithAI(
+                            businessDescription: _businessController.text,
+                            targetMarket: _targetMarketController.text.isEmpty
+                                ? null
+                                : _targetMarketController.text,
+                          ),
+                        );
                         Navigator.of(context).pop();
                       }
                     },

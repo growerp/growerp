@@ -42,3 +42,14 @@ class LedgerJournalDelete extends LedgerJournalEvent {
   const LedgerJournalDelete(this.ledgerJournal);
   final LedgerJournal ledgerJournal;
 }
+
+class LedgerJournalSearchChanged extends LedgerJournalEvent {
+  const LedgerJournalSearchChanged({
+    required this.searchString,
+    this.limit = 20,
+  });
+  final String searchString;
+  final int limit;
+  @override
+  List<Object> get props => [searchString];
+}

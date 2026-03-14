@@ -31,6 +31,7 @@ class CategoryList extends StatefulWidget {
 class CategoriesListState extends State<CategoryList> {
   final _scrollController = ScrollController();
   final _searchController = TextEditingController();
+  final _searchFocusNode = FocusNode();
   late CategoryBloc _categoryBloc;
   List<Category> categories = const <Category>[];
   late double bottom;
@@ -47,6 +48,9 @@ class CategoriesListState extends State<CategoryList> {
     _categoryBloc = context.read<CategoryBloc>()
       ..add(const CategoryFetch(refresh: true));
     bottom = 50;
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _searchFocusNode.requestFocus(),
+    );
   }
 
   @override
@@ -73,8 +77,8 @@ class CategoriesListState extends State<CategoryList> {
         isLoading: _isLoading && categories.isEmpty,
         scrollController: _scrollController,
         rowHeight: isPhone ? 72 : 56,
-        onRowTap: (index) {
-          showDialog(
+        onRowTap: (index) async {
+          await showDialog(
             barrierDismissible: true,
             context: context,
             builder: (BuildContext context) {
@@ -88,6 +92,7 @@ class CategoriesListState extends State<CategoryList> {
               );
             },
           );
+          _searchFocusNode.requestFocus();
         },
       );
     }
@@ -96,6 +101,9 @@ class CategoriesListState extends State<CategoryList> {
       listener: (context, state) {
         if (state.status == CategoryStatus.failure) {
           HelperFunctions.showMessage(context, '${state.message}', Colors.red);
+          WidgetsBinding.instance.addPostFrameCallback(
+            (_) => _searchFocusNode.requestFocus(),
+          );
         }
         if (state.status == CategoryStatus.success) {
           final translatedMessage = state.message != null
@@ -108,6 +116,9 @@ class CategoriesListState extends State<CategoryList> {
               Colors.green,
             );
           }
+          WidgetsBinding.instance.addPostFrameCallback(
+            (_) => _searchFocusNode.requestFocus(),
+          );
         }
       },
       builder: (context, state) {
@@ -137,11 +148,10 @@ class CategoriesListState extends State<CategoryList> {
             ListFilterBar(
               searchHint: 'Search categories...',
               searchController: _searchController,
+              focusNode: _searchFocusNode,
               onSearchChanged: (value) {
                 searchString = value;
-                _categoryBloc.add(
-                  CategoryFetch(refresh: true, searchString: value),
-                );
+                _categoryBloc.add(CategorySearchChanged(searchString: value));
               },
             ),
             // Main content area with StyledDataTable
@@ -175,6 +185,7 @@ class CategoriesListState extends State<CategoryList> {
                                       child: const CategoryFilesDialog(),
                                     ),
                               );
+                              _searchFocusNode.requestFocus();
                             },
                             tooltip: _localizations!.categoryUpDown,
                             child: const Icon(Icons.file_copy),
@@ -194,6 +205,7 @@ class CategoriesListState extends State<CategoryList> {
                                   );
                                 },
                               );
+                              _searchFocusNode.requestFocus();
                             },
                             tooltip: _localizations!.addNew,
                             child: const Icon(Icons.add),
@@ -217,6 +229,7 @@ class CategoriesListState extends State<CategoryList> {
       ..removeListener(_onScroll)
       ..dispose();
     _searchController.dispose();
+    _searchFocusNode.dispose();
     super.dispose();
   }
 

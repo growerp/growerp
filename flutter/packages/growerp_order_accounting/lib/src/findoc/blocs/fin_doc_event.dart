@@ -131,3 +131,24 @@ class FinDocGatewayPaymentRelease extends FinDocEvent {
   const FinDocGatewayPaymentRelease(this.paymentId);
   final String paymentId;
 }
+
+class FinDocSearchChanged extends FinDocEvent {
+  const FinDocSearchChanged({
+    required this.searchString,
+    this.sales,
+    this.docType,
+    this.journalId,
+    this.my = false,
+    this.status,
+    this.limit = 20,
+  });
+  final String searchString;
+  final bool? sales;
+  final FinDocType? docType;
+  final String? journalId;
+  final bool my;
+  final FinDocStatusVal? status;
+  final int limit;
+  @override
+  List<Object> get props => [searchString];
+}

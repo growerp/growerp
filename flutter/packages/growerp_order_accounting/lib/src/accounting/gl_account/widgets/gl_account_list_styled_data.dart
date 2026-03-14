@@ -80,7 +80,7 @@ List<Widget> getGlAccountListRow({
   );
 
   // Account code
-  cells.add(Text(glAccount.accountCode ?? '', key: Key('code$index')));
+  cells.add(Text(glAccount.accountCode ?? '', key: Key('id$index')));
 
   // Account name
   cells.add(

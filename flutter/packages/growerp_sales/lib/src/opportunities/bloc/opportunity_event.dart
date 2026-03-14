@@ -47,3 +47,11 @@ class OpportunityConvertToOrder extends OpportunityEvent {
   const OpportunityConvertToOrder(this.opportunity);
   final Opportunity opportunity;
 }
+
+class OpportunitySearchChanged extends OpportunityEvent {
+  const OpportunitySearchChanged({required this.searchString, this.limit = 20});
+  final String searchString;
+  final int limit;
+  @override
+  List<Object> get props => [searchString];
+}

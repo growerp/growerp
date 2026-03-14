@@ -35,6 +35,19 @@ class GlAccountFetch extends GlAccountEvent {
   List<Object> get props => [searchString, refresh];
 }
 
+class GlAccountSearchChanged extends GlAccountEvent {
+  const GlAccountSearchChanged({
+    required this.searchString,
+    this.limit = 20,
+    this.trialBalance = false,
+  });
+  final String searchString;
+  final int limit;
+  final bool trialBalance;
+  @override
+  List<Object> get props => [searchString, limit, trialBalance];
+}
+
 class GlAccountUpdate extends GlAccountEvent {
   const GlAccountUpdate(this.glAccount);
   final GlAccount glAccount;

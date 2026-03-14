@@ -34,6 +34,7 @@ class SocialPostList extends StatefulWidget {
 class SocialPostListState extends State<SocialPostList> {
   final _scrollController = ScrollController();
   final _searchController = TextEditingController();
+  final _searchFocusNode = FocusNode();
   late SocialPostBloc _socialPostBloc;
   List<SocialPost> socialPosts = const <SocialPost>[];
   bool hasReachedMax = false;
@@ -50,6 +51,9 @@ class SocialPostListState extends State<SocialPostList> {
     _socialPostBloc = context.read<SocialPostBloc>()
       ..add(const SocialPostFetch(refresh: true));
     bottom = 50;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _searchFocusNode.requestFocus();
+    });
   }
 
   @override
@@ -75,8 +79,8 @@ class SocialPostListState extends State<SocialPostList> {
         isLoading: _isLoading && socialPosts.isEmpty,
         scrollController: _scrollController,
         rowHeight: isPhone ? 72 : 56,
-        onRowTap: (index) {
-          showDialog(
+        onRowTap: (index) async {
+          await showDialog(
             barrierDismissible: true,
             context: context,
             builder: (BuildContext context) {
@@ -90,6 +94,7 @@ class SocialPostListState extends State<SocialPostList> {
               );
             },
           );
+          if (mounted) _searchFocusNode.requestFocus();
         },
       );
     }
@@ -98,11 +103,13 @@ class SocialPostListState extends State<SocialPostList> {
       listener: (context, state) {
         if (state.status == SocialPostStatus.failure) {
           HelperFunctions.showMessage(context, '${state.message}', Colors.red);
+          _searchFocusNode.requestFocus();
         }
         if (state.status == SocialPostStatus.success) {
           if ((state.message ?? '').isNotEmpty) {
             HelperFunctions.showMessage(context, state.message!, Colors.green);
           }
+          _searchFocusNode.requestFocus();
         }
       },
       builder: (context, state) {
@@ -131,10 +138,11 @@ class SocialPostListState extends State<SocialPostList> {
             ListFilterBar(
               searchHint: 'Search social posts...',
               searchController: _searchController,
+              focusNode: _searchFocusNode,
               onSearchChanged: (value) {
                 searchString = value;
                 _socialPostBloc.add(
-                  SocialPostFetch(refresh: true, searchString: value),
+                  SocialPostSearchRequested(searchString: value),
                 );
               },
             ),
@@ -172,6 +180,7 @@ class SocialPostListState extends State<SocialPostList> {
                                   );
                                 },
                               );
+                              if (mounted) _searchFocusNode.requestFocus();
                             },
                             tooltip: 'Add new social post',
                             child: const Icon(Icons.add),
@@ -195,6 +204,7 @@ class SocialPostListState extends State<SocialPostList> {
       ..removeListener(_onScroll)
       ..dispose();
     _searchController.dispose();
+    _searchFocusNode.dispose();
     super.dispose();
   }
 

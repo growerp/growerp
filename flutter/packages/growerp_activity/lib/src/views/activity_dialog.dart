@@ -81,7 +81,11 @@ class ActivityDialogState extends State<ActivityDialog> {
       listener: (context, state) {
         switch (state.status) {
           case ActivityBlocStatus.success:
-            Navigator.of(context).pop();
+            // Only pop after a save (create/update). A save always sets a
+            // non-null message; the initial load success has no message.
+            if (state.message != null) {
+              Navigator.of(context).pop();
+            }
             break;
           case ActivityBlocStatus.failure:
             HelperFunctions.showMessage(
@@ -95,36 +99,34 @@ class ActivityDialogState extends State<ActivityDialog> {
         }
       },
       builder: (context, state) {
-        switch (state.status) {
-          case ActivityBlocStatus.success:
-            return Dialog(
-              key: const Key('ActivityDialog'),
-              insetPadding: const EdgeInsets.all(10),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: popUp(
-                context: context,
-                title: _localizations.activity_title(
-                  widget.activity.activityType.toString(),
-                  widget.activity.pseudoId.isEmpty
-                      ? _localizations.activity_new
-                      : widget.activity.pseudoId,
-                ),
-                height: isPhone ? 650 : 550,
-                width: 350,
-                child: _showForm(isPhone),
-              ),
-            );
-          case ActivityBlocStatus.failure:
-            return FatalErrorForm(
+        return Dialog(
+          key: const Key('ActivityDialog'),
+          insetPadding: const EdgeInsets.all(10),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: switch (state.status) {
+            ActivityBlocStatus.failure => FatalErrorForm(
               message: _localizations.activity_loadError(
                 widget.activity.activityType.toString(),
               ),
-            );
-          default:
-            return const Center(child: LoadingIndicator());
-        }
+            ),
+            ActivityBlocStatus.loading || ActivityBlocStatus.initial =>
+              const Center(child: LoadingIndicator()),
+            ActivityBlocStatus.success => popUp(
+              context: context,
+              title: _localizations.activity_title(
+                widget.activity.activityType.toString(),
+                widget.activity.pseudoId.isEmpty
+                    ? _localizations.activity_new
+                    : widget.activity.pseudoId,
+              ),
+              height: isPhone ? 650 : 550,
+              width: 350,
+              child: _showForm(isPhone),
+            ),
+          },
+        );
       },
     );
   }

@@ -18,8 +18,9 @@ class CourseList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => CourseBloc(restClient: context.read<RestClient>())
-        ..add(const CourseFetch(refresh: true)),
+      create: (context) =>
+          CourseBloc(restClient: context.read<RestClient>())
+            ..add(const CourseFetch(refresh: true)),
       child: const CourseListView(),
     );
   }
@@ -35,6 +36,7 @@ class CourseListView extends StatefulWidget {
 class _CourseListViewState extends State<CourseListView> {
   final _scrollController = ScrollController();
   final _searchController = TextEditingController();
+  final _searchFocusNode = FocusNode();
   late CourseBloc _courseBloc;
   List<Course> courses = const <Course>[];
   late double bottom;
@@ -48,6 +50,9 @@ class _CourseListViewState extends State<CourseListView> {
     super.initState();
     _scrollController.addListener(_onScroll);
     _courseBloc = context.read<CourseBloc>();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _searchFocusNode.requestFocus();
+    });
     bottom = 50;
   }
 
@@ -74,8 +79,8 @@ class _CourseListViewState extends State<CourseListView> {
         isLoading: _isLoading && courses.isEmpty,
         scrollController: _scrollController,
         rowHeight: isPhone ? 72 : 56,
-        onRowTap: (index) {
-          showDialog(
+        onRowTap: (index) async {
+          await showDialog(
             barrierDismissible: true,
             context: context,
             builder: (BuildContext context) {
@@ -89,6 +94,7 @@ class _CourseListViewState extends State<CourseListView> {
               );
             },
           );
+          _searchFocusNode.requestFocus();
         },
       );
     }
@@ -101,15 +107,13 @@ class _CourseListViewState extends State<CourseListView> {
             state.message ?? 'An error occurred',
             Colors.red,
           );
+          _searchFocusNode.requestFocus();
         }
         if (state.status == CourseBlocStatus.success) {
           if ((state.message ?? '').isNotEmpty) {
-            HelperFunctions.showMessage(
-              context,
-              state.message!,
-              Colors.green,
-            );
+            HelperFunctions.showMessage(context, state.message!, Colors.green);
           }
+          _searchFocusNode.requestFocus();
         }
       },
       builder: (context, state) {
@@ -117,9 +121,7 @@ class _CourseListViewState extends State<CourseListView> {
         _isLoading = state.status == CourseBlocStatus.loading;
 
         if (state.status == CourseBlocStatus.failure && courses.isEmpty) {
-          return const FatalErrorForm(
-            message: 'Could not load courses!',
-          );
+          return const FatalErrorForm(message: 'Could not load courses!');
         }
 
         courses = state.courses;
@@ -139,11 +141,10 @@ class _CourseListViewState extends State<CourseListView> {
             ListFilterBar(
               searchHint: 'Search courses...',
               searchController: _searchController,
+              focusNode: _searchFocusNode,
               onSearchChanged: (value) {
                 searchString = value;
-                _courseBloc.add(
-                  CourseFetch(refresh: true, searchString: value),
-                );
+                _courseBloc.add(CourseSearchChanged(searchString: value));
               },
             ),
             // Main content area with StyledDataTable
@@ -178,6 +179,7 @@ class _CourseListViewState extends State<CourseListView> {
                                   );
                                 },
                               );
+                              _searchFocusNode.requestFocus();
                             },
                             tooltip: 'Add new course',
                             child: const Icon(Icons.add),
@@ -201,6 +203,7 @@ class _CourseListViewState extends State<CourseListView> {
       ..removeListener(_onScroll)
       ..dispose();
     _searchController.dispose();
+    _searchFocusNode.dispose();
     super.dispose();
   }
 

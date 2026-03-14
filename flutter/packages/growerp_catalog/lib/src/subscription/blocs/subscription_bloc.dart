@@ -2,15 +2,32 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_core/growerp_core.dart';
+import 'package:stream_transform/stream_transform.dart';
 
 part 'subscription_event.dart';
 part 'subscription_state.dart';
+
+const _subscriptionSearchDebounceDuration = Duration(milliseconds: 300);
+
+EventTransformer<SubscriptionSearchChanged> subscriptionSearchDebounce() {
+  return (events, mapper) {
+    final clearStream = events.where((e) => e.searchString.isEmpty);
+    final searchStream = events
+        .where((e) => e.searchString.length >= 3)
+        .debounce(_subscriptionSearchDebounceDuration);
+    return clearStream.merge(searchStream).switchMap(mapper);
+  };
+}
 
 class SubscriptionBloc extends Bloc<SubscriptionEvent, SubscriptionState> {
   SubscriptionBloc(this.restClient) : super(const SubscriptionState()) {
     on<SubscriptionFetch>(_onSubscriptionFetch);
     on<SubscriptionUpdate>(_onSubscriptionUpdate);
     on<SubscriptionDelete>(_onSubscriptionDelete);
+    on<SubscriptionSearchChanged>(
+      _onSubscriptionSearchChanged,
+      transformer: subscriptionSearchDebounce(),
+    );
   }
 
   final RestClient restClient;
@@ -55,6 +72,21 @@ class SubscriptionBloc extends Bloc<SubscriptionEvent, SubscriptionState> {
         ),
       );
     }
+  }
+
+  Future<void> _onSubscriptionSearchChanged(
+    SubscriptionSearchChanged event,
+    Emitter<SubscriptionState> emit,
+  ) async {
+    return _onSubscriptionFetch(
+      SubscriptionFetch(
+        searchString: event.searchString,
+        refresh: true,
+        growerp: event.growerp,
+        limit: event.limit,
+      ),
+      emit,
+    );
   }
 
   Future<void> _onSubscriptionUpdate(

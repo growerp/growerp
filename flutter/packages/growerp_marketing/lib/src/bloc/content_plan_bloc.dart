@@ -2,8 +2,20 @@ import 'package:bloc/bloc.dart';
 import 'package:dio/dio.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_core/growerp_core.dart';
+import 'package:stream_transform/stream_transform.dart';
 import 'content_plan_event.dart';
 import 'content_plan_state.dart';
+
+const _contentPlanSearchDebounceDuration = Duration(milliseconds: 300);
+EventTransformer<ContentPlanSearchRequested> contentPlanSearchDebounce() {
+  return (events, mapper) {
+    final clearStream = events.where((e) => e.searchString.isEmpty);
+    final searchStream = events
+        .where((e) => e.searchString.length >= 3)
+        .debounce(_contentPlanSearchDebounceDuration);
+    return clearStream.merge(searchStream).switchMap(mapper);
+  };
+}
 
 /// BLoC for managing Content Plans
 class ContentPlanBloc extends Bloc<ContentPlanEvent, ContentPlanState> {
@@ -15,7 +27,10 @@ class ContentPlanBloc extends Bloc<ContentPlanEvent, ContentPlanState> {
     on<ContentPlanUpdate>(_onContentPlanUpdate);
     on<ContentPlanDelete>(_onContentPlanDelete);
     on<ContentPlanGenerateWithAI>(_onContentPlanGenerateWithAI);
-    on<ContentPlanSearchRequested>(_onContentPlanSearchRequested);
+    on<ContentPlanSearchRequested>(
+      _onContentPlanSearchRequested,
+      transformer: contentPlanSearchDebounce(),
+    );
   }
 
   Future<void> _onContentPlanFetch(
@@ -36,11 +51,13 @@ class ContentPlanBloc extends Bloc<ContentPlanEvent, ContentPlanState> {
 
         final contentPlans = result.contentPlans;
 
-        emit(state.copyWith(
-          status: ContentPlanStatus.success,
-          contentPlans: contentPlans,
-          hasReachedMax: contentPlans.length < event.limit,
-        ));
+        emit(
+          state.copyWith(
+            status: ContentPlanStatus.success,
+            contentPlans: contentPlans,
+            hasReachedMax: contentPlans.length < event.limit,
+          ),
+        );
       } else {
         final result = await restClient.getContentPlans(
           start: state.contentPlans.length,
@@ -50,22 +67,28 @@ class ContentPlanBloc extends Bloc<ContentPlanEvent, ContentPlanState> {
 
         final contentPlans = result.contentPlans;
 
-        emit(state.copyWith(
-          status: ContentPlanStatus.success,
-          contentPlans: List.of(state.contentPlans)..addAll(contentPlans),
-          hasReachedMax: contentPlans.length < event.limit,
-        ));
+        emit(
+          state.copyWith(
+            status: ContentPlanStatus.success,
+            contentPlans: List.of(state.contentPlans)..addAll(contentPlans),
+            hasReachedMax: contentPlans.length < event.limit,
+          ),
+        );
       }
     } on DioException catch (e) {
-      emit(state.copyWith(
-        status: ContentPlanStatus.failure,
-        message: await getDioError(e),
-      ));
+      emit(
+        state.copyWith(
+          status: ContentPlanStatus.failure,
+          message: await getDioError(e),
+        ),
+      );
     } catch (e) {
-      emit(state.copyWith(
-        status: ContentPlanStatus.failure,
-        message: e.toString(),
-      ));
+      emit(
+        state.copyWith(
+          status: ContentPlanStatus.failure,
+          message: e.toString(),
+        ),
+      );
     }
   }
 
@@ -86,21 +109,27 @@ class ContentPlanBloc extends Bloc<ContentPlanEvent, ContentPlanState> {
       final updatedContentPlans = List<ContentPlan>.from(state.contentPlans)
         ..insert(0, newContentPlan);
 
-      emit(state.copyWith(
-        status: ContentPlanStatus.success,
-        contentPlans: updatedContentPlans,
-        message: 'Content plan created successfully',
-      ));
+      emit(
+        state.copyWith(
+          status: ContentPlanStatus.success,
+          contentPlans: updatedContentPlans,
+          message: 'Content plan created successfully',
+        ),
+      );
     } on DioException catch (e) {
-      emit(state.copyWith(
-        status: ContentPlanStatus.failure,
-        message: await getDioError(e),
-      ));
+      emit(
+        state.copyWith(
+          status: ContentPlanStatus.failure,
+          message: await getDioError(e),
+        ),
+      );
     } catch (e) {
-      emit(state.copyWith(
-        status: ContentPlanStatus.failure,
-        message: e.toString(),
-      ));
+      emit(
+        state.copyWith(
+          status: ContentPlanStatus.failure,
+          message: e.toString(),
+        ),
+      );
     }
   }
 
@@ -120,25 +149,33 @@ class ContentPlanBloc extends Bloc<ContentPlanEvent, ContentPlanState> {
       );
 
       final updatedContentPlans = state.contentPlans
-          .map((p) =>
-              p.planId == event.contentPlan.planId ? updatedContentPlan : p)
+          .map(
+            (p) =>
+                p.planId == event.contentPlan.planId ? updatedContentPlan : p,
+          )
           .toList();
 
-      emit(state.copyWith(
-        status: ContentPlanStatus.success,
-        contentPlans: updatedContentPlans,
-        message: 'Content plan updated successfully',
-      ));
+      emit(
+        state.copyWith(
+          status: ContentPlanStatus.success,
+          contentPlans: updatedContentPlans,
+          message: 'Content plan updated successfully',
+        ),
+      );
     } on DioException catch (e) {
-      emit(state.copyWith(
-        status: ContentPlanStatus.failure,
-        message: await getDioError(e),
-      ));
+      emit(
+        state.copyWith(
+          status: ContentPlanStatus.failure,
+          message: await getDioError(e),
+        ),
+      );
     } catch (e) {
-      emit(state.copyWith(
-        status: ContentPlanStatus.failure,
-        message: e.toString(),
-      ));
+      emit(
+        state.copyWith(
+          status: ContentPlanStatus.failure,
+          message: e.toString(),
+        ),
+      );
     }
   }
 
@@ -149,29 +186,33 @@ class ContentPlanBloc extends Bloc<ContentPlanEvent, ContentPlanState> {
     try {
       emit(state.copyWith(status: ContentPlanStatus.loading));
 
-      await restClient.deleteContentPlan(
-        planId: event.contentPlan.planId!,
-      );
+      await restClient.deleteContentPlan(planId: event.contentPlan.planId!);
 
       final updatedContentPlans = state.contentPlans
           .where((p) => p.planId != event.contentPlan.planId)
           .toList();
 
-      emit(state.copyWith(
-        status: ContentPlanStatus.success,
-        contentPlans: updatedContentPlans,
-        message: 'Content plan deleted successfully',
-      ));
+      emit(
+        state.copyWith(
+          status: ContentPlanStatus.success,
+          contentPlans: updatedContentPlans,
+          message: 'Content plan deleted successfully',
+        ),
+      );
     } on DioException catch (e) {
-      emit(state.copyWith(
-        status: ContentPlanStatus.failure,
-        message: await getDioError(e),
-      ));
+      emit(
+        state.copyWith(
+          status: ContentPlanStatus.failure,
+          message: await getDioError(e),
+        ),
+      );
     } catch (e) {
-      emit(state.copyWith(
-        status: ContentPlanStatus.failure,
-        message: e.toString(),
-      ));
+      emit(
+        state.copyWith(
+          status: ContentPlanStatus.failure,
+          message: e.toString(),
+        ),
+      );
     }
   }
 
@@ -190,21 +231,27 @@ class ContentPlanBloc extends Bloc<ContentPlanEvent, ContentPlanState> {
       final updatedContentPlans = List<ContentPlan>.from(state.contentPlans)
         ..insert(0, generatedContentPlan);
 
-      emit(state.copyWith(
-        status: ContentPlanStatus.success,
-        contentPlans: updatedContentPlans,
-        message: 'Content plan generated successfully with AI',
-      ));
+      emit(
+        state.copyWith(
+          status: ContentPlanStatus.success,
+          contentPlans: updatedContentPlans,
+          message: 'Content plan generated successfully with AI',
+        ),
+      );
     } on DioException catch (e) {
-      emit(state.copyWith(
-        status: ContentPlanStatus.failure,
-        message: await getDioError(e),
-      ));
+      emit(
+        state.copyWith(
+          status: ContentPlanStatus.failure,
+          message: await getDioError(e),
+        ),
+      );
     } catch (e) {
-      emit(state.copyWith(
-        status: ContentPlanStatus.failure,
-        message: e.toString(),
-      ));
+      emit(
+        state.copyWith(
+          status: ContentPlanStatus.failure,
+          message: e.toString(),
+        ),
+      );
     }
   }
 
@@ -212,38 +259,9 @@ class ContentPlanBloc extends Bloc<ContentPlanEvent, ContentPlanState> {
     ContentPlanSearchRequested event,
     Emitter<ContentPlanState> emit,
   ) async {
-    if (event.searchString.isEmpty) {
-      emit(state.copyWith(
-        searchResults: [],
-        searchStatus: ContentPlanStatus.initial,
-        searchError: null,
-      ));
-      return;
-    }
-
-    try {
-      emit(state.copyWith(searchStatus: ContentPlanStatus.loading));
-
-      final result = await restClient.getContentPlans(
-        searchString: event.searchString,
-        start: 0,
-        limit: 20,
-      );
-
-      emit(state.copyWith(
-        searchResults: result.contentPlans,
-        searchStatus: ContentPlanStatus.success,
-      ));
-    } on DioException catch (e) {
-      emit(state.copyWith(
-        searchStatus: ContentPlanStatus.failure,
-        searchError: await getDioError(e),
-      ));
-    } catch (e) {
-      emit(state.copyWith(
-        searchStatus: ContentPlanStatus.failure,
-        searchError: e.toString(),
-      ));
-    }
+    return _onContentPlanFetch(
+      ContentPlanFetch(refresh: true, searchString: event.searchString),
+      emit,
+    );
   }
 }

@@ -25,10 +25,7 @@ import 'credibility_info_detail_screen.dart';
 class CredibilityInfoListScreen extends StatefulWidget {
   final String landingPageId;
 
-  const CredibilityInfoListScreen({
-    super.key,
-    required this.landingPageId,
-  });
+  const CredibilityInfoListScreen({super.key, required this.landingPageId});
 
   @override
   CredibilityInfoListScreenState createState() =>
@@ -80,11 +77,7 @@ class CredibilityInfoListScreenState extends State<CredibilityInfoListScreen> {
           }
           if (state.status == CredibilityStatus.success &&
               (state.message ?? '').isNotEmpty) {
-            HelperFunctions.showMessage(
-              context,
-              state.message!,
-              Colors.green,
-            );
+            HelperFunctions.showMessage(context, state.message!, Colors.green);
           }
         },
         builder: (context, state) {
@@ -120,73 +113,8 @@ class CredibilityInfoListScreenState extends State<CredibilityInfoListScreen> {
               return Card(
                 key: Key('credibilityItem${credibility.pseudoId}'),
                 margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                child: ListTile(
+                child: InkWell(
                   key: Key('item$index'),
-                  leading: credibility.creatorImageUrl != null
-                      ? CircleAvatar(
-                          backgroundImage:
-                              NetworkImage(credibility.creatorImageUrl!),
-                        )
-                      : const CircleAvatar(
-                          child: Icon(Icons.person),
-                        ),
-                  title: Text(credibility.pseudoId ?? 'Credibility Info'),
-                  subtitle: Text(
-                    credibility.creatorBio ?? '',
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (credibility.statistics?.isNotEmpty ?? false)
-                        Chip(
-                          label: Text(
-                            '${credibility.statistics!.length} stats',
-                            style: const TextStyle(fontSize: 12),
-                          ),
-                        ),
-                      const SizedBox(width: 8),
-                      IconButton(
-                        key: Key('deleteCredibility${credibility.pseudoId}'),
-                        icon: const Icon(Icons.delete, color: Colors.red),
-                        onPressed: () async {
-                          final confirmed = await showDialog<bool>(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return AlertDialog(
-                                title: const Text('Delete Credibility Info'),
-                                content: const Text(
-                                  'Are you sure you want to delete this credibility information?',
-                                ),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () =>
-                                        Navigator.of(context).pop(false),
-                                    child: const Text('Cancel'),
-                                  ),
-                                  TextButton(
-                                    onPressed: () =>
-                                        Navigator.of(context).pop(true),
-                                    child: const Text('Delete'),
-                                  ),
-                                ],
-                              );
-                            },
-                          );
-                          if (confirmed == true) {
-                            _credibilityBloc.add(
-                              CredibilityInfoDelete(
-                                landingPageId: widget.landingPageId,
-                                credibilityInfoId:
-                                    credibility.credibilityInfoId ?? '',
-                              ),
-                            );
-                          }
-                        },
-                      ),
-                    ],
-                  ),
                   onTap: () async {
                     await showDialog(
                       barrierDismissible: true,
@@ -206,6 +134,106 @@ class CredibilityInfoListScreenState extends State<CredibilityInfoListScreen> {
                       CredibilityLoad(landingPageId: widget.landingPageId),
                     );
                   },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 10,
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        credibility.creatorImageUrl != null
+                            ? CircleAvatar(
+                                backgroundImage: NetworkImage(
+                                  credibility.creatorImageUrl!,
+                                ),
+                              )
+                            : const CircleAvatar(child: Icon(Icons.person)),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                credibility.pseudoId ?? 'Credibility Info',
+                                style: Theme.of(context).textTheme.titleMedium,
+                              ),
+                              if ((credibility.creatorBio ?? '').isNotEmpty)
+                                Text(
+                                  credibility.creatorBio!,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: Theme.of(context).textTheme.bodySmall,
+                                ),
+                              const SizedBox(height: 4),
+                              Row(
+                                children: [
+                                  if (credibility.statistics?.isNotEmpty ??
+                                      false)
+                                    Chip(
+                                      visualDensity: VisualDensity.compact,
+                                      label: Text(
+                                        '${credibility.statistics!.length} stats',
+                                        style: const TextStyle(fontSize: 12),
+                                      ),
+                                    ),
+                                  IconButton(
+                                    key: Key(
+                                      'deleteCredibility${credibility.pseudoId}',
+                                    ),
+                                    visualDensity: VisualDensity.compact,
+                                    icon: const Icon(
+                                      Icons.delete,
+                                      color: Colors.red,
+                                    ),
+                                    onPressed: () async {
+                                      final confirmed = await showDialog<bool>(
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return AlertDialog(
+                                            title: const Text(
+                                              'Delete Credibility Info',
+                                            ),
+                                            content: const Text(
+                                              'Are you sure you want to delete this credibility information?',
+                                            ),
+                                            actions: [
+                                              TextButton(
+                                                onPressed: () => Navigator.of(
+                                                  context,
+                                                ).pop(false),
+                                                child: const Text('Cancel'),
+                                              ),
+                                              TextButton(
+                                                onPressed: () => Navigator.of(
+                                                  context,
+                                                ).pop(true),
+                                                child: const Text('Delete'),
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      );
+                                      if (confirmed == true) {
+                                        _credibilityBloc.add(
+                                          CredibilityInfoDelete(
+                                            landingPageId: widget.landingPageId,
+                                            credibilityInfoId:
+                                                credibility.credibilityInfoId ??
+                                                '',
+                                          ),
+                                        );
+                                      }
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               );
             },

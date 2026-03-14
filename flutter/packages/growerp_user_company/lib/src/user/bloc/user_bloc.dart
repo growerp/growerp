@@ -35,12 +35,28 @@ EventTransformer<E> userDroppable<E>(Duration duration) {
   };
 }
 
+const _userSearchDebounceDuration = Duration(milliseconds: 300);
+
+EventTransformer<UserSearchChanged> userSearchDebounce() {
+  return (events, mapper) {
+    final clearStream = events.where((e) => e.searchString.isEmpty);
+    final searchStream = events
+        .where((e) => e.searchString.length >= 3)
+        .debounce(_userSearchDebounceDuration);
+    return clearStream.merge(searchStream).switchMap(mapper);
+  };
+}
+
 class UserBloc extends Bloc<UserEvent, UserState>
     with LeadBloc, CustomerBloc, EmployeeBloc, SupplierBloc {
   UserBloc(this.restClient, this.role) : super(const UserState()) {
     on<UserFetch>(
       _onUserFetch,
       transformer: userDroppable(const Duration(milliseconds: 100)),
+    );
+    on<UserSearchChanged>(
+      _onUserSearchChanged,
+      transformer: userSearchDebounce(),
     );
     on<UserUpdate>(_onUserUpdate);
     on<UserDelete>(_onUserDelete);
@@ -89,6 +105,22 @@ class UserBloc extends Bloc<UserEvent, UserState>
         ),
       );
     }
+  }
+
+  Future<void> _onUserSearchChanged(
+    UserSearchChanged event,
+    Emitter<UserState> emit,
+  ) async {
+    return _onUserFetch(
+      UserFetch(
+        refresh: true,
+        searchString: event.searchString,
+        userGroup: event.userGroup,
+        partyId: event.partyId,
+        limit: event.limit,
+      ),
+      emit,
+    );
   }
 
   Future<void> _onUserUpdate(UserUpdate event, Emitter<UserState> emit) async {

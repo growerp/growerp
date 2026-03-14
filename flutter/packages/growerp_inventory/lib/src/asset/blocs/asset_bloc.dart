@@ -25,10 +25,21 @@ part 'asset_event.dart';
 part 'asset_state.dart';
 
 const _assetLimit = 20;
+const searchDebounceDuration = Duration(milliseconds: 300);
 
 EventTransformer<E> assetDroppable<E>(Duration duration) {
   return (events, mapper) {
     return droppable<E>().call(events.throttle(duration), mapper);
+  };
+}
+
+EventTransformer<AssetSearchChanged> assetSearchDebounce() {
+  return (events, mapper) {
+    final clearStream = events.where((e) => e.searchString.isEmpty);
+    final searchStream = events
+        .where((e) => e.searchString.length >= 3)
+        .debounce(searchDebounceDuration);
+    return clearStream.merge(searchStream).switchMap(mapper);
   };
 }
 
@@ -40,6 +51,10 @@ class AssetBloc extends Bloc<AssetEvent, AssetState> {
       transformer: assetDroppable(const Duration(milliseconds: 100)),
     );
     on<AssetUpdate>(_onAssetUpdate);
+    on<AssetSearchChanged>(
+      _onAssetSearchChanged,
+      transformer: assetSearchDebounce(),
+    );
   }
 
   final RestClient restClient;
@@ -69,6 +84,20 @@ class AssetBloc extends Bloc<AssetEvent, AssetState> {
         ),
       );
     }
+  }
+
+  Future<void> _onAssetSearchChanged(
+    AssetSearchChanged event,
+    Emitter<AssetState> emit,
+  ) async {
+    return _onAssetFetch(
+      AssetFetch(
+        searchString: event.searchString,
+        refresh: true,
+        assetClassId: event.assetClassId,
+      ),
+      emit,
+    );
   }
 
   Future<void> _onAssetUpdate(

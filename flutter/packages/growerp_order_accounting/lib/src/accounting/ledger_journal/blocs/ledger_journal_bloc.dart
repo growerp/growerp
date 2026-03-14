@@ -32,17 +32,47 @@ EventTransformer<E> ledgerJournalDroppable<E>(Duration duration) {
   };
 }
 
+const _ledgerJournalSearchDebounceDuration = Duration(milliseconds: 300);
+
+EventTransformer<LedgerJournalSearchChanged> ledgerJournalSearchDebounce() {
+  return (events, mapper) {
+    final clearStream = events.where((e) => e.searchString.isEmpty);
+    final searchStream = events
+        .where((e) => e.searchString.length >= 3)
+        .debounce(_ledgerJournalSearchDebounceDuration);
+    return clearStream.merge(searchStream).switchMap(mapper);
+  };
+}
+
 class LedgerJournalBloc extends Bloc<LedgerJournalEvent, LedgerJournalState> {
   LedgerJournalBloc(this.restClient) : super(const LedgerJournalState()) {
     on<LedgerJournalFetch>(
       _onLedgerJournalFetch,
       transformer: ledgerJournalDroppable(const Duration(milliseconds: 100)),
     );
+    on<LedgerJournalSearchChanged>(
+      _onLedgerJournalSearchChanged,
+      transformer: ledgerJournalSearchDebounce(),
+    );
     on<LedgerJournalUpdate>(_onLedgerJournalUpdate);
   }
 
   final RestClient restClient;
   late int start;
+
+  Future<void> _onLedgerJournalSearchChanged(
+    LedgerJournalSearchChanged event,
+    Emitter<LedgerJournalState> emit,
+  ) async {
+    return _onLedgerJournalFetch(
+      LedgerJournalFetch(
+        refresh: true,
+        searchString: event.searchString,
+        limit: event.limit,
+      ),
+      emit,
+    );
+  }
 
   Future<void> _onLedgerJournalFetch(
     LedgerJournalFetch event,

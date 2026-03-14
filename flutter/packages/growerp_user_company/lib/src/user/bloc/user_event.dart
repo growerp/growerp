@@ -48,3 +48,18 @@ class UserDelete extends UserEvent {
   final User user;
   const UserDelete(this.user);
 }
+
+class UserSearchChanged extends UserEvent {
+  const UserSearchChanged({
+    required this.searchString,
+    this.userGroup,
+    this.partyId,
+    this.limit = 20,
+  });
+  final String searchString;
+  final UserGroup? userGroup;
+  final String? partyId;
+  final int limit;
+  @override
+  List<Object> get props => [searchString];
+}

@@ -28,6 +28,7 @@ class GlAccountList extends StatefulWidget {
 class GlAccountsState extends State<GlAccountList> {
   final _scrollController = ScrollController();
   final _searchController = TextEditingController();
+  final _searchFocusNode = FocusNode();
   late GlAccountBloc _glAccountBloc;
   late bool trialBalance;
   late int limit;
@@ -46,6 +47,9 @@ class GlAccountsState extends State<GlAccountList> {
     _glAccountBloc = context.read<GlAccountBloc>()
       ..add(GlAccountFetch(refresh: true, limit: limit));
     bottom = 50;
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _searchFocusNode.requestFocus(),
+    );
   }
 
   @override
@@ -72,8 +76,8 @@ class GlAccountsState extends State<GlAccountList> {
         isLoading: _isLoading && glAccounts.isEmpty,
         scrollController: _scrollController,
         rowHeight: isPhone ? 56 : 56,
-        onRowTap: (index) {
-          showDialog(
+        onRowTap: (index) async {
+          await showDialog(
             barrierDismissible: true,
             context: context,
             builder: (BuildContext context) {
@@ -87,6 +91,7 @@ class GlAccountsState extends State<GlAccountList> {
               );
             },
           );
+          _searchFocusNode.requestFocus();
         },
       );
     }
@@ -103,167 +108,177 @@ class GlAccountsState extends State<GlAccountList> {
             Colors.green,
           );
         }
+        // Restore focus to search field after every backend response so that
+        // the rebuild triggered by the state change doesn't steal it.
+        if (state.status == GlAccountStatus.success ||
+            state.status == GlAccountStatus.failure) {
+          WidgetsBinding.instance.addPostFrameCallback(
+            (_) => _searchFocusNode.requestFocus(),
+          );
+        }
       },
       builder: (context, state) {
         // Update loading state
         _isLoading = state.status == GlAccountStatus.loading;
 
-        switch (state.status) {
-          case GlAccountStatus.failure:
-            return Center(
-              child: Text(
-                '${localizations.fetchGlAccountFail} ${state.message}',
-              ),
-            );
-          case GlAccountStatus.success:
-            final glAccounts = state.glAccounts;
+        final glAccounts = state.glAccounts;
 
-            // Restore scroll position
-            if (glAccounts.isNotEmpty && _scrollController.hasClients) {
-              Future.delayed(const Duration(milliseconds: 100), () {
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  if (_scrollController.hasClients) {
-                    _scrollController.jumpTo(currentScroll);
-                  }
-                });
-              });
-            }
-
-            return Column(
-              children: [
-                // Filter bar with search
-                ListFilterBar(
-                  searchHint: localizations.searchGlAccountHint,
-                  searchController: _searchController,
-                  onSearchChanged: (value) {
-                    searchString = value;
-                    _glAccountBloc.add(
-                      GlAccountFetch(
-                        refresh: true,
-                        searchString: value,
-                        limit: limit,
-                        trialBalance: trialBalance,
-                      ),
-                    );
-                  },
-                ),
-                // Main content with StyledDataTable
-                Expanded(
-                  child: Stack(
-                    children: [
-                      RefreshIndicator(
-                        onRefresh: () async => _glAccountBloc.add(
-                          GlAccountFetch(
-                            refresh: true,
-                            limit: limit,
-                            trialBalance: trialBalance,
-                            searchString: searchString,
-                          ),
-                        ),
-                        child: tableView(glAccounts),
-                      ),
-                      Positioned(
-                        right: right,
-                        bottom: bottom,
-                        child: GestureDetector(
-                          onPanUpdate: (details) {
-                            setState(() {
-                              right = right! - details.delta.dx;
-                              bottom -= details.delta.dy;
-                            });
-                          },
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              FloatingActionButton(
-                                heroTag: 'glAccountFiles',
-                                key: const Key("upDownload"),
-                                onPressed: () async {
-                                  await showDialog(
-                                    barrierDismissible: true,
-                                    context: context,
-                                    builder: (BuildContext context) {
-                                      return BlocProvider.value(
-                                        value: _glAccountBloc,
-                                        child: const GlAccountFilesDialog(),
-                                      );
-                                    },
-                                  );
-                                },
-                                tooltip: localizations.glAccountFiles,
-                                child: const Icon(Icons.file_copy),
-                              ),
-                              const SizedBox(height: 10),
-                              FloatingActionButton(
-                                heroTag: "trialBalance",
-                                key: const Key("tb"),
-                                onPressed: () {
-                                  bool refresh = false;
-                                  if (trialBalance == false) {
-                                    trialBalance = true;
-                                    limit = 999;
-                                  } else {
-                                    trialBalance = false;
-                                    refresh = true;
-                                    limit = 20;
-                                  }
-                                  _glAccountBloc.add(
-                                    GlAccountFetch(
-                                      trialBalance: trialBalance,
-                                      limit: limit,
-                                      refresh: refresh,
-                                      searchString: searchString,
-                                    ),
-                                  );
-                                },
-                                tooltip: localizations.trialBalance,
-                                child: Text(
-                                  localizations.tb,
-                                  style: trialBalance
-                                      ? const TextStyle(
-                                          decoration:
-                                              TextDecoration.lineThrough,
-                                        )
-                                      : null,
-                                ),
-                              ),
-                              const SizedBox(height: 10),
-                              FloatingActionButton(
-                                heroTag: "addNew",
-                                key: const Key("addNew"),
-                                onPressed: () async {
-                                  await showDialog(
-                                    barrierDismissible: true,
-                                    context: context,
-                                    builder: (BuildContext context) {
-                                      return BlocProvider.value(
-                                        value: _glAccountBloc,
-                                        child: GlAccountDialog(GlAccount()),
-                                      );
-                                    },
-                                  );
-                                },
-                                tooltip: coreLocalizations.addNew,
-                                child: const Icon(Icons.add),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            );
-          default:
-            return const Center(child: LoadingIndicator());
+        // Restore scroll position when new data arrives
+        if (state.status == GlAccountStatus.success &&
+            glAccounts.isNotEmpty &&
+            _scrollController.hasClients) {
+          Future.delayed(const Duration(milliseconds: 100), () {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (_scrollController.hasClients) {
+                _scrollController.jumpTo(currentScroll);
+              }
+            });
+          });
         }
+
+        // Always render the full layout so the search field stays in the
+        // widget tree during loading (otherwise tests can't find it).
+        return Column(
+          children: [
+            // Filter bar with search
+            ListFilterBar(
+              searchHint: localizations.searchGlAccountHint,
+              searchController: _searchController,
+              focusNode: _searchFocusNode,
+              onSearchChanged: (value) {
+                searchString = value;
+                _glAccountBloc.add(
+                  GlAccountSearchChanged(
+                    searchString: value,
+                    limit: limit,
+                    trialBalance: trialBalance,
+                  ),
+                );
+              },
+            ),
+            if (state.status == GlAccountStatus.failure)
+              Center(
+                child: Text(
+                  '${localizations.fetchGlAccountFail} ${state.message}',
+                ),
+              )
+            else
+              // Main content with StyledDataTable
+              Expanded(
+                child: Stack(
+                  children: [
+                    RefreshIndicator(
+                      onRefresh: () async => _glAccountBloc.add(
+                        GlAccountFetch(
+                          refresh: true,
+                          limit: limit,
+                          trialBalance: trialBalance,
+                          searchString: searchString,
+                        ),
+                      ),
+                      child: tableView(glAccounts),
+                    ),
+                    Positioned(
+                      right: right,
+                      bottom: bottom,
+                      child: GestureDetector(
+                        onPanUpdate: (details) {
+                          setState(() {
+                            right = right! - details.delta.dx;
+                            bottom -= details.delta.dy;
+                          });
+                        },
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            FloatingActionButton(
+                              heroTag: 'glAccountFiles',
+                              key: const Key("upDownload"),
+                              onPressed: () async {
+                                await showDialog(
+                                  barrierDismissible: true,
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return BlocProvider.value(
+                                      value: _glAccountBloc,
+                                      child: const GlAccountFilesDialog(),
+                                    );
+                                  },
+                                );
+                                _searchFocusNode.requestFocus();
+                              },
+                              tooltip: localizations.glAccountFiles,
+                              child: const Icon(Icons.file_copy),
+                            ),
+                            const SizedBox(height: 10),
+                            FloatingActionButton(
+                              heroTag: "trialBalance",
+                              key: const Key("tb"),
+                              onPressed: () {
+                                bool refresh = false;
+                                if (trialBalance == false) {
+                                  trialBalance = true;
+                                  limit = 999;
+                                } else {
+                                  trialBalance = false;
+                                  refresh = true;
+                                  limit = 20;
+                                }
+                                _glAccountBloc.add(
+                                  GlAccountFetch(
+                                    trialBalance: trialBalance,
+                                    limit: limit,
+                                    refresh: refresh,
+                                    searchString: searchString,
+                                  ),
+                                );
+                              },
+                              tooltip: localizations.trialBalance,
+                              child: Text(
+                                localizations.tb,
+                                style: trialBalance
+                                    ? const TextStyle(
+                                        decoration: TextDecoration.lineThrough,
+                                      )
+                                    : null,
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            FloatingActionButton(
+                              heroTag: "addNew",
+                              key: const Key("addNew"),
+                              onPressed: () async {
+                                await showDialog(
+                                  barrierDismissible: true,
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return BlocProvider.value(
+                                      value: _glAccountBloc,
+                                      child: GlAccountDialog(GlAccount()),
+                                    );
+                                  },
+                                );
+                                _searchFocusNode.requestFocus();
+                              },
+                              tooltip: coreLocalizations.addNew,
+                              child: const Icon(Icons.add),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+          ],
+        );
       },
     );
   }
 
   @override
   void dispose() {
+    _searchFocusNode.dispose();
     _scrollController
       ..removeListener(_onScroll)
       ..dispose();

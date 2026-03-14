@@ -7,9 +7,8 @@ import 'page_section_state.dart';
 class PageSectionBloc extends Bloc<PageSectionEvent, PageSectionState> {
   final RestClient restClient;
 
-  PageSectionBloc({
-    required this.restClient,
-  }) : super(const PageSectionState()) {
+  PageSectionBloc({required this.restClient})
+    : super(const PageSectionState()) {
     on<PageSectionLoad>(_onPageSectionLoad);
     on<PageSectionCreate>(_onPageSectionCreate);
     on<PageSectionUpdate>(_onPageSectionUpdate);
@@ -22,24 +21,32 @@ class PageSectionBloc extends Bloc<PageSectionEvent, PageSectionState> {
     Emitter<PageSectionState> emit,
   ) async {
     try {
-      emit(state.copyWith(
-        status: PageSectionStatus.loading,
-        pageId: event.landingPageId,
-      ));
+      emit(
+        state.copyWith(
+          status: PageSectionStatus.loading,
+          pageId: event.landingPageId,
+        ),
+      );
 
-      final response =
-          await restClient.getPageSections(landingPageId: event.landingPageId);
+      final response = await restClient.getPageSections(
+        landingPageId: event.landingPageId,
+      );
 
-      emit(state.copyWith(
-        status: PageSectionStatus.success,
-        sections: response.sections,
-        pageId: event.landingPageId,
-      ));
+      emit(
+        state.copyWith(
+          status: PageSectionStatus.success,
+          sections: response.sections,
+          pageId: event.landingPageId,
+          message: null,
+        ),
+      );
     } catch (error) {
-      emit(state.copyWith(
-        status: PageSectionStatus.failure,
-        message: await getDioError(error),
-      ));
+      emit(
+        state.copyWith(
+          status: PageSectionStatus.failure,
+          message: await getDioError(error),
+        ),
+      );
     }
   }
 
@@ -60,20 +67,25 @@ class PageSectionBloc extends Bloc<PageSectionEvent, PageSectionState> {
 
       final updatedSections = List<LandingPageSection>.from(state.sections)
         ..add(newSection)
-        ..sort((a, b) =>
-            (a.sectionSequence ?? 0).compareTo(b.sectionSequence ?? 0));
+        ..sort(
+          (a, b) => (a.sectionSequence ?? 0).compareTo(b.sectionSequence ?? 0),
+        );
 
-      emit(state.copyWith(
-        status: PageSectionStatus.success,
-        sections: updatedSections,
-        selectedSection: newSection,
-        message: 'Section created successfully',
-      ));
+      emit(
+        state.copyWith(
+          status: PageSectionStatus.success,
+          sections: updatedSections,
+          selectedSection: newSection,
+          message: 'Section created successfully',
+        ),
+      );
     } catch (error) {
-      emit(state.copyWith(
-        status: PageSectionStatus.failure,
-        message: await getDioError(error),
-      ));
+      emit(
+        state.copyWith(
+          status: PageSectionStatus.failure,
+          message: await getDioError(error),
+        ),
+      );
     }
   }
 
@@ -93,26 +105,36 @@ class PageSectionBloc extends Bloc<PageSectionEvent, PageSectionState> {
         sectionSequence: event.sectionSequence,
       );
 
-      final updatedSections = state.sections
-          .map((section) => section.landingPageSectionId ==
-                  updatedSection.landingPageSectionId
-              ? updatedSection
-              : section)
-          .toList()
-        ..sort((a, b) =>
-            (a.sectionSequence ?? 0).compareTo(b.sectionSequence ?? 0));
+      final updatedSections =
+          state.sections
+              .map(
+                (section) =>
+                    section.landingPageSectionId ==
+                        updatedSection.landingPageSectionId
+                    ? updatedSection
+                    : section,
+              )
+              .toList()
+            ..sort(
+              (a, b) =>
+                  (a.sectionSequence ?? 0).compareTo(b.sectionSequence ?? 0),
+            );
 
-      emit(state.copyWith(
-        status: PageSectionStatus.success,
-        sections: updatedSections,
-        selectedSection: updatedSection,
-        message: 'Section updated successfully',
-      ));
+      emit(
+        state.copyWith(
+          status: PageSectionStatus.success,
+          sections: updatedSections,
+          selectedSection: updatedSection,
+          message: 'Section updated successfully',
+        ),
+      );
     } catch (error) {
-      emit(state.copyWith(
-        status: PageSectionStatus.failure,
-        message: await getDioError(error),
-      ));
+      emit(
+        state.copyWith(
+          status: PageSectionStatus.failure,
+          message: await getDioError(error),
+        ),
+      );
     }
   }
 
@@ -130,20 +152,25 @@ class PageSectionBloc extends Bloc<PageSectionEvent, PageSectionState> {
 
       final updatedSections = state.sections
           .where(
-              (section) => section.landingPageSectionId != event.pageSectionId)
+            (section) => section.landingPageSectionId != event.pageSectionId,
+          )
           .toList();
 
-      emit(state.copyWith(
-        status: PageSectionStatus.success,
-        sections: updatedSections,
-        message: 'Section deleted successfully',
-        clearSelectedSection: true,
-      ));
+      emit(
+        state.copyWith(
+          status: PageSectionStatus.success,
+          sections: updatedSections,
+          message: 'Section deleted successfully',
+          clearSelectedSection: true,
+        ),
+      );
     } catch (error) {
-      emit(state.copyWith(
-        status: PageSectionStatus.failure,
-        message: await getDioError(error),
-      ));
+      emit(
+        state.copyWith(
+          status: PageSectionStatus.failure,
+          message: await getDioError(error),
+        ),
+      );
     }
   }
 

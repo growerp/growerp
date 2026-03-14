@@ -32,6 +32,7 @@ class LocationList extends StatefulWidget {
 class LocationListState extends State<LocationList> {
   final _scrollController = ScrollController();
   final _searchController = TextEditingController();
+  final _searchFocusNode = FocusNode();
   late LocationBloc _locationBloc;
   List<Location> locations = const <Location>[];
   late int limit;
@@ -49,6 +50,9 @@ class LocationListState extends State<LocationList> {
       ..add(const LocationFetch(refresh: true));
     _scrollController.addListener(_onScroll);
     bottom = 50;
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _searchFocusNode.requestFocus(),
+    );
   }
 
   @override
@@ -76,8 +80,8 @@ class LocationListState extends State<LocationList> {
         isLoading: _isLoading && locations.isEmpty,
         scrollController: _scrollController,
         rowHeight: isPhone ? 72 : 56,
-        onRowTap: (index) {
-          showDialog(
+        onRowTap: (index) async {
+          await showDialog(
             barrierDismissible: true,
             context: context,
             builder: (BuildContext context) {
@@ -91,6 +95,7 @@ class LocationListState extends State<LocationList> {
               );
             },
           );
+          _searchFocusNode.requestFocus();
         },
       );
     }
@@ -103,9 +108,17 @@ class LocationListState extends State<LocationList> {
             _localizations.failedToFetchLocations(state.message ?? ''),
             Colors.red,
           );
+          WidgetsBinding.instance.addPostFrameCallback(
+            (_) => _searchFocusNode.requestFocus(),
+          );
         }
         if (state.status == LocationStatus.success && state.message != null) {
           HelperFunctions.showMessage(context, state.message!, Colors.green);
+        }
+        if (state.status == LocationStatus.success) {
+          WidgetsBinding.instance.addPostFrameCallback(
+            (_) => _searchFocusNode.requestFocus(),
+          );
         }
       },
       builder: (context, state) {
@@ -135,11 +148,10 @@ class LocationListState extends State<LocationList> {
             ListFilterBar(
               searchHint: 'Search locations...',
               searchController: _searchController,
+              focusNode: _searchFocusNode,
               onSearchChanged: (value) {
                 searchString = value;
-                _locationBloc.add(
-                  LocationFetch(refresh: true, searchString: value),
-                );
+                _locationBloc.add(LocationSearchChanged(searchString: value));
               },
             ),
             // Main content area with StyledDataTable
@@ -174,6 +186,7 @@ class LocationListState extends State<LocationList> {
                                   );
                                 },
                               );
+                              _searchFocusNode.requestFocus();
                             },
                             tooltip: _localizations.addNew,
                             child: const Icon(Icons.add),
@@ -197,6 +210,7 @@ class LocationListState extends State<LocationList> {
       ..removeListener(_onScroll)
       ..dispose();
     _searchController.dispose();
+    _searchFocusNode.dispose();
     super.dispose();
   }
 

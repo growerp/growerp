@@ -72,3 +72,18 @@ class ProductUom extends ProductEvent {
   const ProductUom(this.uomTypes);
   final List<String>? uomTypes;
 }
+
+class ProductSearchChanged extends ProductEvent {
+  const ProductSearchChanged({
+    required this.searchString,
+    this.categoryId = '',
+    this.assetClassId = '',
+    this.companyPartyId = '',
+    this.limit = 20,
+  });
+  final String searchString;
+  final String categoryId;
+  final String assetClassId;
+  final String companyPartyId;
+  final int limit;
+}

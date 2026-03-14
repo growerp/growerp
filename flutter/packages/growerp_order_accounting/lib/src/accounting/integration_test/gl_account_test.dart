@@ -65,7 +65,11 @@ class GlAccountTest {
           glAccountId: test.glAccounts[x].glAccountId,
         );
       }
-      await enterGlAccountData(tester, newGlAccounts);
+      await enterGlAccountData(
+        tester,
+        newGlAccounts,
+        searchAccounts: test.glAccounts,
+      );
       await PersistFunctions.persistTest(
         test.copyWith(glAccounts: newGlAccounts),
       );
@@ -97,23 +101,21 @@ class GlAccountTest {
 
   static Future<void> enterGlAccountData(
     WidgetTester tester,
-    List<GlAccount> glAccounts,
-  ) async {
-    for (GlAccount glAccount in glAccounts) {
+    List<GlAccount> glAccounts, {
+    List<GlAccount>? searchAccounts,
+  }) async {
+    for (int i = 0; i < glAccounts.length; i++) {
+      final GlAccount glAccount = glAccounts[i];
+      // When updating, search by the OLD accountCode (before the change).
       if (glAccount.glAccountId == null) {
         await CommonTest.tapByKey(tester, 'addNew');
       } else {
-        await CommonTest.enterText(
+        await CommonTest.doNewSearch(
           tester,
-          'searchField',
-          glAccount.glAccountId!,
+          searchString: glAccount.glAccountId!,
         );
-        await tester.pumpAndSettle(
-          const Duration(seconds: CommonTest.waitTime),
-        );
-        await CommonTest.tapByKey(tester, 'code0');
         expect(
-          CommonTest.getTextField('topHeader').split('#')[1],
+          CommonTest.getTextField('topHeader').split('#')[1].trim(),
           glAccount.glAccountId,
         );
       }
@@ -152,23 +154,10 @@ class GlAccountTest {
   ) async {
     List<GlAccount> newGlAccounts = [];
     for (GlAccount glAccount in glAccounts) {
-      await CommonTest.enterText(tester, 'searchField', glAccount.accountCode!);
-      await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
-      expect(CommonTest.getTextField('code0'), equals(glAccount.accountCode));
-      expect(CommonTest.getTextField('name0'), equals(glAccount.accountName));
-      if (!CommonTest.isPhone()) {
-        expect(
-          CommonTest.getTextField('class0'),
-          equals(glAccount.accountClass!.description),
-        );
-        if (glAccount.accountType != null) {
-          expect(
-            CommonTest.getTextField('type0'),
-            equals(glAccount.accountType?.description!),
-          );
-        }
-      }
-      await CommonTest.tapByKey(tester, 'name0');
+      await CommonTest.doNewSearch(
+        tester,
+        searchString: glAccount.accountCode!,
+      );
       expect(find.byKey(const Key('GlAccountDialog')), findsOneWidget);
       var id = CommonTest.getTextField('topHeader').split('#')[1];
       expect(
@@ -192,7 +181,7 @@ class GlAccountTest {
       newGlAccounts.add(glAccount.copyWith(glAccountId: id));
       await CommonTest.tapByKey(tester, 'cancel');
     }
-    await CommonTest.enterText(tester, 'searchField', '');
+    await CommonTest.tapByKey(tester, 'clearSearch');
     await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
     return newGlAccounts;
   }

@@ -43,3 +43,16 @@ class SubscriptionDelete extends SubscriptionEvent {
   final Subscription subscription;
   const SubscriptionDelete(this.subscription);
 }
+
+class SubscriptionSearchChanged extends SubscriptionEvent {
+  const SubscriptionSearchChanged({
+    required this.searchString,
+    this.growerp = false,
+    this.limit = 20,
+  });
+  final String searchString;
+  final bool growerp;
+  final int limit;
+  @override
+  List<Object> get props => [searchString, growerp];
+}
