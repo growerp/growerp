@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "jcodemunch": {
+      "type": "stdio",
+      "command": "/home/hans/.local/bin/jcodemunch-mcp",
+      "args": [],
+      "env": {}
+    }
+  }
+}

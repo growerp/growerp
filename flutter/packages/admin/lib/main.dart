@@ -182,10 +182,19 @@ class _AdminAppState extends State<AdminApp> {
             );
           } else {
             // Loading or error, show splash screen using shared component
+            // The wildcard route ensures deep-link paths (e.g. #/acct-ledger)
+            // are accepted and preserved while the menu config loads.
             router = GoRouter(
               routes: [
                 GoRoute(
                   path: '/',
+                  builder: (context, state) => AppSplashScreen.simple(
+                    appTitle: 'GrowERP Administrator',
+                    appId: 'admin',
+                  ),
+                ),
+                GoRoute(
+                  path: '/:path',
                   builder: (context, state) => AppSplashScreen.simple(
                     appTitle: 'GrowERP Administrator',
                     appId: 'admin',

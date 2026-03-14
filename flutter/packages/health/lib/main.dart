@@ -147,10 +147,19 @@ class _HealthAppState extends State<HealthApp> {
             );
           } else {
             // Loading or error, show splash screen using shared component
+            // The wildcard route ensures deep-link paths are accepted and
+            // preserved while the menu config loads.
             router = GoRouter(
               routes: [
                 GoRoute(
                   path: '/',
+                  builder: (context, routeState) => AppSplashScreen.simple(
+                    appTitle: 'GrowERP Health',
+                    appId: 'health',
+                  ),
+                ),
+                GoRoute(
+                  path: '/:path',
                   builder: (context, routeState) => AppSplashScreen.simple(
                     appTitle: 'GrowERP Health',
                     appId: 'health',
