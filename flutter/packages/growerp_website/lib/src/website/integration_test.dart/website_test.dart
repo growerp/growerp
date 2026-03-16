@@ -17,6 +17,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:growerp_core/test_data.dart';
 import 'package:growerp_models/growerp_models.dart';
+import 'package:dio/dio.dart';
 
 class WebsiteTest {
   // used in the admin app
@@ -29,7 +30,7 @@ class WebsiteTest {
     await CommonTest.drag(tester);
     await CommonTest.tapByKey(
       tester,
-      'updateWebsite',
+      'modifyWebsiteInfo',
       seconds: CommonTest.waitTime,
     );
     await CommonTest.waitForSnackbarToGo(tester);
@@ -46,7 +47,7 @@ class WebsiteTest {
     await CommonTest.drag(tester);
     await CommonTest.tapByKey(
       tester,
-      'updateWebsite',
+      'modifyWebsiteInfo',
       seconds: CommonTest.waitTime,
     );
     await CommonTest.waitForSnackbarToGo(tester);
@@ -59,7 +60,7 @@ class WebsiteTest {
   static Future<void> updateTitle(WidgetTester tester) async {
     await CommonTest.enterText(tester, 'title', 'Test Company');
     await CommonTest.drag(tester);
-    await CommonTest.tapByKey(tester, 'updateWebsite', seconds: 2);
+    await CommonTest.tapByKey(tester, 'modifyWebsiteInfo', seconds: 2);
     expect(CommonTest.getTextFormField('title'), equals('Test Company'));
   }
 
@@ -84,6 +85,90 @@ class WebsiteTest {
     await CommonTest.enterText(tester, 'mdInput', '# TestingtextNew');
     await CommonTest.tapByKey(tester, 'update', seconds: CommonTest.waitTime);
     expect(CommonTest.getTextField("TestingtextNew"), equals('TestingtextNew'));
+  }
+
+  /// Verifies that the content updated in [updateTextSection] is also served by
+  /// the public store website. This specifically tests the fix for the bug where
+  /// [WikiPage.publishedVersionName] was not updated after a content save, causing
+  /// the public website to keep serving the original content version.
+  ///
+  /// Calls /content/{path} which goes through get#PublishedWikiPageText —
+  /// the Moqui service that uses publishedVersionName to look up content.
+  /// (The PopRestStore store.xml is mounted at the webroot with no-sub-path="true",
+  /// so the content screen is at /content/... not /store/content/...)
+  ///
+  /// [restClient] must be the authenticated client already used by the test.
+  static Future<void> checkTextSectionPubliclyUpdated(
+    WidgetTester tester,
+    RestClient restClient, {
+    String expectedText = 'TestingtextNew',
+  }) async {
+    // Use the admin API to get the website, which gives us:
+    //  • the content path (wikiPageId) for the updated page
+    //  • the configured hostName used for public store URL resolution
+    // get#Website reads directly from DbResourceFile so it always returns the
+    // latest content regardless of publishedVersionName.
+    final Website website = await restClient.getWebsite();
+
+    // The getWebsite() response uses text:'x' as a marker for pages that have
+    // text content — the full text is not returned in the list. Match by title,
+    // which is derived from the leading markdown heading
+    // (e.g. "# TestingtextNew" → title "TestingtextNew").
+    final Content updatedContent = website.websiteContent.firstWhere(
+      (c) => c.title == expectedText,
+      orElse: () => throw Exception(
+        'Expected content with title "$expectedText" not found in '
+        'websiteContent list (available: '
+        '${website.websiteContent.map((c) => c.title).join(', ')})',
+      ),
+    );
+
+    // The stored hostName is e.g. "testingurl.localhost:8080".
+    // Moqui's StoreServices.get#StoreInfo resolves the ProductStore by matching
+    // the request Host header against the stored PsstHostname setting value.
+    // It uses getHostName(false) — which strips the port — and then appends
+    // :8080 when the hostname contains 'localhost'. So passing the full stored
+    // hostName as the Host header produces the correct match.
+    final String storeHost = website.hostName;
+    if (storeHost.isEmpty) {
+      throw Exception(
+        'website.hostName is empty — cannot construct public URL',
+      );
+    }
+
+    // Derive the correct backend address using buildDioClient — this handles
+    // Android emulator translation (localhost → 10.0.2.2) and any
+    // --dart-define=BACKEND_PORT override automatically.
+    final Dio configuredDio = await buildDioClient();
+    final String baseUrl = configuredDio.options.baseUrl;
+
+    // Plain (unauthenticated) Dio — simulates a public browser request.
+    final dio = Dio(
+      BaseOptions(baseUrl: baseUrl, responseType: ResponseType.plain),
+    );
+
+    // GET the public content URL.
+    // The route /content/{path} calls get#PublishedWikiPageText which
+    // reads WikiPage.publishedVersionName. Before the backend fix this always
+    // served the original '01' version; after the fix it serves the latest.
+    final response = await dio.get(
+      '/content/${updatedContent.path}',
+      options: Options(
+        headers: {'Host': storeHost},
+        validateStatus: (status) => status != null,
+      ),
+    );
+
+    final body = response.data as String;
+    expect(
+      body.contains(expectedText),
+      isTrue,
+      reason:
+          'Public website at /content/${updatedContent.path} '
+          '(Host: $storeHost) should contain "$expectedText" after update, '
+          'got HTTP ${response.statusCode}: '
+          '${body.length > 300 ? '${body.substring(0, 300)}…' : body}',
+    );
   }
 
   static Future<void> updateImages(WidgetTester tester) async {

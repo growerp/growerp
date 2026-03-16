@@ -634,6 +634,24 @@ along with this software (see the LICENSE.md file). If not, see
                                         from="ec.resource.getLocationReference(location)" />
                                     <if condition="content.text != docRr.getText()">
                                         <script>docRr.putText(content.text)</script>
+                                        <!-- Update WikiPage.publishedVersionName to the new version
+                                        so public website serves updated content -->
+                                        <script>
+                                            def dbres = ec.entity.find('moqui.resource.DbResource')
+                                                .condition('parentResourceId', topResourceContent[0].resourceId)
+                                                .condition('filename', content.path + '.md.ftl')
+                                                .useCache(false).one()
+                                            if (dbres) {
+                                                def dbrf = ec.entity.find('moqui.resource.DbResourceFile')
+                                                    .condition('resourceId', dbres.resourceId)
+                                                    .useCache(false).one()
+                                                if (dbrf) newPublishedVersionName = dbrf.versionName
+                                            }
+                                        </script>
+                                        <if condition="newPublishedVersionName">
+                                            <service-call name="update#moqui.resource.wiki.WikiPage"
+                                                in-map="[wikiPageId: pages[0].wikiPageId, publishedVersionName: newPublishedVersionName]" />
+                                        </if>
                                     </if>
                                 </else>
                             </if>

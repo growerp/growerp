@@ -25,6 +25,7 @@ import 'package:responsive_framework/responsive_framework.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:from_css_color/from_css_color.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 import '../../../growerp_website.dart';
@@ -56,7 +57,6 @@ class WebsiteDialogState extends State<WebsiteDialog> {
   final _linkedinController = TextEditingController();
   final _substackController = TextEditingController();
   final _websiteFormKey1 = GlobalKey<FormState>();
-  final _websiteFormKey5 = GlobalKey<FormState>();
   ScrollController myScrollController = ScrollController();
   late String classificationId;
   late RestClient restClient;
@@ -524,6 +524,55 @@ class WebsiteDialogState extends State<WebsiteDialog> {
                       labelText: _localizations.websiteStripeApiKey,
                     ),
                   ),
+                  const SizedBox(height: 8),
+                  TextFormField(
+                    key: const Key('twitterUrl'),
+                    controller: _twitterController,
+                    decoration: const InputDecoration(
+                      labelText: 'Twitter / X URL',
+                      hintText: 'https://twitter.com/yourhandle',
+                    ),
+                  ),
+                  TextFormField(
+                    key: const Key('facebookUrl'),
+                    controller: _facebookController,
+                    decoration: const InputDecoration(
+                      labelText: 'Facebook URL',
+                      hintText: 'https://facebook.com/yourpage',
+                    ),
+                  ),
+                  TextFormField(
+                    key: const Key('instagramUrl'),
+                    controller: _instagramController,
+                    decoration: const InputDecoration(
+                      labelText: 'Instagram URL',
+                      hintText: 'https://instagram.com/yourhandle',
+                    ),
+                  ),
+                  TextFormField(
+                    key: const Key('youtubeUrl'),
+                    controller: _youtubeController,
+                    decoration: const InputDecoration(
+                      labelText: 'YouTube URL',
+                      hintText: 'https://youtube.com/yourchannel',
+                    ),
+                  ),
+                  TextFormField(
+                    key: const Key('linkedinUrl'),
+                    controller: _linkedinController,
+                    decoration: const InputDecoration(
+                      labelText: 'LinkedIn URL',
+                      hintText: 'https://linkedin.com/company/yourcompany',
+                    ),
+                  ),
+                  TextFormField(
+                    key: const Key('substackUrl'),
+                    controller: _substackController,
+                    decoration: const InputDecoration(
+                      labelText: 'Substack URL',
+                      hintText: 'https://yourname.substack.com',
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -538,96 +587,122 @@ class WebsiteDialogState extends State<WebsiteDialog> {
             const SizedBox(height: 8),
             Wrap(spacing: 10, children: colorCatButtons),
             const SizedBox(height: 16),
-            Text(
-              _localizations.websiteObsidian,
-              style: TextStyle(
-                fontSize: 12,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    key: const Key('obsTitle'),
-                    controller: _obsidianController,
-                    decoration: InputDecoration(
-                      labelText: _localizations.title,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                OutlinedButton(
-                  key: const Key('upload'),
-                  child: Text(_localizations.upload),
-                  onPressed: () async {
-                    FilePickerResult? result;
-                    String? path;
-                    // Note: Using FileType.any because file_picker 10.1.2 has a
-                    // known bug where FileType.custom with allowedExtensions
-                    // prevents file selection. We validate the extension manually.
-                    result = await FilePicker.platform.pickFiles(
-                      type: FileType.any,
-                      withData:
-                          true, // Ensure bytes are available on all platforms
-                    );
-
-                    // Cancelled by user
-                    if (result == null || result.files.isEmpty) {
-                      return;
+            Align(
+              alignment: Alignment.centerRight,
+              child: OutlinedButton(
+                key: const Key('modifyWebsiteInfo'),
+                child: Text(_localizations.update),
+                onPressed: () {
+                  if (_websiteFormKey1.currentState!.validate()) {
+                    Map updatedColor = {};
+                    if (state.website!.colorJson.isNotEmpty) {
+                      updatedColor = Map.from(
+                        jsonDecode(state.website!.colorJson) as Map,
+                      );
                     }
-
-                    // Validate that the selected file is a .zip file
-                    if (!result.files.first.name.toLowerCase().endsWith(
-                      '.zip',
-                    )) {
-                      if (mounted) {
-                        HelperFunctions.showMessage(
-                          context,
-                          'Please select a .zip file',
-                          Colors.red,
-                        );
-                      }
-                      return;
-                    }
-
-                    // On desktop platforms, get the path from the file
-                    if (!foundation.kIsWeb) {
-                      path = result.files.first.path;
-                    }
-
+                    updatedColor['TwitterUrl'] = _twitterController.text;
+                    updatedColor['FacebookUrl'] = _facebookController.text;
+                    updatedColor['InstagramUrl'] = _instagramController.text;
+                    updatedColor['YouTubeUrl'] = _youtubeController.text;
+                    updatedColor['LinkedInUrl'] = _linkedinController.text;
+                    updatedColor['SubstackUrl'] = _substackController.text;
                     _websiteBloc.add(
-                      WebsiteObsUpload(
-                        Obsidian(
-                          title: _obsidianController.text,
-                          zip: result.files.first.bytes,
+                      WebsiteUpdate(
+                        Website(
+                          id: state.website!.id,
+                          hostName: _urlController.text,
+                          title: _titleController.text,
+                          measurementId: _measurementIdController.text,
+                          stripeApiKey: _stripeApiKeyController.text,
+                          colorJson: jsonEncode(updatedColor),
                         ),
-                        path,
                       ),
                     );
-                  },
-                ),
-                const SizedBox(width: 10),
-                Visibility(
-                  visible: _obsidianController.text.isNotEmpty,
-                  child: OutlinedButton(
-                    key: const Key('obsidianDelete'),
-                    style: ButtonStyle(
-                      backgroundColor: WidgetStateProperty.all(Colors.red),
+                  }
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+      GroupingDecorator(
+        useCardStyle: false,
+        labelText: _localizations.websiteObsidian,
+        child: Row(
+          children: [
+            Expanded(
+              child: TextField(
+                key: const Key('obsTitle'),
+                controller: _obsidianController,
+                decoration: InputDecoration(labelText: _localizations.title),
+              ),
+            ),
+            const SizedBox(width: 10),
+            OutlinedButton(
+              key: const Key('upload'),
+              child: Text(_localizations.upload),
+              onPressed: () async {
+                FilePickerResult? result;
+                String? path;
+                // Note: Using FileType.any because file_picker 10.1.2 has a
+                // known bug where FileType.custom with allowedExtensions
+                // prevents file selection. We validate the extension manually.
+                result = await FilePicker.platform.pickFiles(
+                  type: FileType.any,
+                  withData: true, // Ensure bytes are available on all platforms
+                );
+
+                // Cancelled by user
+                if (result == null || result.files.isEmpty) {
+                  return;
+                }
+
+                // Validate that the selected file is a .zip file
+                if (!result.files.first.name.toLowerCase().endsWith('.zip')) {
+                  if (mounted) {
+                    HelperFunctions.showMessage(
+                      context,
+                      'Please select a .zip file',
+                      Colors.red,
+                    );
+                  }
+                  return;
+                }
+
+                // On desktop platforms, get the path from the file
+                if (!foundation.kIsWeb) {
+                  path = result.files.first.path;
+                }
+
+                _websiteBloc.add(
+                  WebsiteObsUpload(
+                    Obsidian(
+                      title: _obsidianController.text,
+                      zip: result.files.first.bytes,
                     ),
-                    onPressed: () async {
-                      _websiteBloc.add(
-                        WebsiteObsUpload(
-                          Obsidian(title: _obsidianController.text),
-                          null,
-                        ),
-                      );
-                    },
-                    child: Text(_localizations.deleteButton),
+                    path,
                   ),
+                );
+              },
+            ),
+            const SizedBox(width: 10),
+            Visibility(
+              visible: _obsidianController.text.isNotEmpty,
+              child: OutlinedButton(
+                key: const Key('obsidianDelete'),
+                style: ButtonStyle(
+                  backgroundColor: WidgetStateProperty.all(Colors.red),
                 ),
-              ],
+                onPressed: () async {
+                  _websiteBloc.add(
+                    WebsiteObsUpload(
+                      Obsidian(title: _obsidianController.text),
+                      null,
+                    ),
+                  );
+                },
+                child: Text(_localizations.deleteButton),
+              ),
             ),
           ],
         ),
@@ -1039,139 +1114,21 @@ class WebsiteDialogState extends State<WebsiteDialog> {
           }
         },
       ),
-      Form(
-        key: _websiteFormKey5,
-        child: GroupingDecorator(
-          useCardStyle: false,
-          labelText: 'Follow Us Links',
-          child: Column(
-            children: [
-              TextFormField(
-                key: const Key('twitterUrl'),
-                controller: _twitterController,
-                decoration: const InputDecoration(
-                  labelText: 'Twitter / X URL',
-                  hintText: 'https://twitter.com/yourhandle',
-                ),
-              ),
-              TextFormField(
-                key: const Key('facebookUrl'),
-                controller: _facebookController,
-                decoration: const InputDecoration(
-                  labelText: 'Facebook URL',
-                  hintText: 'https://facebook.com/yourpage',
-                ),
-              ),
-              TextFormField(
-                key: const Key('instagramUrl'),
-                controller: _instagramController,
-                decoration: const InputDecoration(
-                  labelText: 'Instagram URL',
-                  hintText: 'https://instagram.com/yourhandle',
-                ),
-              ),
-              TextFormField(
-                key: const Key('youtubeUrl'),
-                controller: _youtubeController,
-                decoration: const InputDecoration(
-                  labelText: 'YouTube URL',
-                  hintText: 'https://youtube.com/yourchannel',
-                ),
-              ),
-              TextFormField(
-                key: const Key('linkedinUrl'),
-                controller: _linkedinController,
-                decoration: const InputDecoration(
-                  labelText: 'LinkedIn URL',
-                  hintText: 'https://linkedin.com/company/yourcompany',
-                ),
-              ),
-              TextFormField(
-                key: const Key('substackUrl'),
-                controller: _substackController,
-                decoration: const InputDecoration(
-                  labelText: 'Substack URL',
-                  hintText: 'https://yourname.substack.com',
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
     ];
 
-    List<Widget> rows = [];
-    if (!ResponsiveBreakpoints.of(context).isMobile) {
-      // change list in two columns
-      for (var i = 0; i < widgets.length; i++) {
-        rows.add(
-          Row(
-            children: [
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.all(10),
-                  child: widgets[i++],
-                ),
-              ),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.all(10),
-                  child: i < widgets.length ? widgets[i] : Container(),
-                ),
-              ),
-            ],
-          ),
-        );
-      }
-    }
+    final isMobile = ResponsiveBreakpoints.of(context).isMobile;
 
-    List<Widget> column = [];
-    for (var i = 0; i < widgets.length; i++) {
-      column.add(Padding(padding: const EdgeInsets.all(10), child: widgets[i]));
-    }
-
-    return Center(
-      child: SingleChildScrollView(
-        key: const Key('listView'),
-        child: Column(
-          children: [
-            Column(children: (rows.isEmpty ? column : rows)),
-            const SizedBox(height: 20),
-            OutlinedButton(
-              key: const Key('updateWebsite'),
-              child: Text(_localizations.update),
-              onPressed: () {
-                if (_websiteFormKey1.currentState!.validate()) {
-                  Map updatedColor = {};
-                  if (state.website!.colorJson.isNotEmpty) {
-                    updatedColor = Map.from(
-                      jsonDecode(state.website!.colorJson) as Map,
-                    );
-                  }
-                  updatedColor['TwitterUrl'] = _twitterController.text;
-                  updatedColor['FacebookUrl'] = _facebookController.text;
-                  updatedColor['InstagramUrl'] = _instagramController.text;
-                  updatedColor['YouTubeUrl'] = _youtubeController.text;
-                  updatedColor['LinkedInUrl'] = _linkedinController.text;
-                  updatedColor['SubstackUrl'] = _substackController.text;
-                  _websiteBloc.add(
-                    WebsiteUpdate(
-                      Website(
-                        id: state.website!.id,
-                        hostName: _urlController.text,
-                        title: _titleController.text,
-                        measurementId: _measurementIdController.text,
-                        stripeApiKey: _stripeApiKeyController.text,
-                        colorJson: jsonEncode(updatedColor),
-                      ),
-                    ),
-                  );
-                }
-              },
-            ),
-            const SizedBox(height: 20),
-          ],
-        ),
+    return SingleChildScrollView(
+      key: const Key('listView'),
+      padding: const EdgeInsets.all(10),
+      child: MasonryGridView.count(
+        crossAxisCount: isMobile ? 1 : 2,
+        mainAxisSpacing: 10,
+        crossAxisSpacing: 10,
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: widgets.length,
+        itemBuilder: (context, index) => widgets[index],
       ),
     );
   }
