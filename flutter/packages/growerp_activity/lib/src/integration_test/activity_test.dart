@@ -122,7 +122,9 @@ class ActivityTest {
     int count = test.activities.length;
     // Count visible rows via delete-button keys
     int visibleCount = 0;
-    while (tester.any(find.byKey(Key('delete$visibleCount')))) visibleCount++;
+    while (tester.any(find.byKey(Key('delete$visibleCount')))) {
+      visibleCount++;
+    }
     expect(visibleCount, count);
     await CommonTest.tapByKey(
       tester,
@@ -132,7 +134,9 @@ class ActivityTest {
     await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
     // Verify one fewer row
     int newCount = 0;
-    while (tester.any(find.byKey(Key('delete$newCount')))) newCount++;
+    while (tester.any(find.byKey(Key('delete$newCount')))) {
+      newCount++;
+    }
     expect(newCount, count - 1);
     await PersistFunctions.persistTest(
       test.copyWith(

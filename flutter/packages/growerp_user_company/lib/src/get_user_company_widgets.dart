@@ -46,7 +46,7 @@ Map<String, GrowerpWidgetBuilder> getUserCompanyWidgets() {
 
     // Company dialogs
     'ShowCompanyDialog': (args) => ShowCompanyDialog(
-      Company(role: parseRole(args?['role'])),
+      args?['company'] as Company? ?? Company(role: parseRole(args?['role'])),
       dialog: false,
     ),
 
@@ -136,7 +136,7 @@ List<WidgetMetadata> getUserCompanyWidgetsWithMetadata() {
       iconName: 'business',
       keywords: ['company', 'details', 'info'],
       builder: (args) => ShowCompanyDialog(
-        Company(role: parseRole(args?['role'])),
+        args?['company'] as Company? ?? Company(role: parseRole(args?['role'])),
         dialog: false,
       ),
     ),

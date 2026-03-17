@@ -235,6 +235,17 @@ GoRouter _buildStaticRouter(StaticRouterConfig config) {
           },
           routes: [...generateRoutes(), ...config.shellRoutes],
         ),
+      // Company dialog route - full screen, no shell wrapper
+      GoRoute(
+        path: '/company',
+        builder: (context, state) {
+          final extra = state.extra;
+          return WidgetRegistry.getWidget('ShowCompanyDialog', {
+            'company': extra,
+          });
+        },
+      ),
+
       // Top-level routes without the shell wrapper (e.g. dialog-style screens)
       ...config.additionalRoutes,
     ],

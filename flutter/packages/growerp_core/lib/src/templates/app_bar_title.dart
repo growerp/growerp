@@ -14,6 +14,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
@@ -26,7 +27,7 @@ Widget appBarTitle(BuildContext context, String title, bool isPhone) {
       InkWell(
         key: const Key('tapCompany'),
         onTap: () {
-          Navigator.pushNamed(context, '/company', arguments: auth?.company);
+          context.push('/company', extra: auth?.company);
         },
         child: Container(
           width: 40,

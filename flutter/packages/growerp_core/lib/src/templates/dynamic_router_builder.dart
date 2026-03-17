@@ -205,6 +205,16 @@ GoRouter createDynamicAppRouter(
           routes: _generateRoutes(mainConfig, config.widgetLoader),
         ),
 
+      // Company dialog route - full screen, no shell wrapper
+      GoRoute(
+        path: '/company',
+        builder: (context, state) {
+          Map<String, dynamic> args = {};
+          if (state.extra != null) args['company'] = state.extra;
+          return config.widgetLoader('ShowCompanyDialog', args);
+        },
+      ),
+
       // FinDoc dialog route - full screen, no shell wrapper
       GoRoute(
         path: '/findoc',
