@@ -327,3 +327,13 @@ abstract class WorkOrders with _$WorkOrders {
   factory WorkOrders.fromJson(Map<String, dynamic> json) =>
       _$WorkOrdersFromJson(json);
 }
+
+@freezed
+abstract class EmailTemplates with _$EmailTemplates {
+  factory EmailTemplates({@Default([]) List<EmailTemplate> emailTemplates}) =
+      _EmailTemplates;
+  EmailTemplates._();
+
+  factory EmailTemplates.fromJson(Map<String, dynamic> json) =>
+      _$EmailTemplatesFromJson(json);
+}

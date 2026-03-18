@@ -28,6 +28,7 @@ export 'asset_model.dart';
 export 'bom_item_model.dart';
 export 'work_order_model.dart';
 export 'application_model.dart';
+export 'email_template_model.dart';
 export 'time_entry_model.dart';
 export 'chat_message_model.dart';
 export 'chat_room_model.dart';

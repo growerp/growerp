@@ -27,6 +27,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:growerp_activity/growerp_activity.dart';
 
 import 'src/application/application.dart';
+import 'src/email_template/email_template.dart';
 import 'views/support_dashboard.dart';
 //webactivate  import 'package:web/web.dart' as web;
 
@@ -203,6 +204,7 @@ List<Map<String, GrowerpWidgetBuilder>> supportWidgetRegistrations = [
     'AboutForm': (args) => const AboutForm(),
     'ApplicationList': (args) => const ApplicationList(),
     'RestRequestList': (args) => const RestRequestList(),
+    'EmailTemplateList': (args) => const EmailTemplateList(),
   },
 ];
 
@@ -217,6 +219,9 @@ List<BlocProvider> getSupportBlocProviders(
     ),
     BlocProvider<RestRequestBloc>(
       create: (context) => RestRequestBloc(restClient),
+    ),
+    BlocProvider<EmailTemplateBloc>(
+      create: (context) => EmailTemplateBloc(restClient),
     ),
   ];
 }

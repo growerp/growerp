@@ -418,7 +418,9 @@ along with this software (see the LICENSE.md file). If not, see
         title="Owners" route="/owners" iconName="business" widgetName="CompanyListMainOnly" sequenceNum="25"/>
     <growerp.menu.MenuItem menuItemId="SUPPORT_REST_REQUESTS" menuConfigurationId="SUPPORT_DEFAULT"
         title="REST Requests" route="/rest-requests" iconName="http" widgetName="RestRequestList" sequenceNum="30"/>
-    <growerp.menu.MenuItem menuItemId="SUPPORT_ABOUT" menuConfigurationId="SUPPORT_DEFAULT" 
+    <growerp.menu.MenuItem menuItemId="SUPPORT_EMAIL_TEMPLATES" menuConfigurationId="SUPPORT_DEFAULT"
+        title="Email Templates" route="/email-templates" iconName="email" widgetName="EmailTemplateList" sequenceNum="35"/>
+    <growerp.menu.MenuItem menuItemId="SUPPORT_ABOUT" menuConfigurationId="SUPPORT_DEFAULT"
         title="About" route="/about" iconName="info" widgetName="AboutForm" sequenceNum="40"/>
 
     <!-- ====================== ELEARNER_DEFAULT (Customer/Student menu) ====================== -->

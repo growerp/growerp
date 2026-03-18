@@ -1371,5 +1371,163 @@ along with this software (see the LICENSE.md file). If not, see
         </actions>
     </service>
 
+    <service verb="get" noun="EmailTemplates">
+        <description>Get a list of email templates, optionally filtered by search string</description>
+        <in-parameters>
+            <parameter name="searchString" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="emailTemplates" type="List">
+                <parameter name="emailTemplate" type="Map">
+                    <parameter name="emailTemplateId" />
+                    <parameter name="description" />
+                    <parameter name="emailTypeEnumId" />
+                    <parameter name="fromAddress" />
+                    <parameter name="fromName" />
+                    <parameter name="subject" />
+                    <parameter name="bodyScreenLocation" />
+                    <parameter name="bodyContent" />
+                    <parameter name="replyToAddresses" />
+                    <parameter name="ccAddresses" />
+                    <parameter name="bccAddresses" />
+                </parameter>
+            </parameter>
+        </out-parameters>
+        <actions>
+            <entity-find entity-name="moqui.basic.email.EmailTemplate" list="rawTemplates">
+                <econdition field-name="emailServerId" value="SYSTEM" />
+                <order-by field-name="emailTemplateId" />
+            </entity-find>
+            <if condition="searchString">
+                <set field="lc" from="searchString.toLowerCase()" />
+                <set field="rawTemplates" from="rawTemplates.findAll { t ->
+                    (t.emailTemplateId?.toLowerCase()?.contains(lc) ?: false) ||
+                    (t.description?.toLowerCase()?.contains(lc) ?: false)
+                }" />
+            </if>
+            <set field="emailTemplates" from="[]" />
+            <iterate list="rawTemplates" entry="t">
+                <script>
+                    def bodyContent = null
+                    def dbLocation = "dbresource://growerp/email/${t.emailTemplateId}.html"
+                    try { bodyContent = ec.resource.getLocationText(dbLocation, false) } catch (Exception e) {}
+                    emailTemplates.add([
+                        emailTemplateId: t.emailTemplateId,
+                        description: t.description,
+                        emailTypeEnumId: t.emailTypeEnumId,
+                        fromAddress: t.fromAddress,
+                        fromName: t.fromName,
+                        subject: t.subject,
+                        bodyScreenLocation: t.bodyScreenLocation,
+                        bodyContent: bodyContent,
+                        replyToAddresses: t.replyToAddresses,
+                        ccAddresses: t.ccAddresses,
+                        bccAddresses: t.bccAddresses
+                    ])
+                </script>
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="update" noun="EmailTemplate">
+        <description>Create or update an email template. If bodyContent is provided it is stored in
+            dbresource://growerp/email/{emailTemplateId}.html and bodyScreenLocation is updated accordingly.</description>
+        <in-parameters>
+            <parameter name="emailTemplate" required="true" type="Map">
+                <parameter name="emailTemplateId" required="true" />
+                <parameter name="description" />
+                <parameter name="emailTypeEnumId" />
+                <parameter name="fromAddress" />
+                <parameter name="fromName" />
+                <parameter name="subject" />
+                <parameter name="bodyContent" />
+                <parameter name="replyToAddresses" />
+                <parameter name="ccAddresses" />
+                <parameter name="bccAddresses" />
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="emailTemplate" type="Map">
+                <parameter name="emailTemplateId" />
+                <parameter name="description" />
+                <parameter name="emailTypeEnumId" />
+                <parameter name="fromAddress" />
+                <parameter name="fromName" />
+                <parameter name="subject" />
+                <parameter name="bodyScreenLocation" />
+                <parameter name="bodyContent" />
+                <parameter name="replyToAddresses" />
+                <parameter name="ccAddresses" />
+                <parameter name="bccAddresses" />
+            </parameter>
+        </out-parameters>
+        <actions>
+            <set field="dbLocation" value="dbresource://growerp/email/${emailTemplate.emailTemplateId}.html" />
+            <if condition="emailTemplate.bodyContent != null">
+                <set field="docRr" from="ec.resource.getLocationReference(dbLocation)" />
+                <script>docRr.putText(emailTemplate.bodyContent)</script>
+            </if>
+            <entity-find-one entity-name="moqui.basic.email.EmailTemplate" value-field="existing">
+                <field-map field-name="emailTemplateId" from="emailTemplate.emailTemplateId" />
+            </entity-find-one>
+            <if condition="existing">
+                <set field="existing.description" from="emailTemplate.description" />
+                <set field="existing.emailTypeEnumId" from="emailTemplate.emailTypeEnumId" />
+                <set field="existing.fromAddress" from="emailTemplate.fromAddress" />
+                <set field="existing.fromName" from="emailTemplate.fromName" />
+                <set field="existing.subject" from="emailTemplate.subject" />
+                <set field="existing.bodyScreenLocation" from="dbLocation" />
+                <set field="existing.replyToAddresses" from="emailTemplate.replyToAddresses" />
+                <set field="existing.ccAddresses" from="emailTemplate.ccAddresses" />
+                <set field="existing.bccAddresses" from="emailTemplate.bccAddresses" />
+                <entity-update value-field="existing" />
+                <else>
+                    <service-call name="create#moqui.basic.email.EmailTemplate"
+                        in-map="emailTemplate + [emailServerId: 'SYSTEM', bodyScreenLocation: dbLocation]" />
+                </else>
+            </if>
+            <entity-find-one entity-name="moqui.basic.email.EmailTemplate" value-field="result">
+                <field-map field-name="emailTemplateId" from="emailTemplate.emailTemplateId" />
+            </entity-find-one>
+            <script>
+                def bodyContent = null
+                try { bodyContent = ec.resource.getLocationText(dbLocation, false) } catch (Exception e) {}
+            </script>
+            <set field="emailTemplate" from="[
+                emailTemplateId: result.emailTemplateId,
+                description: result.description,
+                emailTypeEnumId: result.emailTypeEnumId,
+                fromAddress: result.fromAddress,
+                fromName: result.fromName,
+                subject: result.subject,
+                bodyScreenLocation: result.bodyScreenLocation,
+                bodyContent: bodyContent,
+                replyToAddresses: result.replyToAddresses,
+                ccAddresses: result.ccAddresses,
+                bccAddresses: result.bccAddresses
+            ]" />
+        </actions>
+    </service>
+
+    <service verb="delete" noun="EmailTemplate">
+        <description>Delete an email template by id</description>
+        <in-parameters>
+            <parameter name="emailTemplate" required="true" type="Map">
+                <parameter name="emailTemplateId" required="true" />
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="emailTemplate" type="Map">
+                <parameter name="emailTemplateId" />
+            </parameter>
+        </out-parameters>
+        <actions>
+            <delete-one entity-name="moqui.basic.email.EmailTemplate">
+                <field-map field-name="emailTemplateId" from="emailTemplate.emailTemplateId" />
+            </delete-one>
+            <set field="emailTemplate" from="[emailTemplateId: emailTemplate.emailTemplateId]" />
+        </actions>
+    </service>
+
 </services>
  

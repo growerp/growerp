@@ -128,6 +128,20 @@ abstract class RestClient {
   @DELETE("rest/s1/growerp/100/Application")
   Future<Application> deleteApplication(@Field() Application application);
 
+  // email templates
+  @GET("rest/s1/growerp/100/EmailTemplate")
+  Future<EmailTemplates> getEmailTemplates({
+    @Query('searchString') String? searchString,
+  });
+
+  @POST("rest/s1/growerp/100/EmailTemplate")
+  Future<EmailTemplate> updateEmailTemplate(
+      @Field() EmailTemplate emailTemplate);
+
+  @DELETE("rest/s1/growerp/100/EmailTemplate")
+  Future<EmailTemplate> deleteEmailTemplate(
+      @Field() EmailTemplate emailTemplate);
+
   // countries not used
   @GET("rest/s1/growerp/100/Countries")
   @Extra({'noApiKey': true})
