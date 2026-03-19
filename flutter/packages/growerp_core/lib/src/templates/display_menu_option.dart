@@ -490,7 +490,7 @@ class DisplayMenuItemState extends State<DisplayMenuItem>
         actions: actions,
       ),
       drawer: myDrawer(context, isPhone, menuList),
-      floatingActionButton: _buildAiFab(),
+      floatingActionButton: widget.floatingActionButton,
       body: BlocListener<NotificationBloc, NotificationState>(
         listener: _handleNotifications,
         child: Column(
@@ -587,7 +587,7 @@ class DisplayMenuItemState extends State<DisplayMenuItem>
               },
             )
           : null,
-      floatingActionButton: _buildAiFab(),
+      floatingActionButton: widget.floatingActionButton,
       body: BlocListener<NotificationBloc, NotificationState>(
         listener: _handleNotifications,
         child: Column(
@@ -625,64 +625,6 @@ class DisplayMenuItemState extends State<DisplayMenuItem>
     return wrapInScaffoldMessenger
         ? ScaffoldMessenger(child: scaffold)
         : scaffold;
-  }
-
-  /// Build AI FAB button (and optional additional FAB above it)
-  /// Only shown on dashboard/home, not on specific module pages that have their own FABs
-  Widget? _buildAiFab() {
-    // Only show AI FAB on dashboard/home route
-    // List pages and other modules have their own FABs and don't need AI navigation
-    if (currentRoute != '/') {
-      // Return only the custom FAB if provided
-      return widget.floatingActionButton;
-    }
-
-    final aiFab = FloatingActionButton(
-      key: const Key('aiFab'),
-      heroTag: 'aiFab',
-      mini: true,
-      tooltip: 'AI Navigation',
-      onPressed: () async {
-        // Load API key from SharedPreferences
-        final apiKey = await SystemSetupDialog.getGeminiApiKey() ?? '';
-        if (!mounted) return;
-
-        AiPromptDialog.show(
-          context,
-          apiKey: apiKey,
-          menuConfiguration: widget.menuConfiguration,
-          onNavigate: (intent) {
-            // Use route from intent if available, otherwise derive from widget name
-            if (intent.route != null && intent.route!.isNotEmpty) {
-              context.go(intent.route!);
-            } else {
-              final route = intent.widgetName
-                  .replaceAllMapped(
-                    RegExp(r'([A-Z])'),
-                    (m) => '-${m.group(1)!.toLowerCase()}',
-                  )
-                  .substring(1); // Remove leading dash
-              context.go('/$route');
-            }
-          },
-        );
-      },
-      child: const Icon(Icons.psychology),
-    );
-
-    // If there's an additional FAB, stack it above the AI FAB
-    if (widget.floatingActionButton != null) {
-      return Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          widget.floatingActionButton!,
-          const SizedBox(height: 12),
-          aiFab,
-        ],
-      );
-    }
-
-    return aiFab;
   }
 
   /// Build hidden widgets for integration testing

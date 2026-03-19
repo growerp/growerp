@@ -105,6 +105,17 @@ class MenuItemToggleActive extends MenuConfigEvent {
   List<Object?> get props => [menuItemId];
 }
 
+/// Toggle menu item minimized state on the dashboard
+/// Minimized items are hidden from drawer/nav-rail and moved to end of dashboard
+class MenuItemToggleMinimize extends MenuConfigEvent {
+  const MenuItemToggleMinimize(this.menuItemId);
+
+  final String menuItemId;
+
+  @override
+  List<Object?> get props => [menuItemId];
+}
+
 /// Add a child MenuItem (tab) to a parent MenuItem
 class MenuItemLink extends MenuConfigEvent {
   const MenuItemLink({

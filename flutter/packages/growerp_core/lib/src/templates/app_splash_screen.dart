@@ -78,10 +78,11 @@ class _AppSplashScreenState extends State<AppSplashScreen> {
     return BlocConsumer<AuthBloc, AuthState>(
       listener: (context, authState) {
         if (authState.status == AuthStatus.authenticated) {
-          final menuBloc = context.read<MenuConfigBloc>();
-          if (menuBloc.state.status == MenuConfigStatus.initial) {
-            menuBloc.add(const MenuConfigLoad(userVersion: true));
-          }
+          // Always reload on auth transition so a newly logged-in user/company
+          // gets their own fresh menu config, not the previous user's state.
+          context
+              .read<MenuConfigBloc>()
+              .add(const MenuConfigLoad(userVersion: true));
         }
       },
       builder: (context, authState) {

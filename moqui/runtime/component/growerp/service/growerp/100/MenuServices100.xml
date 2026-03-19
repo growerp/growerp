@@ -129,6 +129,7 @@ Service definitions for menu configuration and menu item management
             userGroups: parseUserGroups(item.userGroupsJson),
             sequenceNum: item.sequenceNum,
             isActive: item.isActive == 'Y',
+            isMinimized: item.isMinimized == 'Y',
             children: children
           ]
         }
@@ -732,6 +733,7 @@ Service definitions for menu configuration and menu item management
       <parameter name="userGroupsJson" />
       <parameter name="sequenceNum" type="Integer" />
       <parameter name="isActive" />
+      <parameter name="isMinimized" />
     </in-parameters>
     <out-parameters>
       <parameter name="menuItemId" />
@@ -743,6 +745,7 @@ Service definitions for menu configuration and menu item management
       <parameter name="widgetName" />
       <parameter name="sequenceNum" type="Integer" />
       <parameter name="isActive" />
+      <parameter name="isMinimized" />
       <parameter name="children" type="List" />
     </out-parameters>
     <actions>
@@ -772,23 +775,40 @@ Service definitions for menu configuration and menu item management
           <set field="menuItemId" from="newItems[0].menuItemId" />
           <set field="existingItem" from="newItems[0]" />
         </if>
+        <else>
+          <!-- Not newly cloned, but the passed menuItemId may be a stale seed ID
+               (Flutter hasn't refreshed its ID map yet). If the item's config
+               doesn't match the user config, look up the real user-config item. -->
+          <if condition="existingItem.menuConfigurationId != ensureOut.userMenuConfigurationId">
+            <entity-find entity-name="growerp.menu.MenuItem" list="userConfigItems">
+              <econdition field-name="menuConfigurationId" from="ensureOut.userMenuConfigurationId" />
+              <econdition field-name="title" from="existingItem.title" />
+            </entity-find>
+            <if condition="userConfigItems">
+              <set field="menuItemId" from="userConfigItems[0].menuItemId" />
+              <set field="existingItem" from="userConfigItems[0]" />
+            </if>
+          </if>
+        </else>
       </if>
 
-      <!-- Update menu item with provided fields -->
+      <!-- Update menu item with provided fields, falling back to existing values
+           for any field not supplied in the request (prevents clearing fields). -->
       <service-call name="update#growerp.menu.MenuItem"
         in-map="[
         menuItemId: menuItemId,
-        parentMenuItemId: parentMenuItemId,
-        itemKey: itemKey,
+        parentMenuItemId: parentMenuItemId ?: existingItem.parentMenuItemId,
+        itemKey: itemKey ?: existingItem.itemKey,
         title: title ?: existingItem.title,
-        route: route,
-        iconName: iconName,
-        widgetName: widgetName,
-        image: image,
-        selectedImage: selectedImage,
-        userGroupsJson: userGroupsJson,
+        route: route ?: existingItem.route,
+        iconName: iconName ?: existingItem.iconName,
+        widgetName: widgetName ?: existingItem.widgetName,
+        image: image ?: existingItem.image,
+        selectedImage: selectedImage ?: existingItem.selectedImage,
+        userGroupsJson: userGroupsJson ?: existingItem.userGroupsJson,
         sequenceNum: sequenceNum ?: existingItem.sequenceNum,
-        isActive: isActive ?: existingItem.isActive
+        isActive: isActive ?: existingItem.isActive,
+        isMinimized: isMinimized ?: existingItem.isMinimized
       ]" />
 
       <!-- Fetch and return the updated item with its children -->

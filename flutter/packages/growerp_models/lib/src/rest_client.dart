@@ -1419,6 +1419,8 @@ abstract class RestClient {
     @Field() String? userGroupsJson,
     @Field() int? sequenceNum,
     @Field() String? isActive,
+    @Field() String? isMinimized,
+    @Field() String? tileType,
   });
 
   /// Delete menu item and its children

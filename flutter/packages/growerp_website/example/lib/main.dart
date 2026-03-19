@@ -93,16 +93,15 @@ class WebsiteDashboard extends StatelessWidget {
           return const LoadingIndicator();
         }
 
-        return DashboardGrid(
-          itemCount: 1,
-          itemBuilder: (context, index) {
-            return const DashboardCard(
+        return const DashboardGrid(
+          items: [
+            MenuItem(
+              menuItemId: 'website',
               title: 'Website',
               iconName: 'web',
               route: '/website',
-              stats: 'Manage website settings',
-            );
-          },
+            ),
+          ],
         );
       },
     );

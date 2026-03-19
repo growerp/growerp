@@ -111,26 +111,24 @@ class ActivityDashboard extends StatelessWidget {
           return const LoadingIndicator();
         }
 
-        final authenticate = state.authenticate!;
         return DashboardGrid(
-          itemCount: 2,
-          itemBuilder: (context, index) {
-            if (index == 0) {
-              return DashboardCard(
-                title: 'To Do',
-                iconName: 'check_circle',
-                route: '/todos',
-                stats: 'To Do: ${authenticate.stats?.todoActivities ?? 0}',
-              );
-            } else {
-              return DashboardCard(
-                title: 'Events',
-                iconName: 'event',
-                route: '/events',
-                stats: 'Events: ${authenticate.stats?.eventActivities ?? 0}',
-              );
-            }
-          },
+          items: const [
+            MenuItem(
+              menuItemId: 'todos',
+              title: 'To Do',
+              iconName: 'check_circle',
+              route: '/todos',
+              tileType: 'statistic',
+            ),
+            MenuItem(
+              menuItemId: 'events',
+              title: 'Events',
+              iconName: 'event',
+              route: '/events',
+              tileType: 'statistic',
+            ),
+          ],
+          stats: state.authenticate?.stats,
         );
       },
     );

@@ -34,7 +34,7 @@ class _SplashScreenState extends State<SplashScreen> {
       final menuBloc = context.read<MenuConfigBloc>();
       if (authState.status == AuthStatus.authenticated &&
           menuBloc.state.status == MenuConfigStatus.initial) {
-        menuBloc.add(const MenuConfigLoad());
+        menuBloc.add(const MenuConfigLoad(userVersion: true));
       }
     });
   }
@@ -46,7 +46,7 @@ class _SplashScreenState extends State<SplashScreen> {
         if (authState.status == AuthStatus.authenticated) {
           final menuBloc = context.read<MenuConfigBloc>();
           if (menuBloc.state.status == MenuConfigStatus.initial) {
-            menuBloc.add(const MenuConfigLoad());
+            menuBloc.add(const MenuConfigLoad(userVersion: true));
           }
         }
       },
@@ -92,7 +92,7 @@ class _SplashScreenState extends State<SplashScreen> {
                       ElevatedButton(
                         onPressed: () {
                           context.read<MenuConfigBloc>().add(
-                            const MenuConfigLoad(),
+                            const MenuConfigLoad(userVersion: true),
                           );
                         },
                         child: const Text('Retry'),

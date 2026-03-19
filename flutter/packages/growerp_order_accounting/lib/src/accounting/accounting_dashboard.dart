@@ -1,12 +1,12 @@
 /*
  * This software is in the public domain under CC0 1.0 Universal plus a
  * Grant of Patent License.
- * 
+ *
  * To the extent possible under law, the author(s) have dedicated all
  * copyright and related and neighboring rights to this software to the
  * public domain worldwide. This software is distributed without any
  * warranty.
- * 
+ *
  * You should have received a copy of the CC0 Public Domain Dedication
  * along with this software (see the LICENSE.md file). If not, see
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
@@ -16,6 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
+import 'ledger/views/revenue_expense_chart_mini.dart';
 
 /// A reusable accounting dashboard widget that displays accounting menu options
 /// as cards with statistics. This widget can be used across different apps
@@ -43,9 +44,74 @@ class AccountingDashboard extends StatelessWidget {
     this.floatingActionButton,
   });
 
+  // Static MenuItem list shown when MenuConfigBloc is unavailable
+  static const List<MenuItem> _staticMenuItems = [
+    MenuItem(
+      menuItemId: 'acc_sales',
+      title: 'Sales',
+      iconName: 'attach_money',
+      route: '/accounting/sales',
+      tileType: 'statistic',
+    ),
+    MenuItem(
+      menuItemId: 'acc_purchase',
+      title: 'Purchase',
+      iconName: 'money_off',
+      route: '/accounting/purchase',
+      tileType: 'statistic',
+    ),
+    MenuItem(
+      menuItemId: 'acc_sales_pay',
+      title: 'Sales Payments',
+      iconName: 'input',
+      route: '/accounting/sales_payments',
+    ),
+    MenuItem(
+      menuItemId: 'acc_purch_pay',
+      title: 'Purchase Payments',
+      iconName: 'output',
+      route: '/accounting/purchase_payments',
+    ),
+    MenuItem(
+      menuItemId: 'acc_ledger',
+      title: 'Ledger',
+      iconName: 'account_balance_wallet',
+      route: '/accounting/ledger',
+    ),
+    MenuItem(
+      menuItemId: 'acc_ledger_accts',
+      title: 'Ledger Accounts',
+      iconName: 'account_tree',
+      route: '/accounting/ledger-accounts',
+    ),
+    MenuItem(
+      menuItemId: 'acc_ledger_journal',
+      title: 'Ledger Journal',
+      iconName: 'receipt_long',
+      route: '/accounting/ledger-journal',
+    ),
+    MenuItem(
+      menuItemId: 'acc_reports',
+      title: 'Reports',
+      iconName: 'summarize',
+      route: '/accounting/reports',
+    ),
+    MenuItem(
+      menuItemId: 'acc_setup',
+      title: 'Setup',
+      iconName: 'settings',
+      route: '/accounting/setup',
+    ),
+    MenuItem(
+      menuItemId: 'acc_item_types',
+      title: 'Item Types',
+      iconName: 'list',
+      route: '/accounting/setup/item-types',
+    ),
+  ];
+
   @override
   Widget build(BuildContext context) {
-    // Check if AuthBloc is available in the context
     final authBloc = context.read<AuthBloc?>();
     if (authBloc == null) {
       return const Center(
@@ -54,66 +120,54 @@ class AccountingDashboard extends StatelessWidget {
     }
 
     return BlocBuilder<AuthBloc, AuthState>(
-      bloc:
-          authBloc, // Explicitly pass the bloc to avoid context.read during initState
+      bloc: authBloc,
       builder: (context, authState) {
         if (authState.status != AuthStatus.authenticated) {
           return const Center(child: CircularProgressIndicator());
         }
 
-        final authenticate = authState.authenticate!;
-        final stats = authenticate.stats;
-        final currency = authenticate.company?.currency?.description ?? '';
-
-        // Check if MenuConfigBloc is available
+        final stats = authState.authenticate?.stats;
         final menuConfigBloc = context.read<MenuConfigBloc?>();
 
         if (menuConfigBloc == null) {
-          // MenuConfigBloc not available - use static dashboard
-          return _buildStaticDashboard(context, stats, currency);
+          return _buildGrid(context, _staticMenuItems, stats);
         }
 
         return BlocBuilder<MenuConfigBloc, MenuConfigState>(
-          bloc: menuConfigBloc, // Explicitly pass the bloc
+          bloc: menuConfigBloc,
           builder: (context, menuState) {
             final menuConfig = menuState.menuConfiguration;
 
-            // Get dashboard options based on prefix or route pattern
-            List<MenuItem> dashboardOptions;
-
+            List<MenuItem> items;
             if (menuConfig != null && menuOptionPrefix != null) {
-              // Use menu configuration with prefix filtering
-              dashboardOptions =
+              items =
                   menuConfig.menuItems
                       .where(
-                        (option) =>
-                            option.isActive &&
-                            option.menuItemId != null &&
-                            option.menuItemId!.startsWith(menuOptionPrefix!),
+                        (o) =>
+                            o.isActive &&
+                            o.menuItemId != null &&
+                            o.menuItemId!.startsWith(menuOptionPrefix!),
                       )
                       .toList()
                     ..sort((a, b) => a.sequenceNum.compareTo(b.sequenceNum));
             } else {
-              // Fallback: show default accounting cards
-              dashboardOptions = [];
+              items = [];
             }
 
-            // If we have menu options from config, use dynamic cards
-            if (dashboardOptions.isNotEmpty) {
-              return _buildDynamicDashboard(context, dashboardOptions, stats);
+            if (items.isEmpty) {
+              return _buildGrid(context, _staticMenuItems, stats);
             }
 
-            // Otherwise, use static cards with stats
-            return _buildStaticDashboard(context, stats, currency);
+            return _buildGrid(context, items, stats);
           },
         );
       },
     );
   }
 
-  Widget _buildDynamicDashboard(
+  Widget _buildGrid(
     BuildContext context,
-    List<MenuItem> options,
+    List<MenuItem> items,
     Stats? stats,
   ) {
     return Scaffold(
@@ -121,116 +175,17 @@ class AccountingDashboard extends StatelessWidget {
       backgroundColor: Colors.transparent,
       floatingActionButton: floatingActionButton,
       body: DashboardGrid(
-        itemCount: options.length,
-        itemBuilder: (context, index) {
-          final option = options[index];
-          return DashboardCard(
-            title: option.title,
-            iconName: option.iconName ?? 'accounting',
-            route: option.route,
-            stats: _getStatsForAccountingRoute(option.route, stats),
-          );
+        items: items,
+        stats: stats,
+        onToggleMinimize: (id) =>
+            context.read<MenuConfigBloc?>()?.add(MenuItemToggleMinimize(id)),
+        chartBuilder: (route) {
+          if (route == '/accounting/reports') {
+            return const RevenueExpenseChartMini();
+          }
+          return null;
         },
       ),
     );
-  }
-
-  Widget _buildStaticDashboard(
-    BuildContext context,
-    Stats? stats,
-    String currency,
-  ) {
-    final staticCards = [
-      DashboardCard(
-        title: "Sales",
-        iconName: 'attach_money',
-        route: '/accounting/sales',
-        stats:
-            "Open Inv: $currency ${stats?.salesInvoicesNotPaidAmount ?? '0.00'}\n(${stats?.salesInvoicesNotPaidCount ?? 0})",
-      ),
-      DashboardCard(
-        title: "Purchase",
-        iconName: 'money_off',
-        route: '/accounting/purchase',
-        stats:
-            "Unpaid Inv: $currency ${stats?.purchInvoicesNotPaidAmount ?? '0.00'}\n(${stats?.purchInvoicesNotPaidCount ?? 0})",
-      ),
-      const DashboardCard(
-        title: "Sales Payments",
-        iconName: 'input',
-        route: '/accounting/sales_payments',
-        stats: "Payments",
-      ),
-      const DashboardCard(
-        title: "Purchase Payments",
-        iconName: 'output',
-        route: '/accounting/purchase_payments',
-        stats: "Payments",
-      ),
-      const DashboardCard(
-        title: "Ledger",
-        iconName: 'account_balance_wallet',
-        route: '/accounting/ledger',
-        stats: "Transactions",
-      ),
-      const DashboardCard(
-        title: "Ledger Accounts",
-        iconName: 'account_tree',
-        route: '/accounting/ledger-accounts',
-        stats: "GL Accounts",
-      ),
-      const DashboardCard(
-        title: "Ledger Journal",
-        iconName: 'receipt_long',
-        route: '/accounting/ledger-journal',
-        stats: "Journal Entries",
-      ),
-      const DashboardCard(
-        title: "Reports",
-        iconName: 'summarize',
-        route: '/accounting/reports',
-        stats: "Balance Sheet, Summary",
-      ),
-      const DashboardCard(
-        title: "Setup",
-        iconName: 'settings',
-        route: '/accounting/setup',
-        stats: "Periods, Payment types",
-      ),
-      const DashboardCard(
-        title: "Item Types",
-        iconName: 'list',
-        route: '/accounting/setup/item-types',
-        stats: "Item type GL accounts",
-      ),
-    ];
-
-    return Scaffold(
-      key: const Key('AcctDashBoard'),
-      backgroundColor: Colors.transparent,
-      floatingActionButton: floatingActionButton,
-      body: DashboardGrid(
-        itemCount: staticCards.length,
-        itemBuilder: (context, index) => staticCards[index],
-      ),
-    );
-  }
-
-  /// Maps accounting sub-routes to their corresponding statistics
-  String? _getStatsForAccountingRoute(String? route, Stats? stats) {
-    if (stats == null || route == null) return null;
-
-    if (route.contains('sales')) {
-      return 'Invoices: ${stats.salesInvoicesNotPaidCount}';
-    } else if (route.contains('purchase')) {
-      return 'Invoices: ${stats.purchInvoicesNotPaidCount}';
-    } else if (route.contains('ledger')) {
-      return 'Accounts, Trans, Journals';
-    } else if (route.contains('reports')) {
-      return 'Balance Sheet, Summary';
-    } else if (route.contains('setup')) {
-      return 'Periods, Types';
-    }
-    return null;
   }
 }

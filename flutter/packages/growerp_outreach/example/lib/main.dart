@@ -159,17 +159,7 @@ class OutreachDashboard extends StatelessWidget {
             .where((item) => item.route != '/')
             .toList();
 
-        return DashboardGrid(
-          itemCount: items.length,
-          itemBuilder: (context, index) {
-            final item = items[index];
-            return DashboardCard(
-              title: item.title,
-              iconName: item.iconName ?? 'dashboard',
-              route: item.route,
-            );
-          },
-        );
+        return DashboardGrid(items: items);
       },
     );
   }

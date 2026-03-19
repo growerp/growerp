@@ -84,7 +84,8 @@ along with this software (see the LICENSE.md file). If not, see
             <description>Display order</description>
         </field>
         <field name="isActive" type="text-indicator" default="'Y'"/>
-        
+        <field name="isMinimized" type="text-indicator" default="'N'"/>
+
         <relationship type="one" related="growerp.menu.MenuConfiguration" short-alias="configuration">
             <key-map field-name="menuConfigurationId"/>
         </relationship>

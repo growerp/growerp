@@ -65,17 +65,11 @@ class FreelanceDbForm extends StatelessWidget {
                 child: const Icon(Icons.menu),
               ),
               body: DashboardGrid(
-                itemCount: dashboardOptions.length,
-                itemBuilder: (context, index) {
-                  final option = dashboardOptions[index];
-                  return DashboardCard(
-                    title: option.title,
-                    iconName: option.iconName ?? 'dashboard',
-                    route: option.route,
-                    stats: getStatsForRoute(option.route, stats),
-                    animationIndex: index,
-                  );
-                },
+                items: dashboardOptions,
+                stats: stats,
+                onToggleMinimize: (id) => context
+                    .read<MenuConfigBloc>()
+                    .add(MenuItemToggleMinimize(id)),
               ),
             );
           },

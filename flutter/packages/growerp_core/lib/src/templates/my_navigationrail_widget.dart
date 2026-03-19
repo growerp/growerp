@@ -34,7 +34,10 @@ Widget myNavigationRail(
   AuthBloc authBloc = context.read<AuthBloc>();
   Authenticate? auth = authBloc.state.authenticate;
 
-  if (menu.isEmpty) {
+  // Exclude minimized items — they appear only at the end of the dashboard
+  final visibleMenu = menu.where((m) => !m.isMinimized).toList();
+
+  if (visibleMenu.isEmpty) {
     return FatalErrorForm(message: localizations.noAccessHere);
   }
 
@@ -97,13 +100,19 @@ Widget myNavigationRail(
                           child: SingleChildScrollView(
                             key: const Key('navigationrail'),
                             child: Column(
-                              children: List.generate(menu.length, (index) {
-                                return _buildNavDestination(
-                                  context,
-                                  menu[index],
-                                  index == menuIndex,
-                                  colorScheme,
-                                  localizations,
+                              children: List.generate(visibleMenu.length, (index) {
+                                final item = visibleMenu[index];
+                                return KeyedSubtree(
+                                  key: ValueKey(
+                                    item.menuItemId ?? item.route ?? index.toString(),
+                                  ),
+                                  child: _buildNavDestination(
+                                    context,
+                                    item,
+                                    index == menuIndex,
+                                    colorScheme,
+                                    localizations,
+                                  ),
                                 );
                               }),
                             ),

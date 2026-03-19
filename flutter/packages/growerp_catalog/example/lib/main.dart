@@ -117,31 +117,10 @@ class CatalogDashboard extends StatelessWidget {
             .toList();
 
         return DashboardGrid(
-          itemCount: dashboardItems.length,
-          itemBuilder: (context, index) {
-            final item = dashboardItems[index];
-            return DashboardCard(
-              title: item.title,
-              iconName: item.iconName ?? 'dashboard',
-              route: item.route!,
-              stats: _getStatsForItem(item, authenticate),
-            );
-          },
+          items: dashboardItems,
+          stats: authenticate.stats,
         );
       },
     );
-  }
-
-  String _getStatsForItem(MenuItem item, Authenticate auth) {
-    switch (item.route) {
-      case '/products':
-        return 'Products: ${auth.stats?.products ?? 0}';
-      case '/categories':
-        return 'Categories: ${auth.stats?.categories ?? 0}';
-      case '/subscriptions':
-        return 'Subscriptions';
-      default:
-        return '';
-    }
   }
 }

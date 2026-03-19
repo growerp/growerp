@@ -1048,15 +1048,7 @@ class ${pascalCaseName}Dashboard extends StatelessWidget {
               const SizedBox(height: 20),
               Expanded(
                 child: DashboardGrid(
-                  itemCount: dashboardItems.length,
-                  itemBuilder: (context, index) {
-                    final item = dashboardItems[index];
-                    return DashboardCard(
-                      title: item.title,
-                      iconName: item.iconName ?? 'dashboard',
-                      route: item.route!,
-                    );
-                  },
+                  items: dashboardItems,
                 ),
               ),
             ],

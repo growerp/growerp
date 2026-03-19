@@ -3,3 +3,4 @@ export 'balance_sheet_form.dart';
 export 'balance_summary_list.dart';
 export 'time_period_list_form.dart';
 export 'revenue_expense_chart.dart';
+export 'revenue_expense_chart_mini.dart';

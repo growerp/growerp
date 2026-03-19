@@ -29,6 +29,7 @@ import 'package:growerp_activity/growerp_activity.dart';
 import 'src/application/application.dart';
 import 'src/email_template/email_template.dart';
 import 'views/support_dashboard.dart';
+import 'views/support_dashboard_content.dart';
 //webactivate  import 'package:web/web.dart' as web;
 
 Future main() async {
@@ -138,6 +139,7 @@ class _SupportAppState extends State<SupportApp> {
             router = createDynamicAppRouter(
               [state.menuConfiguration!],
               config: DynamicRouterConfig(
+                dashboardBuilder: () => const SupportDashboardContent(),
                 widgetLoader: WidgetRegistry.getWidget,
                 appTitle: 'GrowERP Support',
                 deepLinkService: _deepLinkService,

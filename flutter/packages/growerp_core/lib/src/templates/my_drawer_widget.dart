@@ -29,7 +29,8 @@ Widget? myDrawer(BuildContext context, bool isPhone, List<MenuItem> menu) {
   Authenticate? auth = authBloc.state.authenticate;
 
   // Add theme option to menu (combines light/dark + color scheme)
-  List<MenuItem> options = List.from(menu);
+  // Exclude minimized items — they appear only at the end of the dashboard
+  List<MenuItem> options = List.from(menu.where((m) => !m.isMinimized));
   options.add(
     MenuItem(
       menuItemId: 'theme',

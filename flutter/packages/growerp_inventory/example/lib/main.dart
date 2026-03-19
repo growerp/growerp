@@ -102,26 +102,12 @@ class InventoryDashboard extends StatelessWidget {
           return const LoadingIndicator();
         }
 
-        final authenticate = state.authenticate!;
         return DashboardGrid(
-          itemCount: 2,
-          itemBuilder: (context, index) {
-            if (index == 0) {
-              return DashboardCard(
-                title: 'Assets',
-                iconName: 'money',
-                route: '/assets',
-                stats: 'Assets: ${authenticate.stats?.assets ?? 0}',
-              );
-            } else {
-              return DashboardCard(
-                title: 'WH Locations',
-                iconName: 'location_on',
-                route: '/locations',
-                stats: 'Locations: ${authenticate.stats?.whLocations ?? 0}',
-              );
-            }
-          },
+          items: const [
+            MenuItem(menuItemId: 'assets', title: 'Assets', iconName: 'money', route: '/assets', tileType: 'statistic'),
+            MenuItem(menuItemId: 'locations', title: 'WH Locations', iconName: 'location_on', route: '/locations', tileType: 'statistic'),
+          ],
+          stats: state.authenticate?.stats,
         );
       },
     );

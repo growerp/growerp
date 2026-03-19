@@ -36,17 +36,10 @@ class CoursesDashboard extends StatelessWidget {
                   ..sort((a, b) => a.sequenceNum.compareTo(b.sequenceNum));
 
             return DashboardGrid(
-              itemCount: dashboardItems.length,
-              itemBuilder: (context, index) {
-                final item = dashboardItems[index];
-                return DashboardCard(
-                  title: item.title,
-                  iconName: item.iconName ?? 'dashboard',
-                  route: item.route,
-                  stats: getStatsForRoute(item.route, stats),
-                  animationIndex: index,
-                );
-              },
+              items: dashboardItems,
+              stats: stats,
+              onToggleMinimize: (id) =>
+                  context.read<MenuConfigBloc>().add(MenuItemToggleMinimize(id)),
             );
           },
         );

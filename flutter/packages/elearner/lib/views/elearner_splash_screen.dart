@@ -34,7 +34,7 @@ class _ElearnerSplashScreenState extends State<ElearnerSplashScreen> {
       if (authState.status == AuthStatus.authenticated) {
         context
             .read<MenuConfigBloc>()
-            .add(MenuConfigLoad(appId: _appIdFor(authState)));
+            .add(MenuConfigLoad(appId: _appIdFor(authState), userVersion: true));
       }
     });
   }
@@ -54,7 +54,7 @@ class _ElearnerSplashScreenState extends State<ElearnerSplashScreen> {
         if (authState.status == AuthStatus.authenticated) {
           context
               .read<MenuConfigBloc>()
-              .add(MenuConfigLoad(appId: _appIdFor(authState)));
+              .add(MenuConfigLoad(appId: _appIdFor(authState), userVersion: true));
         }
       },
       builder: (context, authState) {
@@ -105,7 +105,7 @@ class _ElearnerSplashScreenState extends State<ElearnerSplashScreen> {
         ElevatedButton(
           onPressed: () => context
               .read<MenuConfigBloc>()
-              .add(MenuConfigLoad(appId: _appIdFor(authState))),
+              .add(MenuConfigLoad(appId: _appIdFor(authState), userVersion: true)),
           child: const Text('Retry'),
         ),
         const SizedBox(height: 16),

@@ -268,70 +268,17 @@ class OrderAccountingDashboard extends StatelessWidget {
           return const LoadingIndicator();
         }
 
-        final authenticate = state.authenticate!;
         return DashboardGrid(
-          itemCount: 7,
-          itemBuilder: (context, index) {
-            switch (index) {
-              case 0:
-                return DashboardCard(
-                  title: 'Orders',
-                  iconName: 'shopping_cart',
-                  route: '/orders',
-                  stats:
-                      'Sales: ${authenticate.stats?.openSlsOrders ?? 0}\n'
-                      'Purchase: ${authenticate.stats?.openPurOrders ?? 0}',
-                );
-              case 1:
-                return DashboardCard(
-                  title: 'Purchase\nOrders',
-                  iconName: 'shopping_cart',
-                  route: '/purchase-orders',
-                  stats: 'Open: ${authenticate.stats?.openPurOrders ?? 0}',
-                );
-              case 2:
-                return DashboardCard(
-                  title: 'Accounting',
-                  iconName: 'account_balance',
-                  route: '/accounting',
-                  stats:
-                      'Sales Invoices: ${authenticate.stats?.salesInvoicesNotPaidCount ?? 0}\n'
-                      'Purchase: ${authenticate.stats?.purchInvoicesNotPaidCount ?? 0}',
-                );
-              case 3:
-                return DashboardCard(
-                  title: 'Shipments',
-                  iconName: 'local_shipping',
-                  route: '/shipments',
-                  stats:
-                      'Incoming: ${authenticate.stats?.incomingShipments ?? 0}\n'
-                      'Outgoing: ${authenticate.stats?.outgoingShipments ?? 0}',
-                );
-              case 4:
-                return DashboardCard(
-                  title: 'Incoming\nShipments',
-                  iconName: 'local_shipping',
-                  route: '/incoming-shipments',
-                  stats:
-                      'Incoming: ${authenticate.stats?.incomingShipments ?? 0}',
-                );
-              case 5:
-                return DashboardCard(
-                  title: 'Inventory',
-                  iconName: 'inventory',
-                  route: '/inventory',
-                  stats:
-                      'WH Locations: ${authenticate.stats?.whLocations ?? 0}',
-                );
-              default:
-                return DashboardCard(
-                  title: 'Requests',
-                  iconName: 'assignment',
-                  route: '/requests',
-                  stats: 'Requests: ${authenticate.stats?.requests ?? 0}',
-                );
-            }
-          },
+          items: const [
+            MenuItem(menuItemId: 'orders', title: 'Orders', iconName: 'shopping_cart', route: '/orders', tileType: 'statistic'),
+            MenuItem(menuItemId: 'pur_orders', title: 'Purchase Orders', iconName: 'shopping_cart', route: '/purchase-orders', tileType: 'statistic'),
+            MenuItem(menuItemId: 'accounting', title: 'Accounting', iconName: 'account_balance', route: '/accounting', tileType: 'statistic'),
+            MenuItem(menuItemId: 'shipments', title: 'Shipments', iconName: 'local_shipping', route: '/shipments', tileType: 'statistic'),
+            MenuItem(menuItemId: 'inc_shipments', title: 'Incoming Shipments', iconName: 'local_shipping', route: '/incoming-shipments', tileType: 'statistic'),
+            MenuItem(menuItemId: 'inventory', title: 'Inventory', iconName: 'inventory', route: '/inventory', tileType: 'statistic'),
+            MenuItem(menuItemId: 'requests', title: 'Requests', iconName: 'assignment', route: '/requests', tileType: 'statistic'),
+          ],
+          stats: state.authenticate?.stats,
         );
       },
     );

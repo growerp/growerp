@@ -325,100 +325,15 @@ class UserCompanyDashboard extends StatelessWidget {
           return const LoadingIndicator();
         }
 
-        final authenticate = state.authenticate!;
         return DashboardGrid(
-          itemCount: 3,
-          itemBuilder: (context, index) {
-            switch (index) {
-              case 0:
-                return _DashboardCard(
-                  title: 'Companies',
-                  iconName: 'business',
-                  route: '/companies',
-                  stats: [
-                    'Customers: ${authenticate.stats?.customers ?? 0}',
-                    'Leads: ${authenticate.stats?.leads ?? 0}',
-                    'Suppliers: ${authenticate.stats?.suppliers ?? 0}',
-                  ],
-                );
-              case 1:
-                return _DashboardCard(
-                  title: 'Users',
-                  iconName: 'people',
-                  route: '/users',
-                  stats: [
-                    'Employees: ${authenticate.company?.employees.length ?? 0}',
-                  ],
-                );
-              default:
-                return _DashboardCard(
-                  title: 'Companies\n& Users',
-                  iconName: 'groups',
-                  route: '/companiesUsers',
-                  stats: ['Leads: ${authenticate.stats?.leads ?? 0}'],
-                );
-            }
-          },
+          items: const [
+            MenuItem(menuItemId: 'companies', title: 'Companies', iconName: 'business', route: '/companies', tileType: 'statistic'),
+            MenuItem(menuItemId: 'users', title: 'Users', iconName: 'people', route: '/users', tileType: 'statistic'),
+            MenuItem(menuItemId: 'companies_users', title: 'Companies & Users', iconName: 'groups', route: '/companiesUsers'),
+          ],
+          stats: state.authenticate?.stats,
         );
       },
-    );
-  }
-}
-
-class _DashboardCard extends StatelessWidget {
-  final String title;
-  final String iconName;
-  final String route;
-  final List<String> stats;
-
-  const _DashboardCard({
-    required this.title,
-    required this.iconName,
-    required this.route,
-    required this.stats,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      elevation: 4,
-      margin: EdgeInsets.zero,
-      child: InkWell(
-        onTap: () => context.go(route),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6.0),
-          child: FittedBox(
-            fit: BoxFit.scaleDown,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                getIconFromRegistry(iconName) ??
-                    const Icon(Icons.dashboard, size: 28),
-                const SizedBox(height: 4),
-                Text(
-                  title,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 2),
-                ...stats.map(
-                  (stat) => Text(
-                    stat,
-                    style: Theme.of(context).textTheme.bodySmall,
-                    textAlign: TextAlign.center,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
     );
   }
 }

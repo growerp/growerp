@@ -165,6 +165,14 @@ void main() {
     await DynamicMenuTest.updateMenuItems(tester, updatedMenuItems);
     await DynamicMenuTest.checkMenuItems(tester);
 
+    // Minimize the first dashboard tile, then restore it.
+    await DynamicMenuTest.minimizeTile(tester);
+    await DynamicMenuTest.restoreTile(tester);
+
+    // Drag-reorder the first two tiles and verify the swap persists.
+    await DynamicMenuTest.reorderTiles(tester);
+    await DynamicMenuTest.verifyReorderPersistence(tester);
+
     // Add child menu items (tabs) to the first menu item
     await DynamicMenuTest.addChildMenuItems(tester, testChildMenuItems);
     await DynamicMenuTest.checkChildMenuItems(tester, testChildMenuItems);

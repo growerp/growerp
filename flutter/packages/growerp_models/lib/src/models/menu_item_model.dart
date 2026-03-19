@@ -27,6 +27,16 @@ bool _isActiveFromJson(dynamic value) {
 
 String _isActiveToJson(bool value) => value ? 'Y' : 'N';
 
+/// Helper functions for isMinimized Y/N conversion
+bool _isMinimizedFromJson(dynamic value) {
+  if (value == null) return false;
+  if (value is bool) return value;
+  if (value is String) return value.toUpperCase() == 'Y';
+  return false;
+}
+
+String _isMinimizedToJson(bool value) => value ? 'Y' : 'N';
+
 /// Unified MenuItem model for dynamic menu system
 /// Supports recursive hierarchy via parentMenuItemId and children
 /// Replaces the former separate MenuOption and MenuItem models
@@ -47,6 +57,13 @@ class MenuItem {
   @JsonKey(fromJson: _isActiveFromJson, toJson: _isActiveToJson)
   final bool isActive;
 
+  /// Tile display type on the dashboard: 'navigation' (1x1), 'statistic' (2x1), 'graphic' (2x2)
+  final String tileType;
+
+  /// Whether this tile is minimized: still shown at end of dashboard, hidden from drawer/nav-rail
+  @JsonKey(fromJson: _isMinimizedFromJson, toJson: _isMinimizedToJson)
+  final bool isMinimized;
+
   /// Recursive children for nested menu structure
   final List<MenuItem>? children;
 
@@ -64,6 +81,8 @@ class MenuItem {
     this.userGroups,
     this.sequenceNum = 10,
     this.isActive = true,
+    this.tileType = 'navigation',
+    this.isMinimized = false,
     this.children,
   });
 
@@ -86,6 +105,8 @@ class MenuItem {
     List<UserGroup>? userGroups,
     int? sequenceNum,
     bool? isActive,
+    String? tileType,
+    bool? isMinimized,
     List<MenuItem>? children,
   }) {
     return MenuItem(
@@ -102,6 +123,8 @@ class MenuItem {
       userGroups: userGroups ?? this.userGroups,
       sequenceNum: sequenceNum ?? this.sequenceNum,
       isActive: isActive ?? this.isActive,
+      tileType: tileType ?? this.tileType,
+      isMinimized: isMinimized ?? this.isMinimized,
       children: children ?? this.children,
     );
   }

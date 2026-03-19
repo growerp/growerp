@@ -573,6 +573,179 @@ class DynamicMenuTest {
     }
   }
 
+  // ==================== Minimize / Restore ====================
+
+  /// Minimize the first non-minimized dashboard tile and verify it moves
+  /// to the minimized section (restore button appears, minimize count drops).
+  static Future<void> minimizeTile(WidgetTester tester) async {
+    await CommonTest.gotoMainMenu(tester);
+    await tester.pumpAndSettle(const Duration(milliseconds: 500));
+
+    final minimizeBtns = find.byIcon(Icons.close_fullscreen);
+    final countBefore = tester.widgetList(minimizeBtns).length;
+    expect(
+      countBefore,
+      greaterThan(0),
+      reason: 'Should have at least one minimize button on the dashboard',
+    );
+
+    await tester.tap(minimizeBtns.first);
+    for (int i = 0; i < 100; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+      if (!tester.any(find.byType(CircularProgressIndicator))) break;
+    }
+    await tester.pumpAndSettle(const Duration(milliseconds: 500));
+
+    // A restore button should now appear in the minimized section.
+    expect(
+      find.byIcon(Icons.open_in_full),
+      findsWidgets,
+      reason: 'Minimized tile should show a restore button',
+    );
+    // One fewer non-minimized tile.
+    expect(
+      tester.widgetList(find.byIcon(Icons.close_fullscreen)).length,
+      equals(countBefore - 1),
+      reason: 'Non-minimized tile count should decrease by 1',
+    );
+  }
+
+  /// Restore the first minimized tile and verify it reappears at the END of the
+  /// non-minimized grid (count increases, no restore buttons remain).
+  static Future<void> restoreTile(WidgetTester tester) async {
+    await CommonTest.gotoMainMenu(tester);
+    await tester.pumpAndSettle(const Duration(milliseconds: 500));
+
+    final restoreBtns = find.byIcon(Icons.open_in_full);
+    expect(
+      restoreBtns,
+      findsWidgets,
+      reason: 'Should have at least one minimized tile to restore',
+    );
+
+    final countBefore =
+        tester.widgetList(find.byIcon(Icons.close_fullscreen)).length;
+
+    await tester.tap(restoreBtns.first);
+    for (int i = 0; i < 100; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+      if (!tester.any(find.byType(CircularProgressIndicator))) break;
+    }
+    await tester.pumpAndSettle(const Duration(milliseconds: 500));
+
+    // Count increased back.
+    expect(
+      tester.widgetList(find.byIcon(Icons.close_fullscreen)).length,
+      greaterThan(countBefore),
+      reason: 'Non-minimized tile count should increase after restore',
+    );
+    // No restore buttons remain.
+    expect(
+      find.byIcon(Icons.open_in_full),
+      findsNothing,
+      reason: 'No minimized tiles should remain after restore',
+    );
+  }
+
+  // ==================== Drag-to-reorder ====================
+
+  /// Long-press the first tile and drag it onto the second to swap their
+  /// positions, then verify the swap is reflected in the widget tree.
+  static Future<void> reorderTiles(WidgetTester tester) async {
+    await CommonTest.gotoMainMenu(tester);
+    await tester.pumpAndSettle(const Duration(milliseconds: 500));
+
+    // LongPressDraggable widgets correspond 1-to-1 with non-minimized tiles.
+    final draggableFinder = find.byWidgetPredicate(
+      (widget) => widget is LongPressDraggable<String>,
+    );
+
+    final draggableWidgets =
+        tester.widgetList<LongPressDraggable<String>>(draggableFinder).toList();
+
+    if (draggableWidgets.length < 2) {
+      debugPrint('reorderTiles: fewer than 2 tiles — skipping');
+      return;
+    }
+
+    // Record IDs before drag.
+    final id0 = draggableWidgets[0].data;
+    final id1 = draggableWidgets[1].data;
+
+    final tile0Center = tester.getCenter(draggableFinder.at(0));
+    final tile1Center = tester.getCenter(draggableFinder.at(1));
+
+    // Long-press tile 0 (hold > 400 ms to activate LongPressDraggable),
+    // slide to tile 1, then release.
+    final gesture = await tester.startGesture(tile0Center);
+    await tester.pump(const Duration(milliseconds: 600));
+    await gesture.moveTo(tile1Center);
+    await tester.pump(const Duration(milliseconds: 200));
+    await gesture.up();
+
+    for (int i = 0; i < 100; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+      if (!tester.any(find.byType(CircularProgressIndicator))) break;
+    }
+    await tester.pumpAndSettle(const Duration(milliseconds: 500));
+
+    // Verify tiles swapped positions.
+    final newWidgets =
+        tester.widgetList<LongPressDraggable<String>>(draggableFinder).toList();
+
+    expect(
+      newWidgets[0].data,
+      equals(id1),
+      reason: 'First tile should now be what was the second',
+    );
+    expect(
+      newWidgets[1].data,
+      equals(id0),
+      reason: 'Second tile should now be what was the first',
+    );
+  }
+
+  /// Logout and login, then verify the tile order that was set by [reorderTiles]
+  /// was persisted to the backend and survives a full session restart.
+  static Future<void> verifyReorderPersistence(WidgetTester tester) async {
+    await CommonTest.gotoMainMenu(tester);
+    await tester.pumpAndSettle(const Duration(milliseconds: 500));
+
+    final draggableFinder = find.byWidgetPredicate(
+      (widget) => widget is LongPressDraggable<String>,
+    );
+
+    // Snapshot current order.
+    final orderBefore =
+        tester.widgetList<LongPressDraggable<String>>(draggableFinder)
+            .map((w) => w.data)
+            .toList();
+
+    // Logout → login.
+    await CommonTest.logout(tester);
+    await tester.pumpAndSettle(
+      const Duration(seconds: CommonTest.waitTime),
+    );
+    await CommonTest.login(tester);
+    for (int i = 0; i < 100; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+      if (!tester.any(find.byType(CircularProgressIndicator))) break;
+    }
+    await tester.pumpAndSettle(const Duration(seconds: 3));
+
+    // Verify order survived the session restart.
+    final orderAfter =
+        tester.widgetList<LongPressDraggable<String>>(draggableFinder)
+            .map((w) => w.data)
+            .toList();
+
+    expect(
+      orderAfter,
+      equals(orderBefore),
+      reason: 'Tile order should be persisted after logout/login',
+    );
+  }
+
   // ==================== Helper methods ====================
 
   /// Enter menu option data into the form

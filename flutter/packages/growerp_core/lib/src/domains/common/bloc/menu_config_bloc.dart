@@ -50,6 +50,7 @@ class MenuConfigBloc extends Bloc<MenuConfigEvent, MenuConfigState> {
       transformer: menuConfigDroppable(const Duration(milliseconds: 300)),
     );
     on<MenuItemToggleActive>(_onMenuItemToggleActive);
+    on<MenuItemToggleMinimize>(_onMenuItemToggleMinimize);
     on<MenuItemLink>(_onMenuItemLink);
     on<MenuItemUnlink>(_onMenuItemUnlink);
     on<MenuConfigClone>(_onMenuConfigClone);
@@ -249,9 +250,31 @@ class MenuConfigBloc extends Bloc<MenuConfigEvent, MenuConfigState> {
     MenuItemsReorder event,
     Emitter<MenuConfigState> emit,
   ) async {
-    try {
-      emit(state.copyWith(status: MenuConfigStatus.loading));
+    // Optimistic local update: apply the new sequenceNums immediately so the
+    // UI doesn't snap back while the network call is in-flight.
+    final currentConfig = state.menuConfiguration;
+    if (currentConfig != null) {
+      final seqMap = {
+        for (final s in event.optionSequences)
+          s['menuItemId'] as String: s['sequenceNum'] as int,
+      };
+      final updatedItems = currentConfig.menuItems
+          .map(
+            (m) => (m.menuItemId != null && seqMap.containsKey(m.menuItemId))
+                ? m.copyWith(sequenceNum: seqMap[m.menuItemId])
+                : m,
+          )
+          .toList()
+        ..sort((a, b) => a.sequenceNum.compareTo(b.sequenceNum));
+      emit(
+        state.copyWith(
+          status: MenuConfigStatus.success,
+          menuConfiguration: currentConfig.copyWith(menuItems: updatedItems),
+        ),
+      );
+    }
 
+    try {
       await restClient.reorderMenuItems(
         menuConfigurationId: event.menuConfigurationId,
         itemSequences: event.optionSequences,
@@ -316,6 +339,66 @@ class MenuConfigBloc extends Bloc<MenuConfigEvent, MenuConfigState> {
           message: await getDioError(e),
         ),
       );
+    }
+  }
+
+  /// Toggle menu item minimized state on the dashboard.
+  ///
+  /// Updates local state immediately (optimistic). The backend save is
+  /// fire-and-forget — if it fails or the backend doesn't support the field
+  /// yet, the in-session state is still correct.
+  Future<void> _onMenuItemToggleMinimize(
+    MenuItemToggleMinimize event,
+    Emitter<MenuConfigState> emit,
+  ) async {
+    final currentConfig = state.menuConfiguration;
+    if (currentConfig == null) return;
+
+    // Find the item and compute new minimized value
+    final currentItem = currentConfig.menuItems.firstWhere(
+      (m) => m.menuItemId == event.menuItemId,
+      orElse: () => const MenuItem(title: ''),
+    );
+    final newMinimized = !currentItem.isMinimized;
+
+    // Optimistic local update — no reload from backend
+    // When un-minimizing, move item to the end so it appears last in the grid.
+    final List<MenuItem> updatedItems;
+    if (newMinimized) {
+      updatedItems = currentConfig.menuItems.map((m) {
+        if (m.menuItemId == event.menuItemId) {
+          return m.copyWith(isMinimized: true);
+        }
+        return m;
+      }).toList();
+    } else {
+      updatedItems = [
+        ...currentConfig.menuItems
+            .where((m) => m.menuItemId != event.menuItemId),
+        currentItem.copyWith(isMinimized: false),
+      ];
+    }
+
+    emit(
+      state.copyWith(
+        status: MenuConfigStatus.success,
+        menuConfiguration: currentConfig.copyWith(menuItems: updatedItems),
+      ),
+    );
+
+    // Persist to backend — emit failure message on error so it is visible
+    try {
+      await restClient.updateMenuItem(
+        menuItemId: event.menuItemId,
+        isMinimized: newMinimized ? 'Y' : 'N',
+      );
+      await clearRestCache();
+    } on DioException catch (e) {
+      final msg = await getDioError(e);
+      emit(state.copyWith(
+        status: MenuConfigStatus.failure,
+        message: 'Minimize persist failed: $msg',
+      ));
     }
   }
 

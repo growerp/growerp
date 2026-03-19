@@ -93,17 +93,17 @@ class SalesDashboard extends StatelessWidget {
           return const LoadingIndicator();
         }
 
-        final authenticate = state.authenticate!;
         return DashboardGrid(
-          itemCount: 1,
-          itemBuilder: (context, index) {
-            return DashboardCard(
+          items: const [
+            MenuItem(
+              menuItemId: 'opportunities',
               title: 'Opportunities',
               iconName: 'campaign',
               route: '/crm',
-              stats: 'Opportunities: ${authenticate.stats?.opportunities ?? 0}',
-            );
-          },
+              tileType: 'statistic',
+            ),
+          ],
+          stats: state.authenticate?.stats,
         );
       },
     );
