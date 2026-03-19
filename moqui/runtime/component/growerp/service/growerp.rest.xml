@@ -1012,6 +1012,44 @@ along with this software (see the LICENSE.md file). If not, see
                 <service name="growerp.100.CourseServices100.subscribe#Course" />
             </method>
         </resource>
+        <!-- Manufacturing: BOM and Work Orders -->
+        <resource name="Boms">
+            <method type="get">
+                <service name="growerp.100.ManufacturingServices100.get#Boms" />
+            </method>
+        </resource>
+        <resource name="BomItems">
+            <method type="get">
+                <service name="growerp.100.ManufacturingServices100.get#BomItem" />
+            </method>
+        </resource>
+        <resource name="BomItem">
+            <method type="post">
+                <service name="growerp.100.ManufacturingServices100.create#BomItem" />
+            </method>
+            <method type="patch">
+                <service name="growerp.100.ManufacturingServices100.update#BomItem" />
+            </method>
+            <method type="delete">
+                <service name="growerp.100.ManufacturingServices100.delete#BomItem" />
+            </method>
+        </resource>
+        <resource name="WorkOrders">
+            <method type="get">
+                <service name="growerp.100.ManufacturingServices100.get#WorkOrder" />
+            </method>
+        </resource>
+        <resource name="WorkOrder">
+            <method type="post">
+                <service name="growerp.100.ManufacturingServices100.create#WorkOrder" />
+            </method>
+            <method type="patch">
+                <service name="growerp.100.ManufacturingServices100.update#WorkOrder" />
+            </method>
+            <method type="delete">
+                <service name="growerp.100.ManufacturingServices100.delete#WorkOrder" />
+            </method>
+        </resource>
     </resource>
     <!-- Antwebsystems website -->
     <resource name="storecontents" require-authentication="anonymous-view">

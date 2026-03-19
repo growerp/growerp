@@ -2935,6 +2935,26 @@ along with this software (see the LICENSE.md file). If not, see
                                 <entity-update value-field="transactions[0]" />
                             </if>
                         </if>
+                        <!-- Auto-create production work orders for BOM products on sales order approval -->
+                        <if condition="order.sales == true">
+                            <iterate list="items" entry="soItem">
+                                <if condition="soItem.productId">
+                                    <entity-find-count entity-name="mantle.product.ProductAssoc"
+                                        count-field="bomCount">
+                                        <econdition field-name="productId" from="soItem.productId" />
+                                        <econdition field-name="productAssocTypeEnumId"
+                                            value="PatMfgBom" />
+                                        <date-filter />
+                                    </entity-find-count>
+                                    <if condition="bomCount > 0">
+                                        <service-call
+                                            name="growerp.100.ManufacturingServices100.create#WorkOrder"
+                                            in-map="[workOrder: [productId: soItem.productId,
+                                                estimatedQuantity: soItem.quantity ?: 1]]" />
+                                    </if>
+                                </if>
+                            </iterate>
+                        </if>
                     </else-if>
                     <else-if condition="order.statusId == 'OrderCompleted'">
                         <service-call name="mantle.order.OrderServices.complete#Order"

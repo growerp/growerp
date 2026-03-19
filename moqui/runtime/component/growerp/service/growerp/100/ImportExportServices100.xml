@@ -1735,7 +1735,7 @@ along with this software (see the LICENSE.md file). If not, see
         <actions>
             <!-- Validate entity types - check for unrecognized keys -->
             <set field="supportedEntities"
-                from="['companies', 'users', 'categories', 'personas', 'products', 'assets', 'locations', 'glAccounts', 'socialPosts']" />
+                from="['companies', 'users', 'categories', 'personas', 'products', 'assets', 'bomItems', 'locations', 'glAccounts', 'socialPosts']" />
             <script><![CDATA[
                 def unrecognizedEntities = []
                 entities.keySet().each { key ->
@@ -1837,6 +1837,13 @@ along with this software (see the LICENSE.md file). If not, see
                         in-map="[asset: asset, classificationId: classificationId]" />
                 </iterate>
                 <message public="true" type="success">Assets Upload completed</message>
+            </if>
+            <if condition="entities.bomItems">
+                <iterate list="entities.bomItems" entry="bomItem">
+                    <service-call name="growerp.100.ManufacturingServices100.create#BomItem"
+                        in-map="[bomItem: bomItem]" />
+                </iterate>
+                <message public="true" type="success">BOM Items Upload completed</message>
             </if>
             <if condition="entities.locations">
                 <iterate list="entities.locations" entry="location">

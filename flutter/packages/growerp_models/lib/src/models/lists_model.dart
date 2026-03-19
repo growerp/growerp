@@ -301,3 +301,29 @@ abstract class MenuConfigurations with _$MenuConfigurations {
   factory MenuConfigurations.fromJson(Map<String, dynamic> json) =>
       _$MenuConfigurationsFromJson(json);
 }
+
+@freezed
+abstract class Boms with _$Boms {
+  factory Boms({@Default([]) List<Bom> boms}) = _Boms;
+  Boms._();
+
+  factory Boms.fromJson(Map<String, dynamic> json) => _$BomsFromJson(json);
+}
+
+@freezed
+abstract class BomItems with _$BomItems {
+  factory BomItems({@Default([]) List<BomItem> bomItems}) = _BomItems;
+  BomItems._();
+
+  factory BomItems.fromJson(Map<String, dynamic> json) =>
+      _$BomItemsFromJson(json);
+}
+
+@freezed
+abstract class WorkOrders with _$WorkOrders {
+  factory WorkOrders({@Default([]) List<WorkOrder> workOrders}) = _WorkOrders;
+  WorkOrders._();
+
+  factory WorkOrders.fromJson(Map<String, dynamic> json) =>
+      _$WorkOrdersFromJson(json);
+}

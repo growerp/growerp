@@ -15,6 +15,7 @@ dependencies:
   growerp_website: ^1.9.0
   growerp_inventory: ^1.9.0
   growerp_catalog: ^1.9.0
+  growerp_manufacturing: ^1.0.0
   growerp_order_accounting: ^1.9.0
   growerp_user_company: ^1.9.0
   growerp_activity: ^1.8.1

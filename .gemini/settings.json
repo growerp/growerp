@@ -1,4 +1,143 @@
 {
+  "hooks": {
+    "AfterAgent": [
+      {
+        "hooks": [
+          {
+            "name": "entire-after-agent",
+            "type": "command",
+            "command": "entire hooks gemini after-agent"
+          }
+        ]
+      }
+    ],
+    "AfterModel": [
+      {
+        "hooks": [
+          {
+            "name": "entire-after-model",
+            "type": "command",
+            "command": "entire hooks gemini after-model"
+          }
+        ]
+      }
+    ],
+    "AfterTool": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "name": "entire-after-tool",
+            "type": "command",
+            "command": "entire hooks gemini after-tool"
+          }
+        ]
+      }
+    ],
+    "BeforeAgent": [
+      {
+        "hooks": [
+          {
+            "name": "entire-before-agent",
+            "type": "command",
+            "command": "entire hooks gemini before-agent"
+          }
+        ]
+      }
+    ],
+    "BeforeModel": [
+      {
+        "hooks": [
+          {
+            "name": "entire-before-model",
+            "type": "command",
+            "command": "entire hooks gemini before-model"
+          }
+        ]
+      }
+    ],
+    "BeforeTool": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "name": "entire-before-tool",
+            "type": "command",
+            "command": "entire hooks gemini before-tool"
+          }
+        ]
+      }
+    ],
+    "BeforeToolSelection": [
+      {
+        "hooks": [
+          {
+            "name": "entire-before-tool-selection",
+            "type": "command",
+            "command": "entire hooks gemini before-tool-selection"
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "hooks": [
+          {
+            "name": "entire-notification",
+            "type": "command",
+            "command": "entire hooks gemini notification"
+          }
+        ]
+      }
+    ],
+    "PreCompress": [
+      {
+        "hooks": [
+          {
+            "name": "entire-pre-compress",
+            "type": "command",
+            "command": "entire hooks gemini pre-compress"
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "matcher": "exit",
+        "hooks": [
+          {
+            "name": "entire-session-end-exit",
+            "type": "command",
+            "command": "entire hooks gemini session-end"
+          }
+        ]
+      },
+      {
+        "matcher": "logout",
+        "hooks": [
+          {
+            "name": "entire-session-end-logout",
+            "type": "command",
+            "command": "entire hooks gemini session-end"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "name": "entire-session-start",
+            "type": "command",
+            "command": "entire hooks gemini session-start"
+          }
+        ]
+      }
+    ]
+  },
+  "hooksConfig": {
+    "enabled": true
+  },
   "mcpServers": {
     "dart": {
       "command": "dart",

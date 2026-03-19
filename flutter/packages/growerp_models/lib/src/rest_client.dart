@@ -440,6 +440,47 @@ abstract class RestClient {
   @DELETE("rest/s1/growerp/100/Location")
   Future<Location> deleteLocation({@Field() required Location location});
 
+  // manufacturing
+  @GET("rest/s1/growerp/100/Boms")
+  Future<Boms> getBoms({
+    @Query('search') String? search,
+    @Query('start') int? start,
+    @Query('limit') int? limit,
+  });
+
+  @GET("rest/s1/growerp/100/BomItems")
+  Future<BomItems> getBomItem({
+    @Query('productId') String? productId,
+    @Query('search') String? search,
+    @Query('start') int? start,
+    @Query('limit') int? limit,
+  });
+
+  @POST("rest/s1/growerp/100/BomItem")
+  Future<BomItem> createBomItem({@Field() required BomItem bomItem});
+
+  @PATCH("rest/s1/growerp/100/BomItem")
+  Future<BomItem> updateBomItem({@Field() required BomItem bomItem});
+
+  @DELETE("rest/s1/growerp/100/BomItem")
+  Future<BomItem> deleteBomItem({@Field() required BomItem bomItem});
+
+  @GET("rest/s1/growerp/100/WorkOrders")
+  Future<WorkOrders> getWorkOrder({
+    @Query('search') String? search,
+    @Query('start') int? start,
+    @Query('limit') int? limit,
+  });
+
+  @POST("rest/s1/growerp/100/WorkOrder")
+  Future<WorkOrder> createWorkOrder({@Field() required WorkOrder workOrder});
+
+  @PATCH("rest/s1/growerp/100/WorkOrder")
+  Future<WorkOrder> updateWorkOrder({@Field() required WorkOrder workOrder});
+
+  @DELETE("rest/s1/growerp/100/WorkOrder")
+  Future<WorkOrder> deleteWorkOrder({@Field() required WorkOrder workOrder});
+
   // accounting
   @GET("rest/s1/growerp/100/Ledger")
   Future<LedgerReport> getLedger();

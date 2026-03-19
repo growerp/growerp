@@ -1,0 +1,92 @@
+{
+  "@@locale": "zh",
+  "failedToFetchBomItems": "failed to fetch BOM items: {message}",
+  "@failedToFetchBomItems": {
+    "description": "Error message when the app fails to fetch BOM items",
+    "placeholders": {
+      "message": { "type": "String" }
+    }
+  },
+  "noBomItemsFound": "no BOM items found",
+  "@noBomItemsFound": {
+    "description": "Message displayed when no BOM items are found"
+  },
+  "failedToFetchWorkOrders": "failed to fetch work orders: {message}",
+  "@failedToFetchWorkOrders": {
+    "description": "Error message when the app fails to fetch work orders",
+    "placeholders": {
+      "message": { "type": "String" }
+    }
+  },
+  "noWorkOrdersFound": "no work orders found",
+  "@noWorkOrdersFound": {
+    "description": "Message displayed when no work orders are found"
+  },
+  "addNew": "Add New",
+  "@addNew": {
+    "description": "Tooltip for a button that adds a new item"
+  },
+  "addSuccess": "Add successful",
+  "@addSuccess": {
+    "description": "Success message when an item is added"
+  },
+  "updateSuccess": "Update successful",
+  "@updateSuccess": {
+    "description": "Success message when an item is updated"
+  },
+  "error": "Error: {message}",
+  "@error": {
+    "description": "Generic error message",
+    "placeholders": {
+      "message": { "type": "String" }
+    }
+  },
+  "newLabel": "New",
+  "@newLabel": {
+    "description": "Label for a new item"
+  },
+  "bomInfo": "BOM {id}",
+  "@bomInfo": {
+    "description": "BOM dialog title",
+    "placeholders": {
+      "id": { "type": "String" }
+    }
+  },
+  "workOrderInfo": "Work Order {id}",
+  "@workOrderInfo": {
+    "description": "Work order dialog title",
+    "placeholders": {
+      "id": { "type": "String" }
+    }
+  },
+  "productId": "Product ID",
+  "@productId": { "description": "Product ID label" },
+  "productName": "Product Name",
+  "@productName": { "description": "Product name label" },
+  "componentId": "Component ID",
+  "@componentId": { "description": "Component ID label" },
+  "componentName": "Component Name",
+  "@componentName": { "description": "Component name label" },
+  "quantity": "Quantity",
+  "@quantity": { "description": "Quantity label" },
+  "scrapFactor": "Scrap Factor",
+  "@scrapFactor": { "description": "Scrap factor label" },
+  "sequenceNum": "Seq#",
+  "@sequenceNum": { "description": "Sequence number label" },
+  "status": "Status",
+  "@status": { "description": "Status label" },
+  "startDate": "Start Date",
+  "@startDate": { "description": "Start date label" },
+  "completionDate": "Completion Date",
+  "@completionDate": { "description": "Completion date label" },
+  "enterQuantity": "Please enter a quantity",
+  "@enterQuantity": { "description": "Validation message for quantity" },
+  "enterProduct": "Please enter a product",
+  "@enterProduct": { "description": "Validation message for product" },
+  "enterComponent": "Please enter a component",
+  "@enterComponent": { "description": "Validation message for component" },
+  "bomTitle": "Bill of Materials",
+  "@bomTitle": { "description": "BOM list screen title" },
+  "workOrderTitle": "Work Orders",
+  "@workOrderTitle": { "description": "Work order list screen title" }
+}

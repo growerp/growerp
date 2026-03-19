@@ -1,0 +1,65 @@
+name: growerp_manufacturing
+resolution: workspace
+description: A manufacturing package for the GrowERP system (BOM and Work Orders)
+version: 1.0.0
+homepage: https://www.growerp.com
+repository: https://github.com/growerp/growerp
+platforms:
+  android:
+  ios:
+  linux:
+  macos:
+  web:
+  windows:
+environment:
+  sdk: ^3.9.0
+  flutter: ^3.33.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  growerp_core: ^1.9.0
+  growerp_models: ^1.11.6
+  growerp_catalog: ^1.10.5
+  decimal: ^3.2.4
+  intl: ^0.20.2
+  global_configuration: ^2.0.0
+  equatable: ^2.0.5
+  flutter_bloc: ^9.1.1
+  bloc_concurrency: ^0.3.0
+  meta: ^1.3.0
+  responsive_framework: ^1.4.0
+  stream_transform: ^2.1.0
+  collection: ^1.16.0
+  dio: ^5.4.3
+  freezed_annotation: ^3.1.0
+  freezed: ^3.2.0
+  flutter_form_builder: ^10.1.0
+  form_builder_validators: ^11.2.0
+  flutter_test:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_driver:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
+  mockito: ^5.0.2
+  very_good_analysis: ^10.2.0
+  bloc_test: ^10.0.0
+  json_serializable: ^6.10.0
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+  generate: true
+
+  assets:
+    - packages/growerp_core/images/growerp.png
+    - packages/growerp_core/images/crm.png
+    - packages/growerp_core/images/growerp.jpg
+    - packages/growerp_core/images/growerpDark.jpg
+    - packages/growerp_core/images/growerp100.png
+    - packages/growerp_core/images/growerpDark100.png

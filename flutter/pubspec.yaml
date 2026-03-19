@@ -19,6 +19,8 @@ workspace:
   - packages/growerp_courses/example
   - packages/growerp_inventory
   - packages/growerp_inventory/example
+  - packages/growerp_manufacturing
+  - packages/growerp_manufacturing/example
   - packages/growerp_marketing
   - packages/growerp_marketing/example
   - packages/growerp_models
@@ -57,6 +59,8 @@ melos:
     - packages/growerp_catalog/example
     - packages/growerp_inventory
     - packages/growerp_inventory/example
+    - packages/growerp_manufacturing
+    - packages/growerp_manufacturing/example
     - packages/growerp_sales
     - packages/growerp_sales/example
     - packages/growerp_order_accounting

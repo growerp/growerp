@@ -56,6 +56,7 @@ This directory contains comprehensive documentation for extending and developing
 - **[Data Model Basic Guide](./basic_explanation_of_the_frontend_REST_Backend_data_models.md)** - Frontend/Backend data models
 - **[Flutter-Moqui REST Backend Interface](./Flutter_Moqui_REST_Backend_Interface.md)** - Complete REST API communication guide with code examples
 - **[Integration Test Guide](./Integration_Test_Guide.md)** ⭐ **NEW!** - Comprehensive guide to GrowERP's integration testing framework
+- **[Manufacturing Lifecycle Test](./Manufacturing_Lifecycle_Test.md)** - End-to-end manufacturing workflow: BOM, work orders, purchase/receive, production, shipment, and accounting
 - **[Invoice Scan Documentation](./Invoice_Scan_Documentation.md)** - AI-powered invoice processing ⭐ **NEW!**
 - **[Timezone Management Guide](./GrowERP_Timezone_Management_Guide.md)** - Handle timezone differences
 - **[Timezone Quick Reference](./GrowERP_Timezone_Quick_Reference.md)** - Quick timezone guide
@@ -289,6 +290,7 @@ BlocListener<UserBloc, UserState>(
 | **Deep linking architecture** | [Deep Linking Architecture](./deep_linking_architecture.md) | System flow |
 | **HTTPS deep links (production)** | [Deep Linking Production Setup](./deep_linking_production_setup.md) | Server configuration |
 | **Integration test framework** | [Integration Test Guide](./Integration_Test_Guide.md) | Complete guide |
+| **Manufacturing workflow / test** | [Manufacturing Lifecycle Test](./Manufacturing_Lifecycle_Test.md) | Complete guide |
 | **Landing page implementation (Phase 12)** | [Assessment Landing Page Explanation](./Assessment_Landing_Page_Explanation.md) | Complete guide |
 | **FTL + Flutter integration** | [Assessment Landing Page Explanation](./Assessment_Landing_Page_Explanation.md) | Architecture, Runtime Behavior |
 | **Assessment app deployment** | [Assessment Landing Page Explanation](./Assessment_Landing_Page_Explanation.md) | Build & Deployment |

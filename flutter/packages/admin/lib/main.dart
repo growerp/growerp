@@ -23,6 +23,7 @@ import 'package:growerp_marketing/growerp_marketing.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_user_company/growerp_user_company.dart';
 import 'package:growerp_website/growerp_website.dart';
+import 'package:growerp_manufacturing/growerp_manufacturing.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 import 'package:growerp_outreach/growerp_outreach.dart';
 import 'package:growerp_courses/growerp_courses.dart';
@@ -230,6 +231,7 @@ List<LocalizationsDelegate> delegates = [
   UserCompanyLocalizations.delegate,
   CatalogLocalizations.delegate,
   InventoryLocalizations.delegate,
+  ManufacturingLocalizations.delegate,
   OrderAccountingLocalizations.delegate,
   WebsiteLocalizations.delegate,
   SalesLocalizations.delegate,
@@ -241,6 +243,7 @@ List<Map<String, GrowerpWidgetBuilder>> adminWidgetRegistrations = [
   getUserCompanyWidgets(),
   getCatalogWidgets(),
   getInventoryWidgets(),
+  getManufacturingWidgets(),
   getOrderAccountingWidgets(),
   getActivityWidgets(),
   getMarketingWidgets(),
@@ -265,6 +268,7 @@ List<BlocProvider> getAdminBlocProviders(
     ...getInventoryBlocProviders(restClient, classificationId),
     ...getUserCompanyBlocProviders(restClient, classificationId),
     ...getCatalogBlocProviders(restClient, classificationId),
+    ...getManufacturingBlocProviders(restClient),
     ...getOrderAccountingBlocProviders(restClient, classificationId),
     ...getSalesBlocProviders(restClient),
     ...getMarketingBlocProviders(restClient),

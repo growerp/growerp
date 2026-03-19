@@ -3225,4 +3225,57 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="orderItemSeqId" entity-alias="ORDITEM" />
     </view-entity>
 
+    <view-entity entity-name="BomItemAndProductDetail" package="growerp.manufacturing">
+        <member-entity entity-alias="PA" entity-name="mantle.product.ProductAssoc"/>
+        <member-entity entity-alias="PP" entity-name="mantle.product.Product"
+            join-from-alias="PA" join-type="outer">
+            <key-map field-name="productId"/>
+        </member-entity>
+        <member-entity entity-alias="CP" entity-name="mantle.product.Product"
+            join-from-alias="PA" join-type="outer">
+            <key-map field-name="toProductId" related="productId"/>
+        </member-entity>
+        <alias name="productId" entity-alias="PA"/>
+        <alias name="toProductId" entity-alias="PA"/>
+        <alias name="productAssocTypeEnumId" entity-alias="PA"/>
+        <alias name="fromDate" entity-alias="PA"/>
+        <alias name="thruDate" entity-alias="PA"/>
+        <alias name="quantity" entity-alias="PA"/>
+        <alias name="scrapFactor" entity-alias="PA"/>
+        <alias name="sequenceNum" entity-alias="PA"/>
+        <alias name="ownerPartyId" entity-alias="PP"/>
+        <alias name="productPseudoId" entity-alias="PP" field="pseudoId"/>
+        <alias name="productName" entity-alias="PP"/>
+        <alias name="componentPseudoId" entity-alias="CP" field="pseudoId"/>
+        <alias name="componentName" entity-alias="CP" field="productName"/>
+    </view-entity>
+
+    <view-entity entity-name="WorkOrderAndProductDetail" package="growerp.manufacturing">
+        <member-entity entity-alias="WE" entity-name="mantle.work.effort.WorkEffort"/>
+        <member-entity entity-alias="WEP" entity-name="mantle.work.effort.WorkEffortProduct"
+            join-from-alias="WE" join-optional="true">
+            <key-map field-name="workEffortId"/>
+            <entity-condition>
+                <econdition field-name="typeEnumId" value="WeptProduce"/>
+            </entity-condition>
+        </member-entity>
+        <member-entity entity-alias="P" entity-name="mantle.product.Product"
+            join-from-alias="WEP" join-optional="true">
+            <key-map field-name="productId"/>
+        </member-entity>
+        <alias name="workEffortId" entity-alias="WE"/>
+        <alias name="workEffortPseudoId" entity-alias="WE"/>
+        <alias name="ownerPartyId" entity-alias="WE"/>
+        <alias name="workEffortName" entity-alias="WE"/>
+        <alias name="statusId" entity-alias="WE"/>
+        <alias name="estimatedStartDate" entity-alias="WE"/>
+        <alias name="estimatedCompletionDate" entity-alias="WE"/>
+        <alias name="actualStartDate" entity-alias="WE"/>
+        <alias name="actualCompletionDate" entity-alias="WE"/>
+        <alias name="productId" entity-alias="WEP"/>
+        <alias name="estimatedQuantity" entity-alias="WEP"/>
+        <alias name="productPseudoId" entity-alias="P" field="pseudoId"/>
+        <alias name="productName" entity-alias="P"/>
+    </view-entity>
+
 </entities>

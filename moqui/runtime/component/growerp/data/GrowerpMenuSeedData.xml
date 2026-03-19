@@ -71,6 +71,8 @@ along with this software (see the LICENSE.md file). If not, see
         title="orders" route="/orders" iconName="shopping_cart" widgetName="SalesOrderList" sequenceNum="50"/>
     <growerp.menu.MenuItem menuItemId="ADMIN_INVENTORY" menuConfigurationId="ADMIN_DEFAULT" itemKey="outgoingShipments"
         title="inventory" route="/inventory" iconName="warehouse" widgetName="OutgoingShipmentList" sequenceNum="60"/>
+    <growerp.menu.MenuItem menuItemId="ADMIN_MANUFACTURING" menuConfigurationId="ADMIN_DEFAULT"
+        title="Manufacturing" route="/manufacturing" iconName="precision_manufacturing" widgetName="WorkOrderList" sequenceNum="65"/>
     <growerp.menu.MenuItem menuItemId="ADMIN_ACC_SALES" menuConfigurationId="ADMIN_DEFAULT" itemKey="salesInvoicesNotPaidCount"
         title="Acct Sales" route="/acct-sales" iconName="receipt_long" widgetName="SalesInvoiceList" sequenceNum="70"/>
     <growerp.menu.MenuItem menuItemId="ADMIN_ACC_PURCHASE" menuConfigurationId="ADMIN_DEFAULT" itemKey="purchInvoicesNotPaidCount"
@@ -161,6 +163,12 @@ along with this software (see the LICENSE.md file). If not, see
         title="Assets" iconName="money" widgetName="AssetList" sequenceNum="30"/>
     <growerp.menu.MenuItem menuItemId="ADMIN_INV_LOC" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_INVENTORY"
         title="WH Locations" iconName="location_pin" widgetName="LocationList" sequenceNum="40"/>
+
+    <!-- ADMIN_MANUFACTURING children -->
+    <growerp.menu.MenuItem menuItemId="ADMIN_MFG_WO" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_MANUFACTURING"
+        title="Work Orders" iconName="precision_manufacturing" widgetName="WorkOrderList" sequenceNum="10"/>
+    <growerp.menu.MenuItem menuItemId="ADMIN_MFG_BOM" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_MANUFACTURING"
+        title="Bill of Materials" iconName="schema" widgetName="BomList" sequenceNum="20"/>
 
     <!-- ADMIN_ACC_SALES children -->
     <growerp.menu.MenuItem menuItemId="ADMIN_ACCS_INVOICES" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_ACC_SALES"
