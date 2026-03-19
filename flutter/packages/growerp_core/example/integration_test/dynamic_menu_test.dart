@@ -155,6 +155,12 @@ void main() {
     await DynamicMenuTest.addMenuItems(tester, testMenuItems);
     await DynamicMenuTest.checkMenuItems(tester);
 
+    // Verify Company A's custom menu items are not visible to a new company's user.
+    await DynamicMenuTest.verifyMenuIsolation(
+      tester,
+      testMenuItems.map((m) => m.title).toList(),
+    );
+
     // Update menu items
     await DynamicMenuTest.updateMenuItems(tester, updatedMenuItems);
     await DynamicMenuTest.checkMenuItems(tester);

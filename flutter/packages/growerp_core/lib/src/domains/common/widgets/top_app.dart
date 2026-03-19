@@ -210,20 +210,38 @@ class _TopAppState extends State<TopApp> {
             _localizationsDelegates.addAll(widget.extraDelegates);
             return BlocBuilder<LocaleBloc, LocaleState>(
               builder: (context, localeState) {
-                return BlocListener<AuthBloc, AuthState>(
-                  listenWhen: (previous, current) =>
-                      current.message != null &&
-                      previous.message != current.message,
-                  listener: (context, authState) {
-                    if (authState.message != null &&
-                        authState.message!.isNotEmpty) {
-                      final isError = authState.status == AuthStatus.failure;
-                      final message = authState.message!;
-                      // Use a retry mechanism to wait for scaffold messenger
-                      // to become available after navigation
-                      _showMessageWithRetry(message, isError);
-                    }
-                  },
+                return MultiBlocListener(
+                  listeners: [
+                    BlocListener<AuthBloc, AuthState>(
+                      listenWhen: (previous, current) =>
+                          current.message != null &&
+                          previous.message != current.message,
+                      listener: (context, authState) {
+                        if (authState.message != null &&
+                            authState.message!.isNotEmpty) {
+                          final isError =
+                              authState.status == AuthStatus.failure;
+                          final message = authState.message!;
+                          // Use a retry mechanism to wait for scaffold messenger
+                          // to become available after navigation
+                          _showMessageWithRetry(message, isError);
+                        }
+                      },
+                    ),
+                    // Reload menu whenever a user authenticates so that
+                    // switching companies/users always fetches fresh menu data.
+                    BlocListener<AuthBloc, AuthState>(
+                      listenWhen: (previous, current) =>
+                          current.status == AuthStatus.authenticated &&
+                          previous.status != AuthStatus.authenticated,
+                      listener: (context, authState) {
+                        final menuBloc = context.read<MenuConfigBloc>();
+                        if (menuBloc.state.status != MenuConfigStatus.loading) {
+                          menuBloc.add(const MenuConfigLoad(userVersion: true));
+                        }
+                      },
+                    ),
+                  ],
                   child: GestureDetector(
                     onTap: () {
                       FocusScopeNode currentFocus = FocusScope.of(context);
@@ -401,7 +419,7 @@ class _TopAppState extends State<TopApp> {
                       routerConfig: widget.router,
                     ),
                   ), // Close GestureDetector
-                ); // Close BlocListener
+                ); // Close MultiBlocListener
               },
             );
           },

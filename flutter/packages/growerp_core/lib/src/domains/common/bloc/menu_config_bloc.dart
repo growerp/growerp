@@ -68,6 +68,10 @@ class MenuConfigBloc extends Bloc<MenuConfigEvent, MenuConfigState> {
     try {
       emit(state.copyWith(status: MenuConfigStatus.loading));
 
+      // Always clear cache before loading so a different user's session
+      // never serves stale data from a previous user's request.
+      await clearRestCache();
+
       // Use provided appId or default from bloc
       final targetAppId = event.appId ?? appId;
 

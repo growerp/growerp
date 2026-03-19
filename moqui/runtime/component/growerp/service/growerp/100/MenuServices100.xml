@@ -44,23 +44,22 @@ Service definitions for menu configuration and menu item management
       <service-call out-map="context"
         name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
 
-      <!-- When userVersion=true, use authenticated user's context for user-specific config -->
+      <!-- When userVersion=true, look for user+owner specific config first -->
       <if condition="userVersion">
-        <set field="lookupUserId" from="ec.user.userId" />
-        <set field="lookupOwnerPartyId" from="ownerPartyId" />
+        <entity-find entity-name="growerp.menu.MenuConfiguration" list="userConfigs">
+          <field-map field-name="menuConfigurationId" from="menuConfigurationId" ignore-if-empty="true"/>
+          <econdition field-name="appId" from="appId" ignore-if-empty="true"/>
+          <econdition field-name="userId" from="ec.user.userId"/>
+          <econdition field-name="ownerPartyId" from="ownerPartyId"/>
+        </entity-find>
       </if>
 
-      <entity-find entity-name="growerp.menu.MenuConfiguration" list="userConfigs">
-        <field-map field-name="menuConfigurationId" from="menuConfigurationId" ignore-if-empty="true"/>
-        <econdition field-name="appId" from="appId" ignore-if-empty="true"/>
-        <econdition field-name="userId" from="lookupUserId" ignore-if-empty="true"/>
-        <econdition field-name="ownerPartyId" from="lookupOwnerPartyId" ignore-if-empty="true"/>
-      </entity-find>
-
-      <!-- If user-specific config not found and userVersion was requested, fall back to seed data -->
+      <!-- Fall back to seed data (userId is null) when userVersion=false or no user config found -->
       <if condition="!userConfigs">
         <entity-find entity-name="growerp.menu.MenuConfiguration" list="userConfigs">
-          <econdition field-name="appId" from="appId"/>
+          <field-map field-name="menuConfigurationId" from="menuConfigurationId" ignore-if-empty="true"/>
+          <econdition field-name="appId" from="appId" ignore-if-empty="true"/>
+          <econdition field-name="userId" operator="is-null"/>
         </entity-find>
       </if>
 

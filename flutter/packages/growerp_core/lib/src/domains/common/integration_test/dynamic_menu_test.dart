@@ -481,6 +481,71 @@ class DynamicMenuTest {
     );
   }
 
+  /// Verify that menu customizations made by one company are not visible to a
+  /// different company's users.
+  ///
+  /// 1. Logs out of the current session.
+  /// 2. Creates a brand-new company with a fresh admin user.
+  /// 3. Waits for the menu to reload (handled by TopApp's auth listener).
+  /// 4. Opens the menu config dialog and asserts that none of [titlesNotExpected]
+  ///    appear — they belong to the first company and must remain isolated.
+  /// 5. Logs out from the new company, restores the original test state, and
+  ///    logs back into the first company so the test can continue.
+  static Future<void> verifyMenuIsolation(
+    WidgetTester tester,
+    List<String> titlesNotExpected,
+  ) async {
+    // Save state so we can restore Company A's session afterwards.
+    final SaveTest savedTest = await PersistFunctions.getTest();
+
+    // Close the menu dialog if open, then log out of Company A.
+    await closeMenuItems(tester);
+    await CommonTest.logout(tester);
+
+    // Reset persisted test state (keep sequence so email addresses stay unique)
+    // but clear admin so createCompanyAndAdmin creates a new company.
+    await PersistFunctions.persistTest(SaveTest(sequence: savedTest.sequence));
+
+    // Register and log in as a brand-new company (Company B).
+    await CommonTest.createCompanyAndAdmin(tester);
+
+    // Wait for the menu to reload for the new user (TopApp triggers MenuConfigLoad
+    // automatically on authentication).
+    for (int i = 0; i < 100; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+      if (!tester.any(find.byType(CircularProgressIndicator))) break;
+    }
+    await tester.pumpAndSettle(const Duration(seconds: 3));
+
+    // Open the menu config dialog.
+    await selectMenuItems(tester);
+
+    // Verify Company A's custom menu items are NOT present for Company B.
+    for (final title in titlesNotExpected) {
+      expect(
+        find.text(title),
+        findsNothing,
+        reason:
+            'Menu item "$title" from a different company should not be visible '
+            'to a new company user',
+      );
+    }
+
+    await closeMenuItems(tester);
+
+    // Log out of Company B, restore Company A's state and log back in.
+    await CommonTest.logout(tester);
+    await PersistFunctions.persistTest(savedTest);
+    await CommonTest.login(tester);
+
+    // Wait for Company A's menu to reload.
+    for (int i = 0; i < 100; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+      if (!tester.any(find.byType(CircularProgressIndicator))) break;
+    }
+    await tester.pumpAndSettle(const Duration(seconds: 3));
+  }
+
   /// Reset menu to default configuration
   /// Calls selectMenuItems first since list may be closed
   static Future<void> resetMenuToDefault(WidgetTester tester) async {
