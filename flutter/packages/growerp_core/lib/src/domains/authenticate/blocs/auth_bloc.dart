@@ -100,11 +100,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       // get session data from last time
       Authenticate? localAuthenticate =
           await PersistFunctions.getAuthenticate();
-      if (localAuthenticate != null &&
-          localAuthenticate.apiKey != null &&
-          localAuthenticate.company?.partyId != null) {
-        // check if company still valid, not for user support
-        if (localAuthenticate.company!.partyId != 'DefaultSettings') {
+      if (localAuthenticate != null && localAuthenticate.apiKey != null) {
+        // check if company still valid; skip if no company (support users) or DefaultSettings
+        if (localAuthenticate.company?.partyId != null &&
+            localAuthenticate.company!.partyId != 'DefaultSettings') {
           Companies? companies = await restClient.getCompanies(
             limit: 1,
             searchString: localAuthenticate.company!.partyId!,
