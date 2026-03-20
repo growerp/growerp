@@ -118,33 +118,12 @@ class ManufacturingDashboard extends StatelessWidget {
           return const LoadingIndicator();
         }
 
-        final authenticate = state.authenticate!;
+        final dashboardItems = manufacturingMenuConfig.menuItems
+            .where((item) => item.itemKey != 'MFG_MAIN')
+            .toList();
         return DashboardGrid(
-          itemCount: 3,
-          itemBuilder: (context, index) {
-            if (index == 0) {
-              return DashboardCard(
-                title: 'Products',
-                iconName: 'category',
-                route: '/products',
-                stats: 'Products: ${authenticate.stats?.products ?? 0}',
-              );
-            } else if (index == 1) {
-              return DashboardCard(
-                title: 'Bill of Materials',
-                iconName: 'schema',
-                route: '/manufacturing/bom',
-                stats: 'BOMs defined',
-              );
-            } else {
-              return DashboardCard(
-                title: 'Work Orders',
-                iconName: 'precision_manufacturing',
-                route: '/manufacturing/workOrder',
-                stats: 'Production runs',
-              );
-            }
-          },
+          items: dashboardItems,
+          stats: state.authenticate!.stats,
         );
       },
     );

@@ -613,6 +613,7 @@ class _DashboardGridState extends State<DashboardGrid> {
     String effectiveType(MenuItem m) {
       if (m.isMinimized) return m.tileType;
       if (m.route != null && chartWidgets.containsKey(m.route)) return 'graphic';
+      if (getStatsForRoute(m.route, widget.stats) != null) return 'statistic';
       return m.tileType;
     }
 
