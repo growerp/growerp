@@ -28,7 +28,6 @@ import 'package:growerp_activity/growerp_activity.dart';
 
 import 'src/application/application.dart';
 import 'src/email_template/email_template.dart';
-import 'views/support_dashboard.dart';
 import 'views/support_dashboard_content.dart';
 //webactivate  import 'package:web/web.dart' as web;
 
@@ -142,6 +141,25 @@ class _SupportAppState extends State<SupportApp> {
                 dashboardBuilder: () => const SupportDashboardContent(),
                 widgetLoader: WidgetRegistry.getWidget,
                 appTitle: 'GrowERP Support',
+                dashboardFabBuilder: (menuConfig) => Builder(
+                  builder: (fabContext) => FloatingActionButton(
+                    key: const Key('menuFab'),
+                    heroTag: 'menuFab',
+                    tooltip: 'Manage Menu Items',
+                    onPressed: () {
+                      showDialog(
+                        context: fabContext,
+                        builder: (dialogContext) => BlocProvider.value(
+                          value: fabContext.read<MenuConfigBloc>(),
+                          child: MenuItemListDialog(
+                            menuConfiguration: menuConfig,
+                          ),
+                        ),
+                      );
+                    },
+                    child: const Icon(Icons.menu),
+                  ),
+                ),
                 deepLinkService: _deepLinkService,
               ),
             );
@@ -202,7 +220,6 @@ List<Map<String, GrowerpWidgetBuilder>> supportWidgetRegistrations = [
   getActivityWidgets(),
   // App-specific widgets
   {
-    'SupportDashboard': (args) => const SupportDashboard(),
     'AboutForm': (args) => const AboutForm(),
     'ApplicationList': (args) => const ApplicationList(),
     'RestRequestList': (args) => const RestRequestList(),

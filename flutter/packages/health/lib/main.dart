@@ -27,7 +27,7 @@ import 'package:flutter/material.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'views/health_dashboard.dart';
+import 'views/health_dashboard_content.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 //webactivate import 'package:web/web.dart' as web;
 
@@ -140,9 +140,28 @@ class _HealthAppState extends State<HealthApp> {
             router = createDynamicAppRouter(
               [state.menuConfiguration!],
               config: DynamicRouterConfig(
+                dashboardBuilder: () => const HealthDashboardContent(),
                 widgetLoader: WidgetRegistry.getWidget,
                 appTitle: 'GrowERP Health',
-                // No accounting submenu for health app
+                dashboardFabBuilder: (menuConfig) => Builder(
+                  builder: (fabContext) => FloatingActionButton(
+                    key: const Key('menuFab'),
+                    heroTag: 'menuFab',
+                    tooltip: 'Manage Menu Items',
+                    onPressed: () {
+                      showDialog(
+                        context: fabContext,
+                        builder: (dialogContext) => BlocProvider.value(
+                          value: fabContext.read<MenuConfigBloc>(),
+                          child: MenuItemListDialog(
+                            menuConfiguration: menuConfig,
+                          ),
+                        ),
+                      );
+                    },
+                    child: const Icon(Icons.menu),
+                  ),
+                ),
               ),
             );
           } else {
@@ -207,7 +226,7 @@ List<Map<String, GrowerpWidgetBuilder>> healthWidgetRegistrations = [
   getWebsiteWidgets(),
   // App-specific widgets
   {
-    'HealthDashboard': (args) => const HealthDashboard(),
+    'HealthDashboardContent': (args) => const HealthDashboardContent(),
     'AboutForm': (args) => const AboutForm(),
   },
 ];

@@ -15,6 +15,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
+import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 
 class FreelanceDbForm extends StatelessWidget {
   const FreelanceDbForm({super.key});
@@ -33,43 +34,38 @@ class FreelanceDbForm extends StatelessWidget {
               return const Center(child: CircularProgressIndicator());
             }
 
-            // Get dashboard options from menu configuration (active items only)
-            // Exclude the Main/Dashboard item itself (route '/'), About, and accounting routes
+            // Top-level active items, excluding the root '/', '/about',
+            // and accounting sub-items (those starting with /accounting/)
             final dashboardOptions =
                 menuConfig.menuItems
                     .where(
                       (option) =>
                           option.isActive &&
+                          option.route != null &&
                           option.route != '/' &&
                           option.route != '/about' &&
-                          option.route != '/accounting' &&
-                          !(option.route?.startsWith('/accounting/') ?? false),
+                          !(option.route!.startsWith('/accounting/') &&
+                              option.route != '/accounting'),
                     )
                     .toList()
                   ..sort((a, b) => a.sequenceNum.compareTo(b.sequenceNum));
 
             return Scaffold(
               backgroundColor: Colors.transparent,
-              floatingActionButton: FloatingActionButton(
-                key: const Key('freelanceFab'),
-                tooltip: 'Manage Menu Items',
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (dialogContext) => BlocProvider.value(
-                      value: context.read<MenuConfigBloc>(),
-                      child: MenuItemListDialog(menuConfiguration: menuConfig),
-                    ),
-                  );
-                },
-                child: const Icon(Icons.menu),
-              ),
               body: DashboardGrid(
                 items: dashboardOptions,
                 stats: stats,
                 onToggleMinimize: (id) => context
                     .read<MenuConfigBloc>()
                     .add(MenuItemToggleMinimize(id)),
+                chartBuilder: (route) {
+                  if (route == '/acct-reports' ||
+                      route == '/accounting' ||
+                      route == '/accounting/reports') {
+                    return const RevenueExpenseChartMini();
+                  }
+                  return null;
+                },
               ),
             );
           },
