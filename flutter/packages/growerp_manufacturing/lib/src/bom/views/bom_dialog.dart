@@ -313,6 +313,9 @@ class BomDialogState extends State<BomDialog> {
         product: Product(
           pseudoId: _pseudoIdController.text.trim(),
           productName: _productNameController.text.trim(),
+          productTypeId: 'Physical Good',
+          useWarehouse: true,
+          assetClassId: 'AsClsInventoryFin',
         ),
         classificationId: _classificationId,
       );
