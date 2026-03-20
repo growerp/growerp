@@ -194,6 +194,7 @@ GoRouter _buildStaticRouter(StaticRouterConfig config) {
               menuIndex: 0,
               actions: getMainActions(context),
               tabWidgetLoader: config.tabWidgetLoader,
+              suppressBlocMenuConfig: true,
               child: getDashboard(),
             );
           } else {
@@ -230,6 +231,7 @@ GoRouter _buildStaticRouter(StaticRouterConfig config) {
               menuConfiguration: config.menuConfig,
               menuIndex: menuIndex,
               tabWidgetLoader: config.tabWidgetLoader,
+              suppressBlocMenuConfig: true,
               child: child,
             );
           },
