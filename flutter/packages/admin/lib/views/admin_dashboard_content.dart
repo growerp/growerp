@@ -68,6 +68,9 @@ class AdminDashboardContent extends StatelessWidget {
                 onToggleMinimize: (id) => context
                     .read<MenuConfigBloc>()
                     .add(MenuItemToggleMinimize(id)),
+                onRefresh: () async {
+                  context.read<AuthBloc>().add(AuthLoad());
+                },
                 // Provide the revenue/expense mini-chart for the accounting tile.
                 // DashboardGrid auto-upgrades it to full-width 4-row graphic tile.
                 chartBuilder: (route) {

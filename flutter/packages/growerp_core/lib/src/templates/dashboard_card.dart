@@ -12,6 +12,7 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+import 'dart:math' show min;
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -20,6 +21,31 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:go_router/go_router.dart';
 import 'package:growerp_models/growerp_models.dart';
 import '../domains/domains.dart';
+
+// ---------------------------------------------------------------------------
+// Per-category accent color
+// ---------------------------------------------------------------------------
+
+/// Returns a distinct accent [Color] for a given route prefix so that each
+/// dashboard module has its own visual identity.
+Color _accentForRoute(String? route, Color fallback) {
+  if (route == null) return fallback;
+  if (route.startsWith('/order')) { return const Color(0xFF3EDDBF); } // teal
+  if (route.startsWith('/account')) { return const Color(0xFF7986CB); } // indigo
+  if (route.startsWith('/catalog')) { return const Color(0xFFFFB300); } // amber
+  if (route.startsWith('/crm') || route.startsWith('/opportunit')) {
+    return const Color(0xFFAB47BC); // purple
+  }
+  if (route.startsWith('/user')) { return const Color(0xFF42A5F5); } // blue
+  if (route.startsWith('/inventor') || route.startsWith('/shipment')) {
+    return const Color(0xFFFF7043); // deep-orange
+  }
+  if (route.startsWith('/task') || route.startsWith('/activit')) {
+    return const Color(0xFF26A69A); // teal-700
+  }
+  if (route.startsWith('/asset')) { return const Color(0xFF8D6E63); } // brown
+  return fallback;
+}
 
 /// Dashboard card widget with glassmorphism, gradients, and animations.
 ///
@@ -74,6 +100,7 @@ class DashboardCard extends StatefulWidget {
   State<DashboardCard> createState() => _DashboardCardState();
 }
 
+
 class _DashboardCardState extends State<DashboardCard>
     with SingleTickerProviderStateMixin {
   bool _isHovered = false;
@@ -99,7 +126,9 @@ class _DashboardCardState extends State<DashboardCard>
           ),
         );
 
-    Future.delayed(Duration(milliseconds: 50 * widget.animationIndex), () {
+    // Cap total stagger at 300 ms so the grid fills in snappily.
+    final delay = min(25 * widget.animationIndex, 300);
+    Future.delayed(Duration(milliseconds: delay), () {
       if (mounted) {
         _entranceController.forward();
       }
@@ -118,6 +147,9 @@ class _DashboardCardState extends State<DashboardCard>
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final isPhone = isAPhone(context);
     final minimized = widget.isMinimized;
+    final accent = minimized
+        ? colorScheme.outline
+        : _accentForRoute(widget.route, colorScheme.primary);
 
     return FadeTransition(
       opacity: _fadeAnimation,
@@ -140,12 +172,11 @@ class _DashboardCardState extends State<DashboardCard>
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: (minimized
-                            ? colorScheme.outline
-                            : colorScheme.primary)
-                        .withValues(alpha: _isHovered ? 0.3 : 0.1),
-                    blurRadius: _isHovered ? 20 : 10,
-                    spreadRadius: _isHovered ? 2 : 0,
+                    color: accent.withValues(
+                      alpha: _isHovered ? 0.35 : 0.12,
+                    ),
+                    blurRadius: _isHovered ? 24 : 10,
+                    spreadRadius: _isHovered ? 3 : 0,
                     offset: Offset(0, _isHovered ? 8 : 4),
                   ),
                 ],
@@ -170,21 +201,16 @@ class _DashboardCardState extends State<DashboardCard>
                                 ),
                               ]
                             : [
-                                colorScheme.primaryContainer.withValues(
-                                  alpha: isDark ? 0.7 : 0.8,
-                                ),
-                                colorScheme.secondaryContainer.withValues(
-                                  alpha: isDark ? 0.5 : 0.6,
+                                accent.withValues(alpha: isDark ? 0.18 : 0.14),
+                                colorScheme.surface.withValues(
+                                  alpha: isDark ? 0.85 : 0.92,
                                 ),
                               ],
                       ),
                       border: Border.all(
-                        color: (minimized
-                                ? colorScheme.outline
-                                : colorScheme.primary)
-                            .withValues(
-                              alpha: _isHovered ? 0.5 : (minimized ? 0.15 : 0.2),
-                            ),
+                        color: accent.withValues(
+                          alpha: _isHovered ? 0.55 : (minimized ? 0.15 : 0.25),
+                        ),
                         width: 1.5,
                       ),
                     ),
@@ -311,130 +337,288 @@ class _DashboardCardState extends State<DashboardCard>
         widget.tileType == 'graphic' && widget.chartWidget != null;
     final isStatistic =
         widget.tileType == 'statistic' && widget.stats != null && !isPhone;
+    final accent = _accentForRoute(widget.route, colorScheme.primary);
 
-    return Column(
-      mainAxisAlignment:
-          isGraphic ? MainAxisAlignment.start : MainAxisAlignment.center,
-      mainAxisSize: isGraphic ? MainAxisSize.max : MainAxisSize.min,
+    if (isStatistic) {
+      return _buildStatisticContent(context, colorScheme, isDark, accent);
+    }
+
+    return Stack(
       children: [
-        // Icon
-        Flexible(
-          flex: isGraphic ? 1 : (isPhone ? 1 : 2),
-          child: Container(
-            padding: EdgeInsets.all(isPhone ? 8 : 12),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: RadialGradient(
-                colors: [
-                  colorScheme.primary.withValues(alpha: 0.2),
-                  colorScheme.primary.withValues(alpha: 0.05),
-                ],
+        Column(
+          mainAxisAlignment:
+              isGraphic ? MainAxisAlignment.start : MainAxisAlignment.center,
+          mainAxisSize: isGraphic ? MainAxisSize.max : MainAxisSize.min,
+          children: [
+            // Icon
+            Flexible(
+              flex: isGraphic ? 1 : (isPhone ? 1 : 2),
+              child: Container(
+                padding: EdgeInsets.all(isPhone ? 8 : 12),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: RadialGradient(
+                    colors: [
+                      accent.withValues(alpha: 0.25),
+                      accent.withValues(alpha: 0.05),
+                    ],
+                  ),
+                ),
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: IconTheme(
+                    data: IconThemeData(color: accent, size: 32),
+                    child:
+                        getIconFromRegistry(widget.iconName) ??
+                        const Icon(Icons.dashboard),
+                  ),
+                ),
               ),
             ),
-            child: FittedBox(
-              fit: BoxFit.scaleDown,
-              child: IconTheme(
-                data: IconThemeData(color: colorScheme.primary, size: 32),
-                child:
-                    getIconFromRegistry(widget.iconName) ??
-                    const Icon(Icons.dashboard),
+            const SizedBox(height: 8),
+            // Title
+            Flexible(
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  isPhone ? widget.title.replaceFirst(' ', '\n') : widget.title,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: isPhone ? 13 : 15,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.3,
+                    color: colorScheme.onSurface,
+                  ),
+                ),
               ),
+            ),
+            // Chart (graphic type)
+            if (isGraphic) ...[
+              const SizedBox(height: 8),
+              Expanded(
+                flex: 3,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: widget.chartWidget!,
+                ),
+              ),
+            ],
+            // Optional action button
+            if (widget.actionLabel != null && !isPhone) ...[
+              const SizedBox(height: 8),
+              Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: widget.onAction,
+                  borderRadius: BorderRadius.circular(6),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: accent.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(
+                        color: accent.withValues(alpha: 0.3),
+                      ),
+                    ),
+                    child: Text(
+                      widget.actionLabel!,
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: accent,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+        // Click-affordance arrow badge (navigation tiles, desktop only)
+        if (!isGraphic && !isStatistic && !isPhone && widget.route != null)
+          Positioned(
+            bottom: 6,
+            right: 6,
+            child: Icon(
+              Icons.arrow_forward_rounded,
+              size: 14,
+              color: accent.withValues(alpha: 0.5),
             ),
           ),
-        ),
-        const SizedBox(height: 8),
-        // Title
-        Flexible(
-          child: ShaderMask(
-            shaderCallback: (bounds) => LinearGradient(
-              colors: [
-                colorScheme.onSurface,
-                colorScheme.onSurface.withValues(alpha: 0.8),
-              ],
-            ).createShader(bounds),
-            child: FittedBox(
-              fit: BoxFit.scaleDown,
-              child: Text(
-                isPhone ? widget.title.replaceFirst(' ', '\n') : widget.title,
+      ],
+    );
+  }
+
+  /// Split layout for statistic tiles: icon+title on the left, big numbers on the right.
+  Widget _buildStatisticContent(
+    BuildContext context,
+    ColorScheme colorScheme,
+    bool isDark,
+    Color accent,
+  ) {
+    final pairs = _parseStatPairs(widget.stats!);
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        // LEFT: icon + title
+        Expanded(
+          flex: 4,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: RadialGradient(
+                    colors: [
+                      accent.withValues(alpha: 0.25),
+                      accent.withValues(alpha: 0.05),
+                    ],
+                  ),
+                ),
+                child: IconTheme(
+                  data: IconThemeData(color: accent, size: 28),
+                  child:
+                      getIconFromRegistry(widget.iconName) ??
+                      const Icon(Icons.dashboard),
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                widget.title,
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  fontSize: isPhone ? 13 : 15,
+                  fontSize: 13,
                   fontWeight: FontWeight.w600,
                   letterSpacing: 0.3,
                   color: colorScheme.onSurface,
                 ),
-              ),
-            ),
-          ),
-        ),
-        // Chart (graphic type)
-        if (isGraphic) ...[
-          const SizedBox(height: 8),
-          Expanded(
-            flex: 3,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: widget.chartWidget!,
-            ),
-          ),
-        ],
-        // Stats text (statistic type)
-        if (isStatistic) ...[
-          const SizedBox(height: 4),
-          Flexible(
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-              decoration: BoxDecoration(
-                color: colorScheme.surface.withValues(alpha: 0.5),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Text(
-                widget.stats!,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: colorScheme.onSurface.withValues(alpha: 0.7),
-                  fontSize: 11,
-                ),
-                textAlign: TextAlign.center,
                 overflow: TextOverflow.ellipsis,
                 maxLines: 2,
               ),
+            ],
+          ),
+        ),
+        // Divider
+        Container(
+          width: 1,
+          height: 56,
+          margin: const EdgeInsets.symmetric(horizontal: 6),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                colorScheme.outline.withValues(alpha: 0.0),
+                colorScheme.outline.withValues(alpha: 0.3),
+                colorScheme.outline.withValues(alpha: 0.0),
+              ],
             ),
           ),
-        ],
-        // Optional action button
-        if (widget.actionLabel != null && !isPhone) ...[
-          const SizedBox(height: 8),
-          Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: widget.onAction,
-              borderRadius: BorderRadius.circular(6),
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color: colorScheme.primary.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(6),
-                  border: Border.all(
-                    color: colorScheme.primary.withValues(alpha: 0.3),
-                  ),
-                ),
+        ),
+        // RIGHT: stat numbers
+        Expanded(
+          flex: 6,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: pairs
+                .map((p) => _buildStatChip(colorScheme, accent, p, pairs.length))
+                .toList(),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStatChip(
+    ColorScheme colorScheme,
+    Color accent,
+    ({String label, String value}) pair,
+    int totalCount,
+  ) {
+    final numFontSize = totalCount == 1 ? 34.0 : (totalCount == 2 ? 28.0 : 22.0);
+    // Try to parse the value as a number for the count-up animation.
+    final numericValue = double.tryParse(pair.value);
+    return Expanded(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          if (numericValue != null)
+            TweenAnimationBuilder<double>(
+              tween: Tween(begin: 0, end: numericValue),
+              duration: const Duration(milliseconds: 800),
+              curve: Curves.easeOut,
+              builder: (_, value, child) => ShaderMask(
+                shaderCallback: (bounds) => LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [accent, accent.withValues(alpha: 0.7)],
+                ).createShader(bounds),
                 child: Text(
-                  widget.actionLabel!,
+                  value.toStringAsFixed(0),
                   style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                    color: colorScheme.primary,
+                    fontSize: numFontSize,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.white,
+                    height: 1.0,
                   ),
                 ),
               ),
+            )
+          else
+            ShaderMask(
+              shaderCallback: (bounds) => LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [accent, accent.withValues(alpha: 0.7)],
+              ).createShader(bounds),
+              child: Text(
+                pair.value,
+                style: TextStyle(
+                  fontSize: numFontSize,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.white,
+                  height: 1.0,
+                ),
+              ),
             ),
+          const SizedBox(height: 4),
+          Text(
+            pair.label,
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w500,
+              color: colorScheme.onSurface.withValues(alpha: 0.55),
+              letterSpacing: 0.3,
+            ),
+            textAlign: TextAlign.center,
+            overflow: TextOverflow.ellipsis,
           ),
         ],
-      ],
+      ),
     );
+  }
+
+  /// Parses "Label: value\nLabel2: value2" into a list of named records.
+  List<({String label, String value})> _parseStatPairs(String stats) {
+    return stats
+        .split('\n')
+        .map((line) {
+          final idx = line.indexOf(':');
+          if (idx == -1) return null;
+          return (
+            label: line.substring(0, idx).trim(),
+            value: line.substring(idx + 1).trim(),
+          );
+        })
+        .whereType<({String label, String value})>()
+        .toList();
   }
 }
 
@@ -458,12 +642,17 @@ class DashboardGrid extends StatefulWidget {
   /// Called when the user taps the minimize/restore button on a tile.
   final void Function(String menuItemId)? onToggleMinimize;
 
+  /// Optional pull-to-refresh callback. When provided a [RefreshIndicator]
+  /// wraps the scroll view.
+  final Future<void> Function()? onRefresh;
+
   const DashboardGrid({
     super.key,
     required this.items,
     this.stats,
     this.chartBuilder,
     this.onToggleMinimize,
+    this.onRefresh,
   });
 
   @override
@@ -595,6 +784,103 @@ class _DashboardGridState extends State<DashboardGrid> {
 
   // ── Build ──────────────────────────────────────────────────────────────────
 
+  // ── Greeting helpers ──────────────────────────────────────────────────────
+
+  String _greeting() {
+    final hour = DateTime.now().hour;
+    if (hour < 12) return 'Good morning';
+    if (hour < 17) return 'Good afternoon';
+    return 'Good evening';
+  }
+
+  String _formattedDate() {
+    final now = DateTime.now();
+    const months = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+    ];
+    return '${months[now.month - 1]} ${now.day}, ${now.year}';
+  }
+
+  Widget _buildGreetingHeader(
+    BuildContext context,
+    ColorScheme colorScheme,
+    bool isDark,
+  ) {
+    // Resolve user name from AuthBloc if available.
+    String name = '';
+    final authState = context.read<AuthBloc?>()?.state;
+    final firstName = authState?.authenticate?.user?.firstName;
+    if (firstName != null && firstName.isNotEmpty) name = ', $firstName';
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 20),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '${_greeting()}$name 👋',
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w700,
+                    color: colorScheme.onSurface,
+                    letterSpacing: 0.2,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  _formattedDate(),
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w400,
+                    color: colorScheme.onSurface.withValues(alpha: 0.55),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // Theme toggle
+          BlocBuilder<ThemeBloc, ThemeState>(
+            builder: (context, themeState) {
+              return Tooltip(
+                message: isDark ? 'Switch to light mode' : 'Switch to dark mode',
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(28),
+                    onTap: () =>
+                        context.read<ThemeBloc>().add(ThemeSwitch()),
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: colorScheme.surfaceContainerHighest
+                            .withValues(alpha: 0.5),
+                        border: Border.all(
+                          color: colorScheme.outline.withValues(alpha: 0.2),
+                        ),
+                      ),
+                      child: Icon(
+                        isDark
+                            ? Icons.light_mode_rounded
+                            : Icons.dark_mode_rounded,
+                        size: 20,
+                        color: colorScheme.onSurface.withValues(alpha: 0.75),
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -628,35 +914,26 @@ class _DashboardGridState extends State<DashboardGrid> {
 
     int mainCells(MenuItem m) => effectiveType(m) == 'graphic' ? 2 : 1;
 
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            colorScheme.surface,
-            colorScheme.surface.withValues(alpha: 0.95),
-            colorScheme.primaryContainer.withValues(alpha: isDark ? 0.15 : 0.1),
-          ],
-          stops: const [0.0, 0.5, 1.0],
-        ),
-      ),
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            // Store column width so _buildFeedback can size the floating card.
-            _colWidth =
-                (constraints.maxWidth - (crossAxisCount - 1) * 16) /
-                crossAxisCount;
+    final scrollContent = SingleChildScrollView(
+      physics: widget.onRefresh != null
+          ? const AlwaysScrollableScrollPhysics()
+          : null,
+      padding: const EdgeInsets.all(16),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          // Store column width so _buildFeedback can size the floating card.
+          _colWidth =
+              (constraints.maxWidth - (crossAxisCount - 1) * 16) /
+              crossAxisCount;
 
-            return Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                StaggeredGrid.count(
-                  crossAxisCount: crossAxisCount,
-                  mainAxisSpacing: 16,
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildGreetingHeader(context, colorScheme, isDark),
+              StaggeredGrid.count(
+                crossAxisCount: crossAxisCount,
+                mainAxisSpacing: 16,
                   crossAxisSpacing: 16,
                   children: _orderedItems.asMap().entries.map((entry) {
                     final index = entry.key;
@@ -796,8 +1073,32 @@ class _DashboardGridState extends State<DashboardGrid> {
             );
           },
         ),
+      );
+
+    final inner = Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            colorScheme.surface,
+            colorScheme.surface.withValues(alpha: 0.95),
+            colorScheme.primaryContainer.withValues(alpha: isDark ? 0.15 : 0.1),
+          ],
+          stops: const [0.0, 0.5, 1.0],
+        ),
       ),
+      child: scrollContent,
     );
+
+    if (widget.onRefresh != null) {
+      return RefreshIndicator(
+        onRefresh: widget.onRefresh!,
+        color: colorScheme.primary,
+        child: inner,
+      );
+    }
+    return inner;
   }
 }
 

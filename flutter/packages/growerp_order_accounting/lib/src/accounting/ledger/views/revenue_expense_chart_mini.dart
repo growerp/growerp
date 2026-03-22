@@ -62,23 +62,21 @@ class _RevenueExpenseChartMiniBody extends StatelessWidget {
     List<String> months, {
     bool showLabel = true,
   }) {
-    final grey =
-        Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.25);
+    final cs = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final lineColor = cs.onSurface.withValues(alpha: 0.18);
+    final gridColor = cs.onSurface.withValues(alpha: 0.08);
+    final labelColor = cs.onSurface.withValues(alpha: 0.3);
+
     // Shaped placeholder data mirroring a typical revenue/expense pattern
     // (6 series × 12 months): net revenue, cost of sales, sales exp,
     // gen/admin exp, other exp, net operating income
     const placeholderData = [
-      // net revenue — large peak around month 9
       [20, 25, 35, 45, 60, 80, 110, 140, 160, 130, 90, 40],
-      // cost of sales — medium peak
       [10, 12, 18, 22, 30, 40, 55, 70, 80, 65, 45, 20],
-      // sales expense — small, fairly flat
       [5, 5, 6, 7, 8, 9, 10, 11, 10, 8, 7, 5],
-      // gen/admin expense — slowly rising
       [8, 9, 10, 12, 14, 16, 18, 20, 22, 20, 17, 12],
-      // other expense — near zero
       [1, 1, 2, 2, 2, 3, 3, 3, 2, 2, 1, 1],
-      // net operating income — mirrors revenue, dips negative at end
       [5, 6, 8, 10, 14, 18, 24, 30, 35, 20, 10, -5],
     ];
 
@@ -91,8 +89,8 @@ class _RevenueExpenseChartMiniBody extends StatelessWidget {
             ],
             isCurved: true,
             preventCurveOverShooting: true,
-            color: grey,
-            barWidth: 3,
+            color: lineColor,
+            barWidth: 2,
             dotData: const FlDotData(show: false),
             belowBarData: BarAreaData(show: false),
           ),
@@ -102,6 +100,7 @@ class _RevenueExpenseChartMiniBody extends StatelessWidget {
     return Stack(
       fit: StackFit.expand,
       children: [
+        // Dimmed placeholder chart
         Padding(
           padding: const EdgeInsets.all(8),
           child: LineChart(
@@ -110,12 +109,8 @@ class _RevenueExpenseChartMiniBody extends StatelessWidget {
                 show: true,
                 drawVerticalLine: false,
                 horizontalInterval: 40,
-                getDrawingHorizontalLine: (value) => FlLine(
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.onSurface.withValues(alpha: 0.1),
-                  strokeWidth: 1,
-                ),
+                getDrawingHorizontalLine: (_) =>
+                    FlLine(color: gridColor, strokeWidth: 1),
               ),
               titlesData: FlTitlesData(
                 show: true,
@@ -141,7 +136,7 @@ class _RevenueExpenseChartMiniBody extends StatelessWidget {
                       if (idx % 3 != 0) return const SizedBox.shrink();
                       return Text(
                         months[idx],
-                        style: TextStyle(fontSize: 9, color: grey),
+                        style: TextStyle(fontSize: 9, color: labelColor),
                       );
                     },
                   ),
@@ -155,12 +150,54 @@ class _RevenueExpenseChartMiniBody extends StatelessWidget {
             ),
           ),
         ),
+        // "No data" overlay — only shown after loading completes
         if (showLabel)
           Center(
-            child: Text(
-              'No data found',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurface,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+              decoration: BoxDecoration(
+                color: isDark
+                    ? cs.surface.withValues(alpha: 0.85)
+                    : cs.surface.withValues(alpha: 0.90),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: cs.outline.withValues(alpha: 0.25),
+                  width: 1,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: cs.shadow.withValues(alpha: 0.12),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.bar_chart_rounded,
+                    size: 32,
+                    color: cs.primary.withValues(alpha: 0.5),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'No data found',
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      color: cs.onSurface,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Post transactions to see\nrevenue & expense trends',
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: cs.onSurface.withValues(alpha: 0.55),
+                      height: 1.4,
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -181,9 +218,15 @@ class _RevenueExpenseChartMiniBody extends StatelessWidget {
     return BlocBuilder<LedgerBloc, LedgerState>(
       builder: (context, state) {
         // Show greyed placeholder until real data is confirmed
+        // Treat all-zero rows as "no data" — the chart would be invisible anyway.
         final hasData = state.status == LedgerStatus.success &&
             state.ledgerReport?.csvRows != null &&
-            state.ledgerReport!.csvRows!.isNotEmpty;
+            state.ledgerReport!.csvRows!.isNotEmpty &&
+            state.ledgerReport!.csvRows!.any(
+              (row) => row.skip(1).any(
+                (cell) => (double.tryParse(cell) ?? 0.0) != 0.0,
+              ),
+            );
 
         if (!hasData) {
           final showLabel = state.status != LedgerStatus.initial &&

@@ -198,7 +198,7 @@ along with this software (see the LICENSE.md file). If not, see
 
     <!-- ADMIN_ACC_REPORTS children -->
     <growerp.menu.MenuItem menuItemId="ADMIN_ACCR_REVENUE" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_ACC_REPORTS"
-        title="Reports" iconName="assessment" widgetName="RevenueExpenseChart" sequenceNum="10"/>
+        title="Revenue/Expenses" iconName="assessment" widgetName="RevenueExpenseChart" sequenceNum="10"/>
     <growerp.menu.MenuItem menuItemId="ADMIN_ACCR_BALANCE" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_ACC_REPORTS"
         title="Balance Sheet" iconName="list" widgetName="BalanceSheetForm" sequenceNum="20"/>
     <growerp.menu.MenuItem menuItemId="ADMIN_ACCR_SUMMARY" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_ACC_REPORTS"
@@ -305,7 +305,7 @@ along with this software (see the LICENSE.md file). If not, see
     <growerp.menu.MenuItem menuItemId="FREELANCE_ACCL_JOUR" menuConfigurationId="FREELANCE_DEFAULT" parentMenuItemId="FREELANCE_ACC_LEDGER"
         title="Ledger Journals" iconName="checklist" widgetName="LedgerJournalList" sequenceNum="40"/>
     <growerp.menu.MenuItem menuItemId="FREELANCE_ACCR_REV" menuConfigurationId="FREELANCE_DEFAULT" parentMenuItemId="FREELANCE_ACC_REPORTS"
-        title="Reports" iconName="assessment" widgetName="RevenueExpenseChart" sequenceNum="10"/>
+        title="Revenue/Expenses" iconName="assessment" widgetName="RevenueExpenseChart" sequenceNum="10"/>
     <growerp.menu.MenuItem menuItemId="FREELANCE_ACCR_BAL" menuConfigurationId="FREELANCE_DEFAULT" parentMenuItemId="FREELANCE_ACC_REPORTS"
         title="Balance Sheet" iconName="list" widgetName="BalanceSheetForm" sequenceNum="20"/>
     <growerp.menu.MenuItem menuItemId="FREELANCE_ACCR_SUM" menuConfigurationId="FREELANCE_DEFAULT" parentMenuItemId="FREELANCE_ACC_REPORTS"
@@ -385,7 +385,7 @@ along with this software (see the LICENSE.md file). If not, see
     <growerp.menu.MenuItem menuItemId="HOTEL_ACCL_JOUR" menuConfigurationId="HOTEL_DEFAULT" parentMenuItemId="HOTEL_ACC_LEDGER"
         title="Ledger Journals" iconName="checklist" widgetName="LedgerJournalList" sequenceNum="40"/>
     <growerp.menu.MenuItem menuItemId="HOTEL_ACCR_REV" menuConfigurationId="HOTEL_DEFAULT" parentMenuItemId="HOTEL_ACC_REPORTS"
-        title="Reports" iconName="assessment" widgetName="RevenueExpenseChart" sequenceNum="10"/>
+        title="Revenue/Expenses" iconName="assessment" widgetName="RevenueExpenseChart" sequenceNum="10"/>
     <growerp.menu.MenuItem menuItemId="HOTEL_ACCR_BAL" menuConfigurationId="HOTEL_DEFAULT" parentMenuItemId="HOTEL_ACC_REPORTS"
         title="Balance Sheet" iconName="list" widgetName="BalanceSheetForm" sequenceNum="20"/>
     <growerp.menu.MenuItem menuItemId="HOTEL_ACCR_SUM" menuConfigurationId="HOTEL_DEFAULT" parentMenuItemId="HOTEL_ACC_REPORTS"

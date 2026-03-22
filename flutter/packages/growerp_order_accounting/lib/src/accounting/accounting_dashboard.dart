@@ -92,7 +92,7 @@ class AccountingDashboard extends StatelessWidget {
     ),
     MenuItem(
       menuItemId: 'acc_reports',
-      title: 'Reports',
+      title: 'Revenue/Expenses',
       iconName: 'summarize',
       route: '/accounting/reports',
     ),
