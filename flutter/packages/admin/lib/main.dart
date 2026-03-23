@@ -35,6 +35,8 @@ import 'package:go_router/go_router.dart';
 import 'views/admin_dashboard_content.dart';
 import 'views/plan_selection_form.dart';
 import 'views/accounting_form.dart';
+import 'demo/catalog_swag_demo_runner.dart';
+import 'demo/demo_list_screen.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 //webactivate  import 'package:web/web.dart' as web;
 
@@ -257,6 +259,10 @@ List<Map<String, GrowerpWidgetBuilder>> adminWidgetRegistrations = [
     'AccountingForm': (args) => const AccountingForm(),
     'PlanSelectionForm': (args) => const PlanSelectionForm(),
     'AboutForm': (args) => const AboutForm(),
+    // Demo widgets — only registered outside production builds
+    if (!kReleaseMode) 'DemoList': (args) => const DemoListScreen(),
+    if (!kReleaseMode)
+      'CatalogSwagDemoRunner': (args) => const CatalogSwagDemoRunner(),
   },
 ];
 

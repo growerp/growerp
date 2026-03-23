@@ -502,6 +502,9 @@ abstract class RestClient {
   @POST("rest/s1/growerp/100/Ledger")
   Future<void> calculateLedger();
 
+  @POST("rest/s1/growerp/100/Statistics")
+  Future<void> recalculateStatistics({@Field() String? ownerPartyId});
+
   @GET("rest/s1/growerp/100/GlAccount")
   Future<GlAccounts> getGlAccount({
     @Query('start') int? start = 0,
