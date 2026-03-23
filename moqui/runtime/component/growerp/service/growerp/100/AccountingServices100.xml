@@ -146,6 +146,7 @@ along with this software (see the LICENSE.md file). If not, see
                     in-map="assetType + [
                                 assetTypeGlAccountId: null,
                                 assetGlAccountId: translate[assetType.assetGlAccountId],
+                                wipAssetGlAccountId: translate[assetType.wipAssetGlAccountId],
                                 receiptGlAccountId: translate[assetType.receiptGlAccountId],
                                 issuanceGlAccountId: translate[assetType.issuanceGlAccountId],
                                 transferGlAccountId: translate[assetType.transferGlAccountId],

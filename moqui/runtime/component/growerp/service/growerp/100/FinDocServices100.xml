@@ -1447,7 +1447,7 @@ along with this software (see the LICENSE.md file). If not, see
                                     accountCode: item.accountCode,
                                     accountName: item.accountName,
                                     ],
-                                product: [productId: item.productId, pseudoId: item.pseudoProductId],
+                                product: [productId: item.productId, pseudoId: item.pseudoProductId, productName: item.productName],
                                 description: item.description,
                                 assetId: item.assetId,
                         ]" />
@@ -2822,6 +2822,14 @@ along with this software (see the LICENSE.md file). If not, see
                                 out-map="customerShippingInfo"
                                 in-map="[partyId: order.otherCompany?.partyId ?: order.otherUser?.partyId ?: parts[0].customerPartyId,
                                     postalContactMechPurposeId:'PostalShippingDest']" />
+                            <if condition="customerShippingInfo.postalAddressList == null">
+                                <!-- Fall back to primary postal address if no dedicated shipping address -->
+                                <service-call
+                                    name="mantle.party.ContactServices.get#PartyContactInfoList"
+                                    out-map="customerShippingInfo"
+                                    in-map="[partyId: order.otherCompany?.partyId ?: order.otherUser?.partyId ?: parts[0].customerPartyId,
+                                        postalContactMechPurposeId:'PostalPrimary']" />
+                            </if>
                             <if condition="customerShippingInfo.postalAddressList == null">
                                 <return error="true"
                                     message="Customer does not have a shipping address!" />

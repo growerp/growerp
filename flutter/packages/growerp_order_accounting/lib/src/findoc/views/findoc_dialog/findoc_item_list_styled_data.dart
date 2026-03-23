@@ -132,11 +132,13 @@ List<Widget> getFinDocItemListShipmentRow({
 }
 
 List<StyledColumn> getFinDocItemListTransactionColumns(BuildContext context) {
+  bool isPhone = isAPhone(context);
   return [
     const StyledColumn(header: 'GL Account', flex: 2),
     const StyledColumn(header: 'Debit', flex: 2),
     const StyledColumn(header: 'Credit', flex: 2),
     const StyledColumn(header: 'Product ID', flex: 2),
+    if (!isPhone) const StyledColumn(header: 'Description', flex: 3),
     const StyledColumn(header: '', flex: 1),
   ];
 }
@@ -160,6 +162,8 @@ List<Widget> getFinDocItemListTransactionRow({
       key: Key('credit$index'),
     ),
     Text(item.product?.pseudoId ?? '', key: Key('itemProductId$index')),
+    if (!isAPhone(context))
+      Text(item.product?.productName ?? '', key: Key('itemProductName$index')),
     if (!readOnly)
       IconButton(
         padding: EdgeInsets.zero,
