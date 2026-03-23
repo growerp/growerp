@@ -336,7 +336,7 @@ class _DashboardCardState extends State<DashboardCard>
     final isGraphic =
         widget.tileType == 'graphic' && widget.chartWidget != null;
     final isStatistic =
-        widget.tileType == 'statistic' && widget.stats != null && !isPhone;
+        widget.tileType == 'statistic' && widget.stats != null;
     final accent = _accentForRoute(widget.route, colorScheme.primary);
 
     if (isStatistic) {

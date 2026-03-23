@@ -111,6 +111,19 @@ void main() {
     // the backend is fresh (company name pre-filled with 'GrowERP').
     await CommonTest.createCompanyAndAdmin(tester);
 
+    // After login, TopApp's BlocListener fires MenuConfigLoad which replaces
+    // the locally-seeded coreMenuConfig with the backend's seed data. The
+    // backend's CORE_EXAMPLE_DEFAULT config uses different routes (/companies,
+    // /crm, …) than the static coreMenuConfig (/company, /user). Re-seed the
+    // bloc so CoreDashboard renders the dashboard cards with the expected keys.
+    menuConfigBloc.add(MenuConfigUpdateLocal(coreMenuConfig));
+
+    // Wait for CoreDashboard to rebuild with the re-seeded configuration.
+    for (int i = 0; i < 50; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+      if (tester.any(find.byKey(const Key('tap/company')))) break;
+    }
+
     // Verify dashboard cards exist for the static menu configuration.
     expect(find.byKey(const Key('tap/company')), findsWidgets);
     expect(find.byKey(const Key('tap/user')), findsWidgets);

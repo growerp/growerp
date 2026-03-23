@@ -184,10 +184,10 @@ class _RevenueExpenseChartMiniBody extends StatelessWidget {
                 children: [
                   Icon(
                     Icons.bar_chart_rounded,
-                    size: 32,
+                    size: 24,
                     color: cs.primary.withValues(alpha: 0.5),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 4),
                   Text(
                     'No data found',
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
@@ -195,7 +195,7 @@ class _RevenueExpenseChartMiniBody extends StatelessWidget {
                       fontWeight: FontWeight.w700,
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 2),
                   Text(
                     'Post transactions to see\nrevenue & expense trends',
                     textAlign: TextAlign.center,

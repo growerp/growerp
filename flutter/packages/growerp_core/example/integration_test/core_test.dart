@@ -90,6 +90,17 @@ void main() {
 
     await CommonTest.createCompanyAndAdmin(tester);
 
+    // After login, TopApp's BlocListener fires MenuConfigLoad which replaces
+    // the locally-seeded coreMenuConfig with the backend's seed data (different
+    // routes). Re-seed the bloc so CoreDashboard renders the expected keys.
+    menuConfigBloc.add(MenuConfigUpdateLocal(coreMenuConfig));
+
+    // Wait for CoreDashboard to rebuild with the re-seeded configuration.
+    for (int i = 0; i < 50; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+      if (tester.any(find.byKey(const Key('tap/company')))) break;
+    }
+
     // Check that menu option cards are displayed on the dashboard
     // CoreDashboard shows cards for each menu option (excluding '/' and '/about')
     // Use key-based finders since DashboardCard applies text transformations in phone mode

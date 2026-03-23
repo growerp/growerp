@@ -22,6 +22,58 @@ import 'package:growerp_models/growerp_models.dart';
 import 'package:universal_io/io.dart';
 import '../../growerp_core.dart';
 
+/// Lazily builds its child only when the tab at [index] is first activated.
+/// Until then it shows an empty box, preventing unnecessary network requests
+/// and skeleton animations for off-screen tabs.
+class _LazyTabChild extends StatefulWidget {
+  final Widget Function() builder;
+  final int index;
+  final TabController tabController;
+
+  const _LazyTabChild({
+    required this.builder,
+    required this.index,
+    required this.tabController,
+  });
+
+  @override
+  State<_LazyTabChild> createState() => _LazyTabChildState();
+}
+
+class _LazyTabChildState extends State<_LazyTabChild> {
+  Widget? _child;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.tabController.index == widget.index) {
+      _child = widget.builder();
+    } else {
+      widget.tabController.addListener(_onTabChange);
+    }
+  }
+
+  void _onTabChange() {
+    if (!mounted) return;
+    if (widget.tabController.index == widget.index && _child == null) {
+      setState(() {
+        _child = widget.builder();
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.tabController.removeListener(_onTabChange);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _child ?? const SizedBox.shrink();
+  }
+}
+
 /// DisplayMenuItem - Renders menu-based navigation with GoRouter
 ///
 /// This widget handles:
@@ -607,9 +659,13 @@ class DisplayMenuItemState extends State<DisplayMenuItem>
                       controller: _controller,
                       children: List.generate(tabItems.length, (index) {
                         if (widget.tabWidgetLoader != null) {
-                          return widget.tabWidgetLoader!(
-                            tabItems[index].widgetName ?? 'Unknown',
-                            {},
+                          return _LazyTabChild(
+                            index: index,
+                            tabController: _controller!,
+                            builder: () => widget.tabWidgetLoader!(
+                              tabItems[index].widgetName ?? 'Unknown',
+                              {},
+                            ),
                           );
                         }
                         return widget.child ?? const SizedBox.shrink();
