@@ -127,8 +127,11 @@ abstract class MoquiAbstractEndpoint extends Endpoint implements MessageHandler.
 
     @Override
     void onError(Session session, Throwable thr) {
-        if (thr instanceof SocketTimeoutException || (thr.getMessage() != null && thr.getMessage().toLowerCase().contains("timeout"))) {
-            logger.info("Timeout in WebSocket Session ${session.getId()}, User ${userId} (${username}): ${thr.getMessage()}")
+        if (thr instanceof SocketTimeoutException ||
+                thr instanceof java.nio.channels.ClosedChannelException ||
+                (thr.getMessage() != null && thr.getMessage().toLowerCase().contains("timeout")) ||
+                (thr.getMessage() != null && thr.getMessage().toLowerCase().contains("connection reset"))) {
+            logger.info("WebSocket Session ${session.getId()} closed/timed out, User ${userId} (${username}): ${thr.class.simpleName}")
         } else {
             logger.warn("Error in WebSocket Session ${session.getId()}, User ${userId} (${username})", thr)
         }
