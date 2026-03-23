@@ -15,7 +15,9 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
+import 'package:intl/intl.dart';
 import 'package:growerp_order_accounting/l10n/generated/order_accounting_localizations.dart';
 
 import '../../accounting.dart';
@@ -45,15 +47,20 @@ class RevenueExpenseChartMini extends StatelessWidget {
 class _RevenueExpenseChartMiniBody extends StatelessWidget {
   const _RevenueExpenseChartMiniBody();
 
-  Color _getColor(BuildContext context, int line) {
+  Color _getColor(BuildContext context, int index) {
     final cs = Theme.of(context).colorScheme;
-    return switch (line) {
-      1 => cs.onSecondary.withGreen(0),
-      2 => cs.primary.withGreen(200),
-      3 => cs.onSecondary.withBlue(0),
-      4 => cs.tertiary.withRed(255),
-      5 => cs.onTertiary.withRed(100),
-      _ => cs.primary.withGreen(200),
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return switch (index) {
+      0 => cs.success, // Net Revenue — emerald green
+      1 => cs.danger, // Cost of Sales — red
+      2 => cs.info, // Sales Expenses — blue
+      3 => cs.warning, // G&A Expenses — amber
+      4 => isDark
+          ? const Color(0xFFC084FC)
+          : const Color(0xFF7C3AED), // Other Exp — violet
+      _ => isDark
+          ? const Color(0xFF38BDF8)
+          : const Color(0xFF0284C7), // Net Op Income — sky blue
     };
   }
 
@@ -315,6 +322,29 @@ class _RevenueExpenseChartMiniBody extends StatelessWidget {
                 ),
               ),
               borderData: FlBorderData(show: false),
+              lineTouchData: LineTouchData(
+                enabled: true,
+                touchTooltipData: LineTouchTooltipData(
+                  fitInsideVertically: true,
+                  fitInsideHorizontally: true,
+                  getTooltipItems: (touchedSpots) {
+                    final csvRows = state.ledgerReport!.csvRows!;
+                    return touchedSpots.map((spot) {
+                      if (spot.y == 0.0) return null;
+                      final seriesLabel = csvRows[0][spot.barIndex + 1];
+                      return LineTooltipItem(
+                        '$seriesLabel\n'
+                        '${NumberFormat('#,##0').format(spot.y)}',
+                        TextStyle(
+                          color: _getColor(context, spot.barIndex),
+                          fontSize: 11,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      );
+                    }).toList();
+                  },
+                ),
+              ),
               lineBarsData: [
                 for (int col = 0; col < data[0].length; col++)
                   LineChartBarData(
@@ -324,7 +354,7 @@ class _RevenueExpenseChartMiniBody extends StatelessWidget {
                     ],
                     isCurved: true,
                     preventCurveOverShooting: true,
-                    color: _getColor(context, col + 1),
+                    color: _getColor(context, col),
                     barWidth: 2,
                     dotData: const FlDotData(show: false),
                     belowBarData: BarAreaData(show: false),

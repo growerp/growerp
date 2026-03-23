@@ -71,21 +71,21 @@ class RevenueExpenseChartState extends State<RevenueExpenseForm> {
   @override
   Widget build(BuildContext context) {
     _localizations = OrderAccountingLocalizations.of(context)!;
-    Color getColor(int line) {
-      switch (line) {
-        case 1:
-          return Theme.of(context).colorScheme.onSecondary.withGreen(0);
-        case 2:
-          return Theme.of(context).colorScheme.primary.withGreen(200);
-        case 3:
-          return Theme.of(context).colorScheme.onSecondary.withBlue(0);
-        case 4:
-          return Theme.of(context).colorScheme.tertiary.withRed(1000);
-        case 5:
-          return Theme.of(context).colorScheme.onTertiary.withRed(100);
-        default:
-          return Theme.of(context).colorScheme.primary.withGreen(200);
-      }
+    Color getColor(int index) {
+      final cs = Theme.of(context).colorScheme;
+      final isDark = Theme.of(context).brightness == Brightness.dark;
+      return switch (index) {
+        0 => cs.success, // Net Revenue — emerald green
+        1 => cs.danger, // Cost of Sales — red
+        2 => cs.info, // Sales Expenses — blue
+        3 => cs.warning, // G&A Expenses — amber
+        4 => isDark
+            ? const Color(0xFFC084FC)
+            : const Color(0xFF7C3AED), // Other Exp — violet
+        _ => isDark
+            ? const Color(0xFF38BDF8)
+            : const Color(0xFF0284C7), // Net Op Income — sky blue
+      };
     }
 
     return BlocConsumer<LedgerBloc, LedgerState>(
@@ -410,6 +410,31 @@ class RevenueExpenseChartState extends State<RevenueExpenseForm> {
                                   ),
                                 ),
                             ],
+                          ),
+                          lineTouchData: LineTouchData(
+                            enabled: true,
+                            touchTooltipData: LineTouchTooltipData(
+                              fitInsideVertically: true,
+                              fitInsideHorizontally: true,
+                              getTooltipItems: (touchedSpots) {
+                                return touchedSpots.map((spot) {
+                                  if (spot.y == 0.0) return null;
+                                  final seriesLabel =
+                                      state.ledgerReport!.csvRows![0][spot
+                                              .barIndex +
+                                          1];
+                                  return LineTooltipItem(
+                                    '$seriesLabel\n'
+                                    '${NumberFormat('#,##0').format(spot.y)}',
+                                    TextStyle(
+                                      color: getColor(spot.barIndex),
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  );
+                                }).toList();
+                              },
+                            ),
                           ),
                           lineBarsData: [
                             for (
