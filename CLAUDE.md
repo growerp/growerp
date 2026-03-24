@@ -57,12 +57,18 @@ melos analyze
 # Run all integration tests (requires running backend on port 8080)
 melos test
 
+# Run tests with explicit backend URL
+BACKEND_URL=http://localhost:8080 melos test
+
 # Run tests for a single package
 cd packages/growerp_catalog/example
 flutter test integration_test --dart-define=BACKEND_PORT=8080
 
-# Headless tests via Docker
-./build_run_all_tests.sh  # from repo root
+# Headless tests via Docker (Linux desktop + xvfb, no Android emulator needed)
+cd flutter && ./build_run_all_tests.sh
+
+# Headless tests for a single package
+./build_run_all_tests.sh catalog
 ```
 
 ## Backend (Moqui)

@@ -124,16 +124,16 @@ melos:
         dirExists: "integration_test"
         scope: "*_example"
     test:
-      description: run all app and package tests. Set BACKEND_PORT env var to override default 8080.
+      description: run all app and package tests. Set BACKEND_PORT or BACKEND_URL env var to override defaults.
       exec:
         concurrency: 1
-      run: for f in integration_test/*.dart; do flutter test "$f" --dart-define=BACKEND_PORT=${BACKEND_PORT:-8080} || exit 1; done
+      run: for f in integration_test/*.dart; do flutter test "$f" --dart-define=BACKEND_PORT=${BACKEND_PORT:-8080} --dart-define=BACKEND_URL=${BACKEND_URL:-} --dart-define=CHAT_URL=${CHAT_URL:-} --dart-define=SCREEN_WIDTH=${SCREEN_WIDTH:-0} --dart-define=SCREEN_HEIGHT=${SCREEN_HEIGHT:-0} || exit 1; done
       packageFilters:
         dirExists: "integration_test"
     test-headless:
-      description: run all app and package tests in headless mode using flutter/ci/docker-compose-test.yml.
+      description: run all app and package tests in headless mode on Linux desktop (via xvfb).
       exec:
         concurrency: 1
-      run: for f in integration_test/*.dart; do flutter test "$f" -d ${DEVICE_ID:-emulator:5557} || exit 1; done
+      run: for f in integration_test/*.dart; do flutter test "$f" -d linux --dart-define=BACKEND_URL=${BACKEND_URL:-http://moqui} --dart-define=CHAT_URL=${CHAT_URL:-ws://moqui} --dart-define=SCREEN_WIDTH=${SCREEN_WIDTH:-412} --dart-define=SCREEN_HEIGHT=${SCREEN_HEIGHT:-732} || exit 1; done
       packageFilters:
         dirExists: "integration_test"

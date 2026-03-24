@@ -11,55 +11,49 @@
 # along with this software (see the LICENSE.md file). If not, see
 # <http://creativecommons.org/publicdomain/zero/1.0/>.
 #
+# Headless test runner image — runs Flutter integration tests on Linux desktop
+# with xvfb for a virtual display. This replaces the previous Android-emulator
+# approach, eliminating ADB, socat tunnels, and Gradle builds entirely.
 #
-# to be build from the flutter directory
-# with: docker build --build-arg DOCKER_TAG=1.3.0 -f packages/admin/Dockerfile -t growerp/admin . --progress=plain
+# Build from the flutter/ directory:
+#   docker build -f ci/Dockerfile -t growerp/flutter-test-runner:latest .
 #
-#Stage 1 - Install dependencies and build the app
-# FROM growerp/flutter-sdk-image:latest
 FROM ghcr.io/cirruslabs/flutter:stable
 
-ARG BRANCH=master # currently either master or development we need to add existing
-ARG DOCKER_TAG=1.0.0+1
+ARG BRANCH=master
 USER root
-# Install linux dependencies
+
+# Install Linux desktop build dependencies and xvfb for headless display
 RUN apt-get update && \
-    apt-get install -y git zip gdb libstdc++6 \
-    fonts-droid-fallback nano sed && \
-    apt-get clean
+    apt-get install -y --no-install-recommends \
+    git zip gdb libstdc++6 fonts-droid-fallback nano sed \
+    xvfb libgtk-3-dev ninja-build cmake clang lld llvm pkg-config liblzma-dev \
+    libglu1-mesa binutils && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Flutter's Linux build looks for tools (llvm-ar, ar, ld.lld) in /usr/lib/llvm-18/bin.
+# Ensure they exist there by symlinking from system paths if missing.
+RUN mkdir -p /usr/lib/llvm-18/bin && \
+    for tool in ar llvm-ar ld.lld; do \
+      if [ ! -f "/usr/lib/llvm-18/bin/$tool" ]; then \
+        src=$(which "$tool" 2>/dev/null) && \
+        [ -n "$src" ] && ln -sf "$src" "/usr/lib/llvm-18/bin/$tool"; \
+      fi; \
+    done
 
 # git security
 RUN git config --system --add safe.directory '*'
 
-# USER mobiledevops
+# Enable Linux desktop support
+RUN flutter config --enable-linux-desktop
 
-# activate melos
-# RUN dart pub global activate melos 3.4.0
-# ENV PATH="$PATH":"$HOME/.pub-cache/bin"
-# ENV FLUTTER_HOME="/home/mobiledevops/.flutter-sdk"
-# ENV PATH="$PATH:$FLUTTER_HOME/bin"
+# Pre-cache Flutter artifacts for Linux desktop
+RUN flutter precache --linux
 
-# Pre-install Android SDK components to avoid runtime downloads
-# Accept all licenses, install build-tools, platforms, NDK, and CMake upfront
-# Versions must match what Flutter stable's Gradle build actually requests:
-#   - flutter.ndkVersion -> 28.2.13676358
-#   - flutter.compileSdkVersion -> 34 (and 36 for some packages)
-RUN yes | sdkmanager --licenses && \
-    sdkmanager "build-tools;35.0.0" \
-    "platforms;android-34" "platforms;android-36" \
-    "ndk;28.2.13676358" "cmake;3.22.1"
-
-# Pre-cache Flutter artifacts for Android to avoid runtime downloads
-RUN flutter precache --android
-
-# Limit memory during Docker build: disable Gradle daemon, cap Dart VM heap
-ENV GRADLE_OPTS="-Dorg.gradle.daemon=false -Xmx2g"
+# Limit memory during Docker build
 ENV DART_VM_OPTIONS="--old_gen_heap_size=1024"
 
-# get growerp repos
-#RUN git clone --depth 1 -b $BRANCH https://github.com/growerp/growerp.git /opt/growerp
-#RUN cp /opt/growerp/flutter /home/mobiledevops/growerp
-# copy from local below, two lines above from repository
+# Copy source and set workdir
 COPY . /home/mobiledevops/growerp
 WORKDIR /home/mobiledevops/growerp
 
@@ -75,15 +69,15 @@ RUN /root/.pub-cache/bin/melos clean && \
     /root/.pub-cache/bin/melos build --no-select && \
     /root/.pub-cache/bin/melos l10n --no-select
 
-# Configure app_settings.json files for automated testing (all example and app packages)
-RUN find packages -name "app_settings.json" -type f -exec sed -i \
-    -e 's|"databaseUrlDebug": "[^"]*"|"databaseUrlDebug": "http://moqui"|g' \
-    -e 's|"chatUrlDebug": "[^"]*"|"chatUrlDebug": "ws://moqui"|g' {} \;
+# No sed patching needed — backend URL is injected at test time via
+# --dart-define=BACKEND_URL and --dart-define=CHAT_URL
 
-# Configure test files for automated testing
-RUN sed -i -e 's/overrideUrl: null/overrideUrl: "http:\/\/moqui"/g' \
-    packages/growerp_core/lib/src/domains/common/integration_test/common_test.dart
-
-# VOLUME /home/mobiledevops/growerp/test
-
-
+# Make pub cache, flutter config, and workspace writable for any UID.
+# The container runs as the host user (via HOST_UID/HOST_GID in compose)
+# to avoid creating root-owned files on the mounted volume.
+RUN chmod -R a+rw /root/.pub-cache && \
+    chmod -R a+rw /root/.config 2>/dev/null || true && \
+    chmod -R a+rw /home/mobiledevops && \
+    chmod -R a+rw /sdks/flutter 2>/dev/null || true && \
+    chmod a+rx /root && \
+    chmod 1777 /tmp

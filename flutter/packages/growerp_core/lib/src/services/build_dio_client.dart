@@ -14,6 +14,11 @@ const String _backendPort = String.fromEnvironment(
   defaultValue: '8080',
 );
 
+/// Full backend URL override at compile time. When set, this takes
+/// highest priority over all other URL resolution logic.
+/// Usage: --dart-define=BACKEND_URL=http://moqui
+const String _backendUrlDefine = String.fromEnvironment('BACKEND_URL');
+
 /// Global in-memory cache store shared across all Dio instances.
 ///
 /// Uses [MemCacheStore] which is a volatile LRU cache — data is lost
@@ -66,7 +71,11 @@ Future<Dio> buildDioClient({
   String? databaseUrlDebug = GlobalConfiguration().get('databaseUrlDebug');
 
   String baseUrl;
-  if (overrideUrl != null) {
+  if (_backendUrlDefine.isNotEmpty) {
+    // Compile-time --dart-define=BACKEND_URL takes highest priority.
+    // Used by headless CI (Linux desktop) and Docker test environments.
+    baseUrl = _backendUrlDefine;
+  } else if (overrideUrl != null) {
     baseUrl = overrideUrl;
   } else if (kReleaseMode) {
     baseUrl = databaseUrl ?? 'https://backend.growerp.com';

@@ -30,9 +30,10 @@ GrowERP is an open-source, multi-platform ERP system designed to streamline busi
 
 **Testing**:
   - **Local**: `melos test` (runs integration tests in dependency order)
-  - **Headless CI**: `./flutter/build_run_all_tests.sh` (Docker + emulator)
+  - **Headless CI**: `cd flutter && ./build_run_all_tests.sh` (Docker + Linux desktop + xvfb)
   - **Package Order**: Tests run in dependency order as defined in `melos.yaml`
   - **Test Structure**: Integration tests in `packages/*/example/integration_test/`
+  - **Backend URL**: Injected via `--dart-define=BACKEND_URL=http://moqui` (no sed patching)
 
 **Backend (Moqui Framework)** - All commands from `moqui/` directory:
   ```bash

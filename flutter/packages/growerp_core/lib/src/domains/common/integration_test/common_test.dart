@@ -120,6 +120,18 @@ class CommonTest {
     String title = "Growerp testing...",
     String classificationId = 'AppAdmin',
   }) async {
+    // Override the logical screen size when SCREEN_WIDTH / SCREEN_HEIGHT are
+    // passed via --dart-define. This lets headless Linux desktop tests emulate
+    // a phone-sized screen so ResponsiveBreakpoints triggers MOBILE layout.
+    const int screenW =
+        int.fromEnvironment('SCREEN_WIDTH', defaultValue: 0);
+    const int screenH =
+        int.fromEnvironment('SCREEN_HEIGHT', defaultValue: 0);
+    if (screenW > 0 && screenH > 0) {
+      tester.view.physicalSize = Size(screenW.toDouble(), screenH.toDouble());
+      tester.view.devicePixelRatio = 1.0;
+    }
+
     // Disable Google Fonts runtime fetching to prevent network failures in
     // headless/offline test environments (e.g., Docker CI).
     GoogleFonts.config.allowRuntimeFetching = false;

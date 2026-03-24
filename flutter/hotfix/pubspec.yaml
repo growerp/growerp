@@ -1,0 +1,9 @@
+name: hotfix
+description: GrowERP Hot Fix Release Tool
+publish_to: none
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  dcli: ^4.0.1
