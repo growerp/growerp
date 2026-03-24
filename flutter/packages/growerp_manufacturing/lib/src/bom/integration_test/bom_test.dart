@@ -47,7 +47,7 @@ class BomTest {
 
     // First component triggers product creation + BOM item creation
     final first = components.first;
-    await CommonTest.enterText(
+    await CommonTest.enterAutocompleteValue(
       tester,
       'componentId0',
       first.componentPseudoId,
@@ -65,7 +65,7 @@ class BomTest {
     // Subsequent components — _addFormKey increments after each successful add
     for (int i = 1; i < components.length; i++) {
       final item = components[i];
-      await CommonTest.enterText(
+      await CommonTest.enterAutocompleteValue(
         tester,
         'componentId$i',
         item.componentPseudoId,
