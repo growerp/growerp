@@ -26,6 +26,7 @@ export 'stats_model.dart';
 export 'save_test_model.dart';
 export 'asset_model.dart';
 export 'bom_item_model.dart';
+export 'work_order_status_val_model.dart';
 export 'work_order_model.dart';
 export 'application_model.dart';
 export 'email_template_model.dart';

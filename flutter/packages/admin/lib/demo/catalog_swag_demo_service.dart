@@ -376,10 +376,10 @@ Future<String> completeWorkOrder(
   WorkOrder? wo = wos.workOrders
       .where(
         (w) =>
-            w.statusId == null ||
-            w.statusId == 'WeInPlanning' ||
-            w.statusId == 'WeApproved' ||
-            w.statusId == 'WeInProgress',
+            w.status == null ||
+            w.status == WorkOrderStatusVal.inPlanning ||
+            w.status == WorkOrderStatusVal.approved ||
+            w.status == WorkOrderStatusVal.inProgress,
       )
       .firstOrNull;
 
@@ -388,24 +388,24 @@ Future<String> completeWorkOrder(
         'Approve the sales order first.');
   }
 
-  // Release (WeInPlanning → WeApproved)
-  if (wo.statusId == null || wo.statusId == 'WeInPlanning') {
+  // Release (In Planning → Approved)
+  if (wo.status == null || wo.status == WorkOrderStatusVal.inPlanning) {
     wo = await rc.updateWorkOrder(
-      workOrder: wo.copyWith(statusId: 'WeApproved'),
+      workOrder: wo.copyWith(status: WorkOrderStatusVal.approved),
     );
   }
 
-  // Start (WeApproved → WeInProgress)
-  if (wo.statusId == 'WeApproved') {
+  // Start (Approved → In Progress)
+  if (wo.status == WorkOrderStatusVal.approved) {
     wo = await rc.updateWorkOrder(
-      workOrder: wo.copyWith(statusId: 'WeInProgress'),
+      workOrder: wo.copyWith(status: WorkOrderStatusVal.inProgress),
     );
   }
 
-  // Complete (WeInProgress → WeComplete)
-  if (wo.statusId == 'WeInProgress') {
+  // Complete (In Progress → Complete)
+  if (wo.status == WorkOrderStatusVal.inProgress) {
     wo = await rc.updateWorkOrder(
-      workOrder: wo.copyWith(statusId: 'WeComplete'),
+      workOrder: wo.copyWith(status: WorkOrderStatusVal.complete),
     );
   }
 

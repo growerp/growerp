@@ -503,12 +503,22 @@ void main() {
     // Pause so the viewer can see the ledger entries.
     await tester.pump(const Duration(seconds: 4));
 
+    // ── Phase 9: Live dashboard summary ──────────────────────────────────────
+    await CommonTest.showDemoStep(
+      tester,
+      'Live Dashboard',
+      'Ledger and statistics totals are being updated.\n'
+          'The accounting dashboard now reflects the completed lifecycle.',
+      seconds: 3,
+    );
+    await TransactionTest.showUpdatedAccountingDashboard(tester);
+
     await CommonTest.showDemoStep(
       tester,
       'Demo Complete',
       'You have seen the full GrowERP catalog + manufacturing lifecycle:\n'
           'Catalog Demo Data → BOM (via UI) → Sales Order → Work Order → '
-          'Purchase → Receive → Assemble → Ship → Accounting.',
+          'Purchase → Receive → Assemble → Ship → Accounting → Dashboard.',
       seconds: 5,
     );
 

@@ -141,38 +141,41 @@ class WorkOrderDialogState extends State<WorkOrderDialog> {
             if (workOrder.workEffortId.isNotEmpty) ...[
               Text(
                 key: const Key('statusLabel'),
-                'Status: ${workOrder.statusId ?? 'WeInPlanning'}',
+                'Status: ${workOrder.status?.name ?? WorkOrderStatusVal.inPlanning.name}',
                 style: const TextStyle(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
-              if (workOrder.statusId == null ||
-                  workOrder.statusId == 'WeInPlanning')
+              if (workOrder.status == null ||
+                  workOrder.status == WorkOrderStatusVal.inPlanning)
                 ElevatedButton(
                   key: const Key('releaseButton'),
                   child: const Text('Release to Shop Floor'),
                   onPressed: () => context.read<WorkOrderBloc>().add(
                         WorkOrderUpdate(
-                          workOrder.copyWith(statusId: 'WeApproved'),
+                          workOrder.copyWith(
+                              status: WorkOrderStatusVal.approved),
                         ),
                       ),
                 ),
-              if (workOrder.statusId == 'WeApproved')
+              if (workOrder.status == WorkOrderStatusVal.approved)
                 ElevatedButton(
                   key: const Key('startButton'),
                   child: const Text('Start Production'),
                   onPressed: () => context.read<WorkOrderBloc>().add(
                         WorkOrderUpdate(
-                          workOrder.copyWith(statusId: 'WeInProgress'),
+                          workOrder.copyWith(
+                              status: WorkOrderStatusVal.inProgress),
                         ),
                       ),
                 ),
-              if (workOrder.statusId == 'WeInProgress')
+              if (workOrder.status == WorkOrderStatusVal.inProgress)
                 ElevatedButton(
                   key: const Key('completeButton'),
                   child: const Text('Complete Production'),
                   onPressed: () => context.read<WorkOrderBloc>().add(
                         WorkOrderUpdate(
-                          workOrder.copyWith(statusId: 'WeComplete'),
+                          workOrder.copyWith(
+                              status: WorkOrderStatusVal.complete),
                         ),
                       ),
                 ),
@@ -190,7 +193,7 @@ class WorkOrderDialogState extends State<WorkOrderDialog> {
                 final available = item.availableQuantity;
                 final hasShortage =
                     available != null && available < needed;
-                final isComplete = workOrder.statusId == 'WeComplete';
+                final isComplete = workOrder.status == WorkOrderStatusVal.complete;
                 return ListTile(
                   dense: true,
                   title: Text(item.componentName ?? item.componentPseudoId),
@@ -227,7 +230,7 @@ class WorkOrderDialogState extends State<WorkOrderDialog> {
                   ),
                 );
               }),
-              if (workOrder.statusId == 'WeComplete' &&
+              if (workOrder.status == WorkOrderStatusVal.complete &&
                   workOrder.totalCost != null)
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8.0),

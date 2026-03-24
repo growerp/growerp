@@ -344,7 +344,7 @@ void main() {
     // Open the auto-created WO and check shortage
     // BOM: CompA need 2, CompB need 1 — no stock yet
     await WorkOrderTest.openWorkOrder(tester, 0);
-    await WorkOrderTest.checkWorkOrderStatus(tester, 'WeInPlanning');
+    await WorkOrderTest.checkWorkOrderStatus(tester, 'In Planning');
     await WorkOrderTest.checkShortage(tester, [
       {'pseudoId': 'MFG-COMP-A', 'haveQty': '0'},
       {'pseudoId': 'MFG-COMP-B', 'haveQty': '0'},
@@ -369,16 +369,16 @@ void main() {
     await WorkOrderTest.selectWorkOrders(tester);
     await CommonTest.waitForKey(tester, 'item0');
     await WorkOrderTest.openWorkOrder(tester, 0);
-    await WorkOrderTest.checkWorkOrderStatus(tester, 'WeInPlanning');
+    await WorkOrderTest.checkWorkOrderStatus(tester, 'In Planning');
     // Components now have stock: Bolt M5 ≥ 2, Bearing 6201 ≥ 1 → no shortage
     await WorkOrderTest.releaseWorkOrder(tester);
 
     await WorkOrderTest.openWorkOrder(tester, 0);
-    await WorkOrderTest.checkWorkOrderStatus(tester, 'WeApproved');
+    await WorkOrderTest.checkWorkOrderStatus(tester, 'Approved');
     await WorkOrderTest.startWorkOrder(tester);
 
     await WorkOrderTest.openWorkOrder(tester, 0);
-    await WorkOrderTest.checkWorkOrderStatus(tester, 'WeInProgress');
+    await WorkOrderTest.checkWorkOrderStatus(tester, 'In Progress');
     await WorkOrderTest.completeWorkOrder(tester);
     // Components consumed; 1 unit of Widget Assembly produced in inventory
 

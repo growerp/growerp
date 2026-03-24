@@ -71,7 +71,7 @@ List<Widget> getWorkOrderListRow({
             style: const TextStyle(fontWeight: FontWeight.w500),
           ),
           Text(
-            'Qty: ${workOrder.estimatedQuantity ?? ''} | ${workOrder.statusId ?? ''}',
+            'Qty: ${workOrder.estimatedQuantity ?? ''} | ${workOrder.status?.name ?? ''}',
             key: Key('info$index'),
             style: TextStyle(
               fontSize: 12,
@@ -91,7 +91,7 @@ List<Widget> getWorkOrderListRow({
         textAlign: TextAlign.right,
       ),
     );
-    cells.add(Text(workOrder.statusId ?? '', key: Key('statusId$index')));
+    cells.add(Text(workOrder.status?.name ?? '', key: Key('statusId$index')));
     cells.add(
       Text(
         workOrder.estimatedStartDate ?? '',

@@ -13,6 +13,7 @@
  */
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:growerp_models/growerp_models.dart';
@@ -22,6 +23,37 @@ class TransactionTest {
     // Navigate to accounting dashboard first, then to ledger/transactions
     await CommonTest.selectOption(tester, '/accounting', 'AcctDashBoard');
     await CommonTest.selectOption(tester, '/accounting/ledger', 'Transaction');
+  }
+
+  /// Recalculates ledger + statistics on the backend, refreshes auth state,
+  /// then navigates to the AccountingDashboard so stats tiles show live numbers.
+  static Future<void> showUpdatedAccountingDashboard(
+    WidgetTester tester,
+  ) async {
+    final authBloc = BlocProvider.of<AuthBloc>(
+      tester.element(find.byType(MaterialApp).first),
+    );
+
+    // Trigger backend recalculation jobs
+    await authBloc.restClient.calculateLedger();
+    await authBloc.restClient.recalculateStatistics(
+      ownerPartyId: authBloc.state.authenticate?.company?.partyId,
+    );
+    // Give the backend background jobs a moment to finish
+    await tester.pump(const Duration(seconds: 3));
+
+    // Fetch fresh auth state with updated stats and push it into the BLoC
+    final freshAuth = await authBloc.restClient.getAuthenticate(
+      classificationId: authBloc.classificationId,
+    );
+    authBloc.add(AuthUpdateLocal(freshAuth));
+    await tester.pumpAndSettle(
+      const Duration(seconds: CommonTest.waitTime),
+    );
+
+    // Navigate to AccountingDashboard so the audience sees updated stats
+    await CommonTest.selectOption(tester, '/accounting', 'AcctDashBoard');
+    await tester.pump(const Duration(seconds: 5));
   }
 
   static Future<void> addTransactions(

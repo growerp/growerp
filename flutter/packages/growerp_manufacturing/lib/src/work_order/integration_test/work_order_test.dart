@@ -125,19 +125,19 @@ class WorkOrderTest {
     }
   }
 
-  /// Tap Release button (WeInPlanning → WeApproved). Waits for list to return.
+  /// Tap Release button (In Planning → Approved). Waits for list to return.
   static Future<void> releaseWorkOrder(WidgetTester tester) async {
     await CommonTest.tapByKey(tester, 'releaseButton', seconds: 3);
     await CommonTest.waitForKey(tester, 'WorkOrderList');
   }
 
-  /// Tap Start button (WeApproved → WeInProgress). Waits for list to return.
+  /// Tap Start button (Approved → In Progress). Waits for list to return.
   static Future<void> startWorkOrder(WidgetTester tester) async {
     await CommonTest.tapByKey(tester, 'startButton', seconds: 3);
     await CommonTest.waitForKey(tester, 'WorkOrderList');
   }
 
-  /// Tap Complete button (WeInProgress → WeComplete). Waits for list to return.
+  /// Tap Complete button (In Progress → Complete). Waits for list to return.
   static Future<void> completeWorkOrder(WidgetTester tester) async {
     await CommonTest.tapByKey(tester, 'completeButton', seconds: 3);
     await CommonTest.waitForKey(tester, 'WorkOrderList');

@@ -100,6 +100,23 @@ class UserGroupConverter implements JsonConverter<UserGroup?, String?> {
   }
 }
 
+class WorkOrderStatusValConverter
+    implements JsonConverter<WorkOrderStatusVal?, String?> {
+  const WorkOrderStatusValConverter();
+
+  @override
+  WorkOrderStatusVal? fromJson(String? json) {
+    if (json == null) return null;
+    return WorkOrderStatusVal.getByValue(json);
+  }
+
+  @override
+  String? toJson(WorkOrderStatusVal? object) {
+    if (object == null) return null;
+    return object.toString();
+  }
+}
+
 class FinDocStatusValConverter
     implements JsonConverter<FinDocStatusVal?, String?> {
   const FinDocStatusValConverter();

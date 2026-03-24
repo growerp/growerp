@@ -26,7 +26,9 @@ abstract class WorkOrder with _$WorkOrder {
     @Default("") String workEffortId,
     @Default("") String pseudoId,
     String? workEffortName,
-    String? statusId,
+    @JsonKey(name: 'statusId')
+    @WorkOrderStatusValConverter()
+    WorkOrderStatusVal? status,
     @Default("") String productId,
     String? productPseudoId,
     String? productName,
@@ -46,5 +48,5 @@ abstract class WorkOrder with _$WorkOrder {
   @override
   String toString() =>
       'WorkOrder: $pseudoId product: $productName qty: $estimatedQuantity '
-      'status: $statusId';
+      'status: $status';
 }
