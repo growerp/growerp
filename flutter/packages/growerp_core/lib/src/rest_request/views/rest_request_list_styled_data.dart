@@ -102,7 +102,7 @@ List<Widget> getRestRequestListRow({
       request.dateTime != null
           ? DateFormat('dd/MM HH:mm:ss').format(request.dateTime!)
           : '',
-      key: Key('dateTime$index'),
+      key: Key('item$index'),
     ),
     Text(
       '${request.user?.firstName ?? ''} ${request.user?.lastName ?? ''}',

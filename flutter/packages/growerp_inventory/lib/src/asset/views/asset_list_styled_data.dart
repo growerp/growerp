@@ -134,7 +134,10 @@ List<Widget> getAssetListRow({
   } else {
     if (isHotel) {
       // Room Nr
-      cells.add(Text(asset.pseudoId, key: Key('id$index')));
+      cells.add(SizedBox(
+        key: Key('item$index'),
+        child: Text(asset.pseudoId, key: Key('id$index')),
+      ));
 
       // Room Name
       cells.add(Text(asset.assetName ?? ''));
@@ -159,7 +162,10 @@ List<Widget> getAssetListRow({
       );
     } else {
       // ID
-      cells.add(Text(asset.pseudoId, key: Key('id$index')));
+      cells.add(SizedBox(
+        key: Key('item$index'),
+        child: Text(asset.pseudoId, key: Key('id$index')),
+      ));
 
       // Product
       cells.add(Text(asset.product?.productName ?? '', key: Key('name$index')));

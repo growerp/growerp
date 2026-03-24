@@ -117,58 +117,6 @@ final List<FinDoc> swagPurchaseOrders = [
   ),
 ];
 
-// ── Demo helper ───────────────────────────────────────────────────────────────
-
-/// Overlays a full-screen info card for [seconds] real seconds, then removes it.
-Future<void> showDemoStep(
-  WidgetTester tester,
-  String title,
-  String description, {
-  int seconds = 3,
-}) async {
-  // Use the Navigator (inside MaterialApp's Localizations tree) as context.
-  final element = tester.element(find.byType(Navigator).last);
-  showDialog(
-    context: element,
-    barrierDismissible: false,
-    barrierColor: Colors.black54,
-    builder: (_) => Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.info_outline, size: 48, color: Colors.blue.shade700),
-            const SizedBox(height: 16),
-            Text(
-              title,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              description,
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 16),
-            ),
-          ],
-        ),
-      ),
-    ),
-  );
-  await tester.pumpAndSettle();
-  // Hold for [seconds] real seconds using small pump intervals.
-  for (int i = 0; i < seconds * 10; i++) {
-    await tester.pump(const Duration(milliseconds: 100));
-  }
-  Navigator.of(element, rootNavigator: true).pop();
-  await tester.pumpAndSettle();
-}
-
 // ── Router ────────────────────────────────────────────────────────────────────
 
 GoRouter createCatalogSwagDemoRouter() {
@@ -319,10 +267,46 @@ class _SwagDemoDashboard extends StatelessWidget {
         if (state.status != AuthStatus.authenticated) {
           return const LoadingIndicator();
         }
-        return const Center(
-          child: Text(
-            'Catalog & Manufacturing Demo',
-            key: Key('SwagDemoDashboard'),
+        return Center(
+          key: const Key('SwagDemoDashboard'),
+          child: Card(
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20)),
+            elevation: 4,
+            margin: const EdgeInsets.symmetric(horizontal: 40),
+            child: Padding(
+              padding:
+                  const EdgeInsets.symmetric(vertical: 40, horizontal: 32),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.category_outlined,
+                          size: 40, color: Colors.amber.shade700),
+                      const SizedBox(width: 12),
+                      Icon(Icons.precision_manufacturing_outlined,
+                          size: 40, color: Colors.blue.shade700),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  const Text(
+                    'Catalog & Manufacturing Demo',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                        fontSize: 26, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    'Products · Bills of Materials · Orders · Shipments · Accounting',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                        fontSize: 15, color: Colors.grey.shade600),
+                  ),
+                ],
+              ),
+            ),
           ),
         );
       },
@@ -349,21 +333,28 @@ void main() {
       delegates,
       blocProviders: getAdminBlocProviders(restClient, 'AppAdmin'),
       restClient: restClient,
-      title: 'GrowERP Catalog & Swag Demo',
+      title: 'GrowERP Catalog & Manufacturing Demo',
       clear: true,
     );
 
-    // ── Setup: catalog demo data + swag products ───────────────────────────────
-    await showDemoStep(
+    await CommonTest.showDemoStep(
       tester,
-      'Starting with Catalog Demo Data',
-      'A fresh company is created with the built-in catalog demo data:\n'
-          'products, customers, suppliers, and warehouse locations are all '
-          'pre-loaded automatically.',
+      'Catalog & Manufacturing Demo',
+      'An end-to-end walkthrough: products, BOM, sales order, '
+          'work order, components, assembly, shipping, and accounting.',
+    );
+
+    // ── Setup: catalog demo data + swag products ───────────────────────────────
+    await CommonTest.showDemoStep(
+      tester,
+      'Setting Up the Demo Company',
+      'A fresh company is registered with the swag products, a warehouse '
+          'location, and demo partners pre-loaded — no built-in catalog demo '
+          'data is used.',
     );
     await CommonTest.createCompanyAndAdmin(
       tester,
-      demoData: true,
+      demoData: false,
       testData: {
         'products': swagProducts,
         'locations': locations.sublist(0, 1),
@@ -372,7 +363,7 @@ void main() {
     );
 
     // ── Phase 1: Create the Bill of Materials through the UI ──────────────────
-    await showDemoStep(
+    await CommonTest.showDemoStep(
       tester,
       'Creating the Bill of Materials',
       'The "Moqui Marketing Package" BOM is built interactively.\n'
@@ -404,7 +395,7 @@ void main() {
     await CommonTest.tapByKey(tester, 'cancel');
 
     // ── Phase 2: Sales order → auto-creates Work Order on approval ────────────
-    await showDemoStep(
+    await CommonTest.showDemoStep(
       tester,
       'Receiving a Customer Order',
       'A customer orders 2 × Moqui Marketing Package.\n'
@@ -420,7 +411,7 @@ void main() {
     final List<FinDoc> approvedSalesOrders = testAfterSalesApprove.orders;
 
     // ── Phase 3: Work Order with material shortage ────────────────────────────
-    await showDemoStep(
+    await CommonTest.showDemoStep(
       tester,
       'Work Order — Material Shortage',
       'The system created a Work Order for the 2 kits.\n'
@@ -435,7 +426,7 @@ void main() {
     await CommonTest.tapByKey(tester, 'cancel');
 
     // ── Phase 4: Purchase order for swag components ───────────────────────────
-    await showDemoStep(
+    await CommonTest.showDemoStep(
       tester,
       'Ordering Swag Components',
       'A purchase order is raised for 3 each of Baseball Cap, Coffee Mug, '
@@ -449,7 +440,7 @@ void main() {
     await OrderTest.completeOrderPayments(tester);
 
     // ── Phase 5: Receive components into warehouse ────────────────────────────
-    await showDemoStep(
+    await CommonTest.showDemoStep(
       tester,
       'Receiving Components into the Warehouse',
       'The incoming shipment from the supplier is received.\n'
@@ -461,7 +452,7 @@ void main() {
     await ShipmentTest.receiveShipments(tester, locations.sublist(0, 1));
 
     // ── Phase 6: Production run ───────────────────────────────────────────────
-    await showDemoStep(
+    await CommonTest.showDemoStep(
       tester,
       'Assembling the Kits',
       'The Work Order is released, started, and completed.\n'
@@ -480,7 +471,7 @@ void main() {
     await WorkOrderTest.completeWorkOrder(tester);
 
     // ── Phase 7: Ship to customer ─────────────────────────────────────────────
-    await showDemoStep(
+    await CommonTest.showDemoStep(
       tester,
       'Shipping to the Customer',
       'The finished kits are shipped to the customer.\n'
@@ -501,7 +492,7 @@ void main() {
     await OrderTest.completeOrderPayments(tester);
 
     // ── Phase 8: Accounting ledger ────────────────────────────────────────────
-    await showDemoStep(
+    await CommonTest.showDemoStep(
       tester,
       'Accounting & GL Transactions',
       'Every financial movement — inventory cost, COGS, revenue, and payments — '
@@ -512,7 +503,7 @@ void main() {
     // Pause so the viewer can see the ledger entries.
     await tester.pump(const Duration(seconds: 4));
 
-    await showDemoStep(
+    await CommonTest.showDemoStep(
       tester,
       'Demo Complete',
       'You have seen the full GrowERP catalog + manufacturing lifecycle:\n'

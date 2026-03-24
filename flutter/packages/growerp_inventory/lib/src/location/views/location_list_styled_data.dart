@@ -108,7 +108,10 @@ List<Widget> getLocationListRow({
     );
   } else {
     // ID
-    cells.add(Text(location.pseudoId ?? '', key: Key('id$index')));
+    cells.add(SizedBox(
+      key: Key('item$index'),
+      child: Text(location.pseudoId ?? '', key: Key('id$index')),
+    ));
 
     // Name
     cells.add(Text(location.locationName ?? '', key: Key('name$index')));

@@ -121,57 +121,6 @@ final List<FinDoc> mfgDemoPurchaseOrders = [
   ),
 ];
 
-// ── Demo helper ───────────────────────────────────────────────────────────────
-
-/// Overlays a full-screen info card for [seconds] real seconds, then removes it.
-Future<void> showDemoStep(
-  WidgetTester tester,
-  String title,
-  String description, {
-  int seconds = 3,
-}) async {
-  // Use the Navigator (inside MaterialApp's Localizations tree) as context.
-  final element = tester.element(find.byType(Navigator).last);
-  showDialog(
-    context: element,
-    barrierDismissible: false,
-    barrierColor: Colors.black54,
-    builder: (_) => Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.info_outline, size: 48, color: Colors.blue.shade700),
-            const SizedBox(height: 16),
-            Text(
-              title,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              description,
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 16),
-            ),
-          ],
-        ),
-      ),
-    ),
-  );
-  await tester.pumpAndSettle();
-  // Hold for [seconds] real seconds using small pump intervals.
-  for (int i = 0; i < seconds * 10; i++) {
-    await tester.pump(const Duration(milliseconds: 100));
-  }
-  Navigator.of(element, rootNavigator: true).pop();
-  await tester.pumpAndSettle();
-}
 
 // ── Router ────────────────────────────────────────────────────────────────────
 
@@ -357,12 +306,20 @@ void main() {
       clear: true,
     );
 
+    await CommonTest.showDemoStep(
+      tester,
+      'Manufacturing Demo',
+      'An end-to-end walkthrough: BOM, sales order, work order, '
+          'purchase, receive, production, shipping, and accounting.',
+    );
+
     // ── Setup: load products, BOM, locations and trading partners ─────────────
-    await showDemoStep(
+    await CommonTest.showDemoStep(
       tester,
       'Setting Up Demo Data',
       'Loading products, Bill of Materials, warehouse locations, '
           'customer and supplier companies into a fresh company.',
+      seconds: 3,
     );
     await CommonTest.createCompanyAndAdmin(
       tester,
@@ -375,11 +332,12 @@ void main() {
     );
 
     // ── Phase 1: Bill of Materials ────────────────────────────────────────────
-    await showDemoStep(
+    await CommonTest.showDemoStep(
       tester,
       'Bill of Materials',
       'Viewing the BOM for "Widget Assembly".\n'
           'It requires 2 × Bolt M5 and 1 × Bearing 6201 per unit.',
+      seconds: 3,
     );
     await BomTest.selectBom(tester);
     await CommonTest.waitForKey(tester, 'item0');
@@ -389,12 +347,13 @@ void main() {
     await CommonTest.tapByKey(tester, 'cancel');
 
     // ── Phase 2: Sales order → auto-creates Work Order on approval ────────────
-    await showDemoStep(
+    await CommonTest.showDemoStep(
       tester,
       'Creating a Sales Order',
       'A customer orders 1 × Widget Assembly.\n'
           'Approving the order will automatically trigger a Work Order '
           'because the product has a Bill of Materials.',
+      seconds: 3,
     );
     await OrderTest.selectSalesOrders(tester);
     await OrderTest.addOrders(tester, mfgDemoSalesOrders);
@@ -405,11 +364,12 @@ void main() {
     final List<FinDoc> approvedSalesOrders = testAfterSalesApprove.orders;
 
     // ── Phase 3: Work Order — shortage ────────────────────────────────────────
-    await showDemoStep(
+    await CommonTest.showDemoStep(
       tester,
       'Work Order Created Automatically',
       'The system created a Work Order for the Widget Assembly.\n'
           'It shows a material shortage because no components are in stock yet.',
+      seconds: 3,
     );
     await WorkOrderTest.selectWorkOrders(tester);
     await CommonTest.waitForKey(tester, 'item0');
@@ -419,12 +379,13 @@ void main() {
     await CommonTest.tapByKey(tester, 'cancel');
 
     // ── Phase 4: Purchase order for components ────────────────────────────────
-    await showDemoStep(
+    await CommonTest.showDemoStep(
       tester,
       'Purchasing Components',
       'Creating a purchase order for 5 × Bolt M5 and 3 × Bearing 6201 '
           'to fulfil the Work Order requirements.\n'
           'The order is then approved and paid.',
+      seconds: 3,
     );
     await OrderTest.selectPurchaseOrders(tester);
     await OrderTest.addOrders(tester, mfgDemoPurchaseOrders);
@@ -434,22 +395,24 @@ void main() {
     await OrderTest.completeOrderPayments(tester);
 
     // ── Phase 5: Receive components into warehouse ────────────────────────────
-    await showDemoStep(
+    await CommonTest.showDemoStep(
       tester,
       'Receiving Components into Warehouse',
       'The incoming shipment from the supplier is approved and received.\n'
           'Components are now in stock and the Work Order shortage is resolved.',
+      seconds: 3,
     );
     await ShipmentTest.selectIncomingShipments(tester);
     await OrderTest.approveOrderShipments(tester);
     await ShipmentTest.receiveShipments(tester, locations.sublist(0, 1));
 
     // ── Phase 6: Production run ───────────────────────────────────────────────
-    await showDemoStep(
+    await CommonTest.showDemoStep(
       tester,
       'Running Production',
       'The Work Order is released, started, and then completed.\n'
           'Components are consumed and 1 × Widget Assembly is added to inventory.',
+      seconds: 3,
     );
     await WorkOrderTest.selectWorkOrders(tester);
     await CommonTest.waitForKey(tester, 'item0');
@@ -463,11 +426,12 @@ void main() {
     await WorkOrderTest.completeWorkOrder(tester);
 
     // ── Phase 7: Ship to customer ─────────────────────────────────────────────
-    await showDemoStep(
+    await CommonTest.showDemoStep(
       tester,
       'Shipping to Customer',
       'The finished Widget Assembly is shipped to the customer.\n'
           'The outgoing shipment is approved, completed, and payment collected.',
+      seconds: 3,
     );
     // Restore sales order context so the shipment step finds the right record.
     final SaveTest currentTest = await PersistFunctions.getTest();
@@ -483,24 +447,24 @@ void main() {
     await OrderTest.completeOrderPayments(tester);
 
     // ── Phase 8: Accounting ledger ────────────────────────────────────────────
-    await showDemoStep(
+    await CommonTest.showDemoStep(
       tester,
       'Accounting & GL Transactions',
       'All financial movements — inventory cost, COGS, revenue and payments — '
           'are automatically posted to the general ledger.',
+      seconds: 3,
     );
     await TransactionTest.selectTransactions(tester);
     await CommonTest.waitForKey(tester, 'id0');
     // Pause so the viewer can see the ledger entries.
     await tester.pump(const Duration(seconds: 4));
 
-    await showDemoStep(
+    await CommonTest.showDemoStep(
       tester,
       'Demo Complete',
       'You have seen the full GrowERP manufacturing lifecycle:\n'
           'BOM → Sales Order → Work Order → Purchase → Receive → '
           'Produce → Ship → Accounting.',
-      seconds: 5,
     );
 
     await CommonTest.logout(tester);

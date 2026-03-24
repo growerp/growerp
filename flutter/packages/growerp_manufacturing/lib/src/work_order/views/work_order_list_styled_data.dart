@@ -82,7 +82,7 @@ List<Widget> getWorkOrderListRow({
       ),
     );
   } else {
-    cells.add(Text(workOrder.pseudoId, key: Key('pseudoId$index')));
+    cells.add(Text(workOrder.pseudoId, key: Key('item$index')));
     cells.add(Text(workOrder.productName ?? '', key: Key('productName$index')));
     cells.add(
       Text(

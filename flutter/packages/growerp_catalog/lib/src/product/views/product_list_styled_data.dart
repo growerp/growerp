@@ -122,7 +122,10 @@ List<Widget> getProductListRow({
     );
   } else {
     // ID
-    cells.add(Text(product.pseudoId, key: Key('id$index')));
+    cells.add(SizedBox(
+      key: Key('item$index'),
+      child: Text(product.pseudoId, key: Key('id$index')),
+    ));
 
     // Name
     cells.add(Text(product.productName ?? '', key: Key('name$index')));

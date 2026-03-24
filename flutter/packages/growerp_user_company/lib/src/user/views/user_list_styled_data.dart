@@ -108,7 +108,10 @@ List<Widget> getUserListRow({
     );
   } else {
     // ID
-    cells.add(Text(user.pseudoId ?? '', key: Key('id$index')));
+    cells.add(SizedBox(
+      key: Key('item$index'),
+      child: Text(user.pseudoId ?? '', key: Key('id$index')),
+    ));
 
     // Name
     cells.add(

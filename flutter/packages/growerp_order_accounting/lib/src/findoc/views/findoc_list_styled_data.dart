@@ -185,7 +185,10 @@ List<Widget> getFinDocListRow({
     );
   } else {
     // ID
-    cells.add(Text(finDoc.pseudoId ?? '', key: Key('id$index')));
+    cells.add(SizedBox(
+      key: Key('item$index'),
+      child: Text(finDoc.pseudoId ?? '', key: Key('id$index')),
+    ));
 
     // Type (only for transactions)
     if (finDoc.docType == FinDocType.transaction) {

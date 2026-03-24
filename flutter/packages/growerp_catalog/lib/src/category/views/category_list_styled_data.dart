@@ -91,7 +91,10 @@ List<Widget> getCategoryListRow({
     );
   } else {
     // ID
-    cells.add(Text(category.pseudoId, key: Key('id$index')));
+    cells.add(SizedBox(
+      key: Key('item$index'),
+      child: Text(category.pseudoId, key: Key('id$index')),
+    ));
 
     // Name
     cells.add(Text(category.categoryName, key: Key('name$index')));

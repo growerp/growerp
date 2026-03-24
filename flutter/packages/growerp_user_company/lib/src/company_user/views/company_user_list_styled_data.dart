@@ -98,7 +98,10 @@ List<Widget> getCompanyUserListRow({
     );
   } else {
     // ID
-    cells.add(Text(companyUser.pseudoId ?? '', key: Key('id$index')));
+    cells.add(SizedBox(
+      key: Key('item$index'),
+      child: Text(companyUser.pseudoId ?? '', key: Key('id$index')),
+    ));
 
     // Type indicator
     cells.add(

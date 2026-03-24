@@ -55,6 +55,55 @@ class CommonTest {
 
   static const int waitTime = 2;
 
+  /// Overlays a full-screen info card for [seconds] real seconds, then removes it.
+  ///
+  /// Use this in integration-test demos to narrate each phase to viewers.
+  /// Suitable for the demo announcement, the initial setup message, and each step.
+  static Future<void> showDemoStep(
+    WidgetTester tester,
+    String title,
+    String description, {
+    int seconds = 5,
+  }) async {
+    final element = tester.element(find.byType(Navigator).last);
+    showDialog(
+      context: element,
+      barrierDismissible: false,
+      barrierColor: Colors.black54,
+      builder: (_) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.info_outline, size: 48, color: Colors.blue.shade700),
+              const SizedBox(height: 16),
+              Text(
+                title,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                    fontSize: 22, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                description,
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 16),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    for (int i = 0; i < seconds * 10; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+    Navigator.of(element, rootNavigator: true).pop();
+    await tester.pumpAndSettle();
+  }
+
   /// Starts the test application with the given GoRouter configuration.
   ///
   /// [router] - The GoRouter instance for navigation
@@ -601,9 +650,9 @@ class CommonTest {
   static Future<bool> waitForKey(WidgetTester tester, String keyName) async {
     int times = 0;
     bool found = false;
-    while (times++ < 10 && found == false) {
+    while (times++ < 10 && !found) {
       found = tester.any(find.byKey(Key(keyName), skipOffstage: true));
-      await tester.pump(const Duration(milliseconds: 500));
+      if (!found) await tester.pump(const Duration(milliseconds: 500));
     }
     //expect(found, true,
     //    reason: 'key $keyName not found even after 6 seconds wait!');

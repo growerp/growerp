@@ -95,14 +95,15 @@ List<Widget> getCompanyListRow({
     );
   } else {
     // ID
-    cells.add(
-      Text(
+    cells.add(SizedBox(
+      key: Key('item$index'),
+      child: Text(
         classificationId == 'AppSupport'
             ? (company.partyId ?? '')
             : (company.pseudoId ?? ''),
         key: Key('id$index'),
       ),
-    );
+    ));
 
     // Name
     cells.add(Text(company.name ?? '', key: Key('name$index')));
