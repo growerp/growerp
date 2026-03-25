@@ -44,6 +44,13 @@ melos exec --dir-exists="integration_test" --concurrency=4 -- flutter clean 2>/d
 # package with paths correct for the Docker container.
 melos bootstrap
 
+# Run code generation (freezed, json_serializable, retrofit).
+# The volume mount overwrites the Docker image's generated *.freezed.dart /
+# *.g.dart files with the unbuilt host checkout, so we must regenerate them
+# here — after bootstrap but before any flutter build or test commands.
+echo "Running code generation (melos build)..."
+melos build --no-select
+
 # Enable Linux desktop if not already enabled
 if ! flutter config | grep -q 'enable-linux-desktop: true'; then
   echo "Enabling Linux desktop support..."
