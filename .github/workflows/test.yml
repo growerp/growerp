@@ -8,15 +8,21 @@ name: Integration Tests
 # to flutter/ or moqui/ since the last run. Can also be triggered manually.
 
 on:
+  push:
+    branches: [master]
+    paths:
+      - "flutter/**"
+      - "moqui/runtime/component/**"
+      - ".github/workflows/test.yml"
   schedule:
     # Every day at midnight UTC — but only actually tests if there are changes
-    - cron: '0 0 * * *'
+    - cron: "0 0 * * *"
   workflow_dispatch:
     inputs:
       package_filter:
         description: 'Only test packages matching this string (e.g. "catalog"). Leave empty for all.'
         required: false
-        default: ''
+        default: ""
 
 concurrency:
   group: test-${{ github.ref }}
@@ -37,7 +43,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # need full history for change detection
+          fetch-depth: 0 # need full history for change detection
 
       # ------------------------------------------------------------------
       # 1b. Skip if no relevant changes in the last 24 hours (scheduled only)
