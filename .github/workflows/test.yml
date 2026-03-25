@@ -4,6 +4,9 @@ name: Integration Tests
 # Tests use Docker Compose for the Moqui backend + PostgreSQL,
 # and xvfb for a virtual display.
 #
+# Full runs split across 4 parallel slices (each with its own Moqui backend).
+# Each package's tests are self-contained — they create their own company/admin.
+#
 # Runs at most once daily (midnight UTC) — only if there were changes
 # to flutter/ or moqui/ since the last run. Can also be triggered manually.
 
@@ -20,7 +23,7 @@ on:
   workflow_dispatch:
     inputs:
       package_filter:
-        description: 'Only test packages matching this string (e.g. "catalog"). Leave empty for all.'
+        description: 'Only test packages matching this string (e.g. "catalog"). Leave empty for all 4 slices.'
         required: false
         default: ""
 
@@ -32,9 +35,50 @@ permissions:
   contents: read
 
 jobs:
-  integration-tests:
+  # ------------------------------------------------------------------
+  # 0. Change detection — skip scheduled runs with no recent changes
+  # ------------------------------------------------------------------
+  check-changes:
     runs-on: ubuntu-latest
-    timeout-minutes: 600
+    outputs:
+      should_run: ${{ steps.detect.outputs.should_run }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - id: detect
+        run: |
+          if [ "${{ github.event_name }}" != "schedule" ]; then
+            echo "should_run=true" >> "$GITHUB_OUTPUT"
+          else
+            SINCE=$(date -u -d '24 hours ago' '+%Y-%m-%dT%H:%M:%S')
+            COUNT=$(git log --since="$SINCE" --oneline -- \
+              'flutter/**' 'moqui/runtime/component/**' | wc -l)
+            if [ "$COUNT" -gt 0 ]; then
+              echo "should_run=true" >> "$GITHUB_OUTPUT"
+              echo "$COUNT commit(s) with relevant changes found."
+            else
+              echo "should_run=false" >> "$GITHUB_OUTPUT"
+              echo "No relevant changes in the last 24 hours — skipping tests."
+            fi
+          fi
+
+  # ------------------------------------------------------------------
+  # 1. Integration tests
+  #    Full run: 4 parallel slices, each with its own Moqui backend.
+  #    Filtered run (package_filter set): single job using PACKAGE_FILTER.
+  # ------------------------------------------------------------------
+  integration-tests:
+    needs: check-changes
+    if: needs.check-changes.outputs.should_run == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    strategy:
+      fail-fast: false
+      matrix:
+        # Use a single slice when package_filter is set; otherwise run all 4.
+        slice: ${{ fromJSON(github.event.inputs.package_filter && '[1]' || '[1,2,3,4]') }}
 
     steps:
       # ------------------------------------------------------------------
@@ -42,41 +86,14 @@ jobs:
       # ------------------------------------------------------------------
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0 # need full history for change detection
-
-      # ------------------------------------------------------------------
-      # 1b. Skip if no relevant changes in the last 24 hours (scheduled only)
-      # ------------------------------------------------------------------
-      - name: Check for recent changes
-        id: changes
-        if: github.event_name == 'schedule'
-        run: |
-          SINCE=$(date -u -d '24 hours ago' '+%Y-%m-%dT%H:%M:%S')
-          COUNT=$(git log --since="$SINCE" --oneline -- \
-            'flutter/**' 'moqui/runtime/component/**' | wc -l)
-          echo "changes=$COUNT" >> "$GITHUB_OUTPUT"
-          if [ "$COUNT" -eq 0 ]; then
-            echo "No relevant changes in the last 24 hours — skipping tests."
-          else
-            echo "$COUNT commit(s) with relevant changes found."
-          fi
-
-      - name: Skip if no changes
-        if: github.event_name == 'schedule' && steps.changes.outputs.changes == '0'
-        run: |
-          echo "No changes detected — skipping."
-          exit 0
 
       # ------------------------------------------------------------------
       # 2. Build test runner image (cached via Docker layer cache)
       # ------------------------------------------------------------------
       - name: Set up Docker Buildx
-        if: github.event_name != 'schedule' || steps.changes.outputs.changes != '0'
         uses: docker/setup-buildx-action@v3
 
       - name: Build test runner image
-        if: github.event_name != 'schedule' || steps.changes.outputs.changes != '0'
         uses: docker/build-push-action@v5
         with:
           context: flutter
@@ -90,13 +107,10 @@ jobs:
       # 3. Start backend services
       # ------------------------------------------------------------------
       - name: Start Moqui backend
-        if: github.event_name != 'schedule' || steps.changes.outputs.changes != '0'
         working-directory: flutter
-        run: |
-          docker compose -f ci/docker-compose-test.yml up -d moqui-database moqui
+        run: docker compose -f ci/docker-compose-test.yml up -d moqui-database moqui
 
       - name: Wait for Moqui to be healthy
-        if: github.event_name != 'schedule' || steps.changes.outputs.changes != '0'
         working-directory: flutter
         run: |
           echo "Waiting for Moqui backend..."
@@ -121,41 +135,52 @@ jobs:
       # ------------------------------------------------------------------
       # 4. Run integration tests
       # ------------------------------------------------------------------
-      - name: Run integration tests
-        if: github.event_name != 'schedule' || steps.changes.outputs.changes != '0'
+      - name: Run integration tests (slice ${{ matrix.slice }})
         working-directory: flutter
         env:
           PACKAGE_FILTER: ${{ github.event.inputs.package_filter || '' }}
+          # Set PACKAGE_SLICE only for full (unfiltered) runs.
+          PACKAGE_SLICE: ${{ !github.event.inputs.package_filter && format('{0}/4', matrix.slice) || '' }}
         run: |
-          PACKAGE_FILTER="$PACKAGE_FILTER" \
+          PACKAGE_FILTER="$PACKAGE_FILTER" PACKAGE_SLICE="$PACKAGE_SLICE" \
             docker compose -f ci/docker-compose-test.yml up \
               --exit-code-from sut sut 2>&1 | tee /tmp/test_output.log
           echo "TEST_EXIT_CODE=${PIPESTATUS[0]}" >> "$GITHUB_ENV"
 
       # ------------------------------------------------------------------
-      # 5. Report results
+      # 5. Per-slice results
       # ------------------------------------------------------------------
-      - name: Test failure summary
-        if: always() && (github.event_name != 'schedule' || steps.changes.outputs.changes != '0')
+      - name: Test results summary (slice ${{ matrix.slice }})
+        if: always()
         run: |
-          echo "## Test Results" >> "$GITHUB_STEP_SUMMARY"
+          echo "## Test Results — Slice ${{ matrix.slice }}/4" >> "$GITHUB_STEP_SUMMARY"
           if [ -f /tmp/test_output.log ]; then
-            FAILED=$(grep -cE ' FAILED$|\[E\]' /tmp/test_output.log || true)
-            if [ "$FAILED" = "0" ]; then
-              echo "All tests passed." >> "$GITHUB_STEP_SUMMARY"
+            if grep -q '=== FINAL TEST SUMMARY ===' /tmp/test_output.log; then
+              echo '```' >> "$GITHUB_STEP_SUMMARY"
+              grep '>>> RESULT:' /tmp/test_output.log >> "$GITHUB_STEP_SUMMARY" || true
+              echo "" >> "$GITHUB_STEP_SUMMARY"
+              sed -n '/=== FINAL TEST SUMMARY ===/,$ p' /tmp/test_output.log | head -100 \
+                >> "$GITHUB_STEP_SUMMARY" || true
+              echo '```' >> "$GITHUB_STEP_SUMMARY"
             else
-              echo "**$FAILED failure(s) detected:**" >> "$GITHUB_STEP_SUMMARY"
-              echo '```' >> "$GITHUB_STEP_SUMMARY"
-              grep -E ' FAILED$|\[E\]' /tmp/test_output.log >> "$GITHUB_STEP_SUMMARY" || true
-              echo '```' >> "$GITHUB_STEP_SUMMARY"
+              # Package-filter or legacy format
+              FAILED=$(grep -cE ' FAILED$|\[E\]' /tmp/test_output.log || true)
+              if [ "$FAILED" = "0" ]; then
+                echo "All tests passed." >> "$GITHUB_STEP_SUMMARY"
+              else
+                echo "**$FAILED failure(s) detected:**" >> "$GITHUB_STEP_SUMMARY"
+                echo '```' >> "$GITHUB_STEP_SUMMARY"
+                grep -E ' FAILED$|\[E\]' /tmp/test_output.log >> "$GITHUB_STEP_SUMMARY" || true
+                echo '```' >> "$GITHUB_STEP_SUMMARY"
+              fi
             fi
           fi
 
       - name: Upload test log
-        if: failure() && (github.event_name != 'schedule' || steps.changes.outputs.changes != '0')
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: test-output
+          name: test-output-${{ matrix.slice }}
           path: /tmp/test_output.log
           retention-days: 7
 
@@ -163,6 +188,50 @@ jobs:
       # 6. Cleanup
       # ------------------------------------------------------------------
       - name: Tear down Docker services
-        if: always() && (github.event_name != 'schedule' || steps.changes.outputs.changes != '0')
+        if: always()
         working-directory: flutter
         run: docker compose -f ci/docker-compose-test.yml down -v
+
+  # ------------------------------------------------------------------
+  # 2. Combined summary across all slices
+  # ------------------------------------------------------------------
+  summarize:
+    needs: integration-tests
+    if: always() && needs.integration-tests.result != 'skipped'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all test logs
+        uses: actions/download-artifact@v4
+        with:
+          pattern: test-output-*
+          path: test-logs/
+
+      - name: Combined summary
+        run: |
+          echo "## Overall Test Results" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          TOTAL_FAILED_PKGS=0
+          for slice_dir in $(ls -d test-logs/test-output-* 2>/dev/null | sort -V); do
+            SLICE=$(basename "$slice_dir" | grep -o '[0-9]*$')
+            LOG="$slice_dir/test_output.log"
+            if [ -f "$LOG" ]; then
+              echo "--- Slice $SLICE ---" >> "$GITHUB_STEP_SUMMARY"
+              grep '>>> RESULT:' "$LOG" >> "$GITHUB_STEP_SUMMARY" \
+                || echo "  (no structured results)" >> "$GITHUB_STEP_SUMMARY"
+              FAILED=$(grep -c '>>> RESULT:.*FAILED' "$LOG" 2>/dev/null || echo 0)
+              TOTAL_FAILED_PKGS=$((TOTAL_FAILED_PKGS + FAILED))
+            fi
+          done
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          if [ "$TOTAL_FAILED_PKGS" -eq 0 ]; then
+            echo "All packages passed!" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "$TOTAL_FAILED_PKGS package(s) failed." >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "Failed tests:" >> "$GITHUB_STEP_SUMMARY"
+            for slice_dir in $(ls -d test-logs/test-output-* 2>/dev/null | sort -V); do
+              LOG="$slice_dir/test_output.log"
+              [ -f "$LOG" ] && grep '^\s*\[' "$LOG" >> "$GITHUB_STEP_SUMMARY" || true
+            done
+          fi
+          echo '```' >> "$GITHUB_STEP_SUMMARY"

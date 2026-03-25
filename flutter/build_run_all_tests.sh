@@ -25,11 +25,19 @@ Arguments:
 Options:
   -h, --help       Show this help message and exit.
 
+Environment variables:
+  PACKAGE_SLICE    Run one of 4 parallel slices, e.g. PACKAGE_SLICE=2/4.
+                   Ignored when package_filter or test_file is provided.
+
 Examples:
   $(basename "$0")                  # Run all tests
   $(basename "$0") marketing        # Only test packages containing "marketing"
   $(basename "$0") catalog          # Only test packages containing "catalog"
   $(basename "$0") packages/growerp_core/example/integration_test/dynamic_menu_test.dart  # Run single test
+  PACKAGE_SLICE=1/4 $(basename "$0")   # Run slice 1 of 4
+  PACKAGE_SLICE=2/4 $(basename "$0")   # Run slice 2 of 4
+  PACKAGE_SLICE=3/4 $(basename "$0")   # Run slice 3 of 4
+  PACKAGE_SLICE=4/4 $(basename "$0")   # Run slice 4 of 4
 
 Steps performed:
   1. Start Docker Compose services (postgres, moqui)
@@ -133,7 +141,7 @@ done
 
 # Run tests — capture output for post-run failure summary
 LOG_FILE=$(mktemp /tmp/growerp_test_XXXXXX.log)
-PACKAGE_FILTER="$PACKAGE_FILTER" TEST_FILE="$TEST_FILE" \
+PACKAGE_FILTER="$PACKAGE_FILTER" TEST_FILE="$TEST_FILE" PACKAGE_SLICE="${PACKAGE_SLICE:-}" \
   docker compose -f ci/docker-compose-test.yml up --exit-code-from sut sut 2>&1 | tee "$LOG_FILE"
 TEST_EXIT_CODE=${PIPESTATUS[0]}
 

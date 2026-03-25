@@ -13,6 +13,7 @@ services:
       - ..:/home/mobiledevops/growerp
     environment:
       - PACKAGE_FILTER=${PACKAGE_FILTER:-}
+      - PACKAGE_SLICE=${PACKAGE_SLICE:-}
       - TEST_FILE=${TEST_FILE:-}
       - HOME=/home/mobiledevops
       # Backend URL injected via dart-define at test time — no sed patching needed

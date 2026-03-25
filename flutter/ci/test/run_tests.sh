@@ -9,6 +9,7 @@
 #   SCREEN_WIDTH  — Logical screen width in px (default: 412, phone emulation)
 #   SCREEN_HEIGHT — Logical screen height in px (default: 732)
 #   PACKAGE_FILTER — Only test packages matching this string (optional)
+#   PACKAGE_SLICE  — Run a slice of all packages, format "N/TOTAL" e.g. "2/4" (optional)
 #   TEST_FILE      — Run a single test file (optional)
 #
 set -x
@@ -194,10 +195,104 @@ elif [ -n "$PACKAGE_FILTER" ]; then
       --dart-define=SCREEN_HEIGHT=$SCREEN_HEIGHT"
   TEST_EXIT=$?
 else
-  echo "Running all tests"
-  # No separate flutter clean here — already done at startup before melos bootstrap.
-  # Running clean again would delete the good package_config.json files.
-  melos run test-headless --no-select
+  echo "Running all tests sequentially by package..."
+
+  WORKSPACE_ROOT="$(pwd)"
+
+  # Build ordered package list from pubspec.yaml (melos order), filtered to
+  # packages that actually have an integration_test/ directory.
+  mapfile -t PACKAGES_WITH_TESTS < <(
+    grep '^\s*- packages/' pubspec.yaml | sed 's/.*- //' | tr -d ' \r' | while IFS= read -r pkg_path; do
+      [ -d "${pkg_path}/integration_test" ] && echo "$pkg_path"
+    done
+  )
+
+  echo "Packages with integration tests (${#PACKAGES_WITH_TESTS[@]}):"
+  for p in "${PACKAGES_WITH_TESTS[@]}"; do echo "  $p"; done
+
+  # Apply slicing if PACKAGE_SLICE is set (e.g. "2/4" = second quarter of all packages)
+  if [ -n "$PACKAGE_SLICE" ]; then
+    SLICE_NUM="${PACKAGE_SLICE%/*}"
+    SLICE_TOTAL="${PACKAGE_SLICE#*/}"
+    TOTAL_PKGS=${#PACKAGES_WITH_TESTS[@]}
+    SLICE_SIZE=$(( (TOTAL_PKGS + SLICE_TOTAL - 1) / SLICE_TOTAL ))
+    START=$(( (SLICE_NUM - 1) * SLICE_SIZE ))
+    END=$(( START + SLICE_SIZE ))
+    [ $END -gt $TOTAL_PKGS ] && END=$TOTAL_PKGS
+    echo "Slice $PACKAGE_SLICE: running packages $((START+1))-$END of $TOTAL_PKGS"
+    PACKAGES_WITH_TESTS=("${PACKAGES_WITH_TESTS[@]:$START:$((END-START))}")
+  fi
+
+  FAILED_PACKAGES=()
+  ALL_FAILED_TESTS=()
+
+  for pkg_path in "${PACKAGES_WITH_TESTS[@]}"; do
+    PKG_NAME=$(basename "$pkg_path")
+    PARENT_NAME=$(basename "$(dirname "$pkg_path")")
+    # Display as "growerp_catalog_example" or just "admin"
+    if [ "$PKG_NAME" = "example" ]; then
+      DISPLAY_NAME="${PARENT_NAME}_example"
+    else
+      DISPLAY_NAME="$PKG_NAME"
+    fi
+
+    echo ""
+    echo "============================================================"
+    echo "=== Package: $DISPLAY_NAME ($pkg_path)"
+    echo "============================================================"
+
+    PKG_LOG=$(mktemp /tmp/pkg_test_XXXXXX.log)
+
+    (
+      cd "$WORKSPACE_ROOT/$pkg_path" || exit 1
+      FAIL=0
+      for f in integration_test/*.dart; do
+        flutter test "$f" -d linux \
+          --dart-define=BACKEND_URL="$BACKEND_URL" \
+          --dart-define=CHAT_URL="$CHAT_URL" \
+          --dart-define=SCREEN_WIDTH="$SCREEN_WIDTH" \
+          --dart-define=SCREEN_HEIGHT="$SCREEN_HEIGHT" || FAIL=1
+      done
+      exit $FAIL
+    ) 2>&1 | tee "$PKG_LOG"
+    PKG_EXIT=${PIPESTATUS[0]}
+
+    if [ $PKG_EXIT -eq 0 ]; then
+      echo ">>> RESULT: $DISPLAY_NAME PASSED <<<"
+    else
+      echo ">>> RESULT: $DISPLAY_NAME FAILED <<<"
+      FAILED_PACKAGES+=("$DISPLAY_NAME")
+      while IFS= read -r line; do
+        [ -n "$line" ] && ALL_FAILED_TESTS+=("[$DISPLAY_NAME] $line")
+      done < <(grep -E '\[E\]| FAILED$' "$PKG_LOG" || true)
+    fi
+
+    rm -f "$PKG_LOG"
+  done
+
+  echo ""
+  echo "============================================================"
+  echo "=== FINAL TEST SUMMARY"
+  echo "============================================================"
+  echo "Packages tested : ${#PACKAGES_WITH_TESTS[@]}"
+  echo "Packages failed : ${#FAILED_PACKAGES[@]}"
+
+  if [ ${#FAILED_PACKAGES[@]} -gt 0 ]; then
+    echo ""
+    echo "Failed packages:"
+    for pkg in "${FAILED_PACKAGES[@]}"; do
+      echo "  - $pkg"
+    done
+    echo ""
+    echo "Failed tests:"
+    for test_line in "${ALL_FAILED_TESTS[@]}"; do
+      echo "  $test_line"
+    done
+  else
+    echo "All packages passed!"
+  fi
+
+  [ ${#FAILED_PACKAGES[@]} -eq 0 ]
   TEST_EXIT=$?
 fi
 
