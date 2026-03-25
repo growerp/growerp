@@ -80,4 +80,5 @@ RUN chmod -R a+rw /root/.pub-cache && \
     chmod -R a+rw /home/mobiledevops && \
     chmod -R a+rw /sdks/flutter 2>/dev/null || true && \
     chmod a+rx /root && \
-    chmod 1777 /tmp
+    chmod 1777 /tmp && \
+    mkdir -p /tmp/.X11-unix && chmod 1777 /tmp/.X11-unix

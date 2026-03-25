@@ -27,7 +27,21 @@ git config --global --add safe.directory '*' 2>/dev/null ||
 # Ensure melos is available (pre-installed in image, but verify)
 which melos || dart pub global activate melos
 
-# Re-bootstrap workspace to pick up any new packages added since the image was built
+# Purge all .dart_tool directories from the mounted volume.
+# The host machine's .dart_tool/package_config.json files contain paths
+# like ../../../../../hans/development/flutter/ which don't exist inside
+# the container.  Removing them before melos bootstrap ensures fresh
+# package configs with correct Docker-internal paths.
+echo "Purging stale .dart_tool directories from host volume..."
+find packages -name '.dart_tool' -type d -exec rm -rf {} + 2>/dev/null || true
+
+# Also clean build/ directories to avoid incremental-build artifacts
+# that reference stale package_config paths.
+echo "Cleaning stale build artifacts..."
+melos exec --dir-exists="integration_test" --concurrency=4 -- flutter clean 2>/dev/null || true
+
+# Bootstrap workspace — regenerates .dart_tool/package_config.json in every
+# package with paths correct for the Docker container.
 melos bootstrap
 
 # Enable Linux desktop if not already enabled
@@ -144,7 +158,8 @@ if [ -n "$TEST_FILE" ]; then
   if [ -d "$PACKAGE_DIR" ] && [ -f "$PACKAGE_DIR/pubspec.yaml" ]; then
     echo "Running test from package directory: $PACKAGE_DIR"
     cd "$PACKAGE_DIR" || exit 1
-    flutter clean
+    # Don't flutter clean here — it would delete package_config.json.
+    # The startup cleanup already handled stale artifacts.
     flutter pub get
 
     TEST_FILE_RELATIVE="${TEST_FILE#$PACKAGE_DIR/}"
@@ -165,7 +180,7 @@ if [ -n "$TEST_FILE" ]; then
 elif [ -n "$PACKAGE_FILTER" ]; then
   echo "Running tests for packages matching: *${PACKAGE_FILTER}*"
   melos exec --scope="*${PACKAGE_FILTER}*" --dir-exists="integration_test" --concurrency=1 -- \
-    "flutter clean && flutter test integration_test -d linux \
+    "flutter pub get && flutter test integration_test -d linux \
       --dart-define=BACKEND_URL=$BACKEND_URL \
       --dart-define=CHAT_URL=$CHAT_URL \
       --dart-define=SCREEN_WIDTH=$SCREEN_WIDTH \
@@ -173,8 +188,8 @@ elif [ -n "$PACKAGE_FILTER" ]; then
   TEST_EXIT=$?
 else
   echo "Running all tests"
-  echo "Cleaning stale build artifacts..."
-  melos exec --dir-exists="integration_test" --concurrency=4 -- flutter clean
+  # No separate flutter clean here — already done at startup before melos bootstrap.
+  # Running clean again would delete the good package_config.json files.
   melos run test-headless --no-select
   TEST_EXIT=$?
 fi
