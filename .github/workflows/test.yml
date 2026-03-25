@@ -4,8 +4,9 @@ name: Integration Tests
 # Tests use Docker Compose for the Moqui backend + PostgreSQL,
 # and xvfb for a virtual display.
 #
-# Full runs split across 4 parallel slices (each with its own Moqui backend).
-# Each package's tests are self-contained — they create their own company/admin.
+# Full runs split across 4 parallel slices on separate runners, each with its own
+# Moqui + PostgreSQL. Tests are self-contained — each creates its own company/admin,
+# so slices don't interfere with each other.
 #
 # Runs daily at 11 PM Bangkok time (16:00 UTC) — only if there were commits that day.
 # Can also be triggered manually via workflow_dispatch.

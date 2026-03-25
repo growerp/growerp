@@ -245,6 +245,10 @@ else
 
     (
       cd "$WORKSPACE_ROOT/$pkg_path" || exit 1
+      if [ ! -d "linux" ]; then
+        echo "Linux platform not found — adding Linux support..."
+        flutter create --platforms=linux .
+      fi
       FAIL=0
       for f in integration_test/*.dart; do
         flutter test "$f" -d linux \
