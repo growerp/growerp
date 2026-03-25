@@ -30,6 +30,11 @@ const String _backendPort = String.fromEnvironment(
   defaultValue: '8080',
 );
 
+/// Full chat/WebSocket URL override at compile time. When set, this takes
+/// highest priority over all other URL resolution logic.
+/// Usage: --dart-define=CHAT_URL=ws://moqui
+const String _chatUrlDefine = String.fromEnvironment('CHAT_URL');
+
 class WsClient {
   WebSocketChannel? _channel;
   late String wsUrl;
@@ -48,7 +53,10 @@ class WsClient {
 
   WsClient(String path) {
     String? baseUrl;
-    if (kReleaseMode) {
+    if (_chatUrlDefine.isNotEmpty) {
+      // Compile-time --dart-define=CHAT_URL takes highest priority.
+      baseUrl = _chatUrlDefine;
+    } else if (kReleaseMode) {
       baseUrl = GlobalConfiguration().get("chatUrl");
     } else {
       baseUrl = GlobalConfiguration().get("chatUrlDebug");

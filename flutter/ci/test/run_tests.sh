@@ -1,212 +1,203 @@
 #! /bin/bash
+#
+# Headless test runner for GrowERP Flutter integration tests.
+# Runs on Linux desktop with xvfb (virtual framebuffer) — no Android emulator needed.
+#
+# Environment variables (set by docker-compose-test.yml):
+#   BACKEND_URL   — REST backend URL (default: http://moqui)
+#   CHAT_URL      — WebSocket URL (default: ws://moqui)
+#   SCREEN_WIDTH  — Logical screen width in px (default: 412, phone emulation)
+#   SCREEN_HEIGHT — Logical screen height in px (default: 732)
+#   PACKAGE_FILTER — Only test packages matching this string (optional)
+#   TEST_FILE      — Run a single test file (optional)
+#
 set -x
-echo "Starting test runner (emulator should be healthy)..."
-sleep 10
+echo "Starting Linux desktop headless test runner..."
+
+# When running as non-root (host UID), use root's pub-cache which was made
+# world-writable in the Dockerfile. Also ensure HOME is set for git/flutter.
+export HOME=${HOME:-/home/mobiledevops}
+export PUB_CACHE=/root/.pub-cache
+export PATH="$PATH:/root/.pub-cache/bin"
 
 # git safe directory (mounted volume may have different owner)
-git config --global --add safe.directory '*'
+git config --global --add safe.directory '*' 2>/dev/null || 
+  git config --system --add safe.directory '*' 2>/dev/null || true
 
-# Ensure melos is available
-dart pub global activate melos
-export PATH="$PATH":"$HOME/.pub-cache/bin"
+# Ensure melos is available (pre-installed in image, but verify)
+which melos || dart pub global activate melos
 
-# Re-bootstrap workspace to pick up any new packages added since the image was built
-# (e.g. packages with 'resolution: workspace' not present in the pre-built image)
+# Purge all .dart_tool directories from the mounted volume.
+# The host machine's .dart_tool/package_config.json files contain paths
+# like ../../../../../hans/development/flutter/ which don't exist inside
+# the container.  Removing them before melos bootstrap ensures fresh
+# package configs with correct Docker-internal paths.
+echo "Purging stale .dart_tool directories from host volume..."
+find packages -name '.dart_tool' -type d -exec rm -rf {} + 2>/dev/null || true
+
+# Also clean build/ directories to avoid incremental-build artifacts
+# that reference stale package_config paths.
+echo "Cleaning stale build artifacts..."
+melos exec --dir-exists="integration_test" --concurrency=4 -- flutter clean 2>/dev/null || true
+
+# Bootstrap workspace — regenerates .dart_tool/package_config.json in every
+# package with paths correct for the Docker container.
 melos bootstrap
 
-# Fix: shared_preferences_android 2.4.x moved SharedPreferencesPlugin from Java to
-# Kotlin, but flutter pub get still adds it to GeneratedPluginRegistrant.java based on
-# the plugin's pubspec.yaml pluginClass field. Java cannot resolve the Kotlin class
-# during Gradle compilation. The plugin is registered via dartPluginClass (Dart-side),
-# so the Java registration entry is not needed and must be removed.
-find packages -name "GeneratedPluginRegistrant.java" | while read f; do
-  awk '
-    /^    try \{$/ { buf=$0; state=1; next }
-    state==1 { buf=buf"\n"$0; if (/SharedPreferencesPlugin\(\)\);/) state=2; else { print buf; buf=""; state=0 }; next }
-    state==2 { buf=buf"\n"$0; if (/^    \} catch \(Exception e\) \{$/) state=3; else { print buf; buf=""; state=0 }; next }
-    state==3 { buf=buf"\n"$0; if (/SharedPreferencesPlugin/) state=4; else { print buf; buf=""; state=0 }; next }
-    state==4 { if (/^    \}$/) { buf=""; state=0 } else { print buf"\n"$0; buf=""; state=0 }; next }
-    { print }
-  ' "$f" > "$f.tmp" && mv "$f.tmp" "$f"
-done
-
-# Disable Gradle daemon and run Kotlin compiler in-process to prevent memory issues
-export GRADLE_OPTS="-Dorg.gradle.daemon=false -Xmx2g -Dkotlin.compiler.execution.strategy=in-process"
-
-# Wait for emulator to be accessible with retries
-MAX_RETRIES=30
-RETRY_COUNT=0
-EMULATOR_IP=""
-
-while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
-  EMULATOR_IP=$(getent hosts emulator | awk '{print $1}' | head -n 1)
-  if [ -n "$EMULATOR_IP" ]; then
-    echo "Resolved emulator IP: $EMULATOR_IP"
-    break
-  fi
-  echo "Waiting for emulator DNS resolution... (attempt $((RETRY_COUNT+1))/$MAX_RETRIES)"
-  sleep 2
-  RETRY_COUNT=$((RETRY_COUNT+1))
-done
-
-if [ -n "$EMULATOR_IP" ]; then
-  echo "Connecting to emulator at $EMULATOR_IP:5557"
-  adb connect "$EMULATOR_IP":5557 || true
-  export DEVICE_ID="$EMULATOR_IP:5557"
-else
-  echo "Failed to resolve emulator via getent, trying direct hostname..."
-  adb connect emulator:5557 || true
-  export DEVICE_ID="emulator:5557"
+# Enable Linux desktop if not already enabled
+if ! flutter config | grep -q 'enable-linux-desktop: true'; then
+  echo "Enabling Linux desktop support..."
+  flutter config --enable-linux-desktop
 fi
 
-echo "Using DEVICE_ID: $DEVICE_ID"
+# Start Xvfb as a persistent background daemon.
+# Using xvfb-run wraps only a single command; when melos launches multiple
+# flutter test processes sequentially, the display goes stale after the first
+# one finishes, causing "The log reader stopped unexpectedly".
+# By running Xvfb as a daemon we keep the display alive for the entire session.
+export DISPLAY=:99
+Xvfb :99 -screen 0 1024x768x24 -ac +extension GLX +render -noreset &
+XVFB_PID=$!
+sleep 2
+if ! kill -0 $XVFB_PID 2>/dev/null; then
+  echo "ERROR: Xvfb failed to start"
+  exit 1
+fi
+echo "Xvfb started on DISPLAY=$DISPLAY (PID $XVFB_PID)"
 
-flutter devices
+# Defaults for environment variables
+export BACKEND_URL="${BACKEND_URL:-http://moqui}"
+export CHAT_URL="${CHAT_URL:-ws://moqui}"
+export SCREEN_WIDTH="${SCREEN_WIDTH:-412}"
+export SCREEN_HEIGHT="${SCREEN_HEIGHT:-732}"
 
-# Wait for device to be online with timeout
-echo "Waiting for Android device to be detected by adb..."
-TIMEOUT=300
+# Wait for Moqui backend to be ready (docker-compose healthcheck handles this,
+# but belt-and-suspenders for standalone usage)
+echo "Verifying Moqui backend connectivity at $BACKEND_URL ..."
+TIMEOUT=120
 ELAPSED=0
 while [ $ELAPSED -lt $TIMEOUT ]; do
-  if adb devices | grep -q "$DEVICE_ID.*device$"; then
-    echo "Device detected by adb"
+  if curl -sf "${BACKEND_URL}/status" -o /dev/null 2>/dev/null; then
+    echo "Moqui backend is ready."
     break
   fi
-  echo "Waiting for device... ($ELAPSED/$TIMEOUT seconds)"
+  echo "Waiting for Moqui... ($ELAPSED/$TIMEOUT seconds)"
   sleep 5
-  ELAPSED=$((ELAPSED+5))
+  ELAPSED=$((ELAPSED + 5))
 done
-
 if [ $ELAPSED -ge $TIMEOUT ]; then
-  echo "ERROR: Device not detected after $TIMEOUT seconds"
-  adb devices
+  echo "ERROR: Moqui backend not ready after $TIMEOUT seconds at $BACKEND_URL"
   exit 1
 fi
 
-# Wait for boot to complete
-echo "Waiting for Android device to complete boot..."
-BOOT_TIMEOUT=180
-BOOT_ELAPSED=0
-while [ $BOOT_ELAPSED -lt $BOOT_TIMEOUT ]; do
-  BOOT_STATUS=$(adb -s "$DEVICE_ID" shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')
-  if [ "$BOOT_STATUS" = "1" ]; then
-    echo "Device boot completed"
-    break
+# Quick connectivity test
+echo "Testing backend connectivity..."
+HTTP_CODE=$(curl -s --max-time 10 \
+  "${BACKEND_URL}/rest/s1/growerp/100/CheckEmail?email=test@test.com" \
+  -o /dev/null -w "%{http_code}")
+echo "Backend connectivity test: HTTP $HTTP_CODE"
+
+# Ensure the initial GrowERP admin user exists.
+# On a fresh database (DB_DATA=INSTALL), seed data creates the GROWERP owner
+# party but no user accounts.  The first call to the Register endpoint with
+# userGroupId=GROWERP_M_ADMIN triggers create#Tenant which sets up the initial
+# company and admin user.  Subsequent tests rely on this user existing.
+echo "Checking / creating initial GrowERP admin user..."
+INIT_EMAIL="test0@example.com"
+CHECK_RESULT=$(curl -s --max-time 10 \
+  "${BACKEND_URL}/rest/s1/growerp/100/CheckEmail?email=${INIT_EMAIL}")
+EMAIL_EXISTS=$(echo "$CHECK_RESULT" | grep -o '"ok" *: *true' || true)
+
+if [ -z "$EMAIL_EXISTS" ]; then
+  echo "Initial admin user not found — registering ${INIT_EMAIL} ..."
+  REG_RESPONSE=$(curl -s --max-time 30 -X POST \
+    -H "Content-Type: application/json" \
+    -d "{
+      \"classificationId\": \"AppAdmin\",
+      \"firstName\": \"Test\",
+      \"lastName\": \"Admin\",
+      \"email\": \"${INIT_EMAIL}\",
+      \"userGroupId\": \"GROWERP_M_ADMIN\"
+    }" \
+    "${BACKEND_URL}/rest/s1/growerp/100/Register")
+  echo "Registration response: $REG_RESPONSE"
+  # Verify registration succeeded (response should contain ownerPartyId)
+  if echo "$REG_RESPONSE" | grep -q "ownerPartyId"; then
+    echo "Initial admin user created successfully."
+  else
+    echo "WARNING: Initial admin registration may have failed. Tests will attempt their own registration."
   fi
-  echo "Waiting for boot... ($BOOT_ELAPSED/$BOOT_TIMEOUT seconds)"
-  sleep 5
-  BOOT_ELAPSED=$((BOOT_ELAPSED+5))
-done
-
-if [ $BOOT_ELAPSED -ge $BOOT_TIMEOUT ]; then
-  echo "ERROR: Device boot did not complete after $BOOT_TIMEOUT seconds"
-  adb -s "$DEVICE_ID" shell getprop | grep boot
-  exit 1
+else
+  echo "Initial admin user already exists."
 fi
 
-# Unlock screen
-adb -s "$DEVICE_ID" shell input keyevent 82 || true
-sleep 2
-
-echo "Emulator is ready for testing"
-
-# Patch all app_settings.json files to use Docker container hostnames
-# This avoids hardcoding Docker URLs in the source repository
-echo "Patching app_settings.json files for Docker networking..."
-find packages -path '*/assets/cfg/app_settings.json' -exec \
-  sed -i 's|"databaseUrlDebug": "[^"]*"|"databaseUrlDebug": "http://moqui"|g; s|"chatUrlDebug": "[^"]*"|"chatUrlDebug": "ws://moqui"|g' {} \;
-echo "Patched app_settings.json files:" 
-find packages -path '*/assets/cfg/app_settings.json' -exec grep -l 'http://moqui' {} \;
-
-# Run tests with optional test file or package filter
+# Run tests
 if [ -n "$TEST_FILE" ]; then
   echo "Running specific test file: $TEST_FILE"
-  
+
   # Check if file exists, if not try to find it
   if [ ! -f "$TEST_FILE" ]; then
-    echo "Test file not found at: $TEST_FILE"
-    # Try to find the file in packages
     FOUND_FILE=$(find packages -name "$(basename "$TEST_FILE")" -type f 2>/dev/null | head -1)
     if [ -n "$FOUND_FILE" ]; then
       echo "Found test file at: $FOUND_FILE"
       TEST_FILE="$FOUND_FILE"
     else
       echo "ERROR: Could not find test file: $TEST_FILE"
-      echo "Available test files:"
       find packages -path "*/integration_test/*.dart" -type f | head -20
       exit 1
     fi
   fi
-  
-  # For integration tests, we need to run them from the package's example directory
-  # Extract package and example path from test file path
-  # e.g., packages/growerp_core/example/integration_test/dynamic_menu_test.dart
-  #       -> packages/growerp_core/example
-  
-  # Use bash string manipulation instead of sed for better portability
-  PACKAGE_DIR="$TEST_FILE"
-  # Remove everything after and including "integration_test" or "lib/src"
-  PACKAGE_DIR="${PACKAGE_DIR%/integration_test/*}"
-  PACKAGE_DIR="${PACKAGE_DIR%/lib/src/*}"
-  
-  # Verify we got a valid package directory
+
+  # Extract package directory from test file path
+  PACKAGE_DIR="${TEST_FILE%/integration_test/*}"
   if [ -z "$PACKAGE_DIR" ] || [ "$PACKAGE_DIR" = "$TEST_FILE" ]; then
     echo "ERROR: Failed to extract package directory from: $TEST_FILE"
-    echo "Please ensure test file is in: packages/PACKAGE_NAME/example/integration_test/TEST_FILE.dart"
     exit 1
   fi
-  
+
   if [ -d "$PACKAGE_DIR" ] && [ -f "$PACKAGE_DIR/pubspec.yaml" ]; then
     echo "Running test from package directory: $PACKAGE_DIR"
     cd "$PACKAGE_DIR" || exit 1
-    
-    # Clean stale Gradle build artifacts (prevents duplicate zip entry errors on incremental builds)
-    flutter clean
-    # Ensure dependencies are resolved for this package
+    # Don't flutter clean here — it would delete package_config.json.
+    # The startup cleanup already handled stale artifacts.
     flutter pub get
-    
-    # Get just the test file path relative to the package
-    # e.g., integration_test/dynamic_menu_test.dart
+
     TEST_FILE_RELATIVE="${TEST_FILE#$PACKAGE_DIR/}"
-    echo "Test file relative path: $TEST_FILE_RELATIVE"
-    echo "Device ID: $DEVICE_ID"
-    
-    # Verify device is still connected
-    echo "Connected devices:"
-    adb devices
-    flutter devices
-    
-    # Reconnect to emulator if needed (cd may have disrupted adb)
-    adb connect "$DEVICE_ID" 2>/dev/null || true
-    
-    flutter test -d "$DEVICE_ID" "$TEST_FILE_RELATIVE"
-    TEST_RESULT=$?
-    
-    # Return to original directory
-    cd - > /dev/null || exit 1
-    
-    if [ $TEST_RESULT -ne 0 ]; then
-      exit $TEST_RESULT
-    fi
+    echo "Test file: $TEST_FILE_RELATIVE"
+
+    flutter test -d linux "$TEST_FILE_RELATIVE" \
+        --dart-define=BACKEND_URL="$BACKEND_URL" \
+        --dart-define=CHAT_URL="$CHAT_URL" \
+        --dart-define=SCREEN_WIDTH="$SCREEN_WIDTH" \
+        --dart-define=SCREEN_HEIGHT="$SCREEN_HEIGHT"
+    TEST_EXIT=$?
+    cd - > /dev/null || true
   else
     echo "ERROR: Could not find package directory for test: $TEST_FILE"
-    exit 1
+    TEST_EXIT=1
   fi
+
 elif [ -n "$PACKAGE_FILTER" ]; then
   echo "Running tests for packages matching: *${PACKAGE_FILTER}*"
   melos exec --scope="*${PACKAGE_FILTER}*" --dir-exists="integration_test" --concurrency=1 -- \
-    "flutter clean && flutter test integration_test -d $DEVICE_ID"
+    "flutter pub get && flutter test integration_test -d linux \
+      --dart-define=BACKEND_URL=$BACKEND_URL \
+      --dart-define=CHAT_URL=$CHAT_URL \
+      --dart-define=SCREEN_WIDTH=$SCREEN_WIDTH \
+      --dart-define=SCREEN_HEIGHT=$SCREEN_HEIGHT"
+  TEST_EXIT=$?
 else
   echo "Running all tests"
-  echo "Cleaning stale build artifacts before full test run..."
-  melos exec --dir-exists="integration_test" --concurrency=4 -- flutter clean
-  DEVICE_ID="$DEVICE_ID" melos run test-headless --no-select
+  # No separate flutter clean here — already done at startup before melos bootstrap.
+  # Running clean again would delete the good package_config.json files.
+  melos run test-headless --no-select
+  TEST_EXIT=$?
 fi
 
-# Take a screenshot of the Flutter app.
-# mkdir -p 'screenshots' || exit 1
-# adb shell screencap /sdcard/screenshot.png
+# Clean up Xvfb
+if [ -n "$XVFB_PID" ] && kill -0 "$XVFB_PID" 2>/dev/null; then
+  kill "$XVFB_PID" 2>/dev/null || true
+  echo "Xvfb stopped."
+fi
 
-# adb pull /sdcard/screenshot.png screenshots/flutter-screen.png
-
-# sleep infinity
+exit $TEST_EXIT

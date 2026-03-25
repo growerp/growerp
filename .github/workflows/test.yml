@@ -1,0 +1,162 @@
+name: Integration Tests
+
+# Run headless Flutter integration tests on Linux desktop.
+# Tests use Docker Compose for the Moqui backend + PostgreSQL,
+# and xvfb for a virtual display.
+#
+# Runs at most once daily (midnight UTC) — only if there were changes
+# to flutter/ or moqui/ since the last run. Can also be triggered manually.
+
+on:
+  schedule:
+    # Every day at midnight UTC — but only actually tests if there are changes
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+    inputs:
+      package_filter:
+        description: 'Only test packages matching this string (e.g. "catalog"). Leave empty for all.'
+        required: false
+        default: ''
+
+concurrency:
+  group: test-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  integration-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 600
+
+    steps:
+      # ------------------------------------------------------------------
+      # 1. Checkout
+      # ------------------------------------------------------------------
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # need full history for change detection
+
+      # ------------------------------------------------------------------
+      # 1b. Skip if no relevant changes in the last 24 hours (scheduled only)
+      # ------------------------------------------------------------------
+      - name: Check for recent changes
+        id: changes
+        if: github.event_name == 'schedule'
+        run: |
+          SINCE=$(date -u -d '24 hours ago' '+%Y-%m-%dT%H:%M:%S')
+          COUNT=$(git log --since="$SINCE" --oneline -- \
+            'flutter/**' 'moqui/runtime/component/**' | wc -l)
+          echo "changes=$COUNT" >> "$GITHUB_OUTPUT"
+          if [ "$COUNT" -eq 0 ]; then
+            echo "No relevant changes in the last 24 hours — skipping tests."
+          else
+            echo "$COUNT commit(s) with relevant changes found."
+          fi
+
+      - name: Skip if no changes
+        if: github.event_name == 'schedule' && steps.changes.outputs.changes == '0'
+        run: |
+          echo "No changes detected — skipping."
+          exit 0
+
+      # ------------------------------------------------------------------
+      # 2. Build test runner image (cached via Docker layer cache)
+      # ------------------------------------------------------------------
+      - name: Set up Docker Buildx
+        if: github.event_name != 'schedule' || steps.changes.outputs.changes != '0'
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build test runner image
+        if: github.event_name != 'schedule' || steps.changes.outputs.changes != '0'
+        uses: docker/build-push-action@v5
+        with:
+          context: flutter
+          file: flutter/ci/Dockerfile
+          load: true
+          tags: growerp/flutter-test-runner:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # ------------------------------------------------------------------
+      # 3. Start backend services
+      # ------------------------------------------------------------------
+      - name: Start Moqui backend
+        if: github.event_name != 'schedule' || steps.changes.outputs.changes != '0'
+        working-directory: flutter
+        run: |
+          docker compose -f ci/docker-compose-test.yml up -d moqui-database moqui
+
+      - name: Wait for Moqui to be healthy
+        if: github.event_name != 'schedule' || steps.changes.outputs.changes != '0'
+        working-directory: flutter
+        run: |
+          echo "Waiting for Moqui backend..."
+          TIMEOUT=180
+          ELAPSED=0
+          while [ $ELAPSED -lt $TIMEOUT ]; do
+            if docker compose -f ci/docker-compose-test.yml exec -T moqui \
+                curl -sf http://localhost/status 2>/dev/null; then
+              echo "Moqui is ready"
+              break
+            fi
+            echo "Waiting... ($ELAPSED/$TIMEOUT seconds)"
+            sleep 10
+            ELAPSED=$((ELAPSED + 10))
+          done
+          if [ $ELAPSED -ge $TIMEOUT ]; then
+            echo "ERROR: Moqui not ready after $TIMEOUT seconds"
+            docker compose -f ci/docker-compose-test.yml logs moqui
+            exit 1
+          fi
+
+      # ------------------------------------------------------------------
+      # 4. Run integration tests
+      # ------------------------------------------------------------------
+      - name: Run integration tests
+        if: github.event_name != 'schedule' || steps.changes.outputs.changes != '0'
+        working-directory: flutter
+        env:
+          PACKAGE_FILTER: ${{ github.event.inputs.package_filter || '' }}
+        run: |
+          PACKAGE_FILTER="$PACKAGE_FILTER" \
+            docker compose -f ci/docker-compose-test.yml up \
+              --exit-code-from sut sut 2>&1 | tee /tmp/test_output.log
+          echo "TEST_EXIT_CODE=${PIPESTATUS[0]}" >> "$GITHUB_ENV"
+
+      # ------------------------------------------------------------------
+      # 5. Report results
+      # ------------------------------------------------------------------
+      - name: Test failure summary
+        if: always() && (github.event_name != 'schedule' || steps.changes.outputs.changes != '0')
+        run: |
+          echo "## Test Results" >> "$GITHUB_STEP_SUMMARY"
+          if [ -f /tmp/test_output.log ]; then
+            FAILED=$(grep -cE ' FAILED$|\[E\]' /tmp/test_output.log || true)
+            if [ "$FAILED" = "0" ]; then
+              echo "All tests passed." >> "$GITHUB_STEP_SUMMARY"
+            else
+              echo "**$FAILED failure(s) detected:**" >> "$GITHUB_STEP_SUMMARY"
+              echo '```' >> "$GITHUB_STEP_SUMMARY"
+              grep -E ' FAILED$|\[E\]' /tmp/test_output.log >> "$GITHUB_STEP_SUMMARY" || true
+              echo '```' >> "$GITHUB_STEP_SUMMARY"
+            fi
+          fi
+
+      - name: Upload test log
+        if: failure() && (github.event_name != 'schedule' || steps.changes.outputs.changes != '0')
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-output
+          path: /tmp/test_output.log
+          retention-days: 7
+
+      # ------------------------------------------------------------------
+      # 6. Cleanup
+      # ------------------------------------------------------------------
+      - name: Tear down Docker services
+        if: always() && (github.event_name != 'schedule' || steps.changes.outputs.changes != '0')
+        working-directory: flutter
+        run: docker compose -f ci/docker-compose-test.yml down -v

@@ -5,47 +5,26 @@ services:
       dockerfile: ci/Dockerfile
     image: growerp/flutter-test-runner:latest
     # pull_policy: never
-    mem_limit: 6g
-    memswap_limit: 6g
+    mem_limit: 4g
+    memswap_limit: 4g
     working_dir: /home/mobiledevops/growerp
-    user: root
+    user: "${HOST_UID:-0}:${HOST_GID:-0}"
     volumes:
       - ..:/home/mobiledevops/growerp
     environment:
       - PACKAGE_FILTER=${PACKAGE_FILTER:-}
       - TEST_FILE=${TEST_FILE:-}
-      # Disable Gradle daemon to prevent memory accumulation across test runs
-      - GRADLE_OPTS=-Dorg.gradle.daemon=false -Xmx2g -Dkotlin.compiler.execution.strategy=in-process
+      - HOME=/home/mobiledevops
+      # Backend URL injected via dart-define at test time — no sed patching needed
+      - BACKEND_URL=http://moqui
+      - CHAT_URL=ws://moqui
+      # Phone screen size for Linux desktop tests (emulates Pixel 4)
+      - SCREEN_WIDTH=412
+      - SCREEN_HEIGHT=732
     depends_on:
-      emulator:
+      moqui:
         condition: service_healthy
     command: bash -c "ci/test/run_tests.sh"
-
-  emulator:
-    image: growerp/android-emulator
-    container_name: emulator
-    restart: unless-stopped
-    mem_limit: 4g
-    memswap_limit: 4g
-    ports:
-      - 5556:5556
-      - 5557:5557
-    depends_on:
-      - moqui
-    privileged: true
-    devices:
-      - "/dev/kvm:/dev/kvm"
-    healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "adb devices | grep -q 'emulator.*device' && adb shell getprop sys.boot_completed | grep -q 1",
-        ]
-      interval: 10s
-      timeout: 5s
-      retries: 30
-      start_period: 120s
-    command: bash -c "/entrypoint.sh 5556 5557"
 
   moqui:
     image: growerp/growerp-moqui:latest
@@ -58,6 +37,12 @@ services:
       - 127.0.0.1:80:80
     depends_on:
       - moqui-database
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost/status || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 120s
     volumes:
       #- ./MoquiProductionConf.xml:/opt/moqui/runtime/conf/MoquiProductionConf.xml
       #- ./runtime/lib:/opt/moqui/runtime/lib
