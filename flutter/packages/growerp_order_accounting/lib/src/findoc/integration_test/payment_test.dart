@@ -21,6 +21,9 @@ import 'integration_test.dart';
 
 class PaymentTest {
   static Future<void> selectPurchasePayments(WidgetTester tester) async {
+    // Go to main menu first to ensure clean navigation state
+    // (consistent with OrderTest.selectPurchaseOrders pattern)
+    await CommonTest.gotoMainMenu(tester);
     // Navigate to accounting dashboard first, then purchase payments
     await CommonTest.selectOption(tester, '/accounting', 'AcctDashBoard');
     await CommonTest.selectOption(
@@ -31,6 +34,8 @@ class PaymentTest {
   }
 
   static Future<void> selectSalesPayments(WidgetTester tester) async {
+    // Go to main menu first to ensure clean navigation state
+    await CommonTest.gotoMainMenu(tester);
     // Navigate to accounting dashboard first, then sales payments
     await CommonTest.selectOption(tester, '/accounting', 'AcctDashBoard');
     await CommonTest.selectOption(

@@ -21,6 +21,8 @@ import 'package:growerp_order_accounting/src/accounting/accounting.dart';
 
 class ItemTypeTest {
   static Future<void> selectItemType(WidgetTester tester) async {
+    // Go to main menu first to ensure clean navigation state
+    await CommonTest.gotoMainMenu(tester);
     // Navigate to accounting dashboard first
     await CommonTest.selectOption(tester, '/accounting', 'AcctDashBoard');
     // Then navigate to setup for item types

@@ -207,7 +207,12 @@ class _TopAppState extends State<TopApp> {
         ],
         child: BlocBuilder<ThemeBloc, ThemeState>(
           builder: (context, themeState) {
-            _localizationsDelegates.addAll(widget.extraDelegates);
+            // Build the full delegates list once per build cycle so
+            // _localizationsDelegates doesn't grow on every rebuild.
+            final allDelegates = [
+              ..._localizationsDelegates,
+              ...widget.extraDelegates,
+            ];
             return BlocBuilder<LocaleBloc, LocaleState>(
               builder: (context, localeState) {
                 return MultiBlocListener(
@@ -268,7 +273,7 @@ class _TopAppState extends State<TopApp> {
                         },
                       ),
                       debugShowCheckedModeBanner: false,
-                      localizationsDelegates: _localizationsDelegates,
+                      localizationsDelegates: allDelegates,
                       builder: (context, child) {
                         Widget appContent = ResponsiveBreakpoints.builder(
                           child: child!,

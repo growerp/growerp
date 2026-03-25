@@ -20,6 +20,8 @@ import 'package:growerp_models/growerp_models.dart';
 
 class TransactionTest {
   static Future<void> selectTransactions(WidgetTester tester) async {
+    // Go to main menu first to ensure clean navigation state
+    await CommonTest.gotoMainMenu(tester);
     // Navigate to accounting dashboard first, then to ledger/transactions
     await CommonTest.selectOption(tester, '/accounting', 'AcctDashBoard');
     await CommonTest.selectOption(tester, '/accounting/ledger', 'Transaction');
@@ -52,6 +54,7 @@ class TransactionTest {
     );
 
     // Navigate to AccountingDashboard so the audience sees updated stats
+    await CommonTest.gotoMainMenu(tester);
     await CommonTest.selectOption(tester, '/accounting', 'AcctDashBoard');
     await tester.pump(const Duration(seconds: 5));
   }
