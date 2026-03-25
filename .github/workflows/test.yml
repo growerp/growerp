@@ -7,19 +7,13 @@ name: Integration Tests
 # Full runs split across 4 parallel slices (each with its own Moqui backend).
 # Each package's tests are self-contained — they create their own company/admin.
 #
-# Runs at most once daily (midnight UTC) — only if there were changes
-# to flutter/ or moqui/ since the last run. Can also be triggered manually.
+# Runs daily at 11 PM Bangkok time (16:00 UTC) — only if there were commits that day.
+# Can also be triggered manually via workflow_dispatch.
 
 on:
-  push:
-    branches: [master]
-    paths:
-      - "flutter/**"
-      - "moqui/runtime/component/**"
-      - ".github/workflows/test.yml"
   schedule:
-    # Every day at midnight UTC — but only actually tests if there are changes
-    - cron: "0 0 * * *"
+    # 11 PM Bangkok time (UTC+7) = 16:00 UTC — only runs if there were commits that day
+    - cron: "0 16 * * *"
   workflow_dispatch:
     inputs:
       package_filter:
@@ -30,6 +24,9 @@ on:
 concurrency:
   group: test-${{ github.ref }}
   cancel-in-progress: true
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 permissions:
   contents: read
