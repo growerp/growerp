@@ -329,6 +329,44 @@ abstract class WorkOrders with _$WorkOrders {
 }
 
 @freezed
+abstract class Routings with _$Routings {
+  factory Routings({@Default([]) List<Routing> routings}) = _Routings;
+  Routings._();
+
+  factory Routings.fromJson(Map<String, dynamic> json) =>
+      _$RoutingsFromJson(json);
+}
+
+@freezed
+abstract class RoutingTasks with _$RoutingTasks {
+  factory RoutingTasks({@Default([]) List<RoutingTask> routingTasks}) =
+      _RoutingTasks;
+  RoutingTasks._();
+
+  factory RoutingTasks.fromJson(Map<String, dynamic> json) =>
+      _$RoutingTasksFromJson(json);
+}
+
+@freezed
+abstract class LinerTypes with _$LinerTypes {
+  factory LinerTypes({@Default([]) List<LinerType> linerTypes}) = _LinerTypes;
+  LinerTypes._();
+
+  factory LinerTypes.fromJson(Map<String, dynamic> json) =>
+      _$LinerTypesFromJson(json);
+}
+
+@freezed
+abstract class LinerPanels with _$LinerPanels {
+  factory LinerPanels({@Default([]) List<LinerPanel> linerPanels}) =
+      _LinerPanels;
+  LinerPanels._();
+
+  factory LinerPanels.fromJson(Map<String, dynamic> json) =>
+      _$LinerPanelsFromJson(json);
+}
+
+@freezed
 abstract class EmailTemplates with _$EmailTemplates {
   factory EmailTemplates({@Default([]) List<EmailTemplate> emailTemplates}) =
       _EmailTemplates;

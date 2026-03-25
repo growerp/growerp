@@ -23,5 +23,8 @@ List<BlocProvider> getManufacturingBlocProviders(RestClient restClient) {
     BlocProvider<WorkOrderBloc>(
       create: (context) => WorkOrderBloc(restClient),
     ),
+    BlocProvider<RoutingBloc>(
+      create: (context) => RoutingBloc(restClient),
+    ),
   ];
 }

@@ -14,6 +14,15 @@
 
 import 'package:flutter/material.dart';
 
+/// Shared test-mode flag for all skeleton loading animations.
+///
+/// Set [SkeletonWidget.testMode] to `true` in [CommonTest.startTestApp] so that
+/// repeating [AnimationController]s in skeleton widgets use a static value
+/// instead of calling `repeat()`, allowing `pumpAndSettle()` to settle.
+class SkeletonWidget {
+  static bool testMode = false;
+}
+
 /// A skeleton loading placeholder widget with shimmer animation.
 ///
 /// Use this widget to indicate loading states for content that is being fetched.
@@ -91,12 +100,20 @@ class _SkeletonLoaderState extends State<SkeletonLoader>
     _controller = AnimationController(
       duration: const Duration(milliseconds: 1500),
       vsync: this,
-    )..repeat();
+    );
 
     _animation = Tween<double>(
       begin: -2,
       end: 2,
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+    // Suppress repeating animation in integration-test environment.
+    // SkeletonWidget.testMode is set to true by CommonTest.startTestApp so that
+    // pumpAndSettle() can settle (an infinite repeat blocks forever).
+    if (SkeletonWidget.testMode) {
+      _controller.value = 0.5;
+    } else {
+      _controller.repeat();
+    }
   }
 
   @override

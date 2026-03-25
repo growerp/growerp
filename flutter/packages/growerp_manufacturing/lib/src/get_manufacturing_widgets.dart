@@ -20,6 +20,7 @@ Map<String, GrowerpWidgetBuilder> getManufacturingWidgets() {
   return {
     'BomList': (args) => BomList(key: getKeyFromArgs(args)),
     'WorkOrderList': (args) => WorkOrderList(key: getKeyFromArgs(args)),
+    'RoutingList': (args) => RoutingList(key: getKeyFromArgs(args)),
   };
 }
 
@@ -38,6 +39,13 @@ List<WidgetMetadata> getManufacturingWidgetsWithMetadata() {
       iconName: 'precision_manufacturing',
       keywords: ['work order', 'production', 'manufacturing', 'run'],
       builder: (args) => WorkOrderList(key: getKeyFromArgs(args)),
+    ),
+    WidgetMetadata(
+      widgetName: 'RoutingList',
+      description: 'Production routings - ordered sequence of operations',
+      iconName: 'route',
+      keywords: ['routing', 'operations', 'work center', 'sequence'],
+      builder: (args) => RoutingList(key: getKeyFromArgs(args)),
     ),
   ];
 }

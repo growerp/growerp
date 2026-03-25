@@ -21,7 +21,13 @@ import 'package:responsive_framework/responsive_framework.dart';
 import '../work_order.dart';
 
 class WorkOrderList extends StatefulWidget {
-  const WorkOrderList({super.key});
+  final List<Widget> Function(WorkOrder workOrder)? extraTabBuilder;
+  final List<Widget> Function(WorkOrder workOrder)? extraActionBuilder;
+  const WorkOrderList({
+    super.key,
+    this.extraTabBuilder,
+    this.extraActionBuilder,
+  });
 
   @override
   WorkOrderListState createState() => WorkOrderListState();
@@ -80,7 +86,11 @@ class WorkOrderListState extends State<WorkOrderList> {
                 direction: DismissDirection.startToEnd,
                 child: BlocProvider.value(
                   value: _workOrderBloc,
-                  child: WorkOrderDialog(workOrders[index]),
+                  child: WorkOrderDialog(
+                    workOrders[index],
+                    extraTabBuilder: widget.extraTabBuilder,
+                    extraActionBuilder: widget.extraActionBuilder,
+                  ),
                 ),
               );
             },
@@ -120,7 +130,11 @@ class WorkOrderListState extends State<WorkOrderList> {
                     builder: (BuildContext context) {
                       return BlocProvider.value(
                         value: _workOrderBloc,
-                        child: WorkOrderDialog(WorkOrder()),
+                        child: WorkOrderDialog(
+                          WorkOrder(),
+                          extraTabBuilder: widget.extraTabBuilder,
+                          extraActionBuilder: widget.extraActionBuilder,
+                        ),
                       );
                     },
                   );

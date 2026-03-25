@@ -21,6 +21,7 @@ workspace:
   - packages/growerp_inventory/example
   - packages/growerp_manufacturing
   - packages/growerp_manufacturing/example
+  - packages/growerp_manuf_liner
   - packages/growerp_marketing
   - packages/growerp_marketing/example
   - packages/growerp_models
@@ -61,6 +62,7 @@ melos:
     - packages/growerp_inventory/example
     - packages/growerp_manufacturing
     - packages/growerp_manufacturing/example
+    - packages/growerp_manuf_liner
     - packages/growerp_sales
     - packages/growerp_sales/example
     - packages/growerp_order_accounting

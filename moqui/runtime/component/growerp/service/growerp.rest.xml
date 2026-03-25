@@ -1067,6 +1067,70 @@ along with this software (see the LICENSE.md file). If not, see
                 <service name="growerp.100.ManufacturingServices100.delete#WorkOrder" />
             </method>
         </resource>
+        <resource name="Routings">
+            <method type="get">
+                <service name="growerp.100.ManufacturingServices100.get#Routings" />
+            </method>
+        </resource>
+        <resource name="Routing">
+            <method type="post">
+                <service name="growerp.100.ManufacturingServices100.create#Routing" />
+            </method>
+            <method type="patch">
+                <service name="growerp.100.ManufacturingServices100.update#Routing" />
+            </method>
+            <method type="delete">
+                <service name="growerp.100.ManufacturingServices100.delete#Routing" />
+            </method>
+        </resource>
+        <resource name="RoutingTasks">
+            <method type="get">
+                <service name="growerp.100.ManufacturingServices100.get#RoutingTasks" />
+            </method>
+        </resource>
+        <resource name="RoutingTask">
+            <method type="post">
+                <service name="growerp.100.ManufacturingServices100.create#RoutingTask" />
+            </method>
+            <method type="patch">
+                <service name="growerp.100.ManufacturingServices100.update#RoutingTask" />
+            </method>
+            <method type="delete">
+                <service name="growerp.100.ManufacturingServices100.delete#RoutingTask" />
+            </method>
+        </resource>
+        <resource name="LinerTypes">
+            <method type="get">
+                <service name="growerp.100.LinerServices100.get#LinerTypes" />
+            </method>
+        </resource>
+        <resource name="LinerType">
+            <method type="post">
+                <service name="growerp.100.LinerServices100.create#LinerType" />
+            </method>
+            <method type="patch">
+                <service name="growerp.100.LinerServices100.update#LinerType" />
+            </method>
+            <method type="delete">
+                <service name="growerp.100.LinerServices100.delete#LinerType" />
+            </method>
+        </resource>
+        <resource name="LinerPanels">
+            <method type="get">
+                <service name="growerp.100.LinerServices100.get#LinerPanels" />
+            </method>
+        </resource>
+        <resource name="LinerPanel">
+            <method type="post">
+                <service name="growerp.100.LinerServices100.create#LinerPanel" />
+            </method>
+            <method type="patch">
+                <service name="growerp.100.LinerServices100.update#LinerPanel" />
+            </method>
+            <method type="delete">
+                <service name="growerp.100.LinerServices100.delete#LinerPanel" />
+            </method>
+        </resource>
     </resource>
     <!-- Antwebsystems website -->
     <resource name="storecontents" require-authentication="anonymous-view">

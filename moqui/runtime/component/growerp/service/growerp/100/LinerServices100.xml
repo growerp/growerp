@@ -1,0 +1,333 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-2.1.xsd">
+
+    <!-- ===================== LinerType Services ===================== -->
+
+    <service verb="get" noun="LinerTypes" authenticate="true">
+        <description>Get liner types (plastic material catalog) for the current company.</description>
+        <in-parameters>
+            <parameter name="search" default="null" />
+            <parameter name="start" default-value="0" type="Integer" />
+            <parameter name="limit" default-value="20" type="Integer" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="linerTypes" type="List">
+                <parameter name="linerType" type="Map">
+                    <parameter name="linerTypeId" />
+                    <parameter name="linerName" />
+                    <parameter name="widthIncrement" />
+                    <parameter name="linerWeight" />
+                    <parameter name="rollStockWidth" />
+                </parameter>
+            </parameter>
+            <parameter name="total" type="Integer" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <if condition="search != null">
+                <set field="searchPattern" value="%${search}%" />
+            </if>
+            <entity-find entity-name="growerp.liner.LinerType" list="linerTypeList"
+                offset="start" limit="limit">
+                <econdition field-name="ownerPartyId" from="ownerPartyId" />
+                <econdition field-name="linerName" ignore-case="true" operator="like"
+                    from="searchPattern" ignore-if-empty="true" />
+                <order-by field-name="linerName" />
+            </entity-find>
+            <entity-find-count entity-name="growerp.liner.LinerType" count-field="total">
+                <econdition field-name="ownerPartyId" from="ownerPartyId" />
+            </entity-find-count>
+            <set field="linerTypes" from="[]" />
+            <iterate list="linerTypeList" entry="lt">
+                <script>linerTypes.add([
+                    linerTypeId: lt.linerTypeId,
+                    linerName: lt.linerName,
+                    widthIncrement: lt.widthIncrement?.toString(),
+                    linerWeight: lt.linerWeight?.toString(),
+                    rollStockWidth: lt.rollStockWidth?.toString()
+                ])</script>
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="create" noun="LinerType" authenticate="true">
+        <description>Create a liner type.</description>
+        <in-parameters>
+            <parameter name="linerType" type="Map" required="true">
+                <parameter name="linerName" required="true" />
+                <parameter name="widthIncrement" type="BigDecimal" />
+                <parameter name="linerWeight" type="BigDecimal" />
+                <parameter name="rollStockWidth" type="BigDecimal" />
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="linerType" type="Map" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <service-call name="create#growerp.liner.LinerType"
+                in-map="[ownerPartyId: ownerPartyId,
+                    linerName: linerType.linerName,
+                    widthIncrement: linerType.widthIncrement,
+                    linerWeight: linerType.linerWeight,
+                    rollStockWidth: linerType.rollStockWidth]"
+                out-map="context" />
+            <entity-find-one entity-name="growerp.liner.LinerType" value-field="lt">
+                <field-map field-name="linerTypeId" />
+            </entity-find-one>
+            <set field="linerType" from="[
+                linerTypeId: lt.linerTypeId,
+                linerName: lt.linerName,
+                widthIncrement: lt.widthIncrement?.toString(),
+                linerWeight: lt.linerWeight?.toString(),
+                rollStockWidth: lt.rollStockWidth?.toString()
+            ]" />
+        </actions>
+    </service>
+
+    <service verb="update" noun="LinerType" authenticate="true">
+        <description>Update a liner type.</description>
+        <in-parameters>
+            <parameter name="linerType" type="Map" required="true">
+                <parameter name="linerTypeId" required="true" />
+                <parameter name="linerName" />
+                <parameter name="widthIncrement" type="BigDecimal" />
+                <parameter name="linerWeight" type="BigDecimal" />
+                <parameter name="rollStockWidth" type="BigDecimal" />
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="linerType" type="Map" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <entity-find-one entity-name="growerp.liner.LinerType" value-field="lt">
+                <field-map field-name="linerTypeId" from="linerType.linerTypeId" />
+            </entity-find-one>
+            <if condition="!lt || lt.ownerPartyId != ownerPartyId">
+                <return error="true" message="LinerType '${linerType.linerTypeId}' not found for company" />
+            </if>
+            <service-call name="update#growerp.liner.LinerType"
+                in-map="[linerTypeId: linerType.linerTypeId,
+                    linerName: linerType.linerName,
+                    widthIncrement: linerType.widthIncrement,
+                    linerWeight: linerType.linerWeight,
+                    rollStockWidth: linerType.rollStockWidth]" />
+            <entity-find-one entity-name="growerp.liner.LinerType" value-field="lt">
+                <field-map field-name="linerTypeId" from="linerType.linerTypeId" />
+            </entity-find-one>
+            <set field="linerType" from="[
+                linerTypeId: lt.linerTypeId,
+                linerName: lt.linerName,
+                widthIncrement: lt.widthIncrement?.toString(),
+                linerWeight: lt.linerWeight?.toString(),
+                rollStockWidth: lt.rollStockWidth?.toString()
+            ]" />
+        </actions>
+    </service>
+
+    <service verb="delete" noun="LinerType" authenticate="true">
+        <description>Delete a liner type.</description>
+        <in-parameters>
+            <parameter name="linerType" type="Map" required="true">
+                <parameter name="linerTypeId" required="true" />
+            </parameter>
+        </in-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <entity-find-one entity-name="growerp.liner.LinerType" value-field="lt">
+                <field-map field-name="linerTypeId" from="linerType.linerTypeId" />
+            </entity-find-one>
+            <if condition="!lt || lt.ownerPartyId != ownerPartyId">
+                <return error="true" message="LinerType '${linerType.linerTypeId}' not found for company" />
+            </if>
+            <service-call name="delete#growerp.liner.LinerType"
+                in-map="[linerTypeId: linerType.linerTypeId]" />
+        </actions>
+    </service>
+
+    <!-- ===================== LinerPanel Services ===================== -->
+
+    <service verb="get" noun="LinerPanels" authenticate="true">
+        <description>Get liner panels, optionally filtered by workEffortId or salesOrderId.</description>
+        <in-parameters>
+            <parameter name="workEffortId" />
+            <parameter name="salesOrderId" />
+            <parameter name="start" default-value="0" type="Integer" />
+            <parameter name="limit" default-value="100" type="Integer" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="linerPanels" type="List">
+                <parameter name="linerPanel" type="Map">
+                    <parameter name="qcNum" />
+                    <parameter name="salesOrderId" />
+                    <parameter name="workEffortId" />
+                    <parameter name="linerTypeId" />
+                    <parameter name="linerName" />
+                    <parameter name="panelWidth" />
+                    <parameter name="panelLength" />
+                    <parameter name="panelSqft" />
+                    <parameter name="passes" />
+                    <parameter name="weight" />
+                    <parameter name="panelName" />
+                </parameter>
+            </parameter>
+            <parameter name="total" type="Integer" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <entity-find entity-name="growerp.liner.LinerPanelAndType" list="panelList"
+                offset="start" limit="limit">
+                <econdition field-name="ownerPartyId" from="ownerPartyId" />
+                <econdition field-name="workEffortId" ignore-if-empty="true" />
+                <econdition field-name="salesOrderId" ignore-if-empty="true" />
+                <order-by field-name="qcNum" />
+            </entity-find>
+            <entity-find-count entity-name="growerp.liner.LinerPanelAndType" count-field="total">
+                <econdition field-name="ownerPartyId" from="ownerPartyId" />
+                <econdition field-name="workEffortId" ignore-if-empty="true" />
+                <econdition field-name="salesOrderId" ignore-if-empty="true" />
+            </entity-find-count>
+            <set field="linerPanels" from="[]" />
+            <iterate list="panelList" entry="lp">
+                <!-- Compute derived values from stored dimensions + liner type -->
+                <set field="sqft" from="lp.panelWidth != null &amp;&amp; lp.panelLength != null ? lp.panelWidth * lp.panelLength : null" />
+                <set field="passes" from="lp.panelWidth != null &amp;&amp; lp.widthIncrement != null &amp;&amp; lp.widthIncrement > 0 ? lp.panelWidth / lp.widthIncrement - 1 : null" />
+                <set field="weight" from="sqft != null &amp;&amp; lp.linerWeight != null ? sqft * lp.linerWeight : null" />
+                <script>linerPanels.add([
+                    qcNum: lp.qcNum,
+                    salesOrderId: lp.salesOrderId,
+                    workEffortId: lp.workEffortId,
+                    linerTypeId: lp.linerTypeId,
+                    linerName: lp.linerName,
+                    panelWidth: lp.panelWidth?.toString(),
+                    panelLength: lp.panelLength?.toString(),
+                    panelSqft: sqft?.toString(),
+                    passes: passes?.toString(),
+                    weight: weight?.toString(),
+                    panelName: lp.panelName
+                ])</script>
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="create" noun="LinerPanel" authenticate="true">
+        <description>Create a liner panel. Assigns a sequential QC number.</description>
+        <in-parameters>
+            <parameter name="linerPanel" type="Map" required="true">
+                <parameter name="salesOrderId" />
+                <parameter name="workEffortId" />
+                <parameter name="linerTypeId" required="true" />
+                <parameter name="panelWidth" type="BigDecimal" required="true" />
+                <parameter name="panelLength" type="BigDecimal" required="true" />
+                <parameter name="panelName" />
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="linerPanel" type="Map" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <!-- Validate liner type belongs to company -->
+            <entity-find-one entity-name="growerp.liner.LinerType" value-field="lt">
+                <field-map field-name="linerTypeId" from="linerPanel.linerTypeId" />
+            </entity-find-one>
+            <if condition="!lt || lt.ownerPartyId != ownerPartyId">
+                <return error="true" message="LinerType '${linerPanel.linerTypeId}' not found for company" />
+            </if>
+            <service-call name="create#growerp.liner.LinerPanel"
+                in-map="[ownerPartyId: ownerPartyId,
+                    salesOrderId: linerPanel.salesOrderId,
+                    workEffortId: linerPanel.workEffortId,
+                    linerTypeId: linerPanel.linerTypeId,
+                    panelWidth: linerPanel.panelWidth,
+                    panelLength: linerPanel.panelLength,
+                    panelName: linerPanel.panelName]"
+                out-map="context" />
+            <service-call name="growerp.100.LinerServices100.get#LinerPanels"
+                in-map="[workEffortId: linerPanel.workEffortId, salesOrderId: linerPanel.salesOrderId,
+                    start: 0, limit: 1000]"
+                out-map="fetchOut" />
+            <set field="linerPanel" from="fetchOut.linerPanels?.find { it.qcNum == qcNum }" />
+        </actions>
+    </service>
+
+    <service verb="update" noun="LinerPanel" authenticate="true">
+        <description>Update a liner panel.</description>
+        <in-parameters>
+            <parameter name="linerPanel" type="Map" required="true">
+                <parameter name="qcNum" required="true" />
+                <parameter name="linerTypeId" />
+                <parameter name="panelWidth" type="BigDecimal" />
+                <parameter name="panelLength" type="BigDecimal" />
+                <parameter name="panelName" />
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="linerPanel" type="Map" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <entity-find-one entity-name="growerp.liner.LinerPanel" value-field="lp">
+                <field-map field-name="qcNum" from="linerPanel.qcNum" />
+            </entity-find-one>
+            <if condition="!lp || lp.ownerPartyId != ownerPartyId">
+                <return error="true" message="LinerPanel '${linerPanel.qcNum}' not found for company" />
+            </if>
+            <service-call name="update#growerp.liner.LinerPanel"
+                in-map="[qcNum: linerPanel.qcNum,
+                    linerTypeId: linerPanel.linerTypeId,
+                    panelWidth: linerPanel.panelWidth,
+                    panelLength: linerPanel.panelLength,
+                    panelName: linerPanel.panelName]" />
+            <service-call name="growerp.100.LinerServices100.get#LinerPanels"
+                in-map="[workEffortId: lp.workEffortId, salesOrderId: lp.salesOrderId,
+                    start: 0, limit: 1000]"
+                out-map="fetchOut" />
+            <set field="linerPanel" from="fetchOut.linerPanels?.find { it.qcNum == linerPanel.qcNum }" />
+        </actions>
+    </service>
+
+    <service verb="delete" noun="LinerPanel" authenticate="true">
+        <description>Delete a liner panel.</description>
+        <in-parameters>
+            <parameter name="linerPanel" type="Map" required="true">
+                <parameter name="qcNum" required="true" />
+            </parameter>
+        </in-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <entity-find-one entity-name="growerp.liner.LinerPanel" value-field="lp">
+                <field-map field-name="qcNum" from="linerPanel.qcNum" />
+            </entity-find-one>
+            <if condition="!lp || lp.ownerPartyId != ownerPartyId">
+                <return error="true" message="LinerPanel '${linerPanel.qcNum}' not found for company" />
+            </if>
+            <service-call name="delete#growerp.liner.LinerPanel"
+                in-map="[qcNum: linerPanel.qcNum]" />
+        </actions>
+    </service>
+
+</services>

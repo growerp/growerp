@@ -1,5 +1,6 @@
 export 'src/bom/bom.dart';
 export 'src/work_order/work_order.dart';
+export 'src/routing/routing.dart';
 export 'l10n/generated/manufacturing_localizations.dart';
 export 'src/get_manufacturing_bloc_providers.dart';
 export 'src/get_manufacturing_widgets.dart';

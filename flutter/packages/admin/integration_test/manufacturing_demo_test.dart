@@ -67,6 +67,26 @@ final List<Product> mfgDemoProducts = [
   ),
 ];
 
+/// Production routing for Widget Assembly
+final Routing mfgDemoRouting = Routing(routingName: 'Widget Assembly Process');
+final List<RoutingTask> mfgDemoRoutingTasks = [
+  RoutingTask(
+    taskName: 'Prepare Components',
+    sequenceNum: 10,
+    estimatedWorkTime: Decimal.parse('0.5'),
+  ),
+  RoutingTask(
+    taskName: 'Assemble',
+    sequenceNum: 20,
+    estimatedWorkTime: Decimal.parse('1.0'),
+  ),
+  RoutingTask(
+    taskName: 'Quality Check',
+    sequenceNum: 30,
+    estimatedWorkTime: Decimal.parse('0.25'),
+  ),
+];
+
 /// BOM: Widget Assembly → 2 × Bolt M5, 1 × Bearing 6201
 final List<BomItem> mfgDemoBomItems = [
   BomItem(
@@ -153,6 +173,7 @@ GoRouter createAdminMfgDemoRouter() {
       '/accounting' => const AccountingDashboard(),
       '/manufacturing/bom' => const BomList(),
       '/manufacturing/workOrder' => const WorkOrderList(),
+      '/manufacturing/routing' => const RoutingList(),
       _ => const _MfgDemoDashboard(),
     },
     shellRoutes: [
@@ -219,6 +240,14 @@ const adminMfgDemoMenuConfig = MenuConfiguration(
       iconName: 'precision_manufacturing',
       sequenceNum: 30,
       widgetName: 'WorkOrderList',
+    ),
+    MenuItem(
+      itemKey: 'MFG_ROUTING',
+      title: 'Routings',
+      route: '/manufacturing/routing',
+      iconName: 'route',
+      sequenceNum: 35,
+      widgetName: 'RoutingList',
     ),
     MenuItem(
       itemKey: 'MFG_SO',
@@ -346,7 +375,23 @@ void main() {
     await tester.pump(const Duration(seconds: 3));
     await CommonTest.tapByKey(tester, 'cancel');
 
-    // ── Phase 2: Sales order → auto-creates Work Order on approval ────────────
+    // ── Phase 2: Production routing ───────────────────────────────────────────
+    await CommonTest.showDemoStep(
+      tester,
+      'Production Routing',
+      'Creating a routing that defines the assembly steps.\n'
+          '3 operations: Prepare Components → Assemble → Quality Check.',
+      seconds: 3,
+    );
+    await RoutingTest.selectRoutings(tester);
+    await RoutingTest.addRoutings(tester, [mfgDemoRouting]);
+    await RoutingTest.openRouting(tester, 0);
+    await RoutingTest.addRoutingTasks(tester, mfgDemoRoutingTasks);
+    await RoutingTest.checkRoutingTasks(tester, mfgDemoRoutingTasks);
+    await tester.pump(const Duration(seconds: 3));
+    await CommonTest.tapByKey(tester, 'cancel');
+
+    // ── Phase 3: Sales order → auto-creates Work Order on approval ────────────
     await CommonTest.showDemoStep(
       tester,
       'Creating a Sales Order',
@@ -363,22 +408,26 @@ void main() {
     final SaveTest testAfterSalesApprove = await PersistFunctions.getTest();
     final List<FinDoc> approvedSalesOrders = testAfterSalesApprove.orders;
 
-    // ── Phase 3: Work Order — shortage ────────────────────────────────────────
+    // ── Phase 4: Work Order — shortage + routing assignment ───────────────────
     await CommonTest.showDemoStep(
       tester,
       'Work Order Created Automatically',
       'The system created a Work Order for the Widget Assembly.\n'
-          'It shows a material shortage because no components are in stock yet.',
+          'It shows a material shortage because no components are in stock yet.\n'
+          'We assign the production routing so shop floor steps are visible.',
       seconds: 3,
     );
     await WorkOrderTest.selectWorkOrders(tester);
     await CommonTest.waitForKey(tester, 'item0');
     await WorkOrderTest.openWorkOrder(tester, 0);
-    // Pause so the viewer can see the WO and shortage info.
+    await tester.pump(const Duration(seconds: 2));
+    await WorkOrderTest.assignRouting(tester, mfgDemoRouting.routingName!);
+    // Re-open to show the routing steps embedded in the WO dialog
+    await WorkOrderTest.openWorkOrder(tester, 0);
     await tester.pump(const Duration(seconds: 3));
     await CommonTest.tapByKey(tester, 'cancel');
 
-    // ── Phase 4: Purchase order for components ────────────────────────────────
+    // ── Phase 5: Purchase order for components ────────────────────────────────
     await CommonTest.showDemoStep(
       tester,
       'Purchasing Components',
@@ -394,7 +443,7 @@ void main() {
     await OrderTest.approveOrderPayments(tester);
     await OrderTest.completeOrderPayments(tester);
 
-    // ── Phase 5: Receive components into warehouse ────────────────────────────
+    // ── Phase 6: Receive components into warehouse ────────────────────────────
     await CommonTest.showDemoStep(
       tester,
       'Receiving Components into Warehouse',
@@ -406,7 +455,7 @@ void main() {
     await OrderTest.approveOrderShipments(tester);
     await ShipmentTest.receiveShipments(tester, locations.sublist(0, 1));
 
-    // ── Phase 6: Production run ───────────────────────────────────────────────
+    // ── Phase 7: Production run ───────────────────────────────────────────────
     await CommonTest.showDemoStep(
       tester,
       'Running Production',
@@ -425,7 +474,7 @@ void main() {
     await WorkOrderTest.openWorkOrder(tester, 0);
     await WorkOrderTest.completeWorkOrder(tester);
 
-    // ── Phase 7: Ship to customer ─────────────────────────────────────────────
+    // ── Phase 8: Ship to customer ─────────────────────────────────────────────
     await CommonTest.showDemoStep(
       tester,
       'Shipping to Customer',
@@ -446,7 +495,7 @@ void main() {
     await OrderTest.approveOrderPayments(tester);
     await OrderTest.completeOrderPayments(tester);
 
-    // ── Phase 8: Accounting ledger ────────────────────────────────────────────
+    // ── Phase 9: Accounting ledger ────────────────────────────────────────────
     await CommonTest.showDemoStep(
       tester,
       'Accounting & GL Transactions',
@@ -459,7 +508,7 @@ void main() {
     // Pause so the viewer can see the ledger entries.
     await tester.pump(const Duration(seconds: 4));
 
-    // ── Phase 9: Live dashboard summary ──────────────────────────────────────
+    // ── Phase 10: Live dashboard summary ─────────────────────────────────────
     await CommonTest.showDemoStep(
       tester,
       'Live Dashboard',
@@ -473,7 +522,7 @@ void main() {
       tester,
       'Demo Complete',
       'You have seen the full GrowERP manufacturing lifecycle:\n'
-          'BOM → Sales Order → Work Order → Purchase → Receive → '
+          'BOM → Routing → Sales Order → Work Order → Purchase → Receive → '
           'Produce → Ship → Accounting → Dashboard.',
     );
 

@@ -13,6 +13,7 @@
  */
 
 import 'package:flutter/material.dart';
+import 'skeleton_loader.dart';
 
 /// A styled data table following the Stitch Orders Management design pattern.
 ///
@@ -271,11 +272,19 @@ class _SkeletonCellState extends State<_SkeletonCell>
     _controller = AnimationController(
       duration: const Duration(milliseconds: 1500),
       vsync: this,
-    )..repeat();
+    );
     _animation = Tween<double>(
       begin: 0.3,
       end: 0.7,
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+    // Suppress repeating animation in integration-test environment.
+    // SkeletonWidget.testMode is set to true by CommonTest.startTestApp so that
+    // pumpAndSettle() can settle (an infinite repeat blocks forever).
+    if (SkeletonWidget.testMode) {
+      _controller.value = 0.5;
+    } else {
+      _controller.repeat();
+    }
   }
 
   @override

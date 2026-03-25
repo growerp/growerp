@@ -51,7 +51,7 @@ class WorkOrderTest {
         await CommonTest.enterText(tester, 'name', workOrder.workEffortName!);
       }
       if (workOrder.productPseudoId != null) {
-        await CommonTest.enterText(
+        await CommonTest.enterAutocompleteValue(
           tester,
           'productId',
           workOrder.productPseudoId!,
@@ -74,11 +74,11 @@ class WorkOrderTest {
     List<WorkOrder> workOrders,
   ) async {
     for (int i = 0; i < workOrders.length; i++) {
-      await CommonTest.waitForKey(tester, 'pseudoId$i');
+      await CommonTest.waitForKey(tester, 'productName$i');
       expect(
-        CommonTest.getTextField('pseudoId$i').isNotEmpty,
+        CommonTest.getTextField('productName$i').isNotEmpty,
         true,
-        reason: 'Work order $i should have a non-empty pseudoId',
+        reason: 'Work order $i should have a product name',
       );
     }
   }
@@ -140,6 +140,17 @@ class WorkOrderTest {
   /// Tap Complete button (In Progress → Complete). Waits for list to return.
   static Future<void> completeWorkOrder(WidgetTester tester) async {
     await CommonTest.tapByKey(tester, 'completeButton', seconds: 3);
+    await CommonTest.waitForKey(tester, 'WorkOrderList');
+  }
+
+  /// Select [routingName] in the routing dropdown of an open WorkOrderDialog,
+  /// then tap update to persist it. Waits for the list to return.
+  static Future<void> assignRouting(
+    WidgetTester tester,
+    String routingName,
+  ) async {
+    await CommonTest.enterDropDown(tester, 'routingDropdown', routingName);
+    await CommonTest.tapByKey(tester, 'update');
     await CommonTest.waitForKey(tester, 'WorkOrderList');
   }
 }

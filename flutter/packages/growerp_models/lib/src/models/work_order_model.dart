@@ -38,7 +38,10 @@ abstract class WorkOrder with _$WorkOrder {
     String? actualStartDate,
     String? actualCompletionDate,
     Decimal? totalCost,
+    String? routingId,
+    String? routingName,
     @Default([]) List<BomItem> bomItems,
+    @Default([]) List<LinerPanel> linerPanels,
   }) = _WorkOrder;
   WorkOrder._();
 

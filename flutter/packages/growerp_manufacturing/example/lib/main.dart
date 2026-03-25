@@ -88,6 +88,14 @@ const manufacturingMenuConfig = MenuConfiguration(
       sequenceNum: 40,
       widgetName: 'WorkOrderList',
     ),
+    MenuItem(
+      itemKey: 'MFG_ROUTING',
+      title: 'Routings',
+      route: '/manufacturing/routing',
+      iconName: 'route',
+      sequenceNum: 50,
+      widgetName: 'RoutingList',
+    ),
   ],
 );
 
@@ -101,6 +109,7 @@ GoRouter createManufacturingExampleRouter() {
       '/products' => const ProductList(),
       '/manufacturing/bom' => const BomList(),
       '/manufacturing/workOrder' => const WorkOrderList(),
+      '/manufacturing/routing' => const RoutingList(),
       _ => const ManufacturingDashboard(),
     },
   );

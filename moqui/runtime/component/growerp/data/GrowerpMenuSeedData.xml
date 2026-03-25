@@ -171,6 +171,8 @@ along with this software (see the LICENSE.md file). If not, see
         title="Work Orders" iconName="precision_manufacturing" widgetName="WorkOrderList" sequenceNum="10"/>
     <growerp.menu.MenuItem menuItemId="ADMIN_MFG_BOM" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_MANUFACTURING"
         title="Bill of Materials" iconName="schema" widgetName="BomList" sequenceNum="20"/>
+    <growerp.menu.MenuItem menuItemId="ADMIN_MFG_ROUTING" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_MANUFACTURING"
+        title="Routings" iconName="route" widgetName="RoutingList" sequenceNum="30"/>
 
     <!-- ADMIN_ACC_SALES children -->
     <growerp.menu.MenuItem menuItemId="ADMIN_ACCS_INVOICES" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_ACC_SALES"

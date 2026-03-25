@@ -292,7 +292,79 @@ along with this software (see the LICENSE.md file). If not, see
     <extend-entity entity-name="WorkEffort" package="mantle.work.effort">
         <field name="flowElementId" type="id" />
         <field name="routing" type="text-medium" />
+        <field name="routingId" type="id" />
     </extend-entity>
+
+    <!-- ===================== Production Routing ===================== -->
+
+    <entity entity-name="Routing" package="growerp.manufacturing" sequence-primary-prefix="ro">
+        <field name="routingId" type="id" is-pk="true" />
+        <field name="ownerPartyId" type="id" />
+        <field name="routingName" type="text-medium" />
+        <field name="description" type="text-long" />
+        <relationship type="one" title="Owner" related="mantle.party.Party" short-alias="owner">
+            <key-map field-name="ownerPartyId" />
+        </relationship>
+    </entity>
+
+    <entity entity-name="RoutingTask" package="growerp.manufacturing" sequence-primary-prefix="rt">
+        <field name="routingTaskId" type="id" is-pk="true" />
+        <field name="routingId" type="id" />
+        <field name="taskName" type="text-short" />
+        <field name="sequenceNum" type="number-integer" />
+        <field name="estimatedWorkTime" type="number-decimal" />
+        <field name="workCenterName" type="text-short" />
+        <relationship type="one" related="growerp.manufacturing.Routing" short-alias="routing">
+            <key-map field-name="routingId" />
+        </relationship>
+    </entity>
+
+    <entity entity-name="ProductRouting" package="growerp.manufacturing">
+        <field name="productId" type="id" is-pk="true" />
+        <field name="routingId" type="id" is-pk="true" />
+        <field name="fromDate" type="date-time" is-pk="true" />
+        <field name="thruDate" type="date-time" />
+        <relationship type="one" related="mantle.product.Product" short-alias="product">
+            <key-map field-name="productId" />
+        </relationship>
+        <relationship type="one" related="growerp.manufacturing.Routing" short-alias="routing">
+            <key-map field-name="routingId" />
+        </relationship>
+    </entity>
+
+    <!-- ===================== Liner Manufacturing ===================== -->
+
+    <entity entity-name="LinerType" package="growerp.liner" sequence-primary-prefix="lt">
+        <field name="linerTypeId" type="id" is-pk="true" />
+        <field name="ownerPartyId" type="id" />
+        <field name="linerName" type="text-medium" />
+        <field name="widthIncrement" type="number-decimal" />
+        <field name="linerWeight" type="number-decimal" />
+        <field name="rollStockWidth" type="number-decimal" />
+        <relationship type="one" title="Owner" related="mantle.party.Party" short-alias="owner">
+            <key-map field-name="ownerPartyId" />
+        </relationship>
+    </entity>
+
+    <entity entity-name="LinerPanel" package="growerp.liner" sequence-primary-prefix="lp">
+        <field name="qcNum" type="id" is-pk="true" />
+        <field name="ownerPartyId" type="id" />
+        <field name="salesOrderId" type="id" />
+        <field name="workEffortId" type="id" />
+        <field name="linerTypeId" type="id" />
+        <field name="panelWidth" type="number-decimal" />
+        <field name="panelLength" type="number-decimal" />
+        <field name="panelName" type="text-short" />
+        <relationship type="one" title="Owner" related="mantle.party.Party" short-alias="owner">
+            <key-map field-name="ownerPartyId" />
+        </relationship>
+        <relationship type="one" related="growerp.liner.LinerType" short-alias="linerType">
+            <key-map field-name="linerTypeId" />
+        </relationship>
+        <relationship type="one-nofk" related="mantle.work.effort.WorkEffort" short-alias="workEffort">
+            <key-map field-name="workEffortId" />
+        </relationship>
+    </entity>
 
     <entity entity-name="TenantSetup" package="growerp.general">
         <field name="ownerPartyId" type="id" is-pk="true" />

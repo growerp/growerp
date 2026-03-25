@@ -3281,6 +3281,47 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="estimatedQuantity" entity-alias="WEP"/>
         <alias name="productPseudoId" entity-alias="P" field="pseudoId"/>
         <alias name="productName" entity-alias="P"/>
+        <alias name="routingId" entity-alias="WE"/>
+    </view-entity>
+
+    <!-- ===================== Production Routing View ===================== -->
+
+    <view-entity entity-name="RoutingAndTasks" package="growerp.manufacturing">
+        <member-entity entity-alias="RO" entity-name="growerp.manufacturing.Routing"/>
+        <member-entity entity-alias="RT" entity-name="growerp.manufacturing.RoutingTask"
+            join-from-alias="RO" join-optional="true">
+            <key-map field-name="routingId"/>
+        </member-entity>
+        <alias name="routingId" entity-alias="RO"/>
+        <alias name="ownerPartyId" entity-alias="RO"/>
+        <alias name="routingName" entity-alias="RO"/>
+        <alias name="description" entity-alias="RO"/>
+        <alias name="routingTaskId" entity-alias="RT"/>
+        <alias name="taskName" entity-alias="RT"/>
+        <alias name="sequenceNum" entity-alias="RT"/>
+        <alias name="estimatedWorkTime" entity-alias="RT"/>
+        <alias name="workCenterName" entity-alias="RT"/>
+    </view-entity>
+
+    <!-- ===================== Liner Panel View ===================== -->
+
+    <view-entity entity-name="LinerPanelAndType" package="growerp.liner">
+        <member-entity entity-alias="LP" entity-name="growerp.liner.LinerPanel"/>
+        <member-entity entity-alias="LT" entity-name="growerp.liner.LinerType"
+            join-from-alias="LP" join-optional="true">
+            <key-map field-name="linerTypeId"/>
+        </member-entity>
+        <alias name="qcNum" entity-alias="LP"/>
+        <alias name="ownerPartyId" entity-alias="LP"/>
+        <alias name="salesOrderId" entity-alias="LP"/>
+        <alias name="workEffortId" entity-alias="LP"/>
+        <alias name="linerTypeId" entity-alias="LP"/>
+        <alias name="panelWidth" entity-alias="LP"/>
+        <alias name="panelLength" entity-alias="LP"/>
+        <alias name="panelName" entity-alias="LP"/>
+        <alias name="linerName" entity-alias="LT"/>
+        <alias name="widthIncrement" entity-alias="LT"/>
+        <alias name="linerWeight" entity-alias="LT"/>
     </view-entity>
 
 </entities>

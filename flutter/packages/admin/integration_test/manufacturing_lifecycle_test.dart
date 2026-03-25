@@ -67,6 +67,26 @@ final List<Product> mfgLifecycleProducts = [
   ),
 ];
 
+/// Production routing for Widget Assembly
+final Routing mfgRouting = Routing(routingName: 'Widget Assembly Process');
+final List<RoutingTask> mfgRoutingTasks = [
+  RoutingTask(
+    taskName: 'Prepare Components',
+    sequenceNum: 10,
+    estimatedWorkTime: Decimal.parse('0.5'),
+  ),
+  RoutingTask(
+    taskName: 'Assemble',
+    sequenceNum: 20,
+    estimatedWorkTime: Decimal.parse('1.0'),
+  ),
+  RoutingTask(
+    taskName: 'Quality Check',
+    sequenceNum: 30,
+    estimatedWorkTime: Decimal.parse('0.25'),
+  ),
+];
+
 /// BOM: Widget Assembly → 2 × Bolt M5, 1 × Bearing 6201
 /// For 1-unit WO: needs 2 Bolt M5 and 1 Bearing 6201
 final List<BomItem> mfgBomItems = [
@@ -153,6 +173,7 @@ GoRouter createAdminMfgTestRouter() {
       '/accounting' => const AccountingDashboard(),
       '/manufacturing/bom' => const BomList(),
       '/manufacturing/workOrder' => const WorkOrderList(),
+      '/manufacturing/routing' => const RoutingList(),
       _ => const _MfgDashboard(),
     },
     shellRoutes: [
@@ -219,6 +240,14 @@ const adminMfgMenuConfig = MenuConfiguration(
       iconName: 'precision_manufacturing',
       sequenceNum: 30,
       widgetName: 'WorkOrderList',
+    ),
+    MenuItem(
+      itemKey: 'MFG_ROUTING',
+      title: 'Routings',
+      route: '/manufacturing/routing',
+      iconName: 'route',
+      sequenceNum: 35,
+      widgetName: 'RoutingList',
     ),
     MenuItem(
       itemKey: 'MFG_SO',
@@ -328,7 +357,15 @@ void main() {
     ]);
     await CommonTest.tapByKey(tester, 'cancel');
 
-    // ── Phase 2: Sales order → auto-creates WorkOrder on approval ─────────────
+    // ── Phase 2: Create production routing ───────────────────────────────────
+    await RoutingTest.selectRoutings(tester);
+    await RoutingTest.addRoutings(tester, [mfgRouting]);
+    await RoutingTest.openRouting(tester, 0);
+    await RoutingTest.addRoutingTasks(tester, mfgRoutingTasks);
+    await RoutingTest.checkRoutingTasks(tester, mfgRoutingTasks);
+    await CommonTest.tapByKey(tester, 'cancel');
+
+    // ── Phase 3: Sales order → auto-creates WorkOrder on approval ─────────────
     await OrderTest.selectSalesOrders(tester);
     await OrderTest.addOrders(tester, mfgSalesOrders);
     await OrderTest.approveOrders(tester);
@@ -338,7 +375,7 @@ void main() {
     final SaveTest testAfterSalesApprove = await PersistFunctions.getTest();
     final List<FinDoc> approvedSalesOrders = testAfterSalesApprove.orders;
 
-    // ── Phase 3: Verify auto-created WorkOrder shows shortage ─────────────────
+    // ── Phase 4: Verify auto-created WorkOrder shows shortage; assign routing ──
     await WorkOrderTest.selectWorkOrders(tester);
     await CommonTest.waitForKey(tester, 'item0');
     // Open the auto-created WO and check shortage
@@ -349,9 +386,14 @@ void main() {
       {'pseudoId': 'MFG-COMP-A', 'haveQty': '0'},
       {'pseudoId': 'MFG-COMP-B', 'haveQty': '0'},
     ]);
+    // Assign the production routing to the work order
+    await WorkOrderTest.assignRouting(tester, mfgRouting.routingName!);
+    // Re-open and verify routing steps are visible in the WO dialog
+    await WorkOrderTest.openWorkOrder(tester, 0);
+    await RoutingTest.checkRoutingTasks(tester, mfgRoutingTasks);
     await CommonTest.tapByKey(tester, 'cancel');
 
-    // ── Phase 4: Purchase order for components ────────────────────────────────
+    // ── Phase 5: Purchase order for components ────────────────────────────────
     await OrderTest.selectPurchaseOrders(tester);
     await OrderTest.addOrders(tester, mfgPurchaseOrders);
     await OrderTest.approveOrders(tester);
@@ -359,13 +401,13 @@ void main() {
     await OrderTest.approveOrderPayments(tester);
     await OrderTest.completeOrderPayments(tester);
 
-    // ── Phase 5: Receive components into warehouse ────────────────────────────
+    // ── Phase 6: Receive components into warehouse ────────────────────────────
     await ShipmentTest.selectIncomingShipments(tester);
     await OrderTest.approveOrderShipments(tester);
     await ShipmentTest.receiveShipments(tester, locations.sublist(0, 1));
     await OrderTest.checkOrderShipmentsComplete(tester);
 
-    // ── Phase 6: Production run — no shortage, release → start → complete ─────
+    // ── Phase 7: Production run — no shortage, release → start → complete ─────
     await WorkOrderTest.selectWorkOrders(tester);
     await CommonTest.waitForKey(tester, 'item0');
     await WorkOrderTest.openWorkOrder(tester, 0);
@@ -382,7 +424,7 @@ void main() {
     await WorkOrderTest.completeWorkOrder(tester);
     // Components consumed; 1 unit of Widget Assembly produced in inventory
 
-    // ── Phase 7: Ship to customer ─────────────────────────────────────────────
+    // ── Phase 8: Ship to customer ─────────────────────────────────────────────
     // Restore sales order to SaveTest so approveOrderShipments finds correct shipment
     final SaveTest currentTest = await PersistFunctions.getTest();
     await PersistFunctions.persistTest(
@@ -397,7 +439,7 @@ void main() {
     await OrderTest.approveOrderPayments(tester);
     await OrderTest.completeOrderPayments(tester);
 
-    // ── Phase 8: Verify ledger has transactions ───────────────────────────────
+    // ── Phase 9: Verify ledger has transactions ───────────────────────────────
     await TransactionTest.selectTransactions(tester);
     await CommonTest.waitForKey(tester, 'id0');
     // Transactions should exist from order approval, shipment, WO completion

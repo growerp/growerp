@@ -20,30 +20,52 @@ import 'package:growerp_models/growerp_models.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
 import '../work_order.dart';
+import '../../routing/routing.dart';
 
 class WorkOrderDialog extends StatefulWidget {
   final WorkOrder workOrder;
-  const WorkOrderDialog(this.workOrder, {super.key});
+  /// Optional extra widgets injected by a higher-level package (e.g. growerp_manuf_liner).
+  final List<Widget> Function(WorkOrder workOrder)? extraTabBuilder;
+  /// Optional extra action buttons injected by a higher-level package (e.g. print button).
+  final List<Widget> Function(WorkOrder workOrder)? extraActionBuilder;
+  const WorkOrderDialog(
+    this.workOrder, {
+    super.key,
+    this.extraTabBuilder,
+    this.extraActionBuilder,
+  });
   @override
   WorkOrderDialogState createState() => WorkOrderDialogState();
 }
 
 class WorkOrderDialogState extends State<WorkOrderDialog> {
   late WorkOrder workOrder;
+  late RestClient _restClient;
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
-  final _productIdController = TextEditingController();
+  Bom? _selectedBom;
   final _quantityController = TextEditingController();
   final _startDateController = TextEditingController();
+  String? _selectedRoutingId;
 
   @override
   void initState() {
     super.initState();
     workOrder = widget.workOrder;
+    _restClient = context.read<WorkOrderBloc>().restClient;
     _nameController.text = workOrder.workEffortName ?? '';
-    _productIdController.text = workOrder.productPseudoId ?? '';
+    if (workOrder.productId.isNotEmpty) {
+      _selectedBom = Bom(
+        productId: workOrder.productId,
+        productPseudoId: workOrder.productPseudoId ?? '',
+        productName: workOrder.productName,
+      );
+    }
     _quantityController.text = workOrder.estimatedQuantity?.toString() ?? '';
     _startDateController.text = workOrder.estimatedStartDate ?? '';
+    _selectedRoutingId = workOrder.routingId;
+    // Fetch routings so dropdown is populated
+    context.read<RoutingBloc>().add(const RoutingsFetch(refresh: true));
   }
 
   @override
@@ -82,7 +104,7 @@ class WorkOrderDialogState extends State<WorkOrderDialog> {
           child: _showForm(isPhone),
           title:
               'Work Order ${workOrder.pseudoId.isEmpty ? 'New' : workOrder.pseudoId}',
-          height: 600,
+          height: 650,
           width: 500,
         ),
       ),
@@ -93,9 +115,10 @@ class WorkOrderDialogState extends State<WorkOrderDialog> {
     return Center(
       child: Form(
         key: _formKey,
-        child: ListView(
+        child: SingleChildScrollView(
           key: const Key('listView'),
-          children: <Widget>[
+          child: Column(
+            children: <Widget>[
             TextFormField(
               key: const Key('name'),
               decoration:
@@ -103,17 +126,22 @@ class WorkOrderDialogState extends State<WorkOrderDialog> {
               controller: _nameController,
             ),
             const SizedBox(height: 20),
-            TextFormField(
+            AutocompleteLabel<Bom>(
               key: const Key('productId'),
-              decoration:
-                  const InputDecoration(labelText: 'Product ID (to produce)'),
-              controller: _productIdController,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter a product ID';
-                }
-                return null;
+              label: 'Product (with BOM)',
+              initialValue: _selectedBom,
+              optionsBuilder: (TextEditingValue v) async {
+                final r = await _restClient.getBoms(
+                  search: v.text,
+                  limit: 5,
+                );
+                return r.boms;
               },
+              displayStringForOption: (b) =>
+                  '${b.productPseudoId}  ${b.productName ?? ''}',
+              onSelected: (Bom? b) => setState(() => _selectedBom = b),
+              validator: (value) =>
+                  _selectedBom == null ? 'Please select a product' : null,
             ),
             const SizedBox(height: 20),
             TextFormField(
@@ -135,6 +163,111 @@ class WorkOrderDialogState extends State<WorkOrderDialog> {
               decoration:
                   const InputDecoration(labelText: 'Start Date (YYYY-MM-DD)'),
               controller: _startDateController,
+            ),
+            const SizedBox(height: 20),
+            // Routing dropdown + inline routing steps
+            BlocBuilder<RoutingBloc, RoutingState>(
+              builder: (context, routingState) {
+                final routings = routingState.routings;
+                final selectedRouting = _selectedRoutingId != null
+                    ? routings.cast<Routing?>().firstWhere(
+                        (r) => r?.routingId == _selectedRoutingId,
+                        orElse: () => null)
+                    : null;
+                final isComplete =
+                    workOrder.status == WorkOrderStatusVal.complete;
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    DropdownButtonFormField<String>(
+                      key: const Key('routingDropdown'),
+                      decoration: const InputDecoration(
+                        labelText: 'Production Routing (optional)',
+                      ),
+                      initialValue: _selectedRoutingId,
+                      items: [
+                        const DropdownMenuItem<String>(
+                          value: null,
+                          child: Text('— None —'),
+                        ),
+                        ...routings.map((r) => DropdownMenuItem<String>(
+                              value: r.routingId,
+                              child: Text(r.routingName ?? r.routingId),
+                            )),
+                      ],
+                      onChanged: (value) =>
+                          setState(() => _selectedRoutingId = value),
+                    ),
+                    if (selectedRouting != null) ...[
+                      const SizedBox(height: 16),
+                      const Text(
+                        'Routing Steps:',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 4),
+                      ...selectedRouting.routingTasks.asMap().entries.map((entry) {
+                        final i = entry.key;
+                        final task = entry.value;
+                        return ListTile(
+                          key: Key('taskItem$i'),
+                          dense: true,
+                          leading: CircleAvatar(
+                            radius: 14,
+                            child: Text('${task.sequenceNum ?? '?'}'),
+                          ),
+                          title: Text(
+                            task.taskName ?? '',
+                            key: Key('taskItemName$i'),
+                          ),
+                          subtitle: task.workCenterName != null
+                              ? Text(task.workCenterName!)
+                              : null,
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              if (task.estimatedWorkTime != null)
+                                Text('${task.estimatedWorkTime}h'),
+                              if (!isComplete)
+                                IconButton(
+                                  key: Key('deleteTaskItem$i'),
+                                  icon: const Icon(Icons.delete, size: 18),
+                                  onPressed: () => context
+                                      .read<RoutingBloc>()
+                                      .add(RoutingTaskDelete(task)),
+                                ),
+                            ],
+                          ),
+                          onTap: isComplete
+                              ? null
+                              : () => showDialog(
+                                    context: context,
+                                    builder: (_) => BlocProvider.value(
+                                      value: context.read<RoutingBloc>(),
+                                      child: RoutingTaskDialog(task),
+                                    ),
+                                  ),
+                        );
+                      }),
+                      if (!isComplete)
+                        TextButton.icon(
+                          key: const Key('addRoutingTask'),
+                          icon: const Icon(Icons.add),
+                          label: const Text('Add Step'),
+                          onPressed: () => showDialog(
+                            context: context,
+                            builder: (_) => BlocProvider.value(
+                              value: context.read<RoutingBloc>(),
+                              child: RoutingTaskDialog(
+                                RoutingTask(
+                                    routingId: selectedRouting.routingId),
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ],
+                );
+              },
             ),
             const SizedBox(height: 20),
             // Status display and lifecycle buttons (existing orders only)
@@ -251,6 +384,18 @@ class WorkOrderDialogState extends State<WorkOrderDialog> {
                 ),
               const SizedBox(height: 20),
             ],
+            // Extra widgets injected by higher-level package
+            if (workOrder.workEffortId.isNotEmpty &&
+                widget.extraTabBuilder != null) ...[
+              ...widget.extraTabBuilder!(workOrder),
+              const SizedBox(height: 20),
+            ],
+            // Extra action buttons (e.g. Print)
+            if (workOrder.workEffortId.isNotEmpty &&
+                widget.extraActionBuilder != null) ...[
+              ...widget.extraActionBuilder!(workOrder),
+              const SizedBox(height: 20),
+            ],
             ElevatedButton(
               key: const Key('update'),
               child: Text(workOrder.workEffortId.isEmpty ? 'Add' : 'Update'),
@@ -263,21 +408,23 @@ class WorkOrderDialogState extends State<WorkOrderDialog> {
                         workEffortName: _nameController.text.isNotEmpty
                             ? _nameController.text
                             : null,
-                        productPseudoId: _productIdController.text,
-                        productId: workOrder.productId,
+                        productPseudoId: _selectedBom?.productPseudoId ?? '',
+                        productId: _selectedBom?.productId ?? workOrder.productId,
                         estimatedQuantity:
                             Decimal.tryParse(_quantityController.text),
                         estimatedStartDate:
                             _startDateController.text.isNotEmpty
                                 ? _startDateController.text
                                 : null,
+                        routingId: _selectedRoutingId,
                       ),
                     ),
                   );
                 }
               },
             ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -286,7 +433,6 @@ class WorkOrderDialogState extends State<WorkOrderDialog> {
   @override
   void dispose() {
     _nameController.dispose();
-    _productIdController.dispose();
     _quantityController.dispose();
     _startDateController.dispose();
     super.dispose();
