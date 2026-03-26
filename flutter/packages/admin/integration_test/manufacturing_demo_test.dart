@@ -267,7 +267,7 @@ const adminMfgDemoMenuConfig = MenuConfiguration(
     ),
     MenuItem(
       itemKey: 'MFG_IN_SHIP',
-      title: 'Incoming',
+      title: 'Shipment-In',
       route: '/incoming-shipments',
       iconName: 'local_shipping',
       sequenceNum: 60,
@@ -275,7 +275,7 @@ const adminMfgDemoMenuConfig = MenuConfiguration(
     ),
     MenuItem(
       itemKey: 'MFG_OUT_SHIP',
-      title: 'Outgoing',
+      title: 'Shipment-out',
       route: '/shipments',
       iconName: 'outbound',
       sequenceNum: 70,
@@ -297,14 +297,30 @@ class _MfgDemoDashboard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<AuthBloc, AuthState>(
-      builder: (context, state) {
-        if (state.status != AuthStatus.authenticated) {
-          return const LoadingIndicator();
-        }
-        return const Center(
-          child: Text(
-            'Manufacturing Demo Dashboard',
-            key: Key('MfgDemoDashboard'),
+      builder: (context, authState) {
+        final stats = authState.authenticate?.stats;
+
+        final dashboardItems = adminMfgDemoMenuConfig.menuItems
+            .where((item) =>
+                item.isActive && item.route != null && item.route != '/')
+            .toList()
+          ..sort((a, b) => a.sequenceNum.compareTo(b.sequenceNum));
+
+        return Scaffold(
+          key: const Key('MfgDemoDashboard'),
+          backgroundColor: Colors.transparent,
+          body: DashboardGrid(
+            items: dashboardItems,
+            stats: stats,
+            onRefresh: () async {
+              context.read<AuthBloc>().add(AuthLoad());
+            },
+            chartBuilder: (route) {
+              if (route == '/accounting') {
+                return const RevenueExpenseChartMini();
+              }
+              return null;
+            },
           ),
         );
       },

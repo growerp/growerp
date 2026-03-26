@@ -368,7 +368,7 @@ const linerDemoMenuConfig = MenuConfiguration(
     ),
     MenuItem(
       itemKey: 'LINER_IN_SHIP',
-      title: 'Incoming',
+      title: 'Shipment-In',
       route: '/incoming-shipments',
       iconName: 'local_shipping',
       sequenceNum: 80,
@@ -376,7 +376,7 @@ const linerDemoMenuConfig = MenuConfiguration(
     ),
     MenuItem(
       itemKey: 'LINER_OUT_SHIP',
-      title: 'Outgoing',
+      title: 'Shipment-out',
       route: '/shipments',
       iconName: 'outbound',
       sequenceNum: 90,

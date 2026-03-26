@@ -267,7 +267,7 @@ const adminMfgMenuConfig = MenuConfiguration(
     ),
     MenuItem(
       itemKey: 'MFG_IN_SHIP',
-      title: 'Incoming',
+      title: 'Shipment-In',
       route: '/incoming-shipments',
       iconName: 'local_shipping',
       sequenceNum: 60,
@@ -275,7 +275,7 @@ const adminMfgMenuConfig = MenuConfiguration(
     ),
     MenuItem(
       itemKey: 'MFG_OUT_SHIP',
-      title: 'Outgoing',
+      title: 'Shipment-out',
       route: '/shipments',
       iconName: 'outbound',
       sequenceNum: 70,

@@ -115,24 +115,31 @@ GoRouter createManufacturingExampleRouter() {
   );
 }
 
-/// Simple dashboard for manufacturing example
+/// Dashboard for manufacturing example — styled to match AdminDashboardContent.
 class ManufacturingDashboard extends StatelessWidget {
   const ManufacturingDashboard({super.key});
 
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<AuthBloc, AuthState>(
-      builder: (context, state) {
-        if (state.status != AuthStatus.authenticated) {
-          return const LoadingIndicator();
-        }
+      builder: (context, authState) {
+        final stats = authState.authenticate?.stats;
 
         final dashboardItems = manufacturingMenuConfig.menuItems
-            .where((item) => item.itemKey != 'MFG_MAIN')
-            .toList();
-        return DashboardGrid(
-          items: dashboardItems,
-          stats: state.authenticate!.stats,
+            .where((item) =>
+                item.isActive && item.route != null && item.route != '/')
+            .toList()
+          ..sort((a, b) => a.sequenceNum.compareTo(b.sequenceNum));
+
+        return Scaffold(
+          backgroundColor: Colors.transparent,
+          body: DashboardGrid(
+            items: dashboardItems,
+            stats: stats,
+            onRefresh: () async {
+              context.read<AuthBloc>().add(AuthLoad());
+            },
+          ),
         );
       },
     );

@@ -83,9 +83,7 @@ class CommonTest {
                 title,
                 textAlign: TextAlign.center,
                 style: const TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                ),
+                    fontSize: 22, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 12),
               Text(
@@ -125,8 +123,10 @@ class CommonTest {
     // Override the logical screen size when SCREEN_WIDTH / SCREEN_HEIGHT are
     // passed via --dart-define. This lets headless Linux desktop tests emulate
     // a phone-sized screen so ResponsiveBreakpoints triggers MOBILE layout.
-    const int screenW = int.fromEnvironment('SCREEN_WIDTH', defaultValue: 0);
-    const int screenH = int.fromEnvironment('SCREEN_HEIGHT', defaultValue: 0);
+    const int screenW =
+        int.fromEnvironment('SCREEN_WIDTH', defaultValue: 0);
+    const int screenH =
+        int.fromEnvironment('SCREEN_HEIGHT', defaultValue: 0);
     if (screenW > 0 && screenH > 0) {
       tester.view.physicalSize = Size(screenW.toDouble(), screenH.toDouble());
       tester.view.devicePixelRatio = 1.0;
@@ -135,11 +135,6 @@ class CommonTest {
     // Disable Google Fonts runtime fetching to prevent network failures in
     // headless/offline test environments (e.g., Docker CI).
     GoogleFonts.config.allowRuntimeFetching = false;
-
-    // Disable repeating skeleton animations so pumpAndSettle() can settle.
-    // AnimationController.repeat() schedules frames indefinitely and blocks
-    // pumpAndSettle from ever completing if skeleton loaders are visible.
-    SkeletonWidget.testMode = true;
 
     // Suppress RenderFlex overflow errors during tests.
     // These are layout issues that should be fixed separately but should not
@@ -564,35 +559,13 @@ class CommonTest {
       );
       await tester.tap(find.byTooltip('Open navigation menu'));
       await tester.pump(const Duration(seconds: waitTime));
-      for (int i = 0; i < 8; i++) {
-        await tester.pump(const Duration(milliseconds: 120));
-      }
-
-      if (!tester.any(find.byKey(Key(targetKey)))) {
-        final drawerList = find.byKey(const Key('listView'));
-        for (int i = 0; i < 12; i++) {
-          if (tester.any(find.byKey(Key(targetKey)))) break;
-          if (tester.any(drawerList)) {
-            await tester.drag(drawerList.last, const Offset(0, -220));
-            await tester.pump(const Duration(milliseconds: 160));
-          } else {
-            break;
-          }
-        }
-      }
-
-      expect(
-        tester.any(find.byKey(Key(targetKey))),
-        true,
-        reason: 'Could not find menu key: $targetKey after opening drawer',
-      );
+      // Wait for drawer animation to complete
+      await tester.pumpAndSettle();
     }
 
     await tapByKey(tester, targetKey, seconds: waitTime, settle: false);
-    for (int i = 0; i < 12; i++) {
-      await tester.pump(const Duration(milliseconds: 150));
-      if (await waitForKey(tester, formName)) break;
-    }
+    // Wait for navigation to complete
+    await tester.pumpAndSettle(const Duration(seconds: waitTime));
 
     if (tapNumber != null) {
       // Both phone (BottomNavigationBar) and desktop (TabBar) use text labels
@@ -600,7 +573,24 @@ class CommonTest {
       await tapByText(tester, tapNumber.replaceAll('\n', ' '));
       await tester.pumpAndSettle(const Duration(seconds: waitTime));
     }
-    await waitForKey(tester, formName);
+    bool formFound = await waitForKey(tester, formName);
+    if (!formFound) {
+      await tester.pumpAndSettle(const Duration(seconds: waitTime));
+      if (tester.any(find.byKey(Key(targetKey)))) {
+        await tapByKey(tester, targetKey, seconds: waitTime, settle: false);
+        await tester.pumpAndSettle(const Duration(seconds: waitTime));
+        if (tapNumber != null) {
+          await tapByText(tester, tapNumber.replaceAll('\n', ' '));
+          await tester.pumpAndSettle(const Duration(seconds: waitTime));
+        }
+      }
+      formFound = await waitForKey(tester, formName);
+    }
+    expect(
+      formFound,
+      true,
+      reason: 'key $formName not found after selecting option $option',
+    );
     await checkWidgetKey(tester, formName);
   }
 
@@ -1243,42 +1233,13 @@ class CommonTest {
     bool settle = true, // If false, use pump instead of pumpAndSettle
   }) async {
     await tester.pump();
-    final finder = find.byKey(Key(key));
     expect(
-      tester.any(finder),
+      tester.any(find.byKey(Key(key))),
       true,
       reason: "could not find key: $key to tap on",
     );
-
-    await tester.ensureVisible(finder.last);
-    await tester.pump();
-
-    Finder tappableFinder = finder.hitTestable();
-
-    if (!tester.any(tappableFinder)) {
-      final listViewFinder = find.byKey(const Key('listView'));
-      final scrollableFinder = find.byType(Scrollable);
-      for (int i = 0; i < 12 && !tester.any(tappableFinder); i++) {
-        if (tester.any(listViewFinder)) {
-          await tester.drag(listViewFinder.last, const Offset(0, -140));
-        } else if (tester.any(scrollableFinder)) {
-          await tester.drag(scrollableFinder.first, const Offset(0, -140));
-        } else {
-          break;
-        }
-        await tester.pump(const Duration(milliseconds: 120));
-        tappableFinder = finder.hitTestable();
-      }
-      await tester.ensureVisible(finder.last);
-      await tester.pump();
-      tappableFinder = finder.hitTestable();
-    }
-
-    if (tester.any(tappableFinder)) {
-      await tester.tap(tappableFinder.first);
-    } else {
-      await tester.tap(finder.last, warnIfMissed: false);
-    }
+    await tester.ensureVisible(find.byKey(Key(key)).last);
+    await tester.tap(find.byKey(Key(key)).last);
     await tester.pump();
     if (settle) {
       await tester.pumpAndSettle(Duration(seconds: seconds));

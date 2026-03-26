@@ -142,7 +142,7 @@ final List<FinDoc> swagPurchaseOrders = [
 GoRouter createCatalogSwagDemoRouter() {
   return createStaticAppRouter(
     menuConfig: catalogSwagDemoMenuConfig,
-    appTitle: 'GrowERP Catalog & Manufacturing Demo',
+    appTitle: 'GrowERP Manufacturing Demo',
     dashboard: const _SwagDemoDashboard(),
     widgetBuilder: (route) => switch (route) {
       '/orders' => const FinDocList(
@@ -210,7 +210,7 @@ GoRouter createCatalogSwagDemoRouter() {
 const catalogSwagDemoMenuConfig = MenuConfiguration(
   menuConfigurationId: 'CATALOG_SWAG_DEMO',
   appId: 'catalog_swag_demo',
-  name: 'GrowERP Catalog & Manufacturing Demo',
+  name: 'GrowERP Manufacturing Demo',
   menuItems: [
     MenuItem(
       itemKey: 'SWAG_MAIN',
@@ -262,7 +262,7 @@ const catalogSwagDemoMenuConfig = MenuConfiguration(
     ),
     MenuItem(
       itemKey: 'SWAG_IN_SHIP',
-      title: 'Incoming',
+      title: 'Shipment-In',
       route: '/incoming-shipments',
       iconName: 'local_shipping',
       sequenceNum: 60,
@@ -270,7 +270,7 @@ const catalogSwagDemoMenuConfig = MenuConfiguration(
     ),
     MenuItem(
       itemKey: 'SWAG_OUT_SHIP',
-      title: 'Outgoing',
+      title: 'Shipment-out',
       route: '/shipments',
       iconName: 'outbound',
       sequenceNum: 70,
@@ -292,50 +292,30 @@ class _SwagDemoDashboard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<AuthBloc, AuthState>(
-      builder: (context, state) {
-        if (state.status != AuthStatus.authenticated) {
-          return const LoadingIndicator();
-        }
-        return Center(
+      builder: (context, authState) {
+        final stats = authState.authenticate?.stats;
+
+        final dashboardItems = catalogSwagDemoMenuConfig.menuItems
+            .where((item) =>
+                item.isActive && item.route != null && item.route != '/')
+            .toList()
+          ..sort((a, b) => a.sequenceNum.compareTo(b.sequenceNum));
+
+        return Scaffold(
           key: const Key('SwagDemoDashboard'),
-          child: Card(
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20)),
-            elevation: 4,
-            margin: const EdgeInsets.symmetric(horizontal: 40),
-            child: Padding(
-              padding:
-                  const EdgeInsets.symmetric(vertical: 40, horizontal: 32),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.category_outlined,
-                          size: 40, color: Colors.amber.shade700),
-                      const SizedBox(width: 12),
-                      Icon(Icons.precision_manufacturing_outlined,
-                          size: 40, color: Colors.blue.shade700),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  const Text(
-                    'Catalog & Manufacturing Demo',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                        fontSize: 26, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    'Products · Bills of Materials · Orders · Shipments · Accounting',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                        fontSize: 15, color: Colors.grey.shade600),
-                  ),
-                ],
-              ),
-            ),
+          backgroundColor: Colors.transparent,
+          body: DashboardGrid(
+            items: dashboardItems,
+            stats: stats,
+            onRefresh: () async {
+              context.read<AuthBloc>().add(AuthLoad());
+            },
+            chartBuilder: (route) {
+              if (route == '/accounting') {
+                return const RevenueExpenseChartMini();
+              }
+              return null;
+            },
           ),
         );
       },
@@ -352,7 +332,7 @@ void main() {
     await GlobalConfiguration().loadFromAsset('app_settings');
   });
 
-  testWidgets('GrowERP Catalog & Swag Manufacturing Demo', (tester) async {
+  testWidgets('GrowERP Manufacturing Demo', (tester) async {
     RestClient restClient = RestClient(await buildDioClient());
 
     await CommonTest.startTestApp(
@@ -362,13 +342,13 @@ void main() {
       delegates,
       blocProviders: getAdminBlocProviders(restClient, 'AppAdmin'),
       restClient: restClient,
-      title: 'GrowERP Catalog & Manufacturing Demo',
+      title: 'GrowERP Manufacturing Demo',
       clear: true,
     );
 
     await CommonTest.showDemoStep(
       tester,
-      'Catalog & Manufacturing Demo',
+      'Manufacturing Demo',
       'An end-to-end walkthrough: products, BOM, sales order, '
           'work order, components, assembly, shipping, and accounting.',
     );
@@ -400,6 +380,7 @@ void main() {
           'into a single sellable kit.',
     );
     await BomTest.selectBom(tester);
+    await tester.pump(const Duration(seconds: 1));
     await BomTest.createBomWithComponents(
       tester,
       productName: 'Moqui Marketing Package',
@@ -421,7 +402,8 @@ void main() {
     );
     // Pause so the viewer can see the completed BOM dialog.
     await tester.pump(const Duration(seconds: 3));
-    print("DEBUG: tapped cancel"); await CommonTest.tapByKey(tester, 'cancel'); print("DEBUG: finished tap cancel");
+    await CommonTest.tapByKey(tester, 'cancel');
+    await tester.pump(const Duration(seconds: 1));
 
     // ── Phase 2: Production routing ───────────────────────────────────────────
     await CommonTest.showDemoStep(
@@ -431,12 +413,15 @@ void main() {
           '3 steps: Pick Components → Pack Kit → Label & QC.',
     );
     await RoutingTest.selectRoutings(tester);
+    await tester.pump(const Duration(seconds: 1));
     await RoutingTest.addRoutings(tester, [swagDemoRouting]);
     await RoutingTest.openRouting(tester, 0);
+    await tester.pump(const Duration(seconds: 1));
     await RoutingTest.addRoutingTasks(tester, swagDemoRoutingTasks);
     await RoutingTest.checkRoutingTasks(tester, swagDemoRoutingTasks);
     await tester.pump(const Duration(seconds: 3));
-    print("DEBUG: tapped cancel"); await CommonTest.tapByKey(tester, 'cancel'); print("DEBUG: finished tap cancel");
+    await CommonTest.tapByKey(tester, 'cancel');
+    await tester.pump(const Duration(seconds: 1));
 
     // ── Phase 3: Sales order → auto-creates Work Order on approval ────────────
     await CommonTest.showDemoStep(
@@ -447,6 +432,7 @@ void main() {
           'the product has a Bill of Materials.',
     );
     await OrderTest.selectSalesOrders(tester);
+    await tester.pump(const Duration(seconds: 1));
     await OrderTest.addOrders(tester, swagSalesOrders);
     await OrderTest.approveOrders(tester);
 
@@ -464,14 +450,18 @@ void main() {
           'We assign the Kit Assembly routing so production steps are visible.',
     );
     await WorkOrderTest.selectWorkOrders(tester);
+    await tester.pump(const Duration(seconds: 1));
     await CommonTest.waitForKey(tester, 'item0');
     await WorkOrderTest.openWorkOrder(tester, 0);
+    await tester.pump(const Duration(seconds: 1));
     await tester.pump(const Duration(seconds: 2));
     await WorkOrderTest.assignRouting(tester, swagDemoRouting.routingName!);
     // Re-open to show the routing steps embedded in the WO dialog
     await WorkOrderTest.openWorkOrder(tester, 0);
+    await tester.pump(const Duration(seconds: 1));
     await tester.pump(const Duration(seconds: 3));
-    print("DEBUG: tapped cancel"); await CommonTest.tapByKey(tester, 'cancel'); print("DEBUG: finished tap cancel");
+    await CommonTest.tapByKey(tester, 'cancel');
+    await tester.pump(const Duration(seconds: 1));
 
     // ── Phase 5: Purchase order for swag components ───────────────────────────
     await CommonTest.showDemoStep(
@@ -481,9 +471,11 @@ void main() {
           'and USB Drive.\nThe order is approved and payment is processed.',
     );
     await OrderTest.selectPurchaseOrders(tester);
+    await tester.pump(const Duration(seconds: 1));
     await OrderTest.addOrders(tester, swagPurchaseOrders);
     await OrderTest.approveOrders(tester);
     await PaymentTest.selectPurchasePayments(tester);
+    await tester.pump(const Duration(seconds: 1));
     await OrderTest.approveOrderPayments(tester);
     await OrderTest.completeOrderPayments(tester);
 
@@ -496,6 +488,7 @@ void main() {
           'shortage is cleared.',
     );
     await ShipmentTest.selectIncomingShipments(tester);
+    await tester.pump(const Duration(seconds: 1));
     await OrderTest.approveOrderShipments(tester);
     await ShipmentTest.receiveShipments(tester, locations.sublist(0, 1));
 
@@ -508,14 +501,18 @@ void main() {
           'are added to finished-goods inventory.',
     );
     await WorkOrderTest.selectWorkOrders(tester);
+    await tester.pump(const Duration(seconds: 1));
     await CommonTest.waitForKey(tester, 'item0');
     await WorkOrderTest.openWorkOrder(tester, 0);
+    await tester.pump(const Duration(seconds: 1));
     await WorkOrderTest.releaseWorkOrder(tester);
 
     await WorkOrderTest.openWorkOrder(tester, 0);
+    await tester.pump(const Duration(seconds: 1));
     await WorkOrderTest.startWorkOrder(tester);
 
     await WorkOrderTest.openWorkOrder(tester, 0);
+    await tester.pump(const Duration(seconds: 1));
     await WorkOrderTest.completeWorkOrder(tester);
 
     // ── Phase 8: Ship to customer ─────────────────────────────────────────────
@@ -533,9 +530,11 @@ void main() {
     );
 
     await ShipmentTest.selectOutgoingShipments(tester);
+    await tester.pump(const Duration(seconds: 1));
     await OrderTest.approveOrderShipments(tester);
     await OrderTest.completeOrderShipments(tester);
     await PaymentTest.selectSalesPayments(tester);
+    await tester.pump(const Duration(seconds: 1));
     await OrderTest.approveOrderPayments(tester);
     await OrderTest.completeOrderPayments(tester);
 
@@ -547,6 +546,7 @@ void main() {
           'is automatically posted to the general ledger.',
     );
     await TransactionTest.selectTransactions(tester);
+    await tester.pump(const Duration(seconds: 1));
     await CommonTest.waitForKey(tester, 'id0');
     // Pause so the viewer can see the ledger entries.
     await tester.pump(const Duration(seconds: 4));
@@ -560,6 +560,7 @@ void main() {
       seconds: 3,
     );
     await TransactionTest.showUpdatedAccountingDashboard(tester);
+    await tester.pump(const Duration(seconds: 1));
 
     await CommonTest.showDemoStep(
       tester,

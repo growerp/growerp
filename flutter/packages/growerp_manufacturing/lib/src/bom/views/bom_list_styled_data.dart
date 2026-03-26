@@ -67,7 +67,14 @@ List<Widget> getBomHeaderRow({
     );
   } else {
     cells.add(
-      Text(bom.productPseudoId, key: Key('item$index')),
+      Column(
+        key: Key('item$index'),
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(bom.productPseudoId, key: Key('productPseudoId$index')),
+        ],
+      ),
     );
     cells.add(
       Text(bom.productName ?? '', key: Key('productName$index')),
