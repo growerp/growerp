@@ -112,6 +112,14 @@ class WorkOrderDialogState extends State<WorkOrderDialog> {
   }
 
   Widget _showForm(bool isPhone) {
+    final isComplete = workOrder.status == WorkOrderStatusVal.complete;
+    final currencyId = context
+        .read<AuthBloc>()
+        .state
+        .authenticate!
+        .company!
+        .currency!
+        .currencyId!;
     return Center(
       child: Form(
         key: _formKey,
@@ -124,12 +132,14 @@ class WorkOrderDialogState extends State<WorkOrderDialog> {
               decoration:
                   const InputDecoration(labelText: 'Work Order Name (optional)'),
               controller: _nameController,
+              readOnly: isComplete,
             ),
             const SizedBox(height: 20),
             AutocompleteLabel<Bom>(
               key: const Key('productId'),
               label: 'Product (with BOM)',
               initialValue: _selectedBom,
+              readOnly: isComplete,
               optionsBuilder: (TextEditingValue v) async {
                 final r = await _restClient.getBoms(
                   search: v.text,
@@ -148,6 +158,7 @@ class WorkOrderDialogState extends State<WorkOrderDialog> {
               key: const Key('quantity'),
               decoration: const InputDecoration(labelText: 'Quantity'),
               controller: _quantityController,
+              readOnly: isComplete,
               keyboardType:
                   const TextInputType.numberWithOptions(decimal: true),
               validator: (value) {
@@ -163,6 +174,7 @@ class WorkOrderDialogState extends State<WorkOrderDialog> {
               decoration:
                   const InputDecoration(labelText: 'Start Date (YYYY-MM-DD)'),
               controller: _startDateController,
+              readOnly: isComplete,
             ),
             const SizedBox(height: 20),
             // Routing dropdown + inline routing steps
@@ -174,8 +186,6 @@ class WorkOrderDialogState extends State<WorkOrderDialog> {
                         (r) => r?.routingId == _selectedRoutingId,
                         orElse: () => null)
                     : null;
-                final isComplete =
-                    workOrder.status == WorkOrderStatusVal.complete;
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -184,7 +194,10 @@ class WorkOrderDialogState extends State<WorkOrderDialog> {
                       decoration: const InputDecoration(
                         labelText: 'Production Routing (optional)',
                       ),
-                      initialValue: _selectedRoutingId,
+                      initialValue: routings.any(
+                              (r) => r.routingId == _selectedRoutingId)
+                          ? _selectedRoutingId
+                          : null,
                       items: [
                         const DropdownMenuItem<String>(
                           value: null,
@@ -195,8 +208,10 @@ class WorkOrderDialogState extends State<WorkOrderDialog> {
                               child: Text(r.routingName ?? r.routingId),
                             )),
                       ],
-                      onChanged: (value) =>
-                          setState(() => _selectedRoutingId = value),
+                      onChanged: isComplete
+                          ? null
+                          : (value) =>
+                              setState(() => _selectedRoutingId = value),
                     ),
                     if (selectedRouting != null) ...[
                       const SizedBox(height: 16),
@@ -326,7 +341,6 @@ class WorkOrderDialogState extends State<WorkOrderDialog> {
                 final available = item.availableQuantity;
                 final hasShortage =
                     available != null && available < needed;
-                final isComplete = workOrder.status == WorkOrderStatusVal.complete;
                 return ListTile(
                   dense: true,
                   title: Text(item.componentName ?? item.componentPseudoId),
@@ -334,7 +348,7 @@ class WorkOrderDialogState extends State<WorkOrderDialog> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text('Need: $needed'),
-                      if (available != null) ...[
+                      if (available != null && !isComplete) ...[
                         const SizedBox(width: 8),
                         Text(
                           key: Key('have${item.componentPseudoId}'),
@@ -355,7 +369,7 @@ class WorkOrderDialogState extends State<WorkOrderDialog> {
                         const SizedBox(width: 8),
                         Text(
                           key: Key('cost${item.componentPseudoId}'),
-                          'Cost: ${item.totalCost}',
+                          'Cost: ${item.totalCost.currency(currencyId: currencyId)}',
                           style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
                       ],
@@ -376,7 +390,7 @@ class WorkOrderDialogState extends State<WorkOrderDialog> {
                       ),
                       Text(
                         key: const Key('totalProductionCost'),
-                        workOrder.totalCost.toString(),
+                        workOrder.totalCost.currency(currencyId: currencyId),
                         style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                     ],
@@ -396,6 +410,7 @@ class WorkOrderDialogState extends State<WorkOrderDialog> {
               ...widget.extraActionBuilder!(workOrder),
               const SizedBox(height: 20),
             ],
+            if (!isComplete)
             ElevatedButton(
               key: const Key('update'),
               child: Text(workOrder.workEffortId.isEmpty ? 'Add' : 'Update'),

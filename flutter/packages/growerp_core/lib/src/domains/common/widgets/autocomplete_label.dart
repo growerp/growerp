@@ -15,6 +15,7 @@ class AutocompleteLabel<T extends Object> extends StatefulWidget {
   final void Function(T?) onSelected;
   final String? Function(T?)? validator;
   final double width;
+  final bool readOnly;
 
   const AutocompleteLabel({
     super.key,
@@ -26,6 +27,7 @@ class AutocompleteLabel<T extends Object> extends StatefulWidget {
     required this.onSelected,
     this.validator,
     this.width = 400,
+    this.readOnly = false,
   });
 
   @override
@@ -58,7 +60,9 @@ class _AutocompleteLabelState<T extends Object>
                   text: widget.displayStringForOption(widget.initialValue!),
                 )
               : null,
-          optionsBuilder: _safeOptionsBuilder,
+          optionsBuilder: widget.readOnly
+              ? (_) async => const Iterable.empty()
+              : _safeOptionsBuilder,
           displayStringForOption: widget.displayStringForOption,
           onSelected: (T value) {
             field.didChange(value);
@@ -69,20 +73,23 @@ class _AutocompleteLabelState<T extends Object>
                 return TextFormField(
                   controller: textController,
                   focusNode: focusNode,
+                  readOnly: widget.readOnly,
                   decoration: InputDecoration(
                     labelText: widget.label,
                     hintText: widget.hintText,
                     errorText: field.errorText,
-                    suffixIcon: textController.text.isNotEmpty
-                        ? IconButton(
-                            icon: const Icon(Icons.clear, size: 20),
-                            onPressed: () {
-                              textController.clear();
-                              field.didChange(null);
-                              widget.onSelected(null);
-                            },
-                          )
-                        : const Icon(Icons.search, size: 20),
+                    suffixIcon: widget.readOnly
+                        ? null
+                        : textController.text.isNotEmpty
+                            ? IconButton(
+                                icon: const Icon(Icons.clear, size: 20),
+                                onPressed: () {
+                                  textController.clear();
+                                  field.didChange(null);
+                                  widget.onSelected(null);
+                                },
+                              )
+                            : const Icon(Icons.search, size: 20),
                   ),
                   onFieldSubmitted: (String value) {
                     onFieldSubmitted();
