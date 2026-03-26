@@ -229,9 +229,10 @@ jobs:
             LOG="$slice_dir/test_output.log"
             if [ -f "$LOG" ]; then
               echo "--- Slice $SLICE ---" >> "$GITHUB_STEP_SUMMARY"
-              grep '>>> RESULT:' "$LOG" >> "$GITHUB_STEP_SUMMARY" \
+              grep '>>> RESULT:' "$LOG" | grep -v '+ echo' | sed 's/^[^|]*| *//' \
+                >> "$GITHUB_STEP_SUMMARY" \
                 || echo "  (no structured results)" >> "$GITHUB_STEP_SUMMARY"
-              FAILED=$(grep -c '>>> RESULT:.*FAILED' "$LOG" 2>/dev/null || echo 0)
+              FAILED=$(grep '>>> RESULT:.*FAILED' "$LOG" | grep -cv '+ echo' 2>/dev/null || echo 0)
               TOTAL_FAILED_PKGS=$((TOTAL_FAILED_PKGS + FAILED))
             fi
           done
@@ -244,7 +245,7 @@ jobs:
             echo "Failed tests:" >> "$GITHUB_STEP_SUMMARY"
             for slice_dir in $(ls -d test-logs/test-output-* 2>/dev/null | sort -V); do
               LOG="$slice_dir/test_output.log"
-              [ -f "$LOG" ] && grep '^\s*\[' "$LOG" >> "$GITHUB_STEP_SUMMARY" || true
+              [ -f "$LOG" ] && sed 's/^[^|]*| *//' "$LOG" | grep '^\s*\[' >> "$GITHUB_STEP_SUMMARY" || true
             done
           fi
           echo '```' >> "$GITHUB_STEP_SUMMARY"
