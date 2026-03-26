@@ -37,6 +37,10 @@ growerp_manufacturing/lib/src/
 │   ├── blocs/        # BomBloc, BomEvent, BomState
 │   ├── views/        # BomList, BomDialog
 │   └── integration_test/  # BomTest
+├── routing/
+│   ├── blocs/        # RoutingBloc, RoutingEvent, RoutingState
+│   ├── views/        # RoutingList, RoutingDialog
+│   └── integration_test/  # RoutingTest
 └── work_order/
     ├── blocs/        # WorkOrderBloc, WorkOrderEvent, WorkOrderState
     ├── views/        # WorkOrderList, WorkOrderDialog
@@ -48,6 +52,7 @@ All backend communication goes through `growerp_models` REST client endpoints:
 | Entity | Endpoint |
 |---|---|
 | BOM items | `GET/POST/PATCH/DELETE /rest/s1/growerp/100/BomItem(s)` |
+| Production Routings | `GET/POST/PATCH/DELETE /rest/s1/growerp/100/Routing(s)` |
 | Work Orders | `GET/POST/PATCH/DELETE /rest/s1/growerp/100/WorkOrder(s)` |
 
 ## Adding to an App
@@ -84,43 +89,68 @@ All backend communication goes through `growerp_models` REST client endpoints:
    MenuItem(title: 'Work Orders', route: '/manufacturing/workOrder',  iconName: 'precision_manufacturing'),
    ```
 
-## Demo: Catalog & Swag Manufacturing
+## Integration Tests
 
-The `admin` app contains a self-contained end-to-end demo in
-[`integration_test/catalog_swag_demo_test.dart`](../admin/integration_test/catalog_swag_demo_test.dart)
-that walks through the full manufacturing lifecycle using a "Moqui Swag Kit" scenario:
+All integration tests live in `example/integration_test/`. Run from the `example/` sub-package
+(requires a running Moqui backend on port 8080 and a connected device/emulator):
+
+```bash
+cd flutter/packages/growerp_manufacturing/example
+flutter test integration_test/<test-file>.dart \
+    -d <device-id> \
+    --dart-define=BACKEND_PORT=8080
+```
+
+### Unit tests
+
+| File | What it covers |
+|---|---|
+| `bom_test.dart` | Create, list, delete a BOM with components |
+| `work_order_test.dart` | Create and delete a work order |
+| `routing_test.dart` | Create a routing with three tasks, then delete |
+| `manufacturing_test.dart` | Aggregator — runs all three unit tests in sequence |
+
+### End-to-end demos
+
+#### Demo: Widget Assembly (`manufacturing_demo_test.dart`)
+
+Uses a **Widget Assembly** finished good with two components (Bolt M5, Bearing 6201).
 
 | Phase | What happens |
 |---|---|
-| 1 | A fresh company is created with catalog demo data and three swag component products (Baseball Cap, Coffee Mug, USB Drive). |
-| 2 | The **Moqui Marketing Package** BOM is built interactively through the BOM UI, bundling one of each component into a kit. |
-| 3 | A sales order for 2 × Moqui Marketing Package is created and approved, which **automatically generates a Work Order**. |
-| 4 | The Work Order is opened — it shows a material shortage for all three components. |
-| 5 | A purchase order for the swag components is raised, approved, and paid. |
-| 6 | The incoming shipment is received into the warehouse; the Work Order shortage clears. |
-| 7 | The Work Order is released → started → completed. Components are consumed and 2 finished kits enter inventory. The dialog shows the component costs and total production cost. |
-| 8 | The finished kits are shipped to the customer and payment is collected. |
-| 9 | The general ledger is reviewed — inventory cost, COGS, revenue, and payments are all posted automatically. |
+| Setup | Products, BOM, warehouse locations, and trading partners are created. |
+| 1 | BOM is viewed in the UI. |
+| 2 | A production routing with three tasks (Prepare Components, Assemble, Quality Check) is created and linked to the BOM. |
+| 3 | A sales order for 1 × Widget Assembly is created and approved — a Work Order is **automatically generated**. |
+| 4 | The Work Order shows material shortage; the production routing is assigned. |
+| 5 | A purchase order for components is raised, approved, and paid. |
+| 6 | Incoming shipment is received into the warehouse; shortages clear. |
+| 7 | Work Order is released → started → completed. Components consumed, finished good received into stock with cost summary. |
+| 8 | Finished goods shipped to customer; payment collected. |
+| 9 | General ledger reviewed — inventory cost, COGS, revenue, and payments all posted. |
+| 10 | Dashboard reviewed to confirm updated KPIs. |
 
-**Run the demo** (requires a running Moqui backend on port 8080 and a connected device/emulator):
+#### Demo: Swag Kit (`manufacturing_swag_demo_test.dart`)
 
-```bash
-cd flutter/packages/admin
-flutter test integration_test/catalog_swag_demo_test.dart \
-    -d <device-id> \
-    --dart-define=BACKEND_PORT=8080
-```
+Uses swag products (Baseball Cap, Coffee Mug, USB Drive) assembled into a **Moqui Marketing Package** kit.
 
-A simpler standalone manufacturing demo (without catalog data) is available in
-[`integration_test/manufacturing_demo_test.dart`](../admin/integration_test/manufacturing_demo_test.dart).
-It uses a **Widget Assembly** finished good with two components (Bolt M5 and Bearing 6201)
-and follows the same eight-phase lifecycle.
+| Phase | What happens |
+|---|---|
+| Setup | Fresh company with swag component products (no pre-loaded catalog data). |
+| 1 | **Moqui Marketing Package** BOM built interactively through the BOM UI (1 × each component). |
+| 2 | A kit-assembly routing with three operations is created. |
+| 3 | Sales order for 2 × Moqui Marketing Package created and approved — Work Order auto-generated. |
+| 4 | Work Order shows material shortage; routing assigned. |
+| 5 | Purchase order for 3 × each component raised, approved, and paid. |
+| 6 | Shipment received; shortages clear. |
+| 7 | Work Order released → started → completed; 2 finished kits enter stock with cost summary. |
+| 8 | Kits shipped to customer; payment collected. |
+| 9 | General ledger reviewed. |
+| 10 | Dashboard reviewed to confirm updated KPIs. |
 
-```bash
-flutter test integration_test/manufacturing_demo_test.dart \
-    -d <device-id> \
-    --dart-define=BACKEND_PORT=8080
-```
+#### Lifecycle test (`manufacturing_lifecycle_test.dart`)
+
+Covers the same Widget Assembly lifecycle as the demo above but **without narration pauses** — intended for automated CI runs rather than live demonstrations.
 
 ## Backend
 
@@ -132,4 +162,5 @@ moqui/runtime/component/growerp/service/growerp/100/ManufacturingServices100.xml
 
 Key services: `get#WorkOrder`, `create#WorkOrder`, `update#WorkOrder` (handles status
 transitions and inventory issuance/receipt on completion), `get#BomItems`, `create#BomItem`,
-`update#BomItem`, `delete#BomItem`.
+`update#BomItem`, `delete#BomItem`, `get#Routing`, `create#Routing`, `update#Routing`,
+`delete#Routing`.

@@ -14,6 +14,7 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
@@ -39,28 +40,35 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
     on<NotificationFetch>(_onNotificationFetch);
     on<NotificationReceive>(_onNotificationReceive);
     on<NotificationSend>(_onNotificationSend);
+    // Set up WS subscription once auth (and thus WS connect) completes.
+    authBloc.stream.listen((authState) {
+      debugPrint(
+        'NotificationBloc: authState=${authState.status} _subscribed=$_subscribed',
+      );
+      if (authState.status == AuthStatus.authenticated && !_subscribed) {
+        add(const NotificationFetch());
+      }
+    });
   }
 
   final RestClient restClient;
   final WsClient notificationClient;
   final AuthBloc authBloc;
+  bool _subscribed = false;
 
   Future<void> _onNotificationFetch(
     NotificationFetch event,
     Emitter<NotificationState> emit,
   ) async {
     try {
-      if (state.status == NotificationStatus.initial) {
-        // Only subscribe if the WebSocket is connected
-        if (notificationClient.isConnected) {
-          notificationClient.send("subscribe: ALL");
-          final myStream = notificationClient.stream();
-          myStream.listen(
-            (data) => add(
-              NotificationReceive(NotificationWs.fromJson(jsonDecode(data))),
-            ),
-          );
-        }
+      if (!_subscribed && notificationClient.isConnected) {
+        _subscribed = true;
+        notificationClient.send("subscribe: ALL");
+        notificationClient.stream().listen(
+          (data) => add(
+            NotificationReceive(NotificationWs.fromJson(jsonDecode(data))),
+          ),
+        );
       }
 
       Notifications compResult = await restClient.getNotifications(
@@ -87,11 +95,11 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
     NotificationReceive event,
     Emitter<NotificationState> emit,
   ) async {
-    emit(state.copyWith(status: NotificationStatus.loading));
     emit(
       state.copyWith(
         notifications: [event.notification],
         status: NotificationStatus.success,
+        notificationSeq: state.notificationSeq + 1,
       ),
     );
   }

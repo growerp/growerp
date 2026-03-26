@@ -21,26 +21,30 @@ class NotificationState extends Equatable {
     this.status = NotificationStatus.initial,
     this.notifications = const <NotificationWs>[],
     this.message,
+    this.notificationSeq = 0,
   });
 
   final NotificationStatus status;
   final String? message;
   final List<NotificationWs> notifications;
+  final int notificationSeq;
 
   NotificationState copyWith({
     NotificationStatus? status,
     String? message,
     List<NotificationWs>? notifications,
+    int? notificationSeq,
   }) {
     return NotificationState(
       status: status ?? this.status,
       notifications: notifications ?? this.notifications,
       message: message,
+      notificationSeq: notificationSeq ?? this.notificationSeq,
     );
   }
 
   @override
-  List<Object?> get props => [notifications, status];
+  List<Object?> get props => [notifications, status, notificationSeq];
 
   @override
   String toString() =>

@@ -31,109 +31,105 @@ import 'package:growerp_order_accounting/src/findoc/integration_test/shipment_te
 import 'package:integration_test/integration_test.dart';
 import 'package:admin/main.dart';
 
-// ── Test data ─────────────────────────────────────────────────────────────────
+// ── Demo products ─────────────────────────────────────────────────────────────
+//
+//  SWAG-PKG-001  Moqui Marketing Package  (finished good — assembled from swag)
+//  SWAG-CAP-001  Baseball Cap             (component, 1 per kit)
+//  SWAG-MUG-001  Coffee Mug              (component, 1 per kit)
+//  SWAG-USB-001  USB Drive               (component, 1 per kit)
 
-/// Products for the manufacturing demo:
-///   MFG-ASSY-001  Widget Assembly (finished good)
-///   MFG-COMP-A    Bolt M5         (component, 2 per assembly)
-///   MFG-COMP-B    Bearing 6201    (component, 1 per assembly)
-final List<Product> mfgDemoProducts = [
+// Note: SWAG-PKG-001 (Moqui Marketing Package) is NOT pre-loaded here.
+// The BOM dialog creates it when the BOM is built through the UI.
+final List<Product> swagProducts = [
   Product(
-    pseudoId: 'MFG-ASSY-001',
-    productName: 'Widget Assembly',
+    pseudoId: 'SWAG-CAP-001',
+    productName: 'Moqui Baseball Cap',
     productTypeId: 'Physical Good',
-    price: Decimal.parse('50.00'),
-    listPrice: Decimal.parse('60.00'),
+    price: Decimal.parse('8.00'),
+    listPrice: Decimal.parse('10.00'),
     useWarehouse: true,
     assetClassId: 'AsClsInventoryFin',
   ),
   Product(
-    pseudoId: 'MFG-COMP-A',
-    productName: 'Bolt M5',
+    pseudoId: 'SWAG-MUG-001',
+    productName: 'Moqui Coffee Mug',
     productTypeId: 'Physical Good',
-    price: Decimal.parse('1.00'),
-    listPrice: Decimal.parse('1.20'),
+    price: Decimal.parse('7.00'),
+    listPrice: Decimal.parse('9.00'),
     useWarehouse: true,
     assetClassId: 'AsClsInventoryFin',
   ),
   Product(
-    pseudoId: 'MFG-COMP-B',
-    productName: 'Bearing 6201',
+    pseudoId: 'SWAG-USB-001',
+    productName: 'Moqui USB Drive',
     productTypeId: 'Physical Good',
     price: Decimal.parse('5.00'),
-    listPrice: Decimal.parse('6.00'),
+    listPrice: Decimal.parse('8.00'),
     useWarehouse: true,
     assetClassId: 'AsClsInventoryFin',
   ),
 ];
 
-/// Production routing for Widget Assembly
-final Routing mfgDemoRouting = Routing(routingName: 'Widget Assembly Process');
-final List<RoutingTask> mfgDemoRoutingTasks = [
+// BOM is created through the UI in this demo — no preloaded bomItems.
+
+/// Production routing for kit assembly
+final Routing swagDemoRouting = Routing(routingName: 'Kit Assembly Process');
+final List<RoutingTask> swagDemoRoutingTasks = [
   RoutingTask(
-    taskName: 'Prepare Components',
+    taskName: 'Pick Components',
     sequenceNum: 10,
+    estimatedWorkTime: Decimal.parse('0.25'),
+  ),
+  RoutingTask(
+    taskName: 'Pack Kit',
+    sequenceNum: 20,
     estimatedWorkTime: Decimal.parse('0.5'),
   ),
   RoutingTask(
-    taskName: 'Assemble',
-    sequenceNum: 20,
-    estimatedWorkTime: Decimal.parse('1.0'),
-  ),
-  RoutingTask(
-    taskName: 'Quality Check',
+    taskName: 'Label & QC',
     sequenceNum: 30,
     estimatedWorkTime: Decimal.parse('0.25'),
   ),
 ];
 
-/// BOM: Widget Assembly → 2 × Bolt M5, 1 × Bearing 6201
-final List<BomItem> mfgDemoBomItems = [
-  BomItem(
-    productId: 'MFG-ASSY-001',
-    toProductId: 'MFG-COMP-A',
-    quantity: Decimal.parse('2'),
-  ),
-  BomItem(
-    productId: 'MFG-ASSY-001',
-    toProductId: 'MFG-COMP-B',
-    quantity: Decimal.parse('1'),
-  ),
-];
-
-/// Sales order: 1 unit of Widget Assembly
-final List<FinDoc> mfgDemoSalesOrders = [
+/// Sales order: 2 × Moqui Marketing Package
+final List<FinDoc> swagSalesOrders = [
   FinDoc(
     sales: true,
     docType: FinDocType.order,
-    description: 'Manufacturing demo sales order',
+    description: 'Moqui swag order',
     otherCompany: customerCompanies[1],
     items: [
       FinDocItem(
-        description: 'Widget Assembly',
-        quantity: Decimal.parse('1'),
-        price: Decimal.parse('50.00'),
+        description: 'Moqui Marketing Package',
+        quantity: Decimal.parse('2'),
+        price: Decimal.parse('35.00'),
       ),
     ],
   ),
 ];
 
-/// Purchase order: enough components to satisfy the WO
-///   5 × Bolt M5, 3 × Bearing 6201
-final List<FinDoc> mfgDemoPurchaseOrders = [
+/// Purchase order: enough swag items to assemble 2 kits
+///   3 × Baseball Cap, 3 × Coffee Mug, 3 × USB Drive
+final List<FinDoc> swagPurchaseOrders = [
   FinDoc(
     sales: false,
     docType: FinDocType.order,
-    description: 'Manufacturing demo purchase order',
+    description: 'Moqui swag components PO',
     otherCompany: supplierCompanies[0],
     items: [
       FinDocItem(
-        description: 'Bolt M5',
-        quantity: Decimal.parse('5'),
-        price: Decimal.parse('1.00'),
+        description: 'Moqui Baseball Cap',
+        quantity: Decimal.parse('3'),
+        price: Decimal.parse('8.00'),
       ),
       FinDocItem(
-        description: 'Bearing 6201',
+        description: 'Moqui Coffee Mug',
+        quantity: Decimal.parse('3'),
+        price: Decimal.parse('7.00'),
+      ),
+      FinDocItem(
+        description: 'Moqui USB Drive',
         quantity: Decimal.parse('3'),
         price: Decimal.parse('5.00'),
       ),
@@ -141,14 +137,13 @@ final List<FinDoc> mfgDemoPurchaseOrders = [
   ),
 ];
 
-
 // ── Router ────────────────────────────────────────────────────────────────────
 
-GoRouter createAdminMfgDemoRouter() {
+GoRouter createCatalogSwagDemoRouter() {
   return createStaticAppRouter(
-    menuConfig: adminMfgDemoMenuConfig,
+    menuConfig: catalogSwagDemoMenuConfig,
     appTitle: 'GrowERP Manufacturing Demo',
-    dashboard: const _MfgDemoDashboard(),
+    dashboard: const _SwagDemoDashboard(),
     widgetBuilder: (route) => switch (route) {
       '/orders' => const FinDocList(
         key: Key('SalesOrder'),
@@ -174,7 +169,7 @@ GoRouter createAdminMfgDemoRouter() {
       '/manufacturing/bom' => const BomList(),
       '/manufacturing/workOrder' => const WorkOrderList(),
       '/manufacturing/routing' => const RoutingList(),
-      _ => const _MfgDemoDashboard(),
+      _ => const _SwagDemoDashboard(),
     },
     shellRoutes: [
       GoRoute(
@@ -212,21 +207,21 @@ GoRouter createAdminMfgDemoRouter() {
   );
 }
 
-const adminMfgDemoMenuConfig = MenuConfiguration(
-  menuConfigurationId: 'ADMIN_MFG_DEMO',
-  appId: 'admin_mfg_demo',
+const catalogSwagDemoMenuConfig = MenuConfiguration(
+  menuConfigurationId: 'CATALOG_SWAG_DEMO',
+  appId: 'catalog_swag_demo',
   name: 'GrowERP Manufacturing Demo',
   menuItems: [
     MenuItem(
-      itemKey: 'MFG_MAIN',
+      itemKey: 'SWAG_MAIN',
       title: 'Main',
       route: '/',
       iconName: 'dashboard',
       sequenceNum: 10,
-      widgetName: 'MfgDemoDashboard',
+      widgetName: 'SwagDemoDashboard',
     ),
     MenuItem(
-      itemKey: 'MFG_BOM',
+      itemKey: 'SWAG_BOM',
       title: 'BOM',
       route: '/manufacturing/bom',
       iconName: 'schema',
@@ -234,7 +229,7 @@ const adminMfgDemoMenuConfig = MenuConfiguration(
       widgetName: 'BomList',
     ),
     MenuItem(
-      itemKey: 'MFG_WO',
+      itemKey: 'SWAG_WO',
       title: 'Work Orders',
       route: '/manufacturing/workOrder',
       iconName: 'precision_manufacturing',
@@ -242,7 +237,7 @@ const adminMfgDemoMenuConfig = MenuConfiguration(
       widgetName: 'WorkOrderList',
     ),
     MenuItem(
-      itemKey: 'MFG_ROUTING',
+      itemKey: 'SWAG_ROUTING',
       title: 'Routings',
       route: '/manufacturing/routing',
       iconName: 'route',
@@ -250,7 +245,7 @@ const adminMfgDemoMenuConfig = MenuConfiguration(
       widgetName: 'RoutingList',
     ),
     MenuItem(
-      itemKey: 'MFG_SO',
+      itemKey: 'SWAG_SO',
       title: 'Sales Orders',
       route: '/orders',
       iconName: 'shopping_cart',
@@ -258,7 +253,7 @@ const adminMfgDemoMenuConfig = MenuConfiguration(
       widgetName: 'FinDocList',
     ),
     MenuItem(
-      itemKey: 'MFG_PO',
+      itemKey: 'SWAG_PO',
       title: 'Purchase Orders',
       route: '/purchase-orders',
       iconName: 'shopping_bag',
@@ -266,7 +261,7 @@ const adminMfgDemoMenuConfig = MenuConfiguration(
       widgetName: 'FinDocList',
     ),
     MenuItem(
-      itemKey: 'MFG_IN_SHIP',
+      itemKey: 'SWAG_IN_SHIP',
       title: 'Shipment-In',
       route: '/incoming-shipments',
       iconName: 'local_shipping',
@@ -274,7 +269,7 @@ const adminMfgDemoMenuConfig = MenuConfiguration(
       widgetName: 'FinDocList',
     ),
     MenuItem(
-      itemKey: 'MFG_OUT_SHIP',
+      itemKey: 'SWAG_OUT_SHIP',
       title: 'Shipment-out',
       route: '/shipments',
       iconName: 'outbound',
@@ -282,7 +277,7 @@ const adminMfgDemoMenuConfig = MenuConfiguration(
       widgetName: 'FinDocList',
     ),
     MenuItem(
-      itemKey: 'MFG_ACCT',
+      itemKey: 'SWAG_ACCT',
       title: 'Accounting',
       route: '/accounting',
       iconName: 'account_balance',
@@ -291,8 +286,8 @@ const adminMfgDemoMenuConfig = MenuConfiguration(
   ],
 );
 
-class _MfgDemoDashboard extends StatelessWidget {
-  const _MfgDemoDashboard();
+class _SwagDemoDashboard extends StatelessWidget {
+  const _SwagDemoDashboard();
 
   @override
   Widget build(BuildContext context) {
@@ -300,14 +295,14 @@ class _MfgDemoDashboard extends StatelessWidget {
       builder: (context, authState) {
         final stats = authState.authenticate?.stats;
 
-        final dashboardItems = adminMfgDemoMenuConfig.menuItems
+        final dashboardItems = catalogSwagDemoMenuConfig.menuItems
             .where((item) =>
                 item.isActive && item.route != null && item.route != '/')
             .toList()
           ..sort((a, b) => a.sequenceNum.compareTo(b.sequenceNum));
 
         return Scaffold(
-          key: const Key('MfgDemoDashboard'),
+          key: const Key('SwagDemoDashboard'),
           backgroundColor: Colors.transparent,
           body: DashboardGrid(
             items: dashboardItems,
@@ -342,8 +337,8 @@ void main() {
 
     await CommonTest.startTestApp(
       tester,
-      createAdminMfgDemoRouter(),
-      adminMfgDemoMenuConfig,
+      createCatalogSwagDemoRouter(),
+      catalogSwagDemoMenuConfig,
       delegates,
       blocProviders: getAdminBlocProviders(restClient, 'AppAdmin'),
       restClient: restClient,
@@ -354,149 +349,184 @@ void main() {
     await CommonTest.showDemoStep(
       tester,
       'Manufacturing Demo',
-      'An end-to-end walkthrough: BOM, sales order, work order, '
-          'purchase, receive, production, shipping, and accounting.',
+      'An end-to-end walkthrough: products, BOM, sales order, '
+          'work order, components, assembly, shipping, and accounting.',
     );
 
-    // ── Setup: load products, BOM, locations and trading partners ─────────────
+    // ── Setup: catalog demo data + swag products ───────────────────────────────
     await CommonTest.showDemoStep(
       tester,
-      'Setting Up Demo Data',
-      'Loading products, Bill of Materials, warehouse locations, '
-          'customer and supplier companies into a fresh company.',
-      seconds: 3,
+      'Setting Up the Demo Company',
+      'A fresh company is registered with the swag products, a warehouse '
+          'location, and demo partners pre-loaded — no built-in catalog demo '
+          'data is used.',
     );
     await CommonTest.createCompanyAndAdmin(
       tester,
+      demoData: false,
       testData: {
-        'products': mfgDemoProducts,
-        'bomItems': mfgDemoBomItems,
+        'products': swagProducts,
         'locations': locations.sublist(0, 1),
         'companies': [customerCompanies[1], supplierCompanies[0]],
       },
     );
 
-    // ── Phase 1: Bill of Materials ────────────────────────────────────────────
+    // ── Phase 1: Create the Bill of Materials through the UI ──────────────────
     await CommonTest.showDemoStep(
       tester,
-      'Bill of Materials',
-      'Viewing the BOM for "Widget Assembly".\n'
-          'It requires 2 × Bolt M5 and 1 × Bearing 6201 per unit.',
-      seconds: 3,
+      'Creating the Bill of Materials',
+      'The "Moqui Marketing Package" BOM is built interactively.\n'
+          'It bundles 1 × Baseball Cap, 1 × Coffee Mug, and 1 × USB Drive '
+          'into a single sellable kit.',
     );
     await BomTest.selectBom(tester);
-    await CommonTest.waitForKey(tester, 'item0');
-    await BomTest.openBom(tester, 'MFG-ASSY-001');
-    // Pause so the viewer can see the BOM detail screen.
+    await tester.pump(const Duration(seconds: 1));
+    await BomTest.createBomWithComponents(
+      tester,
+      productName: 'Moqui Marketing Package',
+      pseudoId: 'SWAG-PKG-001',
+      components: [
+        BomItem(
+          componentPseudoId: 'SWAG-CAP-001',
+          quantity: Decimal.parse('1'),
+        ),
+        BomItem(
+          componentPseudoId: 'SWAG-MUG-001',
+          quantity: Decimal.parse('1'),
+        ),
+        BomItem(
+          componentPseudoId: 'SWAG-USB-001',
+          quantity: Decimal.parse('1'),
+        ),
+      ],
+    );
+    // Pause so the viewer can see the completed BOM dialog.
     await tester.pump(const Duration(seconds: 3));
     await CommonTest.tapByKey(tester, 'cancel');
+    await tester.pump(const Duration(seconds: 1));
 
     // ── Phase 2: Production routing ───────────────────────────────────────────
     await CommonTest.showDemoStep(
       tester,
       'Production Routing',
-      'Creating a routing that defines the assembly steps.\n'
-          '3 operations: Prepare Components → Assemble → Quality Check.',
-      seconds: 3,
+      'Creating a routing for kit assembly.\n'
+          '3 steps: Pick Components → Pack Kit → Label & QC.',
     );
     await RoutingTest.selectRoutings(tester);
-    await RoutingTest.addRoutings(tester, [mfgDemoRouting]);
+    await tester.pump(const Duration(seconds: 1));
+    await RoutingTest.addRoutings(tester, [swagDemoRouting]);
     await RoutingTest.openRouting(tester, 0);
-    await RoutingTest.addRoutingTasks(tester, mfgDemoRoutingTasks);
-    await RoutingTest.checkRoutingTasks(tester, mfgDemoRoutingTasks);
+    await tester.pump(const Duration(seconds: 1));
+    await RoutingTest.addRoutingTasks(tester, swagDemoRoutingTasks);
+    await RoutingTest.checkRoutingTasks(tester, swagDemoRoutingTasks);
     await tester.pump(const Duration(seconds: 3));
     await CommonTest.tapByKey(tester, 'cancel');
+    await tester.pump(const Duration(seconds: 1));
 
     // ── Phase 3: Sales order → auto-creates Work Order on approval ────────────
     await CommonTest.showDemoStep(
       tester,
-      'Creating a Sales Order',
-      'A customer orders 1 × Widget Assembly.\n'
-          'Approving the order will automatically trigger a Work Order '
-          'because the product has a Bill of Materials.',
-      seconds: 3,
+      'Receiving a Customer Order',
+      'A customer orders 2 × Moqui Marketing Package.\n'
+          'Approving the order automatically creates a Work Order because '
+          'the product has a Bill of Materials.',
     );
     await OrderTest.selectSalesOrders(tester);
-    await OrderTest.addOrders(tester, mfgDemoSalesOrders);
+    await tester.pump(const Duration(seconds: 1));
+    await OrderTest.addOrders(tester, swagSalesOrders);
     await OrderTest.approveOrders(tester);
 
     // Save approved sales order state for the outgoing shipment phase.
     final SaveTest testAfterSalesApprove = await PersistFunctions.getTest();
     final List<FinDoc> approvedSalesOrders = testAfterSalesApprove.orders;
 
-    // ── Phase 4: Work Order — shortage + routing assignment ───────────────────
+    // ── Phase 4: Work Order with material shortage + routing assignment ─────────
     await CommonTest.showDemoStep(
       tester,
-      'Work Order Created Automatically',
-      'The system created a Work Order for the Widget Assembly.\n'
-          'It shows a material shortage because no components are in stock yet.\n'
-          'We assign the production routing so shop floor steps are visible.',
-      seconds: 3,
+      'Work Order — Material Shortage',
+      'The system created a Work Order for the 2 kits.\n'
+          'It shows a material shortage for all three components '
+          'because no swag items are in the warehouse yet.\n'
+          'We assign the Kit Assembly routing so production steps are visible.',
     );
     await WorkOrderTest.selectWorkOrders(tester);
+    await tester.pump(const Duration(seconds: 1));
     await CommonTest.waitForKey(tester, 'item0');
     await WorkOrderTest.openWorkOrder(tester, 0);
+    await tester.pump(const Duration(seconds: 1));
     await tester.pump(const Duration(seconds: 2));
-    await WorkOrderTest.assignRouting(tester, mfgDemoRouting.routingName!);
+    await WorkOrderTest.assignRouting(tester, swagDemoRouting.routingName!);
     // Re-open to show the routing steps embedded in the WO dialog
     await WorkOrderTest.openWorkOrder(tester, 0);
+    await tester.pump(const Duration(seconds: 1));
     await tester.pump(const Duration(seconds: 3));
-    await CommonTest.tapByKey(tester, 'cancel');
+    if (await CommonTest.doesExistKey(tester, 'cancel')) {
+      await CommonTest.tapByKey(tester, 'cancel');
+    } else if (await CommonTest.doesExistKey(tester, 'WorkOrderDialog')) {
+      await tester.pageBack();
+      await tester.pumpAndSettle(const Duration(seconds: 2));
+    }
+    await tester.pump(const Duration(seconds: 1));
 
-    // ── Phase 5: Purchase order for components ────────────────────────────────
+    // ── Phase 5: Purchase order for swag components ───────────────────────────
     await CommonTest.showDemoStep(
       tester,
-      'Purchasing Components',
-      'Creating a purchase order for 5 × Bolt M5 and 3 × Bearing 6201 '
-          'to fulfil the Work Order requirements.\n'
-          'The order is then approved and paid.',
-      seconds: 3,
+      'Ordering Swag Components',
+      'A purchase order is raised for 3 each of Baseball Cap, Coffee Mug, '
+          'and USB Drive.\nThe order is approved and payment is processed.',
     );
     await OrderTest.selectPurchaseOrders(tester);
-    await OrderTest.addOrders(tester, mfgDemoPurchaseOrders);
+    await tester.pump(const Duration(seconds: 1));
+    await OrderTest.addOrders(tester, swagPurchaseOrders);
     await OrderTest.approveOrders(tester);
     await PaymentTest.selectPurchasePayments(tester);
+    await tester.pump(const Duration(seconds: 1));
     await OrderTest.approveOrderPayments(tester);
     await OrderTest.completeOrderPayments(tester);
 
     // ── Phase 6: Receive components into warehouse ────────────────────────────
     await CommonTest.showDemoStep(
       tester,
-      'Receiving Components into Warehouse',
-      'The incoming shipment from the supplier is approved and received.\n'
-          'Components are now in stock and the Work Order shortage is resolved.',
-      seconds: 3,
+      'Receiving Components into the Warehouse',
+      'The incoming shipment from the supplier is received.\n'
+          'Caps, mugs and USB drives are now in stock and the Work Order '
+          'shortage is cleared.',
     );
     await ShipmentTest.selectIncomingShipments(tester);
+    await tester.pump(const Duration(seconds: 1));
     await OrderTest.approveOrderShipments(tester);
     await ShipmentTest.receiveShipments(tester, locations.sublist(0, 1));
 
     // ── Phase 7: Production run ───────────────────────────────────────────────
     await CommonTest.showDemoStep(
       tester,
-      'Running Production',
-      'The Work Order is released, started, and then completed.\n'
-          'Components are consumed and 1 × Widget Assembly is added to inventory.',
-      seconds: 3,
+      'Assembling the Kits',
+      'The Work Order is released, started, and completed.\n'
+          'Components are consumed and 2 × Moqui Marketing Package '
+          'are added to finished-goods inventory.',
     );
     await WorkOrderTest.selectWorkOrders(tester);
+    await tester.pump(const Duration(seconds: 1));
     await CommonTest.waitForKey(tester, 'item0');
     await WorkOrderTest.openWorkOrder(tester, 0);
+    await tester.pump(const Duration(seconds: 1));
     await WorkOrderTest.releaseWorkOrder(tester);
 
     await WorkOrderTest.openWorkOrder(tester, 0);
+    await tester.pump(const Duration(seconds: 1));
     await WorkOrderTest.startWorkOrder(tester);
 
     await WorkOrderTest.openWorkOrder(tester, 0);
+    await tester.pump(const Duration(seconds: 1));
     await WorkOrderTest.completeWorkOrder(tester);
 
     // ── Phase 8: Ship to customer ─────────────────────────────────────────────
     await CommonTest.showDemoStep(
       tester,
-      'Shipping to Customer',
-      'The finished Widget Assembly is shipped to the customer.\n'
-          'The outgoing shipment is approved, completed, and payment collected.',
-      seconds: 3,
+      'Shipping to the Customer',
+      'The finished kits are shipped to the customer.\n'
+          'The outgoing shipment is approved, completed, and '
+          'customer payment is collected.',
     );
     // Restore sales order context so the shipment step finds the right record.
     final SaveTest currentTest = await PersistFunctions.getTest();
@@ -505,9 +535,11 @@ void main() {
     );
 
     await ShipmentTest.selectOutgoingShipments(tester);
+    await tester.pump(const Duration(seconds: 1));
     await OrderTest.approveOrderShipments(tester);
     await OrderTest.completeOrderShipments(tester);
     await PaymentTest.selectSalesPayments(tester);
+    await tester.pump(const Duration(seconds: 1));
     await OrderTest.approveOrderPayments(tester);
     await OrderTest.completeOrderPayments(tester);
 
@@ -515,11 +547,11 @@ void main() {
     await CommonTest.showDemoStep(
       tester,
       'Accounting & GL Transactions',
-      'All financial movements — inventory cost, COGS, revenue and payments — '
-          'are automatically posted to the general ledger.',
-      seconds: 3,
+      'Every financial movement — inventory cost, COGS, revenue, and payments — '
+          'is automatically posted to the general ledger.',
     );
     await TransactionTest.selectTransactions(tester);
+    await tester.pump(const Duration(seconds: 1));
     await CommonTest.waitForKey(tester, 'id0');
     // Pause so the viewer can see the ledger entries.
     await tester.pump(const Duration(seconds: 4));
@@ -533,13 +565,15 @@ void main() {
       seconds: 3,
     );
     await TransactionTest.showUpdatedAccountingDashboard(tester);
+    await tester.pump(const Duration(seconds: 1));
 
     await CommonTest.showDemoStep(
       tester,
       'Demo Complete',
-      'You have seen the full GrowERP manufacturing lifecycle:\n'
-          'BOM → Routing → Sales Order → Work Order → Purchase → Receive → '
-          'Produce → Ship → Accounting → Dashboard.',
+      'You have seen the full GrowERP catalog + manufacturing lifecycle:\n'
+          'Catalog Demo Data → BOM (via UI) → Routing → Sales Order → Work Order → '
+          'Purchase → Receive → Assemble → Ship → Accounting → Dashboard.',
+      seconds: 5,
     );
 
     await CommonTest.logout(tester);

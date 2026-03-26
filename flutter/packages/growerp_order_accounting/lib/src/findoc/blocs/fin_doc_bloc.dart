@@ -170,7 +170,6 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
           paymentTypes: paymentTypes.paymentTypes,
           hasReachedMax: result.finDocs.length < event.limit,
           searchString: event.searchString,
-          message: event.refresh ? '${docType}s reloaded' : null,
         ),
       );
     } on DioException catch (e) {

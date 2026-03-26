@@ -391,7 +391,12 @@ void main() {
     // Re-open and verify routing steps are visible in the WO dialog
     await WorkOrderTest.openWorkOrder(tester, 0);
     await RoutingTest.checkRoutingTasks(tester, mfgRoutingTasks);
-    await CommonTest.tapByKey(tester, 'cancel');
+    if (await CommonTest.doesExistKey(tester, 'cancel')) {
+      await CommonTest.tapByKey(tester, 'cancel');
+    } else if (await CommonTest.doesExistKey(tester, 'WorkOrderDialog')) {
+      await tester.pageBack();
+      await tester.pumpAndSettle(const Duration(seconds: 2));
+    }
 
     // ── Phase 5: Purchase order for components ────────────────────────────────
     await OrderTest.selectPurchaseOrders(tester);

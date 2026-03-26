@@ -467,9 +467,11 @@ class _DashboardCardState extends State<DashboardCard>
         // LEFT: icon + title
         Expanded(
           flex: 4,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
@@ -504,7 +506,8 @@ class _DashboardCardState extends State<DashboardCard>
             ],
           ),
         ),
-        // Divider
+      ),
+      // Divider
         Container(
           width: 1,
           height: 56,

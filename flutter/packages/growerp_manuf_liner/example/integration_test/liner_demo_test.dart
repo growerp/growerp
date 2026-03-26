@@ -15,22 +15,19 @@
 // ignore_for_file: depend_on_referenced_packages
 import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:global_configuration/global_configuration.dart';
-import 'package:go_router/go_router.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_core/test_data.dart';
 import 'package:growerp_manuf_liner/growerp_manuf_liner.dart';
 import 'package:growerp_manufacturing/growerp_manufacturing.dart';
 import 'package:growerp_models/growerp_models.dart';
-import 'package:growerp_order_accounting/growerp_order_accounting.dart';
-import 'package:growerp_order_accounting/src/accounting/integration_test/transaction_test.dart';
+
 import 'package:growerp_order_accounting/src/findoc/integration_test/order_test.dart';
-import 'package:growerp_order_accounting/src/findoc/integration_test/payment_test.dart';
 import 'package:growerp_order_accounting/src/findoc/integration_test/shipment_test.dart';
 import 'package:integration_test/integration_test.dart';
-import 'package:admin/main.dart';
+import 'package:admin/main.dart' show getAdminBlocProviders, delegates;
+import 'liner_test_app.dart';
 
 // ── Test data ─────────────────────────────────────────────────────────────────
 
@@ -193,10 +190,7 @@ Future<void> showDemoStep(
             Text(
               title,
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-              ),
+              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
             Text(
@@ -217,202 +211,6 @@ Future<void> showDemoStep(
   await tester.pumpAndSettle();
 }
 
-// ── Router ────────────────────────────────────────────────────────────────────
-
-GoRouter createLinerDemoRouter() {
-  return createStaticAppRouter(
-    menuConfig: linerDemoMenuConfig,
-    appTitle: 'GrowERP Liner Demo',
-    dashboard: const _LinerDemoDashboard(),
-    widgetBuilder: (route) => switch (route) {
-      '/liner/linerType' => const LinerTypeList(),
-      '/manufacturing/routing' => const RoutingList(),
-      '/manufacturing/bom' => const BomList(),
-      '/manufacturing/workOrder' => WorkOrderList(
-          extraTabBuilder: (workOrder) => [
-            SizedBox(
-              height: 300,
-              child: LinerPanelList(workEffortId: workOrder.workEffortId),
-            ),
-          ],
-          extraActionBuilder: (workOrder) => [
-            Tooltip(
-              message: 'Print Production Order',
-              child: IconButton(
-                key: const Key('printProductionOrder'),
-                icon: const Icon(Icons.print),
-                onPressed: () => printProductionOrder(workOrder),
-              ),
-            ),
-          ],
-        ),
-      '/orders' => const FinDocList(
-          key: Key('SalesOrder'),
-          sales: true,
-          docType: FinDocType.order,
-        ),
-      '/purchase-orders' => const FinDocList(
-          key: Key('PurchaseOrder'),
-          sales: false,
-          docType: FinDocType.order,
-        ),
-      '/shipments' => const FinDocList(
-          key: Key('ShipmentsOut'),
-          sales: true,
-          docType: FinDocType.shipment,
-        ),
-      '/incoming-shipments' => const FinDocList(
-          key: Key('ShipmentsIn'),
-          sales: false,
-          docType: FinDocType.shipment,
-        ),
-      '/accounting' => const AccountingDashboard(),
-      _ => const _LinerDemoDashboard(),
-    },
-    shellRoutes: [
-      GoRoute(
-        path: '/accounting/ledger',
-        builder: (_, _) => const FinDocList(
-          key: Key('Transaction'),
-          sales: true,
-          docType: FinDocType.transaction,
-        ),
-      ),
-      GoRoute(
-        path: '/accounting/sales_payments',
-        builder: (_, _) => const FinDocList(
-          key: Key('SalesPayment'),
-          sales: true,
-          docType: FinDocType.payment,
-        ),
-      ),
-      GoRoute(
-        path: '/accounting/purchase_payments',
-        builder: (_, _) => const FinDocList(
-          key: Key('PurchasePayment'),
-          sales: false,
-          docType: FinDocType.payment,
-        ),
-      ),
-    ],
-    additionalRoutes: [
-      GoRoute(
-        path: '/findoc',
-        builder: (context, state) =>
-            ShowFinDocDialog(state.extra as FinDoc? ?? FinDoc()),
-      ),
-    ],
-  );
-}
-
-const linerDemoMenuConfig = MenuConfiguration(
-  menuConfigurationId: 'LINER_DEMO',
-  appId: 'liner_demo',
-  name: 'GrowERP Liner Demo',
-  menuItems: [
-    MenuItem(
-      itemKey: 'LINER_MAIN',
-      title: 'Main',
-      route: '/',
-      iconName: 'dashboard',
-      sequenceNum: 10,
-      widgetName: 'LinerDemoDashboard',
-    ),
-    MenuItem(
-      itemKey: 'LINER_TYPES',
-      title: 'Liner Types',
-      route: '/liner/linerType',
-      iconName: 'layers',
-      sequenceNum: 20,
-      widgetName: 'LinerTypeList',
-    ),
-    MenuItem(
-      itemKey: 'LINER_ROUTING',
-      title: 'Routing',
-      route: '/manufacturing/routing',
-      iconName: 'route',
-      sequenceNum: 30,
-      widgetName: 'RoutingList',
-    ),
-    MenuItem(
-      itemKey: 'LINER_BOM',
-      title: 'BOM',
-      route: '/manufacturing/bom',
-      iconName: 'schema',
-      sequenceNum: 40,
-      widgetName: 'BomList',
-    ),
-    MenuItem(
-      itemKey: 'LINER_WO',
-      title: 'Work Orders',
-      route: '/manufacturing/workOrder',
-      iconName: 'precision_manufacturing',
-      sequenceNum: 50,
-      widgetName: 'WorkOrderList',
-    ),
-    MenuItem(
-      itemKey: 'LINER_SO',
-      title: 'Sales Orders',
-      route: '/orders',
-      iconName: 'shopping_cart',
-      sequenceNum: 60,
-      widgetName: 'FinDocList',
-    ),
-    MenuItem(
-      itemKey: 'LINER_PO',
-      title: 'Purchase Orders',
-      route: '/purchase-orders',
-      iconName: 'shopping_bag',
-      sequenceNum: 70,
-      widgetName: 'FinDocList',
-    ),
-    MenuItem(
-      itemKey: 'LINER_IN_SHIP',
-      title: 'Shipment-In',
-      route: '/incoming-shipments',
-      iconName: 'local_shipping',
-      sequenceNum: 80,
-      widgetName: 'FinDocList',
-    ),
-    MenuItem(
-      itemKey: 'LINER_OUT_SHIP',
-      title: 'Shipment-out',
-      route: '/shipments',
-      iconName: 'outbound',
-      sequenceNum: 90,
-      widgetName: 'FinDocList',
-    ),
-    MenuItem(
-      itemKey: 'LINER_ACCT',
-      title: 'Accounting',
-      route: '/accounting',
-      iconName: 'account_balance',
-      sequenceNum: 100,
-    ),
-  ],
-);
-
-class _LinerDemoDashboard extends StatelessWidget {
-  const _LinerDemoDashboard();
-
-  @override
-  Widget build(BuildContext context) {
-    return BlocBuilder<AuthBloc, AuthState>(
-      builder: (context, state) {
-        if (state.status != AuthStatus.authenticated) {
-          return const LoadingIndicator();
-        }
-        return const Center(
-          child: Text(
-            'Liner Panel Manufacturing Demo',
-            key: Key('LinerDemoDashboard'),
-          ),
-        );
-      },
-    );
-  }
-}
-
 // ── Demo entry point ──────────────────────────────────────────────────────────
 
 void main() {
@@ -427,8 +225,8 @@ void main() {
 
     await CommonTest.startTestApp(
       tester,
-      createLinerDemoRouter(),
-      linerDemoMenuConfig,
+      createLinerExampleRouter(),
+      linerExampleMenuConfig,
       delegates,
       blocProviders: [
         ...getAdminBlocProviders(restClient, 'AppAdmin'),
@@ -525,7 +323,10 @@ void main() {
     await CommonTest.waitForKey(tester, 'item0');
     // Assign the production routing first
     await WorkOrderTest.openWorkOrder(tester, 0);
-    await WorkOrderTest.assignRouting(tester, linerDemoRoutings[0].routingName!);
+    await WorkOrderTest.assignRouting(
+      tester,
+      linerDemoRoutings[0].routingName!,
+    );
     // Re-open to add liner panels (routing steps now visible in dialog)
     await WorkOrderTest.openWorkOrder(tester, 0);
     // Pause to show the WO form with routing steps and shortage visible
@@ -535,7 +336,12 @@ void main() {
     await LinerPanelTest.checkLinerPanels(tester, linerDemoPanels.length);
     // Open first panel to verify computed fields
     await LinerPanelTest.checkComputedFields(tester, 0);
-    await CommonTest.tapByKey(tester, 'cancel'); // close WO dialog
+    if (await CommonTest.doesExistKey(tester, 'cancel')) {
+      await CommonTest.tapByKey(tester, 'cancel'); // close WO dialog
+    } else if (await CommonTest.doesExistKey(tester, 'WorkOrderDialog')) {
+      await tester.pageBack();
+      await tester.pumpAndSettle(const Duration(seconds: 2));
+    }
 
     // ── Phase 6: Purchase roll stock ──────────────────────────────────────────
     await showDemoStep(
@@ -547,7 +353,9 @@ void main() {
     await OrderTest.selectPurchaseOrders(tester);
     await OrderTest.addOrders(tester, linerDemoPurchaseOrders);
     await OrderTest.approveOrders(tester);
-    await PaymentTest.selectPurchasePayments(tester);
+    await CommonTest.gotoMainMenu(tester);
+    await CommonTest.selectOption(
+        tester, '/accounting/purchase_payments', 'PurchasePayment');
     await OrderTest.approveOrderPayments(tester);
     await OrderTest.completeOrderPayments(tester);
 
@@ -603,7 +411,9 @@ void main() {
     await ShipmentTest.selectOutgoingShipments(tester);
     await OrderTest.approveOrderShipments(tester);
     await OrderTest.completeOrderShipments(tester);
-    await PaymentTest.selectSalesPayments(tester);
+    await CommonTest.gotoMainMenu(tester);
+    await CommonTest.selectOption(
+        tester, '/accounting/sales_payments', 'SalesPayment');
     await OrderTest.approveOrderPayments(tester);
     await OrderTest.completeOrderPayments(tester);
 
@@ -614,7 +424,8 @@ void main() {
       'All financial movements — inventory cost, COGS, revenue and payments — '
           'are automatically posted to the general ledger.',
     );
-    await TransactionTest.selectTransactions(tester);
+    await CommonTest.gotoMainMenu(tester);
+    await CommonTest.selectOption(tester, '/accounting/ledger', 'Transaction');
     await CommonTest.waitForKey(tester, 'id0');
     await tester.pump(const Duration(seconds: 4));
 

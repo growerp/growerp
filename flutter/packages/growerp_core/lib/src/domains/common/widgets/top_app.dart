@@ -240,6 +240,7 @@ class _TopAppState extends State<TopApp> {
                           current.status == AuthStatus.authenticated &&
                           previous.status != AuthStatus.authenticated,
                       listener: (context, authState) {
+                        if (_menuConfigBloc == null) return;
                         final menuBloc = context.read<MenuConfigBloc>();
                         if (menuBloc.state.status != MenuConfigStatus.loading) {
                           menuBloc.add(const MenuConfigLoad(userVersion: true));

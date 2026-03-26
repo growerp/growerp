@@ -24,7 +24,8 @@ class PaymentTest {
     // Go to main menu first to ensure clean navigation state
     // (consistent with OrderTest.selectPurchaseOrders pattern)
     await CommonTest.gotoMainMenu(tester);
-    // Navigate to accounting dashboard first, then purchase payments
+    // Navigate to accounting dashboard first. Some app compositions expose
+    // only '/accounting' at top level and payment routes as dashboard tiles.
     await CommonTest.selectOption(tester, '/accounting', 'AcctDashBoard');
     await CommonTest.selectOption(
       tester,
@@ -36,7 +37,8 @@ class PaymentTest {
   static Future<void> selectSalesPayments(WidgetTester tester) async {
     // Go to main menu first to ensure clean navigation state
     await CommonTest.gotoMainMenu(tester);
-    // Navigate to accounting dashboard first, then sales payments
+    // Navigate to accounting dashboard first. Some app compositions expose
+    // only '/accounting' at top level and payment routes as dashboard tiles.
     await CommonTest.selectOption(tester, '/accounting', 'AcctDashBoard');
     await CommonTest.selectOption(
       tester,

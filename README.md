@@ -133,6 +133,8 @@ GrowERP uses a modular architecture that promotes reusability and extensibility:
 - **growerp_models** - Data models and API clients
 - **growerp_catalog** - Product and category management
 - **growerp_inventory** - Warehouse and stock management
+- **[growerp_manufacturing](./flutter/packages/growerp_manufacturing/README.md)** - Bill of Materials, Work Orders, and Routings
+- **[growerp_manuf_liner](./flutter/packages/growerp_manuf_liner/README.md)** - Custom liner manufacturing and production PDF generation
 - **growerp_order_accounting** - Orders, invoices, and accounting
 - **growerp_user_company** - User and company management
 - **growerp_marketing** - Marketing campaigns and analytics
