@@ -245,7 +245,7 @@ jobs:
             echo "Failed tests:" >> "$GITHUB_STEP_SUMMARY"
             for slice_dir in $(ls -d test-logs/test-output-* 2>/dev/null | sort -V); do
               LOG="$slice_dir/test_output.log"
-              [ -f "$LOG" ] && sed 's/^[^|]*| *//' "$LOG" | grep '^\s*\[' >> "$GITHUB_STEP_SUMMARY" || true
+              [ -f "$LOG" ] && sed 's/^[^|]*| *//' "$LOG" | grep '^\s\+\[' >> "$GITHUB_STEP_SUMMARY" || true
             done
           fi
           echo '```' >> "$GITHUB_STEP_SUMMARY"
