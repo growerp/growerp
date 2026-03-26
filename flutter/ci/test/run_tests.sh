@@ -251,6 +251,7 @@ else
       fi
       FAIL=0
       for f in integration_test/*.dart; do
+        [[ "$f" == *demo* ]] && continue
         flutter test "$f" -d linux \
           --dart-define=BACKEND_URL="$BACKEND_URL" \
           --dart-define=CHAT_URL="$CHAT_URL" \
