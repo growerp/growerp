@@ -225,6 +225,8 @@ else
 
   FAILED_PACKAGES=()
   ALL_FAILED_TESTS=()
+  TOTAL_IND_PASSED=0
+  TOTAL_IND_FAILED=0
 
   for pkg_path in "${PACKAGES_WITH_TESTS[@]}"; do
     PKG_NAME=$(basename "$pkg_path")
@@ -262,6 +264,13 @@ else
     ) 2>&1 | tee "$PKG_LOG"
     PKG_EXIT=${PIPESTATUS[0]}
 
+    # Count individual tests passed/failed from flutter test output
+    IND_PASSED=$(grep -oP '\+\K\d+(?=: All tests passed!)' "$PKG_LOG" | paste -sd+ - | bc 2>/dev/null || echo 0)
+    IND_PASSED_PARTIAL=$(grep -oP '\+\K\d+(?= -\d+: Some tests failed\.)' "$PKG_LOG" | paste -sd+ - | bc 2>/dev/null || echo 0)
+    IND_FAILED=$(grep -oP ' -\K\d+(?=: Some tests failed\.)' "$PKG_LOG" | paste -sd+ - | bc 2>/dev/null || echo 0)
+    TOTAL_IND_PASSED=$((TOTAL_IND_PASSED + IND_PASSED + IND_PASSED_PARTIAL))
+    TOTAL_IND_FAILED=$((TOTAL_IND_FAILED + IND_FAILED))
+
     if [ $PKG_EXIT -eq 0 ]; then
       echo ">>> RESULT: $DISPLAY_NAME PASSED <<<"
     else
@@ -279,8 +288,11 @@ else
   echo "============================================================"
   echo "=== FINAL TEST SUMMARY"
   echo "============================================================"
-  echo "Packages tested : ${#PACKAGES_WITH_TESTS[@]}"
-  echo "Packages failed : ${#FAILED_PACKAGES[@]}"
+  echo "Packages tested  : ${#PACKAGES_WITH_TESTS[@]}"
+  echo "Packages passed  : $((${#PACKAGES_WITH_TESTS[@]} - ${#FAILED_PACKAGES[@]}))"
+  echo "Packages failed  : ${#FAILED_PACKAGES[@]}"
+  echo "Tests passed     : $TOTAL_IND_PASSED"
+  echo "Tests failed     : $TOTAL_IND_FAILED"
 
   if [ ${#FAILED_PACKAGES[@]} -gt 0 ]; then
     echo ""

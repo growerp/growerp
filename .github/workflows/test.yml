@@ -224,6 +224,9 @@ jobs:
           echo "## Overall Test Results" >> "$GITHUB_STEP_SUMMARY"
           echo '```' >> "$GITHUB_STEP_SUMMARY"
           TOTAL_FAILED_PKGS=0
+          TOTAL_PASSED_PKGS=0
+          TOTAL_IND_PASSED=0
+          TOTAL_IND_FAILED=0
           for slice_dir in $(ls -d test-logs/test-output-* 2>/dev/null | sort -V); do
             SLICE=$(basename "$slice_dir" | grep -o '[0-9]*$')
             LOG="$slice_dir/test_output.log"
@@ -233,19 +236,31 @@ jobs:
                 >> "$GITHUB_STEP_SUMMARY" \
                 || echo "  (no structured results)" >> "$GITHUB_STEP_SUMMARY"
               FAILED=$(grep '>>> RESULT:.*FAILED' "$LOG" | grep -cv '+ echo' 2>/dev/null || echo 0)
+              PASSED=$(grep '>>> RESULT:.*PASSED' "$LOG" | grep -cv '+ echo' 2>/dev/null || echo 0)
               TOTAL_FAILED_PKGS=$((TOTAL_FAILED_PKGS + FAILED))
+              TOTAL_PASSED_PKGS=$((TOTAL_PASSED_PKGS + PASSED))
+              IND_PASSED=$(grep 'Tests passed' "$LOG" | grep -oE '[0-9]+$' | tail -1 || echo 0)
+              IND_FAILED=$(grep 'Tests failed' "$LOG" | grep -oE '[0-9]+$' | tail -1 || echo 0)
+              TOTAL_IND_PASSED=$((TOTAL_IND_PASSED + IND_PASSED))
+              TOTAL_IND_FAILED=$((TOTAL_IND_FAILED + IND_FAILED))
             fi
           done
           echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "Packages passed : $TOTAL_PASSED_PKGS" >> "$GITHUB_STEP_SUMMARY"
+          echo "Packages failed : $TOTAL_FAILED_PKGS" >> "$GITHUB_STEP_SUMMARY"
+          echo "Tests passed    : $TOTAL_IND_PASSED" >> "$GITHUB_STEP_SUMMARY"
+          echo "Tests failed    : $TOTAL_IND_FAILED" >> "$GITHUB_STEP_SUMMARY"
           if [ "$TOTAL_FAILED_PKGS" -eq 0 ]; then
+            echo "" >> "$GITHUB_STEP_SUMMARY"
             echo "All packages passed!" >> "$GITHUB_STEP_SUMMARY"
           else
-            echo "$TOTAL_FAILED_PKGS package(s) failed." >> "$GITHUB_STEP_SUMMARY"
             echo "" >> "$GITHUB_STEP_SUMMARY"
             echo "Failed tests:" >> "$GITHUB_STEP_SUMMARY"
-            for slice_dir in $(ls -d test-logs/test-output-* 2>/dev/null | sort -V); do
-              LOG="$slice_dir/test_output.log"
-              [ -f "$LOG" ] && sed 's/^[^|]*| *//' "$LOG" | grep -E '^\[[^]]+\] ' >> "$GITHUB_STEP_SUMMARY" || true
-            done
+            {
+              for slice_dir in $(ls -d test-logs/test-output-* 2>/dev/null | sort -V); do
+                LOG="$slice_dir/test_output.log"
+                [ -f "$LOG" ] && sed 's/^[^|]*| *//' "$LOG" | grep -E '^\[[^]]+\] ' || true
+              done
+            } | sort -u >> "$GITHUB_STEP_SUMMARY"
           fi
           echo '```' >> "$GITHUB_STEP_SUMMARY"
