@@ -168,6 +168,10 @@ if [ -n "$TEST_FILE" ]; then
     cd "$PACKAGE_DIR" || exit 1
     # Don't flutter clean here — it would delete package_config.json.
     # The startup cleanup already handled stale artifacts.
+    if [ ! -d "linux" ]; then
+      echo "Linux platform not found — adding Linux support..."
+      flutter create --platforms=linux .
+    fi
     flutter pub get
 
     TEST_FILE_RELATIVE="${TEST_FILE#$PACKAGE_DIR/}"
@@ -188,7 +192,7 @@ if [ -n "$TEST_FILE" ]; then
 elif [ -n "$PACKAGE_FILTER" ]; then
   echo "Running tests for packages matching: *${PACKAGE_FILTER}*"
   melos exec --scope="*${PACKAGE_FILTER}*" --dir-exists="integration_test" --concurrency=1 -- \
-    "flutter pub get && flutter test integration_test -d linux \
+    "if [ ! -d linux ]; then echo 'Linux platform not found — adding Linux support...'; flutter create --platforms=linux .; fi && flutter pub get && flutter test integration_test -d linux \
       --dart-define=BACKEND_URL=$BACKEND_URL \
       --dart-define=CHAT_URL=$CHAT_URL \
       --dart-define=SCREEN_WIDTH=$SCREEN_WIDTH \
