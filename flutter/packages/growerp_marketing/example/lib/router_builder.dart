@@ -1,0 +1,239 @@
+/*
+ * This GrowERP software is in the public domain under CC0 1.0 Universal plus a
+ * Grant of Patent License.
+ *
+ * To the extent possible under law, the author(s) have dedicated all
+ * copyright and related and neighboring rights to this software to the
+ * public domain worldwide. This software is distributed without any
+ * warranty.
+ *
+ * You should have received a copy of the CC0 Public Domain Dedication
+ * along with this software (see the LICENSE.md file). If not, see
+ * <http://creativecommons.org/publicdomain/zero/1.0/>.
+ */
+
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+import 'package:growerp_core/growerp_core.dart';
+import 'package:growerp_marketing/growerp_marketing.dart';
+import 'package:growerp_models/growerp_models.dart';
+
+/// Canonical menu configuration for Marketing example app.
+///
+/// Used by both the production app (main.dart) and all integration tests.
+const marketingMenuConfig = MenuConfiguration(
+  menuConfigurationId: 'MARKETING_EXAMPLE',
+  appId: 'marketing_example',
+  name: 'Marketing Example Menu',
+  menuItems: [
+    MenuItem(
+      itemKey: 'MKT_MAIN',
+      title: 'Main',
+      route: '/',
+      iconName: 'dashboard',
+      sequenceNum: 10,
+      widgetName: 'MarketingDashboard',
+    ),
+    MenuItem(
+      itemKey: 'MKT_LANDING',
+      title: 'Landing Pages',
+      route: '/landingPages',
+      iconName: 'web',
+      sequenceNum: 20,
+      widgetName: 'LandingPageList',
+    ),
+    MenuItem(
+      itemKey: 'MKT_ASSESSMENTS',
+      title: 'Assessments',
+      route: '/assessments',
+      iconName: 'quiz',
+      sequenceNum: 30,
+      widgetName: 'AssessmentList',
+    ),
+    MenuItem(
+      itemKey: 'MKT_TAKE',
+      title: 'Take Assessment',
+      route: '/takeAssessment',
+      iconName: 'assignment',
+      sequenceNum: 40,
+      widgetName: 'TakeAssessmentMenu',
+    ),
+    MenuItem(
+      itemKey: 'MKT_PERSONAS',
+      title: 'Personas',
+      route: '/personas',
+      iconName: 'people',
+      sequenceNum: 50,
+      widgetName: 'PersonaList',
+    ),
+    MenuItem(
+      itemKey: 'MKT_CONTENT',
+      title: 'Content Plans',
+      route: '/contentPlans',
+      iconName: 'calendar_today',
+      sequenceNum: 60,
+      widgetName: 'ContentPlanList',
+    ),
+    MenuItem(
+      itemKey: 'MKT_SOCIAL',
+      title: 'Social Posts',
+      route: '/socialPosts',
+      iconName: 'share',
+      sequenceNum: 70,
+      widgetName: 'SocialPostList',
+    ),
+  ],
+);
+
+/// Creates a static go_router for the marketing example app using shared helper.
+///
+/// Used by both the production app (main.dart) and all integration tests.
+GoRouter createMarketingExampleRouter() {
+  return createStaticAppRouter(
+    menuConfig: marketingMenuConfig,
+    appTitle: 'GrowERP Marketing Example',
+    dashboard: const MarketingDashboard(),
+    widgetBuilder: (route) => switch (route) {
+      '/landingPages' => const LandingPageList(),
+      '/assessments' => const AssessmentList(),
+      '/takeAssessment' => const TakeAssessmentMenu(),
+      '/personas' => const PersonaList(),
+      '/contentPlans' => const ContentPlanList(),
+      '/socialPosts' => const SocialPostList(),
+      _ => const MarketingDashboard(),
+    },
+    additionalRoutes: [
+      GoRoute(
+        path: '/takeAssessment/flow',
+        builder: (context, state) => LandingPageAssessmentFlowScreen(
+          landingPageId: state.uri.queryParameters['landingPageId'] ?? '',
+          assessmentId: state.uri.queryParameters['assessmentId'] ?? '',
+          startAssessmentFlow: true,
+        ),
+      ),
+    ],
+  );
+}
+
+/// BLoC providers for the marketing example app.
+///
+/// Used by both the production app (main.dart) and all integration tests.
+List<BlocProvider> getExampleBlocProviders(
+  RestClient restClient,
+  String classificationId,
+) {
+  return [...getMarketingBlocProviders(restClient, classificationId)];
+}
+
+/// Simple dashboard for marketing example
+class MarketingDashboard extends StatelessWidget {
+  const MarketingDashboard({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<AuthBloc, AuthState>(
+      builder: (context, state) {
+        if (state.status != AuthStatus.authenticated) {
+          return const LoadingIndicator();
+        }
+
+        final items = marketingMenuConfig.menuItems
+            .where((item) => item.route != '/')
+            .toList();
+
+        return DashboardGrid(items: items);
+      },
+    );
+  }
+}
+
+/// Take Assessment menu - allows selecting and taking an assessment
+class TakeAssessmentMenu extends StatelessWidget {
+  const TakeAssessmentMenu({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<AssessmentBloc, AssessmentState>(
+      builder: (context, state) {
+        if (state.status == AssessmentStatus.initial) {
+          context.read<AssessmentBloc>().add(
+            const AssessmentFetch(refresh: true),
+          );
+        }
+
+        if (state.status == AssessmentStatus.loading &&
+            state.assessments.isEmpty) {
+          return const Center(child: LoadingIndicator());
+        }
+
+        if (state.assessments.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(
+                  Icons.assessment_outlined,
+                  size: 64,
+                  color: Colors.grey,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'No assessments available',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Create an assessment first in the Assessments menu',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          );
+        }
+
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text('Select an Assessment to Take'),
+            backgroundColor: Colors.transparent,
+          ),
+          body: ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: state.assessments.length,
+            itemBuilder: (context, index) {
+              final assessment = state.assessments[index];
+              return Card(
+                margin: const EdgeInsets.only(bottom: 12),
+                child: ListTile(
+                  leading: const CircleAvatar(child: Icon(Icons.quiz)),
+                  title: Text(
+                    assessment.assessmentName,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  subtitle: Text(
+                    assessment.description ?? 'No description',
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  trailing: const Icon(Icons.arrow_forward_ios),
+                  onTap: () {
+                    context.go(
+                      Uri(
+                        path: '/takeAssessment/flow',
+                        queryParameters: {
+                          'landingPageId': assessment.pseudoId ?? '',
+                          'assessmentId': assessment.assessmentId ?? '',
+                        },
+                      ).toString(),
+                    );
+                  },
+                ),
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+}

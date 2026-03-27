@@ -15,11 +15,11 @@
 // ignore_for_file: depend_on_referenced_packages
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_sales/growerp_sales.dart';
+import 'package:growerp_sales_example/router_builder.dart';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -41,71 +41,4 @@ Future main() async {
       extraBlocProviders: getSalesBlocProviders(restClient),
     ),
   );
-}
-
-/// Static menu configuration
-const salesMenuConfig = MenuConfiguration(
-  menuConfigurationId: 'SALES_EXAMPLE',
-  appId: 'sales_example',
-  name: 'Sales Example Menu',
-  menuItems: [
-    MenuItem(
-      itemKey: 'SALES_MAIN',
-      title: 'Main',
-      route: '/',
-      iconName: 'dashboard',
-      sequenceNum: 10,
-      widgetName: 'SalesDashboard',
-    ),
-    MenuItem(
-      itemKey: 'SALES_CRM',
-      title: 'Opportunities',
-      route: '/crm',
-      iconName: 'campaign',
-      sequenceNum: 20,
-      widgetName: 'OpportunityList',
-    ),
-  ],
-);
-
-/// Creates a static go_router for the sales example app using shared helper
-GoRouter createSalesExampleRouter() {
-  return createStaticAppRouter(
-    menuConfig: salesMenuConfig,
-    appTitle: 'GrowERP Sales Example',
-    dashboard: const SalesDashboard(),
-    widgetBuilder: (route) => switch (route) {
-      '/crm' => const OpportunityList(),
-      _ => const SalesDashboard(),
-    },
-  );
-}
-
-/// Simple dashboard for sales example
-class SalesDashboard extends StatelessWidget {
-  const SalesDashboard({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return BlocBuilder<AuthBloc, AuthState>(
-      builder: (context, state) {
-        if (state.status != AuthStatus.authenticated) {
-          return const LoadingIndicator();
-        }
-
-        return DashboardGrid(
-          items: const [
-            MenuItem(
-              menuItemId: 'opportunities',
-              title: 'Opportunities',
-              iconName: 'campaign',
-              route: '/crm',
-              tileType: 'statistic',
-            ),
-          ],
-          stats: state.authenticate?.stats,
-        );
-      },
-    );
-  }
 }

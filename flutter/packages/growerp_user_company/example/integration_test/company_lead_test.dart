@@ -12,7 +12,7 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import 'package:user_company_example/main.dart';
+import 'package:user_company_example/router_builder.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:integration_test/integration_test.dart';
@@ -22,7 +22,7 @@ import 'package:growerp_user_company/growerp_user_company.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_user_company/src/company/integration_test/company_test.dart';
 
-Future<void> main() async {
+void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   setUp(() async {

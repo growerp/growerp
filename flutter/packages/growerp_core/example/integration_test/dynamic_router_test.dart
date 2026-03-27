@@ -19,41 +19,6 @@ void main() {
     await GlobalConfiguration().loadFromAsset("app_settings");
   });
 
-  const coreMenuConfig = MenuConfiguration(
-    menuConfigurationId: 'CORE_EXAMPLE',
-    appId: 'core_example',
-    name: 'Core Example Menu',
-    menuItems: [
-      MenuItem(
-        menuItemId: 'CORE_MAIN',
-        title: 'Main',
-        route: '/',
-        iconName: 'dashboard',
-        sequenceNum: 10,
-        widgetName: 'CoreDashboard',
-        isActive: true,
-      ),
-      MenuItem(
-        menuItemId: 'CORE_COMPANY',
-        title: 'Organization',
-        route: '/company',
-        iconName: 'business',
-        sequenceNum: 20,
-        widgetName: 'CoreDashboard',
-        isActive: true,
-      ),
-      MenuItem(
-        menuItemId: 'CORE_USER',
-        title: 'Logged in User',
-        route: '/user',
-        iconName: 'person',
-        sequenceNum: 30,
-        widgetName: 'CoreDashboard',
-        isActive: true,
-      ),
-    ],
-  );
-
   testWidgets('Dynamic Router - Auth Redirect Test', (
     WidgetTester tester,
   ) async {

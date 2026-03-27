@@ -30,6 +30,8 @@ class OrderTest {
   }
 
   static Future<void> selectInventory(WidgetTester tester) async {
+    // Navigate to main dashboard first (the inventory card is there)
+    await CommonTest.gotoMainMenu(tester);
     await CommonTest.selectOption(tester, '/inventory', 'LocationList');
   }
 

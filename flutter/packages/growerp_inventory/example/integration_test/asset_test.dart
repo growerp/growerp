@@ -21,7 +21,7 @@ import 'package:growerp_inventory/growerp_inventory.dart';
 import 'package:growerp_inventory/src/location/integration_test/location_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:growerp_models/growerp_models.dart';
-import 'package:inventory_example/main.dart';
+import 'package:inventory_example/router_builder.dart';
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();

@@ -18,9 +18,6 @@ import 'package:growerp_models/growerp_models.dart';
 
 class PaymentTypeTest {
   static Future<void> selectPaymentType(WidgetTester tester) async {
-    // Navigate to accounting dashboard first
-    await CommonTest.selectOption(tester, '/accounting', 'AcctDashBoard');
-    // Then navigate to setup for payment types
     await CommonTest.selectOption(
       tester,
       '/accounting/setup',

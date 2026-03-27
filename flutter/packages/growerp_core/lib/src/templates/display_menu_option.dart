@@ -474,14 +474,7 @@ class DisplayMenuItemState extends State<DisplayMenuItem>
           key: const Key('homeButton'),
           icon: const Icon(Icons.home),
           tooltip: _localizations!.goHome,
-          onPressed: () {
-            if (currentRoute.startsWith('/accounting') &&
-                currentRoute != '/accounting') {
-              context.go('/accounting');
-            } else {
-              context.go('/');
-            }
-          },
+          onPressed: () => context.go('/'),
         ),
       );
     }

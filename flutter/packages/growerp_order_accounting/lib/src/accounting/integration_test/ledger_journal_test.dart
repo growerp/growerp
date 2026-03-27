@@ -18,9 +18,6 @@ import 'package:growerp_models/growerp_models.dart';
 
 class LedgerJournalTest {
   static Future<void> selectLedgerJournal(WidgetTester tester) async {
-    // Navigate to accounting dashboard first
-    await CommonTest.selectOption(tester, '/accounting', 'AcctDashBoard');
-    // Then navigate to ledger journal
     await CommonTest.selectOption(
       tester,
       '/accounting/ledger-journal',

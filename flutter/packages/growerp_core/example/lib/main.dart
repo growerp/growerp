@@ -123,32 +123,9 @@ class _CoreAppState extends State<CoreApp> {
             // Capture bloc reference here to avoid looking it up
             // from a deactivated widget context during router rebuilds
             final menuConfigBloc = context.read<MenuConfigBloc>();
-            // Use simplified config - no accounting submenu
-            router = createDynamicAppRouter(
+            router = createDynamicCoreRouter(
               [state.menuConfiguration!],
-              config: DynamicRouterConfig(
-                widgetLoader: WidgetRegistry.getWidget,
-                appTitle: 'Core Example',
-                dashboardFabBuilder: (menuConfig) => Builder(
-                  builder: (fabContext) => FloatingActionButton(
-                    key: const Key('coreFab'),
-                    heroTag: 'menuFab',
-                    tooltip: 'Manage Menu Items',
-                    onPressed: () {
-                      showDialog(
-                        context: fabContext,
-                        builder: (dialogContext) => BlocProvider.value(
-                          value: menuConfigBloc,
-                          child: MenuItemListDialog(
-                            menuConfiguration: menuConfig,
-                          ),
-                        ),
-                      );
-                    },
-                    child: const Icon(Icons.menu),
-                  ),
-                ),
-              ),
+              menuConfigBloc: menuConfigBloc,
             );
           } else {
             // Loading or error, show splash screen using shared component

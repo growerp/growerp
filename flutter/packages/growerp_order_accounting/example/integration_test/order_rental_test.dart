@@ -20,7 +20,7 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 import 'package:growerp_order_accounting/src/findoc/integration_test/order_test.dart';
 import 'package:growerp_order_accounting/src/findoc/integration_test/payment_test.dart';
-import 'package:order_accounting_example/main.dart';
+import 'package:order_accounting_example/router_builder.dart';
 import 'package:growerp_core/test_data.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:shared_preferences/shared_preferences.dart';

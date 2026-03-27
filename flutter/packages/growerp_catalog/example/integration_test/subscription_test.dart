@@ -19,7 +19,7 @@ import 'package:integration_test/integration_test.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_catalog/growerp_catalog.dart';
 import 'package:growerp_models/growerp_models.dart';
-import 'package:catalog_example/main.dart';
+import 'package:catalog_example/router_builder.dart';
 import 'package:growerp_catalog/src/subscription/integration_test/subscription_test.dart';
 import 'package:growerp_core/test_data.dart';
 

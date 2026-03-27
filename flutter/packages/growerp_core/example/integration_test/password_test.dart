@@ -34,23 +34,6 @@ import 'package:integration_test/integration_test.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
-// Menu configuration for tests
-const coreMenuConfig = MenuConfiguration(
-  menuConfigurationId: 'CORE_EXAMPLE',
-  appId: 'core_example',
-  name: 'Core Example Menu',
-  menuItems: [
-    MenuItem(
-      menuItemId: 'CORE_MAIN',
-      title: 'Main',
-      route: '/',
-      iconName: 'dashboard',
-      sequenceNum: 10,
-      widgetName: 'CoreDashboard',
-    ),
-  ],
-);
-
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 

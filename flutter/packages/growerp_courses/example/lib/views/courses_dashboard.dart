@@ -5,7 +5,9 @@ import 'package:growerp_models/growerp_models.dart';
 
 /// Dashboard for courses example - displays dashboard panels from menu configuration
 class CoursesDashboard extends StatelessWidget {
-  const CoursesDashboard({super.key});
+  const CoursesDashboard({super.key, required this.menuConfiguration});
+
+  final MenuConfiguration menuConfiguration;
 
   @override
   Widget build(BuildContext context) {
@@ -13,67 +15,18 @@ class CoursesDashboard extends StatelessWidget {
       builder: (context, authState) {
         final stats = authState.authenticate?.stats;
 
-        return BlocBuilder<MenuConfigBloc, MenuConfigState>(
-          builder: (context, menuState) {
-            // Use menu configuration from bloc if available
-            final menuConfig = menuState.menuConfiguration;
+        final dashboardItems = menuConfiguration.menuItems
+            .where(
+              (option) =>
+                  option.isActive &&
+                  option.route != '/' &&
+                  option.route != '/about',
+            )
+            .toList()
+          ..sort((a, b) => a.sequenceNum.compareTo(b.sequenceNum));
 
-            if (menuConfig == null) {
-              return const Center(child: CircularProgressIndicator());
-            }
-
-            // Get dashboard items from menu configuration (top-level, active items only)
-            // Exclude the Main/Dashboard item itself (route '/' and '/about')
-            final dashboardItems =
-                menuConfig.menuItems
-                    .where(
-                      (option) =>
-                          option.isActive &&
-                          option.route != '/' &&
-                          option.route != '/about',
-                    )
-                    .toList()
-                  ..sort((a, b) => a.sequenceNum.compareTo(b.sequenceNum));
-
-            return DashboardGrid(
-              items: dashboardItems,
-              stats: stats,
-              onToggleMinimize: (id) =>
-                  context.read<MenuConfigBloc>().add(MenuItemToggleMinimize(id)),
-            );
-          },
-        );
+        return DashboardGrid(items: dashboardItems, stats: stats);
       },
-    );
-  }
-}
-
-class AuthenticatedDisplayMenuItem extends StatelessWidget {
-  const AuthenticatedDisplayMenuItem({
-    super.key,
-    required this.menuConfiguration,
-    required this.menuIndex,
-    required this.child,
-  });
-
-  final MenuConfiguration menuConfiguration;
-  final int menuIndex;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    // Hidden API key widgets are now handled by DisplayMenuItem's _buildHiddenTestWidgets()
-    return DisplayMenuItem(
-      menuConfiguration: menuConfiguration,
-      menuIndex: menuIndex,
-      actions: [
-        IconButton(
-          key: const Key('logoutButton'),
-          icon: const Icon(Icons.do_not_disturb, key: Key('HomeFormAuth')),
-          onPressed: () => context.read<AuthBloc>().add(const AuthLoggedOut()),
-        ),
-      ],
-      child: child,
     );
   }
 }

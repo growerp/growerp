@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
-import 'package:growerp_outreach_example/main.dart' as app;
+import 'package:growerp_outreach_example/router_builder.dart' as app;
 import 'package:growerp_core/growerp_core.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:growerp_models/growerp_models.dart';
