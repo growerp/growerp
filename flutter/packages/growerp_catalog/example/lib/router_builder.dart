@@ -29,9 +29,9 @@ const catalogMenuConfig = MenuConfiguration(
   menuItems: [
     MenuItem(
       menuItemId: 'CATALOG_MAIN',
-      title: 'Main',
+      title: 'Catalog',
       route: '/',
-      iconName: 'dashboard',
+      iconName: 'category',
       sequenceNum: 10,
       widgetName: 'CatalogDashboard',
     ),
