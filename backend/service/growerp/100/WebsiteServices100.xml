@@ -846,7 +846,7 @@ along with this software (see the LICENSE.md file). If not, see
             import java.io.*
 
             if (obsidian.zip == null) {
-                logger.info("=== NO new obsidian created!")
+                ec.logger.info("=== NO new obsidian created!")
             } else {
                 // strip leading common path
                 ZipInputStream zis = new ZipInputStream(
@@ -990,8 +990,8 @@ along with this software (see the LICENSE.md file). If not, see
                                 int closeBrackets = nextLine.indexOf("]]");
                                 String link = nextLine.substring(brackets + 2,closeBrackets)
 
-                                //logger.info("==br $brackets cl: $closeBrackets link: $link")
-                                //logger.info("==1nl: $nextLine")
+                                //ec.logger.info("==br $brackets cl: $closeBrackets link: $link")
+                                //ec.logger.info("==1nl: $nextLine")
 
                                 // find link in wikipage for full length
                                 def links = ec.entity.find("moqui.resource.wiki.WikiPage")

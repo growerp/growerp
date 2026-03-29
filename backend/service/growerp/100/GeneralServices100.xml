@@ -243,7 +243,7 @@ along with this software (see the LICENSE.md file). If not, see
         <actions>
             <set field="seqName" value="$ownerPartyId-$seqName" />
             <set field="seqNum"
-                from="ec.entityFacade.getNextSeqId(seqName)" />
+                from="ec.entityFacade.sequencedIdPrimary(seqName, null, null)" />
             <if condition="ownerPartyId == 'system'">
                 <set field="seqNum" value="S$seqNum" />
             </if>
@@ -872,7 +872,7 @@ along with this software (see the LICENSE.md file). If not, see
                     (String) userAccount.username, (String) oldPassword)
                 def info = new org.apache.shiro.authc.SimpleAuthenticationInfo(
                     userAccount.username, userAccount.currentPassword,
-                    userAccount.passwordSalt ? new org.apache.shiro.util.SimpleByteSource(
+                    userAccount.passwordSalt ? new org.apache.shiro.lang.util.SimpleByteSource(
                         (String) userAccount.passwordSalt) : null, "moquiRealm")
             </script>
             <if
@@ -885,7 +885,7 @@ along with this software (see the LICENSE.md file). If not, see
                         info = new org.apache.shiro.authc.SimpleAuthenticationInfo(
                             userAccount.username, userAccount.resetPassword,
                             userAccount.passwordSalt 
-                                ? new org.apache.shiro.util.SimpleByteSource(
+                                ? new org.apache.shiro.lang.util.SimpleByteSource(
                                         (String) userAccount.passwordSalt) 
                                 : null, "moquiRealm")
                     </script>

@@ -53,7 +53,6 @@ growerp install
 
 - **[🔗 Data Models Guide](./docs/basic_explanation_of_the_frontend_REST_Backend_data_models.md)** - Frontend-backend data model integration
 - **[📡 Flutter-Moqui REST Backend Interface](./docs/Flutter_Moqui_REST_Backend_Interface.md)** - Complete guide to REST API communication with practical code examples
-- **[🤖 AI Integration (MCP Server)](./moqui/runtime/component/mcp/docs/README.md)** - Model Context Protocol server for AI business automation
 - **[🤖 Gemini AI Communication](./GEMINI_COMMUNICATION_GUIDE.md)** - Invoice scanning and AI-powered data extraction with Google Gemini
 - **[✨ AI Landing Page Generation](./docs/AI_GENERATED_LANDING_PAGE_PLAN.md)** - Generate professional landing pages with AI and internet research
 - **[💳 Stripe Payment Processing](./docs/Stripe_Payment_Processing_Documentation.md)** - Complete payment integration guide
@@ -176,8 +175,7 @@ GrowERP uses a modular architecture that promotes reusability and extensibility:
 
 ### Prerequisites
 
-- **Java JDK 11** - [Download](https://www.oracle.com/th/java/technologies/javase/jdk11-archive-downloads.html)
-- **Java JDK 17** - [Download](https://www.oracle.com/java/technologies/javase/jdk17-archive-downloads.html) (for Gradle 8+)
+- **OpenJDK 21** - `sudo apt install openjdk-21-jdk` or [Download](https://openjdk.org/install/)
 - **Flutter stable** - [Install](https://flutter.dev/)
 - **Chrome Browser** - [Download](https://www.google.com/chrome/)
 - **Git** - [Download](https://git-scm.com/downloads)
@@ -186,35 +184,37 @@ GrowERP uses a modular architecture that promotes reusability and extensibility:
 
 ### Manual Installation
 
-1. **Clone the repository:**
+1. **Clone the repository with all submodules:**
    ```bash
    git clone https://github.com/growerp/growerp
    cd growerp
+   git submodule update --init --recursive
+   bash setup-backend.sh
    ```
 
 2. **Start the backend** (in separate terminal):
    ```bash
    cd moqui
-   # First time only
+   # First time only — build and load initial data
    ./gradlew build
    java -jar moqui.war load types=seed,seed-initial,install no-run-es
-   
+
    # Regular startup
    java -jar moqui.war no-run-es
    ```
 
 3. **Run the Flutter application:**
    ```bash
-   cd flutter/packages/admin
+   cd flutter
    # First time only
-   dart pub global activate melos 3.4.0
+   dart pub global activate melos
    export PATH="$PATH":"$HOME/.pub-cache/bin"
-   melos clean
-   melos bootstrap
+   melos clean && melos bootstrap
    melos l10n --no-select
    melos build --no-select
-   
-   # Regular startup
+
+   # Run the admin app
+   cd packages/admin
    flutter run
    ```
 

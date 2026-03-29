@@ -61,7 +61,7 @@ along with this software (see the LICENSE.md file). If not, see
                 if (base64) {
                     byte[] base64Decoded = Base64.getMimeDecoder().decode(base64)
                     if (base64Decoded == null || base64Decoded.size() == 0) {
-                        logger.error("Could not read uploaded base64 file")
+                        ec.logger.error("Could not read uploaded base64 file")
                         return
                     } else {
                         fileSize = base64Decoded.size()

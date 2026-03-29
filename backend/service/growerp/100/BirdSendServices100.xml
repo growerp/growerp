@@ -50,7 +50,7 @@ along with this software (see the LICENSE.md file). If not, see
                 Map result = sendGET("v1/sequences")
 
                 if (result?.data == null) {
-                    logger.info("Getting sequences from birdsend did not work Api Key expired?, result: $result");
+                    ec.logger.info("Getting sequences from birdsend did not work Api Key expired?, result: $result");
                     return
                 }
 
@@ -59,14 +59,14 @@ along with this software (see the LICENSE.md file). If not, see
                     if (sequence.name == groupName) sequenceId = sequence.sequence_id
                 }
 
-                //logger.info("===seqId: $sequenceId")
+                //ec.logger.info("===seqId: $sequenceId")
                 if (sequenceId) {
                     // add user and sequence
                     result = sendPOST("v1/contacts",
                     """ { \"email\": \"$email\", \"sequence_id\": $sequenceId, \"fields\":
                         { \"first_name\": \"$firstName\", \"last_name\": \"$lastName\" }}""".stripIndent())
                 } else {
-                    logger.warn("Sequence group $groupName not found!")
+                    ec.logger.warn("Sequence group $groupName not found!")
                 }
 
                 //============ closures =============
@@ -122,9 +122,9 @@ along with this software (see the LICENSE.md file). If not, see
                         input.close();
 
                         // print result
-                        logger.info(response.toString());
+                        ec.logger.info(response.toString());
                     } else {
-                        logger.info("POST request did not work: $responseCode ${con.getResponseMessage()}");
+                        ec.logger.info("POST request did not work: $responseCode ${con.getResponseMessage()}");
                     }
                 }
            ]]></script>
