@@ -17,6 +17,7 @@ dependencies:
   growerp_catalog: ^1.9.0
   growerp_manufacturing: ^1.0.0
   growerp_manuf_liner: ^1.0.0
+  growerp_demos: ^1.0.0
   growerp_order_accounting: ^1.9.0
   growerp_user_company: ^1.9.0
   growerp_activity: ^1.8.1
@@ -27,7 +28,6 @@ dependencies:
     sdk: flutter
   global_configuration: ^2.0.0
   intl: ^0.20.2
-  shared_preferences: ^2.3.2
   package_info_plus: ^9.0.0
   hive_flutter: ^1.1.0
   universal_io: ^2.2.2

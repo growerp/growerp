@@ -1,0 +1,37 @@
+name: demos_example
+resolution: workspace
+description: Example app for growerp_demos — shows all registered demos.
+version: 1.0.0+1
+publish_to: none
+
+environment:
+  sdk: ^3.9.0
+  flutter: ^3.33.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  growerp_demos: ^1.0.0
+  growerp_core: ^1.9.0
+  growerp_models: ^1.11.6
+  growerp_catalog: ^1.10.5
+  growerp_manufacturing: ^1.0.0
+  growerp_manuf_liner: ^1.0.0
+  growerp_order_accounting: ^1.0.0
+  growerp_inventory: ^1.0.0
+  growerp_user_company: ^1.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
+  generate: true
+
+  assets:
+    - assets/cfg/
+    - packages/growerp_core/images/growerp.jpg
+    - packages/growerp_core/images/growerpDark.jpg

@@ -10,19 +10,20 @@ import 'package:growerp_catalog/growerp_catalog.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
-import 'catalog_swag_demo_service.dart';
-import 'demo_progress_service.dart';
+import 'demo_progress_helper.dart';
 
-// ── Phase definitions ─────────────────────────────────────────────────────────
+// ── Phase definition ─────────────────────────────────────────────────────────
 
-class _Phase {
+class DemoPhase {
   final String title;
   final String description;
+
   /// Widget name registered in WidgetRegistry — shown in the live screen panel.
   final String widgetName;
+
   final Future<String> Function(RestClient, String, String) action;
 
-  const _Phase({
+  const DemoPhase({
     required this.title,
     required this.description,
     required this.widgetName,
@@ -30,110 +31,32 @@ class _Phase {
   });
 }
 
-final List<_Phase> _phases = [
-  _Phase(
-    title: 'Setup: Create Demo Products & BOM',
-    description:
-        'Creates the Moqui Marketing Package (SWAG-PKG-001) and its three '
-        'components (Baseball Cap, Coffee Mug, USB Drive) together with a '
-        'Bill of Materials and demo customer/supplier companies. '
-        'Skipped automatically if the data already exists.',
-    widgetName: 'BomList',
-    action: setupDemoData,
-  ),
-  _Phase(
-    title: 'Create Sales Order',
-    description:
-        'A customer orders 2× Moqui Marketing Package. '
-        'The order is saved in Created state so you can review it '
-        'before approving.',
-    widgetName: 'SalesOrderList',
-    action: createSalesOrder,
-  ),
-  _Phase(
-    title: 'Approve Sales Order',
-    description:
-        'Approving the sales order triggers the backend to automatically '
-        'create a Work Order because the product has a Bill of Materials.',
-    widgetName: 'SalesOrderList',
-    action: approveSalesOrder,
-  ),
-  _Phase(
-    title: 'View Work Order — Material Shortage',
-    description:
-        'The system created a Work Order for the 2 kits. '
-        'It shows a material shortage for all three components '
-        'because no swag items are in the warehouse yet.',
-    widgetName: 'WorkOrderList',
-    action: viewWorkOrder,
-  ),
-  _Phase(
-    title: 'Order & Pay for Components',
-    description:
-        'A purchase order is raised for 3 each of Baseball Cap, Coffee Mug, '
-        'and USB Drive. The order is approved and payment is processed.',
-    widgetName: 'PurchaseOrderList',
-    action: createAndApprovePurchaseOrder,
-  ),
-  _Phase(
-    title: 'Receive Components into Warehouse',
-    description:
-        'The incoming shipment from the supplier is received. '
-        'Caps, mugs, and USB drives are now in stock and the Work Order '
-        'shortage is cleared.',
-    widgetName: 'IncomingShipmentList',
-    action: receiveIncomingShipment,
-  ),
-  _Phase(
-    title: 'Assemble the Kits',
-    description:
-        'The Work Order is released, started, and completed. '
-        'Components are consumed and 2× Moqui Marketing Package '
-        'are added to finished-goods inventory.',
-    widgetName: 'WorkOrderList',
-    action: completeWorkOrder,
-  ),
-  _Phase(
-    title: 'Ship to Customer & Collect Payment',
-    description:
-        'The finished kits are shipped to the customer. '
-        'The outgoing shipment is approved, completed, and '
-        'customer payment is collected.',
-    widgetName: 'OutgoingShipmentList',
-    action: shipToCustomerAndCollectPayment,
-  ),
-  _Phase(
-    title: 'Update Statistics & Ledger Totals',
-    description:
-        'Runs the ledger recalculation and statistics update jobs for this '
-        'company. Dashboard numbers, balance sheet totals, and GL account '
-        'summaries are refreshed to reflect all completed transactions.',
-    widgetName: 'TransactionList',
-    action: updateStatsAndLedger,
-  ),
-];
+// ── Generic demo runner ───────────────────────────────────────────────────────
 
-// ── Widget ────────────────────────────────────────────────────────────────────
+/// A reusable step-by-step demo runner.
+///
+/// Provide a [title], a list of [phases], and a [progress] helper.
+/// Each phase executes an action via the REST client and shows a live widget.
+class GenericDemoRunner extends StatefulWidget {
+  final String title;
+  final List<DemoPhase> phases;
+  final DemoProgressHelper progress;
 
-class CatalogSwagDemoRunner extends StatefulWidget {
-  const CatalogSwagDemoRunner({super.key});
+  const GenericDemoRunner({
+    super.key,
+    required this.title,
+    required this.phases,
+    required this.progress,
+  });
 
   @override
-  State<CatalogSwagDemoRunner> createState() => _CatalogSwagDemoRunnerState();
+  State<GenericDemoRunner> createState() => _GenericDemoRunnerState();
 }
 
-class _CatalogSwagDemoRunnerState extends State<CatalogSwagDemoRunner> {
-  /// The step that is next to run (0-based).
+class _GenericDemoRunnerState extends State<GenericDemoRunner> {
   int _currentStep = 0;
-
-  /// The step whose screen is displayed in the live panel.
-  /// Set to _currentStep when a step starts; stays there after completion
-  /// so the user can see the newly created data before the next step.
   int _displayedStep = 0;
-
-  /// Incremented after each step to force the embedded screen to reload.
   int _screenVersion = 0;
-
   bool _isRunning = false;
   bool _isComplete = false;
   String? _lastMessage;
@@ -154,25 +77,25 @@ class _CatalogSwagDemoRunnerState extends State<CatalogSwagDemoRunner> {
   }
 
   Future<void> _loadSavedStep() async {
-    final step = await DemoProgressService.getCurrentStep(_ownerPartyId);
+    final step = await widget.progress.getCurrentStep(_ownerPartyId);
     if (mounted) {
       setState(() {
         _currentStep = step;
-        _displayedStep = step.clamp(0, _phases.length - 1);
-        _isComplete = step >= _phases.length;
+        _displayedStep = step.clamp(0, widget.phases.length - 1);
+        _isComplete = step >= widget.phases.length;
         _screenVersion++;
       });
     }
   }
 
   Future<void> _runCurrentStep() async {
-    if (_currentStep >= _phases.length) return;
-    final phase = _phases[_currentStep];
+    if (_currentStep >= widget.phases.length) return;
+    final phase = widget.phases[_currentStep];
 
     setState(() {
       _isRunning = true;
-      _displayedStep = _currentStep; // Show this step's screen while it runs
-      _screenVersion++;               // Force fresh load before the API call
+      _displayedStep = _currentStep;
+      _screenVersion++;
       _errorMessage = null;
       _lastMessage = null;
     });
@@ -181,16 +104,15 @@ class _CatalogSwagDemoRunnerState extends State<CatalogSwagDemoRunner> {
       final message =
           await phase.action(_restClient, _classificationId, _ownerPartyId);
       final nextStep = _currentStep + 1;
-      await DemoProgressService.saveStep(nextStep, _ownerPartyId);
+      await widget.progress.saveStep(nextStep, _ownerPartyId);
 
       if (mounted) {
         setState(() {
           _isRunning = false;
           _lastMessage = message;
           _currentStep = nextStep;
-          _screenVersion++; // Reload the same screen to show created data
-          _isComplete = nextStep >= _phases.length;
-          // _displayedStep stays on the completed step so user sees the result
+          _screenVersion++;
+          _isComplete = nextStep >= widget.phases.length;
         });
       }
     } on DioException catch (e) {
@@ -233,7 +155,7 @@ class _CatalogSwagDemoRunnerState extends State<CatalogSwagDemoRunner> {
       ),
     );
     if (confirm == true && mounted) {
-      await DemoProgressService.reset(_ownerPartyId);
+      await widget.progress.reset(_ownerPartyId);
       setState(() {
         _currentStep = 0;
         _displayedStep = 0;
@@ -245,13 +167,11 @@ class _CatalogSwagDemoRunnerState extends State<CatalogSwagDemoRunner> {
     }
   }
 
-  // ── Build ─────────────────────────────────────────────────────────────────
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Catalog & Manufacturing Demo'),
+        title: Text(widget.title),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
@@ -262,7 +182,6 @@ class _CatalogSwagDemoRunnerState extends State<CatalogSwagDemoRunner> {
       ),
       body: Column(
         children: [
-          // ── Control panel (top) ──────────────────────────────────────────
           ConstrainedBox(
             constraints: BoxConstraints(
               maxHeight: MediaQuery.of(context).size.height * 0.44,
@@ -270,20 +189,18 @@ class _CatalogSwagDemoRunnerState extends State<CatalogSwagDemoRunner> {
             child: SingleChildScrollView(child: _buildControlPanel()),
           ),
           const Divider(height: 1, thickness: 1),
-          // ── Live screen (bottom) ─────────────────────────────────────────
           Expanded(child: _buildLiveScreen()),
         ],
       ),
     );
   }
 
-  // ── Control panel ──────────────────────────────────────────────────────────
-
   Widget _buildControlPanel() {
-    final phase = _isComplete || _currentStep >= _phases.length
-        ? _phases.last
-        : _phases[_currentStep];
-    final displayPhase = _phases[_displayedStep.clamp(0, _phases.length - 1)];
+    final phase = _isComplete || _currentStep >= widget.phases.length
+        ? widget.phases.last
+        : widget.phases[_currentStep];
+    final displayPhase =
+        widget.phases[_displayedStep.clamp(0, widget.phases.length - 1)];
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
@@ -291,20 +208,21 @@ class _CatalogSwagDemoRunnerState extends State<CatalogSwagDemoRunner> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Progress row
           Row(
             children: [
               Text(
                 _isComplete
-                    ? 'All ${_phases.length} steps complete'
-                    : 'Step ${_currentStep + 1} of ${_phases.length}',
+                    ? 'All ${widget.phases.length} steps complete'
+                    : 'Step ${_currentStep + 1} of ${widget.phases.length}',
                 style: Theme.of(context).textTheme.bodySmall,
               ),
               const SizedBox(width: 10),
               Expanded(
                 child: LinearProgressIndicator(
-                  value: _phases.isNotEmpty
-                      ? (_isComplete ? 1.0 : _currentStep / _phases.length)
+                  value: widget.phases.isNotEmpty
+                      ? (_isComplete
+                            ? 1.0
+                            : _currentStep / widget.phases.length)
                       : 0,
                   minHeight: 5,
                   borderRadius: BorderRadius.circular(4),
@@ -321,8 +239,6 @@ class _CatalogSwagDemoRunnerState extends State<CatalogSwagDemoRunner> {
             ],
           ),
           const SizedBox(height: 10),
-
-          // Current step title & description
           if (!_isComplete) ...[
             Text(
               '${_currentStep + 1}. ${phase.title}',
@@ -342,14 +258,12 @@ class _CatalogSwagDemoRunnerState extends State<CatalogSwagDemoRunner> {
             Text(
               'Demo complete — all phases finished!',
               style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.green.shade700,
-                  ),
+                fontWeight: FontWeight.bold,
+                color: Colors.green.shade700,
+              ),
             ),
           ],
           const SizedBox(height: 8),
-
-          // Live screen label
           Row(
             children: [
               Icon(Icons.tv, size: 14, color: Colors.grey.shade500),
@@ -365,8 +279,6 @@ class _CatalogSwagDemoRunnerState extends State<CatalogSwagDemoRunner> {
             ],
           ),
           const SizedBox(height: 8),
-
-          // Status messages
           if (_errorMessage != null) ...[
             _buildStatusBanner(
               icon: Icons.error_outline,
@@ -383,8 +295,6 @@ class _CatalogSwagDemoRunnerState extends State<CatalogSwagDemoRunner> {
             ),
             const SizedBox(height: 8),
           ],
-
-          // Action button
           SizedBox(
             width: double.infinity,
             child: _isComplete
@@ -414,7 +324,7 @@ class _CatalogSwagDemoRunnerState extends State<CatalogSwagDemoRunner> {
                           ? 'Running step ${_currentStep + 1}…'
                           : _errorMessage != null
                           ? 'Retry Step ${_currentStep + 1}'
-                          : 'Run Step ${_currentStep + 1} of ${_phases.length}',
+                          : 'Run Step ${_currentStep + 1} of ${widget.phases.length}',
                     ),
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 12),
@@ -422,8 +332,6 @@ class _CatalogSwagDemoRunnerState extends State<CatalogSwagDemoRunner> {
                     onPressed: _isRunning ? null : _runCurrentStep,
                   ),
           ),
-
-          // Resume hint
           if (!_isComplete && _currentStep > 0) ...[
             const SizedBox(height: 6),
             Text(
@@ -469,13 +377,11 @@ class _CatalogSwagDemoRunnerState extends State<CatalogSwagDemoRunner> {
     );
   }
 
-  // ── Live screen ───────────────────────────────────────────────────────────
-
   Widget _buildLiveScreen() {
-    final widgetName =
-        _phases[_displayedStep.clamp(0, _phases.length - 1)].widgetName;
+    final widgetName = widget
+        .phases[_displayedStep.clamp(0, widget.phases.length - 1)]
+        .widgetName;
     return KeyedSubtree(
-      // Key forces the widget to fully rebuild (= re-fetch data) when version changes.
       key: ValueKey('$widgetName-$_screenVersion'),
       child: WidgetRegistry.getWidget(widgetName),
     );

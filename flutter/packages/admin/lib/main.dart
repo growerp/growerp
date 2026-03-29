@@ -24,9 +24,11 @@ import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_user_company/growerp_user_company.dart';
 import 'package:growerp_website/growerp_website.dart';
 import 'package:growerp_manufacturing/growerp_manufacturing.dart';
+import 'package:growerp_manuf_liner/growerp_manuf_liner.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 import 'package:growerp_outreach/growerp_outreach.dart';
 import 'package:growerp_courses/growerp_courses.dart';
+import 'package:growerp_demos/growerp_demos.dart';
 import 'package:flutter/material.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -35,8 +37,6 @@ import 'package:go_router/go_router.dart';
 import 'views/admin_dashboard_content.dart';
 import 'views/plan_selection_form.dart';
 import 'views/accounting_form.dart';
-import 'demo/catalog_swag_demo_runner.dart';
-import 'demo/demo_list_screen.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 //webactivate  import 'package:web/web.dart' as web;
 
@@ -259,10 +259,8 @@ List<Map<String, GrowerpWidgetBuilder>> adminWidgetRegistrations = [
     'AccountingForm': (args) => const AccountingForm(),
     'PlanSelectionForm': (args) => const PlanSelectionForm(),
     'AboutForm': (args) => const AboutForm(),
-    // Demo widgets — only registered outside production builds
+    // Demo widget — only registered outside production builds
     if (!kReleaseMode) 'DemoList': (args) => const DemoListScreen(),
-    if (!kReleaseMode)
-      'CatalogSwagDemoRunner': (args) => const CatalogSwagDemoRunner(),
   },
 ];
 
@@ -275,6 +273,7 @@ List<BlocProvider> getAdminBlocProviders(
     ...getUserCompanyBlocProviders(restClient, classificationId),
     ...getCatalogBlocProviders(restClient, classificationId),
     ...getManufacturingBlocProviders(restClient),
+    ...getLinerBlocProviders(restClient),
     ...getOrderAccountingBlocProviders(restClient, classificationId),
     ...getSalesBlocProviders(restClient),
     ...getMarketingBlocProviders(restClient),

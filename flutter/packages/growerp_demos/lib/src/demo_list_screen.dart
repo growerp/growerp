@@ -8,64 +8,31 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 
-import 'catalog_swag_demo_runner.dart';
-import 'demo_progress_service.dart';
-
-// ── Demo registry ─────────────────────────────────────────────────────────────
-
-/// Describes a runnable demo that appears in the demo list.
-class DemoEntry {
-  final String title;
-  final String description;
-  final IconData icon;
-  final int totalPhases;
-  final Future<int> Function(String ownerPartyId) getProgress;
-  final Future<void> Function(String ownerPartyId) resetProgress;
-  final Widget Function() builder;
-
-  const DemoEntry({
-    required this.title,
-    required this.description,
-    required this.icon,
-    required this.totalPhases,
-    required this.getProgress,
-    required this.resetProgress,
-    required this.builder,
-  });
-}
-
-/// All registered demos. Add new demos here to have them appear in the list.
-final List<DemoEntry> registeredDemos = [
-  DemoEntry(
-    title: 'Catalog & Manufacturing Demo',
-    description:
-        'End-to-end lifecycle: create swag products and a Bill of Materials, '
-        'sell kits via a sales order, auto-create a work order, purchase and '
-        'receive components, assemble the kits, ship to the customer, and '
-        'review GL transactions.',
-    icon: Icons.precision_manufacturing,
-    totalPhases: 9,
-    getProgress: DemoProgressService.getCurrentStep,
-    resetProgress: DemoProgressService.reset,
-    builder: () => const CatalogSwagDemoRunner(),
-  ),
-];
+import 'demo_entry.dart';
+import 'registered_demos.dart';
 
 // ── Screen ────────────────────────────────────────────────────────────────────
 
 /// Shows all available demos. Only visible when not running in release mode.
 ///
-/// Register this widget as 'DemoList' in adminWidgetRegistrations and add a
+/// Pass [demos] to override the default [registeredDemos] list, which lets
+/// individual apps compose their own demo selection.
+///
+/// Register this widget as 'DemoList' in widgetRegistrations and add a
 /// menu item (widgetName: 'DemoList') via the admin FAB in development.
 class DemoListScreen extends StatefulWidget {
-  const DemoListScreen({super.key});
+  /// Override the demo list shown. Defaults to [registeredDemos] when null.
+  final List<DemoEntry>? demos;
+
+  const DemoListScreen({super.key, this.demos});
 
   @override
   State<DemoListScreen> createState() => _DemoListScreenState();
 }
 
 class _DemoListScreenState extends State<DemoListScreen> {
-  // Per-demo cached progress (step index).
+  List<DemoEntry> get _demos => widget.demos ?? registeredDemos;
+
   late List<int> _progress;
   bool _loaded = false;
   String _ownerPartyId = 'default';
@@ -73,7 +40,7 @@ class _DemoListScreenState extends State<DemoListScreen> {
   @override
   void initState() {
     super.initState();
-    _progress = List.filled(registeredDemos.length, 0);
+    _progress = List.filled(_demos.length, 0);
     _ownerPartyId =
         context.read<AuthBloc>().state.authenticate?.ownerPartyId ?? 'default';
     _loadProgress();
@@ -81,7 +48,7 @@ class _DemoListScreenState extends State<DemoListScreen> {
 
   Future<void> _loadProgress() async {
     final values = await Future.wait(
-      registeredDemos.map((d) => d.getProgress(_ownerPartyId)),
+      _demos.map((d) => d.getProgress(_ownerPartyId)),
     );
     if (mounted) {
       setState(() {
@@ -93,7 +60,6 @@ class _DemoListScreenState extends State<DemoListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Guard: never shown in production builds.
     if (kReleaseMode) {
       return const Scaffold(
         body: Center(
@@ -153,15 +119,15 @@ class _DemoListScreenState extends State<DemoListScreen> {
   }
 
   Widget _buildDemoList() {
-    if (registeredDemos.isEmpty) {
+    if (_demos.isEmpty) {
       return const Center(child: Text('No demos registered.'));
     }
     return ListView.separated(
       padding: const EdgeInsets.all(16),
-      itemCount: registeredDemos.length,
+      itemCount: _demos.length,
       separatorBuilder: (_, _) => const SizedBox(height: 12),
       itemBuilder: (ctx, index) => _DemoCard(
-        entry: registeredDemos[index],
+        entry: _demos[index],
         currentStep: _progress[index],
         ownerPartyId: _ownerPartyId,
         onResetDone: _loadProgress,
@@ -172,11 +138,8 @@ class _DemoListScreenState extends State<DemoListScreen> {
 
   Future<void> _openDemo(BuildContext ctx, int index) async {
     await Navigator.of(ctx).push<void>(
-      MaterialPageRoute(
-        builder: (_) => registeredDemos[index].builder(),
-      ),
+      MaterialPageRoute(builder: (_) => _demos[index].builder()),
     );
-    // Refresh progress when returning from the runner.
     await _loadProgress();
   }
 }
@@ -257,11 +220,7 @@ class _DemoCard extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 12),
-              // Description
-              Text(
-                entry.description,
-                style: const TextStyle(fontSize: 13),
-              ),
+              Text(entry.description, style: const TextStyle(fontSize: 13)),
               const SizedBox(height: 12),
               // Progress bar + step count
               Row(
@@ -286,27 +245,19 @@ class _DemoCard extends StatelessWidget {
                   const SizedBox(width: 10),
                   Text(
                     '$currentStep / ${entry.totalPhases}',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey.shade600,
-                    ),
+                    style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
                   ),
                 ],
               ),
               const SizedBox(height: 12),
-              // Action button
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
                   icon: Icon(_buttonIcon, size: 18),
                   label: Text(_buttonLabel),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: _isComplete
-                        ? Colors.grey.shade200
-                        : null,
-                    foregroundColor: _isComplete
-                        ? Colors.grey.shade700
-                        : null,
+                    backgroundColor: _isComplete ? Colors.grey.shade200 : null,
+                    foregroundColor: _isComplete ? Colors.grey.shade700 : null,
                   ),
                   onPressed: onOpen,
                 ),
@@ -320,7 +271,9 @@ class _DemoCard extends StatelessWidget {
 
   String get _statusLabel {
     if (_isComplete) return 'Completed';
-    if (_isStarted) return 'In progress — step $currentStep of ${entry.totalPhases}';
+    if (_isStarted) {
+      return 'In progress — step $currentStep of ${entry.totalPhases}';
+    }
     return 'Not started';
   }
 

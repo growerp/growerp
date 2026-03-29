@@ -237,6 +237,15 @@ GoRouter _buildStaticRouter(StaticRouterConfig config) {
           },
           routes: [...generateRoutes(), ...config.shellRoutes],
         ),
+      // User profile route - full screen, no shell wrapper
+      GoRoute(
+        path: '/user',
+        builder: (context, state) {
+          final extra = state.extra;
+          return WidgetRegistry.getWidget('UserDialog', {'user': extra});
+        },
+      ),
+
       // Company dialog route - full screen, no shell wrapper
       GoRoute(
         path: '/company',
