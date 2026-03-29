@@ -14,9 +14,8 @@ for ARG in "$@"; do
   [ "$ARG" = "--push" ] && PUSH=true
 done
 
-# Resolve growerp1 root (script lives at moqui/sync-submodules.sh)
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-REPO_ROOT="$(git -C "$SCRIPT_DIR" rev-parse --show-toplevel)"
+# Resolve growerp1 root (script lives at repo root)
+REPO_ROOT="$(cd "$(dirname "$0")" && pwd)"
 cd "$REPO_ROOT"
 
 echo "=== Updating submodule pointers (--remote --recursive) ==="
