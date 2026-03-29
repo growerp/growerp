@@ -1,0 +1,4 @@
+[submodule "moqui"]
+	path = moqui
+	url = git@github.com:growerp/moqui-framework.git
+	branch = growerp
