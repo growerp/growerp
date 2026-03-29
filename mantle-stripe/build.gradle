@@ -49,8 +49,8 @@ task cleanLib(type: Delete) { delete fileTree(dir: projectDir.absolutePath+'/lib
 clean.dependsOn cleanLib
 
 jar {
-    destinationDir = file(projectDir.absolutePath + '/lib') // Declaring compiled Groovy goes into lib directory
-    baseName = jarBaseName
+    destinationDirectory = file(projectDir.absolutePath + '/lib') // Declaring compiled Groovy goes into lib directory
+    archiveBaseName = jarBaseName
 }
 task copyDependencies { doLast {
     copy { from (configurations.runtimeClasspath - project(':framework').configurations.runtimeClasspath - project(':framework').jar.archivePath)
