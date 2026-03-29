@@ -52,9 +52,11 @@ jar {
     destinationDirectory = file(projectDir.absolutePath + '/lib') // Declaring compiled Groovy goes into lib directory
     archiveBaseName = jarBaseName
 }
-task copyDependencies { doLast {
-    copy { from (configurations.runtimeClasspath - project(':framework').configurations.runtimeClasspath - project(':framework').jar.archivePath)
-        into file(projectDir.absolutePath + '/lib') }
-} }
-copyDependencies.dependsOn cleanLib
+tasks.register('copyDependencies', Copy) {
+    dependsOn cleanLib
+    from (configurations.runtimeClasspath -
+          project(':framework').configurations.runtimeClasspath -
+          project(':framework').tasks.named('jar').get().archiveFile.get().asFile)
+    into file(projectDir.absolutePath + '/lib')
+}
 jar.dependsOn copyDependencies
