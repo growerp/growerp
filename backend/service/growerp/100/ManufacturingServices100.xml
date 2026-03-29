@@ -1,0 +1,963 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-2.1.xsd">
+
+    <!-- ===================== BOM Services ===================== -->
+
+    <service verb="get" noun="Boms" authenticate="true">
+        <description>Get distinct assembly products (parent products with BOM items) for the
+            current company. Returns one entry per assembly product.</description>
+        <in-parameters>
+            <parameter name="search" default="null" />
+            <parameter name="start" default-value="0" type="Integer" />
+            <parameter name="limit" default-value="20" type="Integer" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="boms" type="List">
+                <parameter name="bom" type="Map">
+                    <parameter name="productId" />
+                    <parameter name="productPseudoId" />
+                    <parameter name="productName" />
+                </parameter>
+            </parameter>
+            <parameter name="total" type="Integer" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <if condition="search != null">
+                <set field="searchPattern" value="%${search}%" />
+            </if>
+            <entity-find entity-name="growerp.manufacturing.BomItemAndProductDetail"
+                list="allProductList" distinct="true">
+                <select-field field-name="productId" />
+                <select-field field-name="productPseudoId" />
+                <select-field field-name="productName" />
+                <econdition field-name="ownerPartyId" from="ownerPartyId" />
+                <econdition field-name="productAssocTypeEnumId" value="PatMfgBom" />
+                <econdition field-name="thruDate" operator="is-null" or-null="true" />
+                <econditions combine="or">
+                    <econdition field-name="productPseudoId" ignore-case="true"
+                        operator="like" from="searchPattern" ignore-if-empty="true" />
+                    <econdition field-name="productName" ignore-case="true"
+                        operator="like" from="searchPattern" ignore-if-empty="true" />
+                </econditions>
+                <order-by field-name="productPseudoId" />
+            </entity-find>
+            <set field="total" from="allProductList.size() as Integer" />
+            <set field="bomPage"
+                from="allProductList.subList(Math.min(start, total), Math.min(start + limit, total))" />
+            <set field="boms" from="[]" />
+            <iterate list="bomPage" entry="bom">
+                <script>boms.add([
+                    productId: bom.productId,
+                    productPseudoId: bom.productPseudoId,
+                    productName: bom.productName
+                ])</script>
+            </iterate>
+        </actions>
+    </service>
+
+    <!-- ===================== BOM Item Services ===================== -->
+
+    <service verb="get" noun="BomItem" authenticate="true">
+        <description>Get BOM items (ProductAssoc with PatMfgBom type) for the current company.
+            Optionally filter by parent productId.</description>
+        <in-parameters>
+            <parameter name="productId" />
+            <parameter name="search" default="null" />
+            <parameter name="start" default-value="0" type="Integer" />
+            <parameter name="limit" default-value="20" type="Integer" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="bomItems" type="List">
+                <parameter name="bomItem" type="Map">
+                    <parameter name="productId" />
+                    <parameter name="productPseudoId" />
+                    <parameter name="productName" />
+                    <parameter name="toProductId" />
+                    <parameter name="componentPseudoId" />
+                    <parameter name="componentName" />
+                    <parameter name="productAssocTypeEnumId" />
+                    <parameter name="fromDate" />
+                    <parameter name="quantity" />
+                    <parameter name="scrapFactor" />
+                    <parameter name="sequenceNum" />
+                    <parameter name="availableQuantity" />
+                </parameter>
+            </parameter>
+            <parameter name="total" type="Integer" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <if condition="search != null">
+                <set field="search" value="%${search}%" />
+            </if>
+            <entity-find entity-name="growerp.manufacturing.BomItemAndProductDetail"
+                list="bomItemList" offset="start" limit="limit">
+                <econdition field-name="ownerPartyId" from="ownerPartyId" />
+                <econdition field-name="productAssocTypeEnumId" value="PatMfgBom" />
+                <econdition field-name="productId" ignore-if-empty="true" />
+                <econdition field-name="thruDate" operator="is-null" or-null="true" />
+                <econditions combine="or">
+                    <econdition field-name="productPseudoId" ignore-case="true"
+                        operator="like" from="search" ignore-if-empty="true" />
+                    <econdition field-name="productName" ignore-case="true"
+                        operator="like" from="search" ignore-if-empty="true" />
+                    <econdition field-name="componentPseudoId" ignore-case="true"
+                        operator="like" from="search" ignore-if-empty="true" />
+                    <econdition field-name="componentName" ignore-case="true"
+                        operator="like" from="search" ignore-if-empty="true" />
+                </econditions>
+                <order-by field-name="productId,sequenceNum,toProductId" />
+            </entity-find>
+            <entity-find-count entity-name="growerp.manufacturing.BomItemAndProductDetail"
+                count-field="total">
+                <econdition field-name="ownerPartyId" from="ownerPartyId" />
+                <econdition field-name="productAssocTypeEnumId" value="PatMfgBom" />
+                <econdition field-name="productId" ignore-if-empty="true" />
+                <econdition field-name="thruDate" operator="is-null" or-null="true" />
+            </entity-find-count>
+            <set field="bomItems" from="[]" />
+            <iterate list="bomItemList" entry="bom">
+                <entity-find entity-name="mantle.product.asset.Asset" list="assetList">
+                    <econdition field-name="productId" from="bom.toProductId" />
+                    <econdition field-name="ownerPartyId" from="ownerPartyId" />
+                    <econdition field-name="statusId" value="AstAvailable" />
+                </entity-find>
+                <set field="totalAvailable" from="0.0" />
+                <iterate list="assetList" entry="ast">
+                    <set field="totalAvailable"
+                        from="totalAvailable + (ast.quantityOnHandTotal ?: 0.0)" />
+                </iterate>
+                <script>bomItems.add([
+                    productId: bom.productId,
+                    productPseudoId: bom.productPseudoId,
+                    productName: bom.productName,
+                    toProductId: bom.toProductId,
+                    componentPseudoId: bom.componentPseudoId,
+                    componentName: bom.componentName,
+                    productAssocTypeEnumId: bom.productAssocTypeEnumId,
+                    fromDate: bom.fromDate?.toString(),
+                    quantity: bom.quantity?.toString(),
+                    scrapFactor: bom.scrapFactor?.toString(),
+                    sequenceNum: bom.sequenceNum,
+                    availableQuantity: totalAvailable?.toString()
+                ])</script>
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="create" noun="BomItem" authenticate="true">
+        <description>Create a BOM item (ProductAssoc with PatMfgBom type).</description>
+        <in-parameters>
+            <parameter name="bomItem" type="Map" required="true">
+                <parameter name="productId" required="true" />
+                <parameter name="toProductId" required="true" />
+                <parameter name="productAssocTypeEnumId" default-value="PatMfgBom" />
+                <parameter name="quantity" type="BigDecimal" default="1.0" />
+                <parameter name="scrapFactor" type="BigDecimal" />
+                <parameter name="sequenceNum" type="Integer" />
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="bomItem" type="Map" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <!-- Resolve parent product by pseudoId, then by productId -->
+            <entity-find entity-name="mantle.product.Product" list="parentList" limit="1">
+                <econdition field-name="ownerPartyId" from="ownerPartyId" />
+                <econdition field-name="pseudoId" from="bomItem.productId" />
+            </entity-find>
+            <if condition="!parentList">
+                <entity-find entity-name="mantle.product.Product" list="parentList" limit="1">
+                    <econdition field-name="ownerPartyId" from="ownerPartyId" />
+                    <econdition field-name="productId" from="bomItem.productId" />
+                </entity-find>
+            </if>
+            <if condition="!parentList">
+                <return error="true" message="Assembly product '${bomItem.productId}' not found for company" />
+            </if>
+            <set field="resolvedParentId" from="parentList[0].productId" />
+            <!-- Resolve component product by pseudoId, then by productId -->
+            <entity-find entity-name="mantle.product.Product" list="compList" limit="1">
+                <econdition field-name="ownerPartyId" from="ownerPartyId" />
+                <econdition field-name="pseudoId" from="bomItem.toProductId" />
+            </entity-find>
+            <if condition="!compList">
+                <entity-find entity-name="mantle.product.Product" list="compList" limit="1">
+                    <econdition field-name="ownerPartyId" from="ownerPartyId" />
+                    <econdition field-name="productId" from="bomItem.toProductId" />
+                </entity-find>
+            </if>
+            <if condition="!compList">
+                <return error="true" message="Component product '${bomItem.toProductId}' not found for company" />
+            </if>
+            <set field="resolvedCompId" from="compList[0].productId" />
+            <service-call name="create#mantle.product.ProductAssoc"
+                in-map="[productId: resolvedParentId,
+                    toProductId: resolvedCompId,
+                    productAssocTypeEnumId: bomItem.productAssocTypeEnumId ?: 'PatMfgBom',
+                    fromDate: ec.user.nowTimestamp,
+                    quantity: bomItem.quantity ?: 1.0,
+                    scrapFactor: bomItem.scrapFactor,
+                    sequenceNum: bomItem.sequenceNum]"
+                out-map="context" />
+            <service-call name="growerp.100.ManufacturingServices100.get#BomItem"
+                in-map="[productId: resolvedParentId]" out-map="context" />
+            <set field="bomItem" from="bomItems?.find { it.toProductId == resolvedCompId }" />
+        </actions>
+    </service>
+
+    <service verb="update" noun="BomItem" authenticate="true">
+        <description>Update a BOM item quantity/scrapFactor by expiring the old record and
+            creating a new one (ProductAssoc uses fromDate as PK).</description>
+        <in-parameters>
+            <parameter name="bomItem" type="Map" required="true">
+                <parameter name="productId" required="true" />
+                <parameter name="toProductId" required="true" />
+                <parameter name="fromDate" required="true" />
+                <parameter name="quantity" type="BigDecimal" />
+                <parameter name="scrapFactor" type="BigDecimal" />
+                <parameter name="sequenceNum" type="Integer" />
+                <parameter name="productAssocTypeEnumId" />
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="bomItem" type="Map" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <entity-find-one entity-name="mantle.product.Product" value-field="parentProduct">
+                <field-map field-name="productId" from="bomItem.productId" />
+            </entity-find-one>
+            <if condition="!parentProduct || parentProduct.ownerPartyId != companyPartyId">
+                <return error="true" message="Product ${bomItem.productId} not found for company" />
+            </if>
+            <service-call name="update#mantle.product.ProductAssoc"
+                in-map="[productId: bomItem.productId,
+                    toProductId: bomItem.toProductId,
+                    productAssocTypeEnumId: bomItem.productAssocTypeEnumId ?: 'PatMfgBom',
+                    fromDate: bomItem.fromDate,
+                    quantity: bomItem.quantity,
+                    scrapFactor: bomItem.scrapFactor,
+                    sequenceNum: bomItem.sequenceNum]"
+                out-map="context" />
+            <service-call name="growerp.100.ManufacturingServices100.get#BomItem"
+                in-map="[productId: bomItem.productId]" out-map="context" />
+            <set field="bomItem" from="bomItems?.find { it.toProductId == bomItem.toProductId }" />
+        </actions>
+    </service>
+
+    <service verb="delete" noun="BomItem" authenticate="true">
+        <description>Delete (expire) a BOM item by setting its thruDate.</description>
+        <in-parameters>
+            <parameter name="bomItem" type="Map" required="true">
+                <parameter name="productId" required="true" />
+                <parameter name="toProductId" required="true" />
+                <parameter name="fromDate" required="true" />
+                <parameter name="productAssocTypeEnumId" default-value="PatMfgBom" />
+            </parameter>
+        </in-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <entity-find-one entity-name="mantle.product.Product" value-field="parentProduct">
+                <field-map field-name="productId" from="bomItem.productId" />
+            </entity-find-one>
+            <if condition="!parentProduct || parentProduct.ownerPartyId != companyPartyId">
+                <return error="true" message="Product ${bomItem.productId} not found for company" />
+            </if>
+            <service-call name="update#mantle.product.ProductAssoc"
+                in-map="[productId: bomItem.productId,
+                    toProductId: bomItem.toProductId,
+                    productAssocTypeEnumId: bomItem.productAssocTypeEnumId ?: 'PatMfgBom',
+                    fromDate: bomItem.fromDate,
+                    thruDate: ec.user.nowTimestamp]" />
+        </actions>
+    </service>
+
+    <!-- ===================== Work Order Services ===================== -->
+
+    <service verb="get" noun="WorkOrder" authenticate="true">
+        <description>Get production work orders (WorkEffort with WepProductionRun purpose) for
+            the current company.</description>
+        <in-parameters>
+            <parameter name="workEffortId" />
+            <parameter name="pseudoId" />
+            <parameter name="search" default="null" />
+            <parameter name="start" default-value="0" type="Integer" />
+            <parameter name="limit" default-value="20" type="Integer" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="workOrders" type="List">
+                <parameter name="workOrder" type="Map">
+                    <parameter name="workEffortId" />
+                    <parameter name="pseudoId" />
+                    <parameter name="workEffortName" />
+                    <parameter name="statusId" />
+                    <parameter name="productId" />
+                    <parameter name="productPseudoId" />
+                    <parameter name="productName" />
+                    <parameter name="estimatedQuantity" />
+                    <parameter name="estimatedStartDate" />
+                    <parameter name="estimatedCompletionDate" />
+                    <parameter name="actualStartDate" />
+                    <parameter name="actualCompletionDate" />
+                    <parameter name="totalCost" />
+                </parameter>
+            </parameter>
+            <parameter name="total" type="Integer" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <if condition="search != null">
+                <set field="search" value="%${search}%" />
+            </if>
+            <entity-find entity-name="growerp.manufacturing.WorkOrderAndProductDetail"
+                list="workOrderList" offset="start" limit="limit">
+                <econdition field-name="ownerPartyId" from="companyPartyId" />
+                <econdition field-name="workEffortId" ignore-if-empty="true" />
+                <econdition field-name="workEffortPseudoId" from="pseudoId" ignore-if-empty="true" />
+                <econditions combine="or">
+                    <econdition field-name="workEffortPseudoId" ignore-case="true"
+                        operator="like" from="search" ignore-if-empty="true" />
+                    <econdition field-name="workEffortName" ignore-case="true"
+                        operator="like" from="search" ignore-if-empty="true" />
+                    <econdition field-name="productName" ignore-case="true"
+                        operator="like" from="search" ignore-if-empty="true" />
+                    <econdition field-name="productPseudoId" ignore-case="true"
+                        operator="like" from="search" ignore-if-empty="true" />
+                </econditions>
+                <order-by field-name="-estimatedStartDate,workEffortId" />
+            </entity-find>
+            <entity-find-count entity-name="growerp.manufacturing.WorkOrderAndProductDetail"
+                count-field="total">
+                <econdition field-name="ownerPartyId" from="companyPartyId" />
+                <econdition field-name="workEffortId" ignore-if-empty="true" />
+                <econdition field-name="workEffortPseudoId" from="pseudoId" ignore-if-empty="true" />
+            </entity-find-count>
+            <set field="workOrders" from="[]" />
+            <iterate list="workOrderList" entry="wo">
+                <!-- Fetch BOM items (WorkEffortProduct consume records) with inventory availability -->
+                <entity-find entity-name="mantle.work.effort.WorkEffortProduct"
+                    list="wepList">
+                    <econdition field-name="workEffortId" from="wo.workEffortId" />
+                    <econdition field-name="typeEnumId" value="WeptConsume" />
+                </entity-find>
+                <set field="bomItemsList" from="[]" />
+                <iterate list="wepList" entry="wep">
+                    <entity-find-one entity-name="mantle.product.Product" value-field="compProd">
+                        <field-map field-name="productId" from="wep.productId" />
+                    </entity-find-one>
+                    <!-- Sum quantityOnHand across all available assets for this component -->
+                    <entity-find entity-name="mantle.product.asset.Asset" list="assetList">
+                        <econdition field-name="productId" from="wep.productId" />
+                        <econdition field-name="ownerPartyId" from="companyPartyId" />
+                        <econdition field-name="statusId" value="AstAvailable" />
+                    </entity-find>
+                    <set field="totalAvailable" from="0.0" />
+                    <iterate list="assetList" entry="ast">
+                        <set field="totalAvailable" from="totalAvailable + (ast.quantityOnHandTotal ?: 0.0)" />
+                    </iterate>
+                    <!-- requiredQty = BOM per-unit qty * WO estimatedQuantity -->
+                    <set field="requiredQty" from="(wep.estimatedQuantity ?: 1.0) * (wo.estimatedQuantity ?: 1.0)" />
+                    <!-- Look up component purchase/cost price (prefer PptPurchase, fall back to PptCurrent) -->
+                    <entity-find entity-name="mantle.product.ProductPrice" list="purchasePriceList" limit="1">
+                        <econdition field-name="productId" from="wep.productId" />
+                        <econdition field-name="priceTypeEnumId" value="PptPurchase" />
+                        <econdition field-name="thruDate" operator="is-null" or-null="true" />
+                        <order-by field-name="-fromDate" />
+                    </entity-find>
+                    <if condition="!purchasePriceList">
+                        <entity-find entity-name="mantle.product.ProductPrice" list="purchasePriceList" limit="1">
+                            <econdition field-name="productId" from="wep.productId" />
+                            <econdition field-name="priceTypeEnumId" value="PptCurrent" />
+                            <econdition field-name="thruDate" operator="is-null" or-null="true" />
+                            <order-by field-name="-fromDate" />
+                        </entity-find>
+                    </if>
+                    <set field="unitCost" from="purchasePriceList ? purchasePriceList[0].price : null" />
+                    <set field="itemTotalCost" from="unitCost != null ? unitCost * requiredQty : null" />
+                    <script>bomItemsList.add([
+                        toProductId: wep.productId,
+                        componentPseudoId: compProd?.pseudoId ?: '',
+                        componentName: compProd?.productName,
+                        quantity: requiredQty?.toString(),
+                        availableQuantity: totalAvailable?.toString(),
+                        unitCost: unitCost?.toString(),
+                        totalCost: itemTotalCost?.toString()
+                    ])</script>
+                </iterate>
+                <!-- Sum all per-component totalCosts to get the work order total production cost -->
+                <set field="woTotalCost" from="null" />
+                <script>
+                    def costs = bomItemsList.findAll { it.totalCost != null }.collect { new BigDecimal(it.totalCost) }
+                    if (costs) woTotalCost = costs.sum().toString()
+                </script>
+                <!-- Look up routing name if routingId is set -->
+                <set field="woRoutingName" from="null" />
+                <if condition="wo.routingId">
+                    <entity-find-one entity-name="growerp.manufacturing.Routing" value-field="woRouting">
+                        <field-map field-name="routingId" from="wo.routingId" />
+                    </entity-find-one>
+                    <set field="woRoutingName" from="woRouting?.routingName" />
+                </if>
+                <script>workOrders.add([
+                    workEffortId: wo.workEffortId,
+                    pseudoId: wo.workEffortPseudoId,
+                    workEffortName: wo.workEffortName,
+                    statusId: wo.statusId,
+                    productId: wo.productId,
+                    productPseudoId: wo.productPseudoId,
+                    productName: wo.productName,
+                    estimatedQuantity: wo.estimatedQuantity?.toString(),
+                    estimatedStartDate: wo.estimatedStartDate?.toString(),
+                    estimatedCompletionDate: wo.estimatedCompletionDate?.toString(),
+                    actualStartDate: wo.actualStartDate?.toString(),
+                    actualCompletionDate: wo.actualCompletionDate?.toString(),
+                    totalCost: woTotalCost,
+                    routingId: wo.routingId,
+                    routingName: woRoutingName,
+                    bomItems: bomItemsList
+                ])</script>
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="create" noun="WorkOrder" authenticate="true">
+        <description>Create a production work order (WorkEffort). Automatically populates
+            WorkEffortProduct records from the product BOM.</description>
+        <in-parameters>
+            <parameter name="workOrder" type="Map" required="true">
+                <parameter name="workEffortName" />
+                <parameter name="productId" />
+                <parameter name="productPseudoId" />
+                <parameter name="estimatedQuantity" type="BigDecimal" required="true" />
+                <parameter name="estimatedStartDate" type="Timestamp" />
+                <parameter name="estimatedCompletionDate" type="Timestamp" />
+                <parameter name="facilityId" />
+                <parameter name="routingId" />
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="workOrder" type="Map" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <!-- Resolve product by pseudoId, then by productId -->
+            <set field="productRef" from="(workOrder.productPseudoId ?: workOrder.productId) ?: ''" />
+            <entity-find entity-name="mantle.product.Product" list="productList" limit="1">
+                <econdition field-name="ownerPartyId" from="ownerPartyId" />
+                <econdition field-name="pseudoId" from="productRef" />
+            </entity-find>
+            <if condition="!productList">
+                <entity-find entity-name="mantle.product.Product" list="productList" limit="1">
+                    <econdition field-name="ownerPartyId" from="ownerPartyId" />
+                    <econdition field-name="productId" from="productRef" />
+                </entity-find>
+            </if>
+            <if condition="!productList">
+                <return error="true" message="Product '${productRef}' not found for company" />
+            </if>
+            <set field="resolvedProductId" from="productList[0].productId" />
+            <!-- Resolve facilityId: use the first facility for this company if not provided -->
+            <if condition="!workOrder.facilityId">
+                <entity-find entity-name="mantle.facility.Facility" list="facilities" limit="1">
+                    <econdition field-name="ownerPartyId" from="companyPartyId" />
+                </entity-find>
+                <set field="facilityId" from="facilities ? facilities[0].facilityId : null" />
+                <else>
+                    <set field="facilityId" from="workOrder.facilityId" />
+                </else>
+            </if>
+            <!-- Generate pseudoId for the work order -->
+            <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                in-map="[ownerPartyId: ownerPartyId, seqName: 'workOrder']"
+                out-map="context" />
+            <!-- Create the production run via mantle service -->
+            <service-call name="mantle.work.ManufacturingServices.create#ProductionRun"
+                in-map="[workEffortName: workOrder.workEffortName,
+                    produceProductId: resolvedProductId,
+                    produceEstimatedQuantity: workOrder.estimatedQuantity,
+                    estimatedStartDate: workOrder.estimatedStartDate,
+                    estimatedCompletionDate: workOrder.estimatedCompletionDate,
+                    ownerPartyId: companyPartyId,
+                    facilityId: facilityId ?: '_NA_']"
+                out-map="context" />
+            <!-- Set the pseudoId and routingId on the created WorkEffort -->
+            <service-call name="update#mantle.work.effort.WorkEffort"
+                in-map="[workEffortId: workEffortId,
+                    workEffortPseudoId: seqNum,
+                    ownerPartyId: companyPartyId,
+                    routingId: workOrder.routingId]" />
+            <service-call name="growerp.100.ManufacturingServices100.get#WorkOrder"
+                in-map="[workEffortId: workEffortId]" out-map="context" />
+            <set field="workOrder" from="workOrders ? workOrders[0] : null" />
+        </actions>
+    </service>
+
+    <service verb="update" noun="WorkOrder" authenticate="true">
+        <description>Update a production work order status, quantity, or dates.</description>
+        <in-parameters>
+            <parameter name="workOrder" type="Map" required="true">
+                <parameter name="workEffortId" required="true" />
+                <parameter name="workEffortName" />
+                <parameter name="statusId" />
+                <parameter name="estimatedQuantity" type="BigDecimal" />
+                <parameter name="estimatedStartDate" type="Timestamp" />
+                <parameter name="estimatedCompletionDate" type="Timestamp" />
+                <parameter name="routingId" />
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="workOrder" type="Map" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <!-- Verify ownership -->
+            <entity-find-one entity-name="mantle.work.effort.WorkEffort" value-field="we">
+                <field-map field-name="workEffortId" from="workOrder.workEffortId" />
+            </entity-find-one>
+            <if condition="!we || we.ownerPartyId != companyPartyId">
+                <return error="true"
+                    message="Work order ${workOrder.workEffortId} not found for company" />
+            </if>
+            <service-call name="update#mantle.work.effort.WorkEffort"
+                in-map="[workEffortId: workOrder.workEffortId,
+                    workEffortName: workOrder.workEffortName,
+                    statusId: workOrder.statusId,
+                    estimatedQuantity: workOrder.estimatedQuantity,
+                    estimatedStartDate: workOrder.estimatedStartDate,
+                    estimatedCompletionDate: workOrder.estimatedCompletionDate,
+                    routingId: workOrder.routingId]" />
+            <!-- On completion: consume components and receive finished good into inventory -->
+            <if condition="workOrder.statusId == 'WeComplete'">
+                <!-- Issue component inventory to the work effort, accumulating total cost -->
+                <entity-find entity-name="mantle.work.effort.WorkEffortProduct" list="consumeWepList">
+                    <econdition field-name="workEffortId" from="workOrder.workEffortId" />
+                    <econdition field-name="typeEnumId" value="WeptConsume" />
+                </entity-find>
+                <set field="totalProductionCost" from="0.0" />
+                <iterate list="consumeWepList" entry="consumeWep">
+                    <entity-find entity-name="mantle.product.asset.Asset" list="compAssets">
+                        <econdition field-name="productId" from="consumeWep.productId" />
+                        <econdition field-name="ownerPartyId" from="companyPartyId" />
+                        <econdition field-name="statusId" value="AstAvailable" />
+                        <econdition field-name="availableToPromiseTotal" operator="greater" from="0" />
+                        <order-by field-name="receivedDate" />
+                    </entity-find>
+                    <set field="qtyToIssue" from="consumeWep.estimatedQuantity ?: 0.0" />
+                    <iterate list="compAssets" entry="compAsset">
+                        <if condition="qtyToIssue &lt;= 0"><break/></if>
+                        <set field="issueQty" from="compAsset.availableToPromiseTotal > qtyToIssue ? qtyToIssue : compAsset.availableToPromiseTotal" />
+                        <service-call name="mantle.product.AssetServices.issue#AssetToWorkEffort"
+                            in-map="[assetId: compAsset.assetId, workEffortId: workOrder.workEffortId,
+                                quantity: issueQty, noOriginFacility: 'ignore']"
+                            ignore-error="true" />
+                        <!-- Accumulate cost from component asset acquireCost -->
+                        <if condition="compAsset.acquireCost">
+                            <set field="totalProductionCost"
+                                from="totalProductionCost + (compAsset.acquireCost * issueQty)" />
+                        </if>
+                        <set field="qtyToIssue" from="qtyToIssue - issueQty" />
+                    </iterate>
+                </iterate>
+                <!-- Receive the finished good into available inventory with calculated unit cost -->
+                <entity-find entity-name="mantle.work.effort.WorkEffortProduct" list="produceWepList">
+                    <econdition field-name="workEffortId" from="workOrder.workEffortId" />
+                    <econdition field-name="typeEnumId" value="WeptProduce" />
+                </entity-find>
+                <iterate list="produceWepList" entry="produceWep">
+                    <set field="finishedGoodQty" from="(produceWep.estimatedQuantity ?: 1.0) as BigDecimal" />
+                    <set field="finishedGoodUnitCost"
+                        from="finishedGoodQty > 0 ? totalProductionCost / finishedGoodQty : null" />
+                    <service-call name="mantle.product.AssetServices.receive#Asset"
+                        in-map="[productId: produceWep.productId,
+                            quantity: finishedGoodQty,
+                            acquireCost: finishedGoodUnitCost,
+                            facilityId: we.facilityId ?: '_NA_',
+                            ownerPartyId: companyPartyId,
+                            workEffortId: workOrder.workEffortId,
+                            statusId: 'AstAvailable',
+                            noProduceProduct: 'ignore']"
+                        ignore-error="true" />
+                </iterate>
+            </if>
+            <service-call name="growerp.100.ManufacturingServices100.get#WorkOrder"
+                in-map="[workEffortId: workOrder.workEffortId]" out-map="context" />
+            <set field="workOrder" from="workOrders ? workOrders[0] : null" />
+        </actions>
+    </service>
+
+    <!-- ===================== Routing Services ===================== -->
+
+    <service verb="get" noun="Routings" authenticate="true">
+        <description>Get production routings for the current company.</description>
+        <in-parameters>
+            <parameter name="search" default="null" />
+            <parameter name="start" default-value="0" type="Integer" />
+            <parameter name="limit" default-value="20" type="Integer" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="routings" type="List">
+                <parameter name="routing" type="Map">
+                    <parameter name="routingId" />
+                    <parameter name="routingName" />
+                    <parameter name="description" />
+                    <parameter name="routingTasks" type="List" />
+                </parameter>
+            </parameter>
+            <parameter name="total" type="Integer" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <if condition="search != null">
+                <set field="searchPattern" value="%${search}%" />
+            </if>
+            <entity-find entity-name="growerp.manufacturing.Routing" list="routingList"
+                offset="start" limit="limit">
+                <econdition field-name="ownerPartyId" from="ownerPartyId" />
+                <econdition field-name="routingName" ignore-case="true" operator="like"
+                    from="searchPattern" ignore-if-empty="true" />
+                <order-by field-name="routingName" />
+            </entity-find>
+            <entity-find-count entity-name="growerp.manufacturing.Routing" count-field="total">
+                <econdition field-name="ownerPartyId" from="ownerPartyId" />
+            </entity-find-count>
+            <set field="routings" from="[]" />
+            <iterate list="routingList" entry="ro">
+                <entity-find entity-name="growerp.manufacturing.RoutingTask" list="taskList">
+                    <econdition field-name="routingId" from="ro.routingId" />
+                    <order-by field-name="sequenceNum" />
+                </entity-find>
+                <set field="tasks" from="[]" />
+                <iterate list="taskList" entry="rt">
+                    <script>tasks.add([
+                        routingTaskId: rt.routingTaskId,
+                        routingId: rt.routingId,
+                        taskName: rt.taskName,
+                        sequenceNum: rt.sequenceNum,
+                        estimatedWorkTime: rt.estimatedWorkTime?.toString(),
+                        workCenterName: rt.workCenterName
+                    ])</script>
+                </iterate>
+                <script>routings.add([
+                    routingId: ro.routingId,
+                    routingName: ro.routingName,
+                    description: ro.description,
+                    routingTasks: tasks
+                ])</script>
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="get" noun="RoutingTasks" authenticate="true">
+        <description>Get routing tasks for a specific routing.</description>
+        <in-parameters>
+            <parameter name="routingId" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="routingTasks" type="List">
+                <parameter name="routingTask" type="Map">
+                    <parameter name="routingTaskId" />
+                    <parameter name="routingId" />
+                    <parameter name="taskName" />
+                    <parameter name="sequenceNum" />
+                    <parameter name="estimatedWorkTime" />
+                    <parameter name="workCenterName" />
+                </parameter>
+            </parameter>
+            <parameter name="total" type="Integer" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <entity-find-one entity-name="growerp.manufacturing.Routing" value-field="ro">
+                <field-map field-name="routingId" />
+            </entity-find-one>
+            <if condition="!ro || ro.ownerPartyId != ownerPartyId">
+                <return error="true" message="Routing '${routingId}' not found for company" />
+            </if>
+            <entity-find entity-name="growerp.manufacturing.RoutingTask" list="taskList">
+                <econdition field-name="routingId" />
+                <order-by field-name="sequenceNum" />
+            </entity-find>
+            <set field="total" from="taskList.size() as Integer" />
+            <set field="routingTasks" from="[]" />
+            <iterate list="taskList" entry="rt">
+                <script>routingTasks.add([
+                    routingTaskId: rt.routingTaskId,
+                    routingId: rt.routingId,
+                    taskName: rt.taskName,
+                    sequenceNum: rt.sequenceNum,
+                    estimatedWorkTime: rt.estimatedWorkTime?.toString(),
+                    workCenterName: rt.workCenterName
+                ])</script>
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="create" noun="Routing" authenticate="true">
+        <description>Create a production routing with optional tasks.</description>
+        <in-parameters>
+            <parameter name="routing" type="Map" required="true">
+                <parameter name="routingName" required="true" />
+                <parameter name="description" />
+                <parameter name="routingTasks" type="List" />
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="routing" type="Map" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <service-call name="create#growerp.manufacturing.Routing"
+                in-map="[ownerPartyId: ownerPartyId,
+                    routingName: routing.routingName,
+                    description: routing.description]"
+                out-map="context" />
+            <if condition="routing.routingTasks">
+                <iterate list="routing.routingTasks" entry="task">
+                    <service-call name="create#growerp.manufacturing.RoutingTask"
+                        in-map="[routingId: routingId,
+                            taskName: task.taskName,
+                            sequenceNum: task.sequenceNum,
+                            estimatedWorkTime: task.estimatedWorkTime,
+                            workCenterName: task.workCenterName]" />
+                </iterate>
+            </if>
+            <service-call name="growerp.100.ManufacturingServices100.get#Routings"
+                in-map="[start: 0, limit: 1]" out-map="context" />
+            <entity-find entity-name="growerp.manufacturing.Routing" list="newList" limit="1">
+                <econdition field-name="routingId" />
+            </entity-find>
+            <service-call name="growerp.100.ManufacturingServices100.get#Routings"
+                in-map="[search: routing.routingName, start: 0, limit: 1]" out-map="fetchOut" />
+            <set field="routing" from="fetchOut.routings ? fetchOut.routings[0] : null" />
+        </actions>
+    </service>
+
+    <service verb="update" noun="Routing" authenticate="true">
+        <description>Update a production routing name/description.</description>
+        <in-parameters>
+            <parameter name="routing" type="Map" required="true">
+                <parameter name="routingId" required="true" />
+                <parameter name="routingName" />
+                <parameter name="description" />
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="routing" type="Map" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <entity-find-one entity-name="growerp.manufacturing.Routing" value-field="ro">
+                <field-map field-name="routingId" from="routing.routingId" />
+            </entity-find-one>
+            <if condition="!ro || ro.ownerPartyId != ownerPartyId">
+                <return error="true" message="Routing '${routing.routingId}' not found for company" />
+            </if>
+            <service-call name="update#growerp.manufacturing.Routing"
+                in-map="[routingId: routing.routingId,
+                    routingName: routing.routingName,
+                    description: routing.description]" />
+            <service-call name="growerp.100.ManufacturingServices100.get#Routings"
+                in-map="[search: routing.routingName ?: ro.routingName, start: 0, limit: 1]"
+                out-map="fetchOut" />
+            <set field="routing" from="fetchOut.routings ? fetchOut.routings[0] : null" />
+        </actions>
+    </service>
+
+    <service verb="delete" noun="Routing" authenticate="true">
+        <description>Delete a production routing and all its tasks.</description>
+        <in-parameters>
+            <parameter name="routing" type="Map" required="true">
+                <parameter name="routingId" required="true" />
+            </parameter>
+        </in-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <entity-find-one entity-name="growerp.manufacturing.Routing" value-field="ro">
+                <field-map field-name="routingId" from="routing.routingId" />
+            </entity-find-one>
+            <if condition="!ro || ro.ownerPartyId != ownerPartyId">
+                <return error="true" message="Routing '${routing.routingId}' not found for company" />
+            </if>
+            <entity-delete-by-condition entity-name="growerp.manufacturing.RoutingTask">
+                <econdition field-name="routingId" from="routing.routingId" />
+            </entity-delete-by-condition>
+            <service-call name="delete#growerp.manufacturing.Routing"
+                in-map="[routingId: routing.routingId]" />
+        </actions>
+    </service>
+
+    <service verb="create" noun="RoutingTask" authenticate="true">
+        <description>Create a routing task.</description>
+        <in-parameters>
+            <parameter name="routingTask" type="Map" required="true">
+                <parameter name="routingId" required="true" />
+                <parameter name="taskName" required="true" />
+                <parameter name="sequenceNum" type="Integer" />
+                <parameter name="estimatedWorkTime" type="BigDecimal" />
+                <parameter name="workCenterName" />
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="routingTask" type="Map" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <entity-find-one entity-name="growerp.manufacturing.Routing" value-field="ro">
+                <field-map field-name="routingId" from="routingTask.routingId" />
+            </entity-find-one>
+            <if condition="!ro || ro.ownerPartyId != ownerPartyId">
+                <return error="true" message="Routing '${routingTask.routingId}' not found for company" />
+            </if>
+            <service-call name="create#growerp.manufacturing.RoutingTask"
+                in-map="[routingId: routingTask.routingId,
+                    taskName: routingTask.taskName,
+                    sequenceNum: routingTask.sequenceNum,
+                    estimatedWorkTime: routingTask.estimatedWorkTime,
+                    workCenterName: routingTask.workCenterName]"
+                out-map="context" />
+            <entity-find-one entity-name="growerp.manufacturing.RoutingTask" value-field="rt">
+                <field-map field-name="routingTaskId" />
+            </entity-find-one>
+            <set field="routingTask" from="[
+                routingTaskId: rt.routingTaskId,
+                routingId: rt.routingId,
+                taskName: rt.taskName,
+                sequenceNum: rt.sequenceNum,
+                estimatedWorkTime: rt.estimatedWorkTime?.toString(),
+                workCenterName: rt.workCenterName
+            ]" />
+        </actions>
+    </service>
+
+    <service verb="update" noun="RoutingTask" authenticate="true">
+        <description>Update a routing task.</description>
+        <in-parameters>
+            <parameter name="routingTask" type="Map" required="true">
+                <parameter name="routingTaskId" required="true" />
+                <parameter name="taskName" />
+                <parameter name="sequenceNum" type="Integer" />
+                <parameter name="estimatedWorkTime" type="BigDecimal" />
+                <parameter name="workCenterName" />
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="routingTask" type="Map" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <entity-find-one entity-name="growerp.manufacturing.RoutingTask" value-field="rt">
+                <field-map field-name="routingTaskId" from="routingTask.routingTaskId" />
+            </entity-find-one>
+            <if condition="!rt">
+                <return error="true" message="RoutingTask '${routingTask.routingTaskId}' not found" />
+            </if>
+            <entity-find-one entity-name="growerp.manufacturing.Routing" value-field="ro">
+                <field-map field-name="routingId" from="rt.routingId" />
+            </entity-find-one>
+            <if condition="!ro || ro.ownerPartyId != ownerPartyId">
+                <return error="true" message="Routing not found for company" />
+            </if>
+            <service-call name="update#growerp.manufacturing.RoutingTask"
+                in-map="[routingTaskId: routingTask.routingTaskId,
+                    taskName: routingTask.taskName,
+                    sequenceNum: routingTask.sequenceNum,
+                    estimatedWorkTime: routingTask.estimatedWorkTime,
+                    workCenterName: routingTask.workCenterName]" />
+            <entity-find-one entity-name="growerp.manufacturing.RoutingTask" value-field="rt">
+                <field-map field-name="routingTaskId" from="routingTask.routingTaskId" />
+            </entity-find-one>
+            <set field="routingTask" from="[
+                routingTaskId: rt.routingTaskId,
+                routingId: rt.routingId,
+                taskName: rt.taskName,
+                sequenceNum: rt.sequenceNum,
+                estimatedWorkTime: rt.estimatedWorkTime?.toString(),
+                workCenterName: rt.workCenterName
+            ]" />
+        </actions>
+    </service>
+
+    <service verb="delete" noun="RoutingTask" authenticate="true">
+        <description>Delete a routing task.</description>
+        <in-parameters>
+            <parameter name="routingTask" type="Map" required="true">
+                <parameter name="routingTaskId" required="true" />
+            </parameter>
+        </in-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <entity-find-one entity-name="growerp.manufacturing.RoutingTask" value-field="rt">
+                <field-map field-name="routingTaskId" from="routingTask.routingTaskId" />
+            </entity-find-one>
+            <if condition="!rt">
+                <return error="true" message="RoutingTask '${routingTask.routingTaskId}' not found" />
+            </if>
+            <entity-find-one entity-name="growerp.manufacturing.Routing" value-field="ro">
+                <field-map field-name="routingId" from="rt.routingId" />
+            </entity-find-one>
+            <if condition="!ro || ro.ownerPartyId != ownerPartyId">
+                <return error="true" message="Routing not found for company" />
+            </if>
+            <service-call name="delete#growerp.manufacturing.RoutingTask"
+                in-map="[routingTaskId: routingTask.routingTaskId]" />
+        </actions>
+    </service>
+
+    <service verb="delete" noun="WorkOrder" authenticate="true">
+        <description>Cancel a production work order (sets status to WeCancelled and undoes any
+            issued/produced inventory).</description>
+        <in-parameters>
+            <parameter name="workOrder" type="Map" required="true">
+                <parameter name="workEffortId" required="true" />
+            </parameter>
+        </in-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <!-- Verify ownership -->
+            <entity-find-one entity-name="mantle.work.effort.WorkEffort" value-field="we">
+                <field-map field-name="workEffortId" from="workOrder.workEffortId" />
+            </entity-find-one>
+            <if condition="!we || we.ownerPartyId != companyPartyId">
+                <return error="true"
+                    message="Work order ${workOrder.workEffortId} not found for company" />
+            </if>
+            <service-call name="mantle.work.ManufacturingServices.cancel#AssemblyWorkEffort"
+                in-map="[workEffortId: workOrder.workEffortId]" />
+        </actions>
+    </service>
+
+</services>

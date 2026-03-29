@@ -1,0 +1,1360 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Landing Page Services for GrowERP Landing Page System
+Service definitions for landing page, sections, credibility, and CTA management
+- Supports dual-ID lookup: pageId (system-wide) or pseudoId (tenant-unique)
+- All services enforce multi-tenant isolation via ownerPartyId
+- Implementation: Groovy service classes and REST controllers
+-->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
+
+  <!-- ============================================ -->
+  <!-- LANDING PAGE SERVICES (6 services) -->
+  <!-- ============================================ -->
+
+  <!-- getLandingPage: Retrieve single landing page -->
+  <service verb="get" noun="LandingPage" authenticate="anonymous-view">
+    <description>Get landing page by ID (system-wide) or pseudoId (tenant-unique). Public access for display.</description>
+    <in-parameters>
+      <parameter name="landingPageId">
+        <description>landing page Id</description>
+      </parameter>
+      <parameter name="pseudoId">
+        <description>landing page pseudoId</description>
+      </parameter>
+      <parameter name="companyPartyId">
+        <description>Optional company party ID required when providing pseudoId</description>
+      </parameter>
+      <parameter name="ownerPartyId">
+        <description>Optional owner party ID required when providing pseudoId</description>
+      </parameter>
+    </in-parameters>
+    <out-parameters>
+      <parameter name="landingPage" type="Map">
+        <description>Landing page object with all fields, sections, credibility</description>
+        <parameter name="landingPageId" />
+        <parameter name="pseudoId" />
+        <parameter name="title" />
+        <parameter name="headline" />
+        <parameter name="description" />
+        <parameter name="status" />
+        <parameter name="ctaActionType" />
+        <parameter name="ctaAssessmentId" />
+        <parameter name="ctaButtonLink" />
+        <parameter name="createdDate" type="Timestamp" />
+        <parameter name="lastModifiedDate" type="Timestamp" />
+        <parameter name="sections" type="List">
+          <description>List of page sections</description>
+          <parameter name="pageSectionId" />
+          <parameter name="sectionTitle" />
+          <parameter name="sectionSequence" type="Integer" />
+          <parameter name="sectionText" />
+        </parameter>
+        <parameter name="credibility" type="Map">
+          <description>Credibility/bio section</description>
+          <parameter name="credibilityInfoId" />
+          <parameter name="creatorBio" />
+          <parameter name="backgroundText" />
+          <parameter name="creatorImageUrl" />
+        </parameter>
+      </parameter>
+    </out-parameters>
+    <actions>
+      <if condition="!ownerPartyId &amp;&amp; pseudoId">
+        <service-call
+          name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+          out-map="context" />
+      </if>
+
+      <if condition="!ownerPartyId">
+        <return error="true" message="Unable to resolve owner party for landing page request" />
+      </if>
+      <!-- Query for landing page by ID (preferring pseudoId for tenant lookups) -->
+      <!-- Note: companyPartyId is metadata about which company uses this page, NOT a lookup filter -->
+      <entity-find entity-name="growerp.landing.LandingPage" list="pageList">
+        <!-- Use pseudoId if provided (tenant-unique), otherwise use system-wide landingPageId -->
+        <econdition field-name="pseudoId" ignore-if-empty="true" />
+        <econdition field-name="companyPartyId" ignore-if-empty="true" />
+        <econdition field-name="landingPageId" ignore-if-empty="true" />
+        <econdition field-name="ownerPartyId" />
+      </entity-find>
+
+      <if condition="!pageList">
+        <return error="true"
+          message="Landing page not found: pseudoId=$pseudoId, landingPageId=$landingPageId, ownerPartyId=$ownerPartyId" />
+      </if>
+
+      <set field="page" from="pageList[0]" />
+
+      <!-- Get sections for this page -->
+      <entity-find entity-name="growerp.landing.PageSection" list="sections">
+        <econdition field-name="landingPageId" from="page.landingPageId" />
+        <order-by field-name="sectionSequence" />
+      </entity-find>
+
+      <!-- Get credibility info -->
+      <entity-find entity-name="growerp.landing.CredibilityInfo" list="credibilityList">
+        <econdition field-name="landingPageId" from="page.landingPageId" />
+      </entity-find>
+      <set field="credibility" from="credibilityList ? credibilityList[0] : [:]" />
+
+      <!-- Build unified landingPage response with page data + nested dependents -->
+      <script>
+        Map pageMap = page.getMap()
+        pageMap.put('sections', sections ?: [])
+        pageMap.put('credibility', credibility ?: [:])
+        context.landingPage = pageMap
+      </script>
+    </actions>
+  </service>
+
+  <!-- listLandingPages: Get all landing pages for tenant -->
+  <service verb="list" noun="LandingPages" authenticate="true">
+    <description>List all landing pages for tenant with pagination and optional filtering. Results automatically filtered by authenticated user's company.</description>
+    <in-parameters>
+      <parameter name="landingPageId" />
+      <parameter name="pseudoId" />
+      <parameter name="status">
+        <description>Optional status filter: ACTIVE, INACTIVE, DRAFT</description>
+      </parameter>
+      <parameter name="start" type="Integer" default-value="0">
+        <description>Starting index (0-based)</description>
+      </parameter>
+      <parameter name="limit" type="Integer" default-value="20">
+        <description>Results per page</description>
+      </parameter>
+      <parameter name="search">
+        <description>Optional search string for title/headline</description>
+      </parameter>
+    </in-parameters>
+    <out-parameters>
+      <parameter name="landingPages" type="List">
+        <description>List of landing page objects</description>
+        <parameter name="landingPageId" />
+        <parameter name="pseudoId" />
+        <parameter name="title" />
+        <parameter name="hookType" />
+        <parameter name="headline" />
+        <parameter name="subheading" />
+        <parameter name="privacyPolicyUrl" />
+        <parameter name="ctaActionType" />
+        <parameter name="ctaAssessmentId" />
+        <parameter name="ctaButtonLink" />
+        <parameter name="status" />
+        <parameter name="createdDate" type="Timestamp" />
+        <parameter name="lastUpdated" type="Timestamp" />
+      </parameter>
+      <parameter name="totalResults" type="Integer">
+        <description>Total number of landing pages matching filter</description>
+      </parameter>
+      <parameter name="start" type="Integer">
+        <description>Starting index for pagination</description>
+      </parameter>
+      <parameter name="limit" type="Integer">
+        <description>Results per page limit</description>
+      </parameter>
+    </out-parameters>
+    <actions>
+      <!-- Get owner party ID from authenticated user context -->
+      <service-call out-map="context"
+        name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+
+      <if condition="search">
+        <set field="search" value="%$search%" />
+      </if>
+      <!-- Build entity find for landing pages -->
+      <entity-find entity-name="growerp.landing.LandingPage" list="pagesList" offset="start"
+        limit="limit">
+        <econdition field-name="ownerPartyId" from="ownerPartyId" />
+        <econdition field-name="status" from="status" ignore-if-empty="true" />
+        <econdition field-name="landingPageId" ignore-if-empty="true" />
+        <econdition field-name="pseudoId" ignore-if-empty="true" />
+        <econditions combine="or">
+          <econdition field-name="pseudoId" operator="like" from="search"
+            ignore-if-empty="true" ignore-case="true" />
+          <econdition field-name="headline" operator="like" from="search"
+            ignore-if-empty="true" ignore-case="true" />
+          <econdition field-name="title" operator="like" from="search"
+            ignore-if-empty="true" ignore-case="true" />
+        </econditions>
+        <order-by field-name="-lastModifiedDate" />
+      </entity-find>
+
+      <!-- Get total count for pagination -->
+      <entity-find-count entity-name="growerp.landing.LandingPage" count-field="totalResults">
+        <econdition field-name="ownerPartyId" from="ownerPartyId" />
+        <econdition field-name="status" from="status" ignore-if-empty="true" />
+        <econdition field-name="title" operator="like" from="search" ignore-if-empty="true" />
+      </entity-find-count>
+
+      <!-- Convert entity values to maps -->
+      <set field="landingPages" from="[]" />
+      <iterate list="pagesList" entry="page">
+        <set field="pageMap"
+          from="[
+          landingPageId: page.landingPageId,
+          pseudoId: page.pseudoId,
+          title: page.title,
+          hookType: page.hookType,
+          headline: page.headline,
+          subheading: page.subheading,
+          privacyPolicyUrl: page.privacyPolicyUrl,
+          ctaActionType: page.ctaActionType,
+          ctaAssessmentId: page.ctaAssessmentId,
+          ctaButtonLink: page.ctaButtonLink,
+          status: page.status,
+          createdDate: page.createdDate,
+          lastUpdated: page.lastModifiedDate
+        ]" />
+        <script>landingPages.add(pageMap)</script>
+      </iterate>
+    </actions>
+  </service>
+
+  <!-- createLandingPage: Create new landing page -->
+  <service verb="create" noun="LandingPage" authenticate="true">
+    <description>Create new landing page within a tenant</description>
+    <in-parameters>
+      <parameter name="pseudoId">
+        <description>Created landing page tenant-unique ID (user-facing)</description>
+      </parameter>
+      <parameter name="title" required="true">
+        <description>Landing page title</description>
+      </parameter>
+      <parameter name="hookType">
+        <description>Hook type: frustration, results, custom</description>
+      </parameter>
+      <parameter name="headline">
+        <description>Main headline for hero section</description>
+      </parameter>
+      <parameter name="subheading">
+        <description>Optional subheading</description>
+      </parameter>
+      <parameter name="privacyPolicyUrl">
+        <description>Optional privacy policy link</description>
+      </parameter>
+      <parameter name="ctaActionType">
+        <description>CTA action type: assessment or url</description>
+      </parameter>
+      <parameter name="ctaAssessmentId">
+        <description>Assessment ID for CTA (when actionType is assessment)</description>
+      </parameter>
+      <parameter name="ctaButtonLink">
+        <description>Button URL for CTA (when actionType is url)</description>
+      </parameter>
+      <parameter name="status" default-value="DRAFT">
+        <description>Status: ACTIVE, INACTIVE, DRAFT</description>
+      </parameter>
+    </in-parameters>
+    <out-parameters>
+      <parameter name="landingPageId">
+        <description>Created landing page system-wide unique ID</description>
+      </parameter>
+      <parameter name="pseudoId">
+        <description>Created landing page tenant-unique ID (user-facing)</description>
+      </parameter>
+      <parameter name="title">
+        <description>Landing page title</description>
+      </parameter>
+      <parameter name="hookType">
+        <description>Hook type</description>
+      </parameter>
+      <parameter name="headline">
+        <description>Main headline</description>
+      </parameter>
+      <parameter name="subheading">
+        <description>Subheading</description>
+      </parameter>
+      <parameter name="privacyPolicyUrl">
+        <description>Privacy policy URL</description>
+      </parameter>
+      <parameter name="ctaActionType">
+        <description>CTA action type</description>
+      </parameter>
+      <parameter name="ctaAssessmentId">
+        <description>CTA assessment ID</description>
+      </parameter>
+      <parameter name="ctaButtonLink">
+        <description>CTA button link</description>
+      </parameter>
+      <parameter name="status">
+        <description>Landing page status</description>
+      </parameter>
+      <parameter name="createdDate" type="Timestamp">
+        <description>Creation timestamp</description>
+      </parameter>
+      <parameter name="lastModifiedDate" type="Timestamp">
+        <description>Last modified timestamp</description>
+      </parameter>
+    </out-parameters>
+    <actions>
+      <!-- Get owner party ID from authenticated user context -->
+      <service-call out-map="context"
+        name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+
+      <if condition="!pseudoId">
+        <!-- Generate unique pseudoId within the tenant only if not provided -->
+        <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+          in-map="[ownerPartyId: ownerPartyId, seqName: 'landingPage']" out-map="context" />
+        <set field="pseudoId" from="seqNum" />
+      </if>
+
+      <!-- Create landing page record -->
+      <service-call name="create#growerp.landing.LandingPage" out-map="createOut"
+        in-map="[
+        pseudoId: pseudoId,
+        ownerPartyId: ownerPartyId,
+        title: title,
+        hookType: hookType ?: 'custom',
+        headline: headline ?: title,
+        subheading: subheading,
+        privacyPolicyUrl: privacyPolicyUrl,
+        ctaActionType: ctaActionType,
+        ctaAssessmentId: ctaAssessmentId,
+        ctaButtonLink: ctaButtonLink,
+        status: status,
+        createdDate: ec.user.nowTimestamp,
+        lastModifiedDate: ec.user.nowTimestamp
+      ]" />
+
+      <set field="landingPageId" from="createOut.landingPageId" />
+
+      <!-- Fetch the complete landing page using list service for consistency -->
+      <service-call name="growerp.100.LandingPageServices100.list#LandingPages"
+        in-map="[landingPageId: landingPageId, limit: 1]" out-map="listOut" />
+
+      <!-- Return the first (and only) landing page from the list -->
+      <if condition="listOut.landingPages">
+        <script>
+          context.putAll(listOut.landingPages[0])
+        </script>
+      </if>
+    </actions>
+  </service>
+
+  <!-- updateLandingPage: Update existing landing page -->
+  <service verb="update" noun="LandingPage" authenticate="true">
+    <description>Update landing page (title, hook, headline, subheading, assessment, CTA fields, status)</description>
+    <in-parameters>
+      <parameter name="landingPageId" required="true">
+        <description>Landing page ID to update</description>
+      </parameter>
+      <parameter name="pseudoId">
+        <description>Created landing page tenant-unique ID (user-facing)</description>
+      </parameter>
+      <parameter name="title">
+        <description>New landing page title</description>
+      </parameter>
+      <parameter name="hookType">
+        <description>New hook type: frustration, results, custom</description>
+      </parameter>
+      <parameter name="headline">
+        <description>New main headline</description>
+      </parameter>
+      <parameter name="subheading">
+        <description>New subheading</description>
+      </parameter>
+      <parameter name="privacyPolicyUrl">
+        <description>New privacy policy URL</description>
+      </parameter>
+      <parameter name="ctaActionType">
+        <description>CTA action type: assessment or url</description>
+      </parameter>
+      <parameter name="ctaAssessmentId">
+        <description>Assessment ID for CTA (when actionType is assessment)</description>
+      </parameter>
+      <parameter name="ctaButtonLink">
+        <description>Button URL for CTA (when actionType is url)</description>
+      </parameter>
+      <parameter name="status">
+        <description>New status: ACTIVE, INACTIVE, DRAFT</description>
+      </parameter>
+    </in-parameters>
+    <out-parameters>
+      <parameter name="landingPageId">
+        <description>Updated landing page ID</description>
+      </parameter>
+      <parameter name="pseudoId">
+        <description>Updated landing page tenant-unique ID (user-facing)</description>
+      </parameter>
+      <parameter name="title">
+        <description>Landing page title</description>
+      </parameter>
+      <parameter name="hookType">
+        <description>Hook type</description>
+      </parameter>
+      <parameter name="headline">
+        <description>Main headline</description>
+      </parameter>
+      <parameter name="subheading">
+        <description>Subheading</description>
+      </parameter>
+      <parameter name="privacyPolicyUrl">
+        <description>Privacy policy URL</description>
+      </parameter>
+      <parameter name="ctaActionType">
+        <description>CTA action type</description>
+      </parameter>
+      <parameter name="ctaAssessmentId">
+        <description>CTA assessment ID</description>
+      </parameter>
+      <parameter name="ctaButtonLink">
+        <description>CTA button link</description>
+      </parameter>
+      <parameter name="status">
+        <description>Landing page status</description>
+      </parameter>
+      <parameter name="createdDate" type="Timestamp">
+        <description>Creation timestamp</description>
+      </parameter>
+      <parameter name="lastModifiedDate" type="Timestamp">
+        <description>Last modified timestamp</description>
+      </parameter>
+    </out-parameters>
+    <actions>
+      <!-- Get owner party ID from authenticated user context -->
+      <service-call out-map="context"
+        name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+
+      <!-- Verify landing page exists and belongs to owner -->
+      <entity-find-one entity-name="LandingPage" value-field="existingPage">
+        <field-map field-name="landingPageId" from="landingPageId" />
+        <field-map field-name="ownerPartyId" from="ownerPartyId" />
+      </entity-find-one>
+
+      <if condition="!existingPage">
+        <return error="true" message="Landing page not found or access denied" />
+      </if>
+
+      <if condition="!pseudoId">
+        <!-- Generate unique pseudoId within the tenant only if not provided -->
+        <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+          in-map="[ownerPartyId: ownerPartyId, seqName: 'landingPage']" out-map="context" />
+        <set field="pseudoId" from="seqNum" />
+      </if>
+
+      <!-- Update landing page with provided fields -->
+      <service-call name="update#LandingPage"
+        in-map="[
+        landingPageId: landingPageId,
+        pseudoId: pseudoId,
+        title: title ?: existingPage.title,
+        hookType: hookType ?: existingPage.hookType,
+        headline: headline ?: existingPage.headline,
+        subheading: subheading,
+        privacyPolicyUrl: privacyPolicyUrl,
+        ctaActionType: ctaActionType,
+        ctaAssessmentId: ctaAssessmentId,
+        ctaButtonLink: ctaButtonLink,
+        status: status ?: existingPage.status,
+        lastModifiedDate: ec.user.nowTimestamp
+      ]" />
+
+      <!-- Fetch the complete landing page using list service for consistency -->
+      <service-call name="growerp.100.LandingPageServices100.list#LandingPages"
+        in-map="[landingPageId: landingPageId, limit: 1]" out-map="listOut" />
+
+      <!-- Return the first (and only) landing page from the list -->
+      <if condition="listOut.landingPages">
+        <script>
+          context.putAll(listOut.landingPages[0])
+        </script>
+      </if>
+    </actions>
+  </service>
+
+  <!-- deleteLandingPage: Delete landing page and cascade -->
+  <service verb="delete" noun="LandingPage" authenticate="true">
+    <description>Delete landing page and all related sections, credibility, and statistics. Owner party ID is automatically determined from authenticated user context.</description>
+    <in-parameters>
+      <parameter name="landingPageId" required="true">
+        <description>Landing page ID to delete</description>
+      </parameter>
+    </in-parameters>
+    <out-parameters>
+      <parameter name="deletedCount" type="Integer">
+        <description>Total number of records deleted (cascade)</description>
+      </parameter>
+    </out-parameters>
+    <actions>
+      <!-- Get owner party ID from authenticated user context -->
+      <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+        out-map="context" />
+
+      <!-- Verify landing page exists and belongs to owner -->
+      <entity-find-one entity-name="LandingPage" value-field="existingPage">
+        <field-map field-name="landingPageId" from="landingPageId" />
+        <field-map field-name="ownerPartyId" from="ownerPartyId" />
+      </entity-find-one>
+
+      <if condition="!existingPage">
+        <return error="true" message="Landing page not found or access denied" />
+      </if>
+
+      <set field="deletedCount" value="0" type="Integer" />
+
+      <!-- Delete related records in cascade order -->
+      <!-- 1. First get all credibility info for this landing page -->
+      <entity-find entity-name="growerp.landing.CredibilityInfo" list="credibilityToDelete">
+        <econdition field-name="landingPageId" from="landingPageId" />
+      </entity-find>
+
+      <!-- 2. Delete credibility statistics for each credibility info -->
+      <iterate list="credibilityToDelete" entry="credibility">
+        <entity-find entity-name="growerp.landing.CredibilityStatistic" list="statsToDelete">
+          <econdition field-name="credibilityInfoId" from="credibility.credibilityInfoId" />
+        </entity-find>
+        <iterate list="statsToDelete" entry="stat">
+          <service-call name="delete#growerp.landing.CredibilityStatistic"
+            in-map="[credibilityStatisticId: stat.credibilityStatisticId]" />
+          <set field="deletedCount" from="deletedCount + 1" />
+        </iterate>
+      </iterate>
+
+      <!-- 3. Delete credibility info -->
+      <iterate list="credibilityToDelete" entry="credibility">
+        <service-call name="delete#growerp.landing.CredibilityInfo"
+          in-map="[credibilityInfoId: credibility.credibilityInfoId]" />
+        <set field="deletedCount" from="deletedCount + 1" />
+      </iterate>
+
+      <!-- 4. Delete page sections -->
+      <entity-find entity-name="growerp.landing.PageSection" list="sectionsToDelete">
+        <econdition field-name="landingPageId" from="landingPageId" />
+      </entity-find>
+      <iterate list="sectionsToDelete" entry="section">
+        <service-call name="delete#growerp.landing.PageSection"
+          in-map="[pageSectionId: section.pageSectionId]" />
+        <set field="deletedCount" from="deletedCount + 1" />
+      </iterate>
+
+      <!-- 5. Finally delete the landing page itself -->
+      <service-call name="delete#growerp.landing.LandingPage"
+        in-map="[landingPageId: landingPageId]" />
+      <set field="deletedCount" from="deletedCount + 1" />
+
+    </actions>
+  </service>
+
+  <!-- publishLandingPage: Publish page to make it publicly accessible -->
+  <service verb="publish" noun="LandingPage" authenticate="true">
+    <description>Publish landing page to make it publicly accessible via pseudoId URL. Owner party ID is automatically determined from authenticated user context.</description>
+    <in-parameters>
+      <parameter name="landingPageId" required="true">
+        <description>Landing page ID to publish</description>
+      </parameter>
+    </in-parameters>
+    <out-parameters>
+      <parameter name="landingPageId">
+        <description>Published landing page ID</description>
+      </parameter>
+      <parameter name="pseudoId">
+        <description>Public URL pseudoId for this page</description>
+      </parameter>
+      <parameter name="publicUrl">
+        <description>Full public URL where page is accessible</description>
+      </parameter>
+    </out-parameters>
+    <actions>
+      <!-- Get owner party ID from authenticated user context -->
+      <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+        out-map="context" />
+
+      <!-- Verify landing page exists and belongs to owner -->
+      <entity-find-one entity-name="LandingPage" value-field="landingPage">
+        <field-map field-name="landingPageId" from="landingPageId" />
+        <field-map field-name="ownerPartyId" from="ownerPartyId" />
+      </entity-find-one>
+
+      <if condition="!landingPage">
+        <return error="true" message="Landing page not found or access denied" />
+      </if>
+
+      <!-- Update status to ACTIVE (published) -->
+      <service-call name="update#LandingPage"
+        in-map="[
+        landingPageId: landingPageId,
+        status: 'ACTIVE',
+        lastModifiedDate: ec.user.nowTimestamp
+      ]" />
+
+      <!-- Set output parameters -->
+      <set field="pseudoId" from="landingPage.pseudoId" />
+      <set field="publicUrl" from="'https://app.growerp.com/landing/' + pseudoId" />
+    </actions>
+  </service>
+
+  <!-- ============================================ -->
+  <!-- PAGE SECTION SERVICES (4 services) -->
+  <!-- ============================================ -->
+
+  <!-- createPageSection: Add section to landing page -->
+  <service verb="create" noun="PageSection" authenticate="true">
+    <description>Create new section on landing page. Owner party ID is automatically determined from authenticated user context.</description>
+    <in-parameters>
+      <parameter name="landingPageId" required="true">
+        <description>Landing page ID</description>
+      </parameter>
+      <parameter name="sectionTitle" required="true">
+        <description>Section title</description>
+      </parameter>
+      <parameter name="sectionDescription">
+        <description>Section content/description</description>
+      </parameter>
+      <parameter name="sectionImageUrl">
+        <description>Optional section image URL</description>
+      </parameter>
+      <parameter name="sectionSequence" type="Integer">
+        <description>Display order (auto-incremented if not provided)</description>
+      </parameter>
+    </in-parameters>
+    <out-parameters>
+      <parameter name="pageSectionId">
+        <description>Created section ID</description>
+      </parameter>
+      <parameter name="landingPageSectionId">
+        <description>Created section ID (alias for pageSectionId)</description>
+      </parameter>
+      <parameter name="pseudoId">
+        <description>Created section pseudoId</description>
+      </parameter>
+      <parameter name="landingPageId">
+        <description>Landing page ID</description>
+      </parameter>
+      <parameter name="sectionTitle">
+        <description>Section title</description>
+      </parameter>
+      <parameter name="sectionDescription">
+        <description>Section description</description>
+      </parameter>
+      <parameter name="sectionImageUrl">
+        <description>Section image URL</description>
+      </parameter>
+      <parameter name="sectionSequence" type="Integer">
+        <description>Section sequence</description>
+      </parameter>
+      <parameter name="createdDate" type="Timestamp">
+        <description>Creation timestamp</description>
+      </parameter>
+    </out-parameters>
+    <actions>
+      <!-- Get owner party ID from authenticated user context -->
+      <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+        out-map="context" />
+
+      <!-- Verify landing page exists and belongs to owner -->
+      <entity-find-one entity-name="LandingPage" value-field="landingPage">
+        <field-map field-name="landingPageId" from="landingPageId" />
+        <field-map field-name="ownerPartyId" from="ownerPartyId" />
+      </entity-find-one>
+
+      <if condition="!landingPage">
+        <return error="true" message="Landing page not found or access denied" />
+      </if>
+
+      <!-- Auto-increment sequence if not provided -->
+      <if condition="!sectionSequence">
+        <!-- Find the highest existing sequence number for this landing page -->
+        <entity-find entity-name="growerp.landing.PageSection" list="existingSections">
+          <econdition field-name="landingPageId" from="landingPageId" />
+          <select-field field-name="sectionSequence" />
+          <order-by field-name="-sectionSequence" />
+        </entity-find>
+        <!-- Set to max + 1, or 1 if no sections exist -->
+        <if condition="existingSections">
+          <set field="sectionSequence" from="existingSections[0].sectionSequence + 1" />
+          <else>
+            <set field="sectionSequence" value="1" type="Integer" />
+          </else>
+        </if>
+      </if>
+
+      <!-- Generate unique IDs -->
+      <set field="pageSectionId"
+        from="ec.entity.sequencedIdPrimary('growerp.landing.PageSection', null, null)" />
+      <set field="pseudoId" from="'section_' + System.currentTimeMillis()" />
+
+      <!-- Create page section record -->
+      <service-call name="create#growerp.landing.PageSection" out-map="createOut"
+        in-map="[
+        pageSectionId: pageSectionId,
+        pseudoId: pseudoId,
+        landingPageId: landingPageId,
+        sectionTitle: sectionTitle,
+        sectionDescription: sectionDescription,
+        sectionImageUrl: sectionImageUrl,
+        sectionSequence: sectionSequence,
+        createdDate: ec.user.nowTimestamp
+      ]" />
+
+      <!-- Fetch the complete section record to return all fields -->
+      <entity-find-one entity-name="growerp.landing.PageSection" value-field="pageSection">
+        <field-map field-name="pageSectionId" from="pageSectionId" />
+      </entity-find-one>
+
+      <!-- Map all fields including landingPageSectionId alias -->
+      <script>
+        Map sectionMap = pageSection.getMap()
+        sectionMap.put('landingPageSectionId', pageSection.pageSectionId)
+        context.putAll(sectionMap)
+      </script>
+    </actions>
+  </service>
+
+  <!-- updatePageSection: Update section content -->
+  <service verb="update" noun="PageSection" authenticate="true">
+    <description>Update page section content and display order. Owner party ID is automatically determined from authenticated user context.</description>
+    <in-parameters>
+      <parameter name="pageSectionId" required="true">
+        <description>Section ID to update</description>
+      </parameter>
+      <parameter name="sectionTitle">
+        <description>New section title</description>
+      </parameter>
+      <parameter name="sectionDescription">
+        <description>New section content</description>
+      </parameter>
+      <parameter name="sectionImageUrl">
+        <description>New section image URL</description>
+      </parameter>
+      <parameter name="sectionSequence" type="Integer">
+        <description>New display order</description>
+      </parameter>
+    </in-parameters>
+    <out-parameters>
+      <parameter name="landingPageSectionId">
+        <description>Updated section ID (alias for pageSectionId)</description>
+      </parameter>
+      <parameter name="pageSectionId">
+        <description>Updated section ID</description>
+      </parameter>
+      <parameter name="pseudoId">
+        <description>Section pseudoId</description>
+      </parameter>
+      <parameter name="landingPageId">
+        <description>Landing page ID</description>
+      </parameter>
+      <parameter name="sectionTitle">
+        <description>Section title</description>
+      </parameter>
+      <parameter name="sectionDescription">
+        <description>Section description</description>
+      </parameter>
+      <parameter name="sectionImageUrl">
+        <description>Section image URL</description>
+      </parameter>
+      <parameter name="sectionSequence" type="Integer">
+        <description>Section sequence</description>
+      </parameter>
+    </out-parameters>
+    <actions>
+      <!-- Get owner party ID from authenticated user context -->
+      <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+        out-map="context" />
+
+      <!-- Verify section exists and belongs to owner's landing page -->
+      <entity-find-one entity-name="PageSection" value-field="existingSection">
+        <field-map field-name="pageSectionId" from="pageSectionId" />
+      </entity-find-one>
+
+      <if condition="!existingSection">
+        <return error="true" message="Page section not found" />
+      </if>
+
+      <!-- Verify the section's landing page belongs to owner -->
+      <entity-find-one entity-name="LandingPage" value-field="landingPage">
+        <field-map field-name="landingPageId" from="existingSection.landingPageId" />
+        <field-map field-name="ownerPartyId" from="ownerPartyId" />
+      </entity-find-one>
+
+      <if condition="!landingPage">
+        <return error="true" message="Access denied to this page section" />
+      </if>
+
+      <!-- Update section with provided fields -->
+      <service-call name="update#growerp.landing.PageSection" out-map="context"
+        in-map="[
+        pageSectionId: pageSectionId,
+        sectionTitle: sectionTitle ?: existingSection.sectionTitle,
+        sectionDescription: sectionDescription,
+        sectionImageUrl: sectionImageUrl,
+        sectionSequence: sectionSequence ?: existingSection.sectionSequence
+      ]" />
+
+      <!-- Fetch and return the updated section -->
+      <entity-find-one entity-name="growerp.landing.PageSection" value-field="updatedSection">
+        <field-map field-name="pageSectionId" from="pageSectionId" />
+      </entity-find-one>
+
+      <!-- Build response with landingPageSectionId alias for frontend compatibility -->
+      <script>
+        Map sectionMap = updatedSection.getMap()
+        sectionMap.put('landingPageSectionId', updatedSection.pageSectionId)
+        context.putAll(sectionMap)
+      </script>
+    </actions>
+  </service>
+
+  <!-- deletePageSection: Delete section -->
+  <service verb="delete" noun="PageSection" authenticate="true">
+    <description>Delete page section. Owner party ID is automatically determined from authenticated user context.</description>
+    <in-parameters>
+      <parameter name="pageSectionId" required="true">
+        <description>Section ID to delete</description>
+      </parameter>
+    </in-parameters>
+    <out-parameters>
+      <parameter name="deletedCount" type="Integer">
+        <description>Number of records deleted</description>
+      </parameter>
+    </out-parameters>
+    <actions>
+      <!-- Get owner party ID from authenticated user context -->
+      <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+        out-map="context" />
+
+      <!-- Verify section exists and belongs to owner's landing page -->
+      <entity-find-one entity-name="PageSection" value-field="existingSection">
+        <field-map field-name="pageSectionId" from="pageSectionId" />
+      </entity-find-one>
+
+      <if condition="!existingSection">
+        <return error="true" message="Page section not found" />
+      </if>
+
+      <!-- Verify the section's landing page belongs to owner -->
+      <entity-find-one entity-name="LandingPage" value-field="landingPage">
+        <field-map field-name="landingPageId" from="existingSection.landingPageId" />
+        <field-map field-name="ownerPartyId" from="ownerPartyId" />
+      </entity-find-one>
+
+      <if condition="!landingPage">
+        <return error="true" message="Access denied to this page section" />
+      </if>
+
+      <!-- Delete the section -->
+      <service-call name="delete#PageSection" in-map="[pageSectionId: pageSectionId]" />
+      <set field="deletedCount" value="1" type="Integer" />
+
+    </actions>
+  </service>
+
+  <!-- listPageSections: Get sections for a page -->
+  <service verb="list" noun="PageSections" authenticate="false">
+    <description>List all sections for a landing page, ordered by sequence</description>
+    <in-parameters>
+      <parameter name="landingPageId" required="true">
+        <description>Landing page ID</description>
+      </parameter>
+    </in-parameters>
+    <out-parameters>
+      <parameter name="sections" type="List">
+        <description>List of page sections ordered by sequence</description>
+        <parameter name="landingPageSectionId" />
+        <parameter name="pageSectionId" />
+        <parameter name="pseudoId" />
+        <parameter name="landingPageId" />
+        <parameter name="sectionSequence" type="Integer" />
+        <parameter name="sectionTitle" />
+        <parameter name="sectionDescription" />
+        <parameter name="sectionImageUrl" />
+        <parameter name="createdDate" type="Timestamp" />
+      </parameter>
+    </out-parameters>
+    <actions>
+      <!-- Get owner party ID from authenticated user context -->
+      <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+        out-map="context" />
+
+      <!-- Find all sections for the landing page -->
+      <entity-find entity-name="PageSection" list="sectionsList">
+        <econdition field-name="landingPageId" from="landingPageId" />
+        <order-by field-name="sectionSequence" />
+      </entity-find>
+
+      <!-- Map pageSectionId to landingPageSectionId for frontend compatibility -->
+      <set field="sections" from="[]" />
+      <iterate list="sectionsList" entry="section">
+        <script>
+          Map sectionMap = section.getMap()
+          sectionMap.put('landingPageSectionId', section.pageSectionId)
+          sections.add(sectionMap)
+        </script>
+      </iterate>
+    </actions>
+  </service>
+
+  <!-- ============================================ -->
+  <!-- CREDIBILITY SERVICES (4 services) -->
+  <!-- ============================================ -->
+
+  <!-- getCredibilityInfo: Get credibility info for a landing page -->
+  <service verb="get" noun="CredibilityInfo" authenticate="false">
+    <description>Get credibility information for a landing page, including statistics</description>
+    <in-parameters>
+      <parameter name="landingPageId" required="true">
+        <description>Landing page ID</description>
+      </parameter>
+    </in-parameters>
+    <out-parameters>
+      <parameter name="credibilityInfoList" type="List">
+        <description>List of credibility info (typically one per page)</description>
+        <parameter name="credibilityInfoId" />
+        <parameter name="pseudoId" />
+        <parameter name="landingPageId" />
+        <parameter name="creatorBio" />
+        <parameter name="backgroundText" />
+        <parameter name="creatorImageUrl" />
+        <parameter name="createdDate" type="Timestamp" />
+        <parameter name="statistics" type="List">
+          <description>List of credibility statistics</description>
+          <parameter name="credibilityStatisticId" />
+          <parameter name="statistic" />
+          <parameter name="sequence" type="Integer" />
+          <parameter name="createdDate" type="Timestamp" />
+        </parameter>
+      </parameter>
+    </out-parameters>
+    <actions>
+      <!-- Get owner party ID from authenticated user context -->
+      <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+        out-map="context" />
+
+      <!-- Use view entity to get credibility info with statistics in one query -->
+      <entity-find entity-name="growerp.landing.CredibilityInfoAndStatistics" list="viewResults">
+        <econdition field-name="landingPageId" from="landingPageId" />
+        <order-by field-name="credibilityInfoId" />
+        <order-by field-name="sequence" />
+      </entity-find>
+
+      <!-- Group results by credibilityInfoId and nest statistics -->
+      <script><![CDATA[
+        credibilityInfoList = []
+        Map<String, Map> credibilityMap = [:]
+        
+        for (def row : viewResults) {
+          String credInfoId = row.credibilityInfoId
+          
+          // Create or get credibility info entry
+          if (!credibilityMap.containsKey(credInfoId)) {
+            Map credInfo = [
+              credibilityInfoId: row.credibilityInfoId,
+              pseudoId: row.pseudoId,
+              landingPageId: row.landingPageId,
+              creatorBio: row.creatorBio,
+              backgroundText: row.backgroundText,
+              creatorImageUrl: row.creatorImageUrl,
+              createdDate: row.createdDate,
+              statistics: []
+            ]
+            credibilityMap.put(credInfoId, credInfo)
+            credibilityInfoList.add(credInfo)
+          }
+          
+          // Add statistic if present (join is optional, so may be null)
+          if (row.credibilityStatisticId) {
+            Map statistic = [
+              credibilityStatisticId: row.credibilityStatisticId,
+              pseudoId: row.statisticPseudoId,
+              statistic: row.statistic,
+              sequence: row.sequence,
+              createdDate: row.statisticCreatedDate
+            ]
+            credibilityMap.get(credInfoId).statistics.add(statistic)
+          }
+        }
+      ]]></script>
+
+    </actions>
+  </service>
+
+  <!-- createCredibilityInfo: Add credibility section -->
+  <service verb="create" noun="CredibilityInfo" authenticate="true">
+    <description>Create credibility/bio section for landing page with optional statistics. Owner party ID is automatically determined from authenticated user context.</description>
+    <in-parameters>
+      <parameter name="landingPageId">
+        <description>Landing page ID</description>
+      </parameter>
+      <parameter name="pseudoId">
+        <description>pseudo ID</description>
+      </parameter>
+      <parameter name="creatorBio" required="true">
+        <description>Creator bio text</description>
+      </parameter>
+      <parameter name="backgroundText">
+        <description>Background/experience text</description>
+      </parameter>
+      <parameter name="creatorImageUrl">
+        <description>Optional creator image URL</description>
+      </parameter>
+      <parameter name="statisticsJson">
+        <description>Optional JSON array of statistics: [{"statistic":"text","sequence":1}]</description>
+      </parameter>
+    </in-parameters>
+    <out-parameters>
+      <parameter name="credibilityInfoId">
+        <description>Created credibility ID</description>
+      </parameter>
+      <parameter name="pseudoId">
+        <description>Created credibility pseudoId</description>
+      </parameter>
+      <parameter name="landingPageId">
+        <description>Landing page ID</description>
+      </parameter>
+      <parameter name="creatorBio">
+        <description>Creator bio text</description>
+      </parameter>
+      <parameter name="backgroundText">
+        <description>Background text</description>
+      </parameter>
+      <parameter name="creatorImageUrl">
+        <description>Creator image URL</description>
+      </parameter>
+      <parameter name="statistics" type="List">
+        <description>Created statistics</description>
+      </parameter>
+      <parameter name="createdDate" type="Timestamp">
+        <description>Creation timestamp</description>
+      </parameter>
+      <parameter name="lastModifiedDate" type="Timestamp">
+        <description>Last modified timestamp</description>
+      </parameter>
+    </out-parameters>
+    <actions>
+      <!-- Get owner party ID from authenticated user context -->
+      <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+        out-map="context" />
+
+      <!-- Verify landing page exists and belongs to owner -->
+      <entity-find-one entity-name="LandingPage" value-field="landingPage">
+        <field-map field-name="landingPageId" from="landingPageId" />
+        <field-map field-name="ownerPartyId" from="ownerPartyId" />
+      </entity-find-one>
+
+      <if condition="!landingPage">
+        <return error="true" message="Landing page not found or access denied" />
+      </if>
+
+      <if condition="!pseudoId">
+        <!-- Generate unique pseudoId within the tenant only if not provided -->
+        <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+          in-map="[ownerPartyId: ownerPartyId, seqName: 'credibilityInfo']" out-map="context" />
+        <set field="pseudoId" from="seqNum" />
+      </if>
+
+      <!-- Create credibility info record -->
+      <service-call name="create#growerp.landing.CredibilityInfo" out-map="createOut"
+        in-map="[
+        pseudoId: pseudoId,
+        landingPageId: landingPageId,
+        creatorBio: creatorBio,
+        backgroundText: backgroundText,
+        creatorImageUrl: creatorImageUrl,
+        createdDate: ec.user.nowTimestamp
+      ]" />
+
+      <set field="credibilityInfoId" from="createOut.credibilityInfoId" />
+
+      <!-- Handle statistics if provided -->
+      <if condition="statisticsJson">
+        <!-- Parse JSON statistics -->
+        <script>
+          def statsList = new groovy.json.JsonSlurper().parseText(statisticsJson)
+          context.statsList = statsList instanceof List ? statsList : []
+          context.statsIterIndex = 0
+        </script>
+
+        <!-- Create new statistics from parsed JSON -->
+        <iterate list="statsList" entry="stat">
+          <if condition="stat.statistic">
+            <set field="statsIterIndex" from="statsIterIndex + 1" />
+            <if condition="!pseudoId">
+              <!-- Generate unique pseudoId within the tenant only if not provided -->
+              <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                in-map="[ownerPartyId: ownerPartyId, seqName: 'credibilityStatistic']"
+                out-map="context" />
+              <set field="pseudoId" from="seqNum" />
+            </if>
+
+            <!-- Create statistic record using service -->
+            <service-call name="create#growerp.landing.CredibilityStatistic" out-map="statOut"
+              in-map="[
+              pseudoId: pseudoId,
+              credibilityInfoId: credibilityInfoId,
+              statistic: stat.statistic,
+              sequence: stat.sequence ?: statsIterIndex,
+              createdDate: ec.user.nowTimestamp
+            ]" />
+          </if>
+        </iterate>
+      </if>
+
+      <!-- Fetch the complete credibility record with statistics using get service -->
+      <service-call name="growerp.100.LandingPageServices100.get#CredibilityInfo"
+        in-map="[landingPageId: landingPageId]" out-map="credOut" />
+
+      <!-- Find and return the credibility info we just created -->
+      <script>
+        if (credOut.credibilityInfoList) {
+          for (def credInfo : credOut.credibilityInfoList) {
+            if (credInfo.credibilityInfoId == credibilityInfoId) {
+              context.putAll(credInfo)
+              break
+            }
+          }
+        }
+      </script>
+
+    </actions>
+  </service>
+
+  <!-- updateCredibilityInfo: Update credibility section -->
+  <service verb="update" noun="CredibilityInfo" authenticate="true">
+    <description>Update credibility/bio section content and statistics. Owner party ID is automatically determined from authenticated user context.</description>
+    <in-parameters>
+      <parameter name="credibilityInfoId" required="true">
+        <description>Credibility ID to update</description>
+      </parameter>
+      <parameter name="pseudoId" />
+      <parameter name="creatorBio">
+        <description>New creator bio</description>
+      </parameter>
+      <parameter name="backgroundText">
+        <description>New background text</description>
+      </parameter>
+      <parameter name="creatorImageUrl">
+        <description>New creator image URL</description>
+      </parameter>
+      <parameter name="statisticsJson">
+        <description>Optional JSON array of statistics to replace existing: [{"statistic":"text","sequence":1}]</description>
+      </parameter>
+    </in-parameters>
+    <out-parameters>
+      <parameter name="credibilityInfoId">
+        <description>Updated credibility ID</description>
+      </parameter>
+      <parameter name="pseudoId">
+        <description>Credibility pseudoId</description>
+      </parameter>
+      <parameter name="landingPageId">
+        <description>Landing page ID</description>
+      </parameter>
+      <parameter name="creatorBio">
+        <description>Creator bio text</description>
+      </parameter>
+      <parameter name="backgroundText">
+        <description>Background text</description>
+      </parameter>
+      <parameter name="creatorImageUrl">
+        <description>Creator image URL</description>
+      </parameter>
+      <parameter name="statistics" type="List">
+        <description>Updated statistics</description>
+      </parameter>
+      <parameter name="createdDate" type="Timestamp">
+        <description>Creation timestamp</description>
+      </parameter>
+      <parameter name="lastModifiedDate" type="Timestamp">
+        <description>Last modified timestamp</description>
+      </parameter>
+    </out-parameters>
+    <actions>
+      <!-- Get owner party ID from authenticated user context -->
+      <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+        out-map="context" />
+
+      <!-- Verify credibility info exists and belongs to owner's landing page -->
+      <entity-find-one entity-name="CredibilityInfo" value-field="existingCredibility">
+        <field-map field-name="credibilityInfoId" from="credibilityInfoId" />
+      </entity-find-one>
+
+      <if condition="!existingCredibility">
+        <return error="true" message="Credibility info not found" />
+      </if>
+
+      <!-- Verify the credibility's landing page belongs to owner -->
+      <entity-find-one entity-name="LandingPage" value-field="landingPage">
+        <field-map field-name="landingPageId" from="existingCredibility.landingPageId" />
+        <field-map field-name="ownerPartyId" from="ownerPartyId" />
+      </entity-find-one>
+
+      <if condition="!landingPage">
+        <return error="true" message="Access denied to this credibility info" />
+      </if>
+
+      <if condition="!pseudoId">
+        <!-- Generate unique pseudoId within the tenant only if not provided -->
+        <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+          in-map="[ownerPartyId: ownerPartyId, seqName: 'credibilityInfo']" out-map="context" />
+        <set field="pseudoId" from="seqNum" />
+      </if>
+
+      <!-- Update credibility info with provided fields -->
+      <service-call name="update#CredibilityInfo"
+        in-map="[
+        credibilityInfoId: credibilityInfoId,
+        pseudoId: pseudoId,
+        creatorBio: creatorBio ?: existingCredibility.creatorBio,
+        backgroundText: backgroundText,
+        creatorImageUrl: creatorImageUrl,
+        lastModifiedDate: ec.user.nowTimestamp
+      ]" />
+
+      <!-- Handle statistics - replace all existing statistics (or delete all if empty/null) -->
+      <if condition="statisticsJson != null">
+        <!-- Delete all existing statistics first -->
+        <entity-find entity-name="growerp.landing.CredibilityStatistic" list="existingStats">
+          <econdition field-name="credibilityInfoId" from="credibilityInfoId" />
+        </entity-find>
+        <iterate list="existingStats" entry="existingStat">
+          <entity-delete value-field="existingStat" />
+        </iterate>
+
+        <!-- Parse JSON statistics if provided -->
+        <if condition="statisticsJson">
+          <script>
+            def statsList = new groovy.json.JsonSlurper().parseText(statisticsJson)
+            context.statsList = statsList instanceof List ? statsList : []
+            context.statsIterIndex = 0
+          </script>
+
+          <!-- Create new statistics from parsed JSON -->
+          <iterate list="statsList" entry="stat">
+            <if condition="stat.statistic">
+              <!-- Generate unique IDs -->
+              <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                in-map="[ownerPartyId: ownerPartyId, seqName: 'credibilityStatistic']"
+                out-map="context" />
+              <set field="pseudoId" from="seqNum" />
+              <set field="statsIterIndex" from="statsIterIndex + 1" />
+
+              <!-- Create statistic record using service -->
+              <service-call name="create#growerp.landing.CredibilityStatistic" out-map="statOut"
+                in-map="[
+                pseudoId: pseudoId,
+                credibilityInfoId: credibilityInfoId,
+                statistic: stat.statistic,
+                sequence: stat.sequence ?: statsIterIndex,
+                createdDate: ec.user.nowTimestamp
+              ]" />
+            </if>
+          </iterate>
+        </if>
+      </if>
+
+      <!-- Fetch the complete credibility record with statistics using get service -->
+      <service-call name="growerp.100.LandingPageServices100.get#CredibilityInfo"
+        in-map="[landingPageId: existingCredibility.landingPageId]" out-map="credOut" />
+
+      <!-- Find and return the credibility info we just updated -->
+      <script>
+        if (credOut.credibilityInfoList) {
+          for (def credInfo : credOut.credibilityInfoList) {
+            if (credInfo.credibilityInfoId == credibilityInfoId) {
+              context.putAll(credInfo)
+              break
+            }
+          }
+        }
+      </script>
+
+    </actions>
+  </service>
+
+  <!-- deleteCredibilityInfo: Delete credibility section -->
+  <service verb="delete" noun="CredibilityInfo" authenticate="true">
+    <description>Delete credibility/bio section and all statistics. Owner party ID is automatically determined from authenticated user context.</description>
+    <in-parameters>
+      <parameter name="credibilityInfoId" required="true">
+        <description>Credibility ID to delete</description>
+      </parameter>
+      <parameter name="pseudoId" />
+    </in-parameters>
+    <out-parameters>
+      <parameter name="deletedCount" type="Integer">
+        <description>Total records deleted (credibility + statistics)</description>
+      </parameter>
+    </out-parameters>
+    <actions>
+      <!-- Get owner party ID from authenticated user context -->
+      <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+        out-map="context" />
+
+      <!-- Verify credibility info exists and belongs to owner's landing page -->
+      <entity-find-one entity-name="CredibilityInfo" value-field="existingCredibility">
+        <field-map field-name="credibilityInfoId" from="credibilityInfoId" />
+      </entity-find-one>
+
+      <if condition="!existingCredibility">
+        <return error="true" message="Credibility info not found" />
+      </if>
+
+      <!-- Verify the credibility's landing page belongs to owner -->
+      <entity-find-one entity-name="LandingPage" value-field="landingPage">
+        <field-map field-name="landingPageId" from="existingCredibility.landingPageId" />
+        <field-map field-name="ownerPartyId" from="ownerPartyId" />
+      </entity-find-one>
+
+      <if condition="!landingPage">
+        <return error="true" message="Access denied to this credibility info" />
+      </if>
+
+      <set field="deletedCount" value="0" type="Integer" />
+
+      <!-- Delete all related statistics first -->
+      <entity-find entity-name="CredibilityStatistic" list="statisticsToDelete">
+        <econdition field-name="credibilityInfoId" from="credibilityInfoId" />
+      </entity-find>
+      <iterate list="statisticsToDelete" entry="statistic">
+        <service-call name="delete#CredibilityStatistic"
+          in-map="[credibilityStatisticId: statistic.credibilityStatisticId]" />
+        <set field="deletedCount" from="deletedCount + 1" />
+      </iterate>
+
+      <!-- Delete the credibility info -->
+      <service-call name="delete#CredibilityInfo" in-map="[credibilityInfoId: credibilityInfoId]" />
+      <set field="deletedCount" from="deletedCount + 1" />
+
+    </actions>
+  </service>
+
+  <!-- ============================================ -->
+  <!-- AI LANDING PAGE GENERATION SERVICES -->
+  <!-- ============================================ -->
+
+  <!-- generateLandingPageWithAI: Generate landing page with Gemini AI -->
+  <service verb="generate" noun="LandingPageWithAI" authenticate="true">
+    <description>Generate landing page content using Gemini AI and create directly in database</description>
+    <in-parameters>
+      <parameter name="businessDescription" required="true">
+        <description>Description of the business (20-500 characters)</description>
+      </parameter>
+      <parameter name="targetAudience">
+        <description>Target audience for the landing page (optional)</description>
+      </parameter>
+      <parameter name="industry">
+        <description>Industry or market segment (optional, auto-detected if not provided)</description>
+      </parameter>
+      <parameter name="tone" default="professional">
+        <description>Tone of content: professional|casual|inspirational</description>
+      </parameter>
+      <parameter name="numSections" type="Integer" default="5">
+        <description>Number of page sections to generate (3-7)</description>
+      </parameter>
+    </in-parameters>
+    <out-parameters>
+      <parameter name="landingPage" type="Map">
+        <description>Created landing page object with all sections</description>
+      </parameter>
+      <parameter name="sectionsCreated" type="Integer">
+        <description>Number of sections created</description>
+      </parameter>
+    </out-parameters>
+    <actions>
+      <script location="component://growerp/service/generateLandingPageWithAI.groovy" />
+    </actions>
+  </service>
+
+  <!-- ============================================ -->
+</services>

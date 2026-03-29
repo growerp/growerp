@@ -1,0 +1,61 @@
+version '1.0-SNAPSHOT'
+
+apply plugin: 'java'
+apply plugin: 'groovy'
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+}
+
+def jarBaseName = 'CompiledComponentName' // Customize compiled file name
+def componentNode = parseComponent(project)
+def moquiDir = file(projectDir.absolutePath + '/../../..')
+def frameworkDir = file(moquiDir.absolutePath + '/framework')
+
+test {
+    dependsOn cleanTest
+
+    systemProperty 'moqui.runtime', moquiDir.absolutePath + '/runtime'
+    systemProperty 'moqui.conf', 'conf/MoquiDevConf.xml'
+    systemProperty 'moqui.init.static', 'true'
+
+    // testLogging.showsStandardStreams = true; testLogging.showExceptions = true
+
+    classpath += files(sourceSets.main.output.classesDirs)
+
+    classpath = classpath.filter { it.exists() }
+    beforeTest { descriptor -> logger.lifecycle("Runnin test: ${descriptor}") }
+}
+
+version = componentNode.'@version'
+
+repositories {
+    flatDir name: 'localLib', dirs: frameworkDir.absolutePath + '/lib'
+    jcenter()
+    mavenCentral()
+}
+
+tasks.withType(JavaCompile) { options.compilerArgs << "-proc:none" }
+tasks.withType(GroovyCompile) { options.compilerArgs << "-proc:none" }
+
+dependencies {
+    implementation project(':framework')
+    testImplementation project(':framework').configurations.testImplementation.allDependencies
+    implementation 'com.stripe:stripe-java:20.116.0'
+}
+
+task cleanLib(type: Delete) { delete fileTree(dir: projectDir.absolutePath+'/lib', include: '*') }
+clean.dependsOn cleanLib
+
+jar {
+    destinationDir = file(projectDir.absolutePath + '/lib') // Declaring compiled Groovy goes into lib directory
+    baseName = jarBaseName
+}
+task copyDependencies { doLast {
+    copy { from (configurations.runtimeClasspath - project(':framework').configurations.runtimeClasspath - project(':framework').jar.archivePath)
+        into file(projectDir.absolutePath + '/lib') }
+} }
+copyDependencies.dependsOn cleanLib
+jar.dependsOn copyDependencies

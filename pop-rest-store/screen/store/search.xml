@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-2.1.xsd"   require-authentication="anonymous-view" allow-extra-path="true">
+    <parameter name="searchParameter"/>
+    <parameter name="pageIndex"/>
+    <parameter name="addedCorrect"/>
+
+    <transition name="addToCart">
+        <actions>
+            <service-call name="popstore.CartServices.add#Product" out-map="addOut"
+                          in-map="[productId:productId, quantity:quantity, currencyUomId:currencyUomId, productStoreId: productStoreId]"/>
+            <set field="addedCorrect" from="false"/>
+            <if condition="addOut.orderHeader != null">
+                <set field="addedCorrect" from="true"/>
+            </if>
+        </actions>
+        <default-response url="./${searchParameter}"><parameter name="addedCorrect"/></default-response>
+        <error-response url="./${searchParameter}"/>
+    </transition>
+
+    <pre-actions>
+        <set field="extraPathNameList" from="sri.screenUrlInfo.extraPathNameList"/>
+        <if condition="extraPathNameList &amp;&amp; !searchParameter"><set field="searchParameter" from="extraPathNameList[0]"/></if>
+        <if condition="extraPathNameList &amp;&amp; !pageIndex"><set field="pageIndex" from="extraPathNameList[1]"/></if>
+        <if condition="!pageIndex"><set field="pageIndex" from="0"/></if>
+        <if condition="!categoryId"><set field="categoryId" value="RchAllProducts"/></if>
+    </pre-actions>
+    <actions>
+        <if condition="searchParameter">
+        <service-call name="popstore.SearchServices.search#All" out-map="context"
+            in-map="[searchParameter:searchParameter, productStoreId:productStoreId, pageIndex:pageIndex ? pageIndex : '0', pageSize:'12']"/>
+            </if>
+        <service-call name="popstore.CartServices.get#CartInfo" in-map="context" out-map="productsInCart" />
+
+        <set field="productListCount" from="productListCount ?: 0"/>
+        <set field="productListPageSize" from="productListPageSize ?: 0"/>
+        <set field="productListPageRangeHigh" from="productListPageRangeHigh ?: 0"/>
+        <if condition="productSearchResults">
+            <set field="productList" from="productSearchResults.productList"/>
+            <set field="productListCount" from="productSearchResults.productListCount"/>
+            <set field="productListPageSize" from="productSearchResults.productListPageSize"/>
+            <set field="productListPageRangeHigh" from="productSearchResults.productListPageRangeHigh"/>
+        </if>
+    </actions>
+    <widgets>
+        <render-mode><text type="html" location="${template_server_header}"/></render-mode>
+        <render-mode><text type="html" location="${template_server_search}"/></render-mode>
+        <render-mode><text type="html" location="${template_server_footer}"/></render-mode>
+    </widgets>
+</screen>

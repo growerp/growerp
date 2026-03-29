@@ -1,0 +1,579 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<entity-facade-xml type="seed-initial">
+
+  <!-- ============================================ -->
+  <!-- EMAIL MESSAGES - Welcome Email -->
+  <!-- ============================================ -->
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpEmailWelcomeGreeting"
+    localized="Welcome to the GrowERP ${classification} system, ${firstName!} ${lastName!}" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpEmailWelcomeGreeting"
+    localized="ยินดีต้อนรับสู่ระบบ GrowERP ${classification}, ${firstName!} ${lastName!}" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpEmailWelcomeGreeting"
+    localized="Welkom bij het GrowERP ${classification} systeem, ${firstName!} ${lastName!}" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpEmailWelcomeAdminIntro"
+    localized="You can now start a website, sell products, manage your inventory and your accounting is done automatically." />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpEmailWelcomeAdminIntro"
+    localized="คุณสามารถเริ่มเว็บไซต์ ขายสินค้า จัดการสินค้าคงคลัง และระบบบัญชีจะทำงานโดยอัตโนมัติ" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpEmailWelcomeAdminIntro"
+    localized="U kunt nu een website starten, producten verkopen, uw voorraad beheren en uw boekhouding wordt automatisch gedaan." />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpEmailWelcomeStripeInfo"
+    localized="If you sell products on your website, you can enter your Stripe secret key on the website admin screen and incoming payments will be handled by your own stripe account. Your secret key is safe with us: it is encrypted in our database" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpEmailWelcomeStripeInfo"
+    localized="หากคุณขายสินค้าบนเว็บไซต์ คุณสามารถป้อน Stripe secret key ในหน้าจัดการเว็บไซต์ และการชำระเงินที่เข้ามาจะถูกจัดการโดยบัญชี Stripe ของคุณเอง คีย์ของคุณปลอดภัยกับเรา: มันถูกเข้ารหัสในฐานข้อมูลของเรา" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpEmailWelcomeStripeInfo"
+    localized="Als u producten op uw website verkoopt, kunt u uw Stripe geheime sleutel invoeren op het website beheerscherm en inkomende betalingen worden afgehandeld door uw eigen Stripe-account. Uw geheime sleutel is veilig bij ons: deze is versleuteld in onze database" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpEmailWelcomeSupportInfo"
+    localized="When you need any support, please let us know at" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpEmailWelcomeSupportInfo"
+    localized="เมื่อคุณต้องการความช่วยเหลือ โปรดแจ้งให้เราทราบที่" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpEmailWelcomeSupportInfo"
+    localized="Wanneer u ondersteuning nodig heeft, laat het ons weten op" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpEmailWelcomePasswordInfo"
+    localized="Your password to login is ${newPassword} Please Note you need a credit card to register in our production system" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpEmailWelcomePasswordInfo"
+    localized="รหัสผ่านสำหรับเข้าสู่ระบบของคุณคือ ${newPassword} โปรดทราบว่าคุณต้องใช้บัตรเครดิตในการลงทะเบียนในระบบจริงของเรา" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpEmailWelcomePasswordInfo"
+    localized="Uw wachtwoord om in te loggen is ${newPassword} Let op: u heeft een creditcard nodig om te registreren in ons productiesysteem" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpEmailWelcomeTestSystemInfo"
+    localized="If you just want to test, we also have a test system with limited availability and is cleared regularly:" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpEmailWelcomeTestSystemInfo"
+    localized="หากคุณต้องการทดสอบ เรามีระบบทดสอบที่มีความพร้อมใช้งานจำกัดและจะถูกล้างข้อมูลเป็นประจำ:" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpEmailWelcomeTestSystemInfo"
+    localized="Als u alleen wilt testen, hebben we ook een testsysteem met beperkte beschikbaarheid dat regelmatig wordt gewist:" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpEmailWelcomeRegisterAgain"
+    localized="Please register again at" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpEmailWelcomeRegisterAgain"
+    localized="โปรดลงทะเบียนอีกครั้งที่" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpEmailWelcomeRegisterAgain"
+    localized="Registreer opnieuw bij" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpEmailWelcomeTipsInfo"
+    localized="We will send you weekly an email with tips about the system. But for now, look around and let us know your comments!" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpEmailWelcomeTipsInfo"
+    localized="เราจะส่งอีเมลให้คุณทุกสัปดาห์พร้อมคำแนะนำเกี่ยวกับระบบ แต่สำหรับตอนนี้ ลองดูรอบๆ และแจ้งความคิดเห็นของคุณให้เราทราบ!" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpEmailWelcomeTipsInfo"
+    localized="We sturen u wekelijks een e-mail met tips over het systeem. Maar voor nu, kijk rond en laat ons uw opmerkingen weten!" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpEmailWelcomeRegards"
+    localized="Regards," />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpEmailWelcomeRegards"
+    localized="ขอแสดงความนับถือ" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpEmailWelcomeRegards"
+    localized="Met vriendelijke groet," />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpEmailWelcomeTeam"
+    localized="The Growerp-${classification} Team!" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpEmailWelcomeTeam"
+    localized="ทีม Growerp-${classification}!" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpEmailWelcomeTeam"
+    localized="Het Growerp-${classification} Team!" />
+
+  <!-- Welcome Test Email -->
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpEmailWelcomeTestNote"
+    localized="Please note that you are now going to use our test system with limited availability and is cleared regularly?" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpEmailWelcomeTestNote"
+    localized="โปรดทราบว่าคุณกำลังจะใช้ระบบทดสอบของเราที่มีความพร้อมใช้งานจำกัดและจะถูกล้างข้อมูลเป็นประจำ" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpEmailWelcomeTestNote"
+    localized="Houd er rekening mee dat u nu ons testsysteem gaat gebruiken met beperkte beschikbaarheid en dat deze regelmatig wordt gewist?" />
+
+  <!-- ============================================ -->
+  <!-- EMAIL MESSAGES - Password Reset -->
+  <!-- ============================================ -->
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpPasswordResetSet"
+    localized="Your reset password has been set to: ${resetPassword}" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpPasswordResetSet"
+    localized="รหัสผ่านรีเซ็ตของคุณถูกตั้งเป็น: ${resetPassword}" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpPasswordResetSet"
+    localized="Uw resetwachtwoord is ingesteld op: ${resetPassword}" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpPasswordResetInstructions"
+    localized="Please use this reset password to change your password." />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpPasswordResetInstructions"
+    localized="โปรดใช้รหัสผ่านรีเซ็ตนี้เพื่อเปลี่ยนรหัสผ่านของคุณ" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpPasswordResetInstructions"
+    localized="Gebruik dit resetwachtwoord om uw wachtwoord te wijzigen." />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpPasswordCurrentValid"
+    localized="Your current password is still valid." />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpPasswordCurrentValid"
+    localized="รหัสผ่านปัจจุบันของคุณยังคงใช้งานได้" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpPasswordCurrentValid"
+    localized="Uw huidige wachtwoord is nog steeds geldig." />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpPasswordMustChange"
+    localized="Your password must be changed before login." />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpPasswordMustChange"
+    localized="คุณต้องเปลี่ยนรหัสผ่านก่อนเข้าสู่ระบบ" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpPasswordMustChange"
+    localized="Uw wachtwoord moet worden gewijzigd voor het inloggen." />
+
+  <!-- ============================================ -->
+  <!-- SERVICE ERROR MESSAGES -->
+  <!-- ============================================ -->
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpBirdSendNotConfigured"
+    localized="birdsend not configured see growerp/100/BirdSendServices100.xml" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpBirdSendNotConfigured"
+    localized="ยังไม่ได้กำหนดค่า birdsend ดูที่ growerp/100/BirdSendServices100.xml" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpBirdSendNotConfigured"
+    localized="birdsend niet geconfigureerd, zie growerp/100/BirdSendServices100.xml" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpMailerLiteNotConfigured"
+    localized="mailerLight not configured: missing parameters in table interfaceValue" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpMailerLiteNotConfigured"
+    localized="ยังไม่ได้กำหนดค่า mailerLight: พารามิเตอร์ที่ขาดหายไปในตาราง interfaceValue" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpMailerLiteNotConfigured"
+    localized="mailerLight niet geconfigureerd: ontbrekende parameters in tabel interfaceValue" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpOpenMrsHostnameNotFound"
+    localized="OpenMRS system hostname ${hostNames[0].settingValue} in CompanyData not found" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpOpenMrsHostnameNotFound"
+    localized="ไม่พบชื่อโฮสต์ระบบ OpenMRS ${hostNames[0].settingValue} ใน CompanyData" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpOpenMrsHostnameNotFound"
+    localized="OpenMRS systeem hostnaam ${hostNames[0].settingValue} in CompanyData niet gevonden" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpOpenMrsInvalidCredentials"
+    localized="OpenMRS credentials not valid" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpOpenMrsInvalidCredentials"
+    localized="ข้อมูลรับรอง OpenMRS ไม่ถูกต้อง" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpOpenMrsInvalidCredentials"
+    localized="OpenMRS-inloggegevens zijn niet geldig" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpAssetNotFound"
+    localized="asset ${asset.assetId} not found!" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpAssetNotFound"
+    localized="ไม่พบสินทรัพย์ ${asset.assetId}!" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpAssetNotFound"
+    localized="asset ${asset.assetId} niet gevonden!" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpProductNotFound"
+    localized="product ${product.productId} not found!" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpProductNotFound"
+    localized="ไม่พบสินค้า ${product.productId}!" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpProductNotFound"
+    localized="product ${product.productId} niet gevonden!" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpCategoryNotFound"
+    localized="Category: ${category.categoryId} not found" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpCategoryNotFound"
+    localized="ไม่พบหมวดหมู่: ${category.categoryId}" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpCategoryNotFound"
+    localized="Categorie: ${category.categoryId} niet gevonden" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpCompanyNotFound"
+    localized="Company ${company.partyId} not found" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpCompanyNotFound"
+    localized="ไม่พบบริษัท ${company.partyId}" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpCompanyNotFound"
+    localized="Bedrijf ${company.partyId} niet gevonden" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpActivityNotFound"
+    localized="Activity ${activity.activityId} not found" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpActivityNotFound"
+    localized="ไม่พบกิจกรรม ${activity.activityId}" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpActivityNotFound"
+    localized="Activiteit ${activity.activityId} niet gevonden" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpOpportunityNotFound"
+    localized="opportunity ${opportunity?.opportunityId} not found!" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpOpportunityNotFound"
+    localized="ไม่พบโอกาส ${opportunity?.opportunityId}!" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpOpportunityNotFound"
+    localized="kans ${opportunity?.opportunityId} niet gevonden!" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpChatRoomNotFound"
+    localized="Room ${chatRoomId} not found" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpChatRoomNotFound"
+    localized="ไม่พบห้อง ${chatRoomId}" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpChatRoomNotFound"
+    localized="Kamer ${chatRoomId} niet gevonden" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpSubscriptionNotFound"
+    localized="Subscription with ID ${subscription.subscriptionId} not found." />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpSubscriptionNotFound"
+    localized="ไม่พบการสมัครสมาชิกด้วย ID ${subscription.subscriptionId}" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpSubscriptionNotFound"
+    localized="Abonnement met ID ${subscription.subscriptionId} niet gevonden." />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpWebsiteNameTaken"
+    localized="Name $newPart already taken!" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpWebsiteNameTaken"
+    localized="ชื่อ $newPart ถูกใช้ไปแล้ว!" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpWebsiteNameTaken"
+    localized="Naam $newPart is al in gebruik!" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpWebsitePathNotFound"
+    localized="path: $path not found!" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpWebsitePathNotFound"
+    localized="ไม่พบเส้นทาง: $path!" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpWebsitePathNotFound"
+    localized="pad: $path niet gevonden!" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpNeedPostalAddressForCreditCard"
+    localized="Need postal address for creditcard" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpNeedPostalAddressForCreditCard"
+    localized="ต้องการที่อยู่ไปรษณีย์สำหรับบัตรเครดิต" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpNeedPostalAddressForCreditCard"
+    localized="Postadres vereist voor creditcard" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpCreateCompanyNeedsOwner"
+    localized="Creating a company needs an ownerPartyId" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpCreateCompanyNeedsOwner"
+    localized="การสร้างบริษัทต้องมี ownerPartyId" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpCreateCompanyNeedsOwner"
+    localized="Voor het aanmaken van een bedrijf is een ownerPartyId vereist" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpTimeEntryAlreadyInvoiced"
+    localized="Cannot delete time entry: already invoiced" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpTimeEntryAlreadyInvoiced"
+    localized="ไม่สามารถลบรายการเวลา: ออกใบแจ้งหนี้แล้ว" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpTimeEntryAlreadyInvoiced"
+    localized="Kan tijdregistratie niet verwijderen: al gefactureerd" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpInvalidTypeValue"
+    localized="Invalid type value: ${companyUser.type} valid: 'Company','User'" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpInvalidTypeValue"
+    localized="ค่าประเภทไม่ถูกต้อง: ${companyUser.type} ที่ถูกต้อง: 'Company','User'" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpInvalidTypeValue"
+    localized="Ongeldige typewaarde: ${companyUser.type} geldig: 'Company','User'" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpInvalidRoleValue"
+    localized="Invalid role value: ${companyUser.role} valid: 'Customer','Lead','Supplier'" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpInvalidRoleValue"
+    localized="ค่าบทบาทไม่ถูกต้อง: ${companyUser.role} ที่ถูกต้อง: 'Customer','Lead','Supplier'" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpInvalidRoleValue"
+    localized="Ongeldige rolwaarde: ${companyUser.role} geldig: 'Customer','Lead','Supplier'" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpNoValidBase64Image"
+    localized="No valid base64 decoded image file found" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpNoValidBase64Image"
+    localized="ไม่พบไฟล์รูปภาพที่ถอดรหัส base64 ที่ถูกต้อง" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpNoValidBase64Image"
+    localized="Geen geldig base64-gedecodeerd afbeeldingsbestand gevonden" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpActivityTypeRequired"
+    localized="Getting a list of activities, requires an activity type" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpActivityTypeRequired"
+    localized="การรับรายการกิจกรรมต้องระบุประเภทกิจกรรม" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpActivityTypeRequired"
+    localized="Voor het ophalen van een lijst met activiteiten is een activiteitstype vereist" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpActivityTypeNotSupported"
+    localized="Activity type $activityType not supported, only Event and ToDo supported" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpActivityTypeNotSupported"
+    localized="ไม่รองรับประเภทกิจกรรม $activityType รองรับเฉพาะ Event และ ToDo" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpActivityTypeNotSupported"
+    localized="Activiteitstype $activityType wordt niet ondersteund, alleen Event en ToDo worden ondersteund" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpChatMessageIdRequired"
+    localized="Either chatRoomId or ChatMessageId is required to get chat message(s)" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpChatMessageIdRequired"
+    localized="ต้องระบุ chatRoomId หรือ ChatMessageId เพื่อรับข้อความแชท" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpChatMessageIdRequired"
+    localized="chatRoomId of ChatMessageId is vereist om chatbericht(en) op te halen" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpRootCategoryNotFound"
+    localized="Root category not found for ownerPartyId: $ownerPartyId" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpRootCategoryNotFound"
+    localized="ไม่พบหมวดหมู่ราก สำหรับ ownerPartyId: $ownerPartyId" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpRootCategoryNotFound"
+    localized="Hoofdcategorie niet gevonden voor ownerPartyId: $ownerPartyId" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpMandatoryRootCategoryNotFound"
+    localized="Internal data error; mandatory root category not found for owner $ownerPartyId" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpMandatoryRootCategoryNotFound"
+    localized="ข้อผิดพลาดข้อมูลภายใน; ไม่พบหมวดหมู่รากที่จำเป็นสำหรับเจ้าของ $ownerPartyId" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpMandatoryRootCategoryNotFound"
+    localized="Interne gegevensfout; verplichte hoofdcategorie niet gevonden voor eigenaar $ownerPartyId" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpCategoryRollupNotFound"
+    localized="could not find rollup for category: ${category.categoryId}" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpCategoryRollupNotFound"
+    localized="ไม่พบ rollup สำหรับหมวดหมู่: ${category.categoryId}" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpCategoryRollupNotFound"
+    localized="kon rollup niet vinden voor categorie: ${category.categoryId}" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpProductStoreNotFound"
+    localized="Could not find product store for path: ${path} and orgPartyId: $companyPartyId" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpProductStoreNotFound"
+    localized="ไม่พบร้านค้าสินค้าสำหรับเส้นทาง: ${path} และ orgPartyId: $companyPartyId" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpProductStoreNotFound"
+    localized="Kon productwinkel niet vinden voor pad: ${path} en orgPartyId: $companyPartyId" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpTextPageNotFound"
+    localized="Could not find text page with path: ${path}" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpTextPageNotFound"
+    localized="ไม่พบหน้าข้อความที่มีเส้นทาง: ${path}" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpTextPageNotFound"
+    localized="Kon tekstpagina niet vinden met pad: ${path}" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpImageNotFoundWithPath"
+    localized="Could not find image with path: ${path}" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpImageNotFoundWithPath"
+    localized="ไม่พบรูปภาพที่มีเส้นทาง: ${path}" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpImageNotFoundWithPath"
+    localized="Kon afbeelding niet vinden met pad: ${path}" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpAccountCodeNotFound"
+    localized="Could not find accountCode: ${paymentType.accountCode} for company: $companyPartyId" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpAccountCodeNotFound"
+    localized="ไม่พบรหัสบัญชี: ${paymentType.accountCode} สำหรับบริษัท: $companyPartyId" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpAccountCodeNotFound"
+    localized="Kon accountcode niet vinden: ${paymentType.accountCode} voor bedrijf: $companyPartyId" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpCanOnlyDeleteInitialLedger"
+    localized="Can only delete ledger when when not more than the initial settiung of posted balance." />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpCanOnlyDeleteInitialLedger"
+    localized="สามารถลบบัญชีแยกประเภทได้เฉพาะเมื่อไม่เกินการตั้งค่าเริ่มต้นของยอดดุลที่โพสต์" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpCanOnlyDeleteInitialLedger"
+    localized="Kan grootboek alleen verwijderen wanneer niet meer dan de initiële instelling van geboekte balans." />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpEntityNotSupportedForExport"
+    localized="Entity name [${entityName}] not supported for export." />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpEntityNotSupportedForExport"
+    localized="ไม่รองรับชื่อเอนทิตี [${entityName}] สำหรับการส่งออก" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpEntityNotSupportedForExport"
+    localized="Entiteitsnaam [${entityName}] wordt niet ondersteund voor export." />
+
+  <!-- ============================================ -->
+  <!-- ENUMERATION DESCRIPTIONS -->
+  <!-- ============================================ -->
+
+  <!-- ============================================ -->
+  <!-- ADDITIONAL SERVICE ERROR MESSAGES -->
+  <!-- ============================================ -->
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpPartyIdNotFound"
+    localized="Could not find partyId: $partyId" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpPartyIdNotFound"
+    localized="ไม่พบ partyId: $partyId" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpPartyIdNotFound"
+    localized="Kon partyId niet vinden: $partyId" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpInvalidCompanyId"
+    localized="Not a valid companyId" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpInvalidCompanyId"
+    localized="companyId ไม่ถูกต้อง" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpInvalidCompanyId"
+    localized="Geen geldig companyId" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpInvalidCompanyPartyId"
+    localized="Not a valid companyPartyId: $companyPartyId" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpInvalidCompanyPartyId"
+    localized="companyPartyId ไม่ถูกต้อง: $companyPartyId" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpInvalidCompanyPartyId"
+    localized="Geen geldig companyPartyId: $companyPartyId" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpInvalidClassificationId"
+    localized="Not a valid classificationId: ${classificationId}" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpInvalidClassificationId"
+    localized="classificationId ไม่ถูกต้อง: ${classificationId}" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpInvalidClassificationId"
+    localized="Geen geldig classificationId: ${classificationId}" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpInvalidUserGroupId"
+    localized="Not a valid userGroupId: ${user.userGroupId}" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpInvalidUserGroupId"
+    localized="userGroupId ไม่ถูกต้อง: ${user.userGroupId}" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpInvalidUserGroupId"
+    localized="Geen geldig userGroupId: ${user.userGroupId}" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpOwnerCompanyMissing"
+    localized="Owner company missing in create#user service for ${user.firstName} ${user.lastName} ${user.userGroupId}" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpOwnerCompanyMissing"
+    localized="ขาดบริษัทเจ้าของในบริการ create#user สำหรับ ${user.firstName} ${user.lastName} ${user.userGroupId}" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpOwnerCompanyMissing"
+    localized="Eigenaarsbedrijf ontbreekt in create#user service voor ${user.firstName} ${user.lastName} ${user.userGroupId}" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpProductStoreNotFoundForCompany"
+    localized="Could not find a product store for company: ${companyPartyId}" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpProductStoreNotFoundForCompany"
+    localized="ไม่พบร้านค้าสินค้าสำหรับบริษัท: ${companyPartyId}" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpProductStoreNotFoundForCompany"
+    localized="Kon geen productwinkel vinden voor bedrijf: ${companyPartyId}" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpRootBrowseCategoryNotFound"
+    localized="Root browse category not found for productStoreId: $productStoreId of companyId: $companyPartyId" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpRootBrowseCategoryNotFound"
+    localized="ไม่พบหมวดหมู่เรียกดูราก สำหรับ productStoreId: $productStoreId ของ companyId: $companyPartyId" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpRootBrowseCategoryNotFound"
+    localized="Hoofd bladercategorie niet gevonden voor productStoreId: $productStoreId van companyId: $companyPartyId" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpActivityNotFoundForOwner"
+    localized="activity $activityId for owner: $ownerPartyId not found" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpActivityNotFoundForOwner"
+    localized="ไม่พบกิจกรรม $activityId สำหรับเจ้าของ: $ownerPartyId" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpActivityNotFoundForOwner"
+    localized="activiteit $activityId voor eigenaar: $ownerPartyId niet gevonden" />
+
+  <moqui.basic.LocalizedMessage locale="default"
+    original="GrowerpActivityTypeWorkEffortNotSupported"
+    localized="Activity type $workEffortType($activityType) not supported" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpActivityTypeWorkEffortNotSupported"
+    localized="ไม่รองรับประเภทกิจกรรม $workEffortType($activityType)" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpActivityTypeWorkEffortNotSupported"
+    localized="Activiteitstype $workEffortType($activityType) wordt niet ondersteund" />
+
+  <!-- ============================================ -->
+  <!-- FINANCIAL DOCUMENT MESSAGES -->
+  <!-- ============================================ -->
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpFinDocInvoiceNotFound"
+    localized="Get finDoc Invoice: $finDocId or $pseudoId not found!" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpFinDocInvoiceNotFound"
+    localized="รับใบแจ้งหนี้ finDoc: ไม่พบ $finDocId หรือ $pseudoId!" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpFinDocInvoiceNotFound"
+    localized="Haal finDoc Factuur op: $finDocId of $pseudoId niet gevonden!" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpTransactionNotFound"
+    localized="Get Transaction $finDocid $pseudoId not found" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpTransactionNotFound"
+    localized="รับธุรกรรม ไม่พบ $finDocid $pseudoId" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpTransactionNotFound"
+    localized="Haal transactie op $finDocid $pseudoId niet gevonden" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpDocTypeMissing"
+    localized="DocType is missing when creating a financial document" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpDocTypeMissing"
+    localized="ขาด DocType เมื่อสร้างเอกสารทางการเงิน" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpDocTypeMissing"
+    localized="DocType ontbreekt bij het aanmaken van een financieel document" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpOtherCompanyOrUserRequired"
+    localized="Other Company or User required! company: ${finDoc.otherCompany} user: ${finDoc.otherUser} " />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpOtherCompanyOrUserRequired"
+    localized="ต้องระบุบริษัทอื่นหรือผู้ใช้! บริษัท: ${finDoc.otherCompany} ผู้ใช้: ${finDoc.otherUser} " />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpOtherCompanyOrUserRequired"
+    localized="Ander bedrijf of gebruiker vereist! bedrijf: ${finDoc.otherCompany} gebruiker: ${finDoc.otherUser} " />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpCompanyWithPseudoIdNotFound"
+    localized="No company found with pseudoId ${finDoc.otherCompany.pseudoId}" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpCompanyWithPseudoIdNotFound"
+    localized="ไม่พบบริษัทที่มี pseudoId ${finDoc.otherCompany.pseudoId}" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpCompanyWithPseudoIdNotFound"
+    localized="Geen bedrijf gevonden met pseudoId ${finDoc.otherCompany.pseudoId}" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpDocTypeNotSupportedForCreate"
+    localized="Document ${finDoc.docType} not supported yet to create...." />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpDocTypeNotSupportedForCreate"
+    localized="ยังไม่รองรับเอกสาร ${finDoc.docType} สำหรับการสร้าง...." />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpDocTypeNotSupportedForCreate"
+    localized="Document ${finDoc.docType} wordt nog niet ondersteund om aan te maken...." />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpDocTypeNotSupported"
+    localized="doctype ${finDoc.docType} not supported!" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpDocTypeNotSupported"
+    localized="ไม่รองรับประเภทเอกสาร ${finDoc.docType}!" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpDocTypeNotSupported"
+    localized="documenttype ${finDoc.docType} wordt niet ondersteund!" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpOrderHasNoItems"
+    localized="Order $orderId has no items!" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpOrderHasNoItems"
+    localized="คำสั่งซื้อ $orderId ไม่มีรายการ!" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpOrderHasNoItems"
+    localized="Bestelling $orderId heeft geen items!" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpInvoiceNotFound"
+    localized="Could not find Invoice ${invoice.invoiceId}}" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpInvoiceNotFound"
+    localized="ไม่พบใบแจ้งหนี้ ${invoice.invoiceId}}" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpInvoiceNotFound"
+    localized="Kon factuur ${invoice.invoiceId}} niet vinden" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpInvoiceStatusWrong"
+    localized="invoice status wrong: ${items[0].statusId}, cannot update" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpInvoiceStatusWrong"
+    localized="สถานะใบแจ้งหนี้ไม่ถูกต้อง: ${items[0].statusId}, ไม่สามารถอัปเดตได้" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpInvoiceStatusWrong"
+    localized="factuurstatus verkeerd: ${items[0].statusId}, kan niet bijwerken" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpPaymentNotFound"
+    localized="Payment: ${payment.paymentId} noy found for company: $companyPartyId" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpPaymentNotFound"
+    localized="ไม่พบการชำระเงิน: ${payment.paymentId} สำหรับบริษัท: $companyPartyId" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpPaymentNotFound"
+    localized="Betaling: ${payment.paymentId} niet gevonden voor bedrijf: $companyPartyId" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpOrderUpdateNotFound"
+    localized="Update Order ${finDoc.orderId}/${finDoc.pseudoId} for company: ${companyPartyId} not found!" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpOrderUpdateNotFound"
+    localized="ไม่พบคำสั่งซื้ออัปเดต ${finDoc.orderId}/${finDoc.pseudoId} สำหรับบริษัท: ${companyPartyId}!" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpOrderUpdateNotFound"
+    localized="Update bestelling ${finDoc.orderId}/${finDoc.pseudoId} voor bedrijf: ${companyPartyId} niet gevonden!" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpInvoiceUpdateNotFound"
+    localized="Update Invoice ${finDoc.invoiceId} for company: ${companyPartyId} not found!" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpInvoiceUpdateNotFound"
+    localized="ไม่พบใบแจ้งหนี้อัปเดต ${finDoc.invoiceId} สำหรับบริษัท: ${companyPartyId}!" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpInvoiceUpdateNotFound"
+    localized="Update factuur ${finDoc.invoiceId} voor bedrijf: ${companyPartyId} niet gevonden!" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpPaymentUpdateNotFound"
+    localized="Update Payment $finDoc.paymentId} not found!" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpPaymentUpdateNotFound"
+    localized="ไม่พบการชำระเงินอัปเดต $finDoc.paymentId}!" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpPaymentUpdateNotFound"
+    localized="Update betaling $finDoc.paymentId} niet gevonden!" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpShipmentNotFound"
+    localized="Shipment ${finDoc.shipmentId} not found!" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpShipmentNotFound"
+    localized="ไม่พบการจัดส่ง ${finDoc.shipmentId}!" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpShipmentNotFound"
+    localized="Zending ${finDoc.shipmentId} niet gevonden!" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpTransactionUpdateNotFound"
+    localized="Update Transaction ${finDoc.transactionId} not found" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpTransactionUpdateNotFound"
+    localized="ไม่พบธุรกรรมอัปเดต ${finDoc.transactionId}" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpTransactionUpdateNotFound"
+    localized="Update transactie ${finDoc.transactionId} niet gevonden" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpTransactionIsPosted"
+    localized="Transaction ${finDoc.transactionId} is posted, cannot be changed!" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpTransactionIsPosted"
+    localized="ธุรกรรม ${finDoc.transactionId} ถูกโพสต์แล้ว ไม่สามารถเปลี่ยนแปลงได้!" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpTransactionIsPosted"
+    localized="Transactie ${finDoc.transactionId} is geboekt, kan niet worden gewijzigd!" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpTransactionPostedCannotDelete"
+    localized="Transaction ${transaction.pseudoId} is posted, cannot be deleted!" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpTransactionPostedCannotDelete"
+    localized="ธุรกรรม ${transaction.pseudoId} ถูกโพสต์แล้ว ไม่สามารถลบได้!" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpTransactionPostedCannotDelete"
+    localized="Transactie ${transaction.pseudoId} is geboekt, kan niet worden verwijderd!" />
+
+  <!-- ============================================ -->
+  <!-- ENUMERATION DESCRIPTIONS -->
+  <!-- ============================================ -->
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpRequestTypeConsultation"
+    localized="Consultation" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpRequestTypeConsultation"
+    localized="การให้คำปรึกษา" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpRequestTypeConsultation"
+    localized="Consultatie" />
+
+</entity-facade-xml>

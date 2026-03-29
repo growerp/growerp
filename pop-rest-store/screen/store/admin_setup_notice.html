@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GrowERP Admin - Setup Required</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container {
+      background: white;
+      border-radius: 20px;
+      padding: 40px;
+      max-width: 700px;
+      width: 100%;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+
+    .icon {
+      font-size: 64px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      color: #333;
+      margin-bottom: 10px;
+      font-size: 2em;
+      text-align: center;
+    }
+
+    .subtitle {
+      color: #666;
+      margin-bottom: 30px;
+      font-size: 1.1em;
+      text-align: center;
+    }
+
+    .notice-box {
+      background: #fff3cd;
+      border-left: 4px solid #ffc107;
+      padding: 20px;
+      margin-bottom: 30px;
+      border-radius: 4px;
+    }
+
+    .notice-box h2 {
+      color: #856404;
+      margin-bottom: 10px;
+      font-size: 1.2em;
+    }
+
+    .notice-box p {
+      color: #856404;
+      line-height: 1.6;
+      margin-bottom: 10px;
+    }
+
+    .steps {
+      background: #f8f9fa;
+      border-left: 4px solid #667eea;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 4px;
+    }
+
+    .steps h3 {
+      color: #333;
+      margin-bottom: 15px;
+      font-size: 1.1em;
+    }
+
+    .steps ol {
+      margin-left: 20px;
+      color: #555;
+      line-height: 1.8;
+    }
+
+    .steps li {
+      margin-bottom: 10px;
+    }
+
+    code {
+      background: #e9ecef;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9em;
+      color: #d63384;
+    }
+
+    .command-box {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      padding: 15px;
+      border-radius: 8px;
+      margin: 15px 0;
+      font-family: 'Courier New', monospace;
+      overflow-x: auto;
+    }
+
+    .info-box {
+      background: #d1ecf1;
+      border-left: 4px solid #0c5460;
+      padding: 15px;
+      margin-top: 20px;
+      border-radius: 4px;
+    }
+
+    .info-box p {
+      color: #0c5460;
+      line-height: 1.6;
+      margin-bottom: 8px;
+    }
+
+    .info-box p:last-child {
+      margin-bottom: 0;
+    }
+
+    .info-box strong {
+      color: #0c5460;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="icon">⚙️</div>
+    <h1>GrowERP Admin Setup Required</h1>
+    <p class="subtitle">The Flutter web application needs to be built and deployed</p>
+
+    <div class="notice-box">
+      <h2>🔧 What's happening?</h2>
+      <p>You're seeing this page because the GrowERP Admin Flutter web application hasn't been deployed to the Moqui
+        backend yet.</p>
+      <p>This is normal when running GrowERP locally without Docker.</p>
+    </div>
+
+    <div class="steps">
+      <h3>📋 Setup Instructions</h3>
+      <ol>
+        <li>Open a terminal and navigate to the admin package:
+          <div class="command-box">cd flutter/packages/admin</div>
+        </li>
+        <li>Run the build and deploy script:
+          <div class="command-box">./build-and-deploy-web.sh</div>
+        </li>
+        <li>Wait for the build to complete (this may take a few minutes)</li>
+        <li>Refresh this page - the admin application should now load!</li>
+      </ol>
+    </div>
+
+    <div class="info-box">
+      <p><strong>💡 Note:</strong> This setup is only needed once, or after you make changes to the admin web
+        application.</p>
+      <p><strong>🐳 Docker Users:</strong> If you're using Docker, the deployment happens automatically during the
+        container build process.</p>
+      <p><strong>📚 Documentation:</strong> See <code>flutter/packages/admin/DEPLOY_WEB.md</code> for more details.</p>
+    </div>
+  </div>
+</body>
+
+</html>

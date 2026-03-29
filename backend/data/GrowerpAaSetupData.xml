@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<entity-facade-xml type="seed-initial">
+
+    <!-- Service Job: Recalculate GL Account Org Summaries - once per hour by default -->
+    <moqui.service.job.ServiceJob jobName="recalculate_growerp_statistics"
+        description="Recalculate the growerp dashboard statistics"
+        serviceName="growerp.100.GeneralServices100.get#Statistics" cronExpression="0 0 * * * ?"
+        paused="N"
+        transactionTimeout="1800" />
+
+    <!-- Service Job: Publish scheduled social posts - every 15 minutes -->
+    <moqui.service.job.ServiceJob jobName="publish_scheduled_social_posts"
+        description="Publish READY social posts whose scheduled time has arrived (Substack, LinkedIn)"
+        serviceName="growerp.100.SocialPostPublishingServices100.publish#ScheduledSocialPosts"
+        cronExpression="0 0/15 * * * ?"
+        paused="N"
+        transactionTimeout="300" />
+
+    <!-- format time period name -->
+    <moqui.basic.LocalizedMessage locale="default" original="TimePeriodBaseNameTemplate"
+        localized="Y${fromLocalDate.getYear()}${timePeriodType?.lengthUomId!='TF_yr'?(timePeriodType.description.split('(?=[A-Z])')[1][0].toLowerCase())+(periodNum as String).padLeft(2,'0'):''}" />
+
+    <!-- growerp initial products -->
+    <mantle.party.Party partyId="GROWERP" partyTypeEnumId="PtyOwner" disabled="Y" />
+    <mantle.product.category.ProductCategory productCategoryId="GROWERP_SERVICES"
+        ownerPartyId="GROWERP" productCategoryTypeEnumId="PctCatalog"
+        categoryName="GrowERP Services" description="" />
+
+    <!-- Subscription Plans -->
+    <mantle.product.Product productId="GROWERP_DIY_PLAN" productTypeEnumId="PtService" 
+        ownerPartyId="GROWERP" productName="DIY Plan" 
+        description="Perfect for individuals and small teams" />
+    <mantle.product.ProductPrice productId="GROWERP_DIY_PLAN" priceTypeEnumId="PptCurrent" 
+        price="29.00" pricePurposeEnumId="PppPurchase" priceUomId="USD" />
+    <mantle.product.category.ProductCategoryMember productCategoryId="GROWERP_SERVICES" 
+        productId="GROWERP_DIY_PLAN" fromDate="2024-01-01 00:00:00" />
+    
+    <mantle.product.Product productId="GROWERP_SMALL_PLAN" productTypeEnumId="PtService"
+        ownerPartyId="GROWERP" productName="Small Business Plan" 
+        description="For growing businesses" />
+    <mantle.product.ProductPrice productId="GROWERP_SMALL_PLAN" priceTypeEnumId="PptCurrent"
+        price="99.00" pricePurposeEnumId="PppPurchase" priceUomId="USD" />
+    <mantle.product.category.ProductCategoryMember productCategoryId="GROWERP_SERVICES" 
+        productId="GROWERP_SMALL_PLAN" fromDate="2024-01-01 00:00:00" />
+    
+    <mantle.product.Product productId="GROWERP_FULL_PLAN" productTypeEnumId="PtService"
+        ownerPartyId="GROWERP" productName="Full Plan" 
+        description="Complete solution for enterprises" />
+    <mantle.product.ProductPrice productId="GROWERP_FULL_PLAN" priceTypeEnumId="PptCurrent"
+        price="299.00" pricePurposeEnumId="PppPurchase" priceUomId="USD" />
+    <mantle.product.category.ProductCategoryMember productCategoryId="GROWERP_SERVICES" 
+        productId="GROWERP_FULL_PLAN" fromDate="2024-01-01 00:00:00" />
+
+</entity-facade-xml>

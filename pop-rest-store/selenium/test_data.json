@@ -1,0 +1,17 @@
+{
+    "user": {
+        "firstName": "TestFirstName",
+        "lastName": "TestLastName",
+        "email": "testxxx@example.com"
+    },
+    "admin": {
+        "firstName": "TestFirstNameAdmin",
+        "lastName": "TestLastNameAdmin",
+        "email": "testxxx@example.com"
+    },
+    "company": {
+        "name": "Test Company",
+        "currencyId": "USD"
+    },
+    "product": {}
+}

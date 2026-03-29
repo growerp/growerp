@@ -1,0 +1,22 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Launch localhost",
+            "type": "firefox",
+            "request": "launch",
+            "reAttach": true,
+            "url": "http://100000.localhost:8080/store",
+            "webRoot": "/home/dell/growerpMoqui/runtime/component/PopRestStore/screen/store/components",
+            "pathMappings": [
+                {
+                    "url": "http://100000.localhost:8080/store/components",
+                    "path": "/home/dell/growerpMoqui/runtime/component/PopRestStore/screen/store/components"
+                },
+            ]
+        }
+    ]
+}

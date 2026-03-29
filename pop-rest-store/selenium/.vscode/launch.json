@@ -1,0 +1,40 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "node-terminal",
+            "name": "hotelTest",
+            "request": "launch",
+            "command": "npm run testHotel",
+            "localRoot": "moqui/runtime/component/PopRestStore/selenium",
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "node-terminal",
+            "name": "adminTest1",
+            "request": "launch",
+            "command": "npm run testAdmin1",
+            "localRoot": "moqui/runtime/component/PopRestStore/selenium",
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "node-terminal",
+            "name": "adminTest2",
+            "request": "launch",
+            "command": "npm run testAdmin2",
+            "localRoot": "moqui/runtime/component/PopRestStore/selenium",
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "node-terminal",
+            "name": "adminTest3",
+            "request": "launch",
+            "command": "npm run testAdmin3",
+            "localRoot": "moqui/runtime/component/PopRestStore/selenium",
+            "cwd": "${workspaceFolder}"
+        }
+    ]
+}

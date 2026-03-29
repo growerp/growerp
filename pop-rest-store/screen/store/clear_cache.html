@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clear Admin Service Worker & Cache</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container {
+      background: white;
+      border-radius: 20px;
+      padding: 40px;
+      max-width: 700px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+
+    h1 {
+      color: #333;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    button {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      width: 100%;
+      margin: 10px 0;
+      transition: transform 0.2s;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    .status {
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 8px;
+      background: #f8f9fa;
+    }
+
+    .success {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .error {
+      background: #f8d7da;
+      color: #721c24;
+    }
+
+    .info {
+      background: #d1ecf1;
+      color: #0c5460;
+    }
+
+    pre {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      padding: 15px;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 10px 0;
+      font-size: 14px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>🔧 Clear Admin Service Worker & Cache</h1>
+
+    <button onclick="unregisterServiceWorker()">1. Unregister Service Worker</button>
+    <button onclick="clearAllCaches()">2. Clear All Caches</button>
+    <button onclick="checkConfig()">3. Check Current Config</button>
+    <button onclick="clearAndReload()">4. Clear Everything & Reload Admin</button>
+
+    <div id="status"></div>
+  </div>
+
+  <script>
+    function showStatus(message, type = 'info') {
+      const statusDiv = document.getElementById('status');
+      statusDiv.className = `status ${type}`;
+      statusDiv.innerHTML = message;
+    }
+
+    async function unregisterServiceWorker() {
+      try {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        let count = 0;
+        for (let registration of registrations) {
+          await registration.unregister();
+          count++;
+        }
+        showStatus(`✅ Unregistered ${count} service worker(s)`, 'success');
+      } catch (error) {
+        showStatus(`❌ Error: ${error.message}`, 'error');
+      }
+    }
+
+    async function clearAllCaches() {
+      try {
+        const cacheNames = await caches.keys();
+        let count = 0;
+        for (let cacheName of cacheNames) {
+          await caches.delete(cacheName);
+          count++;
+        }
+        showStatus(`✅ Cleared ${count} cache(s)`, 'success');
+      } catch (error) {
+        showStatus(`❌ Error: ${error.message}`, 'error');
+      }
+    }
+
+    async function checkConfig() {
+      try {
+        // Add cache-busting parameter
+        const response = await fetch('/admin/assets/assets/cfg/app_settings.json?t=' + Date.now());
+        const config = await response.json();
+
+        const html = `
+                    <strong>Current Configuration:</strong>
+                    <pre>${JSON.stringify({
+          databaseUrl: config.databaseUrl,
+          chatUrl: config.chatUrl,
+          databaseUrlDebug: config.databaseUrlDebug,
+          chatUrlDebug: config.chatUrlDebug
+        }, null, 2)}</pre>
+                    ${config.databaseUrl === '/rest'
+            ? '<div class="success">✅ Configuration is correct! Using relative URL.</div>'
+            : '<div class="error">❌ Still using old config. Clear cache and try again.</div>'}
+                `;
+        showStatus(html, config.databaseUrl === '/rest' ? 'success' : 'error');
+      } catch (error) {
+        showStatus(`❌ Error: ${error.message}`, 'error');
+      }
+    }
+
+    async function clearAndReload() {
+      try {
+        showStatus('🔄 Clearing service workers...', 'info');
+        await unregisterServiceWorker();
+
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        showStatus('🔄 Clearing caches...', 'info');
+        await clearAllCaches();
+
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        showStatus('✅ Done! Redirecting to admin in 2 seconds...', 'success');
+
+        setTimeout(() => {
+          window.location.href = '/admin/';
+        }, 2000);
+      } catch (error) {
+        showStatus(`❌ Error: ${error.message}`, 'error');
+      }
+    }
+
+    // Auto-check on load
+    window.addEventListener('load', checkConfig);
+  </script>
+</body>
+
+</html>

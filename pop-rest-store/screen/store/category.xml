@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-2.1.xsd"
+        require-authentication="anonymous-view" allow-extra-path="true">
+    <parameter name="categoryId"/>
+    <parameter name="orderBy"/>
+    <parameter name="productName"/>
+    <parameter name="pageIndex"/>
+    <parameter name="addedCorrect"/>
+
+    <transition name="addToCart">
+        <actions>
+            <service-call name="popstore.CartServices.add#Product" out-map="addOut"
+                in-map="[productId:productId, quantity:quantity, currencyUomId:currencyUomId, productStoreId: productStoreId]"/> 
+                <set field="addedCorrect" from="false"/>
+                <if condition="addOut.orderHeader != null">
+                    <set field="addedCorrect" from="true"/>
+                </if>
+        </actions>
+        <default-response url="."><parameter name="addedCorrect"/></default-response>
+        <error-response url="."/>
+    </transition>
+
+    <transition name="removeCartItem">
+        <actions>
+            <service-call name="popstore.CartServices.delete#OrderItem" in-map="[orderId: orderId, orderItemSeqId: orderItemSeqId]"/>
+        </actions>
+        <default-response url="."/>
+    </transition>
+
+    <pre-actions>
+        <set field="extraPathNameList" from="sri.screenUrlInfo.extraPathNameList"/>
+        <if condition="extraPathNameList &amp;&amp; !categoryId"><set field="categoryId" from="extraPathNameList[0]"/></if>
+        <if condition="extraPathNameList &amp;&amp; !pageIndex">
+            <set field="pageIndex" from="extraPathNameList[1]"/>
+            <if condition="pageIndex == null">
+                <set field="pageIndex" from="0"/>
+            </if>
+        </if>
+        <if condition="extraPathNameList &amp;&amp; !orderBy">
+            <set field="orderBy" from="extraPathNameList[2]"/>
+            <if condition="orderBy == null">
+                <set field="orderBy" from="'default'"/>
+            </if>
+        </if>
+        <service-call name="popstore.StoreServices.get#ProductStoreIdFromHostName" in-map="[
+                requestHostName: (ec.web.getHostName(false) == '10.0.2.2' ? 'localhost' : ec.web.getHostName(false))]"
+            out-map="productStoreIdContext"/>
+        <set field="productStoreId" value="${productStoreIdContext.productStoreId ?: 'POPC_DEFAULT'}"/>
+        <set field="currencyUomId" from="productStoreIdContext.defaultCurrencyUomId"/>
+    </pre-actions>
+    <actions>
+        <service-call name="popstore.ProductServices.get#CategoryProducts" out-map="products"
+            in-map="[productStoreId: productStoreId,
+                    productCategoryId:categoryId,
+                    orderBy: orderBy,
+                    pageIndex:pageIndex ? pageIndex : '0', pageSize:6]"/>
+
+        <service-call name="popstore.ProductServices.get#CategoryInfo" out-map="category" in-map="[productCategoryId:categoryId]"/>
+
+        <service-call name="popstore.ProductServices.find#ProductAvailability" in-map="context" out-map="context" />
+
+        <set field="inStock" from="false"/>
+
+        <service-call name="popstore.CartServices.get#CartInfo" in-map="context" out-map="productsInCart" />
+        <service-call name="popstore.ProductServices.get#SortedProductList" in-map="context + [productCategoryId:categoryId]" out-map="context"/>
+
+        <service-call name="popstore.ProductServices.get#ViewAllowProducts" in-map="context" out-map="context"/>
+
+        <set field="pageSize" from="pageSize ?: 100"/>
+
+        <set field="virtualProductsIds" from="[:]"/>
+        <iterate list="productList" entry="product">
+            <if condition="product.productTypeEnumId == 'PtVirtual'">
+                <then>
+                    <script>
+                        virtualProductsIds.put(product.productId, product.productId)
+                    </script>
+                </then>
+                <else>
+                    <entity-find-one entity-name="mantle.product.ProductAssocAndFrom" value-field="productAssoc">
+                        <field-map field-name="toProductId" from="product.productId"/>
+                        <field-map field-name="productTypeEnumId" value="PtVirtual"/>
+                    </entity-find-one>
+                    <script>
+                        if(productAssoc){
+                            virtualProductsIds.put(product.productId, productAssoc.productId)
+                        }else{
+                            virtualProductsIds.put(product.productId, product.productId)
+                        }
+                    </script>
+                </else>
+            </if>
+        </iterate>
+        <script>paginateList("productList", null, context)</script>
+    </actions>
+
+    <widgets>
+        <render-mode><text type="html" location="${template_server_header}"/></render-mode>
+        <render-mode><text type="html" location="${template_server_category}"/></render-mode>
+        <render-mode><text type="html" location="${template_server_footer}"/></render-mode>
+    </widgets>
+</screen>

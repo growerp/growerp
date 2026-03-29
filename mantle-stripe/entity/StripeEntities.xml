@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<entities xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/entity-definition-2.1.xsd">
+    <entity entity-name="PaymentGatewayStripe" package="Stripe">
+        <field name="paymentGatewayConfigId" type="id" is-pk="true"/>
+        <field name="certificateAlias" type="text-medium"><description>Certificate Alias</description></field>
+        <field name="secretKey" type="text-medium" encrypt="true"><description>Secret Key</description></field>
+        <field name="apiVersion" type="text-short"><description>Target Stripe API version</description></field>
+
+        <relationship type="one" related="mantle.account.method.PaymentGatewayConfig"/>
+        <seed-data>
+            <moqui.basic.Enumeration description="Stripe Gateway" enumId="PgtStripe" enumTypeId="PaymentGatewayType"/>
+        </seed-data>
+    </entity>
+</entities>

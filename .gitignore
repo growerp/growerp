@@ -12,4 +12,11 @@ moqui/runtime/component/growerp-shopify/
 moqui/runtime/component/growerp-agent/
 test_output**
 
+# Moqui runtime artifacts (populated by submodules / build)
+moqui/runtime/db/
+moqui/runtime/log/
+moqui/execwartmp/
+moqui/moqui.war
+moqui/moqui-plus-runtime.war
+
 

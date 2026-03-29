@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-2.1.xsd"
+        require-authentication="anonymous-view" allow-extra-path="true">
+
+    <subscreens always-use-full-path="true"/>
+
+    <!-- TODO: any of these needed at root level? as needed move to root.html.ftl -->
+    <pre-actions><script><![CDATA[
+        footerScriptText = """
+    <script>
+        // default store configuration, settings may be reset by script returned by /content/settings.js (transition that calls StoreServices.get#StoreInfo)
+        var storeConfig = {
+            apiKey: null, moquiSessionToken: null,
+            // base path for the router, by default the app page should load from '/store'
+            homePath: "/",
+            basePath: "/d/",
+            storePath: "/",
+            // REST API base location, default on the same server
+            // if the Moqui server is running on a different server use something like "https://api.domain.com/rest/"
+            restApiLocation: "/rest/",
+            // Content base location for server administered content, points to the content.xml screen
+            // this may be a path on the same server or for production preferably a full URL that goes through a caching proxy like CloudFlare
+            contentLocation: "/content/",
+            contentAttachmentLocation: "/content/attachment/",
+            productImageLocation: "/content/productImage/",
+
+            // nav/etc page template locations (may be path or full URL)
+            template_client_header: "/components/template/Header.html",
+            template_client_footer: "/components/template/Footer.html",
+            template_client_menu: "/components/template/MenuLeft.html",
+
+            // Login and password screens
+            template_client_login: "/components/template/LoginPage.html",
+            template_client_resetPassword: "/components/template/ResetPasswordPage.html",
+
+            // account page template locations (may be path or full URL)
+            template_client_accountCreate: "/components/template/AccountCreatePage.html",
+            template_client_account:       "/components/template/AccountPage.html",
+            template_client_orderHistory:  "/components/template/AccountOrders.html",
+            template_client_orderDetail:   "/components/template/AccountOrderDetail.html",
+
+            template_client_modalAddress:   "/components/template/ModalAddress.html",
+            template_client_modalCreditCard:   "/components/template/ModalCreditCard.html",
+
+            // Checkout templates
+            template_client_checkout: "/components/template/CheckoutPage.html",
+            template_client_checkoutHeader: "/components/template/CheckoutNavbar.html",
+            template_client_checkoutSuccess: "/components/template/CheckoutSuccess.html",
+            template_client_productImage: "/components/template/ProductImage.html",
+            template_client_contactInfo: "/components/template/contactInfo.html",
+            template_client_checkoutMessages: ""
+        };
+    </script>
+        """
+
+        String instancePurpose = System.getProperty("instance_purpose")
+        if (!instancePurpose || instancePurpose == 'production') {
+            /* ========== Production Mode ========== */
+            footerScriptText += """
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.16/vue.min.js" integrity="sha256-TaLceMwjWRqe4yhbqPOJH6V7UGt5AvvdNfpaIXJWbFU=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue-router/3.0.1/vue-router.min.js" integrity="sha256-yEB9jUlD51i5kxJZlzgzfR6XmVKI76Nl1WRA1aqIilU=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js" integrity="sha256-mpnrJ5DpEZZkwkE1ZgkEQQJW/46CSEh/STrZKOB/qoM=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.2/moment.min.js" integrity="sha256-CutOzxCRucUsn6C6TcEYsauvvYilEniTXldPa6/wu0k=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/es6-promise@4/dist/es6-promise.js" integrity="sha256-p7N78jBS61kk2Z9gzOF1nUCvhUvrLeTdCNZat+go6qE="></script>
+    <script src="https://cdn.jsdelivr.net/npm/es6-promise@4/dist/es6-promise.auto.js" integrity="sha256-KUNqRLl+PMcaXFAnrXXATFOkGtC99NSTklZi185m37s="></script>
+
+    <script crossorigin="anonymous" src="https://polyfill.io/v3/polyfill.min.js?features=String.prototype.includes%2CArray.prototype.find%2CString.prototype.startsWith%2CPromise.prototype.finally"></script>
+    <script src="/config.js"></script>
+    <script src="/components/combined.min.js"></script>
+            """
+        } else {
+            /* ========== Dev Mode ========== */
+            footerScriptText += """
+    <!-- Vue JS, see: https://vuejs.org/v2/guide/ -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.16/vue.js" integrity="sha256-CMMTrj5gGwOAXBeFi7kNokqowkzbeL8ydAJy39ewjkQ=" crossorigin="anonymous"></script>
+    <!-- Vue Router, see: https://router.vuejs.org/en/ -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue-router/3.0.1/vue-router.min.js" integrity="sha256-yEB9jUlD51i5kxJZlzgzfR6XmVKI76Nl1WRA1aqIilU=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js" integrity="sha256-mpnrJ5DpEZZkwkE1ZgkEQQJW/46CSEh/STrZKOB/qoM=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.2/moment.min.js" integrity="sha256-CutOzxCRucUsn6C6TcEYsauvvYilEniTXldPa6/wu0k=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/es6-promise@4/dist/es6-promise.js" integrity="sha256-p7N78jBS61kk2Z9gzOF1nUCvhUvrLeTdCNZat+go6qE="></script>
+    <script src="https://cdn.jsdelivr.net/npm/es6-promise@4/dist/es6-promise.auto.js" integrity="sha256-KUNqRLl+PMcaXFAnrXXATFOkGtC99NSTklZi185m37s="></script>
+
+    <script crossorigin="anonymous" src="https://polyfill.io/v3/polyfill.min.js?features=Event.hashchange%2CCustomEvent%2CString.prototype.startsWith%2CPromise.prototype.finally"></script>
+
+    <script src="/config.js"></script>
+    <script src="/components/utilities.js"></script>
+    <script src="/components/ApiServices.js"></script>
+
+    <script src="/components/ComponentsNav.js"></script>
+    <script src="/components/ComponentsProduct.js"></script>
+    <script src="/components/ComponentsAccount.js"></script>
+    <script src="/components/ComponentsCheckout.js"></script>
+    
+    <script src="/components/main.js"></script>
+    
+            """
+        }
+    ]]></script></pre-actions>
+
+    <widgets>
+        <render-mode><text type="html"><![CDATA[<div id="app"></div>]]></text></render-mode>
+        <!-- TODO use server rendered footer to avoid redundant templates: <render-mode><text type="html" location="component://PopRestStore/template/footer.html.ftl"/></render-mode> -->
+    </widgets>
+</screen>
