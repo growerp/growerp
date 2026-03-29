@@ -33,7 +33,6 @@ version = componentNode.'@version'
 
 repositories {
     flatDir name: 'localLib', dirs: frameworkDir.absolutePath + '/lib'
-    jcenter()
     mavenCentral()
 }
 
