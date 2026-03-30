@@ -36,6 +36,11 @@ along with this software (see the LICENSE.md file). If not, see
     <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="PmntAuthorized"
         toStatusId="PmntConfirmed" transitionName="Confirm" />
 
+    <!-- status changes -->
+    <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="InvoiceInProcess"
+        toStatusId="InvoiceSent" transitionName="Send" />
+    <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="PmntProposed"
+        toStatusId="PmntAuthorized" transitionName="Authorize" />
 
     <!-- Configuration send email GMAIL-->
     <!--moqui.basic.email.EmailServer
@@ -93,7 +98,8 @@ along with this software (see the LICENSE.md file). If not, see
     <mantle.party.PartyClassification partyClassificationId="AppLandingPage"
         classificationTypeEnumId="PcltMobileApp" description="Marketing landing page application" />
     <mantle.party.PartyClassification partyClassificationId="AppElearner"
-        classificationTypeEnumId="PcltMobileApp" description="eLearner app for students to read subscribed courses" />
+        classificationTypeEnumId="PcltMobileApp"
+        description="eLearner app for students to read subscribed courses" />
 
     <!-- sales opportunity stage -->
     <mantle.sales.opportunity.SalesOpportunityStage opportunityStageId="Prospecting" sequenceNum="1" />
@@ -312,7 +318,8 @@ along with this software (see the LICENSE.md file). If not, see
             <histories versionName="01" versionDate="1700000000000" isDiff="N" />
         </file>
     </moqui.resource.DbResource>
-    <moqui.resource.DbResource filename="apple-app-site-association" isFile="Y" resourceId="DEFAULT_AASA"
+    <moqui.resource.DbResource filename="apple-app-site-association" isFile="Y"
+        resourceId="DEFAULT_AASA"
         parentResourceId="DEFAULT_WELL_KNOWN">
         <file mimeType="application/json" versionName="01" rootVersionName="01">
             <fileData><![CDATA[{

@@ -3231,97 +3231,97 @@ along with this software (see the LICENSE.md file). If not, see
     </view-entity>
 
     <view-entity entity-name="BomItemAndProductDetail" package="growerp.manufacturing">
-        <member-entity entity-alias="PA" entity-name="mantle.product.ProductAssoc"/>
+        <member-entity entity-alias="PA" entity-name="mantle.product.ProductAssoc" />
         <member-entity entity-alias="PP" entity-name="mantle.product.Product"
             join-from-alias="PA" join-type="outer">
-            <key-map field-name="productId"/>
+            <key-map field-name="productId" />
         </member-entity>
         <member-entity entity-alias="CP" entity-name="mantle.product.Product"
             join-from-alias="PA" join-type="outer">
-            <key-map field-name="toProductId" related="productId"/>
+            <key-map field-name="toProductId" related="productId" />
         </member-entity>
-        <alias name="productId" entity-alias="PA"/>
-        <alias name="toProductId" entity-alias="PA"/>
-        <alias name="productAssocTypeEnumId" entity-alias="PA"/>
-        <alias name="fromDate" entity-alias="PA"/>
-        <alias name="thruDate" entity-alias="PA"/>
-        <alias name="quantity" entity-alias="PA"/>
-        <alias name="scrapFactor" entity-alias="PA"/>
-        <alias name="sequenceNum" entity-alias="PA"/>
-        <alias name="ownerPartyId" entity-alias="PP"/>
-        <alias name="productPseudoId" entity-alias="PP" field="pseudoId"/>
-        <alias name="productName" entity-alias="PP"/>
-        <alias name="componentPseudoId" entity-alias="CP" field="pseudoId"/>
-        <alias name="componentName" entity-alias="CP" field="productName"/>
+        <alias name="productId" entity-alias="PA" />
+        <alias name="toProductId" entity-alias="PA" />
+        <alias name="productAssocTypeEnumId" entity-alias="PA" />
+        <alias name="fromDate" entity-alias="PA" />
+        <alias name="thruDate" entity-alias="PA" />
+        <alias name="quantity" entity-alias="PA" />
+        <alias name="scrapFactor" entity-alias="PA" />
+        <alias name="sequenceNum" entity-alias="PA" />
+        <alias name="ownerPartyId" entity-alias="PP" />
+        <alias name="productPseudoId" entity-alias="PP" field="pseudoId" />
+        <alias name="productName" entity-alias="PP" />
+        <alias name="componentPseudoId" entity-alias="CP" field="pseudoId" />
+        <alias name="componentName" entity-alias="CP" field="productName" />
     </view-entity>
 
     <view-entity entity-name="WorkOrderAndProductDetail" package="growerp.manufacturing">
-        <member-entity entity-alias="WE" entity-name="mantle.work.effort.WorkEffort"/>
+        <member-entity entity-alias="WE" entity-name="mantle.work.effort.WorkEffort" />
         <member-entity entity-alias="WEP" entity-name="mantle.work.effort.WorkEffortProduct"
             join-from-alias="WE" join-optional="true">
-            <key-map field-name="workEffortId"/>
+            <key-map field-name="workEffortId" />
             <entity-condition>
-                <econdition field-name="typeEnumId" value="WeptProduce"/>
+                <econdition field-name="typeEnumId" value="WeptProduce" />
             </entity-condition>
         </member-entity>
         <member-entity entity-alias="P" entity-name="mantle.product.Product"
             join-from-alias="WEP" join-optional="true">
-            <key-map field-name="productId"/>
+            <key-map field-name="productId" />
         </member-entity>
-        <alias name="workEffortId" entity-alias="WE"/>
-        <alias name="workEffortPseudoId" entity-alias="WE"/>
-        <alias name="ownerPartyId" entity-alias="WE"/>
-        <alias name="workEffortName" entity-alias="WE"/>
-        <alias name="statusId" entity-alias="WE"/>
-        <alias name="estimatedStartDate" entity-alias="WE"/>
-        <alias name="estimatedCompletionDate" entity-alias="WE"/>
-        <alias name="actualStartDate" entity-alias="WE"/>
-        <alias name="actualCompletionDate" entity-alias="WE"/>
-        <alias name="productId" entity-alias="WEP"/>
-        <alias name="estimatedQuantity" entity-alias="WEP"/>
-        <alias name="productPseudoId" entity-alias="P" field="pseudoId"/>
-        <alias name="productName" entity-alias="P"/>
-        <alias name="routingId" entity-alias="WE"/>
+        <alias name="workEffortId" entity-alias="WE" />
+        <alias name="workEffortPseudoId" entity-alias="WE" />
+        <alias name="ownerPartyId" entity-alias="WE" />
+        <alias name="workEffortName" entity-alias="WE" />
+        <alias name="statusId" entity-alias="WE" />
+        <alias name="estimatedStartDate" entity-alias="WE" />
+        <alias name="estimatedCompletionDate" entity-alias="WE" />
+        <alias name="actualStartDate" entity-alias="WE" />
+        <alias name="actualCompletionDate" entity-alias="WE" />
+        <alias name="productId" entity-alias="WEP" />
+        <alias name="estimatedQuantity" entity-alias="WEP" />
+        <alias name="productPseudoId" entity-alias="P" field="pseudoId" />
+        <alias name="productName" entity-alias="P" />
+        <alias name="routingId" entity-alias="WE" />
     </view-entity>
 
     <!-- ===================== Production Routing View ===================== -->
 
     <view-entity entity-name="RoutingAndTasks" package="growerp.manufacturing">
-        <member-entity entity-alias="RO" entity-name="growerp.manufacturing.Routing"/>
+        <member-entity entity-alias="RO" entity-name="growerp.manufacturing.Routing" />
         <member-entity entity-alias="RT" entity-name="growerp.manufacturing.RoutingTask"
             join-from-alias="RO" join-optional="true">
-            <key-map field-name="routingId"/>
+            <key-map field-name="routingId" />
         </member-entity>
-        <alias name="routingId" entity-alias="RO"/>
-        <alias name="ownerPartyId" entity-alias="RO"/>
-        <alias name="routingName" entity-alias="RO"/>
-        <alias name="description" entity-alias="RO"/>
-        <alias name="routingTaskId" entity-alias="RT"/>
-        <alias name="taskName" entity-alias="RT"/>
-        <alias name="sequenceNum" entity-alias="RT"/>
-        <alias name="estimatedWorkTime" entity-alias="RT"/>
-        <alias name="workCenterName" entity-alias="RT"/>
+        <alias name="routingId" entity-alias="RO" />
+        <alias name="ownerPartyId" entity-alias="RO" />
+        <alias name="routingName" entity-alias="RO" />
+        <alias name="description" entity-alias="RO" />
+        <alias name="routingTaskId" entity-alias="RT" />
+        <alias name="taskName" entity-alias="RT" />
+        <alias name="sequenceNum" entity-alias="RT" />
+        <alias name="estimatedWorkTime" entity-alias="RT" />
+        <alias name="workCenterName" entity-alias="RT" />
     </view-entity>
 
     <!-- ===================== Liner Panel View ===================== -->
 
     <view-entity entity-name="LinerPanelAndType" package="growerp.liner">
-        <member-entity entity-alias="LP" entity-name="growerp.liner.LinerPanel"/>
+        <member-entity entity-alias="LP" entity-name="growerp.liner.LinerPanel" />
         <member-entity entity-alias="LT" entity-name="growerp.liner.LinerType"
             join-from-alias="LP" join-optional="true">
-            <key-map field-name="linerTypeId"/>
+            <key-map field-name="linerTypeId" />
         </member-entity>
-        <alias name="qcNum" entity-alias="LP"/>
-        <alias name="ownerPartyId" entity-alias="LP"/>
-        <alias name="salesOrderId" entity-alias="LP"/>
-        <alias name="workEffortId" entity-alias="LP"/>
-        <alias name="linerTypeId" entity-alias="LP"/>
-        <alias name="panelWidth" entity-alias="LP"/>
-        <alias name="panelLength" entity-alias="LP"/>
-        <alias name="panelName" entity-alias="LP"/>
-        <alias name="linerName" entity-alias="LT"/>
-        <alias name="widthIncrement" entity-alias="LT"/>
-        <alias name="linerWeight" entity-alias="LT"/>
+        <alias name="qcNum" entity-alias="LP" />
+        <alias name="ownerPartyId" entity-alias="LP" />
+        <alias name="salesOrderId" entity-alias="LP" />
+        <alias name="workEffortId" entity-alias="LP" />
+        <alias name="linerTypeId" entity-alias="LP" />
+        <alias name="panelWidth" entity-alias="LP" />
+        <alias name="panelLength" entity-alias="LP" />
+        <alias name="panelName" entity-alias="LP" />
+        <alias name="linerName" entity-alias="LT" />
+        <alias name="widthIncrement" entity-alias="LT" />
+        <alias name="linerWeight" entity-alias="LT" />
     </view-entity>
 
 </entities>

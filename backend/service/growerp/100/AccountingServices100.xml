@@ -61,7 +61,7 @@ along with this software (see the LICENSE.md file). If not, see
                 in-map="partyAcctgPreference + [organizationPartyId:organizationPartyId, errorGlJournalId:errorGlJournalId]" />
 
             <!-- create new ledger from default settings -->
-            <entity-find entity-name="mantle.ledger.account.GlAccountAndOrganization"
+            <entity-find entity-name="growerp.ledger.account.GlAccountAndOrganization"
                 list="glAccounts">
                 <econdition field-name="partyId" from="sourcePartyId" />
                 <order-by field-name="glAccountId" />
@@ -694,7 +694,7 @@ along with this software (see the LICENSE.md file). If not, see
             in-map="organizationPartyId: companyPartyId"
                 name="mantle.ledger.LedgerServices.recalculate#GlAccountOrgSummaries"/-->
             <entity-find list="dbGlAccounts"
-                entity-name="mantle.ledger.account.GlAccountAndOrganization">
+                entity-name="growerp.ledger.account.GlAccountAndOrganization">
                 <econdition field-name="partyId" from="companyPartyId" />
                 <order-by field-name="accountCode" />
             </entity-find>
@@ -849,7 +849,7 @@ along with this software (see the LICENSE.md file). If not, see
                 </else>
             </if>
             <if condition="update">
-                <entity-find entity-name="mantle.ledger.account.GlAccountAndOrganization"
+                <entity-find entity-name="growerp.ledger.account.GlAccountAndOrganization"
                     list="accounts">
                     <econdition field-name="organizationPartyId" from="companyPartyId" />
                     <econdition field-name="accountCode" from="itemType.accountCode" />
@@ -987,7 +987,7 @@ along with this software (see the LICENSE.md file). If not, see
                 </else>
             </if>
             <if condition="update">
-                <entity-find entity-name="mantle.ledger.account.GlAccountAndOrganization"
+                <entity-find entity-name="growerp.ledger.account.GlAccountAndOrganization"
                     list="accounts">
                     <econdition field-name="organizationPartyId" from="companyPartyId" />
                     <econdition field-name="accountCode" from="paymentType.accountCode" />
@@ -1384,7 +1384,7 @@ along with this software (see the LICENSE.md file). If not, see
                 while(!glAccounts &amp;&amp; lastNumber &gt; 0 ) {
                     newAccountCode = accountCode.substring(0, lastNumber);
                     newAccountCode += ('0' * (accountCode.size() - lastNumber));
-                    glAccounts_xafind = ec.entity.find("mantle.ledger.account.GlAccountAndOrganization")
+                    glAccounts_xafind = ec.entity.find("growerp.ledger.account.GlAccountAndOrganization")
                     .condition((org.moqui.entity.EntityCondition) ec.entity.conditionFactory.makeActionConditionDirect("organizationPartyId", "equals", companyPartyId, null, null, false, false, false, "false")).condition((org.moqui.entity.EntityCondition) ec.entity.conditionFactory.makeActionConditionDirect("accountCode", "equals", newAccountCode, null, null, false, false, false, "false"))
                     glAccounts = glAccounts_xafind.list()
                     lastNumber--;
@@ -1393,7 +1393,7 @@ along with this software (see the LICENSE.md file). If not, see
                     parentGlAccountId = (glAccounts[0]?.glAccountId)    
             </script>
             <!--entity-find
-            entity-name="mantle.ledger.account.GlAccountAndOrganization"
+            entity-name="growerp.ledger.account.GlAccountAndOrganization"
                 list="glAccounts">
                 <econdition field-name="organizationPartyId" from="companyPartyId" />
                 <econdition field-name="accountCode" from="newAccountCode" />

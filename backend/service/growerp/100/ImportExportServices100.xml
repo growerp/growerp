@@ -170,7 +170,7 @@ along with this software (see the LICENSE.md file). If not, see
                 when not assume an update of the initial posting values-->
             <if
                 condition="!glAccounts[0].accountName.isEmpty() &amp;&amp; !glAccounts[0].accountClass.description.isEmpty()">
-                <entity-find entity-name="mantle.ledger.account.GlAccountAndOrganization"
+                <entity-find entity-name="growerp.ledger.account.GlAccountAndOrganization"
                     list="glAccountsOrg">
                     <econdition field-name="organizationPartyId" from="relComp.companyPartyId" />
                     <select-field field-name="glAccountId" />
@@ -199,7 +199,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <continue />
                 </if>
                 <!-- check if glaccount exist update just posted value is present -->
-                <entity-find entity-name="mantle.ledger.account.GlAccountAndOrganization"
+                <entity-find entity-name="growerp.ledger.account.GlAccountAndOrganization"
                     list="glAccountsOrg">
                     <econdition field-name="organizationPartyId" from="relComp.companyPartyId" />
                     <econdition field-name="accountCode" from="newGlAccount.accountCode" />
@@ -1872,7 +1872,7 @@ along with this software (see the LICENSE.md file). If not, see
                     </entity-delete-by-condition>
                 </if>
                 <!-- delete existing ledger -->
-                <entity-find entity-name="mantle.ledger.account.GlAccountAndOrganization"
+                <entity-find entity-name="growerp.ledger.account.GlAccountAndOrganization"
                     list="glAccounts">
                     <econdition field-name="organizationPartyId" from="relComp.companyPartyId" />
                     <select-field field-name="glAccountId" />
