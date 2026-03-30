@@ -59,7 +59,7 @@ WORKDIR /home/mobiledevops/growerp
 
 # Clean up any corrupted pub cache and set up environment
 RUN flutter pub cache repair && \
-    dart pub global activate melos 3.4.0
+    dart pub global activate melos 7.4.0
 
 ENV PATH="$PATH:/root/.pub-cache/bin"
 

@@ -206,7 +206,7 @@ else
   # Build ordered package list from pubspec.yaml (melos order), filtered to
   # packages that actually have an integration_test/ directory.
   mapfile -t PACKAGES_WITH_TESTS < <(
-    grep '^\s*- packages/' pubspec.yaml | sed 's/.*- //' | tr -d ' \r' | while IFS= read -r pkg_path; do
+    grep '^    - packages/' pubspec.yaml | sed 's/.*- //' | tr -d ' \r' | while IFS= read -r pkg_path; do
       [ -d "${pkg_path}/integration_test" ] && echo "$pkg_path"
     done
   )

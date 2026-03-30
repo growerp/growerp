@@ -102,6 +102,11 @@ jobs:
       # ------------------------------------------------------------------
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Set up backend component symlinks
+        run: bash setup-backend.sh
 
       # ------------------------------------------------------------------
       # 3. Build test runner image (cached via Docker layer cache)
