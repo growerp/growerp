@@ -191,13 +191,55 @@ if [ -n "$TEST_FILE" ]; then
 
 elif [ -n "$PACKAGE_FILTER" ]; then
   echo "Running tests for packages matching: *${PACKAGE_FILTER}*"
-  melos exec --scope="*${PACKAGE_FILTER}*" --dir-exists="integration_test" --concurrency=1 -- \
-    "if [ ! -d linux ]; then echo 'Linux platform not found — adding Linux support...'; flutter create --platforms=linux .; fi && flutter pub get && flutter test integration_test -d linux \
-      --dart-define=BACKEND_URL=$BACKEND_URL \
-      --dart-define=CHAT_URL=$CHAT_URL \
-      --dart-define=SCREEN_WIDTH=$SCREEN_WIDTH \
-      --dart-define=SCREEN_HEIGHT=$SCREEN_HEIGHT"
-  TEST_EXIT=$?
+
+  # Build a filtered package list in pubspec.yaml order so test ordering is
+  # deterministic and identical to the "all" code path below.
+  WORKSPACE_ROOT="$(pwd)"
+  mapfile -t PACKAGES_WITH_TESTS < <(
+    grep '^    - packages/' pubspec.yaml | sed 's/.*- //' | tr -d ' \r' | while IFS= read -r pkg_path; do
+      [[ "$pkg_path" == *"$PACKAGE_FILTER"* ]] && [ -d "${pkg_path}/integration_test" ] && echo "$pkg_path"
+    done
+  )
+
+  FAILED_PACKAGES=()
+  TEST_EXIT=0
+
+  for pkg_path in "${PACKAGES_WITH_TESTS[@]}"; do
+    PKG_NAME=$(basename "$pkg_path")
+    PARENT_NAME=$(basename "$(dirname "$pkg_path")")
+    DISPLAY_NAME="$( [ "$PKG_NAME" = "example" ] && echo "${PARENT_NAME}_example" || echo "$PKG_NAME" )"
+
+    echo ""
+    echo "============================================================"
+    echo "=== Package: $DISPLAY_NAME ($pkg_path)"
+    echo "============================================================"
+
+    (
+      cd "$WORKSPACE_ROOT/$pkg_path" || exit 1
+      if [ ! -d "linux" ]; then
+        echo "Linux platform not found — adding Linux support..."
+        flutter create --platforms=linux .
+      fi
+      flutter pub get
+      FAIL=0
+      # Run each test file in a separate flutter test invocation to avoid
+      # "The log reader stopped unexpectedly" on app restart between files.
+      for f in integration_test/*.dart; do
+        [[ "$f" == *demo* ]] && continue
+        flutter test "$f" -d linux \
+          --dart-define=BACKEND_URL="$BACKEND_URL" \
+          --dart-define=CHAT_URL="$CHAT_URL" \
+          --dart-define=SCREEN_WIDTH="$SCREEN_WIDTH" \
+          --dart-define=SCREEN_HEIGHT="$SCREEN_HEIGHT" || FAIL=1
+      done
+      exit $FAIL
+    )
+    [ $? -ne 0 ] && { TEST_EXIT=1; FAILED_PACKAGES+=("$DISPLAY_NAME"); }
+  done
+
+  if [ ${#FAILED_PACKAGES[@]} -gt 0 ]; then
+    echo "Failed packages: ${FAILED_PACKAGES[*]}"
+  fi
 else
   echo "Running all tests sequentially by package..."
 

@@ -121,6 +121,11 @@ export HOST_GID=$(id -g)
 echo "Building test runner image..."
 docker compose -f ci/docker-compose-test.yml build sut
 
+# Build moqui backend image from local source — never pull from Docker Hub
+echo "Building moqui backend image..."
+(cd "$REPO_ROOT/moqui" && ./gradlew build getPostgresJdbc)
+(cd "$REPO_ROOT/moqui/docker/simple" && bash docker-build.sh ../.. growerp/growerp-moqui eclipse-temurin:21-jdk)
+
 # Start backend services (no emulator needed — tests run on Linux desktop)
 docker compose -f ci/docker-compose-test.yml down moqui 2>/dev/null || true
 docker compose -f ci/docker-compose-test.yml up -d moqui-database moqui

@@ -8,16 +8,13 @@ name: Integration Tests
 # Moqui + PostgreSQL. Tests are self-contained — each creates its own company/admin,
 # so slices don't interfere with each other.
 #
-# Runs daily at 11 PM Bangkok time (16:00 UTC) — only if there were commits that day.
+# Runs daily at 12 PM Bangkok time (05:00 UTC) — only if there were commits that day.
 # Can also be triggered manually via workflow_dispatch.
 
 on:
-  push:
-    branches:
-      - moqui4
   schedule:
-    # 11 PM Bangkok time (UTC+7) = 16:00 UTC — only runs if there were commits that day
-    - cron: "0 16 * * *"
+    # 12 PM Bangkok time (UTC+7) = 05:00 UTC — only runs if there were commits that day
+    - cron: "0 5 * * *"
   workflow_dispatch:
     inputs:
       package_filter:
@@ -109,7 +106,21 @@ jobs:
         run: bash setup-backend.sh
 
       # ------------------------------------------------------------------
-      # 3. Build test runner image (cached via Docker layer cache)
+      # 3. Build moqui backend image from local source
+      # ------------------------------------------------------------------
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Build moqui backend image
+        run: |
+          cd moqui && ./gradlew build getPostgresJdbc
+          cd docker/simple && bash docker-build.sh ../.. growerp/growerp-moqui eclipse-temurin:21-jdk
+
+      # ------------------------------------------------------------------
+      # 4. Build test runner image (cached via Docker layer cache)
       # ------------------------------------------------------------------
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -125,7 +136,7 @@ jobs:
           cache-to: type=gha,mode=max
 
       # ------------------------------------------------------------------
-      # 3. Start backend services
+      # 5. Start backend services
       # ------------------------------------------------------------------
       - name: Start Moqui backend
         working-directory: flutter
@@ -154,7 +165,7 @@ jobs:
           fi
 
       # ------------------------------------------------------------------
-      # 4. Run integration tests
+      # 6. Run integration tests
       # ------------------------------------------------------------------
       - name: Run integration tests (slice ${{ matrix.slice }})
         working-directory: flutter
@@ -169,7 +180,7 @@ jobs:
           echo "TEST_EXIT_CODE=${PIPESTATUS[0]}" >> "$GITHUB_ENV"
 
       # ------------------------------------------------------------------
-      # 5. Per-slice results
+      # 7. Per-slice results
       # ------------------------------------------------------------------
       - name: Test results summary (slice ${{ matrix.slice }})
         if: always()
@@ -206,7 +217,7 @@ jobs:
           retention-days: 7
 
       # ------------------------------------------------------------------
-      # 6. Cleanup
+      # 8. Cleanup
       # ------------------------------------------------------------------
       - name: Tear down Docker services
         if: always()
