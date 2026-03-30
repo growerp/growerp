@@ -116,6 +116,7 @@ jobs:
 
       - name: Build moqui backend image
         run: |
+          mkdir -p moqui/build
           cd moqui && ./gradlew build getPostgresJdbc
           cd docker/simple && bash docker-build.sh ../.. growerp/growerp-moqui eclipse-temurin:21-jdk
 
