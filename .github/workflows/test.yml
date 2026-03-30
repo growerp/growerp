@@ -12,6 +12,9 @@ name: Integration Tests
 # Can also be triggered manually via workflow_dispatch.
 
 on:
+  push:
+    branches:
+      - moqui4
   schedule:
     # 11 PM Bangkok time (UTC+7) = 16:00 UTC — only runs if there were commits that day
     - cron: "0 16 * * *"
