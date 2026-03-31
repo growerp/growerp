@@ -125,6 +125,13 @@ run_release_tool() {
         print_error "Could not find release_tool.dart"
         exit 1
     fi
+
+    # Resolve dependencies for the release tool
+    local tool_dir
+    tool_dir="$(dirname "$script_path")"
+    echo "Resolving release tool dependencies..."
+    dart pub get --directory "$tool_dir"
+    print_status "Dependencies resolved"
     
     echo "Starting release tool..."
     dart "$script_path" "$@"

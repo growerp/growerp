@@ -1,0 +1,10 @@
+name: growerp_release_tool
+description: GrowERP release automation tool
+version: 1.0.0
+publish_to: none
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+
+dependencies:
+  dcli: ^8.2.0
