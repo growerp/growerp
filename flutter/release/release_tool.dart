@@ -24,8 +24,54 @@ Map<String, dynamic> config = {};
 const stateFile = 'release/release_state.json';
 Map<String, dynamic> releaseState = {};
 
+// ---------------------------------------------------------------------------
+// CI argument parsing
+// ---------------------------------------------------------------------------
+bool ciMode = false;
+Map<String, dynamic> ciArgs = {};
+
+void parseCiArgs(List<String> args) {
+  ciMode = args.contains('--ci');
+  for (var arg in args) {
+    if (arg.startsWith('--bump=')) {
+      ciArgs['bump'] = arg.substring('--bump='.length).trim();
+    } else if (arg.startsWith('--apps=')) {
+      ciArgs['apps'] = arg
+          .substring('--apps='.length)
+          .split(',')
+          .map((s) => s.trim())
+          .where((s) => s.isNotEmpty)
+          .toList();
+    } else if (arg.startsWith('--comment=')) {
+      ciArgs['comment'] = arg.substring('--comment='.length);
+    } else if (arg.startsWith('--workspace=')) {
+      ciArgs['workspace'] = arg.substring('--workspace='.length).trim();
+    } else if (arg == '--push-docker') {
+      ciArgs['pushDocker'] = true;
+    } else if (arg == '--no-push-docker') {
+      ciArgs['pushDocker'] = false;
+    } else if (arg == '--push-github') {
+      ciArgs['pushGitHub'] = true;
+    } else if (arg == '--no-push-github') {
+      ciArgs['pushGitHub'] = false;
+    } else if (arg == '--parallel') {
+      ciArgs['parallel'] = true;
+    }
+  }
+  if (ciMode) {
+    print(
+      '🤖 CI mode — bump=${ciArgs['bump'] ?? 'patch'}, '
+      'workspace=${ciArgs['workspace'] ?? 'clone'}, '
+      'pushDocker=${ciArgs['pushDocker'] ?? true}, '
+      'pushGitHub=${ciArgs['pushGitHub'] ?? 'auto'}',
+    );
+  }
+}
+
 void main(List<String> args) async {
   print("=== GrowERP Production Release Tool ===\n");
+
+  parseCiArgs(args);
 
   bool isRestart = false;
 
@@ -237,6 +283,17 @@ void validateEnvironment() {
 Future<List<String>> selectApplications() async {
   var defaultApps = List<String>.from(config['defaultApps'] ?? []);
 
+  // CI mode: use --apps flag or default to all
+  if (ciMode) {
+    var apps = (ciArgs['apps'] as List<String>? ?? []);
+    if (apps.isNotEmpty) {
+      print("Selected (CI): ${apps.join(', ')}");
+      return apps;
+    }
+    print("Selected (CI): All applications");
+    return defaultApps;
+  }
+
   print("📦 Available applications:");
   for (int i = 0; i < defaultApps.length; i++) {
     print("   ${i + 1}. ${defaultApps[i]}");
@@ -264,6 +321,26 @@ Future<List<String>> selectApplications() async {
 }
 
 Future<Map<String, bool>> getVersionConfiguration() async {
+  // CI mode: derive from --bump flag
+  if (ciMode) {
+    var bump = ciArgs['bump'] as String? ?? 'patch';
+    switch (bump) {
+      case 'none':
+        print("Version bump: none (images will be built at current version)");
+        return {'patch': false, 'minor': false, 'major': false};
+      case 'major':
+        print("Version bump: major");
+        return {'patch': true, 'minor': true, 'major': true};
+      case 'minor':
+        print("Version bump: minor");
+        return {'patch': true, 'minor': true, 'major': false};
+      case 'patch':
+      default:
+        print("Version bump: patch");
+        return {'patch': true, 'minor': false, 'major': false};
+    }
+  }
+
   var upgradePatch =
       ask(
         'Upgrade patch version (recommended for releases)? (Y/n)',
@@ -298,6 +375,31 @@ Future<Map<String, bool>> getVersionConfiguration() async {
 Future<Map<String, bool>> getPushConfiguration(
   Map<String, bool> versionConfig,
 ) async {
+  // CI mode: use explicit flags; Docker always on, GitHub follows bump type
+  if (ciMode) {
+    var pushDocker = ciArgs['pushDocker'] as bool? ?? true;
+    var bumpNone =
+        versionConfig['patch'] == false &&
+        versionConfig['minor'] == false &&
+        versionConfig['major'] == false;
+    bool pushGitHub;
+    if (ciArgs.containsKey('pushGitHub')) {
+      pushGitHub = ciArgs['pushGitHub'] as bool;
+    } else {
+      pushGitHub = pushDocker && !bumpNone;
+    }
+    if (bumpNone) {
+      print(
+        "   Note: Bump is 'none' — skipping version file update and git push.",
+      );
+    }
+    return {
+      'pushToDockerHub': pushDocker,
+      'pushToGitHub': pushGitHub,
+      'bumpNone': bumpNone,
+    };
+  }
+
   var pushToDockerHub =
       ask(
         'Push to Docker Hub? (Y/n)',
@@ -316,16 +418,30 @@ Future<Map<String, bool>> getPushConfiguration(
     );
   }
 
-  return {'pushToDockerHub': pushToDockerHub, 'pushToGitHub': pushToGitHub};
+  return {
+    'pushToDockerHub': pushToDockerHub,
+    'pushToGitHub': pushToGitHub,
+    'bumpNone': false,
+  };
 }
 
 Future<String> getReleaseComment() async {
+  if (ciMode) {
+    return (ciArgs['comment'] as String? ?? '').trim();
+  }
   print("\n📝 Optional: Enter a comment to include in the git commit message.");
   var comment = ask('Release comment (press Enter to skip):', required: false);
   return comment.trim();
 }
 
 Future<String> determineWorkspace(bool pushToGitHub) async {
+  // CI --workspace=local: use the current checkout directly (no clone)
+  if (ciMode && ciArgs['workspace'] == 'local') {
+    var localDir = Directory.current.path;
+    print("📁 Using local workspace: $localDir");
+    return localDir;
+  }
+
   // Always use temp directory for release builds to ensure clean state
   var tempDir = config['tempWorkspaceDir'] ?? '/tmp/growerpRelease';
   print("📁 Setting up repository workspace at: $tempDir");
@@ -507,6 +623,11 @@ Future<void> displaySummaryAndConfirm(
     print("   Comment: $releaseComment");
   }
 
+  if (ciMode) {
+    print("\n✅ CI mode — proceeding automatically.");
+    return;
+  }
+
   var confirm = ask('\nProceed with release? (y/N)', defaultValue: 'N');
   if (confirm.toUpperCase() != 'Y') {
     print("Release cancelled.");
@@ -532,8 +653,12 @@ Future<void> executeRelease(
     newVersions[app] = "${versionInfo['newBase']}$buildSuffix";
   }
 
-  // Step 1: Update version files in workspace
-  if (releaseState['versionUpdated'] != true) {
+  // Step 1: Update version files in workspace (skipped for bump=none)
+  if (pushConfig['bumpNone'] == true) {
+    print("⏭️ Step 1: Bump is 'none' — skipping version file updates.");
+    releaseState['versionUpdated'] = true;
+    saveState();
+  } else if (releaseState['versionUpdated'] != true) {
     print("📁 Step 1: Updating version files in workspace...\n");
     for (var app in selectedApps) {
       var currentVersion = versionInfo['current'][app];

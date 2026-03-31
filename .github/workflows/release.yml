@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
     inputs:
       bump:
-        description: "Version bump type"
+        description: "Version bump type. Use 'none' to build and push images at the current version without committing."
         required: true
         default: "patch"
         type: choice
@@ -18,22 +18,15 @@ on:
           - patch
           - minor
           - major
+          - none
       apps:
         description: "Apps to release (comma-separated). Leave empty for all."
         required: false
         default: ""
       comment:
-        description: "Optional release comment added to the git commit"
+        description: "Optional release comment added to the git commit (ignored when bump is 'none')"
         required: false
         default: ""
-      push_docker:
-        description: "Push images to Docker Hub"
-        required: true
-        default: "true"
-        type: choice
-        options:
-          - "true"
-          - "false"
 
 # Only one release at a time — never cancel a running release.
 concurrency:
@@ -76,7 +69,6 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Login to GitHub Container Registry
-        if: ${{ inputs.push_docker == 'true' }}
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
@@ -107,7 +99,7 @@ jobs:
           GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          ARGS="--ci --bump=${{ inputs.bump }} --parallel --workspace=local"
+          ARGS="--ci --bump=${{ inputs.bump }} --parallel --workspace=local --push-docker"
 
           if [ -n "${{ inputs.apps }}" ]; then
             ARGS="$ARGS --apps=${{ inputs.apps }}"
@@ -118,10 +110,9 @@ jobs:
             ARGS="$ARGS --comment=${{ inputs.comment }}"
           fi
 
-          if [ "${{ inputs.push_docker }}" = "true" ]; then
-            ARGS="$ARGS --push-docker --push-github"
-          else
-            ARGS="$ARGS --no-push-docker --no-push-github"
+          # Commit version bump and push git tag for all bump types except 'none'
+          if [ "${{ inputs.bump }}" != "none" ]; then
+            ARGS="$ARGS --push-github"
           fi
 
           echo "Running: dart release/release_tool.dart $ARGS"
