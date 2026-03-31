@@ -36,7 +36,7 @@ services:
     image: growerp/growerp-moqui
     container_name: moqui
     build:
-      context: ../moqui
+      context: ..
     # command: conf=conf/MoquiProductionConf.xml
     restart: always
     depends_on:
