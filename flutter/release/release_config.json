@@ -8,7 +8,7 @@
     "support",
     "growerp-moqui"
   ],
-  "dockerRegistry": "growerp",
+  "dockerRegistry": "ghcr.io/growerp",
   "repositoryUrl": "git@github.com:growerp/growerp.git",
   "tempWorkspaceDir": "/tmp/growerpRelease",
   "defaultPushToDockerHub": true,

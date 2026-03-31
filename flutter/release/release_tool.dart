@@ -160,7 +160,8 @@ void main(List<String> args) async {
       workspaceDir,
     );
     // Update selectedApps to only those whose version files were found
-    selectedApps = List<String>.from(versionInfo['availableApps'] ?? selectedApps);
+    selectedApps =
+        List<String>.from(versionInfo['availableApps'] ?? selectedApps);
 
     // Initial state
     releaseState = {
@@ -241,6 +242,13 @@ Future<void> loadConfiguration() async {
     var configContent = File(configFile).readAsStringSync();
     config = jsonDecode(configContent);
     print("✓ Configuration loaded from $configFile");
+    // Allow DOCKER_REGISTRY env var to override config file (e.g. CI)
+    var envRegistry = Platform.environment['DOCKER_REGISTRY'];
+    if (envRegistry != null && envRegistry.isNotEmpty) {
+      config['dockerRegistry'] = envRegistry;
+      print(
+          "   Docker registry overridden by DOCKER_REGISTRY env: $envRegistry");
+    }
   } catch (e) {
     print("Error loading configuration: $e");
     exit(1);
@@ -343,8 +351,7 @@ Future<Map<String, bool>> getVersionConfiguration() async {
     }
   }
 
-  var upgradePatch =
-      ask(
+  var upgradePatch = ask(
         'Upgrade patch version (recommended for releases)? (Y/n)',
         defaultValue: 'Y',
       ).toUpperCase() ==
@@ -354,16 +361,14 @@ Future<Map<String, bool>> getVersionConfiguration() async {
   var upgradeMajor = false;
 
   if (upgradePatch) {
-    upgradeMinor =
-        ask(
+    upgradeMinor = ask(
           'Upgrade minor version (for new features)? (y/N)',
           defaultValue: 'N',
         ).toUpperCase() ==
         'Y';
 
     if (upgradeMinor) {
-      upgradeMajor =
-          ask(
+      upgradeMajor = ask(
             'Upgrade major version (for breaking changes)? (y/N)',
             defaultValue: 'N',
           ).toUpperCase() ==
@@ -380,8 +385,7 @@ Future<Map<String, bool>> getPushConfiguration(
   // CI mode: use explicit flags; Docker always on, GitHub follows bump type
   if (ciMode) {
     var pushDocker = ciArgs['pushDocker'] as bool? ?? true;
-    var bumpNone =
-        versionConfig['patch'] == false &&
+    var bumpNone = versionConfig['patch'] == false &&
         versionConfig['minor'] == false &&
         versionConfig['major'] == false;
     bool pushGitHub;
@@ -402,8 +406,7 @@ Future<Map<String, bool>> getPushConfiguration(
     };
   }
 
-  var pushToDockerHub =
-      ask(
+  var pushToDockerHub = ask(
         'Push to Docker Hub? (Y/n)',
         defaultValue: config['defaultPushToDockerHub'] ? 'Y' : 'N',
       ).toUpperCase() ==
@@ -463,11 +466,10 @@ Future<String> determineWorkspace(bool pushToGitHub) async {
   print("   Overlaying local Dockerfiles...");
   final localFlutterDir = Directory.current.path;
   final clonedFlutterDir = '$tempDir/flutter';
-  for (final file
-      in Directory(localFlutterDir)
-          .listSync(recursive: true)
-          .whereType<File>()
-          .where((f) => f.uri.pathSegments.last == 'Dockerfile')) {
+  for (final file in Directory(localFlutterDir)
+      .listSync(recursive: true)
+      .whereType<File>()
+      .where((f) => f.uri.pathSegments.last == 'Dockerfile')) {
     final rel = file.path.substring(localFlutterDir.length + 1);
     final dest = File('$clonedFlutterDir/$rel');
     dest.parent.createSync(recursive: true);
@@ -899,9 +901,8 @@ Future<void> commitAndTag(
     }
 
     // Create commit message
-    var appVersions = selectedApps
-        .map((app) => '$app:${newVersions[app]}')
-        .join(', ');
+    var appVersions =
+        selectedApps.map((app) => '$app:${newVersions[app]}').join(', ');
     var commitMessage = 'build: Release $gitTag - $appVersions';
     if (releaseComment.isNotEmpty) {
       commitMessage += '\n\n$releaseComment';
