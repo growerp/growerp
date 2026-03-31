@@ -3233,11 +3233,11 @@ along with this software (see the LICENSE.md file). If not, see
     <view-entity entity-name="BomItemAndProductDetail" package="growerp.manufacturing">
         <member-entity entity-alias="PA" entity-name="mantle.product.ProductAssoc" />
         <member-entity entity-alias="PP" entity-name="mantle.product.Product"
-            join-from-alias="PA" join-type="outer">
+            join-from-alias="PA">
             <key-map field-name="productId" />
         </member-entity>
         <member-entity entity-alias="CP" entity-name="mantle.product.Product"
-            join-from-alias="PA" join-type="outer">
+            join-from-alias="PA">
             <key-map field-name="toProductId" related="productId" />
         </member-entity>
         <alias name="productId" entity-alias="PA" />
