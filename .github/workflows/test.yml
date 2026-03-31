@@ -99,8 +99,11 @@ jobs:
       # ------------------------------------------------------------------
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          submodules: recursive
+
+      - name: Init submodules (SSH → HTTPS rewrite)
+        run: |
+          git config --global url."https://github.com/".insteadOf "git@github.com:"
+          git submodule update --init --recursive
 
       - name: Set up backend component symlinks
         run: bash setup-backend.sh
@@ -112,7 +115,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '21'
+          java-version: "21"
 
       - name: Build moqui backend image
         run: |
