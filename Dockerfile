@@ -76,7 +76,9 @@ WORKDIR /root
 RUN git clone -b $BRANCH https://github.com/growerp/growerp.git
 WORKDIR /root/growerp
 RUN git submodule update --init --recursive
-# Create symlinks for custom components (backend, pop-rest-store, mantle-stripe)
+# Override setup-backend.sh from build context (may contain unpushed fixes)
+COPY setup-backend.sh /root/growerp/setup-backend.sh
+# Clone moqui-runtime + create symlinks for custom components
 RUN bash setup-backend.sh
 
 # AntWebsystems website
@@ -106,11 +108,12 @@ WORKDIR /root/growerp/moqui
 RUN curl -L https://jdbc.postgresql.org/download/postgresql-42.7.3.jar \
     -o runtime/lib/postgresql-42.7.3.jar
 
-# Remove submodule .git gitlink files — Grgit/JGit cannot resolve them and
-# the build only uses them for optional version embedding in the war file.
-RUN rm -f .git && \
-    rm -f runtime/.git && \
-    find runtime/component -maxdepth 2 -name .git -type f -delete
+# Remove .git dirs/files so Grgit/JGit doesn't fail during the Gradle build.
+# moqui/.git is a gitlink (file), runtime/.git is a full directory (direct clone),
+# and component submodules may have either form.
+RUN rm -rf .git && \
+    rm -rf runtime/.git && \
+    find runtime/component -maxdepth 2 -name .git -exec rm -rf {} + 2>/dev/null || true
 
 # Build Moqui system (produces moqui-plus-runtime.war)
 RUN ./gradlew addRunTime
