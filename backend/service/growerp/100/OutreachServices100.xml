@@ -89,9 +89,9 @@
                     convertedLeads: camp.convertedLeads,
                     expectedResponsePercent: camp.expectedResponsePercent,
                     isActive: camp.isActive,
-                    fromDate: camp.fromDate ? ec.l10n.format(camp.fromDate, growerp.GrowErpDateTimeUtil.TIMESTAMP_FORMAT) : null,
-                    thruDate: camp.thruDate ? ec.l10n.format(camp.thruDate, growerp.GrowErpDateTimeUtil.TIMESTAMP_FORMAT) : null,
-                    startDate: camp.startDate ? ec.l10n.format(camp.startDate, growerp.GrowErpDateTimeUtil.TIMESTAMP_FORMAT) : null,
+                    fromDate: camp.fromDate ? growerp.GrowErpDateTimeUtil.formatTimestamp(ec, camp.fromDate) : null,
+                    thruDate: camp.thruDate ? growerp.GrowErpDateTimeUtil.formatTimestamp(ec, camp.thruDate) : null,
+                    startDate: camp.startDate ? growerp.GrowErpDateTimeUtil.formatTimestamp(ec, camp.startDate) : null,
                     messagesSent: camp.messagesSent ?: 0,
                     responsesReceived: camp.responsesReceived ?: 0,
                     leadsGenerated: camp.leadsGenerated ?: 0
@@ -179,9 +179,9 @@
                 convertedLeads: campaignValue.convertedLeads,
                 expectedResponsePercent: campaignValue.expectedResponsePercent,
                 isActive: campaignValue.isActive,
-                fromDate: campaignValue.fromDate ? ec.l10n.format(campaignValue.fromDate, growerp.GrowErpDateTimeUtil.TIMESTAMP_FORMAT) : null,
-                thruDate: campaignValue.thruDate ? ec.l10n.format(campaignValue.thruDate, growerp.GrowErpDateTimeUtil.TIMESTAMP_FORMAT) : null,
-                startDate: campaignValue.startDate ? ec.l10n.format(campaignValue.startDate, growerp.GrowErpDateTimeUtil.TIMESTAMP_FORMAT) : null
+                fromDate: campaignValue.fromDate ? growerp.GrowErpDateTimeUtil.formatTimestamp(ec, campaignValue.fromDate) : null,
+                thruDate: campaignValue.thruDate ? growerp.GrowErpDateTimeUtil.formatTimestamp(ec, campaignValue.thruDate) : null,
+                startDate: campaignValue.startDate ? growerp.GrowErpDateTimeUtil.formatTimestamp(ec, campaignValue.startDate) : null
             ]" />
             <set field="marketingCampaignId" from="campaignValue.marketingCampaignId" />
 
@@ -369,7 +369,7 @@
                 estimatedCost: estimatedCost,
                 expectedRevenue: expectedRevenue,
                 expectedResponsePercent: expectedResponsePercent,
-                fromDate: ec.l10n.format(ec.user.nowTimestamp, growerp.GrowErpDateTimeUtil.TIMESTAMP_FORMAT),
+                fromDate: growerp.GrowErpDateTimeUtil.formatTimestamp(ec, ec.user.nowTimestamp),
                 startDate: null
             ]" />
         </actions>
@@ -534,9 +534,9 @@
                 expectedRevenue: expectedRevenue ?: existingCampaign.expectedRevenue,
                 expectedResponsePercent: expectedResponsePercent ?: existingCampaign.expectedResponsePercent,
                 isActive: isActive ?: existingCampaign.isActive,
-                fromDate: existingCampaign.fromDate ? ec.l10n.format(existingCampaign.fromDate, growerp.GrowErpDateTimeUtil.TIMESTAMP_FORMAT) : null,
-                thruDate: existingCampaign.thruDate ? ec.l10n.format(existingCampaign.thruDate, growerp.GrowErpDateTimeUtil.TIMESTAMP_FORMAT) : null,
-                startDate: existingCampaign.startDate ? ec.l10n.format(existingCampaign.startDate, growerp.GrowErpDateTimeUtil.TIMESTAMP_FORMAT) : null
+                fromDate: existingCampaign.fromDate ? growerp.GrowErpDateTimeUtil.formatTimestamp(ec, existingCampaign.fromDate) : null,
+                thruDate: existingCampaign.thruDate ? growerp.GrowErpDateTimeUtil.formatTimestamp(ec, existingCampaign.thruDate) : null,
+                startDate: existingCampaign.startDate ? growerp.GrowErpDateTimeUtil.formatTimestamp(ec, existingCampaign.startDate) : null
             ]" />
         </actions>
     </service>
@@ -648,12 +648,12 @@
             <set field="messageContent" from="message.messageContent" />
             <set field="status" from="message.status" />
             <set field="sentDate"
-                from="message.sentDate ? ec.l10n.format(message.sentDate, growerp.GrowErpDateTimeUtil.TIMESTAMP_FORMAT) : null" />
+                from="message.sentDate ? growerp.GrowErpDateTimeUtil.formatTimestamp(ec, message.sentDate) : null" />
             <set field="responseDate"
-                from="message.responseDate ? ec.l10n.format(message.responseDate, growerp.GrowErpDateTimeUtil.TIMESTAMP_FORMAT) : null" />
+                from="message.responseDate ? growerp.GrowErpDateTimeUtil.formatTimestamp(ec, message.responseDate) : null" />
             <set field="errorMessage" from="message.errorMessage" />
             <set field="createdDate"
-                from="message.createdDate ? ec.l10n.format(message.createdDate, growerp.GrowErpDateTimeUtil.TIMESTAMP_FORMAT) : null" />
+                from="message.createdDate ? growerp.GrowErpDateTimeUtil.formatTimestamp(ec, message.createdDate) : null" />
         </actions>
     </service>
 
@@ -719,12 +719,12 @@
             <set field="messageContent" from="updatedMessage.messageContent" />
             <set field="status" from="updatedMessage.status" />
             <set field="sentDate"
-                from="updatedMessage.sentDate ? ec.l10n.format(updatedMessage.sentDate, growerp.GrowErpDateTimeUtil.TIMESTAMP_FORMAT) : null" />
+                from="updatedMessage.sentDate ? growerp.GrowErpDateTimeUtil.formatTimestamp(ec, updatedMessage.sentDate) : null" />
             <set field="responseDate"
-                from="updatedMessage.responseDate ? ec.l10n.format(updatedMessage.responseDate, growerp.GrowErpDateTimeUtil.TIMESTAMP_FORMAT) : null" />
+                from="updatedMessage.responseDate ? growerp.GrowErpDateTimeUtil.formatTimestamp(ec, updatedMessage.responseDate) : null" />
             <set field="errorMessage" from="updatedMessage.errorMessage" />
             <set field="createdDate"
-                from="updatedMessage.createdDate ? ec.l10n.format(updatedMessage.createdDate, growerp.GrowErpDateTimeUtil.TIMESTAMP_FORMAT) : null" />
+                from="updatedMessage.createdDate ? growerp.GrowErpDateTimeUtil.formatTimestamp(ec, updatedMessage.createdDate) : null" />
         </actions>
     </service>
 
@@ -855,9 +855,9 @@
             <set field="isEnabled" from="isEnabled == 'Y'" />
             <!-- Format dates -->
             <set field="createdDate"
-                from="createdDate ? ec.l10n.format(createdDate, growerp.GrowErpDateTimeUtil.TIMESTAMP_FORMAT) : null" />
+                from="createdDate ? growerp.GrowErpDateTimeUtil.formatTimestamp(ec, createdDate) : null" />
             <set field="lastModifiedDate"
-                from="lastModifiedDate ? ec.l10n.format(lastModifiedDate, growerp.GrowErpDateTimeUtil.TIMESTAMP_FORMAT) : null" />
+                from="lastModifiedDate ? growerp.GrowErpDateTimeUtil.formatTimestamp(ec, lastModifiedDate) : null" />
         </actions>
     </service>
 
@@ -909,9 +909,9 @@
             <set field="username" from="conf.username" />
             <set field="password" from="conf.password" />
             <set field="createdDate"
-                from="conf.createdDate ? ec.l10n.format(conf.createdDate, growerp.GrowErpDateTimeUtil.TIMESTAMP_FORMAT) : null" />
+                from="conf.createdDate ? growerp.GrowErpDateTimeUtil.formatTimestamp(ec, conf.createdDate) : null" />
             <set field="lastModifiedDate"
-                from="conf.lastModifiedDate ? ec.l10n.format(conf.lastModifiedDate, growerp.GrowErpDateTimeUtil.TIMESTAMP_FORMAT) : null" />
+                from="conf.lastModifiedDate ? growerp.GrowErpDateTimeUtil.formatTimestamp(ec, conf.lastModifiedDate) : null" />
         </actions>
     </service>
 
@@ -966,8 +966,8 @@
                     apiSecret: conf.apiSecret,
                     username: conf.username,
                     password: conf.password,
-                    createdDate: conf.createdDate ? ec.l10n.format(conf.createdDate, growerp.GrowErpDateTimeUtil.TIMESTAMP_FORMAT) : null,
-                    lastModifiedDate: conf.lastModifiedDate ? ec.l10n.format(conf.lastModifiedDate, growerp.GrowErpDateTimeUtil.TIMESTAMP_FORMAT) : null
+                    createdDate: conf.createdDate ? growerp.GrowErpDateTimeUtil.formatTimestamp(ec, conf.createdDate) : null,
+                    lastModifiedDate: conf.lastModifiedDate ? growerp.GrowErpDateTimeUtil.formatTimestamp(ec, conf.lastModifiedDate) : null
                 ])</script>
             </iterate>
         </actions>
@@ -1241,7 +1241,7 @@
                     recipientEmail: msg.recipientEmail,
                     messageContent: msg.messageContent,
                     status: msg.status,
-                    sentDate: msg.sentDate ? ec.l10n.format(msg.sentDate, growerp.GrowErpDateTimeUtil.TIMESTAMP_FORMAT) : null,
+                    sentDate: msg.sentDate ? growerp.GrowErpDateTimeUtil.formatTimestamp(ec, msg.sentDate) : null,
                     errorMessage: msg.errorMessage
                 ])</script>
             </iterate>

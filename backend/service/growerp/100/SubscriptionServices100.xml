@@ -86,10 +86,10 @@
                             amount: item.amount ? item.amount.toString() : '0.00',
                             uom: [uomId: item.amountUomId],
                             ],
-                        fromDate: item.fromDate ? ec.l10n.format(item.fromDate, growerp.GrowErpDateTimeUtil.TIMESTAMP_FORMAT) : null,
-                        thruDate: item.thruDate ? ec.l10n.format(item.thruDate, growerp.GrowErpDateTimeUtil.TIMESTAMP_FORMAT) : null,
-                        purchaseFromDate: item.purchaseFromDate ? ec.l10n.format(item.purchaseFromDate, growerp.GrowErpDateTimeUtil.TIMESTAMP_FORMAT) : null,
-                        purchaseThruDate: item.purchaseThruDate ? ec.l10n.format(item.purchaseThruDate, growerp.GrowErpDateTimeUtil.TIMESTAMP_FORMAT) : null,
+                        fromDate: item.fromDate ? growerp.GrowErpDateTimeUtil.formatTimestamp(ec, item.fromDate) : null,
+                        thruDate: item.thruDate ? growerp.GrowErpDateTimeUtil.formatTimestamp(ec, item.thruDate) : null,
+                        purchaseFromDate: item.purchaseFromDate ? growerp.GrowErpDateTimeUtil.formatTimestamp(ec, item.purchaseFromDate) : null,
+                        purchaseThruDate: item.purchaseThruDate ? growerp.GrowErpDateTimeUtil.formatTimestamp(ec, item.purchaseThruDate) : null,
                     ])
                 </script>
             </iterate>
