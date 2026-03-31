@@ -6,6 +6,7 @@
 import 'package:decimal/decimal.dart';
 import 'package:json_annotation/json_annotation.dart';
 import '../json_converters.dart';
+import 'assessment_model.dart' show NullableTimestampConverter;
 
 part 'course_model.g.dart';
 
@@ -91,9 +92,9 @@ class Course {
   final int? estimatedDuration;
   final CourseStatus? status;
   final String? coverImageUrl;
-  @DateTimeConverter()
+  @NullableTimestampConverter()
   final DateTime? createdDate;
-  @DateTimeConverter()
+  @NullableTimestampConverter()
   final DateTime? lastModifiedDate;
   final List<CourseModule>? modules;
 
@@ -206,9 +207,9 @@ class CourseModule {
   final String? description;
   final int? sequenceNum;
   final int? estimatedDuration;
-  @DateTimeConverter()
+  @NullableTimestampConverter()
   final DateTime? createdDate;
-  @DateTimeConverter()
+  @NullableTimestampConverter()
   final DateTime? lastModifiedDate;
   final List<CourseLesson>? lessons;
 
@@ -284,9 +285,9 @@ class CourseLesson {
   final int? estimatedDuration;
   final String? videoUrl;
   final String? imageUrl;
-  @DateTimeConverter()
+  @NullableTimestampConverter()
   final DateTime? createdDate;
-  @DateTimeConverter()
+  @NullableTimestampConverter()
   final DateTime? lastModifiedDate;
 
   CourseLesson({
@@ -370,13 +371,13 @@ class CourseMedia {
   final String? generatedContent;
   final String? editedContent;
   final MediaStatus? status;
-  @DateTimeConverter()
+  @NullableTimestampConverter()
   final DateTime? scheduledDate;
-  @DateTimeConverter()
+  @NullableTimestampConverter()
   final DateTime? publishedDate;
-  @DateTimeConverter()
+  @NullableTimestampConverter()
   final DateTime? createdDate;
-  @DateTimeConverter()
+  @NullableTimestampConverter()
   final DateTime? lastModifiedDate;
 
   CourseMedia({
@@ -467,11 +468,11 @@ class CourseProgress {
   @StringListConverter()
   final List<String>? completedLessons;
   final int? progressPercent;
-  @DateTimeConverter()
+  @NullableTimestampConverter()
   final DateTime? startedDate;
-  @DateTimeConverter()
+  @NullableTimestampConverter()
   final DateTime? lastAccessDate;
-  @DateTimeConverter()
+  @NullableTimestampConverter()
   final DateTime? completedDate;
 
   CourseProgress({
@@ -534,11 +535,11 @@ class CourseParticipant {
   final int? progressPercent;
   @StringListConverter()
   final List<String>? completedLessons;
-  @DateTimeConverter()
+  @NullableTimestampConverter()
   final DateTime? startedDate;
-  @DateTimeConverter()
+  @NullableTimestampConverter()
   final DateTime? lastAccessDate;
-  @DateTimeConverter()
+  @NullableTimestampConverter()
   final DateTime? completedDate;
 
   CourseParticipant({

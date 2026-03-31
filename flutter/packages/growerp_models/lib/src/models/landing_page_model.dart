@@ -1,5 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
-import '../json_converters.dart';
+import 'assessment_model.dart' show NullableTimestampConverter;
 
 part 'landing_page_model.g.dart';
 
@@ -47,14 +47,14 @@ class LandingPage {
   final String status;
 
   /// Timestamp when created
-  @DateTimeConverter()
+  @NullableTimestampConverter()
   final DateTime? createdDate;
 
   /// Username who created this landing page
   final String? createdByUserLogin;
 
   /// Timestamp when last modified
-  @DateTimeConverter()
+  @NullableTimestampConverter()
   final DateTime? lastModifiedDate;
 
   /// Username who last modified this landing page

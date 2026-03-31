@@ -57,8 +57,8 @@ void main() {
       },
     );
 
-    // Verify we're authenticated (HomeFormAuth key should be present in logout button icon)
-    expect(find.byKey(const Key('HomeFormAuth')), findsOneWidget);
+    // Verify we're authenticated (logoutButton is present in static router after auth)
+    expect(find.byKey(const Key('logoutButton')), findsOneWidget);
 
     // Navigate to Course List
     await tester.tap(find.text('Courses').last);
