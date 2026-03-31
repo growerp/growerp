@@ -14,6 +14,7 @@
 
 import 'package:json_annotation/json_annotation.dart';
 
+import '../json_converters.dart';
 part 'approval_request_model.g.dart';
 
 /// Status of an approval request
@@ -41,8 +42,11 @@ class ApprovalRequest {
   final ApprovalStatus? status;
   final String? approverPartyId;
   final String? approverComment;
+  @DateTimeConverter()
   final DateTime? expiresDate;
+  @DateTimeConverter()
   final DateTime? createdDate;
+  @DateTimeConverter()
   final DateTime? resolvedDate;
 
   // From join with AgentInstance

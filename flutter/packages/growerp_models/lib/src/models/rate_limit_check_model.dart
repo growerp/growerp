@@ -5,6 +5,7 @@
 
 import 'package:json_annotation/json_annotation.dart';
 
+import '../json_converters.dart';
 part 'rate_limit_check_model.g.dart';
 
 /// Result of a rate limit check
@@ -12,6 +13,7 @@ part 'rate_limit_check_model.g.dart';
 class RateLimitCheck {
   final bool? allowed;
   final int? remainingActions;
+  @DateTimeConverter()
   final DateTime? resetDate;
 
   const RateLimitCheck({this.allowed, this.remainingActions, this.resetDate});

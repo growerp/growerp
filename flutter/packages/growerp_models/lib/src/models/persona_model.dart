@@ -3,6 +3,7 @@ import 'package:json_annotation/json_annotation.dart';
 
 import 'assessment_model.dart';
 
+import '../json_converters.dart';
 part 'persona_model.g.dart';
 
 /// Converts a value that may be a String or a `List<dynamic>` to a String.

@@ -1,6 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'assessment_model.dart' show NullableTimestampConverter;
 
+import '../json_converters.dart';
 part 'scoring_threshold_model.g.dart';
 
 /// Score threshold that determines assessment outcome

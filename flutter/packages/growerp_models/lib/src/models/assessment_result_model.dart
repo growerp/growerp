@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:json_annotation/json_annotation.dart';
 import 'assessment_model.dart' show NullableTimestampConverter;
 
+import '../json_converters.dart';
 part 'assessment_result_model.g.dart';
 
 /// Converter for answersData that can be either a List or a JSON string

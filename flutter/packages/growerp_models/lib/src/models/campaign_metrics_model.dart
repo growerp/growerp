@@ -1,5 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 
+import '../json_converters.dart';
 part 'campaign_metrics_model.g.dart';
 
 /// Campaign Metrics model
@@ -28,6 +29,7 @@ class CampaignMetrics {
   final int leadsGenerated;
 
   /// Last update timestamp
+  @DateTimeConverter()
   final DateTime? lastUpdated;
 
   /// Response rate percentage (calculated)

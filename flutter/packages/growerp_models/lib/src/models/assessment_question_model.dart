@@ -2,6 +2,7 @@ import 'package:json_annotation/json_annotation.dart';
 import 'assessment_question_option_model.dart';
 import 'assessment_model.dart' show NullableTimestampConverter;
 
+import '../json_converters.dart';
 part 'assessment_question_model.g.dart';
 
 /// Converter to handle Moqui's Y/N string booleans
