@@ -181,7 +181,8 @@ Future<void> loadConfiguration() async {
         'support',
         'growerp-moqui',
       ],
-      'dockerRegistry': 'growerp',
+      'dockerRegistry':
+          Platform.environment['DOCKER_REGISTRY'] ?? 'ghcr.io/growerp',
       'defaultPushToDockerHub': true,
       'defaultPushToGitHub': false,
     };

@@ -1,39 +1,39 @@
 name: Release
 
 # Manually trigger a production release from GitHub Actions.
-# Required secrets:
-#   DOCKERHUB_USERNAME  — Docker Hub account name
-#   DOCKERHUB_TOKEN     — Docker Hub access token (read/write)
-# The built-in GITHUB_TOKEN is used for git push (needs Contents: write permission).
+# No extra secrets needed — GITHUB_TOKEN is used for both git push and ghcr.io.
+# Required repository / organisation settings:
+#   Settings → Actions → General → Workflow permissions → "Read and write permissions"
+#   Settings → Packages → "Inherit access from repository" (so the image is published)
 
 on:
   workflow_dispatch:
     inputs:
       bump:
-        description: 'Version bump type'
+        description: "Version bump type"
         required: true
-        default: 'patch'
+        default: "patch"
         type: choice
         options:
           - patch
           - minor
           - major
       apps:
-        description: 'Apps to release (comma-separated). Leave empty for all.'
+        description: "Apps to release (comma-separated). Leave empty for all."
         required: false
-        default: ''
+        default: ""
       comment:
-        description: 'Optional release comment added to the git commit'
+        description: "Optional release comment added to the git commit"
         required: false
-        default: ''
+        default: ""
       push_docker:
-        description: 'Push images to Docker Hub'
+        description: "Push images to Docker Hub"
         required: true
-        default: 'true'
+        default: "true"
         type: choice
         options:
-          - 'true'
-          - 'false'
+          - "true"
+          - "false"
 
 # Only one release at a time — never cancel a running release.
 concurrency:
@@ -41,7 +41,8 @@ concurrency:
   cancel-in-progress: false
 
 permissions:
-  contents: write   # required for git push / tag
+  contents: write # required for git push / tag
+  packages: write # required to push to ghcr.io
 
 jobs:
   release:
@@ -74,12 +75,13 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Login to Docker Hub
+      - name: Login to GitHub Container Registry
         if: ${{ inputs.push_docker == 'true' }}
         uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       # -----------------------------------------------------------------------
       # 4. Git — allow push back via GITHUB_TOKEN over HTTPS
@@ -100,7 +102,10 @@ jobs:
       - name: Run release tool
         working-directory: flutter
         env:
-          DOCKER_BUILDKIT: '1'
+          DOCKER_BUILDKIT: "1"
+          DOCKER_REGISTRY: ghcr.io/growerp
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           ARGS="--ci --bump=${{ inputs.bump }} --parallel --workspace=local"
 

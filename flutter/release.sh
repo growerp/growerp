@@ -60,6 +60,9 @@ validate_environment() {
         print_error "Docker is not installed or not in PATH"
         exit 1
     fi
+
+    # Set GitHub Container Registry as the Docker image repository
+    export DOCKER_REGISTRY="ghcr.io/growerp"
     
     # Check Dart
     if ! command -v dart &> /dev/null; then
@@ -87,6 +90,28 @@ install_dependencies() {
     print_status "Dependencies ready"
 }
 
+# Login to GitHub Container Registry
+login_ghcr() {
+    echo "Logging in to GitHub Container Registry (ghcr.io)..."
+
+    local token="${CR_PAT:-${GITHUB_TOKEN:-}}"
+    if [[ -z "$token" ]]; then
+        print_warning "Neither CR_PAT nor GITHUB_TOKEN is set."
+        print_warning "Docker push to ghcr.io will fail without authentication."
+        print_warning "Set CR_PAT or GITHUB_TOKEN and re-run to authenticate."
+        return 0
+    fi
+
+    local actor="${GITHUB_ACTOR:-$(git config user.name 2>/dev/null || echo '')}"
+    if [[ -z "$actor" ]]; then
+        print_error "GITHUB_ACTOR (or git user.name) is required for ghcr.io login"
+        exit 1
+    fi
+
+    echo "$token" | docker login ghcr.io -u "$actor" --password-stdin
+    print_status "Logged in to ghcr.io as $actor"
+}
+
 # Run the release tool
 run_release_tool() {
     local script_path
@@ -109,6 +134,7 @@ run_release_tool() {
 main() {
     validate_environment
     install_dependencies
+    login_ghcr
     echo ""
     run_release_tool "$@"
 }
