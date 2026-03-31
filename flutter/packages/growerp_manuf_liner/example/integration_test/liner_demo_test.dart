@@ -355,7 +355,10 @@ void main() {
     await OrderTest.approveOrders(tester);
     await CommonTest.gotoMainMenu(tester);
     await CommonTest.selectOption(
-        tester, '/accounting/purchase_payments', 'PurchasePayment');
+      tester,
+      '/accounting/purchase_payments',
+      'PurchasePayment',
+    );
     await OrderTest.approveOrderPayments(tester);
     await OrderTest.completeOrderPayments(tester);
 
@@ -413,11 +416,38 @@ void main() {
     await OrderTest.completeOrderShipments(tester);
     await CommonTest.gotoMainMenu(tester);
     await CommonTest.selectOption(
-        tester, '/accounting/sales_payments', 'SalesPayment');
+      tester,
+      '/accounting/sales_payments',
+      'SalesPayment',
+    );
     await OrderTest.approveOrderPayments(tester);
     await OrderTest.completeOrderPayments(tester);
 
-    // ── Phase 10: Accounting ──────────────────────────────────────────────────
+    // ── Phase 10: Invoices ────────────────────────────────────────────────────
+    await showDemoStep(
+      tester,
+      'Purchase & Sales Invoices',
+      'GrowERP auto-generates invoices from approved orders.\n'
+          'The purchase invoice reflects the roll stock cost; '
+          'the sales invoice captures revenue from the customer.',
+    );
+    await CommonTest.gotoMainMenu(tester);
+    await CommonTest.selectOption(
+      tester,
+      '/accounting/purchase_invoices',
+      'PurchaseInvoice',
+    );
+    await tester.pump(const Duration(seconds: 3));
+
+    await CommonTest.gotoMainMenu(tester);
+    await CommonTest.selectOption(
+      tester,
+      '/accounting/sales_invoices',
+      'SalesInvoice',
+    );
+    await tester.pump(const Duration(seconds: 3));
+
+    // ── Phase 11: Accounting ──────────────────────────────────────────────────
     await showDemoStep(
       tester,
       'Accounting & GL Transactions',
@@ -434,7 +464,8 @@ void main() {
       'Demo Complete',
       'You have seen the full GrowERP liner panel manufacturing lifecycle:\n'
           'Liner Types → Routing → BOM → Sales Order → Work Order → '
-          'Liner Panels → Purchase → Receive → Produce → PDF → Ship → Accounting.',
+          'Liner Panels → Purchase → Receive → Produce → PDF → Ship → '
+          'Purchase Invoice → Sales Invoice → Accounting.',
       seconds: 5,
     );
 

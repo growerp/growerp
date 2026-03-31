@@ -1,5 +1,6 @@
 // ignore_for_file: depend_on_referenced_packages
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:growerp_catalog/growerp_catalog.dart';
 import 'package:growerp_core/growerp_core.dart';
@@ -92,6 +93,22 @@ const linerExampleMenuConfig = MenuConfiguration(
       widgetName: 'FinDocList',
     ),
     MenuItem(
+      itemKey: 'LINER_SALES_INVOICES',
+      title: 'Sales Invoices',
+      route: '/accounting/sales_invoices',
+      iconName: 'receipt',
+      sequenceNum: 92,
+      widgetName: 'SalesInvoiceList',
+    ),
+    MenuItem(
+      itemKey: 'LINER_PURCHASE_INVOICES',
+      title: 'Purchase Invoices',
+      route: '/accounting/purchase_invoices',
+      iconName: 'receipt_long',
+      sequenceNum: 93,
+      widgetName: 'PurchaseInvoiceList',
+    ),
+    MenuItem(
       itemKey: 'LINER_ACCT',
       title: 'Accounting',
       route: '/accounting',
@@ -111,43 +128,43 @@ GoRouter createLinerExampleRouter() {
       '/manufacturing/routing' => const RoutingList(),
       '/manufacturing/bom' => const BomList(),
       '/manufacturing/workOrder' => WorkOrderList(
-          extraTabBuilder: (workOrder) => [
-            SizedBox(
-              height: 300,
-              child: LinerPanelList(workEffortId: workOrder.workEffortId),
+        extraTabBuilder: (workOrder) => [
+          SizedBox(
+            height: 300,
+            child: LinerPanelList(workEffortId: workOrder.workEffortId),
+          ),
+        ],
+        extraActionBuilder: (workOrder) => [
+          Tooltip(
+            message: 'Print Production Order',
+            child: IconButton(
+              key: const Key('printProductionOrder'),
+              icon: const Icon(Icons.print),
+              onPressed: () => printProductionOrder(workOrder),
             ),
-          ],
-          extraActionBuilder: (workOrder) => [
-            Tooltip(
-              message: 'Print Production Order',
-              child: IconButton(
-                key: const Key('printProductionOrder'),
-                icon: const Icon(Icons.print),
-                onPressed: () => printProductionOrder(workOrder),
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
+      ),
       '/orders' => const FinDocList(
-          key: Key('SalesOrder'),
-          sales: true,
-          docType: FinDocType.order,
-        ),
+        key: Key('SalesOrder'),
+        sales: true,
+        docType: FinDocType.order,
+      ),
       '/purchase-orders' => const FinDocList(
-          key: Key('PurchaseOrder'),
-          sales: false,
-          docType: FinDocType.order,
-        ),
+        key: Key('PurchaseOrder'),
+        sales: false,
+        docType: FinDocType.order,
+      ),
       '/shipments' => const FinDocList(
-          key: Key('ShipmentsOut'),
-          sales: true,
-          docType: FinDocType.shipment,
-        ),
+        key: Key('ShipmentsOut'),
+        sales: true,
+        docType: FinDocType.shipment,
+      ),
       '/incoming-shipments' => const FinDocList(
-          key: Key('ShipmentsIn'),
-          sales: false,
-          docType: FinDocType.shipment,
-        ),
+        key: Key('ShipmentsIn'),
+        sales: false,
+        docType: FinDocType.shipment,
+      ),
       '/accounting' => const AccountingDashboard(),
       _ => const _LinerExampleDashboard(),
     },
@@ -176,6 +193,22 @@ GoRouter createLinerExampleRouter() {
           docType: FinDocType.payment,
         ),
       ),
+      GoRoute(
+        path: '/accounting/sales_invoices',
+        builder: (_, _) => const FinDocList(
+          key: Key('SalesInvoice'),
+          sales: true,
+          docType: FinDocType.invoice,
+        ),
+      ),
+      GoRoute(
+        path: '/accounting/purchase_invoices',
+        builder: (_, _) => const FinDocList(
+          key: Key('PurchaseInvoice'),
+          sales: false,
+          docType: FinDocType.invoice,
+        ),
+      ),
     ],
     additionalRoutes: [
       GoRoute(
@@ -191,8 +224,37 @@ class _LinerExampleDashboard extends StatelessWidget {
   const _LinerExampleDashboard();
 
   @override
-  Widget build(BuildContext context) => const Scaffold(
-        key: Key('LinerExampleDashboard'),
-        body: SizedBox.shrink(),
-      );
+  Widget build(BuildContext context) {
+    return BlocBuilder<AuthBloc, AuthState>(
+      builder: (context, authState) {
+        final stats = authState.authenticate?.stats;
+        final dashboardItems =
+            linerExampleMenuConfig.menuItems
+                .where(
+                  (item) =>
+                      item.isActive && item.route != null && item.route != '/',
+                )
+                .toList()
+              ..sort((a, b) => a.sequenceNum.compareTo(b.sequenceNum));
+
+        return Scaffold(
+          key: const Key('LinerExampleDashboard'),
+          backgroundColor: Colors.transparent,
+          body: DashboardGrid(
+            items: dashboardItems,
+            stats: stats,
+            onRefresh: () async {
+              context.read<AuthBloc>().add(AuthLoad());
+            },
+            chartBuilder: (route) {
+              if (route == '/accounting') {
+                return const RevenueExpenseChartMini();
+              }
+              return null;
+            },
+          ),
+        );
+      },
+    );
+  }
 }
