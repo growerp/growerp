@@ -159,6 +159,8 @@ void main(List<String> args) async {
       versionConfig,
       workspaceDir,
     );
+    // Update selectedApps to only those whose version files were found
+    selectedApps = List<String>.from(versionInfo['availableApps'] ?? selectedApps);
 
     // Initial state
     releaseState = {
@@ -496,9 +498,26 @@ Future<Map<String, dynamic>> calculateVersions(
   // Get all available apps from config to find highest version across ALL packages
   var allApps = List<String>.from(config['defaultApps'] ?? []);
 
+  // Filter selectedApps to only those whose version files are present
+  var availableApps = <String>[];
+  for (var app in selectedApps) {
+    try {
+      getVersion(app, workspaceDir); // test-read only
+      availableApps.add(app);
+    } catch (e) {
+      print(
+        "   ⚠️  Skipping '$app': version file not found (${e.runtimeType})",
+      );
+    }
+  }
+  if (availableApps.isEmpty) {
+    print("❌ No valid apps found — aborting.");
+    exit(1);
+  }
+
   // Get current versions for selected apps (for display and build suffix)
   var currentVersions = <String, String>{};
-  for (var app in selectedApps) {
+  for (var app in availableApps) {
     var version = getVersion(app, workspaceDir);
     currentVersions[app] = version;
     print("   $app: $version");
@@ -550,6 +569,7 @@ Future<Map<String, dynamic>> calculateVersions(
     'major': largestMajor,
     'minor': largestMinor,
     'patch': largestPatch,
+    'availableApps': availableApps,
   };
 }
 
