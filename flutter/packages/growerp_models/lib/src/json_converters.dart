@@ -38,17 +38,18 @@ class DateTimeConverter implements JsonConverter<DateTime?, String?> {
 
   @override
   DateTime? fromJson(String? json) {
-    if (json == null) return null;
+    if (json == null || json.isEmpty) return null;
     try {
-      // Parse the timestamp and ensure it's treated as UTC from server
-      DateTime? parsed = DateTime.tryParse(json);
+      // Handle standard ISO 8601 with/without 'T'
+      String normalizedJson = json.replaceFirst(' ', 'T');
+      DateTime? parsed = DateTime.tryParse(normalizedJson);
       if (parsed != null) {
         // If the parsed datetime doesn't have timezone info, treat it as UTC
-        if (!json.contains('Z') &&
-            !json.contains('+') &&
-            !json.contains('-', 10)) {
+        if (!normalizedJson.contains('Z') &&
+            !normalizedJson.contains('+') &&
+            !normalizedJson.contains('-', 10)) {
           // Assume server time is UTC and convert to local
-          return DateTime.parse('${json}Z').toLocal();
+          return DateTime.parse('${normalizedJson}Z').toLocal();
         }
         return parsed.toLocal(); // Convert to local time for display
       }
@@ -61,9 +62,31 @@ class DateTimeConverter implements JsonConverter<DateTime?, String?> {
   @override
   String? toJson(DateTime? object) {
     if (object == null) return null;
-    // Always send to server in UTC to avoid timezone issues
-    // Include timezone information in the format
+    // Always send to server in UTC ISO 8601 to avoid timezone issues
     return object.toUtc().toIso8601String();
+  }
+}
+
+class DateOnlyConverter implements JsonConverter<DateTime?, String?> {
+  const DateOnlyConverter();
+
+  @override
+  DateTime? fromJson(String? json) {
+    if (json == null || json.isEmpty) return null;
+    try {
+      // Parse only the date part to avoid timezone shifts
+      String datePart = json.substring(0, 10);
+      return DateTime.parse(datePart);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  @override
+  String? toJson(DateTime? object) {
+    if (object == null) return null;
+    // Return only yyyy-MM-dd
+    return "${object.year.toString().padLeft(4, '0')}-${object.month.toString().padLeft(2, '0')}-${object.day.toString().padLeft(2, '0')}";
   }
 }
 

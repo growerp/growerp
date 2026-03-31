@@ -30,10 +30,10 @@ abstract class Subscription with _$Subscription {
     String? orderItemSeqId, // Order item that created this subscription
     Product? product, // Product/plan associated with this subscription
     String? description, //
-    DateTime? fromDate, // Start date of the subscription
-    DateTime? thruDate, // End date of the subscription
-    DateTime? purchaseFromDate, // Purchase start date
-    DateTime? purchaseThruDate, // Purchase end date
+    @DateTimeConverter() DateTime? fromDate, // Start date of the subscription
+    @DateTimeConverter() DateTime? thruDate, // End date of the subscription
+    @DateTimeConverter() DateTime? purchaseFromDate, // Purchase start date
+    @DateTimeConverter() DateTime? purchaseThruDate, // Purchase end date
     Duration? availableTime, // Total time available for this subscription
     Duration? useTime, // Time used or period time for renew
     Duration? trialPeriod, // Trial period duration

@@ -1059,7 +1059,7 @@ along with this software (see the LICENSE.md file). If not, see
                         isError: journal.glJournalTypeEnumId == 'GLJRNL_ERROR'
                             ? true : false,
                         postedDate: journal.postedDate
-                            ? ec.l10n.format(journal.postedDate,'yyyy-MM-dd') : null,
+                            ? growerp.GrowErpDateTimeUtil.formatTimestamp(ec, journal.postedDate) : null,
                         isPosted: journal.isPosted=='N' ? false : true,
                         )
                 </script>

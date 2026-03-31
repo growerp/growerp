@@ -324,8 +324,7 @@ along with this software (see the LICENSE.md file). If not, see
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <if condition="startDate">
                 <set field="tsDate"
-                    from="ec.l10n.parseTimestamp(ec.l10n.format(startDate, 'yyyy-MM-dd HH:mm:ss')
-                        + ' 23:59:59.999', 'yyyy-MM-dd HH:mm:ss.SSS')" />
+                    from="growerp.GrowErpDateTimeUtil.getEndOfDay(ec.l10n.parseTimestamp(startDate, null))" />
             </if>
             <if condition="search != null">
                 <set field="search" value="%${search}%" />
@@ -415,9 +414,9 @@ along with this software (see the LICENSE.md file). If not, see
                         requestId: item.requestId,
                         pseudoId: item.pseudoId,
                         statusId: convertedStatusId,
-                        creationDate: item.requestDate ? ec.l10n.format(item.requestDate,'yyyy-MM-dd HH:mm:ssZ')  : null,
+                        creationDate: item.requestDate ? growerp.GrowErpDateTimeUtil.formatTimestamp(ec, item.requestDate)  : null,
                         requestType: requestType.convertedStatusId,
-                        placedDate: item.lastUpdatedStamp ? ec.l10n.format(item.lastUpdatedStamp,'yyyy-MM-dd HH:mm:ssZ')  : null,
+                        placedDate: item.lastUpdatedStamp ? growerp.GrowErpDateTimeUtil.formatTimestamp(ec, item.lastUpdatedStamp)  : null,
                         otherUser: item.personLastName ? [
                                 type: 'user',
                                 partyId: item.filedByPartyId,
@@ -624,9 +623,9 @@ along with this software (see the LICENSE.md file). If not, see
                             salesChannel: item.salesChannelDescr,
                             statusId: convertedStatusId,
                             creationDate: item.entryDate
-                                ? ec.l10n.format(item.entryDate,'yyyy-MM-dd HH:mm:ssZ') : null,
+                                ? growerp.GrowErpDateTimeUtil.formatTimestamp(ec, item.entryDate) : null,
                             placedDate: item.placedDate
-                                ? ec.l10n.format(item.placedDate,'yyyy-MM-dd HH:mm:ssZ')  : null,
+                                ? growerp.GrowErpDateTimeUtil.formatTimestamp(ec, item.placedDate)  : null,
                             sales: sales,
                             docType: docType,
                             otherUser: userOut,
@@ -666,9 +665,9 @@ along with this software (see the LICENSE.md file). If not, see
                             price: item.unitAmount ? item.unitAmount.toString() : '0.00',
                             asset: [assetId: item.assetId, assetName: item.assetName],
                             rentalFromDate: item.rentalFromDate
-                                ?  ec.l10n.format(item.rentalFromDate,'yyyy-MM-dd HH:mm:ssZ')  : null,
+                                ?  growerp.GrowErpDateTimeUtil.formatTimestamp(ec, item.rentalFromDate)  : null,
                             rentalThruDate: item.rentalThruDate
-                                ? ec.l10n.format(item.rentalThruDate,'yyyy-MM-dd HH:mm:ssZ') : null,
+                                ? growerp.GrowErpDateTimeUtil.formatTimestamp(ec, item.rentalThruDate) : null,
                             ]" />
                     <script>finDocItems.add(finDocItem)</script>
                     <!-- check if last line or next line for next order -->
@@ -863,7 +862,7 @@ along with this software (see the LICENSE.md file). If not, see
                             description: item.invoiceName,
                             statusId: convertedStatusId,
                             creationDate: item.invoiceDate
-                                ? ec.l10n.format(item.invoiceDate,'yyyy-MM-dd HH:mm:ssZ')  : null,
+                                ? growerp.GrowErpDateTimeUtil.formatTimestamp(ec, item.invoiceDate)  : null,
                             otherUser: userOut?.partyId ? userOut : null,
                             otherCompany: company?.partyId ? company : null,
                             grandTotal: item.invoiceTotal
@@ -885,9 +884,9 @@ along with this software (see the LICENSE.md file). If not, see
                         quantity: item.quantity ? item.quantity.toString() : null,
                         price: item.amount ? item.amount.toString() : null,
                         rentalFromDate: item.rentalFromDate
-                            ?  ec.l10n.format(item.rentalFromDate,'yyyy-MM-dd HH:mm:ssZ') : null,
+                            ?  growerp.GrowErpDateTimeUtil.formatTimestamp(ec, item.rentalFromDate) : null,
                         rentalThruDate: item.rentalThruDate
-                            ? ec.l10n.format(item.rentalThruDate,'yyyy-MM-dd HH:mm:ssZ') : null,
+                            ? growerp.GrowErpDateTimeUtil.formatTimestamp(ec, item.rentalThruDate) : null,
                         ]" />
                         <script>finDocItems.add(finDocItem)</script>
                     </if>
@@ -1061,7 +1060,7 @@ along with this software (see the LICENSE.md file). If not, see
                             amount: response.amount != null ? response.amount.toString() : null,
                             referenceNum: response.referenceNum,
                             transactionDate: response.transactionDate
-                                ? ec.l10n.format(response.transactionDate,'yyyy-MM-dd HH:mm:ssZ') : null,
+                                ? growerp.GrowErpDateTimeUtil.formatTimestamp(ec, response.transactionDate) : null,
                             resultSuccess: response.resultSuccess == 'Y' ? true : false,
                             resultMessage: response.resultMessage
                         ])</script>
@@ -1088,7 +1087,7 @@ along with this software (see the LICENSE.md file). If not, see
                         invoiceId: item.invoiceId ? item.invoiceId : item.forInvoiceId,
                         statusId: convertedStatusId,
                         creationDate: item.effectiveDate
-                            ? ec.l10n.format(item.effectiveDate,'yyyy-MM-dd HH:mm:ssZ') : null,
+                            ? growerp.GrowErpDateTimeUtil.formatTimestamp(ec, item.effectiveDate) : null,
                         sales: sales,
                         docType: docType,
                         otherUser: userOut?.partyId ? userOut : null,
@@ -1234,7 +1233,7 @@ along with this software (see the LICENSE.md file). If not, see
                             reference: item.externalId,
                             shipmentMethod: item.shipmentMethod,
                             creationDate: item.entryDate 
-                                ? ec.l10n.format(item.entryDate,'yyyy-MM-dd HH:mm:ssZ')  : null,
+                                ? growerp.GrowErpDateTimeUtil.formatTimestamp(ec, item.entryDate)  : null,
                             otherUser: userOut?.partyId ? userOut : null,
                             otherCompany: company?.partyId ? company : null,
                             ]" />
@@ -1252,7 +1251,7 @@ along with this software (see the LICENSE.md file). If not, see
                         assetId: item.assetId,
                         assetName: item.assetName,
                         receivedDate: item.entryDate 
-                            ? ec.l10n.format(item.entryDate,'yyyy-MM-dd HH:mm:ssZ')  : null,
+                            ? growerp.GrowErpDateTimeUtil.formatTimestamp(ec, item.entryDate)  : null,
                         location: location
                         ]" />
                     </if>
@@ -1373,7 +1372,7 @@ along with this software (see the LICENSE.md file). If not, see
                             transactionId: item.transactionId,
                             statusId: convertedStatusId,
                             creationDate: item.transactionDate 
-                                ? ec.l10n.format(item.transactionDate,'yyyy-MM-dd HH:mm:ssZ')  : null,
+                                ? growerp.GrowErpDateTimeUtil.formatTimestamp(ec, item.transactionDate)  : null,
                             otherUser: userOut,
                             otherCompany: company,
                             isPosted: item.isPosted == 'Y'? true : false,
@@ -1636,7 +1635,7 @@ along with this software (see the LICENSE.md file). If not, see
             </if>
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
-            <set field="nowDate" from="ec.user.nowTimestamp.toString().substring(0,10)" />
+            <set field="nowDate" from="growerp.GrowErpDateTimeUtil.formatDate(ec, ec.user.nowTimestamp)" />
             <!-- create 'other Party'-->
             <if
                 condition="finDoc.docType != 'transaction' &amp;&amp; 
@@ -1696,7 +1695,7 @@ along with this software (see the LICENSE.md file). If not, see
                                     requestOwnerPartyId: companyUserPartyId ?: userpartyId,
                                     statusId: convertedStatusId,
                                     filedByPartyId: otherPartyId,
-                                    requestDate: ec.l10n.format(nowDate,'yyyy-MM-dd HH:mm:ssZ'),
+                                    requestDate: growerp.GrowErpDateTimeUtil.formatTimestamp(ec, ec.user.nowTimestamp),
                                     requestOwnerPartyId: companyPartyId
                                 ]"
                         out-map="context" />
@@ -2074,7 +2073,7 @@ along with this software (see the LICENSE.md file). If not, see
                         originalCurrencyAmount: payment.originalGrandTotal,
                         originalCurrencyUomId: payment.originalCurrency?.currencyId,
                         paymentInstrumentEnumId: instrument,
-                        effectiveDate: ec.l10n.format(ec.user.nowTimestamp,'yyyy-MM-dd HH:mm:ss'),
+                        effectiveDate: growerp.GrowErpDateTimeUtil.formatTimestamp(ec, ec.user.nowTimestamp),
                         paymentMethodId: paymentMethodId,
                         paymentGatewayConfigId: paymentGatewayConfigId,
                         toPartyId: toPartyId,
@@ -2540,17 +2539,18 @@ along with this software (see the LICENSE.md file). If not, see
                     <set field="fullDates" from="[]" />
                 </if>
                 <!-- for every date, record the number of assets that have a reservation -->
-                <set field="rentalDate" from="rental.rentalFromDate" />
+                <set field="rentalDate" from="growerp.GrowErpDateTimeUtil.truncateToDate(rental.rentalFromDate)" />
+                <set field="thruDate" from="growerp.GrowErpDateTimeUtil.truncateToDate(rental.rentalThruDate)" />
                 <while
-                    condition="rentalDate.toString().substring(0,10)
-                        &lt; rental.rentalThruDate.toString().substring(0,10)">
+                    condition="rentalDate.before(thruDate)">
                     <script>
-                        int index = fullDates.findIndexOf{it.d.toString().substring(0,10) == 
-                                rentalDate.toString().substring(0,10)};
+                        int index = fullDates.findIndexOf{
+                            growerp.GrowErpDateTimeUtil.truncateToDate(it.d).equals(rentalDate)
+                        };
                         if (index != -1)
                             fullDates[index].n++
                         else
-                            fullDates.add([d: ec.l10n.format(rentalDate,'yyyy-MM-dd HH:mm:ssZ'), n:1]);
+                            fullDates.add([d: rentalDate, n:1]);
                     </script>
                     <!-- increment rentalDate -->
                     <set field="rentalDate"
@@ -3395,7 +3395,7 @@ along with this software (see the LICENSE.md file). If not, see
             </parameter>
         </out-parameters>
         <actions>
-            <set field="nowDate" from="ec.user.nowTimestamp.toString().substring(0,10)" />
+            <set field="nowDate" from="growerp.GrowErpDateTimeUtil.formatDate(ec, ec.user.nowTimestamp)" />
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <entity-find list="shipmentItemDetailList"

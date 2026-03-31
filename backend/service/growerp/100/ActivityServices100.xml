@@ -272,7 +272,7 @@ along with this software (see the LICENSE.md file). If not, see
                                 opportunityId: event.opportunityId,
                                 activityName: event.workEffortName,
                                 description: event.description,
-                                eventDate: event.actualStartDate ? ec.l10n.format(event.actualStartDate,'yyyy-MM-dd') : null,
+                                eventDate: event.actualStartDate ? ec.l10n.format(event.actualStartDate, growerp.GrowErpDateTimeUtil.TIMESTAMP_FORMAT) : null,
                                 thirdParty: thirdparty,
                             ]" />
                         <script>activities.add(eventOut)</script>
@@ -363,7 +363,7 @@ along with this software (see the LICENSE.md file). If not, see
                                 activityId: te.workEffortId,
                                 partyId: te.partyId,
                                 hours: te.hours?.toString(),
-                                date: te.fromDate ? ec.l10n.format(te.fromDate,'yyyy-MM-dd') : null,
+                                date: te.fromDate ? ec.l10n.format(te.fromDate, growerp.GrowErpDateTimeUtil.TIMESTAMP_FORMAT) : null,
                                 comments: te.comments
                             ]" />
                                     <set
@@ -432,13 +432,13 @@ along with this software (see the LICENSE.md file). If not, see
                                         statusId: convertedStatusId,
                                         description: entry.description,
                                         estimatedStartDate: entry.estimatedStartDate?
-                                            ec.l10n.format(entry.estimatedStartDate,'yyyy-MM-dd') : null,
+                                            ec.l10n.format(entry.estimatedStartDate, growerp.GrowErpDateTimeUtil.TIMESTAMP_FORMAT) : null,
                                         estimatedEndDate: entry.estimatedCompletionDate?
-                                            ec.l10n.format(entry.estimatedCompletionDate,'yyyy-MM-dd')  : null,
+                                            ec.l10n.format(entry.estimatedCompletionDate, growerp.GrowErpDateTimeUtil.TIMESTAMP_FORMAT)  : null,
                                         actualStartDate: entry.actualStartDate?
-                                            ec.l10n.format(entry.actualStartDate,'yyyy-MM-dd') : null,
+                                            ec.l10n.format(entry.actualStartDate, growerp.GrowErpDateTimeUtil.TIMESTAMP_FORMAT) : null,
                                         actualEndDate: entry.actualCompletionDate?
-                                            ec.l10n.format(entry.actualCompletionDate,'yyyy-MM-dd')  : null,
+                                            ec.l10n.format(entry.actualCompletionDate, growerp.GrowErpDateTimeUtil.TIMESTAMP_FORMAT)  : null,
                                         unInvoicedHours: unInvoicedHours.toString(),
                                         originator: originator,
                                         assignee: assignee,
@@ -585,9 +585,9 @@ along with this software (see the LICENSE.md file). If not, see
                     description: activity.description,
                     ownerPartyId: ownerPartyId,
                     actualStartDate: activity.startDate ?
-                        activity.startDate.substring(0,18) : null,
+                        growerp.GrowErpDateTimeUtil.parseTimestamp(ec, activity.startDate) : null,
                     actualCompletionDate: activity.endDate ?
-                        activity.endDate.substring(0,18) : null,
+                        growerp.GrowErpDateTimeUtil.parseTimestamp(ec, activity.endDate) : null,
                     routing: activity.routing,
                  ]"
                 out-map="context" />
@@ -737,9 +737,9 @@ along with this software (see the LICENSE.md file). If not, see
                         statusId: statusId,
                         description: activity.description,
                         actualStartDate: activity.estimatedStartDate ?
-                            activity.estimatedStartDate.substring(0,18) : null,
+                            growerp.GrowErpDateTimeUtil.parseTimestamp(ec, activity.estimatedStartDate) : null,
                         actualCompletionDate: activity.estimatedEndDate ?
-                            activity.estimatedEndDate.substring(0,18) : null
+                            growerp.GrowErpDateTimeUtil.parseTimestamp(ec, activity.estimatedEndDate) : null
                     ]" />
             </if>
             <!-- assignee-->
@@ -815,7 +815,7 @@ along with this software (see the LICENSE.md file). If not, see
                 partyId: te.partyId,
                 hours: te.hours?.toString(),
                 comments: te.comments,
-                date: te.fromDate ? ec.l10n.format(te.fromDate,'yyyy-MM-dd') : null
+                date: te.fromDate ? ec.l10n.format(te.fromDate, growerp.GrowErpDateTimeUtil.TIMESTAMP_FORMAT) : null
             ]" />
         </actions>
     </service>
@@ -859,7 +859,7 @@ along with this software (see the LICENSE.md file). If not, see
                 partyId: ec.user.userAccount.partyId,
                 hours: timeEntry.hours,
                 comments: timeEntry.comments,
-                fromDate: timeEntry.date ? timeEntry.date?.substring(0,18) : ec.user.nowTimestamp
+                fromDate: timeEntry.date ? growerp.GrowErpDateTimeUtil.parseTimestamp(ec, timeEntry.date) : ec.user.nowTimestamp
             ]"
                 out-map="context" />
             <!-- set to inprogress -->

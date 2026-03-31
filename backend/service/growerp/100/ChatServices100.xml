@@ -471,7 +471,7 @@ along with this software (see the LICENSE.md file). If not, see
                     fromUserId: message.fromUserId,
                     content: message.content,
                     creationDate: message.lastUpdatedStamp
-                        ? ec.l10n.format(message.lastUpdatedStamp,'yyyy-MM-dd') 
+                        ? ec.l10n.format(message.lastUpdatedStamp, growerp.GrowErpDateTimeUtil.TIMESTAMP_FORMAT)
                         : null,
                     ]" />
                 <script>chatMessages.add(chatMessage)</script>
@@ -596,7 +596,7 @@ along with this software (see the LICENSE.md file). If not, see
                     topic: message.topic,
                     message: [message: mapMessage.message],
                     sentDate: message.sentDate
-                        ? ec.l10n.format(message.sentDate,'yyyy-MM-dd')  : null,
+                        ? ec.l10n.format(message.sentDate, growerp.GrowErpDateTimeUtil.TIMESTAMP_FORMAT)  : null,
                     title: message.titleText,
                     link: message.linkText,
                     type: message.typeString,

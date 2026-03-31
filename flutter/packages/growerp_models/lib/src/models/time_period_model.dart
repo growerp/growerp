@@ -13,6 +13,7 @@
  */
 
 import 'package:freezed_annotation/freezed_annotation.dart';
+import '../../growerp_models.dart';
 
 part 'time_period_model.freezed.dart';
 part 'time_period_model.g.dart';
@@ -24,8 +25,8 @@ abstract class TimePeriod with _$TimePeriod {
     @Default('') String periodId,
     @Default('') String periodName,
     @Default('') String periodType, // Y/M/Q
-    DateTime? fromDate,
-    DateTime? thruDate,
+    @DateTimeConverter() DateTime? fromDate,
+    @DateTimeConverter() DateTime? thruDate,
     @Default(false) bool hasPreviousPeriod,
     @Default(false) bool hasNextPeriod,
     @Default(false) bool isClosed,
