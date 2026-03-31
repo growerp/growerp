@@ -3709,8 +3709,8 @@ along with this software (see the LICENSE.md file). If not, see
                                     itemType: [itemTypeId: 'ItemRental'],
                                     product: [productId: products[0].productId],
                                     price: order.price,
-                                    rentalFromDate: order.rentalFromDate.toString(),
-                                    rentalThruDate: order.rentalThruDate.toString(),
+                                    rentalFromDate: growerp.GrowErpDateTimeUtil.formatDate(ec, order.rentalFromDate),
+                                    rentalThruDate: growerp.GrowErpDateTimeUtil.formatDate(ec, order.rentalThruDate),
                                 ]" />
                                 <script>items.add(item)</script>
                             </while>

@@ -589,7 +589,7 @@ along with this software (see the LICENSE.md file). If not, see
             <set field="productsImported" type="Integer" value="0" />
             <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
                 out-map="relComp" />
-            <script>ec.user.setEffectiveTime(Timestamp.valueOf("1999-01-01 00:00:00"))</script>
+            <script>ec.user.setEffectiveTime(growerp.GrowErpDateTimeUtil.parseTimestamp(ec, "1999-01-01 00:00:00"))</script>
             <iterate list="products" entry="product">
                 <!-- check if related category exist using name, if yes use these-->
                 <iterate list="product.categories" entry="category">
@@ -634,7 +634,7 @@ along with this software (see the LICENSE.md file). If not, see
         </in-parameters>
         <actions>
             <script>System.out.println(">>>>importing ${categories?.size()} categories")</script>
-            <script>ec.user.setEffectiveTime(Timestamp.valueOf("1999-01-01 00:00:00"))</script>
+            <script>ec.user.setEffectiveTime(growerp.GrowErpDateTimeUtil.parseTimestamp(ec, "1999-01-01 00:00:00"))</script>
             <iterate list="categories" entry="category">
                 <service-call name="growerp.100.CatalogServices100.create#ProductCategory"
                     in-map="[category: category, classificationId: classificationId]" />
@@ -740,16 +740,17 @@ along with this software (see the LICENSE.md file). If not, see
             <!-- check if we have a timeperiod here just for transactions.....-->
             <if condition="finDocs[0].docType == 'transaction'">
                 <!-- date-filter does not seem to work here date: 2010-12-31 not found!-->
+                <set field="firstCreationDate" from="growerp.GrowErpDateTimeUtil.parseTimestamp(ec, finDocs[0].creationDate)" />
                 <entity-find entity-name="mantle.party.time.TimePeriod" list="periods">
                     <econdition field-name="partyId" from="companyPartyId" />
                     <econdition field-name="fromDate" operator="less-equals"
-                        from="Timestamp.valueOf(finDocs[0].creationDate)" />
+                        from="firstCreationDate" />
                     <econdition field-name="thruDate" operator="greater-equals"
-                        from="Timestamp.valueOf(finDocs[0].creationDate)" />
+                        from="firstCreationDate" />
                 </entity-find>
                 <!-- when not yet create all until next year -->
                 <if condition="!periods">
-                    <script>System.out.println(">>>Creating time periods starting with ${finDocs[0].creationDate.substring(0,4)} for company $companyPartyId")</script>
+                    <script>System.out.println(">>>Creating time periods starting with ${growerp.GrowErpDateTimeUtil.getYear(firstCreationDate)} for company $companyPartyId")</script>
                     <!-- delete existing timeperiods-->
                     <entity-find entity-name="mantle.party.time.TimePeriod" list="periods">
                         <econdition field-name="partyId" from="companyPartyId" />
@@ -763,11 +764,11 @@ along with this software (see the LICENSE.md file). If not, see
                     </iterate>
                     <!-- create new yearly, quartely, monthly periods until next year-->
                     <set field="nextYearInt"
-                        from="((Calendar) ec.user.nowCalendar).get(Calendar.YEAR) + 1" />
-                    <set field="lastYear" from="ec.l10n.format(nextYearInt, '0000')" />
+                        from="growerp.GrowErpDateTimeUtil.getYear(ec.user.nowTimestamp) + 1" />
+                    <set field="lastYear" from="nextYearInt" />
 
                     <!-- start year from first tranaction ordered by date -->
-                    <set field="curYear" from="finDocs[0].creationDate.substring(0,4)" />
+                    <set field="curYear" from="growerp.GrowErpDateTimeUtil.getYear(firstCreationDate)" />
                     <set field="prevPeriodId" from="null" />
                     <while condition="curYear &lt;= lastYear">
                         <set field="fromDate"
@@ -794,7 +795,7 @@ along with this software (see the LICENSE.md file). If not, see
             </if>
             <iterate list="finDocs" entry="finDoc">
                 <!-- change system date -->
-                <script>ec.user.setEffectiveTime(Timestamp.valueOf(finDoc.creationDate))</script>
+                <script>ec.user.setEffectiveTime(growerp.GrowErpDateTimeUtil.parseTimestamp(ec, finDoc.creationDate))</script>
                 <!-- find partyId of other company-->
                 <if condition="!finDoc.otherCompany.pseudoId &amp;&amp; finDoc.otherCompany.name">
                     <set field="finDoc.otherCompany.pseudoId" from="finDoc.otherCompany.name" />
@@ -1058,7 +1059,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <!-- if document id changed-->
                 <if condition="lastItem &amp;&amp; lastItem.pseudoId != item.pseudoId">
                     <!-- change current date -->
-                    <script>ec.user.setEffectiveTime(Timestamp.valueOf("${finDoc.creationDate} 00:00:00"))</script>
+                    <script>ec.user.setEffectiveTime(growerp.GrowErpDateTimeUtil.parseTimestamp(ec, finDoc.creationDate))</script>
                     <!-- get last document id-->
                     <service-call name="growerp.100.FinDocServices100.get#FinDoc" out-map="context"
                         in-map="[pseudoId: lastItem.pseudoId, docType: lastItem.docType,
@@ -1184,7 +1185,7 @@ along with this software (see the LICENSE.md file). If not, see
             </iterate>
             <!-- process last record -->
             <if condition="lastItem">
-                <script>ec.user.setEffectiveTime(Timestamp.valueOf("${finDoc.creationDate} 00:00:00"))</script>
+                <script>ec.user.setEffectiveTime(growerp.GrowErpDateTimeUtil.parseTimestamp(ec, finDoc.creationDate))</script>
                 <!-- get current document id-->
                 <service-call name="growerp.100.FinDocServices100.get#FinDoc" out-map="context"
                     in-map="[pseudoId: lastItem.pseudoId, docType: lastItem.docType,

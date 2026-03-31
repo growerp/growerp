@@ -19,6 +19,7 @@ class GrowErpDateTimeUtil {
     static Timestamp parseTimestamp(ExecutionContext ec, String str) {
         if (str == null || str.isEmpty()) return null
         // Moqui's parseTimestamp handles ISO 8601 robustly
+        // If it contains 'T', Moqui handles it. If it's the space format, it also handles it.
         return ec.l10n.parseTimestamp(str, null)
     }
 
@@ -42,5 +43,12 @@ class GrowErpDateTimeUtil {
         cal.set(Calendar.SECOND, 0)
         cal.set(Calendar.MILLISECOND, 0)
         return new Timestamp(cal.getTimeInMillis())
+    }
+
+    static Integer getYear(Timestamp ts) {
+        if (ts == null) return null
+        Calendar cal = Calendar.getInstance()
+        cal.setTime(ts)
+        return cal.get(Calendar.YEAR)
     }
 }

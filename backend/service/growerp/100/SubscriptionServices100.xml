@@ -143,7 +143,7 @@
                     if (val == null) return null
                     def s = val.toString()
                     if (s.contains('T')) return java.sql.Timestamp.from(java.time.Instant.parse(s))
-                    return java.sql.Timestamp.valueOf(s)
+                    return growerp.GrowErpDateTimeUtil.parseTimestamp(ec, s)
                 }
                 def parsedFromDate = subscription.fromDate ? parseTs(subscription.fromDate) : null
                 def parsedThruDate = subscription.thruDate ? parseTs(subscription.thruDate) : null
@@ -229,7 +229,7 @@
                     if (val == null) return null
                     def s = val.toString()
                     if (s.contains('T')) return java.sql.Timestamp.from(java.time.Instant.parse(s))
-                    return java.sql.Timestamp.valueOf(s)
+                    return growerp.GrowErpDateTimeUtil.parseTimestamp(ec, s)
                 }
                 lookupEntity.pseudoId = subscription.pseudoId ?: lookupEntity.pseudoId;
                 lookupEntity.description = subscription.description ?: lookupEntity.description;

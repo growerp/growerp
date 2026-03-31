@@ -236,8 +236,8 @@ along with this software (see the LICENSE.md file). If not, see
                     timePeriods.add([periodId: p.timePeriodId,
                                     periodName: p.periodName,
                                     periodType: typeConvert[p.timePeriodTypeId],
-                                    fromDate: p.fromDate.toString(),
-                                    thruDate: p.thruDate.toString(),
+                                    fromDate: growerp.GrowErpDateTimeUtil.formatDate(ec, p.fromDate),
+                                    thruDate: growerp.GrowErpDateTimeUtil.formatDate(ec, p.thruDate),
                                     isClosed: p.isClosed == 'Y' ? true : false,
                                     hasPreviousPeriod: p.previousPeriodId != null ? true : false,
                                     hasNextPeriod: p.nextPeriodId != null ? true : false,
@@ -421,13 +421,13 @@ along with this software (see the LICENSE.md file). If not, see
                 from="[ period: [periodId: periods[0].timePeriodId,
                                     periodName: periods[0].periodName,
                                     periodType: typeConvert[periods[0].timePeriodTypeId],
-                                    fromDate: periods[0].fromDate.toString(),
-                                    thruDate: periods[0].thruDate.toString(),
+                                    fromDate: growerp.GrowErpDateTimeUtil.formatDate(ec, periods[0].fromDate),
+                                    thruDate: growerp.GrowErpDateTimeUtil.formatDate(ec, periods[0].thruDate),
                                     isClosed: periods[0].isClosed == 'Y' ? true : false,
                                     ], company: [companyPartyId: companyPartyId,
                 companyName: company.organizationName],
                 title: 'Balance Summary report',
-                printDate: ec.user.nowTimestamp.toString(),glAccounts: []]" />
+                printDate: growerp.GrowErpDateTimeUtil.formatTimestamp(ec, ec.user.nowTimestamp),glAccounts: []]" />
             <set field="glAccountCodeMask"
                 from="partyAcctgPreference?.glAccountCodeMask ?: ec.user.getPreference('GlAccountCodeMask')" />
             <set field="accountCodeFormatter" from="masker(glAccountCodeMask, '0')" />
@@ -569,11 +569,11 @@ along with this software (see the LICENSE.md file). If not, see
                 period: [periodId: periods[0].timePeriodId,
                                     periodName: periods[0].periodName,
                                     periodType: typeConvert[periods[0].timePeriodTypeId],
-                                    fromDate: periods[0].fromDate.toString(),
-                                    thruDate: periods[0].thruDate.toString(),
+                                    fromDate: growerp.GrowErpDateTimeUtil.formatDate(ec, periods[0].fromDate),
+                                    thruDate: growerp.GrowErpDateTimeUtil.formatDate(ec, periods[0].thruDate),
                                     isClosed: periods[0].isClosed == 'Y' ? true : false,
                                     ],
-                title: 'Balance Sheet', printDate: ec.user.nowTimestamp.toString(),
+                title: 'Balance Sheet', printDate: growerp.GrowErpDateTimeUtil.formatTimestamp(ec, ec.user.nowTimestamp),
                 glAccounts: [asset?:[:], liability?:[:], equity?:[:], distribution?:[:], incomeAmount.totalBalance?.ALL?incomeAmount:[:]]]" />
         </actions>
     </service>
@@ -655,11 +655,11 @@ along with this software (see the LICENSE.md file). If not, see
                 period: [periodId: timePeriods[0].timePeriodId,
                                     periodName: timePeriods[0].periodName,
                                     periodType: typeConvert[timePeriods[0].timePeriodTypeId],
-                                    fromDate: timePeriods[0].fromDate.toString(),
-                                    thruDate: timePeriods[0].thruDate.toString(),
+                                    fromDate: growerp.GrowErpDateTimeUtil.formatDate(ec, timePeriods[0].fromDate),
+                                    thruDate: growerp.GrowErpDateTimeUtil.formatDate(ec, timePeriods[0].thruDate),
                                     isClosed: timePeriods[0].isClosed == 'Y' ? true : false,
                                     ],
-                printDate: ec.user.nowTimestamp.toString(),
+                printDate: growerp.GrowErpDateTimeUtil.formatTimestamp(ec, ec.user.nowTimestamp),
                 csvRows: csvRows]" />
         </actions>
     </service>
@@ -706,7 +706,7 @@ along with this software (see the LICENSE.md file). If not, see
                 company: [companyPartyId: companyPartyId,
                 companyName: company.organizationName],
                 title: 'Current Ledger Tree report',
-                printDate: ec.user.nowTimestamp.toString(),
+                printDate: growerp.GrowErpDateTimeUtil.formatTimestamp(ec, ec.user.nowTimestamp),
                 glAccounts: []]" />
             <set field="glAccountCodeMask"
                 from="partyAcctgPreference?.glAccountCodeMask ?: ec.user.getPreference('GlAccountCodeMask')" />
