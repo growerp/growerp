@@ -339,7 +339,7 @@ homepage: https://www.growerp.com
 repository: https://github.com/growerp/growerp
 
 environment:
-  sdk: ^3.9.0
+  sdk: ^3.10.0
   flutter: ^3.33.0
 
 dependencies:
@@ -868,7 +868,7 @@ description: Example app for $packageName
 publish_to: 'none'
 
 environment:
-  sdk: ^3.9.0
+  sdk: ^3.10.0
   flutter: ^3.33.0
 
 dependencies:

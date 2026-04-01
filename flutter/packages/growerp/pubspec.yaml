@@ -12,7 +12,7 @@ executables:
   growerp: growerp
   convertToCsv: convert_to_csv
 environment:
-  sdk: ^3.9.0
+  sdk: ^3.10.0
 dependencies:
   archive: ^3.6.1
   dcli: ^8.4.2

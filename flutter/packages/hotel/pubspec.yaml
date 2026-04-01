@@ -6,7 +6,7 @@ homepage: https://www.growerp.com
 publish_to: none
 
 environment:
-  sdk: ^3.9.0
+  sdk: ^3.10.0
   flutter: ^3.33.0
 
 dependencies:

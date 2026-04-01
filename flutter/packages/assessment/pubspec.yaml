@@ -7,7 +7,7 @@ publish_to: none
 description: Assessment app with lead capture (name/email form) before assessment questionnaire. Displays embedded Flutter assessment experience.
 
 environment:
-  sdk: ^3.9.0
+  sdk: ^3.10.0
   flutter: ^3.33.0
 
 dependencies:

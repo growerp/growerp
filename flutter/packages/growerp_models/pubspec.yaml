@@ -13,7 +13,7 @@ platforms:
   windows:
 
 environment:
-  sdk: ^3.9.0
+  sdk: ^3.10.0
 
 dependencies:
   decimal: ^3.2.4
