@@ -68,6 +68,8 @@ along with this software (see the LICENSE.md file). If not, see
             <entity-find entity-name="mantle.product.store.ProductStoreSetting" list="hostNames">
                 <econdition field-name="productStoreId" from="stores[0].productStoreId" />
                 <econdition field-name="settingTypeEnumId" value="PsstHostname" />
+                <date-filter/>
+                <order-by field-name="-fromDate"/>
             </entity-find>
             <if condition="hostNames">
                 <set field="hostName" from="hostNames[0].settingValue" />
@@ -179,11 +181,13 @@ along with this software (see the LICENSE.md file). If not, see
             <set field="website.productCategories" from="categories" />
             <!-- colors -->
             <!-- get top resource location -->
-            <entity-find-one entity-name="mantle.product.store.ProductStoreSetting"
-                value-field="topResource">
-                <field-map field-name="productStoreId" from="stores[0].productStoreId" />
-                <field-map field-name="settingTypeEnumId" value="PsstContentLocation" />
-            </entity-find-one>
+            <entity-find entity-name="mantle.product.store.ProductStoreSetting" list="topResourceList" limit="1">
+                <econdition field-name="productStoreId" from="stores[0].productStoreId" />
+                <econdition field-name="settingTypeEnumId" value="PsstContentLocation" />
+                <date-filter/>
+                <order-by field-name="-fromDate"/>
+            </entity-find>
+            <set field="topResource" from="topResourceList ? topResourceList[0] : null"/>
             <if condition="topResource">
                 <set field="location" value="${topResource.settingValue}/content/websiteColor.json" />
                 <set field="contentRef" from="ec.resource.getLocationReference(location)" />
@@ -308,6 +312,8 @@ along with this software (see the LICENSE.md file). If not, see
                             list="prodStoreSettings" for-update="true">
                             <econdition field-name="productStoreId" from="stores[0].productStoreId" />
                             <econdition field-name="settingTypeEnumId" value="PsstHostname" />
+                            <date-filter/>
+                            <order-by field-name="-fromDate"/>
                         </entity-find>
                         <if condition="website.hostName.indexOf('.') &gt; 0">
                             <set field="newPart" from="website.hostName.split('.')[0]" />
@@ -405,11 +411,13 @@ along with this software (see the LICENSE.md file). If not, see
                     <!-- colors -->
                     <if condition="website.colorJson">
                         <!-- get top resource location -->
-                        <entity-find-one entity-name="mantle.product.store.ProductStoreSetting"
-                            value-field="topResource">
-                            <field-map field-name="productStoreId" from="stores[0].productStoreId" />
-                            <field-map field-name="settingTypeEnumId" value="PsstContentLocation" />
-                        </entity-find-one>
+                        <entity-find entity-name="mantle.product.store.ProductStoreSetting" list="topResourceList" limit="1">
+                            <econdition field-name="productStoreId" from="stores[0].productStoreId" />
+                            <econdition field-name="settingTypeEnumId" value="PsstContentLocation" />
+                            <date-filter/>
+                            <order-by field-name="-fromDate"/>
+                        </entity-find>
+                        <set field="topResource" from="topResourceList ? topResourceList[0] : null"/>
                         <!-- save the colorJson file -->
                         <set field="root" from="topResource.settingValue" /><!--
                         dbresource://100000-->
@@ -600,6 +608,8 @@ along with this software (see the LICENSE.md file). If not, see
                         list="topResource">
                         <econdition field-name="productStoreId" from="stores[0].productStoreId" />
                         <econdition field-name="settingTypeEnumId" value="PsstContentLocation" />
+                        <date-filter/>
+                        <order-by field-name="-fromDate"/>
                     </entity-find>
                     <!-- get content resource location -->
                     <entity-find entity-name="moqui.resource.DbResource" list="topResourceContent">
@@ -791,11 +801,13 @@ along with this software (see the LICENSE.md file). If not, see
                 limit="1" for-update="true">
                 <econdition field-name="organizationPartyId" from="companyPartyId" />
             </entity-find>
-            <entity-find-one entity-name="mantle.product.store.ProductStoreSetting"
-                value-field="topResource">
-                <field-map field-name="productStoreId" from="stores[0].productStoreId" />
-                <field-map field-name="settingTypeEnumId" value="PsstContentLocation" />
-            </entity-find-one>
+            <entity-find entity-name="mantle.product.store.ProductStoreSetting" list="topResourceList" limit="1">
+                <econdition field-name="productStoreId" from="stores[0].productStoreId" />
+                <econdition field-name="settingTypeEnumId" value="PsstContentLocation" />
+                <date-filter/>
+                <order-by field-name="-fromDate"/>
+            </entity-find>
+            <set field="topResource" from="topResourceList ? topResourceList[0] : null"/>
             <set field="stores[0].profileUrlPath" from="obsidian.zip ? obsidian.title : null" />
             <entity-update value-field="stores[0]" />
             <entity-find-one entity-name="moqui.resource.wiki.WikiSpace" value-field="wikiSpace">
