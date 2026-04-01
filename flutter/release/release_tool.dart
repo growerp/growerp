@@ -898,7 +898,7 @@ Future<void> commitAndTag(
     for (var app in selectedApps) {
       if (app == 'growerp-moqui') {
         run(
-          'git add moqui/runtime/component/growerp/component.xml',
+          'git add backend/component.xml',
           workingDirectory: gitWorkingDir,
         );
       } else {
