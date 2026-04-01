@@ -96,6 +96,8 @@ melos:
   command:
     bootstrap:
       runPubGetInParallel: false
+      hooks:
+        post: bash setup-flutter.sh
 
   scripts:
     analyze:

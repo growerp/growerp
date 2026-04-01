@@ -46,13 +46,26 @@ docker image rm image-name
 ```
 ## For developers: build the system
 
+**Linux prerequisite** — the `gtk` package requires GTK 3 development headers to
+generate its FFI bindings. Install them once with:
+
+```sh
+sudo apt-get install -y libgtk-3-dev libclang-dev
+```
+
+Then build the workspace:
+
 ```sh
 dart pub global activate melos # only one time
-melos clean
-melos bootstrap
-melos build
-melos l10n
+melos bootstrap   # installs deps + auto-runs setup-flutter.sh (generates gtk FFI bindings)
+melos build       # generate data models
+melos l10n        # generate language localisation files
 ```
+
+> **Note:** `setup-flutter.sh` is run automatically after every `melos bootstrap`
+> via a post-hook. If you ever run `flutter pub cache clean` or `pub upgrade`,
+> re-run `melos bootstrap` (or `bash setup-flutter.sh` directly) to regenerate
+> the gtk FFI bindings.
 
 ## Hot Fix Release Tool
 
