@@ -1,6 +1,6 @@
 name: admin
 resolution: workspace
-version: 1.14.5+102
+version: 1.15.0+102
 repository: https://github.com/growerp/growerp
 homepage: https://www.growerp.com
 publish_to: none
