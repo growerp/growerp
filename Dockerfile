@@ -81,9 +81,8 @@ COPY setup-backend.sh /root/growerp/setup-backend.sh
 # Clone moqui-runtime + create symlinks for custom components
 RUN bash setup-backend.sh
 
-# AntWebsystems website
-ARG PAT
-RUN git clone --depth 1 https://$PAT@github.com/AntWebsystems-Co-Ltd/vueWebsite.git /root/vueWebsite
+# AntWebsystems website (public repo — no PAT required)
+RUN git clone --depth 1 https://github.com/AntWebsystems-Co-Ltd/vueWebsite.git /root/vueWebsite
 RUN cp /root/vueWebsite/AWSSetupAaaWebSiteData.xml moqui/runtime/component/growerp/data
 RUN mkdir -p moqui/runtime/component/growerp/service/growerp/website
 RUN cp /root/vueWebsite/WebSiteRestServices.xml moqui/runtime/component/growerp/service/growerp/website
