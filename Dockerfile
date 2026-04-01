@@ -20,7 +20,7 @@
 # ===== Stage 1: Build Flutter web applications =====
 FROM ghcr.io/cirruslabs/flutter:stable AS build-flutter
 
-ARG BRANCH=moqui4
+ARG BRANCH=master
 USER root
 
 # Install linux dependencies
@@ -58,7 +58,7 @@ RUN flutter build web --release --wasm
 
 # ===== Stage 2: Build Moqui 4 backend =====
 FROM eclipse-temurin:21-jdk AS build-env
-ARG BRANCH=moqui4
+ARG BRANCH=master
 ARG DOCKER_TAG=NOTSET1
 
 RUN echo "DockerTag version: $DOCKER_TAG"
