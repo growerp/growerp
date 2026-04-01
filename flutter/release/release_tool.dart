@@ -815,18 +815,19 @@ Future<String> buildDockerImage(
 
   try {
     if (app == 'growerp-moqui') {
-      // For moqui, determine the correct path based on workspace structure
-      var moquiDir = '';
+      // Build from the repo root using the root Dockerfile.
+      // (moqui/Dockerfile was removed; the root Dockerfile builds the full stack)
+      var rootDir = '';
       if (workspaceDir.endsWith('/flutter')) {
-        // We're in the flutter directory, go up one level to find moqui
-        moquiDir = '$workspaceDir/../moqui';
+        // We're in the flutter directory, go up one level to reach the repo root
+        rootDir = '$workspaceDir/..';
       } else {
-        // We're in the root workspace directory
-        moquiDir = '$workspaceDir/moqui';
+        // We're already in the root workspace directory
+        rootDir = workspaceDir;
       }
       run(
         'docker build --build-arg DOCKER_TAG=$version --label version=$version --progress=plain --no-cache -t $dockerImage:latest .',
-        workingDirectory: moquiDir,
+        workingDirectory: rootDir,
       );
     } else {
       // For flutter apps, determine the correct paths based on workspace structure
