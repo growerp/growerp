@@ -20,7 +20,7 @@ along with this software (see the LICENSE.md file). If not, see
         <in-parameters>
             <parameter name="type" required="true" />
             <parameter name="id" required="true" />
-            <parameter name="file" type="org.apache.commons.fileupload.FileItem" />
+            <parameter name="file" type="org.apache.commons.fileupload2.core.FileItem" />
             <parameter name="description" />
             <parameter name="base64" />
         </in-parameters>
@@ -53,7 +53,7 @@ along with this software (see the LICENSE.md file). If not, see
                 // store uploaded image to large format
                 if (file) {
                     fileSize = file.getSize()
-                    org.apache.commons.fileupload.FileItem attachmentFile = context.file
+                    org.apache.commons.fileupload2.core.FileItem attachmentFile = context.file
                     InputStream fileStream = attachmentFile.getInputStream()
                     attachmentReferenceLarge.putStream(fileStream)
                     fileStream.close()
@@ -194,6 +194,47 @@ along with this software (see the LICENSE.md file). If not, see
                             contentTypeEnumId: 'PrstImageLarge',
                             contentLocation: contentLocation + 'large']" />
                 <set field="contentId" from="productStoreContentId" />
+            </if>
+        </actions>
+    </service>
+
+    <service verb="delete" noun="Image">
+        <in-parameters>
+            <parameter name="type" required="true" />
+            <parameter name="id" required="true" />
+        </in-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <set field="pagePath" value="/${type}/${id}/" />
+            <set field="contentLocation" value="dbresource://C${companyPartyId}/images${pagePath}" />
+            <set field="ec" from="context.ec" />
+            <set field="attachmentReferenceLarge"
+                from="ec.resource.getLocationReference(contentLocation + 'large')" />
+            <set field="attachmentReferenceMedium"
+                from="ec.resource.getLocationReference(contentLocation + 'medium')" />
+            <set field="attachmentReferenceSmall"
+                from="ec.resource.getLocationReference(contentLocation + 'small')" />
+            <script><![CDATA[
+                attachmentReferenceLarge.delete()
+                attachmentReferenceMedium.delete()
+                attachmentReferenceSmall.delete()
+            ]]></script>
+            <if condition="type == 'user' || type == 'company'">
+                <entity-delete-by-condition entity-name="mantle.party.PartyContent">
+                    <econdition field-name="partyId" from="id" />
+                </entity-delete-by-condition>
+            </if>
+            <if condition="type == 'product'">
+                <entity-delete-by-condition entity-name="mantle.product.ProductContent">
+                    <econdition field-name="productId" from="id" />
+                </entity-delete-by-condition>
+            </if>
+            <if condition="type == 'category'">
+                <entity-delete-by-condition
+                    entity-name="mantle.product.category.ProductCategoryContent">
+                    <econdition field-name="productCategoryId" from="id" />
+                </entity-delete-by-condition>
             </if>
         </actions>
     </service>

@@ -75,7 +75,7 @@
                     <#if companyEmailMech?? && (companyEmailMech.infoString!'')?has_content>
                     <li class="footer-contact-item">
                         <i class="fas fa-envelope mr-3 footer-contact-icon"></i>
-                        <span class="footer-contact-text">${companyEmailMech.infoString}</span>
+                        <a href="mailto:${companyEmailMech.infoString}" class="footer-contact-text">${companyEmailMech.infoString}</a>
                     </li>
                     </#if>
                 </ul>

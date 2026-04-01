@@ -86,6 +86,7 @@ class UserDialogState extends State<UserDialog> {
   late Role _selectedRole;
   Company _selectedCompany = Company();
   XFile? _imageFile;
+  bool _deleteImage = false;
   Uint8List? _image;
   dynamic _pickImageError;
   String? _retrieveDataError;
@@ -794,7 +795,7 @@ class UserDialogState extends State<UserDialog> {
                   //                          .languageCode
                   //                          .toString(),
                   company: _selectedCompany.copyWith(role: _selectedRole),
-                  image: _image,
+                  image: _deleteImage && _image == null ? Uint8List(0) : _image,
                 );
 
                 _companyUserBloc.add(
@@ -853,7 +854,7 @@ class UserDialogState extends State<UserDialog> {
                         ? NetworkImage(_imageFile!.path)
                         : FileImage(File(_imageFile!.path)))
                   : null,
-              imageBytes: _imageFile == null ? widget.user.image : null,
+              imageBytes: _imageFile == null && !_deleteImage ? widget.user.image : null,
               fallbackText: widget.user.firstName?.substring(0, 1) ?? '',
               onUploadTap: () async {
                 final pickedFile = await HelperFunctions.pickImage();
@@ -871,6 +872,7 @@ class UserDialogState extends State<UserDialog> {
                       setState(() {
                         _imageFile = null;
                         _image = null;
+                        _deleteImage = true;
                       });
                     }
                   : null,

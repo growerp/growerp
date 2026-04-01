@@ -45,6 +45,7 @@ class ProductDialogState extends State<ProductDialog> {
 
   Uom? _selectedUom;
   XFile? _imageFile;
+  bool _deleteImage = false;
   dynamic _pickImageError;
   String? _retrieveDataError;
   String? _selectedProductTypeId;
@@ -305,7 +306,7 @@ class ProductDialogState extends State<ProductDialog> {
                         ? NetworkImage(_imageFile!.path)
                         : FileImage(File(_imageFile!.path)))
                   : null,
-              imageBytes: _imageFile == null ? widget.product.image : null,
+              imageBytes: _imageFile == null && !_deleteImage ? widget.product.image : null,
               fallbackText: widget.product.productName?.substring(0, 1) ?? 'P',
               onUploadTap: () async {
                 final pickedFile = await HelperFunctions.pickImage();
@@ -319,6 +320,7 @@ class ProductDialogState extends State<ProductDialog> {
                   ? () {
                       setState(() {
                         _imageFile = null;
+                        _deleteImage = true;
                       });
                     }
                   : null,
@@ -692,11 +694,13 @@ class ProductDialogState extends State<ProductDialog> {
         onPressed: () async {
           if (_productDialogFormKey.currentState!.saveAndValidate()) {
             final formData = _productDialogFormKey.currentState!.value;
-            Uint8List? image = await HelperFunctions.getResizedImage(
-              _imageFile?.path,
-            );
+            Uint8List? image = _imageFile != null
+                ? await HelperFunctions.getResizedImage(_imageFile?.path)
+                : _deleteImage
+                ? Uint8List(0)
+                : null;
             if (!mounted) return;
-            if (_imageFile?.path != null && image == null) {
+            if (_imageFile != null && image == null) {
               HelperFunctions.showMessage(
                 context,
                 catalogLocalizations.imageUploadError,

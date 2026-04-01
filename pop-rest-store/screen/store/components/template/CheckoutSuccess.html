@@ -85,7 +85,7 @@
                             {{customerInfo.firstName}} {{customerInfo.lastName}}
                         </span><br>
                         <span class="span-description d-inline-block mb-2">
-                            <i class="fas fa-envelope mr-2"></i>{{customerInfo.emailAddress}}<br>
+                            <i class="fas fa-envelope mr-2"></i><a :href="'mailto:' + customerInfo.emailAddress">{{customerInfo.emailAddress}}</a><br>
                             <!--span v-if="customerInfo.telecomNumber">
                                 <i class="fa fa-phone mr-2"></i>{{customerInfo.telecomNumber.contactNumber}}
                             </span-->

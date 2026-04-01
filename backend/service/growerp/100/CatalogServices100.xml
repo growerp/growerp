@@ -620,11 +620,17 @@ along with this software (see the LICENSE.md file). If not, see
                     </else>
                 </if>
             </if>
-            <!-- update image -->
-            <if condition="product.image">
-                <service-call name="growerp.100.ImageServices100.upload#Image"
-                    in-map="[type: 'product', id: product.productId,
-                        base64: product.image]" />
+            <!-- update image: non-empty base64 = upload, empty string = delete -->
+            <if condition="product.image != null">
+                <if condition="product.image">
+                    <service-call name="growerp.100.ImageServices100.upload#Image"
+                        in-map="[type: 'product', id: product.productId,
+                            base64: product.image]" />
+                    <else>
+                        <service-call name="growerp.100.ImageServices100.delete#Image"
+                            in-map="[type: 'product', id: product.productId]" />
+                    </else>
+                </if>
             </if>
             <service-call name="growerp.100.CatalogServices100.get#Product"
                 in-map="[productId: product.productId]" out-map="context" />
@@ -965,10 +971,16 @@ along with this software (see the LICENSE.md file). If not, see
                                     fromDate: ec.user.nowTimestamp]" />
                 </iterate>
             </if>
-            <!-- update image -->
-            <if condition="category.image">
-                <service-call name="growerp.100.ImageServices100.upload#Image"
-                    in-map="[type: 'category', id: category.categoryId, base64: category.image]" />
+            <!-- update image: non-empty base64 = upload, empty string = delete -->
+            <if condition="category.image != null">
+                <if condition="category.image">
+                    <service-call name="growerp.100.ImageServices100.upload#Image"
+                        in-map="[type: 'category', id: category.categoryId, base64: category.image]" />
+                    <else>
+                        <service-call name="growerp.100.ImageServices100.delete#Image"
+                            in-map="[type: 'category', id: category.categoryId]" />
+                    </else>
+                </if>
             </if>
             <!-- return category information -->
             <service-call name="growerp.100.CatalogServices100.get#ProductCategory"

@@ -12,6 +12,7 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+import 'dart:typed_data';
 import 'package:universal_io/io.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:flutter/foundation.dart' as foundation;
@@ -39,6 +40,7 @@ class CategoryDialogState extends State<CategoryDialog> {
   bool loading = false;
   late Category updatedCategory;
   XFile? _imageFile;
+  bool _deleteImage = false;
   dynamic _pickImageError;
   String? _retrieveDataError;
   List<Product> _selectedProducts = [];
@@ -246,7 +248,7 @@ class CategoryDialogState extends State<CategoryDialog> {
                         ? NetworkImage(_imageFile!.path)
                         : FileImage(File(_imageFile!.path)))
                   : null,
-              imageBytes: _imageFile == null ? widget.category.image : null,
+              imageBytes: _imageFile == null && !_deleteImage ? widget.category.image : null,
               fallbackText: widget.category.categoryName.isEmpty
                   ? '?'
                   : widget.category.categoryName.substring(0, 1),
@@ -262,6 +264,7 @@ class CategoryDialogState extends State<CategoryDialog> {
                   ? () {
                       setState(() {
                         _imageFile = null;
+                        _deleteImage = true;
                       });
                     }
                   : null,
@@ -316,6 +319,11 @@ class CategoryDialogState extends State<CategoryDialog> {
               ),
               onPressed: () async {
                 if (_categoryDialogFormKey.currentState!.validate()) {
+                  final Uint8List? image = _imageFile != null
+                      ? await HelperFunctions.getResizedImage(_imageFile?.path)
+                      : _deleteImage
+                      ? Uint8List(0)
+                      : null;
                   _categoryBloc.add(
                     CategoryUpdate(
                       Category(
@@ -323,9 +331,7 @@ class CategoryDialogState extends State<CategoryDialog> {
                         categoryName: _nameController.text,
                         description: _descrController.text,
                         products: _selectedProducts,
-                        image: await HelperFunctions.getResizedImage(
-                          _imageFile?.path,
-                        ),
+                        image: image,
                       ),
                     ),
                   );

@@ -992,11 +992,17 @@ along with this software (see the LICENSE.md file). If not, see
                     </else>
                 </if>
             </if>
-            <!-- update image -->
-            <if condition="company.image">
-                <service-call name="growerp.100.ImageServices100.upload#Image"
-                    in-map="[type: 'company', id: company.partyId,
-                        base64: company.image]" />
+            <!-- update image: non-empty base64 = upload, empty string = delete -->
+            <if condition="company.image != null">
+                <if condition="company.image">
+                    <service-call name="growerp.100.ImageServices100.upload#Image"
+                        in-map="[type: 'company', id: company.partyId,
+                            base64: company.image]" />
+                    <else>
+                        <service-call name="growerp.100.ImageServices100.delete#Image"
+                            in-map="[type: 'company', id: company.partyId]" />
+                    </else>
+                </if>
             </if>
             <!-- postal address -->
             <!-- get geoId of country and province-->
@@ -2110,11 +2116,17 @@ along with this software (see the LICENSE.md file). If not, see
                 <service-call name="create#moqui.security.UserGroupMember"
                     in-map="[userGroupId: user.userGroupId, userId: userAccount.userId]" />
             </if>
-            <!-- update image -->
-            <if condition="user.image">
-                <service-call name="growerp.100.ImageServices100.upload#Image"
-                    in-map="[type: 'user', id: user.partyId,
-                        base64: user.image]" />
+            <!-- update image: non-empty base64 = upload, empty string = delete -->
+            <if condition="user.image != null">
+                <if condition="user.image">
+                    <service-call name="growerp.100.ImageServices100.upload#Image"
+                        in-map="[type: 'user', id: user.partyId,
+                            base64: user.image]" />
+                    <else>
+                        <service-call name="growerp.100.ImageServices100.delete#Image"
+                            in-map="[type: 'user', id: user.partyId]" />
+                    </else>
+                </if>
             </if>
             <!-- related company changes if any -->
             <if condition="user.company?.partyId != oldValue.user.company?.partyId">

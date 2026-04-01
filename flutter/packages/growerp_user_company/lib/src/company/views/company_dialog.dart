@@ -100,6 +100,7 @@ class CompanyFormState extends State<CompanyDialog> {
   late bool isAdmin;
   late final GlobalKey<FormState> _companyDialogFormKey;
   XFile? _imageFile;
+  bool _deleteImage = false;
   dynamic _pickImageError;
   String? _retrieveDataError;
   final ImagePicker _picker = ImagePicker();
@@ -215,6 +216,19 @@ class CompanyFormState extends State<CompanyDialog> {
               HelperFunctions.showMessage(context, state.message, Colors.red);
             }
             if (state.status == CompanyStatus.success) {
+              // Sync AuthBloc with the returned company (includes fresh image).
+              // Must happen before AuthLoad to avoid the race where AuthLoad's
+              // getAuthenticate runs before the image upload finishes.
+              if (companyBloc.state.companies.isNotEmpty) {
+                final updatedCompany = companyBloc.state.companies[0];
+                if (updatedCompany.partyId == authBloc.state.authenticate?.company?.partyId) {
+                  authBloc.add(
+                    AuthUpdateLocal(
+                      authenticate.copyWith(company: updatedCompany),
+                    ),
+                  );
+                }
+              }
               if (widget.dialog == true && _nameController.text != '') {
                 Navigator.of(context).pop(companyBloc.state.companies[0]);
               }
@@ -651,6 +665,8 @@ class CompanyFormState extends State<CompanyDialog> {
                           convImage = await HelperFunctions.getResizedImage(
                             _imageFile?.path,
                           );
+                        } else if (_deleteImage) {
+                          convImage = Uint8List(0); // empty = delete on backend
                         }
                         company = Company(
                           partyId: company.partyId,
@@ -678,11 +694,6 @@ class CompanyFormState extends State<CompanyDialog> {
                           image: convImage,
                         );
                         companyBloc.add(CompanyUpdate(company));
-                        authBloc.add(AuthLoad());
-                        // get new copy of main company
-                        if (company.partyId == authBloc.company?.partyId) {
-                          company = authenticate.company!;
-                        }
                       }
                     }
                   : null,
@@ -749,6 +760,8 @@ class CompanyFormState extends State<CompanyDialog> {
           ? () {
               setState(() {
                 _imageFile = null;
+                company = company.copyWith(image: null);
+                _deleteImage = true;
               });
             }
           : null,
