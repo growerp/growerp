@@ -15,6 +15,7 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:growerp_models/growerp_models.dart';
 
+import '../json_converters.dart';
 part 'menu_configuration_model.g.dart';
 
 /// Helper functions for isActive Y/N conversion
@@ -38,6 +39,7 @@ class MenuConfiguration {
   final String? userId;
   @JsonKey(fromJson: _isActiveFromJson, toJson: _isActiveToJson)
   final bool isActive;
+  @DateTimeConverter()
   final DateTime? createdDate;
 
   /// List of top-level menu items (those with no parent) for this configuration

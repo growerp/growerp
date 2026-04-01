@@ -14,6 +14,7 @@
 
 import 'package:json_annotation/json_annotation.dart';
 
+import '../json_converters.dart';
 part 'agent_action_log_model.g.dart';
 
 /// Result of an agent action
@@ -39,6 +40,7 @@ class AgentActionLog {
   final ActionResult? result;
   final String? errorMessage;
   final int? executionTimeMs;
+  @DateTimeConverter()
   final DateTime? timestamp;
 
   // For display purposes

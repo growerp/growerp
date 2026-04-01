@@ -14,6 +14,7 @@
 
 import 'package:json_annotation/json_annotation.dart';
 
+import '../json_converters.dart';
 part 'agent_instance_model.g.dart';
 
 /// Status of an agent instance
@@ -52,6 +53,7 @@ class AgentStats {
   final int? pendingApprovals;
   final int? todayTasks;
   final double? successRate;
+  @DateTimeConverter()
   final DateTime? lastActivity;
 
   const AgentStats({
@@ -80,12 +82,16 @@ class AgentInstance {
   final String? name;
   final AgentStatus? status;
   final Map<String, dynamic>? configuration;
+  @DateTimeConverter()
   final DateTime? lastExecutionDate;
+  @DateTimeConverter()
   final DateTime? nextScheduledDate;
   final String? errorMessage;
   final int? errorCount;
+  @DateTimeConverter()
   final DateTime? createdDate;
   final String? createdByUserLogin;
+  @DateTimeConverter()
   final DateTime? lastModifiedDate;
 
   // From join with BusinessAgent

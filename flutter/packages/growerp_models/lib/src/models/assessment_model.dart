@@ -2,6 +2,7 @@ import 'package:json_annotation/json_annotation.dart';
 import 'assessment_question_model.dart';
 import 'scoring_threshold_model.dart';
 
+import '../json_converters.dart';
 part 'assessment_model.g.dart';
 
 /// Converts Unix timestamp (milliseconds) to DateTime

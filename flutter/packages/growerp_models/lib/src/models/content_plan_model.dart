@@ -1,6 +1,7 @@
 import 'package:growerp_models/growerp_models.dart';
 import 'package:json_annotation/json_annotation.dart';
 
+import '../json_converters.dart';
 part 'content_plan_model.g.dart';
 
 /// Content Plan model representing a weekly Pain-News-Prize content strategy

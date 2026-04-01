@@ -80,9 +80,7 @@ Service definitions for menu configuration and menu item management
 
       <!-- Build response structure with recursive children -->
       <script>
-        import java.text.SimpleDateFormat
-        def isoFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
-        
+        import growerp.GrowErpDateTimeUtil
         import groovy.json.JsonSlurper
         def jsonSlurper = new JsonSlurper()
 
@@ -141,8 +139,8 @@ Service definitions for menu configuration and menu item management
           name: (config.name != null ? config.name.toString() : ''),
           description: config.description,
           isActive: config.isActive == 'Y',
-          createdDate: (config.createdDate != null ? isoFormat.format(config.createdDate) : null),
-          lastUpdatedStamp: (config.lastUpdatedStamp != null ? isoFormat.format(config.lastUpdatedStamp) : null)
+          createdDate: GrowErpDateTimeUtil.formatTimestamp(ec, config.createdDate),
+          lastUpdatedStamp: GrowErpDateTimeUtil.formatTimestamp(ec, config.lastUpdatedStamp)
         ]
         
         // Build list of top-level menu items with their children

@@ -1,4 +1,5 @@
 /*
+import '../json_converters.dart';
  * This GrowERP software is in the public domain under CC0 1.0 Universal plus a
  * Grant of Patent License.
  * 
@@ -15,6 +16,7 @@
 import 'package:decimal/decimal.dart';
 import 'package:equatable/equatable.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import '../../growerp_models.dart';
 import 'models.dart';
 
 part 'activity_model.freezed.dart';
@@ -37,10 +39,10 @@ abstract class Activity extends Equatable with _$Activity {
     User? assignee,
     User? thirdParty,
     Decimal? rate,
-    DateTime? actualStartDate,
-    DateTime? actualEndDate,
-    DateTime? estimatedStartDate,
-    DateTime? estimatedEndDate,
+    @DateTimeConverter() DateTime? actualStartDate,
+    @DateTimeConverter() DateTime? actualEndDate,
+    @DateTimeConverter() DateTime? estimatedStartDate,
+    @DateTimeConverter() DateTime? estimatedEndDate,
     Decimal? unInvoicedHours,
     @Default([]) List<TimeEntry> timeEntries,
   }) = _Activity;

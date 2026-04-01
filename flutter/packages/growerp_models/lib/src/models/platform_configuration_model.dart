@@ -1,5 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 
+import '../json_converters.dart';
 part 'platform_configuration_model.g.dart';
 
 /// Platform Configuration model
@@ -33,6 +34,7 @@ class PlatformConfiguration {
   final String? password;
 
   /// Last time platform was used
+  @DateTimeConverter()
   final DateTime? lastUsedDate;
 
   const PlatformConfiguration({

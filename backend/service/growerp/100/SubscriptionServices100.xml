@@ -86,10 +86,10 @@
                             amount: item.amount ? item.amount.toString() : '0.00',
                             uom: [uomId: item.amountUomId],
                             ],
-                        fromDate: item.fromDate ? ec.l10n.format(item.fromDate,'yyyy-MM-dd HH:mm:ssZ') : null,
-                        thruDate: item.thruDate ? ec.l10n.format(item.thruDate,'yyyy-MM-dd HH:mm:ssZ') : null,
-                        purchaseFromDate: item.purchaseFromDate ? ec.l10n.format(item.purchaseFromDate,'yyyy-MM-dd HH:mm:ssZ') : null,
-                        purchaseThruDate: item.purchaseThruDate ? ec.l10n.format(item.purchaseThruDate,'yyyy-MM-dd HH:mm:ssZ') : null,
+                        fromDate: item.fromDate ? growerp.GrowErpDateTimeUtil.formatTimestamp(ec, item.fromDate) : null,
+                        thruDate: item.thruDate ? growerp.GrowErpDateTimeUtil.formatTimestamp(ec, item.thruDate) : null,
+                        purchaseFromDate: item.purchaseFromDate ? growerp.GrowErpDateTimeUtil.formatTimestamp(ec, item.purchaseFromDate) : null,
+                        purchaseThruDate: item.purchaseThruDate ? growerp.GrowErpDateTimeUtil.formatTimestamp(ec, item.purchaseThruDate) : null,
                     ])
                 </script>
             </iterate>
@@ -143,7 +143,7 @@
                     if (val == null) return null
                     def s = val.toString()
                     if (s.contains('T')) return java.sql.Timestamp.from(java.time.Instant.parse(s))
-                    return java.sql.Timestamp.valueOf(s)
+                    return growerp.GrowErpDateTimeUtil.parseTimestamp(ec, s)
                 }
                 def parsedFromDate = subscription.fromDate ? parseTs(subscription.fromDate) : null
                 def parsedThruDate = subscription.thruDate ? parseTs(subscription.thruDate) : null
@@ -229,7 +229,7 @@
                     if (val == null) return null
                     def s = val.toString()
                     if (s.contains('T')) return java.sql.Timestamp.from(java.time.Instant.parse(s))
-                    return java.sql.Timestamp.valueOf(s)
+                    return growerp.GrowErpDateTimeUtil.parseTimestamp(ec, s)
                 }
                 lookupEntity.pseudoId = subscription.pseudoId ?: lookupEntity.pseudoId;
                 lookupEntity.description = subscription.description ?: lookupEntity.description;

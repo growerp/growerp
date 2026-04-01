@@ -471,7 +471,7 @@ along with this software (see the LICENSE.md file). If not, see
                     fromUserId: message.fromUserId,
                     content: message.content,
                     creationDate: message.lastUpdatedStamp
-                        ? ec.l10n.format(message.lastUpdatedStamp,'yyyy-MM-dd') 
+                        ? growerp.GrowErpDateTimeUtil.formatTimestamp(ec, message.lastUpdatedStamp)
                         : null,
                     ]" />
                 <script>chatMessages.add(chatMessage)</script>
@@ -573,7 +573,7 @@ along with this software (see the LICENSE.md file). If not, see
                             preferenceKey: 'notification-lastReadDate',
                             preferenceValue: nowTimestamp]" />
                 <else>
-                    <set field="lastReadTimeStamp" from="java.sql.Timestamp.valueOf(lastReadDate[0].preferenceValue.toString().trim())" />
+                    <set field="lastReadTimeStamp" from="growerp.GrowErpDateTimeUtil.parseTimestamp(ec, lastReadDate[0].preferenceValue.toString().trim())" />
                     <service-call name="update#moqui.security.UserPreference"
                         in-map="[userId: ec.user.userAccount.userId,
                             preferenceKey: 'notification-lastReadDate',
@@ -596,7 +596,7 @@ along with this software (see the LICENSE.md file). If not, see
                     topic: message.topic,
                     message: [message: mapMessage.message],
                     sentDate: message.sentDate
-                        ? ec.l10n.format(message.sentDate,'yyyy-MM-dd')  : null,
+                        ? growerp.GrowErpDateTimeUtil.formatTimestamp(ec, message.sentDate)  : null,
                     title: message.titleText,
                     link: message.linkText,
                     type: message.typeString,

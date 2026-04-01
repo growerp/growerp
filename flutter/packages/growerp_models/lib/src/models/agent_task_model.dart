@@ -14,6 +14,7 @@
 
 import 'package:json_annotation/json_annotation.dart';
 
+import '../json_converters.dart';
 part 'agent_task_model.g.dart';
 
 /// Status of an agent task
@@ -46,9 +47,13 @@ class AgentTask {
   final String? errorMessage;
   final int? retryCount;
   final int? maxRetries;
+  @DateTimeConverter()
   final DateTime? scheduledDate;
+  @DateTimeConverter()
   final DateTime? startedDate;
+  @DateTimeConverter()
   final DateTime? completedDate;
+  @DateTimeConverter()
   final DateTime? createdDate;
 
   // For display purposes

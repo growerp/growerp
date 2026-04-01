@@ -1306,7 +1306,7 @@ along with this software (see the LICENSE.md file). If not, see
                         loginName: restData.loginName
                     ],
                     companyName: restData.companyName,
-                    dateTime: restData.startDateTime ? ec.l10n.format(restData.startDateTime,'yyyy-MM-dd HH:mm:ssZ') : null,
+                    dateTime: restData.startDateTime ? growerp.GrowErpDateTimeUtil.formatTimestamp(ec, restData.startDateTime) : null,
                     restRequestName: restData.artifactName ? restData.artifactName.substring(restData.artifactName.lastIndexOf('.') + 1) : null,
                     serverIp: restData.serverIpAddress,
                     serverHostName: restData.serverHostName,

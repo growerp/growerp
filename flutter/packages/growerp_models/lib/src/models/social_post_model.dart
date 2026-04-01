@@ -1,6 +1,7 @@
 import 'package:growerp_models/growerp_models.dart';
 import 'package:json_annotation/json_annotation.dart';
 
+import '../json_converters.dart';
 part 'social_post_model.g.dart';
 
 /// Social Post model representing a single social media post
