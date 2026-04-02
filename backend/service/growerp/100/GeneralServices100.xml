@@ -872,8 +872,8 @@ along with this software (see the LICENSE.md file). If not, see
                     (String) userAccount.username, (String) oldPassword)
                 def info = new org.apache.shiro.authc.SimpleAuthenticationInfo(
                     userAccount.username, userAccount.currentPassword,
-                    userAccount.passwordSalt ? new org.apache.shiro.lang.util.SimpleByteSource(
-                        (String) userAccount.passwordSalt) : null, "moquiRealm")
+                    new org.apache.shiro.lang.util.SimpleByteSource(
+                        (String) (userAccount.passwordSalt ?: '')), "moquiRealm")
             </script>
             <if
                 condition="!userAccount.currentPassword || 
@@ -884,10 +884,8 @@ along with this software (see the LICENSE.md file). If not, see
                     <script>
                         info = new org.apache.shiro.authc.SimpleAuthenticationInfo(
                             userAccount.username, userAccount.resetPassword,
-                            userAccount.passwordSalt 
-                                ? new org.apache.shiro.lang.util.SimpleByteSource(
-                                        (String) userAccount.passwordSalt) 
-                                : null, "moquiRealm")
+                            new org.apache.shiro.lang.util.SimpleByteSource(
+                                (String) (userAccount.passwordSalt ?: '')), "moquiRealm")
                     </script>
                     <if
                         condition="ec.ecfi.getCredentialsMatcher(userAccount.passwordHashType,
