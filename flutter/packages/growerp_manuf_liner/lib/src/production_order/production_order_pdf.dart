@@ -12,22 +12,18 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+import 'dart:typed_data';
+
 import 'package:decimal/decimal.dart';
+import 'package:flutter/material.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 
-/// Generates and prints a Production Order PDF for a given [workOrder].
-///
-/// Layout:
-///   - Header: WO#, Product, Qty, Start Date, Routing
-///   - Panels table: QC# | Panel Name | Liner | Width | Length | SqFt | Passes | Weight
-///   - Liner Totals: Liner | Total SqFt | Est. Weight
-///   - BOM Items: Product ID | Quantity
-Future<void> printProductionOrder(WorkOrder workOrder) async {
+/// Builds the Production Order PDF and returns the raw bytes.
+Future<Uint8List> buildProductionOrderPdfBytes(WorkOrder workOrder) async {
   final pdf = pw.Document();
-
   pdf.addPage(
     pw.MultiPage(
       pageFormat: PdfPageFormat.letter,
@@ -44,11 +40,62 @@ Future<void> printProductionOrder(WorkOrder workOrder) async {
       ],
     ),
   );
+  return pdf.save();
+}
 
+/// Generates and prints a Production Order PDF for a given [workOrder].
+///
+/// Layout:
+///   - Header: WO#, Product, Qty, Start Date, Routing
+///   - Panels table: QC# | Panel Name | Liner | Width | Length | SqFt | Passes | Weight
+///   - Liner Totals: Liner | Total SqFt | Est. Weight
+///   - BOM Items: Product ID | Quantity
+Future<void> printProductionOrder(WorkOrder workOrder) async {
   await Printing.layoutPdf(
-    onLayout: (PdfPageFormat format) async => pdf.save(),
+    onLayout: (_) => buildProductionOrderPdfBytes(workOrder),
     name: 'ProductionOrder_${workOrder.pseudoId}',
   );
+}
+
+/// Shows an in-app PDF preview of the production order with a close button.
+/// Use this instead of [printProductionOrder] in integration tests so the
+/// preview can be dismissed programmatically.
+Future<void> showProductionOrderPreview(
+  BuildContext context,
+  WorkOrder workOrder,
+) async {
+  await showDialog<void>(
+    context: context,
+    builder: (_) => _ProductionOrderPreviewDialog(workOrder: workOrder),
+  );
+}
+
+class _ProductionOrderPreviewDialog extends StatelessWidget {
+  final WorkOrder workOrder;
+  const _ProductionOrderPreviewDialog({required this.workOrder});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Production Order ${workOrder.pseudoId}'),
+        actions: [
+          IconButton(
+            key: const Key('closePrintPreview'),
+            icon: const Icon(Icons.close),
+            tooltip: 'Close',
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+        ],
+      ),
+      body: PdfPreview(
+        build: (_) => buildProductionOrderPdfBytes(workOrder),
+        canChangeOrientation: false,
+        canChangePageFormat: false,
+        canDebug: false,
+      ),
+    );
+  }
 }
 
 pw.Widget _buildHeader(WorkOrder workOrder) {

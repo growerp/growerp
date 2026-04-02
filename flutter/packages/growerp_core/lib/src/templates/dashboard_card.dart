@@ -918,6 +918,7 @@ class _DashboardGridState extends State<DashboardGrid> {
     int mainCells(MenuItem m) => effectiveType(m) == 'graphic' ? 2 : 1;
 
     final scrollContent = SingleChildScrollView(
+      key: const Key('dashboard_scroll'),
       physics: widget.onRefresh != null
           ? const AlwaysScrollableScrollPhysics()
           : null,

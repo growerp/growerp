@@ -109,6 +109,38 @@ const linerExampleMenuConfig = MenuConfiguration(
       widgetName: 'PurchaseInvoiceList',
     ),
     MenuItem(
+      itemKey: 'LINER_SALES_PAYMENTS',
+      title: 'Sales Payments',
+      route: '/accounting/sales_payments',
+      iconName: 'payments',
+      sequenceNum: 94,
+      widgetName: 'FinDocList',
+    ),
+    MenuItem(
+      itemKey: 'LINER_PURCH_PAYMENTS',
+      title: 'Purchase Payments',
+      route: '/accounting/purchase_payments',
+      iconName: 'payment',
+      sequenceNum: 95,
+      widgetName: 'FinDocList',
+    ),
+    MenuItem(
+      itemKey: 'LINER_LEDGER',
+      title: 'Ledger Transactions',
+      route: '/accounting/ledger',
+      iconName: 'account_balance_wallet',
+      sequenceNum: 96,
+      widgetName: 'FinDocList',
+    ),
+    MenuItem(
+      itemKey: 'LINER_REVENUE_REPORT',
+      title: 'Revenue Report',
+      route: '/accounting/reports',
+      iconName: 'summarize',
+      sequenceNum: 97,
+      widgetName: 'RevenueExpenseChart',
+    ),
+    MenuItem(
       itemKey: 'LINER_ACCT',
       title: 'Accounting',
       route: '/accounting',
@@ -135,12 +167,15 @@ GoRouter createLinerExampleRouter() {
           ),
         ],
         extraActionBuilder: (workOrder) => [
-          Tooltip(
-            message: 'Print Production Order',
-            child: IconButton(
-              key: const Key('printProductionOrder'),
-              icon: const Icon(Icons.print),
-              onPressed: () => printProductionOrder(workOrder),
+          Builder(
+            builder: (context) => Tooltip(
+              message: 'Print Production Order',
+              child: IconButton(
+                key: const Key('printProductionOrder'),
+                icon: const Icon(Icons.print),
+                onPressed: () =>
+                    showProductionOrderPreview(context, workOrder),
+              ),
             ),
           ),
         ],
@@ -166,50 +201,35 @@ GoRouter createLinerExampleRouter() {
         docType: FinDocType.shipment,
       ),
       '/accounting' => const AccountingDashboard(),
+      '/accounting/ledger' => const FinDocList(
+        key: Key('Transaction'),
+        sales: true,
+        docType: FinDocType.transaction,
+      ),
+      '/accounting/sales_payments' => const FinDocList(
+        key: Key('SalesPayment'),
+        sales: true,
+        docType: FinDocType.payment,
+      ),
+      '/accounting/purchase_payments' => const FinDocList(
+        key: Key('PurchasePayment'),
+        sales: false,
+        docType: FinDocType.payment,
+      ),
+      '/accounting/sales_invoices' => const FinDocList(
+        key: Key('SalesInvoice'),
+        sales: true,
+        docType: FinDocType.invoice,
+      ),
+      '/accounting/purchase_invoices' => const FinDocList(
+        key: Key('PurchaseInvoice'),
+        sales: false,
+        docType: FinDocType.invoice,
+      ),
+      '/accounting/reports' => const RevenueExpenseChart(),
       _ => const _LinerExampleDashboard(),
     },
-    shellRoutes: [
-      GoRoute(
-        path: '/accounting/ledger',
-        builder: (_, _) => const FinDocList(
-          key: Key('Transaction'),
-          sales: true,
-          docType: FinDocType.transaction,
-        ),
-      ),
-      GoRoute(
-        path: '/accounting/sales_payments',
-        builder: (_, _) => const FinDocList(
-          key: Key('SalesPayment'),
-          sales: true,
-          docType: FinDocType.payment,
-        ),
-      ),
-      GoRoute(
-        path: '/accounting/purchase_payments',
-        builder: (_, _) => const FinDocList(
-          key: Key('PurchasePayment'),
-          sales: false,
-          docType: FinDocType.payment,
-        ),
-      ),
-      GoRoute(
-        path: '/accounting/sales_invoices',
-        builder: (_, _) => const FinDocList(
-          key: Key('SalesInvoice'),
-          sales: true,
-          docType: FinDocType.invoice,
-        ),
-      ),
-      GoRoute(
-        path: '/accounting/purchase_invoices',
-        builder: (_, _) => const FinDocList(
-          key: Key('PurchaseInvoice'),
-          sales: false,
-          docType: FinDocType.invoice,
-        ),
-      ),
-    ],
+    shellRoutes: [],
     additionalRoutes: [
       GoRoute(
         path: '/findoc',

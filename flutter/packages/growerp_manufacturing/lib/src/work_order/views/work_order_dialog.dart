@@ -285,50 +285,6 @@ class WorkOrderDialogState extends State<WorkOrderDialog> {
               },
             ),
             const SizedBox(height: 20),
-            // Status display and lifecycle buttons (existing orders only)
-            if (workOrder.workEffortId.isNotEmpty) ...[
-              Text(
-                key: const Key('statusLabel'),
-                'Status: ${workOrder.status?.name ?? WorkOrderStatusVal.inPlanning.name}',
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              if (workOrder.status == null ||
-                  workOrder.status == WorkOrderStatusVal.inPlanning)
-                ElevatedButton(
-                  key: const Key('releaseButton'),
-                  child: const Text('Release to Shop Floor'),
-                  onPressed: () => context.read<WorkOrderBloc>().add(
-                        WorkOrderUpdate(
-                          workOrder.copyWith(
-                              status: WorkOrderStatusVal.approved),
-                        ),
-                      ),
-                ),
-              if (workOrder.status == WorkOrderStatusVal.approved)
-                ElevatedButton(
-                  key: const Key('startButton'),
-                  child: const Text('Start Production'),
-                  onPressed: () => context.read<WorkOrderBloc>().add(
-                        WorkOrderUpdate(
-                          workOrder.copyWith(
-                              status: WorkOrderStatusVal.inProgress),
-                        ),
-                      ),
-                ),
-              if (workOrder.status == WorkOrderStatusVal.inProgress)
-                ElevatedButton(
-                  key: const Key('completeButton'),
-                  child: const Text('Complete Production'),
-                  onPressed: () => context.read<WorkOrderBloc>().add(
-                        WorkOrderUpdate(
-                          workOrder.copyWith(
-                              status: WorkOrderStatusVal.complete),
-                        ),
-                      ),
-                ),
-              const SizedBox(height: 20),
-            ],
             // BOM components with shortage indicators
             if (workOrder.workEffortId.isNotEmpty &&
                 workOrder.bomItems.isNotEmpty) ...[
@@ -408,6 +364,51 @@ class WorkOrderDialogState extends State<WorkOrderDialog> {
             if (workOrder.workEffortId.isNotEmpty &&
                 widget.extraActionBuilder != null) ...[
               ...widget.extraActionBuilder!(workOrder),
+              const SizedBox(height: 20),
+            ],
+            // Status display and lifecycle buttons — placed after panels so
+            // scrolling to these buttons is not obscured by the list above
+            if (workOrder.workEffortId.isNotEmpty) ...[
+              Text(
+                key: const Key('statusLabel'),
+                'Status: ${workOrder.status?.name ?? WorkOrderStatusVal.inPlanning.name}',
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              if (workOrder.status == null ||
+                  workOrder.status == WorkOrderStatusVal.inPlanning)
+                ElevatedButton(
+                  key: const Key('releaseButton'),
+                  child: const Text('Release to Shop Floor'),
+                  onPressed: () => context.read<WorkOrderBloc>().add(
+                        WorkOrderUpdate(
+                          workOrder.copyWith(
+                              status: WorkOrderStatusVal.approved),
+                        ),
+                      ),
+                ),
+              if (workOrder.status == WorkOrderStatusVal.approved)
+                ElevatedButton(
+                  key: const Key('startButton'),
+                  child: const Text('Start Production'),
+                  onPressed: () => context.read<WorkOrderBloc>().add(
+                        WorkOrderUpdate(
+                          workOrder.copyWith(
+                              status: WorkOrderStatusVal.inProgress),
+                        ),
+                      ),
+                ),
+              if (workOrder.status == WorkOrderStatusVal.inProgress)
+                ElevatedButton(
+                  key: const Key('completeButton'),
+                  child: const Text('Complete Production'),
+                  onPressed: () => context.read<WorkOrderBloc>().add(
+                        WorkOrderUpdate(
+                          workOrder.copyWith(
+                              status: WorkOrderStatusVal.complete),
+                        ),
+                      ),
+                ),
               const SizedBox(height: 20),
             ],
             if (!isComplete)

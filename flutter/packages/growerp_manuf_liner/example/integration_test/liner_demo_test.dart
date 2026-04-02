@@ -23,6 +23,7 @@ import 'package:growerp_manuf_liner/growerp_manuf_liner.dart';
 import 'package:growerp_manufacturing/growerp_manufacturing.dart';
 import 'package:growerp_models/growerp_models.dart';
 
+import 'package:growerp_order_accounting/src/accounting/integration_test/transaction_test.dart';
 import 'package:growerp_order_accounting/src/findoc/integration_test/order_test.dart';
 import 'package:growerp_order_accounting/src/findoc/integration_test/shipment_test.dart';
 import 'package:integration_test/integration_test.dart';
@@ -240,7 +241,7 @@ void main() {
     // ── Setup ─────────────────────────────────────────────────────────────────
     await showDemoStep(
       tester,
-      'Setting Up Demo Data',
+      'New user/company and set Up Demo Data',
       'Loading products, Bill of Materials, warehouse location, '
           'and trading partners into a fresh company.',
     );
@@ -294,6 +295,7 @@ void main() {
     await BomTest.openBom(tester, 'LINER-SYS-60');
     await tester.pump(const Duration(seconds: 3));
     await CommonTest.tapByKey(tester, 'cancel');
+    await CommonTest.gotoMainMenu(tester);
 
     // ── Phase 4: Sales Order → auto Work Order ────────────────────────────────
     await showDemoStep(
@@ -310,6 +312,7 @@ void main() {
     // Save approved sales order for the outgoing shipment phase
     final SaveTest testAfterSalesApprove = await PersistFunctions.getTest();
     final List<FinDoc> approvedSalesOrders = testAfterSalesApprove.orders;
+    await CommonTest.gotoMainMenu(tester);
 
     // ── Phase 5: Work Order — add liner panels ────────────────────────────────
     await showDemoStep(
@@ -342,6 +345,7 @@ void main() {
       await tester.pageBack();
       await tester.pumpAndSettle(const Duration(seconds: 2));
     }
+    await CommonTest.gotoMainMenu(tester);
 
     // ── Phase 6: Purchase roll stock ──────────────────────────────────────────
     await showDemoStep(
@@ -361,6 +365,7 @@ void main() {
     );
     await OrderTest.approveOrderPayments(tester);
     await OrderTest.completeOrderPayments(tester);
+    await CommonTest.gotoMainMenu(tester);
 
     // ── Phase 7: Receive roll stock ───────────────────────────────────────────
     await showDemoStep(
@@ -372,6 +377,7 @@ void main() {
     await ShipmentTest.selectIncomingShipments(tester);
     await OrderTest.approveOrderShipments(tester);
     await ShipmentTest.receiveShipments(tester, locations.sublist(0, 1));
+    await CommonTest.gotoMainMenu(tester);
 
     // ── Phase 8: Complete production + print PDF ──────────────────────────────
     await showDemoStep(
@@ -392,11 +398,11 @@ void main() {
     await WorkOrderTest.openWorkOrder(tester, 0);
     // Tap print button to demonstrate PDF generation
     await CommonTest.tapByKey(tester, 'printProductionOrder');
-    await tester.pump(const Duration(seconds: 2));
-    await CommonTest.tapByKey(tester, 'cancel');
+    await tester.pumpAndSettle(const Duration(seconds: 3));
+    await CommonTest.tapByKey(tester, 'closePrintPreview');
 
-    await WorkOrderTest.openWorkOrder(tester, 0);
     await WorkOrderTest.completeWorkOrder(tester);
+    await CommonTest.gotoMainMenu(tester);
 
     // ── Phase 9: Ship to customer ─────────────────────────────────────────────
     await showDemoStep(
@@ -422,6 +428,7 @@ void main() {
     );
     await OrderTest.approveOrderPayments(tester);
     await OrderTest.completeOrderPayments(tester);
+    await CommonTest.gotoMainMenu(tester);
 
     // ── Phase 10: Invoices ────────────────────────────────────────────────────
     await showDemoStep(
@@ -431,7 +438,6 @@ void main() {
           'The purchase invoice reflects the roll stock cost; '
           'the sales invoice captures revenue from the customer.',
     );
-    await CommonTest.gotoMainMenu(tester);
     await CommonTest.selectOption(
       tester,
       '/accounting/purchase_invoices',
@@ -445,6 +451,7 @@ void main() {
       '/accounting/sales_invoices',
       'SalesInvoice',
     );
+    await CommonTest.gotoMainMenu(tester);
     await tester.pump(const Duration(seconds: 3));
 
     // ── Phase 11: Accounting ──────────────────────────────────────────────────
@@ -454,10 +461,37 @@ void main() {
       'All financial movements — inventory cost, COGS, revenue and payments — '
           'are automatically posted to the general ledger.',
     );
-    await CommonTest.gotoMainMenu(tester);
     await CommonTest.selectOption(tester, '/accounting/ledger', 'Transaction');
     await CommonTest.waitForKey(tester, 'id0');
     await tester.pump(const Duration(seconds: 4));
+    await CommonTest.gotoMainMenu(tester);
+
+    // ── Phase 12: Ledger Summarize & Statistics ───────────────────────────────
+    await showDemoStep(
+      tester,
+      'Ledger Summarize & Statistics',
+      'Recalculating ledger summaries and company statistics.\n'
+          'All financial totals — assets, liabilities, revenue and costs — '
+          'are refreshed so the dashboard reflects the completed job.',
+    );
+    await TransactionTest.showUpdatedAccountingDashboard(tester);
+
+    // ── Phase 13: Revenue & Expense Report ───────────────────────────────────
+    await showDemoStep(
+      tester,
+      'Revenue & Expense Report',
+      'The general ledger report summarises all financial activity.\n'
+          'Revenue from the sale and costs from purchasing and production '
+          'are reflected here, showing the profit from this liner job.',
+    );
+    await CommonTest.selectOption(tester, '/accounting', 'AcctDashBoard');
+    await CommonTest.selectOption(
+      tester,
+      '/accounting/reports',
+      'RevenueExpenseChart',
+    );
+    await tester.pump(const Duration(seconds: 4));
+    await CommonTest.gotoMainMenu(tester);
 
     await showDemoStep(
       tester,
@@ -465,7 +499,8 @@ void main() {
       'You have seen the full GrowERP liner panel manufacturing lifecycle:\n'
           'Liner Types → Routing → BOM → Sales Order → Work Order → '
           'Liner Panels → Purchase → Receive → Produce → PDF → Ship → '
-          'Purchase Invoice → Sales Invoice → Accounting.',
+          'Purchase Invoice → Sales Invoice → Accounting → '
+          'Summarize & Stats → Revenue Report.',
       seconds: 5,
     );
 
