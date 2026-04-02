@@ -1,0 +1,37 @@
+{
+  "cli_version": "0.5.0",
+  "checkpoint_id": "4f84900f69eb",
+  "session_id": "2090fe4d-b77e-4a34-9796-f0242db12c8e",
+  "strategy": "manual-commit",
+  "created_at": "2026-04-02T22:17:36.291449985Z",
+  "branch": "master",
+  "checkpoints_count": 3,
+  "files_touched": [
+    ".gemini/get_api_key.sh",
+    ".gemini/mcp-config.yaml",
+    ".gemini/settings-oauth.json",
+    ".gemini/settings.json"
+  ],
+  "agent": "Gemini CLI",
+  "model": "gemini-3.1-pro-preview",
+  "turn_id": "0cc21b3651ee",
+  "token_usage": {
+    "input_tokens": 6998284,
+    "cache_creation_tokens": 0,
+    "cache_read_tokens": 6188514,
+    "output_tokens": 12814,
+    "api_call_count": 98
+  },
+  "session_metrics": {
+    "turn_count": 3
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-04-02T22:17:35.94628055Z",
+    "agent_lines": 0,
+    "human_added": 0,
+    "human_modified": 0,
+    "human_removed": 76,
+    "total_committed": 1,
+    "agent_percentage": 0
+  }
+}

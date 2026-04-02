@@ -1,0 +1,46 @@
+═╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: <true>
+  Actual: <false>
+could not find key: tap/accounting/purchase_payments to tap on
+
+When the exception was thrown, this was the stack:
+#4      CommonTest.tapByKey (package:growerp_core/src/domains/common/integration_test/common_test.dart:1236:5)
+common_test.dart:1236
+<asynchronous suspension>
+#5      CommonTest.selectOption (package:growerp_core/src/domains/common/integration_test/common_test.dart:566:5)
+common_test.dart:566
+<asynchronous suspension>
+#6      main.<anonymous closure> (file:///data/growerpLiner/flutter/packages/growerp_manuf_liner/example/integration_test/liner_demo_test.dart:357:5)
+liner_demo_test.dart:357
+<asynchronous suspension>
+#7      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+widget_tester.dart:192
+<asynchronous suspension>
+#8      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1682:5)
+binding.dart:1682
+2
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  package:growerp_core/src/domains/common/integration_test/common_test.dart line 1236
+The test description was:
+  GrowERP Liner Panel Manufacturing Demo
+════════════════════════════════════════════════════════════════════════════════════════════════════
+Test failed. See exception logs above.
+The test description was: GrowERP Liner Panel Manufacturing Demo
+
+✖ GrowERP Liner Panel Manufacturing Demo
+
+---
+
+continue?
+
+---
+
+remove growerp-system
+
+---
+
+remove mcp growerp-system
