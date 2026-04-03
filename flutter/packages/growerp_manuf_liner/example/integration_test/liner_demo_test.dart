@@ -484,7 +484,6 @@ void main() {
           'Revenue from the sale and costs from purchasing and production '
           'are reflected here, showing the profit from this liner job.',
     );
-    await CommonTest.selectOption(tester, '/accounting', 'AcctDashBoard');
     await CommonTest.selectOption(
       tester,
       '/accounting/reports',

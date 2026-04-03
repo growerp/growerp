@@ -681,20 +681,25 @@ class _DashboardGridState extends State<DashboardGrid> {
     _orderedItems = widget.items.where((m) => !m.isMinimized).toList();
   }
 
+  /// Stable identifier for a menu item used for ordering-sync.
+  /// Falls back to itemKey → route → title so static (id-less) items work too.
+  String _itemId(MenuItem m) =>
+      m.menuItemId ?? m.itemKey ?? m.route ?? m.title;
+
   /// Rebuilds [_orderedItems] preserving the current visual order:
   /// - keeps existing tiles in their dragged positions
   /// - removes tiles that became minimized
   /// - appends newly un-minimized tiles at the end
   void _syncOrderedItems() {
     final newNonMin = widget.items.where((m) => !m.isMinimized).toList();
-    final newIds = {for (final m in newNonMin) m.menuItemId};
-    final oldIds = {for (final m in _orderedItems) m.menuItemId};
+    final newIds = {for (final m in newNonMin) _itemId(m)};
+    final oldIds = {for (final m in _orderedItems) _itemId(m)};
     _orderedItems = [
       for (final m in _orderedItems)
-        if (newIds.contains(m.menuItemId))
-          newNonMin.firstWhere((n) => n.menuItemId == m.menuItemId),
+        if (newIds.contains(_itemId(m)))
+          newNonMin.firstWhere((n) => _itemId(n) == _itemId(m)),
       for (final m in newNonMin)
-        if (!oldIds.contains(m.menuItemId)) m,
+        if (!oldIds.contains(_itemId(m))) m,
     ];
   }
 
