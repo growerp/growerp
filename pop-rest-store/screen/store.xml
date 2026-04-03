@@ -13,9 +13,11 @@ along with this software (see the LICENSE.md file). If not, see
 <http://creativecommons.org/publicdomain/zero/1.0/>.
 -->
 <!-- Local XSD is used instead of the upstream http://moqui.org/xsd/xml-screen-2.1.xsd because
-     it has been patched to allow '.' at the first position and '-' anywhere in transition names. -->
+     it has been patched to allow '.' at the first position and '-' anywhere in transition names.
+     Path is relative to the source location; at Moqui runtime this file is symlinked under
+     moqui/runtime/component/PopRestStore/screen/ where ../../../../framework/xsd/... would apply. -->
 <screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:noNamespaceSchemaLocation="../../../../framework/xsd/xml-screen-3.xsd"
+    xsi:noNamespaceSchemaLocation="../../moqui/framework/xsd/xml-screen-3.xsd"
     standalone="true" require-authentication="anonymous-view" allow-extra-path="true">
 
     <always-actions>
