@@ -14,17 +14,16 @@ The `moqui4` branch also upgrades to **Moqui 4.x** (Java 21, Shiro 2.x, Jakarta 
 
 ```
 growerp1/
-├── moqui/                  # 2000+ framework files tracked directly
-│   ├── framework/
-│   └── runtime/
-│       └── component/
-│           ├── growerp/    # GrowERP backend
-│           ├── mantle-udm/
-│           ├── mantle-usl/
-│           └── ...
-├── backend/
-├── pop-rest-store/
-└── mantle-stripe/
+└── moqui/                  # 2000+ framework files tracked directly
+    ├── framework/
+    └── runtime/
+        └── component/
+            ├── growerp/        # GrowERP backend (tracked directly)
+            ├── PopRestStore/   # E-commerce component (tracked directly)
+            ├── mantle-stripe/  # Stripe integration (tracked directly)
+            ├── mantle-udm/
+            ├── mantle-usl/
+            └── moqui-fop/
 ```
 
 ### After (`moqui4`) — Git Submodules
