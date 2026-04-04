@@ -20,20 +20,13 @@ GrowERP is an open-source, multi-platform ERP application built with a modular a
 
 *Create a new company, select demo data, and explore! Login credentials will be sent to your email.*
 
-### Install Locally (Easy Way)
-
-```bash
-dart pub global activate growerp
-growerp install
-```
-
-<a href="https://studio.firebase.google.com/import?url=https%3A%2F%2Fgithub.com%2Fgrowerp%2Fgrowerp">
-  <img height="32" alt="Open in Firebase Studio" src="https://cdn.firebasestudio.dev/btn/open_blue_32.svg">
-</a>
+### Install Locally: see the manual installation below
 
 ## 📚 Documentation
 
 > **🚀 Quick Start**: New to GrowERP? Start with the [Extensibility Overview](./docs/README.md) for a complete roadmap, then check the [Building Blocks Guide](./docs/Building_Blocks_Development_Guide.md) for frontend development or the [Backend Components Guide](./docs/Backend_Components_Development_Guide.md) for backend development.
+
+> **📖 Full Documentation Index**: See **[docs/README.md](./docs/README.md)** for the complete documentation index — 41+ guides organised by role, with reading paths for Project Managers, Architects, Frontend/Backend Developers, DevOps, QA, and more.
 
 ### ⭐ Phase 12 - Assessment Landing Page Implementation (LATEST)
 
@@ -42,7 +35,7 @@ growerp install
 
 ### 🏗️ Core Development & Architecture
 
-- **[📖 Extensibility Overview](./docs/README.md)** - Complete guide to GrowERP's modular architecture and development patterns (40+ documents, 8,750+ lines)
+- **[📖 Extensibility Overview](./docs/README.md)** - Complete guide to GrowERP's modular architecture and development patterns (41+ documents, 9,500+ lines)
 - **[🧩 Building Blocks Guide](./docs/Building_Blocks_Development_Guide.md)** - Create Flutter packages (growerp_* packages)
 - **[⚙️ Backend Components Guide](./docs/Backend_Components_Development_Guide.md)** - Develop Moqui components and services
 - **[🎨 Design Patterns](./docs/GrowERP_Design_Patterns.md)** - Established patterns and conventions for consistent development
@@ -53,7 +46,7 @@ growerp install
 
 - **[🔗 Data Models Guide](./docs/basic_explanation_of_the_frontend_REST_Backend_data_models.md)** - Frontend-backend data model integration
 - **[📡 Flutter-Moqui REST Backend Interface](./docs/Flutter_Moqui_REST_Backend_Interface.md)** - Complete guide to REST API communication with practical code examples
-- **[🤖 Gemini AI Communication](./GEMINI_COMMUNICATION_GUIDE.md)** - Invoice scanning and AI-powered data extraction with Google Gemini
+- **[🤖 Invoice Scan & AI Extraction](./docs/Invoice_Scan_Documentation.md)** - Invoice scanning and AI-powered data extraction with Google Gemini
 - **[✨ AI Landing Page Generation](./docs/AI_GENERATED_LANDING_PAGE_PLAN.md)** - Generate professional landing pages with AI and internet research
 - **[💳 Stripe Payment Processing](./docs/Stripe_Payment_Processing_Documentation.md)** - Complete payment integration guide
 - **[🌐 WebSocket Notifications](./docs/WebSocket_Notification_System.md)** - Real-time notification system
@@ -76,7 +69,7 @@ growerp install
 - **[🔧 Contributing Guide](./CONTRIBUTING.md)** - How to contribute to GrowERP
 - **[📜 Code of Conduct](./CODE_OF_CONDUCT.md)** - Community guidelines and expectations
 - **[📄 License](./LICENSE)** - CC0 1.0 Universal (Public Domain)
-- **[🎯 Development Prompts](./docs/prompts.md)** - AI prompts for development assistance
+- **[🎯 AI Development Guide](./docs/GrowERP_AI_Instructions.md)** - AI-assisted development best practices and prompts
 
 ### 📖 Additional Resources
 
@@ -140,6 +133,9 @@ GrowERP uses a modular architecture that promotes reusability and extensibility:
 - **growerp_website** - Website content management
 - **growerp_activity** - Task and activity tracking
 - **growerp_chat** - Real-time communication
+- **growerp_courses** - eLearning course and content management
+- **growerp_sales** - Sales pipeline and opportunity management
+- **growerp_outreach** - Outreach and lead engagement
 
 ### ⚙️ Backend Components
 - **Moqui Framework** - Enterprise-grade backend framework
@@ -254,6 +250,34 @@ Project management focused:
 - Project organization
 - Invoicing
 - Activity monitoring
+
+### 🎓 eLearner Application
+Student-facing learning platform:
+- Course enrollment and management
+- Learning progress tracking
+- Content delivery
+- Instructor and student management
+
+### 🏥 Health Application
+Healthcare management:
+- Patient management
+- Appointment scheduling
+- Health records
+- Billing and accounting
+
+### 🎧 Support Application
+Customer support and ticketing:
+- Ticket management
+- Customer communication
+- Issue tracking and resolution
+- Reporting
+
+### 📊 Assessment Application
+Lead capture and AI-scored assessment platform:
+- AI-powered assessment scoring
+- Landing page generation
+- Lead capture and management
+- Integration with Admin ERP
 
 ### 🔧 Custom Applications
 Build your own using:
@@ -396,6 +420,7 @@ We welcome contributions from developers of all skill levels! Here's how you can
 - **Mentorship**: Learn from experienced contributors
 
 ### 📈 Project Status
+- **Latest Release**: 1.15.0
 - **License**: CC0 1.0 Universal (Public Domain)
 - **Status**: Active development
 - **Stability**: Production ready
