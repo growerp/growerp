@@ -13,6 +13,11 @@
     <key>uploadBitcode</key>
     <false/>
     <key>signingStyle</key>
-    <string>automatic</string>
+    <string>manual</string>
+    <key>provisioningProfiles</key>
+    <dict>
+        <key>org.growerp.admin</key>
+        <string>match AppStore org.growerp.admin mac</string>
+    </dict>
 </dict>
 </plist>

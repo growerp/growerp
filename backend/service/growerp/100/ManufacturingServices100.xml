@@ -43,9 +43,6 @@ along with this software (see the LICENSE.md file). If not, see
             </if>
             <entity-find entity-name="growerp.manufacturing.BomItemAndProductDetail"
                 list="allProductList" distinct="true">
-                <select-field field-name="productId" />
-                <select-field field-name="productPseudoId" />
-                <select-field field-name="productName" />
                 <econdition field-name="ownerPartyId" from="ownerPartyId" />
                 <econdition field-name="productAssocTypeEnumId" value="PatMfgBom" />
                 <econdition field-name="thruDate" operator="is-null" or-null="true" />
@@ -55,6 +52,9 @@ along with this software (see the LICENSE.md file). If not, see
                     <econdition field-name="productName" ignore-case="true"
                         operator="like" from="searchPattern" ignore-if-empty="true" />
                 </econditions>
+                <select-field field-name="productId" />
+                <select-field field-name="productPseudoId" />
+                <select-field field-name="productName" />
                 <order-by field-name="productPseudoId" />
             </entity-find>
             <set field="total" from="allProductList.size() as Integer" />
@@ -192,7 +192,8 @@ along with this software (see the LICENSE.md file). If not, see
                 </entity-find>
             </if>
             <if condition="!parentList">
-                <return error="true" message="Assembly product '${bomItem.productId}' not found for company" />
+                <return error="true"
+                    message="Assembly product '${bomItem.productId}' not found for company" />
             </if>
             <set field="resolvedParentId" from="parentList[0].productId" />
             <!-- Resolve component product by pseudoId, then by productId -->
@@ -207,7 +208,8 @@ along with this software (see the LICENSE.md file). If not, see
                 </entity-find>
             </if>
             <if condition="!compList">
-                <return error="true" message="Component product '${bomItem.toProductId}' not found for company" />
+                <return error="true"
+                    message="Component product '${bomItem.toProductId}' not found for company" />
             </if>
             <set field="resolvedCompId" from="compList[0].productId" />
             <service-call name="create#mantle.product.ProductAssoc"
@@ -376,27 +378,34 @@ along with this software (see the LICENSE.md file). If not, see
                     </entity-find>
                     <set field="totalAvailable" from="0.0" />
                     <iterate list="assetList" entry="ast">
-                        <set field="totalAvailable" from="totalAvailable + (ast.quantityOnHandTotal ?: 0.0)" />
+                        <set field="totalAvailable"
+                            from="totalAvailable + (ast.quantityOnHandTotal ?: 0.0)" />
                     </iterate>
                     <!-- requiredQty = BOM per-unit qty * WO estimatedQuantity -->
-                    <set field="requiredQty" from="(wep.estimatedQuantity ?: 1.0) * (wo.estimatedQuantity ?: 1.0)" />
-                    <!-- Look up component purchase/cost price (prefer PptPurchase, fall back to PptCurrent) -->
-                    <entity-find entity-name="mantle.product.ProductPrice" list="purchasePriceList" limit="1">
+                    <set field="requiredQty"
+                        from="(wep.estimatedQuantity ?: 1.0) * (wo.estimatedQuantity ?: 1.0)" />
+                    <!-- Look up component purchase/cost price (prefer PptPurchase, fall back to
+                    PptCurrent) -->
+                    <entity-find entity-name="mantle.product.ProductPrice" list="purchasePriceList"
+                        limit="1">
                         <econdition field-name="productId" from="wep.productId" />
                         <econdition field-name="priceTypeEnumId" value="PptPurchase" />
                         <econdition field-name="thruDate" operator="is-null" or-null="true" />
                         <order-by field-name="-fromDate" />
                     </entity-find>
                     <if condition="!purchasePriceList">
-                        <entity-find entity-name="mantle.product.ProductPrice" list="purchasePriceList" limit="1">
+                        <entity-find entity-name="mantle.product.ProductPrice"
+                            list="purchasePriceList" limit="1">
                             <econdition field-name="productId" from="wep.productId" />
                             <econdition field-name="priceTypeEnumId" value="PptCurrent" />
                             <econdition field-name="thruDate" operator="is-null" or-null="true" />
                             <order-by field-name="-fromDate" />
                         </entity-find>
                     </if>
-                    <set field="unitCost" from="purchasePriceList ? purchasePriceList[0].price : null" />
-                    <set field="itemTotalCost" from="unitCost != null ? unitCost * requiredQty : null" />
+                    <set field="unitCost"
+                        from="purchasePriceList ? purchasePriceList[0].price : null" />
+                    <set field="itemTotalCost"
+                        from="unitCost != null ? unitCost * requiredQty : null" />
                     <script>bomItemsList.add([
                         toProductId: wep.productId,
                         componentPseudoId: compProd?.pseudoId ?: '',
@@ -416,7 +425,8 @@ along with this software (see the LICENSE.md file). If not, see
                 <!-- Look up routing name if routingId is set -->
                 <set field="woRoutingName" from="null" />
                 <if condition="wo.routingId">
-                    <entity-find-one entity-name="growerp.manufacturing.Routing" value-field="woRouting">
+                    <entity-find-one entity-name="growerp.manufacturing.Routing"
+                        value-field="woRouting">
                         <field-map field-name="routingId" from="wo.routingId" />
                     </entity-find-one>
                     <set field="woRoutingName" from="woRouting?.routingName" />
@@ -554,7 +564,8 @@ along with this software (see the LICENSE.md file). If not, see
             <!-- On completion: consume components and receive finished good into inventory -->
             <if condition="workOrder.statusId == 'WeComplete'">
                 <!-- Issue component inventory to the work effort, accumulating total cost -->
-                <entity-find entity-name="mantle.work.effort.WorkEffortProduct" list="consumeWepList">
+                <entity-find entity-name="mantle.work.effort.WorkEffortProduct"
+                    list="consumeWepList">
                     <econdition field-name="workEffortId" from="workOrder.workEffortId" />
                     <econdition field-name="typeEnumId" value="WeptConsume" />
                 </entity-find>
@@ -569,8 +580,11 @@ along with this software (see the LICENSE.md file). If not, see
                     </entity-find>
                     <set field="qtyToIssue" from="consumeWep.estimatedQuantity ?: 0.0" />
                     <iterate list="compAssets" entry="compAsset">
-                        <if condition="qtyToIssue &lt;= 0"><break/></if>
-                        <set field="issueQty" from="compAsset.availableToPromiseTotal > qtyToIssue ? qtyToIssue : compAsset.availableToPromiseTotal" />
+                        <if condition="qtyToIssue &lt;= 0">
+                            <break />
+                        </if>
+                        <set field="issueQty"
+                            from="compAsset.availableToPromiseTotal > qtyToIssue ? qtyToIssue : compAsset.availableToPromiseTotal" />
                         <service-call name="mantle.product.AssetServices.issue#AssetToWorkEffort"
                             in-map="[assetId: compAsset.assetId, workEffortId: workOrder.workEffortId,
                                 quantity: issueQty, noOriginFacility: 'ignore']"
@@ -584,12 +598,14 @@ along with this software (see the LICENSE.md file). If not, see
                     </iterate>
                 </iterate>
                 <!-- Receive the finished good into available inventory with calculated unit cost -->
-                <entity-find entity-name="mantle.work.effort.WorkEffortProduct" list="produceWepList">
+                <entity-find entity-name="mantle.work.effort.WorkEffortProduct"
+                    list="produceWepList">
                     <econdition field-name="workEffortId" from="workOrder.workEffortId" />
                     <econdition field-name="typeEnumId" value="WeptProduce" />
                 </entity-find>
                 <iterate list="produceWepList" entry="produceWep">
-                    <set field="finishedGoodQty" from="(produceWep.estimatedQuantity ?: 1.0) as BigDecimal" />
+                    <set field="finishedGoodQty"
+                        from="(produceWep.estimatedQuantity ?: 1.0) as BigDecimal" />
                     <set field="finishedGoodUnitCost"
                         from="finishedGoodQty > 0 ? totalProductionCost / finishedGoodQty : null" />
                     <service-call name="mantle.product.AssetServices.receive#Asset"
@@ -837,7 +853,8 @@ along with this software (see the LICENSE.md file). If not, see
                 <field-map field-name="routingId" from="routingTask.routingId" />
             </entity-find-one>
             <if condition="!ro || ro.ownerPartyId != ownerPartyId">
-                <return error="true" message="Routing '${routingTask.routingId}' not found for company" />
+                <return error="true"
+                    message="Routing '${routingTask.routingId}' not found for company" />
             </if>
             <service-call name="create#growerp.manufacturing.RoutingTask"
                 in-map="[routingId: routingTask.routingId,
@@ -849,7 +866,8 @@ along with this software (see the LICENSE.md file). If not, see
             <entity-find-one entity-name="growerp.manufacturing.RoutingTask" value-field="rt">
                 <field-map field-name="routingTaskId" />
             </entity-find-one>
-            <set field="routingTask" from="[
+            <set field="routingTask"
+                from="[
                 routingTaskId: rt.routingTaskId,
                 routingId: rt.routingId,
                 taskName: rt.taskName,
@@ -898,7 +916,8 @@ along with this software (see the LICENSE.md file). If not, see
             <entity-find-one entity-name="growerp.manufacturing.RoutingTask" value-field="rt">
                 <field-map field-name="routingTaskId" from="routingTask.routingTaskId" />
             </entity-find-one>
-            <set field="routingTask" from="[
+            <set field="routingTask"
+                from="[
                 routingTaskId: rt.routingTaskId,
                 routingId: rt.routingId,
                 taskName: rt.taskName,

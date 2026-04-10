@@ -1,0 +1,256 @@
+def normalized_env(key)
+  ENV[key].to_s.gsub("\r", "").strip
+end
+
+def required_env!(key)
+  value = normalized_env(key)
+  UI.user_error!("Missing required environment variable #{key}.") if value.empty?
+  value
+end
+
+def optional_env(key)
+  value = normalized_env(key)
+  value.empty? ? nil : value
+end
+
+lane :codesign do
+  setup_ci if ENV["CI"]
+  app_name = required_env!("APP_NAME")
+
+  api_key = app_store_connect_api_key(
+    key_id:                required_env!("APP_STORE_CONNECT_API_KEY_ID"),
+    issuer_id:             required_env!("APP_STORE_CONNECT_API_ISSUER_ID"),
+    key_content:           required_env!("APP_STORE_CONNECT_API_KEY_CONTENT"),
+    is_key_content_base64: true,
+    in_house:              false
+  )
+  options = {
+    type: "appstore",
+    platform: "ios",
+    app_identifier: ["org.growerp.#{app_name}"],
+    git_url: required_env!("MATCH_GIT_URL"),
+    readonly: true,
+    api_key: api_key
+  }
+  auth = optional_env("MATCH_GIT_BASIC_AUTHORIZATION")
+  options[:git_basic_authorization] = auth if auth
+  sync_code_signing(**options)
+end
+
+lane :ci_build do
+  app_name = required_env!("APP_NAME")
+  bundle_id = "org.growerp.#{app_name}"
+  workspace_path = File.expand_path("../packages/#{app_name}/ios/Runner.xcworkspace", __dir__)
+  build_app(
+    workspace: workspace_path,
+    scheme: "Runner",
+    export_method: "app-store",
+    export_options: {
+      method: "app-store",
+      provisioningProfiles: {
+        bundle_id => "match AppStore #{bundle_id}"
+      }
+    },
+    buildlog_path: "/tmp/xcodebuild-ios-logs",
+    disable_xcpretty: true,
+    xcargs: "GCC_OPTIMIZATION_LEVEL=s SWIFT_COMPILATION_MODE=wholemodule"
+  )
+end
+
+lane :upload do
+  api_key = app_store_connect_api_key(
+    key_id:                required_env!("APP_STORE_CONNECT_API_KEY_ID"),
+    issuer_id:             required_env!("APP_STORE_CONNECT_API_ISSUER_ID"),
+    key_content:           required_env!("APP_STORE_CONNECT_API_KEY_CONTENT"),
+    is_key_content_base64: true,
+    in_house:              false
+  )
+  upload_to_testflight(
+    api_key:                 api_key,
+    itc_provider:            "P64T65C668",
+    skip_submission:         ENV.fetch("SUBMIT_FOR_REVIEW", "false") != "true",
+    notify_external_testers: false
+  )
+end
+
+lane :codesign_macos do
+  setup_ci if ENV["CI"]
+
+  api_key = app_store_connect_api_key(
+    key_id:                required_env!("APP_STORE_CONNECT_API_KEY_ID"),
+    issuer_id:             required_env!("APP_STORE_CONNECT_API_ISSUER_ID"),
+    key_content:           required_env!("APP_STORE_CONNECT_API_KEY_CONTENT"),
+    is_key_content_base64: true,
+    in_house:              false
+  )
+  options = {
+    type: "appstore",
+    additional_cert_types: ["mac_installer_distribution"],
+    platform: "macos",
+    app_identifier: [required_env!("BUNDLE_ID")],
+    git_url: required_env!("MATCH_GIT_URL"),
+    readonly: true,
+    api_key: api_key
+  }
+  auth = optional_env("MATCH_GIT_BASIC_AUTHORIZATION")
+  options[:git_basic_authorization] = auth if auth
+  sync_code_signing(**options)
+
+  # After sync_code_signing, Match sets sigh_<bundle_id>_appstore_macos_profile-name
+  # and sigh_<bundle_id>_appstore_macos_profile-path in the environment.
+  # Write them to GITHUB_ENV so subsequent shell steps can use them directly,
+  # avoiding fragile directory scans that break when Xcode changes install paths.
+  if ENV["GITHUB_ENV"]
+    bundle_id = required_env!("BUNDLE_ID")
+    profile_name = ENV["sigh_#{bundle_id}_appstore_macos_profile-name"].to_s.strip
+    profile_path = ENV["sigh_#{bundle_id}_appstore_macos_profile-path"].to_s.strip
+
+    UI.user_error!("Match did not set profile-name for #{bundle_id}") if profile_name.empty?
+    UI.user_error!("Match did not set profile-path for #{bundle_id}") if profile_path.empty?
+
+    unless File.exist?(profile_path)
+      UI.user_error!(
+        "Match reported profile at #{profile_path} but the file does not exist on disk. " \
+        "The profile may not have been installed to the Xcode UserData directory. " \
+        "Run 'fastlane match appstore --platform macos' on a Mac to re-push the profiles."
+      )
+    end
+
+    File.open(ENV["GITHUB_ENV"], "a") do |f|
+      f.puts "MATCH_PROFILE_NAME=#{profile_name}"
+      f.puts "MATCH_PROFILE_PATH=#{profile_path}"
+    end
+    UI.message("MATCH_PROFILE_NAME=#{profile_name}")
+    UI.message("MATCH_PROFILE_PATH=#{profile_path}")
+  end
+end
+
+lane :upload_macos do
+  key_id      = required_env!("APP_STORE_CONNECT_API_KEY_ID")
+  issuer_id   = required_env!("APP_STORE_CONNECT_API_ISSUER_ID")
+  key_content = required_env!("APP_STORE_CONNECT_API_KEY_CONTENT")
+
+  api_key = app_store_connect_api_key(
+    key_id:                key_id,
+    issuer_id:             issuer_id,
+    key_content:           key_content,
+    is_key_content_base64: true,
+    in_house:              false
+  )
+
+  app_name   = required_env!("MATRIX_APP")
+  # Use absolute path so both build_macos and upload_macos agree on location
+  export_dir = File.expand_path("../../packages/#{app_name}/build/export", __dir__)
+
+  pkg = Dir["#{export_dir}/*.pkg"].first
+  if pkg
+    upload_to_app_store(
+      api_key:                    api_key,
+      pkg:                        pkg,
+      platform:                   "osx",
+      skip_metadata:              true,
+      skip_screenshots:           true,
+      submit_for_review:          false,
+      run_precheck_before_submit: false
+    )
+  else
+    # Xcode 13+ exports .app directly for App Store Connect upload
+    app_bundle = Dir["#{export_dir}/*.app"].first
+    UI.user_error!("No .pkg or .app found in #{export_dir}") if app_bundle.nil?
+
+    # altool searches ~/.appstoreconnect/private_keys/AuthKey_<ID>.p8
+    require "base64"
+    key_dir  = File.expand_path("~/.appstoreconnect/private_keys")
+    key_path = File.join(key_dir, "AuthKey_#{key_id}.p8")
+    FileUtils.mkdir_p(key_dir)
+    File.write(key_path, Base64.decode64(key_content))
+
+    begin
+      sh "xcrun altool --upload-app --type osx " \
+         "--file #{app_bundle.shellescape} " \
+         "--apiKey #{key_id} " \
+         "--apiIssuer #{issuer_id}"
+    ensure
+      FileUtils.rm_f(key_path)
+    end
+  end
+end
+
+# Check App Store Connect for versions in PENDING_DEVELOPER_RELEASE and release them.
+# Required env vars:
+#   ASC_PLATFORM            — "IOS" or "MAC_OS"
+#   BUNDLE_ID               — e.g. org.growerp.admin
+#   APP_STORE_CONNECT_API_KEY_ID / _ISSUER_ID / _KEY_CONTENT
+#
+# Writes "released=true|false" to $GITHUB_OUTPUT when running in CI.
+lane :release_approved do
+  platform_filter = required_env!("ASC_PLATFORM")
+  bundle_id       = required_env!("BUNDLE_ID")
+
+  api_key = app_store_connect_api_key(
+    key_id:                required_env!("APP_STORE_CONNECT_API_KEY_ID"),
+    issuer_id:             required_env!("APP_STORE_CONNECT_API_ISSUER_ID"),
+    key_content:           required_env!("APP_STORE_CONNECT_API_KEY_CONTENT"),
+    is_key_content_base64: true,
+    in_house:              false
+  )
+
+  require "spaceship"
+  Spaceship::ConnectAPI.token = Spaceship::ConnectAPI::Token.from(hash: api_key)
+
+  app = Spaceship::ConnectAPI::App.find(bundle_id)
+  UI.user_error!("App not found for bundle ID: #{bundle_id}") unless app
+
+  versions = app.get_app_store_versions(
+    filter: {
+      "appStoreState" => "PENDING_DEVELOPER_RELEASE",
+      "platform"      => platform_filter
+    }
+  )
+
+  released = false
+  if versions.empty?
+    UI.message("No versions in PENDING_DEVELOPER_RELEASE for #{bundle_id} (#{platform_filter})")
+  else
+    versions.each do |ver|
+      UI.message("Releasing #{bundle_id} v#{ver.version_string} (#{platform_filter})")
+      Spaceship::ConnectAPI::AppStoreVersionReleaseRequest.create(app_store_version_id: ver.id)
+      UI.success("Released v#{ver.version_string}!")
+      released = true
+    end
+  end
+
+  if ENV["GITHUB_OUTPUT"]
+    File.open(ENV["GITHUB_OUTPUT"], "a") { |f| f.puts "released=#{released}" }
+  end
+end
+
+lane :build_macos do
+  setup_ci if ENV["CI"]
+
+  app       = required_env!("MATRIX_APP")
+  build_num = required_env!("MACOS_BUILD_NUMBER")
+  profile   = required_env!("MATCH_PROFILE_NAME")
+  bundle_id = required_env!("BUNDLE_ID")
+
+  build_mac_app(
+    workspace:            "packages/#{app}/macos/Runner.xcworkspace",
+    scheme:               "Runner",
+    configuration:        "Release",
+    export_method:        "app-store",
+    codesigning_identity: "Apple Distribution",
+    xcargs: [
+      "CURRENT_PROJECT_VERSION=#{build_num}",
+      "DEVELOPMENT_TEAM=P64T65C668",
+      "CODE_SIGN_STYLE=Manual",
+      "PROVISIONING_PROFILE_SPECIFIER=\"#{profile}\""
+    ].join(" "),
+    export_options: {
+      provisioningProfiles: {
+        bundle_id => profile
+      }
+    },
+    output_directory: File.expand_path("../../packages/#{app}/build/export", __dir__),
+    buildlog_path:    "/tmp/xcodebuild-macos-logs"
+  )
+end

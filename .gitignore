@@ -20,3 +20,5 @@ moqui/moqui.war
 moqui/moqui-plus-runtime.war
 
 
+authkey.txt
+AuthKey_*.p8

@@ -1,0 +1,434 @@
+name: Release Approved Store Submissions
+
+# Checks each store for versions that have passed review and are waiting for a
+# manual developer release action, then releases them to the public.
+#
+# Platform        | "Approved but held" state
+# --------------- | -------------------------------------------
+# iOS             | App Store → PENDING_DEVELOPER_RELEASE
+# macOS           | App Store → PENDING_DEVELOPER_RELEASE
+# Android         | Google Play → production track, status=draft  (managed publishing)
+# Windows         | Partner Center → readyToPublish certification status
+# Snap            | Snap Store → any revision in beta channel → promote to stable
+
+on:
+  workflow_dispatch:
+    inputs:
+      apps:
+        description: "Apps to check (comma-separated: admin, hotel)"
+        required: true
+        default: "admin,hotel"
+        type: string
+      stores:
+        description: "Stores to check (comma-separated: ios, macos, android, windows, snap)"
+        required: true
+        default: "ios,macos,android,windows,snap"
+        type: string
+
+concurrency:
+  group: store-release
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  # ───────────────────────────────────────────────────────────────────────────
+  # Convert comma-separated inputs into JSON arrays for downstream matrix jobs
+  # ───────────────────────────────────────────────────────────────────────────
+  resolve-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      ios_matrix:     ${{ steps.build.outputs.ios_matrix }}
+      macos_matrix:   ${{ steps.build.outputs.macos_matrix }}
+      android_matrix: ${{ steps.build.outputs.android_matrix }}
+      windows_matrix: ${{ steps.build.outputs.windows_matrix }}
+      snap_matrix:    ${{ steps.build.outputs.snap_matrix }}
+      run_ios:        ${{ steps.build.outputs.run_ios }}
+      run_macos:      ${{ steps.build.outputs.run_macos }}
+      run_android:    ${{ steps.build.outputs.run_android }}
+      run_windows:    ${{ steps.build.outputs.run_windows }}
+      run_snap:       ${{ steps.build.outputs.run_snap }}
+    steps:
+      - id: build
+        run: |
+          APPS="${{ inputs.apps }}"
+          STORES="${{ inputs.stores }}"
+
+          build_matrix() {
+            local json="["
+            local first=true
+            IFS=',' read -ra app_list <<< "$APPS"
+            for app in "${app_list[@]}"; do
+              app=$(echo "$app" | tr -d ' ')
+              if [[ "$first" == "false" ]]; then json="$json,"; fi
+              json="${json}{\"app\":\"${app}\"}"
+              first=false
+            done
+            json="${json}]"
+            echo "$json"
+          }
+
+          contains() { echo "$STORES" | grep -qw "$1"; }
+
+          if contains "ios"; then
+            echo "run_ios=true"                   >> "$GITHUB_OUTPUT"
+            echo "ios_matrix=$(build_matrix)"     >> "$GITHUB_OUTPUT"
+          else
+            echo "run_ios=false"                  >> "$GITHUB_OUTPUT"
+            echo "ios_matrix=[]"                  >> "$GITHUB_OUTPUT"
+          fi
+
+          if contains "macos"; then
+            echo "run_macos=true"                 >> "$GITHUB_OUTPUT"
+            echo "macos_matrix=$(build_matrix)"   >> "$GITHUB_OUTPUT"
+          else
+            echo "run_macos=false"                >> "$GITHUB_OUTPUT"
+            echo "macos_matrix=[]"                >> "$GITHUB_OUTPUT"
+          fi
+
+          if contains "android"; then
+            echo "run_android=true"               >> "$GITHUB_OUTPUT"
+            echo "android_matrix=$(build_matrix)" >> "$GITHUB_OUTPUT"
+          else
+            echo "run_android=false"              >> "$GITHUB_OUTPUT"
+            echo "android_matrix=[]"              >> "$GITHUB_OUTPUT"
+          fi
+
+          if contains "windows"; then
+            echo "run_windows=true"               >> "$GITHUB_OUTPUT"
+            echo "windows_matrix=$(build_matrix)" >> "$GITHUB_OUTPUT"
+          else
+            echo "run_windows=false"              >> "$GITHUB_OUTPUT"
+            echo "windows_matrix=[]"              >> "$GITHUB_OUTPUT"
+          fi
+
+          if contains "snap"; then
+            echo "run_snap=true"                  >> "$GITHUB_OUTPUT"
+            echo "snap_matrix=$(build_matrix)"    >> "$GITHUB_OUTPUT"
+          else
+            echo "run_snap=false"                 >> "$GITHUB_OUTPUT"
+            echo "snap_matrix=[]"                 >> "$GITHUB_OUTPUT"
+          fi
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # iOS — release versions in PENDING_DEVELOPER_RELEASE via Fastlane Spaceship
+  # Secrets: APP_STORE_CONNECT_API_KEY_ID, APP_STORE_CONNECT_API_ISSUER_ID,
+  #          APP_STORE_CONNECT_API_KEY_CONTENT
+  # ───────────────────────────────────────────────────────────────────────────
+  release-ios:
+    needs: [resolve-matrix]
+    if: needs.resolve-matrix.outputs.run_ios == 'true'
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.resolve-matrix.outputs.ios_matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.2"
+          bundler-cache: true
+          working-directory: flutter/fastlane
+
+      - name: Release approved iOS version
+        env:
+          ASC_PLATFORM: IOS
+          BUNDLE_ID: org.growerp.${{ matrix.app }}
+          APP_STORE_CONNECT_API_KEY_ID:      ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          APP_STORE_CONNECT_API_ISSUER_ID:   ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY_CONTENT: ${{ secrets.APP_STORE_CONNECT_API_KEY_CONTENT }}
+        id: release
+        run: bundle exec fastlane release_approved
+        working-directory: flutter/fastlane
+
+      - name: Report result
+        run: |
+          if [[ "${{ steps.release.outputs.released }}" == "true" ]]; then
+            echo "Released iOS ${{ matrix.app }} to the App Store."
+          else
+            echo "No pending iOS release found for ${{ matrix.app }}."
+          fi
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # macOS — release versions in PENDING_DEVELOPER_RELEASE via Fastlane Spaceship
+  # Secrets: APP_STORE_CONNECT_API_KEY_ID, APP_STORE_CONNECT_API_ISSUER_ID,
+  #          APP_STORE_CONNECT_API_KEY_CONTENT
+  # ───────────────────────────────────────────────────────────────────────────
+  release-macos:
+    needs: [resolve-matrix]
+    if: needs.resolve-matrix.outputs.run_macos == 'true'
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.resolve-matrix.outputs.macos_matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.2"
+          bundler-cache: true
+          working-directory: flutter/fastlane
+
+      - name: Release approved macOS version
+        env:
+          ASC_PLATFORM: MAC_OS
+          BUNDLE_ID: org.growerp.${{ matrix.app }}
+          APP_STORE_CONNECT_API_KEY_ID:      ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          APP_STORE_CONNECT_API_ISSUER_ID:   ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY_CONTENT: ${{ secrets.APP_STORE_CONNECT_API_KEY_CONTENT }}
+        id: release
+        run: bundle exec fastlane release_approved
+        working-directory: flutter/fastlane
+
+      - name: Report result
+        run: |
+          if [[ "${{ steps.release.outputs.released }}" == "true" ]]; then
+            echo "Released macOS ${{ matrix.app }} to the Mac App Store."
+          else
+            echo "No pending macOS release found for ${{ matrix.app }}."
+          fi
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # Android — promote production-track draft releases to completed
+  # (applies when Google Play managed publishing is enabled)
+  # Secrets: GOOGLE_PLAY_SERVICE_ACCOUNT_JSON
+  # ───────────────────────────────────────────────────────────────────────────
+  release-android:
+    needs: [resolve-matrix]
+    if: needs.resolve-matrix.outputs.run_android == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.resolve-matrix.outputs.android_matrix) }}
+    steps:
+      - name: Install Google API client
+        run: pip install --quiet google-auth google-api-python-client
+
+      - name: Release approved Android version
+        env:
+          GOOGLE_PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+          APP_NAME: ${{ matrix.app }}
+        run: |
+          python3 - <<'PYEOF'
+          import json, os, sys
+
+          try:
+              from google.oauth2 import service_account
+              from googleapiclient.discovery import build
+          except ImportError as e:
+              print(f"Missing dependency: {e}", file=sys.stderr)
+              sys.exit(1)
+
+          creds_json = os.environ["GOOGLE_PLAY_SERVICE_ACCOUNT_JSON"]
+          package_name = f"org.growerp.{os.environ['APP_NAME']}"
+
+          creds = service_account.Credentials.from_service_account_info(
+              json.loads(creds_json),
+              scopes=["https://www.googleapis.com/auth/androidpublisher"]
+          )
+          service = build("androidpublisher", "v3", credentials=creds)
+          edits = service.edits()
+
+          # Create a temporary edit to inspect / update the production track
+          edit = edits.insert(packageName=package_name, body={}).execute()
+          edit_id = edit["id"]
+
+          try:
+              track = edits.tracks().get(
+                  packageName=package_name, editId=edit_id, track="production"
+              ).execute()
+
+              draft_releases = [
+                  r for r in track.get("releases", []) if r.get("status") == "draft"
+              ]
+
+              if not draft_releases:
+                  print(f"No draft releases on production track for {package_name}.")
+                  edits.delete(packageName=package_name, editId=edit_id).execute()
+                  sys.exit(0)
+
+              for r in draft_releases:
+                  print(f"Releasing {package_name} v{r.get('name', 'unknown')} "
+                        f"(versionCodes: {r.get('versionCodes', [])})")
+                  r["status"] = "completed"
+
+              track["releases"] = draft_releases
+              edits.tracks().update(
+                  packageName=package_name,
+                  editId=edit_id,
+                  track="production",
+                  body=track
+              ).execute()
+
+              edits.commit(packageName=package_name, editId=edit_id).execute()
+              print("Released successfully to Google Play production!")
+
+          except Exception as exc:
+              try:
+                  edits.delete(packageName=package_name, editId=edit_id).execute()
+              except Exception:
+                  pass
+              print(f"Error: {exc}", file=sys.stderr)
+              sys.exit(1)
+          PYEOF
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # Windows — find submissions in readyToPublish state and publish them
+  # Secrets: WINDOWS_TENANT_ID, WINDOWS_CLIENT_ID, WINDOWS_CLIENT_SECRET,
+  #          WINDOWS_ADMIN_PRODUCT_ID, WINDOWS_HOTEL_PRODUCT_ID
+  # ───────────────────────────────────────────────────────────────────────────
+  release-windows:
+    needs: [resolve-matrix]
+    if: needs.resolve-matrix.outputs.run_windows == 'true'
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.resolve-matrix.outputs.windows_matrix) }}
+    steps:
+      - name: Release approved Windows submission
+        shell: pwsh
+        env:
+          WINDOWS_TENANT_ID:      ${{ secrets.WINDOWS_TENANT_ID }}
+          WINDOWS_CLIENT_ID:      ${{ secrets.WINDOWS_CLIENT_ID }}
+          WINDOWS_CLIENT_SECRET:  ${{ secrets.WINDOWS_CLIENT_SECRET }}
+          WINDOWS_ADMIN_PRODUCT_ID: ${{ secrets.WINDOWS_ADMIN_PRODUCT_ID }}
+          WINDOWS_HOTEL_PRODUCT_ID: ${{ secrets.WINDOWS_HOTEL_PRODUCT_ID }}
+        run: |
+          $ErrorActionPreference = "Stop"
+
+          $appId = if ("${{ matrix.app }}" -eq "admin") {
+            $env:WINDOWS_ADMIN_PRODUCT_ID
+          } else {
+            $env:WINDOWS_HOTEL_PRODUCT_ID
+          }
+
+          # Authenticate with Azure AD
+          $authBody = "grant_type=client_credentials" +
+            "&client_id=$([Uri]::EscapeDataString($env:WINDOWS_CLIENT_ID))" +
+            "&client_secret=$([Uri]::EscapeDataString($env:WINDOWS_CLIENT_SECRET))" +
+            "&resource=https%3A%2F%2Fmanage.devcenter.microsoft.com"
+          $authResp = Invoke-RestMethod `
+            -Uri "https://login.microsoftonline.com/$env:WINDOWS_TENANT_ID/oauth2/token" `
+            -Method POST -ContentType "application/x-www-form-urlencoded" -Body $authBody
+          $headers = @{
+            Authorization = "Bearer $($authResp.access_token)"
+            Accept        = "application/json"
+          }
+          $baseUri = "https://manage.devcenter.microsoft.com/v1.0/my/applications/$appId"
+
+          # Fetch pending submission (if any)
+          $app = Invoke-RestMethod -Uri $baseUri -Headers $headers
+          $pendingId = $app.pendingApplicationSubmission.id
+
+          if (-not $pendingId) {
+            Write-Host "No pending submission found for ${{ matrix.app }} ($appId). Nothing to release."
+            exit 0
+          }
+
+          # Check submission status
+          $sub = Invoke-RestMethod `
+            -Uri "$baseUri/submissions/$pendingId" -Headers $headers
+          Write-Host "Pending submission $pendingId status: $($sub.status)"
+
+          if ($sub.status -ne "ReadyToPublish") {
+            Write-Host "Submission is not in ReadyToPublish state (current: $($sub.status)). Skipping."
+            exit 0
+          }
+
+          # Publish the approved submission
+          Write-Host "Publishing submission $pendingId for ${{ matrix.app }}..."
+          Invoke-RestMethod `
+            -Uri "$baseUri/submissions/$pendingId/commit" `
+            -Method POST -Headers $headers -ContentType "application/json" | Out-Null
+
+          # Poll until the submission moves out of ReadyToPublish (up to 10 min)
+          for ($i = 0; $i -lt 20; $i++) {
+            Start-Sleep -Seconds 30
+            $status = Invoke-RestMethod `
+              -Uri "$baseUri/submissions/$pendingId/status" -Headers $headers
+            Write-Host "[$i] Status: $($status.status)"
+            if ($status.status -eq "Published") {
+              Write-Host "Released ${{ matrix.app }} to the Microsoft Store!"
+              exit 0
+            }
+            if ($status.status -match "Failed|Canceled") {
+              Write-Host ($status.statusDetails | ConvertTo-Json -Depth 5)
+              exit 1
+            }
+          }
+          Write-Host "Publish initiated — processing continues in Partner Center."
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # Snap Store — promote the current beta revision to the stable channel
+  # The public Snap Store API is used to find the beta revision (no auth needed);
+  # snapcraft CLI is used for the promotion (needs SNAPCRAFT_STORE_CREDENTIALS).
+  # Snap name convention: growerp-<app>  (e.g. growerp-admin)
+  # Secrets: SNAPCRAFT_STORE_CREDENTIALS
+  # ───────────────────────────────────────────────────────────────────────────
+  release-snap:
+    needs: [resolve-matrix]
+    if: needs.resolve-matrix.outputs.run_snap == 'true'
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.resolve-matrix.outputs.snap_matrix) }}
+    steps:
+      - name: Install snapcraft
+        run: |
+          sudo systemctl enable --now snapd.socket || true
+          sudo systemctl restart snapd || true
+          for i in {1..30}; do snap version >/dev/null 2>&1 && break; sleep 2; done
+          for i in {1..5}; do
+            sudo snap install snapcraft --classic --channel=latest/stable && break
+            echo "snapcraft install failed (attempt $i), retrying..."
+            sudo snap refresh || true
+            sleep 10
+          done
+
+      - name: Find beta revision via Snap Store API
+        id: find
+        env:
+          SNAP_NAME: growerp-${{ matrix.app }}
+        run: |
+          REVISION=$(curl -s \
+            "https://api.snapcraft.io/v2/snaps/info/${SNAP_NAME}?fields=channel-map" \
+            -H "Snap-Device-Series: 16" | \
+            python3 -c "
+          import json, sys
+          data = json.load(sys.stdin)
+          for entry in data.get('channel-map', []):
+              ch = entry.get('channel', {})
+              if ch.get('name') == 'beta' and ch.get('track') == 'latest':
+                  print(entry.get('revision', ''))
+                  break
+          ")
+
+          if [ -z "$REVISION" ]; then
+            echo "No revision found in latest/beta for ${SNAP_NAME}."
+            echo "revision=" >> "$GITHUB_OUTPUT"
+          else
+            echo "Found revision $REVISION in latest/beta for ${SNAP_NAME}."
+            echo "revision=$REVISION" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Promote beta revision to stable
+        if: steps.find.outputs.revision != ''
+        env:
+          SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}
+          SNAP_NAME: growerp-${{ matrix.app }}
+          REVISION: ${{ steps.find.outputs.revision }}
+        run: |
+          snapcraft release "$SNAP_NAME" "$REVISION" stable
+          echo "Released $SNAP_NAME revision $REVISION to stable!"

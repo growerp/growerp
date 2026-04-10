@@ -1,4 +1,4 @@
-name: Release
+name: Update Staging
 
 # Manually trigger a production release from GitHub Actions.
 # No extra secrets needed — GITHUB_TOKEN is used for both git push and ghcr.io.
