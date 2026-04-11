@@ -1,6 +1,6 @@
 name: Update Staging
 
-# Manually trigger a production release from GitHub Actions.
+# Manually trigger a staging update from GitHub Actions.
 # No extra secrets needed — GITHUB_TOKEN is used for both git push and ghcr.io.
 # Required repository / organisation settings:
 #   Settings → Actions → General → Workflow permissions → "Read and write permissions"
@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
     inputs:
       bump:
-        description: "Version bump type. Use 'none' to build and push images at the current version without committing."
+        description: "Version bump type. Use 'none' to push images at the current version without a version commit."
         required: true
         default: "patch"
         type: choice
@@ -19,18 +19,14 @@ on:
           - minor
           - major
           - none
-      apps:
-        description: "Apps to release (comma-separated). Leave empty for all."
-        required: false
-        default: ""
       comment:
-        description: "Optional release comment added to the git commit (ignored when bump is 'none')"
+        description: "Optional comment added to the git commit (ignored when bump is 'none')"
         required: false
         default: ""
 
-# Only one release at a time — never cancel a running release.
+# Only one update-staging at a time — never cancel a running update.
 concurrency:
-  group: release
+  group: update-staging
   cancel-in-progress: false
 
 permissions:
@@ -38,19 +34,108 @@ permissions:
   packages: write # required to push to ghcr.io
 
 jobs:
-  release:
+  # ───────────────────────────────────────────────────────────────────────────
+  # 1. Bump version files only — no git commit, no docker build yet.
+  #    Bumped pubspecs are uploaded as an artifact for all build-image jobs.
+  # ───────────────────────────────────────────────────────────────────────────
+  prepare:
     runs-on: ubuntu-latest
-    timeout-minutes: 120
-
+    timeout-minutes: 30
     steps:
-      # -----------------------------------------------------------------------
-      # 1. Checkout — full history + all submodules so growerp-moqui can be built
-      # -----------------------------------------------------------------------
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: dart-lang/setup-dart@v1
+
+      - name: Install dcli
+        run: dart pub global activate dcli
+
+      - name: Resolve release tool dependencies
+        run: dart pub get
+        working-directory: flutter/release
+
+      - name: Bump version files
+        if: inputs.bump != 'none'
+        working-directory: flutter
+        run: dart release/release_tool.dart --ci --bump=${{ inputs.bump }} --workspace=local --no-push-docker --no-push-github
+
+      - name: Upload bumped pubspecs
+        if: inputs.bump != 'none'
+        uses: actions/upload-artifact@v4
+        with:
+          name: bumped-pubspecs
+          path: flutter/**/pubspec.yaml
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # 3. Build and push Flutter app Docker images — all apps run in parallel
+  # ───────────────────────────────────────────────────────────────────────────
+  build-image:
+    needs: [prepare]
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      matrix:
+        app: [admin, elearner, freelance, health, hotel, support]
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download bumped pubspecs
+        if: inputs.bump != 'none'
+        uses: actions/download-artifact@v4
+        with:
+          name: bumped-pubspecs
+          path: flutter
+
+      - uses: dart-lang/setup-dart@v1
+
+      - name: Install dcli
+        run: dart pub global activate dcli
+
+      - name: Resolve release tool dependencies
+        run: dart pub get
+        working-directory: flutter/release
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push ${{ matrix.app }}
+        working-directory: flutter
+        env:
+          DOCKER_BUILDKIT: "1"
+          DOCKER_REGISTRY: ghcr.io/growerp
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: dart release/release_tool.dart --ci --bump=none --workspace=local --push-docker --apps=${{ matrix.app }}
+
+      - name: Upload success marker
+        if: success()
+        run: echo "${{ matrix.app }}" > /tmp/${{ matrix.app }}.txt
+
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: success-${{ matrix.app }}
+          path: /tmp/${{ matrix.app }}.txt
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # 4. Build and push growerp-moqui backend Docker image
+  # ───────────────────────────────────────────────────────────────────────────
+  build-moqui:
+    needs: prepare
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Init submodules (SSH → HTTPS rewrite)
         run: |
@@ -60,11 +145,14 @@ jobs:
       - name: Set up backend symlinks
         run: bash setup-backend.sh
 
-      # -----------------------------------------------------------------------
-      # 2. Dart SDK
-      # -----------------------------------------------------------------------
-      - name: Set up Dart
-        uses: dart-lang/setup-dart@v1
+      - name: Download bumped pubspecs
+        if: inputs.bump != 'none'
+        uses: actions/download-artifact@v4
+        with:
+          name: bumped-pubspecs
+          path: flutter
+
+      - uses: dart-lang/setup-dart@v1
 
       - name: Install dcli
         run: dart pub global activate dcli
@@ -73,22 +161,61 @@ jobs:
         run: dart pub get
         working-directory: flutter/release
 
-      # -----------------------------------------------------------------------
-      # 3. Docker — Buildx + layer cache via GitHub Actions cache backend
-      # -----------------------------------------------------------------------
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+      - uses: docker/setup-buildx-action@v3
 
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v3
+      - uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # -----------------------------------------------------------------------
-      # 4. Git — allow push back via GITHUB_TOKEN over HTTPS
-      # -----------------------------------------------------------------------
+      - name: Build and push growerp-moqui
+        working-directory: flutter
+        env:
+          DOCKER_BUILDKIT: "1"
+          DOCKER_REGISTRY: ghcr.io/growerp
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: dart release/release_tool.dart --ci --bump=none --workspace=local --push-docker --apps=growerp-moqui
+
+      - name: Upload success marker
+        if: success()
+        run: echo "growerp-moqui" > /tmp/growerp-moqui.txt
+
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: success-growerp-moqui
+          path: /tmp/growerp-moqui.txt
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # 5. Single git commit covering all successful image pushes
+  # ───────────────────────────────────────────────────────────────────────────
+  commit:
+    needs: [prepare, build-image, build-moqui]
+    runs-on: ubuntu-latest
+    if: always() && needs.prepare.result == 'success' && inputs.bump != 'none'
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Download bumped pubspecs
+        uses: actions/download-artifact@v4
+        with:
+          name: bumped-pubspecs
+          path: flutter
+
+      - name: Download success markers
+        uses: actions/download-artifact@v4
+        with:
+          pattern: success-*
+          merge-multiple: true
+          path: /tmp/build-success
+        continue-on-error: true
+
       - name: Configure git
         run: |
           git config user.email "github-actions@growerp.com"
@@ -96,35 +223,30 @@ jobs:
           git remote set-url origin \
             https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
 
-      # -----------------------------------------------------------------------
-      # 5. Run the release tool in CI mode
-      #    --workspace=local  → skip repo clone, use this checkout directly
-      #    --parallel         → build all selected apps simultaneously
-      #    --push-github      → commit version bump + tag and push
-      # -----------------------------------------------------------------------
-      - name: Run release tool
-        working-directory: flutter
-        env:
-          DOCKER_BUILDKIT: "1"
-          DOCKER_REGISTRY: ghcr.io/growerp
-          GITHUB_ACTOR: ${{ github.actor }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Commit version bump
         run: |
-          ARGS="--ci --bump=${{ inputs.bump }} --parallel --workspace=local --push-docker"
-
-          if [ -n "${{ inputs.apps }}" ]; then
-            ARGS="$ARGS --apps=${{ inputs.apps }}"
+          SUCCEEDED=$(ls /tmp/build-success/*.txt 2>/dev/null \
+            | xargs -I{} basename {} .txt | sort | tr '\n' ', ' | sed 's/, $//')
+          MSG="chore: update staging — ${{ inputs.bump }} bump"
+          if [ -n "$SUCCEEDED" ]; then
+            MSG="$MSG — images pushed: $SUCCEEDED"
           fi
-
           if [ -n "${{ inputs.comment }}" ]; then
-            # Wrap in quotes so spaces are preserved
-            ARGS="$ARGS --comment=${{ inputs.comment }}"
+            MSG="$MSG — ${{ inputs.comment }}"
           fi
+          git add flutter/**/pubspec.yaml
+          git diff --cached --quiet && echo "Nothing to commit" || git commit -m "$MSG"
+          git push origin HEAD
 
-          # Commit version bump and push git tag for all bump types except 'none'
-          if [ "${{ inputs.bump }}" != "none" ]; then
-            ARGS="$ARGS --push-github"
-          fi
-
-          echo "Running: dart release/release_tool.dart $ARGS"
-          dart release/release_tool.dart $ARGS
+      - name: Summary
+        if: always()
+        run: |
+          echo "## Update Staging Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          for app in admin elearner freelance health hotel support growerp-moqui; do
+            if [ -f "/tmp/build-success/${app}.txt" ]; then
+              echo "- ✅ $app" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "- ❌ $app" >> $GITHUB_STEP_SUMMARY
+            fi
+          done
