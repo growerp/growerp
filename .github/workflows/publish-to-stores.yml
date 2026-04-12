@@ -599,6 +599,7 @@ jobs:
           APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
           APP_STORE_CONNECT_API_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
           APP_STORE_CONNECT_API_KEY_CONTENT: ${{ secrets.APP_STORE_CONNECT_API_KEY_CONTENT }}
+          SUBMIT_FOR_REVIEW: ${{ inputs.track == 'stable' && 'true' || 'false' }}
         run: bundle exec fastlane upload_macos
         working-directory: flutter
 
@@ -754,6 +755,7 @@ jobs:
 
           git diff --cached --quiet && { echo "Nothing to commit"; exit 0; }
           git commit -m "chore: bump build number for apps=[$APPS] stores=[$STORES] [skip ci]"
+          git pull --rebase origin ${{ github.ref_name }}
           git push origin HEAD:${{ github.ref_name }}
 
   # ───────────────────────────────────────────────────────────────────────────

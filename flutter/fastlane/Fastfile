@@ -184,36 +184,27 @@ lane :upload_macos do
   export_dir = File.expand_path("../../packages/#{app_name}/build/export", __dir__)
 
   pkg = Dir["#{export_dir}/*.pkg"].first
-  if pkg
+  UI.user_error!("No .pkg found in #{export_dir}") if pkg.nil?
+
+  submit_for_review = ENV.fetch("SUBMIT_FOR_REVIEW", "false") == "true"
+
+  if submit_for_review
     upload_to_app_store(
       api_key:                    api_key,
       pkg:                        pkg,
       platform:                   "osx",
       skip_metadata:              true,
       skip_screenshots:           true,
-      submit_for_review:          false,
+      submit_for_review:          true,
       run_precheck_before_submit: false
     )
   else
-    # Xcode 13+ exports .app directly for App Store Connect upload
-    app_bundle = Dir["#{export_dir}/*.app"].first
-    UI.user_error!("No .pkg or .app found in #{export_dir}") if app_bundle.nil?
-
-    # altool searches ~/.appstoreconnect/private_keys/AuthKey_<ID>.p8
-    require "base64"
-    key_dir  = File.expand_path("~/.appstoreconnect/private_keys")
-    key_path = File.join(key_dir, "AuthKey_#{key_id}.p8")
-    FileUtils.mkdir_p(key_dir)
-    File.write(key_path, Base64.decode64(key_content))
-
-    begin
-      sh "xcrun altool --upload-app --type osx " \
-         "--file #{app_bundle.shellescape} " \
-         "--apiKey #{key_id} " \
-         "--apiIssuer #{issuer_id}"
-    ensure
-      FileUtils.rm_f(key_path)
-    end
+    upload_to_testflight(
+      api_key:                 api_key,
+      pkg:                     pkg,
+      skip_submission:         true,
+      notify_external_testers: false
+    )
   end
 end
 

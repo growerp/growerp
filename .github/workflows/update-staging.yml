@@ -270,6 +270,7 @@ jobs:
           fi
           git add flutter/**/pubspec.yaml
           git diff --cached --quiet && echo "Nothing to commit" || git commit -m "$MSG"
+          git pull --rebase origin ${{ github.ref_name }}
           git push origin HEAD
 
       - name: Summary
