@@ -19,6 +19,10 @@ on:
           - minor
           - major
           - none
+      apps:
+        description: "Comma-separated list of apps to build (blank = all: admin,elearner,freelance,health,hotel,support,growerp-moqui)"
+        required: false
+        default: ""
       comment:
         description: "Optional comment added to the git commit (ignored when bump is 'none')"
         required: false
@@ -41,11 +45,40 @@ jobs:
   prepare:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    outputs:
+      flutter_apps: ${{ steps.resolve-apps.outputs.flutter_apps }}
+      include_moqui: ${{ steps.resolve-apps.outputs.include_moqui }}
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Resolve app list
+        id: resolve-apps
+        run: |
+          INPUT="${{ inputs.apps }}"
+          ALL_FLUTTER="admin elearner freelance health hotel support"
+          if [ -z "$INPUT" ]; then
+            FLUTTER_APPS="$ALL_FLUTTER"
+            INCLUDE_MOQUI=true
+          else
+            FLUTTER_LIST=""
+            INCLUDE_MOQUI=false
+            IFS=',' read -ra APPS <<< "$INPUT"
+            for app in "${APPS[@]}"; do
+              app=$(echo "$app" | xargs)
+              if [ "$app" = "growerp-moqui" ]; then
+                INCLUDE_MOQUI=true
+              else
+                FLUTTER_LIST="$FLUTTER_LIST $app"
+              fi
+            done
+            FLUTTER_APPS="${FLUTTER_LIST# }"
+          fi
+          JSON=$(echo "$FLUTTER_APPS" | tr ' ' '\n' | grep -v '^$' | jq -R . | jq -sc .)
+          echo "flutter_apps=$JSON" >> $GITHUB_OUTPUT
+          echo "include_moqui=$INCLUDE_MOQUI" >> $GITHUB_OUTPUT
 
       - uses: dart-lang/setup-dart@v1
 
@@ -77,7 +110,7 @@ jobs:
     timeout-minutes: 30
     strategy:
       matrix:
-        app: [admin, elearner, freelance, health, hotel, support]
+        app: ${{ fromJson(needs.prepare.outputs.flutter_apps) }}
       fail-fast: false
     steps:
       - uses: actions/checkout@v4
@@ -130,6 +163,7 @@ jobs:
   # ───────────────────────────────────────────────────────────────────────────
   build-moqui:
     needs: prepare
+    if: needs.prepare.outputs.include_moqui == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -194,7 +228,7 @@ jobs:
   commit:
     needs: [prepare, build-image, build-moqui]
     runs-on: ubuntu-latest
-    if: always() && needs.prepare.result == 'success' && inputs.bump != 'none'
+    if: always() && needs.prepare.result == 'success' && inputs.bump != 'none' && (needs.build-image.result == 'success' || needs.build-image.result == 'skipped') && (needs.build-moqui.result == 'success' || needs.build-moqui.result == 'skipped')
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
