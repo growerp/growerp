@@ -309,7 +309,11 @@ class HomeFormState extends State<HomeForm> with TickerProviderStateMixin {
                                     },
                                   ),
                                   const SizedBox(height: 50),
-                                  if (classificationId != 'AppSupport')
+                                  if (classificationId != 'AppSupport' &&
+                                      !(classificationId == 'AppHotel' &&
+                                          GlobalConfiguration().get("test") ==
+                                              true &&
+                                          Platform.isMacOS))
                                     _buildPremiumButton(
                                       context: context,
                                       key: const Key('newUserButton'),
