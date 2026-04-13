@@ -47,5 +47,7 @@
 	<string>We need camera access to take pictures.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>We need photo library access to select pictures.</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 </dict>
 </plist>
