@@ -166,7 +166,8 @@ jobs:
         run: docker compose -f ci/docker-compose-screenshot.yml down -v
 
   # ──────────────────────────────────────────────────────────────────────────
-  # 2. Apply device frames with Fastlane frameit
+  # 2. Apply device frames with Fastlane frameit and upload as artifact.
+  #    publish-to-stores downloads this artifact when update_metadata: true.
   # ──────────────────────────────────────────────────────────────────────────
   frame-screenshots:
     needs: take-screenshots
@@ -185,11 +186,8 @@ jobs:
         run: ls -lh screenshots/
 
       - name: Install Fastlane
-        run: |
-          sudo gem install fastlane --no-document
+        run: sudo gem install fastlane --no-document
 
-      # Build a Framefile.json that maps each device prefix to a frame style.
-      # frameit reads this to know which device bezel to apply.
       - name: Write Framefile.json
         working-directory: screenshots
         run: |
@@ -204,92 +202,69 @@ jobs:
               "title_below_image": false
             },
             "data": [
-              {
-                "filter": "phone-",
-                "frame": "Pixel 4"
-              },
-              {
-                "filter": "tablet7-",
-                "frame": "Nexus 7 2012"
-              },
-              {
-                "filter": "tablet10-",
-                "frame": "Nexus 10"
-              }
+              { "filter": "phone-",   "frame": "Pixel 4"      },
+              { "filter": "tablet7-", "frame": "Nexus 7 2012" },
+              { "filter": "tablet10-","frame": "Nexus 10"     }
             ]
           }
           EOF
 
       - name: Run frameit
         working-directory: screenshots
-        run: |
-          fastlane frameit || {
-            echo "frameit exited non-zero — checking output..."
-            ls -la
-          }
+        run: fastlane frameit || { echo "frameit non-zero — listing output:"; ls -la; }
 
       - name: List framed screenshots
-        run: |
-          echo "=== All files in screenshots/ ==="
-          find screenshots/ -name "*.png" | sort
+        run: find screenshots/ -name "*.png" | sort
 
-      # ── Generate preview HTML (same format as existing hotel preview) ──────
+      # ── Generate _preview.html ──────────────────────────────────────────────
       - name: Generate preview HTML
         working-directory: screenshots
         run: |
           python3 - << 'PYEOF'
-          import os, glob
+          import glob
 
-          files = sorted(f for f in glob.glob("*.png") if "_framed" in f or any(
-              f.startswith(p) for p in ("phone-", "tablet7-", "tablet10-")
-          ))
-
-          imgs = "".join(
-              f'<img src="{f}" alt="{f}" />'
-              for f in files
-          )
-
-          html = f"""<!--suppress ALL --><html lang="en"><head><title>Store Screenshots Preview</title>
+          files = sorted(f for f in glob.glob("*.png"))
+          imgs  = "".join(f'<img src="{f}" alt="{f}" />' for f in files)
+          html  = f"""<!--suppress ALL --><html lang="en"><head><title>Framed Screenshots</title>
           <style>
             :root {{ --height: 600; }}
             body {{ background-color: #efefef; }}
-            img {{ max-height: calc(var(--height) * 1px); margin-left: 16px; }}
+            img  {{ max-height: calc(var(--height) * 1px); margin-left: 16px; }}
             input {{ width: 400px; }}
           </style>
           <script>
           document.addEventListener('DOMContentLoaded', function () {{
             let h = document.getElementById('height');
-            let root = document.documentElement;
-            h.addEventListener('input', function () {{
-              root.style.setProperty('--height', h.value);
-            }});
+            document.documentElement.style.setProperty('--height', h.value);
+            h.addEventListener('input', () =>
+              document.documentElement.style.setProperty('--height', h.value));
           }});
           </script>
           </head>
           <div><label for="height">Preview Height:</label>
           <input type="range" min="100" max="2000" value="600" id="height" /></div>
-          <h1>Framed Screenshots</h1>{imgs}
-          <body></body></html>"""
+          <h1>Framed Screenshots</h1>{imgs}<body></body></html>"""
 
           with open("_preview.html", "w") as fh:
               fh.write(html)
-          print(f"Generated _preview.html with {len(files)} images")
+          print(f"Generated _preview.html ({len(files)} images)")
           PYEOF
 
-      - name: Upload framed screenshots artifact
+      # Artifact retention: 90 days so publish-to-stores can pick it up later.
+      - name: Upload framed-screenshots artifact
         uses: actions/upload-artifact@v4
         with:
           name: framed-screenshots
           path: |
-            screenshots/*.png
+            screenshots/*_framed.png
             screenshots/_preview.html
           if-no-files-found: warn
-          retention-days: 7
+          retention-days: 90
 
       - name: Summary
         run: |
+          TOTAL=$(find screenshots/ -name "*_framed.png" 2>/dev/null | wc -l)
           echo "## Store Screenshot Results" >> "$GITHUB_STEP_SUMMARY"
-          TOTAL=$(find screenshots/ -name "*.png" | wc -l)
-          echo "Total PNG files: $TOTAL" >> "$GITHUB_STEP_SUMMARY"
+          echo "$TOTAL framed PNGs produced." >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "Download the **framed-screenshots** artifact to review." >> "$GITHUB_STEP_SUMMARY"
+          echo "Run **Publish to Stores** with \`update_metadata: true\` to upload them to the stores." >> "$GITHUB_STEP_SUMMARY"

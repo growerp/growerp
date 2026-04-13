@@ -387,6 +387,32 @@ jobs:
         run: bundle exec fastlane upload
         working-directory: flutter/fastlane
 
+      - name: Download framed screenshots for iOS metadata
+        if: inputs.update_metadata == true
+        uses: dawidd6/action-download-artifact@v6
+        with:
+          workflow: screenshots.yml
+          name: framed-screenshots
+          path: framed-screenshots/
+          if_no_artifact_found: warn
+        continue-on-error: true
+
+      - name: Extract iOS screenshots from artifact
+        if: inputs.update_metadata == true
+        run: |
+          set -euo pipefail
+          APP=${{ matrix.app }}
+          ios_dir="flutter/packages/$APP/ios/fastlane/screenshots/en-US"
+          mkdir -p "$ios_dir"
+          shopt -s nullglob
+          # Copy all framed PNGs — deliver infers device from image dimensions (force: true)
+          for src in framed-screenshots/*_framed.png; do
+            dest="$ios_dir/$(basename "$src" "_framed.png").png"
+            cp "$src" "$dest"
+            echo "  → $dest"
+          done
+          echo "iOS screenshots ready: $(ls "$ios_dir" | wc -l) files"
+
       - name: Fastlane upload iOS metadata
         if: inputs.update_metadata == true
         env:
@@ -690,6 +716,43 @@ jobs:
           releaseFiles: flutter/packages/${{ matrix.app }}/build/app/outputs/bundle/release/app-release.aab
           track: ${{ inputs.track == 'stable' && 'production' || inputs.track }}
           status: completed
+
+      - name: Download framed screenshots for Android metadata
+        if: inputs.update_metadata == true
+        uses: dawidd6/action-download-artifact@v6
+        with:
+          workflow: screenshots.yml
+          name: framed-screenshots
+          path: framed-screenshots/
+          if_no_artifact_found: warn
+        continue-on-error: true
+
+      - name: Extract Android screenshots from artifact
+        if: inputs.update_metadata == true
+        run: |
+          set -euo pipefail
+          APP=${{ matrix.app }}
+          base="flutter/packages/$APP/android/fastlane/metadata/android/en-US/images"
+          phone_dir="$base/phoneScreenshots"
+          seven_dir="$base/sevenInchScreenshots"
+          ten_dir="$base/tenInchScreenshots"
+          mkdir -p "$phone_dir" "$seven_dir" "$ten_dir"
+
+          copy_device() {
+            local prefix="$1" dest_dir="$2"
+            shopt -s nullglob
+            for src in framed-screenshots/${prefix}-*_framed.png; do
+              base=$(basename "$src" "_framed.png")  # phone-mainmenu
+              name="${base#${prefix}-}.png"           # mainmenu.png
+              cp "$src" "$dest_dir/$name"
+              echo "  → $dest_dir/$name"
+            done
+          }
+
+          copy_device "phone"    "$phone_dir"
+          copy_device "tablet7"  "$seven_dir"
+          copy_device "tablet10" "$ten_dir"
+          echo "Phone: $(ls "$phone_dir" | wc -l)  7\": $(ls "$seven_dir" | wc -l)  10\": $(ls "$ten_dir" | wc -l)"
 
       - uses: ruby/setup-ruby@v1
         if: inputs.update_metadata == true
