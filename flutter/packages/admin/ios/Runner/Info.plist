@@ -51,10 +51,12 @@
 	</array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
-	<key>NSCameraUsageDescription</key>
-	<string>The app needs the camera to take pictures of persons and paper documents to show later as reference in the app.</string>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>The image you upload will be used on Business documents like invoices or shown on screen with the relevant data.</string>
+		<key>NSCameraUsageDescription</key>
+		<string>This app needs access to your camera to take profile pictures.</string>
+		<key>NSPhotoLibraryUsageDescription</key>
+		<string>This app needs access to your photo library to upload profile pictures.</string>
+		<key>NSPhotoLibraryAddUsageDescription</key>
+		<string>This app saves profile pictures to your photo library.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
