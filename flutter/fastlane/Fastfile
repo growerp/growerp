@@ -50,7 +50,7 @@ lane :ci_build do
   xcode_select "/Applications/Xcode_16.4.app"
   app_name = required_env!("APP_NAME")
   bundle_id = "org.growerp.#{app_name}"
-  profile_name = ENV.fetch("MATCH_IOS_PROFILE_NAME", "match AppStore #{bundle_id}")
+  profile_name = required_env!("MATCH_IOS_PROFILE_NAME")
   workspace_path = File.expand_path("../packages/#{app_name}/ios/Runner.xcworkspace", __dir__)
   build_app(
     workspace: workspace_path,
@@ -64,7 +64,13 @@ lane :ci_build do
     },
     buildlog_path: "/tmp/xcodebuild-ios-logs",
     disable_xcpretty: true,
-    xcargs: "GCC_OPTIMIZATION_LEVEL=s SWIFT_COMPILATION_MODE=wholemodule"
+    xcargs: [
+      "GCC_OPTIMIZATION_LEVEL=s",
+      "SWIFT_COMPILATION_MODE=wholemodule",
+      "CODE_SIGN_STYLE=Manual",
+      "DEVELOPMENT_TEAM=P64T65C668",
+      "PROVISIONING_PROFILE_SPECIFIER=\"#{profile_name}\""
+    ].join(" ")
   )
 end
 
