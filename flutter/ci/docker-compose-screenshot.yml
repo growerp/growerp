@@ -1,0 +1,78 @@
+services:
+  sut:
+    build:
+      context: ..
+      dockerfile: ci/Dockerfile
+    image: growerp/flutter-test-runner:latest
+    mem_limit: 4g
+    memswap_limit: 4g
+    working_dir: /home/mobiledevops/growerp
+    user: "${HOST_UID:-0}:${HOST_GID:-0}"
+    volumes:
+      - ..:/home/mobiledevops/growerp
+    environment:
+      - HOME=/home/mobiledevops
+      - BACKEND_URL=http://moqui
+      - CHAT_URL=ws://moqui
+      # Override these to emulate different device sizes:
+      - SCREEN_WIDTH=${SCREEN_WIDTH:-412}
+      - SCREEN_HEIGHT=${SCREEN_HEIGHT:-892}
+    depends_on:
+      moqui:
+        condition: service_healthy
+    command: bash -c "ci/run_screenshots.sh"
+
+  moqui:
+    image: growerp/growerp-moqui:latest
+    pull_policy: never
+    container_name: moqui
+    restart: always
+    mem_limit: 1536m
+    memswap_limit: 1536m
+    ports:
+      - 127.0.0.1:80:80
+    depends_on:
+      - moqui-database
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost/status || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 120s
+    volumes:
+      - ../../backend:/opt/moqui/runtime/component/growerp
+      - ../../pop-rest-store:/opt/moqui/runtime/component/PopRestStore
+      - ../../mantle-stripe:/opt/moqui/runtime/component/mantle-stripe
+    environment:
+      - instance_purpose=test
+      - entity_ds_db_conf=postgres
+      - entity_ds_host=moqui-database
+      - entity_ds_port=5432
+      - entity_ds_database=moqui
+      - entity_ds_schema=public
+      - entity_ds_user=moqui
+      - entity_ds_password=moqui
+      - entity_ds_crypt_pass='MoquiDefaultPassword:CHANGEME'
+      - JAVA_TOOL_OPTIONS=-Xmx768m -XX:MaxMetaspaceSize=256m
+      - webapp_allow_origins=*
+      - webapp_http_host=
+      - webapp_http_port=80
+      - webapp_client_ip_header=X-Real-IP
+      - default_locale=en_US
+      - default_time_zone=US/Pacific
+      - DB_DATA=INSTALL
+      - SMTP_USER=
+      - SMTP_PASSWORD=
+
+  moqui-database:
+    image: postgres:17.2
+    container_name: postgres
+    restart: always
+    mem_limit: 512m
+    memswap_limit: 512m
+    environment:
+      - POSTGRES_DB=moqui
+      - POSTGRES_DB_SCHEMA=public
+      - POSTGRES_USER=moqui
+      - POSTGRES_PASSWORD=moqui
+    command: postgres -c shared_buffers=128MB -c work_mem=4MB -c maintenance_work_mem=64MB
