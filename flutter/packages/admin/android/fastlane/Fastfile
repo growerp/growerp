@@ -41,4 +41,16 @@ platform :android do
       aab: "../build/app/outputs/bundle/release/app-release.aab"
       )
     end
+
+  lane :upload_metadata do
+    upload_to_play_store(
+      track:                   'production',
+      skip_upload_aab:         true,
+      skip_upload_apk:         true,
+      skip_upload_metadata:    false,
+      skip_upload_changelogs:  false,
+      skip_upload_screenshots: false,
+      skip_upload_images:      false
+    )
+  end
 end

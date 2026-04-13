@@ -1,0 +1,329 @@
+name: Download Store Metadata
+
+# Download current store listings (metadata + screenshots) from the live stores
+# into the fastlane directories in the repo, then commit the result.
+# Run this once to bootstrap or refresh the local metadata from what is actually
+# live in the stores before editing locally and uploading via publish-to-stores.
+
+on:
+  workflow_dispatch:
+    inputs:
+      apps:
+        description: "Apps to download metadata for (comma-separated: admin, hotel, freelance, health, support)"
+        required: true
+        default: "admin,hotel"
+        type: string
+      stores:
+        description: "Stores to download from (comma-separated: ios, macos, android)"
+        required: true
+        default: "ios,android"
+        type: string
+
+concurrency:
+  group: store-metadata-download
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  # ───────────────────────────────────────────────────────────────────────────
+  # Convert comma-separated inputs into JSON arrays for downstream matrix jobs
+  # ───────────────────────────────────────────────────────────────────────────
+  resolve-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      ios_matrix:     ${{ steps.build.outputs.ios_matrix }}
+      macos_matrix:   ${{ steps.build.outputs.macos_matrix }}
+      android_matrix: ${{ steps.build.outputs.android_matrix }}
+      run_ios:        ${{ steps.build.outputs.run_ios }}
+      run_macos:      ${{ steps.build.outputs.run_macos }}
+      run_android:    ${{ steps.build.outputs.run_android }}
+    steps:
+      - id: build
+        run: |
+          APPS="${{ inputs.apps }}"
+          STORES="${{ inputs.stores }}"
+
+          build_matrix() {
+            local json="["
+            local first=true
+            IFS=',' read -ra app_list <<< "$APPS"
+            for app in "${app_list[@]}"; do
+              app=$(echo "$app" | tr -d ' ')
+              if [[ "$first" == "false" ]]; then json="$json,"; fi
+              json="${json}{\"app\":\"${app}\"}"
+              first=false
+            done
+            json="${json}]"
+            echo "$json"
+          }
+
+          contains() { echo "$STORES" | grep -qw "$1"; }
+
+          if contains "ios"; then
+            echo "run_ios=true"                    >> "$GITHUB_OUTPUT"
+            echo "ios_matrix=$(build_matrix)"      >> "$GITHUB_OUTPUT"
+          else
+            echo "run_ios=false"                   >> "$GITHUB_OUTPUT"
+            echo "ios_matrix=[]"                   >> "$GITHUB_OUTPUT"
+          fi
+
+          if contains "macos"; then
+            echo "run_macos=true"                  >> "$GITHUB_OUTPUT"
+            echo "macos_matrix=$(build_matrix)"    >> "$GITHUB_OUTPUT"
+          else
+            echo "run_macos=false"                 >> "$GITHUB_OUTPUT"
+            echo "macos_matrix=[]"                 >> "$GITHUB_OUTPUT"
+          fi
+
+          if contains "android"; then
+            echo "run_android=true"                >> "$GITHUB_OUTPUT"
+            echo "android_matrix=$(build_matrix)"  >> "$GITHUB_OUTPUT"
+          else
+            echo "run_android=false"               >> "$GITHUB_OUTPUT"
+            echo "android_matrix=[]"               >> "$GITHUB_OUTPUT"
+          fi
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # Android — download metadata from Google Play into android/fastlane/metadata/
+  # Secrets: GOOGLE_PLAY_SERVICE_ACCOUNT_JSON
+  # ───────────────────────────────────────────────────────────────────────────
+  download-android:
+    needs: [resolve-matrix]
+    if: needs.resolve-matrix.outputs.run_android == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.resolve-matrix.outputs.android_matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.2"
+          bundler-cache: true
+          working-directory: flutter/packages/${{ matrix.app }}/android/fastlane
+
+      - name: Download Android metadata from Google Play
+        env:
+          GOOGLE_PLAY_JSON_KEY_DATA: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+        run: |
+          bundle exec fastlane run download_from_play_store
+        working-directory: flutter/packages/${{ matrix.app }}/android
+
+      - name: Upload downloaded Android metadata
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-metadata-${{ matrix.app }}
+          path: flutter/packages/${{ matrix.app }}/android/fastlane/metadata/
+          retention-days: 1
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # iOS — download metadata + screenshots from App Store Connect
+  # Secrets: APP_STORE_CONNECT_API_KEY_ID/ISSUER_ID/KEY_CONTENT
+  # ───────────────────────────────────────────────────────────────────────────
+  download-ios:
+    needs: [resolve-matrix]
+    if: needs.resolve-matrix.outputs.run_ios == 'true'
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.resolve-matrix.outputs.ios_matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.2"
+          bundler-cache: true
+          working-directory: flutter/fastlane
+
+      - name: Download iOS metadata from App Store Connect
+        env:
+          APP_NAME: ${{ matrix.app }}
+          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          APP_STORE_CONNECT_API_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY_CONTENT: ${{ secrets.APP_STORE_CONNECT_API_KEY_CONTENT }}
+        run: |
+          set -euo pipefail
+          APP_NAME="${{ matrix.app }}"
+          METADATA_PATH="$(pwd)/packages/${APP_NAME}/ios/fastlane/metadata"
+          SCREENSHOTS_PATH="$(pwd)/packages/${APP_NAME}/ios/fastlane/screenshots"
+          mkdir -p "$METADATA_PATH" "$SCREENSHOTS_PATH"
+
+          bundle exec fastlane deliver download_metadata \
+            --metadata_path "$METADATA_PATH" \
+            --app_identifier "org.growerp.${APP_NAME}"
+
+          bundle exec fastlane deliver download_screenshots \
+            --screenshots_path "$SCREENSHOTS_PATH" \
+            --app_identifier "org.growerp.${APP_NAME}"
+        working-directory: flutter
+
+      - name: Upload downloaded iOS metadata
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-metadata-${{ matrix.app }}
+          path: |
+            flutter/packages/${{ matrix.app }}/ios/fastlane/metadata/
+            flutter/packages/${{ matrix.app }}/ios/fastlane/screenshots/
+          retention-days: 1
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # macOS — download metadata from Mac App Store
+  # Secrets: APP_STORE_CONNECT_API_KEY_ID/ISSUER_ID/KEY_CONTENT
+  # ───────────────────────────────────────────────────────────────────────────
+  download-macos:
+    needs: [resolve-matrix]
+    if: needs.resolve-matrix.outputs.run_macos == 'true'
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.resolve-matrix.outputs.macos_matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve macOS bundle ID
+        env:
+          MATRIX_APP: ${{ matrix.app }}
+        run: |
+          case "$MATRIX_APP" in
+            admin) echo "BUNDLE_ID=org.growerp.admin" >> "$GITHUB_ENV" ;;
+            hotel) echo "BUNDLE_ID=org.growerp.hotel" >> "$GITHUB_ENV" ;;
+            *)
+              echo "Unsupported macOS app: $MATRIX_APP" >&2
+              exit 1
+              ;;
+          esac
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.2"
+          bundler-cache: true
+          working-directory: flutter/fastlane
+
+      - name: Download macOS metadata from Mac App Store
+        env:
+          APP_NAME: ${{ matrix.app }}
+          BUNDLE_ID: ${{ env.BUNDLE_ID }}
+          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          APP_STORE_CONNECT_API_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY_CONTENT: ${{ secrets.APP_STORE_CONNECT_API_KEY_CONTENT }}
+        run: |
+          set -euo pipefail
+          APP_NAME="${{ matrix.app }}"
+          METADATA_PATH="$(pwd)/packages/${APP_NAME}/ios/fastlane/metadata"
+          mkdir -p "$METADATA_PATH"
+
+          bundle exec fastlane deliver download_metadata \
+            --metadata_path "$METADATA_PATH" \
+            --app_identifier "$BUNDLE_ID" \
+            --platform "osx"
+        working-directory: flutter
+
+      - name: Upload downloaded macOS metadata
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-metadata-${{ matrix.app }}
+          path: flutter/packages/${{ matrix.app }}/ios/fastlane/metadata/
+          retention-days: 1
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # Commit all downloaded metadata back to the repo
+  # ───────────────────────────────────────────────────────────────────────────
+  commit-metadata:
+    needs: [download-android, download-ios, download-macos]
+    if: |
+      always() &&
+      (
+        needs.download-android.result == 'success' ||
+        needs.download-ios.result     == 'success' ||
+        needs.download-macos.result   == 'success'
+      )
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download all metadata artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: "*-metadata-*"
+          merge-multiple: false
+
+      - name: Restore Android metadata artifacts
+        if: needs.download-android.result == 'success'
+        run: |
+          set -euo pipefail
+          IFS=',' read -ra app_list <<< "${{ inputs.apps }}"
+          for app in "${app_list[@]}"; do
+            app=$(echo "$app" | tr -d ' ')
+            src="android-metadata-${app}"
+            dst="flutter/packages/${app}/android/fastlane/metadata"
+            if [ -d "$src" ]; then
+              mkdir -p "$dst"
+              cp -r "$src/." "$dst/"
+              echo "Restored Android metadata for $app"
+            fi
+          done
+
+      - name: Restore iOS metadata artifacts
+        if: needs.download-ios.result == 'success'
+        run: |
+          set -euo pipefail
+          IFS=',' read -ra app_list <<< "${{ inputs.apps }}"
+          for app in "${app_list[@]}"; do
+            app=$(echo "$app" | tr -d ' ')
+            src="ios-metadata-${app}"
+            dst_meta="flutter/packages/${app}/ios/fastlane/metadata"
+            dst_shots="flutter/packages/${app}/ios/fastlane/screenshots"
+            if [ -d "$src" ]; then
+              mkdir -p "$dst_meta" "$dst_shots"
+              [ -d "$src/metadata" ]     && cp -r "$src/metadata/."     "$dst_meta/"
+              [ -d "$src/screenshots" ]  && cp -r "$src/screenshots/."  "$dst_shots/"
+              echo "Restored iOS metadata for $app"
+            fi
+          done
+
+      - name: Restore macOS metadata artifacts
+        if: needs.download-macos.result == 'success'
+        run: |
+          set -euo pipefail
+          IFS=',' read -ra app_list <<< "${{ inputs.apps }}"
+          for app in "${app_list[@]}"; do
+            app=$(echo "$app" | tr -d ' ')
+            src="macos-metadata-${app}"
+            dst="flutter/packages/${app}/ios/fastlane/metadata"
+            if [ -d "$src" ]; then
+              mkdir -p "$dst"
+              cp -r "$src/." "$dst/"
+              echo "Restored macOS metadata for $app"
+            fi
+          done
+
+      - name: Commit downloaded metadata
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          APPS=$(echo "${{ inputs.apps }}" | tr -d ' ')
+          STORES=$(echo "${{ inputs.stores }}" | tr -d ' ')
+
+          IFS=',' read -ra app_list <<< "$APPS"
+          for app in "${app_list[@]}"; do
+            git add \
+              "flutter/packages/${app}/android/fastlane/metadata/" \
+              "flutter/packages/${app}/ios/fastlane/metadata/" \
+              "flutter/packages/${app}/ios/fastlane/screenshots/" \
+              2>/dev/null || true
+          done
+
+          git diff --cached --quiet && { echo "Nothing to commit — metadata already up to date"; exit 0; }
+          git commit -m "chore: download store metadata for apps=[$APPS] stores=[$STORES] [skip ci]"
+          git push origin HEAD:${{ github.ref_name }}

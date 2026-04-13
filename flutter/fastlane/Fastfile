@@ -90,6 +90,30 @@ lane :upload do
   )
 end
 
+lane :upload_metadata do
+  app_name = required_env!("APP_NAME")
+  api_key = app_store_connect_api_key(
+    key_id:                required_env!("APP_STORE_CONNECT_API_KEY_ID"),
+    issuer_id:             required_env!("APP_STORE_CONNECT_API_ISSUER_ID"),
+    key_content:           required_env!("APP_STORE_CONNECT_API_KEY_CONTENT"),
+    is_key_content_base64: true,
+    in_house:              false
+  )
+  metadata_path    = File.expand_path("../packages/#{app_name}/ios/fastlane/metadata", __dir__)
+  screenshots_path = File.expand_path("../packages/#{app_name}/ios/fastlane/screenshots", __dir__)
+  has_screenshots  = Dir.exist?(screenshots_path) && !Dir.empty?(screenshots_path)
+  upload_to_app_store(
+    api_key:                    api_key,
+    skip_binary_upload:         true,
+    skip_screenshots:           !has_screenshots,
+    screenshots_path:           screenshots_path,
+    metadata_path:              metadata_path,
+    submit_for_review:          false,
+    run_precheck_before_submit: false,
+    force:                      true
+  )
+end
+
 lane :codesign_macos do
   setup_ci if ENV["CI"]
 
@@ -240,6 +264,30 @@ lane :release_approved do
   if ENV["GITHUB_OUTPUT"]
     File.open(ENV["GITHUB_OUTPUT"], "a") { |f| f.puts "released=#{released}" }
   end
+end
+
+lane :upload_metadata_macos do
+  app_name  = required_env!("MATRIX_APP")
+  bundle_id = required_env!("BUNDLE_ID")
+  api_key = app_store_connect_api_key(
+    key_id:                required_env!("APP_STORE_CONNECT_API_KEY_ID"),
+    issuer_id:             required_env!("APP_STORE_CONNECT_API_ISSUER_ID"),
+    key_content:           required_env!("APP_STORE_CONNECT_API_KEY_CONTENT"),
+    is_key_content_base64: true,
+    in_house:              false
+  )
+  metadata_path = File.expand_path("../packages/#{app_name}/ios/fastlane/metadata", __dir__)
+  upload_to_app_store(
+    api_key:                    api_key,
+    platform:                   "osx",
+    app_identifier:             bundle_id,
+    skip_binary_upload:         true,
+    skip_screenshots:           true,
+    metadata_path:              metadata_path,
+    submit_for_review:          false,
+    run_precheck_before_submit: false,
+    force:                      true
+  )
 end
 
 lane :build_macos do

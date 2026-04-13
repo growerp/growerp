@@ -21,6 +21,11 @@ on:
         options:
           - beta
           - stable
+      update_metadata:
+        description: "Also upload store metadata and screenshots from {app}/{platform}/fastlane/ (Android, iOS, macOS)"
+        required: false
+        default: false
+        type: boolean
 
 concurrency:
   group: store-deploy
@@ -382,6 +387,16 @@ jobs:
         run: bundle exec fastlane upload
         working-directory: flutter/fastlane
 
+      - name: Fastlane upload iOS metadata
+        if: inputs.update_metadata == true
+        env:
+          APP_NAME: ${{ matrix.app }}
+          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          APP_STORE_CONNECT_API_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY_CONTENT: ${{ secrets.APP_STORE_CONNECT_API_KEY_CONTENT }}
+        run: bundle exec fastlane upload_metadata
+        working-directory: flutter/fastlane
+
   # ───────────────────────────────────────────────────────────────────────────
   # macOS — Fastlane Match + xcodebuild + xcrun altool on macos-latest
   # Secrets: APP_STORE_CONNECT_API_KEY_ID, APP_STORE_CONNECT_API_ISSUER_ID,
@@ -587,6 +602,18 @@ jobs:
         run: bundle exec fastlane upload_macos
         working-directory: flutter
 
+      - name: Fastlane upload macOS metadata
+        if: inputs.update_metadata == true
+        env:
+          BUNDLE_GEMFILE: ${{ github.workspace }}/flutter/fastlane/Gemfile
+          MATRIX_APP: ${{ matrix.app }}
+          BUNDLE_ID: ${{ env.BUNDLE_ID }}
+          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          APP_STORE_CONNECT_API_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY_CONTENT: ${{ secrets.APP_STORE_CONNECT_API_KEY_CONTENT }}
+        run: bundle exec fastlane upload_metadata_macos
+        working-directory: flutter
+
   # ───────────────────────────────────────────────────────────────────────────
   # Android — flutter build appbundle + Google Play API
   # Secrets: ANDROID_KEYSTORE_BASE64, ANDROID_KEY_ALIAS,
@@ -662,6 +689,20 @@ jobs:
           releaseFiles: flutter/packages/${{ matrix.app }}/build/app/outputs/bundle/release/app-release.aab
           track: ${{ inputs.track == 'stable' && 'production' || inputs.track }}
           status: completed
+
+      - uses: ruby/setup-ruby@v1
+        if: inputs.update_metadata == true
+        with:
+          ruby-version: "3.2"
+          bundler-cache: true
+          working-directory: flutter/packages/${{ matrix.app }}/android/fastlane
+
+      - name: Fastlane upload Android metadata
+        if: inputs.update_metadata == true
+        env:
+          GOOGLE_PLAY_JSON_KEY_DATA: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+        run: bundle exec fastlane upload_metadata
+        working-directory: flutter/packages/${{ matrix.app }}/android
 
   # ───────────────────────────────────────────────────────────────────────────
   # Commit the bumped pubspecs after all platform deploys complete.
