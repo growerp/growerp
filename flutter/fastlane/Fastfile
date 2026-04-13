@@ -35,11 +35,22 @@ lane :codesign do
   auth = optional_env("MATCH_GIT_BASIC_AUTHORIZATION")
   options[:git_basic_authorization] = auth if auth
   sync_code_signing(**options)
+
+  if ENV["GITHUB_ENV"]
+    bundle_id = "org.growerp.#{app_name}"
+    profile_name = ENV["sigh_#{bundle_id}_appstore_profile-name"].to_s.strip
+    unless profile_name.empty?
+      File.open(ENV["GITHUB_ENV"], "a") { |f| f.puts "MATCH_IOS_PROFILE_NAME=#{profile_name}" }
+      UI.message("MATCH_IOS_PROFILE_NAME=#{profile_name}")
+    end
+  end
 end
 
 lane :ci_build do
+  xcode_select "/Applications/Xcode_16.4.app"
   app_name = required_env!("APP_NAME")
   bundle_id = "org.growerp.#{app_name}"
+  profile_name = ENV.fetch("MATCH_IOS_PROFILE_NAME", "match AppStore #{bundle_id}")
   workspace_path = File.expand_path("../packages/#{app_name}/ios/Runner.xcworkspace", __dir__)
   build_app(
     workspace: workspace_path,
@@ -48,7 +59,7 @@ lane :ci_build do
     export_options: {
       method: "app-store",
       provisioningProfiles: {
-        bundle_id => "match AppStore #{bundle_id}"
+        bundle_id => profile_name
       }
     },
     buildlog_path: "/tmp/xcodebuild-ios-logs",

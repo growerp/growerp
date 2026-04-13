@@ -1,4 +1,4 @@
-git_url("https://gihub.com/growerp/growerp.git")
+git_url("git@github.com:growerp/certificates.git")
 
 storage_mode("git")
 
