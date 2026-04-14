@@ -209,11 +209,18 @@ Future<void> _goTo(
 }
 
 Future<void> _waitForAnyKey(WidgetTester tester, List<String> keys) async {
+  bool found = false;
   for (int i = 0; i < 12; i++) {
-    final found = keys.any((key) => tester.any(find.byKey(Key(key))));
+    found = keys.any((key) => tester.any(find.byKey(Key(key))));
     if (found) return;
     await tester.pump(const Duration(milliseconds: 500));
   }
+  expect(
+    found,
+    isTrue,
+    reason:
+        'Timed out waiting for any of these keys to appear: ${keys.join(', ')}',
+  );
 }
 
 void main() {
