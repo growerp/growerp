@@ -1,8 +1,8 @@
 name: Store Screenshots
 
-# Capture hotel app screenshots on Linux desktop (3 device sizes) and
-# apply Fastlane frameit device frames. The framed PNGs are uploaded as
-# a downloadable workflow artifact.
+# Capture app screenshots on Linux desktop (6 device sizes — 3 Android,
+# 2 iOS App Store, 1 macOS) and apply Fastlane frameit device frames. The framed PNGs
+# are uploaded as a downloadable workflow artifact.
 #
 # Usage: trigger manually via workflow_dispatch. The framed-screenshots
 # artifact is available for 7 days after each run.
@@ -11,9 +11,10 @@ on:
   workflow_dispatch:
     inputs:
       apps:
-        description: 'Apps to screenshot (currently only "hotel" supported)'
-        required: false
-        default: "hotel"
+        description: "Apps to screenshot (comma-separated: admin, hotel)"
+        required: true
+        default: "admin,hotel"
+        type: string
 
 concurrency:
   group: screenshots-${{ github.ref }}
@@ -27,7 +28,15 @@ permissions:
 
 jobs:
   # ──────────────────────────────────────────────────────────────────────────
-  # 1. Take raw screenshots — 3 device sizes run in parallel
+  # 1. Take raw screenshots — all device sizes run in parallel
+  #
+  # width/height are LOGICAL pixels (what Flutter's layout engine sees).
+  # phys_w/phys_h (iOS only) are the physical pixel target for frameit;
+  # a scale-up step runs after capture to produce the correct resolution.
+  #
+  # Android logical sizes stay small so the phone drawer is visible.
+  # iOS logical sizes match real device logical points so the phone layout
+  # renders correctly, then are scaled 3× (iPhone) / 2× (iPad) to physical.
   # ──────────────────────────────────────────────────────────────────────────
   take-screenshots:
     runs-on: ubuntu-latest
@@ -39,15 +48,29 @@ jobs:
           - device: phone
             width: 412
             height: 892
-            frame: "Pixel 4"
           - device: tablet7
-            width: 600
-            height: 960
-            frame: "Nexus 7 2012"
+            width: 960
+            height: 600
           - device: tablet10
-            width: 800
-            height: 1280
-            frame: "Nexus 10"
+            width: 1280
+            height: 800
+          - device: iphone
+            # Logical size of iPhone 12 Pro Max (3× scale) → phone layout
+            width: 428
+            height: 926
+            # Physical resolution that frameit recognises as iPhone 12 Pro Max
+            phys_w: 1284
+            phys_h: 2778
+          - device: ipad_pro
+            # Logical landscape (2× scale) → tablet layout, horizontal
+            width: 1366
+            height: 1024
+            # Physical landscape that frameit recognises as iPad Pro 12.9″
+            phys_w: 2732
+            phys_h: 2048
+          - device: macos
+            width: 1280
+            height: 800
 
     steps:
       - name: Free disk space
@@ -131,32 +154,52 @@ jobs:
         env:
           SCREEN_WIDTH: ${{ matrix.width }}
           SCREEN_HEIGHT: ${{ matrix.height }}
+          APPS_INPUT: ${{ github.event.inputs.apps }}
         run: |
-          SCREEN_WIDTH=$SCREEN_WIDTH SCREEN_HEIGHT=$SCREEN_HEIGHT \
-            docker compose -f ci/docker-compose-screenshot.yml up \
-              --exit-code-from sut sut
+          APPS="${APPS_INPUT:-admin,hotel}"
+          IFS=',' read -ra app_list <<< "$APPS"
+          for app in "${app_list[@]}"; do
+            app=$(echo "$app" | tr -d ' ')
+            [ -n "$app" ] || continue
+            echo "--- Taking screenshots for app: $app ---"
+            docker compose -f ci/docker-compose-screenshot.yml rm -sf sut 2>/dev/null || true
+            HOST_UID=$(id -u) HOST_GID=$(id -g) \
+            APP=$app \
+            SCREEN_WIDTH=$SCREEN_WIDTH SCREEN_HEIGHT=$SCREEN_HEIGHT DEVICE_PREFIX=${{ matrix.device }} \
+              docker compose -f ci/docker-compose-screenshot.yml up \
+                --exit-code-from sut sut
+          done
 
-      # ── Rename with device prefix (e.g. phone-mainmenu.png) ───────────────
-      - name: Prefix screenshots with device name
+      # iOS only: scale captured PNGs from logical → physical resolution so
+      # frameit can auto-detect the device by pixel dimensions.
+      - name: Scale iOS screenshots to physical resolution
+        if: ${{ matrix.phys_w != '' }}
+        env:
+          APPS_INPUT: ${{ github.event.inputs.apps }}
         run: |
-          SHOTS_DIR="flutter/packages/hotel/screenshots"
-          if [ -d "$SHOTS_DIR" ]; then
-            for f in "$SHOTS_DIR"/*.png; do
+          sudo apt-get install -y imagemagick -qq
+          APPS="${APPS_INPUT:-admin,hotel}"
+          IFS=',' read -ra app_list <<< "$APPS"
+          for app in "${app_list[@]}"; do
+            app=$(echo "$app" | tr -d ' ')
+            [ -n "$app" ] || continue
+            for f in flutter/packages/$app/screenshots/${{ matrix.device }}-*.png; do
               [ -f "$f" ] || continue
-              base=$(basename "$f")
-              mv "$f" "$SHOTS_DIR/${{ matrix.device }}-$base"
+              convert "$f" -resize ${{ matrix.phys_w }}x${{ matrix.phys_h }} "$f"
+              echo "Scaled $f → ${{ matrix.phys_w }}x${{ matrix.phys_h }}"
             done
-            echo "Screenshots after rename:"
-            ls -lh "$SHOTS_DIR"
-          else
-            echo "WARNING: no screenshots directory found at $SHOTS_DIR"
-          fi
+          done
+
+      - name: Debug — find all PNGs on host
+        if: always()
+        run: find flutter/packages -name "*.png" 2>/dev/null | sort || true
 
       - name: Upload raw screenshots (${{ matrix.device }})
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: screenshots-${{ matrix.device }}
-          path: flutter/packages/hotel/screenshots/${{ matrix.device }}-*.png
+          path: flutter/packages/*/screenshots/${{ matrix.device }}-*.png
           if-no-files-found: warn
           retention-days: 3
 
@@ -175,6 +218,9 @@ jobs:
     timeout-minutes: 30
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Download all raw screenshots
         uses: actions/download-artifact@v4
         with:
@@ -185,47 +231,91 @@ jobs:
       - name: List downloaded screenshots
         run: ls -lh screenshots/
 
-      - name: Install Fastlane
-        run: sudo gem install fastlane --no-document
+      - name: Install ImageMagick and Fastlane
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y imagemagick
+          sudo gem install fastlane --no-document
 
       - name: Write Framefile.json
         working-directory: screenshots
         run: |
-          cat > Framefile.json << 'EOF'
-          {
-            "device_frame_version": "latest",
-            "default": {
-              "background": "#FFFFFF",
-              "padding": 50,
-              "show_complete_frame": false,
-              "stack_title": false,
-              "title_below_image": false
-            },
-            "data": [
-              { "filter": "phone-",   "frame": "Pixel 4"      },
-              { "filter": "tablet7-", "frame": "Nexus 7 2012" },
-              { "filter": "tablet10-","frame": "Nexus 10"     }
-            ]
-          }
-          EOF
+          # "frame" is a colour code, NOT a device name.
+          # Device is auto-detected by pixel dimensions.
+          # Android screenshots (412×892, 960×600, 1280×800) are at logical
+          # pixels (devicePixelRatio=1) so they don't match any frameit device —
+          # they will be skipped and fall back to raw PNGs.
+          # iOS screenshots (1284×2778 and 2048×2732) ARE at physical resolution
+          # and will be detected and framed.
+          printf '%s\n' \
+            '{' \
+            '  "device_frame_version": "latest",' \
+            '  "default": {' \
+            '    "padding": 50,' \
+            '    "show_complete_frame": false,' \
+            '    "stack_title": false,' \
+            '    "title_below_image": false' \
+            '  },' \
+            '  "data": [' \
+            '    { "filter": "iphone-",   "frame": "PACIFIC_BLUE" },' \
+            '    { "filter": "ipad_pro-", "frame": "SPACE_GRAY"   }' \
+            '  ]' \
+            '}' > Framefile.json
+          echo "=== Framefile.json ==="
+          cat Framefile.json
 
-      - name: Run frameit
+      - name: Run frameit (iOS screenshots only)
         working-directory: screenshots
-        run: fastlane frameit || { echo "frameit non-zero — listing output:"; ls -la; }
+        run: |
+          echo "=== PNG files available ==="
+          ls -lh *.png 2>/dev/null || echo "(none)"
+          fastlane frameit 2>&1 || true
+          echo "=== PNGs after frameit ==="
+          ls -lh *.png 2>/dev/null || echo "(none)"
 
-      - name: List framed screenshots
+      # Android and macOS screenshots are not handled by frameit (wrong
+      # dimensions / not iOS).  Apply a simple dark bezel + drop shadow so
+      # they look presentable alongside the iOS framed images.
+      - name: Frame Android and macOS screenshots with ImageMagick
+        working-directory: screenshots
+        run: |
+          for prefix in phone tablet7 tablet10 macos; do
+            for f in ${prefix}-*.png; do
+              [ -f "$f" ] || continue
+              [[ "$f" == *_framed.png ]] && continue
+              base="${f%.png}"
+              convert "$f" \
+                -bordercolor "#1C1C1E" -border 12 \
+                \( +clone -background black -shadow 80x10+0+8 \) \
+                +swap -background "#F2F2F7" -layers merge +repage \
+                "${base}_framed.png"
+              echo "Framed: $f → ${base}_framed.png"
+            done
+          done
+
+      - name: List all screenshots
         run: find screenshots/ -name "*.png" | sort
 
-      # ── Generate _preview.html ──────────────────────────────────────────────
+      # ── Generate _preview.html — prefers *_framed.png, falls back to raw PNGs
       - name: Generate preview HTML
         working-directory: screenshots
         run: |
           python3 - << 'PYEOF'
-          import glob
+          import glob, os
 
-          files = sorted(f for f in glob.glob("*.png"))
-          imgs  = "".join(f'<img src="{f}" alt="{f}" />' for f in files)
-          html  = f"""<!--suppress ALL --><html lang="en"><head><title>Framed Screenshots</title>
+          raw    = sorted(f for f in glob.glob("*.png") if not f.endswith("_framed.png"))
+          # For each raw PNG prefer the framed version when it exists.
+          files  = []
+          n_framed = 0
+          for r in raw:
+              framed_path = r[:-4] + "_framed.png"
+              if os.path.exists(framed_path):
+                  files.append(framed_path)
+                  n_framed += 1
+              else:
+                  files.append(r)
+          imgs = "".join(f'<img src="{f}" alt="{f}" />' for f in files)
+          html   = f"""<!--suppress ALL --><html lang="en"><head><title>Framed Screenshots</title>
           <style>
             :root {{ --height: 600; }}
             body {{ background-color: #efefef; }}
@@ -247,16 +337,18 @@ jobs:
 
           with open("_preview.html", "w") as fh:
               fh.write(html)
-          print(f"Generated _preview.html ({len(files)} images)")
+          print(f"Generated _preview.html ({len(files)} images, {n_framed} framed, {len(raw)-n_framed} raw)")
           PYEOF
 
       # Artifact retention: 90 days so publish-to-stores can pick it up later.
+      # Includes raw PNGs as fallback so the artifact is never empty.
       - name: Upload framed-screenshots artifact
         uses: actions/upload-artifact@v4
         with:
           name: framed-screenshots
           path: |
             screenshots/*_framed.png
+            screenshots/*.png
             screenshots/_preview.html
           if-no-files-found: warn
           retention-days: 90

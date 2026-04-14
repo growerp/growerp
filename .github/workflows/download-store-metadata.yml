@@ -16,7 +16,7 @@ on:
       stores:
         description: "Stores to download from (comma-separated: ios, macos, android)"
         required: true
-        default: "ios,android"
+        default: "android,ios,macos"
         type: string
 
 concurrency:
@@ -109,6 +109,7 @@ jobs:
       - name: Download Android metadata from Google Play
         env:
           GOOGLE_PLAY_JSON_KEY_DATA: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+          BUNDLE_GEMFILE: fastlane/Gemfile
         run: |
           bundle exec fastlane run download_from_play_store
         working-directory: flutter/packages/${{ matrix.app }}/android
@@ -144,6 +145,7 @@ jobs:
       - name: Download iOS metadata from App Store Connect
         env:
           APP_NAME: ${{ matrix.app }}
+          BUNDLE_GEMFILE: fastlane/Gemfile
           APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
           APP_STORE_CONNECT_API_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
           APP_STORE_CONNECT_API_KEY_CONTENT: ${{ secrets.APP_STORE_CONNECT_API_KEY_CONTENT }}
@@ -154,13 +156,29 @@ jobs:
           SCREENSHOTS_PATH="$(pwd)/packages/${APP_NAME}/ios/fastlane/screenshots"
           mkdir -p "$METADATA_PATH" "$SCREENSHOTS_PATH"
 
+          API_KEY_FILE=$(mktemp /tmp/asc_XXXXXX.json)
+          ruby -e "
+            require 'json'
+            File.write(ARGV[0], JSON.generate(
+              key_id: ENV['APP_STORE_CONNECT_API_KEY_ID'],
+              issuer_id: ENV['APP_STORE_CONNECT_API_ISSUER_ID'],
+              key: ENV['APP_STORE_CONNECT_API_KEY_CONTENT'],
+              is_key_content_base64: true,
+              in_house: false
+            ))
+          " "$API_KEY_FILE"
+
           bundle exec fastlane deliver download_metadata \
+            --api_key_path "$API_KEY_FILE" \
             --metadata_path "$METADATA_PATH" \
             --app_identifier "org.growerp.${APP_NAME}"
 
           bundle exec fastlane deliver download_screenshots \
+            --api_key_path "$API_KEY_FILE" \
             --screenshots_path "$SCREENSHOTS_PATH" \
             --app_identifier "org.growerp.${APP_NAME}"
+
+          rm -f "$API_KEY_FILE"
         working-directory: flutter
 
       - name: Upload downloaded iOS metadata
@@ -210,6 +228,7 @@ jobs:
         env:
           APP_NAME: ${{ matrix.app }}
           BUNDLE_ID: ${{ env.BUNDLE_ID }}
+          BUNDLE_GEMFILE: fastlane/Gemfile
           APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
           APP_STORE_CONNECT_API_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
           APP_STORE_CONNECT_API_KEY_CONTENT: ${{ secrets.APP_STORE_CONNECT_API_KEY_CONTENT }}
@@ -219,10 +238,25 @@ jobs:
           METADATA_PATH="$(pwd)/packages/${APP_NAME}/ios/fastlane/metadata"
           mkdir -p "$METADATA_PATH"
 
+          API_KEY_FILE=$(mktemp /tmp/asc_XXXXXX.json)
+          ruby -e "
+            require 'json'
+            File.write(ARGV[0], JSON.generate(
+              key_id: ENV['APP_STORE_CONNECT_API_KEY_ID'],
+              issuer_id: ENV['APP_STORE_CONNECT_API_ISSUER_ID'],
+              key: ENV['APP_STORE_CONNECT_API_KEY_CONTENT'],
+              is_key_content_base64: true,
+              in_house: false
+            ))
+          " "$API_KEY_FILE"
+
           bundle exec fastlane deliver download_metadata \
+            --api_key_path "$API_KEY_FILE" \
             --metadata_path "$METADATA_PATH" \
             --app_identifier "$BUNDLE_ID" \
-            --platform "osx"
+            --platform osx
+
+          rm -f "$API_KEY_FILE"
         working-directory: flutter
 
       - name: Upload downloaded macOS metadata
@@ -323,6 +357,10 @@ jobs:
               "flutter/packages/${app}/ios/fastlane/screenshots/" \
               2>/dev/null || true
           done
+
+          echo "=== git status ==="
+          git status --short
+          echo "==================="
 
           git diff --cached --quiet && { echo "Nothing to commit — metadata already up to date"; exit 0; }
           git commit -m "chore: download store metadata for apps=[$APPS] stores=[$STORES] [skip ci]"

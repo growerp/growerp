@@ -67,7 +67,12 @@ while [ $ELAPSED -lt $TIMEOUT ]; do
 done
 [ $ELAPSED -ge $TIMEOUT ] && { echo "ERROR: Moqui not ready"; exit 1; }
 
-PKG_DIR="packages/hotel"
+PKG_DIR="packages/${APP:-hotel}"
+# Use an absolute path so the test binary (which may run with a different CWD
+# than the invoking shell) always writes PNGs inside the volume mount.
+SCREENSHOTS_DIR="$(pwd)/${PKG_DIR}/screenshots"
+mkdir -p "$SCREENSHOTS_DIR"
+
 cd "$PKG_DIR"
 
 if [ ! -d "linux" ]; then
@@ -77,25 +82,41 @@ fi
 
 flutter pub get
 
-echo "Running screenshot test (flutter drive) ..."
+echo "Running screenshot test ..."
 echo "  SCREEN: ${SCREEN_WIDTH}x${SCREEN_HEIGHT}"
-flutter drive \
-  --driver=test_driver/integration_test.dart \
-  --target=integration_test/screenshot_test.dart \
+echo "  SCREENSHOTS_DIR: $SCREENSHOTS_DIR"
+flutter test \
+  integration_test/screenshot_test.dart \
   -d linux \
   --dart-define="BACKEND_URL=$BACKEND_URL" \
   --dart-define="CHAT_URL=$CHAT_URL" \
   --dart-define="SCREEN_WIDTH=$SCREEN_WIDTH" \
-  --dart-define="SCREEN_HEIGHT=$SCREEN_HEIGHT"
+  --dart-define="SCREEN_HEIGHT=$SCREEN_HEIGHT" \
+  --dart-define="SCREENSHOTS_DIR=$SCREENSHOTS_DIR"
 
 DRIVE_EXIT=$?
 
 echo ""
+echo "=== Screenshot directory contents ==="
+ls -lh "$SCREENSHOTS_DIR" 2>/dev/null || echo "(directory is empty or missing)"
+echo "=== Search for any PNGs under ${PKG_DIR} ==="
+find "$(pwd)" -name "*.png" 2>/dev/null | head -30 || true
+
 if [ $DRIVE_EXIT -eq 0 ]; then
-  echo "Screenshots captured in $PKG_DIR/screenshots/"
-  ls -lh screenshots/ 2>/dev/null || echo "(no screenshots directory found)"
+  echo "Screenshots captured."
+  # Prefix each PNG with the device name so parallel matrix jobs don't collide.
+  # This runs inside the container (as root) to avoid permission-denied errors
+  # when the host runner tries to rename container-owned files.
+  if [ -n "${DEVICE_PREFIX:-}" ]; then
+    for f in "$SCREENSHOTS_DIR"/*.png; do
+      [ -f "$f" ] || continue
+      base=$(basename "$f")
+      mv "$f" "$SCREENSHOTS_DIR/${DEVICE_PREFIX}-${base}"
+    done
+  fi
+  ls -lh "$SCREENSHOTS_DIR" 2>/dev/null || echo "(no screenshots found after rename)"
 else
-  echo "ERROR: flutter drive exited with code $DRIVE_EXIT"
+  echo "ERROR: flutter test exited with code $DRIVE_EXIT"
 fi
 
 kill "$XVFB_PID" 2>/dev/null || true

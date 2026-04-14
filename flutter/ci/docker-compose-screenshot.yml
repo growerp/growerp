@@ -17,6 +17,8 @@ services:
       # Override these to emulate different device sizes:
       - SCREEN_WIDTH=${SCREEN_WIDTH:-412}
       - SCREEN_HEIGHT=${SCREEN_HEIGHT:-892}
+      - DEVICE_PREFIX=${DEVICE_PREFIX:-}
+      - APP=${APP:-hotel}
     depends_on:
       moqui:
         condition: service_healthy

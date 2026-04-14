@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:integration_test/integration_test_driver_extended.dart';
-import 'package:flutter/material.dart';
 
 Future<void> main() async {
   try {
@@ -14,6 +13,6 @@ Future<void> main() async {
       },
     );
   } catch (e) {
-    debugPrint('Error occured: $e');
+    print('Error occurred: $e');
   }
 }

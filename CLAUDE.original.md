@@ -1,16 +1,16 @@
 # CLAUDE.md
 
-Guidance to Claude Code (claude.ai/code) for this repo.
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Architecture
 
-GrowERP: multi-platform ERP (Android, iOS, Web, Linux, Windows). Flutter frontend, Moqui backend. All comms via REST APIs.
+GrowERP is a multi-platform ERP system (Android, iOS, Web, Linux, Windows) using Flutter for the frontend and Moqui for the backend. All frontend-backend communication is via REST APIs.
 
-**Two Flutter package categories** (all under `flutter/packages/`):
-1. **Building blocks** (`growerp_*`) — domain-specific reusable packages (e.g., `growerp_core`, `growerp_models`, `growerp_catalog`). Lower-level packages are deps of higher-level ones; `growerp_models` is base.
+**Two categories of Flutter packages** (all under `flutter/packages/`):
+1. **Building blocks** (`growerp_*`) — domain-specific reusable packages (e.g., `growerp_core`, `growerp_models`, `growerp_catalog`). Lower-level packages are dependencies of higher-level ones; `growerp_models` is the base.
 2. **Applications** — end-user apps composed from building blocks (e.g., `admin`, `hotel`, `freelance`, `elearner`).
 
-**State management**: BLoC (`flutter_bloc`) throughout. Each domain entity follows:
+**State management**: BLoC (`flutter_bloc`) throughout. Each domain entity follows this structure:
 ```
 growerp_[domain]/lib/src/[entity]/
 ├── blocs/        # [Entity]Bloc, [Entity]Event, [Entity]State
@@ -21,7 +21,7 @@ growerp_[domain]/lib/src/[entity]/
 
 **Code generation**: Data models use `freezed` + `json_serializable`. API clients use `retrofit`. Run `melos build` after changing annotated files.
 
-**Backend**: Moqui components in `moqui/runtime/component/`. `growerp` component (source at `backend/`) provides multi-company ERP. See `docs/Flutter_Moqui_REST_Backend_Interface.md` for REST API details.
+**Backend**: Moqui components in `moqui/runtime/component/`. The `growerp` component (source at `backend/`) provides multi-company ERP functionality. See `docs/Flutter_Moqui_REST_Backend_Interface.md` for REST API details.
 
 **Backend repo structure** — git submodules (all on `growerp` branch of growerp forks):
 - `moqui/` → growerp/moqui-framework
@@ -30,7 +30,7 @@ growerp_[domain]/lib/src/[entity]/
 - `moqui/runtime/component/mantle-usl/` → growerp/mantle-usl
 - `moqui/runtime/component/moqui-fop/` → growerp/moqui-fop
 
-Custom components tracked in growerp1 root, symlinked by `setup-backend.sh`:
+Custom components tracked in growerp1 root and symlinked by `setup-backend.sh`:
 - `backend/` → symlinked as `moqui/runtime/component/growerp`
 - `pop-rest-store/` → symlinked as `moqui/runtime/component/PopRestStore`
 - `mantle-stripe/` → symlinked as `moqui/runtime/component/mantle-stripe`
@@ -45,7 +45,7 @@ Custom components tracked in growerp1 root, symlinked by `setup-backend.sh`:
 
 ## Flutter Commands
 
-All melos commands run from `flutter/`. Workspace defined in `flutter/pubspec.yaml`.
+All melos commands run from the `flutter/` directory. The workspace is defined in `flutter/pubspec.yaml`.
 
 ```bash
 cd flutter
@@ -111,15 +111,15 @@ git push
 ## Conventions
 
 - **Models**: Use `@freezed` with `Equatable`. `fromJson` handles both wrapped (`json['entity']`) and unwrapped JSON.
-- **Forms**: Use `FormBuilder` with `FormBuilderValidators`. All interactive widgets need `Key`.
-- **BLoC events**: Standard set: `Fetch`, `Update`, `Delete`. Status enum: `initial`, `loading`, `success`, `failure`.
+- **Forms**: Use `FormBuilder` with `FormBuilderValidators`. All interactive widgets need a `Key`.
+- **BLoC events**: Standard set is `Fetch`, `Update`, `Delete`. Status enum: `initial`, `loading`, `success`, `failure`.
 - **Error display**: `HelperFunctions.showMessage(context, message, Colors.red)` in BLoC listener.
 - **Integration tests**: In `example/integration_test/`. Use `CommonTest` utilities. Test class has `add`, `update`, `delete`, `check` static methods.
 - **Menu**: Configured per app via building block composition — see `docs/GrowERP_Extensibility_Guide.md`.
 
 ## Missing Flutter/Dart
 
-If `flutter` or `dart` not on PATH:
+If `flutter` or `dart` is not on PATH:
 
 ```bash
 FLUTTER_DIR="/tmp/flutter_install"

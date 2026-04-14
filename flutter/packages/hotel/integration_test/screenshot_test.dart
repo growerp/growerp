@@ -14,7 +14,12 @@
 
 // ignore_for_file: depend_on_referenced_packages
 
+import 'dart:io';
+import 'dart:typed_data';
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:global_configuration/global_configuration.dart';
@@ -124,20 +129,48 @@ GoRouter createHotelScreenshotRouter() {
 }
 
 // ---------------------------------------------------------------------------
-// Screenshot helper — writes PNG to screenshots/<name>.png on disk.
-// Called by the test_driver onScreenshot callback when using flutter drive.
+// Screenshot helper — captures via RenderRepaintBoundary.toImage() and
+// writes PNG to <SCREENSHOTS_DIR>/<name>.png on disk.
+//
+// SCREENSHOTS_DIR is passed via --dart-define so the absolute container path
+// is used regardless of what CWD the Linux binary happens to run with.
+// Works with `flutter test -d linux` without any platform channel.
 // ---------------------------------------------------------------------------
+
+// Absolute path injected by run_screenshots.sh; fallback keeps local dev working.
+const _screenshotsDir = String.fromEnvironment(
+  'SCREENSHOTS_DIR',
+  defaultValue: 'screenshots',
+);
+
 Future<void> _screenshot(
   IntegrationTestWidgetsFlutterBinding binding,
   WidgetTester tester,
   String name,
 ) async {
   await tester.pumpAndSettle(const Duration(seconds: 2));
-  await CommonTest.takeScreenShot(
-    binding: binding,
-    tester: tester,
-    screenShotName: name,
+  // `.first` in pre-order DFS = the outermost RepaintBoundary (parent before
+  // children), which wraps the full viewport.
+  final boundary = tester.renderObject<RenderRepaintBoundary>(
+    find.byType(RepaintBoundary).first,
   );
+  final ui.Image image = await boundary.toImage(
+    pixelRatio: tester.view.devicePixelRatio,
+  );
+  final ByteData? bytes = await image.toByteData(
+    format: ui.ImageByteFormat.png,
+  );
+  image.dispose();
+  if (bytes == null) {
+    // ignore: avoid_print
+    print('WARNING: _screenshot("$name") — toByteData returned null, skipping');
+    return;
+  }
+  final outPath = '$_screenshotsDir/$name.png';
+  // ignore: avoid_print
+  print('Writing screenshot → $outPath');
+  final file = await File(outPath).create(recursive: true);
+  file.writeAsBytesSync(bytes.buffer.asUint8List());
 }
 
 // ---------------------------------------------------------------------------
