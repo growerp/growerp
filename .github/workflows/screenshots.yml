@@ -185,7 +185,7 @@ jobs:
             [ -n "$app" ] || continue
             for f in flutter/packages/$app/screenshots/${{ matrix.device }}-*.png; do
               [ -f "$f" ] || continue
-              convert "$f" -resize ${{ matrix.phys_w }}x${{ matrix.phys_h }} "$f"
+              convert "$f" -resize ${{ matrix.phys_w }}x${{ matrix.phys_h }}\! "$f"
               echo "Scaled $f → ${{ matrix.phys_w }}x${{ matrix.phys_h }}"
             done
           done
