@@ -170,7 +170,7 @@ Future<void> _screenshot(
   // ignore: avoid_print
   print('Writing screenshot → $outPath');
   final file = await File(outPath).create(recursive: true);
-  file.writeAsBytesSync(bytes.buffer.asUint8List());
+  await file.writeAsBytes(bytes.buffer.asUint8List());
 }
 
 // ---------------------------------------------------------------------------
