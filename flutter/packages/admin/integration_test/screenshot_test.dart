@@ -186,11 +186,13 @@ Future<void> _screenshot(
   );
   image.dispose();
   if (bytes == null) {
-    print('WARNING: _screenshot("$name") — toByteData returned null, skipping');
+    debugPrint(
+      'WARNING: _screenshot("$name") — toByteData returned null, skipping',
+    );
     return;
   }
   final outPath = '$_screenshotsDir/$name.png';
-  print('Writing screenshot -> $outPath');
+  debugPrint('Writing screenshot -> $outPath');
   final file = await File(outPath).create(recursive: true);
   file.writeAsBytesSync(bytes.buffer.asUint8List());
 }
