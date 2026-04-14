@@ -194,7 +194,7 @@ Future<void> _screenshot(
   final outPath = '$_screenshotsDir/$name.png';
   debugPrint('Writing screenshot -> $outPath');
   final file = await File(outPath).create(recursive: true);
-  file.writeAsBytesSync(bytes.buffer.asUint8List());
+  await file.writeAsBytes(bytes.buffer.asUint8List());
 }
 
 Future<void> _goTo(
