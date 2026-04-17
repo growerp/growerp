@@ -8,7 +8,7 @@
 PRODUCT_NAME = hotel
 
 // The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = org.growerp.hotel.hotel
+PRODUCT_BUNDLE_IDENTIFIER = org.growerp.hotel
 
 // The copyright displayed in application information
-PRODUCT_COPYRIGHT = Copyright © 2023 org.growerp.hotel. All rights reserved.
+PRODUCT_COPYRIGHT = Copyright © 2026 org.growerp.hotel. All rights reserved.

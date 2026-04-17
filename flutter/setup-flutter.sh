@@ -34,8 +34,10 @@ error()   { echo -e "${RED}[ERROR]${NC} $1"; }
 #   sudo apt-get install -y libgtk-3-dev libclang-dev
 
 generate_gtk_bindings() {
-  local GTK_PKG
-  GTK_PKG="$(find "$HOME/.pub-cache/hosted/pub.dev" -maxdepth 1 -name "gtk-*" -type d | sort -V | tail -1)"
+  local GTK_PKG=""
+  if [ -d "$HOME/.pub-cache/hosted/pub.dev" ]; then
+    GTK_PKG="$(find "$HOME/.pub-cache/hosted/pub.dev" -maxdepth 1 -name "gtk-*" -type d | sort -V | tail -1)"
+  fi
 
   if [ -z "$GTK_PKG" ]; then
     warning "gtk package not found in pub cache — skipping FFI generation."

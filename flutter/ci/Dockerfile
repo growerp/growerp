@@ -24,10 +24,14 @@ ARG BRANCH=master
 USER root
 
 # Install Linux desktop build dependencies and xvfb for headless display
+# Enable universe repo (required on Ubuntu 24.04+ for cmake, gdb, clang, etc.)
 RUN apt-get update && \
+    apt-get install -y --no-install-recommends software-properties-common && \
+    add-apt-repository universe && \
+    apt-get update && \
     apt-get install -y --no-install-recommends \
-    git zip gdb libstdc++6 fonts-droid-fallback nano sed \
-    xvfb libgtk-3-dev ninja-build cmake clang lld llvm pkg-config liblzma-dev \
+    git zip gdb libstdc++6 fonts-noto nano sed \
+    xvfb libgtk-3-dev ninja-build cmake clang lld llvm pkgconf liblzma-dev \
     libglu1-mesa binutils && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 

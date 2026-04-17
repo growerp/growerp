@@ -258,14 +258,14 @@ jobs:
               grep '>>> RESULT:' "$LOG" | grep -v '+ echo' | sed 's/^[^|]*| *//' \
                 >> "$GITHUB_STEP_SUMMARY" \
                 || echo "  (no structured results)" >> "$GITHUB_STEP_SUMMARY"
-              FAILED=$(grep '>>> RESULT:.*FAILED' "$LOG" | grep -cv '+ echo' 2>/dev/null || echo 0)
-              PASSED=$(grep '>>> RESULT:.*PASSED' "$LOG" | grep -cv '+ echo' 2>/dev/null || echo 0)
+              FAILED=$(grep '>>> RESULT:.*FAILED' "$LOG" | grep -v '+ echo' | wc -l)
+              PASSED=$(grep '>>> RESULT:.*PASSED' "$LOG" | grep -v '+ echo' | wc -l)
               TOTAL_FAILED_PKGS=$((TOTAL_FAILED_PKGS + FAILED))
               TOTAL_PASSED_PKGS=$((TOTAL_PASSED_PKGS + PASSED))
-              IND_PASSED=$(grep 'Tests passed' "$LOG" | grep -oE '[0-9]+$' | tail -1 || echo 0)
-              IND_FAILED=$(grep 'Tests failed' "$LOG" | grep -oE '[0-9]+$' | tail -1 || echo 0)
-              TOTAL_IND_PASSED=$((TOTAL_IND_PASSED + IND_PASSED))
-              TOTAL_IND_FAILED=$((TOTAL_IND_FAILED + IND_FAILED))
+              IND_PASSED=$(grep 'Tests passed' "$LOG" | grep -oE '[0-9]+$' | tail -1)
+              IND_FAILED=$(grep 'Tests failed' "$LOG" | grep -oE '[0-9]+$' | tail -1)
+              TOTAL_IND_PASSED=$((TOTAL_IND_PASSED + ${IND_PASSED:-0}))
+              TOTAL_IND_FAILED=$((TOTAL_IND_FAILED + ${IND_FAILED:-0}))
             fi
           done
           echo "" >> "$GITHUB_STEP_SUMMARY"

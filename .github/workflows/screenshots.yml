@@ -1,0 +1,660 @@
+name: Create Store Screenshots
+
+# Capture app screenshots on Linux desktop (6 device sizes — 3 Android,
+# 2 iOS App Store, 1 macOS) and apply Fastlane frameit device frames. The framed PNGs
+# are uploaded as a downloadable workflow artifact.
+#
+# Usage: trigger manually via workflow_dispatch. The framed-screenshots
+# artifact is available for 7 days after each run.
+
+on:
+  workflow_dispatch:
+    inputs:
+      apps:
+        description: "Apps to screenshot (comma-separated: admin, hotel)"
+        required: true
+        default: "admin,hotel"
+        type: string
+
+concurrency:
+  group: screenshots-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+permissions:
+  contents: read
+
+jobs:
+  # ──────────────────────────────────────────────────────────────────────────
+  # 1. Take raw screenshots — all device sizes run in parallel
+  #
+  # width/height are LOGICAL pixels (what Flutter's layout engine sees).
+  # phys_w/phys_h (iOS only) are the physical pixel target for frameit;
+  # a scale-up step runs after capture to produce the correct resolution.
+  #
+  # Android logical sizes stay small so the phone drawer is visible.
+  # iOS logical sizes match real device logical points so the phone layout
+  # renders correctly, then are scaled 3× (iPhone) / 2× (iPad) to physical.
+  # ──────────────────────────────────────────────────────────────────────────
+  take-screenshots:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - device: phone
+            width: 412
+            height: 892
+          - device: tablet7
+            width: 960
+            height: 600
+          - device: tablet10
+            width: 1280
+            height: 800
+          - device: iphone
+            # Logical size of iPhone 12 Pro Max (3× scale) → phone layout
+            width: 428
+            height: 926
+            # Physical resolution that frameit recognises as iPhone 12 Pro Max
+            phys_w: 1284
+            phys_h: 2778
+          - device: ipad_pro
+            # Logical landscape (2× scale) → tablet layout, horizontal
+            width: 1366
+            height: 1024
+            # Physical landscape that frameit recognises as iPad Pro 12.9″
+            phys_w: 2732
+            phys_h: 2048
+          - device: macos
+            width: 1280
+            height: 800
+          - device: windows
+            width: 1920
+            height: 1200
+
+    steps:
+      - name: Validate app names
+        run: |
+          # When triggered by workflow_run there is no inputs context; fall back to default.
+          APPS_INPUT="${{ github.event.inputs.apps || 'admin,hotel' }}"
+          VALID_APPS="admin hotel freelance health elearner support"
+          IFS=',' read -ra app_list <<< "$APPS_INPUT"
+          for app in "${app_list[@]}"; do
+            app=$(echo "$app" | tr -d ' ')
+            if ! echo "$VALID_APPS" | grep -qw "$app"; then
+              echo "Invalid app: '$app'. Valid values: $VALID_APPS" >&2
+              exit 1
+            fi
+          done
+
+      - name: Free disk space
+        run: |
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /usr/local/share/boost
+          sudo rm -rf /usr/share/swift
+          sudo docker image prune -af
+          df -h
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Init submodules (SSH → HTTPS rewrite)
+        run: |
+          git config --global url."https://github.com/".insteadOf "git@github.com:"
+          git submodule update --init --recursive
+
+      - name: Set up backend component symlinks
+        run: bash setup-backend.sh
+
+      # ── Build Moqui backend image ──────────────────────────────────────────
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Build Moqui backend image
+        run: |
+          mkdir -p moqui/build
+          cd moqui && ./gradlew build getPostgresJdbc
+          cd docker/simple && bash docker-build.sh ../.. growerp/growerp-moqui eclipse-temurin:21-jdk
+
+      # ── Build Flutter test runner image (layer-cached) ────────────────────
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Flutter test runner image
+        uses: docker/build-push-action@v5
+        with:
+          context: flutter
+          file: flutter/ci/Dockerfile
+          load: true
+          tags: growerp/flutter-test-runner:latest
+
+      # ── Start backend ──────────────────────────────────────────────────────
+      - name: Start Moqui backend
+        working-directory: flutter
+        run: docker compose -f ci/docker-compose-screenshot.yml up -d moqui-database
+          moqui
+
+      - name: Wait for Moqui to be healthy
+        working-directory: flutter
+        run: |
+          echo "Waiting for Moqui backend..."
+          TIMEOUT=180
+          ELAPSED=0
+          while [ $ELAPSED -lt $TIMEOUT ]; do
+            if docker compose -f ci/docker-compose-screenshot.yml exec -T moqui \
+                curl -sf http://localhost/status 2>/dev/null; then
+              echo "Moqui is ready"
+              break
+            fi
+            echo "Waiting... ($ELAPSED/$TIMEOUT seconds)"
+            sleep 10
+            ELAPSED=$((ELAPSED + 10))
+          done
+          if [ $ELAPSED -ge $TIMEOUT ]; then
+            echo "ERROR: Moqui not ready after $TIMEOUT seconds"
+            docker compose -f ci/docker-compose-screenshot.yml logs moqui
+            exit 1
+          fi
+
+      # ── Run screenshot test ────────────────────────────────────────────────
+      - name: Take screenshots (${{ matrix.device }})
+        working-directory: flutter
+        env:
+          SCREEN_WIDTH: ${{ matrix.width }}
+          SCREEN_HEIGHT: ${{ matrix.height }}
+          APPS_INPUT: ${{ github.event.inputs.apps }}
+        run: |
+          APPS="${APPS_INPUT:-admin,hotel}"
+          IFS=',' read -ra app_list <<< "$APPS"
+          for app in "${app_list[@]}"; do
+            app=$(echo "$app" | tr -d ' ')
+            [ -n "$app" ] || continue
+            echo "--- Taking screenshots for app: $app ---"
+            docker compose -f ci/docker-compose-screenshot.yml rm -sf sut 2>/dev/null || true
+            HOST_UID=$(id -u) HOST_GID=$(id -g) \
+            APP=$app \
+            SCREEN_WIDTH=$SCREEN_WIDTH SCREEN_HEIGHT=$SCREEN_HEIGHT DEVICE_PREFIX=${{ matrix.device }} \
+              docker compose -f ci/docker-compose-screenshot.yml up \
+                --exit-code-from sut sut
+          done
+
+      # iOS only: scale captured PNGs from logical → physical resolution so
+      # frameit can auto-detect the device by pixel dimensions.
+      - name: Scale iOS screenshots to physical resolution
+        if: ${{ matrix.phys_w != '' }}
+        env:
+          APPS_INPUT: ${{ github.event.inputs.apps }}
+        run: |
+          sudo apt-get install -y imagemagick -qq
+          APPS="${APPS_INPUT:-admin,hotel}"
+          IFS=',' read -ra app_list <<< "$APPS"
+          for app in "${app_list[@]}"; do
+            app=$(echo "$app" | tr -d ' ')
+            [ -n "$app" ] || continue
+            for f in flutter/packages/$app/screenshots/${{ matrix.device }}-*.png; do
+              [ -f "$f" ] || continue
+              convert "$f" -resize ${{ matrix.phys_w }}x${{ matrix.phys_h }}\! "$f"
+              echo "Scaled $f → ${{ matrix.phys_w }}x${{ matrix.phys_h }}"
+            done
+          done
+
+      - name: Debug — find all PNGs on host
+        if: always()
+        run: find flutter/packages -name "*.png" 2>/dev/null | sort || true
+
+      - name: Upload raw screenshots (${{ matrix.device }})
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots-${{ matrix.device }}
+          path: flutter/packages/*/screenshots/${{ matrix.device }}-*.png
+          if-no-files-found: warn
+          retention-days: 3
+
+      - name: Tear down Docker services
+        if: always()
+        working-directory: flutter
+        run: docker compose -f ci/docker-compose-screenshot.yml down -v
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # 2. Apply device frames, flatten alpha, resize to store dimensions, and
+  #    upload as artifact. publish-metadata downloads this artifact.
+  # ──────────────────────────────────────────────────────────────────────────
+  frame-screenshots:
+    needs: take-screenshots
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download all raw screenshots
+        uses: actions/download-artifact@v4
+        with:
+          pattern: screenshots-*
+          path: screenshots/
+          merge-multiple: true
+
+      - name: List downloaded screenshots
+        run: find screenshots -type f -name "*.png" | sort || true
+
+      - name: Flatten downloaded screenshots
+        run: |
+          shopt -s globstar nullglob
+          count=0
+          for src in screenshots/**/*.png; do
+            base=$(basename "$src")
+            dst="screenshots/$base"
+            if [ "$src" = "$dst" ]; then
+              continue
+            fi
+            if [ -e "$dst" ]; then
+              echo "WARNING: duplicate screenshot name, keeping existing: $base"
+              continue
+            fi
+            cp "$src" "$dst"
+            count=$((count + 1))
+          done
+          echo "Flattened $count screenshots into screenshots/."
+          find screenshots -maxdepth 1 -type f -name "*.png" | sort || true
+
+      - name: Install ImageMagick and Fastlane
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y imagemagick
+          sudo gem install fastlane --no-document
+
+      - name: Generate titles from app Fastlane files
+        working-directory: screenshots
+        env:
+          APPS_INPUT: ${{ github.event.inputs.apps }}
+        run: |
+          python3 - << 'PYEOF'
+          import glob
+          import json
+          import os
+          import re
+
+          apps = [a.strip() for a in (os.environ.get('APPS_INPUT') or 'admin,hotel').split(',') if a.strip()]
+          screenshots = sorted(
+            os.path.basename(path)
+            for path in glob.glob('*.png')
+            if not path.endswith('_framed.png')
+          )
+
+          key_map = {
+            'admin': {
+              'dashboard': 'dashboard',
+              'company_detail': 'company',
+              'company_employees': 'company',
+              'ledger': 'ledgers',
+              'orders': 'orders',
+            },
+            'hotel': {
+              'dashboard': 'gantt',
+              'hotel_detail': 'company',
+              'room_list': 'catalog',
+              'room_categories': 'catalog',
+              'reservations': 'sales',
+              'ledger': 'ledger',
+            },
+          }
+
+          def parse_strings(path):
+            values = {}
+            if not os.path.exists(path):
+              return values
+            with open(path, encoding='utf-8') as handle:
+              for line in handle:
+                match = re.match(r'\s*"([^"]+)"\s*=\s*"([^"]*)";', line)
+                if match:
+                  values[match.group(1)] = match.group(2)
+            return values
+
+          app_titles = {}
+          app_keywords = {}
+          for app in apps:
+            app_titles[app] = {}
+            app_keywords[app] = {}
+            for kind, store in (('title', app_titles), ('keyword', app_keywords)):
+              for candidate in [
+                f'../flutter/packages/{app}/ios/fastlane/unframed/en-US/{kind}.strings',
+                f'../flutter/packages/{app}/android/fastlane/metadata/android/en-US/{kind}.strings',
+              ]:
+                parsed = parse_strings(candidate)
+                if parsed:
+                  store[app] = parsed
+                  break
+
+          title_strings = {}
+          keyword_strings = {}
+          screenshot_titles = {}
+
+          for filename in screenshots:
+            stem = filename[:-4]
+            parts = stem.split('-', 2)
+            if len(parts) != 3:
+              continue
+            device, app, shot = parts
+            titles = app_titles.get(app, {})
+            keywords = app_keywords.get(app, {})
+            legacy_key = key_map.get(app, {}).get(shot, shot)
+            title = titles.get(legacy_key) or titles.get(shot)
+            keyword = keywords.get(legacy_key) or keywords.get(shot)
+
+            if title:
+              screenshot_titles[stem] = title
+              for alias in {stem, f'{app}-{shot}', shot}:
+                title_strings[alias] = title
+            if keyword:
+              for alias in {stem, f'{app}-{shot}', shot}:
+                keyword_strings[alias] = keyword
+
+          with open('title.strings', 'w', encoding='utf-8') as handle:
+            handle.write('# generated from app Fastlane title.strings\n')
+            for key in sorted(title_strings):
+              escaped = title_strings[key].replace('"', '\\"')
+              handle.write(f'"{key}" = "{escaped}";\n')
+
+          with open('keyword.strings', 'w', encoding='utf-8') as handle:
+            handle.write('# generated from app Fastlane keyword.strings\n')
+            for key in sorted(keyword_strings):
+              escaped = keyword_strings[key].replace('"', '\\"')
+              handle.write(f'"{key}" = "{escaped}";\n')
+
+          with open('.screenshot_titles.json', 'w', encoding='utf-8') as handle:
+            json.dump(screenshot_titles, handle, indent=2, sort_keys=True)
+
+          print(f'Generated title.strings with {len(title_strings)} entries')
+          print(f'Generated keyword.strings with {len(keyword_strings)} entries')
+          print(f'Generated .screenshot_titles.json for {len(screenshot_titles)} screenshots')
+          PYEOF
+          echo "=== title.strings ==="
+          cat title.strings
+
+      - name: Write Framefile.json
+        working-directory: screenshots
+        run: |
+          # "frame" is a colour code, NOT a device name.
+          # Device is auto-detected by pixel dimensions.
+          # Android screenshots (412×892, 960×600, 1280×800) are at logical
+          # pixels (devicePixelRatio=1) so they don't match any frameit device —
+          # they will be skipped and fall back to raw PNGs.
+          # iOS screenshots (1284×2778 and 2048×2732) ARE at physical resolution
+          # and will be detected and framed.
+          printf '%s\n' \
+            '{' \
+            '  "device_frame_version": "latest",' \
+            '  "default": {' \
+            '    "padding": 50,' \
+            '    "show_complete_frame": false,' \
+            '    "stack_title": true,' \
+            '    "title_below_image": true' \
+            '  },' \
+            '  "data": [' \
+            '    { "filter": "iphone-",   "frame": "PACIFIC_BLUE" },' \
+            '    { "filter": "ipad_pro-", "frame": "SPACE_GRAY"   }' \
+            '  ]' \
+            '}' > Framefile.json
+          echo "=== Framefile.json ==="
+          cat Framefile.json
+
+      - name: Run frameit (iOS screenshots only)
+        working-directory: screenshots
+        run: |
+          echo "=== PNG files available ==="
+          ls -lh *.png 2>/dev/null || echo "(none)"
+          fastlane frameit 2>&1 || true
+          echo "=== PNGs after frameit ==="
+          ls -lh *.png 2>/dev/null || echo "(none)"
+
+      # Android, macOS, and Windows screenshots are not handled by frameit (wrong
+      # dimensions / not iOS).  Apply OS-specific frames:
+      # - Android: dark bezel + drop shadow
+      # - macOS: title bar with traffic lights (close/yellow/green) on left
+      # - Windows: title bar with control buttons (minimize/maximize/close) on right
+      - name: Frame Android, macOS, and Windows screenshots with ImageMagick
+        working-directory: screenshots
+        run: |
+          # Helper: draw macOS traffic lights (3 circles on left of title bar)
+          draw_macos_lights() {
+            local x=$1 y=$2 size=14 color_red="#ED6158" color_yellow="#FCC02E" color_green="#5FC038"
+            convert "$_" -fill "$color_red" -draw "circle $((x+size/2)),$((y+size/2)) $((x+size)),$((y+size/2))" \
+                          -fill "$color_yellow" -draw "circle $((x+size*2+6)),$((y+size/2)) $((x+size*2+14)),$((y+size/2))" \
+                          -fill "$color_green" -draw "circle $((x+size*4+12)),$((y+size/2)) $((x+size*4+20)),$((y+size/2))" "$_"
+          }
+
+          # Helper: draw Windows control buttons (minimize/maximize/close on right of title bar)
+          draw_windows_buttons() {
+            local x=$1 y=$2 size=16 spacing=8
+            # Close button (red X on right)
+            convert "$_" \
+              -fill "#C50F1F" -draw "rectangle $((x-size-spacing)),$y $((x-spacing)),$((y+size))" \
+              -strokewidth 2 -stroke white -draw "line $((x-size-spacing+4)),$((y+4)) $((x-spacing-4)),$((y+size-4))" \
+              -draw "line $((x-spacing-4)),$((y+4)) $((x-size-spacing+4)),$((y+size-4))" \
+              "$_"
+          }
+
+          # Frame Android with simple bezel
+          for f in phone-*.png tablet7-*.png tablet10-*.png; do
+            [ -f "$f" ] || continue
+            [[ "$f" == *_framed.png ]] && continue
+            base="${f%.png}"
+            convert "$f" \
+              -bordercolor "#1C1C1E" -border 12 \
+              \( +clone -background black -shadow 80x10+0+8 \) \
+              +swap -background "#F2F2F7" -layers merge +repage \
+              "${base}_framed.png"
+            echo "Framed: $f → ${base}_framed.png"
+          done
+
+          # Frame macOS with title bar + traffic lights
+          for f in macos-*.png; do
+            [ -f "$f" ] || continue
+            [[ "$f" == *_framed.png ]] && continue
+            base="${f%.png}"
+            w=$(identify -format "%w" "$f")
+            h=$(identify -format "%h" "$f")
+            titlebar_h=28
+            new_h=$((h + titlebar_h))
+
+            # Create titlebar with traffic lights on left
+            convert \( -size "${w}x${titlebar_h}" xc:"#E1E1E6" \) \
+              \( "$f" \) \
+              -gravity north -append \
+              -bordercolor "#1C1C1E" -border 12 \
+              \( +clone -background black -shadow 80x10+0+8 \) \
+              +swap -background "#F2F2F7" -layers merge +repage \
+              -draw "fill '#ED6158' circle 26,14 33,14 fill '#FCC02E' circle 51,14 58,14 fill '#5FC038' circle 76,14 83,14" \
+              "${base}_framed.png"
+            echo "Framed: $f → ${base}_framed.png (macOS titlebar with lights)"
+          done
+
+          # Frame Windows with title bar + control buttons on right
+          for f in windows-*.png; do
+            [ -f "$f" ] || continue
+            [[ "$f" == *_framed.png ]] && continue
+            base="${f%.png}"
+            w=$(identify -format "%w" "$f")
+            h=$(identify -format "%h" "$f")
+            titlebar_h=30
+            new_h=$((h + titlebar_h))
+
+            # Create titlebar (Windows 11 style) with minimize/maximize/close on right
+            convert \( -size "${w}x${titlebar_h}" xc:"#ECECEC" \) \
+              \( "$f" \) \
+              -gravity north -append \
+              -bordercolor "#CCCCCC" -border 1 \
+              -draw "fill '#C50F1F' rectangle $((w-46)),0 $w,$titlebar_h" \
+              -draw "strokewidth 1.5 stroke white line $((w-46+8)),10 $((w-46+16)),10" \
+              -draw "stroke white line $((w-46+8)),18 $((w-46+16)),18" \
+              -draw "stroke white line $((w-46+8)),12 $((w-46+14)),12" \
+              -draw "stroke white line $((w-46+8)),13 $((w-46+14)),13" \
+              -draw "stroke white line $((w-46+8)),16 $((w-46+12)),16" \
+              -draw "stroke white line $((w-46+8)),17 $((w-46+12)),17" \
+              "${base}_framed.png"
+            echo "Framed: $f → ${base}_framed.png (Windows titlebar with buttons)"
+          done
+
+      - name: Flatten, resize, and add titles to framed screenshots
+        working-directory: screenshots
+        run: |
+          # Helper: title strip height for a given store width
+          title_height_for() {
+            local w=$1 h
+            h=$((w / 8))
+            [ "$h" -lt 100 ] && h=100
+            echo "$h"
+          }
+
+          # Process one framed screenshot:
+          #   1. Flatten alpha + resize to (store_width x content_height)
+          #      where content_height = store_height - title_height if title exists,
+          #      else store_height — so the final image is always store_width x store_height.
+          #   2. Append title strip below.
+          process() {
+            local f=$1 store_w=$2 store_h=$3
+            [ -f "$f" ] || return
+
+            local base="${f%_framed.png}"
+
+            local title
+            title=$(python3 - "$base" << 'PYEOF'
+          import json, sys
+          stem = sys.argv[1]
+          try:
+              titles = json.load(open('.screenshot_titles.json', encoding='utf-8'))
+          except FileNotFoundError:
+              titles = {}
+          print(titles.get(stem, ''))
+          PYEOF
+            )
+
+            local th=0 content_h="$store_h"
+            if [ -n "$title" ]; then
+              th=$(title_height_for "$store_w")
+              content_h=$((store_h - th))
+            fi
+
+            # Step 1 — flatten alpha + resize to content area.
+            # Height adjusted to leave room for title strip so final = store_w x store_h.
+            convert "$f" -background white -flatten \
+              -resize "${store_w}x${content_h}"\! -type TrueColor "$f"
+            echo "Resized $f -> ${store_w}x${content_h}"
+
+            [ -n "$title" ] || return
+
+            # Step 2 — append title strip below so final size = store_w x store_h.
+            local pointsize=$((store_w / 40))
+            [ "$pointsize" -lt 24 ] && pointsize=24
+
+            local tmp="${base}_titled.png"
+            if convert \
+              "$f" \
+              \( -background "#F2F2F7" \
+                 -fill "#111111" \
+                 -pointsize "$pointsize" \
+                 -gravity center \
+                 -size "${store_w}x${th}" \
+                 caption:"$title" \) \
+              -gravity center -append \
+              -background white -flatten -type TrueColor \
+              "$tmp" 2>/dev/null && [ -s "$tmp" ]; then
+              mv "$tmp" "$f"
+              echo "Added title: $f -> final ${store_w}x${store_h}"
+            else
+              rm -f "$tmp"
+              # Title strip failed — pad to full store dimensions with white
+              convert "$f" -background white -gravity center \
+                -extent "${store_w}x${store_h}" -flatten -type TrueColor "$f"
+              echo "WARNING: title strip failed for $f, padded to ${store_w}x${store_h}"
+            fi
+          }
+
+          # iPhone 6.7" (iPhone 12/13 Pro Max): 1284x2778
+          for f in iphone-*_framed.png;   do process "$f" 1284 2778; done
+          # iPad Pro 12.9" landscape: 2732x2048
+          for f in ipad_pro-*_framed.png; do process "$f" 2732 2048; done
+          # Android phone: 1080x1920
+          for f in phone-*_framed.png;    do process "$f" 1080 1920; done
+          # macOS: 1440x900
+          for f in macos-*_framed.png;    do process "$f" 1440  900; done
+          # Windows: 1920x1200
+          for f in windows-*_framed.png;  do process "$f" 1920 1200; done
+
+      - name: List all screenshots
+        run: find screenshots/ -name "*.png" | sort
+
+      # ── Generate _preview.html — prefers *_framed.png, falls back to raw PNGs
+      - name: Generate preview HTML
+        working-directory: screenshots
+        run: |
+          python3 - << 'PYEOF'
+          import glob, os
+
+          raw    = sorted(f for f in glob.glob("*.png") if not f.endswith("_framed.png"))
+          # For each raw PNG prefer the framed version when it exists.
+          files  = []
+          n_framed = 0
+          for r in raw:
+              framed_path = r[:-4] + "_framed.png"
+              if os.path.exists(framed_path):
+                  files.append(framed_path)
+                  n_framed += 1
+              else:
+                  files.append(r)
+          imgs = "".join(f'<img src="{f}" alt="{f}" />' for f in files)
+          html   = f"""<!--suppress ALL --><html lang="en"><head><title>Framed Screenshots</title>
+          <style>
+            :root {{ --height: 600; }}
+            body {{ background-color: #efefef; }}
+            img  {{ max-height: calc(var(--height) * 1px); margin-left: 16px; }}
+            input {{ width: 400px; }}
+          </style>
+          <script>
+          document.addEventListener('DOMContentLoaded', function () {{
+            let h = document.getElementById('height');
+            document.documentElement.style.setProperty('--height', h.value);
+            h.addEventListener('input', () =>
+              document.documentElement.style.setProperty('--height', h.value));
+          }});
+          </script>
+          </head>
+          <div><label for="height">Preview Height:</label>
+          <input type="range" min="100" max="2000" value="600" id="height" /></div>
+          <h1>Framed Screenshots</h1>{imgs}<body></body></html>"""
+
+          with open("_preview.html", "w") as fh:
+              fh.write(html)
+          print(f"Generated _preview.html ({len(files)} images, {n_framed} framed, {len(raw)-n_framed} raw)")
+          PYEOF
+
+      # Artifact retention: 90 days so publish-metadata can pick it up later.
+      # Includes raw PNGs as fallback so the artifact is never empty.
+      - name: Upload framed-screenshots artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: framed-screenshots
+          path: |
+            screenshots/*_framed.png
+            screenshots/*.png
+            screenshots/_preview.html
+          if-no-files-found: warn
+          retention-days: 90
+
+      - name: Summary
+        run: |
+          TOTAL=$(find screenshots/ -name "*_framed.png" 2>/dev/null | wc -l)
+          echo "## Store Screenshot Results" >> "$GITHUB_STEP_SUMMARY"
+          echo "$TOTAL framed PNGs produced." >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "Run **Publish Metadata to Stores** to upload them to the stores (or it auto-fires via workflow_run)." >> "$GITHUB_STEP_SUMMARY"

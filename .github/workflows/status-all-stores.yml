@@ -1,0 +1,852 @@
+name: Status all stores
+
+# Queries every store for the current state of each app:
+# latest public release, in-review, rejected, pending-developer-release, etc.
+# Each store job saves a JSON fragment; the final 'report' job merges them into
+# a single matrix table (app rows × store columns).
+#
+# Platform | API used
+# -------- | --------
+# iOS      | App Store Connect REST API (Python, JWT auth)
+# macOS    | App Store Connect REST API (Python, JWT auth)
+# Android  | Google Play Developer API  (Python, service account)
+# Windows  | Partner Center REST API    (Python, Azure AD)
+# Snap     | Snap Store public API      (curl + Python, no auth)
+#
+# Per-store app availability:
+# iOS     : admin, hotel, freelance, health
+# macOS   : admin, hotel
+# Android : admin, hotel, freelance, health, elearner, support
+# Windows : admin, hotel
+# Snap    : admin, hotel, freelance, health, elearner, support
+
+on:
+    workflow_dispatch:
+        inputs:
+            apps:
+                description: "Apps to check (comma-separated: admin, hotel, freelance, health,
+                    elearner, support)"
+                required: true
+                default: "admin,hotel,freelance,health,elearner,support"
+                type: string
+            stores:
+                description: "Stores to check (comma-separated: ios, macos, android, windows,
+                    snap)"
+                required: true
+                default: "ios,macos,android,windows,snap"
+                type: string
+
+concurrency:
+    group: store-status
+    cancel-in-progress: true
+
+permissions:
+    contents: read
+
+jobs:
+    # ─────────────────────────────────────────────────────────────────────────────
+    # Build per-store matrix arrays from the intersection of the user's app list
+    # and each store's set of supported apps.
+    # ─────────────────────────────────────────────────────────────────────────────
+    resolve-matrix:
+        runs-on: ubuntu-latest
+        outputs:
+            run_ios: ${{ steps.matrix.outputs.run_ios }}
+            run_macos: ${{ steps.matrix.outputs.run_macos }}
+            run_android: ${{ steps.matrix.outputs.run_android }}
+            run_windows: ${{ steps.matrix.outputs.run_windows }}
+            run_snap: ${{ steps.matrix.outputs.run_snap }}
+            ios_matrix: ${{ steps.matrix.outputs.ios_matrix }}
+            macos_matrix: ${{ steps.matrix.outputs.macos_matrix }}
+            android_matrix: ${{ steps.matrix.outputs.android_matrix }}
+            windows_matrix: ${{ steps.matrix.outputs.windows_matrix }}
+            snap_matrix: ${{ steps.matrix.outputs.snap_matrix }}
+        steps:
+            - id: matrix
+              env:
+                  APPS: ${{ inputs.apps }}
+                  STORES: ${{ inputs.stores }}
+              run: |
+                  VALID_APPS="admin hotel freelance health elearner support"
+                  IFS=',' read -ra app_list <<< "$APPS"
+                  for app in "${app_list[@]}"; do
+                    app=$(echo "$app" | tr -d ' ')
+                    if ! echo "$VALID_APPS" | grep -qw "$app"; then
+                      echo "Invalid app: '$app'. Valid values: $VALID_APPS" >&2
+                      exit 1
+                    fi
+                  done
+
+                  build_matrix() {
+                    local store_apps="$1"
+                    local json="["
+                    local first=true
+                    IFS=',' read -ra app_list <<< "$APPS"
+                    for app in "${app_list[@]}"; do
+                      app=$(echo "$app" | tr -d ' ')
+                      if echo "$store_apps" | grep -qw "$app"; then
+                        if [[ "$first" == "false" ]]; then json="$json,"; fi
+                        json="${json}{\"app\":\"${app}\"}"
+                        first=false
+                      fi
+                    done
+                    json="${json}]"
+                    echo "$json"
+                  }
+
+                  contains_store() { echo "$STORES" | grep -qw "$1"; }
+
+                  declare -A STORE_APPS
+                  STORE_APPS[ios]="admin hotel freelance health"
+                  STORE_APPS[macos]="admin hotel"
+                  STORE_APPS[android]="admin hotel freelance health elearner support"
+                  STORE_APPS[windows]="admin hotel"
+                  STORE_APPS[snap]="admin hotel freelance health elearner support"
+
+                  for store in ios macos android windows snap; do
+                    if contains_store "$store"; then
+                      matrix=$(build_matrix "${STORE_APPS[$store]}")
+                      if [[ "$matrix" == "[]" ]]; then
+                        echo "run_${store}=false"       >> "$GITHUB_OUTPUT"
+                      else
+                        echo "run_${store}=true"        >> "$GITHUB_OUTPUT"
+                      fi
+                      echo "${store}_matrix=${matrix}"  >> "$GITHUB_OUTPUT"
+                    else
+                      echo "run_${store}=false"         >> "$GITHUB_OUTPUT"
+                      echo "${store}_matrix=[]"         >> "$GITHUB_OUTPUT"
+                    fi
+                  done
+
+    # ─────────────────────────────────────────────────────────────────────────────
+    # iOS — App Store Connect REST API
+    # Fragment rows: [{version, state, date}, ...]
+    # Secrets: APP_STORE_CONNECT_API_KEY_ID, APP_STORE_CONNECT_API_ISSUER_ID,
+    #          APP_STORE_CONNECT_API_KEY_CONTENT
+    # ─────────────────────────────────────────────────────────────────────────────
+    status-ios:
+        needs: [ resolve-matrix ]
+        if: needs.resolve-matrix.outputs.run_ios == 'true'
+        runs-on: ubuntu-latest
+        strategy:
+            fail-fast: false
+            matrix:
+                include: ${{ fromJSON(needs.resolve-matrix.outputs.ios_matrix) }}
+        steps:
+            - name: Install Python dependencies
+              run: pip install PyJWT cryptography --quiet
+
+            - name: Query iOS App Store status
+              env:
+                  APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+                  APP_STORE_CONNECT_API_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
+                  APP_STORE_CONNECT_API_KEY_CONTENT: ${{ secrets.APP_STORE_CONNECT_API_KEY_CONTENT }}
+                  APP_NAME: ${{ matrix.app }}
+              run: |
+                  python3 << 'PYEOF'
+                  import jwt, time, base64, json, os, sys
+                  from urllib.request import urlopen, Request
+                  from urllib.error import HTTPError
+
+                  key_id      = os.environ['APP_STORE_CONNECT_API_KEY_ID']
+                  issuer_id   = os.environ['APP_STORE_CONNECT_API_ISSUER_ID']
+                  private_key = base64.b64decode(os.environ['APP_STORE_CONNECT_API_KEY_CONTENT']).decode()
+                  app_name    = os.environ['APP_NAME']
+                  bundle_id   = f'org.growerp.{app_name}'
+
+                  now = int(time.time())
+                  token = jwt.encode(
+                      {'iss': issuer_id, 'iat': now, 'exp': now + 1200, 'aud': 'appstoreconnect-v1'},
+                      private_key, algorithm='ES256', headers={'kid': key_id}
+                  )
+                  hdrs = {'Authorization': f'Bearer {token}'}
+
+                  def asc_get(url):
+                      return json.loads(urlopen(Request(url, headers=hdrs)).read())
+
+                  rows = []
+                  try:
+                      data = asc_get(
+                          f'https://api.appstoreconnect.apple.com/v1/apps?filter[bundleId]={bundle_id}'
+                      )
+                      if not data['data']:
+                          rows = [{'version': '—', 'state': '—', 'date': '—'}]
+                      else:
+                          app_id = data['data'][0]['id']
+                          # appStoreVersions returns HTTP 400 (not empty list) when the app
+                          # has never completed an App Store submission — catch it and fall
+                          # back to preReleaseVersions (TestFlight builds).
+                          # sort is not a valid parameter for appStoreVersions — omit it
+                          vs = []
+                          try:
+                              vs = asc_get(
+                                  f'https://api.appstoreconnect.apple.com/v1/apps/{app_id}/appStoreVersions'
+                                  f'?limit=10'
+                              )['data']
+                          except HTTPError as e:
+                              print(f'appStoreVersions HTTP {e.code}: {e.read().decode("utf-8","replace")[:300]}')
+
+                          if vs:
+                              rows = [
+                                  {
+                                      'version': v['attributes'].get('versionString', '?'),
+                                      'state':   v['attributes'].get('appStoreState', 'UNKNOWN'),
+                                      'date':    (v['attributes'].get('createdDate') or '')[:10],
+                                  }
+                                  for v in vs
+                              ]
+                          else:
+                              # Fall back to TestFlight pre-release versions
+                              pv = []
+                              try:
+                                  pv = asc_get(
+                                      f'https://api.appstoreconnect.apple.com/v1/apps/{app_id}/preReleaseVersions'
+                                      f'?limit=5'
+                                  )['data']
+                              except HTTPError as e:
+                                  print(f'preReleaseVersions HTTP {e.code}: {e.read().decode("utf-8","replace")[:300]}')
+                              rows = [
+                                  {
+                                      'version': v['attributes'].get('version', '?'),
+                                      'state':   f"TESTFLIGHT ({v['attributes'].get('platform', '?')})",
+                                      'date':    '—',
+                                  }
+                                  for v in pv
+                              ] or [{'version': '—', 'state': 'NO SUBMISSIONS', 'date': '—'}]
+                  except Exception as e:
+                      rows = [{'version': '—', 'state': '—', 'date': '—'}]
+
+                  fragment = {'store': 'ios', 'app': app_name, 'rows': rows}
+                  with open('/tmp/fragment.json', 'w') as f:
+                      json.dump(fragment, f)
+
+                  # Per-job summary
+                  lines = [f'### iOS — {app_name}\n',
+                           '| Version | State | Created |', '|---------|-------|---------|']
+                  for r in rows:
+                      lines.append(f"| {r['version']} | {r['state']} | {r['date']} |")
+                  text = '\n'.join(lines) + '\n'
+                  with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as f:
+                      f.write(text)
+                  print(text)
+                  PYEOF
+
+            - uses: actions/upload-artifact@v4
+              with:
+                  name: status-ios-${{ matrix.app }}
+                  path: /tmp/fragment.json
+                  retention-days: 1
+
+    # ─────────────────────────────────────────────────────────────────────────────
+    # macOS — same API as iOS, platform=MAC_OS
+    # Fragment rows: [{version, state, date}, ...]
+    # Secrets: APP_STORE_CONNECT_API_KEY_ID, APP_STORE_CONNECT_API_ISSUER_ID,
+    #          APP_STORE_CONNECT_API_KEY_CONTENT
+    # ─────────────────────────────────────────────────────────────────────────────
+    status-macos:
+        needs: [ resolve-matrix ]
+        if: needs.resolve-matrix.outputs.run_macos == 'true'
+        runs-on: ubuntu-latest
+        strategy:
+            fail-fast: false
+            matrix:
+                include: ${{ fromJSON(needs.resolve-matrix.outputs.macos_matrix) }}
+        steps:
+            - name: Install Python dependencies
+              run: pip install PyJWT cryptography --quiet
+
+            - name: Query macOS App Store status
+              env:
+                  APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+                  APP_STORE_CONNECT_API_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
+                  APP_STORE_CONNECT_API_KEY_CONTENT: ${{ secrets.APP_STORE_CONNECT_API_KEY_CONTENT }}
+                  APP_NAME: ${{ matrix.app }}
+              run: |
+                  python3 << 'PYEOF'
+                  import jwt, time, base64, json, os, sys
+                  from urllib.request import urlopen, Request
+                  from urllib.error import HTTPError
+
+                  key_id      = os.environ['APP_STORE_CONNECT_API_KEY_ID']
+                  issuer_id   = os.environ['APP_STORE_CONNECT_API_ISSUER_ID']
+                  private_key = base64.b64decode(os.environ['APP_STORE_CONNECT_API_KEY_CONTENT']).decode()
+                  app_name    = os.environ['APP_NAME']
+                  bundle_id   = f'org.growerp.{app_name}'
+
+                  now = int(time.time())
+                  token = jwt.encode(
+                      {'iss': issuer_id, 'iat': now, 'exp': now + 1200, 'aud': 'appstoreconnect-v1'},
+                      private_key, algorithm='ES256', headers={'kid': key_id}
+                  )
+                  hdrs = {'Authorization': f'Bearer {token}'}
+
+                  def asc_get(url):
+                      return json.loads(urlopen(Request(url, headers=hdrs)).read())
+
+                  rows = []
+                  try:
+                      data = asc_get(
+                          f'https://api.appstoreconnect.apple.com/v1/apps?filter[bundleId]={bundle_id}'
+                      )
+                      if not data['data']:
+                          rows = [{'version': '—', 'state': '—', 'date': '—'}]
+                      else:
+                          app_id = data['data'][0]['id']
+                          vs = []
+                          try:
+                              vs = asc_get(
+                                  f'https://api.appstoreconnect.apple.com/v1/apps/{app_id}/appStoreVersions'
+                                  f'?limit=10'
+                              )['data']
+                          except HTTPError as e:
+                              print(f'appStoreVersions HTTP {e.code}: {e.read().decode("utf-8","replace")[:300]}')
+
+                          if vs:
+                              rows = [
+                                  {
+                                      'version': v['attributes'].get('versionString', '?'),
+                                      'state':   v['attributes'].get('appStoreState', 'UNKNOWN'),
+                                      'date':    (v['attributes'].get('createdDate') or '')[:10],
+                                  }
+                                  for v in vs
+                              ]
+                          else:
+                              pv = []
+                              try:
+                                  pv = asc_get(
+                                      f'https://api.appstoreconnect.apple.com/v1/apps/{app_id}/preReleaseVersions'
+                                      f'?limit=5'
+                                  )['data']
+                              except HTTPError as e:
+                                  print(f'preReleaseVersions HTTP {e.code}: {e.read().decode("utf-8","replace")[:300]}')
+                              rows = [
+                                  {
+                                      'version': v['attributes'].get('version', '?'),
+                                      'state':   f"TESTFLIGHT ({v['attributes'].get('platform', '?')})",
+                                      'date':    '—',
+                                  }
+                                  for v in pv
+                              ] or [{'version': '—', 'state': 'NO SUBMISSIONS', 'date': '—'}]
+                  except Exception as e:
+                      rows = [{'version': '—', 'state': '—', 'date': '—'}]
+
+                  fragment = {'store': 'macos', 'app': app_name, 'rows': rows}
+                  with open('/tmp/fragment.json', 'w') as f:
+                      json.dump(fragment, f)
+
+                  lines = [f'### macOS — {app_name}\n',
+                           '| Version | State | Created |', '|---------|-------|---------|']
+                  for r in rows:
+                      lines.append(f"| {r['version']} | {r['state']} | {r['date']} |")
+                  text = '\n'.join(lines) + '\n'
+                  with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as f:
+                      f.write(text)
+                  print(text)
+                  PYEOF
+
+            - uses: actions/upload-artifact@v4
+              with:
+                  name: status-macos-${{ matrix.app }}
+                  path: /tmp/fragment.json
+                  retention-days: 1
+
+    # ─────────────────────────────────────────────────────────────────────────────
+    # Android — Google Play Developer API, service account auth
+    # Fragment rows: [{track, version, status, rollout}, ...]
+    # Secrets: GOOGLE_PLAY_SERVICE_ACCOUNT_JSON
+    # ─────────────────────────────────────────────────────────────────────────────
+    status-android:
+        needs: [ resolve-matrix ]
+        if: needs.resolve-matrix.outputs.run_android == 'true'
+        runs-on: ubuntu-latest
+        strategy:
+            fail-fast: false
+            matrix:
+                include: ${{ fromJSON(needs.resolve-matrix.outputs.android_matrix) }}
+        steps:
+            - name: Install Python dependencies
+              run: pip install google-auth google-api-python-client --quiet
+
+            - name: Query Google Play status
+              env:
+                  GOOGLE_PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+                  APP_NAME: ${{ matrix.app }}
+              run: |
+                  python3 << 'PYEOF'
+                  import base64, json, os, sys
+
+                  from google.oauth2 import service_account
+                  from googleapiclient.discovery import build
+
+                  app_name     = os.environ['APP_NAME']
+                  package_name = f'org.growerp.{app_name}'
+
+                  creds_raw = os.environ.get('GOOGLE_PLAY_SERVICE_ACCOUNT_JSON', '')
+                  if not creds_raw:
+                      print('GOOGLE_PLAY_SERVICE_ACCOUNT_JSON not set. Skipping.')
+                      sys.exit(0)
+
+                  # Parse service account JSON — try raw first, then several base64 variants
+                  sa_info = None
+                  try:
+                      sa_info = json.loads(creds_raw)
+                  except Exception as e1:
+                      print(f'Raw JSON parse failed ({type(e1).__name__}), trying base64 variants...')
+                      b64_clean = creds_raw.strip().replace('\n', '').replace('\r', '').replace(' ', '')
+                      # Add padding so length is a multiple of 4
+                      b64_padded = b64_clean + '=' * (-len(b64_clean) % 4)
+                      decoded = None
+                      for decode_fn in (base64.b64decode, base64.urlsafe_b64decode):
+                          try:
+                              decoded = decode_fn(b64_padded)
+                              break
+                          except Exception:
+                              continue
+                      if decoded is None:
+                          print('base64 decode failed (standard and urlsafe). Cannot load credentials.')
+                          sys.exit(1)
+                      for enc in ('utf-8', 'utf-8-sig', 'latin-1'):
+                          try:
+                              sa_info = json.loads(decoded.decode(enc))
+                              break
+                          except Exception:
+                              continue
+                      if sa_info is None:
+                          print(f'JSON parse of decoded bytes failed. First 4 bytes: {decoded[:4].hex()}')
+                          sys.exit(1)
+
+                  creds = service_account.Credentials.from_service_account_info(
+                      sa_info,
+                      scopes=['https://www.googleapis.com/auth/androidpublisher']
+                  )
+                  service = build('androidpublisher', 'v3', credentials=creds)
+                  edits   = service.edits()
+
+                  rows = []
+                  try:
+                      edit    = edits.insert(packageName=package_name, body={}).execute()
+                      edit_id = edit['id']
+                      try:
+                          tracks_resp = edits.tracks().list(
+                              packageName=package_name, editId=edit_id
+                          ).execute()
+                          for track in tracks_resp.get('tracks', []):
+                              track_name = track.get('track', '?')
+                              releases   = track.get('releases', [])
+                              if not releases:
+                                  rows.append({'track': track_name, 'version': '—', 'status': 'empty', 'rollout': '—'})
+                              for release in releases:
+                                  frac = release.get('userFraction')
+                                  rows.append({
+                                      'track':   track_name,
+                                      'version': release.get('name', '?'),
+                                      'status':  release.get('status', '?'),
+                                      'rollout': f"{int(frac * 100)}%" if frac else '100%',
+                                  })
+                      finally:
+                          try:
+                              edits.delete(packageName=package_name, editId=edit_id).execute()
+                          except Exception:
+                              pass
+                  except Exception as e:
+                      rows = [{'track': '—', 'version': '—', 'status': '—', 'rollout': '—'}]
+
+                  if not rows:
+                      rows = [{'track': '—', 'version': '—', 'status': 'NO TRACKS', 'rollout': '—'}]
+
+                  fragment = {'store': 'android', 'app': app_name, 'rows': rows}
+                  with open('/tmp/fragment.json', 'w') as f:
+                      json.dump(fragment, f)
+
+                  lines = [f'### Android — {app_name}\n',
+                           '| Track | Version | Status | Rollout |',
+                           '|-------|---------|--------|---------|']
+                  for r in rows:
+                      lines.append(f"| {r['track']} | {r['version']} | {r['status']} | {r['rollout']} |")
+                  text = '\n'.join(lines) + '\n'
+                  with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as f:
+                      f.write(text)
+                  print(text)
+                  PYEOF
+
+            - uses: actions/upload-artifact@v4
+              if: always()
+              with:
+                  name: status-android-${{ matrix.app }}
+                  path: /tmp/fragment.json
+                  retention-days: 1
+
+    # ─────────────────────────────────────────────────────────────────────────────
+    # Windows — Partner Center REST API, Azure AD client-credentials auth
+    # Fragment rows: [{label, version, status}, ...]
+    # Secrets: WINDOWS_TENANT_ID, WINDOWS_CLIENT_ID, WINDOWS_CLIENT_SECRET,
+    #          WINDOWS_ADMIN_PRODUCT_ID, WINDOWS_HOTEL_PRODUCT_ID
+    # ─────────────────────────────────────────────────────────────────────────────
+    status-windows:
+        needs: [ resolve-matrix ]
+        if: needs.resolve-matrix.outputs.run_windows == 'true'
+        runs-on: ubuntu-latest
+        strategy:
+            fail-fast: false
+            matrix:
+                include: ${{ fromJSON(needs.resolve-matrix.outputs.windows_matrix) }}
+        steps:
+            - name: Install Python dependencies
+              run: pip install requests --quiet
+
+            - name: Query Microsoft Store status
+              env:
+                  WINDOWS_TENANT_ID: ${{ secrets.WINDOWS_TENANT_ID }}
+                  WINDOWS_CLIENT_ID: ${{ secrets.WINDOWS_CLIENT_ID }}
+                  WINDOWS_CLIENT_SECRET: ${{ secrets.WINDOWS_CLIENT_SECRET }}
+                  WINDOWS_ADMIN_PRODUCT_ID: ${{ secrets.WINDOWS_ADMIN_PRODUCT_ID }}
+                  WINDOWS_HOTEL_PRODUCT_ID: ${{ secrets.WINDOWS_HOTEL_PRODUCT_ID }}
+                  APP_NAME: ${{ matrix.app }}
+              run: |
+                  python3 << 'PYEOF'
+                  import json, os, sys, requests
+
+                  app_name = os.environ['APP_NAME']
+                  product_ids = {
+                      'admin': os.environ.get('WINDOWS_ADMIN_PRODUCT_ID', ''),
+                      'hotel': os.environ.get('WINDOWS_HOTEL_PRODUCT_ID', ''),
+                  }
+                  app_id = product_ids.get(app_name, '')
+                  if not app_id:
+                      print(f'No product ID for {app_name}. Skipping.')
+                      sys.exit(0)
+
+                  auth = requests.post(
+                      f"https://login.microsoftonline.com/{os.environ['WINDOWS_TENANT_ID']}/oauth2/token",
+                      data={
+                          'grant_type':    'client_credentials',
+                          'client_id':     os.environ['WINDOWS_CLIENT_ID'],
+                          'client_secret': os.environ['WINDOWS_CLIENT_SECRET'],
+                          'resource':      'https://manage.devcenter.microsoft.com',
+                      }
+                  )
+                  auth.raise_for_status()
+                  hdrs = {'Authorization': f"Bearer {auth.json()['access_token']}", 'Accept': 'application/json'}
+                  base = f'https://manage.devcenter.microsoft.com/v1.0/my/applications/{app_id}'
+
+                  app_data = requests.get(base, headers=hdrs).json()
+
+                  def pkg_version(sub_data):
+                      pkgs = sub_data.get('applicationPackages', [])
+                      return pkgs[0].get('version', '?') if pkgs else '?'
+
+                  rows = []
+                  last = app_data.get('lastPublishedApplicationSubmission', {})
+                  if last:
+                      sub = requests.get(f"{base}/submissions/{last['id']}", headers=hdrs).json()
+                      rows.append({'label': 'published', 'version': pkg_version(sub), 'status': sub.get('status', '?')})
+                  else:
+                      rows.append({'label': 'published', 'version': '—', 'status': 'none'})
+
+                  pending = app_data.get('pendingApplicationSubmission', {})
+                  if pending:
+                      sub = requests.get(f"{base}/submissions/{pending['id']}", headers=hdrs).json()
+                      rows.append({'label': 'pending', 'version': pkg_version(sub), 'status': sub.get('status', '?')})
+
+                  fragment = {'store': 'windows', 'app': app_name, 'rows': rows}
+                  with open('/tmp/fragment.json', 'w') as f:
+                      json.dump(fragment, f)
+
+                  lines = [f'### Windows — {app_name}\n',
+                           '| Submission | Version | Status |',
+                           '|------------|---------|--------|']
+                  for r in rows:
+                      lines.append(f"| {r['label']} | {r['version']} | {r['status']} |")
+                  text = '\n'.join(lines) + '\n'
+                  with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as f:
+                      f.write(text)
+                  print(text)
+                  PYEOF
+
+            - uses: actions/upload-artifact@v4
+              with:
+                  name: status-windows-${{ matrix.app }}
+                  path: /tmp/fragment.json
+                  retention-days: 1
+
+    # ─────────────────────────────────────────────────────────────────────────────
+    # Snap Store — public API, no authentication required
+    # Fragment rows: [{channel, revision, version, released}, ...]
+    # Snap name convention: growerp-<app>
+    # ─────────────────────────────────────────────────────────────────────────────
+    status-snap:
+        needs: [ resolve-matrix ]
+        if: needs.resolve-matrix.outputs.run_snap == 'true'
+        runs-on: ubuntu-latest
+        strategy:
+            fail-fast: false
+            matrix:
+                include: ${{ fromJSON(needs.resolve-matrix.outputs.snap_matrix) }}
+        steps:
+            - name: Install snapcraft
+              run: sudo snap install snapcraft --classic
+
+            - name: Query Snap Store status
+              env:
+                  APP_NAME: ${{ matrix.app }}
+                  SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}
+              run: |
+                  SNAP_NAME="growerp-${APP_NAME}"
+
+                  # Use environment variable for auth (new snapcraft method)
+                  export SNAPCRAFT_STORE_CREDENTIALS="${SNAPCRAFT_STORE_CREDENTIALS}"
+
+                  # Get revisions via snapcraft CLI (don't fail if snap not found)
+                  snapcraft revisions "$SNAP_NAME" > /tmp/snap-revisions.txt 2>&1 || true
+
+                  python3 << 'PYEOF'
+                  import json, os, re
+
+                  app_name  = os.environ['APP_NAME']
+                  snap_name = f'growerp-{app_name}'
+
+                  rows = []
+                  try:
+                      with open('/tmp/snap-revisions.txt') as f:
+                          content = f.read()
+                          lines = content.splitlines()
+
+                      # Check for error messages (snap not found, not authorized, etc)
+                      if any(err in content.lower() for err in ['error', 'not found', 'permission', 'cannot', 'does not exist']):
+                          rows = [{'channel': '—', 'revision': '—', 'version': '—', 'released': '—'}]
+                      elif len(lines) < 2:
+                          rows = [{'channel': '—', 'revision': '—', 'version': '—', 'released': '—'}]
+                      else:
+                          for line in lines[1:]:  # Skip header
+                              line = line.strip()
+                              if not line:
+                                  continue
+                              parts = line.split()
+                              # Format: Rev  Uploaded  Arches  Version  Channels...
+                              # 8      2026-04-17T05:54:18Z  amd64  1.15.5  latest/stable*
+                              if len(parts) >= 5:
+                                  revision = parts[0]
+                                  uploaded = parts[1][:10]  # Date only
+                                  version = parts[3]  # Version is 4th column
+                                  channels = ' '.join(parts[4:])  # Channels (rest)
+                                  rows.append({
+                                      'channel': channels if channels else '—',
+                                      'revision': revision,
+                                      'version': version,
+                                      'released': uploaded,
+                                  })
+
+                      if not rows:
+                          rows = [{'channel': '—', 'revision': '—', 'version': '—', 'released': '—'}]
+                  except Exception as e:
+                      rows = [{'channel': '—', 'revision': '—', 'version': 'NOT FOUND', 'released': '—'}]
+
+                  fragment = {'store': 'snap', 'app': app_name, 'rows': rows}
+                  with open('/tmp/fragment.json', 'w') as f:
+                      json.dump(fragment, f)
+
+                  lines = [f'### Snap — {app_name}\n',
+                           '| Channel | Revision | Version | Released |',
+                           '|---------|----------|---------|----------|']
+                  for r in rows:
+                      lines.append(f"| {r['channel']} | {r['revision']} | {r['version']} | {r['released']} |")
+                  text = '\n'.join(lines) + '\n'
+                  with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as f:
+                      f.write(text)
+                  print(text)
+                  PYEOF
+
+            - uses: actions/upload-artifact@v4
+              with:
+                  name: status-snap-${{ matrix.app }}
+                  path: /tmp/fragment.json
+                  retention-days: 1
+
+    # ─────────────────────────────────────────────────────────────────────────────
+    # Consolidated matrix report — one table, app rows × store columns.
+    # Runs after all store jobs (always, even if some were skipped or failed).
+    #
+    # Cell content per store:
+    #   iOS / macOS : latest version + state  (first row, sorted -createdDate)
+    #   Android     : production track — latest completed/inProgress version
+    #   Windows     : "✓{pub_ver}  ⏳{pend_ver} {status}" (pending omitted if none)
+    #   Snap        : latest/stable revision + version
+    # ─────────────────────────────────────────────────────────────────────────────
+    report:
+        needs: [ status-ios, status-macos, status-android, status-windows, status-snap ]
+        if: always()
+        runs-on: ubuntu-latest
+        steps:
+            - name: Download all status fragments
+              uses: actions/download-artifact@v4
+              with:
+                  pattern: status-*
+                  path: /tmp/fragments
+                  merge-multiple: false
+
+            - name: Install PDF dependencies
+              run: pip install markdown weasyprint --quiet
+
+            - name: Build consolidated report and PDF
+              env:
+                  APPS: ${{ inputs.apps }}
+                  STORES: ${{ inputs.stores }}
+              run: |
+                  python3 << 'PYEOF'
+                  import json, os
+                  import markdown as md_lib
+                  from weasyprint import HTML
+                  from datetime import datetime, timezone
+
+                  STORE_ORDER = ['ios', 'macos', 'android', 'windows', 'snap']
+                  APP_ORDER   = ['admin', 'hotel', 'freelance', 'health', 'elearner', 'support']
+
+                  apps_input   = os.environ.get('APPS', '')
+                  stores_input = os.environ.get('STORES', '')
+                  selected_apps   = [a.strip() for a in apps_input.split(',') if a.strip()]
+                  selected_stores = [s.strip() for s in stores_input.split(',') if s.strip()]
+
+                  # Load all fragments: data[(store, app)] = rows list
+                  data = {}
+                  fragments_dir = '/tmp/fragments'
+                  for store in STORE_ORDER:
+                      for app in APP_ORDER:
+                          path = os.path.join(fragments_dir, f'status-{store}-{app}', 'fragment.json')
+                          if os.path.exists(path):
+                              with open(path) as f:
+                                  frag = json.load(f)
+                              data[(store, app)] = frag.get('rows', [])
+
+                  # ── Cell formatters ──────────────────────────────────────────────
+                  def cell_asc(rows):
+                      if not rows:
+                          return '—'
+                      r = rows[0]
+                      return f"{r.get('version','—')}<br>{r.get('state','?')}"
+
+                  def cell_android(rows):
+                      if not rows:
+                          return '—'
+                      prod = [r for r in rows if r.get('track') == 'production']
+                      src  = prod[0] if prod else rows[0]
+                      return f"{src.get('version','?')}<br>{src.get('status','?')}"
+
+                  def cell_windows(rows):
+                      if not rows:
+                          return '—'
+                      parts = []
+                      for r in rows:
+                          ver, st = r.get('version','?'), r.get('status','?')
+                          parts.append(f"✓ {ver}" if r.get('label') == 'published' else f"⏳ {ver} {st}")
+                      return '<br>'.join(parts)
+
+                  def cell_snap(rows):
+                      if not rows:
+                          return '—'
+                      stable = [r for r in rows if '/stable' in r.get('channel', '')]
+                      r = stable[0] if stable else rows[0]
+                      if r.get('version') == '—':
+                          return '—'
+                      return f"r{r.get('revision','?')} {r.get('version','?')}"
+
+                  cell_fn = {
+                      'ios': cell_asc, 'macos': cell_asc,
+                      'android': cell_android, 'windows': cell_windows, 'snap': cell_snap,
+                  }
+
+                  # ── Build markdown matrix ────────────────────────────────────────
+                  visible_stores = [s for s in STORE_ORDER if s in selected_stores]
+                  visible_apps   = [a for a in APP_ORDER   if a in selected_apps]
+
+                  header = '| App | ' + ' | '.join(s.upper() for s in visible_stores) + ' |'
+                  sep    = '|-----|' + '|'.join(':-------:' for _ in visible_stores) + '|'
+
+                  table_rows = [header, sep]
+                  for app in visible_apps:
+                      cells = [cell_fn[s](data.get((s, app))) if (s, app) in data else '—'
+                               for s in visible_stores]
+                      table_rows.append('| ' + app + ' | ' + ' | '.join(cells) + ' |')
+
+                  now_str   = datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')
+                  report_md = (
+                      '# Store Status Report\n\n'
+                      f'Generated: {now_str}  \n'
+                      f'Apps: `{apps_input}`  \nStores: `{stores_input}`\n\n'
+                      + '\n'.join(table_rows) + '\n'
+                  )
+
+                  # ── Waiting-for-approval scan ────────────────────────────────────
+                  # States that mean "submitted and waiting for store review/release".
+                  PENDING_STATES = {
+                      'ios':     {'IN_REVIEW', 'WAITING_FOR_REVIEW', 'PENDING_DEVELOPER_RELEASE',
+                                  'PENDING_APPLE_RELEASE'},
+                      'macos':   {'IN_REVIEW', 'WAITING_FOR_REVIEW', 'PENDING_DEVELOPER_RELEASE',
+                                  'PENDING_APPLE_RELEASE'},
+                      'android': {'inProgress', 'draft'},
+                      'windows': {'Certification', 'PreProcessing', 'CommitStarted',
+                                  'PendingCommit', 'PendingPublication', 'ReadyToPublish'},
+                      'snap':    set(),
+                  }
+
+                  waiting = []
+                  for store in STORE_ORDER:
+                      for app in APP_ORDER:
+                          rows = data.get((store, app))
+                          if not rows:
+                              continue
+                          for r in rows:
+                              # iOS/macOS use 'state'; Android uses 'status'; Windows uses 'status'
+                              status_val = r.get('state') or r.get('status', '')
+                              track_info = f" [{r['track']}]" if 'track' in r else ''
+                              label_info = f" [{r['label']}]" if 'label' in r else ''
+                              if status_val in PENDING_STATES.get(store, set()):
+                                  ver = r.get('version', '?')
+                                  waiting.append(
+                                      f"  {store.upper():8s}  {app:10s}  v{ver:12s}  "
+                                      f"{status_val}{track_info}{label_info}"
+                                  )
+
+                  print('=' * 60)
+                  if waiting:
+                      print('APPS WAITING FOR APPROVAL:')
+                      for line in waiting:
+                          print(line)
+                  else:
+                      print('No apps currently waiting for approval.')
+                  print('=' * 60)
+
+                  # GitHub step summary (markdown)
+                  with open(os.environ['GITHUB_STEP_SUMMARY'], 'w') as f:
+                      f.write(report_md)
+                  print(report_md)
+
+                  # ── Generate PDF ─────────────────────────────────────────────────
+                  html_body = md_lib.markdown(report_md, extensions=['tables'])
+                  css = '\n'.join([
+                      '  @page { size: A4 landscape; margin: 1cm; }',
+                      '  body  { font-family: Arial, sans-serif; font-size: 11pt; margin: 2cm; color: #222; }',
+                      '  h1    { color: #1a5276; border-bottom: 2px solid #1a5276; padding-bottom: 6px; }',
+                      '  p     { margin: 4px 0; }',
+                      '  table { border-collapse: collapse; width: 100%; margin-top: 1em; }',
+                      '  th    { background: #1a5276; color: #fff; padding: 7px 12px; text-align: center; }',
+                      '  td    { border: 1px solid #ccc; padding: 6px 10px; vertical-align: top; }',
+                      '  tr:nth-child(even) td { background: #f4f6f9; }',
+                      '  td:first-child { font-weight: bold; }',
+                      '  code  { background: #eef; padding: 1px 4px; border-radius: 3px; font-size: 10pt; }',
+                  ])
+                  full_html = (
+                      '<!DOCTYPE html><html><head><meta charset="utf-8">'
+                      f'<style>\n{css}\n</style></head><body>'
+                      + html_body
+                      + '</body></html>'
+                  )
+                  HTML(string=full_html).write_pdf('/tmp/store-status-report.pdf')
+                  print('PDF written.')
+                  PYEOF
+
+            - name: Upload PDF report
+              uses: actions/upload-artifact@v4
+              with:
+                  name: store-status-report
+                  path: /tmp/store-status-report.pdf
+                  retention-days: 30

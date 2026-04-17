@@ -72,6 +72,7 @@ This directory contains comprehensive documentation for extending and developing
 
 ### 🚀 Release & Operations
 
+- **[GitHub Actions Guide](./GitHub_Actions_Guide.md)** ⭐ **NEW!** - All CI/CD workflows explained with full secrets reference and setup instructions
 - **[Version Management and Release Process](./GrowERP_Version_Management_and_Release_Process.md)** - Release strategy
 - **[Snap Linux Distribution Guide](./snap_linux_distribution.md)** - Package for Linux
 - **[GrowERP Timeout Fix Documentation](./GrowERP_Timeout_Fix_Documentation.md)** - Timeout handling
@@ -234,9 +235,10 @@ BlocListener<UserBloc, UserState>(
 7. [Moqui Subscription Function](./Moqui_Subscription_Function.md)
 
 ### 🔧 DevOps / Infrastructure
-**Time:** 45 minutes
-1. [Assessment Landing Page Explanation](./Assessment_Landing_Page_Explanation.md) (30 min) ⭐ **Phase 12 - Deployment & MIME types**
-2. [Version Management and Release Process](./GrowERP_Version_Management_and_Release_Process.md) (15 min)
+**Time:** 60 minutes
+1. [GitHub Actions Guide](./GitHub_Actions_Guide.md) ⭐ **NEW!** - CI/CD workflows, secrets setup (20 min)
+2. [Assessment Landing Page Explanation](./Assessment_Landing_Page_Explanation.md) (30 min) ⭐ **Phase 12 - Deployment & MIME types**
+3. [Version Management and Release Process](./GrowERP_Version_Management_and_Release_Process.md) (15 min)
 
 ### 🎨 Admin / UI Developers
 **Time:** 60 minutes
@@ -331,6 +333,7 @@ BlocListener<UserBloc, UserState>(
 | **Payment integration** | [Stripe Payment Processing Documentation](./Stripe_Payment_Processing_Documentation.md) | Complete guide |
 | **Real-time notifications** | [WebSocket Notification System](./WebSocket_Notification_System.md) | Complete guide |
 | **Timezone handling** | [Timezone Management Guide](./GrowERP_Timezone_Management_Guide.md) | Complete guide |
+| **CI/CD workflows & secrets** | [GitHub Actions Guide](./GitHub_Actions_Guide.md) | Complete guide |
 | **Release process** | [Version Management and Release Process](./GrowERP_Version_Management_and_Release_Process.md) | Complete guide |
 | **AI development** | [GrowERP AI Development Instructions](./GrowERP_AI_Instructions.md) | Complete guide |
 

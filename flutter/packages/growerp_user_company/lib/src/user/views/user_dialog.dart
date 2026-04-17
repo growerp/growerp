@@ -837,7 +837,9 @@ class UserDialogState extends State<UserDialogStateFull> {
                         ? NetworkImage(_imageFile!.path)
                         : FileImage(File(_imageFile!.path)))
                   : null,
-              imageBytes: _imageFile == null && !_deleteImage ? widget.user.image : null,
+              imageBytes: _imageFile == null && !_deleteImage
+                  ? widget.user.image
+                  : null,
               fallbackText: widget.user.firstName?.substring(0, 1) ?? '',
               onUploadTap: () async {
                 final pickedFile = await HelperFunctions.pickImage();

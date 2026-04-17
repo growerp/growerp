@@ -141,7 +141,6 @@ final List<FinDoc> mfgDemoPurchaseOrders = [
   ),
 ];
 
-
 // ── Router ────────────────────────────────────────────────────────────────────
 
 GoRouter createAdminMfgDemoRouter() {
@@ -186,6 +185,7 @@ GoRouter createAdminMfgDemoRouter() {
         sales: true,
         docType: FinDocType.transaction,
       ),
+      '/accounting/reports' => const RevenueExpenseChart(),
       '/manufacturing/bom' => const BomList(),
       '/manufacturing/workOrder' => const WorkOrderList(),
       '/manufacturing/routing' => const RoutingList(),
@@ -301,6 +301,14 @@ const adminMfgDemoMenuConfig = MenuConfiguration(
       sequenceNum: 110,
       widgetName: 'FinDocList',
     ),
+    MenuItem(
+      itemKey: 'MFG_REPORTS',
+      title: 'Revenue Report',
+      route: '/accounting/reports',
+      iconName: 'summarize',
+      sequenceNum: 120,
+      widgetName: 'RevenueExpenseChart',
+    ),
   ],
 );
 
@@ -313,11 +321,14 @@ class _MfgDemoDashboard extends StatelessWidget {
       builder: (context, authState) {
         final stats = authState.authenticate?.stats;
 
-        final dashboardItems = adminMfgDemoMenuConfig.menuItems
-            .where((item) =>
-                item.isActive && item.route != null && item.route != '/')
-            .toList()
-          ..sort((a, b) => a.sequenceNum.compareTo(b.sequenceNum));
+        final dashboardItems =
+            adminMfgDemoMenuConfig.menuItems
+                .where(
+                  (item) =>
+                      item.isActive && item.route != null && item.route != '/',
+                )
+                .toList()
+              ..sort((a, b) => a.sequenceNum.compareTo(b.sequenceNum));
 
         return Scaffold(
           key: const Key('MfgDemoDashboard'),
@@ -552,12 +563,29 @@ void main() {
     );
     await TransactionTest.showUpdatedAccountingDashboard(tester);
 
+    // ── Phase 11: Revenue & Expense Report ─────────────────────────────────
+    await CommonTest.showDemoStep(
+      tester,
+      'Revenue & Expense Report',
+      'The general ledger report summarises all financial activity.\n'
+          'Revenue from the sale and costs from purchasing and production '
+          'are reflected here, showing the profit from this manufacturing job.',
+      seconds: 3,
+    );
+    await CommonTest.selectOption(
+      tester,
+      '/accounting/reports',
+      'RevenueExpenseChart',
+    );
+    await tester.pump(const Duration(seconds: 4));
+    await CommonTest.gotoMainMenu(tester);
+
     await CommonTest.showDemoStep(
       tester,
       'Demo Complete',
       'You have seen the full GrowERP manufacturing lifecycle:\n'
           'BOM → Routing → Sales Order → Work Order → Purchase → Receive → '
-          'Produce → Ship → Accounting → Dashboard.',
+          'Produce → Ship → Accounting → Dashboard → Revenue Report.',
     );
 
     await CommonTest.logout(tester);

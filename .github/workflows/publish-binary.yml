@@ -1,0 +1,1144 @@
+name: Publish Binary to Stores
+
+on:
+  workflow_dispatch:
+    inputs:
+      apps:
+        description: "Apps to submit (comma-separated: admin, hotel, freelance, health,
+          elearner, support)"
+        required: true
+        default: "admin,hotel"
+        type: string
+      stores:
+        description: "Stores to deploy to (comma-separated: ios, macos, android,
+          windows, snap)"
+        required: true
+        default: "ios,macos,android,windows,snap"
+        type: string
+      track:
+        description: "Release track (beta = TestFlight only, stable = submit for App
+          Store review)"
+        required: true
+        default: "beta"
+        type: choice
+        options:
+          - beta
+          - stable
+
+concurrency:
+  group: store-deploy
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  # ───────────────────────────────────────────────────────────────────────────
+  # Convert comma-separated inputs into JSON arrays for downstream matrix jobs.
+  # Inline job (not reusable workflow) so IDE tooling can validate outputs.
+  # ───────────────────────────────────────────────────────────────────────────
+  resolve-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      run_ios: ${{ steps.matrix.outputs.run_ios }}
+      run_macos: ${{ steps.matrix.outputs.run_macos }}
+      run_android: ${{ steps.matrix.outputs.run_android }}
+      run_windows: ${{ steps.matrix.outputs.run_windows }}
+      run_snap: ${{ steps.matrix.outputs.run_snap }}
+      ios_matrix: ${{ steps.matrix.outputs.ios_matrix }}
+      macos_matrix: ${{ steps.matrix.outputs.macos_matrix }}
+      android_matrix: ${{ steps.matrix.outputs.android_matrix }}
+      windows_matrix: ${{ steps.matrix.outputs.windows_matrix }}
+      snap_matrix: ${{ steps.matrix.outputs.snap_matrix }}
+    steps:
+      - id: matrix
+        env:
+          APPS: ${{ inputs.apps }}
+          STORES: ${{ inputs.stores }}
+        run: |
+          VALID_APPS="admin hotel freelance health elearner support"
+          IFS=',' read -ra app_list <<< "$APPS"
+          for app in "${app_list[@]}"; do
+            app=$(echo "$app" | tr -d ' ')
+            if ! echo "$VALID_APPS" | grep -qw "$app"; then
+              echo "Invalid app: '$app'. Valid values: $VALID_APPS" >&2
+              exit 1
+            fi
+          done
+
+          build_matrix() {
+            local json="["
+            local first=true
+            IFS=',' read -ra app_list <<< "$APPS"
+            for app in "${app_list[@]}"; do
+              app=$(echo "$app" | tr -d ' ')
+              if [[ "$first" == "false" ]]; then json="$json,"; fi
+              json="${json}{\"app\":\"${app}\"}"
+              first=false
+            done
+            json="${json}]"
+            echo "$json"
+          }
+
+          contains() { echo "$STORES" | grep -qw "$1"; }
+
+          for store in ios macos android windows snap; do
+            if contains "$store"; then
+              echo "run_${store}=true"               >> "$GITHUB_OUTPUT"
+              echo "${store}_matrix=$(build_matrix)" >> "$GITHUB_OUTPUT"
+            else
+              echo "run_${store}=false"              >> "$GITHUB_OUTPUT"
+              echo "${store}_matrix=[]"              >> "$GITHUB_OUTPUT"
+            fi
+          done
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # Run once: bootstrap the Melos workspace and generate all Freezed / Retrofit
+  # / l10n files. The generated sources are uploaded as an artifact and
+  # downloaded by every store job, so code generation never runs twice.
+  # ───────────────────────────────────────────────────────────────────────────
+  bootstrap:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - uses: ./.github/actions/bootstrap
+
+      - name: Package generated sources
+        run: |
+          find flutter \( -name "*.freezed.dart" -o -name "*.g.dart" -o -path "*/l10n/*.dart" \) \
+            | tar -czf /tmp/generated-sources.tar.gz -T -
+
+      - name: Upload generated sources
+        uses: actions/upload-artifact@v4
+        with:
+          name: generated-sources
+          retention-days: 1
+          path: /tmp/generated-sources.tar.gz
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # Bump build number once for all selected apps before any store deploy.
+  # iOS, macOS and Android all enforce strictly-increasing build numbers.
+  # Bumped pubspecs are saved as an artifact; the commit only happens after
+  # all platform jobs complete (in commit-version), and only if at least one
+  # platform succeeded.
+  # ───────────────────────────────────────────────────────────────────────────
+  bump-version:
+    needs: [ resolve-matrix ]
+    if: >-
+      contains(inputs.stores, 'ios') || contains(inputs.stores, 'macos') ||
+      contains(inputs.stores, 'android')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Python dependencies
+        run: pip install PyJWT cryptography google-auth requests --quiet
+
+      - name: Bump version based on store latest versions
+        env:
+          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          APP_STORE_CONNECT_API_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY_CONTENT: ${{ secrets.APP_STORE_CONNECT_API_KEY_CONTENT }}
+          GOOGLE_PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+        run: |
+          python3 << 'PYEOF'
+          import jwt, time, base64, json, os, re, requests
+          from urllib.request import urlopen, Request
+          import google.oauth2.service_account
+          import google.auth.transport.requests
+
+          # ── App Store Connect ────────────────────────────────────────────────
+          key_id      = os.environ['APP_STORE_CONNECT_API_KEY_ID']
+          issuer_id   = os.environ['APP_STORE_CONNECT_API_ISSUER_ID']
+          private_key = base64.b64decode(os.environ['APP_STORE_CONNECT_API_KEY_CONTENT']).decode()
+
+          now       = int(time.time())
+          asc_token = jwt.encode(
+              {'iss': issuer_id, 'iat': now, 'exp': now + 1200, 'aud': 'appstoreconnect-v1'},
+              private_key, algorithm='ES256', headers={'kid': key_id}
+          )
+          asc_hdrs = {'Authorization': f'Bearer {asc_token}'}
+
+          def asc_get(url):
+              return json.loads(urlopen(Request(url, headers=asc_hdrs)).read())
+
+          def latest_asc_version(bundle_id):
+              try:
+                  data = asc_get(f'https://api.appstoreconnect.apple.com/v1/apps?filter[bundleId]={bundle_id}')
+                  if not data['data']:
+                      return None
+                  app_id = data['data'][0]['id']
+                  data = asc_get(
+                      f'https://api.appstoreconnect.apple.com/v1/apps/{app_id}/appStoreVersions'
+                      f'?filter[platform]=IOS&sort=-createdDate&limit=5'
+                  )
+                  versions = [v['attributes']['versionString'] for v in data['data']]
+                  if not versions:
+                      return None
+                  versions.sort(key=lambda v: [int(x) for x in v.split('.')])
+                  return versions[-1]
+              except Exception as e:
+                  print(f'  ASC query failed for {bundle_id}: {e}')
+                  return None
+
+          # ── Google Play ──────────────────────────────────────────────────────
+          def latest_play_version(package_name):
+              try:
+                  sa_json = os.environ.get('GOOGLE_PLAY_SERVICE_ACCOUNT_JSON', '')
+                  if not sa_json:
+                      return None
+                  creds = google.oauth2.service_account.Credentials.from_service_account_info(
+                      json.loads(sa_json),
+                      scopes=['https://www.googleapis.com/auth/androidpublisher']
+                  )
+                  creds.refresh(google.auth.transport.requests.Request())
+                  resp = requests.get(
+                      f'https://androidpublisher.googleapis.com/androidpublisher/v3/applications/{package_name}/tracks',
+                      headers={'Authorization': f'Bearer {creds.token}'}
+                  )
+                  resp.raise_for_status()
+                  versions = []
+                  for track in resp.json().get('tracks', []):
+                      for release in track.get('releases', []):
+                          name = release.get('name', '')
+                          if re.match(r'\d+\.\d+\.\d+', name):
+                              versions.append(name)
+                  if not versions:
+                      return None
+                  versions.sort(key=lambda v: [int(x) for x in v.split('.')])
+                  return versions[-1]
+              except Exception as e:
+                  print(f'  Play Store query failed for {package_name}: {e}')
+                  return None
+
+          def max_version(a, b):
+              if not a:
+                  return b
+              if not b:
+                  return a
+              ka = [int(x) for x in a.split('.')]
+              kb = [int(x) for x in b.split('.')]
+              return a if ka >= kb else b
+
+          # ── Bump each app ────────────────────────────────────────────────────
+          apps = "${{ inputs.apps }}".split(',')
+          for app in [a.strip() for a in apps]:
+              pubspec = f'flutter/packages/{app}/pubspec.yaml'
+              with open(pubspec) as f:
+                  content = f.read()
+
+              m = re.search(r'^version:\s*(\d+)\.(\d+)\.(\d+)\+(\d+)', content, re.MULTILINE)
+              pub_major, pub_minor, pub_patch, pub_build = m.groups()
+              pub_ver = f'{pub_major}.{pub_minor}.{pub_patch}'
+
+              bundle_id = f'org.growerp.{app}'
+              asc_ver  = latest_asc_version(bundle_id)
+              play_ver = latest_play_version(bundle_id)
+              best_ver = max_version(max_version(asc_ver, play_ver), pub_ver)
+
+              print(f'{app}: ASC={asc_ver or "n/a"}  Play={play_ver or "n/a"}  pubspec={pub_ver}  → base={best_ver}')
+
+              major, minor, patch = best_ver.split('.')
+              new_patch = int(patch) + 1
+              new_build = int(pub_build) + 1
+              new_ver = f'{major}.{minor}.{new_patch}+{new_build}'
+              content = re.sub(r'^version:\s*[\d.+]+', f'version: {new_ver}', content, flags=re.MULTILINE)
+              with open(pubspec, 'w') as f:
+                  f.write(content)
+              print(f'  → {new_ver}')
+          PYEOF
+
+      - name: Upload bumped pubspecs
+        uses: actions/upload-artifact@v4
+        with:
+          name: bumped-pubspecs
+          path: flutter/packages/*/pubspec.yaml
+          retention-days: 1
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # iOS — Fastlane on macos-latest
+  # Secrets: APP_STORE_CONNECT_API_KEY_ID, APP_STORE_CONNECT_API_ISSUER_ID,
+  #          APP_STORE_CONNECT_API_KEY_CONTENT, MATCH_PASSWORD,
+  #          MATCH_GIT_BASIC_AUTHORIZATION, MATCH_GIT_URL
+  # ───────────────────────────────────────────────────────────────────────────
+  deploy-ios:
+    needs: [ resolve-matrix, bootstrap, bump-version ]
+    if: needs.resolve-matrix.outputs.run_ios == 'true'
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.resolve-matrix.outputs.ios_matrix) }}
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Validate iOS deploy parameters
+        env:
+          MATRIX_APP: ${{ matrix.app }}
+          SUBMIT_FOR_REVIEW: ${{ inputs.track == 'stable' && 'true' || 'false' }}
+          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          APP_STORE_CONNECT_API_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY_CONTENT: ${{ secrets.APP_STORE_CONNECT_API_KEY_CONTENT }}
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
+          MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
+        run: |
+          set -euo pipefail
+
+          case "$MATRIX_APP" in
+            admin|hotel|freelance|health)
+              ;;
+            *)
+              echo "Unsupported iOS app: $MATRIX_APP" >&2
+              exit 1
+              ;;
+          esac
+
+          case "$SUBMIT_FOR_REVIEW" in
+            true|false)
+              ;;
+            *)
+              echo "submit_for_review must be 'true' or 'false', got: $SUBMIT_FOR_REVIEW" >&2
+              exit 1
+              ;;
+          esac
+
+          required_vars=(
+            APP_STORE_CONNECT_API_KEY_ID
+            APP_STORE_CONNECT_API_ISSUER_ID
+            APP_STORE_CONNECT_API_KEY_CONTENT
+            MATCH_PASSWORD
+            MATCH_GIT_BASIC_AUTHORIZATION
+            MATCH_GIT_URL
+          )
+
+          for var_name in "${required_vars[@]}"; do
+            if [[ -z "${!var_name}" ]]; then
+              echo "Missing required iOS deploy parameter: $var_name" >&2
+              exit 1
+            fi
+          done
+
+      - name: Download bumped pubspecs
+        uses: actions/download-artifact@v4
+        with:
+          name: bumped-pubspecs
+          path: flutter/packages
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Download generated sources
+        uses: actions/download-artifact@v4
+        with:
+          name: generated-sources
+
+      - name: Restore generated sources
+        run: tar -xzf generated-sources.tar.gz
+        shell: bash
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.2"
+          bundler-cache: true
+          working-directory: flutter/fastlane
+
+      - name: Clean iOS derived artifacts
+        run: |
+          rm -rf ios/Pods ios/.symlinks ios/Runner.xcworkspace
+          rm -f ios/Podfile.lock
+          flutter clean
+        working-directory: flutter/packages/${{ matrix.app }}
+
+      - name: Flutter pub get
+        run: flutter pub get
+        working-directory: flutter/packages/${{ matrix.app }}
+
+      - name: Resolve macOS build number
+        run: |
+          set -euo pipefail
+          BASE_BUILD_NUMBER=$(grep '^version:' pubspec.yaml | grep -oE '\+[0-9]+' | tr -d '+')
+          MACOS_BUILD_NUMBER=$((BASE_BUILD_NUMBER + 1))
+          echo "BASE_BUILD_NUMBER=$BASE_BUILD_NUMBER" >> "$GITHUB_ENV"
+          echo "MACOS_BUILD_NUMBER=$MACOS_BUILD_NUMBER" >> "$GITHUB_ENV"
+          echo "Using macOS build number $MACOS_BUILD_NUMBER (base pubspec build number: $BASE_BUILD_NUMBER)"
+        working-directory: flutter/packages/${{ matrix.app }}
+
+      - name: Flutter build iOS (no codesign)
+        run: flutter build ios --release --no-codesign
+        working-directory: flutter/packages/${{ matrix.app }}
+
+      - name: Validate iOS signing certificate access
+        env:
+          MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
+          MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
+        run: |
+          set -euo pipefail
+
+          MATCH_GIT_BASIC_AUTHORIZATION="$(printf '%s' "${MATCH_GIT_BASIC_AUTHORIZATION:-}" | tr -d '\r' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
+          MATCH_GIT_URL="$(printf '%s' "${MATCH_GIT_URL:-}" | tr -d '\r' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
+
+          if [ -z "$MATCH_GIT_URL" ]; then
+            echo "Missing secret: MATCH_GIT_URL" >&2
+            exit 1
+          fi
+
+          # Clear any global git credentials left by actions/checkout
+          git config --global --unset-all http.https://github.com/.extraheader 2>/dev/null || true
+
+          echo "MATCH_GIT_URL length: ${#MATCH_GIT_URL}"
+          echo "MATCH_GIT_BASIC_AUTHORIZATION length: ${#MATCH_GIT_BASIC_AUTHORIZATION}"
+
+          trimmed_url="$(echo -n "$MATCH_GIT_URL" | tr -d '[:space:]')"
+          echo "Trimmed URL length: ${#trimmed_url}"
+
+          if [ -n "$MATCH_GIT_BASIC_AUTHORIZATION" ]; then
+            decoded="$(printf '%s' "$MATCH_GIT_BASIC_AUTHORIZATION" | base64 --decode 2>/dev/null || true)"
+            echo "Decoded auth has colon: $( [[ "$decoded" == *:* ]] && echo yes || echo no )"
+            if [[ -z "$decoded" || "$decoded" != *:* ]]; then
+              echo "Invalid MATCH_GIT_BASIC_AUTHORIZATION: expected base64(username:token)" >&2
+              echo "Generate with: printf '%s' 'github_user:ghp_token' | base64" >&2
+              exit 1
+            fi
+            unset decoded
+
+            git_output="$(GIT_TERMINAL_PROMPT=0 git \
+              -c credential.helper= \
+              -c http.extraheader="Authorization: Basic $MATCH_GIT_BASIC_AUTHORIZATION" \
+              ls-remote "$trimmed_url" 2>&1)" || {
+              echo "ls-remote failed for URL: $trimmed_url" >&2
+              echo "$git_output" >&2
+              echo "Verify MATCH_GIT_URL and MATCH_GIT_BASIC_AUTHORIZATION." >&2
+              exit 1
+            }
+          else
+            git_output="$(GIT_TERMINAL_PROMPT=0 git -c credential.helper= ls-remote "$trimmed_url" 2>&1)" || {
+              echo "ls-remote failed for URL: $trimmed_url" >&2
+              echo "$git_output" >&2
+              echo "Verify MATCH_GIT_URL." >&2
+              exit 1
+            }
+          fi
+
+      - name: Fastlane codesign
+        env:
+          APP_NAME: ${{ matrix.app }}
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
+          MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
+          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          APP_STORE_CONNECT_API_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY_CONTENT: ${{ secrets.APP_STORE_CONNECT_API_KEY_CONTENT }}
+        run: bundle exec fastlane codesign
+        working-directory: flutter/fastlane
+
+      - name: Fastlane ci_build
+        env:
+          APP_NAME: ${{ matrix.app }}
+          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          APP_STORE_CONNECT_API_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY_CONTENT: ${{ secrets.APP_STORE_CONNECT_API_KEY_CONTENT }}
+        run: bundle exec fastlane ci_build
+        working-directory: flutter/fastlane
+
+      - name: Upload iOS build logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-build-logs-${{ matrix.app }}
+          path: /tmp/xcodebuild-ios-logs/
+          if-no-files-found: ignore
+
+      - name: Fastlane upload
+        env:
+          APP_NAME: ${{ matrix.app }}
+          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          APP_STORE_CONNECT_API_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY_CONTENT: ${{ secrets.APP_STORE_CONNECT_API_KEY_CONTENT }}
+          SUBMIT_FOR_REVIEW: ${{ inputs.track == 'stable' && 'true' || 'false' }}
+        run: bundle exec fastlane upload
+        working-directory: flutter/fastlane
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # macOS — Fastlane Match + xcodebuild + xcrun altool on macos-latest
+  # Secrets: APP_STORE_CONNECT_API_KEY_ID, APP_STORE_CONNECT_API_ISSUER_ID,
+  #          APP_STORE_CONNECT_API_KEY_CONTENT, MATCH_PASSWORD,
+  #          MATCH_GIT_BASIC_AUTHORIZATION, MATCH_GIT_URL
+  # ───────────────────────────────────────────────────────────────────────────
+  deploy-macos:
+    needs: [ resolve-matrix, bootstrap, bump-version ]
+    if: needs.resolve-matrix.outputs.run_macos == 'true'
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.resolve-matrix.outputs.macos_matrix) }}
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Resolve macOS app settings
+        env:
+          MATRIX_APP: ${{ matrix.app }}
+          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          APP_STORE_CONNECT_API_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY_CONTENT: ${{ secrets.APP_STORE_CONNECT_API_KEY_CONTENT }}
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
+          MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
+        run: |
+          set -euo pipefail
+
+          required_vars=(
+            APP_STORE_CONNECT_API_KEY_ID
+            APP_STORE_CONNECT_API_ISSUER_ID
+            APP_STORE_CONNECT_API_KEY_CONTENT
+            MATCH_PASSWORD
+            MATCH_GIT_BASIC_AUTHORIZATION
+            MATCH_GIT_URL
+          )
+
+          for var_name in "${required_vars[@]}"; do
+            if [[ -z "${!var_name}" ]]; then
+              echo "Missing required macOS deploy parameter: $var_name" >&2
+              exit 1
+            fi
+          done
+
+          case "$MATRIX_APP" in
+            admin)
+              BUNDLE_ID='org.growerp.admin'
+              ;;
+            hotel)
+              BUNDLE_ID='org.growerp.hotel'
+              ;;
+            *)
+              echo "Unsupported macOS app: $MATRIX_APP" >&2
+              exit 1
+              ;;
+          esac
+
+          {
+            echo "MATRIX_APP=$MATRIX_APP"
+            echo "BUNDLE_ID=$BUNDLE_ID"
+          } >> "$GITHUB_ENV"
+
+      - name: Download bumped pubspecs
+        uses: actions/download-artifact@v4
+        with:
+          name: bumped-pubspecs
+          path: flutter/packages
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.2"
+          bundler-cache: true
+          working-directory: flutter/fastlane
+
+      - name: Download generated sources
+        uses: actions/download-artifact@v4
+        with:
+          name: generated-sources
+
+      - name: Restore generated sources
+        run: tar -xzf generated-sources.tar.gz
+        shell: bash
+
+      - name: Flutter pub get
+        run: flutter pub get
+        working-directory: flutter/packages/${{ matrix.app }}
+
+      - name: Resolve macOS build number
+        run: |
+          set -euo pipefail
+          BUILD_NUMBER=$(grep '^version:' pubspec.yaml | grep -oE '\+[0-9]+' | tr -d '+')
+          echo "MACOS_BUILD_NUMBER=$BUILD_NUMBER" >> "$GITHUB_ENV"
+          echo "Using macOS build number: $BUILD_NUMBER"
+        working-directory: flutter/packages/${{ matrix.app }}
+
+      - name: Validate macOS Match repository access
+        env:
+          MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
+          MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
+        run: |
+          set -euo pipefail
+
+          MATCH_GIT_BASIC_AUTHORIZATION="$(printf '%s' "${MATCH_GIT_BASIC_AUTHORIZATION:-}" | tr -d '\r' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
+          MATCH_GIT_URL="$(printf '%s' "${MATCH_GIT_URL:-}" | tr -d '\r' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
+
+          if [ -z "$MATCH_GIT_URL" ]; then
+            echo "Missing secret: MATCH_GIT_URL" >&2
+            exit 1
+          fi
+
+          # Clear any global git credentials left by actions/checkout
+          git config --global --unset-all http.https://github.com/.extraheader 2>/dev/null || true
+
+          echo "MATCH_GIT_URL length: ${#MATCH_GIT_URL}"
+          echo "MATCH_GIT_BASIC_AUTHORIZATION length: ${#MATCH_GIT_BASIC_AUTHORIZATION}"
+
+          trimmed_url="$(echo -n "$MATCH_GIT_URL" | tr -d '[:space:]')"
+          echo "Trimmed URL length: ${#trimmed_url}"
+
+          if [ -n "$MATCH_GIT_BASIC_AUTHORIZATION" ]; then
+            decoded="$(printf '%s' "$MATCH_GIT_BASIC_AUTHORIZATION" | base64 --decode 2>/dev/null || true)"
+            echo "Decoded auth has colon: $( [[ "$decoded" == *:* ]] && echo yes || echo no )"
+            if [[ -z "$decoded" || "$decoded" != *:* ]]; then
+              echo "Invalid MATCH_GIT_BASIC_AUTHORIZATION: expected base64(username:token)" >&2
+              echo "Generate with: printf '%s' 'github_user:ghp_token' | base64" >&2
+              exit 1
+            fi
+            unset decoded
+
+            git_output="$(GIT_TERMINAL_PROMPT=0 git \
+              -c credential.helper= \
+              -c http.extraheader="Authorization: Basic $MATCH_GIT_BASIC_AUTHORIZATION" \
+              ls-remote "$trimmed_url" 2>&1)" || {
+              echo "ls-remote failed for URL: $trimmed_url" >&2
+              echo "$git_output" >&2
+              echo "Verify MATCH_GIT_URL and MATCH_GIT_BASIC_AUTHORIZATION." >&2
+              exit 1
+            }
+          else
+            git_output="$(GIT_TERMINAL_PROMPT=0 git -c credential.helper= ls-remote "$trimmed_url" 2>&1)" || {
+              echo "ls-remote failed for URL: $trimmed_url" >&2
+              echo "$git_output" >&2
+              echo "Verify MATCH_GIT_URL." >&2
+              exit 1
+            }
+          fi
+
+      - name: Fastlane macOS codesign
+        env:
+          BUNDLE_GEMFILE: ${{ github.workspace }}/flutter/fastlane/Gemfile
+          BUNDLE_ID: ${{ env.BUNDLE_ID }}
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
+          MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
+          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          APP_STORE_CONNECT_API_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY_CONTENT: ${{ secrets.APP_STORE_CONNECT_API_KEY_CONTENT }}
+        run: bundle exec fastlane codesign_macos
+        working-directory: flutter
+
+      - name: CocoaPods install
+        run: pod install --repo-update
+        working-directory: flutter/packages/${{ matrix.app }}/macos
+
+      - name: Flutter build macOS (generate ephemeral files)
+        run: flutter build macos --release --build-number "$MACOS_BUILD_NUMBER"
+        working-directory: flutter/packages/${{ matrix.app }}
+
+      - name: Fastlane build macOS
+        env:
+          BUNDLE_GEMFILE: ${{ github.workspace }}/flutter/fastlane/Gemfile
+          MATRIX_APP: ${{ matrix.app }}
+          BUNDLE_ID: ${{ env.BUNDLE_ID }}
+          MACOS_BUILD_NUMBER: ${{ env.MACOS_BUILD_NUMBER }}
+          MATCH_PROFILE_NAME: ${{ env.MATCH_PROFILE_NAME }}
+        run: bundle exec fastlane build_macos
+        working-directory: flutter
+
+      - name: Upload build logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-build-logs-${{ matrix.app }}
+          path: /tmp/xcodebuild-macos-logs/
+          if-no-files-found: ignore
+
+      - name: Fastlane upload macOS
+        env:
+          BUNDLE_GEMFILE: ${{ github.workspace }}/flutter/fastlane/Gemfile
+          MATRIX_APP: ${{ matrix.app }}
+          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          APP_STORE_CONNECT_API_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY_CONTENT: ${{ secrets.APP_STORE_CONNECT_API_KEY_CONTENT }}
+          SUBMIT_FOR_REVIEW: ${{ inputs.track == 'stable' && 'true' || 'false' }}
+        run: bundle exec fastlane upload_macos
+        working-directory: flutter
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # Android — flutter build appbundle + Google Play API
+  # Secrets: ANDROID_KEYSTORE_BASE64, ANDROID_KEY_ALIAS,
+  #          ANDROID_KEY_PASSWORD, ANDROID_STORE_PASSWORD,
+  #          GOOGLE_PLAY_SERVICE_ACCOUNT_JSON
+  # ───────────────────────────────────────────────────────────────────────────
+  deploy-android:
+    needs: [ resolve-matrix, bootstrap, bump-version ]
+    if: needs.resolve-matrix.outputs.run_android == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.resolve-matrix.outputs.android_matrix) }}
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download bumped pubspecs
+        uses: actions/download-artifact@v4
+        with:
+          name: bumped-pubspecs
+          path: flutter/packages
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Download generated sources
+        uses: actions/download-artifact@v4
+        with:
+          name: generated-sources
+
+      - name: Restore generated sources
+        run: tar -xzf generated-sources.tar.gz
+        shell: bash
+
+      - name: Validate Android deploy parameters
+        env:
+          MATRIX_APP: ${{ matrix.app }}
+        run: |
+          case "$MATRIX_APP" in
+            admin|hotel|freelance|health|elearner|support)
+              ;;
+            *)
+              echo "Unsupported Android app: $MATRIX_APP" >&2
+              exit 1
+              ;;
+          esac
+
+      - name: Write keystore and key.properties
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          ANDROID_STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
+        run: |
+          echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode \
+            > flutter/packages/${{ matrix.app }}/android/app/release.jks
+          cat > flutter/packages/${{ matrix.app }}/android/key.properties <<EOF
+          storePassword=$ANDROID_STORE_PASSWORD
+          keyPassword=$ANDROID_KEY_PASSWORD
+          keyAlias=$ANDROID_KEY_ALIAS
+          storeFile=release.jks
+          EOF
+
+      - name: Flutter pub get
+        run: flutter pub get
+        working-directory: flutter/packages/${{ matrix.app }}
+
+      - name: Flutter build appbundle
+        run: flutter build appbundle --release
+        working-directory: flutter/packages/${{ matrix.app }}
+
+      - name: Upload to Play Store
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: org.growerp.${{ matrix.app }}
+          releaseFiles: flutter/packages/${{ matrix.app
+            }}/build/app/outputs/bundle/release/app-release.aab
+          track: ${{ inputs.track == 'stable' && 'production' || inputs.track }}
+          status: completed
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # Commit the bumped pubspecs after all platform deploys complete.
+  # Only runs if at least one platform job succeeded; skipped/failed platforms
+  # do not block the commit for the ones that did succeed.
+  # ───────────────────────────────────────────────────────────────────────────
+  commit-version:
+    needs: [ bump-version, deploy-ios, deploy-macos, deploy-android ]
+    if: |
+      always() &&
+      needs.bump-version.result == 'success' &&
+      (
+        (contains(inputs.stores, 'ios')     && needs.deploy-ios.result     == 'success') ||
+        (contains(inputs.stores, 'macos')   && needs.deploy-macos.result   == 'success') ||
+        (contains(inputs.stores, 'android') && needs.deploy-android.result == 'success')
+      )
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download bumped pubspecs
+        uses: actions/download-artifact@v4
+        with:
+          name: bumped-pubspecs
+          path: flutter/packages
+
+      - name: Commit version bump
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          APPS=$(echo "${{ inputs.apps }}" | tr -d ' ')
+
+          # Collect only platforms that were selected AND succeeded
+          STORES=""
+          add_store() { STORES="${STORES:+$STORES,}$1"; }
+          contains() { echo "${{ inputs.stores }}" | grep -qw "$1"; }
+          [[ "${{ needs.deploy-ios.result }}"     == "success" ]] && contains ios     && add_store ios     || true
+          [[ "${{ needs.deploy-macos.result }}"   == "success" ]] && contains macos   && add_store macos   || true
+          [[ "${{ needs.deploy-android.result }}" == "success" ]] && contains android && add_store android || true
+
+
+          IFS=',' read -ra app_list <<< "$APPS"
+          for app in "${app_list[@]}"; do
+            git add "flutter/packages/${app}/pubspec.yaml"
+          done
+
+          git diff --cached --quiet && { echo "Nothing to commit"; exit 0; }
+          git commit -m "chore: bump build number for apps=[$APPS] stores=[$STORES] [skip ci]"
+          git pull --rebase origin ${{ github.ref_name }}
+          git push origin HEAD:${{ github.ref_name }}
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # Windows — flutter build windows + MSIX + Partner Center
+  # Secrets: WINDOWS_CERTIFICATE_BASE64, WINDOWS_CERTIFICATE_PASSWORD,
+  #          WINDOWS_TENANT_ID, WINDOWS_CLIENT_ID, WINDOWS_CLIENT_SECRET,
+  #          WINDOWS_ADMIN_PRODUCT_ID, WINDOWS_HOTEL_PRODUCT_ID
+  # ───────────────────────────────────────────────────────────────────────────
+  deploy-windows:
+    needs: [ resolve-matrix, bootstrap ]
+    if: needs.resolve-matrix.outputs.run_windows == 'true'
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.resolve-matrix.outputs.windows_matrix) }}
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Download generated sources
+        uses: actions/download-artifact@v4
+        with:
+          name: generated-sources
+
+      - name: Restore generated sources
+        run: tar -xzf generated-sources.tar.gz
+        shell: bash
+
+      - name: Download bumped pubspecs
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: bumped-pubspecs
+          path: flutter/packages
+
+      - name: Flutter pub get
+        run: flutter pub get
+        working-directory: flutter/packages/${{ matrix.app }}
+
+      - name: Sync msix_version from version field
+        shell: pwsh
+        run: |
+          $content = Get-Content pubspec.yaml -Raw
+          if ($content -match 'version:\s*(\d+\.\d+\.\d+)\+') {
+            $semver = $Matches[1]
+            $msixVer = "$semver.0"
+            $content = $content -replace '(?m)^(\s*msix_version:\s*)[\d.]+', "`${1}$msixVer"
+            Set-Content pubspec.yaml $content -NoNewline
+            Write-Host "msix_version set to $msixVer"
+          } else {
+            throw "Could not parse version from pubspec.yaml"
+          }
+        working-directory: flutter/packages/${{ matrix.app }}
+
+      - name: Decode code-signing certificate
+        id: import-cert
+        env:
+          WINDOWS_CERTIFICATE_BASE64: ${{ secrets.WINDOWS_CERTIFICATE_BASE64 }}
+        shell: pwsh
+        run: |
+          $certPath = "$env:RUNNER_TEMP\cert.pfx"
+          [IO.File]::WriteAllBytes($certPath, [Convert]::FromBase64String($env:WINDOWS_CERTIFICATE_BASE64))
+          "cert_path=$certPath" >> $env:GITHUB_OUTPUT
+
+      - name: Flutter build MSIX
+        shell: pwsh
+        env:
+          WINDOWS_CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
+        run: |
+          flutter pub run msix:create `
+            --certificate-path "${{ steps.import-cert.outputs.cert_path }}" `
+            --certificate-password "$env:WINDOWS_CERTIFICATE_PASSWORD"
+        working-directory: flutter/packages/${{ matrix.app }}
+
+      - name: Submit to Partner Center
+        shell: pwsh
+        env:
+          WINDOWS_TENANT_ID: ${{ secrets.WINDOWS_TENANT_ID }}
+          WINDOWS_CLIENT_ID: ${{ secrets.WINDOWS_CLIENT_ID }}
+          WINDOWS_CLIENT_SECRET: ${{ secrets.WINDOWS_CLIENT_SECRET }}
+          WINDOWS_ADMIN_PRODUCT_ID: ${{ secrets.WINDOWS_ADMIN_PRODUCT_ID }}
+          WINDOWS_HOTEL_PRODUCT_ID: ${{ secrets.WINDOWS_HOTEL_PRODUCT_ID }}
+        run: |
+          $ErrorActionPreference = "Stop"
+
+          $appId = if ("${{ matrix.app }}" -eq "admin") { $env:WINDOWS_ADMIN_PRODUCT_ID } else { $env:WINDOWS_HOTEL_PRODUCT_ID }
+
+          # Find MSIX
+          $msixPath = Get-ChildItem -Path "flutter/packages/${{ matrix.app }}/build" `
+            -Recurse -Filter "*.msix" -ErrorAction SilentlyContinue |
+            Select-Object -First 1 -ExpandProperty FullName
+          if (-not $msixPath) { throw "No .msix found under flutter/packages/${{ matrix.app }}/build" }
+          Write-Host "Submitting: $msixPath"
+
+          # Authenticate with Azure AD
+          $authBody = "grant_type=client_credentials" +
+            "&client_id=$([Uri]::EscapeDataString($env:WINDOWS_CLIENT_ID))" +
+            "&client_secret=$([Uri]::EscapeDataString($env:WINDOWS_CLIENT_SECRET))" +
+            "&resource=https%3A%2F%2Fmanage.devcenter.microsoft.com"
+          $authResp = Invoke-RestMethod `
+            -Uri "https://login.microsoftonline.com/$env:WINDOWS_TENANT_ID/oauth2/token" `
+            -Method POST -ContentType "application/x-www-form-urlencoded" -Body $authBody
+          $headers = @{
+            Authorization = "Bearer $($authResp.access_token)"
+            Accept        = "application/json"
+          }
+          $baseUri = "https://manage.devcenter.microsoft.com/v1.0/my/applications/$appId"
+
+          # Delete any pending submission to avoid conflicts
+          $app = Invoke-RestMethod -Uri $baseUri -Headers $headers
+          Write-Host "Partner Center app id: $($app.id)"
+          Write-Host "Partner Center primary name: $($app.primaryName)"
+          Write-Host "Partner Center first published date: $($app.firstPublishedDate)"
+          Write-Host "Partner Center last published submission: $($app.lastPublishedApplicationSubmission.id)"
+
+          $hasPublishedSubmission =
+            -not [string]::IsNullOrWhiteSpace([string]$app.lastPublishedApplicationSubmission.id) -and
+            [string]$app.firstPublishedDate -ne "1601-01-01T00:00:00Z"
+
+          if (-not $hasPublishedSubmission) {
+            throw "Partner Center application '$appId' does not have a published submission in the ingestion API. Verify that the Windows secret uses the published Store ID for this app, not a draft or different Partner Center record. The public Store ID format looks like 9NWX6KFTJNQL."
+          }
+
+          if ($app.pendingApplicationSubmission.id) {
+            Write-Host "Deleting pending submission $($app.pendingApplicationSubmission.id)..."
+            Invoke-RestMethod -Uri "$baseUri/submissions/$($app.pendingApplicationSubmission.id)" `
+              -Method DELETE -Headers $headers | Out-Null
+          }
+
+          # Create new submission (clones last published)
+          $sub = Invoke-RestMethod -Uri "$baseUri/submissions" -Method POST `
+            -Headers $headers -ContentType "application/json"
+          $subId   = $sub.id
+          $uploadUrl = $sub.fileUploadUrl
+          Write-Host "Created submission $subId"
+
+          # Mark old packages for deletion, add new one
+          foreach ($pkg in $sub.applicationPackages) { $pkg.fileStatus = "PendingDelete" }
+          $sub.applicationPackages += [PSCustomObject]@{
+            fileName               = [IO.Path]::GetFileName($msixPath)
+            fileStatus             = "PendingUpload"
+            minimumDirectXVersion  = "None"
+            minimumSystemRam       = "None"
+          }
+
+          # Update submission metadata
+          $subJson = $sub | ConvertTo-Json -Depth 100 -Compress
+          Invoke-RestMethod -Uri "$baseUri/submissions/$subId" -Method PUT `
+            -Headers $headers -ContentType "application/json" -Body $subJson | Out-Null
+
+          # Package MSIX into zip and upload to Azure Blob
+          $zipPath = "$env:TEMP\submission_$subId.zip"
+          Compress-Archive -Path $msixPath -DestinationPath $zipPath -Force
+          Invoke-RestMethod -Uri $uploadUrl -Method PUT -InFile $zipPath `
+            -Headers @{ "x-ms-blob-type" = "BlockBlob" } | Out-Null
+          Remove-Item $zipPath
+
+          # Commit
+          $commit = Invoke-RestMethod -Uri "$baseUri/submissions/$subId/commit" `
+            -Method POST -Headers $headers -ContentType "application/json"
+          Write-Host "Commit status: $($commit.status)"
+
+          # Poll until committed (up to 10 min)
+          for ($i = 0; $i -lt 20; $i++) {
+            Start-Sleep -Seconds 30
+            $status = Invoke-RestMethod -Uri "$baseUri/submissions/$subId/status" -Headers $headers
+            Write-Host "[$i] $($status.status)"
+            if ($status.status -eq "CommitStarted") { Write-Host "Committed!"; exit 0 }
+            if ($status.status -match "Failed|Canceled") {
+              Write-Host ($status.statusDetails | ConvertTo-Json)
+              exit 1
+            }
+          }
+          Write-Host "Submission committed — processing continues in Partner Center"
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # Snap Store — snapcraft on ubuntu-22.04 (must match base: core22)
+  # Secrets: SNAPCRAFT_STORE_CREDENTIALS
+  # ───────────────────────────────────────────────────────────────────────────
+  deploy-snap:
+    needs: [ resolve-matrix, bootstrap ]
+    if: needs.resolve-matrix.outputs.run_snap == 'true'
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.resolve-matrix.outputs.snap_matrix) }}
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Free disk space
+        run: |
+          sudo rm -rf /usr/local/lib/android /usr/share/dotnet /opt/ghc
+          df -h
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install Linux build dependencies
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y clang cmake ninja-build pkg-config \
+            libgtk-3-dev liblzma-dev libstdc++-12-dev
+
+      - name: Install snapcraft (with retry)
+        shell: bash
+        run: |
+          set -euxo pipefail
+
+          sudo systemctl enable --now snapd.socket || true
+          sudo systemctl restart snapd || true
+
+          for i in {1..30}; do
+            if snap version >/dev/null 2>&1; then break; fi
+            sleep 2
+          done
+
+          for i in {1..5}; do
+            if sudo snap install snapcraft --classic --channel=latest/stable; then exit 0; fi
+            echo "snapcraft install failed (attempt $i), retrying..."
+            sudo snap refresh || true
+            sleep 10
+          done
+
+          echo "snapcraft install failed after retries"
+          exit 1
+
+      - name: Ensure snapd seeded + preinstall core22 (with retry)
+        shell: bash
+        run: |
+          set -euxo pipefail
+
+          # Wait for snapd to finish seeding (prevents "cannot install" races)
+          for i in {1..60}; do
+            if snap wait system seed.loaded 2>/dev/null; then break; fi
+            sleep 2
+          done
+
+          # Pre-install the base snap that snapcraft needs at pack time
+          for i in {1..10}; do
+            if sudo snap install core22 --channel=latest/stable; then exit 0; fi
+            echo "core22 install failed (attempt $i), retrying..."
+            snap debug connectivity || true
+            sudo snap refresh || true
+            sudo systemctl restart snapd || true
+            sleep 15
+          done
+
+          echo "core22 install failed after retries"
+          exit 1
+
+      - name: Snap diagnostics (on failure)
+        if: failure()
+        run: |
+          snap version || true
+          snap debug connectivity || true
+          systemctl status snapd --no-pager || true
+          journalctl -u snapd --no-pager | tail -200 || true
+
+      - name: Download generated sources
+        uses: actions/download-artifact@v4
+        with:
+          name: generated-sources
+
+      - name: Restore generated sources
+        run: tar -xzf generated-sources.tar.gz
+        shell: bash
+
+      - name: Validate Snap deploy parameters
+        env:
+          MATRIX_APP: ${{ matrix.app }}
+        run: |
+          case "$MATRIX_APP" in
+            admin|hotel|freelance|health|elearner|support)
+              ;;
+            *)
+              echo "Unsupported Snap app: $MATRIX_APP" >&2
+              exit 1
+              ;;
+          esac
+
+      - name: Flutter pub get
+        run: flutter pub get
+        working-directory: flutter/packages/${{ matrix.app }}
+
+      - name: Flutter build Linux release
+        run: flutter build linux --release
+        working-directory: flutter/packages/${{ matrix.app }}
+
+      - name: Sync snapcraft.yaml version from pubspec.yaml
+        run: |
+          VERSION=$(grep '^version:' pubspec.yaml | awk '{print $2}' | cut -d+ -f1)
+          sed -i "s/^version:.*/version: \"$VERSION\"/" snapcraft.yaml
+        working-directory: flutter/packages/${{ matrix.app }}
+
+      - name: Build snap (destructive mode, with retry)
+        shell: bash
+        run: |
+          set -euxo pipefail
+          for i in {1..3}; do
+            if snapcraft pack --destructive-mode; then exit 0; fi
+            echo "snapcraft pack failed (attempt $i), retrying..."
+            sleep 15
+          done
+          echo "snapcraft pack failed after retries"
+          exit 1
+        working-directory: flutter/packages/${{ matrix.app }}
+
+      - name: Upload and release snap
+        env:
+          SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}
+        run: |
+          SNAP_FILE=$(ls flutter/packages/${{ matrix.app }}/growerp-${{ matrix.app }}_*.snap 2>/dev/null \
+            || ls flutter/packages/${{ matrix.app }}/*.snap | head -1)
+          snapcraft upload "$SNAP_FILE" --release="${{ inputs.track }}"

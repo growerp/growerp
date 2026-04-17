@@ -1,0 +1,22 @@
+name: Copy Staging to Production
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: stage-to-production
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Sync staging to production on growerp.com
+        uses: appleboy/ssh-action@v1
+        with:
+          host: growerp.com
+          username: ${{ secrets.PROD_SSH_USER }}
+          key: ${{ secrets.PROD_SSH_KEY }}
+          script: swarm/sync-to-prod.sh

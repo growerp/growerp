@@ -199,5 +199,16 @@
                 "linux"
             ]
         },
+        {
+            "name": "Hotel Mac (lib/main.dart)",
+            "type": "dart",
+            "request": "launch",
+            "cwd": "flutter/packages/hotel",
+            "program": "lib/main.dart",
+            "args": [
+                "-d",
+                "macos"
+            ]
+        },
     ]
 }

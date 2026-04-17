@@ -1,0 +1,1 @@
+Latest updates, improvements, and bug fixes. For detailed release notes, visit https://github.com/growerp/growerp/releases

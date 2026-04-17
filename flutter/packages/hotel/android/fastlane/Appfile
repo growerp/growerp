@@ -1,2 +1,6 @@
-json_key_file("/home/hans/secrets/android/growerp-b3757eb8059d.json")
+if ENV["SUPPLY_JSON_KEY_DATA"] && !ENV["SUPPLY_JSON_KEY_DATA"].empty?
+  json_key_data(ENV["SUPPLY_JSON_KEY_DATA"])
+elsif ENV["SUPPLY_JSON_KEY_FILE"] && File.exist?(ENV["SUPPLY_JSON_KEY_FILE"])
+  json_key_file(ENV["SUPPLY_JSON_KEY_FILE"])
+end
 package_name("org.growerp.hotel") # e.g. com.krausefx.app

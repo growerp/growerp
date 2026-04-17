@@ -588,13 +588,11 @@ String getVersion(String appName, String workspaceDir) {
     // For moqui, determine the correct path based on workspace structure
     var componentFile = '';
     if (workspaceDir.endsWith('/flutter')) {
-      // We're in the flutter directory, go up one level to find moqui
-      componentFile =
-          '$workspaceDir/../moqui/runtime/component/growerp/component.xml';
+      // We're in the flutter directory, go up one level to find backend/
+      componentFile = '$workspaceDir/../backend/component.xml';
     } else {
       // We're in the root workspace directory
-      componentFile =
-          '$workspaceDir/moqui/runtime/component/growerp/component.xml';
+      componentFile = '$workspaceDir/backend/component.xml';
     }
     var content = File(componentFile).readAsStringSync();
     var start = content.indexOf('name="growerp" version=') + 24;
@@ -780,11 +778,11 @@ Future<void> updateVersionFile(
     // For moqui, determine the correct path based on workspace structure
     var file = '';
     if (workspaceDir.endsWith('/flutter')) {
-      // We're in the flutter directory, go up one level to find moqui
-      file = '$workspaceDir/../moqui/runtime/component/growerp/component.xml';
+      // We're in the flutter directory, go up one level to find backend/
+      file = '$workspaceDir/../backend/component.xml';
     } else {
       // We're in the root workspace directory
-      file = '$workspaceDir/moqui/runtime/component/growerp/component.xml';
+      file = '$workspaceDir/backend/component.xml';
     }
     replace(
       file,

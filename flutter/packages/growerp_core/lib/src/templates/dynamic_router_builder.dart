@@ -153,7 +153,7 @@ GoRouter createDynamicAppRouter(
                   },
                 ),
               ],
-              suppressBlocMenuConfig: true,
+              suppressBlocMenuConfig: false,
               tabWidgetLoader: config.widgetLoader,
               floatingActionButton: config.dashboardFabBuilder != null
                   ? config.dashboardFabBuilder!(mainConfig)

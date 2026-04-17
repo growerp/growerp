@@ -28,31 +28,11 @@ import 'package:global_configuration/global_configuration.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:flutter/foundation.dart' as found;
 
 import '../../../../growerp_core.dart';
 import '../../../../test_data.dart';
 
 class CommonTest {
-  static Future<void> takeScreenShot({
-    IntegrationTestWidgetsFlutterBinding? binding,
-    WidgetTester? tester,
-    String? screenShotName,
-  }) async {
-    if (binding == null || tester == null || screenShotName == null) return;
-
-    if (found.kIsWeb) {
-      await binding.takeScreenshot(screenShotName);
-      await tester.pumpAndSettle();
-      return;
-    } else if (Platform.isAndroid) {
-      await binding.convertFlutterSurfaceToImage();
-      await tester.pumpAndSettle();
-    }
-    await binding.takeScreenshot(screenShotName);
-    await tester.pumpAndSettle();
-  }
-
   static const int waitTime = 2;
 
   /// Overlays a full-screen info card for [seconds] real seconds, then removes it.
@@ -83,7 +63,9 @@ class CommonTest {
                 title,
                 textAlign: TextAlign.center,
                 style: const TextStyle(
-                    fontSize: 22, fontWeight: FontWeight.bold),
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 12),
               Text(
@@ -123,10 +105,8 @@ class CommonTest {
     // Override the logical screen size when SCREEN_WIDTH / SCREEN_HEIGHT are
     // passed via --dart-define. This lets headless Linux desktop tests emulate
     // a phone-sized screen so ResponsiveBreakpoints triggers MOBILE layout.
-    const int screenW =
-        int.fromEnvironment('SCREEN_WIDTH', defaultValue: 0);
-    const int screenH =
-        int.fromEnvironment('SCREEN_HEIGHT', defaultValue: 0);
+    const int screenW = int.fromEnvironment('SCREEN_WIDTH', defaultValue: 0);
+    const int screenH = int.fromEnvironment('SCREEN_HEIGHT', defaultValue: 0);
     if (screenW > 0 && screenH > 0) {
       tester.view.physicalSize = Size(screenW.toDouble(), screenH.toDouble());
       tester.view.devicePixelRatio = 1.0;
@@ -1233,6 +1213,22 @@ class CommonTest {
     bool settle = true, // If false, use pump instead of pumpAndSettle
   }) async {
     await tester.pump();
+    // If not yet in tree, the item may be off-screen in the drawer's lazy
+    // ListView.builder (phone). Scroll to reveal it before asserting.
+    if (!tester.any(find.byKey(Key(key))) &&
+        tester.any(find.byKey(const Key('listView')))) {
+      try {
+        await tester.scrollUntilVisible(
+          find.byKey(Key(key)),
+          100.0,
+          scrollable: find.descendant(
+            of: find.byKey(const Key('listView')),
+            matching: find.byType(Scrollable),
+          ),
+          maxScrolls: 20,
+        );
+      } catch (_) {}
+    }
     expect(
       tester.any(find.byKey(Key(key))),
       true,

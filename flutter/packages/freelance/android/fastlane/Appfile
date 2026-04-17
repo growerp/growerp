@@ -1,2 +1,3 @@
-json_key_file("/home/hans/server/api-8169559093702942817-245351-ca5a28759e09.json")
+google_play_json_key_file = ENV["SUPPLY_JSON_KEY_FILE"] || ENV["GOOGLE_PLAY_JSON_KEY_FILE"]
+json_key_file(google_play_json_key_file) if google_play_json_key_file && File.exist?(google_play_json_key_file)
 package_name("org.growerp.freelance") # e.g. com.krausefx.app

@@ -23,8 +23,11 @@ ARG DOCKER_TAG=1.0.0+1
 USER root
 # Install linux dependencies
 RUN apt-get update && \
+    apt-get install -y software-properties-common && \
+    add-apt-repository universe && \
+    apt-get update && \
     apt-get install -y git zip gdb libstdc++6 \
-    fonts-droid-fallback nano sed && \
+    fonts-noto nano sed && \
     apt-get clean
 
 # git security

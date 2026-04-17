@@ -1,0 +1,514 @@
+name: Publish Metadata to Stores
+
+# Uploads store listing metadata (descriptions, screenshots) to iOS App Store,
+# Mac App Store, and Google Play. Runs independently of binary publishing —
+# metadata can be updated for the currently live version at any time.
+#
+# Screenshots must already be framed and resized by the "Create Store
+# Screenshots" workflow. The framed-screenshots artifact is downloaded
+# automatically.
+#
+# Triggers:
+#   - Manually via workflow_dispatch for targeted app/store updates.
+
+on:
+  workflow_dispatch:
+    inputs:
+      apps:
+        description: "Apps to update (comma-separated: admin, hotel, freelance, health,
+          elearner, support)"
+        required: true
+        default: "admin,hotel"
+        type: string
+      stores:
+        description: "Stores to update (comma-separated: ios, macos, android, windows)"
+        required: true
+        default: "ios,macos,android,windows"
+        type: string
+
+concurrency:
+  group: store-metadata-upload
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  # ───────────────────────────────────────────────────────────────────────────
+  # Resolve effective apps/stores parameters.
+  # When triggered by workflow_run there is no inputs context; use defaults.
+  # ───────────────────────────────────────────────────────────────────────────
+  set-params:
+    runs-on: ubuntu-latest
+    outputs:
+      apps: ${{ steps.params.outputs.apps }}
+      stores: ${{ steps.params.outputs.stores }}
+    steps:
+      - id: params
+        run: |
+          echo "apps=${{ inputs.apps }}"     >> "$GITHUB_OUTPUT"
+          echo "stores=${{ inputs.stores }}" >> "$GITHUB_OUTPUT"
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # Convert comma-separated inputs into JSON arrays for downstream matrix jobs.
+  # Inline job (not reusable workflow) so IDE tooling can validate outputs.
+  # ───────────────────────────────────────────────────────────────────────────
+  resolve-matrix:
+    needs: [ set-params ]
+    runs-on: ubuntu-latest
+    outputs:
+      run_android: ${{ steps.matrix.outputs.run_android }}
+      run_ios: ${{ steps.matrix.outputs.run_ios }}
+      run_macos: ${{ steps.matrix.outputs.run_macos }}
+      run_windows: ${{ steps.matrix.outputs.run_windows }}
+      android_matrix: ${{ steps.matrix.outputs.android_matrix }}
+      ios_matrix: ${{ steps.matrix.outputs.ios_matrix }}
+      macos_matrix: ${{ steps.matrix.outputs.macos_matrix }}
+      windows_matrix: ${{ steps.matrix.outputs.windows_matrix }}
+    steps:
+      - id: matrix
+        env:
+          APPS: ${{ needs.set-params.outputs.apps }}
+          STORES: ${{ needs.set-params.outputs.stores }}
+        run: |
+          VALID_APPS="admin hotel freelance health elearner support"
+          IFS=',' read -ra app_list <<< "$APPS"
+          for app in "${app_list[@]}"; do
+            app=$(echo "$app" | tr -d ' ')
+            if ! echo "$VALID_APPS" | grep -qw "$app"; then
+              echo "Invalid app: '$app'. Valid values: $VALID_APPS" >&2
+              exit 1
+            fi
+          done
+
+          build_matrix() {
+            local json="["
+            local first=true
+            IFS=',' read -ra app_list <<< "$APPS"
+            for app in "${app_list[@]}"; do
+              app=$(echo "$app" | tr -d ' ')
+              if [[ "$first" == "false" ]]; then json="$json,"; fi
+              json="${json}{\"app\":\"${app}\"}"
+              first=false
+            done
+            json="${json}]"
+            echo "$json"
+          }
+
+          contains() { echo "$STORES" | grep -qw "$1"; }
+
+          for store in ios macos android windows; do
+            if contains "$store"; then
+              echo "run_${store}=true"               >> "$GITHUB_OUTPUT"
+              echo "${store}_matrix=$(build_matrix)" >> "$GITHUB_OUTPUT"
+            else
+              echo "run_${store}=false"              >> "$GITHUB_OUTPUT"
+              echo "${store}_matrix=[]"              >> "$GITHUB_OUTPUT"
+            fi
+          done
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # iOS — upload metadata and screenshots to App Store Connect
+  # Secrets: APP_STORE_CONNECT_API_KEY_ID/ISSUER_ID/KEY_CONTENT
+  # ───────────────────────────────────────────────────────────────────────────
+  upload-metadata-ios:
+    needs: [ set-params, resolve-matrix ]
+    if: needs.resolve-matrix.outputs.run_ios == 'true'
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.resolve-matrix.outputs.ios_matrix) }}
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.2"
+          bundler-cache: true
+          working-directory: flutter/fastlane
+
+      - name: Download framed screenshots
+        uses: dawidd6/action-download-artifact@v6
+        with:
+          workflow: screenshots.yml
+          name: framed-screenshots
+          path: framed-screenshots/
+          if_no_artifact_found: warn
+        continue-on-error: true
+
+      - name: Install ImageMagick
+        run: brew install imagemagick
+
+      - name: Extract iOS screenshots from artifact
+        run: |
+          set -euo pipefail
+          APP=${{ matrix.app }}
+          ios_dir="flutter/packages/$APP/ios/fastlane/screenshots/en-US"
+          mkdir -p "$ios_dir"
+          shopt -s nullglob
+          for prefix in iphone ipad_pro; do
+            case "$prefix" in
+              iphone)   required="1284x2778" ;;
+              ipad_pro) required="2732x2048" ;;
+            esac
+            for src in framed-screenshots/${prefix}-${APP}-*_framed.png; do
+              base=$(basename "$src" "_framed.png")
+              name="${base/-${APP}-/-}.png"
+              dest="$ios_dir/$name"
+              convert "$src" -background white -flatten \
+                -resize "${required}" -gravity center -extent "${required}" \
+                -type TrueColor "$dest"
+              echo "  → $dest (${required})"
+            done
+          done
+          echo "iOS screenshots ready: $(ls "$ios_dir" | wc -l) files"
+
+      - name: Fastlane upload iOS metadata
+        env:
+          APP_NAME: ${{ matrix.app }}
+          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          APP_STORE_CONNECT_API_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY_CONTENT: ${{ secrets.APP_STORE_CONNECT_API_KEY_CONTENT }}
+        run: bundle exec fastlane upload_metadata
+        working-directory: flutter/fastlane
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # macOS — upload metadata and screenshots to Mac App Store
+  # Secrets: APP_STORE_CONNECT_API_KEY_ID/ISSUER_ID/KEY_CONTENT
+  # ───────────────────────────────────────────────────────────────────────────
+  upload-metadata-macos:
+    needs: [ set-params, resolve-matrix ]
+    if: needs.resolve-matrix.outputs.run_macos == 'true'
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.resolve-matrix.outputs.macos_matrix) }}
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve BUNDLE_ID
+        run: |
+          case "${{ matrix.app }}" in
+            admin) echo "BUNDLE_ID=org.growerp.admin" >> "$GITHUB_ENV" ;;
+            hotel) echo "BUNDLE_ID=org.growerp.hotel" >> "$GITHUB_ENV" ;;
+            *) echo "Unsupported macOS app: ${{ matrix.app }}" >&2; exit 1 ;;
+          esac
+
+      - name: Download framed screenshots artifact
+        uses: dawidd6/action-download-artifact@v6
+        with:
+          workflow: screenshots.yml
+          name: framed-screenshots
+          path: framed-screenshots
+          if_no_artifact_found: warn
+        continue-on-error: true
+
+      - name: Extract macOS screenshots from artifact
+        run: |
+          set -euo pipefail
+          APP=${{ matrix.app }}
+          macos_dir="flutter/packages/$APP/macos/fastlane/screenshots/en-US"
+          mkdir -p "$macos_dir"
+          shopt -s nullglob
+          for src in framed-screenshots/macos-${APP}-*_framed.png; do
+            base=$(basename "$src" "_framed.png")
+            name="${base/-${APP}-/-}.png"
+            cp "$src" "$macos_dir/$name"
+            echo "  $name"
+          done
+          echo "macOS screenshots ready: $(ls "$macos_dir" | wc -l) files"
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.2"
+          bundler-cache: true
+          working-directory: flutter/fastlane
+
+      - name: Fastlane upload macOS metadata
+        env:
+          BUNDLE_GEMFILE: ${{ github.workspace }}/flutter/fastlane/Gemfile
+          MATRIX_APP: ${{ matrix.app }}
+          BUNDLE_ID: ${{ env.BUNDLE_ID }}
+          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          APP_STORE_CONNECT_API_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY_CONTENT: ${{ secrets.APP_STORE_CONNECT_API_KEY_CONTENT }}
+        run: bundle exec fastlane upload_metadata_macos
+        working-directory: flutter
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # Android — upload metadata and screenshots to Google Play
+  # Secrets: GOOGLE_PLAY_SERVICE_ACCOUNT_JSON
+  # ───────────────────────────────────────────────────────────────────────────
+  upload-metadata-android:
+    needs: [ set-params, resolve-matrix ]
+    if: needs.resolve-matrix.outputs.run_android == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.resolve-matrix.outputs.android_matrix) }}
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download framed screenshots
+        uses: dawidd6/action-download-artifact@v6
+        with:
+          workflow: screenshots.yml
+          name: framed-screenshots
+          path: framed-screenshots/
+          if_no_artifact_found: warn
+        continue-on-error: true
+
+      - name: Install ImageMagick
+        run: sudo apt-get install -y imagemagick -qq
+
+      - name: Extract Android screenshots from artifact
+        run: |
+          set -euo pipefail
+          APP=${{ matrix.app }}
+          base="flutter/packages/$APP/android/fastlane/metadata/android/en-US/images"
+          phone_dir="$base/phoneScreenshots"
+          seven_dir="$base/sevenInchScreenshots"
+          ten_dir="$base/tenInchScreenshots"
+          mkdir -p "$phone_dir" "$seven_dir" "$ten_dir"
+          rm -f "$phone_dir"/*.png "$seven_dir"/*.png "$ten_dir"/*.png
+
+          # copy_device: copy phone screenshots as-is (already 1080×1920 from screenshots.yml)
+          copy_device() {
+            local prefix="$1" dest_dir="$2" base name src count=0
+            shopt -s nullglob
+            for src in framed-screenshots/${prefix}-${APP}-*_framed.png; do
+              [[ $count -ge 8 ]] && break
+              base=$(basename "$src" "_framed.png")
+              name="${base#${prefix}-${APP}-}.png"
+              cp "$src" "$dest_dir/$name"
+              echo "  → $dest_dir/$name"
+              (( count++ )) || true
+            done
+          }
+
+          # resize_device: resize tablet screenshots so shorter side ≥ 1080px (Play Store min)
+          resize_device() {
+            local prefix="$1" dest_dir="$2" base name src count=0
+            shopt -s nullglob
+            for src in framed-screenshots/${prefix}-${APP}-*_framed.png; do
+              [[ $count -ge 8 ]] && break
+              base=$(basename "$src" "_framed.png")
+              name="${base#${prefix}-${APP}-}.png"
+              convert "$src" -resize "x1080" -background white -flatten "$dest_dir/$name"
+              echo "  → $dest_dir/$name (resized to min 1080px)"
+              (( count++ )) || true
+            done
+          }
+
+          copy_device  "phone"    "$phone_dir"
+          resize_device "tablet7"  "$seven_dir"
+          resize_device "tablet10" "$ten_dir"
+          echo "Phone: $(ls "$phone_dir" | wc -l)  7\": $(ls "$seven_dir" | wc -l)  10\": $(ls "$ten_dir" | wc -l)"
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.2"
+          bundler-cache: true
+          working-directory: flutter/packages/${{ matrix.app }}/android/fastlane
+
+      - name: Fastlane upload Android metadata
+        env:
+          GOOGLE_PLAY_JSON_KEY_DATA: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+        run: |
+          export KEY_FILE="/tmp/gplay_key_${{ matrix.app }}.json"
+          python3 - << 'PYEOF'
+          import os, json
+          raw = os.environ.get('GOOGLE_PLAY_JSON_KEY_DATA', '')
+          start = raw.find('{')
+          if start < 0:
+              raise ValueError(f"No JSON object found in secret (first 4 chars: {repr(raw[:4])})")
+          content = raw[start:]
+          json.loads(content)  # validate before writing
+          open(os.environ['KEY_FILE'], 'w').write(content)
+          PYEOF
+          GOOGLE_PLAY_JSON_KEY_FILE="$KEY_FILE" bundle exec fastlane upload_metadata
+          rm -f "$KEY_FILE"
+        working-directory: flutter/packages/${{ matrix.app }}/android/fastlane
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # Windows — upload metadata to Partner Center API
+  # Secrets: WINDOWS_TENANT_ID, WINDOWS_CLIENT_ID, WINDOWS_CLIENT_SECRET,
+  #          WINDOWS_ADMIN_PRODUCT_ID, WINDOWS_HOTEL_PRODUCT_ID
+  # ───────────────────────────────────────────────────────────────────────────
+  upload-metadata-windows:
+    needs: [ set-params, resolve-matrix ]
+    if: needs.resolve-matrix.outputs.run_windows == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.resolve-matrix.outputs.windows_matrix) }}
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download framed screenshots
+        uses: dawidd6/action-download-artifact@v6
+        with:
+          workflow: screenshots.yml
+          name: framed-screenshots
+          path: framed-screenshots/
+          if_no_artifact_found: warn
+        continue-on-error: true
+
+      - name: Extract Windows screenshots
+        run: |
+          set -euo pipefail
+          APP=${{ matrix.app }}
+          base="flutter/packages/$APP/windows/fastlane/metadata/en-US/screenshots"
+          mkdir -p "$base"
+          rm -f "$base"/*.png
+
+          count=0
+          shopt -s nullglob
+          for src in framed-screenshots/windows-${APP}-*_framed.png; do
+            [[ $count -ge 9 ]] && break
+            cp "$src" "$base/screenshot_$((count+1)).png"
+            echo "  → $base/screenshot_$((count+1)).png"
+            (( count++ )) || true
+          done
+          echo "Extracted $count Windows screenshots"
+
+      - name: Upload Windows metadata to Partner Center
+        env:
+          WINDOWS_TENANT_ID: ${{ secrets.WINDOWS_TENANT_ID }}
+          WINDOWS_CLIENT_ID: ${{ secrets.WINDOWS_CLIENT_ID }}
+          WINDOWS_CLIENT_SECRET: ${{ secrets.WINDOWS_CLIENT_SECRET }}
+          WINDOWS_ADMIN_PRODUCT_ID: ${{ secrets.WINDOWS_ADMIN_PRODUCT_ID }}
+          WINDOWS_HOTEL_PRODUCT_ID: ${{ secrets.WINDOWS_HOTEL_PRODUCT_ID }}
+          APP_NAME: ${{ matrix.app }}
+        run: |
+          python3 << 'PYEOF'
+          import requests
+          import json
+          import os
+          from pathlib import Path
+
+          app_name = os.environ['APP_NAME']
+          product_ids = {
+              'admin': os.environ.get('WINDOWS_ADMIN_PRODUCT_ID', ''),
+              'hotel': os.environ.get('WINDOWS_HOTEL_PRODUCT_ID', ''),
+          }
+          app_id = product_ids.get(app_name, '')
+
+          if not app_id:
+              print(f'No product ID for {app_name}. Skipping.')
+              exit(0)
+
+          # Authenticate
+          auth_data = {
+              'grant_type': 'client_credentials',
+              'client_id': os.environ['WINDOWS_CLIENT_ID'],
+              'client_secret': os.environ['WINDOWS_CLIENT_SECRET'],
+              'resource': 'https://manage.devcenter.microsoft.com',
+          }
+          auth_resp = requests.post(
+              f"https://login.microsoftonline.com/{os.environ['WINDOWS_TENANT_ID']}/oauth2/token",
+              data=auth_data
+          )
+          auth_resp.raise_for_status()
+          token = auth_resp.json()['access_token']
+          headers = {'Authorization': f'Bearer {token}', 'Accept': 'application/json'}
+
+          # Read metadata from fastlane directory
+          metadata_dir = Path(f'flutter/packages/{app_name}/windows/fastlane/metadata/en-US')
+          metadata = {
+              'description': (metadata_dir / 'description.txt').read_text().strip() if (metadata_dir / 'description.txt').exists() else '',
+              'shortDescription': (metadata_dir / 'short_description.txt').read_text().strip() if (metadata_dir / 'short_description.txt').exists() else '',
+              'releaseNotes': (metadata_dir / 'release_notes.txt').read_text().strip() if (metadata_dir / 'release_notes.txt').exists() else '',
+              'keywords': (metadata_dir / 'keywords.txt').read_text().strip() if (metadata_dir / 'keywords.txt').exists() else '',
+          }
+
+          # Read screenshots if available
+          screenshots_dir = metadata_dir / 'screenshots'
+          screenshots = []
+          if screenshots_dir.exists():
+              for img in sorted(screenshots_dir.glob('screenshot_*.png')):
+                  screenshots.append({'fileStatus': 'PendingUpload', 'fileName': img.name})
+              print(f'Found {len(screenshots)} screenshots')
+
+          base_url = f'https://manage.devcenter.microsoft.com/v1.0/my/applications/{app_id}'
+          app_data = requests.get(base_url, headers=headers).json()
+
+          # Create new submission (clones last published)
+          sub = requests.post(f'{base_url}/submissions', headers=headers, json={}).json()
+          sub_id = sub['id']
+          print(f'Created submission {sub_id}')
+
+          # Update listing with metadata + screenshots (en-US is default)
+          listings = sub.get('listings', {})
+          if 'en-us' in listings:
+              listings['en-us'].update(metadata)
+              if screenshots:
+                  listings['en-us']['images'] = screenshots
+          else:
+              listings['en-us'] = metadata
+              if screenshots:
+                  listings['en-us']['images'] = screenshots
+          sub['listings'] = listings
+
+          # Update submission
+          update_resp = requests.put(
+              f'{base_url}/submissions/{sub_id}',
+              headers=headers,
+              json=sub
+          )
+          update_resp.raise_for_status()
+          print(f'Updated submission metadata + screenshots')
+
+          # Upload screenshot files to Partner Center
+          if screenshots:
+              for screenshot in screenshots:
+                  file_name = screenshot['fileName']
+                  file_path = screenshots_dir / file_name
+                  if not file_path.exists():
+                      print(f'Warning: {file_path} not found')
+                      continue
+
+                  # Get file upload URL
+                  file_resp = requests.post(
+                      f'{base_url}/submissions/{sub_id}/files',
+                      headers=headers,
+                      json={'fileName': file_name, 'fileStatus': 'PendingUpload'}
+                  )
+                  if file_resp.status_code not in [200, 201]:
+                      print(f'Warning: Could not get upload URL for {file_name}')
+                      continue
+
+                  upload_url = file_resp.json().get('uploadUrl', '')
+                  if not upload_url:
+                      print(f'Warning: No upload URL for {file_name}')
+                      continue
+
+                  # Upload file
+                  with open(file_path, 'rb') as f:
+                      upload_resp = requests.put(
+                          upload_url,
+                          data=f,
+                          headers={'x-ms-blob-type': 'BlockBlob'}
+                      )
+                      upload_resp.raise_for_status()
+                      print(f'Uploaded {file_name}')
+
+          # Commit submission
+          commit_resp = requests.post(
+              f'{base_url}/submissions/{sub_id}/commit',
+              headers=headers,
+              json={}
+          )
+          commit_resp.raise_for_status()
+          print(f'Committed submission')
+
+          print('Windows metadata + screenshots uploaded successfully')
+          PYEOF

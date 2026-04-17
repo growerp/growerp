@@ -1,0 +1,15 @@
+name: Bootstrap Flutter workspace
+description: Activates Melos, bootstraps the workspace, and runs code generation
+
+runs:
+  using: composite
+  steps:
+    - name: Bootstrap workspace
+      shell: bash
+      run: |
+        dart pub global activate melos
+        export PATH="$PATH":"$HOME/.pub-cache/bin"
+        melos clean && melos bootstrap
+        melos l10n --no-select
+        melos build --no-select
+      working-directory: flutter

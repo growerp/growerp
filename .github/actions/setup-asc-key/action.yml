@@ -1,0 +1,44 @@
+name: Setup App Store Connect API Key
+description: >
+  Creates a temporary JSON key file for fastlane deliver / Fastlane API calls
+  that require --api_key_path. Outputs the file path for use in subsequent steps.
+  Caller is responsible for cleanup using the api_key_path output.
+
+inputs:
+  asc_key_content:
+    description: "Base64-encoded App Store Connect API private key (.p8)"
+    required: true
+  asc_key_id:
+    description: "App Store Connect API Key ID"
+    required: true
+  asc_issuer_id:
+    description: "App Store Connect API Issuer ID"
+    required: true
+
+outputs:
+  api_key_path:
+    description: "Path to the temporary JSON key file"
+    value: ${{ steps.create.outputs.api_key_path }}
+
+runs:
+  using: composite
+  steps:
+    - id: create
+      shell: bash
+      env:
+        ASC_KEY_CONTENT: ${{ inputs.asc_key_content }}
+        ASC_KEY_ID: ${{ inputs.asc_key_id }}
+        ASC_ISSUER_ID: ${{ inputs.asc_issuer_id }}
+      run: |
+        API_KEY_FILE=$(mktemp /tmp/asc_XXXXXX.json)
+        ruby -e "
+          require 'json'
+          File.write(ARGV[0], JSON.generate(
+            key_id:              ENV['ASC_KEY_ID'],
+            issuer_id:           ENV['ASC_ISSUER_ID'],
+            key:                 ENV['ASC_KEY_CONTENT'],
+            is_key_content_base64: true,
+            in_house:            false
+          ))
+        " "$API_KEY_FILE"
+        echo "api_key_path=$API_KEY_FILE" >> "$GITHUB_OUTPUT"
