@@ -425,25 +425,6 @@ jobs:
       - name: Frame Android, macOS, and Windows screenshots with ImageMagick
         working-directory: screenshots
         run: |
-          # Helper: draw macOS traffic lights (3 circles on left of title bar)
-          draw_macos_lights() {
-            local x=$1 y=$2 size=14 color_red="#ED6158" color_yellow="#FCC02E" color_green="#5FC038"
-            convert "$_" -fill "$color_red" -draw "circle $((x+size/2)),$((y+size/2)) $((x+size)),$((y+size/2))" \
-                          -fill "$color_yellow" -draw "circle $((x+size*2+6)),$((y+size/2)) $((x+size*2+14)),$((y+size/2))" \
-                          -fill "$color_green" -draw "circle $((x+size*4+12)),$((y+size/2)) $((x+size*4+20)),$((y+size/2))" "$_"
-          }
-
-          # Helper: draw Windows control buttons (minimize/maximize/close on right of title bar)
-          draw_windows_buttons() {
-            local x=$1 y=$2 size=16 spacing=8
-            # Close button (red X on right)
-            convert "$_" \
-              -fill "#C50F1F" -draw "rectangle $((x-size-spacing)),$y $((x-spacing)),$((y+size))" \
-              -strokewidth 2 -stroke white -draw "line $((x-size-spacing+4)),$((y+4)) $((x-spacing-4)),$((y+size-4))" \
-              -draw "line $((x-spacing-4)),$((y+4)) $((x-size-spacing+4)),$((y+size-4))" \
-              "$_"
-          }
-
           # Frame Android with simple bezel
           for f in phone-*.png tablet7-*.png tablet10-*.png; do
             [ -f "$f" ] || continue
@@ -457,52 +438,30 @@ jobs:
             echo "Framed: $f → ${base}_framed.png"
           done
 
-          # Frame macOS with title bar + traffic lights
+          # Frame macOS with simple bezel
           for f in macos-*.png; do
             [ -f "$f" ] || continue
             [[ "$f" == *_framed.png ]] && continue
             base="${f%.png}"
-            w=$(identify -format "%w" "$f")
-            h=$(identify -format "%h" "$f")
-            titlebar_h=28
-            new_h=$((h + titlebar_h))
-
-            # Create titlebar with traffic lights on left
-            convert \( -size "${w}x${titlebar_h}" xc:"#E1E1E6" \) \
-              \( "$f" \) \
-              -gravity north -append \
+            convert "$f" \
               -bordercolor "#1C1C1E" -border 12 \
               \( +clone -background black -shadow 80x10+0+8 \) \
               +swap -background "#F2F2F7" -layers merge +repage \
-              -draw "fill '#ED6158' circle 26,14 33,14 fill '#FCC02E' circle 51,14 58,14 fill '#5FC038' circle 76,14 83,14" \
               "${base}_framed.png"
-            echo "Framed: $f → ${base}_framed.png (macOS titlebar with lights)"
+            echo "Framed: $f → ${base}_framed.png (macOS bezel)"
           done
 
-          # Frame Windows with title bar + control buttons on right
+          # Frame Windows with simple bezel
           for f in windows-*.png; do
             [ -f "$f" ] || continue
             [[ "$f" == *_framed.png ]] && continue
             base="${f%.png}"
-            w=$(identify -format "%w" "$f")
-            h=$(identify -format "%h" "$f")
-            titlebar_h=30
-            new_h=$((h + titlebar_h))
-
-            # Create titlebar (Windows 11 style) with minimize/maximize/close on right
-            convert \( -size "${w}x${titlebar_h}" xc:"#ECECEC" \) \
-              \( "$f" \) \
-              -gravity north -append \
-              -bordercolor "#CCCCCC" -border 1 \
-              -draw "fill '#C50F1F' rectangle $((w-46)),0 $w,$titlebar_h" \
-              -draw "strokewidth 1.5 stroke white line $((w-46+8)),10 $((w-46+16)),10" \
-              -draw "stroke white line $((w-46+8)),18 $((w-46+16)),18" \
-              -draw "stroke white line $((w-46+8)),12 $((w-46+14)),12" \
-              -draw "stroke white line $((w-46+8)),13 $((w-46+14)),13" \
-              -draw "stroke white line $((w-46+8)),16 $((w-46+12)),16" \
-              -draw "stroke white line $((w-46+8)),17 $((w-46+12)),17" \
+            convert "$f" \
+              -bordercolor "#CCCCCC" -border 12 \
+              \( +clone -background black -shadow 80x10+0+8 \) \
+              +swap -background "#F2F2F7" -layers merge +repage \
               "${base}_framed.png"
-            echo "Framed: $f → ${base}_framed.png (Windows titlebar with buttons)"
+            echo "Framed: $f → ${base}_framed.png (Windows bezel)"
           done
 
       - name: Flatten, resize, and add titles to framed screenshots
