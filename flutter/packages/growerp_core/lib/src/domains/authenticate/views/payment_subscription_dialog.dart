@@ -68,7 +68,7 @@ class PaymentSubscriptionDialogState extends State<PaymentSubscriptionDialog> {
   @override
   Widget build(BuildContext context) {
     final localizations = CoreLocalizations.of(context);
-    final daysRemaining = widget.authenticate.evaluationDays ?? 0;
+    final daysRemaining = widget.authenticate.subscriptionDaysRemaining ?? 0;
 
     return popUp(
       context: context,

@@ -463,6 +463,119 @@ void main() {
     });
   });
 
+  group('Trial Expiry Tests', () {
+    testWidgets('TC-TRIAL-002: Expired Trial Shows Payment Form', (
+      WidgetTester tester,
+    ) async {
+      final restClient = RestClient(await buildDioClient());
+      final router = createDynamicCoreRouter([
+        coreMenuConfig,
+      ], rootNavigatorKey: GlobalKey<NavigatorState>());
+
+      // Fresh tenant so we start with a known trial state
+      await CommonTest.startTestApp(
+        tester,
+        router,
+        coreMenuConfig,
+        CoreLocalizations.localizationsDelegates,
+        restClient: restClient,
+        clear: true,
+        title: "TC-TRIAL-002: Expired Trial",
+      );
+
+      await CommonTest.createCompanyAndAdmin(tester);
+
+      // Save the admin email for re-login
+      SaveTest test = await PersistFunctions.getTest();
+      final adminEmail = test.admin?.email;
+      if (adminEmail == null) {
+        debugPrint('Skipping: No admin email persisted');
+        return;
+      }
+
+      await CommonTest.logout(tester);
+
+      // Advance time past the 14-day trial period
+      EvaluationTest.setTestDaysOffset(15);
+
+      await CommonTest.pressLoginButton(tester);
+      await CommonTest.enterText(tester, 'username', adminEmail);
+      await CommonTest.enterText(tester, 'password', testPassword);
+      await CommonTest.pressLogin(tester);
+
+      // Backend returns subscriptionExpired — payment form must appear
+      expect(
+        await EvaluationTest.isPaymentFormDisplayed(tester),
+        isTrue,
+        reason: 'Payment form should be shown when trial has expired',
+      );
+
+      // Status banner must say expired, not "trial expires in X days"
+      expect(
+        find.text('Your subscription has expired'),
+        findsOneWidget,
+        reason: 'Expired message should be shown, not remaining-days message',
+      );
+
+      EvaluationTest.resetTestDaysOffset();
+
+      debugPrint('✓ TC-TRIAL-002: Expired trial shows payment form');
+    });
+
+    testWidgets('TC-TRIAL-003: Payment After Trial Expiry Grants Access', (
+      WidgetTester tester,
+    ) async {
+      final restClient = RestClient(await buildDioClient());
+      final router = createDynamicCoreRouter([
+        coreMenuConfig,
+      ], rootNavigatorKey: GlobalKey<NavigatorState>());
+
+      await CommonTest.startTestApp(
+        tester,
+        router,
+        coreMenuConfig,
+        CoreLocalizations.localizationsDelegates,
+        restClient: restClient,
+        clear: false,
+        title: "TC-TRIAL-003: Pay After Expiry",
+      );
+
+      SaveTest test = await PersistFunctions.getTest();
+      final adminEmail = test.admin?.email;
+      if (adminEmail == null) {
+        debugPrint('Skipping: No admin email persisted');
+        return;
+      }
+
+      EvaluationTest.setTestDaysOffset(15);
+
+      await CommonTest.pressLoginButton(tester);
+      await CommonTest.enterText(tester, 'username', adminEmail);
+      await CommonTest.enterText(tester, 'password', testPassword);
+      await CommonTest.pressLogin(tester);
+
+      expect(
+        await EvaluationTest.isPaymentFormDisplayed(tester),
+        isTrue,
+        reason: 'Payment form should appear for expired trial',
+      );
+
+      // Submit with pre-filled test card
+      final success = await EvaluationTest.submitPayment(tester);
+      expect(
+        success,
+        isTrue,
+        reason: 'Payment should succeed and grant dashboard access',
+      );
+
+      EvaluationTest.resetTestDaysOffset();
+
+      debugPrint('✓ TC-TRIAL-003: Payment after expiry grants access');
+
+      await CommonTest.logout(tester);
+    });
+  });
+
   group('Cleanup', () {
     testWidgets('Final cleanup and logout', (WidgetTester tester) async {
       final restClient = RestClient(await buildDioClient());

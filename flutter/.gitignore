@@ -64,5 +64,13 @@ build/
 # Web related
 lib/generated_plugin_registrant.dart
 
+# iOS generated plugin registrant
+**/GeneratedPluginRegistrant.m
+**/GeneratedPluginRegistrant.h
+
+# iOS Flutter generated files
+**/ios/Flutter/flutter_export_environment.sh
+**/ios/Flutter/ephemeral/
+
 # Exceptions to above rules.
 !/packages/flutter_tools/test/data/dart_dependencies_test/**/.packages
