@@ -12,8 +12,11 @@ The GrowERP release process consist out of the following workflows:
    using the staging backend for the store review to test
 4. "published metadata to stores" (opt)
    will send meta dat in apps dirs to the stores
-5. When review ok,
+5. Create userid/password for stores to check app on staging
+   submit for review
+6. When review ok,
     a. "Copy staging to production"
+       Backend upgrade from Staging
     b. Manually release apps in the IOS/MACOS/Android.Windows store
        No api available for this!
 

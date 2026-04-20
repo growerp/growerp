@@ -1,0 +1,10 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "org.growerp.support",
+    "sha256_cert_fingerprints": [
+      "93:E0:F3:24:11:CB:CC:A2:B5:A8:23:98:55:D9:B7:10:F1:E6:2E:A8:64:F3:06:B8:F4:8D:C7:54:1A:05:20:09"
+    ]
+  }
+}]

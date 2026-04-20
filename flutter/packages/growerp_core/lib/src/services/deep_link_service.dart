@@ -23,18 +23,35 @@ class DeepLinkService {
   final AppLinks _appLinks = AppLinks();
   StreamSubscription<Uri>? _linkSubscription;
   GoRouter? _router;
+  Uri? _pendingLink;
+  bool _isReady = false;
+
+  /// Call once the dynamic router (with all menu routes) is active.
+  void markReady() {
+    _isReady = true;
+    if (_pendingLink != null) {
+      debugPrint('DeepLinkService: Flushing pending link: $_pendingLink');
+      _handleDeepLink(_pendingLink!);
+      _pendingLink = null;
+    }
+  }
 
   /// Initializes the deep link service with the provided router.
   /// Also handles the initial link if the app was launched via a deep link.
   Future<void> initialize({required GoRouter router}) async {
     _router = router;
+    _isReady = false;
+
+    // Cancel any previous subscription to avoid duplicate listeners on rebuild.
+    await _linkSubscription?.cancel();
+    _linkSubscription = null;
 
     try {
       // Handle initial link
       final initialUri = await _appLinks.getInitialLink();
       if (initialUri != null) {
         debugPrint('DeepLinkService: Initial link received: $initialUri');
-        _handleDeepLink(initialUri);
+        _pendingLink = initialUri;
       }
     } catch (e) {
       debugPrint('DeepLinkService: Error getting initial link: $e');
@@ -44,7 +61,11 @@ class DeepLinkService {
     _linkSubscription = _appLinks.uriLinkStream.listen(
       (uri) {
         debugPrint('DeepLinkService: Incoming link received: $uri');
-        _handleDeepLink(uri);
+        if (_isReady) {
+          _handleDeepLink(uri);
+        } else {
+          _pendingLink = uri;
+        }
       },
       onError: (err) {
         debugPrint('DeepLinkService: Error listening for links: $err');
