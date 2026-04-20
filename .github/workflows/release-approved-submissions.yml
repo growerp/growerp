@@ -317,14 +317,15 @@ jobs:
             exit 0
           }
 
-          # Check submission status
-          $sub = Invoke-RestMethod `
-            -Uri "$baseUri/submissions/$pendingId" -Headers $headers
-          Write-Host "Pending submission $pendingId status: $($sub.status)"
+          # Check real submission state via /status endpoint (submission.status is submission type, not state)
+          $subStatus = Invoke-RestMethod `
+            -Uri "$baseUri/submissions/$pendingId/status" -Headers $headers
+          Write-Host "Pending submission $pendingId state: $($subStatus.status)"
 
-          if ($sub.status -ne "ReadyToPublish") {
-            Write-Host "Submission is not in ReadyToPublish state (current: $($sub.status)). Skipping."
-            exit 0
+          if ($subStatus.status -ne "ReadyToPublish") {
+            Write-Host "::error::Submission $pendingId is in state '$($subStatus.status)' — cannot release via API."
+            Write-Host "::error::ACTION REQUIRED: Go to https://partner.microsoft.com/dashboard and click 'Publish now' to release ${{ matrix.app }} manually."
+            exit 1
           }
 
           # Publish the approved submission

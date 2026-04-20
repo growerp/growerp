@@ -191,11 +191,11 @@ jobs:
         run: |
           echo "## Test Results — Slice ${{ matrix.slice }}/4" >> "$GITHUB_STEP_SUMMARY"
           if [ -f /tmp/test_output.log ]; then
-            if grep -q '=== FINAL TEST SUMMARY ===' /tmp/test_output.log; then
+            if grep -q '=== FINAL TEST SUMMARY' /tmp/test_output.log; then
               echo '```' >> "$GITHUB_STEP_SUMMARY"
               grep '>>> RESULT:' /tmp/test_output.log >> "$GITHUB_STEP_SUMMARY" || true
               echo "" >> "$GITHUB_STEP_SUMMARY"
-              sed -n '/=== FINAL TEST SUMMARY ===/,$ p' /tmp/test_output.log | head -100 \
+              sed -n '/=== FINAL TEST SUMMARY/,$ p' /tmp/test_output.log | head -100 \
                 >> "$GITHUB_STEP_SUMMARY" || true
               echo '```' >> "$GITHUB_STEP_SUMMARY"
             else
@@ -244,8 +244,9 @@ jobs:
 
       - name: Combined summary
         run: |
-          echo "## Overall Test Results" >> "$GITHUB_STEP_SUMMARY"
-          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          {
+          echo "## Overall Test Results"
+          echo '```'
           TOTAL_FAILED_PKGS=0
           TOTAL_PASSED_PKGS=0
           TOTAL_IND_PASSED=0
@@ -254,36 +255,36 @@ jobs:
             SLICE=$(basename "$slice_dir" | grep -o '[0-9]*$')
             LOG="$slice_dir/test_output.log"
             if [ -f "$LOG" ]; then
-              echo "--- Slice $SLICE ---" >> "$GITHUB_STEP_SUMMARY"
+              echo "--- Slice $SLICE ---"
               grep '>>> RESULT:' "$LOG" | grep -v '+ echo' | sed 's/^[^|]*| *//' \
-                >> "$GITHUB_STEP_SUMMARY" \
-                || echo "  (no structured results)" >> "$GITHUB_STEP_SUMMARY"
+                || echo "  (no structured results)"
               FAILED=$(grep '>>> RESULT:.*FAILED' "$LOG" | grep -v '+ echo' | wc -l)
               PASSED=$(grep '>>> RESULT:.*PASSED' "$LOG" | grep -v '+ echo' | wc -l)
               TOTAL_FAILED_PKGS=$((TOTAL_FAILED_PKGS + FAILED))
               TOTAL_PASSED_PKGS=$((TOTAL_PASSED_PKGS + PASSED))
-              IND_PASSED=$(grep 'Tests passed' "$LOG" | grep -oE '[0-9]+$' | tail -1)
-              IND_FAILED=$(grep 'Tests failed' "$LOG" | grep -oE '[0-9]+$' | tail -1)
+              IND_PASSED=$(grep 'Tests passed' "$LOG" | sed 's/^[^|]*| *//' | grep -oE '[0-9]+$' | tail -1)
+              IND_FAILED=$(grep 'Tests failed' "$LOG" | sed 's/^[^|]*| *//' | grep -oE '[0-9]+$' | tail -1)
               TOTAL_IND_PASSED=$((TOTAL_IND_PASSED + ${IND_PASSED:-0}))
               TOTAL_IND_FAILED=$((TOTAL_IND_FAILED + ${IND_FAILED:-0}))
             fi
           done
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "Packages passed : $TOTAL_PASSED_PKGS" >> "$GITHUB_STEP_SUMMARY"
-          echo "Packages failed : $TOTAL_FAILED_PKGS" >> "$GITHUB_STEP_SUMMARY"
-          echo "Tests passed    : $TOTAL_IND_PASSED" >> "$GITHUB_STEP_SUMMARY"
-          echo "Tests failed    : $TOTAL_IND_FAILED" >> "$GITHUB_STEP_SUMMARY"
+          echo ""
+          echo "Packages passed : $TOTAL_PASSED_PKGS"
+          echo "Packages failed : $TOTAL_FAILED_PKGS"
+          echo "Tests passed    : $TOTAL_IND_PASSED"
+          echo "Tests failed    : $TOTAL_IND_FAILED"
           if [ "$TOTAL_FAILED_PKGS" -eq 0 ]; then
-            echo "" >> "$GITHUB_STEP_SUMMARY"
-            echo "All packages passed!" >> "$GITHUB_STEP_SUMMARY"
+            echo ""
+            echo "All packages passed!"
           else
-            echo "" >> "$GITHUB_STEP_SUMMARY"
-            echo "Failed tests:" >> "$GITHUB_STEP_SUMMARY"
+            echo ""
+            echo "Failed tests:"
             {
               for slice_dir in $(ls -d test-logs/test-output-* 2>/dev/null | sort -V); do
                 LOG="$slice_dir/test_output.log"
                 [ -f "$LOG" ] && sed 's/^[^|]*| *//' "$LOG" | grep -E '^\[[^]]+\] ' || true
               done
-            } | sort -u >> "$GITHUB_STEP_SUMMARY"
+            } | sort -u
           fi
-          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          echo '```'
+          } | tee -a "$GITHUB_STEP_SUMMARY"
