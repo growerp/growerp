@@ -323,10 +323,8 @@ jobs:
           Write-Host "Pending submission $pendingId state: $($subStatus.status)"
 
           if ($subStatus.status -ne "ReadyToPublish") {
-            Write-Host "::error::Submission is not in ReadyToPublish state (current: $($subStatus.status))."
-            if ($subStatus.status -eq "Release") {
-              Write-Host "::error::Submission is held for manual publish. Click 'Publish now' in Partner Center, or set targetPublishMode=Immediate when creating submissions to enable API-driven release."
-            }
+            Write-Host "::error::Submission $pendingId is in state '$($subStatus.status)' — cannot release via API."
+            Write-Host "::error::ACTION REQUIRED: Go to https://partner.microsoft.com/dashboard and click 'Publish now' to release ${{ matrix.app }} manually."
             exit 1
           }
 
