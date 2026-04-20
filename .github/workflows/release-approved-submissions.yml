@@ -325,9 +325,22 @@ jobs:
           Write-Host "  targetPublishDate: $($sub.targetPublishDate)"
           Write-Host "  statusDetails: $($sub.statusDetails | ConvertTo-Json -Depth 3)"
 
-          if ($sub.status -ne "ReadyToPublish") {
-            Write-Host "Submission is not in ReadyToPublish state (current: $($sub.status)). Skipping."
+          $publishable = ($sub.status -eq "ReadyToPublish") -or
+                        ($sub.status -eq "Release" -and $sub.targetPublishMode -eq "Manual")
+
+          if (-not $publishable) {
+            Write-Host "Submission is not in a publishable state (current: $($sub.status), mode: $($sub.targetPublishMode)). Skipping."
             exit 0
+          }
+
+          # For Manual-mode submissions in Release state, switch to Immediate then commit
+          if ($sub.status -eq "Release" -and $sub.targetPublishMode -eq "Manual") {
+            Write-Host "Switching targetPublishMode to Immediate for manual-hold submission..."
+            $sub.targetPublishMode = "Immediate"
+            $body = $sub | ConvertTo-Json -Depth 20
+            Invoke-RestMethod `
+              -Uri "$baseUri/submissions/$pendingId" `
+              -Method PUT -Headers $headers -ContentType "application/json" -Body $body | Out-Null
           }
 
           # Publish the approved submission
