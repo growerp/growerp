@@ -322,8 +322,8 @@ jobs:
             -Uri "$baseUri/submissions/$pendingId" -Headers $headers
           Write-Host "Pending submission $pendingId status: $($sub.status)"
 
-          if ($sub.status -notin @("ReadyToPublish", "Release")) {
-            Write-Host "Submission is not in a publishable state (current: $($sub.status)). Skipping."
+          if ($sub.status -ne "ReadyToPublish") {
+            Write-Host "Submission is not in ReadyToPublish state (current: $($sub.status)). Skipping."
             exit 0
           }
 
