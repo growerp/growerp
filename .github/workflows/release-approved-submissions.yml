@@ -317,24 +317,23 @@ jobs:
             exit 0
           }
 
-          # Check submission status
-          $sub = Invoke-RestMethod `
-            -Uri "$baseUri/submissions/$pendingId" -Headers $headers
-          Write-Host "Pending submission $pendingId status: $($sub.status)"
-          Write-Host "  targetPublishMode: $($sub.targetPublishMode)"
-          Write-Host "  targetPublishDate: $($sub.targetPublishDate)"
-          Write-Host "  statusDetails: $($sub.statusDetails | ConvertTo-Json -Depth 3)"
+          # Check real submission state via /status endpoint (submission.status is submission type, not state)
+          $subStatus = Invoke-RestMethod `
+            -Uri "$baseUri/submissions/$pendingId/status" -Headers $headers
+          Write-Host "Pending submission $pendingId state: $($subStatus.status)"
 
-          $publishable = ($sub.status -eq "ReadyToPublish") -or
-                        ($sub.status -eq "Release" -and $sub.targetPublishMode -eq "Manual")
-
-          if (-not $publishable) {
-            Write-Host "Submission is not in a publishable state (current: $($sub.status), mode: $($sub.targetPublishMode)). Skipping."
+          if ($subStatus.status -ne "ReadyToPublish") {
+            Write-Host "Submission is not in ReadyToPublish state (current: $($subStatus.status)). Skipping."
             exit 0
           }
 
-          # For Manual-mode submissions in Release state, switch to Immediate then commit
-          if ($sub.status -eq "Release" -and $sub.targetPublishMode -eq "Manual") {
+          # Fetch full submission to read targetPublishMode
+          $sub = Invoke-RestMethod `
+            -Uri "$baseUri/submissions/$pendingId" -Headers $headers
+          Write-Host "  targetPublishMode: $($sub.targetPublishMode)"
+
+          # For Manual-mode submissions, switch to Immediate so commit will publish immediately
+          if ($sub.targetPublishMode -eq "Manual") {
             Write-Host "Switching targetPublishMode to Immediate for manual-hold submission..."
             $sub.targetPublishMode = "Immediate"
             $body = $sub | ConvertTo-Json -Depth 20
