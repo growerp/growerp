@@ -323,8 +323,8 @@ jobs:
           Write-Host "Pending submission $pendingId state: $($subStatus.status)"
 
           if ($subStatus.status -ne "ReadyToPublish") {
-            Write-Host "Submission is not in ReadyToPublish state (current: $($subStatus.status)). Skipping."
-            exit 0
+            Write-Host "::error::Submission is not in ReadyToPublish state (current: $($subStatus.status))."
+            exit 1
           }
 
           # Fetch full submission to read targetPublishMode
