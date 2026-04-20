@@ -32,6 +32,8 @@
                 <!-- Replace with your actual domain -->
                 <data android:scheme="https" android:host="support.growerp.com" />
                 <data android:scheme="https" android:host="www.support.growerp.com" />
+                <data android:scheme="https" android:host="support.growerp.org" />
+                <data android:scheme="https" android:host="www.support.growerp.org" />
             </intent-filter>
             <!-- Deep linking: Custom scheme fallback -->
             <intent-filter>
