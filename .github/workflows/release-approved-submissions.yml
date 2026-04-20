@@ -322,24 +322,19 @@ jobs:
             -Uri "$baseUri/submissions/$pendingId/status" -Headers $headers
           Write-Host "Pending submission $pendingId state: $($subStatus.status)"
 
-          if ($subStatus.status -ne "ReadyToPublish") {
-            Write-Host "::error::Submission is not in ReadyToPublish state (current: $($subStatus.status))."
+          # "Release" = post-cert manual-publish hold; "ReadyToPublish" = auto-publish ready
+          if ($subStatus.status -notin @("ReadyToPublish", "Release")) {
+            Write-Host "::error::Submission is not in a publishable state (current: $($subStatus.status))."
             exit 1
           }
 
-          # Fetch full submission to read targetPublishMode
-          $sub = Invoke-RestMethod `
+          # Verify no certification errors before publishing
+          $subDetail = Invoke-RestMethod `
             -Uri "$baseUri/submissions/$pendingId" -Headers $headers
-          Write-Host "  targetPublishMode: $($sub.targetPublishMode)"
-
-          # For Manual-mode submissions, switch to Immediate so commit will publish immediately
-          if ($sub.targetPublishMode -eq "Manual") {
-            Write-Host "Switching targetPublishMode to Immediate for manual-hold submission..."
-            $sub.targetPublishMode = "Immediate"
-            $body = $sub | ConvertTo-Json -Depth 20
-            Invoke-RestMethod `
-              -Uri "$baseUri/submissions/$pendingId" `
-              -Method PUT -Headers $headers -ContentType "application/json" -Body $body | Out-Null
+          if ($subDetail.statusDetails.errors.Count -gt 0) {
+            Write-Host "::error::Submission has certification errors. Manual review required."
+            Write-Host ($subDetail.statusDetails | ConvertTo-Json -Depth 5)
+            exit 1
           }
 
           # Publish the approved submission
