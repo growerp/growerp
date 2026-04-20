@@ -321,6 +321,9 @@ jobs:
           $sub = Invoke-RestMethod `
             -Uri "$baseUri/submissions/$pendingId" -Headers $headers
           Write-Host "Pending submission $pendingId status: $($sub.status)"
+          Write-Host "  targetPublishMode: $($sub.targetPublishMode)"
+          Write-Host "  targetPublishDate: $($sub.targetPublishDate)"
+          Write-Host "  statusDetails: $($sub.statusDetails | ConvertTo-Json -Depth 3)"
 
           if ($sub.status -ne "ReadyToPublish") {
             Write-Host "Submission is not in ReadyToPublish state (current: $($sub.status)). Skipping."
