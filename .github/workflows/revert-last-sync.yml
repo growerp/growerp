@@ -19,4 +19,4 @@ jobs:
           host: growerp.com
           username: ${{ secrets.PROD_SSH_USER }}
           key: ${{ secrets.PROD_SSH_KEY }}
-          script: server/swarm/revert-prod.sh
+          script: server/swarm/revert-prod.sh --apply
