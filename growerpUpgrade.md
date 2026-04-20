@@ -1,10 +1,28 @@
-upgrading Growerp production
+# upgrading Growerp production
+
+## Automated
+
+The GrowERP release process consist out of the following workflows:
+1. "update staging" 
+   will update staging server and can increment version
+2. "create store screenshots" (opt)
+   will create framed screenshots of apps in the stores
+3. "publish binary to stores"
+   with new version from 'update staging'
+   using the staging backend for the store review to test
+4. "published metadata to stores" (opt)
+   will send meta dat in apps dirs to the stores
+5. When review ok,
+    a. "Copy staging to production"
+    b. Manually release apps in the IOS/MACOS/Android.Windows store
+       No api available for this!
+
+## Manual
 
 1. have a tested version available in growerp.org
 2. send all new apps to the various stores with manageble release
 3. wait for all stores to approve (but not release)
-4. upgrade the backend and apps and set new version Check the backend version is really new
-5. release all apps at the stores.
+4. upgrade the backend and apps and set new version Check the backend version is really new5. release all apps at the stores.
     windows: https://partner.microsoft.com/en-us/dashboard/home
     playstore: https://play.google.com/console/u/0/developers/8169559093702942817/app-list?pli=1
     linux: 
