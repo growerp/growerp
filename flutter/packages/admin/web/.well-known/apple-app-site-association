@@ -1,0 +1,15 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["P64T65C668.org.growerp.admin"],
+        "components": [
+          {
+            "/": "/*",
+            "comment": "Matches all paths"
+          }
+        ]
+      }
+    ]
+  }
+}
