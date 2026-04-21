@@ -295,7 +295,9 @@ GoRouter createDynamicAppRouter(
 
   // Initialize deep link service if provided
   if (config.deepLinkService != null) {
-    config.deepLinkService!.initialize(router: router);
+    config.deepLinkService!.initialize(router: router).then((_) {
+      config.deepLinkService!.markReady();
+    });
   }
 
   return router;

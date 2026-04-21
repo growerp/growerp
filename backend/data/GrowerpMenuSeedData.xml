@@ -351,9 +351,9 @@ along with this software (see the LICENSE.md file). If not, see
     <growerp.menu.MenuItem menuItemId="HOTEL_MH_WEBSITE" menuConfigurationId="HOTEL_DEFAULT" parentMenuItemId="HOTEL_MYHOTEL"
         title="Website" iconName="webhook" widgetName="WebsiteDialog" sequenceNum="30"/>
     <growerp.menu.MenuItem menuItemId="HOTEL_ROOMS_ASSETS" menuConfigurationId="HOTEL_DEFAULT" parentMenuItemId="HOTEL_ROOMS"
-        title="Assets" iconName="money" widgetName="AssetList" sequenceNum="10"/>
+        title="Rooms" iconName="king_bed" widgetName="AssetList" sequenceNum="10"/>
     <growerp.menu.MenuItem menuItemId="HOTEL_ROOMS_PROD" menuConfigurationId="HOTEL_DEFAULT" parentMenuItemId="HOTEL_ROOMS"
-        title="Products" iconName="home" widgetName="ProductList" sequenceNum="20"/>
+        title="Room Types" iconName="category" widgetName="ProductList" sequenceNum="20"/>
     <growerp.menu.MenuItem menuItemId="HOTEL_RES_ORDERS" menuConfigurationId="HOTEL_DEFAULT" parentMenuItemId="HOTEL_RESERVATIONS"
         title="reservations" iconName="home" widgetName="SalesOrderRentalList" sequenceNum="10"/>
     <growerp.menu.MenuItem menuItemId="HOTEL_RES_CUST" menuConfigurationId="HOTEL_DEFAULT" parentMenuItemId="HOTEL_RESERVATIONS"

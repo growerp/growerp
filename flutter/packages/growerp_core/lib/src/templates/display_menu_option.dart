@@ -31,6 +31,7 @@ class _LazyTabChild extends StatefulWidget {
   final TabController tabController;
 
   const _LazyTabChild({
+    super.key,
     required this.builder,
     required this.index,
     required this.tabController,
@@ -653,6 +654,9 @@ class DisplayMenuItemState extends State<DisplayMenuItem>
                       children: List.generate(tabItems.length, (index) {
                         if (widget.tabWidgetLoader != null) {
                           return _LazyTabChild(
+                            key: ValueKey(
+                              tabItems[index].menuItemId ?? '$index',
+                            ),
                             index: index,
                             tabController: _controller!,
                             builder: () => widget.tabWidgetLoader!(

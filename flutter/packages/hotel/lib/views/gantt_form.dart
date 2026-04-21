@@ -14,12 +14,12 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:growerp_inventory/growerp_inventory.dart';
-import 'package:growerp_order_accounting/growerp_order_accounting.dart';
-import 'package:intl/intl.dart';
 import 'package:growerp_core/growerp_core.dart';
+import 'package:growerp_inventory/growerp_inventory.dart';
 import 'package:growerp_models/growerp_models.dart';
+import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 import 'package:horizontal_data_table/horizontal_data_table.dart';
+import 'package:intl/intl.dart';
 
 enum Period { day, week, month }
 
@@ -42,6 +42,9 @@ class _GanttFormState extends State<GanttForm> {
   List<ProductRentalDate> productRentalDates = [];
   List<Widget> chartContent = [];
   int itemCount = 0;
+  final _searchController = TextEditingController();
+  final _searchFocusNode = FocusNode();
+  String _searchString = '';
   late double screenWidth;
   late ColorScheme scheme;
   late int chartInDays;
@@ -49,6 +52,13 @@ class _GanttFormState extends State<GanttForm> {
   late int columnsOnScreen; // periods
   late double bottom;
   double? right;
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _searchFocusNode.dispose();
+    super.dispose();
+  }
 
   @override
   void initState() {
@@ -103,6 +113,40 @@ class _GanttFormState extends State<GanttForm> {
 
                   // group all open reservations by Room number as a single item
                   assets = List.of(assets);
+                  final Set<String> matchingOrderIds = {};
+                  if (_searchString.isNotEmpty) {
+                    final searchLower = _searchString.toLowerCase();
+                    final dateFormatter = DateFormat('yyyy-MM-dd');
+                    final matchingAssetIds = <String>{};
+                    for (var finDoc in finDocs) {
+                      if (finDoc.status == FinDocStatusVal.created ||
+                          finDoc.status == FinDocStatusVal.approved) {
+                        for (var item in finDoc.items) {
+                          final matches =
+                              (finDoc.pseudoId ?? '')
+                                  .toLowerCase()
+                                  .contains(searchLower) ||
+                              (finDoc.otherUser?.firstName ?? '')
+                                  .toLowerCase()
+                                  .contains(searchLower) ||
+                              (finDoc.otherUser?.lastName ?? '')
+                                  .toLowerCase()
+                                  .contains(searchLower) ||
+                              (item.rentalFromDate != null &&
+                                  dateFormatter
+                                      .format(item.rentalFromDate!)
+                                      .contains(searchLower));
+                          if (matches && item.asset?.assetId != null) {
+                            matchingAssetIds.add(item.asset!.assetId);
+                            matchingOrderIds.add(finDoc.orderId ?? '');
+                          }
+                        }
+                      }
+                    }
+                    assets = assets
+                        .where((a) => matchingAssetIds.contains(a.assetId))
+                        .toList();
+                  }
                   assets.sort(
                     (a, b) =>
                         (a.assetName ?? '?').compareTo(b.assetName ?? '?'),
@@ -113,6 +157,10 @@ class _GanttFormState extends State<GanttForm> {
                     for (var finDoc in finDocs) {
                       if (finDoc.status == FinDocStatusVal.created ||
                           finDoc.status == FinDocStatusVal.approved) {
+                        if (_searchString.isNotEmpty &&
+                            !matchingOrderIds.contains(finDoc.orderId ?? '')) {
+                          continue;
+                        }
                         // create a findoc for every item
                         for (var item in finDoc.items) {
                           if (item.asset!.assetId == asset.assetId &&
@@ -129,7 +177,7 @@ class _GanttFormState extends State<GanttForm> {
                         }
                       }
                     }
-                    if (!hasReservation) {
+                    if (!hasReservation && _searchString.isEmpty) {
                       reservations.add(
                         FinDoc(
                           shipmentId: itemCount.toString(),
@@ -184,9 +232,64 @@ class _GanttFormState extends State<GanttForm> {
                     children: [
                       Column(
                         children: <Widget>[
+                          if (!isAPhone(context))
+                            Padding(
+                              padding:
+                                  const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                              child: GreetingHeader(
+                                searchWidget: TextField(
+                                  controller: _searchController,
+                                  focusNode: _searchFocusNode,
+                                  onChanged: (value) =>
+                                      setState(() => _searchString = value),
+                                  decoration: InputDecoration(
+                                    hintText:
+                                        'Search reservation ID, guest name, date...',
+                                    prefixIcon: const Icon(
+                                      Icons.search_rounded,
+                                      size: 20,
+                                    ),
+                                    suffixIcon: _searchString.isNotEmpty
+                                        ? IconButton(
+                                            icon: const Icon(
+                                              Icons.clear_rounded,
+                                              size: 18,
+                                            ),
+                                            onPressed: () => setState(() {
+                                              _searchController.clear();
+                                              _searchString = '';
+                                            }),
+                                          )
+                                        : null,
+                                    filled: true,
+                                    contentPadding:
+                                        const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 10,
+                                    ),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(14),
+                                      borderSide: BorderSide.none,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          if (isAPhone(context))
+                            ListFilterBar(
+                              searchHint:
+                                  'Search reservation ID, guest name, date...',
+                              searchController: _searchController,
+                              focusNode: _searchFocusNode,
+                              onSearchChanged: (value) {
+                                setState(() {
+                                  _searchString = value;
+                                });
+                              },
+                            ),
                           Expanded(
                             child: HorizontalDataTable(
-                              leftHandSideColumnWidth: 80,
+                              leftHandSideColumnWidth: 96,
                               rightHandSideColumnWidth:
                                   chartColumns * screenWidth / columnsOnScreen,
                               isFixedHeader: true,
@@ -365,10 +468,26 @@ class _GanttFormState extends State<GanttForm> {
     const List<String> days = ["Sun", "Mon", "Tue", "Wen", "Thu", "Fri", "Sat"];
     late String headerText;
     int year = ganttFromDate.year;
+    final headerDecoration = BoxDecoration(
+      color: scheme.surfaceContainerHighest,
+      border: Border(
+        bottom: BorderSide(color: scheme.outlineVariant, width: 1),
+      ),
+    );
+    final headerTextStyle = TextStyle(
+      fontSize: 11.0,
+      fontWeight: FontWeight.w600,
+      color: scheme.onSurfaceVariant,
+      letterSpacing: 0.4,
+    );
     List<Widget> headerItems = [
-      const SizedBox(
-        height: 30,
-        child: Text('Type/Name', textAlign: TextAlign.center),
+      Container(
+        height: 48,
+        width: 96,
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        decoration: headerDecoration,
+        alignment: Alignment.centerLeft,
+        child: Text('Room Type\nnbr/name', style: headerTextStyle),
       ),
     ];
     DateTime? tempDate = ganttFromDate;
@@ -380,7 +499,7 @@ class _GanttFormState extends State<GanttForm> {
       var formatter = DateFormat('yyyy-MM-dd');
       if (columnPeriod == Period.week) {
         headerText =
-            'Week starting:\n${days[(ganttFromDate.weekday) % 7]} ${formatter.format(ganttFromDate.add(Duration(days: i * 7)))}';
+            'Week:\n${days[(ganttFromDate.weekday) % 7]} ${formatter.format(ganttFromDate.add(Duration(days: i * 7)))}';
       }
       if (columnPeriod == Period.day) {
         headerText =
@@ -388,13 +507,15 @@ class _GanttFormState extends State<GanttForm> {
       }
       headerItems.add(
         Container(
-          height: 30,
-          color: scheme.tertiaryContainer,
+          height: 48,
+          decoration: headerDecoration,
           width: screenWidth / columnsOnScreen,
+          alignment: Alignment.center,
+          padding: const EdgeInsets.symmetric(horizontal: 2),
           child: Text(
             headerText,
             textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 10.0),
+            style: headerTextStyle,
           ),
         ),
       );
@@ -416,13 +537,33 @@ class _GanttFormState extends State<GanttForm> {
       );
       columnText = roomReservation.items[0].asset?.assetName ?? '';
     }
+    final isEven = index.isEven;
     return Container(
-      color: scheme.tertiaryContainer,
-      width: 80,
+      width: 96,
       height: 20,
-      padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
+      padding: const EdgeInsets.fromLTRB(8, 0, 4, 0),
       alignment: Alignment.centerLeft,
-      child: Text(columnText),
+      decoration: BoxDecoration(
+        color: isEven
+            ? scheme.surface
+            : scheme.surfaceContainerLowest,
+        border: Border(
+          bottom: BorderSide(
+            color: scheme.outlineVariant.withValues(alpha: 0.3),
+            width: 1,
+          ),
+        ),
+      ),
+      child: Text(
+        columnText,
+        style: TextStyle(
+          fontSize: 11,
+          color: scheme.onSurface,
+          fontWeight: FontWeight.w500,
+        ),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
     );
   }
 

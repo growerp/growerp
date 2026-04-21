@@ -666,6 +666,9 @@ class _DashboardGridState extends State<DashboardGrid> {
   /// Working copy of non-minimized items; reordered optimistically on drop.
   List<MenuItem> _orderedItems = [];
 
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+
   /// menuItemId of the tile currently being dragged, or null.
   String? _draggingItemId;
 
@@ -679,6 +682,15 @@ class _DashboardGridState extends State<DashboardGrid> {
   void initState() {
     super.initState();
     _orderedItems = widget.items.where((m) => !m.isMinimized).toList();
+    _searchController.addListener(() {
+      setState(() => _searchQuery = _searchController.text.toLowerCase());
+    });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   /// Stable identifier for a menu item used for ordering-sync.
@@ -794,21 +806,8 @@ class _DashboardGridState extends State<DashboardGrid> {
 
   // ── Greeting helpers ──────────────────────────────────────────────────────
 
-  String _greeting() {
-    final hour = DateTime.now().hour;
-    if (hour < 12) return 'Good morning';
-    if (hour < 17) return 'Good afternoon';
-    return 'Good evening';
-  }
-
-  String _formattedDate() {
-    final now = DateTime.now();
-    const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-    ];
-    return '${months[now.month - 1]} ${now.day}, ${now.year}';
-  }
+  String _greeting() => _greetingText();
+  String _formattedDate() => _formattedDateText();
 
   Widget _buildGreetingHeader(
     BuildContext context,
@@ -824,32 +823,71 @@ class _DashboardGridState extends State<DashboardGrid> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
+          // Greeting + date
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '${_greeting()}$name 👋',
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w700,
+                  color: colorScheme.onSurface,
+                  letterSpacing: 0.2,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                _formattedDate(),
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w400,
+                  color: colorScheme.onSurface.withValues(alpha: 0.55),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(width: 20),
+          // Search field
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '${_greeting()}$name 👋',
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.w700,
-                    color: colorScheme.onSurface,
-                    letterSpacing: 0.2,
-                  ),
+            child: TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                hintText: 'Search…',
+                hintStyle: TextStyle(
+                  color: colorScheme.onSurface.withValues(alpha: 0.4),
+                  fontSize: 14,
                 ),
-                const SizedBox(height: 2),
-                Text(
-                  _formattedDate(),
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w400,
-                    color: colorScheme.onSurface.withValues(alpha: 0.55),
-                  ),
+                prefixIcon: Icon(
+                  Icons.search_rounded,
+                  color: colorScheme.onSurface.withValues(alpha: 0.45),
+                  size: 20,
                 ),
-              ],
+                suffixIcon: _searchQuery.isNotEmpty
+                    ? IconButton(
+                        icon: Icon(
+                          Icons.clear_rounded,
+                          size: 18,
+                          color: colorScheme.onSurface.withValues(alpha: 0.45),
+                        ),
+                        onPressed: () => _searchController.clear(),
+                      )
+                    : null,
+                filled: true,
+                fillColor: colorScheme.surfaceContainerHighest
+                    .withValues(alpha: isDark ? 0.35 : 0.45),
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  borderSide: BorderSide.none,
+                ),
+              ),
             ),
           ),
+          const SizedBox(width: 12),
           // Theme toggle
           BlocBuilder<ThemeBloc, ThemeState>(
             builder: (context, themeState) {
@@ -911,7 +949,14 @@ class _DashboardGridState extends State<DashboardGrid> {
       return m.tileType;
     }
 
-    final minimizedItems = widget.items.where((m) => m.isMinimized).toList();
+    final visibleOrdered = _searchQuery.isEmpty
+        ? _orderedItems
+        : _orderedItems
+            .where((m) => m.title.toLowerCase().contains(_searchQuery))
+            .toList();
+    final minimizedItems = _searchQuery.isEmpty
+        ? widget.items.where((m) => m.isMinimized).toList()
+        : <MenuItem>[];
     final crossAxisCount = isPhone ? 3 : 6;
 
     int crossCells(MenuItem m) => switch (effectiveType(m)) {
@@ -939,12 +984,12 @@ class _DashboardGridState extends State<DashboardGrid> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildGreetingHeader(context, colorScheme, isDark),
+              if (!isPhone) _buildGreetingHeader(context, colorScheme, isDark),
               StaggeredGrid.count(
                 crossAxisCount: crossAxisCount,
                 mainAxisSpacing: 16,
                   crossAxisSpacing: 16,
-                  children: _orderedItems.asMap().entries.map((entry) {
+                  children: visibleOrdered.asMap().entries.map((entry) {
                     final index = entry.key;
                     final item = entry.value;
                     final et = effectiveType(item);
@@ -1149,5 +1194,116 @@ String? getStatsForRoute(String? route, Stats? stats) {
       return 'Open: ${stats.purchInvoicesNotPaidCount}';
     default:
       return null;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Standalone greeting header — reusable outside DashboardGrid
+// ---------------------------------------------------------------------------
+
+String _greetingText() {
+  final hour = DateTime.now().hour;
+  if (hour < 12) return 'Good morning';
+  if (hour < 17) return 'Good afternoon';
+  return 'Good evening';
+}
+
+String _formattedDateText() {
+  final now = DateTime.now();
+  const months = [
+    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+  ];
+  return '${months[now.month - 1]} ${now.day}, ${now.year}';
+}
+
+/// Time-of-day greeting with user first name, date, and theme toggle.
+/// Typically placed at the top of a page on tablet/desktop only.
+///
+/// Pass [searchWidget] to embed a search field between the greeting and the
+/// theme toggle (all in one row).
+class GreetingHeader extends StatelessWidget {
+  final Widget? searchWidget;
+  const GreetingHeader({super.key, this.searchWidget});
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    String name = '';
+    final authState = context.read<AuthBloc?>()?.state;
+    final firstName = authState?.authenticate?.user?.firstName;
+    if (firstName != null && firstName.isNotEmpty) name = ', $firstName';
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '${_greetingText()}$name 👋',
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w700,
+                  color: colorScheme.onSurface,
+                  letterSpacing: 0.2,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                _formattedDateText(),
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w400,
+                  color: colorScheme.onSurface.withValues(alpha: 0.55),
+                ),
+              ),
+            ],
+          ),
+          if (searchWidget != null) ...[
+            const SizedBox(width: 20),
+            Expanded(child: searchWidget!),
+            const SizedBox(width: 12),
+          ] else
+            const Spacer(),
+          BlocBuilder<ThemeBloc, ThemeState>(
+            builder: (context, themeState) {
+              return Tooltip(
+                message: isDark ? 'Switch to light mode' : 'Switch to dark mode',
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(28),
+                    onTap: () => context.read<ThemeBloc>().add(ThemeSwitch()),
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: colorScheme.surfaceContainerHighest
+                            .withValues(alpha: 0.5),
+                        border: Border.all(
+                          color: colorScheme.outline.withValues(alpha: 0.2),
+                        ),
+                      ),
+                      child: Icon(
+                        isDark
+                            ? Icons.light_mode_rounded
+                            : Icons.dark_mode_rounded,
+                        size: 20,
+                        color: colorScheme.onSurface.withValues(alpha: 0.75),
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+    );
   }
 }
