@@ -1,12 +1,12 @@
 /*
  * This GrowERP software is in the public domain under CC0 1.0 Universal plus a
  * Grant of Patent License.
- * 
+ *
  * To the extent possible under law, the author(s) have dedicated all
  * copyright and related and neighboring rights to this software to the
  * public domain worldwide. This software is distributed without any
  * warranty.
- * 
+ *
  * You should have received a copy of the CC0 Public Domain Dedication
  * along with this software (see the LICENSE.md file). If not, see
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
@@ -19,6 +19,7 @@ import 'package:global_configuration/global_configuration.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_order_accounting/l10n/generated/order_accounting_localizations.dart';
+import 'package:growerp_user_company/growerp_user_company.dart';
 import 'package:intl/intl.dart';
 import '../../findoc.dart';
 
@@ -35,6 +36,8 @@ class ReservationDialog extends StatefulWidget {
 
 class ReservationDialogState extends State<ReservationDialog> {
   CompanyUser? _selectedCompanyUser;
+  late CompanyUserBloc _companyUserBloc;
+  TextEditingController? _customerTextController;
   bool loading = false;
   late DataFetchBloc<Products> _productBloc;
   late SalesOrderBloc _salesOrderBloc; // get/update sales order
@@ -55,21 +58,16 @@ class ReservationDialogState extends State<ReservationDialog> {
     _selectedCompanyUser = CompanyUser.tryParse(
       widget.finDoc.otherCompany ?? widget.finDoc.otherUser,
     );
-    context.read<DataFetchBloc<CompaniesUsers>>().add(
-      GetDataEvent(
-        () => context.read<RestClient>().getCompanyUser(
-          limit: 100,
-          role: widget.finDoc.sales ? Role.customer : Role.supplier,
-        ),
-      ),
-    );
+    _companyUserBloc = widget.finDoc.sales
+        ? context.read<CompanyUserCustomerBloc>() as CompanyUserBloc
+        : context.read<CompanyUserSupplierBloc>() as CompanyUserBloc;
+    _companyUserBloc.add(const CompanyUserFetch(refresh: true, limit: 20));
     _productBloc = context.read<DataFetchBloc<Products>>()
       ..add(
         GetDataEvent(
           () => context.read<RestClient>().getProduct(
             limit: 100,
             isForDropDown: true,
-            //          assetClassId: classificationId == 'AppHotel' ? 'Hotel Room' : '',
             classificationId: classificationId,
           ),
         ),
@@ -94,6 +92,31 @@ class ReservationDialogState extends State<ReservationDialog> {
     classificationId = GlobalConfiguration().get("classificationId");
     _finDocBloc = context.read<FinDocBloc>();
     _salesOrderBloc = context.read<SalesOrderBloc>();
+  }
+
+  String _displayName(CompanyUser cu) {
+    final name = cu.name ?? '';
+    if (cu.type == PartyType.user && (cu.company?.name?.isNotEmpty ?? false)) {
+      return '$name (${cu.company!.name}) [${cu.pseudoId ?? ''}]';
+    }
+    return name.isEmpty ? (cu.pseudoId ?? '') : '$name [${cu.pseudoId ?? ''}]';
+  }
+
+  Future<void> _showNewCustomerDialog(BuildContext context) async {
+    final role = widget.finDoc.sales ? Role.customer : Role.supplier;
+    final newCustomer = await showDialog<CompanyUser>(
+      context: context,
+      builder: (_) => _NewCustomerDialog(
+        companyUserBloc: _companyUserBloc,
+        role: role,
+      ),
+    );
+    if (newCustomer != null && mounted) {
+      setState(() {
+        _selectedCompanyUser = newCustomer;
+        _customerTextController?.text = _displayName(newCustomer);
+      });
+    }
   }
 
   @override
@@ -143,7 +166,6 @@ class ReservationDialogState extends State<ReservationDialog> {
 
   Widget _addRentalItemDialog() {
     Future<void> selectDate(BuildContext context) async {
-      // Get locale from LocaleBloc to ensure it's always correct
       final localeState = context.read<LocaleBloc>().state;
       final themeState = context.read<ThemeBloc>().state;
 
@@ -211,95 +233,104 @@ class ReservationDialogState extends State<ReservationDialog> {
           child: ListView(
             key: const Key('listView'),
             children: <Widget>[
-              BlocBuilder<
-                DataFetchBloc<CompaniesUsers>,
-                DataFetchState<CompaniesUsers>
-              >(
+              BlocBuilder<CompanyUserBloc, CompanyUserState>(
+                bloc: _companyUserBloc,
                 builder: (context, state) {
-                  switch (state.status) {
-                    case DataFetchStatus.loading:
-                      return const LoadingIndicator();
-                    case DataFetchStatus.failure:
-                    case DataFetchStatus.success:
-                      final companyUsers =
-                          (state.data as CompaniesUsers).companiesUsers;
-                      return Autocomplete<CompanyUser>(
-                        key: const Key('customer'),
-                        initialValue: TextEditingValue(
-                          text: _selectedCompanyUser != null
-                              ? " ${_selectedCompanyUser!.name ?? ''}"
-                              : '',
-                        ),
-                        displayStringForOption: (CompanyUser u) =>
-                            " ${u.name ?? ''}",
-                        optionsBuilder: (TextEditingValue textEditingValue) {
-                          final query = textEditingValue.text
-                              .toLowerCase()
-                              .trim();
-                          if (query.isEmpty) return companyUsers;
-                          return companyUsers.where((cu) {
-                            final display = " ${cu.name ?? ''}".toLowerCase();
-                            return display.contains(query);
-                          }).toList();
-                        },
-                        fieldViewBuilder:
-                            (
-                              context,
-                              textController,
-                              focusNode,
-                              onFieldSubmitted,
-                            ) {
-                              return TextFormField(
-                                key: const Key('customerField'),
-                                controller: textController,
-                                focusNode: focusNode,
-                                decoration: InputDecoration(
-                                  labelText: _localizations.customer,
-                                ),
-                                onFieldSubmitted: (_) => onFieldSubmitted(),
-                                validator: (value) =>
-                                    (value == null || value.isEmpty)
-                                    ? 'field required'
-                                    : null,
-                              );
-                            },
-                        optionsViewBuilder: (context, onSelected, options) {
-                          return Align(
-                            alignment: Alignment.topLeft,
-                            child: Material(
-                              elevation: 4,
-                              borderRadius: BorderRadius.circular(12),
-                              child: ConstrainedBox(
-                                constraints: const BoxConstraints(
-                                  maxHeight: 250,
-                                  maxWidth: 400,
-                                ),
-                                child: ListView.builder(
-                                  padding: EdgeInsets.zero,
-                                  shrinkWrap: true,
-                                  itemCount: options.length,
-                                  itemBuilder: (context, idx) {
-                                    final cu = options.elementAt(idx);
-                                    return ListTile(
-                                      dense: true,
-                                      title: Text(" ${cu.name ?? ''}"),
-                                      onTap: () => onSelected(cu),
-                                    );
-                                  },
-                                ),
+                  if (state.status == CompanyUserStatus.loading &&
+                      state.companiesUsers.isEmpty) {
+                    return const LoadingIndicator();
+                  }
+                  final companyUsers = state.companiesUsers;
+                  return Autocomplete<CompanyUser>(
+                    key: const Key('customer'),
+                    initialValue: TextEditingValue(
+                      text: _selectedCompanyUser != null
+                          ? _displayName(_selectedCompanyUser!)
+                          : '',
+                    ),
+                    displayStringForOption: _displayName,
+                    optionsBuilder: (TextEditingValue textEditingValue) {
+                      final query = textEditingValue.text
+                          .toLowerCase()
+                          .trim();
+                      if (query.isEmpty) {
+                        _companyUserBloc.add(
+                          const CompanyUserFetch(refresh: true, limit: 20),
+                        );
+                        return companyUsers;
+                      }
+                      if (query.length >= 3) {
+                        _companyUserBloc.add(
+                          CompanyUserSearchChanged(searchString: query),
+                        );
+                      }
+                      return companyUsers.where((cu) {
+                        return _displayName(cu).toLowerCase().contains(query);
+                      }).toList();
+                    },
+                    fieldViewBuilder:
+                        (
+                          context,
+                          textController,
+                          focusNode,
+                          onFieldSubmitted,
+                        ) {
+                          _customerTextController = textController;
+                          return TextFormField(
+                            key: const Key('customerField'),
+                            controller: textController,
+                            focusNode: focusNode,
+                            decoration: InputDecoration(
+                              labelText: _localizations.customer,
+                              suffixIcon: IconButton(
+                                key: const Key('addNewCustomer'),
+                                icon: const Icon(Icons.person_add_outlined),
+                                tooltip: 'New customer',
+                                onPressed: () =>
+                                    _showNewCustomerDialog(context),
                               ),
                             ),
+                            onFieldSubmitted: (_) => onFieldSubmitted(),
+                            validator: (value) =>
+                                (value == null || value.isEmpty)
+                                ? 'field required'
+                                : null,
                           );
                         },
-                        onSelected: (CompanyUser newValue) {
-                          setState(() {
-                            _selectedCompanyUser = newValue;
-                          });
-                        },
+                    optionsViewBuilder: (context, onSelected, options) {
+                      return Align(
+                        alignment: Alignment.topLeft,
+                        child: Material(
+                          elevation: 4,
+                          borderRadius: BorderRadius.circular(12),
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(
+                              maxHeight: 250,
+                              maxWidth: 400,
+                            ),
+                            child: ListView.builder(
+                              padding: EdgeInsets.zero,
+                              shrinkWrap: true,
+                              itemCount: options.length,
+                              itemBuilder: (context, idx) {
+                                final cu = options.elementAt(idx);
+                                return ListTile(
+                                  dense: true,
+                                  title: Text(_displayName(cu)),
+                                  onTap: () => onSelected(cu),
+                                );
+                              },
+                            ),
+                          ),
+                        ),
                       );
-                    default:
-                      return const Center(child: LoadingIndicator());
-                  }
+                    },
+                    onSelected: (CompanyUser newValue) {
+                      setState(() {
+                        _selectedCompanyUser = newValue;
+                      });
+                    },
+                  );
                 },
               ),
               const SizedBox(height: 20),
@@ -330,7 +361,9 @@ class ReservationDialogState extends State<ReservationDialog> {
                         controller: textController,
                         focusNode: focusNode,
                         decoration: InputDecoration(
-                          labelText: _localizations.product,
+                          labelText: classificationId == 'AppHotel'
+                              ? 'Room Type'
+                              : _localizations.product,
                         ),
                         onFieldSubmitted: (_) => onFieldSubmitted(),
                         validator: (value) => (value == null || value.isEmpty)
@@ -385,7 +418,7 @@ class ReservationDialogState extends State<ReservationDialog> {
               TextFormField(
                 key: const Key('price'),
                 decoration: InputDecoration(
-                  labelText: _localizations.priceAmount,
+                  labelText: 'Price',
                 ),
                 controller: _priceController,
                 validator: (value) {
@@ -499,6 +532,150 @@ class ReservationDialogState extends State<ReservationDialog> {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Mini-dialog to create a new customer (person and/or company) inline.
+/// Returns the created [CompanyUser] via [Navigator.pop] on success.
+class _NewCustomerDialog extends StatefulWidget {
+  final CompanyUserBloc companyUserBloc;
+  final Role role;
+  const _NewCustomerDialog({
+    required this.companyUserBloc,
+    required this.role,
+  });
+
+  @override
+  State<_NewCustomerDialog> createState() => _NewCustomerDialogState();
+}
+
+class _NewCustomerDialogState extends State<_NewCustomerDialog> {
+  final _formKey = GlobalKey<FormState>();
+  final _firstNameController = TextEditingController();
+  final _lastNameController = TextEditingController();
+  final _companyController = TextEditingController();
+  bool _isSubmitting = false;
+
+  @override
+  void dispose() {
+    _firstNameController.dispose();
+    _lastNameController.dispose();
+    _companyController.dispose();
+    super.dispose();
+  }
+
+  void _submit() {
+    if (!_formKey.currentState!.validate()) return;
+    final firstName = _firstNameController.text.trim();
+    final lastName = _lastNameController.text.trim();
+    final companyName = _companyController.text.trim();
+
+    final CompanyUser newCustomer;
+    if (companyName.isNotEmpty) {
+      // Create company with person as first employee
+      newCustomer = CompanyUser(
+        type: PartyType.company,
+        role: widget.role,
+        name: companyName,
+        employees: [
+          User(
+            firstName: firstName,
+            lastName: lastName,
+            role: widget.role,
+          ),
+        ],
+      );
+    } else {
+      // Individual person — name split by space in getUser()
+      newCustomer = CompanyUser(
+        type: PartyType.user,
+        role: widget.role,
+        name: '$firstName $lastName',
+      );
+    }
+
+    setState(() => _isSubmitting = true);
+    widget.companyUserBloc.add(CompanyUserUpdate(newCustomer));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocConsumer<CompanyUserBloc, CompanyUserState>(
+      bloc: widget.companyUserBloc,
+      listenWhen: (prev, curr) =>
+          _isSubmitting &&
+          prev.status == CompanyUserStatus.loading &&
+          curr.status != CompanyUserStatus.loading,
+      listener: (context, state) {
+        if (state.status == CompanyUserStatus.success) {
+          Navigator.of(context).pop(
+            state.companiesUsers.isNotEmpty ? state.companiesUsers.first : null,
+          );
+        }
+        if (state.status == CompanyUserStatus.failure) {
+          setState(() => _isSubmitting = false);
+          HelperFunctions.showMessage(
+            context,
+            state.message ?? 'Failed to create customer',
+            Colors.red,
+          );
+        }
+      },
+      builder: (context, state) {
+        return AlertDialog(
+          title: const Text('New Customer'),
+          content: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextFormField(
+                  key: const Key('newFirstName'),
+                  controller: _firstNameController,
+                  decoration: const InputDecoration(labelText: 'First Name *'),
+                  textCapitalization: TextCapitalization.words,
+                  validator: (v) =>
+                      (v == null || v.trim().isEmpty) ? 'Required' : null,
+                ),
+                TextFormField(
+                  key: const Key('newLastName'),
+                  controller: _lastNameController,
+                  decoration: const InputDecoration(labelText: 'Last Name *'),
+                  textCapitalization: TextCapitalization.words,
+                  validator: (v) =>
+                      (v == null || v.trim().isEmpty) ? 'Required' : null,
+                ),
+                TextFormField(
+                  key: const Key('newCompanyName'),
+                  controller: _companyController,
+                  decoration:
+                      const InputDecoration(labelText: 'Company (optional)'),
+                  textCapitalization: TextCapitalization.words,
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              key: const Key('cancelNewCustomer'),
+              onPressed: () => Navigator.of(context).pop(null),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              key: const Key('createNewCustomer'),
+              onPressed: _isSubmitting ? null : _submit,
+              child: _isSubmitting
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Text('Create'),
+            ),
+          ],
+        );
+      },
     );
   }
 }

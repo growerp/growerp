@@ -479,6 +479,55 @@ List<User> customers = [
   ),
 ];
 
+/// Hotel guest customers — individuals, some with a company affiliation.
+/// Used for hotel reservation integration tests.
+List<User> hotelCustomers = [
+  User(
+    firstName: 'Emma',
+    lastName: 'Thornton',
+    role: Role.customer,
+    email: 'emailXXX@example.org',
+    telephoneNr: '441234567890',
+  ),
+  User(
+    firstName: 'Lucas',
+    lastName: 'Müller',
+    role: Role.customer,
+    email: 'emailXXX@example.org',
+    telephoneNr: '4915712345678',
+  ),
+  User(
+    firstName: 'Sofia',
+    lastName: 'García',
+    role: Role.customer,
+    email: 'emailXXX@example.org',
+    telephoneNr: '34612345678',
+    company: customerCompanies[0],
+  ),
+  User(
+    firstName: 'James',
+    lastName: 'Nakamura',
+    role: Role.customer,
+    email: 'emailXXX@example.org',
+    telephoneNr: '81312345678',
+    company: customerCompanies[1],
+  ),
+  User(
+    firstName: 'Amara',
+    lastName: 'Diallo',
+    role: Role.customer,
+    email: 'emailXXX@example.org',
+    telephoneNr: '2251234567',
+  ),
+  User(
+    firstName: 'Noah',
+    lastName: 'Andersen',
+    role: Role.customer,
+    email: 'emailXXX@example.org',
+    telephoneNr: '4512345678',
+  ),
+];
+
 List<Activity> activities = [
   Activity(
     activityName: 'activity1',

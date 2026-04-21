@@ -132,6 +132,9 @@ class _GanttFormState extends State<GanttForm> {
                               (finDoc.otherUser?.lastName ?? '')
                                   .toLowerCase()
                                   .contains(searchLower) ||
+                              (finDoc.otherCompany?.name ?? '')
+                                  .toLowerCase()
+                                  .contains(searchLower) ||
                               (item.rentalFromDate != null &&
                                   dateFormatter
                                       .format(item.rentalFromDate!)
@@ -240,8 +243,19 @@ class _GanttFormState extends State<GanttForm> {
                                 searchWidget: TextField(
                                   controller: _searchController,
                                   focusNode: _searchFocusNode,
-                                  onChanged: (value) =>
-                                      setState(() => _searchString = value),
+                                  onChanged: (value) {
+                                    setState(() => _searchString = value);
+                                    if (value.length >= 3) {
+                                      _salesOrderBloc.add(FinDocFetch(
+                                        searchString: value,
+                                        refresh: true,
+                                      ));
+                                    } else if (value.isEmpty) {
+                                      _salesOrderBloc.add(
+                                        const FinDocFetch(refresh: true),
+                                      );
+                                    }
+                                  },
                                   decoration: InputDecoration(
                                     hintText:
                                         'Search reservation ID, guest name, date...',
@@ -282,9 +296,17 @@ class _GanttFormState extends State<GanttForm> {
                               searchController: _searchController,
                               focusNode: _searchFocusNode,
                               onSearchChanged: (value) {
-                                setState(() {
-                                  _searchString = value;
-                                });
+                                setState(() => _searchString = value);
+                                if (value.length >= 3) {
+                                  _salesOrderBloc.add(FinDocFetch(
+                                    searchString: value,
+                                    refresh: true,
+                                  ));
+                                } else if (value.isEmpty) {
+                                  _salesOrderBloc.add(
+                                    const FinDocFetch(refresh: true),
+                                  );
+                                }
                               },
                             ),
                           Expanded(
