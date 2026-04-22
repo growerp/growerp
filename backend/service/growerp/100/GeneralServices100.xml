@@ -58,16 +58,14 @@ along with this software (see the LICENSE.md file). If not, see
                     </if>
                     <set field="majorVersion" from="versionDbParts[0]" type="Integer" />
                     <set field="minorVersion" from="versionDbParts[1]" type="Integer" />
-                    <set field="patchVersion" from="versionDbParts.length &gt; 2 ? versionDbParts[2] : '0'" type="Integer" />
                     <set field="majorVersionIn" from="versionInParts[0]"
                         type="Integer" />
                     <set field="minorVersionIn" from="versionInParts[1]"
                         type="Integer" />
-                    <set field="patchVersionIn" from="versionInParts.length &gt; 2 ? versionInParts[2] : '0'" type="Integer" />
-                    <!--
-                        Version Comparison Logic (major.minor.patch compared; missing patch treated as 0):
+                    <!-- 
+                        Version Comparison Logic (only major.minor are compared; patch is ignored):
                         - incomingVersion > dbVersion: App is newer (test/dev version) -> use override URL from db
-                        - incomingVersion == dbVersion: App is current -> use production (no override)
+                        - incomingVersion == dbVersion: App is current -> use production (no override)  
                         - incomingVersion < dbVersion: App is outdated -> force upgrade
                     -->
 
@@ -84,12 +82,6 @@ along with this software (see the LICENSE.md file). If not, see
                             <set field="incomingVersionIsGreater" from="true" />
                         </else-if>
                         <else-if condition="minorVersionIn &lt; minorVersion">
-                            <set field="incomingVersionIsLess" from="true" />
-                        </else-if>
-                        <else-if condition="patchVersionIn &gt; patchVersion">
-                            <set field="incomingVersionIsGreater" from="true" />
-                        </else-if>
-                        <else-if condition="patchVersionIn &lt; patchVersion">
                             <set field="incomingVersionIsLess" from="true" />
                         </else-if>
                     </if>
