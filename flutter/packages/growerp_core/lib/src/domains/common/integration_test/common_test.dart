@@ -1104,8 +1104,9 @@ class CommonTest {
       findsWidgets,
       reason: 'No Text widget found with key "$key")}',
     );
-    Text tf = finder.last.evaluate().single.widget as Text;
-    return tf.data!;
+    final widget = finder.last.evaluate().single.widget;
+    if (widget is StatusChip) return widget.label;
+    return (widget as Text).data!;
   }
 
   /// get the content of a TextFormField providing the key

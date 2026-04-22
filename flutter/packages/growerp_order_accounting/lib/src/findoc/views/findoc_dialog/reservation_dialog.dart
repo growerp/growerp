@@ -62,6 +62,7 @@ class ReservationDialogState extends State<ReservationDialog> {
         ? context.read<CompanyUserCustomerBloc>() as CompanyUserBloc
         : context.read<CompanyUserSupplierBloc>() as CompanyUserBloc;
     _companyUserBloc.add(const CompanyUserFetch(refresh: true, limit: 20));
+    classificationId = GlobalConfiguration().get("classificationId");
     _productBloc = context.read<DataFetchBloc<Products>>()
       ..add(
         GetDataEvent(
@@ -89,7 +90,6 @@ class ReservationDialogState extends State<ReservationDialog> {
       _daysController.text = "1";
       _selectedDate = CustomizableDateTime.current;
     }
-    classificationId = GlobalConfiguration().get("classificationId");
     _finDocBloc = context.read<FinDocBloc>();
     _salesOrderBloc = context.read<SalesOrderBloc>();
   }

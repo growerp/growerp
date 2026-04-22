@@ -184,7 +184,7 @@ class MyFinDocState extends State<FinDocPage> {
           () => context.read<RestClient>().getProduct(
             limit: 100,
             isForDropDown: true,
-            assetClassId: classificationId == 'AppHotel' ? 'Hotel Room' : '',
+            classificationId: classificationId,
           ),
         ),
       );

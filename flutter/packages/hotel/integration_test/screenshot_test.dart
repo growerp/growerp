@@ -20,7 +20,7 @@ screens:
   - route: /             title: "Dashboard"         wait_key: refresh
   - route: /myHotel     tab: Company               title: "Hotel detail"
   - route: /rooms                                    title: "Room list"
-  - route: /rooms    tab: Products                  title: "Room Categories"
+  - route: /rooms    tab: Room Types                 title: "Room Categories"
   - route: /reservations                             title: "Room reservations"
   - route: /acct-ledger  tab: Ledger                title: "Ledger"
 */
@@ -216,7 +216,7 @@ void main() {
       tester,
       route: '/rooms',
       formKey: '/rooms',
-      tab: 'Products',
+      tab: 'Room Types',
     );
     await _screenshot(binding, tester, 'room_categories');
 

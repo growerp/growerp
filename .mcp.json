@@ -6,15 +6,13 @@
       "args": [],
       "env": {}
     },
-    "dart": {
-      "type": "stdio",
-      "command": "/home/hans/development/flutter/bin/dart",
-      "args": ["mcp-server"]
-    },
     "gcloud": {
       "type": "stdio",
       "command": "npx",
-      "args": ["-y", "@google-cloud/gcloud-mcp"]
+      "args": [
+        "-y",
+        "@google-cloud/gcloud-mcp"
+      ]
     }
   }
 }
