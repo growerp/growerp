@@ -1142,3 +1142,19 @@ jobs:
           SNAP_FILE=$(ls flutter/packages/${{ matrix.app }}/growerp-${{ matrix.app }}_*.snap 2>/dev/null \
             || ls flutter/packages/${{ matrix.app }}/*.snap | head -1)
           snapcraft upload "$SNAP_FILE" --release="${{ inputs.track }}"
+
+      - name: Rebuild and release snap as 'growerp' (admin only)
+        if: matrix.app == 'admin'
+        env:
+          SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}
+        run: |
+          set -euxo pipefail
+          sed -i 's/^name: growerp-admin$/name: growerp/' flutter/packages/admin/snapcraft.yaml
+          cd flutter/packages/admin
+          for i in {1..3}; do
+            if snapcraft pack --destructive-mode; then break; fi
+            echo "snapcraft pack failed (attempt $i), retrying..."
+            sleep 15
+          done
+          SNAP_FILE=$(ls growerp_*.snap | head -1)
+          snapcraft upload "$SNAP_FILE" --release="${{ inputs.track }}"
