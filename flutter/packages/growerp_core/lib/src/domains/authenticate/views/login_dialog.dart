@@ -90,16 +90,18 @@ class LoginDialogState extends State<LoginDialog> {
                   Theme.of(context).colorScheme.error,
                 );
               case AuthStatus.authenticated:
-                // Trial welcome is now shown by TenantSetupDialog after setup completes
-                // No need to show it here on every authentication
-                // Close the login dialog and navigate to home
-                // LoginDialog is shown as a dialog, so we pop it and ensure we're at home
+                // Show trial welcome before navigating away — must happen here
+                // because TenantSetupDialog's context is invalidated by pop().
                 if (context.mounted) {
-                  // First check if we can pop (dialog case), otherwise go to root
+                  await TrialWelcomeHelper.showTrialWelcomeIfNeeded(
+                    context: context,
+                    authenticate: state.authenticate,
+                  );
+                }
+                if (context.mounted) {
                   if (Navigator.of(context).canPop()) {
                     Navigator.of(context).pop();
                   } else {
-                    // We're the root page, navigate to home instead
                     context.go('/');
                   }
                 }

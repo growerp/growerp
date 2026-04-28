@@ -31,6 +31,7 @@ class RestRequestFetch extends RestRequestEvent {
     this.ownerPartyId,
     this.startDateTime,
     this.endDateTime,
+    this.externalOnly = true,
   });
 
   final bool refresh;
@@ -41,6 +42,7 @@ class RestRequestFetch extends RestRequestEvent {
   final String? ownerPartyId;
   final String? startDateTime;
   final String? endDateTime;
+  final bool externalOnly;
 
   @override
   List<Object?> get props => [
@@ -52,5 +54,6 @@ class RestRequestFetch extends RestRequestEvent {
     ownerPartyId,
     startDateTime,
     endDateTime,
+    externalOnly,
   ];
 }

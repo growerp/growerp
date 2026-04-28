@@ -12,6 +12,7 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+import 'package:decimal/decimal.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -37,7 +38,7 @@ class PaymentSubscriptionDialog extends StatefulWidget {
 class PaymentSubscriptionDialogState extends State<PaymentSubscriptionDialog> {
   final _formKey = GlobalKey<FormBuilderState>();
   bool _isSubmitting = false;
-  String _selectedPlan = 'smallPlan';
+  String? _selectedPlan;
 
   // Test data for payment forms - auto-fill when in test mode
   String get _testCardNumber {
@@ -137,25 +138,48 @@ class PaymentSubscriptionDialogState extends State<PaymentSubscriptionDialog> {
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
                 const SizedBox(height: 16),
-                _buildPlanOption(
-                  'DIY Plan',
-                  'diyPlan',
-                  '\$29/month',
-                  'Perfect for individuals and small teams',
-                ),
-                const SizedBox(height: 12),
-                _buildPlanOption(
-                  'Small Business',
-                  'smallPlan',
-                  '\$99/month',
-                  'For growing businesses',
-                ),
-                const SizedBox(height: 12),
-                _buildPlanOption(
-                  'Full Plan',
-                  'fullPlan',
-                  '\$299/month',
-                  'Complete solution for enterprises',
+                BlocBuilder<DataFetchBloc<Products>, DataFetchState<Products>>(
+                  builder: (context, state) {
+                    if (state.data is! Products ||
+                        state.status == DataFetchStatus.loading) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    final products = List<Product>.from(
+                      (state.data as Products).products,
+                    )..sort(
+                        (a, b) => (a.price ?? Decimal.zero)
+                            .compareTo(b.price ?? Decimal.zero),
+                      );
+                    if (products.isEmpty) {
+                      return const Text('No plans available');
+                    }
+                    if (_selectedPlan == null) {
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        if (mounted) {
+                          setState(
+                            () => _selectedPlan = products.first.productId,
+                          );
+                        }
+                      });
+                    }
+                    return Column(
+                      children: [
+                        for (int i = 0; i < products.length; i++) ...[
+                          if (i > 0) const SizedBox(height: 12),
+                          _buildPlanOption(
+                            products[i].productName ?? '',
+                            products[i].productId,
+                            '\$${(products[i].price ?? Decimal.zero).toStringAsFixed(0)}/month',
+                            products[i].description
+                                    ?.split('|')
+                                    .skip(1)
+                                    .join(' · ') ??
+                                '',
+                          ),
+                        ],
+                      ],
+                    );
+                  },
                 ),
                 const SizedBox(height: 30),
 

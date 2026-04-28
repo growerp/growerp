@@ -64,6 +64,7 @@ class RestRequestBloc extends Bloc<RestRequestEvent, RestRequestState> {
         startDateTime: event.startDateTime,
         endDateTime: event.endDateTime,
         searchString: event.searchString,
+        externalOnly: event.externalOnly,
         start: start,
         limit: event.limit,
       );
