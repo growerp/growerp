@@ -57,6 +57,7 @@ dependencies:
   flutter_test:
     sdk: flutter
   fl_chart: ^1.1.0
+  home_widget: ^0.9.1
 
 dev_dependencies:
   integration_test:

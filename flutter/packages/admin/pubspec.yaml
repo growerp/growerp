@@ -44,6 +44,7 @@ dependencies:
   go_router: ^17.1.0
   growerp_outreach: ^1.9.0
   growerp_courses: ^1.9.0
+  home_widget: ^0.9.1
 
 dev_dependencies:
   flutter_test:

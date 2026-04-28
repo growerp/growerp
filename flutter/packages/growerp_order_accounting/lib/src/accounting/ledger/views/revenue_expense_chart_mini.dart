@@ -21,6 +21,7 @@ import 'package:intl/intl.dart';
 import 'package:growerp_order_accounting/l10n/generated/order_accounting_localizations.dart';
 
 import '../../accounting.dart';
+import 'accounting_home_widget.dart';
 
 /// Compact revenue/expense line chart for embedding in a dashboard tile.
 ///
@@ -222,7 +223,12 @@ class _RevenueExpenseChartMiniBody extends StatelessWidget {
       localizations.oct, localizations.nov, localizations.dec,
     ];
 
-    return BlocBuilder<LedgerBloc, LedgerState>(
+    return BlocConsumer<LedgerBloc, LedgerState>(
+      listener: (context, state) {
+        if (state.status == LedgerStatus.success) {
+          AccountingHomeWidget.updateWidget(state.ledgerReport);
+        }
+      },
       builder: (context, state) {
         // Show greyed placeholder until real data is confirmed
         // Treat all-zero rows as "no data" — the chart would be invisible anyway.
