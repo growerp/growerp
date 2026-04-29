@@ -178,6 +178,7 @@ class _ElearnerAppState extends State<ElearnerApp> {
 final List<LocalizationsDelegate> _delegates = [
   UserCompanyLocalizations.delegate,
   CatalogLocalizations.delegate,
+  WebsiteLocalizations.delegate,
 ];
 
 /// Widget registrations for the eLearner app.
