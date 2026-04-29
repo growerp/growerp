@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -9,6 +10,10 @@ class AccountingHomeWidget {
   static const String iOSWidgetName = 'AccountingWidget';
 
   static Future<void> updateWidget(LedgerReport? report) async {
+    if (defaultTargetPlatform != TargetPlatform.android &&
+        defaultTargetPlatform != TargetPlatform.iOS) {
+      return;
+    }
     await HomeWidget.setAppGroupId(appGroupId);
 
     if (report == null || report.csvRows == null || report.csvRows!.isEmpty) {
