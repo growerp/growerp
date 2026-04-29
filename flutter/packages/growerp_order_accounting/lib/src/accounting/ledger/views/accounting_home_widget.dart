@@ -3,10 +3,10 @@ import 'package:home_widget/home_widget.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:growerp_models/growerp_models.dart';
 
-
 class AccountingHomeWidget {
   static const String appGroupId = 'group.org.growerp.admin';
   static const String androidWidgetName = 'AccountingWidgetProvider';
+  static const String iOSWidgetName = 'AccountingWidget';
 
   static Future<void> updateWidget(LedgerReport? report) async {
     await HomeWidget.setAppGroupId(appGroupId);
@@ -15,6 +15,7 @@ class AccountingHomeWidget {
       await HomeWidget.saveWidgetData<String>('accounting_chart_image', null);
       await HomeWidget.updateWidget(
         androidName: androidWidgetName,
+        iOSName: iOSWidgetName,
       );
       return;
     }
@@ -48,7 +49,7 @@ class AccountingHomeWidget {
         logicalSize: const Size(400, 280),
       );
 
-      await HomeWidget.saveWidgetData<String>('accounting_chart_image', path!);
+      await HomeWidget.saveWidgetData<String>('accounting_chart_image', path);
       await HomeWidget.updateWidget(androidName: androidWidgetName);
     } catch (e) {
       debugPrint('Error updating home widget: $e');
@@ -61,13 +62,27 @@ class AccountingHomeWidget {
     final List<List<double>> data = [];
     int row = 1;
 
-    final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    final months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
 
     for (int i = 0; i < 12; i++) {
       List<double> newRow = [];
       if (row < csvRows.length - 1 &&
           months.indexWhere(
-                (m) => csvRows[row][0].length >= 3 &&
+                (m) =>
+                    csvRows[row][0].length >= 3 &&
                     csvRows[row][0].substring(0, 3) == m,
               ) ==
               i) {
@@ -89,19 +104,32 @@ class AccountingHomeWidget {
 
     Color getColor(int index) {
       switch (index) {
-        case 0: return Colors.green; // Net Revenue
-        case 1: return Colors.red; // Cost of Sales
-        case 2: return Colors.blue; // Sales Expenses
-        case 3: return Colors.amber; // G&A Expenses
-        case 4: return Colors.purple; // Other Exp
-        default: return Colors.lightBlue; // Net Op Income
+        case 0:
+          return Colors.green; // Net Revenue
+        case 1:
+          return Colors.red; // Cost of Sales
+        case 2:
+          return Colors.blue; // Sales Expenses
+        case 3:
+          return Colors.amber; // G&A Expenses
+        case 4:
+          return Colors.purple; // Other Exp
+        default:
+          return Colors.lightBlue; // Net Op Income
       }
     }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Revenue / Expense (Current Year)', style: TextStyle(color: Colors.black, fontSize: 16, fontWeight: FontWeight.bold)),
+        const Text(
+          'Revenue / Expense (Current Year)',
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         const SizedBox(height: 10),
         Expanded(
           child: LineChart(
@@ -109,9 +137,15 @@ class AccountingHomeWidget {
               gridData: FlGridData(show: true, drawVerticalLine: false),
               titlesData: FlTitlesData(
                 show: true,
-                leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                leftTitles: AxisTitles(
+                  sideTitles: SideTitles(showTitles: false),
+                ),
+                rightTitles: AxisTitles(
+                  sideTitles: SideTitles(showTitles: false),
+                ),
+                topTitles: AxisTitles(
+                  sideTitles: SideTitles(showTitles: false),
+                ),
                 bottomTitles: AxisTitles(
                   sideTitles: SideTitles(
                     showTitles: true,
@@ -119,9 +153,17 @@ class AccountingHomeWidget {
                     reservedSize: 20,
                     getTitlesWidget: (value, meta) {
                       final idx = value.toInt() - 1;
-                      if (idx < 0 || idx >= months.length) return const SizedBox.shrink();
+                      if (idx < 0 || idx >= months.length) {
+                        return const SizedBox.shrink();
+                      }
                       if (idx % 3 != 0) return const SizedBox.shrink();
-                      return Text(months[idx], style: const TextStyle(fontSize: 10, color: Colors.grey));
+                      return Text(
+                        months[idx],
+                        style: const TextStyle(
+                          fontSize: 10,
+                          color: Colors.grey,
+                        ),
+                      );
                     },
                   ),
                 ),

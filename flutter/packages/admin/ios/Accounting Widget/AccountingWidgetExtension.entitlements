@@ -6,12 +6,5 @@
 	<array>
 		<string>group.org.growerp.admin</string>
 	</array>
-	<key>com.apple.developer.associated-domains</key>
-	<array>
-		<string>applinks:admin.growerp.com</string>
-		<string>applinks:admin.growerp.org</string>
-	</array>
-	<key>com.apple.developer.associated-domains.mdm-managed</key>
-	<true/>
 </dict>
 </plist>
