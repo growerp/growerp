@@ -7,8 +7,6 @@ docker/logs
 docker/nginx/html
 .env
 
-.claude/
-
 flutter/packages/growerp_agent
 moqui/runtime/component/growerp-shopify/
 moqui/runtime/component/growerp-agent/

@@ -196,6 +196,7 @@ GoRouter createDynamicAppRouter(
             return DisplayMenuItem(
               menuConfiguration: mainConfig,
               menuIndex: menuIndex,
+              tabIndex: int.tryParse(state.uri.queryParameters['tab'] ?? ''),
               tabWidgetLoader: config.widgetLoader,
               suppressBlocMenuConfig:
                   false, // Allow BLoC updates for dynamic menus

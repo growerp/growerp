@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+
+<!-- Disable Moqui Tools REST API (/rest/s1/moqui/...), Mantle USL REST API (/rest/s1/mantle/...),
+     and Entity/EntityMaster REST API (/rest/e1/..., /rest/m1/..., /rest/v1/...).
+     Overrides the AUTHZT_ALWAYS grants from ToolsSecurityData.xml and MantleSetupData.xml.
+     Loaded after those components because growerp depends on mantle-usl and tools. -->
+<entity-facade-xml type="seed">
+
+    <!-- ===== Disable Moqui Tools REST API (/rest/s1/moqui/...) ===== -->
+
+    <!-- Override the ADMIN allow → deny so ADMIN cannot use the Moqui Tools REST API -->
+    <moqui.security.ArtifactAuthz artifactAuthzId="MOQUI_API_ADMIN"
+        userGroupId="ADMIN" artifactGroupId="MOQUI_API"
+        authzTypeEnumId="AUTHZT_DENY" authzActionEnumId="AUTHZA_ALL" />
+
+    <!-- Also deny all other users explicitly -->
+    <moqui.security.ArtifactAuthz artifactAuthzId="MOQUI_API_ALL_DENY"
+        userGroupId="ALL_USERS" artifactGroupId="MOQUI_API"
+        authzTypeEnumId="AUTHZT_DENY" authzActionEnumId="AUTHZA_ALL" />
+
+    <!-- ===== Disable Mantle USL Entity Master REST API (/rest/s1/mantle/...) ===== -->
+
+    <!-- Override the ADMIN allow → deny so ADMIN cannot use the Mantle USL REST API -->
+    <moqui.security.ArtifactAuthz artifactAuthzId="MANTLE_API_ADMIN"
+        userGroupId="ADMIN" artifactGroupId="MANTLE_API"
+        authzTypeEnumId="AUTHZT_DENY" authzActionEnumId="AUTHZA_ALL" />
+
+    <!-- Also deny all other users explicitly -->
+    <moqui.security.ArtifactAuthz artifactAuthzId="MANTLE_API_ALL_DENY"
+        userGroupId="ALL_USERS" artifactGroupId="MANTLE_API"
+        authzTypeEnumId="AUTHZT_DENY" authzActionEnumId="AUTHZA_ALL" />
+
+    <!-- Deny the Mantle My Info sub-path as well (/rest/s1/mantle/my/...) -->
+    <moqui.security.ArtifactAuthz artifactAuthzId="MANTLE_MY_API_ALL_DENY"
+        userGroupId="ALL_USERS" artifactGroupId="MANTLE_MY_API"
+        authzTypeEnumId="AUTHZT_DENY" authzActionEnumId="AUTHZA_ALL" />
+
+    <!-- ===== Disable Entity REST API (/rest/e1/...) and Entity Master REST API (/rest/m1/...)
+    ===== -->
+    <!-- These are screen transitions in rest.xml (AT_XML_SCREEN_TRANS), not AT_REST_PATH resources.
+         The DENY with inheritAuthz="Y" breaks the authorization inheritance chain so child entity
+         operations cannot inherit authorization from the denied transition. -->
+
+    <!-- Artifact group covering e1 (entity), m1 (entity master), and deprecated v1 transitions -->
+    <moqui.security.ArtifactGroup artifactGroupId="ENTITY_REST_API"
+        description="Entity and Entity Master REST API (e1/m1/v1 transitions in webroot rest.xml)" />
+    <moqui.security.ArtifactGroupMember artifactGroupId="ENTITY_REST_API"
+        artifactName="component://webroot/screen/webroot/rest.xml/e1"
+        artifactTypeEnumId="AT_XML_SCREEN_TRANS" inheritAuthz="Y" />
+    <moqui.security.ArtifactGroupMember artifactGroupId="ENTITY_REST_API"
+        artifactName="component://webroot/screen/webroot/rest.xml/m1"
+        artifactTypeEnumId="AT_XML_SCREEN_TRANS" inheritAuthz="Y" />
+    <moqui.security.ArtifactGroupMember artifactGroupId="ENTITY_REST_API"
+        artifactName="component://webroot/screen/webroot/rest.xml/v1"
+        artifactTypeEnumId="AT_XML_SCREEN_TRANS" inheritAuthz="Y" />
+
+    <moqui.security.ArtifactAuthz artifactAuthzId="ENTITY_REST_API_ADMIN"
+        userGroupId="ADMIN" artifactGroupId="ENTITY_REST_API"
+        authzTypeEnumId="AUTHZT_DENY" authzActionEnumId="AUTHZA_ALL" />
+    <moqui.security.ArtifactAuthz artifactAuthzId="ENTITY_REST_API_ALL_DENY"
+        userGroupId="ALL_USERS" artifactGroupId="ENTITY_REST_API"
+        authzTypeEnumId="AUTHZT_DENY" authzActionEnumId="AUTHZA_ALL" />
+
+</entity-facade-xml>

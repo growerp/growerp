@@ -13,6 +13,13 @@
         "-y",
         "@google-cloud/gcloud-mcp"
       ]
+    },
+    "moqui": {
+      "type": "http",
+      "url": "http://localhost:8080/mcp",
+      "headers": {
+        "Authorization": "Basic U3lzdGVtU3VwcG9ydDptb3F1aQ=="
+      }
     }
   }
 }

@@ -1,5 +1,15 @@
 {
   "enabledPlugins": {
     "entire@entire-skills": true
+  },
+  "permissions": {
+    "allow": [
+      "mcp__moqui__moqui_search_services",
+      "mcp__moqui__moqui_get_service_details",
+      "mcp__moqui__moqui_execute_service",
+      "mcp__moqui__moqui_prompts_list",
+      "mcp__moqui__moqui_prompts_get",
+      "Bash(git -C *)"
+    ]
   }
 }
