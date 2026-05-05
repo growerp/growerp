@@ -39,9 +39,9 @@ if [ ! -d "$COMP_DIR" ]; then
   exit 1
 fi
 
-ln -sfn "$REPO_ROOT/backend"       "$COMP_DIR/growerp"
-ln -sfn "$REPO_ROOT/pop-rest-store" "$COMP_DIR/PopRestStore"
-ln -sfn "$REPO_ROOT/mantle-stripe"  "$COMP_DIR/mantle-stripe"
+ln -sfn "../../../backend"        "$COMP_DIR/growerp"
+ln -sfn "../../../pop-rest-store" "$COMP_DIR/PopRestStore"
+ln -sfn "../../../mantle-stripe"  "$COMP_DIR/mantle-stripe"
 
 echo "Custom components linked into $COMP_DIR:"
 ls -la "$COMP_DIR/growerp" "$COMP_DIR/PopRestStore" "$COMP_DIR/mantle-stripe"
