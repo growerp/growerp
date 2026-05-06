@@ -23,14 +23,15 @@ growerp_[domain]/lib/src/[entity]/
 
 **Backend**: Moqui components in `moqui/runtime/component/`. `growerp` component (source at `backend/`) provides multi-company ERP. See `docs/Flutter_Moqui_REST_Backend_Interface.md` for REST API details.
 
-**Backend repo structure** — git submodules (all on `growerp` branch of growerp forks):
-- `moqui/` → growerp/moqui-framework
-- `moqui/runtime/` → growerp/moqui-runtime
-- `moqui/runtime/component/mantle-udm/` → growerp/mantle-udm
-- `moqui/runtime/component/mantle-usl/` → growerp/mantle-usl
-- `moqui/runtime/component/moqui-fop/` → growerp/moqui-fop
+**Backend repo structure** — all on `growerp` branch of growerp forks:
+- `moqui/` → growerp/moqui-framework (submodule of growerp root)
+- `moqui/runtime/` → growerp/moqui-runtime (cloned by `setup-backend.sh`, not a submodule)
+- `moqui/runtime/component/mantle-udm/` → growerp/mantle-udm (submodule of moqui-runtime)
+- `moqui/runtime/component/mantle-usl/` → growerp/mantle-usl (submodule of moqui-runtime)
+- `moqui/runtime/component/moqui-fop/` → growerp/moqui-fop (submodule of moqui-runtime)
+- `moqui/runtime/component/moqui-mcp/` → growerp/moqui-mcp (submodule of moqui-runtime)
 
-Custom components tracked in growerp1 root, symlinked by `setup-backend.sh`:
+Custom components tracked in growerp root, symlinked by `setup-backend.sh`:
 - `backend/` → symlinked as `moqui/runtime/component/growerp`
 - `pop-rest-store/` → symlinked as `moqui/runtime/component/PopRestStore`
 - `mantle-stripe/` → symlinked as `moqui/runtime/component/mantle-stripe`
@@ -102,9 +103,9 @@ java -jar moqui.war load types=seed,seed-initial,install no-run-es
 # Start backend (admin at http://localhost:8080/vapps, user: SystemSupport, pass: moqui)
 java -jar moqui.war no-run-es
 
-# Sync upstream moqui changes into growerp forks, then update growerp1
+# Sync upstream moqui changes into growerp forks, then update growerp root
 bash sync-upstream.sh    # merges upstream → each growerp fork (runs from repo root)
-bash sync-submodules.sh  # updates growerp1 submodule pointers + commits
+bash sync-submodules.sh  # updates growerp root submodule pointers + commits
 git push
 ```
 
