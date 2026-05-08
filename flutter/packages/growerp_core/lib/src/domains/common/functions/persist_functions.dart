@@ -50,8 +50,19 @@ class PersistFunctions {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.setString('authenticate', jsonEncode(authenticate.toJson()));
 
-      if (authenticate.apiKey == null || authenticate.apiKey == '') {
+      if (authenticate.apiKey != null && authenticate.apiKey != '') {
+        await prefs.setString('apiKey', authenticate.apiKey!);
+      } else {
         await prefs.remove('apiKey');
+      }
+      if (authenticate.moquiSessionToken != null &&
+          authenticate.moquiSessionToken != '') {
+        await prefs.setString(
+          'moquiSessionToken',
+          authenticate.moquiSessionToken!,
+        );
+      } else {
+        await prefs.remove('moquiSessionToken');
       }
     } catch (e) {
       debugPrint("????????persist????????? error: $e");

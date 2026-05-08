@@ -83,23 +83,26 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     Authenticate defaultAuthenticate = Authenticate(
       classificationId: classificationId,
     );
+    // get session data from last time
+    Authenticate? localAuthenticate = await PersistFunctions.getAuthenticate();
+    if (localAuthenticate != null) {
+      defaultAuthenticate = localAuthenticate;
+    }
+
     try {
       // load currencies from backend
       await loadCurrencies(restClient);
       // check connection with default company
       Companies? companies = await restClient.getCompanies(
-        searchString: company?.partyId,
+        searchString: defaultAuthenticate.company?.partyId ?? company?.partyId,
         limit: 1,
       );
-      defaultAuthenticate = Authenticate(
+      defaultAuthenticate = defaultAuthenticate.copyWith(
         company: companies.companies.isEmpty
             ? Company()
             : companies.companies[0],
-        classificationId: classificationId,
       );
-      // get session data from last time
-      Authenticate? localAuthenticate =
-          await PersistFunctions.getAuthenticate();
+
       if (localAuthenticate != null && localAuthenticate.apiKey != null) {
         // check if company still valid; skip if no company (support users) or DefaultSettings
         if (localAuthenticate.company?.partyId != null &&
@@ -150,11 +153,17 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         );
       }
     } on DioException catch (e) {
-      await PersistFunctions.persistAuthenticate(defaultAuthenticate);
+      // if connection error, don't wipe session
+      if (e.type != DioExceptionType.connectionError &&
+          e.type != DioExceptionType.connectionTimeout &&
+          e.type != DioExceptionType.sendTimeout &&
+          e.type != DioExceptionType.receiveTimeout) {
+        await PersistFunctions.persistAuthenticate(defaultAuthenticate);
+      }
       emit(
         state.copyWith(
           status: AuthStatus.failure,
-          authenticate: defaultAuthenticate,
+          authenticate: state.authenticate ?? defaultAuthenticate,
           message: await getDioError(e),
         ),
       );
