@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  This GrowERP software is in the public domain under CC0 1.0 Universal plus a
+  Grant of Patent License.
+
+  To the extent possible under law, the author(s) have dedicated all
+  copyright and related and neighboring rights to this software to the
+  public domain worldwide. This software is distributed without any
+  warranty.
+
+  You should have received a copy of the CC0 Public Domain Dedication
+  along with this software (see the LICENSE.md file). If not, see
+  <http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-2.1.xsd">
+
+    <!-- Called each conversation turn. Returns A2UI JSONL for genui to render. -->
+    <service verb="chat" noun="Onboarding" authenticate="true">
+        <in-parameters>
+            <parameter name="messages" type="List" required="true" />
+            <parameter name="systemPrompt" type="String" required="true" />
+            <parameter name="classificationId" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="jsonl" />
+        </out-parameters>
+        <actions>
+            <!-- Get API key from user preference or environment variable -->
+            <set field="apiKey" from="ec.user.getPreference('GEMINI_API_KEY')" />
+            <if condition="!apiKey">
+                <set field="apiKey" from="System.getenv('GEMINI_API_KEY')" />
+            </if>
+            <if condition="!apiKey">
+                <return error="true" message="GEMINI_API_KEY not configured." />
+            </if>
+
+            <!-- Build proper Gemini multi-turn conversation contents.
+                 messages format: [{role:"user"|"model", parts:[{text:"..."}]}]
+                 Gemini requires alternating user/model turns starting with user. -->
+            <set field="contents" from="[]" />
+            <iterate list="messages" entry="msg">
+                <set field="role" from="msg.role == 'model' ? 'model' : 'user'" />
+                <set field="text" from="msg.parts?.find { it.text }?.text ?: ''" />
+                <script>contents.add([role: role, parts: [[text: text]]])</script>
+            </iterate>
+
+            <!-- Ensure we have at least one user turn (safety guard) -->
+            <if condition="!contents">
+                <script>contents = [[role: 'user', parts: [[text: 'Start onboarding.']]]]</script>
+            </if>
+
+            <!-- Call Gemini REST API using Moqui RestClient -->
+            <script><![CDATA[
+org.moqui.util.RestClient restClient = ec.service.rest()
+    .method(org.moqui.util.RestClient.POST)
+    .uri("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}")
+    .addHeader("Content-Type", "application/json")
+    .jsonObject([
+        systemInstruction: [parts: [[text: systemPrompt]]],
+        contents         : contents,
+        generationConfig : [maxOutputTokens: 2048]
+    ])
+org.moqui.util.RestClient.RestResponse restResponse = restClient.call()
+if (restResponse.statusCode < 200 || restResponse.statusCode >= 300) {
+    ec.message.addError("Gemini API error ${restResponse.statusCode}: ${restResponse.text()}")
+    return
+}
+Map parsed = (Map) restResponse.jsonObject()
+jsonl = parsed.candidates?[0]?.content?.parts?[0]?.text ?: ""
+            ]]></script>
+        </actions>
+    </service>
+
+    <!-- Called once when user confirms the menu. Saves config + chat log. -->
+    <!-- The Flutter MenuConfigBloc handles the actual menu save (create#/update#MenuConfiguration).
+         This service only persists the conversation as a private ChatRoom for support review. -->
+    <service verb="save" noun="Onboarding" authenticate="true">
+        <in-parameters>
+            <parameter name="classificationId" required="true" />
+            <parameter name="menuConfig" type="Map" required="true" />
+            <parameter name="conversation" type="List" required="true" />
+        </in-parameters>
+        <actions>
+            <!-- 1. Get owner party for the chat room -->
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="ownerResult" />
+            <set field="ownerPartyId" from="ownerResult.ownerPartyId ?: ownerResult.companyPartyId" />
+            <if condition="!ownerPartyId">
+                <return error="true" message="Cannot save onboarding: ownerPartyId not found" />
+            </if>
+
+            <!-- 2. Get company name -->
+            <set field="companyName" from="classificationId" />
+            <set field="companyPartyId" from="ownerResult.companyPartyId" />
+            <if condition="companyPartyId">
+                <entity-find entity-name="mantle.party.PartyDetailAndRole" list="companyDetails" limit="1">
+                    <econdition field-name="partyId" from="companyPartyId" />
+                </entity-find>
+                <if condition="companyDetails &amp;&amp; companyDetails[0].organizationName">
+                    <set field="companyName" from="companyDetails[0].organizationName" />
+                </if>
+            </if>
+
+            <set field="roomName"
+                from="'Onboarding: ' + companyName + ' [' + classificationId + '] ' + new Date().format('yyyy-MM-dd')" />
+
+            <!-- 3. Create ChatRoom -->
+            <service-call name="create#growerp.general.ChatRoom" out-map="roomCreate"
+                in-map="[chatRoomName: roomName, isPrivate: 'Y', ownerPartyId: ownerPartyId]" />
+            <if condition="!roomCreate.chatRoomId">
+                <return error="true" message="Onboarding save: could not create ChatRoom" />
+            </if>
+            <set field="chatRoomId" from="roomCreate.chatRoomId" />
+
+            <!-- 4. Add initiating user as member -->
+            <service-call name="create#growerp.general.ChatRoomMember"
+                in-map="[chatRoomId: chatRoomId, userId: ec.user.userAccount.userId,
+                         isActive: 'Y', hasRead: 'Y']" />
+
+            <!-- 5. Add SYSTEM_SUPPORT as member so the support app can list this room -->
+            <service-call name="create#growerp.general.ChatRoomMember"
+                in-map="[chatRoomId: chatRoomId, userId: 'SYSTEM_SUPPORT',
+                         isActive: 'Y', hasRead: 'Y']" />
+
+            <!-- 6. Persist conversation messages -->
+            <iterate list="conversation" entry="msg">
+                <set field="role" from="msg.role == 'model' ? 'AI' : 'User'" />
+                <set field="text" from="msg.parts?.find { it.text }?.text ?: ''" />
+                <if condition="text">
+                    <script><![CDATA[
+                        if (msg.role == 'model') {
+                            // 1. Strip markdown code blocks which often wrap the JSON
+                            text = text.replaceAll(/```json|```/, "")
+                            
+                            def lines = text.split('\n')
+                            def cleanLines = []
+                            def jsonSlurper = new groovy.json.JsonSlurper()
+                            
+                            lines.each { line ->
+                                String trimmed = line.trim()
+                                if (!trimmed) return
+                                
+                                if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
+                                    try {
+                                        def map = jsonSlurper.parseText(trimmed)
+                                        // 2. Recursively find relevant user-facing fields
+                                        def extractRelevant
+                                        extractRelevant = { obj ->
+                                            if (obj instanceof Map) {
+                                                // Priority fields for display
+                                                ['headline', 'greeting', 'text', 'inputPrompt', 'name'].each { key ->
+                                                    if (obj[key] && obj[key] instanceof String) cleanLines << obj[key]
+                                                }
+                                                // Recurse into nested structures
+                                                obj.each { k, v -> if (!(k in ['headline', 'greeting', 'text', 'inputPrompt', 'name'])) extractRelevant(v) }
+                                            } else if (obj instanceof List) {
+                                                obj.each { extractRelevant(it) }
+                                            }
+                                        }
+                                        extractRelevant(map)
+                                    } catch (e) {
+                                        // If it looks like JSON but fails parsing, it's likely a partial block; 
+                                        // discard it to satisfy "no json" requirement
+                                    }
+                                } else {
+                                    // Not JSON, keep as plain text
+                                    cleanLines << trimmed
+                                }
+                            }
+                            text = cleanLines.findAll { it }.unique().join('\n').trim()
+                        }
+                    ]]></script>
+                    <if condition="text">
+                        <service-call name="create#growerp.general.ChatMessage"
+                            in-map="[chatRoomId: chatRoomId,
+                                     fromUserId: ec.user.userAccount.userId,
+                                     content: role + ': ' + text]" />
+                    </if>
+                </if>
+            </iterate>
+        </actions>
+    </service>
+
+</services>

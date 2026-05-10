@@ -665,6 +665,7 @@ abstract class RestClient {
     @Query('isPrivate') bool? isPrivate,
     @Query('search') String? searchString,
     @Query('filter') String? filter,
+    @Query('namePrefix') String? namePrefix,
   });
 
   @POST("rest/s1/growerp/100/ChatRoom")
@@ -1692,4 +1693,11 @@ abstract class RestClient {
 
   @POST("rest/s1/growerp/100/CourseSubscription")
   Future<dynamic> subscribeCourse({@Body() required Map<String, dynamic> data});
+
+  @POST("rest/s1/growerp/100/OnboardingChat")
+  Future<Map<String, String>> chatOnboarding(
+      @Body() Map<String, dynamic> body);
+
+  @POST("rest/s1/growerp/100/OnboardingSave")
+  Future<dynamic> saveOnboarding(@Body() Map<String, dynamic> body);
 }

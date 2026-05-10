@@ -38,6 +38,7 @@ class MenuConfiguration {
   final String? userId;
   @JsonKey(fromJson: _isActiveFromJson, toJson: _isActiveToJson)
   final bool isActive;
+  @NullableTimestampConverter()
   final DateTime? createdDate;
 
   /// List of top-level menu items (those with no parent) for this configuration

@@ -27,6 +27,7 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="filter" default="null" />
             <parameter name="isPrivate" default="null" />
             <parameter name="hasRead" type="Boolean" default="null" />
+            <parameter name="namePrefix" default="null" />
         </in-parameters>
         <out-parameters>
             <parameter name="chatRooms" type="List">
@@ -104,6 +105,9 @@ along with this software (see the LICENSE.md file). If not, see
             <if condition="isPrivate">
                 <set field="isPriv" value="N" />
             </if>
+            <if condition="namePrefix">
+                <set field="namePrefixLike" value="${namePrefix}%" />
+            </if>
             <if condition="ec.user.userAccount.userId == 'SYSTEM_SUPPORT'">
                 <entity-find entity-name="growerp.general.ChatRoomsAndMembers" list="rooms">
                     <econdition field-name="isPrivate" value="Y" />
@@ -112,6 +116,7 @@ along with this software (see the LICENSE.md file). If not, see
                         <econdition field-name="hasRead" value="N" />
                     </econditions>
                     <econdition field-name="userId" value="SYSTEM_SUPPORT" />
+                    <econdition field-name="chatRoomName" operator="like" from="namePrefixLike" ignore-if-empty="true" />
                 </entity-find>
                 <else>
                     <entity-find entity-name="growerp.general.ChatRoomsAndMembers" list="rooms">

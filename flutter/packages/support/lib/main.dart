@@ -28,6 +28,7 @@ import 'package:growerp_activity/growerp_activity.dart';
 
 import 'src/application/application.dart';
 import 'src/email_template/email_template.dart';
+import 'src/onboarding/views/onboarding_conversation_list.dart';
 import 'views/support_dashboard_content.dart';
 //webactivate  import 'package:web/web.dart' as web;
 
@@ -224,6 +225,8 @@ List<Map<String, GrowerpWidgetBuilder>> supportWidgetRegistrations = [
     'ApplicationList': (args) => const ApplicationList(),
     'RestRequestList': (args) => const RestRequestList(),
     'EmailTemplateList': (args) => const EmailTemplateList(),
+    'OnboardingConversationList': (args) =>
+        const OnboardingConversationList(),
   },
 ];
 

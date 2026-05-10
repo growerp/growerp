@@ -90,12 +90,24 @@ class LoginDialogState extends State<LoginDialog> {
                   Theme.of(context).colorScheme.error,
                 );
               case AuthStatus.authenticated:
-                // Show trial welcome before navigating away — must happen here
-                // because TenantSetupDialog's context is invalidated by pop().
-                if (context.mounted) {
-                  await TrialWelcomeHelper.showTrialWelcomeIfNeeded(
+                final auth = state.authenticate!;
+                final isGrowERP =
+                    auth.company?.name?.toLowerCase() == 'growerp';
+                if (context.mounted &&
+                    !isGrowERP &&
+                    (auth.user?.appsUsed.isEmpty ?? false)) {
+                  await showDialog(
                     context: context,
-                    authenticate: state.authenticate,
+                    barrierDismissible: false,
+                    builder: (ctx) => MultiBlocProvider(
+                      providers: [
+                        BlocProvider<OnboardingBloc>.value(
+                            value: context.read<OnboardingBloc>()),
+                        BlocProvider<MenuConfigBloc>.value(
+                            value: context.read<MenuConfigBloc>()),
+                      ],
+                      child: OnboardingDialog(authenticate: auth),
+                    ),
                   );
                 }
                 if (context.mounted) {

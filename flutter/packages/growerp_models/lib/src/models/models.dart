@@ -87,3 +87,4 @@ export 'agent_instances_model.dart';
 export 'rate_limit_check_model.dart';
 // Course models
 export 'course_model.dart';
+export 'onboarding_models.dart';

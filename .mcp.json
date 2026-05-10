@@ -16,7 +16,7 @@
     },
     "moqui": {
       "type": "http",
-      "url": "http://localhost:8080/mcp",
+      "url": "http://127.0.0.1:8080/mcp",
       "headers": {
         "Authorization": "Basic U3lzdGVtU3VwcG9ydDptb3F1aQ=="
       }

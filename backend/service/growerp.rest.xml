@@ -781,6 +781,17 @@ along with this software (see the LICENSE.md file). If not, see
                 <service name="growerp.100.ChatServices100.delete#ChatRoom" />
             </method>
         </resource>
+        <!-- onboarding (GenUI) -->
+        <resource name="OnboardingChat">
+            <method type="post">
+                <service name="growerp.100.OnboardingServices100.chat#Onboarding" />
+            </method>
+        </resource>
+        <resource name="OnboardingSave">
+            <method type="post">
+                <service name="growerp.100.OnboardingServices100.save#Onboarding" />
+            </method>
+        </resource>
         <!-- website -->
         <resource name="Website">
             <method type="get">

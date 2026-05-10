@@ -119,7 +119,9 @@ class TenantSetupDialogState extends State<TenantSetupDialog> {
                         initialValue:
                             widget.authenticate.ownerPartyId == 'GROWERP'
                             ? 'GrowERP'
-                            : null,
+                            : kDebugMode
+                                ? 'Company ${widget.authenticate.user?.email?.split('@').first ?? ''}'
+                                : null,
                         decoration: const InputDecoration(
                           labelText: 'Company Name',
                         ),

@@ -73,6 +73,9 @@ List<BlocProvider> getCoreBlocProviders(
     BlocProvider<DataFetchBloc<Subscriptions>>(
       create: (context) => DataFetchBloc<Subscriptions>(),
     ),
+    BlocProvider<OnboardingBloc>(
+      create: (context) => OnboardingBloc(classificationId),
+    ),
   ];
   return blocProviders;
 }

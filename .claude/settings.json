@@ -9,7 +9,9 @@
       "mcp__moqui__moqui_execute_service",
       "mcp__moqui__moqui_prompts_list",
       "mcp__moqui__moqui_prompts_get",
-      "Bash(git -C *)"
+      "Bash(git -C *)",
+      "Bash(find *)",
+      "Bash(grep *)"
     ]
   }
 }

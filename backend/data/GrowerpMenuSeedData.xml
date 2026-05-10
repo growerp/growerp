@@ -424,6 +424,9 @@ along with this software (see the LICENSE.md file). If not, see
         title="REST Requests" route="/rest-requests" iconName="http" widgetName="RestRequestList" sequenceNum="30"/>
     <growerp.menu.MenuItem menuItemId="SUPPORT_EMAIL_TEMPLATES" menuConfigurationId="SUPPORT_DEFAULT"
         title="Email Templates" route="/email-templates" iconName="email" widgetName="EmailTemplateList" sequenceNum="35"/>
+    <growerp.menu.MenuItem menuItemId="SUPPORT_ONBOARDING" menuConfigurationId="SUPPORT_DEFAULT"
+        title="Onboarding Conversations" route="/onboarding" iconName="onboarding"
+        widgetName="OnboardingConversationList" sequenceNum="38"/>
     <growerp.menu.MenuItem menuItemId="SUPPORT_ABOUT" menuConfigurationId="SUPPORT_DEFAULT"
         title="About" route="/about" iconName="info" widgetName="AboutForm" sequenceNum="40"/>
 

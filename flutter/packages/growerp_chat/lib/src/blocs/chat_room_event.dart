@@ -40,14 +40,17 @@ class ChatRoomFetch extends ChatRoomEvent {
   final bool refresh;
   final int limit;
   final String searchString;
+  final String? namePrefix;
   const ChatRoomFetch({
     this.refresh = false,
     this.limit = 20,
     this.searchString = '',
+    this.namePrefix,
   });
   @override
   String toString() =>
-      "FetchChatRoom refresh: $refresh limit: $limit, search: $searchString";
+      "FetchChatRoom refresh: $refresh limit: $limit, search: $searchString"
+      "${namePrefix != null ? ', namePrefix: $namePrefix' : ''}";
 }
 
 class ChatRoomUpdate extends ChatRoomEvent {

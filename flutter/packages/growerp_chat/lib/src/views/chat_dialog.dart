@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:growerp_models/growerp_models.dart';
 import 'package:flutter/material.dart';
@@ -101,6 +102,8 @@ class ChatState extends State<ChatDialog> {
 
   Widget chatPage(BuildContext context) {
     final theme = Theme.of(context);
+    // Backend returns newest-first; reverse for chronological top→bottom display
+    final ordered = messages.reversed.toList();
     return Column(
       children: [
         Expanded(
@@ -111,36 +114,79 @@ class ChatState extends State<ChatDialog> {
             child: ListView.builder(
               physics: const AlwaysScrollableScrollPhysics(),
               key: const Key('listView'),
-              reverse: true,
-              itemCount: messages.length,
+              itemCount: ordered.length,
               controller: _scrollController,
               padding: const EdgeInsets.only(top: 10, bottom: 10),
               itemBuilder: (BuildContext context, int index) {
+                final raw = ordered[index].content ?? '';
+                final isAi = raw.startsWith('[Gemini]');
+                final isUser = raw.startsWith('[User]');
+                final onRight = isUser ||
+                    (!isAi &&
+                        ordered[index].fromUserId ==
+                            authenticate.user!.userId);
+                final bubbleColor = onRight
+                    ? theme.colorScheme.primary
+                    : theme.colorScheme.secondaryContainer;
+                final textColor = onRight
+                    ? theme.colorScheme.onPrimary
+                    : theme.colorScheme.onSecondaryContainer;
                 return Container(
                   padding: const EdgeInsets.only(
                     left: 14,
                     right: 14,
-                    top: 10,
-                    bottom: 10,
+                    top: 6,
+                    bottom: 6,
                   ),
                   child: Align(
-                    alignment:
-                        (messages[index].fromUserId == authenticate.user!.userId
-                        ? Alignment.topRight
-                        : Alignment.topLeft),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(20),
-                        color:
-                            (messages[index].fromUserId ==
-                                authenticate.user!.userId
-                            ? theme.primaryColor
-                            : theme.secondaryHeaderColor),
+                    alignment: onRight
+                        ? Alignment.centerRight
+                        : Alignment.centerLeft,
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxWidth:
+                            MediaQuery.of(context).size.width * 0.75,
                       ),
-                      padding: const EdgeInsets.all(16),
-                      child: Text(
-                        messages[index].content ?? '',
-                        style: const TextStyle(fontSize: 15),
+                      child: Column(
+                        crossAxisAlignment: onRight
+                            ? CrossAxisAlignment.end
+                            : CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(
+                                left: 4, right: 4, bottom: 2),
+                            child: Text(
+                              isAi
+                                  ? 'AI'
+                                  : isUser
+                                      ? 'User'
+                                      : onRight
+                                          ? 'You'
+                                          : ordered[index]
+                                                  .fromUserFullName ??
+                                              'Other',
+                              style: theme.textTheme.labelSmall
+                                  ?.copyWith(color: theme.hintColor),
+                            ),
+                          ),
+                          Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.only(
+                                topLeft: const Radius.circular(16),
+                                topRight: const Radius.circular(16),
+                                bottomLeft:
+                                    Radius.circular(onRight ? 16 : 4),
+                                bottomRight:
+                                    Radius.circular(onRight ? 4 : 16),
+                              ),
+                              color: bubbleColor,
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 14, vertical: 10),
+                            child: _buildContent(
+                                raw, textColor, bubbleColor),
+                          ),
+                        ],
                       ),
                     ),
                   ),
@@ -193,6 +239,46 @@ class ChatState extends State<ChatDialog> {
         ),
       ],
     );
+  }
+
+  String _stripContent(String raw) {
+    var text = raw
+        .replaceFirst(RegExp(r'^\[Gemini\]\s*'), '')
+        .replaceFirst(RegExp(r'^\[User\]\s*'), '');
+    // Strip complete fences first
+    final stripped = text.replaceAllMapped(
+      RegExp(r'```\w*\n?([\s\S]*?)```', dotAll: true),
+      (m) => m.group(1) ?? '',
+    );
+    if (stripped != text) return stripped.trim();
+    // Handle truncated content: opening fence with no closing fence
+    return text.replaceFirst(RegExp(r'^```\w*\n?'), '').trim();
+  }
+
+  Widget _buildContent(String raw, Color textColor, Color bubbleColor) {
+    final text = _stripContent(raw);
+    // Try pretty-print JSON
+    try {
+      final decoded = jsonDecode(text);
+      final pretty = const JsonEncoder.withIndent('  ').convert(decoded);
+      return Container(
+        decoration: BoxDecoration(
+          color: Colors.black12,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        padding: const EdgeInsets.all(8),
+        child: Text(
+          pretty,
+          style: TextStyle(
+            fontFamily: 'monospace',
+            fontSize: 11,
+            color: textColor,
+          ),
+        ),
+      );
+    } catch (_) {
+      return Text(text, style: TextStyle(fontSize: 15, color: textColor));
+    }
   }
 
   void _onScroll() {

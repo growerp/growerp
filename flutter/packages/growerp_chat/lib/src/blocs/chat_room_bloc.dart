@@ -104,6 +104,7 @@ class ChatRoomBloc extends Bloc<ChatRoomEvent, ChatRoomState> {
       // start from record zero for initial and refresh
       ChatRooms compResult = await restClient.getChatRooms(
         searchString: event.searchString,
+        namePrefix: event.namePrefix,
       );
       return emit(
         state.copyWith(

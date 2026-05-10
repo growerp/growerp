@@ -71,6 +71,8 @@ dependencies:
   form_builder_validators: ^11.2.0
   google_fonts: ^8.0.2
   animations: ^2.1.1
+  genui: ^0.9.0
+  json_schema_builder: ^0.1.3
 
 dev_dependencies:
   flutter_driver:
