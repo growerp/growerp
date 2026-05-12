@@ -142,9 +142,23 @@
     "dart": {
       "command": "dart",
       "args": [
-        "mcp-server",
-        "--experimental-mcp-server"
+        "mcp-server"
       ]
+    },
+    "moqui": {
+      "type": "sse",
+      "url": "http://localhost:8080/mcp/sse",
+      "headers": {
+        "Authorization": "Basic U3lzdGVtU3VwcG9ydDptb3F1aQ=="
+      }
     }
+  },
+  "permissions": {
+    "allow": [
+      "Bash(grep *)",
+      "Bash(cat *)",
+      "Bash(curl *)",
+      "Bash(find *)"
+    ]
   }
 }
