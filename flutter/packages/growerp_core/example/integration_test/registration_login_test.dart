@@ -202,6 +202,7 @@ void main() {
         username: registeredAdminEmail,
         password: testPassword,
       );
+      await CommonTest.skipOnboardingIfPresent(tester);
 
       // Verify authenticated - dashboard should be visible
       expect(
@@ -420,6 +421,7 @@ void main() {
       );
 
       debugPrint('✓ TC-SETUP-001: Tenant setup completed');
+      await CommonTest.skipOnboardingIfPresent(tester);
 
       // Cleanup
       await CommonTest.logout(tester);
@@ -427,168 +429,173 @@ void main() {
   });
 
   group('Trial Welcome Tests', () {
-    testWidgets(
-      'TC-TRIAL-001: Trial Welcome Dialog Appears on First Login',
-      (WidgetTester tester) async {
-        final restClient = RestClient(await buildDioClient());
-        final router = createDynamicCoreRouter([
-          coreMenuConfig,
-        ], rootNavigatorKey: GlobalKey<NavigatorState>());
+    testWidgets('TC-TRIAL-001: Trial Welcome Dialog Appears on First Login', (
+      WidgetTester tester,
+    ) async {
+      final restClient = RestClient(await buildDioClient());
+      final router = createDynamicCoreRouter([
+        coreMenuConfig,
+      ], rootNavigatorKey: GlobalKey<NavigatorState>());
 
-        await CommonTest.startTestApp(
-          tester,
-          router,
-          coreMenuConfig,
-          CoreLocalizations.localizationsDelegates,
-          restClient: restClient,
-          clear: true,
-          title: "TC-TRIAL-001: Trial Welcome",
-        );
+      await CommonTest.startTestApp(
+        tester,
+        router,
+        coreMenuConfig,
+        CoreLocalizations.localizationsDelegates,
+        restClient: restClient,
+        clear: true,
+        title: "TC-TRIAL-001: Trial Welcome",
+      );
 
-        // --- Registration (mirrors createCompanyAndAdmin) ---
-        SaveTest test = await PersistFunctions.getTest();
-        int seq = test.sequence + 1;
-        // Find an unused email address.
-        bool emailExists = true;
-        while (emailExists) {
-          try {
-            final result = await restClient.checkEmail(
-              email: 'trial$seq@example.com',
-            );
-            emailExists = result['ok'] as bool;
-            if (emailExists) seq++;
-          } catch (_) {
-            break;
-          }
+      // --- Registration (mirrors createCompanyAndAdmin) ---
+      SaveTest test = await PersistFunctions.getTest();
+      int seq = test.sequence + 1;
+      // Find an unused email address.
+      bool emailExists = true;
+      while (emailExists) {
+        try {
+          final result = await restClient.checkEmail(
+            email: 'trial$seq@example.com',
+          );
+          emailExists = result['ok'] as bool;
+          if (emailExists) seq++;
+        } catch (_) {
+          break;
         }
-        final email = 'trial$seq@example.com';
+      }
+      final email = 'trial$seq@example.com';
 
-        await CommonTest.logout(tester);
-        for (int i = 0; i < 150; i++) {
-          await tester.pump(const Duration(milliseconds: 100));
-          if (tester.any(find.byKey(const Key('newUserButton')))) break;
-        }
-        await tester.pumpAndSettle(const Duration(milliseconds: 500));
+      await CommonTest.logout(tester);
+      for (int i = 0; i < 150; i++) {
+        await tester.pump(const Duration(milliseconds: 100));
+        if (tester.any(find.byKey(const Key('newUserButton')))) break;
+      }
+      await tester.pumpAndSettle(const Duration(milliseconds: 500));
 
-        await CommonTest.tapByKey(tester, 'newUserButton');
-        await CommonTest.enterText(tester, 'firstName', 'Trial');
-        await CommonTest.enterText(tester, 'lastName', 'Welcome');
-        await CommonTest.enterText(tester, 'email', email);
-        await CommonTest.tapByKey(
-          tester,
-          'newUserButton',
-          seconds: CommonTest.waitTime,
-        );
-        await CommonTest.waitForSnackbarToGo(tester);
-        await PersistFunctions.persistTest(
-          SaveTest(
-            sequence: seq + 1,
-            nowDate: DateTime.now(),
-            admin: User(
-              email: email,
-              loginName: email,
-              firstName: 'Trial',
-              lastName: 'Welcome',
-            ),
+      await CommonTest.tapByKey(tester, 'newUserButton');
+      await CommonTest.enterText(tester, 'firstName', 'Trial');
+      await CommonTest.enterText(tester, 'lastName', 'Welcome');
+      await CommonTest.enterText(tester, 'email', email);
+      await CommonTest.tapByKey(
+        tester,
+        'newUserButton',
+        seconds: CommonTest.waitTime,
+      );
+      await CommonTest.waitForSnackbarToGo(tester);
+      await PersistFunctions.persistTest(
+        SaveTest(
+          sequence: seq + 1,
+          nowDate: DateTime.now(),
+          admin: User(
+            email: email,
+            loginName: email,
+            firstName: 'Trial',
+            lastName: 'Welcome',
           ),
-        );
+        ),
+      );
 
-        // --- Manual login loop — stops at trial welcome instead of dismissing it ---
-        await CommonTest.pressLoginButton(tester);
-        await CommonTest.enterText(tester, 'username', email);
-        await CommonTest.enterText(tester, 'password', testPassword);
-        await CommonTest.pressLogin(tester);
-        await CommonTest.waitForSnackbarToGo(tester);
-        await tester.pumpAndSettle(const Duration(seconds: 2));
+      // --- Manual login loop — stops at trial welcome instead of dismissing it ---
+      await CommonTest.pressLoginButton(tester);
+      await CommonTest.enterText(tester, 'username', email);
+      await CommonTest.enterText(tester, 'password', testPassword);
+      await CommonTest.pressLogin(tester);
+      await CommonTest.waitForSnackbarToGo(tester);
+      await tester.pumpAndSettle(const Duration(seconds: 2));
 
-        bool tenantSetupDone = false;
-        for (int attempt = 0; attempt < 40 && !tenantSetupDone; attempt++) {
-          await tester.pump(const Duration(seconds: 1));
+      bool tenantSetupDone = false;
+      for (int attempt = 0; attempt < 40 && !tenantSetupDone; attempt++) {
+        await tester.pump(const Duration(seconds: 1));
 
-          // Trial welcome visible — stop looping; will assert below.
-          if (await CommonTest.doesExistKey(tester, 'startTrial')) break;
+        // Trial welcome visible — stop looping; will assert below.
+        if (await CommonTest.doesExistKey(tester, 'startTrial')) break;
 
-          // Dashboard without welcome — unexpected but stop.
-          if (tester.any(find.byKey(const Key('HomeFormAuth')))) break;
+        // Dashboard without welcome — unexpected but stop.
+        if (tester.any(find.byKey(const Key('HomeFormAuth')))) break;
 
-          // TenantSetupDialog
-          if (await CommonTest.doesExistKey(tester, 'submit') &&
-              await CommonTest.doesExistKey(tester, 'companyName')) {
-            final existingName = CommonTest.getFormBuilderTextFieldByName(
-              tester,
-              'companyName',
-            );
-            if (existingName == 'GrowERP') {
-              // Master-tenant first-run setup — submit then re-login.
-              await tester.tap(find.byKey(const Key('submit')));
-              await tester.pump();
-              for (int w = 0;
-                  w < 120 &&
-                      await CommonTest.doesExistKey(tester, 'submit');
-                  w++) {
-                await tester.pump(const Duration(seconds: 1));
-              }
-              await CommonTest.logout(tester);
-              await tester.pumpAndSettle(const Duration(seconds: 2));
-              await CommonTest.pressLoginButton(tester);
-              await CommonTest.enterText(tester, 'username', email);
-              await CommonTest.enterText(tester, 'password', testPassword);
-              await CommonTest.pressLogin(tester);
-              await CommonTest.waitForSnackbarToGo(tester);
-              await tester.pumpAndSettle(const Duration(seconds: 2));
-              continue;
-            }
-            // Company TenantSetupDialog — fill and submit.
-            final companyName = 'TC-TRIAL-001 Co $seq';
-            await CommonTest.enterText(tester, 'companyName', companyName);
-            await CommonTest.enterDropDownSearch(
-              tester,
-              'currency',
-              'United States Dollar',
-            );
-            // Uncheck demo data (checked by default in debug mode).
-            await CommonTest.tapByKey(tester, 'demoData', settle: false);
+        // TenantSetupDialog
+        if (await CommonTest.doesExistKey(tester, 'submit') &&
+            await CommonTest.doesExistKey(tester, 'companyName')) {
+          final existingName = CommonTest.getFormBuilderTextFieldByName(
+            tester,
+            'companyName',
+          );
+          if (existingName == 'GrowERP') {
+            // Master-tenant first-run setup — submit then re-login.
             await tester.tap(find.byKey(const Key('submit')));
             await tester.pump();
-            for (int w = 0;
-                w < 120 && await CommonTest.doesExistKey(tester, 'submit');
-                w++) {
+            for (
+              int w = 0;
+              w < 120 && await CommonTest.doesExistKey(tester, 'submit');
+              w++
+            ) {
               await tester.pump(const Duration(seconds: 1));
             }
-            tenantSetupDone = true;
-            // Give the welcome dialog time to appear.
-            for (int i = 0; i < 30; i++) {
-              await tester.pump(const Duration(milliseconds: 200));
-            }
+            await CommonTest.logout(tester);
+            await tester.pumpAndSettle(const Duration(seconds: 2));
+            await CommonTest.pressLoginButton(tester);
+            await CommonTest.enterText(tester, 'username', email);
+            await CommonTest.enterText(tester, 'password', testPassword);
+            await CommonTest.pressLogin(tester);
+            await CommonTest.waitForSnackbarToGo(tester);
+            await tester.pumpAndSettle(const Duration(seconds: 2));
+            continue;
+          }
+          // Company TenantSetupDialog — fill and submit.
+          final companyName = 'TC-TRIAL-001 Co $seq';
+          await CommonTest.enterText(tester, 'companyName', companyName);
+          await CommonTest.enterDropDownSearch(
+            tester,
+            'currency',
+            'United States Dollar',
+          );
+          // Uncheck demo data (checked by default in debug mode).
+          await CommonTest.tapByKey(tester, 'demoData', settle: false);
+          await tester.tap(find.byKey(const Key('submit')));
+          await tester.pump();
+          for (
+            int w = 0;
+            w < 120 && await CommonTest.doesExistKey(tester, 'submit');
+            w++
+          ) {
+            await tester.pump(const Duration(seconds: 1));
+          }
+          tenantSetupDone = true;
+          // Give the welcome dialog time to appear.
+          for (int i = 0; i < 30; i++) {
+            await tester.pump(const Duration(milliseconds: 200));
           }
         }
+      }
 
-        // ASSERT: trial welcome dialog must be visible on first login after setup.
-        expect(
-          await EvaluationTest.isTrialWelcomeDisplayed(tester),
-          isTrue,
-          reason:
-              'Trial welcome dialog must appear on first login after tenant setup',
-        );
-        expect(
-          find.text('Welcome to GrowERP!'),
-          findsOneWidget,
-          reason: 'Welcome dialog must show "Welcome to GrowERP!" title',
-        );
+      // ASSERT: trial welcome dialog must be visible on first login after setup.
+      expect(
+        await EvaluationTest.isTrialWelcomeDisplayed(tester),
+        isTrue,
+        reason:
+            'Trial welcome dialog must appear on first login after tenant setup',
+      );
+      expect(
+        find.text('Welcome to GrowERP!'),
+        findsOneWidget,
+        reason: 'Welcome dialog must show "Welcome to GrowERP!" title',
+      );
 
-        // Dismiss welcome and verify dashboard.
-        await EvaluationTest.startTrial(tester);
+      // Dismiss welcome and verify dashboard.
+      await EvaluationTest.startTrial(tester);
 
-        expect(
-          find.byKey(const Key('HomeFormAuth')),
-          findsOneWidget,
-          reason: 'Dashboard must be visible after dismissing trial welcome',
-        );
+      expect(
+        find.byKey(const Key('HomeFormAuth')),
+        findsOneWidget,
+        reason: 'Dashboard must be visible after dismissing trial welcome',
+      );
 
-        debugPrint('✓ TC-TRIAL-001: Trial welcome dialog verified on first login');
-        await CommonTest.logout(tester);
-      },
-    );
+      debugPrint(
+        '✓ TC-TRIAL-001: Trial welcome dialog verified on first login',
+      );
+      await CommonTest.skipOnboardingIfPresent(tester);
+      await CommonTest.logout(tester);
+    });
   });
 
   group('Trial Expiry Tests', () {
@@ -620,7 +627,7 @@ void main() {
         debugPrint('Skipping: No admin email persisted');
         return;
       }
-
+      await CommonTest.skipOnboardingIfPresent(tester);
       await CommonTest.logout(tester);
 
       // Advance time past the 14-day trial period
@@ -670,10 +677,9 @@ void main() {
       );
 
       final restClient = RestClient(await buildDioClient());
-      final router = createDynamicCoreRouter(
-        [coreMenuConfig],
-        rootNavigatorKey: GlobalKey<NavigatorState>(),
-      );
+      final router = createDynamicCoreRouter([
+        coreMenuConfig,
+      ], rootNavigatorKey: GlobalKey<NavigatorState>());
 
       await CommonTest.startTestApp(
         tester,
@@ -693,7 +699,7 @@ void main() {
         debugPrint('Skipping TC-TRIAL-004: no admin email persisted');
         return;
       }
-
+      await CommonTest.skipOnboardingIfPresent(tester);
       await CommonTest.logout(tester);
 
       // Advance past the 14-day trial so the backend returns subscriptionExpired.

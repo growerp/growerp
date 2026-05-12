@@ -32,7 +32,8 @@
                 <set field="apiKey" from="System.getenv('GEMINI_API_KEY')" />
             </if>
             <if condition="!apiKey">
-                <return error="true" message="GEMINI_API_KEY not configured." />
+                <log level="warn" message="GEMINI_API_KEY not configured — skipping onboarding service." />
+                <return />
             </if>
 
             <!-- Build proper Gemini multi-turn conversation contents.
@@ -78,10 +79,23 @@ jsonl = parsed.candidates?[0]?.content?.parts?[0]?.text ?: ""
     <service verb="save" noun="Onboarding" authenticate="true">
         <in-parameters>
             <parameter name="classificationId" required="true" />
-            <parameter name="menuConfig" type="Map" required="true" />
-            <parameter name="conversation" type="List" required="true" />
+            <parameter name="menuConfig" type="Map" />
+            <parameter name="conversation" type="List" />
         </in-parameters>
         <actions>
+            <!-- Mark onboarding complete: create PartyClassificationAppl if absent -->
+            <entity-find-one entity-name="mantle.party.PartyClassificationAppl"
+                value-field="existingClassification">
+                <field-map field-name="partyId" from="ec.user.userAccount.partyId" />
+                <field-map field-name="partyClassificationId" from="classificationId" />
+            </entity-find-one>
+            <if condition="!existingClassification">
+                <service-call name="create#mantle.party.PartyClassificationAppl"
+                    in-map="[partyId: ec.user.userAccount.partyId, partyClassificationId: classificationId]" />
+            </if>
+            <!-- No conversation (e.g. no Gemini key): party classification done, skip ChatRoom -->
+            <if condition="!conversation || conversation.isEmpty()"><return /></if>
+
             <!-- 1. Get owner party for the chat room -->
             <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
                 out-map="ownerResult" />

@@ -3589,7 +3589,6 @@ along with this software (see the LICENSE.md file). If not, see
                             role: us.role,
                             company: company ,
                             address: us.address,
-                            appsUsed: [classificationId],
                         ]" />
                     <service-call name="growerp.100.PartyServices100.create#User"
                         in-map="[user: userIn, ownerPartyId: ownerPartyId,

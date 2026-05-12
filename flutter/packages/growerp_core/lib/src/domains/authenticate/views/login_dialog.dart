@@ -52,6 +52,7 @@ class LoginDialogState extends State<LoginDialog> {
   late User? user;
   late String? moquiSessionToken; // in login process used for password
   String? furtherAction;
+  bool _trialAccepted = false;
   late String username;
   late String password;
   late DataFetchBloc productBloc;
@@ -96,19 +97,25 @@ class LoginDialogState extends State<LoginDialog> {
                 if (context.mounted &&
                     !isGrowERP &&
                     (auth.user?.appsUsed.isEmpty ?? false)) {
-                  await showDialog(
+                  await TrialWelcomeHelper.showTrialWelcomeDialog(
                     context: context,
-                    barrierDismissible: false,
-                    builder: (ctx) => MultiBlocProvider(
-                      providers: [
-                        BlocProvider<OnboardingBloc>.value(
-                            value: context.read<OnboardingBloc>()),
-                        BlocProvider<MenuConfigBloc>.value(
-                            value: context.read<MenuConfigBloc>()),
-                      ],
-                      child: OnboardingDialog(authenticate: auth),
-                    ),
+                    authenticate: auth,
                   );
+                  if (context.mounted) {
+                    await showDialog(
+                      context: context,
+                      barrierDismissible: false,
+                      builder: (ctx) => MultiBlocProvider(
+                        providers: [
+                          BlocProvider<OnboardingBloc>.value(
+                              value: context.read<OnboardingBloc>()),
+                          BlocProvider<MenuConfigBloc>.value(
+                              value: context.read<MenuConfigBloc>()),
+                        ],
+                        child: OnboardingDialog(authenticate: auth),
+                      ),
+                    );
+                  }
                 }
                 if (context.mounted) {
                   if (Navigator.of(context).canPop()) {
@@ -146,19 +153,13 @@ class LoginDialogState extends State<LoginDialog> {
                     'setupRequired' => TenantSetupDialog(
                       authenticate: state.authenticate!,
                     ),
-                    'trialWelcome' => TrialWelcomeDialog(
-                      authenticate: state.authenticate!,
-                      onStartTrial: () {
-                        Navigator.of(context).pop();
-                        showDialog(
-                          context: context,
-                          barrierDismissible: false,
-                          builder: (context) => TenantSetupDialog(
-                            authenticate: state.authenticate!,
-                          ),
-                        );
-                      },
-                    ),
+                    'trialWelcome' => _trialAccepted
+                      ? loginForm()
+                      : TrialWelcomeDialog(
+                          authenticate: state.authenticate!,
+                          onStartTrial: () =>
+                              setState(() => _trialAccepted = true),
+                        ),
                     'subscriptionExpired' => PaymentSubscriptionDialog(
                       authenticate: state.authenticate!,
                     ),

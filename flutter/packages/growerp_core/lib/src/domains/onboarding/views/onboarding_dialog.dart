@@ -56,7 +56,22 @@ class _OnboardingDialogState extends State<OnboardingDialog> {
         'systemPrompt': _systemPrompt,
         'messages': _history,
       });
-      final jsonl = result['jsonl'] ?? '';
+      final jsonl = result['jsonl']?.toString() ?? '';
+      if (jsonl.isEmpty) {
+        if (mounted) {
+          try {
+            await context.read<RestClient>().saveOnboarding({
+              'classificationId': _classificationId,
+              'menuConfig': <String, dynamic>{},
+              'conversation': <Map<String, dynamic>>[],
+            });
+          } catch (e) {
+            debugPrint('saveOnboarding (no-AI path) failed: $e');
+          }
+          if (mounted) Navigator.of(context).pop();
+        }
+        return;
+      }
       _history.add({
         'role': 'model',
         'parts': [
@@ -92,17 +107,20 @@ class _OnboardingDialogState extends State<OnboardingDialog> {
 
     if (!mounted) return;
     final restClient = context.read<RestClient>();
+    // classificationId is "AppAdmin"/"AppHotel"/etc. but menu seed data uses
+    // "admin"/"hotel"/etc. — read the correct appId from MenuConfigBloc.
+    final appId = context.read<MenuConfigBloc>().appId;
 
     try {
       // 1. Load default menu AND any existing user-specific menu
       final defaultMenu = await restClient.getMenuConfiguration(
-        appId: menuConfig.classificationId,
+        appId: appId,
       );
       // Reset any stale user config from previous (failed) onboarding runs
       // so the clone starts from a clean default
       try {
         final userMenu = await restClient.getMenuConfiguration(
-          appId: menuConfig.classificationId,
+          appId: appId,
           userVersion: true,
         );
         if (userMenu.menuConfigurationId != null &&
@@ -118,9 +136,12 @@ class _OnboardingDialogState extends State<OnboardingDialog> {
         sourceMenuConfigurationId: defaultMenu.menuConfigurationId!,
         name: menuConfig.name,
       );
-      // Fetch the full cloned menu with all item IDs
+      // Fetch the full cloned menu with all item IDs.
+      // userVersion: true is required — without it the service filters userId=null
+      // (seed data path) and never finds the freshly cloned user config.
       final cloned = await restClient.getMenuConfiguration(
         menuConfigurationId: clonedShell.menuConfigurationId,
+        userVersion: true,
       );
 
       // Match by ROUTE — more stable than widgetName (AI may use slightly
@@ -163,6 +184,7 @@ class _OnboardingDialogState extends State<OnboardingDialog> {
     final catalog = buildOnboardingCatalog(
       onUserMessage: _onUserMessage,
       onFinalize: _handleCompletion,
+      classificationId: _classificationId,
     );
 
     _adapter = A2uiTransportAdapter();

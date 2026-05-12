@@ -32,7 +32,8 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     git zip gdb libstdc++6 fonts-noto nano sed \
     xvfb libgtk-3-dev ninja-build cmake clang lld llvm pkgconf liblzma-dev \
-    libglu1-mesa binutils && \
+    libglu1-mesa binutils \
+    libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Flutter's Linux build looks for tools (llvm-ar, ar, ld.lld) in /usr/lib/llvm-18/bin.

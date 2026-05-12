@@ -156,6 +156,14 @@ class CommonTest {
     );
     await tester.pump(const Duration());
     await tester.pumpAndSettle(const Duration(seconds: waitTime));
+    await skipOnboardingIfPresent(tester);
+  }
+
+  static Future<void> skipOnboardingIfPresent(WidgetTester tester) async {
+    if (tester.any(find.text('Skip'))) {
+      await tester.tap(find.text('Skip'));
+      await tester.pumpAndSettle(const Duration(seconds: waitTime));
+    }
   }
 
   static Future<void> createCompanyAndAdmin(

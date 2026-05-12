@@ -132,7 +132,6 @@ void main() {
             settle: false,
           );
           debugPrint('✓ Tenant setup submitted');
-
           if (await EvaluationTest.isTrialWelcomeDisplayed(tester)) {
             debugPrint('✓ Trial welcome dialog displayed (shown SECOND)');
             await EvaluationTest.checkTrialWelcomeContent(tester);
@@ -150,6 +149,7 @@ void main() {
         } else {
           debugPrint('? Neither form shown - checking if dashboard accessible');
         }
+        await CommonTest.skipOnboardingIfPresent(tester);
 
         // Verify we reached the dashboard
         // Use manual pump to avoid getting stuck

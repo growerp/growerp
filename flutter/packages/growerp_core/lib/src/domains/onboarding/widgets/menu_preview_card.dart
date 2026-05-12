@@ -15,6 +15,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:genui/genui.dart';
+import 'package:growerp_models/growerp_models.dart';
 import 'package:json_schema_builder/json_schema_builder.dart';
 
 class MenuPreviewCard extends StatefulWidget {
@@ -23,19 +24,30 @@ class MenuPreviewCard extends StatefulWidget {
     required this.headline,
     required this.menuItems,
     required this.onSubmit,
+    required this.classificationId,
+    required this.onFinalize,
+    this.name,
   });
 
   final String headline;
   final List<Map<String, dynamic>> menuItems;
   final Future<void> Function(String text) onSubmit;
+  final String classificationId;
+  final Future<void> Function(OnboardingMenuConfig) onFinalize;
+  final String? name;
 
-  static CatalogItem catalogItem(Future<void> Function(String) onSubmit) =>
+  static CatalogItem catalogItem({
+    required Future<void> Function(String) onSubmit,
+    required String classificationId,
+    required Future<void> Function(OnboardingMenuConfig) onFinalize,
+  }) =>
       CatalogItem(
         name: 'MenuPreviewCard',
         dataSchema: Schema.object(
           description: 'Preview of the generated menu for user confirmation.',
           properties: {
             'headline': Schema.string(),
+            'name': Schema.string(),
             'menuItems': Schema.list(
               items: Schema.object(
                 properties: {
@@ -44,6 +56,7 @@ class MenuPreviewCard extends StatefulWidget {
                   'route': Schema.string(),
                   'widgetName': Schema.string(),
                   'sequenceNum': Schema.integer(),
+                  'tileType': Schema.string(),
                 },
                 required: ['title', 'route', 'widgetName'],
               ),
@@ -53,11 +66,15 @@ class MenuPreviewCard extends StatefulWidget {
         ),
         widgetBuilder: (ctx) {
           final data = ctx.data as Map<String, dynamic>;
+          final rawItems = (data['menuItems'] as List? ?? []);
+          final cleanItems = rawItems.whereType<Map<String, dynamic>>().toList();
           return MenuPreviewCard(
             headline: data['headline'] as String,
-            menuItems: (data['menuItems'] as List)
-                .cast<Map<String, dynamic>>(),
+            name: data['name'] as String?,
+            menuItems: cleanItems,
+            classificationId: classificationId,
             onSubmit: onSubmit,
+            onFinalize: onFinalize,
           );
         },
       );
@@ -77,10 +94,30 @@ class _MenuPreviewCardState extends State<MenuPreviewCard> {
     super.dispose();
   }
 
-  void _confirm() async {
+  Future<void> _confirm() async {
     setState(() => _submitting = true);
-    await widget.onSubmit('confirmed');
-    if (mounted) setState(() => _submitting = false);
+    final items = widget.menuItems
+        .whereType<Map<String, dynamic>>()
+        .map((m) => OnboardingMenuItem(
+              title: m['title'] as String,
+              iconName: m['iconName'] as String?,
+              route: m['route'] as String,
+              widgetName: m['widgetName'] as String,
+              sequenceNum: m['sequenceNum'] as int?,
+              tileType: m['tileType'] as String?,
+            ))
+        .toList();
+    try {
+      await widget.onFinalize(OnboardingMenuConfig(
+        name: widget.name ?? widget.classificationId,
+        classificationId: widget.classificationId,
+        menuItems: items,
+      ));
+    } catch (e) {
+      debugPrint('onFinalize failed: $e');
+    } finally {
+      if (mounted) setState(() => _submitting = false);
+    }
   }
 
   void _submitAdjust() async {

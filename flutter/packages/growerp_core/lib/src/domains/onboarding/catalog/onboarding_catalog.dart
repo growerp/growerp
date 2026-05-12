@@ -15,7 +15,6 @@
 import 'package:genui/genui.dart';
 import 'package:growerp_models/growerp_models.dart';
 
-import '../widgets/finalize_menu_widget.dart';
 import '../widgets/menu_preview_card.dart';
 import '../widgets/options_card.dart';
 import '../widgets/welcome_card.dart';
@@ -34,14 +33,18 @@ Example createSurface:
 
 Catalog buildOnboardingCatalog({
   required Future<void> Function(String text) onUserMessage,
-  required void Function(OnboardingMenuConfig config) onFinalize,
+  required Future<void> Function(OnboardingMenuConfig config) onFinalize,
+  required String classificationId,
 }) =>
     Catalog(
       [
         WelcomeCard.catalogItem(onUserMessage),
         OptionsCard.catalogItem(onUserMessage),
-        MenuPreviewCard.catalogItem(onUserMessage),
-        FinalizeMenuWidget.catalogItem(onFinalize),
+        MenuPreviewCard.catalogItem(
+          onSubmit: onUserMessage,
+          classificationId: classificationId,
+          onFinalize: onFinalize,
+        ),
       ],
       catalogId: _catalogId,
       systemPromptFragments: [_catalogIdInstruction],

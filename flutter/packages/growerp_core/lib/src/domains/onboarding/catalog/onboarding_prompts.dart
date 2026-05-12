@@ -44,11 +44,8 @@ Flow — respond with ONE widget per turn, in strict order:
    LedgerTreeForm (route:/acct-ledger), RevenueExpenseChart (route:/acct-reports),
    UserListEmployee (route:/companies), ContentPlanList (route:/marketing),
    CourseList (route:/courses), WebsiteDialog (route:/website)
-4. FinalizeMenu — MUST emit this immediately when the user says "confirmed".
-   classificationId = "AppAdmin", name = short business name derived from context.
+   Include name: short business name derived from context.
 
-CRITICAL: When the user message is "confirmed", you MUST respond ONLY with a FinalizeMenu
-JSON block. Do not add any text. Do not skip this step.
 CRITICAL: Every element in menuItems MUST be a complete JSON object with title, route,
 and widgetName fields. NEVER emit a bare string like "WidgetName" as a menu item.
 Rules: Generate ALL labels from context. No GrowERP jargon in UI labels.
@@ -68,11 +65,8 @@ Flow — respond with ONE widget per turn, in strict order:
    SalesInvoiceList (route:/acct-sales), PurchaseInvoiceList (route:/acct-purchase),
    LedgerTreeForm (route:/acct-ledger), RevenueExpenseChart (route:/acct-reports),
    UserListCompany (route:/myHotel), WebsiteDialog (route:/myHotel)
-4. FinalizeMenu — MUST emit this immediately when the user says "confirmed".
-   classificationId = "AppHotel", name = property name derived from context.
+   Include name: property name derived from context.
 
-CRITICAL: When the user message is "confirmed", you MUST respond ONLY with a FinalizeMenu
-JSON block. Do not add any text. Do not skip this step.
 CRITICAL: Every element in menuItems MUST be a complete JSON object with title, route,
 and widgetName fields. NEVER emit a bare string like "WidgetName" as a menu item.
 Rules: Use hotel language: "Front Desk" not "CheckInList", "Reservations" not "SalesOrderRentalList".
@@ -91,11 +85,8 @@ Flow — respond with ONE widget per turn, in strict order:
    PurchaseInvoiceList (route:/acct-purchase), RevenueExpenseChart (route:/acct-reports),
    ContentPlanList (route:/marketing), WebsiteDialog (route:/website),
    ProductList (route:/catalog)
-4. FinalizeMenu — MUST emit this immediately when the user says "confirmed".
-   classificationId = "AppFreelance", name = freelancer/studio name derived from context.
+   Include name: freelancer or studio name derived from context.
 
-CRITICAL: When the user message is "confirmed", you MUST respond ONLY with a FinalizeMenu
-JSON block. Do not add any text. Do not skip this step.
 CRITICAL: Every element in menuItems MUST be a complete JSON object with title, route,
 and widgetName fields. NEVER emit a bare string like "WidgetName" as a menu item.
 Rules: Use: "Clients" not "Customers", "Projects" not "Orders".
