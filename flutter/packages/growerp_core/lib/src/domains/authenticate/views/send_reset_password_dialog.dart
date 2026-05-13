@@ -74,6 +74,7 @@ class _SendResetPasswordDialogState extends State<SendResetPasswordDialog> {
                     children: [
                       const SizedBox(height: 20),
                       TextFormField(
+                        key: const Key('resetEmail'),
                         controller: _usernameController,
                         autofocus: true,
                         decoration: InputDecoration(
@@ -82,6 +83,7 @@ class _SendResetPasswordDialogState extends State<SendResetPasswordDialog> {
                       ),
                       const SizedBox(height: 20),
                       OutlinedButton(
+                        key: const Key('resetPasswordOk'),
                         child: Text(_localizations!.ok),
                         onPressed: () {
                           _authBloc.add(

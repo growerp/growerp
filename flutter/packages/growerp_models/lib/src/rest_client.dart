@@ -82,6 +82,11 @@ abstract class RestClient {
   @Extra({'noApiKey': true})
   Future<String> resetPassword({@Field() required String username});
 
+  @GET("rest/s1/growerp/100/TempResetPassword")
+  @Extra({'noApiKey': true})
+  Future<String> getTempResetPassword(
+      {@Query('username') required String username});
+
   @POST("rest/s1/growerp/100/Password")
   @Extra({'noApiKey': true})
   Future<Authenticate> updatePassword({

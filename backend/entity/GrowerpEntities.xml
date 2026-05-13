@@ -24,6 +24,9 @@ along with this software (see the LICENSE.md file). If not, see
 
     <extend-entity entity-name="UserAccount" package="moqui.security">
         <field name="currentPassword" type="text-medium" enable-audit-log="true" />
+        <!-- Plaintext temp password stored only when email server is not configured (dev/test).
+             Cleared after the user successfully changes their password. -->
+        <field name="tempResetPassword" type="text-medium" />
     </extend-entity>
 
     <extend-entity entity-name="GlAccount" package="mantle.ledger.account"

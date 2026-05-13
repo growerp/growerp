@@ -22,12 +22,11 @@
 ///
 /// PREREQUISITES:
 /// 1. Moqui backend must be running with instance_purpose=dev
-/// 2. GrowERP owner account (test@example.com/qqqqqq9!) must exist
 
 // ignore_for_file: depend_on_referenced_packages
+import 'dart:convert';
 import 'package:core_example/router_builder.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:integration_test/integration_test.dart';
@@ -42,7 +41,7 @@ void main() {
   });
 
   group('Password Reset Tests', () {
-    testWidgets('TC-PWD-001: Password Reset Request', (
+    testWidgets('TC-PWD-001: Forgot Password — create account then reset', (
       WidgetTester tester,
     ) async {
       final restClient = RestClient(await buildDioClient());
@@ -50,64 +49,121 @@ void main() {
         coreMenuConfig,
       ], rootNavigatorKey: GlobalKey<NavigatorState>());
 
+      // Start fresh so we own the account we're resetting
       await CommonTest.startTestApp(
         tester,
         router,
         coreMenuConfig,
         CoreLocalizations.localizationsDelegates,
         restClient: restClient,
-        clear: false,
-        title: "TC-PWD-001: Password Reset",
+        clear: true,
+        title: "TC-PWD-001: Forgot Password",
       );
 
-      // Ensure we're logged out
+      await CommonTest.createCompanyAndAdmin(tester);
+      await CommonTest.skipOnboardingIfPresent(tester);
+
+      // Retrieve the email that was just registered
+      final SaveTest test = await PersistFunctions.getTest();
+      final String adminEmail = test.admin!.email!;
+
       await CommonTest.logout(tester);
-      await tester.pumpAndSettle();
-
-      // Navigate to login form
       await CommonTest.pressLoginButton(tester);
-      await tester.pumpAndSettle();
 
-      // Verify login form is displayed
       expect(
         find.byKey(const Key('username')),
         findsOneWidget,
-        reason: 'Login form should be visible',
+        reason: 'Login form must be visible before testing forgot-password',
       );
 
-      // Find and tap "Forgot Password?" link
-      final forgotPasswordFinder = find.textContaining(
-        RegExp('forgot', caseSensitive: false),
+      // Tap the "Forgot password?" link
+      await tester.tap(find.text('Forgot password?'));
+      await tester.pumpAndSettle(const Duration(seconds: 1));
+
+      // Reset dialog must open and show the email field
+      expect(
+        find.byKey(const Key('resetEmail')),
+        findsOneWidget,
+        reason: 'Reset-password dialog must open with email field',
       );
 
-      if (tester.any(forgotPasswordFinder)) {
-        await tester.tap(forgotPasswordFinder.first);
-        await tester.pumpAndSettle(const Duration(seconds: 1));
+      // Enter the registered account email
+      await tester.tap(find.byKey(const Key('resetEmail')));
+      await tester.pump();
+      await tester.enterText(find.byKey(const Key('resetEmail')), adminEmail);
+      await tester.pump();
 
-        // Password reset dialog should open
-        // Look for a dialog or username input field in the dialog
-        expect(
-          find.byType(AlertDialog).evaluate().isNotEmpty ||
-              find.byType(Dialog).evaluate().isNotEmpty,
-          isTrue,
-          reason: 'Password reset dialog should open',
-        );
+      // Submit the reset request
+      await tester.tap(find.byKey(const Key('resetPasswordOk')));
+      await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
 
-        debugPrint('✓ TC-PWD-001: Password reset dialog opened');
+      // Dialog must close on success (AuthStatus.unAuthenticated) and login
+      // form must be visible again
+      expect(
+        find.byKey(const Key('resetEmail')),
+        findsNothing,
+        reason: 'Reset dialog must close after successful submission',
+      );
+      expect(
+        find.byKey(const Key('username')),
+        findsOneWidget,
+        reason: 'Login form must be visible again after reset request',
+      );
 
-        // Close dialog (cancel or tap outside)
-        final cancelFinder = find.text('Cancel');
-        if (tester.any(cancelFinder)) {
-          await tester.tap(cancelFinder);
-          await tester.pumpAndSettle();
-        } else {
-          // Press back or escape
-          await tester.sendKeyEvent(LogicalKeyboardKey.escape);
-          await tester.pumpAndSettle();
-        }
-      } else {
-        debugPrint('Forgot Password link not found - test skipped');
-      }
+      // Fetch the temp password from the backend (stored in DB when email
+      // server is not configured).
+      final tempResponse =
+          await restClient.getTempResetPassword(username: adminEmail);
+      final tempPassword =
+          (jsonDecode(tempResponse) as Map<String, dynamic>)['tempPassword']
+              as String? ??
+          '';
+      expect(
+        tempPassword,
+        isNotEmpty,
+        reason: 'Backend must return tempPassword when email server not configured',
+      );
+
+      // --- Step 6: login with temp password → change-password form appears ---
+      await CommonTest.enterText(tester, 'username', adminEmail);
+      await CommonTest.enterText(tester, 'password', tempPassword);
+      await CommonTest.pressLogin(tester);
+      await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
+
+      expect(
+        await AuthTest.isPasswordChangeDisplayed(tester),
+        isTrue,
+        reason: 'Change-password form must appear after login with temp password',
+      );
+
+      // Enter new password twice
+      await CommonTest.enterText(tester, 'password', 'aaaaaa9!');
+      await CommonTest.enterText(tester, 'password2', 'aaaaaa9!');
+      await tester.tap(find.text('Submit new password'));
+      await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
+
+      // --- Step 7: logout ---
+      await CommonTest.logout(tester);
+
+      // --- Steps 8-9: login with new password → main menu visible ---
+      await CommonTest.pressLoginButton(tester);
+      await CommonTest.enterText(tester, 'username', adminEmail);
+      await CommonTest.enterText(tester, 'password', 'aaaaaa9!');
+      await CommonTest.pressLogin(tester);
+      await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
+      await CommonTest.skipOnboardingIfPresent(tester);
+
+      expect(
+        find.byKey(const Key('HomeFormAuth')),
+        findsOneWidget,
+        reason: 'Main menu must be visible after login with new password',
+      );
+
+      debugPrint(
+        '✓ TC-PWD-001: Full forgot-password flow completed for $adminEmail',
+      );
+
+      await CommonTest.logout(tester);
     });
 
     testWidgets('TC-PWD-003: Password Validation Requirements', (

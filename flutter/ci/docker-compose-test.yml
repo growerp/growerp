@@ -52,7 +52,6 @@ services:
       - ../../backend:/opt/moqui/runtime/component/growerp
       - ../../pop-rest-store:/opt/moqui/runtime/component/PopRestStore
       - ../../mantle-stripe:/opt/moqui/runtime/component/mantle-stripe
-      #- ./runtime/log:/opt/moqui/runtime/log
       #- ./runtime/txlog:/opt/moqui/runtime/txlog
       #- ../docker/runtime/sessions:/opt/moqui/runtime/sessions
       # this one isn't needed when not using H2/etc: - ./runtime/db:/opt/moqui/runtime/db
