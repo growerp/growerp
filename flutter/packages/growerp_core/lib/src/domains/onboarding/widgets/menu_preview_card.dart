@@ -125,7 +125,13 @@ class _MenuPreviewCardState extends State<MenuPreviewCard> {
     if (text.isEmpty) return;
     setState(() => _submitting = true);
     await widget.onSubmit('adjust: $text');
-    if (mounted) setState(() => _submitting = false);
+    if (mounted) {
+      setState(() {
+        _submitting = false;
+        _adjusting = false;
+        _adjustController.clear();
+      });
+    }
   }
 
   @override

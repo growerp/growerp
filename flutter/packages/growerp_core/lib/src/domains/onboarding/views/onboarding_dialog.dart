@@ -206,19 +206,13 @@ class _OnboardingDialogState extends State<OnboardingDialog> {
   }
 
   Widget _buildHeader() {
-    final days = widget.authenticate.evaluationDays ?? 14;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(children: [
-            Expanded(
-              child: Text(
-                'Your $days-day free trial has started!',
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-            ),
+            const Expanded(child: SizedBox()),
             TextButton(
               onPressed: () async {
                 setState(() => _isLoading = true);
