@@ -158,6 +158,9 @@
       "Bash(grep *)",
       "Bash(cat *)",
       "Bash(curl *)",
+      "Bash(git log *)",
+      "Bash(git status *)",
+      "Bash(git show *)",
       "Bash(find *)"
     ]
   }

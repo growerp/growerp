@@ -355,12 +355,14 @@ class PaymentSubscriptionDialogState extends State<PaymentSubscriptionDialog> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        title,
-                        style: Theme.of(context).textTheme.titleMedium,
+                      Flexible(
+                        child: Text(
+                          title,
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
                       ),
+                      const SizedBox(width: 8),
                       Text(
                         price,
                         style: Theme.of(context).textTheme.titleMedium

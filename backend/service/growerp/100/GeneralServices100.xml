@@ -837,6 +837,7 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="authenticate" type="Map">
                 <parameter name="ownerPartyId" />
                 <parameter name="classificationId" />
+                <parameter name="loginStatus" />
                 <parameter name="apiKey" /><!-- 'authenticated', 'setupRequired',
                 'subscriptionExpired', 'passwordChange' -->
                 <parameter name="user" type="Map" />
@@ -895,6 +896,7 @@ along with this software (see the LICENSE.md file). If not, see
                             from="[
                             user: [loginName: username],
                             classificationId: classificationId,
+                            loginStatus: 'passwordChange',
                             apiKey: 'passwordChange'
                         ]" />
                         <return />
@@ -971,6 +973,7 @@ along with this software (see the LICENSE.md file). If not, see
                                 from="[
                             ownerPartyId: ownerPartyId,
                             classificationId: classificationId,
+                            loginStatus: 'setupRequired',
                             apiKey: 'setupRequired',
                             user: [
                                 partyId: userAccount.partyId,
@@ -1011,6 +1014,7 @@ along with this software (see the LICENSE.md file). If not, see
                         from="[
                         ownerPartyId: ownerPartyId,
                         classificationId: classificationId,
+                        loginStatus: 'subscriptionExpired',
                         apiKey: 'subscriptionExpired',
                         evaluationDays: evaluationDays,
                         user: [

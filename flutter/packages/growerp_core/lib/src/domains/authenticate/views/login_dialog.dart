@@ -52,7 +52,7 @@ class LoginDialogState extends State<LoginDialog> {
   late User? user;
   late String? moquiSessionToken; // in login process used for password
   String? furtherAction;
-  bool _trialAccepted = false;
+
   late String username;
   late String password;
   late DataFetchBloc productBloc;
@@ -97,9 +97,11 @@ class LoginDialogState extends State<LoginDialog> {
                 if (context.mounted &&
                     !isGrowERP &&
                     (auth.user?.appsUsed.isEmpty ?? false)) {
-                  await TrialWelcomeHelper.showTrialWelcomeDialog(
+                  await showDialog(
                     context: context,
-                    authenticate: auth,
+                    barrierDismissible: false,
+                    builder: (ctx) =>
+                        TrialWelcomeDialog(authenticate: auth),
                   );
                   if (context.mounted) {
                     await showDialog(
@@ -133,14 +135,14 @@ class LoginDialogState extends State<LoginDialog> {
             }
           },
           buildWhen: (previous, current) {
-            // Rebuild the UI only when the (apikey=furtherAction) changes
-            return previous.authenticate?.apiKey !=
-                    current.authenticate?.apiKey ||
+            // Rebuild the UI only when the (loginStatus=furtherAction) changes
+            return previous.authenticate?.loginStatus !=
+                    current.authenticate?.loginStatus ||
                 current.status == AuthStatus.loading ||
                 current.status == AuthStatus.failure;
           },
           builder: (context, state) {
-            furtherAction = state.authenticate?.apiKey;
+            furtherAction = state.authenticate?.loginStatus;
             user = state.authenticate!.user;
             moquiSessionToken = state.authenticate!.moquiSessionToken;
 
@@ -153,13 +155,6 @@ class LoginDialogState extends State<LoginDialog> {
                     'setupRequired' => TenantSetupDialog(
                       authenticate: state.authenticate!,
                     ),
-                    'trialWelcome' => _trialAccepted
-                      ? loginForm()
-                      : TrialWelcomeDialog(
-                          authenticate: state.authenticate!,
-                          onStartTrial: () =>
-                              setState(() => _trialAccepted = true),
-                        ),
                     'subscriptionExpired' => PaymentSubscriptionDialog(
                       authenticate: state.authenticate!,
                     ),

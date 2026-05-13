@@ -220,7 +220,19 @@ class _OnboardingDialogState extends State<OnboardingDialog> {
               ),
             ),
             TextButton(
-              onPressed: () => Navigator.of(context).pop(),
+              onPressed: () async {
+                setState(() => _isLoading = true);
+                try {
+                  await context.read<RestClient>().saveOnboarding({
+                    'classificationId': _classificationId,
+                    'menuConfig': <String, dynamic>{},
+                    'conversation': <Map<String, dynamic>>[],
+                  });
+                } catch (e) {
+                  debugPrint('saveOnboarding (Skip path) failed: $e');
+                }
+                if (mounted) Navigator.of(context).pop();
+              },
               child: const Text('Skip'),
             ),
           ]),

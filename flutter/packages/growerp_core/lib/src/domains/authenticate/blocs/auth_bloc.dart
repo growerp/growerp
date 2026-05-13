@@ -279,16 +279,15 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         testDaysOffset: event.testDaysOffset,
       );
 
-      // Handle apiKey values from backend
-      if (authenticate.apiKey != null &&
+      // Handle loginStatus values from backend
+      if (authenticate.loginStatus == null ||
           ![
             'setupRequired', // Admin needs to provide company info
             'subscriptionExpired', // Subscription expired, payment required
-            'trialWelcome', // New tenant, show trial welcome
             'registered', // User registered for existing company
             'passwordChange', // Password reset required
-          ].contains(authenticate.apiKey)) {
-        // apiKey found so save and authenticated
+          ].contains(authenticate.loginStatus)) {
+        // no special status so save and authenticated
         emit(
           state.copyWith(
             status: AuthStatus.authenticated,

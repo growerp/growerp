@@ -1863,8 +1863,14 @@ along with this software (see the LICENSE.md file). If not, see
             </if>
             <!-- appsUsed -->
             <if condition="user.appsUsed &amp;&amp; user.appsUsed.size() &gt; 0">
-                <service-call name="create#mantle.party.PartyClassificationAppl"
-                    in-map="[partyId: userPartyId, partyClassificationId: user.appsUsed[0]]" />
+                <entity-find-count entity-name="mantle.party.PartyClassificationAppl" count-field="existingApplCount">
+                    <econdition field-name="partyId" from="userPartyId" />
+                    <econdition field-name="partyClassificationId" from="user.appsUsed[0]" />
+                </entity-find-count>
+                <if condition="existingApplCount == 0">
+                    <service-call name="create#mantle.party.PartyClassificationAppl"
+                        in-map="[partyId: userPartyId, partyClassificationId: user.appsUsed[0]]" />
+                </if>
             </if>
             <!-- system support chat room -->
             <if condition="userAccount">
@@ -2893,6 +2899,7 @@ along with this software (see the LICENSE.md file). If not, see
                         ownerPartyId: ownerPartyId,
                         user: user,
                         classificationId: classificationId,
+                        loginStatus: 'registered',
                         apiKey: 'registered'
                     ]" />
                 </then>
@@ -2922,13 +2929,14 @@ along with this software (see the LICENSE.md file). If not, see
                     <service-call name="growerp.100.BirdSendServices100.registerAdd#UserToGroup"
                         in-map="[email: email, firstName: firstName, lastName: lastName]" />
 
-                    <!-- Return with 'trialWelcome' to show trial period welcome screen -->
+                    <!-- Return with 'registered' status -->
                     <set field="authenticate"
                         from="[
                         ownerPartyId: tenantResult.ownerPartyId,
                         user: userInfo.users[0],
                         classificationId: classificationId,
-                        apiKey: 'trialWelcome'
+                        loginStatus: 'registered',
+                        apiKey: 'registered'
                     ]" />
                 </else-if>
 
