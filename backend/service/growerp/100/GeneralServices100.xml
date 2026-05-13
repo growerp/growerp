@@ -704,12 +704,14 @@ along with this software (see the LICENSE.md file). If not, see
             <if condition="!userInfo.users.isEmpty()">
                 <set field="authenticate.user" from="userInfo.users[0]"/>
             </if>
-            <!-- get company-->
-            <service-call name="growerp.100.PartyServices100.get#Company"
-                in-map="[companyPartyId: companyPartyId, ownerPartyId: ownerPartyId]"
-                out-map="companyInfo"/>
-            <if condition="!companyInfo.companies.isEmpty()">
-                <set field="authenticate.company" from="companyInfo.companies[0]"/>
+            <!-- get company (skip for AppSupport - support users are cross-company) -->
+            <if condition="classificationId != 'AppSupport'">
+                <service-call name="growerp.100.PartyServices100.get#Company"
+                    in-map="[companyPartyId: companyPartyId, ownerPartyId: ownerPartyId]"
+                    out-map="companyInfo"/>
+                <if condition="!companyInfo.companies.isEmpty()">
+                    <set field="authenticate.company" from="companyInfo.companies[0]"/>
+                </if>
             </if>
             <!-- keys -->
             <set field="authenticate.apiKey" from="ec.user.getLoginKey()"/>
