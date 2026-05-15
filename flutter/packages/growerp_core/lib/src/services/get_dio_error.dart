@@ -88,7 +88,7 @@ Future<String> getDioError(dynamic e) async {
   } else if (e is FormatException) {
     returnMessage = 'Invalid data format';
   } else {
-    returnMessage = 'An error occurred';
+    returnMessage = e.toString();
   }
 
   if (returnMessage.trim().isEmpty) returnMessage = "Server Connection error";

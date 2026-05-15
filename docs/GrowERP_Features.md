@@ -25,7 +25,7 @@
 
 - **AI-Powered Features:** Integrated AI capabilities powered by Google Gemini, including invoice scanning, assessment scoring, landing page generation, and AI-assisted content creation.
 
-- **Real-Time Chat:** Built-in WebSocket-based chat and notifications for team collaboration.
+- **Real-Time Chat:** Built-in WebSocket-based chat and notifications for team collaboration. See [Chat Functionality](./GrowERP_Chat_Functionality.md) for details.
 
 - **Data Exchange:** CSV import and export for bulk data operations across all major entities.
 

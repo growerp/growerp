@@ -63,6 +63,7 @@ This directory contains comprehensive documentation for extending and developing
 - **[Timezone Quick Reference](./GrowERP_Timezone_Quick_Reference.md)** - Quick timezone guide
 - **[Stripe Payment Processing](./Stripe_Payment_Processing_Documentation.md)** - Payment integration
 - **[WebSocket Notification System](./WebSocket_Notification_System.md)** - Real-time notifications
+- **[Chat Functionality](./GrowERP_Chat_Functionality.md)** - Real-time collaboration and messaging ⭐ **NEW!**
 - **[Backend URL Selection System](./Backend_URL_Selection_System_Documentation.md)** - Backend configuration
 
 ### 🌍 Internationalization
@@ -332,6 +333,7 @@ BlocListener<UserBloc, UserState>(
 | **Invoice scanning** | [Invoice Scan Documentation](./Invoice_Scan_Documentation.md) | Complete guide |
 | **Payment integration** | [Stripe Payment Processing Documentation](./Stripe_Payment_Processing_Documentation.md) | Complete guide |
 | **Real-time notifications** | [WebSocket Notification System](./WebSocket_Notification_System.md) | Complete guide |
+| **Chat functionality** | [Chat Functionality](./GrowERP_Chat_Functionality.md) | Functional overview |
 | **Timezone handling** | [Timezone Management Guide](./GrowERP_Timezone_Management_Guide.md) | Complete guide |
 | **CI/CD workflows & secrets** | [GitHub Actions Guide](./GitHub_Actions_Guide.md) | Complete guide |
 | **Release process** | [Version Management and Release Process](./GrowERP_Version_Management_and_Release_Process.md) | Complete guide |

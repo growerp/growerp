@@ -2533,9 +2533,14 @@ along with this software (see the LICENSE.md file). If not, see
             join-from-alias="CR">
             <key-map field-name="chatRoomId" />
         </member-entity>
+        <member-entity entity-alias="UA" entity-name="moqui.security.UserAccount"
+            join-from-alias="CMSGS" join-optional="true">
+            <key-map field-name="fromUserId" related="userId" />
+        </member-entity>
         <alias-all entity-alias="CR" />
         <alias-all entity-alias="CMSGS" />
         <alias name="lastUpdatedStamp" entity-alias="CMSGS" />
+        <alias name="fromUserFullName" entity-alias="UA" field="username" />
     </view-entity>
 
     <!-- activity views -->

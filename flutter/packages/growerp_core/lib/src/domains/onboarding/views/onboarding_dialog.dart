@@ -19,6 +19,7 @@ import 'package:growerp_models/growerp_models.dart';
 
 import '../../common/bloc/menu_config_bloc.dart';
 import '../../common/widgets/loading_indicator.dart';
+import '../../../services/get_dio_error.dart';
 import '../bloc/onboarding_bloc.dart';
 import '../catalog/onboarding_catalog.dart';
 import '../catalog/onboarding_prompts.dart';
@@ -40,6 +41,9 @@ class _OnboardingDialogState extends State<OnboardingDialog> {
 
   final List<Map<String, dynamic>> _history = [];
   bool _isLoading = false;
+  bool _completing = false;
+  bool _hasFinalized = false;
+  bool _chatError = false;
 
   Future<void> _onUserMessage(String text) async {
     if (!mounted) return;
@@ -80,17 +84,26 @@ class _OnboardingDialogState extends State<OnboardingDialog> {
       });
       _adapter.addChunk(jsonl);
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Setup error: $e')),
-        );
+      _history.removeLast(); // remove the user turn that failed
+      if (mounted) setState(() { _isLoading = false; _chatError = true; });
+      final msg = await getDioError(e);
+      if (!mounted) return;
+      final retry = await _showRetryDialog(msg);
+      if (!mounted) return;
+      setState(() => _chatError = false);
+      if (retry) {
+        _onUserMessage(text);
+      } else {
+        Navigator.of(context).pop();
       }
+      return;
     } finally {
-      if (mounted) setState(() => _isLoading = false);
+      if (mounted && !_chatError) setState(() => _isLoading = false);
     }
   }
 
   Future<void> _handleCompletion(OnboardingMenuConfig menuConfig) async {
+    if (mounted) setState(() { _isLoading = true; _completing = true; _hasFinalized = true; });
     // Save the conversation as a ChatRoom for support review
     try {
       final result = await context.read<RestClient>().saveOnboarding({
@@ -98,11 +111,22 @@ class _OnboardingDialogState extends State<OnboardingDialog> {
         'menuConfig': menuConfig.toJson(),
         'conversation': _history,
       });
-      if (result['errors'] != null) {
-        debugPrint('saveOnboarding errors: ${result['errors']}');
+      final errors = result is Map ? result['errors'] : null;
+      if (errors != null && mounted) {
+        if (mounted) setState(() { _isLoading = false; _completing = false; });
+        final retry = await _showRetryDialog(errors.toString());
+        if (retry) return _handleCompletion(menuConfig);
+        if (mounted) Navigator.of(context).pop();
+        return;
       }
     } catch (e) {
-      debugPrint('saveOnboarding failed: $e');
+      if (mounted) setState(() { _isLoading = false; _completing = false; });
+      final msg = await getDioError(e);
+      if (!mounted) return;
+      final retry = await _showRetryDialog(msg);
+      if (retry) return _handleCompletion(menuConfig);
+      if (mounted) Navigator.of(context).pop();
+      return;
     }
 
     if (!mounted) return;
@@ -205,6 +229,28 @@ class _OnboardingDialogState extends State<OnboardingDialog> {
     super.dispose();
   }
 
+  Future<bool> _showRetryDialog(String message) async {
+    final result = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Error'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Exit'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('Retry'),
+          ),
+        ],
+      ),
+    );
+    return result ?? false;
+  }
+
   Widget _buildHeader() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -256,7 +302,20 @@ class _OnboardingDialogState extends State<OnboardingDialog> {
               child: ValueListenableBuilder<ConversationState>(
                 valueListenable: _conversation.state,
                 builder: (context, state, _) {
+                  if (_completing) {
+                    return const Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          CircularProgressIndicator(),
+                          SizedBox(height: 16),
+                          Text('Saving…'),
+                        ],
+                      ),
+                    );
+                  }
                   if (state.surfaces.isEmpty) {
+                    if (_hasFinalized || _chatError) return const SizedBox.shrink();
                     return const Center(child: LoadingIndicator());
                   }
                   return Surface(

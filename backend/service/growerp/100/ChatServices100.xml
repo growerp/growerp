@@ -124,6 +124,7 @@ along with this software (see the LICENSE.md file). If not, see
                         <econdition field-name="chatRoomId" from="chatRoomId" ignore-if-empty="true" />
                         <econdition field-name="isPrivate" from="isPriv" ignore-if-empty="true" />
                         <econdition field-name="chatRoomName" from="filter" ignore-if-empty="true" />
+                        <econdition field-name="chatRoomName" operator="like" from="namePrefixLike" ignore-if-empty="true" />
                         <econdition field-name="isActive" value="Y" />
                         <econdition field-name="userId" from="ec.user.userAccount.userId" />
                     </entity-find>
@@ -444,6 +445,7 @@ along with this software (see the LICENSE.md file). If not, see
                         <parameter name="chatRoomName" />
                     </parameter>
                     <parameter name="fromUserId" />
+                    <parameter name="fromUserFullName" />
                     <parameter name="content" />
                     <parameter name="creationDate" />
                 </parameter>
@@ -456,7 +458,7 @@ along with this software (see the LICENSE.md file). If not, see
             </if>
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
-            <if condition="ec.user.userAccount.userId == 'System_Support'">
+            <if condition="ec.user.userAccount.userId == 'SYSTEM_SUPPORT'">
                 <set field="ownerPartyId" from="null" />
             </if>
             <entity-find entity-name="growerp.general.ChatRoomAndMessages"
@@ -465,7 +467,7 @@ along with this software (see the LICENSE.md file). If not, see
                     ignore-if-empty="true" />
                 <econdition field-name="chatMessageId" from="chatMessageId"
                     ignore-if-empty="true" />
-                <order-by field-name="-lastUpdatedStamp" />
+                <order-by field-name="lastUpdatedStamp" />
             </entity-find>
             <set field="chatMessages" from="[]" />
             <iterate list="messages" entry="message">
@@ -474,9 +476,10 @@ along with this software (see the LICENSE.md file). If not, see
                     chatRoom: [chatRoomId: message.chatRoomId],
                     chatMessageId : message.chatMessageId,
                     fromUserId: message.fromUserId,
+                    fromUserFullName: message.fromUserFullName,
                     content: message.content,
                     creationDate: message.lastUpdatedStamp
-                        ? ec.l10n.format(message.lastUpdatedStamp,'yyyy-MM-dd') 
+                        ? ec.l10n.format(message.lastUpdatedStamp,'yyyy-MM-dd')
                         : null,
                     ]" />
                 <script>chatMessages.add(chatMessage)</script>
