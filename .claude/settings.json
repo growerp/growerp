@@ -11,6 +11,7 @@
       "mcp__moqui__moqui_prompts_get",
       "Bash(git -C *)",
       "Bash(find *)",
+      "Bash(awk *)",
       "Bash(grep *)"
     ]
   }

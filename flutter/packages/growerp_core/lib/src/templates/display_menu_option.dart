@@ -712,14 +712,20 @@ class DisplayMenuItemState extends State<DisplayMenuItem>
   }
 
   void _handleNotifications(BuildContext context, NotificationState state) {
+    debugPrint(
+      '_handleNotifications: status=${state.status} '
+      'seq=${state.notificationSeq} notifs=${state.notifications.length} '
+      'msg0=${state.notifications.isEmpty ? "none" : state.notifications.first.message}',
+    );
     if (state.status == NotificationStatus.success &&
         state.notifications.isNotEmpty) {
-      String messages = '';
-      for (final (index, note) in state.notifications.indexed) {
-        messages +=
-            "${note.message!["message"]}${index < state.notifications.length - 1 ? '\n' : ''}";
+      final parts = state.notifications
+          .map((note) => '${note.message?['message'] ?? ''}')
+          .where((m) => m.isNotEmpty)
+          .toList();
+      if (parts.isNotEmpty) {
+        HelperFunctions.showMessage(context, parts.join('\n'), Colors.green);
       }
-      HelperFunctions.showMessage(context, messages, Colors.green);
     }
   }
 }

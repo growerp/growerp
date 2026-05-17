@@ -86,13 +86,18 @@ class WsClient {
   }
 
   Future<void> connect(String apiKey, String userId) async {
+    // Close previous connection gracefully; ignore errors (connection may already be dead).
+    try { _channel?.sink.close(status.normalClosure); } catch (_) {}
+    try { _streamController?.close(); } catch (_) {}
+    _channel = null;
+    _streamController = null;
+
     try {
       logger.i("WS connect $wsUrl");
       _channel = WebSocketChannel.connect(
-        Uri.parse("$wsUrl?apiKey=$apiKey&userId=$userId"),
+        Uri.parse("$wsUrl?api_key=$apiKey&userId=$userId"),
       );
-
-      //await channel.ready;
+      await _channel!.ready;
     } catch (error) {
       if (error is WebSocketChannelException) {
         if (error.inner != null) {
@@ -100,7 +105,11 @@ class WsClient {
           logger.e('Websocket inner error: ${err.message.toString()}');
         }
         logger.e('Websocket error: ${error.message}');
+      } else {
+        logger.e('Websocket connect error: $error');
       }
+      _channel = null;
+      return;
     }
     _streamController = StreamController.broadcast()
       ..addStream(_channel!.stream);

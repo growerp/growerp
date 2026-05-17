@@ -737,8 +737,9 @@ along with this software (see the LICENSE.md file). If not, see
                     return glAccount;
                 }
 
+                def maskLen = glAccountCodeMask?.count('#') ?: 0
                 def rootAccounts = dbGlAccounts.findAll {
-                    it.parentGlAccountId == null }
+                    it.parentGlAccountId == null &amp;&amp; (maskLen == 0 || it.accountCode?.length() == maskLen) }
                 rootAccounts.each {
                  //   if(it.accountCode == '70000') {
                  //       ec.logger.info("====tree ${it.accountCode}: ${getGlAccountTree(it, 1)}")
@@ -1187,10 +1188,16 @@ along with this software (see the LICENSE.md file). If not, see
             <if condition="search">
                 <set field="search" value="%$search%" />
             </if>
+            <set field="glAccountCodeMask"
+                from="partyAcctgPreference?.glAccountCodeMask ?: ec.user.getPreference('GlAccountCodeMask')" />
+            <set field="accountCodePattern"
+                from="glAccountCodeMask ? glAccountCodeMask.replaceAll('[^#]', '').replaceAll('#', '_') : null" />
             <if condition="trialBalance == true">
                 <entity-find entity-name="growerp.ledger.account.GlAccountAndOrganization"
                     list="glAccountList" offset="start">
                     <econdition field-name="organizationPartyId" from="companyPartyId" />
+                    <econdition field-name="accountCode" operator="like"
+                        from="accountCodePattern" ignore-if-empty="true" />
                     <econdition field-name="postedBalance" operator="not-equals"
                         from="BigDecimal.ZERO" />
                     <order-by field-name="accountCode" />
@@ -1201,6 +1208,8 @@ along with this software (see the LICENSE.md file). If not, see
                         <econdition field-name="organizationPartyId" from="companyPartyId" />
                         <econdition field-name="glAccountId"
                             from="glAccountId" ignore-if-empty="true" />
+                        <econdition field-name="accountCode" operator="like"
+                            from="accountCodePattern" ignore-if-empty="true" />
                         <econditions combine="or">
                             <econdition field-name="accountName" operator="like" ignore-case="true"
                                 from="search" ignore-if-empty="true" />

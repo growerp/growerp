@@ -42,11 +42,10 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
     on<NotificationSend>(_onNotificationSend);
     // Set up WS subscription once auth (and thus WS connect) completes.
     authBloc.stream.listen((authState) {
-      debugPrint(
-        'NotificationBloc: authState=${authState.status} _subscribed=$_subscribed',
-      );
       if (authState.status == AuthStatus.authenticated && !_subscribed) {
         add(const NotificationFetch());
+      } else if (authState.status == AuthStatus.unAuthenticated) {
+        _subscribed = false;
       }
     });
   }
@@ -61,13 +60,30 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
     Emitter<NotificationState> emit,
   ) async {
     try {
+      debugPrint(
+        'NotificationFetch: _subscribed=$_subscribed '
+        'isConnected=${notificationClient.isConnected}',
+      );
       if (!_subscribed && notificationClient.isConnected) {
         _subscribed = true;
-        notificationClient.send("subscribe: ALL");
+        try {
+          notificationClient.send("subscribe: ALL");
+        } catch (e) {
+          debugPrint('WS subscribe send error: $e');
+          _subscribed = false;
+          return;
+        }
         notificationClient.stream().listen(
-          (data) => add(
-            NotificationReceive(NotificationWs.fromJson(jsonDecode(data))),
-          ),
+          (data) {
+            debugPrint('WS notification received: $data');
+            try {
+              add(NotificationReceive(NotificationWs.fromJson(jsonDecode(data))));
+            } catch (e) {
+              debugPrint('WS notification parse error: $e');
+            }
+          },
+          onError: (e) => debugPrint('WS stream error: $e'),
+          cancelOnError: false,
         );
       }
 
