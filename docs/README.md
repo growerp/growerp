@@ -81,6 +81,7 @@ This directory contains comprehensive documentation for extending and developing
 ### 🤖 AI Integration
 
 - **[GrowERP AI Development Instructions](./GrowERP_AI_Instructions.md)** - AI-assisted development
+- **[Generative AI Integration Guide](./GrowERP_AI_Integration_Guide.md)** - Guide to all AI-integrated features (Gemini, Vertex AI, Veo 2, GenUI Onboarding) ⭐ **NEW FEATURE!**
 - **[Model Context Protocol (MCP) Server](../moqui/runtime/component/growerp/docs/README.md)** - AI integration system
 - **[Invoice Scan Documentation](./Invoice_Scan_Documentation.md)** - AI-powered invoice processing ⭐ **NEW FEATURE!**
 
