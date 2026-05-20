@@ -275,7 +275,12 @@ jobs:
         run: |
           SUCCEEDED=$(ls /tmp/build-success/*.txt 2>/dev/null \
             | xargs -I{} basename {} .txt | sort | tr '\n' ', ' | sed 's/, $//')
+          NEW_VERSION=$(grep '^version:' flutter/packages/growerp_core/pubspec.yaml 2>/dev/null \
+            | head -1 | awk '{print $2}')
           MSG="chore: update staging — ${{ inputs.bump }} bump"
+          if [ -n "$NEW_VERSION" ]; then
+            MSG="$MSG — new version: $NEW_VERSION"
+          fi
           if [ -n "$SUCCEEDED" ]; then
             MSG="$MSG — images pushed: $SUCCEEDED"
           fi
