@@ -164,7 +164,9 @@
       "Bash(git log *)",
       "Bash(git status *)",
       "Bash(git show *)",
-      "Bash(find *)"
+      "Bash(find *)",
+      "Bash(ls *)",
+      "Bash(cd *)"
     ]
   }
 }
