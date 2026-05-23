@@ -56,12 +56,12 @@ const coreMenuConfig = MenuConfiguration(
       isActive: true,
     ),
     MenuItem(
-      menuItemId: 'CORE_MCP',
-      title: 'MCP Chat',
-      route: '/mcp',
+      menuItemId: 'CORE_ADK',
+      title: 'AI Chat',
+      route: '/chat',
       iconName: 'smart_toy',
       sequenceNum: 40,
-      widgetName: 'McpChatView',
+      widgetName: 'AdkChatView',
       isActive: true,
     ),
   ],
@@ -125,7 +125,7 @@ List<Map<String, GrowerpWidgetBuilder>> coreWidgetRegistrations = [
     'CoreDashboard': (args) => const CoreDashboard(),
     'AboutForm': (args) => const AboutForm(),
     'SystemSetupDialog': (args) => const SystemSetupDialog(),
-    'McpChatView': (args) {
+    'AdkChatView': (args) {
           // Dialog builders per route — dialog:true so popUp frame with close
           // button is shown. Registry uses dialog:false (full-screen nav mode).
           final routeDialogBuilders = <String, WidgetBuilder>{
@@ -138,10 +138,10 @@ List<Map<String, GrowerpWidgetBuilder>> coreWidgetRegistrations = [
               dialog: true,
             ),
           };
-          return McpChatView(
+          return AdkChatView(
             menuItems: coreMenuConfig.menuItems
                 .where((m) => m.isActive && m.route != null)
-                .map((m) => McpMenuEntry(
+                .map((m) => ChatMenuEntry(
                       title: m.title,
                       route: m.route!,
                       dialogBuilder: routeDialogBuilders[m.route],

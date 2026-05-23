@@ -19,4 +19,4 @@ export 'src/domains/authenticate/authenticate.dart';
 export 'src/rest_request/rest_request.dart';
 export 'src/common/translate_bloc_messages.dart';
 export 'src/domains/integration_test.dart';
-export 'src/mcp/mcp_chat_view.dart';
+export 'src/adk/adk_chat_view.dart';
