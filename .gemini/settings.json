@@ -153,6 +153,9 @@
       }
     }
   },
+  "model": {
+    "name": "gemini-3.5-flash"
+  },
   "permissions": {
     "allow": [
       "Bash(grep *)",

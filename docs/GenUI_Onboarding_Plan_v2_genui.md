@@ -10,7 +10,7 @@ New GrowERP tenants face an empty, complex ERP with no navigation configured. Th
 
 **Core principle:** Gemini generates all question text, option labels, and menu items dynamically from what the user types. No hardcoded lists. The Flutter widgets are generic `CatalogItem` renderers; Gemini fills every field.
 
-**LLM:** Gemini Flash (`gemini-2.5-flash`) via Moqui backend proxy — API key stays server-side.
+**LLM:** Gemini Flash (`gemini-3.5-flash`) via Moqui backend proxy — API key stays server-side.
 
 ### Existing screens — how they integrate
 
@@ -216,7 +216,7 @@ def fullPrompt = systemPrompt + "\n\n" +
 
 try {
     jsonl = aiUtil.callGeminiApi(ec, fullPrompt,
-        [model: "gemini-2.5-flash", maxOutputTokens: 1024, jsonMode: false])
+        [model: "gemini-3.5-flash", maxOutputTokens: 1024, jsonMode: false])
 } catch (Exception e) {
     ec.message.addError("Gemini error: ${e.message}")
 }

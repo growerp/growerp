@@ -32,7 +32,7 @@ import groovy.json.JsonOutput
 
 class GeminiAiUtil {
     
-    static final String DEFAULT_MODEL = "gemini-2.5-flash"
+    static final String DEFAULT_MODEL = "gemini-3.5-flash"
     static final String API_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models"
     
     /**
@@ -55,7 +55,7 @@ class GeminiAiUtil {
         }
         
         // Configuration with defaults
-        def model = options.model ?: DEFAULT_MODEL
+        def model = options.model ?: ec.user.getPreference("GEMINI_MODEL") ?: System.getenv("GEMINI_MODEL") ?: System.getProperty("GEMINI_MODEL") ?: DEFAULT_MODEL
         def temperature = options.temperature ?: 0.7
         def topK = options.topK ?: 40
         def topP = options.topP ?: 0.95

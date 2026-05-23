@@ -20,7 +20,7 @@ AI inside GrowERP is primarily powered by **Google Gemini 2.5 Flash** (via direc
     *   Implements retry logic with exponential backoff for handling API rate limits (`429` responses).
     *   Retrieves authorization key from User Preferences (`GEMINI_API_KEY`) with fallback to system environment variables.
     *   Supports dynamic parameter binding (e.g., custom model choice, temperature settings, max token lengths).
-    *   Standardizes standard model usage with a default model configuration of `gemini-2.5-flash`.
+    *   Standardizes standard model usage with a default model configuration of `gemini-3.5-flash`.
 
 ---
 
@@ -161,4 +161,4 @@ The Flutter app leverages these backend services through its state-management an
 ---
 
 > [!NOTE]
-> All direct integrations with Gemini models use `gemini-2.5-flash` for high-speed, cost-effective generation. Complex multi-step generations (like landing pages or media nurture sequences) include built-in exponential delay retries to safely handle rate limits.
+> All direct integrations with Gemini models use `gemini-3.5-flash` for high-speed, cost-effective generation. Complex multi-step generations (like landing pages or media nurture sequences) include built-in exponential delay retries to safely handle rate limits.

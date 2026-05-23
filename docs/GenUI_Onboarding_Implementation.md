@@ -15,7 +15,7 @@ OnboardingDialog
   │ POST /rest/s1/growerp/100/OnboardingChat
   │  { classificationId,    ──► onboardingChat.groovy
   │    systemPrompt,             │ flattens history → prompt
-  │    messages (history) }      │ POST generateContent    ──► gemini-2.5-flash
+  │    messages (history) }      │ POST generateContent    ──► gemini-3.5-flash
   │                              │                         ◄── A2UI JSONL text
   │  { jsonl }              ◄──  └ returns jsonl field
   │
@@ -30,7 +30,7 @@ OnboardingDialog
 | File | Purpose |
 |------|---------|
 | `backend/service/growerp/100/OnboardingServices100.xml` | Service definitions: `chat#Onboarding`, `save#Onboarding` |
-| `backend/service/onboardingChat.groovy` | Calls Gemini 2.5 Flash, returns A2UI JSONL |
+| `backend/service/onboardingChat.groovy` | Calls Gemini 3.5 Flash, returns A2UI JSONL |
 | `backend/service/onboardingSave.groovy` | Persists menu config + conversation log |
 | `backend/service/growerp.rest.xml` | REST endpoints: `POST /OnboardingChat`, `POST /OnboardingSave` |
 
