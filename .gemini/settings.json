@@ -166,6 +166,8 @@
       "Bash(git show *)",
       "Bash(find *)",
       "Bash(ls *)",
+      "Bash(sed *)",
+      "Bash(awk *)",
       "Bash(cd *)"
     ]
   }

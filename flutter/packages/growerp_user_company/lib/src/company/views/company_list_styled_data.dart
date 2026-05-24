@@ -19,6 +19,7 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 import '../company.dart';
+import 'rest_request_stats_dialog.dart';
 
 /// Returns column definitions for company list based on device type
 List<StyledColumn> getCompanyListColumns(BuildContext context) {
@@ -135,16 +136,36 @@ List<Widget> getCompanyListRow({
     );
   }
 
-  // Delete action (both phone and desktop)
+  // Actions (both phone and desktop)
   cells.add(
-    IconButton(
-      key: Key("delete$index"),
-      icon: const Icon(Icons.delete_forever),
-      padding: EdgeInsets.zero,
-      constraints: const BoxConstraints(),
-      onPressed: () {
-        bloc.add(CompanyDelete(company.copyWith(image: null)));
-      },
+    Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        IconButton(
+          key: Key("stats$index"),
+          icon: const Icon(Icons.bar_chart),
+          padding: EdgeInsets.zero,
+          constraints: const BoxConstraints(),
+          onPressed: () {
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return RestRequestStatsDialog(company: company);
+              },
+            );
+          },
+        ),
+        const SizedBox(width: 8),
+        IconButton(
+          key: Key("delete$index"),
+          icon: const Icon(Icons.delete_forever),
+          padding: EdgeInsets.zero,
+          constraints: const BoxConstraints(),
+          onPressed: () {
+            bloc.add(CompanyDelete(company.copyWith(image: null)));
+          },
+        ),
+      ],
     ),
   );
 

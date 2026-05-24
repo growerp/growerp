@@ -120,7 +120,7 @@ class CompanyFormState extends State<CompanyDialog> {
     switch (widget.company.partyId) {
       case null:
         // main company
-        company = authenticate.company!;
+        company = authenticate.company ?? Company();
       case '_NEW_':
         company = widget.company.copyWith(partyId: null);
       default:
@@ -366,9 +366,9 @@ class CompanyFormState extends State<CompanyDialog> {
               controller: _idController,
             ),
           ),
-          if (authenticate.company!.partyId != company.partyId)
+          if (authenticate.company?.partyId != company.partyId)
             const SizedBox(width: 10),
-          if (authenticate.company!.partyId != company.partyId)
+          if (authenticate.company?.partyId != company.partyId)
             Expanded(
               child: DropdownButtonFormField<Role>(
                 key: const Key('role'),

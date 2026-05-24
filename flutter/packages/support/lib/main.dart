@@ -214,7 +214,6 @@ List<LocalizationsDelegate> delegates = [
   ActivityLocalizations.delegate,
 ];
 
-/// Widget registrations for all packages used by Support app
 List<Map<String, GrowerpWidgetBuilder>> supportWidgetRegistrations = [
   getUserCompanyWidgets(),
   getActivityWidgets(),
@@ -222,7 +221,6 @@ List<Map<String, GrowerpWidgetBuilder>> supportWidgetRegistrations = [
   {
     'AboutForm': (args) => const AboutForm(),
     'ApplicationList': (args) => const ApplicationList(),
-    'RestRequestList': (args) => const RestRequestList(),
     'GenUiCatalogScreen': (args) => const GenUiCatalogScreen(),
   },
 ];
@@ -235,9 +233,6 @@ List<BlocProvider> getSupportBlocProviders(
     ...getUserCompanyBlocProviders(restClient, classificationId),
     BlocProvider<ApplicationBloc>(
       create: (context) => ApplicationBloc(restClient),
-    ),
-    BlocProvider<RestRequestBloc>(
-      create: (context) => RestRequestBloc(restClient),
     ),
   ];
 }

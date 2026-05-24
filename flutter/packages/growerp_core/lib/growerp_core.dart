@@ -16,7 +16,7 @@ export 'src/services/ai_navigation_service.dart';
 export 'src/services/deep_link_service.dart';
 export 'src/get_core_bloc_providers.dart';
 export 'src/domains/authenticate/authenticate.dart';
-export 'src/rest_request/rest_request.dart';
+
 export 'src/common/translate_bloc_messages.dart';
 export 'src/domains/integration_test.dart';
 export 'src/adk/adk_chat_view.dart';
