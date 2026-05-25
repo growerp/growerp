@@ -162,6 +162,14 @@ class _AdminAppState extends State<AdminApp> {
                 widgetLoader: WidgetRegistry.getWidget,
                 appTitle: 'GrowERP Administrator',
                 deepLinkService: _deepLinkService,
+                dashboardFabBuilder: (_) => Builder(
+                  builder: (ctx) => FloatingActionButton(
+                    key: const Key('adkChatFab'),
+                    tooltip: 'AI Assistant',
+                    onPressed: () => AdkChatDialog.show(ctx),
+                    child: const Icon(Icons.smart_toy),
+                  ),
+                ),
               ),
             );
           } else {

@@ -88,6 +88,14 @@ GoRouter createDynamicCoreRouter(
     config: DynamicRouterConfig(
       widgetLoader: WidgetRegistry.getWidget,
       appTitle: 'Core Example',
+      dashboardFabBuilder: (_) => Builder(
+        builder: (ctx) => FloatingActionButton(
+          key: const Key('adkChatFab'),
+          tooltip: 'AI Assistant',
+          onPressed: () => AdkChatDialog.show(ctx),
+          child: const Icon(Icons.smart_toy),
+        ),
+      ),
     ),
   );
 }

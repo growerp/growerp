@@ -146,6 +146,14 @@ class _FreelanceAppState extends State<FreelanceApp> {
                 dashboardBuilder: () => const FreelanceDbForm(),
                 widgetLoader: WidgetRegistry.getWidget,
                 appTitle: 'GrowERP Freelance',
+                dashboardFabBuilder: (_) => Builder(
+                  builder: (ctx) => FloatingActionButton(
+                    key: const Key('adkChatFab'),
+                    tooltip: 'AI Assistant',
+                    onPressed: () => AdkChatDialog.show(ctx),
+                    child: const Icon(Icons.smart_toy),
+                  ),
+                ),
               ),
               rootNavigatorKey: GlobalKey<NavigatorState>(),
             );

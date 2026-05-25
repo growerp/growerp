@@ -20,3 +20,4 @@ export 'src/domains/authenticate/authenticate.dart';
 export 'src/common/translate_bloc_messages.dart';
 export 'src/domains/integration_test.dart';
 export 'src/adk/adk_chat_view.dart';
+export 'src/adk/adk_chat_dialog.dart';
