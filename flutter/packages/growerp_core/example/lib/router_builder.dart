@@ -88,31 +88,6 @@ GoRouter createDynamicCoreRouter(
     config: DynamicRouterConfig(
       widgetLoader: WidgetRegistry.getWidget,
       appTitle: 'Core Example',
-      dashboardFabBuilder: menuConfigBloc == null
-          ? null
-          : (menuConfig) => Builder(
-                builder: (fabContext) => FloatingActionButton(
-                  key: const Key('coreFab'),
-                  heroTag: 'menuFab',
-                  tooltip: 'Manage Menu Items',
-                  onPressed: () {
-                    // Use backend-loaded config from bloc when available (has
-                    // correct menuConfigurationId); fall back to static config.
-                    final currentConfig =
-                        menuConfigBloc.state.menuConfiguration ?? menuConfig;
-                    showDialog(
-                      context: fabContext,
-                      builder: (dialogContext) => BlocProvider.value(
-                        value: menuConfigBloc,
-                        child: MenuItemListDialog(
-                          menuConfiguration: currentConfig,
-                        ),
-                      ),
-                    );
-                  },
-                  child: const Icon(Icons.menu),
-                ),
-              ),
     ),
   );
 }

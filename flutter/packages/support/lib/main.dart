@@ -141,25 +141,6 @@ class _SupportAppState extends State<SupportApp> {
                 dashboardBuilder: () => const SupportDashboardContent(),
                 widgetLoader: WidgetRegistry.getWidget,
                 appTitle: 'GrowERP Support',
-                dashboardFabBuilder: (menuConfig) => Builder(
-                  builder: (fabContext) => FloatingActionButton(
-                    key: const Key('menuFab'),
-                    heroTag: 'menuFab',
-                    tooltip: 'Manage Menu Items',
-                    onPressed: () {
-                      showDialog(
-                        context: fabContext,
-                        builder: (dialogContext) => BlocProvider.value(
-                          value: fabContext.read<MenuConfigBloc>(),
-                          child: MenuItemListDialog(
-                            menuConfiguration: menuConfig,
-                          ),
-                        ),
-                      );
-                    },
-                    child: const Icon(Icons.menu),
-                  ),
-                ),
                 deepLinkService: _deepLinkService,
               ),
             );

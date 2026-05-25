@@ -13,44 +13,15 @@
  */
 
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 
-/// Accounting dashboard for the Freelance app.
-/// Uses the shared AccountingDashboard with FREELANCE_ACC_ prefix
-/// and includes a FAB for menu management.
 class AccountingForm extends StatelessWidget {
   const AccountingForm({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<MenuConfigBloc, MenuConfigState>(
-      builder: (context, state) {
-        final menuConfig = state.menuConfiguration;
-
-        return AccountingDashboard(
-          menuOptionPrefix: 'FREELANCE_ACC_',
-          floatingActionButton: menuConfig != null
-              ? FloatingActionButton(
-                  key: const Key('accountingFab'),
-                  tooltip: 'Manage Menu Items',
-                  onPressed: () {
-                    showDialog(
-                      context: context,
-                      builder: (dialogContext) => BlocProvider.value(
-                        value: context.read<MenuConfigBloc>(),
-                        child: MenuItemListDialog(
-                          menuConfiguration: menuConfig,
-                        ),
-                      ),
-                    );
-                  },
-                  child: const Icon(Icons.menu),
-                )
-              : null,
-        );
-      },
+    return const AccountingDashboard(
+      menuOptionPrefix: 'FREELANCE_ACC_',
     );
   }
 }
