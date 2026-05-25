@@ -19,6 +19,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:growerp_models/growerp_models.dart';
+import '../domains/authenticate/blocs/auth_bloc.dart';
 import '../domains/common/bloc/menu_config_bloc.dart';
 import '../services/build_dio_client.dart';
 
@@ -60,9 +61,9 @@ class _AdkChatViewState extends State<AdkChatView> {
   final List<_Msg> _messages = [];
 
   static const _adkAppName = 'moqui-adk';
-  static const _adkUserId = 'flutter-user';
 
   Dio? _dio;
+  String _adkUserId = 'anonymous';
   bool _ready = false;
   bool _busy = false;
   String? _sessionId;
@@ -84,6 +85,7 @@ class _AdkChatViewState extends State<AdkChatView> {
 
   Future<void> _connect() async {
     setState(() => _busy = true);
+    _adkUserId = context.read<AuthBloc>().state.authenticate?.user?.userId ?? 'anonymous';
     _dio = await buildDioClient();
     final baseUrl = _dio!.options.baseUrl.replaceAll(RegExp(r'/$'), '');
     _addMsg(_Msg.system('Connecting to ADK agent at $baseUrl/adk …'));
