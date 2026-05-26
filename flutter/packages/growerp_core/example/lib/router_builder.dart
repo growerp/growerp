@@ -64,6 +64,15 @@ const coreMenuConfig = MenuConfiguration(
       widgetName: 'AdkChatView',
       isActive: true,
     ),
+    MenuItem(
+      menuItemId: 'CORE_ADK_AGENTS',
+      title: 'AI Agents',
+      route: '/adk-agents',
+      iconName: 'smart_toy',
+      sequenceNum: 50,
+      widgetName: 'AdkAgentListView',
+      isActive: true,
+    ),
   ],
 );
 
@@ -108,6 +117,7 @@ List<Map<String, GrowerpWidgetBuilder>> coreWidgetRegistrations = [
     'CoreDashboard': (args) => const CoreDashboard(),
     'AboutForm': (args) => const AboutForm(),
     'SystemSetupDialog': (args) => const SystemSetupDialog(),
+    'AdkAgentListView': (args) => const AdkAgentListView(),
     'AdkChatView': (args) {
           // Dialog builders per route — dialog:true so popUp frame with close
           // button is shown. Registry uses dialog:false (full-screen nav mode).

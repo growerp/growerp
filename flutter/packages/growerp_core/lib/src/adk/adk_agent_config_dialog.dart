@@ -1,0 +1,268 @@
+/*
+ * This GrowERP software is in the public domain under CC0 1.0 Universal plus a
+ * Grant of Patent License.
+ *
+ * To the extent possible under law, the author(s) have dedicated all
+ * copyright and related and neighboring rights to this software to the
+ * public domain worldwide. This software is distributed without any
+ * warranty.
+ *
+ * You should have received a copy of the CC0 Public Domain Dedication
+ * along with this software (see the LICENSE.md file). If not, see
+ * <http://creativecommons.org/publicdomain/zero/1.0/>.
+ */
+
+import 'package:flutter/material.dart';
+import 'adk_agent_config_model.dart';
+import 'adk_config_service.dart';
+
+/// Dialog to create or edit an [AdkAgentConfig].
+/// Returns the saved [AdkAgentConfig] (with the generated ID) or null if cancelled.
+class AdkAgentConfigDialog extends StatefulWidget {
+  final AdkAgentConfig? existing;
+
+  const AdkAgentConfigDialog({super.key, this.existing});
+
+  static Future<AdkAgentConfig?> show(
+    BuildContext context, {
+    AdkAgentConfig? existing,
+  }) =>
+      showDialog<AdkAgentConfig>(
+        context: context,
+        builder: (_) => AdkAgentConfigDialog(existing: existing),
+      );
+
+  @override
+  State<AdkAgentConfigDialog> createState() => _AdkAgentConfigDialogState();
+}
+
+class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
+  final _formKey = GlobalKey<FormState>();
+  final _nameCtrl = TextEditingController();
+  final _modelCtrl = TextEditingController();
+  final _instructionCtrl = TextEditingController();
+  final _descriptionCtrl = TextEditingController();
+  final _apiKeyCtrl = TextEditingController();
+  final _scheduleCronCtrl = TextEditingController();
+  final _schedulePromptCtrl = TextEditingController();
+  final _chatRoomIdCtrl = TextEditingController();
+
+  bool _scheduleEnabled = false;
+  bool _saving = false;
+
+  static const _cronHints = [
+    ('Every minute', '0 * * * * ?'),
+    ('Every 5 minutes', '0 */5 * * * ?'),
+    ('Every hour', '0 0 * * * ?'),
+    ('Every day at 9am', '0 0 9 * * ?'),
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    final e = widget.existing;
+    if (e != null) {
+      _nameCtrl.text = e.agentName ?? '';
+      _modelCtrl.text = e.modelName ?? 'gemini-2.0-flash';
+      _instructionCtrl.text = e.instruction ?? '';
+      _descriptionCtrl.text = e.description ?? '';
+      _scheduleCronCtrl.text = e.scheduleExpression ?? '';
+      _schedulePromptCtrl.text = e.schedulePrompt ?? '';
+      _chatRoomIdCtrl.text = e.scheduleChatRoomId ?? '';
+      _scheduleEnabled = e.scheduleEnabled;
+    } else {
+      _modelCtrl.text = 'gemini-2.5-flash';
+    }
+  }
+
+  @override
+  void dispose() {
+    _nameCtrl.dispose();
+    _modelCtrl.dispose();
+    _instructionCtrl.dispose();
+    _descriptionCtrl.dispose();
+    _apiKeyCtrl.dispose();
+    _scheduleCronCtrl.dispose();
+    _schedulePromptCtrl.dispose();
+    _chatRoomIdCtrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _save() async {
+    if (!_formKey.currentState!.validate()) return;
+    setState(() => _saving = true);
+    try {
+      final svc = await AdkConfigService.create();
+      final cfg = AdkAgentConfig(
+        adkAgentConfigId: widget.existing?.adkAgentConfigId,
+        agentName: _nameCtrl.text.trim(),
+        modelName: _modelCtrl.text.trim(),
+        instruction: _instructionCtrl.text.trim(),
+        description: _descriptionCtrl.text.trim(),
+        scheduleExpression:
+            _scheduleEnabled ? _scheduleCronCtrl.text.trim() : null,
+        scheduleEnabled: _scheduleEnabled,
+        schedulePrompt:
+            _scheduleEnabled ? _schedulePromptCtrl.text.trim() : null,
+        scheduleChatRoomId:
+            _chatRoomIdCtrl.text.trim().isEmpty
+                ? null
+                : _chatRoomIdCtrl.text.trim(),
+      );
+      final apiKey = _apiKeyCtrl.text.trim();
+      final id = await svc.save(cfg, apiKey: apiKey.isEmpty ? null : apiKey);
+      if (mounted) {
+        Navigator.of(context).pop(cfg.copyWith(adkAgentConfigId: id));
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Save failed: $e'), backgroundColor: Colors.red),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isNew = widget.existing == null;
+    return AlertDialog(
+      title: Text(isNew ? 'New ADK Agent' : 'Edit ADK Agent'),
+      content: SizedBox(
+        width: 480,
+        child: Form(
+          key: _formKey,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TextFormField(
+                  key: const Key('agentName'),
+                  controller: _nameCtrl,
+                  decoration: const InputDecoration(labelText: 'Agent name *'),
+                  validator: (v) =>
+                      (v == null || v.trim().isEmpty) ? 'Required' : null,
+                ),
+                const SizedBox(height: 8),
+                TextFormField(
+                  key: const Key('modelName'),
+                  controller: _modelCtrl,
+                  decoration: const InputDecoration(
+                    labelText: 'Model',
+                    hintText: 'gemini-2.5-flash',
+                  ),
+                ),
+                const SizedBox(height: 8),
+                TextFormField(
+                  key: const Key('instruction'),
+                  controller: _instructionCtrl,
+                  decoration: const InputDecoration(
+                    labelText: 'Instruction (system prompt)',
+                    hintText: 'You are a helpful assistant…',
+                  ),
+                  maxLines: 3,
+                ),
+                const SizedBox(height: 8),
+                TextFormField(
+                  key: const Key('description'),
+                  controller: _descriptionCtrl,
+                  decoration:
+                      const InputDecoration(labelText: 'Description (optional)'),
+                ),
+                const SizedBox(height: 8),
+                TextFormField(
+                  key: const Key('apiKey'),
+                  controller: _apiKeyCtrl,
+                  decoration: InputDecoration(
+                    labelText: isNew
+                        ? 'Google API key (leave blank to use server default)'
+                        : 'New API key (leave blank to keep existing)',
+                  ),
+                  obscureText: true,
+                ),
+                const Divider(height: 24),
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Enable scheduled runs'),
+                  value: _scheduleEnabled,
+                  onChanged: (v) => setState(() => _scheduleEnabled = v),
+                ),
+                if (_scheduleEnabled) ...[
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextFormField(
+                          key: const Key('scheduleExpression'),
+                          controller: _scheduleCronCtrl,
+                          decoration: const InputDecoration(
+                            labelText: 'Cron expression *',
+                            hintText: '0 * * * * ?',
+                          ),
+                          validator: (v) => (_scheduleEnabled &&
+                                  (v == null || v.trim().isEmpty))
+                              ? 'Required when schedule enabled'
+                              : null,
+                        ),
+                      ),
+                      PopupMenuButton<String>(
+                        tooltip: 'Quick schedules',
+                        icon: const Icon(Icons.schedule),
+                        onSelected: (v) =>
+                            setState(() => _scheduleCronCtrl.text = v),
+                        itemBuilder: (_) => _cronHints
+                            .map(
+                              (h) => PopupMenuItem<String>(
+                                value: h.$2,
+                                child: Text('${h.$1}  (${h.$2})'),
+                              ),
+                            )
+                            .toList(),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  TextFormField(
+                    key: const Key('schedulePrompt'),
+                    controller: _schedulePromptCtrl,
+                    decoration: const InputDecoration(
+                      labelText: 'Prompt for each scheduled run',
+                      hintText: 'What is the current time?',
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  TextFormField(
+                    key: const Key('scheduleChatRoomId'),
+                    controller: _chatRoomIdCtrl,
+                    decoration: const InputDecoration(
+                      labelText: 'Chat room ID for delivery (optional)',
+                      hintText: 'Leave blank to log only',
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: _saving ? null : () => Navigator.of(context).pop(),
+          child: const Text('Cancel'),
+        ),
+        FilledButton(
+          onPressed: _saving ? null : _save,
+          child: _saving
+              ? const SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : const Text('Save'),
+        ),
+      ],
+    );
+  }
+}

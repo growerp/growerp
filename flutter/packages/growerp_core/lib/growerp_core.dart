@@ -21,3 +21,7 @@ export 'src/common/translate_bloc_messages.dart';
 export 'src/domains/integration_test.dart';
 export 'src/adk/adk_chat_view.dart';
 export 'src/adk/adk_chat_dialog.dart';
+export 'src/adk/adk_agent_config_model.dart';
+export 'src/adk/adk_config_service.dart';
+export 'src/adk/adk_agent_config_dialog.dart';
+export 'src/adk/adk_agent_list_view.dart';
