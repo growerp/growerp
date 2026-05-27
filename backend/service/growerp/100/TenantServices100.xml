@@ -230,6 +230,13 @@ along with this software (see the LICENSE.md file). If not, see
                 <log message="Trial subscription created: ${subscriptionResult.subscription?.pseudoId} - ${evaluationDays} days until ${thruDate} for subscriber ${subscriberPartyId}"/>
             </if>
 
+            <!-- Load ERP landing page data for GROWERP owner -->
+            <if condition="ownerPartyId == 'GROWERP'">
+                <script><![CDATA[
+                    ec.entity.makeDataLoader().location("component://growerp/data/ErpLandingPageData.xml").load()
+                ]]></script>
+            </if>
+
             <!-- Mark tenant setup as complete -->
             <service-call name="update#growerp.general.TenantSetup"
                 in-map="[ownerPartyId: ownerPartyId, setupComplete: 'Y', setupCompletedDate: ec.user.nowTimestamp]"/>
