@@ -39,6 +39,18 @@ android {
     }
 }
 
+// Force glance to version compatible with AGP 8.9.1 (1.3.0-alpha01 requires AGP 9.1.0+)
+configurations.all {
+    resolutionStrategy.eachDependency {
+        if (requested.group == "androidx.glance") {
+            useVersion("1.1.0")
+        }
+        if (requested.group == "androidx.compose.remote") {
+            useVersion("1.0.0-alpha05")
+        }
+    }
+}
+
 flutter {
     source = "../.."
 }
