@@ -335,7 +335,7 @@
 
     <!-- Footer -->
     <footer class="footer">
-        <p>© 2025 GrowERP. All rights reserved.</p>
+        <p>© ${.now?string('yyyy')} GrowERP. All rights reserved.</p>
         <p><a onclick="showPrivacyPolicy()">Privacy Policy</a></p>
     </footer>
 
