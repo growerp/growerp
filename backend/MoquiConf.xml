@@ -19,7 +19,11 @@
     </server-stats>
 
     <webapp-list>
-        <webapp name="webroot">
+        <!-- require-session-token=false: anonymous public POSTs (assessment submit,
+             Register, etc.) cannot obtain the CSRF token when embedded in an iframe whose
+             parent page already minted the session token. Authenticated requests (api_key/
+             JWT) are exempt regardless, so this only relaxes anonymous non-GET endpoints. -->
+        <webapp name="webroot" require-session-token="false">
             <!-- Notification Message Endpoint -->
             <endpoint path="/chat" class="org.moqui.impl.webapp.ChatEndpoint"
                 timeout="3600000" enabled="true" />
