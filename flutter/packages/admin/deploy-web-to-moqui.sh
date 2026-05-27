@@ -63,22 +63,28 @@ deploy_app() {
     echo -e "${YELLOW}Building Flutter web with WASM for ${APP}...${NC}"
     cd "$PACKAGE_DIR"
     
-    # For admin app, temporarily modify app_settings.json for local deployment
-    if [ "$APP" = "admin" ]; then
-        APP_SETTINGS="assets/cfg/app_settings.json"
-        APP_SETTINGS_BACKUP="assets/cfg/app_settings.json.backup"
-        cp "$APP_SETTINGS" "$APP_SETTINGS_BACKUP"
-        
-        echo -e "${YELLOW}Configuring for local deployment (using relative URLs)...${NC}"
-        sed -i 's|"databaseUrl": *"https://backend\.growerp\.com"|"databaseUrl": "/rest"|g' "$APP_SETTINGS"
-        sed -i 's|"chatUrl": *"wss://backend\.growerp\.com"|"chatUrl": "ws://localhost:8080/chat"|g' "$APP_SETTINGS"
-    fi
-    
-    flutter build web --wasm
+    # Temporarily modify app_settings.json so the built app talks to the local
+    # Moqui (relative /rest) instead of the production backend it ships with.
+    APP_SETTINGS="assets/cfg/app_settings.json"
+    APP_SETTINGS_BACKUP="assets/cfg/app_settings.json.backup"
+    cp "$APP_SETTINGS" "$APP_SETTINGS_BACKUP"
+
+    # Empty databaseUrl => baseUrl resolves to the serving origin ("/"), so the
+    # retrofit paths (which already start with "rest/") become "/rest/s1/...".
+    # Using "/rest" here would double to "/rest/rest/s1/..." and 404.
+    echo -e "${YELLOW}Configuring for local deployment (using relative URLs)...${NC}"
+    sed -i 's|"databaseUrl": *"https://backend\.growerp\.com"|"databaseUrl": ""|g' "$APP_SETTINGS"
+    sed -i 's|"chatUrl": *"wss://backend\.growerp\.com"|"chatUrl": "ws://localhost:8080/chat"|g' "$APP_SETTINGS"
+
+    # --pwa-strategy=none: do NOT generate or register a service worker. These apps are
+    # served inside Moqui (the assessment app runs in an iframe) and need no offline
+    # support. The SW only caused stale-bundle pain after every redeploy because
+    # version.json is not bumped, so browsers kept serving the previous build.
+    flutter build web --wasm --pwa-strategy=none
     BUILD_RESULT=$?
-    
-    # Restore original app_settings.json for admin app
-    if [ "$APP" = "admin" ] && [ -f "$APP_SETTINGS_BACKUP" ]; then
+
+    # Restore original app_settings.json
+    if [ -f "$APP_SETTINGS_BACKUP" ]; then
         echo -e "${YELLOW}Restoring original app_settings.json...${NC}"
         mv "$APP_SETTINGS_BACKUP" "$APP_SETTINGS"
     fi
@@ -93,13 +99,6 @@ deploy_app() {
     if [ ! -d "$FLUTTER_BUILD_DIR" ]; then
         echo -e "${RED}Error: Flutter build directory not found at $FLUTTER_BUILD_DIR${NC}"
         echo -e "${YELLOW}Please run 'flutter build web' first${NC}"
-        return 1
-    fi
-
-    # Check if flutter_service_worker.js exists
-    if [ ! -f "$FLUTTER_BUILD_DIR/flutter_service_worker.js" ]; then
-        echo -e "${RED}Error: flutter_service_worker.js not found in build directory${NC}"
-        echo -e "${YELLOW}Please ensure the Flutter web build completed successfully${NC}"
         return 1
     fi
 
@@ -299,23 +298,17 @@ NOTICE_EOF
         echo -e "${GREEN}✓ Base href fixed${NC}"
     fi
 
-    # Remove service worker registration from index.html (it's registered globally)
-    echo -e "Removing service worker registration from index.html (registered in root.html.ftl)..."
+    # Build with --pwa-strategy=none means no service worker is registered going forward.
+    # But browsers that visited a PREVIOUS deploy still have an old SW installed that will
+    # keep serving the stale bundle. Inject a snippet that unregisters any existing SW and
+    # drops its caches on load, so those clients self-heal without a manual cache clear.
+    echo -e "Injecting service-worker unregister snippet into index.html..."
     if [ -f "$MOQUI_TARGET_DIR/index.html" ]; then
-        perl -i -0pe 's/<script>\s*if \(.serviceWorker. in navigator\).*?<\/script>\s*//gs' "$MOQUI_TARGET_DIR/index.html"
-
-        sed -i "s|<script src=\"flutter_bootstrap.js\" async></script>|<!-- Service worker is already registered in root.html.ftl -->\n  <!-- Flutter bootstrap will find and use the already-registered and activated service worker -->\n  \n  <script src=\"flutter_bootstrap.js\" async></script>|g" "$MOQUI_TARGET_DIR/index.html"
-        echo -e "${GREEN}✓ Service worker registration removed${NC}"
+        perl -i -pe 's{(<script src="flutter_bootstrap\.js")}{<script>if("serviceWorker" in navigator){navigator.serviceWorker.getRegistrations().then(function(rs){rs.forEach(function(r){r.unregister()})});if(window.caches){caches.keys().then(function(ks){ks.forEach(function(k){caches.delete(k)})})}}</script>\n  $1}' "$MOQUI_TARGET_DIR/index.html"
+        echo -e "${GREEN}✓ SW unregister snippet injected${NC}"
     fi
 
     # Verify critical files were copied
-    if [ -f "$MOQUI_TARGET_DIR/flutter_service_worker.js" ]; then
-        echo -e "${GREEN}✓ flutter_service_worker.js deployed successfully${NC}"
-    else
-        echo -e "${RED}✗ flutter_service_worker.js deployment failed${NC}"
-        return 1
-    fi
-
     if [ -f "$MOQUI_TARGET_DIR/index.html" ]; then
         echo -e "${GREEN}✓ index.html deployed successfully${NC}"
     else
@@ -332,7 +325,6 @@ NOTICE_EOF
 
     echo -e "${GREEN}✓ Flutter ${APP} web build successfully deployed to Moqui!${NC}"
     echo -e "${YELLOW}Files are now accessible at: $BASE_PATH${NC}"
-    echo -e "${YELLOW}Service worker accessible at: ${BASE_PATH}flutter_service_worker.js${NC}"
     return 0
 }
 

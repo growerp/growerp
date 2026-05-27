@@ -60,13 +60,6 @@ class _LandingPageAssessmentFlowScreenState
             ownerPartyId: widget.ownerPartyId,
           ),
         );
-
-    // If direct assessment flow requested, skip landing page and go straight to assessment
-    if (widget.startAssessmentFlow) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _navigateToPage(1); // Page 1: Assessment
-      });
-    }
   }
 
   @override
@@ -120,7 +113,7 @@ class _LandingPageAssessmentFlowScreenState
           _buildLandingPageStep(),
 
           // Page 1: Assessment (includes lead capture internally)
-          if (_assessmentId != null) _buildAssessmentStep(),
+          _buildAssessmentStep(),
 
           // Page 2: Results & Next Steps
           _buildResultsStep(),
@@ -137,6 +130,11 @@ class _LandingPageAssessmentFlowScreenState
           setState(() {
             _assessmentId = state.selectedLandingPage!.ctaAssessmentId;
           });
+          if (widget.startAssessmentFlow) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              _navigateToPage(1);
+            });
+          }
         }
       },
       child: PublicLandingPageScreen(
@@ -149,7 +147,7 @@ class _LandingPageAssessmentFlowScreenState
 
   Widget _buildAssessmentStep() {
     if (_assessmentId == null) {
-      return const Center(child: Text('Assessment not available'));
+      return const Center(child: CircularProgressIndicator());
     }
 
     return AssessmentFlowScreen(
@@ -157,8 +155,7 @@ class _LandingPageAssessmentFlowScreenState
       ownerPartyId: widget.ownerPartyId,
       campaignId: widget.campaignId,
       onComplete: () {
-        // Navigate to results on assessment completion (Page 3: Results)
-        _navigateToPage(3);
+        _navigateToPage(2);
       },
     );
   }

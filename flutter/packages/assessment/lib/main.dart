@@ -162,7 +162,7 @@ class AssessmentApp extends StatelessWidget {
         ],
         supportedLocales: CoreLocalizations.supportedLocales,
         home: LandingPageAssessmentFlowScreen(
-          landingPageId: landingPageId ?? '',
+          landingPageId: pseudoId ?? landingPageId ?? '',
           ownerPartyId: ownerPartyId,
           startAssessmentFlow: true,
         ),

@@ -202,10 +202,13 @@ class KeyInterceptor extends Interceptor {
 
   @override
   void onResponse(Response response, ResponseInterceptorHandler handler) async {
-    await prefs.setString(
-      'moquiSessionToken',
-      response.headers['moquiSessionToken']?.first ?? '',
-    );
+    // Moqui only sends the moquiSessionToken header on the response that first
+    // creates it; later responses omit it. Only update when present so we don't
+    // wipe a valid token to empty (which breaks anonymous POSTs needing CSRF).
+    final token = response.headers['moquiSessionToken']?.first;
+    if (token != null && token.isNotEmpty) {
+      await prefs.setString('moquiSessionToken', token);
+    }
 
     return super.onResponse(response, handler);
   }
