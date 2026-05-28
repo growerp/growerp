@@ -226,7 +226,13 @@ class ChatState extends State<ChatDialog> {
                 messageController.text = '';
                 Timer(
                   const Duration(seconds: 1),
-                  () => _scrollController.jumpTo(0.0),
+                  () {
+                    if (_scrollController.hasClients) {
+                      _scrollController.jumpTo(
+                        _scrollController.position.maxScrollExtent,
+                      );
+                    }
+                  },
                 );
               },
             ),

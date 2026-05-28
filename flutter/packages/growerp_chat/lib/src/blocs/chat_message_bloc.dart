@@ -15,6 +15,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:equatable/equatable.dart';
@@ -48,6 +49,19 @@ class ChatMessageBloc extends Bloc<ChatMessageEvent, ChatMessageState> {
     );
     on<ChatMessageReceiveWs>(_onChatMessageReceiveWs);
     on<ChatMessageSendWs>(_onChatMessageSendWs);
+    _authSubscription = authBloc.stream.listen((authState) {
+      if (authState.status == AuthStatus.unAuthenticated) {
+        _wsSubscription?.cancel();
+        _wsSubscription = null;
+      }
+    });
+  }
+
+  @override
+  Future<void> close() {
+    _authSubscription?.cancel();
+    _wsSubscription?.cancel();
+    return super.close();
   }
 
   final RestClient restClient;
@@ -55,17 +69,20 @@ class ChatMessageBloc extends Bloc<ChatMessageEvent, ChatMessageState> {
   final AuthBloc authBloc;
   final ChatRoomBloc chatRoomBloc;
   int start = 0;
+  StreamSubscription? _wsSubscription;
+  StreamSubscription? _authSubscription;
 
   Future<void> _onChatMessageFetch(
     ChatMessageFetch event,
     Emitter<ChatMessageState> emit,
   ) async {
     if (state.status == ChatMessageStatus.initial) {
-      final myStream = chatClient.stream();
-      // ignore: unused_local_variable
-      final subscription = myStream.listen(
+      await _wsSubscription?.cancel();
+      _wsSubscription = chatClient.stream().listen(
         (data) =>
             add(ChatMessageReceiveWs(ChatMessage.fromJson(jsonDecode(data)))),
+        onError: (e) => debugPrint('ChatMessage WS stream error: $e'),
+        cancelOnError: false,
       );
     }
     try {
@@ -113,8 +130,7 @@ class ChatMessageBloc extends Bloc<ChatMessageEvent, ChatMessageState> {
     Emitter<ChatMessageState> emit,
   ) async {
     List<ChatMessage> chatMessages = List.from(state.chatMessages);
-    chatMessages.insert(
-      0,
+    chatMessages.add(
       ChatMessage(
         fromUserId: event.chatMessage.fromUserId,
         content: event.chatMessage.content,
@@ -136,11 +152,7 @@ class ChatMessageBloc extends Bloc<ChatMessageEvent, ChatMessageState> {
       chatClient.send(event.chatMessage);
       await restClient.createChatMessage(chatMessage: event.chatMessage);
       List<ChatMessage> chatMessages = List.from(state.chatMessages);
-      if (chatMessages.isEmpty) {
-        chatMessages.add(event.chatMessage);
-      } else {
-        chatMessages.insert(0, event.chatMessage);
-      }
+      chatMessages.add(event.chatMessage);
       emit(state.copyWith(chatMessages: chatMessages));
     } on DioException catch (e) {
       emit(
