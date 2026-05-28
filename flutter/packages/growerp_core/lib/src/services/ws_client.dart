@@ -133,7 +133,7 @@ class WsClient {
   }
 
   Stream<dynamic> stream() {
-    return _streamController!.stream;
+    return _streamController?.stream ?? const Stream.empty();
   }
 
   void close() {

@@ -14,6 +14,7 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
@@ -38,7 +39,9 @@ class ChatRoomBloc extends Bloc<ChatRoomEvent, ChatRoomState> {
   final WsClient chatClient;
   final AuthBloc authBloc;
   int start = 0;
+  bool _subscribed = false;
   StreamSubscription? _wsSubscription;
+  StreamSubscription? _authSubscription;
 
   ChatRoomBloc(this.restClient, this.chatClient, this.authBloc)
     : super(const ChatRoomState()) {
@@ -50,10 +53,19 @@ class ChatRoomBloc extends Bloc<ChatRoomEvent, ChatRoomState> {
     on<ChatRoomUpdate>(_onChatRoomUpdate);
     on<ChatRoomDelete>(_onChatRoomDelete);
     on<ChatRoomReceiveWsChatMessage>(_onChatRoomReceiveWsChatMessage);
+    // Reset the WS subscription on logout so the next login re-subscribes.
+    _authSubscription = authBloc.stream.listen((authState) {
+      if (authState.status == AuthStatus.unAuthenticated) {
+        _subscribed = false;
+        _wsSubscription?.cancel();
+        _wsSubscription = null;
+      }
+    });
   }
 
   @override
   Future<void> close() {
+    _authSubscription?.cancel();
     _wsSubscription?.cancel();
     return super.close();
   }
@@ -92,12 +104,23 @@ class ChatRoomBloc extends Bloc<ChatRoomEvent, ChatRoomState> {
     } else {
       start = state.chatRooms.length;
     }
-    if (state.status == ChatRoomStatus.initial) {
-      final myStream = chatClient.stream();
-      _wsSubscription = myStream.listen(
-        (data) => add(
-          ChatRoomReceiveWsChatMessage(ChatMessage.fromJson(jsonDecode(data))),
-        ),
+    if (!_subscribed && chatClient.isConnected) {
+      _subscribed = true;
+      await _wsSubscription?.cancel();
+      _wsSubscription = chatClient.stream().listen(
+        (data) {
+          try {
+            add(
+              ChatRoomReceiveWsChatMessage(
+                ChatMessage.fromJson(jsonDecode(data)),
+              ),
+            );
+          } catch (e) {
+            debugPrint('Chat WS parse error: $e');
+          }
+        },
+        onError: (e) => debugPrint('Chat WS stream error: $e'),
+        cancelOnError: false,
       );
     }
     try {
