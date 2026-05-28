@@ -13,6 +13,8 @@
  */
 
 import 'package:flutter/material.dart';
+import '../domains/common/functions/screen_size.dart';
+import '../domains/common/widgets/styled_data_table.dart';
 import 'adk_agent_config_dialog.dart';
 import 'adk_agent_config_model.dart';
 import 'adk_config_service.dart';
@@ -163,100 +165,117 @@ class _AdkAgentListViewState extends State<AdkAgentListView> {
       );
     }
 
-    return ListView.builder(
-      itemCount: _configs.length,
-      itemBuilder: (_, i) => _AgentTile(
-        config: _configs[i],
-        onEdit: () => _edit(_configs[i]),
-        onDelete: () => _delete(_configs[i]),
-      ),
-    );
-  }
-}
-
-class _AgentTile extends StatelessWidget {
-  final AdkAgentConfig config;
-  final VoidCallback onEdit;
-  final VoidCallback onDelete;
-
-  const _AgentTile({
-    required this.config,
-    required this.onEdit,
-    required this.onDelete,
-  });
-
-  @override
-  Widget build(BuildContext context) {
+    final phone = isAPhone(context);
     final cs = Theme.of(context).colorScheme;
-    final hasSchedule = config.scheduleEnabled &&
-        config.scheduleExpression != null &&
-        config.scheduleExpression!.isNotEmpty;
 
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: cs.secondaryContainer,
-          child: Icon(Icons.smart_toy, color: cs.onSecondaryContainer),
-        ),
-        title: Text(config.agentName ?? '(unnamed)'),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              config.modelName ?? 'gemini-2.0-flash',
-              style: TextStyle(fontSize: 11, color: cs.onSurfaceVariant),
-            ),
-            if (config.instruction != null && config.instruction!.isNotEmpty)
+    final columns = phone
+        ? const [
+            StyledColumn(header: '', flex: 1),
+            StyledColumn(header: 'Info', flex: 5),
+            StyledColumn(header: '', flex: 2),
+          ]
+        : const [
+            StyledColumn(header: '', flex: 1),
+            StyledColumn(header: 'Name', flex: 2),
+            StyledColumn(header: 'Model', flex: 2),
+            StyledColumn(header: 'Instruction', flex: 4),
+            StyledColumn(header: 'Schedule', flex: 2),
+            StyledColumn(header: '', flex: 1),
+          ];
+
+    final rows = _configs.map((cfg) {
+      final hasSchedule = cfg.scheduleEnabled &&
+          cfg.scheduleExpression != null &&
+          cfg.scheduleExpression!.isNotEmpty;
+
+      final avatar = CircleAvatar(
+        backgroundColor: cs.secondaryContainer,
+        child: Icon(Icons.smart_toy, color: cs.onSecondaryContainer),
+      );
+
+      final actions = Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          IconButton(
+            icon: const Icon(Icons.edit, size: 20),
+            tooltip: 'Edit',
+            onPressed: () => _edit(cfg),
+          ),
+          IconButton(
+            icon: Icon(Icons.delete, size: 20, color: cs.error),
+            tooltip: 'Delete',
+            onPressed: () => _delete(cfg),
+          ),
+        ],
+      );
+
+      if (phone) {
+        return [
+          avatar,
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
               Text(
-                config.instruction!.length > 80
-                    ? '${config.instruction!.substring(0, 80)}…'
-                    : config.instruction!,
+                cfg.agentName ?? '(unnamed)',
+                style: const TextStyle(fontWeight: FontWeight.w500),
+              ),
+              Text(
+                cfg.modelName ?? 'gemini-2.0-flash',
                 style: TextStyle(fontSize: 11, color: cs.onSurfaceVariant),
               ),
-            if (hasSchedule)
-              Padding(
-                padding: const EdgeInsets.only(top: 2),
-                child: Row(
-                  children: [
-                    Icon(Icons.schedule, size: 12, color: cs.primary),
-                    const SizedBox(width: 4),
-                    Text(
-                      config.scheduleExpression!,
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: cs.primary,
-                        fontFamily: 'monospace',
-                      ),
-                    ),
-                  ],
+              if (cfg.instruction != null && cfg.instruction!.isNotEmpty)
+                Text(
+                  cfg.instruction!.length > 60
+                      ? '${cfg.instruction!.substring(0, 60)}…'
+                      : cfg.instruction!,
+                  style: TextStyle(fontSize: 11, color: cs.onSurfaceVariant),
                 ),
-              ),
-          ],
+            ],
+          ),
+          actions,
+        ];
+      }
+
+      return [
+        avatar,
+        Text(cfg.agentName ?? '(unnamed)'),
+        Text(
+          cfg.modelName ?? 'gemini-2.0-flash',
+          style: TextStyle(fontSize: 13, color: cs.onSurfaceVariant),
         ),
-        isThreeLine: true,
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (hasSchedule)
-              Tooltip(
-                message: 'Scheduled: ${config.scheduleExpression}',
-                child: Icon(Icons.alarm_on, size: 18, color: cs.primary),
-              ),
-            IconButton(
-              icon: const Icon(Icons.edit, size: 20),
-              tooltip: 'Edit',
-              onPressed: onEdit,
-            ),
-            IconButton(
-              icon: Icon(Icons.delete, size: 20, color: cs.error),
-              tooltip: 'Delete',
-              onPressed: onDelete,
-            ),
-          ],
+        Text(
+          cfg.instruction != null && cfg.instruction!.length > 60
+              ? '${cfg.instruction!.substring(0, 60)}…'
+              : cfg.instruction ?? '',
+          style: TextStyle(fontSize: 13, color: cs.onSurfaceVariant),
         ),
-        onTap: onEdit,
-      ),
+        hasSchedule
+            ? Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.schedule, size: 14, color: cs.primary),
+                  const SizedBox(width: 4),
+                  Text(
+                    cfg.scheduleExpression!,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: cs.primary,
+                      fontFamily: 'monospace',
+                    ),
+                  ),
+                ],
+              )
+            : const SizedBox.shrink(),
+        actions,
+      ];
+    }).toList();
+
+    return StyledDataTable(
+      columns: columns,
+      rows: rows,
+      rowHeight: phone ? 80 : 56,
+      onRowTap: (index) => _edit(_configs[index]),
     );
   }
 }
