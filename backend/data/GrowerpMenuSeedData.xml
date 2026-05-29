@@ -536,6 +536,8 @@ along with this software (see the LICENSE.md file). If not, see
         title="AI Chat" route="/chat" iconName="smart_toy" widgetName="AdkChatView" sequenceNum="60"/>
     <growerp.menu.MenuItem menuItemId="CORE_EX_AIAGENTS" menuConfigurationId="CORE_EXAMPLE_DEFAULT"
         title="AI Agents" route="/adk-agents" iconName="smart_toy" widgetName="AdkAgentListView" sequenceNum="70"/>
+    <growerp.menu.MenuItem menuItemId="CORE_EX_AIJOBS" menuConfigurationId="CORE_EXAMPLE_DEFAULT"
+        title="Agent Jobs" route="/adk-jobs" iconName="schedule" widgetName="AdkJobListView" sequenceNum="80"/>
     <!-- Core Example children -->
     <growerp.menu.MenuItem menuItemId="CORE_EX_ORG_COMPANY" menuConfigurationId="CORE_EXAMPLE_DEFAULT" parentMenuItemId="CORE_EX_ORG"
         title="company" iconName="home" widgetName="ShowCompanyDialog" sequenceNum="10"/>

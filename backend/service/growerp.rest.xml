@@ -1147,6 +1147,38 @@ along with this software (see the LICENSE.md file). If not, see
                 <service name="growerp.100.LinerServices100.delete#LinerPanel" />
             </method>
         </resource>
+        <!-- ADK Agent Config & Job management -->
+        <resource name="AdkAgentConfig">
+            <method type="get">
+                <service name="AdkServices100.get#AdkAgentConfig"/>
+            </method>
+            <method type="post">
+                <service name="AdkServices100.create#AdkAgentConfig"/>
+            </method>
+            <method type="patch">
+                <service name="AdkServices100.update#AdkAgentConfig"/>
+            </method>
+            <method type="delete">
+                <service name="AdkServices100.delete#AdkAgentConfig"/>
+            </method>
+        </resource>
+        <resource name="AdkJob">
+            <method type="get">
+                <service name="AdkServices100.get#AdkJob"/>
+            </method>
+            <id name="jobName">
+                <resource name="clearLock">
+                    <method type="post">
+                        <service name="AdkServices100.update#AdkJobLock"/>
+                    </method>
+                </resource>
+                <resource name="paused">
+                    <method type="post">
+                        <service name="AdkServices100.update#AdkJobPaused"/>
+                    </method>
+                </resource>
+            </id>
+        </resource>
     </resource>
     <!-- Antwebsystems website -->
     <resource name="storecontents" require-authentication="anonymous-view">

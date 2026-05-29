@@ -15,8 +15,8 @@
 import 'package:flutter/material.dart';
 import '../domains/common/functions/screen_size.dart';
 import '../domains/common/widgets/styled_data_table.dart';
+import 'package:growerp_models/growerp_models.dart';
 import 'adk_agent_config_dialog.dart';
-import 'adk_agent_config_model.dart';
 import 'adk_config_service.dart';
 
 /// Screen that lists all ADK agent configs and lets users create / edit / delete them.
@@ -76,19 +76,19 @@ class _AdkAgentListViewState extends State<AdkAgentListView> {
   Future<void> _delete(AdkAgentConfig cfg) async {
     final confirm = await showDialog<bool>(
       context: context,
-      builder: (_) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: const Text('Delete agent?'),
         content: Text('Delete "${cfg.agentName}"? This cannot be undone.'),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context, false),
+            onPressed: () => Navigator.pop(dialogContext, false),
             child: const Text('Cancel'),
           ),
           FilledButton(
             style: FilledButton.styleFrom(
               backgroundColor: Theme.of(context).colorScheme.error,
             ),
-            onPressed: () => Navigator.pop(context, true),
+            onPressed: () => Navigator.pop(dialogContext, true),
             child: const Text('Delete'),
           ),
         ],

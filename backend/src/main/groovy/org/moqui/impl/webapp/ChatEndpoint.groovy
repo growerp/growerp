@@ -144,4 +144,23 @@ class ChatEndpoint extends MoquiAbstractEndpoint {
             }
         })
     }
+
+    /** Push a server-originated message to all connected WebSocket sessions whose userId is in memberUserIds. */
+    static void pushToMembers(String messageJson, List<String> memberUserIds) {
+        chatEndpoints.forEach(endpoint -> {
+            String toUserId = endpoint.getUserId()
+            if (toUserId != null && memberUserIds.contains(toUserId)) {
+                synchronized (endpoint) {
+                    try {
+                        if (endpoint.session != null && endpoint.session.isOpen()) {
+                            endpoint.session.asyncRemote.sendText(messageJson)
+                            logger.info("Chat push sent to ${toUserId}")
+                        }
+                    } catch (Exception e) {
+                        logger.warn("Chat push to ${toUserId} failed: ${e.message}")
+                    }
+                }
+            }
+        })
+    }
 }

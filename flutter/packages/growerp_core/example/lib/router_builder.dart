@@ -73,6 +73,15 @@ const coreMenuConfig = MenuConfiguration(
       widgetName: 'AdkAgentListView',
       isActive: true,
     ),
+    MenuItem(
+      menuItemId: 'CORE_ADK_JOBS',
+      title: 'Agent Jobs',
+      route: '/adk-jobs',
+      iconName: 'schedule',
+      sequenceNum: 60,
+      widgetName: 'AdkJobListView',
+      isActive: true,
+    ),
   ],
 );
 
@@ -118,6 +127,7 @@ List<Map<String, GrowerpWidgetBuilder>> coreWidgetRegistrations = [
     'AboutForm': (args) => const AboutForm(),
     'SystemSetupDialog': (args) => const SystemSetupDialog(),
     'AdkAgentListView': (args) => const AdkAgentListView(),
+    'AdkJobListView': (args) => const AdkJobListView(),
     'AdkChatView': (args) {
           // Dialog builders per route — dialog:true so popUp frame with close
           // button is shown. Registry uses dialog:false (full-screen nav mode).

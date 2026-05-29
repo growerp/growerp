@@ -12,49 +12,53 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import 'dart:convert';
-import 'package:dio/dio.dart';
+import 'package:growerp_models/growerp_models.dart';
 import '../services/build_dio_client.dart';
-import 'adk_agent_config_model.dart';
 
-/// Thin Dio wrapper for the /adk/configs REST endpoints added to AdkDevServlet.
 class AdkConfigService {
-  final Dio _dio;
+  final RestClient _client;
 
-  AdkConfigService._(this._dio);
+  AdkConfigService._(this._client);
 
   static Future<AdkConfigService> create() async {
-    final dio = await buildDioClient();
-    return AdkConfigService._(dio);
+    final client = RestClient(await buildDioClient());
+    return AdkConfigService._(client);
   }
 
   Future<List<AdkAgentConfig>> list() async {
-    final resp = await _dio.get<String>(
-      '/adk/configs',
-      options: Options(responseType: ResponseType.plain),
-    );
-    final data = jsonDecode(resp.data!) as List;
-    return data
-        .map((e) => AdkAgentConfig.fromJson(e as Map<String, dynamic>))
-        .toList();
+    final result = await _client.getAdkAgentConfigs();
+    return result.adkAgentConfigs;
   }
 
-  Future<String> save(AdkAgentConfig cfg, {String? apiKey}) async {
-    final body = cfg.toJson();
-    if (apiKey != null && apiKey.isNotEmpty) body['apiKey'] = apiKey;
-    final resp = await _dio.post<String>(
-      '/adk/configs',
-      data: jsonEncode(body),
-      options: Options(
-        contentType: 'application/json',
-        responseType: ResponseType.plain,
-      ),
+  Future<AdkAgentConfig> save(AdkAgentConfig cfg, {String? apiKey}) async {
+    if (cfg.adkAgentConfigId == null || cfg.adkAgentConfigId!.isEmpty) {
+      return _client.createAdkAgentConfig(
+        agentName: cfg.agentName,
+        modelName: cfg.modelName,
+        apiKey: apiKey,
+        instruction: cfg.instruction,
+        description: cfg.description,
+        scheduleExpression: cfg.scheduleExpression,
+        scheduleEnabled: cfg.scheduleEnabled,
+        schedulePrompt: cfg.schedulePrompt,
+        scheduleChatRoomId: cfg.scheduleChatRoomId,
+      );
+    }
+    return _client.updateAdkAgentConfig(
+      adkAgentConfigId: cfg.adkAgentConfigId!,
+      agentName: cfg.agentName,
+      modelName: cfg.modelName,
+      apiKey: apiKey,
+      instruction: cfg.instruction,
+      description: cfg.description,
+      scheduleExpression: cfg.scheduleExpression,
+      scheduleEnabled: cfg.scheduleEnabled,
+      schedulePrompt: cfg.schedulePrompt,
+      scheduleChatRoomId: cfg.scheduleChatRoomId,
     );
-    final result = jsonDecode(resp.data!) as Map<String, dynamic>;
-    return result['adkAgentConfigId'] as String;
   }
 
   Future<void> delete(String configId) async {
-    await _dio.delete<void>('/adk/configs/$configId');
+    await _client.deleteAdkAgentConfig(adkAgentConfigId: configId);
   }
 }

@@ -85,6 +85,9 @@ export 'agent_action_log_model.dart';
 export 'agent_dashboard_model.dart';
 export 'agent_instances_model.dart';
 export 'rate_limit_check_model.dart';
+// ADK models
+export 'adk_agent_config_model.dart';
+export 'adk_job_model.dart';
 // Course models
 export 'course_model.dart';
 export 'onboarding_models.dart';

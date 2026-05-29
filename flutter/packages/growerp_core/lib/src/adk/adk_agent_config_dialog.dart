@@ -13,7 +13,8 @@
  */
 
 import 'package:flutter/material.dart';
-import 'adk_agent_config_model.dart';
+import 'package:growerp_models/growerp_models.dart';
+import '../domains/common/widgets/popup.dart';
 import 'adk_config_service.dart';
 
 /// Dialog to create or edit an [AdkAgentConfig].
@@ -90,6 +91,17 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
 
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
+    if (_scheduleEnabled &&
+        _instructionCtrl.text.trim().isEmpty &&
+        _schedulePromptCtrl.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Set instruction or schedule prompt — at least one required'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
     setState(() => _saving = true);
     try {
       final svc = await AdkConfigService.create();
@@ -110,9 +122,9 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
                 : _chatRoomIdCtrl.text.trim(),
       );
       final apiKey = _apiKeyCtrl.text.trim();
-      final id = await svc.save(cfg, apiKey: apiKey.isEmpty ? null : apiKey);
+      final saved = await svc.save(cfg, apiKey: apiKey.isEmpty ? null : apiKey);
       if (mounted) {
-        Navigator.of(context).pop(cfg.copyWith(adkAgentConfigId: id));
+        Navigator.of(context).pop(saved);
       }
     } catch (e) {
       if (mounted) {
@@ -128,141 +140,160 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
   @override
   Widget build(BuildContext context) {
     final isNew = widget.existing == null;
-    return AlertDialog(
-      title: Text(isNew ? 'New ADK Agent' : 'Edit ADK Agent'),
-      content: SizedBox(
-        width: 480,
+    final id = widget.existing?.adkAgentConfigId ?? 'new';
+    return Dialog(
+      key: const Key('AdkAgentConfigDialog'),
+      insetPadding: const EdgeInsets.all(10),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      child: popUp(
+        context: context,
+        title: 'ADK Agent #$id',
+        width: 500,
+        height: _scheduleEnabled ? 660 : 480,
         child: Form(
           key: _formKey,
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                TextFormField(
-                  key: const Key('agentName'),
-                  controller: _nameCtrl,
-                  decoration: const InputDecoration(labelText: 'Agent name *'),
-                  validator: (v) =>
-                      (v == null || v.trim().isEmpty) ? 'Required' : null,
-                ),
-                const SizedBox(height: 8),
-                TextFormField(
-                  key: const Key('modelName'),
-                  controller: _modelCtrl,
-                  decoration: const InputDecoration(
-                    labelText: 'Model',
-                    hintText: 'gemini-2.5-flash',
-                  ),
-                ),
-                const SizedBox(height: 8),
-                TextFormField(
-                  key: const Key('instruction'),
-                  controller: _instructionCtrl,
-                  decoration: const InputDecoration(
-                    labelText: 'Instruction (system prompt)',
-                    hintText: 'You are a helpful assistant…',
-                  ),
-                  maxLines: 3,
-                ),
-                const SizedBox(height: 8),
-                TextFormField(
-                  key: const Key('description'),
-                  controller: _descriptionCtrl,
-                  decoration:
-                      const InputDecoration(labelText: 'Description (optional)'),
-                ),
-                const SizedBox(height: 8),
-                TextFormField(
-                  key: const Key('apiKey'),
-                  controller: _apiKeyCtrl,
-                  decoration: InputDecoration(
-                    labelText: isNew
-                        ? 'Google API key (leave blank to use server default)'
-                        : 'New API key (leave blank to keep existing)',
-                  ),
-                  obscureText: true,
-                ),
-                const Divider(height: 24),
-                SwitchListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: const Text('Enable scheduled runs'),
-                  value: _scheduleEnabled,
-                  onChanged: (v) => setState(() => _scheduleEnabled = v),
-                ),
-                if (_scheduleEnabled) ...[
-                  Row(
+          child: Column(
+            children: [
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(
-                        child: TextFormField(
-                          key: const Key('scheduleExpression'),
-                          controller: _scheduleCronCtrl,
-                          decoration: const InputDecoration(
-                            labelText: 'Cron expression *',
-                            hintText: '0 * * * * ?',
-                          ),
-                          validator: (v) => (_scheduleEnabled &&
-                                  (v == null || v.trim().isEmpty))
-                              ? 'Required when schedule enabled'
-                              : null,
+                      TextFormField(
+                        key: const Key('agentName'),
+                        controller: _nameCtrl,
+                        decoration:
+                            const InputDecoration(labelText: 'Agent name *'),
+                        validator: (v) =>
+                            (v == null || v.trim().isEmpty) ? 'Required' : null,
+                      ),
+                      const SizedBox(height: 8),
+                      TextFormField(
+                        key: const Key('modelName'),
+                        controller: _modelCtrl,
+                        decoration: const InputDecoration(
+                          labelText: 'Model',
+                          hintText: 'gemini-2.5-flash',
                         ),
                       ),
-                      PopupMenuButton<String>(
-                        tooltip: 'Quick schedules',
-                        icon: const Icon(Icons.schedule),
-                        onSelected: (v) =>
-                            setState(() => _scheduleCronCtrl.text = v),
-                        itemBuilder: (_) => _cronHints
-                            .map(
-                              (h) => PopupMenuItem<String>(
-                                value: h.$2,
-                                child: Text('${h.$1}  (${h.$2})'),
-                              ),
-                            )
-                            .toList(),
+                      const SizedBox(height: 8),
+                      TextFormField(
+                        key: const Key('instruction'),
+                        controller: _instructionCtrl,
+                        decoration: const InputDecoration(
+                          labelText: 'Instruction (system prompt)',
+                          hintText: 'You are a helpful assistant…',
+                        ),
+                        maxLines: 3,
                       ),
+                      const SizedBox(height: 8),
+                      TextFormField(
+                        key: const Key('description'),
+                        controller: _descriptionCtrl,
+                        decoration: const InputDecoration(
+                            labelText: 'Description (optional)'),
+                      ),
+                      const SizedBox(height: 8),
+                      TextFormField(
+                        key: const Key('apiKey'),
+                        controller: _apiKeyCtrl,
+                        decoration: InputDecoration(
+                          labelText: isNew
+                              ? 'Google API key (leave blank to use server default)'
+                              : 'New API key (leave blank to keep existing)',
+                        ),
+                        obscureText: true,
+                      ),
+                      const Divider(height: 24),
+                      SwitchListTile(
+                        contentPadding: EdgeInsets.zero,
+                        title: const Text('Enable scheduled runs'),
+                        value: _scheduleEnabled,
+                        onChanged: (v) =>
+                            setState(() => _scheduleEnabled = v),
+                      ),
+                      if (_scheduleEnabled) ...[
+                        Row(
+                          children: [
+                            Expanded(
+                              child: TextFormField(
+                                key: const Key('scheduleExpression'),
+                                controller: _scheduleCronCtrl,
+                                decoration: const InputDecoration(
+                                  labelText: 'Cron expression *',
+                                  hintText: '0 * * * * ?',
+                                ),
+                                validator: (v) => (_scheduleEnabled &&
+                                        (v == null || v.trim().isEmpty))
+                                    ? 'Required when schedule enabled'
+                                    : null,
+                              ),
+                            ),
+                            PopupMenuButton<String>(
+                              tooltip: 'Quick schedules',
+                              icon: const Icon(Icons.schedule),
+                              onSelected: (v) =>
+                                  setState(() => _scheduleCronCtrl.text = v),
+                              itemBuilder: (_) => _cronHints
+                                  .map(
+                                    (h) => PopupMenuItem<String>(
+                                      value: h.$2,
+                                      child: Text('${h.$1}  (${h.$2})'),
+                                    ),
+                                  )
+                                  .toList(),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        TextFormField(
+                          key: const Key('schedulePrompt'),
+                          controller: _schedulePromptCtrl,
+                          decoration: const InputDecoration(
+                            labelText: 'Prompt for each scheduled run',
+                            hintText: 'What is the current time?',
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        TextFormField(
+                          key: const Key('scheduleChatRoomId'),
+                          controller: _chatRoomIdCtrl,
+                          decoration: const InputDecoration(
+                            labelText: 'Chat room ID for delivery (optional)',
+                            hintText: 'Leave blank to log only',
+                          ),
+                        ),
+                      ],
                     ],
                   ),
-                  const SizedBox(height: 8),
-                  TextFormField(
-                    key: const Key('schedulePrompt'),
-                    controller: _schedulePromptCtrl,
-                    decoration: const InputDecoration(
-                      labelText: 'Prompt for each scheduled run',
-                      hintText: 'What is the current time?',
-                    ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed:
+                        _saving ? null : () => Navigator.of(context).pop(),
+                    child: const Text('Cancel'),
                   ),
-                  const SizedBox(height: 8),
-                  TextFormField(
-                    key: const Key('scheduleChatRoomId'),
-                    controller: _chatRoomIdCtrl,
-                    decoration: const InputDecoration(
-                      labelText: 'Chat room ID for delivery (optional)',
-                      hintText: 'Leave blank to log only',
-                    ),
+                  const SizedBox(width: 8),
+                  FilledButton(
+                    onPressed: _saving ? null : _save,
+                    child: _saving
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Text('Save'),
                   ),
                 ],
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
-      actions: [
-        TextButton(
-          onPressed: _saving ? null : () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
-        ),
-        FilledButton(
-          onPressed: _saving ? null : _save,
-          child: _saving
-              ? const SizedBox(
-                  width: 16,
-                  height: 16,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : const Text('Save'),
-        ),
-      ],
     );
   }
 }

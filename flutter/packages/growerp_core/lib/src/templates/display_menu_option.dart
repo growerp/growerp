@@ -712,19 +712,29 @@ class DisplayMenuItemState extends State<DisplayMenuItem>
   }
 
   void _handleNotifications(BuildContext context, NotificationState state) {
-    debugPrint(
-      '_handleNotifications: status=${state.status} '
-      'seq=${state.notificationSeq} notifs=${state.notifications.length} '
-      'msg0=${state.notifications.isEmpty ? "none" : state.notifications.first.message}',
-    );
-    if (state.status == NotificationStatus.success &&
-        state.notifications.isNotEmpty) {
-      final parts = state.notifications
-          .map((note) => '${note.message?['message'] ?? ''}')
-          .where((m) => m.isNotEmpty)
-          .toList();
-      if (parts.isNotEmpty) {
-        HelperFunctions.showMessage(context, parts.join('\n'), Colors.green);
+    if (state.status != NotificationStatus.success ||
+        state.notifications.isEmpty) {
+      return;
+    }
+
+    for (final note in state.notifications) {
+      switch (note.topic) {
+        case 'chatMessage':
+          final chatRoomId = note.message?['chatRoomId'] as String?;
+          if (chatRoomId != null) {
+            final chatBloc = context.read<ChatRoomBloc>();
+            if (!chatBloc.state.chatRooms
+                .any((r) => r.chatRoomId == chatRoomId)) {
+              chatBloc.add(const ChatRoomFetch(refresh: true));
+            }
+            chatBloc.add(ChatRoomUpdateLocal(addNotReadChatRoomId: chatRoomId));
+          }
+        default:
+          // Show toast for any unhandled notification that has a message text
+          final msg = '${note.message?['message'] ?? ''}';
+          if (msg.isNotEmpty) {
+            HelperFunctions.showMessage(context, msg, Colors.green);
+          }
       }
     }
   }

@@ -12,18 +12,28 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-/// Represents one ADK agent configuration stored in AdkAgentConfig entity.
+import 'package:json_annotation/json_annotation.dart';
+
+part 'adk_agent_config_model.g.dart';
+
+@JsonSerializable(includeIfNull: false, explicitToJson: true)
 class AdkAgentConfig {
   final String? adkAgentConfigId;
   final String? agentName;
   final String? modelName;
   final String? instruction;
   final String? description;
+  @JsonKey(defaultValue: true)
   final bool enabled;
   final String? scheduleExpression;
+  @JsonKey(defaultValue: false)
   final bool scheduleEnabled;
   final String? schedulePrompt;
   final String? scheduleChatRoomId;
+
+  /// Write-only: sent on create/update, never returned by GET.
+  @JsonKey(includeFromJson: false)
+  final String? apiKey;
 
   const AdkAgentConfig({
     this.adkAgentConfigId,
@@ -36,35 +46,13 @@ class AdkAgentConfig {
     this.scheduleEnabled = false,
     this.schedulePrompt,
     this.scheduleChatRoomId,
+    this.apiKey,
   });
 
-  factory AdkAgentConfig.fromJson(Map<String, dynamic> json) => AdkAgentConfig(
-        adkAgentConfigId: json['adkAgentConfigId'] as String?,
-        agentName: json['agentName'] as String?,
-        modelName: json['modelName'] as String?,
-        instruction: json['instruction'] as String?,
-        description: json['description'] as String?,
-        enabled: json['enabled'] == 'Y',
-        scheduleExpression: json['scheduleExpression'] as String?,
-        scheduleEnabled: json['scheduleEnabled'] == 'Y',
-        schedulePrompt: json['schedulePrompt'] as String?,
-        scheduleChatRoomId: json['scheduleChatRoomId'] as String?,
-      );
+  factory AdkAgentConfig.fromJson(Map<String, dynamic> json) =>
+      _$AdkAgentConfigFromJson(json);
 
-  Map<String, dynamic> toJson() => {
-        if (adkAgentConfigId != null) 'adkAgentConfigId': adkAgentConfigId,
-        if (agentName != null) 'agentName': agentName,
-        if (modelName != null) 'modelName': modelName,
-        if (instruction != null) 'instruction': instruction,
-        if (description != null) 'description': description,
-        'enabled': enabled ? 'Y' : 'N',
-        if (scheduleExpression != null)
-          'scheduleExpression': scheduleExpression,
-        'scheduleEnabled': scheduleEnabled ? 'Y' : 'N',
-        if (schedulePrompt != null) 'schedulePrompt': schedulePrompt,
-        if (scheduleChatRoomId != null)
-          'scheduleChatRoomId': scheduleChatRoomId,
-      };
+  Map<String, dynamic> toJson() => _$AdkAgentConfigToJson(this);
 
   AdkAgentConfig copyWith({
     String? adkAgentConfigId,
@@ -77,6 +65,7 @@ class AdkAgentConfig {
     bool? scheduleEnabled,
     String? schedulePrompt,
     String? scheduleChatRoomId,
+    String? apiKey,
   }) =>
       AdkAgentConfig(
         adkAgentConfigId: adkAgentConfigId ?? this.adkAgentConfigId,
@@ -89,5 +78,20 @@ class AdkAgentConfig {
         scheduleEnabled: scheduleEnabled ?? this.scheduleEnabled,
         schedulePrompt: schedulePrompt ?? this.schedulePrompt,
         scheduleChatRoomId: scheduleChatRoomId ?? this.scheduleChatRoomId,
+        apiKey: apiKey ?? this.apiKey,
       );
+
+  @override
+  String toString() => 'AdkAgentConfig[$adkAgentConfigId: $agentName]';
+}
+
+@JsonSerializable()
+class AdkAgentConfigs {
+  final List<AdkAgentConfig> adkAgentConfigs;
+
+  const AdkAgentConfigs({required this.adkAgentConfigs});
+
+  factory AdkAgentConfigs.fromJson(Map<String, dynamic> json) =>
+      _$AdkAgentConfigsFromJson(json);
+  Map<String, dynamic> toJson() => _$AdkAgentConfigsToJson(this);
 }

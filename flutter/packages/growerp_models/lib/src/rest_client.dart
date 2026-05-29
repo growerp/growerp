@@ -1705,4 +1705,55 @@ abstract class RestClient {
 
   @POST("rest/s1/growerp/100/OnboardingSave")
   Future<dynamic> saveOnboarding(@Body() Map<String, dynamic> body);
+
+  // ADK Agent Config endpoints
+  @GET("rest/s1/growerp/100/AdkAgentConfig")
+  Future<AdkAgentConfigs> getAdkAgentConfigs();
+
+  @POST("rest/s1/growerp/100/AdkAgentConfig")
+  Future<AdkAgentConfig> createAdkAgentConfig({
+    @Field() String? agentName,
+    @Field() String? modelName,
+    @Field() String? apiKey,
+    @Field() String? instruction,
+    @Field() String? description,
+    @Field() String? scheduleExpression,
+    @Field() bool? scheduleEnabled,
+    @Field() String? schedulePrompt,
+    @Field() String? scheduleChatRoomId,
+  });
+
+  @PATCH("rest/s1/growerp/100/AdkAgentConfig")
+  Future<AdkAgentConfig> updateAdkAgentConfig({
+    @Query('adkAgentConfigId') required String adkAgentConfigId,
+    @Field() String? agentName,
+    @Field() String? modelName,
+    @Field() String? apiKey,
+    @Field() String? instruction,
+    @Field() String? description,
+    @Field() String? scheduleExpression,
+    @Field() bool? scheduleEnabled,
+    @Field() String? schedulePrompt,
+    @Field() String? scheduleChatRoomId,
+  });
+
+  @DELETE("rest/s1/growerp/100/AdkAgentConfig")
+  Future<void> deleteAdkAgentConfig({
+    @Query('adkAgentConfigId') required String adkAgentConfigId,
+  });
+
+  // ADK Job endpoints
+  @GET("rest/s1/growerp/100/AdkJob")
+  Future<AdkJobs> getAdkJobs();
+
+  @POST("rest/s1/growerp/100/AdkJob/{jobName}/clearLock")
+  Future<void> clearAdkJobLock({
+    @Path() required String jobName,
+  });
+
+  @POST("rest/s1/growerp/100/AdkJob/{jobName}/paused")
+  Future<void> updateAdkJobPaused({
+    @Path() required String jobName,
+    @Field() required bool paused,
+  });
 }
