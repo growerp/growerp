@@ -67,15 +67,13 @@ Widget popUpDialogNoScaffold({
                 ),
               ),
               Expanded(
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).brightness == Brightness.dark
-                        ? colorScheme.surfaceContainerHighest
-                        : colorScheme.surface,
-                    borderRadius: const BorderRadius.only(
-                      bottomLeft: Radius.circular(20),
-                      bottomRight: Radius.circular(20),
-                    ),
+                child: Material(
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? colorScheme.surfaceContainerHighest
+                      : colorScheme.surface,
+                  borderRadius: const BorderRadius.only(
+                    bottomLeft: Radius.circular(20),
+                    bottomRight: Radius.circular(20),
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(20),
