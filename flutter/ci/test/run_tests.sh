@@ -64,7 +64,7 @@ fi
 # one finishes, causing "The log reader stopped unexpectedly".
 # By running Xvfb as a daemon we keep the display alive for the entire session.
 export DISPLAY=:99
-Xvfb :99 -screen 0 1024x768x24 -ac +extension GLX +render -noreset &
+Xvfb :99 -screen 0 1920x1080x24 -ac +extension GLX +render -noreset &
 XVFB_PID=$!
 sleep 2
 if ! kill -0 $XVFB_PID 2>/dev/null; then

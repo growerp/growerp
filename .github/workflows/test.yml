@@ -77,6 +77,7 @@ jobs:
       matrix:
         # Use a single slice when package_filter is set; otherwise run all 4.
         slice: ${{ fromJSON(github.event.inputs.package_filter && '[1]' || '[1,2,3,4]') }}
+        format: [mobile, desktop]
 
     steps:
       # ------------------------------------------------------------------
@@ -171,14 +172,17 @@ jobs:
       # ------------------------------------------------------------------
       # 6. Run integration tests
       # ------------------------------------------------------------------
-      - name: Run integration tests (slice ${{ matrix.slice }})
+      - name: Run integration tests (slice ${{ matrix.slice }} - ${{ matrix.format }})
         working-directory: flutter
         env:
           PACKAGE_FILTER: ${{ github.event.inputs.package_filter || '' }}
           # Set PACKAGE_SLICE only for full (unfiltered) runs.
           PACKAGE_SLICE: ${{ !github.event.inputs.package_filter && format('{0}/4', matrix.slice) || '' }}
+          SCREEN_WIDTH: ${{ matrix.format == 'mobile' && '412' || '1280' }}
+          SCREEN_HEIGHT: ${{ matrix.format == 'mobile' && '732' || '800' }}
         run: |
           PACKAGE_FILTER="$PACKAGE_FILTER" PACKAGE_SLICE="$PACKAGE_SLICE" \
+            SCREEN_WIDTH="$SCREEN_WIDTH" SCREEN_HEIGHT="$SCREEN_HEIGHT" \
             docker compose -f ci/docker-compose-test.yml up \
               --exit-code-from sut sut 2>&1 | tee /tmp/test_output.log
           echo "TEST_EXIT_CODE=${PIPESTATUS[0]}" >> "$GITHUB_ENV"
@@ -186,10 +190,10 @@ jobs:
       # ------------------------------------------------------------------
       # 7. Per-slice results
       # ------------------------------------------------------------------
-      - name: Test results summary (slice ${{ matrix.slice }})
+      - name: Test results summary (slice ${{ matrix.slice }} - ${{ matrix.format }})
         if: always()
         run: |
-          echo "## Test Results — Slice ${{ matrix.slice }}/4" >> "$GITHUB_STEP_SUMMARY"
+          echo "## Test Results — Slice ${{ matrix.slice }}/4 (${{ matrix.format }})" >> "$GITHUB_STEP_SUMMARY"
           if [ -f /tmp/test_output.log ]; then
             if grep -q '=== FINAL TEST SUMMARY' /tmp/test_output.log; then
               echo '```' >> "$GITHUB_STEP_SUMMARY"
@@ -216,7 +220,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: test-output-${{ matrix.slice }}
+          name: test-output-${{ matrix.slice }}-${{ matrix.format }}
           path: /tmp/test_output.log
           retention-days: 7
 
@@ -252,10 +256,10 @@ jobs:
           TOTAL_IND_PASSED=0
           TOTAL_IND_FAILED=0
           for slice_dir in $(ls -d test-logs/test-output-* 2>/dev/null | sort -V); do
-            SLICE=$(basename "$slice_dir" | grep -o '[0-9]*$')
+            SLICE_NAME=$(basename "$slice_dir" | sed 's/test-output-//')
             LOG="$slice_dir/test_output.log"
             if [ -f "$LOG" ]; then
-              echo "--- Slice $SLICE ---"
+              echo "--- Slice $SLICE_NAME ---"
               grep '>>> RESULT:' "$LOG" | grep -v '+ echo' | sed 's/^[^|]*| *//' \
                 || echo "  (no structured results)"
               FAILED=$(grep '>>> RESULT:.*FAILED' "$LOG" | grep -v '+ echo' | wc -l)

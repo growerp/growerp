@@ -20,8 +20,8 @@ services:
       - BACKEND_URL=http://moqui
       - CHAT_URL=ws://moqui
       # Phone screen size for Linux desktop tests (emulates Pixel 4)
-      - SCREEN_WIDTH=412
-      - SCREEN_HEIGHT=732
+      - SCREEN_WIDTH=${SCREEN_WIDTH:-412}
+      - SCREEN_HEIGHT=${SCREEN_HEIGHT:-732}
     depends_on:
       moqui:
         condition: service_healthy
