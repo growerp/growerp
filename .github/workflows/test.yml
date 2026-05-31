@@ -250,45 +250,60 @@ jobs:
         run: |
           {
           echo "## Overall Test Results"
-          echo '```'
-          TOTAL_FAILED_PKGS=0
-          TOTAL_PASSED_PKGS=0
-          TOTAL_IND_PASSED=0
-          TOTAL_IND_FAILED=0
-          for slice_dir in $(ls -d test-logs/test-output-* 2>/dev/null | sort -V); do
-            SLICE_NAME=$(basename "$slice_dir" | sed 's/test-output-//')
-            LOG="$slice_dir/test_output.log"
-            if [ -f "$LOG" ]; then
-              echo "--- Slice $SLICE_NAME ---"
-              grep '>>> RESULT:' "$LOG" | grep -v '+ echo' | sed 's/^[^|]*| *//' \
-                || echo "  (no structured results)"
-              FAILED=$(grep '>>> RESULT:.*FAILED' "$LOG" | grep -v '+ echo' | wc -l)
-              PASSED=$(grep '>>> RESULT:.*PASSED' "$LOG" | grep -v '+ echo' | wc -l)
-              TOTAL_FAILED_PKGS=$((TOTAL_FAILED_PKGS + FAILED))
-              TOTAL_PASSED_PKGS=$((TOTAL_PASSED_PKGS + PASSED))
-              IND_PASSED=$(grep 'Tests passed' "$LOG" | sed 's/^[^|]*| *//' | grep -oE '[0-9]+$' | tail -1)
-              IND_FAILED=$(grep 'Tests failed' "$LOG" | sed 's/^[^|]*| *//' | grep -oE '[0-9]+$' | tail -1)
-              TOTAL_IND_PASSED=$((TOTAL_IND_PASSED + ${IND_PASSED:-0}))
-              TOTAL_IND_FAILED=$((TOTAL_IND_FAILED + ${IND_FAILED:-0}))
+          
+          for FORMAT in mobile desktop; do
+            DISPLAY_FORMAT="Mobile"
+            if [ "$FORMAT" = "desktop" ]; then
+              DISPLAY_FORMAT="Desktop"
             fi
+            echo "### $DISPLAY_FORMAT Layout Results"
+            echo '```'
+            
+            FAILED_PKGS=0
+            PASSED_PKGS=0
+            IND_PASSED=0
+            IND_FAILED=0
+            
+            for slice_dir in $(ls -d test-logs/test-output-*-${FORMAT} 2>/dev/null | sort -V); do
+              SLICE_NAME=$(basename "$slice_dir" | sed 's/test-output-//')
+              LOG="$slice_dir/test_output.log"
+              if [ -f "$LOG" ]; then
+                echo "--- Slice $SLICE_NAME ---"
+                grep '>>> RESULT:' "$LOG" | grep -v '+ echo' | sed 's/^[^|]*| *//' \
+                  || echo "  (no structured results)"
+                FAILED=$(grep '>>> RESULT:.*FAILED' "$LOG" | grep -v '+ echo' | wc -l)
+                PASSED=$(grep '>>> RESULT:.*PASSED' "$LOG" | grep -v '+ echo' | wc -l)
+                FAILED_PKGS=$((FAILED_PKGS + FAILED))
+                PASSED_PKGS=$((PASSED_PKGS + PASSED))
+                
+                # Extract individual test counts
+                P_COUNT=$(grep 'Tests passed' "$LOG" | sed 's/^[^|]*| *//' | grep -oE '[0-9]+$' | tail -1)
+                F_COUNT=$(grep 'Tests failed' "$LOG" | sed 's/^[^|]*| *//' | grep -oE '[0-9]+$' | tail -1)
+                IND_PASSED=$((IND_PASSED + ${P_COUNT:-0}))
+                IND_FAILED=$((IND_FAILED + ${F_COUNT:-0}))
+              fi
+            done
+            
+            echo ""
+            echo "Packages passed : $PASSED_PKGS"
+            echo "Packages failed : $FAILED_PKGS"
+            echo "Tests passed    : $IND_PASSED"
+            echo "Tests failed    : $IND_FAILED"
+            
+            if [ "$FAILED_PKGS" -eq 0 ]; then
+              echo ""
+              echo "All packages passed for $DISPLAY_FORMAT layout!"
+            else
+              echo ""
+              echo "Failed tests ($DISPLAY_FORMAT):"
+              {
+                for slice_dir in $(ls -d test-logs/test-output-*-${FORMAT} 2>/dev/null | sort -V); do
+                  LOG="$slice_dir/test_output.log"
+                  [ -f "$LOG" ] && sed 's/^[^|]*| *//' "$LOG" | grep -E '^\[[^]]+\] ' || true
+                done
+              } | sort -u
+            fi
+            echo '```'
+            echo ""
           done
-          echo ""
-          echo "Packages passed : $TOTAL_PASSED_PKGS"
-          echo "Packages failed : $TOTAL_FAILED_PKGS"
-          echo "Tests passed    : $TOTAL_IND_PASSED"
-          echo "Tests failed    : $TOTAL_IND_FAILED"
-          if [ "$TOTAL_FAILED_PKGS" -eq 0 ]; then
-            echo ""
-            echo "All packages passed!"
-          else
-            echo ""
-            echo "Failed tests:"
-            {
-              for slice_dir in $(ls -d test-logs/test-output-* 2>/dev/null | sort -V); do
-                LOG="$slice_dir/test_output.log"
-                [ -f "$LOG" ] && sed 's/^[^|]*| *//' "$LOG" | grep -E '^\[[^]]+\] ' || true
-              done
-            } | sort -u
-          fi
-          echo '```'
           } | tee -a "$GITHUB_STEP_SUMMARY"
