@@ -8,13 +8,13 @@ name: Integration Tests
 # Moqui + PostgreSQL. Tests are self-contained — each creates its own company/admin,
 # so slices don't interfere with each other.
 #
-# Runs daily at 12 PM Bangkok time (05:00 UTC) — only if there were commits that day.
+# Runs daily at 1 AM Bangkok time (18:00 UTC previous day) — only if there were commits that day.
 # Can also be triggered manually via workflow_dispatch.
 
 on:
   schedule:
-    # 12 PM Bangkok time (UTC+7) = 05:00 UTC — only runs if there were commits that day
-    - cron: "0 5 * * *"
+    # 1 AM Bangkok time (UTC+7) = 18:00 UTC previous day — only runs if there were commits that day
+    - cron: "0 18 * * *"
   workflow_dispatch:
     inputs:
       package_filter:
