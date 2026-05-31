@@ -120,7 +120,10 @@ class GroupingDecorator extends StatelessWidget {
             ),
           ),
           // Content
-          Padding(padding: const EdgeInsets.all(16), child: child),
+          Material(
+            type: MaterialType.transparency,
+            child: Padding(padding: const EdgeInsets.all(16), child: child),
+          ),
         ],
       ),
     );
