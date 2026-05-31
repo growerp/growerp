@@ -33,6 +33,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:integration_test/integration_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
@@ -660,6 +661,10 @@ void main() {
     testWidgets('TC-TRIAL-004: Plan prices in payment form come from database', (
       WidgetTester tester,
     ) async {
+      // Clear any cached invalid apiKey before making the public anonymous request
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('apiKey');
+
       // Fetch the authoritative plan list from the backend before opening the app.
       // The GROWERP owner Products endpoint is public (require-authentication="anonymous-all").
       final apiClient = RestClient(await buildDioClient());

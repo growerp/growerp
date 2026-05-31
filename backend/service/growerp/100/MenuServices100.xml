@@ -68,6 +68,7 @@ Service definitions for menu configuration and menu item management
         <log message="Menu configuration not found: menuConfigurationId=$menuConfigurationId, appId=$appId, userVersion=$userVersion. Returning empty configuration." level="warn" />
         <set field="menuConfigurationId" from="menuConfigurationId ?: ''" />
         <set field="appId" from="appId ?: ''" />
+        <set field="name" from="appId ?: ''" />
         <set field="menuItems" from="[]" />
         <return />
       </if>

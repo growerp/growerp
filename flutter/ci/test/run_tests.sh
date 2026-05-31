@@ -225,6 +225,7 @@ elif [ -n "$PACKAGE_FILTER" ]; then
       # Run each test file in a separate flutter test invocation to avoid
       # "The log reader stopped unexpectedly" on app restart between files.
       for f in integration_test/*.dart; do
+        grep -qE 'void main\(|main\(' "$f" || continue
         [[ "$f" == *demo* ]] && continue
         flutter test "$f" -d linux \
           --dart-define=BACKEND_URL="$BACKEND_URL" \
@@ -299,6 +300,7 @@ else
       fi
       FAIL=0
       for f in integration_test/*.dart; do
+        grep -qE 'void main\(|main\(' "$f" || continue
         [[ "$f" == *demo* ]] && continue
         flutter test "$f" -d linux \
           --dart-define=BACKEND_URL="$BACKEND_URL" \
