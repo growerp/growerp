@@ -1401,25 +1401,25 @@ List<FinDoc> roomReservations = [
 List<GlAccount> glAccounts = [
   // 1 Asset
   GlAccount(
-    accountCode: "100",
+    accountCode: "99901",
     accountName: "Asset",
     accountClass: const AccountClass(description: "Land and Building"),
     postedBalance: Decimal.parse("11.11"),
   ),
   GlAccount(
-    accountCode: "101",
+    accountCode: "99902",
     accountName: "Cash",
     accountClass: const AccountClass(description: "Inventory Assets"),
     postedBalance: Decimal.parse("22.22"),
   ),
   GlAccount(
-    accountCode: "120",
+    accountCode: "99903",
     accountName: "Accounts Receivable",
     accountClass: const AccountClass(description: "Inventory Assets"),
     postedBalance: Decimal.parse("33.33"),
   ),
   GlAccount(
-    accountCode: "150",
+    accountCode: "99904",
     accountName: "Supplies",
     accountClass: const AccountClass(description: "Office and Supplies"),
     postedBalance: Decimal.parse("44.44"),

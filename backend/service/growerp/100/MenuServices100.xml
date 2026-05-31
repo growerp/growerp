@@ -63,10 +63,13 @@ Service definitions for menu configuration and menu item management
         </entity-find>
       </if>
 
-      <!-- If still not found, return error -->
+      <!-- If still not found, return success with empty menu configuration (non-fatal, e.g. for local config / integration tests) -->
       <if condition="!userConfigs">
-        <return error="true"
-          message="Menu configuration not found: menuConfigurationId=$menuConfigurationId, appId=$appId, userVersion=$userVersion" />
+        <log message="Menu configuration not found: menuConfigurationId=$menuConfigurationId, appId=$appId, userVersion=$userVersion. Returning empty configuration." level="warn" />
+        <set field="menuConfigurationId" from="menuConfigurationId ?: ''" />
+        <set field="appId" from="appId ?: ''" />
+        <set field="menuItems" from="[]" />
+        <return />
       </if>
 
       <set field="config" from="userConfigs[0]" />

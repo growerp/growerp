@@ -212,9 +212,7 @@ GoRouter createOrderAccountingExampleRouter() {
         sales: true,
         docType: FinDocType.transaction,
       ),
-      '/accounting/ledger-accounts' => const GlAccountList(
-        key: Key('GlAccountList'),
-      ),
+      '/accounting/ledger-accounts' => const GlAccountList(),
       '/accounting/ledger-journal' => const LedgerJournalList(
         key: Key('LedgerJournalListLedgerJournal'),
       ),

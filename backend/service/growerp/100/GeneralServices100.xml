@@ -851,7 +851,7 @@ along with this software (see the LICENSE.md file). If not, see
         <actions>
             <!-- For testing: set effective time if testDaysOffset provided -->
             <if
-                condition="testDaysOffset != null &amp;&amp; 'dev'.equals(System.getProperty('instance_purpose'))">
+                condition="testDaysOffset != null &amp;&amp; ('dev'.equals(System.getProperty('instance_purpose')) || 'test'.equals(System.getProperty('instance_purpose')))">
                 <set field="effectiveTime"
                     from="java.sql.Timestamp.valueOf(ec.user.nowTimestamp.toLocalDateTime().plusDays(testDaysOffset))"/>
                 <script>ec.user.setEffectiveTime(effectiveTime)</script>

@@ -93,7 +93,7 @@ Map<String, GrowerpWidgetBuilder> getOrderAccountingWidgets() {
 
     // Accounting
     'LedgerTreeForm': (args) => const LedgerTreeForm(),
-    'GlAccountList': (args) => const GlAccountList(key: Key('GlAccountList')),
+    'GlAccountList': (args) => const GlAccountList(),
     'LedgerJournalList': (args) => LedgerJournalList(key: getKeyFromArgs(args)),
     'RevenueExpenseChart': (args) => const RevenueExpenseChart(),
     'BalanceSheetForm': (args) => const BalanceSheetForm(),
@@ -269,7 +269,7 @@ List<WidgetMetadata> getOrderAccountingWidgetsWithMetadata() {
       description: 'List of general ledger accounts',
       iconName: 'account_balance',
       keywords: ['accounts', 'GL', 'general ledger', 'COA'],
-      builder: (args) => const GlAccountList(key: Key('GlAccountList')),
+      builder: (args) => const GlAccountList(),
     ),
     WidgetMetadata(
       widgetName: 'TransactionList',

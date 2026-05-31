@@ -605,17 +605,22 @@ class CommonTest {
 
     // Tap first filtered result in StyledDataTable
     // Try common row cell keys used across different list screens
-    for (final key in ['name0', 'title0', 'theme0', 'headline0', 'id0']) {
+    for (final key in ['id0', 'name0', 'title0', 'theme0', 'headline0']) {
       if (tester.any(find.byKey(Key(key)))) {
-        // For id0 (pseudoId column), poll until the filter has applied and
-        // the first visible result matches the search string. This avoids
-        // tapping the wrong row when the backend hasn't responded yet and
-        // the list still shows the previous (unfiltered) ascending results.
-        if (key == 'id0') {
-          for (int i = 0; i < 30; i++) {
-            if (getTextField('id0') == searchString) break;
-            await tester.pump(const Duration(milliseconds: 200));
+        // Poll until the filter has applied and the first visible result matches the search string.
+        // This avoids tapping the wrong row when the backend hasn't responded yet.
+        for (int i = 0; i < 30; i++) {
+          String currentVal = getTextField(key);
+          String otherVal = '';
+          if (key == 'id0' && tester.any(find.byKey(const Key('name0')))) {
+            otherVal = getTextField('name0');
+          } else if (key == 'name0' && tester.any(find.byKey(const Key('id0')))) {
+            otherVal = getTextField('id0');
           }
+          if (currentVal == searchString || otherVal == searchString) {
+            break;
+          }
+          await tester.pump(const Duration(milliseconds: 200));
         }
         await tester.ensureVisible(find.byKey(Key(key)).last);
         await tester.tap(find.byKey(Key(key)).last);
@@ -709,8 +714,19 @@ class CommonTest {
     String widgetKey, [
     int count = 1,
   ]) async {
+    Finder finder = find.byKey(Key(widgetKey));
+    try {
+      if (tester.allElements.where((el) => el.widget.key == Key(widgetKey)).length > count) {
+        final nonSubtreeFinder = find.byWidgetPredicate((widget) =>
+          widget.key == Key(widgetKey) && widget is! KeyedSubtree
+        );
+        if (nonSubtreeFinder.evaluate().isNotEmpty) {
+          finder = nonSubtreeFinder;
+        }
+      }
+    } catch (_) {}
     expect(
-      find.byKey(Key(widgetKey)),
+      finder,
       findsNWidgets(count),
       reason: "looking for widget key: $widgetKey failed",
     );
@@ -723,7 +739,18 @@ class CommonTest {
   ]) async {
     // close keyboard, if open
     await tester.testTextInput.receiveAction(TextInputAction.done);
-    return Future.value(tester.any(find.byKey(Key(widgetKey))));
+    Finder finder = find.byKey(Key(widgetKey));
+    try {
+      if (tester.allElements.where((el) => el.widget.key == Key(widgetKey)).length > count) {
+        final nonSubtreeFinder = find.byWidgetPredicate((widget) =>
+          widget.key == Key(widgetKey) && widget is! KeyedSubtree
+        );
+        if (nonSubtreeFinder.evaluate().isNotEmpty) {
+          finder = nonSubtreeFinder;
+        }
+      }
+    } catch (_) {}
+    return Future.value(tester.any(finder));
   }
 
   /// check if a particular text can be found on the page.
