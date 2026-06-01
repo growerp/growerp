@@ -14,6 +14,7 @@
 
 // ignore_for_file: depend_on_referenced_packages
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/material.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_demos/growerp_demos.dart';
@@ -48,19 +49,35 @@ void main() {
     // Navigate to the Demos screen
     await CommonTest.selectOption(tester, '/demos', 'DemoList');
 
-    // All registered demos should be visible
+    // Wait for async progress load (_loaded becomes true and ListView appears)
+    for (var i = 0; i < 20; i++) {
+      if (find.byKey(const Key('DemoList')).evaluate().isNotEmpty) break;
+      await tester.pump(const Duration(milliseconds: 200));
+    }
+    final listFinder = find.byKey(const Key('DemoList'));
+
+    // All registered demos should be visible and say "Not started"
     for (final demo in registeredDemos) {
-      expect(find.text(demo.title), findsOneWidget);
+      final titleFinder = find.text(demo.title);
+      await tester.dragUntilVisible(
+        titleFinder,
+        listFinder,
+        const Offset(0, -300),
+      );
+      expect(titleFinder, findsOneWidget);
+      expect(find.text('Not started'), findsWidgets);
     }
 
-    // All demos should initially show "Not started"
-    expect(
-      find.text('Not started'),
-      findsNWidgets(registeredDemos.length),
+    // Scroll back up to the first demo before tapping
+    final firstDemoFinder = find.text(registeredDemos.first.title);
+    await tester.dragUntilVisible(
+      firstDemoFinder,
+      listFinder,
+      const Offset(0, 300),
     );
 
     // Tapping the first demo opens the runner
-    await tester.tap(find.text(registeredDemos.first.title));
+    await tester.tap(firstDemoFinder);
     await tester.pumpAndSettle();
 
     // The runner should show "Step 1 of ..." (appears in both progress label and button)

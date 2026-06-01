@@ -123,6 +123,7 @@ class _DemoListScreenState extends State<DemoListScreen> {
       return const Center(child: Text('No demos registered.'));
     }
     return ListView.separated(
+      key: const Key('DemoList'),
       padding: const EdgeInsets.all(16),
       itemCount: _demos.length,
       separatorBuilder: (_, _) => const SizedBox(height: 12),
