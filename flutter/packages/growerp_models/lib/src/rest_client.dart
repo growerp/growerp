@@ -148,6 +148,13 @@ abstract class RestClient {
   Future<EmailTemplate> deleteEmailTemplate(
       @Field() EmailTemplate emailTemplate);
 
+  @GET("rest/s1/growerp/100/SystemSettings")
+  Future<SystemSettings> getSystemSettings();
+
+  @POST("rest/s1/growerp/100/SystemSettings")
+  Future<SystemSettings> updateSystemSettings(
+      @Body() Map<String, dynamic> systemSettings);
+
   // countries not used
   @GET("rest/s1/growerp/100/Countries")
   @Extra({'noApiKey': true})

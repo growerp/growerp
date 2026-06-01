@@ -336,9 +336,16 @@ class DisplayMenuItemState extends State<DisplayMenuItem>
 
           // Force using the passed configuration if it's different (e.g. for sub-menus)
           // AND we are suppressing the global config
-          final effectiveConfig = widget.suppressBlocMenuConfig
+          final rawConfig = widget.suppressBlocMenuConfig
               ? widget.menuConfiguration
               : menuConfiguration;
+
+          // Inject System Setup for admin users regardless of which app is running
+          final authState = context.read<AuthBloc>().state;
+          final effectiveConfig =
+              authState.authenticate?.user?.userGroup == UserGroup.admin
+                  ? injectAdminSetup(rawConfig)
+                  : rawConfig;
 
           if (!_isInitialized || effectiveConfig != _lastMenuConfig) {
             _localizations = CoreLocalizations.of(context)!;

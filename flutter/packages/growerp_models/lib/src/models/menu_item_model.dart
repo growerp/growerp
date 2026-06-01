@@ -37,6 +37,19 @@ bool _isMinimizedFromJson(dynamic value) {
 
 String _isMinimizedToJson(bool value) => value ? 'Y' : 'N';
 
+/// Helper functions for userGroups — converts Moqui string values
+/// (e.g. 'GROWERP_M_ADMIN') to/from List<UserGroup>.
+List<UserGroup>? _userGroupsFromJson(List<dynamic>? json) {
+  if (json == null) return null;
+  return json
+      .map((e) => UserGroup.getByValue(e as String))
+      .whereType<UserGroup>()
+      .toList();
+}
+
+List<String>? _userGroupsToJson(List<UserGroup>? list) =>
+    list?.map((e) => e.value).toList();
+
 /// Unified MenuItem model for dynamic menu system
 /// Supports recursive hierarchy via parentMenuItemId and children
 /// Replaces the former separate MenuOption and MenuItem models
@@ -52,6 +65,7 @@ class MenuItem {
   final String? widgetName;
   final String? image;
   final String? selectedImage;
+  @JsonKey(fromJson: _userGroupsFromJson, toJson: _userGroupsToJson)
   final List<UserGroup>? userGroups;
   final int sequenceNum;
   @JsonKey(fromJson: _isActiveFromJson, toJson: _isActiveToJson)

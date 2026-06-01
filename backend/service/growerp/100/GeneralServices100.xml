@@ -1590,5 +1590,133 @@ along with this software (see the LICENSE.md file). If not, see
         </actions>
     </service>
 
+    <!-- ═══════════════════ SystemSettings ═══════════════════ -->
+
+    <service verb="get" noun="SystemSettings" authenticate="true">
+        <description>Return the SystemSettings record for the current tenant. mailPassword is
+            masked as "****" when set.</description>
+        <out-parameters>
+            <parameter name="systemSettings" type="Map"/>
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="relInfo"/>
+            <set field="ownerPartyId" from="relInfo.ownerPartyId"/>
+            <if condition="!ownerPartyId">
+                <set field="systemSettings" from="[:]"/>
+                <return/>
+            </if>
+            <entity-find-one entity-name="growerp.general.SystemSettings" value-field="ss">
+                <field-map field-name="ownerPartyId"/>
+            </entity-find-one>
+            <if condition="ss == null">
+                <set field="systemSettings" from="[:]"/>
+                <return/>
+            </if>
+            <set field="systemSettings" from="ss.getMap()"/>
+            <script>systemSettings.mailPassword = ss.mailPassword ? '****' : ''</script>
+        </actions>
+    </service>
+
+    <service verb="update" noun="SystemSettings" authenticate="true">
+        <description>Create or update SystemSettings for the current tenant. Also syncs SMTP/store
+            fields into moqui.basic.email.EmailServer so built-in Moqui email services keep working.
+            mailPassword is not updated when blank or "****".</description>
+        <in-parameters>
+            <parameter name="geminiApiKey"/>
+            <parameter name="smtpHost"/>
+            <parameter name="smtpPort"/>
+            <parameter name="smtpStartTls" default-value="N"/>
+            <parameter name="smtpSsl"      default-value="N"/>
+            <parameter name="storeHost"/>
+            <parameter name="storePort"/>
+            <parameter name="storeProtocol" default-value="imaps"/>
+            <parameter name="storeFolder"   default-value="INBOX"/>
+            <parameter name="storeDelete"   default-value="N"/>
+            <parameter name="storeMarkSeen" default-value="Y"/>
+            <parameter name="storeSkipSeen" default-value="Y"/>
+            <parameter name="mailUsername"/>
+            <parameter name="mailPassword"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="systemSettings" type="Map"/>
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="relInfo"/>
+            <set field="ownerPartyId" from="relInfo.ownerPartyId"/>
+            <if condition="!ownerPartyId"><return error="true" message="ownerPartyId not found for current user"/></if>
+
+            <entity-find-one entity-name="growerp.general.SystemSettings" value-field="ss">
+                <field-map field-name="ownerPartyId"/>
+            </entity-find-one>
+            <if condition="ss == null">
+                <set field="ss" from="ec.entity.makeValue('growerp.general.SystemSettings')"/>
+                <set field="ss.ownerPartyId" from="ownerPartyId"/>
+                <set field="isNew" from="true"/>
+            <else>
+                <set field="isNew" from="false"/>
+            </else>
+            </if>
+
+            <if condition="geminiApiKey  != null"><set field="ss.geminiApiKey"  from="geminiApiKey"/></if>
+            <if condition="smtpHost      != null"><set field="ss.smtpHost"      from="smtpHost"/></if>
+            <if condition="smtpPort      != null"><set field="ss.smtpPort"      from="smtpPort"/></if>
+            <if condition="smtpStartTls  != null"><set field="ss.smtpStartTls"  from="smtpStartTls"/></if>
+            <if condition="smtpSsl       != null"><set field="ss.smtpSsl"       from="smtpSsl"/></if>
+            <if condition="storeHost     != null"><set field="ss.storeHost"     from="storeHost"/></if>
+            <if condition="storePort     != null"><set field="ss.storePort"     from="storePort"/></if>
+            <if condition="storeProtocol != null"><set field="ss.storeProtocol" from="storeProtocol"/></if>
+            <if condition="storeFolder   != null"><set field="ss.storeFolder"   from="storeFolder"/></if>
+            <if condition="storeDelete   != null"><set field="ss.storeDelete"   from="storeDelete"/></if>
+            <if condition="storeMarkSeen != null"><set field="ss.storeMarkSeen" from="storeMarkSeen"/></if>
+            <if condition="storeSkipSeen != null"><set field="ss.storeSkipSeen" from="storeSkipSeen"/></if>
+            <if condition="mailUsername  != null"><set field="ss.mailUsername"  from="mailUsername"/></if>
+            <if condition="mailPassword &amp;&amp; mailPassword != '****'">
+                <set field="ss.mailPassword" from="mailPassword"/>
+            </if>
+
+            <if condition="isNew"><then><script>ss.create()</script></then>
+                <else><script>ss.update()</script></else>
+            </if>
+
+            <!-- Sync to moqui.basic.email.EmailServer so poll#EmailServer / send#EmailMessage work -->
+            <if condition="ss.smtpHost">
+                <entity-find-one entity-name="moqui.basic.email.EmailServer" value-field="es">
+                    <field-map field-name="emailServerId" from="ownerPartyId"/>
+                </entity-find-one>
+                <if condition="es == null">
+                    <set field="es" from="ec.entity.makeValue('moqui.basic.email.EmailServer')"/>
+                    <set field="es.emailServerId" from="ownerPartyId"/>
+                    <set field="esNew" from="true"/>
+                <else>
+                    <set field="esNew" from="false"/>
+                </else>
+                </if>
+                <set field="es.smtpHost"     from="ss.smtpHost"/>
+                <set field="es.smtpPort"     from="ss.smtpPort"/>
+                <set field="es.smtpStartTls" from="ss.smtpStartTls"/>
+                <set field="es.smtpSsl"      from="ss.smtpSsl"/>
+                <set field="es.storeHost"    from="ss.storeHost"/>
+                <set field="es.storePort"    from="ss.storePort"/>
+                <set field="es.storeProtocol" from="ss.storeProtocol"/>
+                <set field="es.storeFolder"  from="ss.storeFolder"/>
+                <set field="es.storeDelete"  from="ss.storeDelete"/>
+                <set field="es.storeMarkSeen" from="ss.storeMarkSeen"/>
+                <set field="es.storeSkipSeen" from="ss.storeSkipSeen"/>
+                <set field="es.mailUsername" from="ss.mailUsername"/>
+                <if condition="mailPassword &amp;&amp; mailPassword != '****'">
+                    <set field="es.mailPassword" from="mailPassword"/>
+                </if>
+                <if condition="esNew"><then><script>es.create()</script></then>
+                    <else><script>es.update()</script></else>
+                </if>
+            </if>
+
+            <service-call name="growerp.100.GeneralServices100.get#SystemSettings"
+                out-map="context"/>
+        </actions>
+    </service>
+
 </services>
  

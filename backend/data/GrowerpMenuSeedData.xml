@@ -87,6 +87,9 @@ along with this software (see the LICENSE.md file). If not, see
         title="about" route="/about" iconName="info" widgetName="AboutForm" image="packages/growerp_core/images/infoGrey.png" selectedImage="packages/growerp_core/images/info.png" sequenceNum="80"/>
     <growerp.menu.MenuItem menuItemId="ADMIN_DEMO" menuConfigurationId="ADMIN_DEFAULT"
         title="Demos" route="/demos" iconName="play_circle" widgetName="DemoList" sequenceNum="90"/>
+    <growerp.menu.MenuItem menuItemId="ADMIN_SYSTEM_SETUP" menuConfigurationId="ADMIN_DEFAULT"
+        title="System Setup" route="/systemSetup" iconName="settings" widgetName="SystemSetupDialog"
+        userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="95"/>
 
     <!-- ADMIN_ORG children (tabs) -->
     <growerp.menu.MenuItem menuItemId="ADMIN_ORG_COMPANY" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_ORG"
@@ -218,7 +221,8 @@ along with this software (see the LICENSE.md file). If not, see
     <growerp.menu.MenuItem menuItemId="ADMIN_ACCU_PLAN" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_ACC_SETUP"
         title="Plan Selection" iconName="subscriptions" widgetName="PlanSelectionForm" sequenceNum="40"/>
     <growerp.menu.MenuItem menuItemId="ADMIN_ACCU_SYSTEM" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_ACC_SETUP"
-        title="AI Settings" iconName="psychology" widgetName="SystemSetupDialog" sequenceNum="50"/>
+        title="System Setup" iconName="settings" widgetName="SystemSetupDialog"
+        userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="50"/>
 
     <!-- ====================== FREELANCE_DEFAULT Menu Items ====================== -->
     <!-- Top-level -->
@@ -320,6 +324,9 @@ along with this software (see the LICENSE.md file). If not, see
         title="Item Types" iconName="list" widgetName="ItemTypeList" sequenceNum="20"/>
     <growerp.menu.MenuItem menuItemId="FREELANCE_ACCU_PAY" menuConfigurationId="FREELANCE_DEFAULT" parentMenuItemId="FREELANCE_ACC_SETUP"
         title="Payment Types" iconName="list" widgetName="PaymentTypeList" sequenceNum="30"/>
+    <growerp.menu.MenuItem menuItemId="FREELANCE_SYSTEM_SETUP" menuConfigurationId="FREELANCE_DEFAULT"
+        title="System Setup" route="/systemSetup" iconName="settings" widgetName="SystemSetupDialog"
+        userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="999"/>
 
     <!-- ====================== HOTEL_DEFAULT Menu Items ====================== -->
     <growerp.menu.MenuItem menuItemId="HOTEL_MAIN" menuConfigurationId="HOTEL_DEFAULT" 
@@ -400,6 +407,9 @@ along with this software (see the LICENSE.md file). If not, see
         title="Item Types" iconName="list" widgetName="ItemTypeList" sequenceNum="20"/>
     <growerp.menu.MenuItem menuItemId="HOTEL_ACCU_PAY" menuConfigurationId="HOTEL_DEFAULT" parentMenuItemId="HOTEL_ACC_SETUP"
         title="Payment Types" iconName="list" widgetName="PaymentTypeList" sequenceNum="30"/>
+    <growerp.menu.MenuItem menuItemId="HOTEL_SYSTEM_SETUP" menuConfigurationId="HOTEL_DEFAULT"
+        title="System Setup" route="/systemSetup" iconName="settings" widgetName="SystemSetupDialog"
+        userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="999"/>
 
     <!-- ====================== HEALTH_DEFAULT ====================== -->
     <growerp.menu.MenuItem menuItemId="HEALTH_MAIN" menuConfigurationId="HEALTH_DEFAULT" 
@@ -412,6 +422,9 @@ along with this software (see the LICENSE.md file). If not, see
         title="Staff" route="/employees" iconName="badge" widgetName="UserListCompany" sequenceNum="40"/>
     <growerp.menu.MenuItem menuItemId="HEALTH_COMPANY" menuConfigurationId="HEALTH_DEFAULT" itemKey="dbCompany"
         title="Organization" route="/company" iconName="business" widgetName="ShowCompanyDialog" sequenceNum="50"/>
+    <growerp.menu.MenuItem menuItemId="HEALTH_SYSTEM_SETUP" menuConfigurationId="HEALTH_DEFAULT"
+        title="System Setup" route="/systemSetup" iconName="settings" widgetName="SystemSetupDialog"
+        userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="999"/>
 
     <!-- ====================== SUPPORT_DEFAULT ====================== -->
     <growerp.menu.MenuItem menuItemId="SUPPORT_MAIN" menuConfigurationId="SUPPORT_DEFAULT" 
@@ -425,6 +438,9 @@ along with this software (see the LICENSE.md file). If not, see
         title="GenUi Catalog" route="/genui-catalog" iconName="widgets" widgetName="GenUiCatalogScreen" sequenceNum="35"/>
     <growerp.menu.MenuItem menuItemId="SUPPORT_ABOUT" menuConfigurationId="SUPPORT_DEFAULT"
         title="About" route="/about" iconName="info" widgetName="AboutForm" sequenceNum="40"/>
+    <growerp.menu.MenuItem menuItemId="SUPPORT_SYSTEM_SETUP" menuConfigurationId="SUPPORT_DEFAULT"
+        title="System Setup" route="/systemSetup" iconName="settings" widgetName="SystemSetupDialog"
+        userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="999"/>
 
     <!-- ====================== ELEARNER_DEFAULT (Customer/Student menu) ====================== -->
     <growerp.menu.MenuItem menuItemId="ELEARNER_MY_COURSES" menuConfigurationId="ELEARNER_DEFAULT"
@@ -433,6 +449,9 @@ along with this software (see the LICENSE.md file). If not, see
         title="All Courses" route="/catalog" iconName="explore" widgetName="CourseCatalogView" sequenceNum="20"/>
     <growerp.menu.MenuItem menuItemId="ELEARNER_PROFILE" menuConfigurationId="ELEARNER_DEFAULT"
         title="Profile" route="/profile" iconName="person" widgetName="UserDialog" sequenceNum="30"/>
+    <growerp.menu.MenuItem menuItemId="ELEARNER_SYSTEM_SETUP" menuConfigurationId="ELEARNER_DEFAULT"
+        title="System Setup" route="/systemSetup" iconName="settings" widgetName="SystemSetupDialog"
+        userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="999"/>
 
     <!-- ====================== ELEARNER_ADMIN_DEFAULT (Admin/Employee menu) ====================== -->
     <growerp.menu.MenuItem menuItemId="ELEARNER_ADM_SUBSCRIPTIONS" menuConfigurationId="ELEARNER_ADMIN_DEFAULT"
@@ -447,6 +466,9 @@ along with this software (see the LICENSE.md file). If not, see
         title="Company" route="/company" iconName="home" widgetName="ShowCompanyDialog" sequenceNum="50"/>
     <growerp.menu.MenuItem menuItemId="ELEARNER_ADM_ABOUT" menuConfigurationId="ELEARNER_ADMIN_DEFAULT"
         title="About" route="/about" iconName="info" widgetName="AboutForm" sequenceNum="60"/>
+    <growerp.menu.MenuItem menuItemId="ELEARNER_ADM_SYSTEM_SETUP" menuConfigurationId="ELEARNER_ADMIN_DEFAULT"
+        title="System Setup" route="/systemSetup" iconName="settings" widgetName="SystemSetupDialog"
+        userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="999"/>
 
     <!-- ====================== EXAMPLE APP MENUS ====================== -->
     <!-- Catalog Example -->
@@ -531,7 +553,7 @@ along with this software (see the LICENSE.md file). If not, see
     <growerp.menu.MenuItem menuItemId="CORE_EX_ABOUT" menuConfigurationId="CORE_EXAMPLE_DEFAULT"
         title="About" route="/about" iconName="info" widgetName="AboutForm" sequenceNum="40"/>
     <growerp.menu.MenuItem menuItemId="CORE_EX_SETUP" menuConfigurationId="CORE_EXAMPLE_DEFAULT"
-        title="AI Settings" route="/setup" iconName="psychology" widgetName="SystemSetupDialog" sequenceNum="50"/>
+        title="System Setup" route="/setup" iconName="settings" widgetName="SystemSetupDialog" sequenceNum="50"/>
     <growerp.menu.MenuItem menuItemId="CORE_EX_AICHAT" menuConfigurationId="CORE_EXAMPLE_DEFAULT"
         title="AI Chat" route="/chat" iconName="smart_toy" widgetName="AdkChatView" sequenceNum="60"/>
     <growerp.menu.MenuItem menuItemId="CORE_EX_AIAGENTS" menuConfigurationId="CORE_EXAMPLE_DEFAULT"

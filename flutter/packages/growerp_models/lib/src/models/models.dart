@@ -33,6 +33,7 @@ export 'work_order_status_val_model.dart';
 export 'work_order_model.dart';
 export 'application_model.dart';
 export 'email_template_model.dart';
+export 'system_settings_model.dart';
 export 'time_entry_model.dart';
 export 'chat_message_model.dart';
 export 'chat_room_model.dart';

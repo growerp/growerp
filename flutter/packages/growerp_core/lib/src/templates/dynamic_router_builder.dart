@@ -70,6 +70,27 @@ class DynamicRouterConfig {
 /// - Main app shell with menu
 /// - Authentication redirects
 /// - Route generation from menu options
+/// Returns [config] with a System Setup menu item appended when it is not
+/// already present. Works on any top-level item list — also called from
+/// DisplayMenuItem so the BLoC-driven config gets the same injection.
+MenuConfiguration injectAdminSetup(MenuConfiguration config) {
+  final alreadyPresent =
+      config.menuItems.any((m) => m.widgetName == 'SystemSetupDialog');
+  if (alreadyPresent) return config;
+  final setupItem = MenuItem(
+    menuItemId: 'systemSetup',
+    title: 'System Setup',
+    iconName: 'settings',
+    widgetName: 'SystemSetupDialog',
+    route: '/systemSetup',
+    sequenceNum: 999,
+    isActive: true,
+  );
+  return config.copyWith(
+    menuItems: [...config.menuItems, setupItem],
+  );
+}
+
 GoRouter createDynamicAppRouter(
   List<MenuConfiguration> configurations, {
   required DynamicRouterConfig config,
