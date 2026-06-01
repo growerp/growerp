@@ -306,4 +306,29 @@ jobs:
             echo '```'
             echo ""
           done
+
+          echo "## Flutter Exceptions Report"
+          HAS_EXCEPTIONS=0
+          for slice_dir in $(ls -d test-logs/test-output-* 2>/dev/null | sort -V); do
+            SLICE_NAME=$(basename "$slice_dir" | sed 's/test-output-//')
+            LOG="$slice_dir/test_output.log"
+            if [ -f "$LOG" ]; then
+              EXCEPTIONS=$(sed 's/^[^|]*| *//' "$LOG" | awk '/══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞═════/,/═════════════════════════════════════════════════/ && !/EXCEPTION/' || true)
+              if [ -n "$EXCEPTIONS" ]; then
+                if [ "$HAS_EXCEPTIONS" -eq 0 ]; then
+                  HAS_EXCEPTIONS=1
+                fi
+                echo "### Exceptions in Slice: $SLICE_NAME"
+                echo '```'
+                echo "$EXCEPTIONS"
+                echo '```'
+                echo ""
+              fi
+            fi
+          done
+
+          if [ "$HAS_EXCEPTIONS" -eq 0 ]; then
+            echo "No Flutter exceptions caught by the test framework."
+          fi
           } | tee -a "$GITHUB_STEP_SUMMARY"
+
