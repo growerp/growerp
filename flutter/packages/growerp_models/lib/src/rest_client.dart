@@ -1721,6 +1721,7 @@ abstract class RestClient {
   Future<AdkAgentConfig> createAdkAgentConfig({
     @Field() String? agentName,
     @Field() String? modelName,
+    @Field() String? llmProvider,
     @Field() String? apiKey,
     @Field() String? instruction,
     @Field() String? description,
@@ -1735,6 +1736,7 @@ abstract class RestClient {
     @Query('adkAgentConfigId') required String adkAgentConfigId,
     @Field() String? agentName,
     @Field() String? modelName,
+    @Field() String? llmProvider,
     @Field() String? apiKey,
     @Field() String? instruction,
     @Field() String? description,

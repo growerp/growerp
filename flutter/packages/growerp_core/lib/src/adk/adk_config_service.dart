@@ -35,6 +35,7 @@ class AdkConfigService {
       return _client.createAdkAgentConfig(
         agentName: cfg.agentName,
         modelName: cfg.modelName,
+        llmProvider: cfg.llmProvider,
         apiKey: apiKey,
         instruction: cfg.instruction,
         description: cfg.description,
@@ -48,6 +49,7 @@ class AdkConfigService {
       adkAgentConfigId: cfg.adkAgentConfigId!,
       agentName: cfg.agentName,
       modelName: cfg.modelName,
+      llmProvider: cfg.llmProvider,
       apiKey: apiKey,
       instruction: cfg.instruction,
       description: cfg.description,

@@ -13,6 +13,7 @@
  */
 
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'llm_config_model.dart';
 
 part 'system_settings_model.freezed.dart';
 part 'system_settings_model.g.dart';
@@ -20,7 +21,9 @@ part 'system_settings_model.g.dart';
 @freezed
 abstract class SystemSettings with _$SystemSettings {
   factory SystemSettings({
+    // Deprecated: migrated to llmConfigs. Kept nullable for pre-migration servers.
     String? geminiApiKey,
+    @Default([]) List<LlmConfig> llmConfigs,
     // SMTP
     String? smtpHost,
     String? smtpPort,

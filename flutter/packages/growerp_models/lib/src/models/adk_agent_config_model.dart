@@ -21,6 +21,7 @@ class AdkAgentConfig {
   final String? adkAgentConfigId;
   final String? agentName;
   final String? modelName;
+  final String? llmProvider;
   final String? instruction;
   final String? description;
   @JsonKey(defaultValue: true)
@@ -39,6 +40,7 @@ class AdkAgentConfig {
     this.adkAgentConfigId,
     this.agentName,
     this.modelName,
+    this.llmProvider,
     this.instruction,
     this.description,
     this.enabled = true,
@@ -58,6 +60,7 @@ class AdkAgentConfig {
     String? adkAgentConfigId,
     String? agentName,
     String? modelName,
+    String? llmProvider,
     String? instruction,
     String? description,
     bool? enabled,
@@ -71,6 +74,7 @@ class AdkAgentConfig {
         adkAgentConfigId: adkAgentConfigId ?? this.adkAgentConfigId,
         agentName: agentName ?? this.agentName,
         modelName: modelName ?? this.modelName,
+        llmProvider: llmProvider ?? this.llmProvider,
         instruction: instruction ?? this.instruction,
         description: description ?? this.description,
         enabled: enabled ?? this.enabled,

@@ -1615,6 +1615,17 @@ along with this software (see the LICENSE.md file). If not, see
             </if>
             <set field="systemSettings" from="ss.getMap()"/>
             <script>systemSettings.mailPassword = ss.mailPassword ? '****' : ''</script>
+            <entity-find entity-name="growerp.general.LlmConfig" list="llmConfigList">
+                <econdition field-name="ownerPartyId"/>
+                <order-by field-name="llmProvider"/>
+            </entity-find>
+            <script><![CDATA[
+                def llmConfigs = []
+                for (def lc in llmConfigList) {
+                    llmConfigs.add([llmProvider: lc.llmProvider, apiKey: lc.apiKey ? '****' : ''])
+                }
+                systemSettings.llmConfigs = llmConfigs
+            ]]></script>
         </actions>
     </service>
 
@@ -1624,6 +1635,7 @@ along with this software (see the LICENSE.md file). If not, see
             mailPassword is not updated when blank or "****".</description>
         <in-parameters>
             <parameter name="geminiApiKey"/>
+            <parameter name="llmConfigs" type="List"/>
             <parameter name="smtpHost"/>
             <parameter name="smtpPort"/>
             <parameter name="smtpStartTls" default-value="N"/>
@@ -1680,6 +1692,37 @@ along with this software (see the LICENSE.md file). If not, see
                 <else><script>ss.update()</script></else>
             </if>
 
+            <!-- Upsert/delete LlmConfig rows -->
+            <if condition="llmConfigs != null">
+                <entity-find entity-name="growerp.general.LlmConfig" list="existingLlmList">
+                    <econdition field-name="ownerPartyId"/>
+                </entity-find>
+                <script><![CDATA[
+                    def incomingProviders = llmConfigs.collect { it.llmProvider } as Set
+                    for (def elc in existingLlmList) {
+                        if (!incomingProviders.contains(elc.llmProvider)) elc.delete()
+                    }
+                    for (def lc in llmConfigs) {
+                        if (!lc.llmProvider) continue
+                        def existing = ec.entity.find('growerp.general.LlmConfig')
+                            .condition('ownerPartyId', ownerPartyId)
+                            .condition('llmProvider', lc.llmProvider).one()
+                        if (existing) {
+                            if (lc.apiKey && lc.apiKey != '****') {
+                                existing.apiKey = lc.apiKey
+                                existing.update()
+                            }
+                        } else {
+                            def newLc = ec.entity.makeValue('growerp.general.LlmConfig')
+                            newLc.ownerPartyId = ownerPartyId
+                            newLc.llmProvider  = lc.llmProvider
+                            if (lc.apiKey && lc.apiKey != '****') newLc.apiKey = lc.apiKey
+                            newLc.create()
+                        }
+                    }
+                ]]></script>
+            </if>
+
             <!-- Sync to moqui.basic.email.EmailServer so poll#EmailServer / send#EmailMessage work -->
             <if condition="ss.smtpHost">
                 <entity-find-one entity-name="moqui.basic.email.EmailServer" value-field="es">
@@ -1715,6 +1758,37 @@ along with this software (see the LICENSE.md file). If not, see
 
             <service-call name="growerp.100.GeneralServices100.get#SystemSettings"
                 out-map="context"/>
+        </actions>
+    </service>
+
+    <service verb="migrate" noun="GeminiApiKeyToLlmConfig" authenticate="false">
+        <description>One-time idempotent migration: copies geminiApiKey from SystemSettings rows
+            into LlmConfig(llmProvider='gemini') and clears the flat field.</description>
+        <actions>
+            <entity-find entity-name="growerp.general.SystemSettings" list="allSs">
+                <econdition field-name="geminiApiKey" operator="is-not-null"/>
+            </entity-find>
+            <iterate list="allSs" entry="ssRow">
+                <if condition="ssRow.geminiApiKey &amp;&amp; ssRow.geminiApiKey.trim()">
+                    <entity-find-one entity-name="growerp.general.LlmConfig" value-field="existing">
+                        <field-map field-name="ownerPartyId" from="ssRow.ownerPartyId"/>
+                        <field-map field-name="llmProvider" value="gemini"/>
+                    </entity-find-one>
+                    <if condition="!existing">
+                        <set field="newLc" from="ec.entity.makeValue('growerp.general.LlmConfig')"/>
+                        <set field="newLc.ownerPartyId" from="ssRow.ownerPartyId"/>
+                        <set field="newLc.llmProvider" value="gemini"/>
+                        <set field="newLc.apiKey" from="ssRow.geminiApiKey"/>
+                        <script>newLc.create()</script>
+                    </if>
+                    <entity-find-one entity-name="growerp.general.SystemSettings"
+                            value-field="ssUpdate" for-update="true">
+                        <field-map field-name="ownerPartyId" from="ssRow.ownerPartyId"/>
+                    </entity-find-one>
+                    <set field="ssUpdate.geminiApiKey" from="null"/>
+                    <script>ssUpdate.update()</script>
+                </if>
+            </iterate>
         </actions>
     </service>
 

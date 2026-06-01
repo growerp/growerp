@@ -25,11 +25,17 @@ class SystemSetupDialog extends StatefulWidget {
   const SystemSetupDialog({super.key});
 
   /// Backward-compat: returns Gemini API key.
-  /// Tries backend first (requires authenticated RestClient), falls back to SharedPreferences.
+  /// Checks llmConfigs list first, then legacy geminiApiKey field, then SharedPreferences.
   static Future<String?> getGeminiApiKey(RestClient? restClient) async {
     if (restClient != null) {
       try {
         final s = await restClient.getSystemSettings();
+        final geminiCfg = s.llmConfigs
+            .where((lc) => lc.llmProvider == 'gemini')
+            .firstOrNull;
+        if (geminiCfg?.apiKey != null && geminiCfg!.apiKey!.isNotEmpty) {
+          return geminiCfg.apiKey;
+        }
         if (s.geminiApiKey != null && s.geminiApiKey!.isNotEmpty) {
           return s.geminiApiKey;
         }
@@ -48,9 +54,8 @@ class _SystemSetupDialogState extends State<SystemSetupDialog> {
   bool _isLoading = true;
   bool _isSaving = false;
 
-  // AI
-  final _geminiKeyCtrl = TextEditingController();
-  bool _obscureGeminiKey = true;
+  // AI — dynamic list of {providerCtrl, apiKeyCtrl, obscure, apiKeyIsSet}
+  final List<Map<String, dynamic>> _llmRows = [];
 
   // SMTP
   final _smtpHostCtrl = TextEditingController();
@@ -82,7 +87,10 @@ class _SystemSetupDialogState extends State<SystemSetupDialog> {
 
   @override
   void dispose() {
-    _geminiKeyCtrl.dispose();
+    for (final row in _llmRows) {
+      (row['providerCtrl'] as TextEditingController).dispose();
+      (row['apiKeyCtrl'] as TextEditingController).dispose();
+    }
     _smtpHostCtrl.dispose();
     _smtpPortCtrl.dispose();
     _mailUserCtrl.dispose();
@@ -100,19 +108,40 @@ class _SystemSetupDialogState extends State<SystemSetupDialog> {
       final s = await _restClient!.getSystemSettings();
       if (!mounted) return;
 
-      // One-time migration: lift gemini key from SharedPreferences to backend
-      String geminiKey = s.geminiApiKey ?? '';
-      if (geminiKey.isEmpty) {
+      // Build LLM rows from llmConfigs list.
+      // Fallback 1: pre-migration server returns geminiApiKey flat field.
+      // Fallback 2: SharedPreferences local key (old local-only storage).
+      var configs = s.llmConfigs;
+      if (configs.isEmpty && (s.geminiApiKey?.isNotEmpty ?? false)) {
+        configs = [LlmConfig(llmProvider: 'gemini', apiKey: s.geminiApiKey)];
+      } else if (configs.isEmpty) {
         final prefs = await SharedPreferences.getInstance();
         final local = prefs.getString('gemini_api_key');
         if (local != null && local.isNotEmpty) {
-          geminiKey = local;
-          // Will be saved to backend on next save; clear local copy now
+          configs = [LlmConfig(llmProvider: 'gemini', apiKey: local)];
           await prefs.remove('gemini_api_key');
         }
       }
 
-      _geminiKeyCtrl.text = geminiKey;
+      final newRows = configs
+          .map((lc) => <String, dynamic>{
+                'providerCtrl': TextEditingController(text: lc.llmProvider),
+                'apiKeyCtrl':
+                    TextEditingController(text: lc.apiKey ?? ''),
+                'obscure': true,
+                'apiKeyIsSet': (lc.apiKey ?? '').isNotEmpty,
+              })
+          .toList();
+
+      // Dispose old rows before replacing
+      for (final row in _llmRows) {
+        (row['providerCtrl'] as TextEditingController).dispose();
+        (row['apiKeyCtrl'] as TextEditingController).dispose();
+      }
+      _llmRows
+        ..clear()
+        ..addAll(newRows);
+
       _smtpHostCtrl.text = s.smtpHost ?? '';
       _smtpPortCtrl.text = s.smtpPort ?? '';
       _smtpSecurity = s.smtpSsl == 'Y'
@@ -146,8 +175,20 @@ class _SystemSetupDialogState extends State<SystemSetupDialog> {
     setState(() => _isSaving = true);
     try {
       final pass = _mailPassCtrl.text;
+      final llmConfigs = _llmRows
+          .where((r) =>
+              (r['providerCtrl'] as TextEditingController).text.isNotEmpty)
+          .map((r) {
+            final provider =
+                (r['providerCtrl'] as TextEditingController).text;
+            final apiKey = (r['apiKeyCtrl'] as TextEditingController).text;
+            final m = <String, dynamic>{'llmProvider': provider};
+            if (apiKey.isNotEmpty && apiKey != '****') m['apiKey'] = apiKey;
+            return m;
+          })
+          .toList();
       final payload = {
-        'geminiApiKey': _geminiKeyCtrl.text,
+        'llmConfigs': llmConfigs,
         'smtpHost': _smtpHostCtrl.text,
         'smtpPort': _smtpPortCtrl.text,
         'smtpStartTls': _smtpSecurity == 'starttls' ? 'Y' : 'N',
@@ -238,54 +279,85 @@ class _SystemSetupDialogState extends State<SystemSetupDialog> {
             _sectionHeader(Icons.psychology, 'AI Settings'),
             const Divider(),
             Text(
-              'Enter your Google Gemini API key to enable AI-powered navigation.',
+              'Configure LLM provider API keys (gemini, openai, anthropic, …).',
               style: TextStyle(
                 fontSize: 14,
                 color: Theme.of(context).colorScheme.outline,
               ),
             ),
             const SizedBox(height: 16),
-            TextFormField(
-              key: const Key('geminiApiKey'),
-              controller: _geminiKeyCtrl,
-              obscureText: _obscureGeminiKey,
-              decoration: InputDecoration(
-                labelText: 'Gemini API Key',
-                hintText: 'Enter your API key',
-                prefixIcon: const Icon(Icons.key),
-                suffixIcon: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      icon: Icon(_obscureGeminiKey
-                          ? Icons.visibility
-                          : Icons.visibility_off),
-                      onPressed: () =>
-                          setState(() => _obscureGeminiKey = !_obscureGeminiKey),
-                      tooltip: _obscureGeminiKey ? 'Show key' : 'Hide key',
-                    ),
-                    if (_geminiKeyCtrl.text.isNotEmpty)
-                      IconButton(
-                        icon: const Icon(Icons.clear),
-                        onPressed: () => setState(() => _geminiKeyCtrl.clear()),
-                        tooltip: 'Clear',
-                      ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 12),
+            ..._llmRows.asMap().entries.map((e) => _llmProviderRow(e.key)),
+            const SizedBox(height: 8),
             TextButton.icon(
-              icon: const Icon(Icons.open_in_new, size: 16),
-              label: const Text('Get API Key from Google AI Studio'),
-              onPressed: () => HelperFunctions.showMessage(
-                context,
-                'Visit: https://aistudio.google.com/apikey',
-                Theme.of(context).colorScheme.primary,
-              ),
+              key: const Key('addLlmProvider'),
+              icon: const Icon(Icons.add),
+              label: const Text('Add Provider'),
+              onPressed: () => setState(() {
+                _llmRows.add({
+                  'providerCtrl': TextEditingController(),
+                  'apiKeyCtrl': TextEditingController(),
+                  'obscure': true,
+                  'apiKeyIsSet': false,
+                });
+              }),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _llmProviderRow(int index) {
+    final row = _llmRows[index];
+    final providerCtrl = row['providerCtrl'] as TextEditingController;
+    final apiKeyCtrl = row['apiKeyCtrl'] as TextEditingController;
+    final obscure = row['obscure'] as bool;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 110,
+            child: TextFormField(
+              key: Key('llmProvider_$index'),
+              controller: providerCtrl,
+              decoration: const InputDecoration(
+                labelText: 'Provider',
+                hintText: 'gemini',
+              ),
+              validator: (v) =>
+                  (v == null || v.isEmpty) ? 'Required' : null,
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: TextFormField(
+              key: Key('llmApiKey_$index'),
+              controller: apiKeyCtrl,
+              obscureText: obscure,
+              decoration: InputDecoration(
+                labelText: 'API Key',
+                suffixIcon: IconButton(
+                  icon: Icon(
+                      obscure ? Icons.visibility : Icons.visibility_off),
+                  onPressed: () =>
+                      setState(() => row['obscure'] = !obscure),
+                ),
+              ),
+            ),
+          ),
+          IconButton(
+            key: Key('removeLlmProvider_$index'),
+            icon: const Icon(Icons.delete_outline),
+            tooltip: 'Remove',
+            onPressed: () => setState(() {
+              providerCtrl.dispose();
+              apiKeyCtrl.dispose();
+              _llmRows.removeAt(index);
+            }),
+          ),
+        ],
       ),
     );
   }

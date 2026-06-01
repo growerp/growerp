@@ -41,6 +41,7 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
   final _formKey = GlobalKey<FormState>();
   final _nameCtrl = TextEditingController();
   final _modelCtrl = TextEditingController();
+  final _llmProviderCtrl = TextEditingController();
   final _instructionCtrl = TextEditingController();
   final _descriptionCtrl = TextEditingController();
   final _apiKeyCtrl = TextEditingController();
@@ -65,6 +66,7 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
     if (e != null) {
       _nameCtrl.text = e.agentName ?? '';
       _modelCtrl.text = e.modelName ?? 'gemini-2.0-flash';
+      _llmProviderCtrl.text = e.llmProvider ?? 'gemini';
       _instructionCtrl.text = e.instruction ?? '';
       _descriptionCtrl.text = e.description ?? '';
       _scheduleCronCtrl.text = e.scheduleExpression ?? '';
@@ -73,6 +75,7 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
       _scheduleEnabled = e.scheduleEnabled;
     } else {
       _modelCtrl.text = 'gemini-2.5-flash';
+      _llmProviderCtrl.text = 'gemini';
     }
   }
 
@@ -80,6 +83,7 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
   void dispose() {
     _nameCtrl.dispose();
     _modelCtrl.dispose();
+    _llmProviderCtrl.dispose();
     _instructionCtrl.dispose();
     _descriptionCtrl.dispose();
     _apiKeyCtrl.dispose();
@@ -109,6 +113,9 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
         adkAgentConfigId: widget.existing?.adkAgentConfigId,
         agentName: _nameCtrl.text.trim(),
         modelName: _modelCtrl.text.trim(),
+        llmProvider: _llmProviderCtrl.text.trim().isEmpty
+            ? 'gemini'
+            : _llmProviderCtrl.text.trim(),
         instruction: _instructionCtrl.text.trim(),
         description: _descriptionCtrl.text.trim(),
         scheduleExpression:
@@ -174,6 +181,17 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
                         decoration: const InputDecoration(
                           labelText: 'Model',
                           hintText: 'gemini-2.5-flash',
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      TextFormField(
+                        key: const Key('llmProvider'),
+                        controller: _llmProviderCtrl,
+                        decoration: const InputDecoration(
+                          labelText: 'LLM Provider',
+                          hintText: 'gemini',
+                          helperText:
+                              'Provider configured in System Setup (gemini, openai, anthropic, …)',
                         ),
                       ),
                       const SizedBox(height: 8),
