@@ -37,11 +37,28 @@ final List<LinerType> panelTestLinerTypes = [
 
 final List<Product> panelTestProducts = [
   Product(
+    pseudoId: 'LINER-ROLL-60',
+    productName: '60mil HDPE Roll Stock',
+    productTypeId: 'Physical Good',
+    price: Decimal.parse('1.50'),
+    listPrice: Decimal.parse('1.75'),
+  ),
+  Product(
     pseudoId: 'LINER-SYS-60',
     productName: 'Pond Liner System 60mil',
-    productTypeId: 'GoodsSaleShipped',
+    productTypeId: 'Physical Good',
     price: Decimal.parse('2.00'),
     listPrice: Decimal.parse('2.40'),
+  ),
+];
+
+// The work order product autocomplete only lists products that have a BOM
+// (WorkOrderDialog uses getBoms), so LINER-SYS-60 needs one.
+final List<BomItem> panelTestBomItems = [
+  BomItem(
+    productId: 'LINER-SYS-60',
+    toProductId: 'LINER-ROLL-60',
+    quantity: Decimal.parse('1'),
   ),
 ];
 
@@ -87,7 +104,10 @@ void main() {
     );
     await CommonTest.createCompanyAndAdmin(
       tester,
-      testData: {'products': panelTestProducts},
+      testData: {
+        'products': panelTestProducts,
+        'bomItems': panelTestBomItems,
+      },
     );
 
     // Set up liner types so the panel dialog's dropdown is populated.
