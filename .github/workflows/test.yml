@@ -248,9 +248,12 @@ jobs:
 
       - name: Combined summary
         run: |
+          FAIL_FILE=$(mktemp)
+          echo "0" > "$FAIL_FILE"
+
           {
           echo "## Overall Test Results"
-          
+
           for FORMAT in mobile desktop; do
             DISPLAY_FORMAT="Mobile"
             if [ "$FORMAT" = "desktop" ]; then
@@ -258,12 +261,12 @@ jobs:
             fi
             echo "### $DISPLAY_FORMAT Layout Results"
             echo '```'
-            
+
             FAILED_PKGS=0
             PASSED_PKGS=0
             IND_PASSED=0
             IND_FAILED=0
-            
+
             for slice_dir in $(ls -d test-logs/test-output-*-${FORMAT} 2>/dev/null | sort -V); do
               SLICE_NAME=$(basename "$slice_dir" | sed 's/test-output-//')
               LOG="$slice_dir/test_output.log"
@@ -275,7 +278,7 @@ jobs:
                 PASSED=$(grep '>>> RESULT:.*PASSED' "$LOG" | grep -v '+ echo' | wc -l)
                 FAILED_PKGS=$((FAILED_PKGS + FAILED))
                 PASSED_PKGS=$((PASSED_PKGS + PASSED))
-                
+
                 # Extract individual test counts
                 P_COUNT=$(grep 'Tests passed' "$LOG" | sed 's/^[^|]*| *//' | grep -oE '[0-9]+$' | tail -1)
                 F_COUNT=$(grep 'Tests failed' "$LOG" | sed 's/^[^|]*| *//' | grep -oE '[0-9]+$' | tail -1)
@@ -283,13 +286,17 @@ jobs:
                 IND_FAILED=$((IND_FAILED + ${F_COUNT:-0}))
               fi
             done
-            
+
             echo ""
             echo "Packages passed : $PASSED_PKGS"
             echo "Packages failed : $FAILED_PKGS"
             echo "Tests passed    : $IND_PASSED"
             echo "Tests failed    : $IND_FAILED"
-            
+
+            if [ "$IND_FAILED" -gt 1 ]; then
+              echo "1" > "$FAIL_FILE"
+            fi
+
             if [ "$FAILED_PKGS" -eq 0 ]; then
               echo ""
               echo "All packages passed for $DISPLAY_FORMAT layout!"
@@ -331,4 +338,10 @@ jobs:
             echo "No Flutter exceptions caught by the test framework."
           fi
           } | tee -a "$GITHUB_STEP_SUMMARY"
+
+          if [ "$(cat "$FAIL_FILE")" = "1" ]; then
+            echo "CI FAILED: more than 1 individual test failure for at least one platform." \
+              | tee -a "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
 
