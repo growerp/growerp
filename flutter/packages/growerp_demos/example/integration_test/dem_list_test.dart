@@ -51,10 +51,10 @@ void main() {
 
     // Wait for async progress load (_loaded becomes true and ListView appears)
     for (var i = 0; i < 20; i++) {
-      if (find.byKey(const Key('DemoList')).evaluate().isNotEmpty) break;
+      if (find.byKey(const Key('DemoListView')).evaluate().isNotEmpty) break;
       await tester.pump(const Duration(milliseconds: 200));
     }
-    final listFinder = find.byKey(const Key('DemoList'));
+    final listFinder = find.byKey(const Key('DemoListView'));
 
     // All registered demos should be visible and say "Not started"
     for (final demo in registeredDemos) {
