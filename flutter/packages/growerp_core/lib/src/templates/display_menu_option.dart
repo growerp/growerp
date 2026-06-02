@@ -133,6 +133,9 @@ class DisplayMenuItemState extends State<DisplayMenuItem>
   CoreLocalizations? _localizations;
   bool _isInitialized = false;
   MenuConfiguration? _lastMenuConfig;
+  MenuConfiguration? _injectSrcConfig; // rawConfig the cache was built from
+  bool? _injectSrcIsAdmin; // admin flag the cache was built with
+  MenuConfiguration? _injectedConfig; // memoized effectiveConfig
 
   @override
   void initState() {
@@ -340,12 +343,22 @@ class DisplayMenuItemState extends State<DisplayMenuItem>
               ? widget.menuConfiguration
               : menuConfiguration;
 
-          // Inject System Setup for admin users regardless of which app is running
+          // Inject System Setup for admin users regardless of which app is
+          // running. Memoize the result so the reference stays stable across
+          // rebuilds (MenuConfiguration has no value equality); otherwise the
+          // `effectiveConfig != _lastMenuConfig` guard below would always be
+          // true and trigger an infinite rebuild loop.
           final authState = context.read<AuthBloc>().state;
-          final effectiveConfig =
-              authState.authenticate?.user?.userGroup == UserGroup.admin
-                  ? injectAdminSetup(rawConfig)
-                  : rawConfig;
+          final isAdmin =
+              authState.authenticate?.user?.userGroup == UserGroup.admin;
+          if (!identical(rawConfig, _injectSrcConfig) ||
+              isAdmin != _injectSrcIsAdmin) {
+            _injectSrcConfig = rawConfig;
+            _injectSrcIsAdmin = isAdmin;
+            _injectedConfig =
+                isAdmin ? injectAdminSetup(rawConfig) : rawConfig;
+          }
+          final effectiveConfig = _injectedConfig!;
 
           if (!_isInitialized || effectiveConfig != _lastMenuConfig) {
             _localizations = CoreLocalizations.of(context)!;
