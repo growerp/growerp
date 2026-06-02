@@ -603,32 +603,36 @@ class CommonTest {
     await tester.pump(Duration(seconds: seconds));
     await tester.pumpAndSettle(Duration(seconds: seconds));
 
-    // Tap first filtered result in StyledDataTable
-    // Try common row cell keys used across different list screens
+    // Tap the result row whose cell value exactly matches the search string.
+    // The backend filter may not have applied yet, or may return several rows
+    // in an unsorted order (e.g. a bloc that prepends newly-added items), so we
+    // must locate the matching row by value instead of blindly tapping row 0.
+    const baseKeys = ['id', 'name', 'title', 'theme', 'headline'];
+    for (int i = 0; i < 30; i++) {
+      for (int row = 0; row < 20; row++) {
+        for (final base in baseKeys) {
+          final finder = find.byKey(Key('$base$row'));
+          if (tester.any(finder) && getTextField('$base$row') == searchString) {
+            await tester.ensureVisible(finder.last);
+            await tester.tap(finder.last);
+            await tester.pumpAndSettle(Duration(seconds: seconds));
+            return;
+          }
+        }
+      }
+      await tester.pump(const Duration(milliseconds: 200));
+    }
+    // Fallback: no exact match found (e.g. a partial/prefix search). Tap the
+    // first available result row using the common row cell keys.
     for (final key in ['id0', 'name0', 'title0', 'theme0', 'headline0']) {
       if (tester.any(find.byKey(Key(key)))) {
-        // Poll until the filter has applied and the first visible result matches the search string.
-        // This avoids tapping the wrong row when the backend hasn't responded yet.
-        for (int i = 0; i < 30; i++) {
-          String currentVal = getTextField(key);
-          String otherVal = '';
-          if (key == 'id0' && tester.any(find.byKey(const Key('name0')))) {
-            otherVal = getTextField('name0');
-          } else if (key == 'name0' && tester.any(find.byKey(const Key('id0')))) {
-            otherVal = getTextField('id0');
-          }
-          if (currentVal == searchString || otherVal == searchString) {
-            break;
-          }
-          await tester.pump(const Duration(milliseconds: 200));
-        }
         await tester.ensureVisible(find.byKey(Key(key)).last);
         await tester.tap(find.byKey(Key(key)).last);
         await tester.pumpAndSettle(Duration(seconds: seconds));
         return;
       }
     }
-    // Fallback to tapping by text
+    // Final fallback to tapping by text
     await tapByText(tester, searchString);
     await tester.pumpAndSettle(Duration(seconds: seconds));
   }
