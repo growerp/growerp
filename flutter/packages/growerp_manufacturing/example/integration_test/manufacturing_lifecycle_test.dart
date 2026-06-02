@@ -171,37 +171,29 @@ GoRouter createAdminMfgTestRouter() {
         docType: FinDocType.shipment,
       ),
       '/accounting' => const AccountingDashboard(),
+      // Accounting sub-routes are also menu items, so generateRoutes() builds
+      // their GoRoute via this widgetBuilder — handle them here (not via
+      // shellRoutes, which would create duplicate, shadowing routes).
+      '/accounting/sales_payments' => const FinDocList(
+        key: Key('SalesPayment'),
+        sales: true,
+        docType: FinDocType.payment,
+      ),
+      '/accounting/purchase_payments' => const FinDocList(
+        key: Key('PurchasePayment'),
+        sales: false,
+        docType: FinDocType.payment,
+      ),
+      '/accounting/ledger' => const FinDocList(
+        key: Key('Transaction'),
+        sales: true,
+        docType: FinDocType.transaction,
+      ),
       '/manufacturing/bom' => const BomList(),
       '/manufacturing/workOrder' => const WorkOrderList(),
       '/manufacturing/routing' => const RoutingList(),
       _ => const _MfgDashboard(),
     },
-    shellRoutes: [
-      GoRoute(
-        path: '/accounting/ledger',
-        builder: (_, _) => const FinDocList(
-          key: Key('Transaction'),
-          sales: true,
-          docType: FinDocType.transaction,
-        ),
-      ),
-      GoRoute(
-        path: '/accounting/sales_payments',
-        builder: (_, _) => const FinDocList(
-          key: Key('SalesPayment'),
-          sales: true,
-          docType: FinDocType.payment,
-        ),
-      ),
-      GoRoute(
-        path: '/accounting/purchase_payments',
-        builder: (_, _) => const FinDocList(
-          key: Key('PurchasePayment'),
-          sales: false,
-          docType: FinDocType.payment,
-        ),
-      ),
-    ],
     additionalRoutes: [
       GoRoute(
         path: '/findoc',
@@ -287,6 +279,32 @@ const adminMfgMenuConfig = MenuConfiguration(
       route: '/accounting',
       iconName: 'account_balance',
       sequenceNum: 80,
+    ),
+    // Accounting sub-items: not shown on the dashboard but rendered in the
+    // drawer/rail so selectOption can tap their 'tap/accounting/...' keys.
+    MenuItem(
+      itemKey: 'MFG_SALES_PAY',
+      title: 'Sales Payments',
+      route: '/accounting/sales_payments',
+      iconName: 'input',
+      sequenceNum: 85,
+      widgetName: 'FinDocList',
+    ),
+    MenuItem(
+      itemKey: 'MFG_PURCH_PAY',
+      title: 'Purchase Payments',
+      route: '/accounting/purchase_payments',
+      iconName: 'output',
+      sequenceNum: 90,
+      widgetName: 'FinDocList',
+    ),
+    MenuItem(
+      itemKey: 'MFG_LEDGER',
+      title: 'Ledger',
+      route: '/accounting/ledger',
+      iconName: 'account_balance_wallet',
+      sequenceNum: 95,
+      widgetName: 'FinDocList',
     ),
   ],
 );
