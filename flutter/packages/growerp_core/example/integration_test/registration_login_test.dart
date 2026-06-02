@@ -665,22 +665,6 @@ void main() {
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove('apiKey');
 
-      // Fetch the authoritative plan list from the backend before opening the app.
-      // The GROWERP owner Products endpoint is public (require-authentication="anonymous-all").
-      final apiClient = RestClient(await buildDioClient());
-      late Products backendPlans;
-      try {
-        backendPlans = await apiClient.getProduct(ownerPartyId: 'GROWERP');
-      } catch (e) {
-        debugPrint('Skipping TC-TRIAL-004: could not fetch plans – $e');
-        return;
-      }
-      expect(
-        backendPlans.products,
-        isNotEmpty,
-        reason: 'Backend must have GROWERP subscription plans configured',
-      );
-
       final restClient = RestClient(await buildDioClient());
       final router = createDynamicCoreRouter([
         coreMenuConfig,
@@ -696,7 +680,27 @@ void main() {
         title: "TC-TRIAL-004: Plan prices from DB",
       );
 
+      // On a fresh backend, createCompanyAndAdmin bootstraps the GrowERP master
+      // tenant first; that bootstrap (complete#TenantSetup -> setup#MainOrganization)
+      // creates the GROWERP owner's root product category. The public plan list
+      // returns empty until this has happened, so fetch the plans afterwards.
       await CommonTest.createCompanyAndAdmin(tester);
+
+      // Fetch the authoritative plan list from the public GROWERP owner Products
+      // endpoint (require-authentication="anonymous-all").
+      final apiClient = RestClient(await buildDioClient());
+      late Products backendPlans;
+      try {
+        backendPlans = await apiClient.getProduct(ownerPartyId: 'GROWERP');
+      } catch (e) {
+        debugPrint('Skipping TC-TRIAL-004: could not fetch plans – $e');
+        return;
+      }
+      expect(
+        backendPlans.products,
+        isNotEmpty,
+        reason: 'Backend must have GROWERP subscription plans configured',
+      );
 
       SaveTest test = await PersistFunctions.getTest();
       final adminEmail = test.admin?.email;
