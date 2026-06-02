@@ -142,6 +142,14 @@ const orderAccountingMenuConfig = MenuConfiguration(
       widgetName: 'ItemTypeList',
     ),
     MenuItem(
+      menuItemId: 'OA_INCOMING_SHIP',
+      title: 'Incoming Shipments',
+      route: '/incoming-shipments',
+      iconName: 'local_shipping',
+      sequenceNum: 73,
+      widgetName: 'FinDocList',
+    ),
+    MenuItem(
       menuItemId: 'OA_SHIPMENTS',
       title: 'Shipments',
       route: '/shipments',
@@ -219,6 +227,11 @@ GoRouter createOrderAccountingExampleRouter() {
       '/accounting/reports' => const Center(child: Text("Reports")),
       '/accounting/setup' => const PaymentTypeList(),
       '/accounting/setup/item-types' => const ItemTypeList(),
+      '/incoming-shipments' => const FinDocList(
+        key: Key('ShipmentsIn'),
+        sales: false,
+        docType: FinDocType.shipment,
+      ),
       '/shipments' => const FinDocList(
         key: Key('ShipmentsOut'),
         sales: true,
@@ -247,16 +260,6 @@ GoRouter createOrderAccountingExampleRouter() {
           final finDoc = state.extra as FinDoc?;
           return PrintingForm(finDocIn: finDoc ?? FinDoc());
         },
-      ),
-    ],
-    shellRoutes: [
-      GoRoute(
-        path: '/incoming-shipments',
-        builder: (context, state) => const FinDocList(
-          key: Key('ShipmentsIn'),
-          sales: false,
-          docType: FinDocType.shipment,
-        ),
       ),
     ],
   );
