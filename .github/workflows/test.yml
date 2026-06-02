@@ -316,22 +316,31 @@ jobs:
 
           echo "## Flutter Exceptions Report"
           HAS_EXCEPTIONS=0
-          for slice_dir in $(ls -d test-logs/test-output-* 2>/dev/null | sort -V); do
-            SLICE_NAME=$(basename "$slice_dir" | sed 's/test-output-//')
-            LOG="$slice_dir/test_output.log"
-            if [ -f "$LOG" ]; then
-              EXCEPTIONS=$(sed 's/^[^|]*| *//' "$LOG" | awk '/══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞═════/,/═════════════════════════════════════════════════/ && !/EXCEPTION/' || true)
-              if [ -n "$EXCEPTIONS" ]; then
-                if [ "$HAS_EXCEPTIONS" -eq 0 ]; then
-                  HAS_EXCEPTIONS=1
-                fi
-                echo "### Exceptions in Slice: $SLICE_NAME"
-                echo '```'
-                echo "$EXCEPTIONS"
-                echo '```'
-                echo ""
-              fi
+          for FORMAT in mobile desktop; do
+            DISPLAY_FORMAT="Mobile"
+            if [ "$FORMAT" = "desktop" ]; then
+              DISPLAY_FORMAT="Desktop"
             fi
+            FORMAT_HEADER_PRINTED=0
+            for slice_dir in $(ls -d test-logs/test-output-*-${FORMAT} 2>/dev/null | sort -V); do
+              SLICE_NAME=$(basename "$slice_dir" | sed 's/test-output-//')
+              LOG="$slice_dir/test_output.log"
+              if [ -f "$LOG" ]; then
+                EXCEPTIONS=$(sed 's/^[^|]*| *//' "$LOG" | awk '/══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞═════/,/═════════════════════════════════════════════════/ && !/EXCEPTION/' || true)
+                if [ -n "$EXCEPTIONS" ]; then
+                  HAS_EXCEPTIONS=1
+                  if [ "$FORMAT_HEADER_PRINTED" -eq 0 ]; then
+                    echo "### $DISPLAY_FORMAT Layout Exceptions"
+                    FORMAT_HEADER_PRINTED=1
+                  fi
+                  echo "#### Exceptions in Slice: $SLICE_NAME"
+                  echo '```'
+                  echo "$EXCEPTIONS"
+                  echo '```'
+                  echo ""
+                fi
+              fi
+            done
           done
 
           if [ "$HAS_EXCEPTIONS" -eq 0 ]; then
