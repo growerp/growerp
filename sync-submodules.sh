@@ -26,13 +26,13 @@ echo "=== Submodule status ==="
 git submodule status --recursive
 
 # Stage the updated moqui submodule pointer
-git add moqui
+git add .
 
 if git diff --cached --quiet; then
   echo ""
   echo "No submodule pointer changes to commit."
 else
-  git commit -m "chore: update moqui submodules to latest growerp branch"
+  git commit -m "chore: update submodules to latest growerp branch"
   echo ""
   echo "Committed updated submodule pointers."
 
