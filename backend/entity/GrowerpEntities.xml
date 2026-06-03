@@ -403,7 +403,8 @@ along with this software (see the LICENSE.md file). If not, see
         <field name="storeSkipSeen" type="text-indicator"/>
         <field name="mailUsername"  type="text-medium" enable-audit-log="true"/>
         <field name="mailPassword"  type="text-medium" encrypt="true" enable-audit-log="true"/>
-        <field name="githubToken"   type="text-medium" encrypt="true" enable-audit-log="true"/>
+        <field name="githubToken"      type="text-medium" encrypt="true" enable-audit-log="true"/>
+        <field name="githubRepository" type="text-medium"/>
     </entity>
 
     <entity entity-name="LlmConfig" package="growerp.general"

@@ -43,6 +43,7 @@ abstract class SystemSettings with _$SystemSettings {
     String? mailPassword,
     // GitHub
     String? githubToken,
+    String? githubRepository,
   }) = _SystemSettings;
   SystemSettings._();
 
@@ -53,5 +54,6 @@ abstract class SystemSettings with _$SystemSettings {
   String toString() =>
       'SystemSettings smtpHost: $smtpHost storeHost: $storeHost '
       'geminiApiKey: ${geminiApiKey != null ? "set" : "unset"} '
-      'githubToken: ${githubToken != null ? "set" : "unset"}';
+      'githubToken: ${githubToken != null ? "set" : "unset"} '
+      'githubRepository: ${githubRepository ?? "unset"}';
 }

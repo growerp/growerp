@@ -74,6 +74,7 @@ class _SystemSetupDialogState extends State<SystemSetupDialog> {
   final _githubTokenCtrl = TextEditingController();
   bool _obscureGithubToken = true;
   bool _githubTokenSet = false;
+  final _githubRepoCtrl = TextEditingController();
 
   // IMAP / store
   final _storeHostCtrl = TextEditingController();
@@ -103,6 +104,7 @@ class _SystemSetupDialogState extends State<SystemSetupDialog> {
     _mailUserCtrl.dispose();
     _mailPassCtrl.dispose();
     _githubTokenCtrl.dispose();
+    _githubRepoCtrl.dispose();
     _storeHostCtrl.dispose();
     _storePortCtrl.dispose();
     _storeFolderCtrl.dispose();
@@ -162,6 +164,7 @@ class _SystemSetupDialogState extends State<SystemSetupDialog> {
       _mailPassCtrl.text = _mailPassSet ? '****' : '';
       _githubTokenSet = (s.githubToken ?? '').isNotEmpty;
       _githubTokenCtrl.text = _githubTokenSet ? '****' : '';
+      _githubRepoCtrl.text = s.githubRepository ?? '';
       _storeHostCtrl.text = s.storeHost ?? '';
       _storePortCtrl.text = s.storePort ?? '';
       _storeProtocol = s.storeProtocol.isNotEmpty ? s.storeProtocol : 'imaps';
@@ -207,6 +210,7 @@ class _SystemSetupDialogState extends State<SystemSetupDialog> {
         'mailUsername': _mailUserCtrl.text,
         if (pass.isNotEmpty && pass != '****') 'mailPassword': pass,
         if (githubToken.isNotEmpty && githubToken != '****') 'githubToken': githubToken,
+        'githubRepository': _githubRepoCtrl.text,
         'storeHost': _storeHostCtrl.text,
         'storePort': _storePortCtrl.text,
         'storeProtocol': _storeProtocol,
@@ -558,7 +562,7 @@ class _SystemSetupDialogState extends State<SystemSetupDialog> {
             controller: _githubTokenCtrl,
             obscureText: _obscureGithubToken,
             decoration: InputDecoration(
-              labelText: 'GitHub Token',
+              labelText: 'GitHub Token (GITHUB_TOKEN)',
               hintText: _githubTokenSet ? '(leave as **** to keep current)' : '',
               prefixIcon: const Icon(Icons.security),
               suffixIcon: IconButton(
@@ -574,6 +578,16 @@ class _SystemSetupDialogState extends State<SystemSetupDialog> {
                 _githubTokenCtrl.clear();
               }
             },
+          ),
+          const SizedBox(height: 12),
+          TextFormField(
+            key: const Key('githubRepository'),
+            controller: _githubRepoCtrl,
+            decoration: const InputDecoration(
+              labelText: 'GitHub Repository',
+              hintText: 'owner/repository',
+              prefixIcon: Icon(Icons.source_outlined),
+            ),
           ),
         ],
       ),
