@@ -45,6 +45,7 @@ class TopApp extends StatefulWidget {
     this.company,
     this.appId,
     this.widgetRegistrations = const [],
+    this.widgetMetadata = const [],
     this.forceUpdateInfo,
   });
 
@@ -62,6 +63,11 @@ class TopApp extends StatefulWidget {
 
   final String? appId;
   final List<Map<String, GrowerpWidgetBuilder>> widgetRegistrations;
+
+  /// Rich widget metadata (description/keywords/parameters) registered after the
+  /// plain [widgetRegistrations] so the AI screen catalog
+  /// ([WidgetRegistry.getWidgetCatalog]) has useful context for navigation.
+  final List<WidgetMetadata> widgetMetadata;
 
   /// Force update information from backend. If provided and forceUpdate is true,
   /// a non-dismissible dialog will be shown prompting the user to update.
@@ -94,6 +100,10 @@ class _TopAppState extends State<TopApp> {
 
     for (final widgetMap in widget.widgetRegistrations) {
       WidgetRegistry.register(widgetMap);
+    }
+    // Enrich the catalog with descriptions/keywords/params for AI navigation.
+    if (widget.widgetMetadata.isNotEmpty) {
+      WidgetRegistry.registerAllWithMetadata(widget.widgetMetadata);
     }
     if (widget.appId != null) {
       _menuConfigBloc = MenuConfigBloc(widget.restClient, widget.appId!);

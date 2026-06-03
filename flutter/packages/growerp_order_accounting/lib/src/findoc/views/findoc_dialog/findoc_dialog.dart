@@ -52,7 +52,11 @@ class ShowFinDocDialog extends StatelessWidget {
 
 class FinDocDialog extends StatelessWidget {
   final FinDoc finDoc;
-  const FinDocDialog(this.finDoc, {super.key});
+
+  /// Agent-driven: preset the status dropdown (e.g. approved) so the user only
+  /// has to confirm. Null leaves the document's own status.
+  final FinDocStatusVal? presetStatus;
+  const FinDocDialog(this.finDoc, {super.key, this.presetStatus});
 
   @override
   Widget build(BuildContext context) {
@@ -73,7 +77,7 @@ class FinDocDialog extends StatelessWidget {
               : context.read<TransactionBloc>() as FinDocBloc,
           restClient: restClient,
         )..add(CartFetch(finDoc)),
-        child: FinDocPage(finDoc),
+        child: FinDocPage(finDoc, presetStatus: presetStatus),
       );
     }
     return BlocProvider<PurchaseCartBloc>(
@@ -98,7 +102,10 @@ class FinDocDialog extends StatelessWidget {
 
 class FinDocPage extends StatefulWidget {
   final FinDoc finDoc;
-  const FinDocPage(this.finDoc, {super.key});
+
+  /// Agent-driven: preset the status dropdown initial value.
+  final FinDocStatusVal? presetStatus;
+  const FinDocPage(this.finDoc, {super.key, this.presetStatus});
   @override
   MyFinDocState createState() => MyFinDocState();
 }
@@ -160,7 +167,8 @@ class MyFinDocState extends State<FinDocPage> {
         ? false
         : FinDocStatusVal.statusFixed(finDoc.status!);
     _isPosted = finDocUpdated.isPosted ?? false;
-    _updatedStatus = finDocUpdated.status ?? FinDocStatusVal.created;
+    _updatedStatus =
+        widget.presetStatus ?? finDocUpdated.status ?? FinDocStatusVal.created;
     _selectedCompanyUser = CompanyUser.tryParse(
       finDocUpdated.otherCompany ?? finDocUpdated.otherUser,
     );

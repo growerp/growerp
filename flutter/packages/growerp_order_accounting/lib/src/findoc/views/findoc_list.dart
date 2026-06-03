@@ -34,6 +34,9 @@ class FinDocList extends StatefulWidget {
     this.additionalItemButtonName,
     this.additionalItemButtonRoute,
     this.journalId,
+    this.openNew = false,
+    this.openFinDocId,
+    this.presetStatus,
   });
 
   final bool sales;
@@ -43,6 +46,16 @@ class FinDocList extends StatefulWidget {
   final String? additionalItemButtonName;
   final String? additionalItemButtonRoute;
   final String? journalId;
+
+  /// Agent-driven: auto-open the new-document dialog after the list loads.
+  final bool openNew;
+
+  /// Agent-driven: filter to and auto-open this document (pseudoId or id).
+  final String? openFinDocId;
+
+  /// Agent-driven: when auto-opening a document, preset its status dropdown to
+  /// this value (e.g. approved) so the user only has to confirm.
+  final FinDocStatusVal? presetStatus;
 
   @override
   FinDocListState createState() => FinDocListState();
@@ -68,6 +81,8 @@ class FinDocListState extends State<FinDocList> {
   late OrderAccountingLocalizations _localizations;
   bool _isLoading = true;
   double currentScroll = 0;
+  // Ensure agent-driven auto-open (openNew/openFinDocId) fires only once.
+  bool _autoOpened = false;
 
   @override
   void initState() {
@@ -103,10 +118,79 @@ class FinDocListState extends State<FinDocList> {
         _finDocBloc = context.read<RequestBloc>() as FinDocBloc;
       default:
     }
+    // Agent-driven: narrow the list to the requested document up front.
+    searchString = widget.openFinDocId ?? '';
+    if (searchString.isNotEmpty) _searchController.text = searchString;
     _finDocBloc.add(
-      FinDocFetch(refresh: true, limit: 15, my: my, status: widget.status),
+      FinDocFetch(
+        refresh: true,
+        limit: 15,
+        my: my,
+        status: widget.status,
+        searchString: searchString,
+      ),
     );
     bottom = 50;
+  }
+
+  /// Agent-driven auto-open: fires once after the first successful load.
+  /// Opens the new-document dialog ([FinDocList.openNew]) or the requested
+  /// document ([FinDocList.openFinDocId]).
+  void _maybeAutoOpen(BuildContext context) {
+    if (_autoOpened) return;
+    if (!widget.openNew && (widget.openFinDocId?.isEmpty ?? true)) return;
+    _autoOpened = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (widget.openNew) {
+        _openNewDialog(context);
+        return;
+      }
+      final id = widget.openFinDocId;
+      FinDoc? match;
+      for (final f in finDocs) {
+        if (f.pseudoId == id || f.id() == id) {
+          match = f;
+          break;
+        }
+      }
+      match ??= finDocs.isNotEmpty ? finDocs.first : null;
+      if (match != null) {
+        showDialog(
+          barrierDismissible: true,
+          context: context,
+          builder: (_) => BlocProvider.value(
+            value: _finDocBloc,
+            child: SelectFinDocDialog(
+              onlyRental: widget.onlyRental,
+              finDoc: match!,
+              presetStatus: widget.presetStatus,
+            ),
+          ),
+        );
+      }
+    });
+  }
+
+  void _openNewDialog(BuildContext context) {
+    showDialog(
+      barrierDismissible: true,
+      context: context,
+      builder: (_) => BlocProvider.value(
+        value: _finDocBloc,
+        child: widget.docType == FinDocType.payment
+            ? PaymentDialog(
+                finDoc: FinDoc(sales: widget.sales, docType: widget.docType),
+              )
+            : widget.docType == FinDocType.request
+            ? RequestDialog(
+                finDoc: FinDoc(sales: widget.sales, docType: widget.docType),
+              )
+            : FinDocDialog(
+                FinDoc(sales: widget.sales, docType: widget.docType),
+              ),
+      ),
+    );
   }
 
   @override
@@ -232,6 +316,10 @@ class FinDocListState extends State<FinDocList> {
             finDocs = state.finDocs
                 .where((el) => el.items[0].rentalFromDate != null)
                 .toList();
+          }
+
+          if (state.status == FinDocStatus.success) {
+            _maybeAutoOpen(context);
           }
 
           if (finDocs.isNotEmpty && _scrollController.hasClients) {
@@ -457,10 +545,14 @@ class SelectFinDocDialog extends StatelessWidget {
     super.key,
     required this.finDoc,
     bool onlyRental = false,
+    this.presetStatus,
   });
 
   final FinDoc finDoc;
   final bool onlyRental = false;
+
+  /// Agent-driven: preset the status dropdown of the opened document.
+  final FinDocStatusVal? presetStatus;
 
   @override
   Widget build(BuildContext context) {
@@ -475,6 +567,6 @@ class SelectFinDocDialog extends StatelessWidget {
         ? ShipmentReceiveDialog(finDoc)
         : finDoc.docType == FinDocType.payment
         ? PaymentDialog(finDoc: finDoc)
-        : FinDocDialog(finDoc);
+        : FinDocDialog(finDoc, presetStatus: presetStatus);
   }
 }

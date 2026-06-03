@@ -109,6 +109,42 @@ Map<String, GrowerpWidgetBuilder> getOrderAccountingWidgets() {
   };
 }
 
+/// True for `true`/`'true'`/`'1'` (query params arrive as strings).
+bool _truthy(dynamic v) => v == true || v == 'true' || v == '1';
+
+/// Parse an agent `presetStatus` arg (enum name, display name, or backend value)
+/// into a [FinDocStatusVal]. Returns null when unset/unrecognised.
+FinDocStatusVal? _parsePresetStatus(dynamic v) {
+  if (v == null) return null;
+  final s = v.toString().toLowerCase();
+  for (final st in FinDocStatusVal.values) {
+    if (st.name.toLowerCase() == s ||
+        st.value.toLowerCase() == s ||
+        st.toString().toLowerCase() == s) {
+      return st;
+    }
+  }
+  return null;
+}
+
+/// Build a [FinDocList] honoring agent-driven open args (openNew / finDocId /
+/// presetStatus) so chat navigation lands on an operational, pre-filled screen.
+FinDocList _finDocListFromArgs(
+  Map<String, dynamic>? args, {
+  required bool sales,
+  required FinDocType docType,
+}) {
+  return FinDocList(
+    key: getKeyFromArgs(args),
+    sales: sales,
+    docType: docType,
+    openNew: _truthy(args?['openNew']),
+    openFinDocId: (args?['finDocId'] ?? args?['pseudoId'] ?? args?['openFinDocId'])
+        ?.toString(),
+    presetStatus: _parsePresetStatus(args?['presetStatus']),
+  );
+}
+
 /// Returns widget metadata for AI-powered navigation
 List<WidgetMetadata> getOrderAccountingWidgetsWithMetadata() {
   return [
@@ -136,15 +172,17 @@ List<WidgetMetadata> getOrderAccountingWidgetsWithMetadata() {
     ),
     WidgetMetadata(
       widgetName: 'SalesOrderList',
-      description: 'List of sales orders from customers',
+      description: 'List of sales orders from customers. Use openNew=true to '
+          'enter a new order, or finDocId+presetStatus=approved to approve one.',
       iconName: 'shopping_cart',
-      keywords: ['order', 'sales', 'customer order', 'SO'],
-      parameters: {'status': 'Filter: open, approved, completed'},
-      builder: (args) => FinDocList(
-        key: getKeyFromArgs(args),
-        sales: true,
-        docType: FinDocType.order,
-      ),
+      keywords: ['order', 'sales', 'customer order', 'SO', 'enter order', 'approve order'],
+      parameters: {
+        'openNew': 'true → open the new sales order entry dialog',
+        'finDocId': 'open this order (orderId or pseudoId)',
+        'presetStatus': 'preset status dropdown, e.g. approved',
+      },
+      builder: (args) =>
+          _finDocListFromArgs(args, sales: true, docType: FinDocType.order),
     ),
     WidgetMetadata(
       widgetName: 'SalesPaymentList',
@@ -169,12 +207,9 @@ List<WidgetMetadata> getOrderAccountingWidgetsWithMetadata() {
       description: 'List of shipments sent to customers',
       iconName: 'local_shipping',
       keywords: ['shipment', 'delivery', 'shipping', 'outgoing', 'dispatch'],
-      parameters: {'status': 'Filter: open, approved, completed'},
-      builder: (args) => FinDocList(
-        key: getKeyFromArgs(args),
-        sales: true,
-        docType: FinDocType.shipment,
-      ),
+      parameters: {'finDocId': 'open this shipment (shipmentId or pseudoId)'},
+      builder: (args) =>
+          _finDocListFromArgs(args, sales: true, docType: FinDocType.shipment),
     ),
 
     // Purchase documents
@@ -202,15 +237,17 @@ List<WidgetMetadata> getOrderAccountingWidgetsWithMetadata() {
     ),
     WidgetMetadata(
       widgetName: 'PurchaseOrderList',
-      description: 'List of purchase orders to suppliers',
+      description: 'List of purchase orders to suppliers. Use openNew=true to '
+          'enter a new order, or finDocId+presetStatus=approved to approve one.',
       iconName: 'shopping_bag',
-      keywords: ['order', 'purchase', 'supplier order', 'vendor order', 'PO'],
-      parameters: {'status': 'Filter: open, approved, completed'},
-      builder: (args) => FinDocList(
-        key: getKeyFromArgs(args),
-        sales: false,
-        docType: FinDocType.order,
-      ),
+      keywords: ['order', 'purchase', 'supplier order', 'vendor order', 'PO', 'approve order'],
+      parameters: {
+        'openNew': 'true → open the new purchase order entry dialog',
+        'finDocId': 'open this order (orderId or pseudoId)',
+        'presetStatus': 'preset status dropdown, e.g. approved',
+      },
+      builder: (args) =>
+          _finDocListFromArgs(args, sales: false, docType: FinDocType.order),
     ),
     WidgetMetadata(
       widgetName: 'PurchasePaymentList',
@@ -232,21 +269,23 @@ List<WidgetMetadata> getOrderAccountingWidgetsWithMetadata() {
     ),
     WidgetMetadata(
       widgetName: 'IncomingShipmentList',
-      description: 'List of shipments received from suppliers',
+      description: 'List of shipments received from suppliers. Pass finDocId of '
+          'an approved incoming shipment to open its receive screen.',
       iconName: 'local_shipping',
       keywords: [
         'shipment',
         'receiving',
+        'receive shipment',
         'incoming',
         'receipt',
         'goods receipt',
       ],
-      parameters: {'status': 'Filter: open, approved, completed'},
-      builder: (args) => FinDocList(
-        key: getKeyFromArgs(args),
-        sales: false,
-        docType: FinDocType.shipment,
-      ),
+      parameters: {
+        'finDocId': 'open this shipment (shipmentId or pseudoId); an approved '
+            'incoming shipment opens the receive dialog',
+      },
+      builder: (args) =>
+          _finDocListFromArgs(args, sales: false, docType: FinDocType.shipment),
     ),
 
     // Accounting

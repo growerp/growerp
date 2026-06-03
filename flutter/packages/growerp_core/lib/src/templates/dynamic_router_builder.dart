@@ -307,6 +307,7 @@ GoRouter createDynamicAppRouter(
 
               Map<String, dynamic> args = {};
               if (option.itemKey != null) args['key'] = option.itemKey;
+              args.addAll(state.uri.queryParameters);
               return config.widgetLoader(option.widgetName!, args);
             },
           ),
@@ -346,6 +347,7 @@ List<RouteBase> _generateRoutes(
         builder: (context, state) {
           Map<String, dynamic> args = {};
           if (option.itemKey != null) args['key'] = option.itemKey;
+          args.addAll(state.uri.queryParameters);
           return widgetLoader(option.widgetName ?? 'Unknown', args);
         },
       ),

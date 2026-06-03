@@ -210,6 +210,7 @@ class _AdminAppState extends State<AdminApp> {
             ),
             company: widget.company,
             widgetRegistrations: adminWidgetRegistrations,
+            widgetMetadata: adminWidgetMetadata,
             forceUpdateInfo: widget.forceUpdateInfo,
           );
         },
@@ -251,6 +252,23 @@ List<Map<String, GrowerpWidgetBuilder>> adminWidgetRegistrations = [
     // Demo widget — only registered outside production builds
     if (!kReleaseMode) 'DemoList': (args) => const DemoListScreen(),
   },
+];
+
+/// Rich widget metadata for AI navigation (descriptions/keywords/parameters).
+/// Registered after [adminWidgetRegistrations] to enrich the screen catalog the
+/// ADK agent uses to emit navigation directives.
+List<WidgetMetadata> adminWidgetMetadata = [
+  ...getUserCompanyWidgetsWithMetadata(),
+  ...getCatalogWidgetsWithMetadata(),
+  ...getInventoryWidgetsWithMetadata(),
+  ...getManufacturingWidgetsWithMetadata(),
+  ...getOrderAccountingWidgetsWithMetadata(),
+  ...getActivityWidgetsWithMetadata(),
+  ...getMarketingWidgetsWithMetadata(),
+  ...getOutreachWidgetsWithMetadata(),
+  ...getSalesWidgetsWithMetadata(),
+  ...getWebsiteWidgetsWithMetadata(),
+  ...getCoursesWidgetsWithMetadata(),
 ];
 
 List<BlocProvider> getAdminBlocProviders(
