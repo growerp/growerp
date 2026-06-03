@@ -42,6 +42,7 @@ void main() {
       restClient: restClient,
       title: 'GrowERP Demos',
       clear: true,
+      widgetRegistrations: demosWidgetRegistrations,
     );
 
     await CommonTest.createCompanyAndAdmin(tester);
@@ -76,8 +77,15 @@ void main() {
       const Offset(0, 300),
     );
 
-    // Tapping the first demo opens the runner
-    await tester.tap(firstDemoFinder);
+    // Tapping the first demo opens the runner. Tap the full-width "open" button
+    // (keyed) rather than the title text: on narrow mobile layouts the title's
+    // center can sit off-screen, so a tap on it misses and never navigates.
+    final openButtonFinder = find.byKey(
+      Key('openDemo_${registeredDemos.first.title}'),
+    );
+    await tester.ensureVisible(openButtonFinder);
+    await tester.pumpAndSettle();
+    await tester.tap(openButtonFinder);
     await tester.pumpAndSettle();
 
     // The runner should show "Step 1 of ..." (appears in both progress label and button)

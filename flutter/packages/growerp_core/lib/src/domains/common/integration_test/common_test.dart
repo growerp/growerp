@@ -101,6 +101,7 @@ class CommonTest {
     bool clear = false,
     String title = "Growerp testing...",
     String classificationId = 'AppAdmin',
+    List<Map<String, GrowerpWidgetBuilder>> widgetRegistrations = const [],
   }) async {
     // Override the logical screen size when SCREEN_WIDTH / SCREEN_HEIGHT are
     // passed via --dart-define. This lets headless Linux desktop tests emulate
@@ -152,6 +153,7 @@ class CommonTest {
         extraDelegates: extraDelegates,
         extraBlocProviders: blocProviders ?? [],
         appId: menuConfiguration.appId,
+        widgetRegistrations: widgetRegistrations,
       ),
     );
     await tester.pump(const Duration());

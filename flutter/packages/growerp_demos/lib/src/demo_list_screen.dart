@@ -254,6 +254,7 @@ class _DemoCard extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
+                  key: Key('openDemo_${entry.title}'),
                   icon: Icon(_buttonIcon, size: 18),
                   label: Text(_buttonLabel),
                   style: ElevatedButton.styleFrom(
