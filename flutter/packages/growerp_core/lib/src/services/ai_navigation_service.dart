@@ -82,7 +82,7 @@ class NavigationIntent {
 class AiNavigationService {
   final String apiKey;
   final String _baseUrl = 'https://generativelanguage.googleapis.com/v1beta';
-  final String _model = 'gemini-2.0-flash';
+  final String _model = 'gemini-2.5-flash';
 
   /// Optional menu configuration for route-aware navigation
   List<MenuItemInfo>? _menuItems;

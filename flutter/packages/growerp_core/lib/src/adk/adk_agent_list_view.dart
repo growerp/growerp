@@ -221,7 +221,7 @@ class _AdkAgentListViewState extends State<AdkAgentListView> {
                 style: const TextStyle(fontWeight: FontWeight.w500),
               ),
               Text(
-                cfg.modelName ?? 'gemini-2.0-flash',
+                cfg.modelName ?? 'gemini-2.5-flash',
                 style: TextStyle(fontSize: 11, color: cs.onSurfaceVariant),
               ),
               if (cfg.instruction != null && cfg.instruction!.isNotEmpty)
@@ -241,7 +241,7 @@ class _AdkAgentListViewState extends State<AdkAgentListView> {
         avatar,
         Text(cfg.agentName ?? '(unnamed)'),
         Text(
-          cfg.modelName ?? 'gemini-2.0-flash',
+          cfg.modelName ?? 'gemini-2.5-flash',
           style: TextStyle(fontSize: 13, color: cs.onSurfaceVariant),
         ),
         Text(

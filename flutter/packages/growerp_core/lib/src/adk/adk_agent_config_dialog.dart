@@ -65,7 +65,7 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
     final e = widget.existing;
     if (e != null) {
       _nameCtrl.text = e.agentName ?? '';
-      _modelCtrl.text = e.modelName ?? 'gemini-2.0-flash';
+      _modelCtrl.text = e.modelName ?? 'gemini-2.5-flash';
       _llmProviderCtrl.text = e.llmProvider ?? 'gemini';
       _instructionCtrl.text = e.instruction ?? '';
       _descriptionCtrl.text = e.description ?? '';
