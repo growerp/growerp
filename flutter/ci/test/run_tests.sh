@@ -105,39 +105,13 @@ HTTP_CODE=$(curl -s --max-time 10 \
   -o /dev/null -w "%{http_code}")
 echo "Backend connectivity test: HTTP $HTTP_CODE"
 
-# Ensure the initial GrowERP admin user exists.
-# On a fresh database (DB_DATA=INSTALL), seed data creates the GROWERP owner
-# party but no user accounts.  The first call to the Register endpoint with
-# userGroupId=GROWERP_M_ADMIN triggers create#Tenant which sets up the initial
-# company and admin user.  Subsequent tests rely on this user existing.
-echo "Checking / creating initial GrowERP admin user..."
-INIT_EMAIL="test0@example.com"
-CHECK_RESULT=$(curl -s --max-time 10 \
-  "${BACKEND_URL}/rest/s1/growerp/100/CheckEmail?email=${INIT_EMAIL}")
-EMAIL_EXISTS=$(echo "$CHECK_RESULT" | grep -o '"ok" *: *true' || true)
-
-if [ -z "$EMAIL_EXISTS" ]; then
-  echo "Initial admin user not found — registering ${INIT_EMAIL} ..."
-  REG_RESPONSE=$(curl -s --max-time 30 -X POST \
-    -H "Content-Type: application/json" \
-    -d "{
-      \"classificationId\": \"AppAdmin\",
-      \"firstName\": \"Test\",
-      \"lastName\": \"Admin\",
-      \"email\": \"${INIT_EMAIL}\",
-      \"userGroupId\": \"GROWERP_M_ADMIN\"
-    }" \
-    "${BACKEND_URL}/rest/s1/growerp/100/Register")
-  echo "Registration response: $REG_RESPONSE"
-  # Verify registration succeeded (response should contain ownerPartyId)
-  if echo "$REG_RESPONSE" | grep -q "ownerPartyId"; then
-    echo "Initial admin user created successfully."
-  else
-    echo "WARNING: Initial admin registration may have failed. Tests will attempt their own registration."
-  fi
-else
-  echo "Initial admin user already exists."
-fi
+# NOTE: We deliberately do NOT pre-register an initial GrowERP admin here.
+# On a fresh database the GROWERP owner party exists (seed data) but has no
+# users, so the first test's createCompanyAndAdmin -> create#Tenant claims the
+# GROWERP owner and the Flutter login sequence completes its TenantSetup
+# (setup#MainOrganization creates the GROWERP root category). Pre-registering a
+# GROWERP admin here without completing setup would steal that first-registration
+# slot, leaving GROWERP's setup incomplete and its product/plan list empty.
 
 # Run tests
 if [ -n "$TEST_FILE" ]; then
