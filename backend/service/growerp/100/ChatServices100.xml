@@ -615,4 +615,140 @@ along with this software (see the LICENSE.md file). If not, see
             </iterate>
         </actions>
     </service>
+
+    <service verb="submit" noun="WebsiteChat" authenticate="false">
+        <description>
+            Public endpoint for the floating chat button on a generated website.
+            A visitor enters an email and a question. This creates (or reuses) a Lead
+            user for that email, owned by the website's company, then creates a chat
+            room named after the email containing the company admin and the visitor as
+            members, with the question as the first message. No authentication required.
+        </description>
+        <in-parameters>
+            <parameter name="productStoreId" required="true" />
+            <parameter name="email" required="true" />
+            <parameter name="question" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="chatRoomId" />
+        </out-parameters>
+        <actions>
+            <!-- resolve the company (owner) from the product store -->
+            <entity-find-one entity-name="mantle.product.store.ProductStore" value-field="store">
+                <field-map field-name="productStoreId" from="productStoreId" />
+            </entity-find-one>
+            <if condition="!store || !store.organizationPartyId">
+                <return error="true"
+                    message="No company found for productStoreId: ${productStoreId}" />
+            </if>
+            <!-- get#ChatRoom filters ChatRoom.ownerPartyId by the admin's Party.ownerPartyId
+                 (returned as ownerPartyId from get#RelatedCompanyAndOwner). In a simple
+                 setup that equals companyPartyId; in a hosted/multi-tenant setup it is the
+                 tenant root (orgParty.ownerPartyId). Use the company Party's ownerPartyId so
+                 we match whatever get#ChatRoom will query. -->
+            <entity-find-one entity-name="mantle.party.Party" value-field="orgParty">
+                <field-map field-name="partyId" from="store.organizationPartyId" />
+            </entity-find-one>
+            <set field="ownerPartyId" from="orgParty?.ownerPartyId ?: store.organizationPartyId" />
+
+            <!-- find the company's admin user; fall back to SYSTEM_SUPPORT -->
+            <entity-find entity-name="growerp.party.OwnerPersonDetailAndCompany"
+                list="admins" limit="1">
+                <econdition field-name="ownerPartyId" from="ownerPartyId" />
+                <econdition field-name="userGroupId" value="GROWERP_M_ADMIN" />
+                <econdition field-name="userId" operator="is-not-null" />
+            </entity-find>
+            <set field="adminUserId"
+                from="admins ? admins[0].userId : 'SYSTEM_SUPPORT'" />
+
+            <!-- Resolve (or create) the visitor as a Lead party for this email, then
+                 ensure a disabled UserAccount exists so the visitor can be a chat member
+                 and message author (the chat views inner-join to UserAccount).
+                 We deliberately do NOT pass loginName to create#User: that keeps it from
+                 creating an enabled login and emailing the visitor a system password. -->
+            <set field="visitorName"
+                from="email.contains('@') ? email.substring(0, email.indexOf('@')) : email" />
+            <entity-find entity-name="mantle.party.contact.ContactMech" list="emailContacts">
+                <econdition field-name="infoString" from="email" />
+                <econdition field-name="contactMechTypeEnumId" value="CmtEmailAddress" />
+            </entity-find>
+            <if condition="!emailContacts">
+                <service-call name="growerp.100.PartyServices100.create#User" ignore-error="true">
+                    <field-map field-name="ownerPartyId" from="ownerPartyId" />
+                    <field-map field-name="user"
+                        from="[
+                            firstName: visitorName,
+                            lastName: 'website',
+                            email: email,
+                            role: 'Lead',
+                            userGroupId: 'GROWERP_M_LEAD',
+                        ]" />
+                </service-call>
+                <!-- re-find the freshly created email contact -->
+                <entity-find entity-name="mantle.party.contact.ContactMech" list="emailContacts">
+                    <econdition field-name="infoString" from="email" />
+                    <econdition field-name="contactMechTypeEnumId" value="CmtEmailAddress" />
+                </entity-find>
+            </if>
+            <!-- resolve the visitor partyId from the email contact -->
+            <set field="visitorPartyId" from="null" />
+            <if condition="emailContacts">
+                <entity-find entity-name="mantle.party.contact.PartyContactMech"
+                    list="partyContacts" limit="1">
+                    <econdition field-name="contactMechId" from="emailContacts[0].contactMechId" />
+                    <date-filter />
+                </entity-find>
+                <if condition="partyContacts">
+                    <set field="visitorPartyId" from="partyContacts[0].partyId" />
+                </if>
+            </if>
+            <if condition="!visitorPartyId">
+                <return error="true"
+                    message="Could not create or find a party for email: ${email}" />
+            </if>
+            <!-- ensure a disabled UserAccount for chat membership -->
+            <entity-find entity-name="moqui.security.UserAccount" list="visitorAccounts" limit="1">
+                <econdition field-name="partyId" from="visitorPartyId" />
+            </entity-find>
+            <if condition="visitorAccounts">
+                <set field="visitorUserId" from="visitorAccounts[0].userId" />
+                <else>
+                    <service-call name="create#moqui.security.UserAccount" out-map="visitorAcct"
+                        in-map="[partyId: visitorPartyId,
+                                username: email,
+                                userFullName: email,
+                                disabled: 'Y',
+                                requirePasswordChange: 'N']" />
+                    <set field="visitorUserId" from="visitorAcct.userId" />
+                </else>
+            </if>
+
+            <!-- create the chat room named after the email -->
+            <service-call name="create#growerp.general.ChatRoom" out-map="context"
+                in-map="[chatRoomName: email,
+                        ownerPartyId: ownerPartyId,
+                        isPrivate: 'N',
+                        isActive: 'Y']" />
+
+            <!-- add the company admin (unread) and the visitor (read) as members -->
+            <if condition="adminUserId != visitorUserId">
+                <service-call name="create#growerp.general.ChatRoomMember"
+                    in-map="[chatRoomId: chatRoomId,
+                            userId: adminUserId,
+                            isActive: 'Y',
+                            hasRead: 'N']" />
+            </if>
+            <service-call name="create#growerp.general.ChatRoomMember"
+                in-map="[chatRoomId: chatRoomId,
+                        userId: visitorUserId,
+                        isActive: 'Y',
+                        hasRead: 'Y']" />
+
+            <!-- store the question as the first message from the visitor -->
+            <service-call name="create#growerp.general.ChatMessage"
+                in-map="[chatRoomId: chatRoomId,
+                        fromUserId: visitorUserId,
+                        content: question]" />
+        </actions>
+    </service>
 </services>

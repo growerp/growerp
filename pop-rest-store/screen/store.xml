@@ -241,5 +241,136 @@ var storeInfo = ${storeInfoJson};
                 <label text="${ec.web.sendError(404, 'Not a valid website url', null)}"/>
             </fail-widgets>
         </section>
+        <!-- floating chat-inquiry button: separate section so it always renders after the store page -->
+        <section name="chat-button" condition="productStoreId != null &amp;&amp; productStoreId != 'POPC_DEFAULT'">
+            <widgets>
+                <render-mode>
+                    <text type="html"><![CDATA[
+<style>
+#growerp-chat-btn{position:fixed;right:20px;bottom:20px;z-index:2147483000;
+  display:flex;align-items:center;gap:10px;cursor:pointer;
+  background:#2962ff;color:#fff;border:none;border-radius:28px;
+  height:56px;padding:0 16px;box-shadow:0 4px 14px rgba(0,0,0,.25);
+  font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.2;
+  max-width:56px;overflow:hidden;white-space:nowrap;
+  transition:max-width .4s ease,border-radius .4s ease,background .2s ease}
+#growerp-chat-btn svg{flex:0 0 auto;width:24px;height:24px;fill:#fff}
+#growerp-chat-btn .growerp-chat-label{opacity:0;transition:opacity .3s ease .1s}
+#growerp-chat-btn.growerp-expanded{max-width:260px;border-radius:14px}
+#growerp-chat-btn.growerp-expanded .growerp-chat-label{opacity:1}
+#growerp-chat-panel{position:fixed;right:20px;bottom:86px;z-index:2147483000;
+  width:320px;max-width:calc(100vw - 40px);display:none;flex-direction:column;
+  background:#fff;color:#222;border-radius:12px;overflow:hidden;
+  box-shadow:0 8px 28px rgba(0,0,0,.3);font-family:Arial,Helvetica,sans-serif}
+#growerp-chat-panel.growerp-open{display:flex}
+#growerp-chat-panel .growerp-chat-head{background:#2962ff;color:#fff;
+  padding:12px 14px;font-size:15px;font-weight:bold}
+#growerp-chat-panel .growerp-chat-body{padding:14px;display:flex;flex-direction:column;gap:10px}
+#growerp-chat-panel label{font-size:12px;color:#555}
+#growerp-chat-panel input,#growerp-chat-panel textarea{
+  width:100%;box-sizing:border-box;border:1px solid #ccc;border-radius:6px;
+  padding:8px;font-size:14px;font-family:inherit}
+#growerp-chat-panel textarea{resize:vertical;min-height:72px}
+#growerp-chat-panel button.growerp-chat-send{background:#2962ff;color:#fff;border:none;
+  border-radius:6px;padding:10px;font-size:14px;cursor:pointer}
+#growerp-chat-panel button.growerp-chat-send:disabled{opacity:.6;cursor:default}
+#growerp-chat-status{font-size:13px;min-height:18px}
+#growerp-chat-status.growerp-err{color:#c62828}
+#growerp-chat-status.growerp-ok{color:#2e7d32}
+</style>
+<button id="growerp-chat-btn" type="button" aria-label="Ask a question">
+  <svg viewBox="0 0 24 24"><path d="M20 2H4a2 2 0 0 0-2 2v18l4-4h14a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2zm-2 9H6V9h12v2zm0-3H6V6h12v2z"/></svg>
+  <span class="growerp-chat-label">Question?<br>we answer within one day</span>
+</button>
+<div id="growerp-chat-panel" role="dialog" aria-label="Ask a question">
+  <div class="growerp-chat-head">Ask us a question</div>
+  <div class="growerp-chat-body">
+    <div>
+      <label for="growerp-chat-email">Your email *</label>
+      <input id="growerp-chat-email" type="email" required placeholder="you@example.com"/>
+    </div>
+    <div>
+      <label for="growerp-chat-question">Your question *</label>
+      <textarea id="growerp-chat-question" placeholder="How can we help?"></textarea>
+    </div>
+    <div id="growerp-chat-status"></div>
+    <button class="growerp-chat-send" type="button">Send</button>
+  </div>
+</div>
+<script>
+(function(){
+  var productStoreId = "${productStoreId}";
+  var btn = document.getElementById('growerp-chat-btn');
+  var panel = document.getElementById('growerp-chat-panel');
+  var emailEl = document.getElementById('growerp-chat-email');
+  var questionEl = document.getElementById('growerp-chat-question');
+  var statusEl = document.getElementById('growerp-chat-status');
+  var sendBtn = panel.querySelector('.growerp-chat-send');
+
+  // one-time animation: icon → label (after 3s) → back to icon (after 2s)
+  var animDone = false;
+  setTimeout(function(){
+    if (!panel.classList.contains('growerp-open')) btn.classList.add('growerp-expanded');
+    setTimeout(function(){
+      if (!panel.classList.contains('growerp-open')) btn.classList.remove('growerp-expanded');
+      animDone = true;
+    }, 2000);
+  }, 3000);
+
+  // hover: expand on mouseenter, shrink on mouseleave (not while panel is open)
+  btn.addEventListener('mouseenter', function(){
+    btn.classList.add('growerp-expanded');
+  });
+  btn.addEventListener('mouseleave', function(){
+    if (!panel.classList.contains('growerp-open')) btn.classList.remove('growerp-expanded');
+  });
+
+  function setStatus(msg, kind){
+    statusEl.textContent = msg || '';
+    statusEl.className = kind ? ('growerp-' + kind) : '';
+  }
+
+  btn.addEventListener('click', function(){
+    var isOpen = panel.classList.toggle('growerp-open');
+    if (isOpen) {
+      btn.classList.add('growerp-expanded');
+      emailEl.focus();
+    } else {
+      btn.classList.remove('growerp-expanded');
+    }
+  });
+
+  function validEmail(v){ return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v); }
+
+  sendBtn.addEventListener('click', function(){
+    var email = (emailEl.value || '').trim();
+    var question = (questionEl.value || '').trim();
+    if (!validEmail(email)){ setStatus('Please enter a valid email address.', 'err'); emailEl.focus(); return; }
+    if (!question){ setStatus('Please enter your question.', 'err'); questionEl.focus(); return; }
+    setStatus('Sending...', '');
+    sendBtn.disabled = true;
+    fetch(window.location.origin + '/rest/s1/growerp/100/WebsiteChat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ productStoreId: productStoreId, email: email, question: question })
+    }).then(function(r){
+      if (!r.ok) throw new Error('http ' + r.status);
+      return r.json();
+    }).then(function(){
+      setStatus('Thanks! We answer within one day.', 'ok');
+      emailEl.value = ''; questionEl.value = '';
+      sendBtn.disabled = false;
+      setTimeout(function(){ panel.classList.remove('growerp-open'); setStatus('', ''); }, 3000);
+    }).catch(function(){
+      setStatus('Sorry, something went wrong. Please try again.', 'err');
+      sendBtn.disabled = false;
+    });
+  });
+})();
+</script>
+]]></text>
+                </render-mode>
+            </widgets>
+        </section>
     </widgets>
 </screen>
