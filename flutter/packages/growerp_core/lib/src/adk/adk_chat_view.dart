@@ -23,6 +23,7 @@ import '../domains/authenticate/blocs/auth_bloc.dart';
 import '../domains/common/bloc/menu_config_bloc.dart';
 import '../services/build_dio_client.dart';
 import '../services/widget_registry.dart';
+import '../services/async_record_dialog.dart';
 
 /// A single navigable menu entry passed to [AdkChatView].
 class ChatMenuEntry {
@@ -113,6 +114,7 @@ class AdkChatView extends StatefulWidget {
 
 class _AdkChatViewState extends State<AdkChatView> {
   final _inputController = TextEditingController();
+  final _inputFocus = FocusNode();
   final _scrollController = ScrollController();
   final List<_Msg> _messages = [];
 
@@ -127,12 +129,19 @@ class _AdkChatViewState extends State<AdkChatView> {
   @override
   void initState() {
     super.initState();
+    // Surface failed record lookups (AsyncRecordDialog) as chat text instead of
+    // a popped "not found" screen.
+    AsyncRecordDialog.messageSink = (message) {
+      if (mounted) _addMsg(_Msg.error(message));
+    };
     _connect();
   }
 
   @override
   void dispose() {
+    AsyncRecordDialog.messageSink = null;
     _inputController.dispose();
+    _inputFocus.dispose();
     _scrollController.dispose();
     super.dispose();
   }
@@ -174,6 +183,10 @@ class _AdkChatViewState extends State<AdkChatView> {
       setState(() {
         _ready = true;
         _busy = false;
+      });
+      // Put the cursor in the input field once the chat is ready.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _inputFocus.requestFocus();
       });
       _addMsg(
         _Msg.system(
@@ -492,11 +505,12 @@ class _AdkChatViewState extends State<AdkChatView> {
     return null;
   }
 
-  /// Execute an agent action entry: navigate to a route (with params/tab as the
-  /// query string) or show a registry widget in a dialog.
+  /// Execute an agent action entry: navigate to a route or show a widget/dialog.
   ///
-  /// The chat lives in a modal dialog overlay, so it is closed first — otherwise
-  /// it would cover the screen we navigate to.
+  /// Navigation closes the chat overlay first (otherwise it would cover the
+  /// target screen). Dialog actions keep the chat open and stack the dialog on
+  /// top, so a failed record lookup can fall back to a chat message
+  /// (see [AsyncRecordDialog.messageSink]).
   void _runAction(ChatMenuEntry e) {
     final query = <String, String>{};
     e.params?.forEach((k, v) {
@@ -514,11 +528,8 @@ class _AdkChatViewState extends State<AdkChatView> {
       }
     }
 
-    // Capture router + root navigator before closing the chat dialog.
     final router = GoRouter.of(context);
     final rootNav = Navigator.of(context, rootNavigator: true);
-    // Close the chat dialog so the target screen/dialog is visible.
-    if (rootNav.canPop()) rootNav.pop();
 
     void openInDialog(WidgetBuilder builder) {
       showDialog(context: rootNav.context, builder: builder);
@@ -530,15 +541,23 @@ class _AdkChatViewState extends State<AdkChatView> {
     }
 
     // Explicit dialog action, or navigate with no resolvable route: open the
-    // widget directly in a dialog so the requested screen still appears.
+    // widget directly in a dialog (kept on top of the chat).
     if ((e.action == 'dialog' || route.isEmpty) && e.registryWidget != null) {
-      openInDialog(
-        (_) => Dialog(child: WidgetRegistry.getWidget(e.registryWidget!, e.params)),
-      );
+      openInDialog((_) {
+        final w = WidgetRegistry.getWidget(e.registryWidget!, e.params);
+        // Entity dialogs (and the fetch wrappers ShowXxxDialog / AsyncRecordDialog)
+        // render their own Dialog — show as-is. Wrap only bare content (e.g. a list).
+        final isDialogLike = w is Dialog ||
+            w is AlertDialog ||
+            w.runtimeType.toString().endsWith('Dialog');
+        return isDialogLike ? w : Dialog(child: w);
+      });
       return;
     }
 
     if (route.isEmpty) return;
+    // Navigation: close the chat overlay so the target screen is visible.
+    if (rootNav.canPop()) rootNav.pop();
     if (tab != null) query['tab'] = tab.toString();
     final uri = Uri(path: route, queryParameters: query.isEmpty ? null : query);
     router.go(uri.toString());
@@ -578,6 +597,7 @@ class _AdkChatViewState extends State<AdkChatView> {
         ),
         _InputBar(
           controller: _inputController,
+          focusNode: _inputFocus,
           enabled: _ready && !_busy,
           onSend: _send,
         ),
@@ -733,11 +753,13 @@ class _Bubble extends StatelessWidget {
 class _InputBar extends StatelessWidget {
   const _InputBar({
     required this.controller,
+    required this.focusNode,
     required this.enabled,
     required this.onSend,
   });
 
   final TextEditingController controller;
+  final FocusNode focusNode;
   final bool enabled;
   final VoidCallback onSend;
 
@@ -751,6 +773,8 @@ class _InputBar extends StatelessWidget {
             Expanded(
               child: TextField(
                 controller: controller,
+                focusNode: focusNode,
+                autofocus: true,
                 enabled: enabled,
                 textInputAction: TextInputAction.send,
                 onSubmitted: (_) => onSend(),

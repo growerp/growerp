@@ -1614,7 +1614,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <return/>
             </if>
             <set field="systemSettings" from="ss.getMap()"/>
-            <script>systemSettings.mailPassword = ss.mailPassword ? '****' : ''</script>
+            <script>systemSettings.mailPassword = ss.mailPassword ? '****' : ''; systemSettings.githubToken = ss.githubToken ? '****' : ''</script>
             <entity-find entity-name="growerp.general.LlmConfig" list="llmConfigList">
                 <econdition field-name="ownerPartyId"/>
                 <order-by field-name="llmProvider"/>
@@ -1649,6 +1649,7 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="storeSkipSeen" default-value="Y"/>
             <parameter name="mailUsername"/>
             <parameter name="mailPassword"/>
+            <parameter name="githubToken"/>
         </in-parameters>
         <out-parameters>
             <parameter name="systemSettings" type="Map"/>
@@ -1686,6 +1687,10 @@ along with this software (see the LICENSE.md file). If not, see
             <if condition="mailUsername  != null"><set field="ss.mailUsername"  from="mailUsername"/></if>
             <if condition="mailPassword &amp;&amp; mailPassword != '****'">
                 <set field="ss.mailPassword" from="mailPassword"/>
+            </if>
+            <if condition="githubToken &amp;&amp; githubToken != '****'">
+                <set field="ss.githubToken" from="githubToken.take(255)"/>
+                <script>System.setProperty('growerp.github.token', githubToken.take(255))</script>
             </if>
 
             <if condition="isNew"><then><script>ss.create()</script></then>

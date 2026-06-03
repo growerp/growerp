@@ -12,6 +12,7 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import '../growerp_user_company.dart';
@@ -121,24 +122,46 @@ List<WidgetMetadata> getUserCompanyWidgetsWithMetadata() {
     ),
     WidgetMetadata(
       widgetName: 'UserDialog',
-      description: 'User details dialog',
+      description: 'Create or edit a user. Pass partyId to edit an existing '
+          'user; omit it to create a new one (optional role: customer/supplier/'
+          'lead/employee).',
       iconName: 'person',
-      keywords: ['user', 'profile', 'details'],
-      builder: (args) => UserDialog(
-        args?['user'] as User? ??
-            User(), // Empty user = show authenticated user
-        dialog: false,
-      ),
+      keywords: ['add user', 'new user', 'create user', 'edit user', 'open user'],
+      parameters: {
+        'partyId': 'open this user for editing; omit to create new',
+        'role': 'customer | supplier | lead | employee (for create)',
+      },
+      builder: (args) {
+        final id = (args?['partyId'] ?? args?['userPartyId'] ?? args?['id'])?.toString();
+        if (id == null || id.isEmpty) {
+          return UserDialog(User(role: parseRole(args?['role'])), dialog: false);
+        }
+        return AsyncRecordDialog<User>(
+          fetch: (ctx) async {
+            final r = await ctx.read<RestClient>().getUser(partyId: id, limit: 1);
+            return r.users.isNotEmpty ? r.users.first : null;
+          },
+          onLoaded: (u) => UserDialog(u, dialog: false),
+        );
+      },
     ),
     WidgetMetadata(
       widgetName: 'ShowCompanyDialog',
-      description: 'Company details dialog',
+      description: 'Create or edit a company. Pass partyId to edit an existing '
+          'company; omit it to create a new one.',
       iconName: 'business',
-      keywords: ['company', 'details', 'info'],
-      builder: (args) => ShowCompanyDialog(
-        args?['company'] as Company? ?? Company(role: parseRole(args?['role'])),
-        dialog: false,
-      ),
+      keywords: ['add company', 'new company', 'create company', 'edit company', 'open company'],
+      parameters: {'partyId': 'open this company for editing; omit to create new'},
+      builder: (args) {
+        // ShowCompanyDialog fetches by partyId itself; '_NEW_' opens a blank form.
+        final id = (args?['partyId'] ?? args?['companyPartyId'] ?? args?['id'])?.toString();
+        return ShowCompanyDialog(
+          (id == null || id.isEmpty)
+              ? Company(partyId: '_NEW_', role: parseRole(args?['role']))
+              : Company(partyId: id),
+          dialog: false,
+        );
+      },
     ),
     WidgetMetadata(
       widgetName: 'CompanyUserList',

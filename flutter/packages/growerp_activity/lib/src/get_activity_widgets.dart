@@ -3,6 +3,7 @@
  * Grant of Patent License.
  */
 
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import '../growerp_activity.dart';
@@ -29,6 +30,27 @@ List<WidgetMetadata> getActivityWidgetsWithMetadata() {
         _parseActivityType(args?['activityType']),
         key: getKeyFromArgs(args),
       ),
+    ),
+    WidgetMetadata(
+      widgetName: 'ActivityDialog',
+      description: 'Create or edit an activity/task. Pass activityId to edit an '
+          'existing activity; omit it to create a new one.',
+      iconName: 'task',
+      keywords: ['add activity', 'new activity', 'create task', 'add task', 'edit activity'],
+      parameters: {'activityId': 'open this activity for editing; omit to create new'},
+      builder: (args) {
+        final id = (args?['activityId'] ?? args?['id'])?.toString();
+        if (id == null || id.isEmpty) {
+          return ActivityDialog(Activity(), null);
+        }
+        return AsyncRecordDialog<Activity>(
+          fetch: (ctx) async {
+            final r = await ctx.read<RestClient>().getActivity(activityId: id, limit: 1);
+            return r.activities.isNotEmpty ? r.activities.first : null;
+          },
+          onLoaded: (a) => ActivityDialog(a, null),
+        );
+      },
     ),
   ];
 }

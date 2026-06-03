@@ -38,7 +38,7 @@ bool _isMinimizedFromJson(dynamic value) {
 String _isMinimizedToJson(bool value) => value ? 'Y' : 'N';
 
 /// Helper functions for userGroups — converts Moqui string values
-/// (e.g. 'GROWERP_M_ADMIN') to/from List<UserGroup>.
+/// (e.g. 'GROWERP_M_ADMIN') to/from `List<UserGroup>`.
 List<UserGroup>? _userGroupsFromJson(List<dynamic>? json) {
   if (json == null) return null;
   return json

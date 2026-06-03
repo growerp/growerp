@@ -41,6 +41,8 @@ abstract class SystemSettings with _$SystemSettings {
     String? mailUsername,
     // write-only: backend returns '****' when set; never stored locally
     String? mailPassword,
+    // GitHub
+    String? githubToken,
   }) = _SystemSettings;
   SystemSettings._();
 
@@ -50,5 +52,6 @@ abstract class SystemSettings with _$SystemSettings {
   @override
   String toString() =>
       'SystemSettings smtpHost: $smtpHost storeHost: $storeHost '
-      'geminiApiKey: ${geminiApiKey != null ? "set" : "unset"}';
+      'geminiApiKey: ${geminiApiKey != null ? "set" : "unset"} '
+      'githubToken: ${githubToken != null ? "set" : "unset"}';
 }

@@ -12,6 +12,7 @@ export 'src/services/build_dio_client.dart';
 export 'src/services/get_dio_error.dart';
 export 'src/services/timezone_helper.dart';
 export 'src/services/widget_registry.dart';
+export 'src/services/async_record_dialog.dart';
 export 'src/services/ai_navigation_service.dart';
 export 'src/services/deep_link_service.dart';
 export 'src/get_core_bloc_providers.dart';
