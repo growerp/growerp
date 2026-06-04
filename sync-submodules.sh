@@ -25,7 +25,7 @@ echo ""
 echo "=== Submodule status ==="
 git submodule status --recursive
 
-# Stage the updated moqui submodule pointer
+# Stage all updated submodule pointers
 git add .
 
 if git diff --cached --quiet; then
