@@ -230,6 +230,9 @@ class AssetListState extends State<AssetList> {
   bool get _isBottom {
     if (!_scrollController.hasClients) return false;
     final maxScroll = _scrollController.position.maxScrollExtent;
+    // Nothing to page when the list fits on screen (e.g. a 1-row search result);
+    // otherwise scroll-triggered fetches fire endlessly on short lists.
+    if (maxScroll <= 0) return false;
     final currentScroll = _scrollController.offset;
     return currentScroll >= (maxScroll * 0.9);
   }

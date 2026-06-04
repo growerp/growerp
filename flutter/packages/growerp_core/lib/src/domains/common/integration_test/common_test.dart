@@ -616,6 +616,8 @@ class CommonTest {
     // list each iteration so lazily-built rows are realized before giving up.
     final scrollable = find.byType(Scrollable);
     bool scrolled = false;
+    bool hasResultRow() =>
+        baseKeys.any((b) => tester.any(find.byKey(Key('${b}0'))));
     for (int i = 0; i < 60; i++) {
       for (int row = 0; row < 20; row++) {
         for (final base in baseKeys) {
@@ -628,8 +630,16 @@ class CommonTest {
           }
         }
       }
-      // Realize off-screen rows (and let in-flight results settle) before the
-      // next scan.
+      // Results are present (the initial pumpAndSettle let the search settle)
+      // but none of the visible rows exactly match — stop polling and fall
+      // through to the row-0 fallback below. Continuing the full 60-iteration
+      // wait here just burns ~12s per call (e.g. an asset searched by assetName,
+      // whose row only keys the product name) and can blow the test time budget.
+      if (hasResultRow()) break;
+      // List still empty: the backend search round-trip (plus debounce) can
+      // exceed the settle above on slow CI runners (headless Linux + xvfb).
+      // Keep polling — scrolling to realize any lazily-built rows — until rows
+      // appear.
       if (tester.any(scrollable)) {
         await tester.drag(scrollable.first, const Offset(0, -200));
         await tester.pump();
@@ -646,18 +656,16 @@ class CommonTest {
       await tester.pumpAndSettle();
     }
 
-    // No exact-match row was found within the window. For an exact lookup
-    // (id/code/pseudoId) we must NOT blindly tap row 0 — after a create the bloc
-    // may have prepended a different item there, so tapping it opens the wrong
-    // record and produces a confusing downstream assertion. Tap by the exact
-    // text instead: this lands on the correct row for exact lookups and simply
-    // finds nothing for a genuine partial/prefix search.
-    if (tester.any(find.text(searchString))) {
-      await tapByText(tester, searchString);
-      await tester.pumpAndSettle(Duration(seconds: seconds));
-      return;
-    }
-    // Fallback for partial/prefix searches: tap the first available result row.
+    // No exact keyed-cell match was found. The exact-match poll above already
+    // gave the backend search time to settle, so the list now holds the filtered
+    // result and the top row (row 0) is the correct candidate — tap one of its
+    // keyed cells to open it. This also covers lookups whose search value is not
+    // shown as a keyed cell (e.g. an asset searched by assetName while the row
+    // only keys the product name).
+    //
+    // We must NOT fall back to `tapByText(searchString)` here: the search field
+    // still contains `searchString`, so `find.text(searchString)` always matches
+    // it and would tap the search field instead of a result row.
     for (final key in ['id0', 'name0', 'title0', 'theme0', 'headline0']) {
       if (tester.any(find.byKey(Key(key)))) {
         await tester.ensureVisible(find.byKey(Key(key)).last);
@@ -666,9 +674,6 @@ class CommonTest {
         return;
       }
     }
-    // Final fallback to tapping by text.
-    await tapByText(tester, searchString);
-    await tester.pumpAndSettle(Duration(seconds: seconds));
   }
 
   static Future<void> doSearch(

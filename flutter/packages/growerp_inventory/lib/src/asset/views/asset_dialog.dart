@@ -54,6 +54,10 @@ class AssetDialogState extends State<AssetDialog> {
   late String currencyId;
   late String currencySymbol;
   late InventoryLocalizations _localizations;
+  // Only pop on a success caused by this dialog's own add/update — the
+  // AssetBloc is shared with the list, so background search/pagination success
+  // events must not close the dialog.
+  bool _pressedUpdate = false;
 
   @override
   void initState() {
@@ -104,11 +108,15 @@ class AssetDialogState extends State<AssetDialog> {
   Widget build(BuildContext context) {
     _localizations = InventoryLocalizations.of(context)!;
     bool isPhone = ResponsiveBreakpoints.of(context).isMobile;
-    return BlocConsumer<AssetBloc, AssetState>(
+    // The AssetBloc is shared with the list, so the keyed Dialog is always
+    // rendered (regardless of status) and the listener only pops after this
+    // dialog's own add/update — mirroring LocationDialog. Otherwise background
+    // search/pagination loading/success events would hide or close the dialog.
+    return BlocListener<AssetBloc, AssetState>(
       listener: (context, state) {
         switch (state.status) {
           case AssetStatus.success:
-            Navigator.of(context).pop();
+            if (_pressedUpdate) Navigator.of(context).pop();
             break;
           case AssetStatus.failure:
             HelperFunctions.showMessage(
@@ -121,30 +129,19 @@ class AssetDialogState extends State<AssetDialog> {
             const Text("????");
         }
       },
-      builder: (context, state) {
-        switch (state.status) {
-          case AssetStatus.success:
-            return Dialog(
-              key: const Key('AssetDialog'),
-              insetPadding: const EdgeInsets.all(10),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: popUp(
-                context: context,
-                title:
-                    '${classificationId == 'AppHotel' ? _localizations.roomNumber : _localizations.assetNumber} #${widget.asset.pseudoId.isEmpty ? _localizations.newLabel : widget.asset.pseudoId}',
-                height: 480,
-                width: 350,
-                child: _showForm(isPhone),
-              ),
-            );
-          case AssetStatus.failure:
-            return FatalErrorForm(message: _localizations.assetLoadProblem);
-          default:
-            return const Center(child: LoadingIndicator());
-        }
-      },
+      child: Dialog(
+        key: const Key('AssetDialog'),
+        insetPadding: const EdgeInsets.all(10),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: popUp(
+          context: context,
+          title:
+              '${classificationId == 'AppHotel' ? _localizations.roomNumber : _localizations.assetNumber} #${widget.asset.pseudoId.isEmpty ? _localizations.newLabel : widget.asset.pseudoId}',
+          height: 480,
+          width: 350,
+          child: _showForm(isPhone),
+        ),
+      ),
     );
   }
 
@@ -387,6 +384,7 @@ class AssetDialogState extends State<AssetDialog> {
               ),
               onPressed: () async {
                 if (_assetDialogformKey.currentState!.validate()) {
+                  _pressedUpdate = true;
                   _assetBloc.add(
                     AssetUpdate(
                       Asset(
