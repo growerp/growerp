@@ -914,14 +914,44 @@ class CommonTest {
     await tester.tap(textField.first);
     await tester.pumpAndSettle();
 
-    // Clear the field and enter new text
-    await tester.enterText(textField.first, '');
-    await tester.pumpAndSettle();
-    await tester.enterText(textField.first, value);
+    // Returns true when a dropdown OPTION (overlay ListTile containing [value],
+    // with no TextFormField ancestor — i.e. not the form row itself) is present.
+    bool optionVisible() {
+      final containing = find.textContaining(value);
+      for (final el in containing.evaluate()) {
+        Element? tile;
+        el.visitAncestorElements((ancestor) {
+          if (ancestor.widget is ListTile) {
+            tile = ancestor;
+            return false;
+          }
+          return true;
+        });
+        if (tile == null) continue;
+        final tileFinder = find.byElementPredicate((e) => e == tile);
+        final hasField = find.descendant(
+          of: tileFinder,
+          matching: find.byType(TextFormField),
+        );
+        if (!tester.any(hasField)) return true;
+      }
+      return false;
+    }
 
-    // Wait generously for optionsBuilder to complete
-    await tester.pump(const Duration(seconds: waitTime));
-    await tester.pumpAndSettle();
+    // Poll until the (async-loaded) dropdown options appear before selecting.
+    // The dialog fetches its option list (e.g. GL account classes) asynchronously
+    // in initState, so on a slow backend the options may not exist yet right
+    // after typing. Re-entering the text each iteration re-runs the Autocomplete
+    // optionsBuilder against the now-populated state. Without this wait the
+    // selection silently fails and the field's value is never committed.
+    for (int i = 0; i < 10; i++) {
+      await tester.enterText(textField.first, '');
+      await tester.pump();
+      await tester.enterText(textField.first, value);
+      await tester.pump(const Duration(seconds: waitTime));
+      await tester.pumpAndSettle();
+      if (optionVisible()) break;
+    }
 
     // Approach 1: Find dropdown option ListTiles in the Overlay.
     // Autocomplete renders its options in an Overlay, so look for ListTiles
