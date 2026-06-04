@@ -19,6 +19,7 @@ done
 
 # Resolve growerp1 root (script lives at repo root)
 REPO_ROOT="$(cd "$(dirname "$0")" && pwd)"
+RUNTIME_DIR="$REPO_ROOT/moqui/runtime"
 cd "$REPO_ROOT"
 
 check_clean() {
@@ -48,6 +49,15 @@ if ! $FORCE; then
     rel="${subpath#$REPO_ROOT/}"
     check_clean "$subpath" "$rel" || PREFLIGHT_OK=false
   done < <(git submodule foreach --recursive --quiet 'echo "$toplevel/$sm_path"')
+
+  if [ -d "$RUNTIME_DIR/.git" ]; then
+    check_clean "$RUNTIME_DIR" "moqui/runtime" || PREFLIGHT_OK=false
+    while IFS= read -r subpath; do
+      rel="${subpath#$REPO_ROOT/}"
+      check_clean "$subpath" "$rel" || PREFLIGHT_OK=false
+    done < <(git -C "$RUNTIME_DIR" submodule foreach --recursive --quiet \
+               'echo "$toplevel/$sm_path"')
+  fi
 
   if ! $PREFLIGHT_OK; then
     echo ""
@@ -81,5 +91,34 @@ else
     echo "Pushed to origin."
   else
     echo "Run 'git push' to publish."
+  fi
+fi
+
+# Update moqui-runtime submodule pointers
+if [ -d "$RUNTIME_DIR/.git" ]; then
+  echo ""
+  echo "=== Updating moqui-runtime submodule pointers (--remote --recursive) ==="
+  git -C "$RUNTIME_DIR" submodule update --remote --recursive --merge
+
+  echo ""
+  echo "=== moqui-runtime submodule status ==="
+  git -C "$RUNTIME_DIR" submodule status --recursive
+
+  git -C "$RUNTIME_DIR" add .
+
+  if git -C "$RUNTIME_DIR" diff --cached --quiet; then
+    echo ""
+    echo "No moqui-runtime submodule pointer changes to commit."
+  else
+    git -C "$RUNTIME_DIR" commit -m "chore: update submodules to latest growerp branch"
+    echo ""
+    echo "Committed moqui-runtime submodule pointers."
+
+    if $PUSH; then
+      git -C "$RUNTIME_DIR" push
+      echo "Pushed moqui-runtime to origin."
+    else
+      echo "Run 'git -C moqui/runtime push' to publish."
+    fi
   fi
 fi
