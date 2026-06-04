@@ -958,6 +958,38 @@ class CommonTest {
       if (optionVisible()) break;
     }
 
+    // Approach 0 (preferred): tap an option by its stable Key.
+    // Autocomplete option ListTiles are keyed `autocompleteOption$index` (see
+    // AutocompleteLabel and the GL account dialog). Only one autocomplete overlay
+    // is open at a time, so these keys are unambiguous. Tapping a keyed widget
+    // (with ensureVisible) is reliable on narrow/headless layouts, unlike the
+    // coordinate-tap fallbacks below which can silently miss.
+    if (tester.any(find.byKey(const Key('autocompleteOption0')))) {
+      for (int i = 0; i < 30; i++) {
+        final opt = find.byKey(Key('autocompleteOption$i'));
+        if (!tester.any(opt)) break;
+        final match = find.descendant(
+          of: opt,
+          matching: find.textContaining(value),
+        );
+        if (tester.any(match)) {
+          await tester.ensureVisible(opt.first);
+          await tester.pumpAndSettle();
+          await tester.tap(opt.first);
+          await tester.pumpAndSettle();
+          return;
+        }
+      }
+      // Keyed options present but none matched the text: tap the first one
+      // (the typed value has already filtered the list).
+      final opt0 = find.byKey(const Key('autocompleteOption0'));
+      await tester.ensureVisible(opt0.first);
+      await tester.pumpAndSettle();
+      await tester.tap(opt0.first);
+      await tester.pumpAndSettle();
+      return;
+    }
+
     // Approach 1: Find dropdown option ListTiles in the Overlay.
     // Autocomplete renders its options in an Overlay, so look for ListTiles
     // that contain the search text but live outside the form (no TextFormField

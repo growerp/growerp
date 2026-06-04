@@ -212,6 +212,7 @@ class GlAccountDialogState extends State<GlAccountDialog> {
                   itemBuilder: (context, index) {
                     final ac = options.elementAt(index);
                     return ListTile(
+                      key: Key('autocompleteOption$index'),
                       dense: true,
                       title: Text(_classDisplayString(ac)),
                       onTap: () => onSelected(ac),
@@ -272,6 +273,7 @@ class GlAccountDialogState extends State<GlAccountDialog> {
                   itemBuilder: (context, index) {
                     final at = options.elementAt(index);
                     return ListTile(
+                      key: Key('autocompleteOption$index'),
                       dense: true,
                       title: Text(at.description ?? ''),
                       onTap: () => onSelected(at),

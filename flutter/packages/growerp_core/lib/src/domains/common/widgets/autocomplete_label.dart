@@ -114,6 +114,7 @@ class _AutocompleteLabelState<T extends Object>
                     itemBuilder: (context, index) {
                       final option = options.elementAt(index);
                       return ListTile(
+                        key: Key('autocompleteOption$index'),
                         dense: true,
                         title: Text(widget.displayStringForOption(option)),
                         onTap: () => onSelected(option),
