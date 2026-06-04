@@ -20,6 +20,7 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_demos/growerp_demos.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:integration_test/integration_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:demos_example/main.dart';
 
@@ -28,6 +29,8 @@ void main() {
 
   setUp(() async {
     await GlobalConfiguration().loadFromAsset('app_settings');
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
   });
 
   testWidgets('Demo list shows all registered demos', (tester) async {
