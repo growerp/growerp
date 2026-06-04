@@ -610,7 +610,13 @@ class CommonTest {
     // in an unsorted order (e.g. a bloc that prepends newly-added items), so we
     // must locate the matching row by value instead of blindly tapping row 0.
     const baseKeys = ['id', 'name', 'title', 'theme', 'headline'];
-    for (int i = 0; i < 30; i++) {
+    // Rows render in a ListView.builder, so off-screen rows are not in the tree.
+    // Poll generously: the backend search round-trip (plus debounce) can exceed
+    // a couple of seconds on slow CI runners (headless Linux + xvfb). Scroll the
+    // list each iteration so lazily-built rows are realized before giving up.
+    final scrollable = find.byType(Scrollable);
+    bool scrolled = false;
+    for (int i = 0; i < 60; i++) {
       for (int row = 0; row < 20; row++) {
         for (final base in baseKeys) {
           final finder = find.byKey(Key('$base$row'));
@@ -622,10 +628,36 @@ class CommonTest {
           }
         }
       }
+      // Realize off-screen rows (and let in-flight results settle) before the
+      // next scan.
+      if (tester.any(scrollable)) {
+        await tester.drag(scrollable.first, const Offset(0, -200));
+        await tester.pump();
+        scrolled = true;
+      }
       await tester.pump(const Duration(milliseconds: 200));
     }
-    // Fallback: no exact match found (e.g. a partial/prefix search). Tap the
-    // first available result row using the common row cell keys.
+
+    // No exact match was found, so we fall through to the partial-search
+    // fallbacks below (which expect row 0 / the top of the list). Undo any
+    // scrolling done above so those fallbacks see the original first row.
+    if (scrolled && tester.any(scrollable)) {
+      await tester.drag(scrollable.first, const Offset(0, 100000));
+      await tester.pumpAndSettle();
+    }
+
+    // No exact-match row was found within the window. For an exact lookup
+    // (id/code/pseudoId) we must NOT blindly tap row 0 — after a create the bloc
+    // may have prepended a different item there, so tapping it opens the wrong
+    // record and produces a confusing downstream assertion. Tap by the exact
+    // text instead: this lands on the correct row for exact lookups and simply
+    // finds nothing for a genuine partial/prefix search.
+    if (tester.any(find.text(searchString))) {
+      await tapByText(tester, searchString);
+      await tester.pumpAndSettle(Duration(seconds: seconds));
+      return;
+    }
+    // Fallback for partial/prefix searches: tap the first available result row.
     for (final key in ['id0', 'name0', 'title0', 'theme0', 'headline0']) {
       if (tester.any(find.byKey(Key(key)))) {
         await tester.ensureVisible(find.byKey(Key(key)).last);
@@ -634,7 +666,7 @@ class CommonTest {
         return;
       }
     }
-    // Final fallback to tapping by text
+    // Final fallback to tapping by text.
     await tapByText(tester, searchString);
     await tester.pumpAndSettle(Duration(seconds: seconds));
   }
