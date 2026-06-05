@@ -74,7 +74,6 @@ class ChatRoomBloc extends Bloc<ChatRoomEvent, ChatRoomState> {
     ChatRoomUpdateLocal event,
     Emitter<ChatRoomState> emit,
   ) {
-    emit(state.copyWith(status: ChatRoomStatus.loading));
     var chatRooms = List.of(state.chatRooms);
     int index = chatRooms.indexWhere(
       (element) =>

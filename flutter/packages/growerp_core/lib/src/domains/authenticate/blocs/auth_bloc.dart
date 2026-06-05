@@ -279,7 +279,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         testDaysOffset: event.testDaysOffset,
       );
 
-      // Handle loginStatus values from backend
       if (authenticate.loginStatus == null ||
           ![
             'setupRequired', // Admin needs to provide company info
@@ -287,6 +286,18 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
             'registered', // User registered for existing company
             'passwordChange', // Password reset required
           ].contains(authenticate.loginStatus)) {
+        
+        if (authenticate.user?.userId != null) {
+          await chat.connect(
+            authenticate.apiKey!,
+            authenticate.user!.userId!,
+          );
+          await notification.connect(
+            authenticate.apiKey!,
+            authenticate.user!.userId!,
+          );
+        }
+
         // no special status so save and authenticated
         emit(
           state.copyWith(
@@ -296,16 +307,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           ),
         );
         PersistFunctions.persistAuthenticate(state.authenticate!);
-        if (state.authenticate!.user!.userId != null) {
-          await chat.connect(
-            state.authenticate!.apiKey!,
-            state.authenticate!.user!.userId!,
-          );
-          await notification.connect(
-            state.authenticate!.apiKey!,
-            state.authenticate!.user!.userId!,
-          );
-        }
 
         PersistFunctions.persistKeyValue('apiKey', authenticate.apiKey ?? '');
         PersistFunctions.persistKeyValue(
