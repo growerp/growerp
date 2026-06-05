@@ -21,6 +21,7 @@ import 'package:go_router/go_router.dart';
 import 'package:growerp_models/growerp_models.dart';
 import '../domains/authenticate/blocs/auth_bloc.dart';
 import '../domains/common/bloc/menu_config_bloc.dart';
+import '../domains/common/views/system_setup_dialog.dart';
 import '../services/build_dio_client.dart';
 import '../services/widget_registry.dart';
 import '../services/async_record_dialog.dart';
@@ -197,7 +198,11 @@ class _AdkChatViewState extends State<AdkChatView> {
       );
     } on DioException catch (e) {
       final body = e.response?.data?.toString() ?? e.message ?? e.toString();
-      _addMsg(_Msg.error('Connection failed — HTTP ${e.response?.statusCode}: $body'));
+      if (_isMissingKeyError(body)) {
+        _addSetupNeeded();
+      } else {
+        _addMsg(_Msg.error('Connection failed — HTTP ${e.response?.statusCode}: $body'));
+      }
       setState(() => _busy = false);
     } catch (e) {
       _addMsg(_Msg.error('Connection failed: $e'));
@@ -313,6 +318,7 @@ class _AdkChatViewState extends State<AdkChatView> {
     final stream = response.data!.stream;
     final buffer = StringBuffer();
     String agentReply = '';
+    bool missingKey = false;
 
     // Add a placeholder message for the streaming response
     final msgIndex = _messages.length;
@@ -335,7 +341,13 @@ class _AdkChatViewState extends State<AdkChatView> {
         try {
           final event = jsonDecode(payload) as Map<String, dynamic>;
           if (event.containsKey('error')) {
-            agentReply = '[Error: ${event['error']}]';
+            final err = event['error']?.toString();
+            if (_isMissingKeyError(err)) {
+              missingKey = true;
+              agentReply = '';
+            } else {
+              agentReply = '[Error: $err]';
+            }
             continue;
           }
           final content = event['content'] as Map<String, dynamic>?;
@@ -364,6 +376,12 @@ class _AdkChatViewState extends State<AdkChatView> {
     }
 
     // Final update
+    if (missingKey) {
+      // Drop the streaming placeholder and offer to open System Setup.
+      setState(() => _messages.removeAt(msgIndex));
+      _addSetupNeeded();
+      return;
+    }
     if (agentReply.isEmpty) {
       setState(() {
         _messages[msgIndex] = _Msg.adk('[No response from agent]');
@@ -418,6 +436,11 @@ class _AdkChatViewState extends State<AdkChatView> {
     String reply = '';
     for (final event in events.reversed) {
       if (event is Map<String, dynamic>) {
+        if (event.containsKey('error') &&
+            _isMissingKeyError(event['error']?.toString())) {
+          _addSetupNeeded();
+          return;
+        }
         final content = event['content'] as Map<String, dynamic>?;
         if (content != null) {
           final parts = content['parts'] as List?;
@@ -568,6 +591,32 @@ class _AdkChatViewState extends State<AdkChatView> {
   void _addMsg(_Msg msg) {
     setState(() => _messages.add(msg));
     _scrollToBottom();
+  }
+
+  /// True when a backend error means no usable LLM API key is configured
+  /// (missing, or rejected by the provider).
+  bool _isMissingKeyError(String? t) {
+    final s = (t ?? '').toLowerCase();
+    return s.contains('not configured') ||
+        s.contains('api key') ||
+        s.contains('api_key') ||
+        s.contains('permission denied') ||
+        s.contains('unauthenticated');
+  }
+
+  /// Prompt the user to add an LLM key, with a chip that opens System Setup as a
+  /// dialog on top of the chat (so they can save a key and retry inline).
+  void _addSetupNeeded() {
+    _addMsg(_Msg.error(
+        'No AI key configured. Add an LLM API key in System Setup, then retry.'));
+    _addMsg(_Msg.nav([
+      ChatMenuEntry(
+        title: 'Open System Setup',
+        route: '',
+        action: 'dialog',
+        dialogBuilder: (_) => const Dialog(child: SystemSetupDialog(inDialog: true)),
+      ),
+    ]));
   }
 
   void _scrollToBottom() {

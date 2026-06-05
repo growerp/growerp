@@ -24,7 +24,10 @@ import '../widgets/widgets.dart';
 /// System Setup Screen — configures AI (Gemini API key) and email server settings.
 /// Settings are stored per-tenant in the backend via the SystemSettings REST endpoint.
 class SystemSetupDialog extends StatefulWidget {
-  const SystemSetupDialog({super.key});
+  /// When shown modally (e.g. from the ADK chat as a Dialog) rather than as a
+  /// full-screen menu route: adds a Cancel button and pops on a successful save.
+  final bool inDialog;
+  const SystemSetupDialog({super.key, this.inDialog = false});
 
   /// Backward-compat: returns Gemini API key.
   /// Checks llmConfigs list first, then legacy geminiApiKey field, then SharedPreferences.
@@ -223,6 +226,9 @@ class _SystemSetupDialogState extends State<SystemSetupDialog> {
           'Settings saved successfully',
           Theme.of(context).colorScheme.primary,
         );
+        // When opened as a modal dialog (e.g. from the ADK chat), close on save
+        // so the user returns to where they were and can retry.
+        if (widget.inDialog) Navigator.of(context).pop();
       }
     } catch (e) {
       if (mounted) {
@@ -287,7 +293,24 @@ class _SystemSetupDialogState extends State<SystemSetupDialog> {
                   },
                 ),
                 const SizedBox(height: 32),
-                Center(child: _saveButton()),
+                Center(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (widget.inDialog) ...[
+                        OutlinedButton(
+                          key: const Key('cancelSettings'),
+                          onPressed: _isSaving
+                              ? null
+                              : () => Navigator.of(context).pop(),
+                          child: const Text('Cancel'),
+                        ),
+                        const SizedBox(width: 16),
+                      ],
+                      _saveButton(),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),

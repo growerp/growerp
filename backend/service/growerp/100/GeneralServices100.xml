@@ -1708,9 +1708,10 @@ along with this software (see the LICENSE.md file). If not, see
                     <econdition field-name="ownerPartyId"/>
                 </entity-find>
                 <script><![CDATA[
+                    def llmKeyChanged = false
                     def incomingProviders = llmConfigs.collect { it.llmProvider } as Set
                     for (def elc in existingLlmList) {
-                        if (!incomingProviders.contains(elc.llmProvider)) elc.delete()
+                        if (!incomingProviders.contains(elc.llmProvider)) { elc.delete(); llmKeyChanged = true }
                     }
                     for (def lc in llmConfigs) {
                         if (!lc.llmProvider) continue
@@ -1721,6 +1722,7 @@ along with this software (see the LICENSE.md file). If not, see
                             if (lc.apiKey && lc.apiKey != '****') {
                                 existing.apiKey = lc.apiKey
                                 existing.update()
+                                llmKeyChanged = true
                             }
                         } else {
                             def newLc = ec.entity.makeValue('growerp.general.LlmConfig')
@@ -1728,9 +1730,19 @@ along with this software (see the LICENSE.md file). If not, see
                             newLc.llmProvider  = lc.llmProvider
                             if (lc.apiKey && lc.apiKey != '****') newLc.apiKey = lc.apiKey
                             newLc.create()
+                            llmKeyChanged = true
                         }
                     }
+                    ec.context.llmKeyChanged = llmKeyChanged
                 ]]></script>
+                <!-- Refresh the interactive ADK chat runner so the new key applies without a
+                     backend restart. Guarded: a no-op when the moqui-adk component is absent. -->
+                <if condition="llmKeyChanged">
+                    <script><![CDATA[
+                        try { ec.service.sync().name('AdkServices100.reload#Adk').call() }
+                        catch (Throwable t) { ec.logger.warn("ADK reload skipped: ${t.message}") }
+                    ]]></script>
+                </if>
             </if>
 
             <!-- Sync to moqui.basic.email.EmailServer so poll#EmailServer / send#EmailMessage work -->
