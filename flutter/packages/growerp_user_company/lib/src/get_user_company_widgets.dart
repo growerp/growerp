@@ -147,18 +147,24 @@ List<WidgetMetadata> getUserCompanyWidgetsWithMetadata() {
     ),
     WidgetMetadata(
       widgetName: 'ShowCompanyDialog',
-      description: 'Create or edit a company. Pass partyId to edit an existing '
-          'company; omit it to create a new one.',
+      description: 'Show, create or edit a company. Omit partyId to show the '
+          "owner's main company; pass a partyId to edit an existing company; "
+          "pass partyId='_NEW_' to create a new one.",
       iconName: 'business',
       keywords: ['add company', 'new company', 'create company', 'edit company', 'open company'],
-      parameters: {'partyId': 'open this company for editing; omit to create new'},
+      parameters: {
+        'partyId': "company to edit; '_NEW_' to create; omit for the main company",
+      },
       builder: (args) {
-        // ShowCompanyDialog fetches by partyId itself; '_NEW_' opens a blank form.
+        // ShowCompanyDialog resolves the company itself:
+        //   null partyId  -> owner's main company (from authenticate)
+        //   '_NEW_'       -> blank create form
+        //   other partyId -> fetched and edited
         final id = (args?['partyId'] ?? args?['companyPartyId'] ?? args?['id'])?.toString();
         return ShowCompanyDialog(
           (id == null || id.isEmpty)
-              ? Company(partyId: '_NEW_', role: parseRole(args?['role']))
-              : Company(partyId: id),
+              ? Company(role: parseRole(args?['role'])) // main company
+              : Company(partyId: id), // '_NEW_' or a real partyId
           dialog: false,
         );
       },

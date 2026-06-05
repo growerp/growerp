@@ -197,6 +197,13 @@ class _AdminAppState extends State<AdminApp> {
           }
 
           return TopApp(
+            // Key forces a complete rebuild when the menu config changes
+            // (e.g. the user-specific menu loaded after authentication), so the
+            // subtree re-reads fresh AuthBloc state. Matches the core example.
+            key: ValueKey(
+              '${state.menuConfiguration?.menuConfigurationId ?? ''}_'
+              '${state.menuConfiguration?.menuItems.length ?? 0}',
+            ),
             restClient: widget.restClient,
             classificationId: widget.classificationId,
             chatClient: widget.chatClient,

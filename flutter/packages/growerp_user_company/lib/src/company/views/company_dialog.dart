@@ -69,6 +69,25 @@ class ShowCompanyDialog extends StatelessWidget {
         },
       );
     }
+    // No partyId given: show the main company of the owner. The main company is
+    // always carried (with full details) in the top-level authenticate.company
+    // (NOT authenticate.user.company, which is the user's employer company).
+    // Read it reactively so a late-populated company still shows, and key the
+    // dialog on partyId so its initState re-runs once the company arrives.
+    if (company.partyId == null) {
+      return BlocBuilder<AuthBloc, AuthState>(
+        buildWhen: (p, c) =>
+            p.authenticate?.company?.partyId != c.authenticate?.company?.partyId,
+        builder: (context, authState) {
+          final mainCompany = authState.authenticate?.company;
+          return CompanyDialog(
+            key: ValueKey('mainCompany_${mainCompany?.partyId ?? 'none'}'),
+            mainCompany ?? Company(),
+            dialog: dialog,
+          );
+        },
+      );
+    }
     return CompanyDialog(company, dialog: dialog);
   }
 }
