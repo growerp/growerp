@@ -117,11 +117,22 @@ jobs:
         with:
           distribution: temurin
           java-version: "21"
+          cache: gradle
 
       - name: Build moqui backend image
         run: |
           mkdir -p moqui/build
-          cd moqui && ./gradlew build getPostgresJdbc
+          cd moqui
+          # services.gradle.org is slow/flaky from CI; the 10s wrapper default
+          # times out. Bump it and retry so a single hiccup doesn't fail the run.
+          sed -i 's/^networkTimeout=.*/networkTimeout=60000/' gradle/wrapper/gradle-wrapper.properties
+          ok=0
+          for attempt in 1 2 3; do
+            if ./gradlew build getPostgresJdbc; then ok=1; break; fi
+            echo "gradlew attempt $attempt failed; retrying in 15s..."
+            sleep 15
+          done
+          [ "$ok" = 1 ] || { echo "gradlew failed after 3 attempts"; exit 1; }
           cd docker/simple && bash docker-build.sh ../.. growerp/growerp-moqui eclipse-temurin:21-jdk
 
       # ------------------------------------------------------------------
