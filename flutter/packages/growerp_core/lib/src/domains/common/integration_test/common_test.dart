@@ -431,6 +431,11 @@ class CommonTest {
       await tapByKey(tester, 'getStarted', settle: false);
     }
 
+    // The TrialWelcome flow opens the onboarding assistant right after auth.
+    // Tests must not run the AI onboarding chat, so dismiss it here for every
+    // login instead of relying on each test to call skipOnboardingIfPresent.
+    await skipOnboardingIfPresent(tester);
+
     // Refresh test data and handle test data upload
     test = await PersistFunctions.getTest();
     String apiKey = getTextField('apiKey');
