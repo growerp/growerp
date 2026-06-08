@@ -123,16 +123,29 @@ jobs:
         run: |
           mkdir -p moqui/build
           cd moqui
-          # services.gradle.org is slow/flaky from CI; the 10s wrapper default
-          # times out. Bump it and retry so a single hiccup doesn't fail the run.
-          sed -i 's/^networkTimeout=.*/networkTimeout=60000/' gradle/wrapper/gradle-wrapper.properties
+          WRAPPER=gradle/wrapper/gradle-wrapper.properties
+          # services.gradle.org regularly times out / returns 504 from CI.
+          # Bump the wrapper timeout and fall back to a mirror when the
+          # primary CDN is unavailable. validateDistributionUrl must be off
+          # for the mirror since it is not on the gradle.org domain.
+          sed -i 's/^networkTimeout=.*/networkTimeout=60000/' "$WRAPPER"
+          sed -i 's/^validateDistributionUrl=.*/validateDistributionUrl=false/' "$WRAPPER"
+          MIRRORS=(
+            'https\://services.gradle.org/distributions/gradle-9.2.0-bin.zip'
+            'https\://mirrors.cloud.tencent.com/gradle/gradle-9.2.0-bin.zip'
+          )
           ok=0
-          for attempt in 1 2 3; do
-            if ./gradlew build getPostgresJdbc; then ok=1; break; fi
-            echo "gradlew attempt $attempt failed; retrying in 15s..."
-            sleep 15
+          for url in "${MIRRORS[@]}"; do
+            sed -i "s|^distributionUrl=.*|distributionUrl=$url|" "$WRAPPER"
+            for attempt in 1 2 3; do
+              if ./gradlew build getPostgresJdbc; then ok=1; break; fi
+              echo "gradlew attempt $attempt via $url failed; retrying in 20s..."
+              sleep 20
+            done
+            [ "$ok" = 1 ] && break
+            echo "all attempts on $url failed; trying next mirror..."
           done
-          [ "$ok" = 1 ] || { echo "gradlew failed after 3 attempts"; exit 1; }
+          [ "$ok" = 1 ] || { echo "gradlew failed on all mirrors"; exit 1; }
           cd docker/simple && bash docker-build.sh ../.. growerp/growerp-moqui eclipse-temurin:21-jdk
 
       # ------------------------------------------------------------------
