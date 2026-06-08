@@ -113,6 +113,10 @@ jobs:
   # ───────────────────────────────────────────────────────────────────────────
   build-image:
     needs: [prepare]
+    # Skip cleanly when no Flutter apps were selected (e.g. growerp-moqui only).
+    # An empty matrix otherwise leaves this job stuck "Waiting for pending jobs"
+    # — neither success nor skipped — which fails the commit job's gate.
+    if: needs.prepare.outputs.flutter_apps != '[]'
     runs-on: ubuntu-latest
     timeout-minutes: 60
     strategy:
