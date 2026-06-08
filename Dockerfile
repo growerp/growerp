@@ -59,6 +59,8 @@ WORKDIR /root/growerp/flutter/packages/admin
 RUN flutter build web --release --wasm --pwa-strategy=none
 WORKDIR /root/growerp/flutter/packages/assessment
 RUN flutter build web --release --wasm --pwa-strategy=none
+WORKDIR /root/growerp/flutter/packages/freelance
+RUN flutter build web --release --wasm --pwa-strategy=none
 
 # ===== Stage 2: Build Moqui 4 backend =====
 FROM eclipse-temurin:21-jdk AS build-env
@@ -97,16 +99,20 @@ COPY --from=build-flutter /root/growerp/flutter/packages/admin/build/web \
     /root/growerp/pop-rest-store/screen/store/admin
 COPY --from=build-flutter /root/growerp/flutter/packages/assessment/build/web \
     /root/growerp/pop-rest-store/screen/store/assessment
+COPY --from=build-flutter /root/growerp/flutter/packages/freelance/build/web \
+    /root/growerp/pop-rest-store/screen/store/freelance
 
 # Fix the base href in index.html to work with sub-paths
 WORKDIR /root/growerp/pop-rest-store/screen/store
 RUN sed -i 's|<base href="/">|<base href="/admin/">|g' "admin/index.html"
 RUN sed -i 's|<base href="/">|<base href="/assessment/">|g' "assessment/index.html"
+RUN sed -i 's|<base href="/">|<base href="/freelance/">|g' "freelance/index.html"
 # Self-heal browsers that still have an old caching service worker from a previous deploy:
 # inject a snippet that unregisters any SW and drops its caches on load. Combined with
 # --pwa-strategy=none above (no new SW), this stops the stale-bundle-on-redeploy problem.
 RUN perl -i -pe 's{(<script src="flutter_bootstrap\.js")}{<script>if("serviceWorker" in navigator){navigator.serviceWorker.getRegistrations().then(function(rs){rs.forEach(function(r){r.unregister()})});if(window.caches){caches.keys().then(function(ks){ks.forEach(function(k){caches.delete(k)})})}}</script>\n  $1}' "admin/index.html"
 RUN perl -i -pe 's{(<script src="flutter_bootstrap\.js")}{<script>if("serviceWorker" in navigator){navigator.serviceWorker.getRegistrations().then(function(rs){rs.forEach(function(r){r.unregister()})});if(window.caches){caches.keys().then(function(ks){ks.forEach(function(k){caches.delete(k)})})}}</script>\n  $1}' "assessment/index.html"
+RUN perl -i -pe 's{(<script src="flutter_bootstrap\.js")}{<script>if("serviceWorker" in navigator){navigator.serviceWorker.getRegistrations().then(function(rs){rs.forEach(function(r){r.unregister()})});if(window.caches){caches.keys().then(function(ks){ks.forEach(function(k){caches.delete(k)})})}}</script>\n  $1}' "freelance/index.html"
 
 # Download PostgreSQL JDBC driver
 WORKDIR /root/growerp/moqui

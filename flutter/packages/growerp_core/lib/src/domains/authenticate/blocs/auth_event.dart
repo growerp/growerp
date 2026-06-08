@@ -32,7 +32,11 @@ class AuthUpdateLocal extends AuthEvent {
 class AuthRegister extends AuthEvent {
   final User user;
   final Locale? locale;
-  const AuthRegister(this.user, {this.locale});
+
+  /// Optional caller-chosen password. When null the backend generates and
+  /// emails a temporary password (the default flow).
+  final String? newPassword;
+  const AuthRegister(this.user, {this.locale, this.newPassword});
   @override
   List<Object> get props => [user];
 }

@@ -8,6 +8,7 @@ screen/store/components/*.min.js
 screen/store/admin/
 screen/store/landingpage/
 screen/store/assessment/
+screen/store/freelance/
 
 
 # gradle/build files

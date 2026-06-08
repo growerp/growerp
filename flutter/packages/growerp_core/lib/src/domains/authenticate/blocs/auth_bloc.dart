@@ -26,6 +26,7 @@ import 'package:credit_card_type_detector/credit_card_type_detector.dart';
 import '../../../services/ws_client.dart';
 import '../../../services/build_dio_client.dart';
 import '../../../services/get_dio_error.dart';
+import '../../../services/startup_credentials.dart';
 import '../../common/functions/functions.dart';
 
 part 'auth_event.dart';
@@ -126,7 +127,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         );
         // Api key invalid or not present: UnAuthenticated
         if (authResult.apiKey == null) {
-          return emit(state.copyWith(status: AuthStatus.unAuthenticated));
+          if (_applyStartupCredentials(defaultAuthenticate, emit)) return;
+          return emit(
+            state.copyWith(
+              status: AuthStatus.unAuthenticated,
+              authenticate: defaultAuthenticate,
+            ),
+          );
         }
         // Authenticated
         await PersistFunctions.persistAuthenticate(authResult);
@@ -144,7 +151,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           ),
         );
       } else {
-        // UnAuthenticated
+        // UnAuthenticated — honor web startup-page credentials if present
+        if (_applyStartupCredentials(defaultAuthenticate, emit)) return;
         return emit(
           state.copyWith(
             status: AuthStatus.unAuthenticated,
@@ -170,6 +178,63 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
+  /// Applies credentials handed off by the web startup page (see
+  /// admin/web/index.html) to an otherwise unauthenticated result. When the
+  /// email exists it logs in automatically; otherwise it emits an
+  /// unauthenticated state flagged for registration (the landing auto-opens the
+  /// prefilled register dialog). Returns true when credentials were consumed so
+  /// the caller skips its own unauthenticated emit. Always false on non-web.
+  bool _applyStartupCredentials(Authenticate auth, Emitter<AuthState> emit) {
+    final creds = getStartupCredentials();
+    if (creds == null) return false;
+    final authWithEmail = auth.copyWith(
+      user: (auth.user ?? User()).copyWith(loginName: creds.email),
+    );
+    if (creds.isRegister) {
+      if (creds.firstName != null && creds.lastName != null) {
+        // The HTML register dialog collected name + email → register directly
+        // (new company + admin), matching RegisterUserDialog(admin: true).
+        emit(
+          state.copyWith(
+            status: AuthStatus.unAuthenticated,
+            authenticate: authWithEmail,
+          ),
+        );
+        add(
+          AuthRegister(
+            User(
+              company: company,
+              firstName: creds.firstName,
+              lastName: creds.lastName,
+              email: creds.email,
+              userGroup: UserGroup.admin,
+            ),
+            newPassword: creds.password,
+          ),
+        );
+      } else {
+        // Fallback (only email known) → open the prefilled register dialog.
+        emit(
+          state.copyWith(
+            status: AuthStatus.unAuthenticated,
+            authenticate: authWithEmail,
+            pendingRegistrationEmail: creds.email,
+            pendingRegistrationPassword: creds.password,
+          ),
+        );
+      }
+    } else {
+      emit(
+        state.copyWith(
+          status: AuthStatus.unAuthenticated,
+          authenticate: authWithEmail,
+        ),
+      );
+      add(AuthLogin(creds.email, creds.password ?? ''));
+    }
+    return true;
+  }
+
   Future<void> _onAuthRegister(
     AuthRegister event,
     Emitter<AuthState> emit,
@@ -183,8 +248,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         firstName: event.user.firstName!,
         lastName: event.user.lastName!,
         userGroup: event.user.userGroup!,
-        // when debug mode password is always qqqqqq9!
-        newPassword: kReleaseMode ? null : 'qqqqqq9!',
+        // Caller-chosen password (e.g. from the web startup page) wins;
+        // otherwise debug builds default to qqqqqq9!, release emails a temp one.
+        newPassword: event.newPassword ?? (kReleaseMode ? null : 'qqqqqq9!'),
         timeZoneOffset: DateTime.now().timeZoneOffset.toString(),
         locale: (event.locale ?? PlatformDispatcher.instance.locale)
             .toLanguageTag(),

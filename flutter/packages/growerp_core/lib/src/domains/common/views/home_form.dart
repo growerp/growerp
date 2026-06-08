@@ -84,7 +84,28 @@ class HomeFormState extends State<HomeForm> with TickerProviderStateMixin {
     });
     // Note: Auth messages (including logout) are now handled at TopApp level
     // with retry logic to ensure scaffold messenger is available
+
+    // Web startup page found no existing account: auto-open the registration
+    // dialog (prefilled with the typed email) so the user can finish signing up.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || _pendingRegisterHandled) return;
+      if (_authBloc.state.pendingRegistrationEmail != null) {
+        _pendingRegisterHandled = true;
+        showDialog(
+          barrierDismissible: true,
+          context: context,
+          builder: (BuildContext context) {
+            return BlocProvider.value(
+              value: _authBloc,
+              child: const RegisterUserDialog(true),
+            );
+          },
+        );
+      }
+    });
   }
+
+  bool _pendingRegisterHandled = false;
 
   @override
   void dispose() {

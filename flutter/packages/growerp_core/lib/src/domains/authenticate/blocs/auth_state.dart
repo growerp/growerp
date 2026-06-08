@@ -29,26 +29,49 @@ class AuthState extends Equatable {
     this.status = AuthStatus.initial,
     this.authenticate,
     this.message,
+    this.pendingRegistrationEmail,
+    this.pendingRegistrationPassword,
   });
 
   final AuthStatus status;
   final Authenticate? authenticate;
   final String? message;
 
+  /// When set (web startup page found no existing account), the unauthenticated
+  /// landing auto-opens the registration dialog prefilled with this email.
+  /// Transient: not carried across state changes (consumed once).
+  final String? pendingRegistrationEmail;
+
+  /// Password typed on the web startup page, used as the new account's password
+  /// when finishing registration. Transient, consumed once.
+  final String? pendingRegistrationPassword;
+
   AuthState copyWith({
     AuthStatus? status,
     Authenticate? authenticate,
     String? message,
+    String? pendingRegistrationEmail,
+    String? pendingRegistrationPassword,
   }) {
     return AuthState(
       status: status ?? this.status,
       authenticate: authenticate ?? this.authenticate,
       message: message, // message not kept over state changes
+      pendingRegistrationEmail:
+          pendingRegistrationEmail, // transient, consumed once
+      pendingRegistrationPassword:
+          pendingRegistrationPassword, // transient, consumed once
     );
   }
 
   @override
-  List<Object?> get props => [status, authenticate, message];
+  List<Object?> get props => [
+    status,
+    authenticate,
+    message,
+    pendingRegistrationEmail,
+    pendingRegistrationPassword,
+  ];
 
   @override
   String toString() =>

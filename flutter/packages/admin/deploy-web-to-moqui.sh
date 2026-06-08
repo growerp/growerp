@@ -47,6 +47,15 @@ deploy_app() {
             SCREEN_AUTH="anonymous-view"
             BASE_PATH="/assessment/"
             ;;
+        freelance)
+            PACKAGE_DIR="$PROJECT_ROOT/flutter/packages/freelance"
+            APP_DIR_NAME="freelance"
+            SCREEN_FILE_NAME="freelance.xml"
+            SCREEN_COMMENT="GrowERP Freelance Flutter App Screen"
+            SCREEN_DESCRIPTION="Serves the Flutter freelance app and assets"
+            SCREEN_AUTH="anonymous-view"
+            BASE_PATH="/freelance/"
+            ;;
         *)
             echo -e "${RED}Unknown app: $APP${NC}"
             return 1
@@ -344,7 +353,7 @@ case "$APP_NAME" in
             exit 1
         fi
         ;;
-    admin|assessment)
+    admin|assessment|freelance)
         deploy_app "$APP_NAME"
         if [ $? -ne 0 ]; then
             exit 1
@@ -352,7 +361,7 @@ case "$APP_NAME" in
         ;;
     *)
         echo -e "${RED}Unknown app: $APP_NAME${NC}"
-        echo -e "${YELLOW}Usage: $0 [admin|assessment|both|all]${NC}"
+        echo -e "${YELLOW}Usage: $0 [admin|assessment|freelance|both|all]${NC}"
         echo -e "${YELLOW}Default (no args): deploys all apps${NC}"
         exit 1
         ;;

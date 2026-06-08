@@ -182,6 +182,9 @@ class _RegisterUserDialogState extends State<RegisterUserDialog> {
                         userGroup: widget.admin ? UserGroup.admin : null,
                       ),
                       locale: context.read<LocaleBloc>().state.locale,
+                      // Honor a password typed on the web startup page, if any.
+                      newPassword:
+                          _authBloc.state.pendingRegistrationPassword,
                     ),
                   );
                 }

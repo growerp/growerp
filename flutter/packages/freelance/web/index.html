@@ -8,11 +8,12 @@
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
   <meta name="description" content="GrowERP freelance.">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
   <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="admin">
+  <meta name="apple-mobile-web-app-title" content="freelance">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
   <!-- Favicon -->
@@ -20,88 +21,353 @@
 
   <title>GrowERP-Freelance</title>
   <style>
-    body {
-      background-color: #030303;
+    :root {
+      --bg: #030303;
+      --primary: #3EDDBF;
+      --secondary: #006B5A;
+      --surface: #121212;
+      --on-surface: #e6e6e6;
+      --muted: #8a8a8a;
+      --error: #ff6b6b;
+      --warn: #ffb74d;
+    }
+
+    html, body { margin: 0; padding: 0; height: 100%; }
+    body { background-color: var(--bg); }
+
+    /* Startup screen shown instantly while Flutter loads in the background.
+       Own id (#startup) so the Flutter engine does NOT auto-fade it. */
+    #startup {
+      position: fixed;
+      inset: 0;
+      z-index: 2147483647;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: auto;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background:
+        radial-gradient(120% 120% at 30% 20%, rgba(62, 221, 191, 0.10) 0%, rgba(0, 107, 90, 0.06) 35%, rgba(3, 3, 3, 1) 70%),
+        var(--bg);
+      color: var(--on-surface);
+    }
+
+    /* ---- Landing (mirrors Flutter HomeForm) ---- */
+    #startup .landing {
+      width: 100%;
+      max-width: 420px;
+      margin: 24px;
+      padding: 32px 28px;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      animation: fadeIn .5s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: none; }
+    }
+
+    .logo-glow {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at center, rgba(18,18,18,1) 55%, rgba(18,18,18,0.9) 100%);
+      border: 2px solid rgba(62, 221, 191, 0.30);
+      box-shadow: 0 0 30px 5px rgba(62, 221, 191, 0.25), 0 0 50px 10px rgba(0, 107, 90, 0.20);
+      margin-bottom: 24px;
+    }
+    .logo-glow img { width: 80px; height: 80px; object-fit: contain; }
+
+    #startup h1 {
+      margin: 0 0 40px;
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-align: center;
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* Buttons */
+    .btn {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 15px 16px;
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      border-radius: 30px;
+      cursor: pointer;
+      transition: transform .1s, opacity .2s;
+    }
+    .btn:active { transform: scale(0.99); }
+    .btn:disabled { opacity: 0.6; cursor: default; }
+    .btn-primary {
+      color: #00201a;
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+      border: none;
+      box-shadow: 0 6px 15px rgba(62, 221, 191, 0.35);
+    }
+    .btn-outline {
+      color: var(--primary);
+      background: transparent;
+      border: 1.5px solid rgba(62, 221, 191, 0.5);
+    }
+    .landing .btn-primary { margin-bottom: 22px; }
+
+    .status {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 36px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .spinner {
+      width: 14px; height: 14px;
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ---- Dialog (mirrors Flutter showDialog popUp) ---- */
+    .backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      box-sizing: border-box;
+    }
+    .backdrop.open { display: flex; }
+    .dialog {
+      width: 100%;
+      max-width: 560px;
+      background: var(--surface);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 20px;
+      padding: 22px 22px 26px;
+      box-sizing: border-box;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.6);
+      animation: fadeIn .25s ease-out;
+    }
+    .dialog .title {
+      position: relative;
+      text-align: center;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--primary);
+      padding: 4px 28px 18px;
+    }
+    .dialog .close {
+      position: absolute;
+      top: -2px; right: 0;
+      width: 30px; height: 30px;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      font-size: 22px;
+      line-height: 1;
+      cursor: pointer;
+    }
+    .field { position: relative; margin-bottom: 16px; }
+    .field input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 14px 44px 14px 16px;
+      font-size: 16px;
+      color: var(--on-surface);
+      background: rgba(255, 255, 255, 0.04);
+      border: 1.5px solid rgba(255, 255, 255, 0.15);
+      border-radius: 12px;
+      outline: none;
+      transition: border-color .2s;
+    }
+    .field input:focus { border-color: var(--primary); }
+    .field input::placeholder { color: var(--muted); }
+    .field .eye {
+      position: absolute;
+      top: 50%; right: 8px;
+      transform: translateY(-50%);
+      border: none; background: transparent;
+      color: var(--muted); cursor: pointer;
+      font-size: 18px; padding: 4px;
+    }
+    .row { display: flex; gap: 12px; }
+    .row .field { flex: 1; }
+    .note {
+      text-align: center;
+      color: var(--warn);
+      font-size: 13px;
+      margin: 4px 0 14px;
+    }
+    .dialog .msg {
+      min-height: 18px;
+      font-size: 13px;
+      text-align: center;
+      color: var(--error);
+      margin-bottom: 10px;
+    }
+    .dialog .btn { margin-top: 4px; }
+    .link {
+      display: block;
+      text-align: center;
+      margin-top: 18px;
+      color: var(--muted);
+      font-size: 14px;
+      cursor: pointer;
     }
   </style>
   <link rel="manifest" href="manifest.json">
 </head>
 
 <body>
-  <div id="loading">
-    <style>
-      body {
-        inset: 0;
-        overflow: hidden;
-        margin: 0;
-        padding: 0;
-        position: fixed;
-      }
+  <div id="startup">
+    <!-- Landing: mirrors Flutter HomeForm -->
+    <div class="landing">
+      <div class="logo-glow"><img src="growerp-logo.png" alt="GrowERP" /></div>
+      <h1>GrowERP Freelance</h1>
+      <button class="btn btn-primary" id="btnShowLogin" type="button">Login</button>
+      <button class="btn btn-outline" id="btnShowRegister" type="button">
+        Register new company and admin
+      </button>
+      <div class="status"><div class="spinner"></div><span>starting app…</span></div>
+    </div>
 
-      #loading {
-        align-items: center;
-        display: flex;
-        height: 100%;
-        justify-content: center;
-        width: 100%;
-      }
+    <!-- Login dialog: mirrors Flutter LoginDialog -->
+    <div class="backdrop" id="loginBackdrop">
+      <form class="dialog" id="loginForm" autocomplete="on">
+        <div class="title">
+          Login with existing user name
+          <button class="close" type="button" data-close>×</button>
+        </div>
+        <div class="field">
+          <input id="loginEmail" name="email" type="email" inputmode="email"
+                 autocomplete="username" placeholder="User name / email" required />
+        </div>
+        <div class="field">
+          <input id="loginPassword" name="password" type="password"
+                 autocomplete="current-password" placeholder="Password" required />
+          <button class="eye" type="button" data-toggle="loginPassword">👁</button>
+        </div>
+        <div class="msg" id="loginMsg"></div>
+        <button class="btn btn-primary" type="submit">Login</button>
+        <span class="link" data-close>Cancel</span>
+      </form>
+    </div>
 
-      .logo-container {
-        width: 80px;
-        height: 80px;
-        box-sizing: border-box;
-        border-radius: 50%;
-        background-color: #030303;
-        border: none;
-        box-shadow: none;
-        overflow: hidden;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-
-      .logo-container img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        animation: 1s ease-in-out 0s infinite alternate breathe;
-        opacity: .66;
-        transition: opacity .4s;
-      }
-
-      #loading.main_done .logo-container img {
-        opacity: 1;
-      }
-
-      #loading.init_done .logo-container img {
-        animation: .33s ease-in-out 0s 1 forwards zooooom;
-        opacity: .05;
-      }
-
-      @keyframes breathe {
-        from {
-          transform: scale(1)
-        }
-
-        to {
-          transform: scale(0.95)
-        }
-      }
-
-      @keyframes zooooom {
-        from {
-          transform: scale(1)
-        }
-
-        to {
-          transform: scale(10)
-        }
-      }
-    </style>
-    <div class="logo-container">
-      <img src="icons/Icon-192.png" alt="Loading indicator..." />
+    <!-- Register dialog: mirrors Flutter RegisterUserDialog -->
+    <div class="backdrop" id="registerBackdrop">
+      <form class="dialog" id="registerForm" autocomplete="on">
+        <div class="title">
+          Registration
+          <button class="close" type="button" data-close>×</button>
+        </div>
+        <div class="row">
+          <div class="field">
+            <input id="regFirstName" name="firstName" type="text"
+                   autocomplete="given-name" placeholder="First name" required />
+          </div>
+          <div class="field">
+            <input id="regLastName" name="lastName" type="text"
+                   autocomplete="family-name" placeholder="Last name" required />
+          </div>
+        </div>
+        <div class="note">A temporary password will be emailed to you.</div>
+        <div class="field">
+          <input id="regEmail" name="email" type="email" inputmode="email"
+                 autocomplete="email" placeholder="Email address" required />
+        </div>
+        <div class="msg" id="registerMsg"></div>
+        <button class="btn btn-primary" type="submit">Register</button>
+        <span class="link" data-close>Cancel</span>
+      </form>
     </div>
   </div>
+
+  <script>
+    (function () {
+      var startup = document.getElementById('startup');
+      var loginBackdrop = document.getElementById('loginBackdrop');
+      var registerBackdrop = document.getElementById('registerBackdrop');
+
+      function open(el) { el.classList.add('open'); }
+      function closeAll() {
+        loginBackdrop.classList.remove('open');
+        registerBackdrop.classList.remove('open');
+      }
+
+      document.getElementById('btnShowLogin').addEventListener('click', function () {
+        open(loginBackdrop);
+        document.getElementById('loginEmail').focus();
+      });
+      document.getElementById('btnShowRegister').addEventListener('click', function () {
+        open(registerBackdrop);
+        document.getElementById('regFirstName').focus();
+      });
+
+      // Cancel / close buttons + backdrop click
+      document.querySelectorAll('[data-close]').forEach(function (el) {
+        el.addEventListener('click', closeAll);
+      });
+      [loginBackdrop, registerBackdrop].forEach(function (bd) {
+        bd.addEventListener('click', function (e) { if (e.target === bd) closeAll(); });
+      });
+
+      // Password show/hide
+      document.querySelectorAll('[data-toggle]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var inp = document.getElementById(btn.getAttribute('data-toggle'));
+          inp.type = inp.type === 'password' ? 'text' : 'password';
+        });
+      });
+
+      // Write credentials to sessionStorage for the Flutter app to consume, then
+      // remove the whole startup overlay so Flutter (loaded in background) shows.
+      function handoff(values) {
+        try {
+          Object.keys(values).forEach(function (k) {
+            sessionStorage.setItem('growerp_startup_' + k, values[k]);
+          });
+        } catch (err) { /* ignore */ }
+        if (startup && startup.parentNode) startup.parentNode.removeChild(startup);
+      }
+
+      document.getElementById('loginForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+        var email = document.getElementById('loginEmail').value.trim();
+        var password = document.getElementById('loginPassword').value;
+        var msg = document.getElementById('loginMsg');
+        msg.textContent = '';
+        if (!email || !password) { msg.textContent = 'User name and password are required.'; return; }
+        handoff({ mode: 'login', email: email, password: password });
+      });
+
+      document.getElementById('registerForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+        var firstName = document.getElementById('regFirstName').value.trim();
+        var lastName = document.getElementById('regLastName').value.trim();
+        var email = document.getElementById('regEmail').value.trim();
+        var msg = document.getElementById('registerMsg');
+        msg.textContent = '';
+        if (!firstName || !lastName || !email) { msg.textContent = 'All fields are required.'; return; }
+        handoff({ mode: 'register', email: email, firstName: firstName, lastName: lastName });
+      });
+    })();
+  </script>
 
   <script src="flutter_bootstrap.js" async></script>
 </body>
