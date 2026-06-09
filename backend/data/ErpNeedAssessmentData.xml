@@ -3,7 +3,7 @@
 "Do you need an ERP system?" assessment, owned by GROWERP.
 Higher option scores = stronger indication the respondent needs an integrated
 ERP. submit#Assessment sums optionScore and matches a ScoringThreshold to set
-score + leadStatus. Eight MultipleChoice questions, max score 80.
+score + leadStatus. Four MultipleChoice questions, max score 105.
 -->
 <entity-facade-xml type="demo">
 
@@ -13,159 +13,72 @@ score + leadStatus. Eight MultipleChoice questions, max score 80.
         description="Find out whether your business has outgrown spreadsheets and disconnected tools and would benefit from an integrated ERP system."
         status="Active" />
 
-    <!-- Q1: number of disconnected tools -->
+    <!-- Q1: Disconnected Tools -->
     <growerp.assessment.AssessmentQuestion assessmentQuestionId="ERPN_Q1" pseudoId="erpn-q1"
         assessmentId="ERP_NEED" questionSequence="1" questionType="MultipleChoice"
-        questionText="How many separate tools or spreadsheets do you use to run your business?"
-        isRequired="Y" defaultOption="ERPN_Q1_O2" />
+        questionText="How many different, disconnected software tools do you currently use to run the business?"
+        isRequired="Y" defaultOption="ERPN_Q1_O1" />
     <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERPN_Q1_O1"
         pseudoId="erpn-q1-o1" assessmentQuestionId="ERPN_Q1" assessmentId="ERP_NEED"
-        optionSequence="1" optionText="1-2 tools" optionScore="0" />
+        optionSequence="1" optionText="1-3 tools" optionScore="10" />
     <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERPN_Q1_O2"
         pseudoId="erpn-q1-o2" assessmentQuestionId="ERPN_Q1" assessmentId="ERP_NEED"
-        optionSequence="2" optionText="3-5 tools" optionScore="3" />
+        optionSequence="2" optionText="4-6 tools" optionScore="20" />
     <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERPN_Q1_O3"
         pseudoId="erpn-q1-o3" assessmentQuestionId="ERPN_Q1" assessmentId="ERP_NEED"
-        optionSequence="3" optionText="6-10 tools" optionScore="7" />
-    <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERPN_Q1_O4"
-        pseudoId="erpn-q1-o4" assessmentQuestionId="ERPN_Q1" assessmentId="ERP_NEED"
-        optionSequence="4" optionText="More than 10 tools" optionScore="10" />
+        optionSequence="3" optionText="7+ tools" optionScore="30" />
 
-    <!-- Q2: re-keying data between systems -->
+    <!-- Q2: Business Model / Scale -->
     <growerp.assessment.AssessmentQuestion assessmentQuestionId="ERPN_Q2" pseudoId="erpn-q2"
         assessmentId="ERP_NEED" questionSequence="2" questionType="MultipleChoice"
-        questionText="How often does your team re-enter the same data into more than one system?"
-        isRequired="Y" defaultOption="ERPN_Q2_O2" />
+        questionText="Do you manage physical inventory, manufacturing processes, or complex supply chains?"
+        isRequired="Y" defaultOption="ERPN_Q2_O1" />
     <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERPN_Q2_O1"
         pseudoId="erpn-q2-o1" assessmentQuestionId="ERPN_Q2" assessmentId="ERP_NEED"
-        optionSequence="1" optionText="Never" optionScore="0" />
+        optionSequence="1" optionText="Service-based" optionScore="0" />
     <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERPN_Q2_O2"
         pseudoId="erpn-q2-o2" assessmentQuestionId="ERPN_Q2" assessmentId="ERP_NEED"
-        optionSequence="2" optionText="Rarely" optionScore="3" />
+        optionSequence="2" optionText="Basic physical inventory" optionScore="15" />
     <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERPN_Q2_O3"
         pseudoId="erpn-q2-o3" assessmentQuestionId="ERPN_Q2" assessmentId="ERP_NEED"
-        optionSequence="3" optionText="Weekly" optionScore="7" />
-    <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERPN_Q2_O4"
-        pseudoId="erpn-q2-o4" assessmentQuestionId="ERPN_Q2" assessmentId="ERP_NEED"
-        optionSequence="4" optionText="Every day" optionScore="10" />
+        optionSequence="3" optionText="Multi-stage manufacturing / Complex supply chain" optionScore="30" />
 
-    <!-- Q3: real-time visibility -->
+    <!-- Q3: Complexity -->
     <growerp.assessment.AssessmentQuestion assessmentQuestionId="ERPN_Q3" pseudoId="erpn-q3"
         assessmentId="ERP_NEED" questionSequence="3" questionType="MultipleChoice"
-        questionText="How easily can you get a real-time view of your finances and operations?"
-        isRequired="Y" defaultOption="ERPN_Q3_O2" />
+        questionText="Are you operating across multiple entities, locations, currencies, or tax jurisdictions?"
+        isRequired="Y" defaultOption="ERPN_Q3_O1" />
     <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERPN_Q3_O1"
         pseudoId="erpn-q3-o1" assessmentQuestionId="ERPN_Q3" assessmentId="ERP_NEED"
-        optionSequence="1" optionText="Instantly, in one place" optionScore="0" />
+        optionSequence="1" optionText="Single entity / Single currency" optionScore="0" />
     <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERPN_Q3_O2"
         pseudoId="erpn-q3-o2" assessmentQuestionId="ERPN_Q3" assessmentId="ERP_NEED"
-        optionSequence="2" optionText="With a little manual effort" optionScore="3" />
-    <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERPN_Q3_O3"
-        pseudoId="erpn-q3-o3" assessmentQuestionId="ERPN_Q3" assessmentId="ERP_NEED"
-        optionSequence="3" optionText="It takes hours of digging" optionScore="7" />
-    <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERPN_Q3_O4"
-        pseudoId="erpn-q3-o4" assessmentQuestionId="ERPN_Q3" assessmentId="ERP_NEED"
-        optionSequence="4" optionText="I really can't" optionScore="10" />
+        optionSequence="2" optionText="Multi-entity / Multi-currency" optionScore="25" />
 
-    <!-- Q4: inventory / asset tracking -->
+    <!-- Q4: Reporting Time / Visibility -->
     <growerp.assessment.AssessmentQuestion assessmentQuestionId="ERPN_Q4" pseudoId="erpn-q4"
         assessmentId="ERP_NEED" questionSequence="4" questionType="MultipleChoice"
-        questionText="How accurate is your stock, inventory or resource tracking?"
-        isRequired="Y" defaultOption="ERPN_Q4_O2" />
+        questionText="If I asked you for the exact profit margins on your top-selling item right now, how long would it take your team to pull that report?"
+        isRequired="Y" defaultOption="ERPN_Q4_O1" />
     <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERPN_Q4_O1"
         pseudoId="erpn-q4-o1" assessmentQuestionId="ERPN_Q4" assessmentId="ERP_NEED"
-        optionSequence="1" optionText="Always accurate and automated" optionScore="0" />
+        optionSequence="1" optionText="Immediate (Minutes)" optionScore="0" />
     <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERPN_Q4_O2"
         pseudoId="erpn-q4-o2" assessmentQuestionId="ERPN_Q4" assessmentId="ERP_NEED"
-        optionSequence="2" optionText="Mostly accurate, minor gaps" optionScore="3" />
+        optionSequence="2" optionText="Hours" optionScore="10" />
     <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERPN_Q4_O3"
         pseudoId="erpn-q4-o3" assessmentQuestionId="ERPN_Q4" assessmentId="ERP_NEED"
-        optionSequence="3" optionText="Frequently out of date" optionScore="7" />
-    <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERPN_Q4_O4"
-        pseudoId="erpn-q4-o4" assessmentQuestionId="ERPN_Q4" assessmentId="ERP_NEED"
-        optionSequence="4" optionText="We don't really track it" optionScore="10" />
+        optionSequence="3" optionText="Days or Weeks" optionScore="20" />
 
-    <!-- Q5: reporting effort -->
-    <growerp.assessment.AssessmentQuestion assessmentQuestionId="ERPN_Q5" pseudoId="erpn-q5"
-        assessmentId="ERP_NEED" questionSequence="5" questionType="MultipleChoice"
-        questionText="How long does it take to produce your monthly management reports?"
-        isRequired="Y" defaultOption="ERPN_Q5_O2" />
-    <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERPN_Q5_O1"
-        pseudoId="erpn-q5-o1" assessmentQuestionId="ERPN_Q5" assessmentId="ERP_NEED"
-        optionSequence="1" optionText="Less than an hour" optionScore="0" />
-    <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERPN_Q5_O2"
-        pseudoId="erpn-q5-o2" assessmentQuestionId="ERPN_Q5" assessmentId="ERP_NEED"
-        optionSequence="2" optionText="About a day" optionScore="3" />
-    <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERPN_Q5_O3"
-        pseudoId="erpn-q5-o3" assessmentQuestionId="ERPN_Q5" assessmentId="ERP_NEED"
-        optionSequence="3" optionText="Several days" optionScore="7" />
-    <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERPN_Q5_O4"
-        pseudoId="erpn-q5-o4" assessmentQuestionId="ERPN_Q5" assessmentId="ERP_NEED"
-        optionSequence="4" optionText="Weeks, or we don't really do them" optionScore="10" />
-
-    <!-- Q6: manual reconciliation -->
-    <growerp.assessment.AssessmentQuestion assessmentQuestionId="ERPN_Q6" pseudoId="erpn-q6"
-        assessmentId="ERP_NEED" questionSequence="6" questionType="MultipleChoice"
-        questionText="How much manual work is needed to reconcile sales, invoicing and accounting?"
-        isRequired="Y" defaultOption="ERPN_Q6_O2" />
-    <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERPN_Q6_O1"
-        pseudoId="erpn-q6-o1" assessmentQuestionId="ERPN_Q6" assessmentId="ERP_NEED"
-        optionSequence="1" optionText="Fully automated" optionScore="0" />
-    <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERPN_Q6_O2"
-        pseudoId="erpn-q6-o2" assessmentQuestionId="ERPN_Q6" assessmentId="ERP_NEED"
-        optionSequence="2" optionText="Some manual checks" optionScore="3" />
-    <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERPN_Q6_O3"
-        pseudoId="erpn-q6-o3" assessmentQuestionId="ERPN_Q6" assessmentId="ERP_NEED"
-        optionSequence="3" optionText="Mostly manual" optionScore="7" />
-    <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERPN_Q6_O4"
-        pseudoId="erpn-q6-o4" assessmentQuestionId="ERPN_Q6" assessmentId="ERP_NEED"
-        optionSequence="4" optionText="Entirely manual" optionScore="10" />
-
-    <!-- Q7: team size / growth -->
-    <growerp.assessment.AssessmentQuestion assessmentQuestionId="ERPN_Q7" pseudoId="erpn-q7"
-        assessmentId="ERP_NEED" questionSequence="7" questionType="MultipleChoice"
-        questionText="How big is the team that needs to share business data?"
-        isRequired="Y" defaultOption="ERPN_Q7_O2" />
-    <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERPN_Q7_O1"
-        pseudoId="erpn-q7-o1" assessmentQuestionId="ERPN_Q7" assessmentId="ERP_NEED"
-        optionSequence="1" optionText="Just 1-3 people" optionScore="0" />
-    <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERPN_Q7_O2"
-        pseudoId="erpn-q7-o2" assessmentQuestionId="ERPN_Q7" assessmentId="ERP_NEED"
-        optionSequence="2" optionText="4-10 people" optionScore="3" />
-    <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERPN_Q7_O3"
-        pseudoId="erpn-q7-o3" assessmentQuestionId="ERPN_Q7" assessmentId="ERP_NEED"
-        optionSequence="3" optionText="11-50 people" optionScore="7" />
-    <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERPN_Q7_O4"
-        pseudoId="erpn-q7-o4" assessmentQuestionId="ERPN_Q7" assessmentId="ERP_NEED"
-        optionSequence="4" optionText="More than 50 people" optionScore="10" />
-
-    <!-- Q8: cost of data errors -->
-    <growerp.assessment.AssessmentQuestion assessmentQuestionId="ERPN_Q8" pseudoId="erpn-q8"
-        assessmentId="ERP_NEED" questionSequence="8" questionType="MultipleChoice"
-        questionText="How often do data errors or duplicate entries cause problems for you?"
-        isRequired="Y" defaultOption="ERPN_Q8_O2" />
-    <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERPN_Q8_O1"
-        pseudoId="erpn-q8-o1" assessmentQuestionId="ERPN_Q8" assessmentId="ERP_NEED"
-        optionSequence="1" optionText="Never" optionScore="0" />
-    <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERPN_Q8_O2"
-        pseudoId="erpn-q8-o2" assessmentQuestionId="ERPN_Q8" assessmentId="ERP_NEED"
-        optionSequence="2" optionText="Occasionally" optionScore="3" />
-    <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERPN_Q8_O3"
-        pseudoId="erpn-q8-o3" assessmentQuestionId="ERPN_Q8" assessmentId="ERP_NEED"
-        optionSequence="3" optionText="Often" optionScore="7" />
-    <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERPN_Q8_O4"
-        pseudoId="erpn-q8-o4" assessmentQuestionId="ERPN_Q8" assessmentId="ERP_NEED"
-        optionSequence="4" optionText="Constantly" optionScore="10" />
-
-    <!-- Scoring thresholds (evaluation) - contiguous, cover 0..80 -->
+    <!-- Scoring thresholds (evaluation) - contiguous, cover 0..105 -->
     <growerp.assessment.ScoringThreshold thresholdId="ERPN_T1" pseudoId="erpn-t1"
-        assessmentId="ERP_NEED" minScore="0" maxScore="26" leadStatus="LOW"
-        description="An ERP is likely overkill for you right now. Your business still runs comfortably on simple tools - revisit this as you grow." />
+        assessmentId="ERP_NEED" minScore="0" maxScore="30" leadStatus="LOW"
+        description="Keep as Subscriber. An ERP is likely overkill for you right now. Your business still runs comfortably on simple tools - revisit this as you grow." />
     <growerp.assessment.ScoringThreshold thresholdId="ERPN_T2" pseudoId="erpn-t2"
-        assessmentId="ERP_NEED" minScore="27" maxScore="53" leadStatus="WARM"
-        description="You're approaching the point where an ERP would pay off. Disconnected tools and manual work are starting to slow you down - worth planning for an integrated system." />
+        assessmentId="ERP_NEED" minScore="31" maxScore="60" leadStatus="WARM"
+        description="Mark as Marketing Qualified Lead (MQL). You're approaching the point where an ERP would pay off. Disconnected tools and manual work are starting to slow you down." />
     <growerp.assessment.ScoringThreshold thresholdId="ERPN_T3" pseudoId="erpn-t3"
-        assessmentId="ERP_NEED" minScore="54" maxScore="80" leadStatus="HOT"
-        description="You clearly need an integrated ERP system. The cost of staying on fragmented tools and manual processes is hurting your business - GrowERP can help you consolidate." />
+        assessmentId="ERP_NEED" minScore="61" maxScore="105" leadStatus="HOT"
+        description="Mark as Sales Qualified Lead (SQL). You clearly need an integrated ERP system. The cost of staying on fragmented tools and manual processes is hurting your business." />
 
 </entity-facade-xml>
