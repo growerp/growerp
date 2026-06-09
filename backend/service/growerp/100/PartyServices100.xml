@@ -2331,24 +2331,37 @@ along with this software (see the LICENSE.md file). If not, see
                         contactMechPurposeId: 'WebUrlPrimary', webAddress: user.url]" />
                 </if>
             </if>
-            <!-- appsUsed: register the mobile app the user has now used, so a
-                 one-time post-login flow (welcome/assessment) is not repeated -->
-            <if condition="user.appsUsed &amp;&amp; user.appsUsed.size() &gt; 0">
-                <entity-find-count entity-name="mantle.party.PartyClassificationAppl"
-                    count-field="existingApplCount">
-                    <econdition field-name="partyId" from="user.partyId" />
-                    <econdition field-name="partyClassificationId" from="user.appsUsed[0]" />
-                </entity-find-count>
-                <if condition="existingApplCount == 0">
-                    <service-call name="create#mantle.party.PartyClassificationAppl"
-                        in-map="[partyId: user.partyId, partyClassificationId: user.appsUsed[0]]" />
-                </if>
-            </if>
             <!-- return updated user -->
             <service-call name="growerp.100.PartyServices100.get#User"
                 in-map="[userPartyId: user.partyId]" out-map="userInfo" />
             <if condition="userInfo.users">
                 <set field="user" from="userInfo.users[0]" />
+            </if>
+        </actions>
+    </service>
+
+    <service verb="register" noun="AppUsed" authenticate="true">
+        <description>Mark a mobile app as used by the logged-in user, so a
+            one-time post-login flow (welcome/assessment) is shown only once.
+            Adds a PartyClassificationAppl which surfaces in user.appsUsed.</description>
+        <in-parameters>
+            <parameter name="classificationId" required="true">
+                <description>PartyClassificationId of type PcltMobileApp, e.g. AppAdmin</description>
+            </parameter>
+        </in-parameters>
+        <actions>
+            <set field="partyId" from="ec.user.userAccount?.partyId" />
+            <if condition="!partyId">
+                <return />
+            </if>
+            <entity-find-count entity-name="mantle.party.PartyClassificationAppl"
+                count-field="existingCount">
+                <econdition field-name="partyId" from="partyId" />
+                <econdition field-name="partyClassificationId" from="classificationId" />
+            </entity-find-count>
+            <if condition="existingCount == 0">
+                <service-call name="create#mantle.party.PartyClassificationAppl"
+                    in-map="[partyId: partyId, partyClassificationId: classificationId]" />
             </if>
         </actions>
     </service>

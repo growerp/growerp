@@ -239,6 +239,11 @@ abstract class RestClient {
     @Field() required bool deleteCompanyToo,
   });
 
+  /// Marks the current app as used by the logged-in user so one-time
+  /// post-login flows (welcome/assessment) appear only on the first login.
+  @POST("rest/s1/growerp/100/AppUsed")
+  Future<void> registerAppUsed({@Field() required String classificationId});
+
   // payment gateway actions
   @POST("rest/s1/growerp/100/GatewayPayment")
   Future<FinDoc> authorizeGatewayPayment({@Field() required String paymentId});
