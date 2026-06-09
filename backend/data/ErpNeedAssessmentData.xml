@@ -5,7 +5,7 @@ Higher option scores = stronger indication the respondent needs an integrated
 ERP. submit#Assessment sums optionScore and matches a ScoringThreshold to set
 score + leadStatus. Eight MultipleChoice questions, max score 80.
 -->
-<entity-facade-xml type="demo">
+<entity-facade-xml type="install">
 
     <!-- Assessment -->
     <growerp.assessment.Assessment assessmentId="ERP_NEED" pseudoId="erp-need"
