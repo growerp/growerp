@@ -5,14 +5,13 @@ Higher option scores = stronger indication the respondent needs an integrated
 ERP. submit#Assessment sums optionScore and matches a ScoringThreshold to set
 score + leadStatus. Eight MultipleChoice questions, max score 80.
 -->
-<entity-facade-xml type="install">
+<entity-facade-xml type="demo">
 
     <!-- Assessment -->
-    <growerp.assessment.Assessment assessmentId="ERP_NEED" pseudoId="erp-need"
-        ownerPartyId="GROWERP"
+    <growerp.assessment.Assessment assessmentId="ERP_NEED" pseudoId="erp-need" ownerPartyId="GROWERP"
         assessmentName="Do you need an ERP system?"
         description="Find out whether your business has outgrown spreadsheets and disconnected tools and would benefit from an integrated ERP system."
-        status="Active" createdByUserLogin="admin" />
+        status="Active" />
 
     <!-- Q1: number of disconnected tools -->
     <growerp.assessment.AssessmentQuestion assessmentQuestionId="ERPN_Q1" pseudoId="erpn-q1"
