@@ -97,13 +97,20 @@ class LoginDialogState extends State<LoginDialog> {
                 if (context.mounted &&
                     !isGrowERP &&
                     (auth.user?.appsUsed.isEmpty ?? false)) {
+                  final restClient = context.read<RestClient>();
                   await showDialog(
                     context: context,
                     barrierDismissible: false,
                     builder: (ctx) =>
                         TrialWelcomeDialog(authenticate: auth),
                   );
-                  if (context.mounted) {
+                  // Only run the AI onboarding assistant when a Gemini key is
+                  // configured; without it OnboardingChat returns empty. This
+                  // keeps keyless deployments and integration tests out of
+                  // onboarding entirely.
+                  final aiKey =
+                      await SystemSetupDialog.getGeminiApiKey(restClient);
+                  if (context.mounted && (aiKey?.isNotEmpty ?? false)) {
                     await showDialog(
                       context: context,
                       barrierDismissible: false,
