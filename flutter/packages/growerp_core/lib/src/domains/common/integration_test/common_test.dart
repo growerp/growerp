@@ -162,8 +162,8 @@ class CommonTest {
   }
 
   static Future<void> skipOnboardingIfPresent(WidgetTester tester) async {
-    if (tester.any(find.text('Skip'))) {
-      await tester.tap(find.text('Skip'));
+    if (tester.any(find.byKey(const Key('skipAssessment')))) {
+      await tester.tap(find.byKey(const Key('skipAssessment')));
       await tester.pumpAndSettle(const Duration(seconds: waitTime));
     }
   }
@@ -763,9 +763,12 @@ class CommonTest {
   ]) async {
     Finder finder = find.byKey(Key(widgetKey));
     try {
-      if (tester.allElements.where((el) => el.widget.key == Key(widgetKey)).length > count) {
-        final nonSubtreeFinder = find.byWidgetPredicate((widget) =>
-          widget.key == Key(widgetKey) && widget is! KeyedSubtree
+      if (tester.allElements
+              .where((el) => el.widget.key == Key(widgetKey))
+              .length >
+          count) {
+        final nonSubtreeFinder = find.byWidgetPredicate(
+          (widget) => widget.key == Key(widgetKey) && widget is! KeyedSubtree,
         );
         if (nonSubtreeFinder.evaluate().isNotEmpty) {
           finder = nonSubtreeFinder;
@@ -788,9 +791,12 @@ class CommonTest {
     await tester.testTextInput.receiveAction(TextInputAction.done);
     Finder finder = find.byKey(Key(widgetKey));
     try {
-      if (tester.allElements.where((el) => el.widget.key == Key(widgetKey)).length > count) {
-        final nonSubtreeFinder = find.byWidgetPredicate((widget) =>
-          widget.key == Key(widgetKey) && widget is! KeyedSubtree
+      if (tester.allElements
+              .where((el) => el.widget.key == Key(widgetKey))
+              .length >
+          count) {
+        final nonSubtreeFinder = find.byWidgetPredicate(
+          (widget) => widget.key == Key(widgetKey) && widget is! KeyedSubtree,
         );
         if (nonSubtreeFinder.evaluate().isNotEmpty) {
           finder = nonSubtreeFinder;

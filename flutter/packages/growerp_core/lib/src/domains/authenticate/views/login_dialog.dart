@@ -113,6 +113,22 @@ class LoginDialogState extends State<LoginDialog> {
                           ErpAssessmentDialog(authenticate: auth),
                     );
                   }
+                  // Mark this app as used so the welcome + assessment only
+                  // appear on the first login. Registering the app
+                  // classification makes user.appsUsed non-empty next time.
+                  if (context.mounted && auth.user != null) {
+                    try {
+                      final classificationId =
+                          context.read<AuthBloc>().classificationId;
+                      await context.read<RestClient>().updateUser(
+                            user: auth.user!
+                                .copyWith(appsUsed: [classificationId]),
+                          );
+                    } catch (_) {
+                      // Non-fatal: if registration fails the dialog may show
+                      // again next login, but login itself must not break.
+                    }
+                  }
                 }
                 if (context.mounted) {
                   if (Navigator.of(context).canPop()) {

@@ -2331,6 +2331,19 @@ along with this software (see the LICENSE.md file). If not, see
                         contactMechPurposeId: 'WebUrlPrimary', webAddress: user.url]" />
                 </if>
             </if>
+            <!-- appsUsed: register the mobile app the user has now used, so a
+                 one-time post-login flow (welcome/assessment) is not repeated -->
+            <if condition="user.appsUsed &amp;&amp; user.appsUsed.size() &gt; 0">
+                <entity-find-count entity-name="mantle.party.PartyClassificationAppl"
+                    count-field="existingApplCount">
+                    <econdition field-name="partyId" from="user.partyId" />
+                    <econdition field-name="partyClassificationId" from="user.appsUsed[0]" />
+                </entity-find-count>
+                <if condition="existingApplCount == 0">
+                    <service-call name="create#mantle.party.PartyClassificationAppl"
+                        in-map="[partyId: user.partyId, partyClassificationId: user.appsUsed[0]]" />
+                </if>
+            </if>
             <!-- return updated user -->
             <service-call name="growerp.100.PartyServices100.get#User"
                 in-map="[userPartyId: user.partyId]" out-map="userInfo" />
