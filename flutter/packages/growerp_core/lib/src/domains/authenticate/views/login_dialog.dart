@@ -103,6 +103,16 @@ class LoginDialogState extends State<LoginDialog> {
                     builder: (ctx) =>
                         TrialWelcomeDialog(authenticate: auth),
                   );
+                  // Replace the old onboarding assistant with the
+                  // "Do you need an ERP system?" assessment.
+                  if (context.mounted) {
+                    await showDialog(
+                      context: context,
+                      barrierDismissible: false,
+                      builder: (ctx) =>
+                          ErpAssessmentDialog(authenticate: auth),
+                    );
+                  }
                 }
                 if (context.mounted) {
                   if (Navigator.of(context).canPop()) {
