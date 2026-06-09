@@ -618,7 +618,14 @@ class CommonTest {
     // Poll generously: the backend search round-trip (plus debounce) can exceed
     // a couple of seconds on slow CI runners (headless Linux + xvfb). Scroll the
     // list each iteration so lazily-built rows are realized before giving up.
-    final scrollable = find.byType(Scrollable);
+    // Only the result list scrolls vertically. The search field also exposes a
+    // (horizontal) Scrollable that sorts first under find.byType(Scrollable), so
+    // dragging `.first` would target the text field, miss the hit test, and the
+    // resulting FlutterError fails the test. Select by axis instead.
+    final scrollable = find.byWidgetPredicate((w) =>
+        w is Scrollable &&
+        (w.axisDirection == AxisDirection.down ||
+            w.axisDirection == AxisDirection.up));
     bool scrolled = false;
     bool hasResultRow() =>
         baseKeys.any((b) => tester.any(find.byKey(Key('${b}0'))));
@@ -645,7 +652,8 @@ class CommonTest {
       // Keep polling — scrolling to realize any lazily-built rows — until rows
       // appear.
       if (tester.any(scrollable)) {
-        await tester.drag(scrollable.first, const Offset(0, -200));
+        await tester.drag(scrollable.first, const Offset(0, -200),
+            warnIfMissed: false);
         await tester.pump();
         scrolled = true;
       }
@@ -656,7 +664,8 @@ class CommonTest {
     // fallbacks below (which expect row 0 / the top of the list). Undo any
     // scrolling done above so those fallbacks see the original first row.
     if (scrolled && tester.any(scrollable)) {
-      await tester.drag(scrollable.first, const Offset(0, 100000));
+      await tester.drag(scrollable.first, const Offset(0, 100000),
+          warnIfMissed: false);
       await tester.pumpAndSettle();
     }
 
