@@ -619,35 +619,6 @@ String getVersion(String appName, String workspaceDir) {
   }
 }
 
-/// Bump the canonical project version (growerp_core) on its own semantic line.
-/// growerp_core is not an "app" in [config]['defaultApps'], so the normal app
-/// version flow never touches it. The staging workflow reads its version for the
-/// commit message — bumping it here keeps that reported version advancing.
-Future<void> bumpCoreVersion(
-  String workspaceDir,
-  Map<String, bool> versionConfig,
-) async {
-  final file = workspaceDir.endsWith('/flutter')
-      ? '$workspaceDir/packages/growerp_core/pubspec.yaml'
-      : '$workspaceDir/flutter/packages/growerp_core/pubspec.yaml';
-  final current = getVersion('growerp_core', workspaceDir);
-  final p = parseVersion(current);
-  var major = p['major']!, minor = p['minor']!, patch = p['patch']!;
-  if (versionConfig['major'] == true) {
-    major++;
-    minor = 0;
-    patch = 0;
-  } else if (versionConfig['minor'] == true) {
-    minor++;
-    patch = 0;
-  } else {
-    patch++;
-  }
-  final next = '$major.$minor.$patch';
-  replace(file, 'version: $current', 'version: $next');
-  print('   growerp_core (canonical): $current → $next');
-}
-
 Map<String, int> parseVersion(String version) {
   var versionOnly = version.contains('+') ? version.split('+')[0] : version;
   var parts = versionOnly.split('.');
@@ -723,14 +694,6 @@ Future<void> executeRelease(
       var newVersion = newVersions[app]!;
       await updateVersionFile(app, currentVersion, newVersion, workspaceDir);
     }
-    // Bump the canonical project version (growerp_core) on its own line so the
-    // staging commit message reports a version that actually advances.
-    await bumpCoreVersion(
-      workspaceDir,
-      Map<String, bool>.from(
-        releaseState['versionConfig'] ?? const {'patch': true},
-      ),
-    );
     releaseState['versionUpdated'] = true;
     releaseState['currentStep'] = 'versions_updated';
     saveState();
