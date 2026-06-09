@@ -145,6 +145,18 @@ class ChatEndpoint extends MoquiAbstractEndpoint {
         })
     }
 
+    /** True if the given userId has at least one open WebSocket session. */
+    static boolean isUserOnline(String userId) {
+        if (userId == null) return false
+        for (ChatEndpoint endpoint : chatEndpoints) {
+            if (userId == endpoint.getUserId()
+                    && endpoint.session != null && endpoint.session.isOpen()) {
+                return true
+            }
+        }
+        return false
+    }
+
     /** Push a server-originated message to all connected WebSocket sessions whose userId is in memberUserIds. */
     static void pushToMembers(String messageJson, List<String> memberUserIds) {
         chatEndpoints.forEach(endpoint -> {

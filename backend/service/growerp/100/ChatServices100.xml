@@ -526,15 +526,46 @@ along with this software (see the LICENSE.md file). If not, see
                 list="roomMembers">
                 <econdition field-name="chatRoomId" from="chatMessage.chatRoom.chatRoomId" />
             </entity-find>
+            <!-- email config + sender name, resolved once for offline notifications -->
+            <entity-find-one entity-name="moqui.basic.email.EmailServer" value-field="emailServer">
+                <field-map field-name="emailServerId" value="SYSTEM" />
+            </entity-find-one>
+            <set field="emailConfigured"
+                from="emailServer &amp;&amp; emailServer.mailPassword != 'SMTP_PASSWORD'" />
+            <entity-find-one entity-name="moqui.security.UserAccount" value-field="senderUa">
+                <field-map field-name="userId" from="ec.user.userAccount.userId" />
+            </entity-find-one>
             <iterate
                 list="roomMembers" entry="member">
-                <if
-                    condition="ec.user.userAccount.userId != member.userId &amp;&amp;member.hasRead != 'N'">
-                    <service-call name="update#growerp.general.ChatRoomMember"
-                        in-map="[chatRoomId: member.chatRoomId,
-                                    userId: member.userId, 
-                                        hasRead: 'N',
-                                        isActive: 'Y']" />
+                <if condition="ec.user.userAccount.userId != member.userId">
+                    <if condition="member.hasRead != 'N'">
+                        <service-call name="update#growerp.general.ChatRoomMember"
+                            in-map="[chatRoomId: member.chatRoomId,
+                                        userId: member.userId,
+                                            hasRead: 'N',
+                                            isActive: 'Y']" />
+                    </if>
+                    <!-- email the message to members who are not connected (offline) -->
+                    <if condition="emailConfigured &amp;&amp; !org.moqui.impl.webapp.ChatEndpoint.isUserOnline(member.userId)">
+                        <entity-find-one entity-name="moqui.security.UserAccount" value-field="toUa">
+                            <field-map field-name="userId" from="member.userId" />
+                        </entity-find-one>
+                        <entity-find entity-name="mantle.party.contact.PartyContactMech" list="emailPcms">
+                            <econdition field-name="partyId" from="toUa.partyId" />
+                            <econdition field-name="contactMechPurposeId" value="EmailPrimary" />
+                            <date-filter />
+                        </entity-find>
+                        <set field="toEmail" from="emailPcms ? emailPcms[0].contactMech.infoString : null" />
+                        <if condition="toEmail &amp;&amp; !toEmail.contains('example.com')">
+                            <service-call name="org.moqui.impl.EmailServices.send#EmailTemplate" async="true">
+                                <field-map field-name="toAddresses" from="toEmail" />
+                                <field-map field-name="fromAddress" value="noreply@growerp.com" />
+                                <field-map field-name="subject"
+                                    from="'New chat message from ' + (senderUa?.userFullName ?: 'GrowERP')" />
+                                <field-map field-name="bodyText" from="chatMessage.content" />
+                            </service-call>
+                        </if>
+                    </if>
                 </if>
             </iterate>
             <service-call name="growerp.100.ChatServices100.get#ChatMessage"
