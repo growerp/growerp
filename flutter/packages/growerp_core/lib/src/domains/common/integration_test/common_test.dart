@@ -431,8 +431,7 @@ class CommonTest {
       await tapByKey(tester, 'getStarted', settle: false);
     }
 
-    // The TrialWelcome flow opens the onboarding assistant right after auth.
-    // Tests must not run the AI onboarding chat, so dismiss it here for every
+    // A post-login dialog may open right after auth; dismiss it here for every
     // login instead of relying on each test to call skipOnboardingIfPresent.
     await skipOnboardingIfPresent(tester);
 

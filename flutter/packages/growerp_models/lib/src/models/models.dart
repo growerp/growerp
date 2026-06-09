@@ -92,4 +92,3 @@ export 'adk_agent_config_model.dart';
 export 'adk_job_model.dart';
 // Course models
 export 'course_model.dart';
-export 'onboarding_models.dart';

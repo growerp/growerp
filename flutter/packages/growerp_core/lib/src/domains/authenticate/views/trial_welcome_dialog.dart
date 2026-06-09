@@ -16,7 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 /// Welcomes new tenant admins, showing company/user info and trial period.
-/// Shown once after tenant setup completes, before onboarding.
+/// Shown once after tenant setup completes.
 class TrialWelcomeDialog extends StatelessWidget {
   final Authenticate authenticate;
 

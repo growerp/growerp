@@ -27,7 +27,6 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:growerp_activity/growerp_activity.dart';
 
 import 'src/application/application.dart';
-import 'src/genui_catalog/genui_catalog_screen.dart';
 import 'views/support_dashboard_content.dart';
 //webactivate  import 'package:web/web.dart' as web;
 
@@ -202,7 +201,6 @@ List<Map<String, GrowerpWidgetBuilder>> supportWidgetRegistrations = [
   {
     'AboutForm': (args) => const AboutForm(),
     'ApplicationList': (args) => const ApplicationList(),
-    'GenUiCatalogScreen': (args) => const GenUiCatalogScreen(),
   },
 ];
 
