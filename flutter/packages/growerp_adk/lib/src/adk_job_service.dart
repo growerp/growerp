@@ -13,7 +13,7 @@
  */
 
 import 'package:growerp_models/growerp_models.dart';
-import '../services/build_dio_client.dart';
+import 'package:growerp_core/growerp_core.dart';
 
 class AdkJobService {
   final RestClient _client;

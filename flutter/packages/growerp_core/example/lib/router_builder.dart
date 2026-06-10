@@ -16,6 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:growerp_core/growerp_core.dart';
+import 'package:growerp_adk/growerp_adk.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_user_company/growerp_user_company.dart';
 import 'views/core_dashboard.dart';
@@ -82,6 +83,24 @@ const coreMenuConfig = MenuConfiguration(
       widgetName: 'AdkJobListView',
       isActive: true,
     ),
+    MenuItem(
+      menuItemId: 'CORE_ADK_APPROVALS',
+      title: 'Approvals',
+      route: '/adk-approvals',
+      iconName: 'fact_check',
+      sequenceNum: 70,
+      widgetName: 'AdkApprovalsListView',
+      isActive: true,
+    ),
+    MenuItem(
+      menuItemId: 'CORE_ADK_ACTIONS',
+      title: 'Agent Actions',
+      route: '/adk-actions',
+      iconName: 'history',
+      sequenceNum: 80,
+      widgetName: 'AdkActionsListView',
+      isActive: true,
+    ),
   ],
 );
 
@@ -128,6 +147,8 @@ List<Map<String, GrowerpWidgetBuilder>> coreWidgetRegistrations = [
     'SystemSetupDialog': (args) => const SystemSetupDialog(),
     'AdkAgentListView': (args) => const AdkAgentListView(),
     'AdkJobListView': (args) => const AdkJobListView(),
+    'AdkApprovalsListView': (args) => const AdkApprovalsListView(),
+    'AdkActionsListView': (args) => const AdkActionsListView(),
     'AdkChatView': (args) {
           // Dialog builders per route — dialog:true so popUp frame with close
           // button is shown. Registry uses dialog:false (full-screen nav mode).

@@ -19,12 +19,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:growerp_models/growerp_models.dart';
-import '../domains/authenticate/blocs/auth_bloc.dart';
-import '../domains/common/bloc/menu_config_bloc.dart';
-import '../domains/common/views/system_setup_dialog.dart';
-import '../services/build_dio_client.dart';
-import '../services/widget_registry.dart';
-import '../services/async_record_dialog.dart';
+import 'package:growerp_core/growerp_core.dart';
 
 /// A single navigable menu entry passed to [AdkChatView].
 class ChatMenuEntry {

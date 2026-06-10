@@ -14,7 +14,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:growerp_models/growerp_models.dart';
-import '../domains/common/widgets/popup.dart';
+import 'package:growerp_core/growerp_core.dart';
 import 'adk_config_service.dart';
 
 /// Dialog to create or edit an [AdkAgentConfig].
@@ -48,9 +48,14 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
   final _scheduleCronCtrl = TextEditingController();
   final _schedulePromptCtrl = TextEditingController();
   final _chatRoomIdCtrl = TextEditingController();
+  final _allowlistCtrl = TextEditingController();
+  final _approvalRoomCtrl = TextEditingController();
 
   bool _scheduleEnabled = false;
   bool _saving = false;
+  // Trust foundation: safe-by-default for new agents.
+  String _toolMode = 'readOnly'; // readOnly | scoped | full
+  String _writePolicy = 'approve'; // block | approve | allow
 
   static const _cronHints = [
     ('Every minute', '0 * * * * ?'),
@@ -73,6 +78,10 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
       _schedulePromptCtrl.text = e.schedulePrompt ?? '';
       _chatRoomIdCtrl.text = e.scheduleChatRoomId ?? '';
       _scheduleEnabled = e.scheduleEnabled;
+      _toolMode = e.toolMode ?? 'readOnly';
+      _writePolicy = e.writePolicy ?? 'approve';
+      _allowlistCtrl.text = e.serviceAllowlist ?? '';
+      _approvalRoomCtrl.text = e.approvalChatRoomId ?? '';
     } else {
       _modelCtrl.text = 'gemini-2.5-flash';
       _llmProviderCtrl.text = 'gemini';
@@ -90,6 +99,8 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
     _scheduleCronCtrl.dispose();
     _schedulePromptCtrl.dispose();
     _chatRoomIdCtrl.dispose();
+    _allowlistCtrl.dispose();
+    _approvalRoomCtrl.dispose();
     super.dispose();
   }
 
@@ -127,6 +138,14 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
             _chatRoomIdCtrl.text.trim().isEmpty
                 ? null
                 : _chatRoomIdCtrl.text.trim(),
+        toolMode: _toolMode,
+        serviceAllowlist: _toolMode == 'scoped'
+            ? _allowlistCtrl.text.trim()
+            : null,
+        writePolicy: _writePolicy,
+        approvalChatRoomId: _approvalRoomCtrl.text.trim().isEmpty
+            ? null
+            : _approvalRoomCtrl.text.trim(),
       );
       final apiKey = _apiKeyCtrl.text.trim();
       final saved = await svc.save(cfg, apiKey: apiKey.isEmpty ? null : apiKey);
@@ -156,7 +175,7 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
         context: context,
         title: 'ADK Agent #$id',
         width: 500,
-        height: _scheduleEnabled ? 660 : 480,
+        height: _scheduleEnabled ? 760 : 600,
         child: Form(
           key: _formKey,
           child: Column(
@@ -222,6 +241,73 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
                         ),
                         obscureText: true,
                       ),
+                      const Divider(height: 24),
+                      const Text('Permissions & governance',
+                          style: TextStyle(fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 8),
+                      DropdownButtonFormField<String>(
+                        key: const Key('toolMode'),
+                        initialValue: _toolMode,
+                        decoration: const InputDecoration(
+                          labelText: 'Tool access',
+                          helperText:
+                              'readOnly: queries only · scoped: allow-listed services · full: any service',
+                        ),
+                        items: const [
+                          DropdownMenuItem(
+                              value: 'readOnly', child: Text('Read-only')),
+                          DropdownMenuItem(
+                              value: 'scoped', child: Text('Scoped (allow-list)')),
+                          DropdownMenuItem(value: 'full', child: Text('Full')),
+                        ],
+                        onChanged: (v) =>
+                            setState(() => _toolMode = v ?? 'readOnly'),
+                      ),
+                      if (_toolMode == 'scoped') ...[
+                        const SizedBox(height: 8),
+                        TextFormField(
+                          key: const Key('serviceAllowlist'),
+                          controller: _allowlistCtrl,
+                          decoration: const InputDecoration(
+                            labelText: 'Allowed services',
+                            hintText: 'growerp.*#get*, mantle.order.*',
+                            helperText:
+                                'Comma-separated service-name globs (* wildcard)',
+                          ),
+                        ),
+                      ],
+                      const SizedBox(height: 8),
+                      DropdownButtonFormField<String>(
+                        key: const Key('writePolicy'),
+                        initialValue: _writePolicy,
+                        decoration: const InputDecoration(
+                          labelText: 'Write policy',
+                          helperText:
+                              'How write (create/update/…) actions are handled',
+                        ),
+                        items: const [
+                          DropdownMenuItem(
+                              value: 'block', child: Text('Block writes')),
+                          DropdownMenuItem(
+                              value: 'approve',
+                              child: Text('Require approval')),
+                          DropdownMenuItem(
+                              value: 'allow', child: Text('Allow (auto-run)')),
+                        ],
+                        onChanged: (v) =>
+                            setState(() => _writePolicy = v ?? 'approve'),
+                      ),
+                      if (_writePolicy == 'approve') ...[
+                        const SizedBox(height: 8),
+                        TextFormField(
+                          key: const Key('approvalChatRoomId'),
+                          controller: _approvalRoomCtrl,
+                          decoration: const InputDecoration(
+                            labelText: 'Approval chat room ID (optional)',
+                            hintText: 'Where approval requests are posted',
+                          ),
+                        ),
+                      ],
                       const Divider(height: 24),
                       SwitchListTile(
                         contentPadding: EdgeInsets.zero,

@@ -13,9 +13,8 @@
  */
 
 import 'package:flutter/material.dart';
-import '../domains/common/functions/screen_size.dart';
-import '../domains/common/widgets/styled_data_table.dart';
 import 'package:growerp_models/growerp_models.dart';
+import 'package:growerp_core/growerp_core.dart';
 import 'adk_agent_config_dialog.dart';
 import 'adk_config_service.dart';
 

@@ -9,6 +9,7 @@ workspace:
   - packages/growerp
   - packages/growerp_activity
   - packages/growerp_activity/example
+  - packages/growerp_adk
   - packages/growerp_catalog
   - packages/growerp_catalog/example
   - packages/growerp_chat
@@ -77,6 +78,7 @@ melos:
     - packages/growerp_website/example
     - packages/growerp_activity
     - packages/growerp_activity/example
+    - packages/growerp_adk
     - packages/growerp_marketing
     - packages/growerp_marketing/example
     - packages/growerp_outreach

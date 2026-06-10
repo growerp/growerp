@@ -1727,6 +1727,10 @@ abstract class RestClient {
     @Field() bool? scheduleEnabled,
     @Field() String? schedulePrompt,
     @Field() String? scheduleChatRoomId,
+    @Field() String? toolMode,
+    @Field() String? serviceAllowlist,
+    @Field() String? writePolicy,
+    @Field() String? approvalChatRoomId,
   });
 
   @PATCH("rest/s1/growerp/100/AdkAgentConfig")
@@ -1742,6 +1746,10 @@ abstract class RestClient {
     @Field() bool? scheduleEnabled,
     @Field() String? schedulePrompt,
     @Field() String? scheduleChatRoomId,
+    @Field() String? toolMode,
+    @Field() String? serviceAllowlist,
+    @Field() String? writePolicy,
+    @Field() String? approvalChatRoomId,
   });
 
   @DELETE("rest/s1/growerp/100/AdkAgentConfig")
@@ -1762,5 +1770,23 @@ abstract class RestClient {
   Future<void> updateAdkJobPaused({
     @Path() required String jobName,
     @Field() required bool paused,
+  });
+
+  // ADK agent governance: action audit log + write approvals (tenant-scoped)
+  @GET("rest/s1/growerp/100/AdkAction")
+  Future<AdkActionLogs> getAdkActions({
+    @Query('configId') String? configId,
+    @Query('limit') int? limit,
+  });
+
+  @GET("rest/s1/growerp/100/AdkApproval")
+  Future<AdkApprovals> getAdkApprovals({
+    @Query('status') String? status,
+  });
+
+  @PATCH("rest/s1/growerp/100/AdkApproval")
+  Future<void> updateAdkApproval({
+    @Query('adkApprovalId') required String adkApprovalId,
+    @Field() required String decision, // approved | rejected
   });
 }
