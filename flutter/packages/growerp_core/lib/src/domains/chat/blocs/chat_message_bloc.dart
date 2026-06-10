@@ -23,8 +23,6 @@ import 'package:growerp_models/growerp_models.dart';
 import 'package:stream_transform/stream_transform.dart';
 import 'package:growerp_core/growerp_core.dart';
 
-import 'chat_room_bloc.dart';
-
 part 'chat_message_event.dart';
 part 'chat_message_state.dart';
 

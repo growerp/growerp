@@ -369,8 +369,6 @@ dependency_overrides:
     path: ../growerp_models
   growerp_core:
     path: ../growerp_core
-  growerp_chat:
-    path: ../growerp_chat
   growerp_activity:
     path: ../growerp_activity
 
@@ -894,8 +892,6 @@ dependency_overrides:
     path: ../../growerp_models
   growerp_core:
     path: ../../growerp_core
-  growerp_chat:
-    path: ../../growerp_chat
   growerp_activity:
     path: ../../growerp_activity
 

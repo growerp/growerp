@@ -5,9 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:growerp_core/growerp_core.dart';
-import 'package:growerp_chat/l10n/generated/chat_localizations.dart';
-
-import '../blocs/blocs.dart';
 
 class ChatDialog extends StatefulWidget {
   final ChatRoom chatRoom;
@@ -29,7 +26,7 @@ class ChatState extends State<ChatDialog> {
   String? searchString;
   List<ChatMessage> messages = [];
   TextEditingController messageController = TextEditingController();
-  ChatLocalizations? _localizations;
+  CoreLocalizations? _localizations;
 
   @override
   void initState() {
@@ -53,7 +50,7 @@ class ChatState extends State<ChatDialog> {
 
   @override
   Widget build(BuildContext context) {
-    _localizations = ChatLocalizations.of(context);
+    _localizations = CoreLocalizations.of(context);
     chat = context.read<WsClient>();
     bool isPhone = ResponsiveBreakpoints.of(context).isMobile;
     if (chat == null) {

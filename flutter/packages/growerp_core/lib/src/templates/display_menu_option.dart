@@ -17,7 +17,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:go_router/go_router.dart';
-import 'package:growerp_chat/growerp_chat.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:universal_io/io.dart';
 import '../../growerp_core.dart';

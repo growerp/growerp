@@ -18,10 +18,6 @@ import 'package:global_configuration/global_configuration.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:growerp_core/growerp_core.dart';
-import 'package:growerp_chat/l10n/generated/chat_localizations.dart';
-
-import '../blocs/blocs.dart';
-import 'views.dart';
 
 class ChatRoomListDialog extends StatefulWidget {
   const ChatRoomListDialog({super.key});
@@ -40,7 +36,7 @@ class ChatRoomListDialogsState extends State<ChatRoomListDialog> {
   String classificationId = GlobalConfiguration().getValue("classificationId");
   late String entityName;
   late double top, left;
-  ChatLocalizations? _localizations;
+  CoreLocalizations? _localizations;
 
   @override
   void initState() {
@@ -56,7 +52,7 @@ class ChatRoomListDialogsState extends State<ChatRoomListDialog> {
 
   @override
   Widget build(BuildContext context) {
-    _localizations = ChatLocalizations.of(context);
+    _localizations = CoreLocalizations.of(context);
     bool isPhone = ResponsiveBreakpoints.of(context).isMobile;
     left = isPhone ? 250 : 700;
     limit = (MediaQuery.of(context).size.height / 35).round();
@@ -119,7 +115,7 @@ class ChatRoomListDialogsState extends State<ChatRoomListDialog> {
                             },
                           );
                         },
-                        tooltip: _localizations?.addNew ?? 'Add New',
+                        tooltip: _localizations?.chatAddNew ?? 'Add New',
                         child: const Icon(Icons.add),
                       ),
                     ),
@@ -148,7 +144,7 @@ class ChatRoomListDialogsState extends State<ChatRoomListDialog> {
           return Center(
             heightFactor: 20,
             child: Text(
-              "${_localizations?.no ?? 'No'} $entityName${_localizations?.sFound ?? ' found'}",
+              "${_localizations?.chatNo ?? 'No'} $entityName${_localizations?.sFound ?? ' found'}",
               key: const Key('empty'),
               textAlign: TextAlign.center,
             ),
@@ -271,7 +267,7 @@ class ListDetail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final localizations = ChatLocalizations.of(context);
+    final localizations = CoreLocalizations.of(context);
     return ListTile(
       leading: Badge(
         label: chatRoom.hasRead ? null : const Text('!'),

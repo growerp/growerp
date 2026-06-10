@@ -229,7 +229,7 @@ class ChatRoomBloc extends Bloc<ChatRoomEvent, ChatRoomState> {
             ),
           );
           ChatRoom compResult = await restClient.createChatRoom(
-            chatRoom: event.chatRoom.copyWith(members: members),
+              chatRoom: event.chatRoom.copyWith(members: members),
           );
           chatRooms.insert(0, compResult);
           return emit(
@@ -282,70 +282,6 @@ class ChatRoomBloc extends Bloc<ChatRoomEvent, ChatRoomState> {
     }
   }
 
-  /*
-  Future<void> _onChatRoomCreate(
-    ChatRoomCreate event,
-    Emitter<ChatRoomState> emit,
-  ) async {
-    try {
-      List<ChatRoom> chatRooms = List.from(state.chatRooms);
-      // private chatroom exist?
-      if (event.chatRoom.chatRoomName == null) {
-        // get chatroom where current user and toUserId are members, name is null
-        ChatRooms roomsResult = await restClient.getChatRooms(
-            chatRoomName: ' ', // server should interprete as null
-            userId: event.chatRoom.getToUserId(event.fromUserId));
-        dynamic result = roomsResult.chatRooms;
-        if (result is ChatRoomState) return emit(result);
-        if (result.length == 1) {
-          // exist, so activate 2 members
-          List<ChatRoomMember> members = [];
-          for (ChatRoomMember member in result[0].members) {
-            members.add(member.copyWith(isActive: true));
-          }
-          add(ChatRoomUpdate(
-              result[0].copyWith(members: members), event.fromUserId));
-        } else {
-          // get chatRoom by provided name
-          ChatRooms roomsResult = await restClient.getChatRooms(
-              chatRoomName: event.chatRoom.chatRoomName,
-              userId: event.chatRoom.getToUserId(event.fromUserId));
-          if (roomsResult.chatRooms is ChatRoomState) return emit(result);
-
-          if (result.length == 1) {
-            // exist so activate all members
-            List<ChatRoomMember> members = [];
-            for (ChatRoomMember member in result[0].members) {
-              members.add(member.copyWith(isActive: true));
-            }
-            add(ChatRoomUpdate(
-                result[0].copyWith(members: members), event.fromUserId));
-          } else {
-            // add new chatroom
-            ChatRoom roomsResult =
-                await restClient.createChatRoom(chatRoom:event.chatRoom);
-            if (roomsResult is ChatRoomState) return emit(result);
-            chatRooms.add(roomsResult);
-            emit(state.copyWith(chatRooms: chatRooms));
-          }
-        }
-      } else {
-        // new group with name
-        ChatRoom roomsResult =
-            await restClient.createChatRoom(chatRoom:event.chatRoom);
-        dynamic response = roomsResult;
-        if (roomsResult is ChatRoomState) return emit(response);
-        chatRooms.add(response);
-        emit(state.copyWith(chatRooms: chatRooms));
-      }
-    } on DioException catch (e) {
-      emit(state.copyWith(
-          status: ChatRoomStatus.failure,
-          chatRooms: [],
-          message: await getDioError(e)));
-    }
-  }
-*/
   Future<void> _onChatRoomReceiveWsChatMessage(
     ChatRoomReceiveWsChatMessage event,
     Emitter<ChatRoomState> emit,

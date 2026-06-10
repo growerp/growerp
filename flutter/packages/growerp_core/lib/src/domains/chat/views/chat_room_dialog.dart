@@ -18,9 +18,6 @@ import 'package:responsive_framework/responsive_framework.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
-import 'package:growerp_chat/l10n/generated/chat_localizations.dart';
-
-import '../blocs/blocs.dart';
 
 class ChatRoomDialog extends StatefulWidget {
   final ChatRoom chatRoom;
@@ -36,7 +33,7 @@ class ChatRoomDialogState extends State<ChatRoomDialog> {
   bool loading = false;
   User? _selectedUser;
   late DataFetchBloc<Users> _userBloc;
-  ChatLocalizations? _localizations;
+  CoreLocalizations? _localizations;
 
   @override
   void initState() {
@@ -56,7 +53,7 @@ class ChatRoomDialogState extends State<ChatRoomDialog> {
 
   @override
   Widget build(BuildContext context) {
-    _localizations = ChatLocalizations.of(context);
+    _localizations = CoreLocalizations.of(context);
     bool isPhone = ResponsiveBreakpoints.of(context).isMobile;
     return BlocConsumer<ChatRoomBloc, ChatRoomState>(
       listener: (context, state) {
@@ -101,7 +98,7 @@ class ChatRoomDialogState extends State<ChatRoomDialog> {
           children: <Widget>[
             Center(
               child: Text(
-                "${_localizations?.chat ?? 'Chat'} #${widget.chatRoom.chatRoomId.isEmpty ? _localizations?.newChat ?? 'New Chat' : widget.chatRoom.chatRoomId}",
+                "${_localizations?.chatRoomHeader ?? 'Chat #'} #${widget.chatRoom.chatRoomId.isEmpty ? _localizations?.newChat ?? 'New Chat' : widget.chatRoom.chatRoomId}",
                 style: const TextStyle(
                   fontSize: 10,
                   color: Colors.black,
@@ -136,7 +133,7 @@ class ChatRoomDialogState extends State<ChatRoomDialog> {
               },
               validator: (value) =>
                   _nameController.text.isEmpty && value == null
-                  ? _localizations?.fieldRequired ?? 'Field required'
+                  ? _localizations?.chatFieldRequired ?? 'Field required'
                   : null,
             ),
             const SizedBox(height: 20),
@@ -144,8 +141,8 @@ class ChatRoomDialogState extends State<ChatRoomDialog> {
               key: const Key('update'),
               child: Text(
                 widget.chatRoom.chatRoomId.isEmpty
-                    ? _localizations?.create ?? 'Create'
-                    : _localizations?.update ?? 'Update',
+                    ? _localizations?.chatCreate ?? 'Create'
+                    : _localizations?.chatUpdate ?? 'Update',
               ),
               onPressed: () async {
                 if (_formKey.currentState!.validate() && !loading) {
