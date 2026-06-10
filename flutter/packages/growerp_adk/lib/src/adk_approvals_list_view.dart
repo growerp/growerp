@@ -98,6 +98,13 @@ class _AdkApprovalsListViewState extends State<AdkApprovalsListView> {
 
   @override
   Widget build(BuildContext context) {
+    return KeyedSubtree(
+      key: const Key('AdkApprovalsListView'),
+      child: _content(context),
+    );
+  }
+
+  Widget _content(BuildContext context) {
     if (_loading) return const Center(child: CircularProgressIndicator());
     if (_error != null) {
       return Center(

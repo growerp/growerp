@@ -72,6 +72,13 @@ class _AdkActionsListViewState extends State<AdkActionsListView> {
 
   @override
   Widget build(BuildContext context) {
+    return KeyedSubtree(
+      key: const Key('AdkActionsListView'),
+      child: _content(context),
+    );
+  }
+
+  Widget _content(BuildContext context) {
     if (_loading) return const Center(child: CircularProgressIndicator());
     if (_error != null) {
       return Center(

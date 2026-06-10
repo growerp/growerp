@@ -68,7 +68,8 @@ class AdkTest {
   }
 
   static Future<void> checkAgent(WidgetTester tester, String agentName) async {
-    await CommonTest.refresh(tester);
+    // The list reloads itself after a successful save; just settle and look.
+    await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
     expect(find.text(agentName), findsWidgets,
         reason: 'created agent "$agentName" should appear in the list');
   }

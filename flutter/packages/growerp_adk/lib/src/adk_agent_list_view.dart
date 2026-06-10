@@ -113,6 +113,7 @@ class _AdkAgentListViewState extends State<AdkAgentListView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: const Key('AdkAgentListView'),
       appBar: AppBar(
         title: const Text('ADK Agents'),
         actions: [
