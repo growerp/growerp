@@ -108,6 +108,18 @@ along with this software (see the LICENSE.md file). If not, see
             <if condition="namePrefix">
                 <set field="namePrefixLike" value="${namePrefix}%" />
             </if>
+            <!-- when userId is given (one-to-one lookup) restrict to rooms that
+                 the given partner is also a member of; if the partner shares no
+                 room, force an empty result so the caller creates a new room -->
+            <set field="partnerRoomIds" from="null" />
+            <if condition="userId">
+                <entity-find entity-name="growerp.general.ChatRoomMember"
+                    list="partnerMemberships">
+                    <econdition field-name="userId" from="userId" />
+                </entity-find>
+                <set field="partnerRoomIds"
+                    from="partnerMemberships ? partnerMemberships.collect{ it.chatRoomId } : ['__none__']" />
+            </if>
             <if condition="ec.user.userAccount.userId == 'SYSTEM_SUPPORT'">
                 <entity-find entity-name="growerp.general.ChatRoomsAndMembers" list="rooms">
                     <econdition field-name="isPrivate" value="Y" />
@@ -127,6 +139,8 @@ along with this software (see the LICENSE.md file). If not, see
                         <econdition field-name="chatRoomName" operator="like" from="namePrefixLike" ignore-if-empty="true" />
                         <econdition field-name="isActive" value="Y" />
                         <econdition field-name="userId" from="ec.user.userAccount.userId" />
+                        <econdition field-name="chatRoomId" operator="in"
+                            from="partnerRoomIds" ignore-if-empty="true" />
                     </entity-find>
                 </else>
             </if>
@@ -157,8 +171,31 @@ along with this software (see the LICENSE.md file). If not, see
                     <if condition="member.userId == ec.user.userAccount.userId">
                         <set field="hasRead" from="member.hasRead" />
                     </if>
+                    <!-- the member is stored by userId only; resolve its login +
+                         name for display. OwnerPersonDetailAndCompany has
+                         loginName/first/last; fall back to UserAccount for
+                         non-person accounts (e.g. SYSTEM_SUPPORT). -->
+                    <entity-find entity-name="growerp.party.OwnerPersonDetailAndCompany"
+                        list="mInfos" limit="1">
+                        <econdition field-name="userId" from="member.userId" />
+                    </entity-find>
+                    <if condition="mInfos">
+                        <set field="memberUser"
+                            from="[userId: member.userId, partyId: mInfos[0].userPartyId,
+                                loginName: mInfos[0].loginName, firstName: mInfos[0].firstName,
+                                lastName: mInfos[0].lastName, email: mInfos[0].emailAddress]" />
+                        <else>
+                            <entity-find-one entity-name="moqui.security.UserAccount"
+                                value-field="mUa">
+                                <field-map field-name="userId" from="member.userId" />
+                            </entity-find-one>
+                            <set field="memberUser"
+                                from="[userId: member.userId, loginName: mUa?.username,
+                                    firstName: mUa?.userFullName]" />
+                        </else>
+                    </if>
                     <set field="memberOut"
-                        from="[user: [userId: member.userId],
+                        from="[user: memberUser,
                         hasRead: member.hasRead == 'Y' ? true : false,
                         isActive: member.isActive == 'Y' ? true : false]" />
                     <script>members.add(memberOut)</script>
@@ -183,7 +220,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="isPrivate" type="Boolean" />
                 <parameter name="members" type="List">
                     <parameter name="member" type="Map">
-                        <parameter name="member" type="Map">
+                        <parameter name="user" type="Map">
                             <parameter name="userId" />
                         </parameter>
                         <parameter name="hasRead" type="Boolean" />
@@ -244,12 +281,12 @@ along with this software (see the LICENSE.md file). If not, see
                     isPrivate: chatRoom.isPrivate == true ? 'Y' : 'N']" />
             <!-- add 'other' members -->
             <iterate list="chatRoom.members" entry="memberIn">
-                <if condition="memberIn.member.userId != ec.user.userAccount.userId">
+                <if condition="(memberIn.user?.userId ?: memberIn.userId) != ec.user.userAccount.userId">
                     <service-call name="create#growerp.general.ChatRoomMember"
                         in-map="[chatRoomId: chatRoomId,
-                                isActive: memberIn.member.isActive = true ? 'Y' : 'N',
-                                hasRead: memberIn.member.hasRead = true ? 'Y' : 'N',
-                                userId: memberIn.member.userId]" />
+                                isActive: memberIn.isActive == true ? 'Y' : 'N',
+                                hasRead: memberIn.hasRead == true ? 'Y' : 'N',
+                                userId: memberIn.user?.userId ?: memberIn.userId]" />
                 </if>
             </iterate>
             <!-- add the initiator -->
@@ -273,8 +310,10 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="hasRead" type="Boolean" />
                 <parameter name="isPrivate" type="Boolean" />
                 <parameter name="members" type="List">
-                    <parameter name="member" type="Map"><!-- user -->
-                        <parameter name="partyId" />
+                    <parameter name="member" type="Map">
+                        <parameter name="user" type="Map">
+                            <parameter name="userId" />
+                        </parameter>
                         <parameter name="hasRead" type="Boolean" />
                         <parameter name="isActive" type="Boolean" />
                     </parameter>
@@ -348,7 +387,7 @@ along with this software (see the LICENSE.md file). If not, see
                     in-map="[chatRoomId: chatRoom.chatRoomId,
                             isActive: member.isActive == true ? 'Y' : 'N',
                             hasRead: member.hasRead == true ? 'Y' : 'N',
-                            userId: member.userId]" />
+                            userId: member.user?.userId ?: member.userId]" />
             </iterate>
             <service-call name="growerp.100.ChatServices100.get#ChatRoom"
                 in-map="[chatRoomId: chatRoom.chatRoomId]" out-map="context" />
