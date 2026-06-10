@@ -613,7 +613,7 @@ class CommonTest {
     // The backend filter may not have applied yet, or may return several rows
     // in an unsorted order (e.g. a bloc that prepends newly-added items), so we
     // must locate the matching row by value instead of blindly tapping row 0.
-    const baseKeys = ['id', 'name', 'title', 'theme', 'headline'];
+    const baseKeys = ['id', 'name', 'title', 'theme', 'headline', 'code'];
     // Rows render in a ListView.builder, so off-screen rows are not in the tree.
     // Poll generously: the backend search round-trip (plus debounce) can exceed
     // a couple of seconds on slow CI runners (headless Linux + xvfb). Scroll the
@@ -679,7 +679,7 @@ class CommonTest {
     // We must NOT fall back to `tapByText(searchString)` here: the search field
     // still contains `searchString`, so `find.text(searchString)` always matches
     // it and would tap the search field instead of a result row.
-    for (final key in ['id0', 'name0', 'title0', 'theme0', 'headline0']) {
+    for (final key in ['id0', 'name0', 'title0', 'theme0', 'headline0', 'code0']) {
       if (tester.any(find.byKey(Key(key)))) {
         await tester.ensureVisible(find.byKey(Key(key)).last);
         await tester.tap(find.byKey(Key(key)).last);
