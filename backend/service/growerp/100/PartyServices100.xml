@@ -1326,6 +1326,12 @@ along with this software (see the LICENSE.md file). If not, see
                 <econdition field-name="userPartyId" ignore-if-empty="true" />
                 <econdition
                     field-name="userId" operator="is-not-null" ignore="!loginOnly" />
+                <!-- a real login account has a username; lead/visitor pseudo-accounts
+                     (created without a loginName, e.g. submit#WebsiteChat) have a
+                     UserAccount row but no username and a blank userFullName, which
+                     surfaces as "??" in chat. Exclude them from member selection. -->
+                <econdition
+                    field-name="loginName" operator="is-not-null" ignore="!loginOnly" />
                 <econdition
                     field-name="loginDisabled" operator="not-equals" from="Y" or-null="true"
                     ignore="!loginOnly" />
