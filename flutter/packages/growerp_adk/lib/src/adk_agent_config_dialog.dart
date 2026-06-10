@@ -377,12 +377,14 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   TextButton(
+                    key: const Key('AdkAgentConfigCancel'),
                     onPressed:
                         _saving ? null : () => Navigator.of(context).pop(),
                     child: const Text('Cancel'),
                   ),
                   const SizedBox(width: 8),
                   FilledButton(
+                    key: const Key('AdkAgentConfigSave'),
                     onPressed: _saving ? null : _save,
                     child: _saving
                         ? const SizedBox(
