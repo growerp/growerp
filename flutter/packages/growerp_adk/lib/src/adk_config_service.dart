@@ -13,7 +13,7 @@
  */
 
 import 'package:growerp_models/growerp_models.dart';
-import '../services/build_dio_client.dart';
+import 'package:growerp_core/growerp_core.dart';
 
 class AdkConfigService {
   final RestClient _client;
@@ -43,6 +43,10 @@ class AdkConfigService {
         scheduleEnabled: cfg.scheduleEnabled,
         schedulePrompt: cfg.schedulePrompt,
         scheduleChatRoomId: cfg.scheduleChatRoomId,
+        toolMode: cfg.toolMode,
+        serviceAllowlist: cfg.serviceAllowlist,
+        writePolicy: cfg.writePolicy,
+        approvalChatRoomId: cfg.approvalChatRoomId,
       );
     }
     return _client.updateAdkAgentConfig(
@@ -57,6 +61,10 @@ class AdkConfigService {
       scheduleEnabled: cfg.scheduleEnabled,
       schedulePrompt: cfg.schedulePrompt,
       scheduleChatRoomId: cfg.scheduleChatRoomId,
+      toolMode: cfg.toolMode,
+      serviceAllowlist: cfg.serviceAllowlist,
+      writePolicy: cfg.writePolicy,
+      approvalChatRoomId: cfg.approvalChatRoomId,
     );
   }
 

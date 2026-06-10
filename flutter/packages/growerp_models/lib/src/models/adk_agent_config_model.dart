@@ -32,6 +32,18 @@ class AdkAgentConfig {
   final String? schedulePrompt;
   final String? scheduleChatRoomId;
 
+  // Trust foundation: per-agent tool/service scoping + write governance.
+  /// readOnly | scoped | full
+  final String? toolMode;
+
+  /// CSV/JSON of service-name globs allowed when toolMode == scoped
+  final String? serviceAllowlist;
+
+  /// block | approve | allow
+  final String? writePolicy;
+  final String? approvalChatRoomId;
+  final String? agentPartyId;
+
   /// Write-only: sent on create/update, never returned by GET.
   @JsonKey(includeFromJson: false)
   final String? apiKey;
@@ -48,6 +60,11 @@ class AdkAgentConfig {
     this.scheduleEnabled = false,
     this.schedulePrompt,
     this.scheduleChatRoomId,
+    this.toolMode,
+    this.serviceAllowlist,
+    this.writePolicy,
+    this.approvalChatRoomId,
+    this.agentPartyId,
     this.apiKey,
   });
 
@@ -68,6 +85,11 @@ class AdkAgentConfig {
     bool? scheduleEnabled,
     String? schedulePrompt,
     String? scheduleChatRoomId,
+    String? toolMode,
+    String? serviceAllowlist,
+    String? writePolicy,
+    String? approvalChatRoomId,
+    String? agentPartyId,
     String? apiKey,
   }) =>
       AdkAgentConfig(
@@ -82,6 +104,11 @@ class AdkAgentConfig {
         scheduleEnabled: scheduleEnabled ?? this.scheduleEnabled,
         schedulePrompt: schedulePrompt ?? this.schedulePrompt,
         scheduleChatRoomId: scheduleChatRoomId ?? this.scheduleChatRoomId,
+        toolMode: toolMode ?? this.toolMode,
+        serviceAllowlist: serviceAllowlist ?? this.serviceAllowlist,
+        writePolicy: writePolicy ?? this.writePolicy,
+        approvalChatRoomId: approvalChatRoomId ?? this.approvalChatRoomId,
+        agentPartyId: agentPartyId ?? this.agentPartyId,
         apiKey: apiKey ?? this.apiKey,
       );
 

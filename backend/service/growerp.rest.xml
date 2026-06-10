@@ -1187,6 +1187,21 @@ along with this software (see the LICENSE.md file). If not, see
                 </resource>
             </id>
         </resource>
+        <!-- Agent action audit log (tenant-scoped) -->
+        <resource name="AdkAction">
+            <method type="get">
+                <service name="AdkServices100.get#AdkAction"/>
+            </method>
+        </resource>
+        <!-- Agent write approvals (tenant-scoped) -->
+        <resource name="AdkApproval">
+            <method type="get">
+                <service name="AdkServices100.get#AdkApproval"/>
+            </method>
+            <method type="patch">
+                <service name="AdkServices100.update#AdkApproval"/>
+            </method>
+        </resource>
     </resource>
     <!-- Antwebsystems website -->
     <resource name="storecontents" require-authentication="anonymous-view">

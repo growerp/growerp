@@ -12,6 +12,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  growerp_adk: ^1.0.0
   growerp_core: ^1.9.0
   growerp_sales: ^1.9.0
   growerp_website: ^1.9.0

@@ -21,10 +21,6 @@ export 'src/domains/authenticate/authenticate.dart';
 
 export 'src/common/translate_bloc_messages.dart';
 export 'src/domains/integration_test.dart';
-export 'src/adk/adk_chat_view.dart';
-export 'src/adk/adk_chat_dialog.dart';
-export 'src/adk/adk_config_service.dart';
-export 'src/adk/adk_agent_config_dialog.dart';
-export 'src/adk/adk_agent_list_view.dart';
-export 'src/adk/adk_job_service.dart';
-export 'src/adk/adk_job_list_view.dart';
+// NOTE: ADK (AI agent) views moved to the growerp_adk building block.
+// The AI-navigation directive hooks (ai_navigation_service / ai_prompt_dialog)
+// remain here as cross-cutting core UI affordances.
