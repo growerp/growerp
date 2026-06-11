@@ -4,6 +4,7 @@ environment:
   sdk: ^3.10.0
 workspace:
   - packages/admin
+  - packages/agents
   - packages/assessment
   - packages/freelance
   - packages/growerp
@@ -85,6 +86,7 @@ melos:
     - packages/growerp_courses/example
     - packages/growerp
     - packages/admin
+    - packages/agents
     - packages/website
     - packages/hotel
     - packages/freelance

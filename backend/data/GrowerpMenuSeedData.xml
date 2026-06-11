@@ -48,8 +48,10 @@ along with this software (see the LICENSE.md file). If not, see
         name="Order Accounting Example Menu" description="Default menu for order accounting example app"/>
     <growerp.menu.MenuConfiguration menuConfigurationId="CORE_EXAMPLE_DEFAULT" appId="core_example" 
         name="Core Example Menu" description="Default menu for core example app"/>
-    <growerp.menu.MenuConfiguration menuConfigurationId="COURSES_EXAMPLE_DEFAULT" appId="courses_example" 
+    <growerp.menu.MenuConfiguration menuConfigurationId="COURSES_EXAMPLE_DEFAULT" appId="courses_example"
         name="Courses Example Menu" description="Default menu for courses example app"/>
+    <growerp.menu.MenuConfiguration menuConfigurationId="AGENTS_DEFAULT" appId="agents"
+        name="Agents Menu" description="Default menu for the GrowERP Agents app"/>
 
     <!-- ====================== ADMIN_DEFAULT Menu Items ====================== -->
     <!-- Top-level menu items -->
@@ -580,5 +582,30 @@ along with this software (see the LICENSE.md file). If not, see
         title="Course List" iconName="list" widgetName="CourseList" sequenceNum="10"/>
     <growerp.menu.MenuItem menuItemId="COURSES_EX_COURSES_VIEWER" menuConfigurationId="COURSES_EXAMPLE_DEFAULT" parentMenuItemId="COURSES_EX_COURSES"
         title="Take a Course" iconName="school" widgetName="CourseViewer" sequenceNum="20"/>
+
+    <!-- ====================== AGENTS_DEFAULT Menu Items ====================== -->
+    <growerp.menu.MenuItem menuItemId="AGENTS_MAIN" menuConfigurationId="AGENTS_DEFAULT"
+        title="Main" route="/" iconName="dashboard" widgetName="AgentsDashboard" sequenceNum="10"/>
+    <growerp.menu.MenuItem menuItemId="AGENTS_AICHAT" menuConfigurationId="AGENTS_DEFAULT"
+        title="AI Chat" route="/chat" iconName="smart_toy" widgetName="AdkChatView" sequenceNum="20"/>
+    <growerp.menu.MenuItem menuItemId="AGENTS_AIAGENTS" menuConfigurationId="AGENTS_DEFAULT"
+        title="AI Agents" route="/adk-agents" iconName="smart_toy" widgetName="AdkAgentListView" sequenceNum="30"/>
+    <growerp.menu.MenuItem menuItemId="AGENTS_AIJOBS" menuConfigurationId="AGENTS_DEFAULT"
+        title="Agent Jobs" route="/adk-jobs" iconName="schedule" widgetName="AdkJobListView" sequenceNum="40"/>
+    <growerp.menu.MenuItem menuItemId="AGENTS_APPROVALS" menuConfigurationId="AGENTS_DEFAULT"
+        title="Approvals" route="/adk-approvals" iconName="fact_check" widgetName="AdkApprovalsListView" sequenceNum="50"/>
+    <growerp.menu.MenuItem menuItemId="AGENTS_ACTIONS" menuConfigurationId="AGENTS_DEFAULT"
+        title="Agent Actions" route="/adk-actions" iconName="history" widgetName="AdkActionsListView" sequenceNum="60"/>
+    <growerp.menu.MenuItem menuItemId="AGENTS_ORG" menuConfigurationId="AGENTS_DEFAULT"
+        title="Organization" route="/organization" iconName="business" widgetName="ShowCompanyDialog" sequenceNum="70"/>
+    <growerp.menu.MenuItem menuItemId="AGENTS_SETUP" menuConfigurationId="AGENTS_DEFAULT"
+        title="System Setup" route="/setup" iconName="settings" widgetName="SystemSetupDialog" sequenceNum="80"/>
+    <!-- AGENTS_ORG children (tabs): company / employees / web -->
+    <growerp.menu.MenuItem menuItemId="AGENTS_ORG_COMPANY" menuConfigurationId="AGENTS_DEFAULT" parentMenuItemId="AGENTS_ORG"
+        title="company" iconName="home" widgetName="ShowCompanyDialog" sequenceNum="10"/>
+    <growerp.menu.MenuItem menuItemId="AGENTS_ORG_USERS" menuConfigurationId="AGENTS_DEFAULT" parentMenuItemId="AGENTS_ORG"
+        title="employees" iconName="school" widgetName="UserListEmployee" sequenceNum="20"/>
+    <growerp.menu.MenuItem menuItemId="AGENTS_ORG_WEB" menuConfigurationId="AGENTS_DEFAULT" parentMenuItemId="AGENTS_ORG"
+        title="Web" iconName="webhook" widgetName="WebsiteDialog" sequenceNum="30"/>
 
 </entity-facade-xml>
