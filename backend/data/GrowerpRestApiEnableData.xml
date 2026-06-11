@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+
+<!-- READ-ONLY re-enable of the REST APIs that GrowerpRestApiDisableData.xml disables, for the
+     ADMIN group only (SystemSupport-class system superusers; GrowERP company admins are in the
+     GROWERP_* groups, not the framework ADMIN group).
+
+     Purpose: support read-only data inspection / debugging through the moqui MCP server's
+     moqui_rest_call tool (McpServices.mcp#RestCall), which is itself gated to the SystemSupport
+     account and only ever issues GET requests.
+
+     How it works: AUTHZT_ALWAYS has the highest precedence in Moqui authorization
+     (ArtifactExecutionFacadeImpl: an ALWAYS match returns permitted immediately, overriding any
+     DENY). We grant ALWAYS for the VIEW action only — so GET/find/list is re-enabled, while the
+     AUTHZT_DENY (AUTHZA_ALL) records in GrowerpRestApiDisableData.xml still block create/update/
+     delete for every user. These records coexist with the DENY records (distinct artifactAuthzId).
+
+     Covers: Moqui Tools REST API (/rest/s1/moqui/...), Mantle USL REST API (/rest/s1/mantle/...),
+     and the Entity / Entity Master REST API (/rest/e1/..., /rest/m1/..., /rest/v1/...). -->
+<entity-facade-xml type="seed">
+
+    <!-- Moqui Tools REST API (/rest/s1/moqui/...) — read-only allow -->
+    <moqui.security.ArtifactAuthz artifactAuthzId="MOQUI_API_ADMIN_READ"
+        userGroupId="ADMIN" artifactGroupId="MOQUI_API"
+        authzTypeEnumId="AUTHZT_ALWAYS" authzActionEnumId="AUTHZA_VIEW"/>
+
+    <!-- Mantle USL REST API (/rest/s1/mantle/...) — read-only allow -->
+    <moqui.security.ArtifactAuthz artifactAuthzId="MANTLE_API_ADMIN_READ"
+        userGroupId="ADMIN" artifactGroupId="MANTLE_API"
+        authzTypeEnumId="AUTHZT_ALWAYS" authzActionEnumId="AUTHZA_VIEW"/>
+
+    <!-- Mantle My Info sub-path (/rest/s1/mantle/my/...) — read-only allow -->
+    <moqui.security.ArtifactAuthz artifactAuthzId="MANTLE_MY_API_ADMIN_READ"
+        userGroupId="ADMIN" artifactGroupId="MANTLE_MY_API"
+        authzTypeEnumId="AUTHZT_ALWAYS" authzActionEnumId="AUTHZA_VIEW"/>
+
+    <!-- Entity (e1) and Entity Master (m1/v1) REST API transitions — read-only allow.
+         ALWAYS+VIEW on the transitions restores the inheritance chain for child entity reads.
+         The ENTITY_REST_API ArtifactGroup is created by GrowerpRestApiDisableData.xml; declare it
+         here too so this file loads cleanly regardless of file order (store = create-or-update). -->
+    <moqui.security.ArtifactGroup artifactGroupId="ENTITY_REST_API"
+        description="Entity and Entity Master REST API (e1/m1/v1 transitions in webroot rest.xml)"/>
+    <moqui.security.ArtifactAuthz artifactAuthzId="ENTITY_REST_API_ADMIN_READ"
+        userGroupId="ADMIN" artifactGroupId="ENTITY_REST_API"
+        authzTypeEnumId="AUTHZT_ALWAYS" authzActionEnumId="AUTHZA_VIEW"/>
+
+</entity-facade-xml>

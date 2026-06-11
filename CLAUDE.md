@@ -110,6 +110,19 @@ bash sync-submodules.sh  # updates growerp root submodule pointers + commits
 git push
 ```
 
+## Debugging backend data (MCP)
+
+When the backend is running, the `moqui` MCP server exposes `moqui_rest_call` — a read-only
+(GET) tool to inspect live data via Moqui's REST API. Use it to check what's actually stored
+when debugging. `path` is relative to `/rest/`:
+- `e1/{Entity}/{id}` — any entity by name (e.g. `e1/mantle.party.Party/100000`), filter/page
+  via `queryParameters` (e.g. `{pageSize:'10', statusId:'...', orderByField:'lastName'}`)
+- `m1/{Entity}/{master}/{id}` — entity plus dependent records
+- `s1/moqui/...`, `s1/mantle/...` — Moqui Tools / Mantle USL Service REST APIs
+- Discover: `service.swagger/moqui.json`, `service.swagger/mantle.json`, `entity.swagger`
+
+Read-only (no create/update/delete) and restricted to the SystemSupport account.
+
 ## Conventions
 
 - **Models**: Use `@freezed` with `Equatable`. `fromJson` handles both wrapped (`json['entity']`) and unwrapped JSON.
