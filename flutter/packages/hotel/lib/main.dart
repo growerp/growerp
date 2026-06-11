@@ -22,7 +22,6 @@ import 'package:http/http.dart' as http;
 import 'package:go_router/go_router.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:growerp_core/growerp_core.dart';
-import 'package:growerp_adk/growerp_adk.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_inventory/growerp_inventory.dart';
 import 'package:growerp_activity/growerp_activity.dart';
@@ -159,14 +158,6 @@ class _HotelAppState extends State<HotelApp> {
                 widgetLoader: WidgetRegistry.getWidget,
                 appTitle: 'GrowERP Hotel',
                 deepLinkService: _deepLinkService,
-                dashboardFabBuilder: (_) => Builder(
-                  builder: (ctx) => FloatingActionButton(
-                    key: const Key('adkChatFab'),
-                    tooltip: 'AI Assistant',
-                    onPressed: () => AdkChatDialog.show(ctx),
-                    child: const Icon(Icons.smart_toy),
-                  ),
-                ),
               ),
               rootNavigatorKey: GlobalKey<NavigatorState>(),
             );

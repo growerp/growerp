@@ -13,6 +13,8 @@
  */
 
 import 'package:flutter/material.dart';
+import 'package:growerp_core/growerp_core.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 import 'adk_chat_view.dart';
 
 /// Wraps [AdkChatView] in a resizable dialog.
@@ -35,42 +37,20 @@ class AdkChatDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.sizeOf(context);
-    final cs = Theme.of(context).colorScheme;
+    final isPhone = ResponsiveBreakpoints.of(context).isMobile;
     return Dialog(
       insetPadding: const EdgeInsets.all(16),
-      clipBehavior: Clip.hardEdge,
-      child: ConstrainedBox(
-        constraints: BoxConstraints(
-          maxWidth: 600,
-          maxHeight: size.height * 0.85,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ColoredBox(
-              color: cs.primaryContainer,
-              child: Row(
-                children: [
-                  const SizedBox(width: 16),
-                  Icon(Icons.smart_toy, color: cs.onPrimaryContainer),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'AI Assistant',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            color: cs.onPrimaryContainer,
-                          ),
-                    ),
-                  ),
-                  IconButton(
-                    icon: Icon(Icons.close, color: cs.onPrimaryContainer),
-                    onPressed: () => Navigator.of(context).pop(),
-                  ),
-                ],
-              ),
-            ),
-            Flexible(child: AdkChatView(menuItems: menuItems)),
-          ],
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      child: popUp(
+        context: context,
+        title: 'AI Assistant',
+        width: isPhone ? 400 : 600,
+        height: size.height * 0.85,
+        child: ScaffoldMessenger(
+          child: Scaffold(
+            backgroundColor: Colors.transparent,
+            body: AdkChatView(menuItems: menuItems),
+          ),
         ),
       ),
     );

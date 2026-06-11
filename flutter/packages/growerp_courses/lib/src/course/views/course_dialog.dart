@@ -6,6 +6,7 @@
 import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import '../bloc/course_bloc.dart';
 import 'course_participants_view.dart';
@@ -62,59 +63,50 @@ class _CourseDialogState extends State<CourseDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final container = Container(
-      width: 600,
-      constraints: BoxConstraints(
-        maxHeight: MediaQuery.of(context).size.height * 0.85,
-      ),
-      child: isEdit
-          ? DefaultTabController(
-              length: 2,
-              child: Scaffold(
-                appBar: AppBar(
-                  title: const Text('Edit Course'),
-                  automaticallyImplyLeading: false,
-                  actions: [
-                    IconButton(
-                      icon: const Icon(Icons.close),
-                      onPressed: () => Navigator.pop(context),
+    return Dialog(
+      clipBehavior: Clip.antiAlias,
+      insetPadding: const EdgeInsets.all(16),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      child: popUp(
+        context: context,
+        title: isEdit ? 'Edit Course' : 'New Course',
+        width: 600,
+        height: MediaQuery.of(context).size.height * 0.85,
+        child: ScaffoldMessenger(
+          child: DefaultTabController(
+            length: isEdit ? 2 : 1,
+            child: Scaffold(
+              backgroundColor: Colors.transparent,
+              body: Column(
+                children: [
+                  if (isEdit)
+                    TabBar(
+                      labelColor: Theme.of(context).colorScheme.primary,
+                      unselectedLabelColor: Theme.of(context).colorScheme.onSurfaceVariant,
+                      tabs: const [
+                        Tab(icon: Icon(Icons.edit_note), text: 'Details'),
+                        Tab(icon: Icon(Icons.group), text: 'Participants'),
+                      ],
                     ),
-                  ],
-                  bottom: const TabBar(
-                    tabs: [
-                      Tab(icon: Icon(Icons.edit_note), text: 'Details'),
-                      Tab(icon: Icon(Icons.group), text: 'Participants'),
-                    ],
-                  ),
-                ),
-                body: TabBarView(
-                  children: [
-                    _buildDetailsTab(),
-                    CourseParticipantsView(
-                      courseId: widget.course!.courseId!,
+                  Expanded(
+                    child: TabBarView(
+                      children: [
+                        _buildDetailsTab(),
+                        if (isEdit)
+                          CourseParticipantsView(
+                            courseId: widget.course!.courseId!,
+                          ),
+                      ],
                     ),
-                  ],
-                ),
-                bottomNavigationBar: _buildActionButtons(),
-              ),
-            )
-          : Scaffold(
-              appBar: AppBar(
-                title: const Text('New Course'),
-                automaticallyImplyLeading: false,
-                actions: [
-                  IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: () => Navigator.pop(context),
                   ),
                 ],
               ),
-              body: _buildDetailsTab(),
               bottomNavigationBar: _buildActionButtons(),
             ),
+          ),
+        ),
+      ),
     );
-
-    return Dialog(child: container);
   }
 
   Widget _buildDetailsTab() {

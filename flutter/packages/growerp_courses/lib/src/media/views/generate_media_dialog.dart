@@ -5,6 +5,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import '../bloc/course_media_bloc.dart';
 
@@ -47,28 +48,24 @@ class _GenerateMediaDialogState extends State<GenerateMediaDialog> {
         },
         builder: (context, state) {
           return Dialog(
-            child: Container(
+            clipBehavior: Clip.antiAlias,
+            insetPadding: const EdgeInsets.all(16),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            child: popUp(
+              context: context,
+              title: 'Generate AI Content',
               width: 500,
-              constraints: BoxConstraints(
-                maxHeight: MediaQuery.of(context).size.height * 0.8,
-              ),
-              child: Scaffold(
-                appBar: AppBar(
-                  title: const Text('Generate AI Content'),
-                  automaticallyImplyLeading: false,
-                  actions: [
-                    IconButton(
-                      icon: const Icon(Icons.close),
-                      onPressed: () => Navigator.pop(context),
-                    ),
-                  ],
+              height: MediaQuery.of(context).size.height * 0.8,
+              child: ScaffoldMessenger(
+                child: Scaffold(
+                  backgroundColor: Colors.transparent,
+                  body: state.status == MediaBlocStatus.generating
+                      ? _buildGeneratingState()
+                      : _buildForm(context, state),
+                  bottomNavigationBar: state.status == MediaBlocStatus.generating
+                      ? null
+                      : _buildActionButtons(context),
                 ),
-                body: state.status == MediaBlocStatus.generating
-                    ? _buildGeneratingState()
-                    : _buildForm(context, state),
-                bottomNavigationBar: state.status == MediaBlocStatus.generating
-                    ? null
-                    : _buildActionButtons(context),
               ),
             ),
           );

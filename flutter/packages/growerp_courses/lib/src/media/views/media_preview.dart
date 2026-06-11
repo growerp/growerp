@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
+import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 /// Preview dialog for generated media content
@@ -43,38 +44,41 @@ class _MediaPreviewState extends State<MediaPreview> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      child: SizedBox(
+      clipBehavior: Clip.antiAlias,
+      insetPadding: const EdgeInsets.all(16),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      child: popUp(
+        context: context,
+        title: widget.media.title ?? 'Media Preview',
         width: 700,
         height: MediaQuery.of(context).size.height * 0.85,
-        child: Scaffold(
-          appBar: AppBar(
-            title: Text(widget.media.title ?? 'Media Preview'),
-            automaticallyImplyLeading: false,
-            actions: [
-              IconButton(
-                icon: Icon(_isEditing ? Icons.visibility : Icons.edit),
-                tooltip: _isEditing ? 'Preview' : 'Edit',
-                onPressed: () => setState(() => _isEditing = !_isEditing),
-              ),
-              IconButton(
-                icon: const Icon(Icons.copy),
-                tooltip: 'Copy to clipboard',
-                onPressed: _copyToClipboard,
-              ),
-              IconButton(
-                icon: const Icon(Icons.close),
-                onPressed: () => Navigator.pop(context),
-              ),
-            ],
+        actions: [
+          IconButton(
+            icon: Icon(
+              _isEditing ? Icons.visibility : Icons.edit,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
+            tooltip: _isEditing ? 'Preview' : 'Edit',
+            onPressed: () => setState(() => _isEditing = !_isEditing),
           ),
-          body: Column(
-            children: [
-              _buildHeader(),
-              const Divider(height: 1),
-              Expanded(child: _isEditing ? _buildEditor() : _buildPreview()),
-            ],
+          IconButton(
+            icon: Icon(Icons.copy, color: Theme.of(context).colorScheme.onSurface),
+            tooltip: 'Copy to clipboard',
+            onPressed: _copyToClipboard,
           ),
-          bottomNavigationBar: _buildActionButtons(),
+        ],
+        child: ScaffoldMessenger(
+          child: Scaffold(
+            backgroundColor: Colors.transparent,
+            body: Column(
+              children: [
+                _buildHeader(),
+                const Divider(height: 1),
+                Expanded(child: _isEditing ? _buildEditor() : _buildPreview()),
+              ],
+            ),
+            bottomNavigationBar: _buildActionButtons(),
+          ),
         ),
       ),
     );

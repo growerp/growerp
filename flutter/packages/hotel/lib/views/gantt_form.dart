@@ -18,6 +18,7 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_inventory/growerp_inventory.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
+import 'package:growerp_adk/growerp_adk.dart';
 import 'package:horizontal_data_table/horizontal_data_table.dart';
 import 'package:intl/intl.dart';
 
@@ -421,6 +422,14 @@ class _GanttFormState extends State<GanttForm> {
                                   tooltip: 'Add New',
                                   child: const Icon(Icons.add),
                                 ),
+                              const SizedBox(height: 5),
+                              FloatingActionButton(
+                                heroTag: 'adkChatFab',
+                                key: const Key('adkChatFab'),
+                                onPressed: () => AdkChatDialog.show(context),
+                                tooltip: 'AI Assistant',
+                                child: const Icon(Icons.smart_toy),
+                              ),
                             ],
                           ),
                         ),

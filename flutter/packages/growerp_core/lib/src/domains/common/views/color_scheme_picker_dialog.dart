@@ -124,106 +124,123 @@ class ThemePickerDialog extends StatelessWidget {
                   ),
                 ),
 
-                // Premium Light/Dark Mode Toggle
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 16,
-                  ),
-                  child: Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(16),
-                      color: colorScheme.surface,
-                      border: Border.all(
-                        color: colorScheme.outline.withValues(alpha: 0.2),
-                      ),
+                // Body
+                Expanded(
+                  child: Material(
+                    color: isDark
+                        ? colorScheme.surfaceContainerHighest
+                        : colorScheme.surface,
+                    borderRadius: const BorderRadius.only(
+                      bottomLeft: Radius.circular(24),
+                      bottomRight: Radius.circular(24),
                     ),
-                    child: Row(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        Expanded(
-                          child: _buildModeButton(
-                            context: context,
-                            icon: Icons.light_mode,
-                            label: 'Light',
-                            isSelected: !isDark,
-                            colorScheme: colorScheme,
-                            onTap: () {
-                              if (isDark) themeBloc.add(ThemeSwitch());
-                            },
+                        // Premium Light/Dark Mode Toggle
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 16,
+                          ),
+                          child: Container(
+                            padding: const EdgeInsets.all(6),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(16),
+                              color: colorScheme.surface,
+                              border: Border.all(
+                                color: colorScheme.outline.withValues(alpha: 0.2),
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: _buildModeButton(
+                                    context: context,
+                                    icon: Icons.light_mode,
+                                    label: 'Light',
+                                    isSelected: !isDark,
+                                    colorScheme: colorScheme,
+                                    onTap: () {
+                                      if (isDark) themeBloc.add(ThemeSwitch());
+                                    },
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: _buildModeButton(
+                                    context: context,
+                                    icon: Icons.dark_mode,
+                                    label: 'Dark',
+                                    isSelected: isDark,
+                                    colorScheme: colorScheme,
+                                    onTap: () {
+                                      if (!isDark) themeBloc.add(ThemeSwitch());
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: _buildModeButton(
-                            context: context,
-                            icon: Icons.dark_mode,
-                            label: 'Dark',
-                            isSelected: isDark,
-                            colorScheme: colorScheme,
-                            onTap: () {
-                              if (!isDark) themeBloc.add(ThemeSwitch());
+
+                        // Color Scheme Label
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.color_lens,
+                                size: 18,
+                                color: colorScheme.primary,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                localizations.colorScheme,
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w600,
+                                  color: colorScheme.onSurface,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+
+                        // Color Scheme Grid
+                        Flexible(
+                          child: GridView.builder(
+                            padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                            shrinkWrap: true,
+                            gridDelegate:
+                                const SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 3,
+                                  crossAxisSpacing: 14,
+                                  mainAxisSpacing: 14,
+                                  childAspectRatio: 1.0,
+                                ),
+                            itemCount: curatedSchemes.length,
+                            itemBuilder: (context, index) {
+                              final scheme = curatedSchemes[index];
+                              final isSelected = scheme == currentScheme;
+                              final colors = isDark
+                                  ? FlexThemeData.dark(scheme: scheme).colorScheme
+                                  : FlexThemeData.light(scheme: scheme).colorScheme;
+
+                              return _ColorSchemeTile(
+                                scheme: scheme,
+                                colors: colors,
+                                isSelected: isSelected,
+                                onTap: () {
+                                  themeBloc.add(ColorSchemeChange(scheme));
+                                },
+                              );
                             },
                           ),
                         ),
                       ],
                     ),
-                  ),
-                ),
-
-                // Color Scheme Label
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.color_lens,
-                        size: 18,
-                        color: colorScheme.primary,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        localizations.colorScheme,
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                          color: colorScheme.onSurface,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 12),
-
-                // Color Scheme Grid
-                Flexible(
-                  child: GridView.builder(
-                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-                    shrinkWrap: true,
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 3,
-                          crossAxisSpacing: 14,
-                          mainAxisSpacing: 14,
-                          childAspectRatio: 1.0,
-                        ),
-                    itemCount: curatedSchemes.length,
-                    itemBuilder: (context, index) {
-                      final scheme = curatedSchemes[index];
-                      final isSelected = scheme == currentScheme;
-                      final colors = isDark
-                          ? FlexThemeData.dark(scheme: scheme).colorScheme
-                          : FlexThemeData.light(scheme: scheme).colorScheme;
-
-                      return _ColorSchemeTile(
-                        scheme: scheme,
-                        colors: colors,
-                        isSelected: isSelected,
-                        onTap: () {
-                          themeBloc.add(ColorSchemeChange(scheme));
-                        },
-                      );
-                    },
                   ),
                 ),
               ],

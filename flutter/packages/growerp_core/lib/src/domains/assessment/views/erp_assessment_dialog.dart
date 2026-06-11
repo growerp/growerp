@@ -19,6 +19,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 import '../../../services/get_dio_error.dart';
+import '../../common/widgets/popup.dart';
 
 /// Post-login assessment "Do you need an ERP system?".
 ///
@@ -142,31 +143,33 @@ class _ErpAssessmentDialogState extends State<ErpAssessmentDialog> {
     return Dialog(
       clipBehavior: Clip.antiAlias,
       insetPadding: const EdgeInsets.all(16),
-      child: Scaffold(
-        appBar: AppBar(
-          centerTitle: true,
-          title: Text(
-            _assessment?.assessmentName ?? 'Do you need an ERP system?',
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      child: popUp(
+        context: context,
+        title: _assessment?.assessmentName ?? 'Do you need an ERP system?',
+        width: 600,
+        height: MediaQuery.of(context).size.height * 0.85,
+        actions: [
+          TextButton(
+            key: const Key('skipAssessment'),
+            onPressed: _close,
+            child: const Text('Skip'),
           ),
-          actions: [
-            // 'Skip' lets the user (and integration tests) dismiss the dialog.
-            TextButton(
-              key: const Key('skipAssessment'),
-              onPressed: _close,
-              child: const Text('Skip'),
+        ],
+        child: ScaffoldMessenger(
+          child: Scaffold(
+            backgroundColor: Colors.transparent,
+            body: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 560),
+                child: switch (_phase) {
+                  _Phase.loading => const Center(child: CircularProgressIndicator()),
+                  _Phase.error => _buildError(),
+                  _Phase.questions => _buildQuestions(),
+                  _Phase.result => _buildResult(),
+                },
+              ),
             ),
-          ],
-        ),
-        // Constrain and center the content so it reads well on wide screens.
-        body: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 560),
-            child: switch (_phase) {
-              _Phase.loading => const Center(child: CircularProgressIndicator()),
-              _Phase.error => _buildError(),
-              _Phase.questions => _buildQuestions(),
-              _Phase.result => _buildResult(),
-            },
           ),
         ),
       ),

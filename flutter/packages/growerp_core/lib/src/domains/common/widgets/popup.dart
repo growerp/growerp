@@ -23,6 +23,7 @@ Widget popUp({
   double? width,
   double padding = 10,
   bool? closeButton = true,
+  List<Widget>? actions,
   required BuildContext context,
 }) {
   final colorScheme = Theme.of(context).colorScheme;
@@ -55,18 +56,32 @@ Widget popUp({
                   topRight: Radius.circular(20),
                 ),
               ),
-              child: Center(
-                child: Text(
-                  title,
-                  key: const Key('topHeader'),
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 0.3,
-                    color: colorScheme.onSurface,
+              child: Stack(
+                children: [
+                  Center(
+                    child: Text(
+                      title,
+                      key: const Key('topHeader'),
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0.3,
+                        color: colorScheme.onSurface,
+                      ),
+                    ),
                   ),
-                ),
+                  if (actions != null)
+                    Positioned(
+                      right: closeButton == true ? 40 : 10,
+                      top: 0,
+                      bottom: 0,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: actions,
+                      ),
+                    ),
+                ],
               ),
             ),
             Expanded(
