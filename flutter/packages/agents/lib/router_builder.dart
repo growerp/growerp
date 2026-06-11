@@ -177,63 +177,47 @@ List<Map<String, GrowerpWidgetBuilder>> agentsWidgetRegistrations = [
   },
 ];
 
-/// Dashboard for the Agents app.
+/// Dashboard for the Agents app. Built from the live MenuConfigBloc menu so
+/// dashboard tiles can be long-press reordered and minimized — those actions
+/// are persisted back to the menu configuration (same pattern as the admin app).
 class AgentsDashboard extends StatelessWidget {
   const AgentsDashboard({super.key});
 
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<AuthBloc, AuthState>(
-      builder: (context, state) {
-        if (state.status != AuthStatus.authenticated) {
-          return const LoadingIndicator();
-        }
-        return DashboardGrid(
-          items: const [
-            MenuItem(
-              menuItemId: 'chat',
-              title: 'AI Chat',
-              iconName: 'smart_toy',
-              route: '/chat',
-            ),
-            MenuItem(
-              menuItemId: 'agents',
-              title: 'AI Agents',
-              iconName: 'smart_toy',
-              route: '/adk-agents',
-            ),
-            MenuItem(
-              menuItemId: 'jobs',
-              title: 'Agent Jobs',
-              iconName: 'schedule',
-              route: '/adk-jobs',
-            ),
-            MenuItem(
-              menuItemId: 'approvals',
-              title: 'Approvals',
-              iconName: 'fact_check',
-              route: '/adk-approvals',
-            ),
-            MenuItem(
-              menuItemId: 'actions',
-              title: 'Agent Actions',
-              iconName: 'history',
-              route: '/adk-actions',
-            ),
-            MenuItem(
-              menuItemId: 'organization',
-              title: 'Organization',
-              iconName: 'business',
-              route: '/organization',
-            ),
-            MenuItem(
-              menuItemId: 'system',
-              title: 'System Setup',
-              iconName: 'settings',
-              route: '/setup',
-            ),
-          ],
-          stats: state.authenticate?.stats,
+      builder: (context, authState) {
+        final stats = authState.authenticate?.stats;
+        return BlocBuilder<MenuConfigBloc, MenuConfigState>(
+          builder: (context, menuState) {
+            final menuConfig = menuState.menuConfiguration;
+            if (menuConfig == null) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            // Top-level active items shown as dashboard tiles (skip root/about).
+            final dashboardOptions = menuConfig.menuItems
+                .where((o) =>
+                    o.isActive &&
+                    o.route != null &&
+                    o.route != '/' &&
+                    o.route != '/about')
+                .toList()
+              ..sort((a, b) => a.sequenceNum.compareTo(b.sequenceNum));
+
+            return Scaffold(
+              backgroundColor: Colors.transparent,
+              body: DashboardGrid(
+                items: dashboardOptions,
+                stats: stats,
+                onToggleMinimize: (id) => context
+                    .read<MenuConfigBloc>()
+                    .add(MenuItemToggleMinimize(id)),
+                onRefresh: () async {
+                  context.read<AuthBloc>().add(AuthLoad());
+                },
+              ),
+            );
+          },
         );
       },
     );
