@@ -47,10 +47,17 @@ List<WidgetMetadata> getCatalogWidgetsWithMetadata() {
           'existing product; omit it to create a new one.',
       iconName: 'inventory',
       keywords: ['add product', 'new product', 'create product', 'edit product', 'open product'],
-      parameters: {'productId': 'open this product for editing; omit to create new'},
+      parameters: {
+        'productId': 'open this product for editing; omit to create new',
+        'productName': 'product name (prefill for create)',
+        'description': 'description (prefill for create)',
+        'price': 'list price (prefill for create)',
+      },
       builder: (args) {
         final id = (args?['productId'] ?? args?['id'])?.toString();
-        if (id == null || id.isEmpty) return ProductDialog(Product());
+        if (id == null || id.isEmpty) {
+          return ProductDialog(entityFromArgs<Product>(args, Product.fromJson) ?? Product());
+        }
         return AsyncRecordDialog<Product>(
           fetch: (ctx) async {
             final r = await ctx.read<RestClient>().getProduct(
@@ -67,10 +74,16 @@ List<WidgetMetadata> getCatalogWidgetsWithMetadata() {
           'an existing category; omit it to create a new one.',
       iconName: 'category',
       keywords: ['add category', 'new category', 'create category', 'edit category'],
-      parameters: {'categoryId': 'open this category for editing; omit to create new'},
+      parameters: {
+        'categoryId': 'open this category for editing; omit to create new',
+        'categoryName': 'category name (prefill for create)',
+        'description': 'description (prefill for create)',
+      },
       builder: (args) {
         final id = (args?['categoryId'] ?? args?['id'])?.toString();
-        if (id == null || id.isEmpty) return CategoryDialog(Category());
+        if (id == null || id.isEmpty) {
+          return CategoryDialog(entityFromArgs<Category>(args, Category.fromJson) ?? Category());
+        }
         return AsyncRecordDialog<Category>(
           fetch: (ctx) async {
             final r = await ctx.read<RestClient>().getCategory(

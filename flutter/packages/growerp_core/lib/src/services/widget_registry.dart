@@ -179,6 +179,53 @@ Key? getKeyFromArgs(Map<String, dynamic>? args) {
   return null;
 }
 
+/// Reserved arg keys that are never entity fields (navigation/AI metadata).
+const _reservedArgKeys = {
+  'key', 'route', 'tab', 'tabIndex', 'role', 'dialog', 'id', '_aiPrefill',
+};
+
+/// True when [args] carry an AI-prefill marker (set by chat directives so the
+/// opened dialog can show a "review & Save" banner).
+bool isAiPrefill(Map<String, dynamic>? args) =>
+    args != null && (args['_aiPrefill'] == true || args['_aiPrefill'] == 'true');
+
+/// Build a typed entity from a chat directive's flat `params` map.
+///
+/// Used by widget-registry builders so an agent can open a create/edit dialog
+/// **pre-filled** with field values, e.g.
+/// `{"action":"dialog","widget":"UserDialog","params":{"firstName":"John"}}`.
+/// Reserved navigation keys are stripped and numeric/boolean strings are coerced
+/// so the model's `fromJson` receives sensible types. Returns null when there
+/// are no usable field values (so callers keep their existing default).
+T? entityFromArgs<T>(
+  Map<String, dynamic>? args,
+  T Function(Map<String, dynamic>) fromJson,
+) {
+  if (args == null) return null;
+  final fields = <String, dynamic>{};
+  args.forEach((k, v) {
+    if (_reservedArgKeys.contains(k) || v == null) return;
+    if (v is String) {
+      final n = num.tryParse(v);
+      if (n != null) {
+        fields[k] = n;
+      } else if (v == 'true' || v == 'false') {
+        fields[k] = v == 'true';
+      } else {
+        fields[k] = v;
+      }
+    } else {
+      fields[k] = v;
+    }
+  });
+  if (fields.isEmpty) return null;
+  try {
+    return fromJson(fields);
+  } catch (_) {
+    return null; // unknown field types — fall back to caller default
+  }
+}
+
 /// Parse Role from string
 Role parseRole(String? roleName) {
   if (roleName == null) return Role.unknown;

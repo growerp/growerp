@@ -39,15 +39,21 @@ Map<String, GrowerpWidgetBuilder> getUserCompanyWidgets() {
     'UserListCompany': (args) =>
         UserList(key: getKeyFromArgs(args), role: Role.company),
 
-    // User Dialog
+    // User Dialog — accepts a typed User, or AI/chat prefill field values,
+    // else an empty user (show authenticated user).
     'UserDialog': (args) => UserDialog(
-      args?['user'] as User? ?? User(), // Empty user = show authenticated user
+      args?['user'] as User? ??
+          entityFromArgs<User>(args, User.fromJson) ??
+          User(role: parseRole(args?['role'])),
       dialog: true,
     ),
 
-    // Company dialogs
+    // Company dialogs — typed Company, or prefill field values, else empty.
     'ShowCompanyDialog': (args) => ShowCompanyDialog(
-      args?['company'] as Company? ?? Company(role: parseRole(args?['role'])),
+      args?['company'] as Company? ??
+          entityFromArgs<Company>(
+              args, (j) => Company.fromJson(j).copyWith(role: parseRole(args?['role']))) ??
+          Company(role: parseRole(args?['role'])),
       dialog: true,
     ),
 
@@ -130,11 +136,18 @@ List<WidgetMetadata> getUserCompanyWidgetsWithMetadata() {
       parameters: {
         'partyId': 'open this user for editing; omit to create new',
         'role': 'customer | supplier | lead | employee (for create)',
+        'firstName': 'first name (prefill for create)',
+        'lastName': 'last name (prefill for create)',
+        'email': 'email address (prefill for create)',
+        'telephoneNr': 'phone number (prefill for create)',
       },
       builder: (args) {
         final id = (args?['partyId'] ?? args?['userPartyId'] ?? args?['id'])?.toString();
         if (id == null || id.isEmpty) {
-          return UserDialog(User(role: parseRole(args?['role'])), dialog: true);
+          // Create — prefill from any supplied field values.
+          final prefilled = entityFromArgs<User>(args, User.fromJson);
+          final user = (prefilled ?? User()).copyWith(role: parseRole(args?['role']));
+          return UserDialog(user, dialog: true);
         }
         return AsyncRecordDialog<User>(
           fetch: (ctx) async {
@@ -154,6 +167,8 @@ List<WidgetMetadata> getUserCompanyWidgetsWithMetadata() {
       keywords: ['add company', 'new company', 'create company', 'edit company', 'open company'],
       parameters: {
         'partyId': "company to edit; '_NEW_' to create; omit for the main company",
+        'name': 'company name (prefill for create)',
+        'email': 'company email (prefill for create)',
       },
       builder: (args) {
         // ShowCompanyDialog resolves the company itself:
@@ -161,12 +176,15 @@ List<WidgetMetadata> getUserCompanyWidgetsWithMetadata() {
         //   '_NEW_'       -> blank create form
         //   other partyId -> fetched and edited
         final id = (args?['partyId'] ?? args?['companyPartyId'] ?? args?['id'])?.toString();
-        return ShowCompanyDialog(
-          (id == null || id.isEmpty)
-              ? Company(role: parseRole(args?['role'])) // main company
-              : Company(partyId: id), // '_NEW_' or a real partyId
-          dialog: true,
-        );
+        if (id == null || id.isEmpty) {
+          // Show/create — prefill from any supplied field values.
+          final prefilled = entityFromArgs<Company>(args, Company.fromJson);
+          return ShowCompanyDialog(
+            (prefilled ?? Company()).copyWith(role: parseRole(args?['role'])),
+            dialog: true,
+          );
+        }
+        return ShowCompanyDialog(Company(partyId: id), dialog: true);
       },
     ),
     WidgetMetadata(

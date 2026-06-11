@@ -126,14 +126,17 @@ class UserDialogState extends State<UserDialogStateFull> {
     super.initState();
     _userDialogFormKey = GlobalKey<FormState>();
 
+    // Populate editable fields from the passed user. This runs for both edit
+    // (partyId set) and create-with-prefill (e.g. AI chat directive supplying
+    // firstName/email on a new user), so prefilled values are shown.
+    _firstNameController.text = widget.user.firstName ?? '';
+    _lastNameController.text = widget.user.lastName ?? '';
+    _telephoneController.text = widget.user.telephoneNr ?? '';
+    _emailController.text = widget.user.email ?? '';
+    _urlController.text = widget.user.url ?? '';
     if (widget.user.partyId != null) {
       _idController.text = widget.user.pseudoId ?? '';
-      _firstNameController.text = widget.user.firstName ?? '';
-      _lastNameController.text = widget.user.lastName ?? '';
       _loginNameController.text = widget.user.loginName ?? '';
-      _telephoneController.text = widget.user.telephoneNr ?? '';
-      _emailController.text = widget.user.email ?? '';
-      _urlController.text = widget.user.url ?? '';
       _isLoginDisabled = widget.user.loginDisabled ?? false;
       _hasLogin = widget.user.userId != null;
     }
