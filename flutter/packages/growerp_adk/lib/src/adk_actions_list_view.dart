@@ -72,10 +72,7 @@ class _AdkActionsListViewState extends State<AdkActionsListView> {
 
   @override
   Widget build(BuildContext context) {
-    return KeyedSubtree(
-      key: const Key('AdkActionsListView'),
-      child: _content(context),
-    );
+    return _content(context);
   }
 
   Widget _content(BuildContext context) {

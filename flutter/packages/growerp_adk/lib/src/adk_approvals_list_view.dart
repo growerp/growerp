@@ -98,10 +98,7 @@ class _AdkApprovalsListViewState extends State<AdkApprovalsListView> {
 
   @override
   Widget build(BuildContext context) {
-    return KeyedSubtree(
-      key: const Key('AdkApprovalsListView'),
-      child: _content(context),
-    );
+    return _content(context);
   }
 
   Widget _content(BuildContext context) {

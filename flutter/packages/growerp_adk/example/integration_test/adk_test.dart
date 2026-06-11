@@ -14,9 +14,7 @@
 
 // ignore_for_file: depend_on_referenced_packages
 import 'package:adk_example/router_builder.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:growerp_core/growerp_core.dart';
@@ -36,16 +34,9 @@ void main() {
   ) async {
     final restClient = RestClient(await buildDioClient());
 
-    final router = createDynamicAdkRouter([
-      adkMenuConfig,
-    ], rootNavigatorKey: GlobalKey<NavigatorState>());
-
-    final menuConfigBloc = MenuConfigBloc(restClient, 'adk_example')
-      ..add(MenuConfigUpdateLocal(adkMenuConfig));
-
     await CommonTest.startTestApp(
       tester,
-      router,
+      createAdkExampleRouter(),
       adkMenuConfig,
       [
         ...CoreLocalizations.localizationsDelegates,
@@ -54,22 +45,10 @@ void main() {
       restClient: restClient,
       clear: true,
       title: "ADK Test",
-      widgetRegistrations: adkWidgetRegistrations,
-      blocProviders: [
-        BlocProvider<MenuConfigBloc>.value(value: menuConfigBloc),
-        ...getUserCompanyBlocProviders(restClient, 'AppAdmin'),
-      ],
+      blocProviders: getUserCompanyBlocProviders(restClient, 'AppAdmin'),
     );
 
     await CommonTest.createCompanyAndAdmin(tester);
-
-    // Re-seed the local menu so the ADK routes are present after login
-    // (TopApp loads the backend seed menu on authentication).
-    menuConfigBloc.add(MenuConfigUpdateLocal(adkMenuConfig));
-    for (int i = 0; i < 50; i++) {
-      await tester.pump(const Duration(milliseconds: 100));
-      if (tester.any(find.byKey(const Key('tap/adk-agents')))) break;
-    }
 
     // Agents: create a safe-by-default (read-only) agent via the dialog,
     // asserting the governance controls exist, then confirm it is listed.
