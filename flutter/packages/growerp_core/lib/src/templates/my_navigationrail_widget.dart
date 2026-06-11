@@ -210,7 +210,13 @@ Widget _buildNavDestination(
   return InkWell(
     key: Key('tap${option.route}'),
     onTap: () {
-      if (option.route != null) context.go(option.route!);
+      if (option.route != null) {
+        if (option.route == '/user' || option.route == '/company') {
+          context.push(option.route!);
+        } else {
+          context.go(option.route!);
+        }
+      }
     },
     child: Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),

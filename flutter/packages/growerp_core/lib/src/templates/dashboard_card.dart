@@ -224,7 +224,13 @@ class _DashboardCardState extends State<DashboardCard>
                                 ? Key('tap${widget.route}')
                                 : null,
                             onTap: widget.route != null
-                                ? () => context.go(widget.route!)
+                                ? () {
+                                    if (widget.route == '/user' || widget.route == '/company') {
+                                      context.push(widget.route!);
+                                    } else {
+                                      context.go(widget.route!);
+                                    }
+                                  }
                                 : null,
                             borderRadius: BorderRadius.circular(20),
                             splashColor:

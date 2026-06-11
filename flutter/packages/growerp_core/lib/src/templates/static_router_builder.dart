@@ -17,6 +17,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:growerp_models/growerp_models.dart';
 import '../../growerp_core.dart';
+import 'dialog_page.dart';
 
 /// Configuration for creating a static app router for example apps.
 ///
@@ -240,20 +241,26 @@ GoRouter _buildStaticRouter(StaticRouterConfig config) {
       // User profile route - full screen, no shell wrapper
       GoRoute(
         path: '/user',
-        builder: (context, state) {
+        pageBuilder: (context, state) {
           final extra = state.extra;
-          return WidgetRegistry.getWidget('UserDialog', {'user': extra});
+          return DialogPage(
+            key: state.pageKey,
+            child: WidgetRegistry.getWidget('UserDialog', {'user': extra}),
+          );
         },
       ),
 
       // Company dialog route - full screen, no shell wrapper
       GoRoute(
         path: '/company',
-        builder: (context, state) {
+        pageBuilder: (context, state) {
           final extra = state.extra;
-          return WidgetRegistry.getWidget('ShowCompanyDialog', {
-            'company': extra,
-          });
+          return DialogPage(
+            key: state.pageKey,
+            child: WidgetRegistry.getWidget('ShowCompanyDialog', {
+              'company': extra,
+            }),
+          );
         },
       ),
 

@@ -98,7 +98,7 @@ Widget? myDrawer(BuildContext context, bool isPhone, List<MenuItem> menu) {
                   key: const Key('tapUser'),
                   onTap: () {
                     Navigator.pop(context);
-                    context.go('/user', extra: auth?.user);
+                    context.push('/user', extra: auth?.user);
                   },
                   borderRadius: BorderRadius.circular(16),
                   child: Column(

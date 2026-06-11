@@ -17,6 +17,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:growerp_models/growerp_models.dart';
 import '../../growerp_core.dart';
+import 'dialog_page.dart';
 
 /// Configuration for creating a dynamic app router
 ///
@@ -193,12 +194,15 @@ GoRouter createDynamicAppRouter(
       // User Profile
       GoRoute(
         path: '/user',
-        builder: (context, state) {
+        pageBuilder: (context, state) {
           Map<String, dynamic> args = {};
           if (state.extra != null) {
             args['user'] = state.extra;
           }
-          return config.widgetLoader('UserDialog', args);
+          return DialogPage(
+            key: state.pageKey,
+            child: config.widgetLoader('UserDialog', args),
+          );
         },
       ),
 
@@ -230,10 +234,13 @@ GoRouter createDynamicAppRouter(
       // Company dialog route - full screen, no shell wrapper
       GoRoute(
         path: '/company',
-        builder: (context, state) {
+        pageBuilder: (context, state) {
           Map<String, dynamic> args = {};
           if (state.extra != null) args['company'] = state.extra;
-          return config.widgetLoader('ShowCompanyDialog', args);
+          return DialogPage(
+            key: state.pageKey,
+            child: config.widgetLoader('ShowCompanyDialog', args),
+          );
         },
       ),
 

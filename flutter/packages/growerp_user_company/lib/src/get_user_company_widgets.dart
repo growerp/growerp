@@ -42,13 +42,13 @@ Map<String, GrowerpWidgetBuilder> getUserCompanyWidgets() {
     // User Dialog
     'UserDialog': (args) => UserDialog(
       args?['user'] as User? ?? User(), // Empty user = show authenticated user
-      dialog: false,
+      dialog: true,
     ),
 
     // Company dialogs
     'ShowCompanyDialog': (args) => ShowCompanyDialog(
       args?['company'] as Company? ?? Company(role: parseRole(args?['role'])),
-      dialog: false,
+      dialog: true,
     ),
 
     // CompanyUser list variants
@@ -134,14 +134,14 @@ List<WidgetMetadata> getUserCompanyWidgetsWithMetadata() {
       builder: (args) {
         final id = (args?['partyId'] ?? args?['userPartyId'] ?? args?['id'])?.toString();
         if (id == null || id.isEmpty) {
-          return UserDialog(User(role: parseRole(args?['role'])), dialog: false);
+          return UserDialog(User(role: parseRole(args?['role'])), dialog: true);
         }
         return AsyncRecordDialog<User>(
           fetch: (ctx) async {
             final r = await ctx.read<RestClient>().getUser(partyId: id, limit: 1);
             return r.users.isNotEmpty ? r.users.first : null;
           },
-          onLoaded: (u) => UserDialog(u, dialog: false),
+          onLoaded: (u) => UserDialog(u, dialog: true),
         );
       },
     ),
@@ -165,7 +165,7 @@ List<WidgetMetadata> getUserCompanyWidgetsWithMetadata() {
           (id == null || id.isEmpty)
               ? Company(role: parseRole(args?['role'])) // main company
               : Company(partyId: id), // '_NEW_' or a real partyId
-          dialog: false,
+          dialog: true,
         );
       },
     ),
