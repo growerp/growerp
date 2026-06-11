@@ -106,9 +106,15 @@ class AssetTest {
   ) async {
     List<Asset> newAssets = [];
     for (Asset asset in assets) {
+      // When assetId is known (e.g. during update verification), search by
+      // pseudoId so doNewSearch can find an exact keyed-cell match (id$row)
+      // and reliably open the correct dialog. The asset list shows product name
+      // in the 'name$row' cell, so searching by assetName would never match a
+      // keyed cell and always fall back to tapping id0, which may be wrong.
       await CommonTest.doNewSearch(
         tester,
-        searchString: asset.assetName!,
+        searchString:
+            asset.assetId.isNotEmpty ? asset.assetId : asset.assetName!,
         seconds: CommonTest.waitTime,
       );
       // detail dialog should be open

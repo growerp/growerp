@@ -1101,6 +1101,10 @@ class CommonTest {
     await tester.enterText(finder.last, '');
     await tester.pump();
     await tester.enterText(finder.last, value);
+    // Wait for the debounce timer (usually 300ms) to fire so the bloc emits
+    // the loading state. This prevents tests from seeing stale results from
+    // the clear ('') search above.
+    await tester.pump(const Duration(milliseconds: 400));
     await tester.pumpAndSettle();
   }
 
