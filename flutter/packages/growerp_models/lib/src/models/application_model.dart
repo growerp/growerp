@@ -23,15 +23,12 @@ abstract class Application with _$Application {
     @Default("") String applicationId,
     String? version, // room, table etc
     String? backendUrl, // include room number/name
+    String? assessmentId,
   }) = _Application;
   Application._();
 
   factory Application.fromJson(Map<String, dynamic> json) =>
       _$ApplicationFromJson(json['application'] ?? json);
 
-  @override
-  String toString() =>
-      'Application: $applicationId '
-      'Version: $version '
-      'BackendUrl: $backendUrl ';
+
 }

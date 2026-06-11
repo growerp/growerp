@@ -3,6 +3,37 @@
     // Example: "--dart-define=BACKEND_PORT=9090" in the args array
     "configurations": [
         {
+            "name": "Agents Web (lib/main.dart)",
+            "type": "dart",
+            "request": "launch",
+            "cwd": "flutter/packages/agents",
+            "program": "lib/main.dart",
+            "args": [
+                "-d",
+                "chrome",
+                "--web-port",
+                "55555"
+            ]
+        },
+        {
+            "name": "Agents linux (lib/main.dart)",
+            "type": "dart",
+            "request": "launch",
+            "cwd": "flutter/packages/agents",
+            "program": "lib/main.dart",
+            "args": [
+                "-d",
+                "linux"
+            ]
+        },
+        {
+            "name": "Agents Mobile (lib/main.dart)",
+            "type": "dart",
+            "request": "launch",
+            "cwd": "flutter/packages/agents",
+            "program": "lib/main.dart"
+        },
+        {
             "name": "Support Web (lib/main.dart)",
             "type": "dart",
             "request": "launch",

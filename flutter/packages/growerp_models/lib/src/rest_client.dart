@@ -871,6 +871,7 @@ abstract class RestClient {
   Future<Assessments> getAssessment({
     @Query('assessmentId') String? assessmentId,
     @Query('pseudoId') String? pseudoId,
+    @Query('ownerPartyId') String? ownerPartyId,
     @Query('start') int? start,
     @Query('limit') int? limit,
     @Query('search') String? searchString,

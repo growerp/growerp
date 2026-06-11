@@ -236,6 +236,7 @@ along with this software (see the LICENSE.md file). If not, see
                     ec.entity.makeDataLoader().location("component://growerp/data/ErpLandingPageData.xml").load()
                     ec.entity.makeDataLoader().location("component://growerp/data/ErpNeedAssessmentData.xml").load()
                 ]]></script>
+                <service-call name="update#growerp.Application" in-map="[applicationId: 'AppAdmin', assessmentId: 'ERP_NEED']"/>
             </if>
 
             <!-- Mark tenant setup as complete -->

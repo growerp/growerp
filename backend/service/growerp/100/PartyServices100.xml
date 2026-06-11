@@ -1452,14 +1452,13 @@ along with this software (see the LICENSE.md file). If not, see
                 </if>
                 <set field="telephoneNr"
                     value="${userInfo.telCountryCode?:''}${userInfo.telAreaCode?:''}${userInfo.telContactNumber?:''}" />
-                <entity-find entity-name="mantle.party.PartyClassificationAndAppl"
-                    list="partyClassifications">
+                <entity-find entity-name="growerp.PartyApplication"
+                    list="partyApplications">
                     <econdition field-name="partyId" from="userInfo?.userPartyId" />
-                    <econdition field-name="classificationTypeEnumId" value="PcltMobileApp" />
                 </entity-find>
                 <set field="appsUsed" from="[]" />
-                <iterate list="partyClassifications" entry="pc">
-                    <script>appsUsed.add(pc.partyClassificationId)</script>
+                <iterate list="partyApplications" entry="pa">
+                    <script>appsUsed.add(pa.applicationId)</script>
                 </iterate>
                 <if condition="isForDropDown">
                     <set field="userOut"
@@ -1863,13 +1862,13 @@ along with this software (see the LICENSE.md file). If not, see
             </if>
             <!-- appsUsed -->
             <if condition="user.appsUsed &amp;&amp; user.appsUsed.size() &gt; 0">
-                <entity-find-count entity-name="mantle.party.PartyClassificationAppl" count-field="existingApplCount">
+                <entity-find-count entity-name="growerp.PartyApplication" count-field="existingApplCount">
                     <econdition field-name="partyId" from="userPartyId" />
-                    <econdition field-name="partyClassificationId" from="user.appsUsed[0]" />
+                    <econdition field-name="applicationId" from="user.appsUsed[0]" />
                 </entity-find-count>
                 <if condition="existingApplCount == 0">
-                    <service-call name="create#mantle.party.PartyClassificationAppl"
-                        in-map="[partyId: userPartyId, partyClassificationId: user.appsUsed[0]]" />
+                    <service-call name="create#growerp.PartyApplication"
+                        in-map="[partyId: userPartyId, applicationId: user.appsUsed[0], fromDate: ec.user.nowTimestamp]" />
                 </if>
             </if>
             <!-- system support chat room -->
@@ -2343,10 +2342,10 @@ along with this software (see the LICENSE.md file). If not, see
     <service verb="register" noun="AppUsed" authenticate="true">
         <description>Mark a mobile app as used by the logged-in user, so a
             one-time post-login flow (welcome/assessment) is shown only once.
-            Adds a PartyClassificationAppl which surfaces in user.appsUsed.</description>
+            Adds a PartyApplication which surfaces in user.appsUsed.</description>
         <in-parameters>
             <parameter name="classificationId" required="true">
-                <description>PartyClassificationId of type PcltMobileApp, e.g. AppAdmin</description>
+                <description>ApplicationId, e.g. AppAdmin</description>
             </parameter>
         </in-parameters>
         <actions>
@@ -2354,14 +2353,14 @@ along with this software (see the LICENSE.md file). If not, see
             <if condition="!partyId">
                 <return />
             </if>
-            <entity-find-count entity-name="mantle.party.PartyClassificationAppl"
+            <entity-find-count entity-name="growerp.PartyApplication"
                 count-field="existingCount">
                 <econdition field-name="partyId" from="partyId" />
-                <econdition field-name="partyClassificationId" from="classificationId" />
+                <econdition field-name="applicationId" from="classificationId" />
             </entity-find-count>
             <if condition="existingCount == 0">
-                <service-call name="create#mantle.party.PartyClassificationAppl"
-                    in-map="[partyId: partyId, partyClassificationId: classificationId]" />
+                <service-call name="create#growerp.PartyApplication"
+                    in-map="[partyId: partyId, applicationId: classificationId, fromDate: ec.user.nowTimestamp]" />
             </if>
         </actions>
     </service>
@@ -2739,11 +2738,11 @@ along with this software (see the LICENSE.md file). If not, see
             <if condition="!companyParty">
                 <return message="Not a valid companyId" />
             </if>
-            <entity-find-one entity-name="mantle.party.PartyClassification"
-                value-field="classification">
-                <field-map field-name="partyClassificationId" from="classificationId" />
+            <entity-find-one entity-name="growerp.Application"
+                value-field="application">
+                <field-map field-name="applicationId" from="classificationId" />
             </entity-find-one>
-            <if condition="!classification">
+            <if condition="!application">
                 <return message="Not a valid classificationId: ${classificationId}" />
             </if>
             <!-- create account, not active when no login provided -->
@@ -2868,12 +2867,12 @@ along with this software (see the LICENSE.md file). If not, see
                 <script>ec.user.setLocale(new Locale(locale))</script>
             </if>
 
-            <!-- Validate classification -->
-            <entity-find-one entity-name="mantle.party.PartyClassification"
-                value-field="classification">
-                <field-map field-name="partyClassificationId" from="classificationId" />
+            <!-- Validate application -->
+            <entity-find-one entity-name="growerp.Application"
+                value-field="application">
+                <field-map field-name="applicationId" from="classificationId" />
             </entity-find-one>
-            <if condition="!classification">
+            <if condition="!application">
                 <return error="true" message="Not a valid classificationId: ${classificationId}" />
             </if>
 
@@ -3317,15 +3316,14 @@ along with this software (see the LICENSE.md file). If not, see
         </out-parameters>
         <actions>
             <!-- check for specific classification application-->
-            <entity-find-one entity-name="mantle.party.PartyClassificationAndAppl"
-                value-field="partyClassification">
+            <entity-find-one entity-name="growerp.PartyApplication"
+                value-field="partyApplication">
                 <field-map field-name="partyId" from="userPartyId" />
-                <field-map field-name="partyClassificationId" from="classificationId" />
-                <field-map field-name="classificationTypeEnumId" value="PcltMobileApp" />
+                <field-map field-name="applicationId" from="classificationId" />
             </entity-find-one>
 
             <!-- hotel app not using categories but need one for products -->
-            <if condition="!partyClassification">
+            <if condition="!partyApplication">
                 <if condition="classificationId == 'AppHotel'">
                     <entity-find entity-name="mantle.product.category.ProductCategory"
                         list="rootList">

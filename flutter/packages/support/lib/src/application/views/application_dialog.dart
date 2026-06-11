@@ -34,6 +34,8 @@ class ApplicationDialogState extends State<ApplicationDialog> {
   bool loading = false;
   late Application updatedApplication;
   late ApplicationBloc _applicationBloc;
+  List<Assessment> _assessments = [];
+  String? _selectedAssessmentId;
 
   @override
   void initState() {
@@ -41,7 +43,24 @@ class ApplicationDialogState extends State<ApplicationDialog> {
     _idController.text = widget.application.applicationId;
     _versionController.text = widget.application.version ?? '';
     _backendUrlController.text = widget.application.backendUrl ?? '';
+    _selectedAssessmentId = widget.application.assessmentId;
     _applicationBloc = context.read<ApplicationBloc>();
+    _fetchAssessments();
+  }
+
+  Future<void> _fetchAssessments() async {
+    try {
+      final assessmentsData = await context.read<RestClient>().getAssessment(
+        ownerPartyId: 'GROWERP',
+      );
+      if (mounted) {
+        setState(() {
+          _assessments = assessmentsData.assessments;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error fetching assessments: $e');
+    }
   }
 
   @override
@@ -77,7 +96,7 @@ class ApplicationDialogState extends State<ApplicationDialog> {
               child: _showForm(),
               title:
                   'Application #${widget.application.applicationId.isEmpty ? 'New' : widget.application.applicationId}',
-              height: 400,
+              height: 480,
               width: 350,
             ),
           );
@@ -124,6 +143,25 @@ class ApplicationDialogState extends State<ApplicationDialog> {
                 return null;
               },
             ),
+            const SizedBox(height: 10),
+            DropdownButtonFormField<String>(
+              key: const Key('assessmentId'),
+              decoration: const InputDecoration(labelText: 'Assessment'),
+              initialValue: _assessments.any((a) => a.assessmentId == _selectedAssessmentId)
+                  ? _selectedAssessmentId
+                  : null,
+              items: _assessments.map((Assessment assessment) {
+                return DropdownMenuItem<String>(
+                  value: assessment.assessmentId,
+                  child: Text(assessment.assessmentName),
+                );
+              }).toList(),
+              onChanged: (String? newValue) {
+                setState(() {
+                  _selectedAssessmentId = newValue;
+                });
+              },
+            ),
             const SizedBox(height: 20),
             OutlinedButton(
               key: const Key('update'),
@@ -138,6 +176,7 @@ class ApplicationDialogState extends State<ApplicationDialog> {
                         applicationId: _idController.text,
                         version: _versionController.text,
                         backendUrl: _backendUrlController.text,
+                        assessmentId: _selectedAssessmentId,
                       ),
                     ),
                   );

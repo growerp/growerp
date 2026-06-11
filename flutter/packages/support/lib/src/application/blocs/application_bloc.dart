@@ -47,6 +47,8 @@ class ApplicationBloc extends Bloc<ApplicationEvent, ApplicationState> {
     ApplicationFetch event,
     Emitter<ApplicationState> emit,
   ) async {
+    if (state.hasReachedMax && !event.refresh && event.searchString == '') return;
+
     List<Application> current = [];
     if (state.status == ApplicationStatus.initial ||
         event.refresh ||

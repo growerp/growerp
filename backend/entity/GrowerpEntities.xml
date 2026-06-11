@@ -381,8 +381,8 @@ along with this software (see the LICENSE.md file). If not, see
         <relationship type="one" title="Owner" related="mantle.party.Party" short-alias="owner">
             <key-map field-name="ownerPartyId" />
         </relationship>
-        <relationship type="one" title="Classification" related="mantle.party.PartyClassification" short-alias="classification">
-            <key-map field-name="classificationId" related="partyClassificationId" />
+        <relationship type="one" title="Application" related="growerp.Application" short-alias="application">
+            <key-map field-name="classificationId" related="applicationId" />
         </relationship>
     </entity>
 
@@ -416,5 +416,36 @@ along with this software (see the LICENSE.md file). If not, see
             <key-map field-name="ownerPartyId"/>
         </relationship>
     </entity>
+
+    <entity entity-name="Application" package="growerp">
+        <field name="applicationId" type="id" is-pk="true"/>
+        <field name="description" type="text-medium"/>
+        <field name="version" type="text-short"/>
+        <field name="backendUrl" type="text-medium"/>
+        <field name="assessmentId" type="id"/>
+        <relationship type="one" related="growerp.assessment.Assessment">
+            <key-map field-name="assessmentId"/>
+        </relationship>
+    </entity>
+
+    <entity entity-name="PartyApplication" package="growerp">
+        <field name="partyId" type="id" is-pk="true"/>
+        <field name="applicationId" type="id" is-pk="true"/>
+        <field name="fromDate" type="date-time" is-pk="true" default="ec.user.nowTimestamp"/>
+        <field name="thruDate" type="date-time"/>
+        <relationship type="one" related="mantle.party.Party"/>
+        <relationship type="one" related="growerp.Application"/>
+    </entity>
+    <view-entity entity-name="PartyAndApplication" package="growerp">
+        <member-entity entity-alias="PA" entity-name="growerp.PartyApplication"/>
+        <member-entity entity-alias="APP" entity-name="growerp.Application" join-from-alias="PA">
+            <key-map field-name="applicationId"/>
+        </member-entity>
+        <alias-all entity-alias="PA"/>
+        <alias-all entity-alias="APP"/>
+        <entity-condition>
+            <date-filter entity-alias="PA" valid-date="ec.user.nowTimestamp"/>
+        </entity-condition>
+    </view-entity>
 
 </entities>

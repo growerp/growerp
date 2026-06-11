@@ -67,39 +67,18 @@ along with this software (see the LICENSE.md file). If not, see
 
 
     <!-- allocate companies to application -->
-    <moqui.basic.Enumeration description="Mobile App Name used by company" enumId="PcltMobileApp"
-        enumTypeId="PartyClassificationType" />
-    <mantle.party.PartyClassification partyClassificationId="AppSupport"
-        classificationTypeEnumId="PcltMobileApp"
+    <growerp.Application applicationId="AppSupport"
         description="System support app to management registered companies" />
-    <mantle.party.PartyClassification partyClassificationId="AppAdmin"
-        classificationTypeEnumId="PcltMobileApp"
+    <growerp.Application applicationId="AppAdmin"
         description="Admin app to maintain backoffice data, products, categories, orders" />
-    <mantle.party.PartyClassification partyClassificationId="AppRestaurant"
-        classificationTypeEnumId="PcltMobileApp" description="App for restaurant,cafe,bar" />
-    <mantle.party.PartyClassification partyClassificationId="AppPOS"
-        classificationTypeEnumId="PcltMobileApp" description="Point of sale APP" />
-    <mantle.party.PartyClassification partyClassificationId="AppEcommerceShop"
-        classificationTypeEnumId="PcltMobileApp" description="App for Ecommerce and shop" />
-    <mantle.party.PartyClassification partyClassificationId="AppHospital"
-        classificationTypeEnumId="PcltMobileApp"
-        description="App for Hospital/Clinic/Dentist/Doctor/Beauty Shop" />
-    <mantle.party.PartyClassification partyClassificationId="AppService"
-        classificationTypeEnumId="PcltMobileApp"
-        description="App for Service company, freelancer, wfh" />
-    <mantle.party.PartyClassification partyClassificationId="AppHotel"
-        classificationTypeEnumId="PcltMobileApp" description="App for Hotel, Bed &amp; Breakfeast" />
-    <mantle.party.PartyClassification partyClassificationId="AppRealtor"
-        classificationTypeEnumId="PcltMobileApp" description="App for Realtor/property management" />
-    <mantle.party.PartyClassification partyClassificationId="AppFreelance"
-        classificationTypeEnumId="PcltMobileApp" description="App for a freelancer" />
-    <mantle.party.PartyClassification partyClassificationId="AppHealth"
-        classificationTypeEnumId="PcltMobileApp" description="Health/hospital/clinic application" />
-    <mantle.party.PartyClassification partyClassificationId="AppLandingPage"
-        classificationTypeEnumId="PcltMobileApp" description="Marketing landing page application" />
-    <mantle.party.PartyClassification partyClassificationId="AppElearner"
-        classificationTypeEnumId="PcltMobileApp"
+    <growerp.Application applicationId="AppHotel"
+        description="App for Hotel, Bed &amp; Breakfeast" />
+    <growerp.Application applicationId="AppFreelance"
+        description="App for a freelancer" />
+    <growerp.Application applicationId="AppElearner"
         description="eLearner app for students to read subscribed courses" />
+    <growerp.Application applicationId="AppAgents"
+        description="App for agents" />
 
     <!-- sales opportunity stage -->
     <mantle.sales.opportunity.SalesOpportunityStage opportunityStageId="Prospecting" sequenceNum="1" />

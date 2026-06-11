@@ -14,6 +14,7 @@ List<StyledColumn> getApplicationListColumns(BuildContext context) {
     StyledColumn(header: 'ID', flex: isPhone ? 2 : 1),
     const StyledColumn(header: 'Version', flex: 1),
     const StyledColumn(header: 'Backend URL', flex: 2),
+    const StyledColumn(header: 'Assessment ID', flex: 1),
     const StyledColumn(header: '', flex: 1),
   ];
 }
@@ -28,6 +29,7 @@ List<Widget> getApplicationListRow({
     Text(application.applicationId, key: Key("id$index")),
     Text(application.version ?? '', key: Key("version$index")),
     Text(application.backendUrl ?? '', key: Key("backendUrl$index")),
+    Text(application.assessmentId ?? '', key: Key("assessmentId$index")),
     IconButton(
       key: Key('delete$index'),
       padding: EdgeInsets.zero,

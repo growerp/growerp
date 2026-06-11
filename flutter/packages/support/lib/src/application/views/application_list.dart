@@ -117,7 +117,7 @@ class ApplicationsListState extends State<ApplicationList> {
   }
 
   void _onScroll() {
-    if (_isBottom) {
+    if (_isBottom && !_applicationBloc.state.hasReachedMax) {
       context.read<ApplicationBloc>().add(const ApplicationFetch());
     }
   }
