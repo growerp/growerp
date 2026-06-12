@@ -152,12 +152,16 @@ List<WidgetMetadata> getUserCompanyWidgetsWithMetadata() {
       builder: (args) {
         final id = (args?['partyId'] ?? args?['userPartyId'] ?? args?['id'])?.toString();
         if (id == null || id.isEmpty) {
-          // Create — render the inner form directly (blank or prefilled). Using
-          // UserDialog here would discard a party-less user and show the
-          // authenticated user ("my profile") instead of a new-employee form.
           final prefilled = entityFromArgs<User>(args, User.fromJson);
-          final user = (prefilled ?? User()).copyWith(role: parseRole(args?['role']));
-          return UserDialogStateFull(user: user, dialog: true);
+          // CREATE only when there's an explicit create signal (AI prefill marker
+          // or supplied field values). Render the inner form directly so a NEW
+          // (blank/prefilled) user is shown, not the authenticated user.
+          if (prefilled != null || isAiPrefill(args)) {
+            final user = (prefilled ?? User()).copyWith(role: parseRole(args?['role']));
+            return UserDialogStateFull(user: user, dialog: true);
+          }
+          // No create signal → show the current/authenticated user ("my profile").
+          return UserDialog(User(role: parseRole(args?['role'])), dialog: true);
         }
         return AsyncRecordDialog<User>(
           fetch: (ctx) async {
