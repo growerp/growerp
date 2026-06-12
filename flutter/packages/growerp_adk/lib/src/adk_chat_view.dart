@@ -285,7 +285,9 @@ class _AdkChatViewState extends State<AdkChatView> {
       }
     }
 
-    setState(() => _busy = false);
+    // The reply may have opened a dialog and popped this chat overlay, disposing
+    // the State — guard the async-tail setState.
+    if (mounted) setState(() => _busy = false);
   }
 
   /// Send message via SSE streaming endpoint /adk/run_sse.
@@ -362,7 +364,7 @@ class _AdkChatViewState extends State<AdkChatView> {
       }
 
       // Update the streaming message in-place (hide any action block while it streams)
-      if (agentReply.isNotEmpty && msgIndex < _messages.length) {
+      if (mounted && agentReply.isNotEmpty && msgIndex < _messages.length) {
         setState(() {
           _messages[msgIndex] = _Msg.adk(_stripActions(agentReply));
         });
@@ -370,7 +372,9 @@ class _AdkChatViewState extends State<AdkChatView> {
       }
     }
 
-    // Final update
+    // Final update — the stream may have completed after the chat overlay was
+    // popped (e.g. an action opened a dialog), disposing this State.
+    if (!mounted) return;
     if (missingKey) {
       // Drop the streaming placeholder and offer to open System Setup.
       setState(() => _messages.removeAt(msgIndex));
@@ -584,6 +588,7 @@ class _AdkChatViewState extends State<AdkChatView> {
   // ── Helpers ───────────────────────────────────────────────────────────────
 
   void _addMsg(_Msg msg) {
+    if (!mounted) return;
     setState(() => _messages.add(msg));
     _scrollToBottom();
   }

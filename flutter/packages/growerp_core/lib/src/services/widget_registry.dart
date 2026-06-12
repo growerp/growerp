@@ -194,9 +194,11 @@ bool isAiPrefill(Map<String, dynamic>? args) =>
 /// Used by widget-registry builders so an agent can open a create/edit dialog
 /// **pre-filled** with field values, e.g.
 /// `{"action":"dialog","widget":"UserDialog","params":{"firstName":"John"}}`.
-/// Reserved navigation keys are stripped and numeric/boolean strings are coerced
-/// so the model's `fromJson` receives sensible types. Returns null when there
-/// are no usable field values (so callers keep their existing default).
+/// Reserved navigation keys are stripped and every remaining value is passed as
+/// a **String**, because GrowERP model converters deserialize from strings
+/// (e.g. `Decimal.fromJson(json['price'] as String)`, DateTime). Sending a raw
+/// number would throw the `as String` cast and lose the whole prefill. Returns
+/// null when there are no usable field values (so callers keep their default).
 T? entityFromArgs<T>(
   Map<String, dynamic>? args,
   T Function(Map<String, dynamic>) fromJson,
@@ -205,18 +207,7 @@ T? entityFromArgs<T>(
   final fields = <String, dynamic>{};
   args.forEach((k, v) {
     if (_reservedArgKeys.contains(k) || v == null) return;
-    if (v is String) {
-      final n = num.tryParse(v);
-      if (n != null) {
-        fields[k] = n;
-      } else if (v == 'true' || v == 'false') {
-        fields[k] = v == 'true';
-      } else {
-        fields[k] = v;
-      }
-    } else {
-      fields[k] = v;
-    }
+    fields[k] = v is String ? v : v.toString();
   });
   if (fields.isEmpty) return null;
   try {
@@ -226,17 +217,38 @@ T? entityFromArgs<T>(
   }
 }
 
-/// Parse Role from string
+/// Parse Role from a string. Accepts the enum name (company/customer/lead/
+/// supplier), the backend value (OrgInternal/Customer/Lead/Supplier), and common
+/// synonyms — notably "employee"/"staff"/"internal" → Role.company (OrgInternal,
+/// the organization's own employees).
 Role parseRole(String? roleName) {
   if (roleName == null) return Role.unknown;
-  try {
-    return Role.values.firstWhere(
-      (e) => e.name.toLowerCase() == roleName.toLowerCase(),
-      orElse: () => Role.unknown,
-    );
-  } catch (_) {
-    return Role.unknown;
+  final r = roleName.toLowerCase().trim();
+  switch (r) {
+    case 'employee':
+    case 'employees':
+    case 'staff':
+    case 'internal':
+    case 'orginternal':
+    case 'company':
+      return Role.company;
+    case 'customer':
+    case 'customers':
+      return Role.customer;
+    case 'supplier':
+    case 'suppliers':
+    case 'vendor':
+      return Role.supplier;
+    case 'lead':
+    case 'leads':
+    case 'prospect':
+      return Role.lead;
   }
+  // Fallback: match by enum name or backend value (e.g. "OrgInternal").
+  return Role.values.firstWhere(
+    (e) => e.name.toLowerCase() == r || e.value.toLowerCase() == r,
+    orElse: () => Role.unknown,
+  );
 }
 
 /// Parse FinDocType from string

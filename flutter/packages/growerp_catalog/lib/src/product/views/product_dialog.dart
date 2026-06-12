@@ -72,6 +72,13 @@ class ProductDialogState extends State<ProductDialog> {
       name: widget.product.currency?.currencyId ?? currencyId,
     ).currencySymbol;
     _productBloc = context.read<ProductBloc>();
+    // The form is gated on ProductBloc reaching success (for uoms etc.). When the
+    // dialog is opened cold — e.g. from the AI chat without first visiting the
+    // product list — the bloc is still `initial` and would spin forever, so kick
+    // off a fetch here. (No-op refresh when already loaded by the list.)
+    if (_productBloc.state.status == ProductStatus.initial) {
+      _productBloc.add(const ProductFetch(limit: 20));
+    }
     context.read<CategoryBloc>().add(
       const CategoryFetch(isForDropDown: true, limit: 3),
     );

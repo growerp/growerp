@@ -39,14 +39,22 @@ Map<String, GrowerpWidgetBuilder> getUserCompanyWidgets() {
     'UserListCompany': (args) =>
         UserList(key: getKeyFromArgs(args), role: Role.company),
 
-    // User Dialog — accepts a typed User, or AI/chat prefill field values,
-    // else an empty user (show authenticated user).
-    'UserDialog': (args) => UserDialog(
-      args?['user'] as User? ??
-          entityFromArgs<User>(args, User.fromJson) ??
-          User(role: parseRole(args?['role'])),
-      dialog: true,
-    ),
+    // User Dialog. A typed User → as-is. Chat/AI create (prefill fields or the
+    // _aiPrefill marker) → render the inner UserDialogStateFull directly so a NEW
+    // (prefilled) user form is shown — the UserDialog wrapper would otherwise
+    // discard a party-less user and load the authenticated user ("my profile").
+    'UserDialog': (args) {
+      final typed = args?['user'] as User?;
+      if (typed != null) return UserDialog(typed, dialog: true);
+      final prefilled = entityFromArgs<User>(args, User.fromJson);
+      if (prefilled != null || isAiPrefill(args)) {
+        return UserDialogStateFull(
+          user: (prefilled ?? User()).copyWith(role: parseRole(args?['role'])),
+          dialog: true,
+        );
+      }
+      return UserDialog(User(role: parseRole(args?['role'])), dialog: true);
+    },
 
     // Company dialogs — typed Company, or prefill field values, else empty.
     'ShowCompanyDialog': (args) => ShowCompanyDialog(
@@ -144,10 +152,12 @@ List<WidgetMetadata> getUserCompanyWidgetsWithMetadata() {
       builder: (args) {
         final id = (args?['partyId'] ?? args?['userPartyId'] ?? args?['id'])?.toString();
         if (id == null || id.isEmpty) {
-          // Create — prefill from any supplied field values.
+          // Create — render the inner form directly (blank or prefilled). Using
+          // UserDialog here would discard a party-less user and show the
+          // authenticated user ("my profile") instead of a new-employee form.
           final prefilled = entityFromArgs<User>(args, User.fromJson);
           final user = (prefilled ?? User()).copyWith(role: parseRole(args?['role']));
-          return UserDialog(user, dialog: true);
+          return UserDialogStateFull(user: user, dialog: true);
         }
         return AsyncRecordDialog<User>(
           fetch: (ctx) async {
