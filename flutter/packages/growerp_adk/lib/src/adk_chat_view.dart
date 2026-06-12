@@ -574,6 +574,17 @@ class _AdkChatViewState extends State<AdkChatView> {
             w.runtimeType.toString().endsWith('Dialog');
         return isDialogLike ? w : Dialog(child: w);
       });
+      // When the agent pre-filled the form, hint the user to review before saving.
+      final p = e.params;
+      if (p != null && (p['_aiPrefill'] == true || p['_aiPrefill'] == 'true')) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          final messenger = ScaffoldMessenger.maybeOf(rootNav.context);
+          messenger?.showSnackBar(const SnackBar(
+            content: Text('AI filled this form — please review the values before saving.'),
+            duration: Duration(seconds: 4),
+          ));
+        });
+      }
       return;
     }
 
