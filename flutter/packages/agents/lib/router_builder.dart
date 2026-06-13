@@ -84,6 +84,15 @@ const agentsMenuConfig = MenuConfiguration(
       isActive: true,
     ),
     MenuItem(
+      menuItemId: 'AGENTS_KNOWLEDGE',
+      title: 'Knowledge',
+      route: '/adk-knowledge',
+      iconName: 'menu_book',
+      sequenceNum: 65,
+      widgetName: 'AdkKnowledgeView',
+      isActive: true,
+    ),
+    MenuItem(
       menuItemId: 'AGENTS_ORG',
       title: 'Organization',
       route: '/organization',
@@ -168,6 +177,7 @@ List<Map<String, GrowerpWidgetBuilder>> agentsWidgetRegistrations = [
     'AdkJobListView': (args) => const AdkJobListView(),
     'AdkApprovalsListView': (args) => const AdkApprovalsListView(),
     'AdkActionsListView': (args) => const AdkActionsListView(),
+    'AdkKnowledgeView': (args) => const AdkKnowledgeView(),
     'AdkChatView': (args) => AdkChatView(
           menuItems: agentsMenuConfig.menuItems
               .where((m) => m.isActive && m.route != null)

@@ -1202,6 +1202,27 @@ along with this software (see the LICENSE.md file). If not, see
                 <service name="AdkServices100.update#AdkApproval"/>
             </method>
         </resource>
+        <!-- Knowledge base (tenant-scoped RAG) -->
+        <resource name="AdkKnowledge">
+            <method type="get">
+                <service name="AdkServices100.get#AdkKnowledge"/>
+            </method>
+            <method type="post">
+                <service name="AdkServices100.create#AdkKnowledge"/>
+            </method>
+            <method type="delete">
+                <service name="AdkServices100.delete#AdkKnowledge"/>
+            </method>
+        </resource>
+        <!-- Per-(owner,user) memory summary -->
+        <resource name="AdkMemory">
+            <method type="get">
+                <service name="AdkServices100.get#AdkMemory"/>
+            </method>
+            <method type="patch">
+                <service name="AdkServices100.update#AdkMemory"/>
+            </method>
+        </resource>
     </resource>
     <!-- Antwebsystems website -->
     <resource name="storecontents" require-authentication="anonymous-view">

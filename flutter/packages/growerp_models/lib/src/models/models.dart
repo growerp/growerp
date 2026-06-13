@@ -92,5 +92,6 @@ export 'adk_agent_config_model.dart';
 export 'adk_job_model.dart';
 export 'adk_action_model.dart';
 export 'adk_approval_model.dart';
+export 'adk_knowledge_model.dart';
 // Course models
 export 'course_model.dart';

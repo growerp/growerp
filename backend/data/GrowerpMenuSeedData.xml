@@ -596,6 +596,8 @@ along with this software (see the LICENSE.md file). If not, see
         title="Approvals" route="/adk-approvals" iconName="fact_check" widgetName="AdkApprovalsListView" sequenceNum="50"/>
     <growerp.menu.MenuItem menuItemId="AGENTS_ACTIONS" menuConfigurationId="AGENTS_DEFAULT"
         title="Agent Actions" route="/adk-actions" iconName="history" widgetName="AdkActionsListView" sequenceNum="60"/>
+    <growerp.menu.MenuItem menuItemId="AGENTS_KNOWLEDGE" menuConfigurationId="AGENTS_DEFAULT"
+        title="Knowledge" route="/adk-knowledge" iconName="menu_book" widgetName="AdkKnowledgeView" sequenceNum="65"/>
     <growerp.menu.MenuItem menuItemId="AGENTS_ORG" menuConfigurationId="AGENTS_DEFAULT"
         title="Organization" route="/organization" iconName="business" widgetName="ShowCompanyDialog" sequenceNum="70"/>
     <growerp.menu.MenuItem menuItemId="AGENTS_SETUP" menuConfigurationId="AGENTS_DEFAULT"

@@ -17,3 +17,6 @@ export 'src/adk_job_list_view.dart';
 export 'src/adk_governance_service.dart';
 export 'src/adk_actions_list_view.dart';
 export 'src/adk_approvals_list_view.dart';
+// Knowledge base (RAG)
+export 'src/adk_knowledge_service.dart';
+export 'src/adk_knowledge_view.dart';

@@ -1790,4 +1790,20 @@ abstract class RestClient {
     @Query('adkApprovalId') required String adkApprovalId,
     @Field() required String decision, // approved | rejected
   });
+
+  // ADK knowledge base (tenant-scoped RAG)
+  @GET("rest/s1/growerp/100/AdkKnowledge")
+  Future<AdkKnowledgeDocs> getAdkKnowledge();
+
+  @POST("rest/s1/growerp/100/AdkKnowledge")
+  Future<AdkKnowledgeDoc> createAdkKnowledge({
+    @Field() required String title,
+    @Field() required String text,
+    @Field() String? sourceType,
+  });
+
+  @DELETE("rest/s1/growerp/100/AdkKnowledge")
+  Future<void> deleteAdkKnowledge({
+    @Query('adkKnowledgeDocId') required String adkKnowledgeDocId,
+  });
 }
