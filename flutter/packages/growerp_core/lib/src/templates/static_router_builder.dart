@@ -240,19 +240,8 @@ GoRouter _buildStaticRouter(StaticRouterConfig config) {
             return DisplayMenuItem(
               menuConfiguration: config.menuConfig,
               menuIndex: menuIndex,
-              // Logout on every sub-screen too (main menu = hamburger drawer on
-              // mobile). No FAB here — the main-route FAB is dashboard-only and
-              // sub-screens keep their own FAB.
-              actions: [
-                IconButton(
-                  key: const Key('logoutButton'),
-                  icon: const Icon(Icons.do_not_disturb, key: Key('HomeFormAuth')),
-                  tooltip: 'Logout',
-                  onPressed: () {
-                    context.read<AuthBloc>().add(const AuthLoggedOut());
-                  },
-                ),
-              ],
+              // Sub-screens show a Home button (auto-added) to return to the
+              // main menu; logout and the main-route FAB live on '/' only.
               tabWidgetLoader: config.tabWidgetLoader,
               suppressBlocMenuConfig: true,
               child: child,
