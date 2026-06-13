@@ -52,6 +52,10 @@ class StaticRouterConfig {
   /// If null, adds a default logout button
   final List<Widget>? mainRouteActions;
 
+  /// Optional floating action button shown ONLY on the main '/' route
+  /// (e.g. an AI-chat FAB). Sub-routes don't get it — they keep their own FAB.
+  final Widget? mainRouteFab;
+
   /// Optional function to load tab widgets by widgetName
   /// Used when MenuItems have children (tabs)
   final Widget Function(String widgetName, Map<String, dynamic> args)?
@@ -65,6 +69,7 @@ class StaticRouterConfig {
     this.shellRoutes = const [],
     this.additionalRoutes = const [],
     this.mainRouteActions,
+    this.mainRouteFab,
     this.tabWidgetLoader,
   });
 }
@@ -97,6 +102,7 @@ GoRouter createStaticAppRouter({
   List<RouteBase> shellRoutes = const [],
   List<RouteBase> additionalRoutes = const [],
   List<Widget>? mainRouteActions,
+  Widget? mainRouteFab,
   Widget Function(String widgetName, Map<String, dynamic> args)?
   tabWidgetLoader,
 }) {
@@ -108,6 +114,7 @@ GoRouter createStaticAppRouter({
     shellRoutes: shellRoutes,
     additionalRoutes: additionalRoutes,
     mainRouteActions: mainRouteActions,
+    mainRouteFab: mainRouteFab,
     tabWidgetLoader: tabWidgetLoader,
   );
 
@@ -196,6 +203,8 @@ GoRouter _buildStaticRouter(StaticRouterConfig config) {
               actions: getMainActions(context),
               tabWidgetLoader: config.tabWidgetLoader,
               suppressBlocMenuConfig: true,
+              // Chat (or other) FAB shown ONLY on the main menu/dashboard.
+              floatingActionButton: config.mainRouteFab,
               child: getDashboard(),
             );
           } else {
@@ -231,6 +240,19 @@ GoRouter _buildStaticRouter(StaticRouterConfig config) {
             return DisplayMenuItem(
               menuConfiguration: config.menuConfig,
               menuIndex: menuIndex,
+              // Logout on every sub-screen too (main menu = hamburger drawer on
+              // mobile). No FAB here — the main-route FAB is dashboard-only and
+              // sub-screens keep their own FAB.
+              actions: [
+                IconButton(
+                  key: const Key('logoutButton'),
+                  icon: const Icon(Icons.do_not_disturb, key: Key('HomeFormAuth')),
+                  tooltip: 'Logout',
+                  onPressed: () {
+                    context.read<AuthBloc>().add(const AuthLoggedOut());
+                  },
+                ),
+              ],
               tabWidgetLoader: config.tabWidgetLoader,
               suppressBlocMenuConfig: true,
               child: child,

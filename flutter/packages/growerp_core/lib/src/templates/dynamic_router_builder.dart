@@ -285,6 +285,20 @@ GoRouter createDynamicAppRouter(
           return DisplayMenuItem(
             menuConfiguration: currentConfig,
             menuIndex: menuIndex,
+            // Restore the logout action on every screen (mobile: app-bar
+            // top-right; main menu is the hamburger drawer). The chat FAB stays
+            // on the dashboard only — sub-screens (lists) have their own FAB, so
+            // a second FAB here would collide.
+            actions: [
+              IconButton(
+                key: const Key('logoutButton'),
+                icon: const Icon(Icons.do_not_disturb, key: Key('HomeFormAuth')),
+                tooltip: 'Logout',
+                onPressed: () {
+                  context.read<AuthBloc>().add(const AuthLoggedOut());
+                },
+              ),
+            ],
             tabWidgetLoader: config.widgetLoader,
             suppressBlocMenuConfig: false,
             child: child,

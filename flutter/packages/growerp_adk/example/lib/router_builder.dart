@@ -109,16 +109,15 @@ GoRouter createAdkExampleRouter() {
     appTitle: 'GrowERP ADK',
     dashboard: const AdkDashboard(),
     widgetBuilder: _routeWidget,
-    mainRouteActions: [
-      Builder(
-        builder: (ctx) => IconButton(
-          key: const Key('adkChatFab'),
-          tooltip: 'AI Assistant',
-          icon: const Icon(Icons.smart_toy),
-          onPressed: () => AdkChatDialog.show(ctx),
-        ),
+    // AI-chat as a FAB on the main menu only; logout stays in the app bar.
+    mainRouteFab: Builder(
+      builder: (ctx) => FloatingActionButton(
+        key: const Key('adkChatFab'),
+        tooltip: 'AI Assistant',
+        onPressed: () => AdkChatDialog.show(ctx),
+        child: const Icon(Icons.smart_toy),
       ),
-    ],
+    ),
   );
 }
 
