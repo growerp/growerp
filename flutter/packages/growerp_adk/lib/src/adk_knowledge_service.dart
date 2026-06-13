@@ -47,4 +47,12 @@ class AdkKnowledgeService {
 
   Future<void> delete(String adkKnowledgeDocId) async =>
       _client.deleteAdkKnowledge(adkKnowledgeDocId: adkKnowledgeDocId);
+
+  /// Auto-ingest the company's product catalog into the knowledge base.
+  /// Returns the number of products processed.
+  Future<int> importProducts() async {
+    final result = await _client.importAdkKnowledgeProducts();
+    final n = result['productCount'];
+    return n is int ? n : int.tryParse('$n') ?? 0;
+  }
 }

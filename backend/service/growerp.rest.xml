@@ -1222,6 +1222,12 @@ along with this software (see the LICENSE.md file). If not, see
                 </method>
             </id>
         </resource>
+        <!-- Import the company's product catalog into the knowledge base -->
+        <resource name="AdkKnowledgeImportProducts">
+            <method type="post">
+                <service name="AdkServices100.import#AdkKnowledgeProducts"/>
+            </method>
+        </resource>
         <!-- Per-(owner,user) memory summary -->
         <resource name="AdkMemory">
             <method type="get">

@@ -12,6 +12,9 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+import 'dart:convert';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
@@ -159,6 +162,95 @@ class _AdkKnowledgeViewState extends State<AdkKnowledgeView> {
     }
   }
 
+  /// Pick a text document, read it, and open the form pre-filled so the user can
+  /// review/edit before ingesting it (sourceType=upload).
+  Future<void> _upload() async {
+    FilePickerResult? picked;
+    try {
+      picked = await FilePicker.platform.pickFiles(
+        withData: true,
+        type: FileType.custom,
+        allowedExtensions: const ['txt', 'md', 'markdown', 'csv', 'json', 'log', 'text'],
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not open file: $e'), backgroundColor: Colors.red),
+        );
+      }
+      return;
+    }
+    if (picked == null || picked.files.isEmpty) return;
+    final f = picked.files.first;
+    final bytes = f.bytes;
+    if (bytes == null) return;
+    String content;
+    try {
+      content = utf8.decode(bytes);
+    } catch (_) {
+      content = String.fromCharCodes(bytes);
+    }
+    final dot = f.name.lastIndexOf('.');
+    final base = dot > 0 ? f.name.substring(0, dot) : f.name;
+    if (!mounted) return;
+    final r = await _knowledgeForm(heading: 'Add document', title: base, text: content);
+    if (r == null) return;
+    setState(() => _loading = true);
+    try {
+      final svc = await AdkKnowledgeService.create();
+      await svc.add(r.title, r.text, sourceType: 'upload');
+      await _load();
+    } catch (e) {
+      if (mounted) {
+        setState(() => _loading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed: $e'), backgroundColor: Colors.red),
+        );
+      }
+    }
+  }
+
+  /// Import the company's product catalog into the knowledge base (one doc per
+  /// product, upserted server-side).
+  Future<void> _importProducts() async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (dctx) => AlertDialog(
+        title: const Text('Import products?'),
+        content: const Text(
+            'Add (or refresh) one knowledge entry per product so agents can answer '
+            'questions about your catalog. This may take a moment.'),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(dctx, false),
+              child: const Text('Cancel')),
+          FilledButton(
+              onPressed: () => Navigator.pop(dctx, true),
+              child: const Text('Import')),
+        ],
+      ),
+    );
+    if (confirm != true) return;
+    setState(() => _loading = true);
+    try {
+      final svc = await AdkKnowledgeService.create();
+      final n = await svc.importProducts();
+      await _load();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Imported $n product(s) into the knowledge base')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _loading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed: $e'), backgroundColor: Colors.red),
+        );
+      }
+    }
+  }
+
   /// Open a doc: fetch its full text, let the user edit title/content and Save
   /// (re-chunks + re-embeds server-side).
   Future<void> _openDoc(AdkKnowledgeDoc d) async {
@@ -233,6 +325,18 @@ class _AdkKnowledgeViewState extends State<AdkKnowledgeView> {
       appBar: AppBar(
         title: const Text('Knowledge base'),
         actions: [
+          IconButton(
+            key: const Key('uploadKnowledge'),
+            icon: const Icon(Icons.upload_file),
+            tooltip: 'Upload a document',
+            onPressed: _upload,
+          ),
+          IconButton(
+            key: const Key('importProductsKnowledge'),
+            icon: const Icon(Icons.inventory_2_outlined),
+            tooltip: 'Import product catalog',
+            onPressed: _importProducts,
+          ),
           IconButton(
             key: const Key('refreshKnowledge'),
             icon: const Icon(Icons.refresh),

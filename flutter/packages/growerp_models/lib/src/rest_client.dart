@@ -1818,4 +1818,7 @@ abstract class RestClient {
   Future<void> deleteAdkKnowledge({
     @Query('adkKnowledgeDocId') required String adkKnowledgeDocId,
   });
+
+  @POST("rest/s1/growerp/100/AdkKnowledgeImportProducts")
+  Future<Map<String, dynamic>> importAdkKnowledgeProducts();
 }
