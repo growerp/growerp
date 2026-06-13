@@ -13,6 +13,7 @@
  */
 
 import 'package:json_annotation/json_annotation.dart';
+import 'assessment_model.dart' show NullableTimestampConverter;
 
 part 'adk_knowledge_model.g.dart';
 
@@ -27,7 +28,11 @@ class AdkKnowledgeDoc {
   final String? sourceType;
   final String? mimeType;
   final int? chunkCount;
+  @NullableTimestampConverter()
   final DateTime? createdDate;
+
+  /// Full document text — returned only by the detail endpoint (joined chunks).
+  final String? content;
 
   /// Write-only: the document text sent on create (chunked + embedded server-side).
   @JsonKey(includeFromJson: false)
@@ -40,6 +45,7 @@ class AdkKnowledgeDoc {
     this.mimeType,
     this.chunkCount,
     this.createdDate,
+    this.content,
     this.text,
   });
 

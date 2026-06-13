@@ -13,6 +13,7 @@
  */
 
 import 'package:flutter/material.dart';
+import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'adk_knowledge_service.dart';
 
@@ -26,14 +27,26 @@ class AdkKnowledgeView extends StatefulWidget {
 }
 
 class _AdkKnowledgeViewState extends State<AdkKnowledgeView> {
+  final _searchController = TextEditingController();
+  final _searchFocusNode = FocusNode();
+  final _scrollController = ScrollController();
   List<AdkKnowledgeDoc> _docs = [];
   bool _loading = true;
   String? _error;
+  String _search = '';
 
   @override
   void initState() {
     super.initState();
     _load();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _searchFocusNode.dispose();
+    _scrollController.dispose();
+    super.dispose();
   }
 
   Future<void> _load() async {
@@ -43,7 +56,7 @@ class _AdkKnowledgeViewState extends State<AdkKnowledgeView> {
     });
     try {
       final svc = await AdkKnowledgeService.create();
-      final list = await svc.list();
+      final list = await svc.list(search: _search.isEmpty ? null : _search);
       if (mounted) setState(() => _docs = list);
     } catch (e) {
       if (mounted) setState(() => _error = e.toString());
@@ -52,55 +65,125 @@ class _AdkKnowledgeViewState extends State<AdkKnowledgeView> {
     }
   }
 
-  Future<void> _add() async {
-    final titleCtrl = TextEditingController();
-    final textCtrl = TextEditingController();
-    final ok = await showDialog<bool>(
+  /// Shared title+content form, using the standard GrowERP detail-dialog frame
+  /// (Dialog + popUp), the same design as the user detail screen. Returns the
+  /// entered (title, text) on save, or null on cancel.
+  Future<({String title, String text})?> _knowledgeForm({
+    required String heading,
+    String title = '',
+    String text = '',
+  }) {
+    final titleCtrl = TextEditingController(text: title);
+    final textCtrl = TextEditingController(text: text);
+    final phone = isAPhone(context);
+    return showDialog<({String title, String text})>(
       context: context,
-      builder: (dctx) => AlertDialog(
-        title: const Text('Add knowledge'),
-        content: SizedBox(
-          width: 500,
+      builder: (dctx) => Dialog(
+        key: const Key('AdkKnowledgeDialog'),
+        insetPadding: const EdgeInsets.all(10),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: popUp(
+          context: dctx,
+          title: heading,
+          width: phone ? 400 : 800,
+          height: phone ? 600 : 550,
           child: Column(
-            mainAxisSize: MainAxisSize.min,
             children: [
-              TextField(
+              TextFormField(
                 key: const Key('knowledgeTitle'),
                 controller: titleCtrl,
                 decoration: const InputDecoration(labelText: 'Title'),
               ),
-              const SizedBox(height: 8),
-              TextField(
-                key: const Key('knowledgeText'),
-                controller: textCtrl,
-                decoration: const InputDecoration(
-                  labelText: 'Text (policy, note, document…)',
+              const SizedBox(height: 10),
+              Expanded(
+                child: TextFormField(
+                  key: const Key('knowledgeText'),
+                  controller: textCtrl,
+                  decoration: const InputDecoration(
+                    labelText: 'Content (policy, note, document…)',
+                    alignLabelWithHint: true,
+                    border: OutlineInputBorder(),
+                  ),
+                  textAlignVertical: TextAlignVertical.top,
+                  expands: true,
+                  maxLines: null,
                 ),
-                maxLines: 8,
-                minLines: 4,
+              ),
+              const SizedBox(height: 10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  OutlinedButton(
+                    onPressed: () => Navigator.pop(dctx),
+                    child: const Text('Cancel'),
+                  ),
+                  const SizedBox(width: 10),
+                  FilledButton(
+                    key: const Key('knowledgeSave'),
+                    onPressed: () {
+                      if (titleCtrl.text.trim().isEmpty ||
+                          textCtrl.text.trim().isEmpty) {
+                        return;
+                      }
+                      Navigator.pop(dctx, (
+                        title: titleCtrl.text.trim(),
+                        text: textCtrl.text.trim(),
+                      ));
+                    },
+                    child: const Text('Save'),
+                  ),
+                ],
               ),
             ],
           ),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dctx, false),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            key: const Key('knowledgeSave'),
-            onPressed: () => Navigator.pop(dctx, true),
-            child: const Text('Add'),
-          ),
-        ],
       ),
     );
-    if (ok != true) return;
-    if (titleCtrl.text.trim().isEmpty || textCtrl.text.trim().isEmpty) return;
+  }
+
+  Future<void> _add() async {
+    final r = await _knowledgeForm(heading: 'Add knowledge');
+    if (r == null) return;
     setState(() => _loading = true);
     try {
       final svc = await AdkKnowledgeService.create();
-      await svc.add(titleCtrl.text.trim(), textCtrl.text.trim());
+      await svc.add(r.title, r.text);
+      await _load();
+    } catch (e) {
+      if (mounted) {
+        setState(() => _loading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed: $e'), backgroundColor: Colors.red),
+        );
+      }
+    }
+  }
+
+  /// Open a doc: fetch its full text, let the user edit title/content and Save
+  /// (re-chunks + re-embeds server-side).
+  Future<void> _openDoc(AdkKnowledgeDoc d) async {
+    final svc = await AdkKnowledgeService.create();
+    AdkKnowledgeDoc full;
+    try {
+      full = await svc.detail(d.adkKnowledgeDocId!);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed: $e'), backgroundColor: Colors.red),
+        );
+      }
+      return;
+    }
+    if (!mounted) return;
+    final r = await _knowledgeForm(
+      heading: 'Edit knowledge',
+      title: full.title ?? '',
+      text: full.content ?? '',
+    );
+    if (r == null) return;
+    setState(() => _loading = true);
+    try {
+      await svc.update(d.adkKnowledgeDocId!, title: r.title, text: r.text);
       await _load();
     } catch (e) {
       if (mounted) {
@@ -163,45 +246,88 @@ class _AdkKnowledgeViewState extends State<AdkKnowledgeView> {
         tooltip: 'Add knowledge',
         child: const Icon(Icons.add),
       ),
-      body: _loading
-          ? const Center(child: CircularProgressIndicator())
-          : _error != null
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text('Error: $_error'),
-                      const SizedBox(height: 8),
-                      ElevatedButton(
-                          onPressed: _load, child: const Text('Retry')),
-                    ],
+      body: _error != null
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text('Error: $_error'),
+                  const SizedBox(height: 8),
+                  ElevatedButton(onPressed: _load, child: const Text('Retry')),
+                ],
+              ),
+            )
+          : Column(
+              children: [
+                // Search bar — same component/behaviour as the user list.
+                ListFilterBar(
+                  searchHint: 'Search knowledge...',
+                  searchController: _searchController,
+                  focusNode: _searchFocusNode,
+                  onSearchChanged: (value) {
+                    _search = value;
+                    _load();
+                  },
+                ),
+                Expanded(
+                  child: StyledDataTable(
+                    columns: _columns(context),
+                    rows: _docs.map(_rowFor).toList(),
+                    isLoading: _loading && _docs.isEmpty,
+                    scrollController: _scrollController,
+                    rowHeight: isAPhone(context) ? 72 : 56,
+                    onRowTap: (index) async {
+                      await _openDoc(_docs[index]);
+                      _searchFocusNode.requestFocus();
+                    },
                   ),
-                )
-              : _docs.isEmpty
-                  ? const Center(
-                      child: Text(
-                          'No knowledge yet.\nTap + to add a policy or note.',
-                          textAlign: TextAlign.center))
-                  : ListView.builder(
-                      itemCount: _docs.length,
-                      itemBuilder: (context, index) {
-                        final d = _docs[index];
-                        return Card(
-                          key: Key('knowledge$index'),
-                          child: ListTile(
-                            leading: const Icon(Icons.menu_book),
-                            title: Text(d.title ?? '?'),
-                            subtitle: Text(
-                                '${d.sourceType ?? 'note'} • ${d.chunkCount ?? 0} chunk(s)'),
-                            trailing: IconButton(
-                              key: Key('deleteKnowledge$index'),
-                              icon: const Icon(Icons.delete, color: Colors.red),
-                              onPressed: () => _delete(d),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
+                ),
+              ],
+            ),
     );
+  }
+
+  List<StyledColumn> _columns(BuildContext context) {
+    if (isAPhone(context)) {
+      return const [
+        StyledColumn(header: '', flex: 1),
+        StyledColumn(header: 'Title', flex: 5),
+        StyledColumn(header: '', flex: 1),
+      ];
+    }
+    return const [
+      StyledColumn(header: '', flex: 1),
+      StyledColumn(header: 'Title', flex: 4),
+      StyledColumn(header: 'Type', flex: 2),
+      StyledColumn(header: 'Chunks', flex: 1),
+      StyledColumn(header: '', flex: 1),
+    ];
+  }
+
+  List<Widget> _rowFor(AdkKnowledgeDoc d) {
+    final index = _docs.indexOf(d);
+    final delete = IconButton(
+      key: Key('deleteKnowledge$index'),
+      icon: const Icon(Icons.delete, color: Colors.red, size: 20),
+      padding: EdgeInsets.zero,
+      visualDensity: VisualDensity.compact,
+      constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+      tooltip: 'Delete',
+      onPressed: () => _delete(d),
+    );
+    if (isAPhone(context)) {
+      return [
+        const CircleAvatar(child: Icon(Icons.menu_book)),
+        Text('${d.title ?? '?'}\n${d.sourceType ?? 'note'} • ${d.chunkCount ?? 0} chunk(s)'),
+        delete,
+      ];
+    }
+    return [
+      const CircleAvatar(child: Icon(Icons.menu_book)),
+      Text(d.title ?? '?'),
+      Text(d.sourceType ?? 'note'),
+      Text('${d.chunkCount ?? 0}'),
+      delete,
+    ];
   }
 }

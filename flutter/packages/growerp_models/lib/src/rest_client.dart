@@ -1793,13 +1793,25 @@ abstract class RestClient {
 
   // ADK knowledge base (tenant-scoped RAG)
   @GET("rest/s1/growerp/100/AdkKnowledge")
-  Future<AdkKnowledgeDocs> getAdkKnowledge();
+  Future<AdkKnowledgeDocs> getAdkKnowledge({@Query('search') String? search});
+
+  @GET("rest/s1/growerp/100/AdkKnowledge/{adkKnowledgeDocId}")
+  Future<AdkKnowledgeDoc> getAdkKnowledgeDetail({
+    @Path() required String adkKnowledgeDocId,
+  });
 
   @POST("rest/s1/growerp/100/AdkKnowledge")
   Future<AdkKnowledgeDoc> createAdkKnowledge({
     @Field() required String title,
     @Field() required String text,
     @Field() String? sourceType,
+  });
+
+  @PATCH("rest/s1/growerp/100/AdkKnowledge/{adkKnowledgeDocId}")
+  Future<void> updateAdkKnowledge({
+    @Path() required String adkKnowledgeDocId,
+    @Field() String? title,
+    @Field() String? text,
   });
 
   @DELETE("rest/s1/growerp/100/AdkKnowledge")

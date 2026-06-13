@@ -26,15 +26,24 @@ class AdkKnowledgeService {
     return AdkKnowledgeService._(client);
   }
 
-  Future<List<AdkKnowledgeDoc>> list() async {
-    final result = await _client.getAdkKnowledge();
+  Future<List<AdkKnowledgeDoc>> list({String? search}) async {
+    final result = await _client.getAdkKnowledge(search: search);
     return result.adkKnowledgeDocs;
   }
+
+  /// Full document (with joined chunk text) for the detail view.
+  Future<AdkKnowledgeDoc> detail(String adkKnowledgeDocId) async =>
+      _client.getAdkKnowledgeDetail(adkKnowledgeDocId: adkKnowledgeDocId);
 
   Future<AdkKnowledgeDoc> add(String title, String text,
           {String sourceType = 'note'}) async =>
       _client.createAdkKnowledge(
           title: title, text: text, sourceType: sourceType);
+
+  Future<void> update(String adkKnowledgeDocId,
+          {String? title, String? text}) async =>
+      _client.updateAdkKnowledge(
+          adkKnowledgeDocId: adkKnowledgeDocId, title: title, text: text);
 
   Future<void> delete(String adkKnowledgeDocId) async =>
       _client.deleteAdkKnowledge(adkKnowledgeDocId: adkKnowledgeDocId);

@@ -13,6 +13,7 @@
  */
 
 import 'package:json_annotation/json_annotation.dart';
+import 'assessment_model.dart' show NullableTimestampConverter;
 
 part 'adk_approval_model.g.dart';
 
@@ -30,7 +31,9 @@ class AdkApproval {
   final String? status;
   final String? requestedByUserId;
   final String? decidedByUserId;
+  @NullableTimestampConverter()
   final DateTime? requestTime;
+  @NullableTimestampConverter()
   final DateTime? decisionTime;
 
   const AdkApproval({

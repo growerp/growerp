@@ -1213,6 +1213,14 @@ along with this software (see the LICENSE.md file). If not, see
             <method type="delete">
                 <service name="AdkServices100.delete#AdkKnowledge"/>
             </method>
+            <id name="adkKnowledgeDocId">
+                <method type="get">
+                    <service name="AdkServices100.get#AdkKnowledgeDetail"/>
+                </method>
+                <method type="patch">
+                    <service name="AdkServices100.update#AdkKnowledge"/>
+                </method>
+            </id>
         </resource>
         <!-- Per-(owner,user) memory summary -->
         <resource name="AdkMemory">

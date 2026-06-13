@@ -13,6 +13,7 @@
  */
 
 import 'package:json_annotation/json_annotation.dart';
+import 'assessment_model.dart' show NullableTimestampConverter;
 
 part 'adk_action_model.g.dart';
 
@@ -37,6 +38,7 @@ class AdkActionLog {
   final int? tokensIn;
   final int? tokensOut;
   final int? tokensTotal;
+  @NullableTimestampConverter()
   final DateTime? actionTime;
 
   const AdkActionLog({
