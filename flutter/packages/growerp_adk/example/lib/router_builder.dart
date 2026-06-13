@@ -81,6 +81,15 @@ const adkMenuConfig = MenuConfiguration(
       sequenceNum: 60,
       widgetName: 'AdkActionsListView',
     ),
+    MenuItem(
+      menuItemId: 'ADK_KNOWLEDGE',
+      itemKey: 'ADK_KNOWLEDGE',
+      title: 'Knowledge',
+      route: '/adk-knowledge',
+      iconName: 'menu_book',
+      sequenceNum: 65,
+      widgetName: 'AdkKnowledgeView',
+    ),
   ],
 );
 
@@ -98,6 +107,7 @@ Widget _routeWidget(String route) => switch (route) {
       '/adk-jobs' => const AdkJobListView(),
       '/adk-approvals' => const AdkApprovalsListView(),
       '/adk-actions' => const AdkActionsListView(),
+      '/adk-knowledge' => const AdkKnowledgeView(),
       _ => const AdkDashboard(),
     };
 
@@ -163,6 +173,12 @@ class AdkDashboard extends StatelessWidget {
               title: 'Agent Actions',
               iconName: 'history',
               route: '/adk-actions',
+            ),
+            MenuItem(
+              menuItemId: 'knowledge',
+              title: 'Knowledge',
+              iconName: 'menu_book',
+              route: '/adk-knowledge',
             ),
           ],
           stats: state.authenticate?.stats,
