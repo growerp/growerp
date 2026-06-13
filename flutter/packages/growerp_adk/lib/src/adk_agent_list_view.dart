@@ -198,11 +198,17 @@ class _AdkAgentListViewState extends State<AdkAgentListView> {
           IconButton(
             icon: const Icon(Icons.edit, size: 20),
             tooltip: 'Edit',
+            padding: EdgeInsets.zero,
+            visualDensity: VisualDensity.compact,
+            constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
             onPressed: () => _edit(cfg),
           ),
           IconButton(
             icon: Icon(Icons.delete, size: 20, color: cs.error),
             tooltip: 'Delete',
+            padding: EdgeInsets.zero,
+            visualDensity: VisualDensity.compact,
+            constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
             onPressed: () => _delete(cfg),
           ),
         ],
