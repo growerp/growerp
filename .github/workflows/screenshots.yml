@@ -11,7 +11,7 @@ on:
   workflow_dispatch:
     inputs:
       apps:
-        description: "Apps to screenshot (comma-separated: admin, hotel)"
+        description: "Apps to screenshot (comma-separated: admin, hotel, freelance, health, elearner, support, agents)"
         required: true
         default: "admin,hotel"
         type: string
@@ -80,7 +80,7 @@ jobs:
         run: |
           # When triggered by workflow_run there is no inputs context; fall back to default.
           APPS_INPUT="${{ github.event.inputs.apps || 'admin,hotel' }}"
-          VALID_APPS="admin hotel freelance health elearner support"
+          VALID_APPS="admin hotel freelance health elearner support agents"
           IFS=',' read -ra app_list <<< "$APPS_INPUT"
           for app in "${app_list[@]}"; do
             app=$(echo "$app" | tr -d ' ')

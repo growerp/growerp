@@ -16,18 +16,18 @@ name: Status all stores
 # Per-store app availability:
 # iOS     : admin, hotel, freelance, health
 # macOS   : admin, hotel
-# Android : admin, hotel, freelance, health, elearner, support
+# Android : admin, hotel, freelance, health, elearner, support, agents
 # Windows : admin, hotel
-# Snap    : admin, hotel, freelance, health, elearner, support
+# Snap    : admin, hotel, freelance, health, elearner, support, agents
 
 on:
     workflow_dispatch:
         inputs:
             apps:
                 description: "Apps to check (comma-separated: admin, hotel, freelance, health,
-                    elearner, support)"
+                    elearner, support, agents)"
                 required: true
-                default: "admin,hotel,freelance,health,elearner,support"
+                default: "admin,hotel,freelance,health,elearner,support,agents"
                 type: string
             stores:
                 description: "Stores to check (comma-separated: ios, macos, android, windows,
@@ -67,7 +67,7 @@ jobs:
                   APPS: ${{ inputs.apps }}
                   STORES: ${{ inputs.stores }}
               run: |
-                  VALID_APPS="admin hotel freelance health elearner support"
+                  VALID_APPS="admin hotel freelance health elearner support agents"
                   IFS=',' read -ra app_list <<< "$APPS"
                   for app in "${app_list[@]}"; do
                     app=$(echo "$app" | tr -d ' ')
@@ -99,9 +99,9 @@ jobs:
                   declare -A STORE_APPS
                   STORE_APPS[ios]="admin hotel freelance health"
                   STORE_APPS[macos]="admin hotel"
-                  STORE_APPS[android]="admin hotel freelance health elearner support"
+                  STORE_APPS[android]="admin hotel freelance health elearner support agents"
                   STORE_APPS[windows]="admin hotel"
-                  STORE_APPS[snap]="admin hotel freelance health elearner support"
+                  STORE_APPS[snap]="admin hotel freelance health elearner support agents"
 
                   for store in ios macos android windows snap; do
                     if contains_store "$store"; then
@@ -699,7 +699,7 @@ jobs:
                   from datetime import datetime, timezone
 
                   STORE_ORDER = ['ios', 'macos', 'android', 'windows', 'snap']
-                  APP_ORDER   = ['admin', 'hotel', 'freelance', 'health', 'elearner', 'support']
+                  APP_ORDER   = ['admin', 'hotel', 'freelance', 'health', 'elearner', 'support', 'agents']
 
                   apps_input   = os.environ.get('APPS', '')
                   stores_input = os.environ.get('STORES', '')

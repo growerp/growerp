@@ -16,7 +16,7 @@ on:
     inputs:
       apps:
         description: "Apps to update (comma-separated: admin, hotel, freelance, health,
-          elearner, support)"
+          elearner, support, agents)"
         required: true
         default: "admin,hotel"
         type: string
@@ -71,7 +71,7 @@ jobs:
           APPS: ${{ needs.set-params.outputs.apps }}
           STORES: ${{ needs.set-params.outputs.stores }}
         run: |
-          VALID_APPS="admin hotel freelance health elearner support"
+          VALID_APPS="admin hotel freelance health elearner support agents"
           IFS=',' read -ra app_list <<< "$APPS"
           for app in "${app_list[@]}"; do
             app=$(echo "$app" | tr -d ' ')

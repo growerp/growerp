@@ -5,7 +5,7 @@ on:
     inputs:
       apps:
         description: "Apps to submit (comma-separated: admin, hotel, freelance, health,
-          elearner, support)"
+          elearner, support, agents)"
         required: true
         default: "admin,hotel"
         type: string
@@ -56,7 +56,7 @@ jobs:
           APPS: ${{ inputs.apps }}
           STORES: ${{ inputs.stores }}
         run: |
-          VALID_APPS="admin hotel freelance health elearner support"
+          VALID_APPS="admin hotel freelance health elearner support agents"
           IFS=',' read -ra app_list <<< "$APPS"
           for app in "${app_list[@]}"; do
             app=$(echo "$app" | tr -d ' ')
@@ -724,7 +724,7 @@ jobs:
           MATRIX_APP: ${{ matrix.app }}
         run: |
           case "$MATRIX_APP" in
-            admin|hotel|freelance|health|elearner|support)
+            admin|hotel|freelance|health|elearner|support|agents)
               ;;
             *)
               echo "Unsupported Android app: $MATRIX_APP" >&2
@@ -1100,7 +1100,7 @@ jobs:
           MATRIX_APP: ${{ matrix.app }}
         run: |
           case "$MATRIX_APP" in
-            admin|hotel|freelance|health|elearner|support)
+            admin|hotel|freelance|health|elearner|support|agents)
               ;;
             *)
               echo "Unsupported Snap app: $MATRIX_APP" >&2

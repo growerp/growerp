@@ -11,7 +11,7 @@ on:
     inputs:
       apps:
         description: "Apps to download metadata for (comma-separated: admin, hotel,
-          freelance, health, elearner, support)"
+          freelance, health, elearner, support, agents)"
         required: true
         default: "admin,hotel"
         type: string
@@ -51,7 +51,7 @@ jobs:
           APPS: ${{ inputs.apps }}
           STORES: ${{ inputs.stores }}
         run: |
-          VALID_APPS="admin hotel freelance health elearner support"
+          VALID_APPS="admin hotel freelance health elearner support agents"
           IFS=',' read -ra app_list <<< "$APPS"
           for app in "${app_list[@]}"; do
             app=$(echo "$app" | tr -d ' ')

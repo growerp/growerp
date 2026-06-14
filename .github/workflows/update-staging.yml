@@ -20,7 +20,7 @@ on:
           - major
           - none
       apps:
-        description: "Comma-separated list of apps to build (blank = all: admin,elearner,freelance,health,hotel,support,growerp-moqui)"
+        description: "Comma-separated list of apps to build (blank = all: admin,elearner,freelance,health,hotel,support,agents,growerp-moqui)"
         required: false
         default: ""
       comment:
@@ -58,7 +58,7 @@ jobs:
         id: resolve-apps
         run: |
           INPUT="${{ inputs.apps }}"
-          ALL_FLUTTER="admin elearner freelance health hotel support"
+          ALL_FLUTTER="admin elearner freelance health hotel support agents"
           if [ -z "$INPUT" ]; then
             FLUTTER_APPS="$ALL_FLUTTER"
             INCLUDE_MOQUI=true
@@ -302,7 +302,7 @@ jobs:
         run: |
           echo "## Update Staging Results" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          for app in admin elearner freelance health hotel support growerp-moqui; do
+          for app in admin elearner freelance health hotel support agents growerp-moqui; do
             if [ -f "/tmp/build-success/${app}.txt" ]; then
               echo "- ✅ $app" >> $GITHUB_STEP_SUMMARY
             else
