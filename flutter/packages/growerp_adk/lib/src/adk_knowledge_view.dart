@@ -321,73 +321,80 @@ class _AdkKnowledgeViewState extends State<AdkKnowledgeView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Knowledge base'),
-        actions: [
-          IconButton(
-            key: const Key('uploadKnowledge'),
-            icon: const Icon(Icons.upload_file),
-            tooltip: 'Upload a document',
-            onPressed: _upload,
-          ),
-          IconButton(
-            key: const Key('importProductsKnowledge'),
-            icon: const Icon(Icons.inventory_2_outlined),
-            tooltip: 'Import product catalog',
-            onPressed: _importProducts,
-          ),
-          IconButton(
-            key: const Key('refreshKnowledge'),
-            icon: const Icon(Icons.refresh),
-            onPressed: _load,
-          ),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        key: const Key('addKnowledge'),
-        onPressed: _add,
-        tooltip: 'Add knowledge',
-        child: const Icon(Icons.add),
-      ),
-      body: _error != null
-          ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text('Error: $_error'),
-                  const SizedBox(height: 8),
-                  ElevatedButton(onPressed: _load, child: const Text('Retry')),
-                ],
-              ),
-            )
-          : Column(
-              children: [
-                // Search bar — same component/behaviour as the user list.
-                ListFilterBar(
-                  searchHint: 'Search knowledge...',
-                  searchController: _searchController,
-                  focusNode: _searchFocusNode,
-                  onSearchChanged: (value) {
-                    _search = value;
-                    _load();
-                  },
-                ),
-                Expanded(
-                  child: StyledDataTable(
-                    columns: _columns(context),
-                    rows: _docs.map(_rowFor).toList(),
-                    isLoading: _loading && _docs.isEmpty,
-                    scrollController: _scrollController,
-                    rowHeight: isAPhone(context) ? 72 : 56,
-                    onRowTap: (index) async {
-                      await _openDoc(_docs[index]);
-                      _searchFocusNode.requestFocus();
-                    },
-                  ),
-                ),
-              ],
+    if (_error != null) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text('Error: $_error'),
+            const SizedBox(height: 8),
+            ElevatedButton(onPressed: _load, child: const Text('Retry')),
+          ],
+        ),
+      );
+    }
+    // No AppBar — the title comes from the app shell/menu. Title-bar actions live
+    // on the search line; add is a FAB. Same design as the user list.
+    return Column(
+      children: [
+        ListFilterBar(
+          searchHint: 'Search knowledge...',
+          searchController: _searchController,
+          focusNode: _searchFocusNode,
+          onSearchChanged: (value) {
+            _search = value;
+            _load();
+          },
+          actions: [
+            IconButton(
+              key: const Key('uploadKnowledge'),
+              icon: const Icon(Icons.upload_file),
+              tooltip: 'Upload a document',
+              onPressed: _upload,
             ),
+            IconButton(
+              key: const Key('importProductsKnowledge'),
+              icon: const Icon(Icons.inventory_2_outlined),
+              tooltip: 'Import product catalog',
+              onPressed: _importProducts,
+            ),
+            IconButton(
+              key: const Key('refreshKnowledge'),
+              icon: const Icon(Icons.refresh),
+              tooltip: 'Refresh',
+              onPressed: _load,
+            ),
+          ],
+        ),
+        Expanded(
+          child: Stack(
+            children: [
+              StyledDataTable(
+                columns: _columns(context),
+                rows: _docs.map(_rowFor).toList(),
+                isLoading: _loading && _docs.isEmpty,
+                scrollController: _scrollController,
+                rowHeight: isAPhone(context) ? 72 : 56,
+                onRowTap: (index) async {
+                  await _openDoc(_docs[index]);
+                  _searchFocusNode.requestFocus();
+                },
+              ),
+              Positioned(
+                right: 16,
+                bottom: 16,
+                child: FloatingActionButton(
+                  key: const Key('addKnowledge'),
+                  heroTag: 'adkKnowledgeAdd',
+                  onPressed: _add,
+                  tooltip: 'Add knowledge',
+                  child: const Icon(Icons.add),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 

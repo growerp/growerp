@@ -13,11 +13,14 @@
  */
 
 import 'package:flutter/material.dart';
+import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'adk_governance_service.dart';
 
 /// Audit trail of agent tool/service actions for the logged-in company.
 /// Owner-scoped by the backend — a tenant never sees another company's rows.
+/// Same design/function as the user list: ListFilterBar search + StyledDataTable +
+/// row-tap detail (a read-only log, so no add FAB).
 class AdkActionsListView extends StatefulWidget {
   const AdkActionsListView({super.key, this.configId});
 
@@ -32,11 +35,33 @@ class _AdkActionsListViewState extends State<AdkActionsListView> {
   List<AdkActionLog> _actions = [];
   bool _loading = true;
   String? _error;
+  final _searchController = TextEditingController();
+  final _searchFocusNode = FocusNode();
+  final _scrollController = ScrollController();
+  String _search = '';
 
   @override
   void initState() {
     super.initState();
     _load();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _searchFocusNode.dispose();
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  /// Client-side filter by service/tool/decision/reason.
+  List<AdkActionLog> get _visible {
+    if (_search.isEmpty) return _actions;
+    final q = _search.toLowerCase();
+    return _actions.where((a) {
+      return [a.serviceName, a.toolName, a.decision, a.verbClass, a.reason]
+          .any((v) => (v ?? '').toLowerCase().contains(q));
+    }).toList();
   }
 
   Future<void> _load() async {
@@ -64,19 +89,66 @@ class _AdkActionsListViewState extends State<AdkActionsListView> {
         return Colors.orange;
       case 'approved':
       case 'allowed':
+      case 'delegated':
         return Colors.green;
       default:
         return Colors.grey;
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return _content(context);
+  /// Read-only detail, using the standard Dialog + popUp frame (user-detail design).
+  Future<void> _openAction(AdkActionLog a) async {
+    final phone = isAPhone(context);
+    Widget line(String label, String? value) => value == null || value.isEmpty
+        ? const SizedBox.shrink()
+        : Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(label,
+                    style: const TextStyle(
+                        fontSize: 12, fontWeight: FontWeight.bold)),
+                SelectableText(value),
+              ],
+            ),
+          );
+    await showDialog<void>(
+      context: context,
+      builder: (dctx) => Dialog(
+        key: const Key('AdkActionDialog'),
+        insetPadding: const EdgeInsets.all(10),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: popUp(
+          context: dctx,
+          title: 'Agent action',
+          width: phone ? 400 : 700,
+          height: phone ? 600 : 520,
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                line('Service', a.serviceName),
+                line('Tool', a.toolName),
+                line('Type', a.verbClass),
+                line('Decision', a.decision),
+                line('Reason', a.reason),
+                line('When', a.actionTime.toLocalizedDateTime(context)),
+                if ((a.tokensTotal ?? 0) > 0)
+                  line('Tokens', '${a.tokensTotal}'),
+                line('Result', a.resultSummary),
+                line('Arguments', a.argsJson),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    _searchFocusNode.requestFocus();
   }
 
-  Widget _content(BuildContext context) {
-    if (_loading) return const Center(child: CircularProgressIndicator());
+  @override
+  Widget build(BuildContext context) {
     if (_error != null) {
       return Center(
         child: Column(
@@ -89,45 +161,78 @@ class _AdkActionsListViewState extends State<AdkActionsListView> {
         ),
       );
     }
-    return RefreshIndicator(
-      onRefresh: _load,
-      child: _actions.isEmpty
-          ? ListView(
-              children: const [
-                SizedBox(height: 200),
-                Center(child: Text('No agent actions recorded')),
-              ],
-            )
-          : ListView.builder(
-              itemCount: _actions.length,
-              itemBuilder: (context, index) {
-                final a = _actions[index];
-                final tokens = a.tokensTotal != null && a.tokensTotal! > 0
-                    ? ' • ${a.tokensTotal} tok'
-                    : '';
-                return Card(
-                  key: Key('action$index'),
-                  child: ListTile(
-                    leading: Icon(
-                      a.verbClass == 'write'
-                          ? Icons.edit
-                          : Icons.visibility,
-                      color: _decisionColor(a.decision),
-                    ),
-                    title: Text(a.serviceName ?? a.toolName ?? '?'),
-                    subtitle: Text(
-                      '${a.decision ?? ''}${a.reason != null ? ' — ${a.reason}' : ''}$tokens',
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    trailing: Text(
-                      a.decision ?? '',
-                      style: TextStyle(color: _decisionColor(a.decision)),
-                    ),
-                  ),
-                );
-              },
+    return Column(
+      children: [
+        ListFilterBar(
+          searchHint: 'Search actions...',
+          searchController: _searchController,
+          focusNode: _searchFocusNode,
+          onSearchChanged: (value) => setState(() => _search = value),
+          actions: [
+            IconButton(
+              key: const Key('refreshAdkActions'),
+              icon: const Icon(Icons.refresh),
+              tooltip: 'Refresh',
+              onPressed: _load,
             ),
+          ],
+        ),
+        Expanded(
+          child: StyledDataTable(
+            columns: _columns(context),
+            rows: _visible.map(_rowFor).toList(),
+            isLoading: _loading && _actions.isEmpty,
+            scrollController: _scrollController,
+            rowHeight: isAPhone(context) ? 72 : 56,
+            onRowTap: (index) => _openAction(_visible[index]),
+          ),
+        ),
+      ],
     );
+  }
+
+  List<StyledColumn> _columns(BuildContext context) {
+    if (isAPhone(context)) {
+      return const [
+        StyledColumn(header: '', flex: 1),
+        StyledColumn(header: 'Action', flex: 5),
+        StyledColumn(header: 'Decision', flex: 2),
+      ];
+    }
+    return const [
+      StyledColumn(header: '', flex: 1),
+      StyledColumn(header: 'Service / tool', flex: 4),
+      StyledColumn(header: 'Type', flex: 1),
+      StyledColumn(header: 'When', flex: 2),
+      StyledColumn(header: 'Decision', flex: 1),
+    ];
+  }
+
+  List<Widget> _rowFor(AdkActionLog a) {
+    final icon = Icon(
+      a.verbClass == 'write'
+          ? Icons.edit
+          : a.verbClass == 'delegate'
+              ? Icons.share
+              : Icons.visibility,
+      color: _decisionColor(a.decision),
+    );
+    final title = a.serviceName ?? a.toolName ?? '?';
+    final decision = Text(
+      a.decision ?? '',
+      style: TextStyle(color: _decisionColor(a.decision), fontSize: 12),
+    );
+    if (isAPhone(context)) {
+      final sub = a.reason != null && a.reason!.isNotEmpty ? '\n${a.reason}' : '';
+      return [icon, Text('$title$sub'), decision];
+    }
+    return [
+      icon,
+      Text(a.reason != null && a.reason!.isNotEmpty ? '$title\n${a.reason}' : title),
+      Text(a.verbClass ?? '', style: const TextStyle(fontSize: 12)),
+      Text(a.actionTime.toLocalizedDateTime(context),
+          style: const TextStyle(fontSize: 12)),
+      decision,
+    ];
   }
 }

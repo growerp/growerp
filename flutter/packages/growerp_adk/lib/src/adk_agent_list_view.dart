@@ -39,11 +39,31 @@ class _AdkAgentListViewState extends State<AdkAgentListView> {
   List<AdkAgentConfig> _configs = [];
   bool _loading = true;
   String? _error;
+  final _searchController = TextEditingController();
+  final _searchFocusNode = FocusNode();
+  final _scrollController = ScrollController();
+  String _search = '';
+
+  /// Client-side filter (the config list is small) by agent name.
+  List<AdkAgentConfig> get _visible => _search.isEmpty
+      ? _configs
+      : _configs
+          .where((c) =>
+              (c.agentName ?? '').toLowerCase().contains(_search.toLowerCase()))
+          .toList();
 
   @override
   void initState() {
     super.initState();
     _load();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _searchFocusNode.dispose();
+    _scrollController.dispose();
+    super.dispose();
   }
 
   Future<void> _load() async {
@@ -112,24 +132,43 @@ class _AdkAgentListViewState extends State<AdkAgentListView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('ADK Agents'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            tooltip: 'Refresh',
-            onPressed: _load,
+    // No AppBar — title comes from the app shell. Refresh moves to the search line;
+    // add is a FAB. Same design as the user list.
+    return Column(
+      children: [
+        ListFilterBar(
+          searchHint: 'Search agents...',
+          searchController: _searchController,
+          focusNode: _searchFocusNode,
+          onSearchChanged: (value) => setState(() => _search = value),
+          actions: [
+            IconButton(
+              key: const Key('refreshAdkAgents'),
+              icon: const Icon(Icons.refresh),
+              tooltip: 'Refresh',
+              onPressed: _load,
+            ),
+          ],
+        ),
+        Expanded(
+          child: Stack(
+            children: [
+              _buildBody(),
+              Positioned(
+                right: 16,
+                bottom: 16,
+                child: FloatingActionButton(
+                  key: const Key('addAdkAgent'),
+                  heroTag: 'adkAgentAdd',
+                  onPressed: _create,
+                  tooltip: 'New agent',
+                  child: const Icon(Icons.add),
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        key: const Key('addAdkAgent'),
-        onPressed: _create,
-        tooltip: 'New agent',
-        child: const Icon(Icons.add),
-      ),
-      body: _buildBody(),
+        ),
+      ],
     );
   }
 
@@ -182,7 +221,7 @@ class _AdkAgentListViewState extends State<AdkAgentListView> {
             StyledColumn(header: '', flex: 1),
           ];
 
-    final rows = _configs.map((cfg) {
+    final rows = _visible.map((cfg) {
       final hasSchedule = cfg.scheduleEnabled &&
           cfg.scheduleExpression != null &&
           cfg.scheduleExpression!.isNotEmpty;
@@ -279,8 +318,9 @@ class _AdkAgentListViewState extends State<AdkAgentListView> {
     return StyledDataTable(
       columns: columns,
       rows: rows,
+      scrollController: _scrollController,
       rowHeight: phone ? 80 : 56,
-      onRowTap: (index) => _edit(_configs[index]),
+      onRowTap: (index) => _edit(_visible[index]),
     );
   }
 }

@@ -29,11 +29,29 @@ class _AdkJobListViewState extends State<AdkJobListView> {
   List<AdkJob> _jobs = [];
   bool _loading = true;
   String? _error;
+  final _searchController = TextEditingController();
+  final _searchFocusNode = FocusNode();
+  String _search = '';
+
+  /// Client-side filter (few jobs) by agent name.
+  List<AdkJob> get _visible => _search.isEmpty
+      ? _jobs
+      : _jobs
+          .where(
+              (j) => j.agentName.toLowerCase().contains(_search.toLowerCase()))
+          .toList();
 
   @override
   void initState() {
     super.initState();
     _load();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _searchFocusNode.dispose();
+    super.dispose();
   }
 
   Future<void> _load() async {
@@ -112,18 +130,24 @@ class _AdkJobListViewState extends State<AdkJobListView> {
           current.notificationSeq != previous.notificationSeq &&
           current.notifications.any((n) => n.topic == 'adkJobUpdate'),
       listener: (context, state) => _load(),
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Agent Jobs'),
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.refresh),
-              tooltip: 'Refresh',
-              onPressed: _load,
-            ),
-          ],
-        ),
-        body: _buildBody(),
+      child: Column(
+        children: [
+          ListFilterBar(
+            searchHint: 'Search jobs...',
+            searchController: _searchController,
+            focusNode: _searchFocusNode,
+            onSearchChanged: (value) => setState(() => _search = value),
+            actions: [
+              IconButton(
+                key: const Key('refreshAdkJobs'),
+                icon: const Icon(Icons.refresh),
+                tooltip: 'Refresh',
+                onPressed: _load,
+              ),
+            ],
+          ),
+          Expanded(child: _buildBody()),
+        ],
       ),
     );
   }
@@ -166,14 +190,15 @@ class _AdkJobListViewState extends State<AdkJobListView> {
   }
 
   Widget _buildCardList() {
+    final jobs = _visible;
     return ListView.separated(
       padding: const EdgeInsets.all(12),
-      itemCount: _jobs.length,
+      itemCount: jobs.length,
       separatorBuilder: (_, _) => const SizedBox(height: 8),
       itemBuilder: (ctx, i) => _JobCard(
-        job: _jobs[i],
-        onClearLock: () => _clearLock(_jobs[i]),
-        onTogglePause: () => _togglePause(_jobs[i]),
+        job: jobs[i],
+        onClearLock: () => _clearLock(jobs[i]),
+        onTogglePause: () => _togglePause(jobs[i]),
       ),
     );
   }
@@ -191,7 +216,7 @@ class _AdkJobListViewState extends State<AdkJobListView> {
       StyledColumn(header: '', flex: 2),
     ];
 
-    final rows = _jobs.map((job) {
+    final rows = _visible.map((job) {
       Color statusColor;
       IconData statusIcon;
       switch (job.latestStatus) {
