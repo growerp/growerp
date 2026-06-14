@@ -44,6 +44,14 @@ class AdkAgentConfig {
   final String? approvalChatRoomId;
   final String? agentPartyId;
 
+  // Multi-agent orchestration (Phase 4).
+  /// specialist | coordinator | workflow
+  final String? agentRole;
+
+  /// router | sequential | parallel | loop  (coordinator/workflow only)
+  final String? orchestrationType;
+  final int? loopMaxIterations;
+
   /// Write-only: sent on create/update, never returned by GET.
   @JsonKey(includeFromJson: false)
   final String? apiKey;
@@ -65,6 +73,9 @@ class AdkAgentConfig {
     this.writePolicy,
     this.approvalChatRoomId,
     this.agentPartyId,
+    this.agentRole,
+    this.orchestrationType,
+    this.loopMaxIterations,
     this.apiKey,
   });
 
@@ -90,6 +101,9 @@ class AdkAgentConfig {
     String? writePolicy,
     String? approvalChatRoomId,
     String? agentPartyId,
+    String? agentRole,
+    String? orchestrationType,
+    int? loopMaxIterations,
     String? apiKey,
   }) =>
       AdkAgentConfig(
@@ -109,6 +123,9 @@ class AdkAgentConfig {
         writePolicy: writePolicy ?? this.writePolicy,
         approvalChatRoomId: approvalChatRoomId ?? this.approvalChatRoomId,
         agentPartyId: agentPartyId ?? this.agentPartyId,
+        agentRole: agentRole ?? this.agentRole,
+        orchestrationType: orchestrationType ?? this.orchestrationType,
+        loopMaxIterations: loopMaxIterations ?? this.loopMaxIterations,
         apiKey: apiKey ?? this.apiKey,
       );
 

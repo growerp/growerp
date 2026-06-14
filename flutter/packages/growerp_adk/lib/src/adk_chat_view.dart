@@ -316,6 +316,8 @@ class _AdkChatViewState extends State<AdkChatView> {
     final buffer = StringBuffer();
     String agentReply = '';
     bool missingKey = false;
+    // Phase 4: which agents responded this turn (coordinator + delegated specialists).
+    final Set<String> authors = {};
 
     // Add a placeholder message for the streaming response
     final msgIndex = _messages.length;
@@ -347,6 +349,8 @@ class _AdkChatViewState extends State<AdkChatView> {
             }
             continue;
           }
+          final author = event['author'];
+          if (author is String && author.isNotEmpty) authors.add(author);
           final content = event['content'] as Map<String, dynamic>?;
           if (content != null) {
             final parts = content['parts'] as List?;
@@ -389,9 +393,12 @@ class _AdkChatViewState extends State<AdkChatView> {
     }
     final cleaned = _stripActions(agentReply);
     final actions = _parseActions(agentReply);
+    // Phase 4: if specialists answered via a coordinator, show a small delegation trace.
+    final delegates = authors.where((a) => a != 'growerp-agent').toList();
+    final trace = delegates.length > 1 ? '_↳ via ${delegates.join(', ')}_\n\n' : '';
     setState(() {
       _messages[msgIndex] = _Msg.adk(cleaned.isNotEmpty
-          ? cleaned
+          ? (trace + cleaned)
           : (actions.isEmpty ? '[No response from agent]' : 'Opening the requested screen…'));
     });
     _emitActions(cleaned, actions);

@@ -1732,6 +1732,9 @@ abstract class RestClient {
     @Field() String? serviceAllowlist,
     @Field() String? writePolicy,
     @Field() String? approvalChatRoomId,
+    @Field() String? agentRole,
+    @Field() String? orchestrationType,
+    @Field() int? loopMaxIterations,
   });
 
   @PATCH("rest/s1/growerp/100/AdkAgentConfig")
@@ -1751,11 +1754,33 @@ abstract class RestClient {
     @Field() String? serviceAllowlist,
     @Field() String? writePolicy,
     @Field() String? approvalChatRoomId,
+    @Field() String? agentRole,
+    @Field() String? orchestrationType,
+    @Field() int? loopMaxIterations,
   });
 
   @DELETE("rest/s1/growerp/100/AdkAgentConfig")
   Future<void> deleteAdkAgentConfig({
     @Query('adkAgentConfigId') required String adkAgentConfigId,
+  });
+
+  // Phase 4: coordinator team membership
+  @GET("rest/s1/growerp/100/AdkAgentTeam")
+  Future<AdkAgentTeamMembers> getAdkAgentTeam({
+    @Query('coordinatorConfigId') required String coordinatorConfigId,
+  });
+
+  @POST("rest/s1/growerp/100/AdkAgentTeam")
+  Future<void> createAdkAgentTeam({
+    @Field() required String coordinatorConfigId,
+    @Field() required String memberConfigId,
+    @Field() int? sequenceNum,
+    @Field() String? delegationMode,
+  });
+
+  @DELETE("rest/s1/growerp/100/AdkAgentTeam")
+  Future<void> deleteAdkAgentTeam({
+    @Query('adkAgentTeamMemberId') required String adkAgentTeamMemberId,
   });
 
   // ADK Job endpoints

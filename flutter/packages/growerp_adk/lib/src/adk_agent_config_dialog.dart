@@ -56,6 +56,12 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
   // Trust foundation: safe-by-default for new agents.
   String _toolMode = 'readOnly'; // readOnly | scoped | full
   String _writePolicy = 'approve'; // block | approve | allow
+  // Multi-agent orchestration (Phase 4).
+  String _agentRole = 'specialist'; // specialist | coordinator
+  String _orchestrationType = 'router'; // router | sequential | parallel | loop
+  List<AdkAgentTeamMember> _members = [];
+  List<AdkAgentConfig> _allAgents = [];
+  bool _teamLoading = false;
 
   static const _cronHints = [
     ('Every minute', '0 * * * * ?'),
@@ -82,9 +88,68 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
       _writePolicy = e.writePolicy ?? 'approve';
       _allowlistCtrl.text = e.serviceAllowlist ?? '';
       _approvalRoomCtrl.text = e.approvalChatRoomId ?? '';
+      _agentRole = e.agentRole ?? 'specialist';
+      _orchestrationType = e.orchestrationType ?? 'router';
+      if (_agentRole != 'specialist' && e.adkAgentConfigId != null) _loadTeam();
     } else {
       _modelCtrl.text = 'gemini-2.5-flash';
       _llmProviderCtrl.text = 'gemini';
+    }
+  }
+
+  /// Load this coordinator's members + the company's other agents (to add from).
+  Future<void> _loadTeam() async {
+    final id = widget.existing?.adkAgentConfigId;
+    if (id == null) return;
+    setState(() => _teamLoading = true);
+    try {
+      final svc = await AdkConfigService.create();
+      final members = await svc.teamMembers(id);
+      final all = await svc.list();
+      if (mounted) {
+        setState(() {
+          _members = members;
+          _allAgents = all;
+        });
+      }
+    } catch (_) {
+      // best-effort; team UI just stays empty
+    } finally {
+      if (mounted) setState(() => _teamLoading = false);
+    }
+  }
+
+  Future<void> _addMember(String memberConfigId) async {
+    final id = widget.existing?.adkAgentConfigId;
+    if (id == null) return;
+    setState(() => _teamLoading = true);
+    try {
+      final svc = await AdkConfigService.create();
+      await svc.addTeamMember(id, memberConfigId, sequenceNum: _members.length);
+      await _loadTeam();
+    } catch (e) {
+      if (mounted) {
+        setState(() => _teamLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Add failed: $e'), backgroundColor: Colors.red),
+        );
+      }
+    }
+  }
+
+  Future<void> _removeMember(String teamMemberId) async {
+    setState(() => _teamLoading = true);
+    try {
+      final svc = await AdkConfigService.create();
+      await svc.removeTeamMember(teamMemberId);
+      await _loadTeam();
+    } catch (e) {
+      if (mounted) {
+        setState(() => _teamLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Remove failed: $e'), backgroundColor: Colors.red),
+        );
+      }
     }
   }
 
@@ -146,6 +211,8 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
         approvalChatRoomId: _approvalRoomCtrl.text.trim().isEmpty
             ? null
             : _approvalRoomCtrl.text.trim(),
+        agentRole: _agentRole,
+        orchestrationType: _agentRole == 'specialist' ? null : _orchestrationType,
       );
       final apiKey = _apiKeyCtrl.text.trim();
       final saved = await svc.save(cfg, apiKey: apiKey.isEmpty ? null : apiKey);
@@ -161,6 +228,75 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
     } finally {
       if (mounted) setState(() => _saving = false);
     }
+  }
+
+  /// Current members + an add-from-available picker. Members can only be managed on a
+  /// coordinator that already exists (needs an id); for a new one, prompt to save first.
+  Widget _teamMembersSection({required bool isNew}) {
+    if (isNew) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: 4),
+        child: Text('Save the coordinator first, then re-open it to add team members.',
+            style: TextStyle(fontStyle: FontStyle.italic)),
+      );
+    }
+    final selfId = widget.existing?.adkAgentConfigId;
+    final memberIds = _members.map((m) => m.memberConfigId).toSet();
+    final available = _allAgents
+        .where((a) =>
+            a.adkAgentConfigId != selfId &&
+            !memberIds.contains(a.adkAgentConfigId) &&
+            (a.agentRole ?? 'specialist') == 'specialist')
+        .toList();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text('Team members', style: TextStyle(fontWeight: FontWeight.w600)),
+        if (_teamLoading) const LinearProgressIndicator(),
+        if (_members.isEmpty && !_teamLoading)
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 4),
+            child: Text('No members yet — add specialists below.'),
+          ),
+        ..._members.map((m) => ListTile(
+              key: Key('teamMember_${m.memberConfigId}'),
+              dense: true,
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.smart_toy_outlined),
+              title: Text(m.memberName ?? m.memberConfigId ?? '?'),
+              subtitle: m.memberDescription != null
+                  ? Text(m.memberDescription!,
+                      maxLines: 1, overflow: TextOverflow.ellipsis)
+                  : null,
+              trailing: IconButton(
+                key: Key('removeMember_${m.memberConfigId}'),
+                icon: const Icon(Icons.remove_circle_outline, color: Colors.red),
+                tooltip: 'Remove',
+                onPressed: _teamLoading || m.adkAgentTeamMemberId == null
+                    ? null
+                    : () => _removeMember(m.adkAgentTeamMemberId!),
+              ),
+            )),
+        if (available.isNotEmpty)
+          DropdownButtonFormField<String>(
+            key: const Key('addTeamMember'),
+            initialValue: null,
+            isExpanded: true,
+            decoration: const InputDecoration(labelText: 'Add specialist…'),
+            items: available
+                .map((a) => DropdownMenuItem(
+                      value: a.adkAgentConfigId,
+                      child: Text(a.agentName ?? a.adkAgentConfigId ?? '?'),
+                    ))
+                .toList(),
+            onChanged: _teamLoading
+                ? null
+                : (v) {
+                    if (v != null) _addMember(v);
+                  },
+          ),
+      ],
+    );
   }
 
   @override
@@ -307,6 +443,49 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
                             hintText: 'Where approval requests are posted',
                           ),
                         ),
+                      ],
+                      const Divider(height: 24),
+                      const Text('Team / orchestration',
+                          style: TextStyle(fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 8),
+                      DropdownButtonFormField<String>(
+                        key: const Key('agentRole'),
+                        initialValue: _agentRole,
+                        decoration: const InputDecoration(
+                          labelText: 'Role',
+                          helperText:
+                              'specialist: does the work · coordinator: delegates to a team of specialists',
+                        ),
+                        items: const [
+                          DropdownMenuItem(
+                              value: 'specialist', child: Text('Specialist')),
+                          DropdownMenuItem(
+                              value: 'coordinator', child: Text('Coordinator (team)')),
+                        ],
+                        onChanged: (v) =>
+                            setState(() => _agentRole = v ?? 'specialist'),
+                      ),
+                      if (_agentRole != 'specialist') ...[
+                        const SizedBox(height: 8),
+                        DropdownButtonFormField<String>(
+                          key: const Key('orchestrationType'),
+                          initialValue: _orchestrationType,
+                          decoration: const InputDecoration(
+                            labelText: 'Orchestration',
+                            helperText:
+                                'router: the LLM picks specialists (sequential/parallel/loop: Phase 4b)',
+                          ),
+                          items: const [
+                            DropdownMenuItem(value: 'router', child: Text('Router (LLM picks)')),
+                            DropdownMenuItem(value: 'sequential', child: Text('Sequential')),
+                            DropdownMenuItem(value: 'parallel', child: Text('Parallel')),
+                            DropdownMenuItem(value: 'loop', child: Text('Loop')),
+                          ],
+                          onChanged: (v) =>
+                              setState(() => _orchestrationType = v ?? 'router'),
+                        ),
+                        const SizedBox(height: 8),
+                        _teamMembersSection(isNew: widget.existing == null),
                       ],
                       const Divider(height: 24),
                       SwitchListTile(

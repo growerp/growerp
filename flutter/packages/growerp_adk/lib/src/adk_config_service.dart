@@ -47,6 +47,9 @@ class AdkConfigService {
         serviceAllowlist: cfg.serviceAllowlist,
         writePolicy: cfg.writePolicy,
         approvalChatRoomId: cfg.approvalChatRoomId,
+        agentRole: cfg.agentRole,
+        orchestrationType: cfg.orchestrationType,
+        loopMaxIterations: cfg.loopMaxIterations,
       );
     }
     return _client.updateAdkAgentConfig(
@@ -65,10 +68,30 @@ class AdkConfigService {
       serviceAllowlist: cfg.serviceAllowlist,
       writePolicy: cfg.writePolicy,
       approvalChatRoomId: cfg.approvalChatRoomId,
+      agentRole: cfg.agentRole,
+      orchestrationType: cfg.orchestrationType,
+      loopMaxIterations: cfg.loopMaxIterations,
     );
   }
 
   Future<void> delete(String configId) async {
     await _client.deleteAdkAgentConfig(adkAgentConfigId: configId);
   }
+
+  // ── Phase 4: team membership ───────────────────────────────────────────────
+  Future<List<AdkAgentTeamMember>> teamMembers(String coordinatorConfigId) async {
+    final r = await _client.getAdkAgentTeam(coordinatorConfigId: coordinatorConfigId);
+    return r.members;
+  }
+
+  Future<void> addTeamMember(String coordinatorConfigId, String memberConfigId,
+          {int? sequenceNum, String delegationMode = 'tool'}) async =>
+      _client.createAdkAgentTeam(
+          coordinatorConfigId: coordinatorConfigId,
+          memberConfigId: memberConfigId,
+          sequenceNum: sequenceNum,
+          delegationMode: delegationMode);
+
+  Future<void> removeTeamMember(String adkAgentTeamMemberId) async =>
+      _client.deleteAdkAgentTeam(adkAgentTeamMemberId: adkAgentTeamMemberId);
 }

@@ -1170,6 +1170,18 @@ along with this software (see the LICENSE.md file). If not, see
                 <service name="AdkServices100.delete#AdkAgentConfig"/>
             </method>
         </resource>
+        <!-- Phase 4: coordinator team membership -->
+        <resource name="AdkAgentTeam">
+            <method type="get">
+                <service name="AdkServices100.get#AdkAgentTeam"/>
+            </method>
+            <method type="post">
+                <service name="AdkServices100.create#AdkAgentTeam"/>
+            </method>
+            <method type="delete">
+                <service name="AdkServices100.delete#AdkAgentTeam"/>
+            </method>
+        </resource>
         <resource name="AdkJob">
             <method type="get">
                 <service name="AdkServices100.get#AdkJob"/>

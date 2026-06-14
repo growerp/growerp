@@ -89,6 +89,7 @@ export 'agent_instances_model.dart';
 export 'rate_limit_check_model.dart';
 // ADK models
 export 'adk_agent_config_model.dart';
+export 'adk_agent_team_model.dart';
 export 'adk_job_model.dart';
 export 'adk_action_model.dart';
 export 'adk_approval_model.dart';
