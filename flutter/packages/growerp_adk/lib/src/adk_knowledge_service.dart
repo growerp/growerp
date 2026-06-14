@@ -12,6 +12,8 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+import 'dart:convert';
+
 import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_core/growerp_core.dart';
 
@@ -49,10 +51,24 @@ class AdkKnowledgeService {
       _client.deleteAdkKnowledge(adkKnowledgeDocId: adkKnowledgeDocId);
 
   /// Auto-ingest the company's product catalog into the knowledge base.
-  /// Returns the number of products processed.
+  /// Returns the number of products processed. The endpoint may hand back the
+  /// body as a Map (decoded) or a raw JSON String depending on content-type, so
+  /// decode defensively.
   Future<int> importProducts() async {
-    final result = await _client.importAdkKnowledgeProducts();
-    final n = result['productCount'];
-    return n is int ? n : int.tryParse('$n') ?? 0;
+    dynamic data = await _client.importAdkKnowledgeProducts();
+    if (data is String) {
+      final s = data.trim();
+      if (s.isEmpty) return 0;
+      try {
+        data = jsonDecode(s);
+      } catch (_) {
+        return int.tryParse(s) ?? 0;
+      }
+    }
+    if (data is Map) {
+      final n = data['productCount'];
+      return n is int ? n : int.tryParse('$n') ?? 0;
+    }
+    return 0;
   }
 }
