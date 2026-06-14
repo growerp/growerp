@@ -116,11 +116,18 @@ class ListFilterBar extends StatelessWidget {
   }
 
   Widget _buildMobileLayout(BuildContext context, ColorScheme colorScheme) {
+    final hasActions = actions != null && actions!.isNotEmpty;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (showSearch) _buildSearchField(colorScheme),
+        // Search field + action buttons on one line (search shrinks to fit).
+        Row(
+          children: [
+            if (showSearch) Expanded(child: _buildSearchField(colorScheme)),
+            if (hasActions) ...actions!,
+          ],
+        ),
         if (filters != null && filters!.isNotEmpty) ...[
           const SizedBox(height: 12),
           SingleChildScrollView(
@@ -136,10 +143,6 @@ class ListFilterBar extends StatelessWidget {
                   .toList(),
             ),
           ),
-        ],
-        if (actions != null && actions!.isNotEmpty) ...[
-          const SizedBox(height: 12),
-          Row(mainAxisAlignment: MainAxisAlignment.end, children: actions!),
         ],
       ],
     );
