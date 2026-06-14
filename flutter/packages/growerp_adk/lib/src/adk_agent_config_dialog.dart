@@ -278,22 +278,31 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
               ),
             )),
         if (available.isNotEmpty)
-          DropdownButtonFormField<String>(
-            key: const Key('addTeamMember'),
-            initialValue: null,
-            isExpanded: true,
-            decoration: const InputDecoration(labelText: 'Add specialist…'),
-            items: available
-                .map((a) => DropdownMenuItem(
-                      value: a.adkAgentConfigId,
-                      child: Text(a.agentName ?? a.adkAgentConfigId ?? '?'),
-                    ))
-                .toList(),
-            onChanged: _teamLoading
-                ? null
-                : (v) {
-                    if (v != null) _addMember(v);
-                  },
+          Align(
+            alignment: Alignment.centerLeft,
+            child: PopupMenuButton<String>(
+              key: const Key('addTeamMember'),
+              enabled: !_teamLoading,
+              tooltip: 'Add specialist',
+              itemBuilder: (_) => available
+                  .map((a) => PopupMenuItem<String>(
+                        value: a.adkAgentConfigId,
+                        child: Text(a.agentName ?? a.adkAgentConfigId ?? '?'),
+                      ))
+                  .toList(),
+              onSelected: (v) => _addMember(v),
+              child: const Padding(
+                padding: EdgeInsets.symmetric(vertical: 12),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.add),
+                    SizedBox(width: 8),
+                    Text('Add specialist…'),
+                  ],
+                ),
+              ),
+            ),
           ),
       ],
     );
