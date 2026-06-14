@@ -324,6 +324,7 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
                       TextFormField(
                         key: const Key('agentName'),
                         controller: _nameCtrl,
+                        maxLength: 63,
                         decoration:
                             const InputDecoration(labelText: 'Agent name *'),
                         validator: (v) =>
@@ -363,6 +364,7 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
                       TextFormField(
                         key: const Key('description'),
                         controller: _descriptionCtrl,
+                        maxLength: 255,
                         decoration: const InputDecoration(
                             labelText: 'Description (optional)'),
                       ),
