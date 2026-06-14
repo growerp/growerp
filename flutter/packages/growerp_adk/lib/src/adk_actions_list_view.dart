@@ -54,16 +54,6 @@ class _AdkActionsListViewState extends State<AdkActionsListView> {
     super.dispose();
   }
 
-  /// Client-side filter by service/tool/decision/reason.
-  List<AdkActionLog> get _visible {
-    if (_search.isEmpty) return _actions;
-    final q = _search.toLowerCase();
-    return _actions.where((a) {
-      return [a.serviceName, a.toolName, a.decision, a.verbClass, a.reason]
-          .any((v) => (v ?? '').toLowerCase().contains(q));
-    }).toList();
-  }
-
   Future<void> _load() async {
     setState(() {
       _loading = true;
@@ -71,7 +61,8 @@ class _AdkActionsListViewState extends State<AdkActionsListView> {
     });
     try {
       final svc = await AdkGovernanceService.create();
-      final list = await svc.actions(configId: widget.configId);
+      final list = await svc.actions(
+          configId: widget.configId, search: _search.isEmpty ? null : _search);
       if (mounted) setState(() => _actions = list);
     } catch (e) {
       if (mounted) setState(() => _error = e.toString());
@@ -167,7 +158,10 @@ class _AdkActionsListViewState extends State<AdkActionsListView> {
           searchHint: 'Search actions...',
           searchController: _searchController,
           focusNode: _searchFocusNode,
-          onSearchChanged: (value) => setState(() => _search = value),
+          onSearchChanged: (value) {
+            _search = value;
+            _load();
+          },
           actions: [
             IconButton(
               key: const Key('refreshAdkActions'),
@@ -180,11 +174,11 @@ class _AdkActionsListViewState extends State<AdkActionsListView> {
         Expanded(
           child: StyledDataTable(
             columns: _columns(context),
-            rows: _visible.map(_rowFor).toList(),
+            rows: _actions.map(_rowFor).toList(),
             isLoading: _loading && _actions.isEmpty,
             scrollController: _scrollController,
             rowHeight: isAPhone(context) ? 72 : 56,
-            onRowTap: (index) => _openAction(_visible[index]),
+            onRowTap: (index) => _openAction(_actions[index]),
           ),
         ),
       ],

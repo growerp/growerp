@@ -28,13 +28,16 @@ class AdkGovernanceService {
     return AdkGovernanceService._(client);
   }
 
-  Future<List<AdkActionLog>> actions({String? configId, int limit = 100}) async {
-    final result = await _client.getAdkActions(configId: configId, limit: limit);
+  Future<List<AdkActionLog>> actions(
+      {String? configId, String? search, int limit = 100}) async {
+    final result = await _client.getAdkActions(
+        configId: configId, search: search, limit: limit);
     return result.adkActions;
   }
 
-  Future<List<AdkApproval>> approvals({String status = 'pending'}) async {
-    final result = await _client.getAdkApprovals(status: status);
+  Future<List<AdkApproval>> approvals(
+      {String status = 'pending', String? search}) async {
+    final result = await _client.getAdkApprovals(status: status, search: search);
     return result.adkApprovals;
   }
 

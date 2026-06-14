@@ -1714,7 +1714,7 @@ abstract class RestClient {
 
   // ADK Agent Config endpoints
   @GET("rest/s1/growerp/100/AdkAgentConfig")
-  Future<AdkAgentConfigs> getAdkAgentConfigs();
+  Future<AdkAgentConfigs> getAdkAgentConfigs({@Query('search') String? search});
 
   @POST("rest/s1/growerp/100/AdkAgentConfig")
   Future<AdkAgentConfig> createAdkAgentConfig({
@@ -1785,7 +1785,7 @@ abstract class RestClient {
 
   // ADK Job endpoints
   @GET("rest/s1/growerp/100/AdkJob")
-  Future<AdkJobs> getAdkJobs();
+  Future<AdkJobs> getAdkJobs({@Query('search') String? search});
 
   @POST("rest/s1/growerp/100/AdkJob/{jobName}/clearLock")
   Future<void> clearAdkJobLock({
@@ -1802,12 +1802,14 @@ abstract class RestClient {
   @GET("rest/s1/growerp/100/AdkAction")
   Future<AdkActionLogs> getAdkActions({
     @Query('configId') String? configId,
+    @Query('search') String? search,
     @Query('limit') int? limit,
   });
 
   @GET("rest/s1/growerp/100/AdkApproval")
   Future<AdkApprovals> getAdkApprovals({
     @Query('status') String? status,
+    @Query('search') String? search,
   });
 
   @PATCH("rest/s1/growerp/100/AdkApproval")

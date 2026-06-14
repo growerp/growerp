@@ -25,8 +25,8 @@ class AdkConfigService {
     return AdkConfigService._(client);
   }
 
-  Future<List<AdkAgentConfig>> list() async {
-    final result = await _client.getAdkAgentConfigs();
+  Future<List<AdkAgentConfig>> list({String? search}) async {
+    final result = await _client.getAdkAgentConfigs(search: search);
     return result.adkAgentConfigs;
   }
 

@@ -44,14 +44,6 @@ class _AdkAgentListViewState extends State<AdkAgentListView> {
   final _scrollController = ScrollController();
   String _search = '';
 
-  /// Client-side filter (the config list is small) by agent name.
-  List<AdkAgentConfig> get _visible => _search.isEmpty
-      ? _configs
-      : _configs
-          .where((c) =>
-              (c.agentName ?? '').toLowerCase().contains(_search.toLowerCase()))
-          .toList();
-
   @override
   void initState() {
     super.initState();
@@ -73,7 +65,7 @@ class _AdkAgentListViewState extends State<AdkAgentListView> {
     });
     try {
       final svc = await AdkConfigService.create();
-      final list = await svc.list();
+      final list = await svc.list(search: _search.isEmpty ? null : _search);
       if (mounted) setState(() => _configs = list);
     } catch (e) {
       if (mounted) setState(() => _error = e.toString());
@@ -140,7 +132,10 @@ class _AdkAgentListViewState extends State<AdkAgentListView> {
           searchHint: 'Search agents...',
           searchController: _searchController,
           focusNode: _searchFocusNode,
-          onSearchChanged: (value) => setState(() => _search = value),
+          onSearchChanged: (value) {
+            _search = value;
+            _load();
+          },
           actions: [
             IconButton(
               key: const Key('refreshAdkAgents'),
@@ -221,7 +216,7 @@ class _AdkAgentListViewState extends State<AdkAgentListView> {
             StyledColumn(header: '', flex: 1),
           ];
 
-    final rows = _visible.map((cfg) {
+    final rows = _configs.map((cfg) {
       final hasSchedule = cfg.scheduleEnabled &&
           cfg.scheduleExpression != null &&
           cfg.scheduleExpression!.isNotEmpty;
@@ -320,7 +315,7 @@ class _AdkAgentListViewState extends State<AdkAgentListView> {
       rows: rows,
       scrollController: _scrollController,
       rowHeight: phone ? 80 : 56,
-      onRowTap: (index) => _edit(_visible[index]),
+      onRowTap: (index) => _edit(_configs[index]),
     );
   }
 }

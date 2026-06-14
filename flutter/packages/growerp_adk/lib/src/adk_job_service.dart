@@ -25,8 +25,8 @@ class AdkJobService {
     return AdkJobService._(client);
   }
 
-  Future<List<AdkJob>> list() async {
-    final result = await _client.getAdkJobs();
+  Future<List<AdkJob>> list({String? search}) async {
+    final result = await _client.getAdkJobs(search: search);
     return result.adkJobs;
   }
 

@@ -33,14 +33,6 @@ class _AdkJobListViewState extends State<AdkJobListView> {
   final _searchFocusNode = FocusNode();
   String _search = '';
 
-  /// Client-side filter (few jobs) by agent name.
-  List<AdkJob> get _visible => _search.isEmpty
-      ? _jobs
-      : _jobs
-          .where(
-              (j) => j.agentName.toLowerCase().contains(_search.toLowerCase()))
-          .toList();
-
   @override
   void initState() {
     super.initState();
@@ -61,7 +53,7 @@ class _AdkJobListViewState extends State<AdkJobListView> {
     });
     try {
       final svc = await AdkJobService.create();
-      final list = await svc.list();
+      final list = await svc.list(search: _search.isEmpty ? null : _search);
       if (mounted) setState(() => _jobs = list);
     } catch (e) {
       if (mounted) setState(() => _error = e.toString());
@@ -136,7 +128,10 @@ class _AdkJobListViewState extends State<AdkJobListView> {
             searchHint: 'Search jobs...',
             searchController: _searchController,
             focusNode: _searchFocusNode,
-            onSearchChanged: (value) => setState(() => _search = value),
+            onSearchChanged: (value) {
+              _search = value;
+              _load();
+            },
             actions: [
               IconButton(
                 key: const Key('refreshAdkJobs'),
@@ -190,7 +185,7 @@ class _AdkJobListViewState extends State<AdkJobListView> {
   }
 
   Widget _buildCardList() {
-    final jobs = _visible;
+    final jobs = _jobs;
     return ListView.separated(
       padding: const EdgeInsets.all(12),
       itemCount: jobs.length,
@@ -216,7 +211,7 @@ class _AdkJobListViewState extends State<AdkJobListView> {
       StyledColumn(header: '', flex: 2),
     ];
 
-    final rows = _visible.map((job) {
+    final rows = _jobs.map((job) {
       Color statusColor;
       IconData statusIcon;
       switch (job.latestStatus) {

@@ -52,16 +52,6 @@ class _AdkApprovalsListViewState extends State<AdkApprovalsListView> {
     super.dispose();
   }
 
-  /// Client-side filter by service/args (the status filter is server-side).
-  List<AdkApproval> get _visible {
-    if (_search.isEmpty) return _approvals;
-    final q = _search.toLowerCase();
-    return _approvals
-        .where((a) => [a.serviceName, a.argsJson]
-            .any((v) => (v ?? '').toLowerCase().contains(q)))
-        .toList();
-  }
-
   Future<void> _load() async {
     setState(() {
       _loading = true;
@@ -69,7 +59,8 @@ class _AdkApprovalsListViewState extends State<AdkApprovalsListView> {
     });
     try {
       final svc = await AdkGovernanceService.create();
-      final list = await svc.approvals(status: _status);
+      final list = await svc.approvals(
+          status: _status, search: _search.isEmpty ? null : _search);
       if (mounted) setState(() => _approvals = list);
     } catch (e) {
       if (mounted) setState(() => _error = e.toString());
@@ -217,7 +208,10 @@ class _AdkApprovalsListViewState extends State<AdkApprovalsListView> {
           searchHint: 'Search approvals...',
           searchController: _searchController,
           focusNode: _searchFocusNode,
-          onSearchChanged: (value) => setState(() => _search = value),
+          onSearchChanged: (value) {
+            _search = value;
+            _load();
+          },
           filters: [
             FilterDropdown<String>(
               label: 'Status',
@@ -247,11 +241,11 @@ class _AdkApprovalsListViewState extends State<AdkApprovalsListView> {
         Expanded(
           child: StyledDataTable(
             columns: _columns(context),
-            rows: _visible.map(_rowFor).toList(),
+            rows: _approvals.map(_rowFor).toList(),
             isLoading: _loading && _approvals.isEmpty,
             scrollController: _scrollController,
             rowHeight: isAPhone(context) ? 72 : 56,
-            onRowTap: (index) => _openApproval(_visible[index]),
+            onRowTap: (index) => _openApproval(_approvals[index]),
           ),
         ),
       ],
