@@ -1820,5 +1820,5 @@ abstract class RestClient {
   });
 
   @POST("rest/s1/growerp/100/AdkKnowledgeImportProducts")
-  Future<Map<String, dynamic>> importAdkKnowledgeProducts();
+  Future<dynamic> importAdkKnowledgeProducts();
 }
