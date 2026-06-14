@@ -50,6 +50,7 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
   final _chatRoomIdCtrl = TextEditingController();
   final _allowlistCtrl = TextEditingController();
   final _approvalRoomCtrl = TextEditingController();
+  final _loopMaxCtrl = TextEditingController();
 
   bool _scheduleEnabled = false;
   bool _saving = false;
@@ -90,6 +91,7 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
       _approvalRoomCtrl.text = e.approvalChatRoomId ?? '';
       _agentRole = e.agentRole ?? 'specialist';
       _orchestrationType = e.orchestrationType ?? 'router';
+      _loopMaxCtrl.text = e.loopMaxIterations?.toString() ?? '';
       if (_agentRole != 'specialist' && e.adkAgentConfigId != null) _loadTeam();
     } else {
       _modelCtrl.text = 'gemini-2.5-flash';
@@ -166,6 +168,7 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
     _chatRoomIdCtrl.dispose();
     _allowlistCtrl.dispose();
     _approvalRoomCtrl.dispose();
+    _loopMaxCtrl.dispose();
     super.dispose();
   }
 
@@ -213,6 +216,10 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
             : _approvalRoomCtrl.text.trim(),
         agentRole: _agentRole,
         orchestrationType: _agentRole == 'specialist' ? null : _orchestrationType,
+        loopMaxIterations:
+            (_agentRole != 'specialist' && _orchestrationType == 'loop')
+                ? int.tryParse(_loopMaxCtrl.text.trim())
+                : null,
       );
       final apiKey = _apiKeyCtrl.text.trim();
       final saved = await svc.save(cfg, apiKey: apiKey.isEmpty ? null : apiKey);
@@ -495,6 +502,19 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
                           onChanged: (v) =>
                               setState(() => _orchestrationType = v ?? 'router'),
                         ),
+                        if (_orchestrationType == 'loop') ...[
+                          const SizedBox(height: 8),
+                          TextFormField(
+                            key: const Key('loopMaxIterations'),
+                            controller: _loopMaxCtrl,
+                            keyboardType: TextInputType.number,
+                            decoration: const InputDecoration(
+                              labelText: 'Max loop iterations',
+                              hintText: '3',
+                              helperText: 'Safety cap for the loop workflow',
+                            ),
+                          ),
+                        ],
                         const SizedBox(height: 8),
                         _teamMembersSection(isNew: widget.existing == null),
                       ],
