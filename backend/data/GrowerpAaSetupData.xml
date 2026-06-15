@@ -49,16 +49,16 @@ along with this software (see the LICENSE.md file). If not, see
         productId="GROWERP_DIY_PLAN" fromDate="2024-01-01 00:00:00" />
 
     <mantle.product.Product productId="GROWERP_SMALL_PLAN" productTypeEnumId="PtService"
-        ownerPartyId="GROWERP" productName="GrowERP small Company plan"
-        description="Small Company Plan $499 per month|Full functionality, unlimited users|including support for 20hrs/month" />
+        ownerPartyId="GROWERP" productName="GrowERP Do it With You (DWY) Plan"
+        description="Do it With You plan $499 per month|Full functionality, unlimited users|including support for 20hrs/month" />
     <mantle.product.ProductPrice productId="GROWERP_SMALL_PLAN" priceTypeEnumId="PptCurrent"
         price="499.00" pricePurposeEnumId="PppPurchase" priceUomId="USD" />
     <mantle.product.category.ProductCategoryMember productCategoryId="GROWERP_SERVICES"
         productId="GROWERP_SMALL_PLAN" fromDate="2024-01-01 00:00:00" />
 
     <mantle.product.Product productId="GROWERP_FULL_PLAN" productTypeEnumId="PtService"
-        ownerPartyId="GROWERP" productName="GrowERP full company plan"
-        description="Full Company Plan $999 per month|Full functionality, unlimited users|including support for 40hrs/month" />
+        ownerPartyId="GROWERP" productName="Do it For You (DFY) Plan"
+        description="Do it For You Plan $999 per month|Full functionality, unlimited users|including support for 40hrs/month" />
     <mantle.product.ProductPrice productId="GROWERP_FULL_PLAN" priceTypeEnumId="PptCurrent"
         price="999.00" pricePurposeEnumId="PppPurchase" priceUomId="USD" />
     <mantle.product.category.ProductCategoryMember productCategoryId="GROWERP_SERVICES"
