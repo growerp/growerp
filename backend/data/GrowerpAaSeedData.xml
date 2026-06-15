@@ -262,6 +262,21 @@ along with this software (see the LICENSE.md file). If not, see
     </moqui.resource.DbResource>
     <moqui.resource.DbResource filename="content" isFile="N" resourceId="default_content_dir"
         parentResourceId="DEFAULT_ROOT" />
+    <moqui.resource.DbResource filename="websiteColor.json" isFile="Y" resourceId="default_website_color"
+        parentResourceId="default_content_dir">
+        <file mimeType="application/json" versionName="01" rootVersionName="01">
+            <fileData><![CDATA[{
+  "HeaderFooterBg": "#064e3b",
+  "HeaderFooterText": "#ffffff",
+  "TwitterUrl": "https://x.com/grow_erp",
+  "FacebookUrl": "https://www.facebook.com/growerp/",
+  "InstagramUrl": "https://www.instagram.com/notjusterp",
+  "YouTubeUrl": "https://www.youtube.com/channel/UCroM6tobneiB9zbMVnaVuTg",
+  "LinkedInUrl": "https://www.linkedin.com/company/2692477/admin/dashboard/",
+  "SubstackUrl": "https://notjusterp.substack.com/"
+}]]></fileData>
+        </file>
+    </moqui.resource.DbResource>
     <!-- Deep linking configuration -->
     <moqui.resource.DbResource filename=".well-known" isFile="N" resourceId="DEFAULT_WELL_KNOWN"
         parentResourceId="DEFAULT_ROOT" />

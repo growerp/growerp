@@ -8,7 +8,7 @@
     <moqui.resource.wiki.WikiSpace wikiSpaceId="GROWERP_WS" description="GrowERP Official Website Content"
         rootWikiPageId="growerp_home" allowAnyHtml="Y" rootPageLocation="dbresource://GROWERP_ROOT"/>
 
-    <!-- Home Page -->
+    <!-- Home Page -->main
     <moqui.resource.wiki.WikiPage wikiPageId="growerp_home" wikiSpaceId="GROWERP_WS" pagePath="home"
         publishedVersionName="01" sequenceNum="1">
         <histories historySeqId="01" versionName="01" changeDateTime="1485028800000" />

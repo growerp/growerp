@@ -191,8 +191,14 @@ along with this software (see the LICENSE.md file). If not, see
             <if condition="topResource">
                 <set field="location" value="${topResource.settingValue}/content/websiteColor.json" />
                 <set field="contentRef" from="ec.resource.getLocationReference(location)" />
-                <if condition="contentRef != null">
+                <if condition="contentRef != null &amp;&amp; contentRef.exists">
                     <set field="website.colorJson" from="contentRef.getText()" />
+                    <else>
+                        <set field="fallbackRef" from="ec.resource.getLocationReference('dbresource://GROWERP_ROOT/content/websiteColor.json')" />
+                        <if condition="fallbackRef != null &amp;&amp; fallbackRef.exists">
+                            <set field="website.colorJson" from="fallbackRef.getText()" />
+                        </if>
+                    </else>
                 </if>
             </if>
             <!-- google analytics -->
@@ -281,11 +287,11 @@ along with this software (see the LICENSE.md file). If not, see
                         <parameter name="categoryName" />
                     </parameter>
                 </parameter>
+                <parameter name="colorJson" />
+                <parameter name="obsidianName" />
+                <parameter name="measurementId" />
+                <parameter name="stripeApiKey" />
             </parameter>
-            <parameter name="colorJson" />
-            <parameter name="obsidianName" />
-            <parameter name="measurementId" />
-            <parameter name="stripeApiKey" />
         </out-parameters>
         <actions>
             <service-call out-map="context"
@@ -786,13 +792,16 @@ along with this software (see the LICENSE.md file). If not, see
                     </parameter>
                 </parameter>
                 <parameter name="productCategories" type="List">
-                    <parameter name="productCategory" type="Map">
+                <parameter name="productCategory" type="Map">
                         <parameter name="categoryId" />
                         <parameter name="categoryName" />
                     </parameter>
                 </parameter>
+                <parameter name="colorJson" />
+                <parameter name="obsidianName" />
+                <parameter name="measurementId" />
+                <parameter name="stripeApiKey" />
             </parameter>
-            <parameter name="colorJson" />
         </out-parameters>
         <actions>
             <service-call out-map="context"
