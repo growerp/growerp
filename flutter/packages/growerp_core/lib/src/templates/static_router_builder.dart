@@ -256,7 +256,10 @@ GoRouter _buildStaticRouter(StaticRouterConfig config) {
           final extra = state.extra;
           return DialogPage(
             key: state.pageKey,
-            child: WidgetRegistry.getWidget('UserDialog', {'user': extra}),
+            child: WidgetRegistry.getWidget('UserDialog', {
+              'user': extra,
+              'dialog': true,
+            }),
           );
         },
       ),
@@ -270,6 +273,7 @@ GoRouter _buildStaticRouter(StaticRouterConfig config) {
             key: state.pageKey,
             child: WidgetRegistry.getWidget('ShowCompanyDialog', {
               'company': extra,
+              'dialog': true,
             }),
           );
         },

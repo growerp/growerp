@@ -187,25 +187,26 @@ class CompanyFormState extends State<CompanyDialog> {
   Widget build(BuildContext context) {
     var localizations = UserCompanyLocalizations.of(context)!;
     isPhone = ResponsiveBreakpoints.of(context).isMobile;
-    return Dialog(
-      key: Key('CompanyDialog${company.role?.name ?? Role.unknown}'),
-      insetPadding: const EdgeInsets.all(10),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      child: widget.dialog == true
-          ? popUp(
-              context: context,
-              title: localizations.companyRoleDetail(
-                _selectedRole.value,
-                company.partyId == null
-                    ? localizations.newItem
-                    : company.pseudoId!,
-              ),
-              width: isPhone ? 400 : 1000,
-              height: isPhone ? 700 : 750,
-              child: listChild(localizations),
-            )
-          : listChild(localizations),
-    );
+    if (widget.dialog) {
+      return Dialog(
+        key: Key('CompanyDialog${company.role?.name ?? Role.unknown}'),
+        insetPadding: const EdgeInsets.all(10),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: popUp(
+          context: context,
+          title: localizations.companyRoleDetail(
+            _selectedRole.value,
+            company.partyId == null
+                ? localizations.newItem
+                : company.pseudoId!,
+          ),
+          width: isPhone ? 400 : 1000,
+          height: isPhone ? 700 : 750,
+          child: listChild(localizations),
+        ),
+      );
+    }
+    return listChild(localizations);
   }
 
   Widget listChild(UserCompanyLocalizations localizations) {

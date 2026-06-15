@@ -219,63 +219,67 @@ class UserDialogState extends State<UserDialogStateFull> {
       title = _selectedRole.name;
     }
 
-    return Dialog(
-      key: Key('UserDialog${_selectedRole.name}'),
-      insetPadding: const EdgeInsets.all(10),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      child: popUp(
-        context: context,
-        title: "$title #${widget.user.pseudoId ?? localizations.newItem}",
-        width: isPhone ? 400 : 800,
-        height: isPhone ? 700 : 600,
-        child: ScaffoldMessenger(
-          child: Scaffold(
-            backgroundColor: Colors.transparent,
-
-            body: BlocConsumer<UserBloc, UserState>(
-              listener: (context, state) {
-                if (state.status == UserStatus.failure) {
-                  HelperFunctions.showMessage(
-                    context,
-                    state.message,
-                    Colors.red,
+    Widget content = ScaffoldMessenger(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: BlocConsumer<UserBloc, UserState>(
+          listener: (context, state) {
+            if (state.status == UserStatus.failure) {
+              HelperFunctions.showMessage(
+                context,
+                state.message,
+                Colors.red,
+              );
+            }
+            if (state.status == UserStatus.success) {
+              // Update AuthBloc if this is the logged-in user
+              if (state.users.isNotEmpty) {
+                final updatedUser = state.users.first;
+                final authBloc = context.read<AuthBloc>();
+                final currentAuth = authBloc.state.authenticate;
+                if (currentAuth?.user?.partyId == updatedUser.partyId) {
+                  // Update the authenticate state with the new user data
+                  authBloc.add(
+                    AuthUpdateLocal(
+                      currentAuth!.copyWith(user: updatedUser),
+                    ),
                   );
                 }
-                if (state.status == UserStatus.success) {
-                  // Update AuthBloc if this is the logged-in user
-                  if (state.users.isNotEmpty) {
-                    final updatedUser = state.users.first;
-                    final authBloc = context.read<AuthBloc>();
-                    final currentAuth = authBloc.state.authenticate;
-                    if (currentAuth?.user?.partyId == updatedUser.partyId) {
-                      // Update the authenticate state with the new user data
-                      authBloc.add(
-                        AuthUpdateLocal(
-                          currentAuth!.copyWith(user: updatedUser),
-                        ),
-                      );
-                    }
-                  }
-                  if (widget.dialog) {
-                    Navigator.of(
-                      context,
-                    ).pop(state.users.isNotEmpty ? state.users.first : null);
-                  } else {
-                    context.go('/');
-                  }
-                }
-              },
-              builder: (context, state) {
-                if (state.status == UserStatus.loading) {
-                  return const LoadingIndicator();
-                }
-                return listChild(localizations);
-              },
-            ),
-          ),
+              }
+              if (widget.dialog) {
+                Navigator.of(
+                  context,
+                ).pop(state.users.isNotEmpty ? state.users.first : null);
+              } else {
+                context.go('/');
+              }
+            }
+          },
+          builder: (context, state) {
+            if (state.status == UserStatus.loading) {
+              return const LoadingIndicator();
+            }
+            return listChild(localizations);
+          },
         ),
       ),
     );
+
+    if (widget.dialog) {
+      return Dialog(
+        key: Key('UserDialog${_selectedRole.name}'),
+        insetPadding: const EdgeInsets.all(10),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: popUp(
+          context: context,
+          title: "$title #${widget.user.pseudoId ?? localizations.newItem}",
+          width: isPhone ? 400 : 800,
+          height: isPhone ? 700 : 600,
+          child: content,
+        ),
+      );
+    }
+    return content;
   }
 
   Widget listChild(UserCompanyLocalizations localizations) {

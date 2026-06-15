@@ -45,15 +45,16 @@ Map<String, GrowerpWidgetBuilder> getUserCompanyWidgets() {
     // discard a party-less user and load the authenticated user ("my profile").
     'UserDialog': (args) {
       final typed = args?['user'] as User?;
-      if (typed != null) return UserDialog(typed, dialog: true);
+      final isDialog = args?['dialog'] == true || args?['dialog'] == 'true';
+      if (typed != null) return UserDialog(typed, dialog: isDialog);
       final prefilled = entityFromArgs<User>(args, User.fromJson);
       if (prefilled != null || isAiPrefill(args)) {
         return UserDialogStateFull(
           user: (prefilled ?? User()).copyWith(role: parseRole(args?['role'])),
-          dialog: true,
+          dialog: isDialog,
         );
       }
-      return UserDialog(User(role: parseRole(args?['role'])), dialog: true);
+      return UserDialog(User(role: parseRole(args?['role'])), dialog: isDialog);
     },
 
     // Company dialogs — typed Company, or prefill field values, else empty.
@@ -62,7 +63,7 @@ Map<String, GrowerpWidgetBuilder> getUserCompanyWidgets() {
           entityFromArgs<Company>(
               args, (j) => Company.fromJson(j).copyWith(role: parseRole(args?['role']))) ??
           Company(role: parseRole(args?['role'])),
-      dialog: true,
+      dialog: args?['dialog'] == true || args?['dialog'] == 'true',
     ),
 
     // CompanyUser list variants
@@ -151,6 +152,7 @@ List<WidgetMetadata> getUserCompanyWidgetsWithMetadata() {
       },
       builder: (args) {
         final id = (args?['partyId'] ?? args?['userPartyId'] ?? args?['id'])?.toString();
+        final isDialog = args?['dialog'] == true || args?['dialog'] == 'true';
         if (id == null || id.isEmpty) {
           final prefilled = entityFromArgs<User>(args, User.fromJson);
           // CREATE only when there's an explicit create signal (AI prefill marker
@@ -158,17 +160,17 @@ List<WidgetMetadata> getUserCompanyWidgetsWithMetadata() {
           // (blank/prefilled) user is shown, not the authenticated user.
           if (prefilled != null || isAiPrefill(args)) {
             final user = (prefilled ?? User()).copyWith(role: parseRole(args?['role']));
-            return UserDialogStateFull(user: user, dialog: true);
+            return UserDialogStateFull(user: user, dialog: isDialog);
           }
           // No create signal → show the current/authenticated user ("my profile").
-          return UserDialog(User(role: parseRole(args?['role'])), dialog: true);
+          return UserDialog(User(role: parseRole(args?['role'])), dialog: isDialog);
         }
         return AsyncRecordDialog<User>(
           fetch: (ctx) async {
             final r = await ctx.read<RestClient>().getUser(partyId: id, limit: 1);
             return r.users.isNotEmpty ? r.users.first : null;
           },
-          onLoaded: (u) => UserDialog(u, dialog: true),
+          onLoaded: (u) => UserDialog(u, dialog: isDialog),
         );
       },
     ),
@@ -190,15 +192,16 @@ List<WidgetMetadata> getUserCompanyWidgetsWithMetadata() {
         //   '_NEW_'       -> blank create form
         //   other partyId -> fetched and edited
         final id = (args?['partyId'] ?? args?['companyPartyId'] ?? args?['id'])?.toString();
+        final isDialog = args?['dialog'] == true || args?['dialog'] == 'true';
         if (id == null || id.isEmpty) {
           // Show/create — prefill from any supplied field values.
           final prefilled = entityFromArgs<Company>(args, Company.fromJson);
           return ShowCompanyDialog(
             (prefilled ?? Company()).copyWith(role: parseRole(args?['role'])),
-            dialog: true,
+            dialog: isDialog,
           );
         }
-        return ShowCompanyDialog(Company(partyId: id), dialog: true);
+        return ShowCompanyDialog(Company(partyId: id), dialog: isDialog);
       },
     ),
     WidgetMetadata(

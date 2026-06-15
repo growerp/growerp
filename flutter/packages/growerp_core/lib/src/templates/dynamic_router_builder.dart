@@ -195,7 +195,7 @@ GoRouter createDynamicAppRouter(
       GoRoute(
         path: '/user',
         pageBuilder: (context, state) {
-          Map<String, dynamic> args = {};
+          Map<String, dynamic> args = {'dialog': true};
           if (state.extra != null) {
             args['user'] = state.extra;
           }
@@ -235,7 +235,7 @@ GoRouter createDynamicAppRouter(
       GoRoute(
         path: '/company',
         pageBuilder: (context, state) {
-          Map<String, dynamic> args = {};
+          Map<String, dynamic> args = {'dialog': true};
           if (state.extra != null) args['company'] = state.extra;
           return DialogPage(
             key: state.pageKey,
