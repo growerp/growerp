@@ -87,6 +87,8 @@ along with this software (see the LICENSE.md file). If not, see
         title="Acct Setup" route="/acct-setup" iconName="settings" widgetName="TimePeriodListForm" sequenceNum="74"/>
     <growerp.menu.MenuItem menuItemId="ADMIN_ABOUT" menuConfigurationId="ADMIN_DEFAULT"
         title="about" route="/about" iconName="info" widgetName="AboutForm" image="packages/growerp_core/images/infoGrey.png" selectedImage="packages/growerp_core/images/info.png" sequenceNum="80"/>
+    <growerp.menu.MenuItem menuItemId="ADMIN_AGENT_CONTROL" menuConfigurationId="ADMIN_DEFAULT"
+        title="Agent Control" route="/agent-control" iconName="smart_toy" widgetName="AdkAgentListView" sequenceNum="85"/>
     <growerp.menu.MenuItem menuItemId="ADMIN_DEMO" menuConfigurationId="ADMIN_DEFAULT"
         title="Demos" route="/demos" iconName="play_circle" widgetName="DemoList" sequenceNum="90"/>
     <growerp.menu.MenuItem menuItemId="ADMIN_SYSTEM_SETUP" menuConfigurationId="ADMIN_DEFAULT"
@@ -225,6 +227,18 @@ along with this software (see the LICENSE.md file). If not, see
     <growerp.menu.MenuItem menuItemId="ADMIN_ACCU_SYSTEM" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_ACC_SETUP"
         title="System Setup" iconName="settings" widgetName="SystemSetupDialog"
         userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="50"/>
+
+    <!-- ADMIN_AGENT_CONTROL children -->
+    <growerp.menu.MenuItem menuItemId="ADMIN_ADK_AGENTS" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_AGENT_CONTROL"
+        title="AI Agents" iconName="smart_toy" widgetName="AdkAgentListView" sequenceNum="10"/>
+    <growerp.menu.MenuItem menuItemId="ADMIN_ADK_JOBS" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_AGENT_CONTROL"
+        title="Agent Jobs" iconName="schedule" widgetName="AdkJobListView" sequenceNum="20"/>
+    <growerp.menu.MenuItem menuItemId="ADMIN_ADK_APPROVALS" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_AGENT_CONTROL"
+        title="Approvals" iconName="fact_check" widgetName="AdkApprovalsListView" sequenceNum="30"/>
+    <growerp.menu.MenuItem menuItemId="ADMIN_ADK_ACTIONS" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_AGENT_CONTROL"
+        title="Agent Actions" iconName="history" widgetName="AdkActionsListView" sequenceNum="40"/>
+    <growerp.menu.MenuItem menuItemId="ADMIN_ADK_KNOWLEDGE" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_AGENT_CONTROL"
+        title="Knowledge" iconName="menu_book" widgetName="AdkKnowledgeView" sequenceNum="50"/>
 
     <!-- ====================== FREELANCE_DEFAULT Menu Items ====================== -->
     <!-- Top-level -->

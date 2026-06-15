@@ -257,6 +257,11 @@ List<Map<String, GrowerpWidgetBuilder>> adminWidgetRegistrations = [
     'AccountingForm': (args) => const AccountingForm(),
     'PlanSelectionForm': (args) => const PlanSelectionForm(),
     'AboutForm': (args) => const AboutForm(),
+    'AdkAgentListView': (args) => const AdkAgentListView(),
+    'AdkJobListView': (args) => const AdkJobListView(),
+    'AdkApprovalsListView': (args) => const AdkApprovalsListView(),
+    'AdkActionsListView': (args) => const AdkActionsListView(),
+    'AdkKnowledgeView': (args) => const AdkKnowledgeView(),
     // Demo widget — only registered outside production builds
     if (!kReleaseMode) 'DemoList': (args) => const DemoListScreen(),
   },
