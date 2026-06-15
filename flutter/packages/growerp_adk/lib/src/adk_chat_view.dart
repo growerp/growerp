@@ -839,6 +839,7 @@ class _InputBar extends StatelessWidget {
           children: [
             Expanded(
               child: TextField(
+                key: const Key('chatInput'),
                 controller: controller,
                 focusNode: focusNode,
                 autofocus: true,
@@ -862,6 +863,7 @@ class _InputBar extends StatelessWidget {
             ),
             const SizedBox(width: 8),
             IconButton.filled(
+              key: const Key('chatSend'),
               onPressed: enabled ? onSend : null,
               icon: const Icon(Icons.send),
             ),

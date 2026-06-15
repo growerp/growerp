@@ -73,10 +73,12 @@ class _AdkJobListViewState extends State<AdkJobListView> {
         ),
         actions: [
           TextButton(
+            key: const Key('cancelClearLock'),
             onPressed: () => Navigator.pop(dialogContext, false),
             child: const Text('Cancel'),
           ),
           FilledButton(
+            key: const Key('confirmClearLock'),
             onPressed: () => Navigator.pop(dialogContext, true),
             child: const Text('Clear Lock'),
           ),
@@ -191,6 +193,7 @@ class _AdkJobListViewState extends State<AdkJobListView> {
       itemCount: jobs.length,
       separatorBuilder: (_, _) => const SizedBox(height: 8),
       itemBuilder: (ctx, i) => _JobCard(
+        index: i,
         job: jobs[i],
         onClearLock: () => _clearLock(jobs[i]),
         onTogglePause: () => _togglePause(jobs[i]),
@@ -211,7 +214,9 @@ class _AdkJobListViewState extends State<AdkJobListView> {
       StyledColumn(header: '', flex: 2),
     ];
 
-    final rows = _jobs.map((job) {
+    final rows = _jobs.asMap().entries.map((entry) {
+      final i = entry.key;
+      final job = entry.value;
       Color statusColor;
       IconData statusIcon;
       switch (job.latestStatus) {
@@ -286,11 +291,13 @@ class _AdkJobListViewState extends State<AdkJobListView> {
         children: [
           if (job.isLocked)
             IconButton(
+              key: Key('clearLockJob$i'),
               icon: Icon(Icons.lock_open, size: 18, color: cs.error),
               tooltip: 'Clear Lock',
               onPressed: () => _clearLock(job),
             ),
           IconButton(
+            key: Key('toggleJob$i'),
             icon: Icon(
               job.paused ? Icons.play_arrow : Icons.pause,
               size: 18,
@@ -305,6 +312,7 @@ class _AdkJobListViewState extends State<AdkJobListView> {
         avatar,
         Text(
           job.agentName,
+          key: Key('name$i'),
           style: const TextStyle(fontWeight: FontWeight.w500),
         ),
         Text(
@@ -344,11 +352,13 @@ class _AdkJobListViewState extends State<AdkJobListView> {
 }
 
 class _JobCard extends StatelessWidget {
+  final int index;
   final AdkJob job;
   final VoidCallback onClearLock;
   final VoidCallback onTogglePause;
 
   const _JobCard({
+    required this.index,
     required this.job,
     required this.onClearLock,
     required this.onTogglePause,
@@ -388,6 +398,7 @@ class _JobCard extends StatelessWidget {
                 Expanded(
                   child: Text(
                     job.agentName,
+                    key: Key('name$index'),
                     style: const TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 15,
@@ -492,6 +503,7 @@ class _JobCard extends StatelessWidget {
               children: [
                 if (job.isLocked)
                   TextButton.icon(
+                    key: Key('clearLockJob$index'),
                     onPressed: onClearLock,
                     icon: const Icon(Icons.lock_open, size: 16),
                     label: const Text('Clear Lock'),
@@ -499,6 +511,7 @@ class _JobCard extends StatelessWidget {
                   ),
                 const SizedBox(width: 8),
                 TextButton.icon(
+                  key: Key('toggleJob$index'),
                   onPressed: onTogglePause,
                   icon: Icon(
                     job.paused ? Icons.play_arrow : Icons.pause,

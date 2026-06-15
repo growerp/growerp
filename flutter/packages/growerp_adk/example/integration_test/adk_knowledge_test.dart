@@ -12,53 +12,44 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-// ignore_for_file: depend_on_referenced_packages
 import 'package:adk_example/router_builder.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:growerp_core/growerp_core.dart';
-import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_user_company/growerp_user_company.dart';
+import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_adk/src/integration_test/adk_test.dart';
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
-  setUpAll(() async {
+  setUp(() async {
     await GlobalConfiguration().loadFromAsset("app_settings");
   });
 
-  testWidgets('GrowERP ADK governance integration test', (
-    WidgetTester tester,
-  ) async {
-    final restClient = RestClient(await buildDioClient());
-
+  testWidgets('''GrowERP ADK knowledge-base test''', (tester) async {
+    RestClient restClient = RestClient(await buildDioClient());
     await CommonTest.startTestApp(
       tester,
       createAdkExampleRouter(),
       adkMenuConfig,
-      [
-        ...CoreLocalizations.localizationsDelegates,
-        UserCompanyLocalizations.delegate,
-      ],
+      UserCompanyLocalizations.localizationsDelegates,
       restClient: restClient,
-      clear: true,
-      title: "ADK Test",
       blocProviders: getUserCompanyBlocProviders(restClient, 'AppAdmin'),
+      title: 'GrowERP ADK knowledge test',
+      clear: true,
     );
-
     await CommonTest.createCompanyAndAdmin(tester);
 
-    // Agents: create a safe-by-default (read-only) agent via the dialog,
-    // asserting the governance controls exist, then confirm it is listed.
-    await AdkTest.selectAgents(tester);
-    await AdkTest.addReadOnlyAgent(tester, 'TestReadOnlyAgent');
-    await AdkTest.checkAgent(tester, 'TestReadOnlyAgent');
-
-    // Governance surfaces render for the logged-in company.
-    await AdkTest.selectApprovals(tester);
-    await AdkTest.selectActions(tester);
+    // Smoke only: adding/editing a knowledge doc chunks + embeds it server-side,
+    // which requires a per-company Gemini API key (the same LLM dependency the
+    // chat/approval surfaces have). On a keyless CI backend the create 400s, so
+    // here we just verify the screen and its controls render. The full
+    // add/check/update/delete steps live on AdkTest for key-equipped backends.
+    await AdkTest.selectKnowledge(tester);
+    await CommonTest.checkWidgetKey(tester, 'addKnowledge');
+    await CommonTest.checkWidgetKey(tester, 'refreshKnowledge');
 
     await CommonTest.logout(tester);
   });

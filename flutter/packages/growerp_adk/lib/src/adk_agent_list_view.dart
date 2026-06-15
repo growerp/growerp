@@ -92,10 +92,12 @@ class _AdkAgentListViewState extends State<AdkAgentListView> {
         content: Text('Delete "${cfg.agentName}"? This cannot be undone.'),
         actions: [
           TextButton(
+            key: const Key('cancelDeleteAgent'),
             onPressed: () => Navigator.pop(dialogContext, false),
             child: const Text('Cancel'),
           ),
           FilledButton(
+            key: const Key('confirmDeleteAgent'),
             style: FilledButton.styleFrom(
               backgroundColor: Theme.of(context).colorScheme.error,
             ),
@@ -216,7 +218,9 @@ class _AdkAgentListViewState extends State<AdkAgentListView> {
             StyledColumn(header: '', flex: 1),
           ];
 
-    final rows = _configs.map((cfg) {
+    final rows = _configs.asMap().entries.map((entry) {
+      final i = entry.key;
+      final cfg = entry.value;
       final hasSchedule = cfg.scheduleEnabled &&
           cfg.scheduleExpression != null &&
           cfg.scheduleExpression!.isNotEmpty;
@@ -230,6 +234,7 @@ class _AdkAgentListViewState extends State<AdkAgentListView> {
         mainAxisSize: MainAxisSize.min,
         children: [
           IconButton(
+            key: Key('editAdkAgent$i'),
             icon: const Icon(Icons.edit, size: 20),
             tooltip: 'Edit',
             padding: EdgeInsets.zero,
@@ -238,6 +243,7 @@ class _AdkAgentListViewState extends State<AdkAgentListView> {
             onPressed: () => _edit(cfg),
           ),
           IconButton(
+            key: Key('deleteAdkAgent$i'),
             icon: Icon(Icons.delete, size: 20, color: cs.error),
             tooltip: 'Delete',
             padding: EdgeInsets.zero,
@@ -257,6 +263,7 @@ class _AdkAgentListViewState extends State<AdkAgentListView> {
             children: [
               Text(
                 cfg.agentName ?? '(unnamed)',
+                key: Key('name$i'),
                 style: const TextStyle(fontWeight: FontWeight.w500),
               ),
               Text(
@@ -278,7 +285,7 @@ class _AdkAgentListViewState extends State<AdkAgentListView> {
 
       return [
         avatar,
-        Text(cfg.agentName ?? '(unnamed)'),
+        Text(cfg.agentName ?? '(unnamed)', key: Key('agentName$i')),
         Text(
           cfg.modelName ?? 'gemini-2.5-flash',
           style: TextStyle(fontSize: 13, color: cs.onSurfaceVariant),

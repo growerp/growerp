@@ -222,9 +222,11 @@ class _AdkKnowledgeViewState extends State<AdkKnowledgeView> {
             'questions about your catalog. This may take a moment.'),
         actions: [
           TextButton(
+              key: const Key('cancelImport'),
               onPressed: () => Navigator.pop(dctx, false),
               child: const Text('Cancel')),
           FilledButton(
+              key: const Key('confirmImport'),
               onPressed: () => Navigator.pop(dctx, true),
               child: const Text('Import')),
         ],
@@ -295,9 +297,11 @@ class _AdkKnowledgeViewState extends State<AdkKnowledgeView> {
         content: Text('Remove "${d.title}" from the knowledge base?'),
         actions: [
           TextButton(
+              key: const Key('cancelDeleteKnowledge'),
               onPressed: () => Navigator.pop(dctx, false),
               child: const Text('Cancel')),
           FilledButton(
+            key: const Key('confirmDeleteKnowledge'),
             style: FilledButton.styleFrom(backgroundColor: Colors.red),
             onPressed: () => Navigator.pop(dctx, true),
             child: const Text('Delete'),
@@ -429,13 +433,16 @@ class _AdkKnowledgeViewState extends State<AdkKnowledgeView> {
     if (isAPhone(context)) {
       return [
         const CircleAvatar(child: Icon(Icons.menu_book)),
-        Text('${d.title ?? '?'}\n${d.sourceType ?? 'note'} • ${d.chunkCount ?? 0} chunk(s)'),
+        Text(
+          '${d.title ?? '?'}\n${d.sourceType ?? 'note'} • ${d.chunkCount ?? 0} chunk(s)',
+          key: Key('title$index'),
+        ),
         delete,
       ];
     }
     return [
       const CircleAvatar(child: Icon(Icons.menu_book)),
-      Text(d.title ?? '?'),
+      Text(d.title ?? '?', key: Key('knowledgeTitle$index')),
       Text(d.sourceType ?? 'note'),
       Text('${d.chunkCount ?? 0}'),
       delete,

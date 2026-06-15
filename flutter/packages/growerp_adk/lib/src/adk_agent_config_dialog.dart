@@ -520,6 +520,7 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
                       ],
                       const Divider(height: 24),
                       SwitchListTile(
+                        key: const Key('scheduleEnabled'),
                         contentPadding: EdgeInsets.zero,
                         title: const Text('Enable scheduled runs'),
                         value: _scheduleEnabled,
