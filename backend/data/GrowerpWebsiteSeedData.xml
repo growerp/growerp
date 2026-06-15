@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-facade-xml type="install">
+
+    <moqui.resource.DbResource filename="GROWERP_ROOT" isFile="N" resourceId="GROWERP_ROOT" parentResourceId="" />
+    <moqui.resource.DbResource filename="content" isFile="N" resourceId="growerp_content_dir" parentResourceId="GROWERP_ROOT" />
+
+    <!-- Wiki Space -->
+    <moqui.resource.wiki.WikiSpace wikiSpaceId="GROWERP_WS" description="GrowERP Official Website Content"
+        rootWikiPageId="growerp_home" allowAnyHtml="Y" rootPageLocation="dbresource://GROWERP_ROOT"/>
+
+    <!-- Home Page -->
+    <moqui.resource.wiki.WikiPage wikiPageId="growerp_home" wikiSpaceId="GROWERP_WS" pagePath="home"
+        publishedVersionName="01" sequenceNum="1">
+        <histories historySeqId="01" versionName="01" changeDateTime="1485028800000" />
+    </moqui.resource.wiki.WikiPage>
+    <moqui.resource.DbResource filename="home.md.ftl" isFile="Y" resourceId="growerp_home"
+        parentResourceId="growerp_content_dir">
+        <file mimeType="text/markdown" versionName="01" rootVersionName="01">
+            <fileData><![CDATA[# Home
+
+**Feeling overwhelmed by your ERP? You're not alone.**
+
+Many business owners find accounting difficult and traditional ERP systems bloated with confusing features they'll never use. That's why we created GrowERP.
+
+We believe you deserve a clear view of your business performance. GrowERP is an intuitive, open-source AI supported assistant that provides accurate reports to guide your decisions and ensure regulatory compliance. While designed for simplicity from the start, it is built to grow with you through modular expansion. 
+
+**Welcome to the Future: The AI Native Company**
+GrowERP offers exactly the features you need to manage your company efficiently, now empowered with our latest **Agent Management System**. Transform your business into an **AI Native Company** by deploying intelligent agents that handle tedious tasks, automate workflows, and provide predictive insights. Our agents work seamlessly alongside your team to boost productivity and reduce operational friction.
+
+GrowERP is for you.
+
+## Start your free trial.
+(NO credit card required)  
+***Full system:***
+1. Web browser at [https://admin.growerp.com](https://admin.growerp.com)
+2. Android [PlayStore](https://play.google.com/store/apps/details?id=org.growerp.admin)
+3. IOS & MacOS [AppStore](https://apps.apple.com/us/app/growerp-admin-open-source/id1545521755)
+4. Linux [SnapStore](https://snapcraft.io/growerp-admin)
+5. Windows [MS store](https://apps.microsoft.com/detail/9nwx6kftjnql?hl=en-US&gl=TH)
+
+## Or try it at our next version limited availability test system
+*Full test system:*
+1. Web browser at [https://admin.growerp.org](https://admin.growerp.org)
+2. Linux: install with: `snap install growerp-admin --channel=beta`
+
+Hotel test system:  [https://hotel.growerp.org](https://hotel.growerp.org)
+
+## Follow us backstage
+Interested in the GrowERP development and back stage operation?
+Follow us via social media:
+1. [Weekly Mailing list](https://birdsend.page/forms/6228/3tDTt3BLhY): Not Just ERP
+2. [Twitter/X](https://x.com/grow_erp/status/1694945989977895320)
+3. [Linked In Group](https://www.linkedin.com/groups/4576897/)
+4. [YouTube](https://www.youtube.com/channel/UCroM6tobneiB9zbMVnaVuTg)
+5. [Github](https://github.com/growerp)
+6. [Substack](https://substack.com/@notjusterp)
+]]></fileData>
+            <histories versionName="01" versionDate="1485028800000" isDiff="N" />
+        </file>
+    </moqui.resource.DbResource>
+
+    <!-- Features Page -->
+    <moqui.resource.wiki.WikiPage wikiPageId="growerp_features" wikiSpaceId="GROWERP_WS" pagePath="features"
+        publishedVersionName="01" sequenceNum="2">
+        <histories historySeqId="01" versionName="01" changeDateTime="1485028800000" />
+    </moqui.resource.wiki.WikiPage>
+    <moqui.resource.DbResource filename="features.md.ftl" isFile="Y" resourceId="growerp_features"
+        parentResourceId="growerp_content_dir">
+        <file mimeType="text/markdown" versionName="01" rootVersionName="01">
+            <fileData><![CDATA[# Features
+
+- **Agent Management System (NEW!):** Empower your business to become an **AI Native Company**. Define, deploy, and manage AI agents that execute specialized tasks automatically. Our agent framework natively integrates with all ERP modules, transforming your entire workflow.
+- **Open Source:** GrowERP is a fully open-source ERP system, allowing for complete customization and community-driven development.
+- **Multi-Platform:** Built with Flutter, the application offers a consistent user experience across Web, Android, iOS, Linux, and Windows.
+- **Multi-Tenancy:** Supports multi-company, multi-currency, and multi-language setups for SAAS installations.
+- **Two Main Applications:** Admin Application for comprehensive ERP management, and a specialized Hotel Application.
+- **Demo Data:** The system can be initialized with demo data for quick exploration.
+- **Local Installation:** Streamlined command-line installer, manual instructions, and full Docker support.
+- **Backend:** Powered by the robust and scalable [Moqui Framework](https://www.moqui.org/).
+- **Frontend:** Built with [Flutter](https://flutter.dev/) for a modern, responsive experience.
+- **Generated Business Website:** Automatically generate a professional, customer-facing website based on your ERP data.
+
+## Core Modules (Admin Application)
+
+- **Dashboard:** A centralized and customizable dashboard.
+- **User and Company Management:** Manage contact persons, employees, suppliers, and customers.
+- **Catalog Management:** Support for Services, Physical, and Rental product types.
+- **Order Management:** Manage purchase and sales orders with flexible items and automated document creation.
+- **Inventory Management:** Handle multiple locations, shipments, and asset tracking.
+- **Accounting:** Full cycle accounting, automated posting, double-entry ledger.
+- **Marketing:** Opportunity tracking, task management, and lead/customer management.
+- **Website Management:** Seamlessly manage the content of your automatically generated business website.
+
+## Hotel Application Modules
+- **Dashboard:** Specialized dashboard for hotel operations.
+- **Room Management:** Manage rooms, bed configurations, and availability.
+- **Reservation Management:** Visual reservation calendar with day/week views.
+- **Accounting:** Integrated accounting tailored for the hospitality industry.
+]]></fileData>
+            <histories versionName="01" versionDate="1485028800000" isDiff="N" />
+        </file>
+    </moqui.resource.DbResource>
+
+    <!-- Getting Started -->
+    <moqui.resource.wiki.WikiPage wikiPageId="growerp_getting_started" wikiSpaceId="GROWERP_WS" pagePath="getting-started"
+        publishedVersionName="01" sequenceNum="3">
+        <histories historySeqId="01" versionName="01" changeDateTime="1485028800000" />
+    </moqui.resource.wiki.WikiPage>
+    <moqui.resource.DbResource filename="getting-started.md.ftl" isFile="Y" resourceId="growerp_getting_started"
+        parentResourceId="growerp_content_dir">
+        <file mimeType="text/markdown" versionName="01" rootVersionName="01">
+            <fileData><![CDATA[# Getting Started
+
+To get up to speed quickly, follow the checklist below. If you need assistance, we provide support via email at support@growerp.com.
+
+## Quick Setup Guide
+
+1. **Select Your App:** Navigate to the home page of this site and choose your application under **"Start your free trial."**
+2. **Register:** Click "Register" at the bottom of the screen and enter your email and desired password.
+3. **Check Your Email:** After registering, the system will send you a password. Use these credentials to log in for the first time.
+4. **Initial Configuration:** The system will prompt you for your company name and preferred currency. If you simply want to explore, select the option to **generate demo data.**
+5. **Explore the Dashboard:** Once setup is complete, you will be directed to the main menu.
+
+**Give it a spin:** Look around, enter a test order, view your generated website, and send us your feedback!
+
+---
+
+## Deleting Your Data
+
+If you no longer wish to use the system and want to remove your information, follow these steps:
+- **Access Settings:** Log in as the administrator. Navigate to your **Personal Screen** (found under "Company" in the employee section) or click the menu in the **top-left corner**.
+- **The Delete Button:** You will find a delete button here.
+- **Scope of Deletion:** Clicking this will delete your user profile. If you are the sole administrator, it will also permanently delete the associated company data.
+
+> **Warning:** Please be certain before proceeding, as this action is **irreversible** and data cannot be recovered.
+]]></fileData>
+            <histories versionName="01" versionDate="1485028800000" isDiff="N" />
+        </file>
+    </moqui.resource.DbResource>
+
+    <!-- Pricing Page -->
+    <moqui.resource.wiki.WikiPage wikiPageId="growerp_pricing" wikiSpaceId="GROWERP_WS" pagePath="pricing"
+        publishedVersionName="01" sequenceNum="4">
+        <histories historySeqId="01" versionName="01" changeDateTime="1485028800000" />
+    </moqui.resource.wiki.WikiPage>
+    <moqui.resource.DbResource filename="pricing.md.ftl" isFile="Y" resourceId="growerp_pricing"
+        parentResourceId="growerp_content_dir">
+        <file mimeType="text/markdown" versionName="01" rootVersionName="01">
+            <fileData><![CDATA[# Pricing
+
+Choose the perfect plan for your business needs.
+
+## The 'Do It Yourself' (DIY) Plan
+- $49.99 monthly
+- All features
+- No user limit
+- Email support $75 per hour. 48 hours response time
+
+## The 'Do it With You' (DWY) Plan
+- $499 monthly
+- All Features
+- No user limit
+- Includes 20 hours monthly support for:
+  - data conversion
+  - user support
+  - specific reporting
+  - data entry
+  - customization
+- Extra support $50 per hour.
+
+## The 'Do it For You' (DFY) Company Plan
+- $1499 monthly
+- Same as the DWY plan however with 80 hours monthly included
+
+## Enterprise Plan
+- Contact support at support@growerp.com
+]]></fileData>
+            <histories versionName="01" versionDate="1485028800000" isDiff="N" />
+        </file>
+    </moqui.resource.DbResource>
+
+    <!-- Privacy Policy Page -->
+    <moqui.resource.wiki.WikiPage wikiPageId="growerp_privacy" wikiSpaceId="GROWERP_WS" pagePath="privacy"
+        publishedVersionName="01" sequenceNum="5">
+        <histories historySeqId="01" versionName="01" changeDateTime="1485028800000" />
+    </moqui.resource.wiki.WikiPage>
+    <moqui.resource.DbResource filename="privacy.md.ftl" isFile="Y" resourceId="growerp_privacy"
+        parentResourceId="growerp_content_dir">
+        <file mimeType="text/markdown" versionName="01" rootVersionName="01">
+            <fileData><![CDATA[# Privacy Policy
+
+**Effective Date:** October 2024
+
+This Privacy Policy explains how The system GrowERP collects, uses, discloses, and safeguards your information when you use our application (App). By using our App, you agree to the collection and use of information in accordance with this policy.
+
+## 1. Information We Collect
+### a. Personal Information
+We may collect personal information that you provide directly to us, such as: Name, Email address, Phone number, Payment information when you use the E-Commerce part.
+### b. Usage Data
+We may collect information automatically when you use our App, including: Device type and model, IP address, Operating system version, App usage information.
+
+## 2. How We Use Your Information
+- To provide, maintain, and improve the App
+- To personalize your experience
+- To process transactions and send related information
+- To communicate with you about updates, promotions, or news related to the app
+- To analyze usage trends and monitor app performance
+
+## 3. How We Share Your Information
+We do not sell or share your personal information with third parties, except as follows: Service Providers and Legal Requirements.
+
+## 4. Data Security
+We take the security of your data seriously and use safeguards to protect your information.
+
+## 5. Your Rights
+You have the right to Access, Correction, Deletion, and Opt-out.
+
+## 6. Third-Party Links
+We are not responsible for the privacy practices or the content of third-party websites or services linked from our App.
+
+## 7. Children's Privacy
+Our App is not intended for children under the age of 13.
+
+## 8. Changes to This Privacy Policy
+We may update this Privacy Policy from time to time. 
+
+## 9. Contact Us
+If you have any questions about this Privacy Policy, please contact us at: support@growerp.com
+]]></fileData>
+            <histories versionName="01" versionDate="1485028800000" isDiff="N" />
+        </file>
+    </moqui.resource.DbResource>
+
+    <moqui.resource.DbResource filename="websiteColor.json" isFile="Y" resourceId="growerp_website_color"
+        parentResourceId="growerp_content_dir">
+        <file mimeType="application/json" versionName="01" rootVersionName="01">
+            <fileData><![CDATA[{
+  "HeaderFooterBg": "#064e3b",
+  "HeaderFooterText": "#ffffff",
+  "TwitterUrl": "https://x.com/grow_erp",
+  "FacebookUrl": "https://www.facebook.com/growerp/",
+  "InstagramUrl": "https://www.instagram.com/notjusterp",
+  "YouTubeUrl": "https://www.youtube.com/channel/UCroM6tobneiB9zbMVnaVuTg",
+  "LinkedInUrl": "https://www.linkedin.com/company/2692477/admin/dashboard/",
+  "SubstackUrl": "https://notjusterp.substack.com/"
+}]]></fileData>
+            <histories versionName="01" versionDate="1485028800000" isDiff="N" />
+        </file>
+    </moqui.resource.DbResource>
+
+    <!-- Store Setting for GROWERP -->
+    <mantle.product.store.ProductStore productStoreId="GROWERP_STORE" storeName="GrowERP Official"
+        organizationPartyId="GROWERP" wikiSpaceId="GROWERP_WS" defaultLocale="en_US" defaultCurrencyUomId="USD" />
+
+    <mantle.product.store.ProductStoreSetting productStoreId="GROWERP_STORE"
+        settingValue=".*100000\.localhost.*|.*growerp\.com.*|.*growerp\.org.*"
+        settingTypeEnumId="PsstHostname" />
+        
+    <!-- Required store categories for PopRestStore UI templates -->
+    <mantle.product.store.ProductStoreCategory productStoreId="GROWERP_STORE" productCategoryId="PopcAllProducts" storeCategoryTypeEnumId="PsctSearch" />
+    <mantle.product.store.ProductStoreCategory productStoreId="GROWERP_STORE" productCategoryId="PopcAllProducts" storeCategoryTypeEnumId="PsctPurchaseAllow" />
+    <mantle.product.store.ProductStoreCategory productStoreId="GROWERP_STORE" productCategoryId="PopcAllProducts" storeCategoryTypeEnumId="PsctViewAllow" />
+    <mantle.product.store.ProductStoreCategory productStoreId="GROWERP_STORE" productCategoryId="PopcDeals" storeCategoryTypeEnumId="PsctPromotions" />
+    <mantle.product.store.ProductStoreCategory productStoreId="GROWERP_STORE" productCategoryId="PopcNew" storeCategoryTypeEnumId="PsctNewProducts" />
+    <mantle.product.store.ProductStoreCategory productStoreId="GROWERP_STORE" productCategoryId="PopcFeatured" storeCategoryTypeEnumId="PsctFeatured" />
+    <mantle.product.store.ProductStoreCategory productStoreId="GROWERP_STORE" productCategoryId="PopcHome" storeCategoryTypeEnumId="PsctHomePage" />
+    <mantle.product.store.ProductStoreCategory productStoreId="GROWERP_STORE" productCategoryId="PopcBrowseRoot" storeCategoryTypeEnumId="PsctBrowseRoot" />
+    <mantle.product.store.ProductStoreSetting productStoreId="GROWERP_STORE"
+        settingValue="dbresource://GROWERP_ROOT"
+        settingTypeEnumId="PsstContentLocation" />
+
+</entity-facade-xml>

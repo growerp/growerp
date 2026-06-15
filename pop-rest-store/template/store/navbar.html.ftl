@@ -141,14 +141,7 @@
                     </a>
                 </li>
                 
-                <#-- Admin Link -->
-                <li class="nav-item">
-                    <a href="/admin/" class="nav-link admin-link" title="Administration Panel">
-                        <i class="fas fa-cogs"></i>
-                        <span class="d-none d-lg-inline ml-1">Admin</span>
-                    </a>
-                </li>
-                
+
                 <#-- Mobile Search -->
                 <li class="nav-item d-block d-sm-block d-md-none mt-3">
                     <form id="form-search-mobile" class="search-input">
