@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<entity-facade-xml type="install">
+<entity-facade-xml type="demo">
 
     <moqui.resource.DbResource filename="GROWERP_ROOT" isFile="N" resourceId="GROWERP_ROOT" parentResourceId="" />
     <moqui.resource.DbResource filename="content" isFile="N" resourceId="growerp_content_dir" parentResourceId="GROWERP_ROOT" />
@@ -8,7 +8,7 @@
     <moqui.resource.wiki.WikiSpace wikiSpaceId="GROWERP_WS" description="GrowERP Official Website Content"
         rootWikiPageId="growerp_home" allowAnyHtml="Y" rootPageLocation="dbresource://GROWERP_ROOT"/>
 
-    <!-- Home Page -->main
+    <!-- Home Page -->
     <moqui.resource.wiki.WikiPage wikiPageId="growerp_home" wikiSpaceId="GROWERP_WS" pagePath="home"
         publishedVersionName="01" sequenceNum="1">
         <histories historySeqId="01" versionName="01" changeDateTime="1485028800000" />
@@ -248,25 +248,10 @@ If you have any questions about this Privacy Policy, please contact us at: suppo
         </file>
     </moqui.resource.DbResource>
 
-    <!-- Store Setting for GROWERP -->
-    <mantle.product.store.ProductStore productStoreId="GROWERP_STORE" storeName="GrowERP Official"
-        organizationPartyId="GROWERP" wikiSpaceId="GROWERP_WS" defaultLocale="en_US" defaultCurrencyUomId="USD" />
-
-    <mantle.product.store.ProductStoreSetting productStoreId="GROWERP_STORE"
-        settingValue=".*100000\.localhost.*|.*growerp\.com.*|.*growerp\.org.*"
-        settingTypeEnumId="PsstHostname" />
-        
-    <!-- Required store categories for PopRestStore UI templates -->
-    <mantle.product.store.ProductStoreCategory productStoreId="GROWERP_STORE" productCategoryId="PopcAllProducts" storeCategoryTypeEnumId="PsctSearch" />
-    <mantle.product.store.ProductStoreCategory productStoreId="GROWERP_STORE" productCategoryId="PopcAllProducts" storeCategoryTypeEnumId="PsctPurchaseAllow" />
-    <mantle.product.store.ProductStoreCategory productStoreId="GROWERP_STORE" productCategoryId="PopcAllProducts" storeCategoryTypeEnumId="PsctViewAllow" />
-    <mantle.product.store.ProductStoreCategory productStoreId="GROWERP_STORE" productCategoryId="PopcDeals" storeCategoryTypeEnumId="PsctPromotions" />
-    <mantle.product.store.ProductStoreCategory productStoreId="GROWERP_STORE" productCategoryId="PopcNew" storeCategoryTypeEnumId="PsctNewProducts" />
-    <mantle.product.store.ProductStoreCategory productStoreId="GROWERP_STORE" productCategoryId="PopcFeatured" storeCategoryTypeEnumId="PsctFeatured" />
-    <mantle.product.store.ProductStoreCategory productStoreId="GROWERP_STORE" productCategoryId="PopcHome" storeCategoryTypeEnumId="PsctHomePage" />
-    <mantle.product.store.ProductStoreCategory productStoreId="GROWERP_STORE" productCategoryId="PopcBrowseRoot" storeCategoryTypeEnumId="PsctBrowseRoot" />
-    <mantle.product.store.ProductStoreSetting productStoreId="GROWERP_STORE"
-        settingValue="dbresource://GROWERP_ROOT"
-        settingTypeEnumId="PsstContentLocation" />
+    <!-- NOTE: no ProductStore / ProductStoreSetting / ProductStoreCategory here.
+         The GROWERP company already owns a store (cloned from POPC_DEFAULT by
+         setup#MainOrganization, with GROWERP-owned browse/search categories). This file
+         only supplies the official marketing wiki + content; complete#TenantSetup repoints
+         that existing store at GROWERP_WS / GROWERP_ROOT (see TenantServices100.xml). -->
 
 </entity-facade-xml>

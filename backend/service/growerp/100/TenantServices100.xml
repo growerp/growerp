@@ -230,13 +230,50 @@ along with this software (see the LICENSE.md file). If not, see
                 <log message="Trial subscription created: ${subscriptionResult.subscription?.pseudoId} - ${evaluationDays} days until ${thruDate} for subscriber ${subscriberPartyId}"/>
             </if>
 
-            <!-- Load ERP landing page data for GROWERP owner and onboarding assessment -->
+            <!-- Load ERP landing page data, onboarding assessment and the official
+                 GROWERP marketing website (all GROWERP-owner-scoped) after the GROWERP
+                 tenant org/store is set up -->
             <if condition="ownerPartyId == 'GROWERP'">
                 <script><![CDATA[
                     ec.entity.makeDataLoader().location("component://growerp/data/ErpLandingPageData.xml").load()
                     ec.entity.makeDataLoader().location("component://growerp/data/ErpNeedAssessmentData.xml").load()
+                    ec.entity.makeDataLoader().location("component://growerp/data/GrowerpWebsiteSeedData.xml").load()
                 ]]></script>
                 <service-call name="update#growerp.Application" in-map="[applicationId: 'AppAdmin', assessmentId: 'ERP_NEED']"/>
+
+                <!-- Repoint the GROWERP company store (created by setup#MainOrganization) at the
+                     official marketing wiki/content just loaded, and let it serve the growerp.com
+                     / growerp.org domains. The store keeps its GROWERP-owned categories. -->
+                <entity-find entity-name="mantle.product.store.ProductStore" list="growerpStores">
+                    <econdition field-name="organizationPartyId" from="companyPartyId"/>
+                </entity-find>
+                <if condition="growerpStores">
+                    <set field="growerpStoreId" from="growerpStores[0].productStoreId"/>
+                    <service-call name="update#mantle.product.store.ProductStore"
+                        in-map="[productStoreId: growerpStoreId, storeName: 'GrowERP Official', wikiSpaceId: 'GROWERP_WS']"/>
+
+                    <!-- point content location at the marketing DbResource tree -->
+                    <entity-find entity-name="mantle.product.store.ProductStoreSetting" list="contentSettings">
+                        <econdition field-name="productStoreId" from="growerpStoreId"/>
+                        <econdition field-name="settingTypeEnumId" value="PsstContentLocation"/>
+                    </entity-find>
+                    <iterate list="contentSettings" entry="contentSetting">
+                        <service-call name="update#mantle.product.store.ProductStoreSetting"
+                            in-map="contentSetting + [settingValue: 'dbresource://GROWERP_ROOT']"/>
+                    </iterate>
+
+                    <!-- Add the official growerp.com / growerp.org domains as extra PsstHostname
+                         rows so the public store also resolves on those hosts. The original
+                         cloned "<storeId>.localhost" row is left untouched and (being the newest)
+                         stays the human-readable URL shown in the admin Website Info screen.
+                         PsstHostname is matched as a regex by PopRestStore (StoreServices). -->
+                    <service-call name="create#mantle.product.store.ProductStoreSetting"
+                        in-map="[productStoreId: growerpStoreId, settingTypeEnumId: 'PsstHostname',
+                                 fromDate: java.sql.Timestamp.valueOf('2024-01-01 00:00:00'), settingValue: '.*growerp\\.com.*']"/>
+                    <service-call name="create#mantle.product.store.ProductStoreSetting"
+                        in-map="[productStoreId: growerpStoreId, settingTypeEnumId: 'PsstHostname',
+                                 fromDate: java.sql.Timestamp.valueOf('2024-01-02 00:00:00'), settingValue: '.*growerp\\.org.*']"/>
+                </if>
             </if>
 
             <!-- Mark tenant setup as complete -->
