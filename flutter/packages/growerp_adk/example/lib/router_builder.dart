@@ -55,6 +55,15 @@ const adkMenuConfig = MenuConfiguration(
       widgetName: 'AdkAgentListView',
     ),
     MenuItem(
+      menuItemId: 'ADK_MCPSERVERS',
+      itemKey: 'ADK_MCPSERVERS',
+      title: 'MCP Servers',
+      route: '/adk-mcp-servers',
+      iconName: 'dns',
+      sequenceNum: 35,
+      widgetName: 'AdkMcpServerListView',
+    ),
+    MenuItem(
       menuItemId: 'ADK_JOBS',
       itemKey: 'ADK_JOBS',
       title: 'Agent Jobs',
@@ -104,6 +113,7 @@ List<ChatMenuEntry> _chatEntries() => adkMenuConfig.menuItems
 Widget _routeWidget(String route) => switch (route) {
       '/chat' => AdkChatView(menuItems: _chatEntries()),
       '/adk-agents' => const AdkAgentListView(),
+      '/adk-mcp-servers' => const AdkMcpServerListView(),
       '/adk-jobs' => const AdkJobListView(),
       '/adk-approvals' => const AdkApprovalsListView(),
       '/adk-actions' => const AdkActionsListView(),

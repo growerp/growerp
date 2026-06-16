@@ -1783,6 +1783,52 @@ abstract class RestClient {
     @Query('adkAgentTeamMemberId') required String adkAgentTeamMemberId,
   });
 
+  // External MCP server registry (tenant-level)
+  @GET("rest/s1/growerp/100/AdkMcpServer")
+  Future<AdkMcpServers> getAdkMcpServers({@Query('search') String? search});
+
+  @POST("rest/s1/growerp/100/AdkMcpServer")
+  Future<AdkMcpServer> createAdkMcpServer({
+    @Field() required String serverName,
+    @Field() required String url,
+    @Field() String? transport,
+    @Field() String? headersJson,
+    @Field() bool? enabled,
+  });
+
+  @PATCH("rest/s1/growerp/100/AdkMcpServer")
+  Future<AdkMcpServer> updateAdkMcpServer({
+    @Query('adkMcpServerId') required String adkMcpServerId,
+    @Field() String? serverName,
+    @Field() String? url,
+    @Field() String? transport,
+    @Field() String? headersJson,
+    @Field() bool? enabled,
+  });
+
+  @DELETE("rest/s1/growerp/100/AdkMcpServer")
+  Future<void> deleteAdkMcpServer({
+    @Query('adkMcpServerId') required String adkMcpServerId,
+  });
+
+  // Attach / detach an MCP server to an agent
+  @GET("rest/s1/growerp/100/AdkAgentMcpServer")
+  Future<AdkAgentMcpServers> getAdkAgentMcpServers({
+    @Query('configId') required String configId,
+  });
+
+  @POST("rest/s1/growerp/100/AdkAgentMcpServer")
+  Future<void> createAdkAgentMcpServer({
+    @Field() required String configId,
+    @Field() required String adkMcpServerId,
+    @Field() int? sequenceNum,
+  });
+
+  @DELETE("rest/s1/growerp/100/AdkAgentMcpServer")
+  Future<void> deleteAdkAgentMcpServer({
+    @Query('adkAgentMcpServerId') required String adkAgentMcpServerId,
+  });
+
   // ADK Job endpoints
   @GET("rest/s1/growerp/100/AdkJob")
   Future<AdkJobs> getAdkJobs({@Query('search') String? search});

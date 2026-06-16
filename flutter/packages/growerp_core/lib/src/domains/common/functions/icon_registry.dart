@@ -119,6 +119,12 @@ final Map<String, Icon> iconRegistry = {
   'psychology': const Icon(Icons.psychology),
   'assignment': const Icon(Icons.assignment),
   'group': const Icon(Icons.group),
+  // Agent Control (ADK) icons — shown in the mobile bottom selection bar
+  'dns': const Icon(Icons.dns), // MCP servers (server stack)
+  'schedule': const Icon(Icons.schedule), // scheduled agent jobs (clock)
+  'fact_check': const Icon(Icons.fact_check), // write approvals
+  'history': const Icon(Icons.history), // agent action audit log
+  'menu_book': const Icon(Icons.menu_book), // knowledge base
 };
 
 /// Get an Icon by its name from the registry.

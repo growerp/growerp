@@ -68,6 +68,37 @@ Agents can be triggered automatically on a recurring schedule.
 * **Prompt for each scheduled run**: The explicit prompt given to the agent when the schedule triggers (e.g., "Summarize the orders from the last 24 hours").
 * **Chat Room ID for delivery**: If provided, the agent will post the result of its scheduled run to this chat room. If left blank, the run will only be logged.
 
+---
+
+## MCP Servers (external tools)
+
+Agents reach Moqui/GrowERP through a built-in MCP (Model Context Protocol) toolset
+automatically. You can also give an agent extra tools by registering **external MCP
+servers** and attaching them to agents.
+
+### Registering a server
+1. Open **MCP Servers** (under Agent Control / the Agents menu).
+2. Tap **+** to register one, or tap a row to edit it. Fields:
+   * **Server name**: a label for the server (required).
+   * **URL**: the server's endpoint, e.g. `https://host/mcp/sse` (required).
+   * **Transport**: `SSE` (Server-Sent Events) or `HTTP` (streamable HTTP).
+   * **Auth headers**: optional name/value pairs sent on connect (e.g.
+     `Authorization: Bearer …`). Header values are stored encrypted and are never shown
+     again — re-enter a value to change it.
+   * **Enabled**: turn the whole server on/off without deleting it.
+
+Servers are scoped to your company; other tenants never see or use them.
+
+### Attaching a server to an agent
+1. Create and **save** the agent first (attachment needs a saved agent).
+2. Re-open the agent and find the **MCP servers** section.
+3. Use **Attach MCP server…** to add one of your registered servers; the agent gains that
+   server's tools on its next run. Use the remove icon to detach.
+
+Changes take effect immediately — the agent is rebuilt in the background, no restart needed.
+The same governance applies: an external server's tools are still subject to the agent's
+Tool Access and Write Policy.
+
 ## Best Practices
 * **Start Small**: Use the `Read-only` tool mode when testing a new agent to prevent accidental data modifications.
 * **Be Specific**: Write clear and highly specific system instructions.

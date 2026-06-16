@@ -63,6 +63,10 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
   List<AdkAgentTeamMember> _members = [];
   List<AdkAgentConfig> _allAgents = [];
   bool _teamLoading = false;
+  // External MCP servers attached to this agent (+ the tenant registry to add from).
+  List<AdkAgentMcpServer> _attachedServers = [];
+  List<AdkMcpServer> _allServers = [];
+  bool _mcpLoading = false;
 
   static const _cronHints = [
     ('Every minute', '0 * * * * ?'),
@@ -93,6 +97,7 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
       _orchestrationType = e.orchestrationType ?? 'router';
       _loopMaxCtrl.text = e.loopMaxIterations?.toString() ?? '';
       if (_agentRole != 'specialist' && e.adkAgentConfigId != null) _loadTeam();
+      if (e.adkAgentConfigId != null) _loadMcpServers();
     } else {
       _modelCtrl.text = 'gemini-2.5-flash';
       _llmProviderCtrl.text = 'gemini';
@@ -150,6 +155,63 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
         setState(() => _teamLoading = false);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Remove failed: $e'), backgroundColor: Colors.red),
+        );
+      }
+    }
+  }
+
+  /// Load this agent's attached external MCP servers + the tenant registry to add from.
+  Future<void> _loadMcpServers() async {
+    final id = widget.existing?.adkAgentConfigId;
+    if (id == null) return;
+    setState(() => _mcpLoading = true);
+    try {
+      final svc = await AdkConfigService.create();
+      final attached = await svc.attachedServers(id);
+      final all = await svc.listMcpServers();
+      if (mounted) {
+        setState(() {
+          _attachedServers = attached;
+          _allServers = all;
+        });
+      }
+    } catch (_) {
+      // best-effort; the MCP section just stays empty
+    } finally {
+      if (mounted) setState(() => _mcpLoading = false);
+    }
+  }
+
+  Future<void> _attachServer(String adkMcpServerId) async {
+    final id = widget.existing?.adkAgentConfigId;
+    if (id == null) return;
+    setState(() => _mcpLoading = true);
+    try {
+      final svc = await AdkConfigService.create();
+      await svc.attachServer(id, adkMcpServerId,
+          sequenceNum: _attachedServers.length);
+      await _loadMcpServers();
+    } catch (e) {
+      if (mounted) {
+        setState(() => _mcpLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Attach failed: $e'), backgroundColor: Colors.red),
+        );
+      }
+    }
+  }
+
+  Future<void> _detachServer(String adkAgentMcpServerId) async {
+    setState(() => _mcpLoading = true);
+    try {
+      final svc = await AdkConfigService.create();
+      await svc.detachServer(adkAgentMcpServerId);
+      await _loadMcpServers();
+    } catch (e) {
+      if (mounted) {
+        setState(() => _mcpLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Detach failed: $e'), backgroundColor: Colors.red),
         );
       }
     }
@@ -306,6 +368,80 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
                     Icon(Icons.add),
                     SizedBox(width: 8),
                     Text('Add specialist…'),
+                  ],
+                ),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  /// Attached external MCP servers + a picker of the tenant registry. Only manageable on a
+  /// saved agent (needs an id); for a new one, prompt to save first.
+  Widget _mcpServersSection({required bool isNew}) {
+    if (isNew) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: 4),
+        child: Text(
+            'Save the agent first, then re-open it to attach MCP servers.',
+            style: TextStyle(fontStyle: FontStyle.italic)),
+      );
+    }
+    final attachedIds =
+        _attachedServers.map((s) => s.adkMcpServerId).toSet();
+    final available = _allServers
+        .where((s) => s.enabled && !attachedIds.contains(s.adkMcpServerId))
+        .toList();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (_mcpLoading) const LinearProgressIndicator(),
+        if (_attachedServers.isEmpty && !_mcpLoading)
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 4),
+            child: Text('No MCP servers attached.'),
+          ),
+        ..._attachedServers.map((s) => ListTile(
+              key: Key('mcpServer_${s.adkMcpServerId}'),
+              dense: true,
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.dns_outlined),
+              title: Text(s.serverName ?? s.adkMcpServerId ?? '?'),
+              subtitle: s.url != null
+                  ? Text(s.url!, maxLines: 1, overflow: TextOverflow.ellipsis)
+                  : null,
+              trailing: IconButton(
+                key: Key('detachMcpServer_${s.adkMcpServerId}'),
+                icon: const Icon(Icons.remove_circle_outline, color: Colors.red),
+                tooltip: 'Detach',
+                onPressed: _mcpLoading || s.adkAgentMcpServerId == null
+                    ? null
+                    : () => _detachServer(s.adkAgentMcpServerId!),
+              ),
+            )),
+        if (available.isNotEmpty)
+          Align(
+            alignment: Alignment.centerLeft,
+            child: PopupMenuButton<String>(
+              key: const Key('attachMcpServer'),
+              enabled: !_mcpLoading,
+              tooltip: 'Attach MCP server',
+              itemBuilder: (_) => available
+                  .map((s) => PopupMenuItem<String>(
+                        value: s.adkMcpServerId,
+                        child: Text(s.serverName ?? s.adkMcpServerId ?? '?'),
+                      ))
+                  .toList(),
+              onSelected: (v) => _attachServer(v),
+              child: const Padding(
+                padding: EdgeInsets.symmetric(vertical: 12),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.add),
+                    SizedBox(width: 8),
+                    Text('Attach MCP server…'),
                   ],
                 ),
               ),
@@ -518,6 +654,16 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
                         const SizedBox(height: 8),
                         _teamMembersSection(isNew: widget.existing == null),
                       ],
+                      const Divider(height: 24),
+                      const Text('MCP servers',
+                          style: TextStyle(fontWeight: FontWeight.bold)),
+                      const Text(
+                        'External tool servers (SSE / HTTP) this agent may use. '
+                        'Register them in the MCP Servers screen first.',
+                        style: TextStyle(fontSize: 12, color: Colors.grey),
+                      ),
+                      const SizedBox(height: 8),
+                      _mcpServersSection(isNew: widget.existing == null),
                       const Divider(height: 24),
                       SwitchListTile(
                         key: const Key('scheduleEnabled'),

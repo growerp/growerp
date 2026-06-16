@@ -258,6 +258,7 @@ List<Map<String, GrowerpWidgetBuilder>> adminWidgetRegistrations = [
     'PlanSelectionForm': (args) => const PlanSelectionForm(),
     'AboutForm': (args) => const AboutForm(),
     'AdkAgentListView': (args) => const AdkAgentListView(),
+    'AdkMcpServerListView': (args) => const AdkMcpServerListView(),
     'AdkJobListView': (args) => const AdkJobListView(),
     'AdkApprovalsListView': (args) => const AdkApprovalsListView(),
     'AdkActionsListView': (args) => const AdkActionsListView(),
