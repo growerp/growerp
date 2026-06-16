@@ -6,7 +6,7 @@
 /* CSS Custom Properties - Design Tokens */
 :root {
     /* Dynamic Header/Footer colors from website settings */
-    --header-footer-bg: #1e293b;
+    --header-footer-bg: #1f2937;
     --header-footer-text: #ffffff;
     
     /* Primary Palette - Deep Emerald/Teal */
