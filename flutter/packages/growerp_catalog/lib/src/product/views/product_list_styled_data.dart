@@ -121,10 +121,14 @@ List<Widget> getProductListRow({
       ),
     );
   } else {
-    // ID
+    // ID (the constant 'productItem' key must be present on desktop too —
+    // tests count it to determine the number of rows)
     cells.add(SizedBox(
-      key: Key('item$index'),
-      child: Text(product.pseudoId, key: Key('id$index')),
+      key: const Key('productItem'),
+      child: SizedBox(
+        key: Key('item$index'),
+        child: Text(product.pseudoId, key: Key('id$index')),
+      ),
     ));
 
     // Name

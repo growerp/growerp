@@ -90,10 +90,14 @@ List<Widget> getCategoryListRow({
       ),
     );
   } else {
-    // ID
+    // ID (the constant 'categoryItem' key must be present on desktop too —
+    // tests count it to determine the number of rows)
     cells.add(SizedBox(
-      key: Key('item$index'),
-      child: Text(category.pseudoId, key: Key('id$index')),
+      key: const Key('categoryItem'),
+      child: SizedBox(
+        key: Key('item$index'),
+        child: Text(category.pseudoId, key: Key('id$index')),
+      ),
     ));
 
     // Name

@@ -105,11 +105,15 @@ List<Widget> getQuestionListRow({
       ),
     );
   } else {
-    // Sequence
+    // Sequence (wrapped so the constant 'questionItem' key is present on
+    // desktop too — tests count it to determine the number of rows)
     cells.add(
-      Text(
-        '${question.questionSequence ?? index + 1}',
-        key: Key('id$index'),
+      SizedBox(
+        key: const Key('questionItem'),
+        child: Text(
+          '${question.questionSequence ?? index + 1}',
+          key: Key('id$index'),
+        ),
       ),
     );
 

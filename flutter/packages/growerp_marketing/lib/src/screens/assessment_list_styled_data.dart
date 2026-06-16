@@ -133,11 +133,15 @@ List<Widget> getAssessmentListRow({
       ),
     );
   } else {
-    // ID
+    // ID (wrapped so the constant 'assessmentItem' key is present on desktop
+    // too — tests count it to determine the number of rows)
     cells.add(
-      Text(
-        assessment.pseudoId ?? assessment.assessmentId ?? 'N/A',
-        key: Key('id$index'),
+      SizedBox(
+        key: const Key('assessmentItem'),
+        child: Text(
+          assessment.pseudoId ?? assessment.assessmentId ?? 'N/A',
+          key: Key('id$index'),
+        ),
       ),
     );
 

@@ -136,8 +136,12 @@ List<Widget> getLandingPageListRow({
       ),
     );
   } else {
-    // ID
-    cells.add(Text(page.pseudoId ?? '', key: Key('id$index')));
+    // ID (wrapped so the constant 'landingPageItem' key is present on desktop
+    // too — tests count it to determine the number of rows)
+    cells.add(SizedBox(
+      key: const Key('landingPageItem'),
+      child: Text(page.pseudoId ?? '', key: Key('id$index')),
+    ));
 
     // Title
     cells.add(

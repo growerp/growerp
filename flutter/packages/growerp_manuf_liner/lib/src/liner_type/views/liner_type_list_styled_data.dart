@@ -84,7 +84,12 @@ List<Widget> getLinerTypeListRow({
       ),
     );
   } else {
-    cells.add(Text(linerType.linerName ?? '', key: Key('linerName$index')));
+    // wrap so the row's 'item$index' tap-key exists on desktop too (tests tap it
+    // to open the row)
+    cells.add(SizedBox(
+      key: Key('item$index'),
+      child: Text(linerType.linerName ?? '', key: Key('linerName$index')),
+    ));
     cells.add(Text(linerType.widthIncrement?.toString() ?? '',
         key: Key('widthIncrement$index'), textAlign: TextAlign.right));
     cells.add(Text(linerType.rollStockWidth?.toString() ?? '',

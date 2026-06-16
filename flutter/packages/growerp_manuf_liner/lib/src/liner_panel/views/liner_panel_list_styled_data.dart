@@ -75,7 +75,12 @@ List<Widget> getLinerPanelListRow({
       ),
     );
   } else {
-    cells.add(Text(linerPanel.qcNum, key: Key('qcNum$index')));
+    // wrap so the row's 'item$index' tap-key exists on desktop too (tests tap it
+    // to open the row)
+    cells.add(SizedBox(
+      key: Key('item$index'),
+      child: Text(linerPanel.qcNum, key: Key('qcNum$index')),
+    ));
     cells.add(
         Text(linerPanel.panelName ?? '', key: Key('panelName$index')));
     cells.add(

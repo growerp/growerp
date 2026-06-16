@@ -811,18 +811,21 @@ class UserDialogState extends State<UserDialogStateFull> {
     List<Widget> rows = [];
     if (!ResponsiveBreakpoints.of(context).isMobile) {
       rows.add(const SizedBox(height: 20));
+      // shrinkWrap + NeverScrollable so every field is built eagerly (no lazy
+      // viewport) and the outer SingleChildScrollView does the scrolling. A
+      // fixed-height lazy grid hides off-screen fields from the widget tree,
+      // breaking field entry/lookup in tests on desktop.
       rows.add(
-        SizedBox(
-          height: 300,
-          child: MasonryGridView.count(
-            itemCount: widgets.length,
-            crossAxisCount: 2,
-            mainAxisSpacing: 10,
-            crossAxisSpacing: 10,
-            itemBuilder: (context, index) {
-              return widgets[index];
-            },
-          ),
+        MasonryGridView.count(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: widgets.length,
+          crossAxisCount: 2,
+          mainAxisSpacing: 10,
+          crossAxisSpacing: 10,
+          itemBuilder: (context, index) {
+            return widgets[index];
+          },
         ),
       );
       rows.add(updateButton(localizations));

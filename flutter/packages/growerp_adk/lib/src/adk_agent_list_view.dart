@@ -285,7 +285,8 @@ class _AdkAgentListViewState extends State<AdkAgentListView> {
 
       return [
         avatar,
-        Text(cfg.agentName ?? '(unnamed)', key: Key('agentName$i')),
+        // 'name$i' (same as phone) so doNewSearch can find/open the row on desktop
+        Text(cfg.agentName ?? '(unnamed)', key: Key('name$i')),
         Text(
           cfg.modelName ?? 'gemini-2.5-flash',
           style: TextStyle(fontSize: 13, color: cs.onSurfaceVariant),

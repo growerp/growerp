@@ -118,8 +118,12 @@ List<Widget> getPersonaListRow({
       ),
     );
   } else {
-    // ID
-    cells.add(Text(persona.pseudoId ?? '', key: Key('id$index')));
+    // ID (wrapped so the constant 'personaItem' key is present on desktop too —
+    // tests count it to determine the number of rows)
+    cells.add(SizedBox(
+      key: const Key('personaItem'),
+      child: Text(persona.pseudoId ?? '', key: Key('id$index')),
+    ));
 
     // Name
     cells.add(

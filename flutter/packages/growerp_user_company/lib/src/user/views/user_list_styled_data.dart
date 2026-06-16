@@ -107,10 +107,14 @@ List<Widget> getUserListRow({
       ),
     );
   } else {
-    // ID
+    // ID (the constant 'userItem' key must be present on desktop too —
+    // tests count it to determine the number of rows)
     cells.add(SizedBox(
-      key: Key('item$index'),
-      child: Text(user.pseudoId ?? '', key: Key('id$index')),
+      key: const Key('userItem'),
+      child: SizedBox(
+        key: Key('item$index'),
+        child: Text(user.pseudoId ?? '', key: Key('id$index')),
+      ),
     ));
 
     // Name
