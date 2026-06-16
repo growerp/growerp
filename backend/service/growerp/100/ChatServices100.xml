@@ -701,6 +701,10 @@ along with this software (see the LICENSE.md file). If not, see
         </in-parameters>
         <out-parameters>
             <parameter name="chatRoomId" />
+            <!-- per-room secret + visitor identity, kept by the browser to continue
+                 the conversation (read replies / post follow-ups) anonymously -->
+            <parameter name="visitorToken" />
+            <parameter name="visitorUserId" />
         </out-parameters>
         <actions>
             <!-- resolve the company (owner) from the product store -->
@@ -776,16 +780,32 @@ along with this software (see the LICENSE.md file). If not, see
                 <return error="true"
                     message="Could not create or find a party for email: ${email}" />
             </if>
-            <!-- ensure a disabled UserAccount for chat membership -->
+            <!-- per-room secret token, also used to make the visitor username unique -->
+            <set field="visitorToken"
+                from="java.util.UUID.randomUUID().toString().replace('-','')" />
+            <!-- chat author: a DISABLED account only, never an enabled/admin/customer
+                 account. Match our prior website-visitor accounts by userFullName==email
+                 (the enabled admin account has a different userFullName and disabled='N',
+                 so it is excluded) — this guarantees the visitor is distinct from the
+                 admin even when the visitor types an already-registered email. -->
             <entity-find entity-name="moqui.security.UserAccount" list="visitorAccounts" limit="1">
-                <econdition field-name="partyId" from="visitorPartyId" />
+                <econdition field-name="userFullName" from="email" />
+                <econdition field-name="disabled" value="Y" />
             </entity-find>
             <if condition="visitorAccounts">
                 <set field="visitorUserId" from="visitorAccounts[0].userId" />
                 <else>
+                    <!-- prefer username==email (readable sender name, since the chat view
+                         shows username as fromUserFullName); fall back to a unique
+                         webchat-<token> only when that username is already taken -->
+                    <entity-find entity-name="moqui.security.UserAccount" list="nameClash" limit="1">
+                        <econdition field-name="username" from="email" />
+                    </entity-find>
+                    <set field="visitorUsername"
+                        from="nameClash ? 'webchat-' + visitorToken : email" />
                     <service-call name="create#moqui.security.UserAccount" out-map="visitorAcct"
                         in-map="[partyId: visitorPartyId,
-                                username: email,
+                                username: visitorUsername,
                                 userFullName: email,
                                 disabled: 'Y',
                                 requirePasswordChange: 'N']" />
@@ -793,32 +813,259 @@ along with this software (see the LICENSE.md file). If not, see
                 </else>
             </if>
 
-            <!-- create the chat room named after the email -->
+            <!-- always create a NEW room per question (a fresh ticket for the admin);
+                 store the per-room token and the resolved visitor account on the room -->
             <service-call name="create#growerp.general.ChatRoom" out-map="context"
                 in-map="[chatRoomName: email,
                         ownerPartyId: ownerPartyId,
                         isPrivate: 'N',
-                        isActive: 'Y']" />
-
+                        isActive: 'Y',
+                        visitorToken: visitorToken,
+                        visitorUserId: visitorUserId]" />
             <!-- add the company admin (unread) and the visitor (read) as members -->
             <if condition="adminUserId != visitorUserId">
                 <service-call name="create#growerp.general.ChatRoomMember"
-                    in-map="[chatRoomId: chatRoomId,
-                            userId: adminUserId,
-                            isActive: 'Y',
-                            hasRead: 'N']" />
+                    in-map="[chatRoomId: chatRoomId, userId: adminUserId,
+                            isActive: 'Y', hasRead: 'N']" />
             </if>
             <service-call name="create#growerp.general.ChatRoomMember"
-                in-map="[chatRoomId: chatRoomId,
-                        userId: visitorUserId,
-                        isActive: 'Y',
-                        hasRead: 'Y']" />
+                in-map="[chatRoomId: chatRoomId, userId: visitorUserId,
+                        isActive: 'Y', hasRead: 'Y']" />
 
             <!-- store the question as the first message from the visitor -->
-            <service-call name="create#growerp.general.ChatMessage"
-                in-map="[chatRoomId: chatRoomId,
-                        fromUserId: visitorUserId,
-                        content: question]" />
+            <service-call name="create#growerp.general.ChatMessage" out-map="context"
+                in-map="[chatRoomId: chatRoomId, fromUserId: visitorUserId, content: question]" />
+            <!-- push over the chat WebSocket so the admin app's unread indicator lights up -->
+            <service-call name="growerp.100.ChatServices100.push#WebsiteChatWs"
+                in-map="[chatRoomId: chatRoomId, fromUserId: visitorUserId,
+                        fromUserFullName: email, content: question,
+                        chatMessageId: chatMessageId]" />
+        </actions>
+    </service>
+
+    <!-- ===== anonymous bidirectional website chat (polling) ===================== -->
+
+    <service verb="push" noun="WebsiteChatWs" authenticate="false">
+        <description>
+            Push a visitor's chat message to the other room members over the chat
+            WebSocket (ChatEndpoint), so a connected admin's app updates its unread
+            indicator in real time. Mirrors what ChatEndpoint.onMessage broadcasts for
+            app-to-app chat. No-op when no member is connected.
+        </description>
+        <in-parameters>
+            <parameter name="chatRoomId" required="true" />
+            <parameter name="fromUserId" />
+            <parameter name="fromUserFullName" />
+            <parameter name="content" />
+            <parameter name="chatMessageId" />
+        </in-parameters>
+        <actions>
+            <entity-find entity-name="growerp.general.ChatRoomMember" list="members">
+                <econdition field-name="chatRoomId" from="chatRoomId" />
+            </entity-find>
+            <set field="targetIds" from="[]" />
+            <iterate list="members" entry="m">
+                <if condition="m.userId != fromUserId">
+                    <script>targetIds.add(m.userId)</script>
+                </if>
+            </iterate>
+            <if condition="targetIds">
+                <script><![CDATA[
+                    def msgJson = groovy.json.JsonOutput.toJson([
+                        chatRoom: [chatRoomId: chatRoomId],
+                        fromUserId: fromUserId,
+                        fromUserFullName: fromUserFullName,
+                        content: content,
+                        chatMessageId: chatMessageId])
+                    org.moqui.impl.webapp.ChatEndpoint.pushToMembers(msgJson, targetIds)
+                ]]></script>
+            </if>
+        </actions>
+    </service>
+
+    <service verb="get" noun="WebsiteChatRoom" authenticate="false">
+        <description>
+            Internal helper: validate an anonymous website visitor's access to a chat
+            room. The room must belong to the product store's company (ownerPartyId) and
+            its per-room visitorToken must match. Returns the room and the visitor's
+            userId (the UserAccount whose username equals the room name / visitor email).
+        </description>
+        <in-parameters>
+            <parameter name="productStoreId" required="true" />
+            <parameter name="chatRoomId" required="true" />
+            <parameter name="visitorToken" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="room" type="Map" />
+            <parameter name="ownerPartyId" />
+            <parameter name="visitorUserId" />
+        </out-parameters>
+        <actions>
+            <entity-find-one entity-name="mantle.product.store.ProductStore" value-field="store">
+                <field-map field-name="productStoreId" from="productStoreId" />
+            </entity-find-one>
+            <if condition="!store || !store.organizationPartyId">
+                <return error="true"
+                    message="No company found for productStoreId: ${productStoreId}" />
+            </if>
+            <entity-find-one entity-name="mantle.party.Party" value-field="orgParty">
+                <field-map field-name="partyId" from="store.organizationPartyId" />
+            </entity-find-one>
+            <set field="ownerPartyId" from="orgParty?.ownerPartyId ?: store.organizationPartyId" />
+            <entity-find-one entity-name="growerp.general.ChatRoom" value-field="room">
+                <field-map field-name="chatRoomId" from="chatRoomId" />
+            </entity-find-one>
+            <!-- token + tenant must both match; reject anything else -->
+            <if condition="!room || !room.visitorToken || room.visitorToken != visitorToken
+                    || room.ownerPartyId != ownerPartyId">
+                <return error="true" message="Chat room not found or access denied" />
+            </if>
+            <!-- visitor account is stored on the room; fall back to the email-named
+                 disabled account for rooms created before visitorUserId existed -->
+            <set field="visitorUserId" from="room.visitorUserId" />
+            <if condition="!visitorUserId">
+                <entity-find entity-name="moqui.security.UserAccount" list="vUsers" limit="1">
+                    <econdition field-name="userFullName" from="room.chatRoomName" />
+                    <econdition field-name="disabled" value="Y" />
+                </entity-find>
+                <set field="visitorUserId" from="vUsers ? vUsers[0].userId : null" />
+            </if>
+        </actions>
+    </service>
+
+    <service verb="get" noun="WebsiteChatMessages" authenticate="false">
+        <description>
+            Public endpoint: return the full message thread of a website chat room for an
+            anonymous visitor, after validating the per-room token. The browser polls this
+            and marks the visitor side read.
+        </description>
+        <in-parameters>
+            <parameter name="productStoreId" required="true" />
+            <parameter name="chatRoomId" required="true" />
+            <parameter name="visitorToken" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="visitorUserId" />
+            <parameter name="chatMessages" type="List">
+                <parameter name="chatMessage" type="Map">
+                    <parameter name="chatMessageId" />
+                    <parameter name="fromUserId" />
+                    <parameter name="fromUserFullName" />
+                    <parameter name="content" />
+                    <parameter name="creationDate" />
+                </parameter>
+            </parameter>
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.ChatServices100.get#WebsiteChatRoom"
+                in-map="[productStoreId: productStoreId, chatRoomId: chatRoomId,
+                        visitorToken: visitorToken]" />
+            <entity-find entity-name="growerp.general.ChatRoomAndMessages" list="messages">
+                <econdition field-name="chatRoomId" from="chatRoomId" />
+                <order-by field-name="lastUpdatedStamp" />
+                <order-by field-name="chatMessageId" />
+            </entity-find>
+            <set field="chatMessages" from="[]" />
+            <iterate list="messages" entry="message">
+                <set field="chatMessage"
+                    from="[
+                    chatMessageId : message.chatMessageId,
+                    fromUserId: message.fromUserId,
+                    fromUserFullName: message.fromUserFullName,
+                    content: message.content,
+                    creationDate: message.lastUpdatedStamp
+                        ? ec.l10n.format(message.lastUpdatedStamp,'yyyy-MM-dd HH:mm')
+                        : null,
+                    ]" />
+                <script>chatMessages.add(chatMessage)</script>
+            </iterate>
+            <!-- the visitor has now seen the thread -->
+            <if condition="visitorUserId">
+                <service-call name="update#growerp.general.ChatRoomMember"
+                    in-map="[chatRoomId: chatRoomId, userId: visitorUserId, hasRead: 'Y']" />
+            </if>
+        </actions>
+    </service>
+
+    <service verb="submit" noun="WebsiteChatMessage" authenticate="false">
+        <description>
+            Public endpoint: an anonymous website visitor posts a follow-up message to
+            their chat room (validated by the per-room token). Marks the other members
+            (the company admin) unread and emails them if offline, mirroring
+            create#ChatMessage.
+        </description>
+        <in-parameters>
+            <parameter name="productStoreId" required="true" />
+            <parameter name="chatRoomId" required="true" />
+            <parameter name="visitorToken" required="true" />
+            <parameter name="content" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="chatMessage" type="Map">
+                <parameter name="chatMessageId" />
+                <parameter name="fromUserId" />
+                <parameter name="content" />
+                <parameter name="creationDate" />
+            </parameter>
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.ChatServices100.get#WebsiteChatRoom"
+                in-map="[productStoreId: productStoreId, chatRoomId: chatRoomId,
+                        visitorToken: visitorToken]" />
+            <if condition="!visitorUserId">
+                <return error="true" message="Visitor account not found for this chat room" />
+            </if>
+            <service-call name="create#growerp.general.ChatMessage" out-map="context"
+                in-map="[chatRoomId: chatRoomId, fromUserId: visitorUserId, content: content]" />
+            <!-- mark the other (admin) members unread + email them when offline -->
+            <entity-find entity-name="growerp.general.ChatRoomMember" list="roomMembers">
+                <econdition field-name="chatRoomId" from="chatRoomId" />
+            </entity-find>
+            <entity-find-one entity-name="moqui.basic.email.EmailServer" value-field="emailServer">
+                <field-map field-name="emailServerId" value="SYSTEM" />
+            </entity-find-one>
+            <set field="emailConfigured"
+                from="emailServer &amp;&amp; emailServer.mailPassword != 'SMTP_PASSWORD'" />
+            <iterate list="roomMembers" entry="member">
+                <if condition="member.userId != visitorUserId">
+                    <if condition="member.hasRead != 'N'">
+                        <service-call name="update#growerp.general.ChatRoomMember"
+                            in-map="[chatRoomId: member.chatRoomId, userId: member.userId,
+                                    hasRead: 'N', isActive: 'Y']" />
+                    </if>
+                    <if condition="emailConfigured &amp;&amp; !org.moqui.impl.webapp.ChatEndpoint.isUserOnline(member.userId)">
+                        <entity-find-one entity-name="moqui.security.UserAccount" value-field="toUa">
+                            <field-map field-name="userId" from="member.userId" />
+                        </entity-find-one>
+                        <entity-find entity-name="mantle.party.contact.PartyContactMech" list="emailPcms">
+                            <econdition field-name="partyId" from="toUa.partyId" />
+                            <econdition field-name="contactMechPurposeId" value="EmailPrimary" />
+                            <date-filter />
+                        </entity-find>
+                        <set field="toEmail" from="emailPcms ? emailPcms[0].contactMech.infoString : null" />
+                        <if condition="toEmail &amp;&amp; !toEmail.contains('example.com')">
+                            <service-call name="org.moqui.impl.EmailServices.send#EmailTemplate" async="true">
+                                <field-map field-name="toAddresses" from="toEmail" />
+                                <field-map field-name="fromAddress" value="noreply@growerp.com" />
+                                <field-map field-name="subject"
+                                    from="'New chat message from ' + (room?.chatRoomName ?: 'website visitor')" />
+                                <field-map field-name="bodyText" from="content" />
+                            </service-call>
+                        </if>
+                    </if>
+                </if>
+            </iterate>
+            <!-- push over the chat WebSocket so the admin app's unread indicator updates -->
+            <service-call name="growerp.100.ChatServices100.push#WebsiteChatWs"
+                in-map="[chatRoomId: chatRoomId, fromUserId: visitorUserId,
+                        fromUserFullName: room?.chatRoomName, content: content,
+                        chatMessageId: chatMessageId]" />
+            <set field="chatMessage"
+                from="[chatMessageId: chatMessageId, fromUserId: visitorUserId,
+                        content: content,
+                        creationDate: ec.l10n.format(ec.user.nowTimestamp,'yyyy-MM-dd HH:mm')]" />
         </actions>
     </service>
 </services>

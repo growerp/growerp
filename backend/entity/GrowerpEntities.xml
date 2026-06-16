@@ -228,6 +228,10 @@ along with this software (see the LICENSE.md file). If not, see
         <field name="isPrivate" type="text-indicator" />
         <field name="isActive" type="text-indicator" />
         <field name="ownerPartyId" type="id" />
+        <!-- per-room secret + visitor account for anonymous website visitors;
+             null for internal rooms -->
+        <field name="visitorToken" type="text-medium" />
+        <field name="visitorUserId" type="id" />
         <relationship type="one" title="Owner" related="mantle.party.Party">
             <key-map field-name="ownerPartyId" />
         </relationship>
