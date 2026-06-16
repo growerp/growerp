@@ -113,9 +113,23 @@
 
 **Start Reading:** YES - Reference for understanding changes
 
+### 6. Agent_Control_Center_User_Guide.md ⭐ AI AGENT CONFIGURATION
+**Size:** 60+ lines | **Purpose:** Guide on configuring and managing ADK AI agents  
+**Read Time:** 10 minutes  
+**For:** Administrators, Users configuring AI features
+
+**Contents:**
+- Accessing the Agent Control Center
+- Agent Configuration options
+- Permissions & Governance (Tool Modes, Write Policies)
+- Agent Orchestration (Specialists vs Coordinators)
+- Scheduling Autonomous Agents
+
+**Start Reading:** YES - Essential for using AI agents in GrowERP
+
 ---
 
-### 6. GrowERP_CLI_Reference.md ⭐ DEVELOPER TOOLS
+### 7. GrowERP_CLI_Reference.md ⭐ DEVELOPER TOOLS
 **Size:** 450+ lines | **Purpose:** Complete CLI command documentation  
 **Read Time:** 25 minutes  
 **For:** Developers, DevOps, system administrators
