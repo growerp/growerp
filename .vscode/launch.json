@@ -1,6 +1,6 @@
 {
     // Use --dart-define=BACKEND_PORT=XXXX to override the default 8080 backend port
-    // Example: "--dart-define=BACKEND_PORT=9090" in the args array
+    // Example: "--dart-define=BACKEND_PORT=9090" in the toolArgs array
     "configurations": [
         {
             "name": "Agents Web (lib/main.dart)",
@@ -8,7 +8,7 @@
             "request": "launch",
             "cwd": "flutter/packages/agents",
             "program": "lib/main.dart",
-            "args": [
+            "toolArgs": [
                 "-d",
                 "chrome",
                 "--web-port",
@@ -21,7 +21,7 @@
             "request": "launch",
             "cwd": "flutter/packages/agents",
             "program": "lib/main.dart",
-            "args": [
+            "toolArgs": [
                 "-d",
                 "linux"
             ]
@@ -39,7 +39,7 @@
             "request": "launch",
             "cwd": "flutter/packages/support",
             "program": "lib/main.dart",
-            "args": [
+            "toolArgs": [
                 "-d",
                 "chrome",
                 "--web-port",
@@ -52,7 +52,7 @@
             "request": "launch",
             "cwd": "flutter/packages/support",
             "program": "lib/main.dart",
-            "args": [
+            "toolArgs": [
                 "-d",
                 "linux"
             ]
@@ -70,7 +70,7 @@
             "request": "launch",
             "cwd": "flutter/packages/admin",
             "program": "lib/main.dart",
-            "args": [
+            "toolArgs": [
                 "-d",
                 "chrome",
                 "--web-port",
@@ -83,7 +83,7 @@
             "request": "launch",
             "cwd": "flutter/packages/admin",
             "program": "lib/main.dart",
-            "args": [
+            "toolArgs": [
                 "-d",
                 "linux"
             ]
@@ -94,7 +94,7 @@
             "request": "launch",
             "cwd": "flutter/packages/admin",
             "program": "lib/main.dart",
-            "args": [
+            "toolArgs": [
                 "-d",
                 "macos"
             ]
@@ -119,7 +119,7 @@
             "request": "launch",
             "cwd": "flutter/packages/health",
             "program": "lib/main.dart",
-            "args": [
+            "toolArgs": [
                 "-d",
                 "chrome",
                 "--web-port",
@@ -132,7 +132,7 @@
             "request": "launch",
             "cwd": "flutter/packages/health",
             "program": "lib/main.dart",
-            "args": [
+            "toolArgs": [
                 "-d",
                 "linux"
             ]
@@ -150,7 +150,7 @@
             "request": "launch",
             "cwd": "flutter/packages/elearner",
             "program": "lib/main.dart",
-            "args": [
+            "toolArgs": [
                 "-d",
                 "linux"
             ]
@@ -161,7 +161,7 @@
             "request": "launch",
             "cwd": "flutter/packages/elearner",
             "program": "lib/main.dart",
-            "args": [
+            "toolArgs": [
                 "-d",
                 "chrome",
                 "--web-port",
@@ -181,7 +181,7 @@
             "request": "launch",
             "cwd": "flutter/packages/freelance",
             "program": "lib/main.dart",
-            "args": [
+            "toolArgs": [
                 "-d",
                 "linux"
             ]
@@ -192,7 +192,7 @@
             "request": "launch",
             "cwd": "flutter/packages/freelance",
             "program": "lib/main.dart",
-            "args": [
+            "toolArgs": [
                 "-d",
                 "chrome",
                 "--web-port",
@@ -212,7 +212,7 @@
             "request": "launch",
             "cwd": "flutter/packages/hotel",
             "program": "lib/main.dart",
-            "args": [
+            "toolArgs": [
                 "-d",
                 "chrome",
                 "--web-port",
@@ -225,7 +225,7 @@
             "request": "launch",
             "cwd": "flutter/packages/hotel",
             "program": "lib/main.dart",
-            "args": [
+            "toolArgs": [
                 "-d",
                 "linux"
             ]
@@ -236,10 +236,10 @@
             "request": "launch",
             "cwd": "flutter/packages/hotel",
             "program": "lib/main.dart",
-            "args": [
+            "toolArgs": [
                 "-d",
                 "macos"
             ]
-        },
+        }
     ]
 }
