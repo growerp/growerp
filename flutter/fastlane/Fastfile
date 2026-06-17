@@ -67,7 +67,8 @@ lane :ci_build do
       "GCC_OPTIMIZATION_LEVEL=s",
       "SWIFT_COMPILATION_MODE=wholemodule",
       "CODE_SIGN_STYLE=Manual",
-      "DEVELOPMENT_TEAM=P64T65C668"
+      "DEVELOPMENT_TEAM=P64T65C668",
+      "PROVISIONING_PROFILE_SPECIFIER=\"#{profile_name}\""
     ].join(" ")
   )
 end
