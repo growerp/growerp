@@ -138,7 +138,7 @@ class CompanyTest {
       // get generated pseudoId's
       if (clist.length > 1 && c.pseudoId == null) {
         // new entry is at the top of the list, get allocated ID
-        await CommonTest.tapByKey(tester, 'item0');
+        await CommonTest.openRow0Detail(tester);
         var id = CommonTest.getTextField('topHeader').split('#')[1];
         c = c.copyWith(pseudoId: id);
         await CommonTest.tapByKey(tester, 'cancel');

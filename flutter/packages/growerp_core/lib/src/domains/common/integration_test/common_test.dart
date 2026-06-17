@@ -1410,6 +1410,33 @@ class CommonTest {
     }
   }
 
+  /// Re-open the row-0 detail dialog right after a save (used to read the
+  /// server-allocated id from the popUp header).
+  ///
+  /// On wide (desktop/tablet) layouts the list still re-fetches when the save
+  /// dialog closes, so the new row is not yet at index 0 — a single immediate
+  /// `tapByKey('item0')` either misses (row not laid out) or opens a stale row.
+  /// Poll until the list settles, tap row 0, and confirm the detail popUp
+  /// (`topHeader`) actually opened, retrying a few times. On phone the dialog
+  /// opens on the first tap so behaviour is unchanged.
+  static Future<void> openRow0Detail(WidgetTester tester) async {
+    for (int attempt = 0; attempt < 6; attempt++) {
+      await tester.pumpAndSettle();
+      // Already open (e.g. opened on a previous attempt) — done.
+      if (tester.any(find.byKey(const Key('topHeader')))) return;
+      if (!await waitForKey(tester, 'item0')) continue;
+      await tester.ensureVisible(find.byKey(const Key('item0')).last);
+      await tester.tap(find.byKey(const Key('item0')).last);
+      await tester.pumpAndSettle(Duration(seconds: waitTime));
+      if (tester.any(find.byKey(const Key('topHeader')))) return;
+    }
+    expect(
+      find.byKey(const Key('topHeader')),
+      findsOneWidget,
+      reason: 'row-0 detail dialog did not open after save',
+    );
+  }
+
   static Future<void> tapByWidget(
     WidgetTester tester,
     Widget widget, {

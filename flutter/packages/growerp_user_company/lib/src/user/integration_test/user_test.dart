@@ -285,11 +285,7 @@ class UserTest {
       // get new user pseudoId when adding
       if (user.pseudoId == null) {
         // new entry is at the top of the list, get allocated ID
-        await CommonTest.tapByKey(
-          tester,
-          'item0',
-          seconds: CommonTest.waitTime,
-        );
+        await CommonTest.openRow0Detail(tester);
         var id = CommonTest.getTextField('topHeader').split('#')[1];
         // if this test is called from company_usertest.dart
         // companyUser = true

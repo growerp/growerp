@@ -600,10 +600,13 @@ class DisplayMenuItemState extends State<DisplayMenuItem>
                         (item) => Tab(
                           height: 30,
                           key: Key('tab_${item.menuItemId}'),
+                          // single-line label (newlines→spaces) so it matches
+                          // the phone BottomNavigationBar label and the value
+                          // selectOption taps via tapByText
                           text: HelperFunctions.translateMenuTitle(
                             _localizations!,
                             item.title,
-                          ),
+                          ).replaceAll('\n', ' '),
                         ),
                       )
                       .toList(),
