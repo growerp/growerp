@@ -12,6 +12,8 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+import 'dart:convert';
+
 import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_core/growerp_core.dart';
 
@@ -94,4 +96,53 @@ class AdkConfigService {
 
   Future<void> removeTeamMember(String adkAgentTeamMemberId) async =>
       _client.deleteAdkAgentTeam(adkAgentTeamMemberId: adkAgentTeamMemberId);
+
+  // ── External MCP server registry (tenant-level) ────────────────────────────
+  Future<List<AdkMcpServer>> listMcpServers({String? search}) async {
+    final r = await _client.getAdkMcpServers(search: search);
+    return r.adkMcpServers;
+  }
+
+  Future<AdkMcpServer> saveMcpServer(AdkMcpServer server) async {
+    final headersJson =
+        (server.headers != null && server.headers!.isNotEmpty)
+            ? jsonEncode(server.headers)
+            : null;
+    if (server.adkMcpServerId == null || server.adkMcpServerId!.isEmpty) {
+      return _client.createAdkMcpServer(
+        serverName: server.serverName ?? '',
+        url: server.url ?? '',
+        transport: server.transport,
+        headersJson: headersJson,
+        enabled: server.enabled,
+      );
+    }
+    return _client.updateAdkMcpServer(
+      adkMcpServerId: server.adkMcpServerId!,
+      serverName: server.serverName,
+      url: server.url,
+      transport: server.transport,
+      headersJson: headersJson,
+      enabled: server.enabled,
+    );
+  }
+
+  Future<void> deleteMcpServer(String adkMcpServerId) async =>
+      _client.deleteAdkMcpServer(adkMcpServerId: adkMcpServerId);
+
+  // ── Attach / detach an MCP server to an agent ──────────────────────────────
+  Future<List<AdkAgentMcpServer>> attachedServers(String configId) async {
+    final r = await _client.getAdkAgentMcpServers(configId: configId);
+    return r.servers;
+  }
+
+  Future<void> attachServer(String configId, String adkMcpServerId,
+          {int? sequenceNum}) async =>
+      _client.createAdkAgentMcpServer(
+          configId: configId,
+          adkMcpServerId: adkMcpServerId,
+          sequenceNum: sequenceNum);
+
+  Future<void> detachServer(String adkAgentMcpServerId) async =>
+      _client.deleteAdkAgentMcpServer(adkAgentMcpServerId: adkAgentMcpServerId);
 }

@@ -1191,6 +1191,32 @@ along with this software (see the LICENSE.md file). If not, see
                 <service name="AdkServices100.delete#AdkAgentTeam"/>
             </method>
         </resource>
+        <!-- External MCP server registry + per-agent attachment -->
+        <resource name="AdkMcpServer">
+            <method type="get">
+                <service name="AdkServices100.get#AdkMcpServer"/>
+            </method>
+            <method type="post">
+                <service name="AdkServices100.create#AdkMcpServer"/>
+            </method>
+            <method type="patch">
+                <service name="AdkServices100.update#AdkMcpServer"/>
+            </method>
+            <method type="delete">
+                <service name="AdkServices100.delete#AdkMcpServer"/>
+            </method>
+        </resource>
+        <resource name="AdkAgentMcpServer">
+            <method type="get">
+                <service name="AdkServices100.get#AdkAgentMcpServer"/>
+            </method>
+            <method type="post">
+                <service name="AdkServices100.create#AdkAgentMcpServer"/>
+            </method>
+            <method type="delete">
+                <service name="AdkServices100.delete#AdkAgentMcpServer"/>
+            </method>
+        </resource>
         <resource name="AdkJob">
             <method type="get">
                 <service name="AdkServices100.get#AdkJob"/>

@@ -231,6 +231,8 @@ along with this software (see the LICENSE.md file). If not, see
     <!-- ADMIN_AGENT_CONTROL children -->
     <growerp.menu.MenuItem menuItemId="ADMIN_ADK_AGENTS" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_AGENT_CONTROL"
         title="AI Agents" iconName="smart_toy" widgetName="AdkAgentListView" sequenceNum="10"/>
+    <growerp.menu.MenuItem menuItemId="ADMIN_ADK_MCPSERVERS" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_AGENT_CONTROL"
+        title="MCP Servers" iconName="dns" widgetName="AdkMcpServerListView" sequenceNum="15"/>
     <growerp.menu.MenuItem menuItemId="ADMIN_ADK_JOBS" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_AGENT_CONTROL"
         title="Agent Jobs" iconName="schedule" widgetName="AdkJobListView" sequenceNum="20"/>
     <growerp.menu.MenuItem menuItemId="ADMIN_ADK_APPROVALS" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_AGENT_CONTROL"
@@ -604,6 +606,8 @@ along with this software (see the LICENSE.md file). If not, see
         title="AI Chat" route="/chat" iconName="smart_toy" widgetName="AdkChatView" sequenceNum="20"/>
     <growerp.menu.MenuItem menuItemId="AGENTS_AIAGENTS" menuConfigurationId="AGENTS_DEFAULT"
         title="AI Agents" route="/adk-agents" iconName="smart_toy" widgetName="AdkAgentListView" sequenceNum="30"/>
+    <growerp.menu.MenuItem menuItemId="AGENTS_MCPSERVERS" menuConfigurationId="AGENTS_DEFAULT"
+        title="MCP Servers" route="/adk-mcp-servers" iconName="dns" widgetName="AdkMcpServerListView" sequenceNum="35"/>
     <growerp.menu.MenuItem menuItemId="AGENTS_AIJOBS" menuConfigurationId="AGENTS_DEFAULT"
         title="Agent Jobs" route="/adk-jobs" iconName="schedule" widgetName="AdkJobListView" sequenceNum="40"/>
     <growerp.menu.MenuItem menuItemId="AGENTS_APPROVALS" menuConfigurationId="AGENTS_DEFAULT"

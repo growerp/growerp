@@ -57,6 +57,15 @@ const agentsMenuConfig = MenuConfiguration(
       isActive: true,
     ),
     MenuItem(
+      menuItemId: 'AGENTS_MCPSERVERS',
+      title: 'MCP Servers',
+      route: '/adk-mcp-servers',
+      iconName: 'dns',
+      sequenceNum: 35,
+      widgetName: 'AdkMcpServerListView',
+      isActive: true,
+    ),
+    MenuItem(
       menuItemId: 'AGENTS_AIJOBS',
       title: 'Agent Jobs',
       route: '/adk-jobs',
@@ -174,6 +183,7 @@ List<Map<String, GrowerpWidgetBuilder>> agentsWidgetRegistrations = [
     'AboutForm': (args) => const AboutForm(),
     'SystemSetupDialog': (args) => const SystemSetupDialog(),
     'AdkAgentListView': (args) => const AdkAgentListView(),
+    'AdkMcpServerListView': (args) => const AdkMcpServerListView(),
     'AdkJobListView': (args) => const AdkJobListView(),
     'AdkApprovalsListView': (args) => const AdkApprovalsListView(),
     'AdkActionsListView': (args) => const AdkActionsListView(),

@@ -11,6 +11,9 @@ export 'src/adk_chat_dialog.dart';
 export 'src/adk_config_service.dart';
 export 'src/adk_agent_config_dialog.dart';
 export 'src/adk_agent_list_view.dart';
+// External MCP server registry
+export 'src/adk_mcp_server_dialog.dart';
+export 'src/adk_mcp_server_list_view.dart';
 export 'src/adk_job_service.dart';
 export 'src/adk_job_list_view.dart';
 // Governance: action audit log + write approvals
