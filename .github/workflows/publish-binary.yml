@@ -376,7 +376,9 @@ jobs:
         working-directory: flutter/packages/${{ matrix.app }}
 
       - name: Flutter build iOS (no codesign)
-        run: flutter build ios --release --no-codesign
+        run: |
+          flutter config --no-enable-swift-package-manager
+          flutter build ios --release --no-codesign
         working-directory: flutter/packages/${{ matrix.app }}
 
       - name: Validate iOS signing certificate access
@@ -644,7 +646,9 @@ jobs:
         working-directory: flutter/packages/${{ matrix.app }}/macos
 
       - name: Flutter build macOS (generate ephemeral files)
-        run: flutter build macos --release --build-number "$MACOS_BUILD_NUMBER"
+        run: |
+          flutter config --no-enable-swift-package-manager
+          flutter build macos --release --build-number "$MACOS_BUILD_NUMBER"
         working-directory: flutter/packages/${{ matrix.app }}
 
       - name: Fastlane build macOS
