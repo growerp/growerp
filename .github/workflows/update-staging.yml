@@ -92,7 +92,7 @@ jobs:
       - name: Bump version files
         if: inputs.bump != 'none'
         working-directory: flutter
-        run: dart release/release_tool.dart --ci --bump=${{ inputs.bump }} --workspace=local --no-push-docker --no-push-github
+        run: dart release/release_tool.dart --ci --bump=${{ inputs.bump }} --workspace=local --no-push-docker --no-push-github --no-build-docker
 
       - name: Upload bumped pubspecs
         if: inputs.bump != 'none'

@@ -50,6 +50,8 @@ void parseCiArgs(List<String> args) {
       ciArgs['pushDocker'] = true;
     } else if (arg == '--no-push-docker') {
       ciArgs['pushDocker'] = false;
+    } else if (arg == '--no-build-docker') {
+      ciArgs['buildDocker'] = false;
     } else if (arg == '--push-github') {
       ciArgs['pushGitHub'] = true;
     } else if (arg == '--no-push-github') {
@@ -410,6 +412,7 @@ Future<Map<String, bool>> getPushConfiguration(
       'pushToDockerHub': pushDocker,
       'pushToGitHub': pushGitHub,
       'bumpNone': bumpNone,
+      'buildDocker': ciArgs['buildDocker'] as bool? ?? true,
     };
   }
 
@@ -435,6 +438,7 @@ Future<Map<String, bool>> getPushConfiguration(
     'pushToDockerHub': pushToDockerHub,
     'pushToGitHub': pushToGitHub,
     'bumpNone': false,
+    'buildDocker': true,
   };
 }
 
@@ -726,6 +730,11 @@ Future<void> executeRelease(
   }
 
   // Step 3: Build Docker images from repository
+  if (pushConfig['buildDocker'] == false) {
+    print("\n⏭️ Step 3: Skipping Docker build (--no-build-docker)\n");
+    return;
+  }
+
   print("\n🐳 Step 3: Building Docker images from repository...\n");
   var imageIds = <String, String>{};
 
