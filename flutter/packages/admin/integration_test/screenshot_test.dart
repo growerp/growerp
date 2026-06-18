@@ -31,6 +31,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:admin/main.dart'
     show delegates, getAdminBlocProviders, adminWidgetRegistrations;
 import 'package:admin/views/admin_dashboard_content.dart';
+import 'package:growerp_adk/growerp_adk.dart';
 
 /*
 app: admin
@@ -63,6 +64,14 @@ GoRouter createAdminScreenshotRouter() {
       dashboardBuilder: () => const AdminDashboardContent(),
       widgetLoader: WidgetRegistry.getWidget,
       appTitle: 'GrowERP Administrator',
+      dashboardFabBuilder: (_) => Builder(
+        builder: (ctx) => FloatingActionButton(
+          key: const Key('adkChatFab'),
+          tooltip: 'AI Assistant',
+          onPressed: () => AdkChatDialog.show(ctx),
+          child: const Icon(Icons.smart_toy),
+        ),
+      ),
     ),
   );
 }
