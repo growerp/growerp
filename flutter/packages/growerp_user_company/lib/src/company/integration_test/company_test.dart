@@ -137,11 +137,15 @@ class CompanyTest {
       );
       // get generated pseudoId's
       if (clist.length > 1 && c.pseudoId == null) {
-        // new entry is at the top of the list, get allocated ID
-        await CommonTest.openRow0Detail(tester);
+        // Read the allocated id from the just-saved company. Find it by name
+        // instead of by position (row 0): on wide/desktop layouts the new row
+        // may not be at the top of the list (or not yet built), so tapping
+        // 'item0' is unreliable. A search filters to the matching row.
+        await CommonTest.doNewSearch(tester, searchString: c.name!);
         var id = CommonTest.getTextField('topHeader').split('#')[1];
         c = c.copyWith(pseudoId: id);
         await CommonTest.tapByKey(tester, 'cancel');
+        await CommonTest.enterText(tester, 'searchField', '');
       }
       newCompanies.add(c);
     }

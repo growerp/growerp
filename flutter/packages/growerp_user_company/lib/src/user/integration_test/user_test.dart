@@ -284,8 +284,20 @@ class UserTest {
       // here the list is shown again
       // get new user pseudoId when adding
       if (user.pseudoId == null) {
-        // new entry is at the top of the list, get allocated ID
-        await CommonTest.openRow0Detail(tester);
+        // Open the just-saved record to read the allocated id. Find it by a
+        // known field instead of by position (row 0): on wide/desktop layouts
+        // the new row may not be at the top (or not yet built), so tapping
+        // 'item0' is unreliable. A search filters to the matching row.
+        // For company/user tests the visible list (and opened dialog) is the
+        // company, so search by company name; otherwise search the user.
+        if (companyAssigned && companyUser) {
+          await CommonTest.doNewSearch(tester,
+              searchString: user.company!.name!);
+        } else {
+          // search by firstName — the field the user list filters on
+          // (same as checkUsers below)
+          await CommonTest.doNewSearch(tester, searchString: user.firstName!);
+        }
         var id = CommonTest.getTextField('topHeader').split('#')[1];
         // if this test is called from company_usertest.dart
         // companyUser = true
@@ -353,6 +365,7 @@ class UserTest {
           user = user.copyWith(pseudoId: id);
         }
         await CommonTest.tapByKey(tester, 'cancel');
+        await CommonTest.enterText(tester, 'searchField', '');
       }
       newUsers.add(user);
     }
