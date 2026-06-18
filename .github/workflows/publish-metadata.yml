@@ -207,6 +207,9 @@ jobs:
           if_no_artifact_found: warn
         continue-on-error: true
 
+      - name: Install ImageMagick
+        run: brew install imagemagick
+
       - name: Extract macOS screenshots from artifact
         run: |
           set -euo pipefail
@@ -217,7 +220,7 @@ jobs:
           for src in framed-screenshots/macos-${APP}-*_framed.png; do
             base=$(basename "$src" "_framed.png")
             name="${base/-${APP}-/-}.png"
-            cp "$src" "$macos_dir/$name"
+            convert "$src" -background white -gravity center -extent 1280x800 -flatten -type TrueColor "$macos_dir/$name"
             echo "  $name"
           done
           echo "macOS screenshots ready: $(ls "$macos_dir" | wc -l) files"
@@ -362,6 +365,9 @@ jobs:
           if_no_artifact_found: warn
         continue-on-error: true
 
+      - name: Install ImageMagick
+        run: sudo apt-get install -y imagemagick -qq
+
       - name: Extract Windows screenshots
         run: |
           set -euo pipefail
@@ -374,7 +380,7 @@ jobs:
           shopt -s nullglob
           for src in framed-screenshots/windows-${APP}-*_framed.png; do
             [[ $count -ge 9 ]] && break
-            cp "$src" "$base/screenshot_$((count+1)).png"
+            convert "$src" -background white -gravity center -extent 1920x1080 -flatten -type TrueColor "$base/screenshot_$((count+1)).png"
             echo "  → $base/screenshot_$((count+1)).png"
             (( count++ )) || true
           done

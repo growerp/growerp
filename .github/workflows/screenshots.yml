@@ -537,6 +537,10 @@ jobs:
                 -extent "${store_w}x${store_h}" -flatten -type TrueColor "$f"
               echo "WARNING: title strip failed for $f, padded to ${store_w}x${store_h}"
             fi
+
+            # Guarantee final dimensions to prevent App Store rejection if title append silently failed
+            convert "$f" -background white -gravity center \
+              -extent "${store_w}x${store_h}" -flatten -type TrueColor "$f"
           }
 
           # iPhone 6.7" (iPhone 12/13 Pro Max): 1284x2778
