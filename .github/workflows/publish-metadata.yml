@@ -456,8 +456,11 @@ jobs:
               print(f'Deleting existing pending submission {old_sub_id}...')
               requests.delete(f'{base_url}/submissions/{old_sub_id}', headers=headers).raise_for_status()
 
-          # Create new submission (clones last published)
-          sub_resp = requests.post(f'{base_url}/submissions', headers=headers, json={})
+          # Create new submission (clones last published).
+          # Do NOT send json={} — an empty body tells the API to clone from
+          # the last published submission; json={} is interpreted as "create
+          # with these (empty) settings" which fails listing validation.
+          sub_resp = requests.post(f'{base_url}/submissions', headers=headers)
           if not sub_resp.ok:
               print(f'Error creating submission: {sub_resp.text}')
               sub_resp.raise_for_status()
