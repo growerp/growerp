@@ -441,14 +441,26 @@ jobs:
           screenshots = []
           if screenshots_dir.exists():
               for img in sorted(screenshots_dir.glob('screenshot_*.png')):
-                  screenshots.append({'fileStatus': 'PendingUpload', 'fileName': img.name})
+                  screenshots.append({'fileStatus': 'PendingUpload', 'fileName': img.name, 'imageType': 'Screenshot'})
               print(f'Found {len(screenshots)} screenshots')
 
           base_url = f'https://manage.devcenter.microsoft.com/v1.0/my/applications/{app_id}'
-          app_data = requests.get(base_url, headers=headers).json()
+          app_resp = requests.get(base_url, headers=headers)
+          app_resp.raise_for_status()
+          app_data = app_resp.json()
+
+          # Delete pending submission if exists
+          if 'pendingApplicationSubmission' in app_data:
+              old_sub_id = app_data['pendingApplicationSubmission']['id']
+              print(f'Deleting existing pending submission {old_sub_id}...')
+              requests.delete(f'{base_url}/submissions/{old_sub_id}', headers=headers).raise_for_status()
 
           # Create new submission (clones last published)
-          sub = requests.post(f'{base_url}/submissions', headers=headers, json={}).json()
+          sub_resp = requests.post(f'{base_url}/submissions', headers=headers, json={})
+          if not sub_resp.ok:
+              print(f'Error creating submission: {sub_resp.text}')
+              sub_resp.raise_for_status()
+          sub = sub_resp.json()
           sub_id = sub['id']
           print(f'Created submission {sub_id}')
 
@@ -470,7 +482,9 @@ jobs:
               headers=headers,
               json=sub
           )
-          update_resp.raise_for_status()
+          if not update_resp.ok:
+              print(f'Error updating submission: {update_resp.text}')
+              update_resp.raise_for_status()
           print(f'Updated submission metadata + screenshots')
 
           # Upload screenshot files to Partner Center
