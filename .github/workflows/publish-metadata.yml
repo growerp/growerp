@@ -450,8 +450,9 @@ jobs:
           app_data = app_resp.json()
 
           # Delete pending submission if exists
-          if 'pendingApplicationSubmission' in app_data:
-              old_sub_id = app_data['pendingApplicationSubmission']['id']
+          pending_sub = app_data.get('pendingApplicationSubmission')
+          if pending_sub and pending_sub.get('id'):
+              old_sub_id = pending_sub['id']
               print(f'Deleting existing pending submission {old_sub_id}...')
               requests.delete(f'{base_url}/submissions/{old_sub_id}', headers=headers).raise_for_status()
 
@@ -466,14 +467,18 @@ jobs:
 
           # Update listing with metadata + screenshots (en-US is default)
           listings = sub.get('listings', {})
-          if 'en-us' in listings:
-              listings['en-us'].update(metadata)
-              if screenshots:
-                  listings['en-us']['images'] = screenshots
-          else:
-              listings['en-us'] = metadata
-              if screenshots:
-                  listings['en-us']['images'] = screenshots
+          if 'en-us' not in listings:
+              listings['en-us'] = {}
+              
+          listings['en-us'].update(metadata)
+          
+          if screenshots:
+              # Preserve non-screenshot images (like StoreLogo)
+              old_images = listings['en-us'].get('images', [])
+              new_images = [img for img in old_images if img.get('imageType') != 'Screenshot']
+              new_images.extend(screenshots)
+              listings['en-us']['images'] = new_images
+              
           sub['listings'] = listings
 
           # Update submission
