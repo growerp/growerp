@@ -73,7 +73,7 @@ jobs:
             height: 800
           - device: windows
             width: 1920
-            height: 1200
+            height: 1080
 
     steps:
       - name: Validate app names
@@ -545,10 +545,10 @@ jobs:
           for f in ipad_pro-*_framed.png; do process "$f" 2732 2048; done
           # Android phone: 1080x1920
           for f in phone-*_framed.png;    do process "$f" 1080 1920; done
-          # macOS: 1440x900
-          for f in macos-*_framed.png;    do process "$f" 1440  900; done
-          # Windows: 1920x1200
-          for f in windows-*_framed.png;  do process "$f" 1920 1200; done
+          # macOS: 1280x800
+          for f in macos-*_framed.png;    do process "$f" 1280  800; done
+          # Windows: 1920x1080
+          for f in windows-*_framed.png;  do process "$f" 1920 1080; done
 
       - name: List all screenshots
         run: find screenshots/ -name "*.png" | sort
