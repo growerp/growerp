@@ -7,15 +7,25 @@
 #   bash sync-submodules.sh           # update, commit (no push)
 #   bash sync-submodules.sh --push    # update, commit, and push
 #   bash sync-submodules.sh --force   # skip pre-flight clean check
+#   bash sync-submodules.sh --ssh     # use SSH instead of HTTPS for GitHub URLs
 
 set -euo pipefail
 
 PUSH=false
 FORCE=false
+SSH=false
 for ARG in "$@"; do
   [ "$ARG" = "--push"  ] && PUSH=true
   [ "$ARG" = "--force" ] && FORCE=true
+  [ "$ARG" = "--ssh" ] && SSH=true
 done
+
+if $SSH; then
+  echo "=== Using SSH for GitHub URLs ==="
+  export GIT_CONFIG_COUNT=1
+  export GIT_CONFIG_KEY_0="url.git@github.com:.insteadOf"
+  export GIT_CONFIG_VALUE_0="https://github.com/"
+fi
 
 # Resolve growerp1 root (script lives at repo root)
 REPO_ROOT="$(cd "$(dirname "$0")" && pwd)"
