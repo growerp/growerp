@@ -86,6 +86,11 @@ class AssetListState extends State<AssetList> {
         scrollController: _scrollController,
         rowHeight: isPhone ? 72 : 56,
         onRowTap: (index) async {
+          if (index < 0 || index >= assets.length) return;
+          // Capture the asset now: the dialog's builder runs again on every
+          // bloc rebuild, and a search behind the open dialog can empty
+          // `assets`, so indexing the live list there throws a RangeError.
+          final asset = assets[index];
           await showDialog(
             barrierDismissible: true,
             context: context,
@@ -95,7 +100,7 @@ class AssetListState extends State<AssetList> {
                 direction: DismissDirection.startToEnd,
                 child: BlocProvider.value(
                   value: _assetBloc,
-                  child: AssetDialog(assets[index]),
+                  child: AssetDialog(asset),
                 ),
               );
             },
