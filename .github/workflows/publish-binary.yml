@@ -3,18 +3,54 @@ name: Publish Binary to Stores
 on:
   workflow_dispatch:
     inputs:
-      apps:
-        description: "Apps to submit (comma-separated: admin, hotel, freelance, health,
-          elearner, support, agents)"
-        required: true
-        default: "admin,hotel"
-        type: string
-      stores:
-        description: "Stores to deploy to (comma-separated: ios, macos, android,
-          windows, snap)"
-        required: true
-        default: "ios,macos,android,windows,snap"
-        type: string
+      app_admin:
+        description: "Admin App"
+        type: boolean
+        default: true
+      app_hotel:
+        description: "Hotel App"
+        type: boolean
+        default: true
+      app_freelance:
+        description: "Freelance App"
+        type: boolean
+        default: false
+      app_health:
+        description: "Health App"
+        type: boolean
+        default: false
+      app_elearner:
+        description: "eLearner App"
+        type: boolean
+        default: false
+      app_support:
+        description: "Support App"
+        type: boolean
+        default: false
+      app_agents:
+        description: "Agents App"
+        type: boolean
+        default: false
+      store_ios:
+        description: "iOS App Store"
+        type: boolean
+        default: true
+      store_macos:
+        description: "Mac App Store"
+        type: boolean
+        default: true
+      store_android:
+        description: "Google Play"
+        type: boolean
+        default: true
+      store_windows:
+        description: "Windows Store"
+        type: boolean
+        default: true
+      store_snap:
+        description: "Snap Store"
+        type: boolean
+        default: true
       track:
         description: "Release track (beta = TestFlight only, stable = submit for App
           Store review)"
@@ -53,25 +89,45 @@ jobs:
     steps:
       - id: matrix
         env:
-          APPS: ${{ inputs.apps }}
-          STORES: ${{ inputs.stores }}
+          APP_ADMIN: ${{ inputs.app_admin }}
+          APP_HOTEL: ${{ inputs.app_hotel }}
+          APP_FREELANCE: ${{ inputs.app_freelance }}
+          APP_HEALTH: ${{ inputs.app_health }}
+          APP_ELEARNER: ${{ inputs.app_elearner }}
+          APP_SUPPORT: ${{ inputs.app_support }}
+          APP_AGENTS: ${{ inputs.app_agents }}
+          STORE_IOS: ${{ inputs.store_ios }}
+          STORE_MACOS: ${{ inputs.store_macos }}
+          STORE_ANDROID: ${{ inputs.store_android }}
+          STORE_WINDOWS: ${{ inputs.store_windows }}
+          STORE_SNAP: ${{ inputs.store_snap }}
         run: |
-          VALID_APPS="admin hotel freelance health elearner support agents"
-          IFS=',' read -ra app_list <<< "$APPS"
-          for app in "${app_list[@]}"; do
-            app=$(echo "$app" | tr -d ' ')
-            if ! echo "$VALID_APPS" | grep -qw "$app"; then
-              echo "Invalid app: '$app'. Valid values: $VALID_APPS" >&2
-              exit 1
-            fi
-          done
+          APPS=""
+          [[ "$APP_ADMIN" == "true" ]] && APPS="${APPS}admin,"
+          [[ "$APP_HOTEL" == "true" ]] && APPS="${APPS}hotel,"
+          [[ "$APP_FREELANCE" == "true" ]] && APPS="${APPS}freelance,"
+          [[ "$APP_HEALTH" == "true" ]] && APPS="${APPS}health,"
+          [[ "$APP_ELEARNER" == "true" ]] && APPS="${APPS}elearner,"
+          [[ "$APP_SUPPORT" == "true" ]] && APPS="${APPS}support,"
+          [[ "$APP_AGENTS" == "true" ]] && APPS="${APPS}agents,"
+          APPS="${APPS%,}"
+
+          STORES=""
+          [[ "$STORE_IOS" == "true" ]] && STORES="${STORES}ios,"
+          [[ "$STORE_MACOS" == "true" ]] && STORES="${STORES}macos,"
+          [[ "$STORE_ANDROID" == "true" ]] && STORES="${STORES}android,"
+          [[ "$STORE_WINDOWS" == "true" ]] && STORES="${STORES}windows,"
+          [[ "$STORE_SNAP" == "true" ]] && STORES="${STORES}snap,"
+          STORES="${STORES%,}"
+
+          if [[ -z "$APPS" ]]; then echo "No apps selected" >&2; exit 1; fi
+          if [[ -z "$STORES" ]]; then echo "No stores selected" >&2; exit 1; fi
 
           build_matrix() {
             local json="["
             local first=true
             IFS=',' read -ra app_list <<< "$APPS"
             for app in "${app_list[@]}"; do
-              app=$(echo "$app" | tr -d ' ')
               if [[ "$first" == "false" ]]; then json="$json,"; fi
               json="${json}{\"app\":\"${app}\"}"
               first=false
@@ -131,14 +187,26 @@ jobs:
   bump-version:
     needs: [ resolve-matrix ]
     if: >-
-      contains(inputs.stores, 'ios') || contains(inputs.stores, 'macos') ||
-      contains(inputs.stores, 'android')
+      inputs.store_ios == true || inputs.store_macos == true ||
+      inputs.store_android == true
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
       - name: Install Python dependencies
         run: pip install PyJWT cryptography google-auth requests --quiet
+
+      - name: Resolve selected apps
+        run: |
+          APPS=""
+          [[ "${{ inputs.app_admin }}" == "true" ]] && APPS="${APPS}admin,"
+          [[ "${{ inputs.app_hotel }}" == "true" ]] && APPS="${APPS}hotel,"
+          [[ "${{ inputs.app_freelance }}" == "true" ]] && APPS="${APPS}freelance,"
+          [[ "${{ inputs.app_health }}" == "true" ]] && APPS="${APPS}health,"
+          [[ "${{ inputs.app_elearner }}" == "true" ]] && APPS="${APPS}elearner,"
+          [[ "${{ inputs.app_support }}" == "true" ]] && APPS="${APPS}support,"
+          [[ "${{ inputs.app_agents }}" == "true" ]] && APPS="${APPS}agents,"
+          echo "APPS=${APPS%,}" >> "$GITHUB_ENV"
 
       - name: Bump version based on store latest versions
         env:
@@ -227,7 +295,7 @@ jobs:
               return a if ka >= kb else b
 
           # ── Bump each app ────────────────────────────────────────────────────
-          apps = "${{ inputs.apps }}".split(',')
+          apps = "${{ env.APPS }}".split(',')
           for app in [a.strip() for a in apps]:
               pubspec = f'flutter/packages/{app}/pubspec.yaml'
               with open(pubspec) as f:
@@ -791,9 +859,9 @@ jobs:
       always() &&
       needs.bump-version.result == 'success' &&
       (
-        (contains(inputs.stores, 'ios')     && needs.deploy-ios.result     == 'success') ||
-        (contains(inputs.stores, 'macos')   && needs.deploy-macos.result   == 'success') ||
-        (contains(inputs.stores, 'android') && needs.deploy-android.result == 'success')
+        (inputs.store_ios == true     && needs.deploy-ios.result     == 'success') ||
+        (inputs.store_macos == true   && needs.deploy-macos.result   == 'success') ||
+        (inputs.store_android == true && needs.deploy-android.result == 'success')
       )
     runs-on: ubuntu-latest
     permissions:
@@ -813,15 +881,22 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          APPS=$(echo "${{ inputs.apps }}" | tr -d ' ')
+          APPS=""
+          [[ "${{ inputs.app_admin }}" == "true" ]] && APPS="${APPS}admin,"
+          [[ "${{ inputs.app_hotel }}" == "true" ]] && APPS="${APPS}hotel,"
+          [[ "${{ inputs.app_freelance }}" == "true" ]] && APPS="${APPS}freelance,"
+          [[ "${{ inputs.app_health }}" == "true" ]] && APPS="${APPS}health,"
+          [[ "${{ inputs.app_elearner }}" == "true" ]] && APPS="${APPS}elearner,"
+          [[ "${{ inputs.app_support }}" == "true" ]] && APPS="${APPS}support,"
+          [[ "${{ inputs.app_agents }}" == "true" ]] && APPS="${APPS}agents,"
+          APPS="${APPS%,}"
 
           # Collect only platforms that were selected AND succeeded
           STORES=""
           add_store() { STORES="${STORES:+$STORES,}$1"; }
-          contains() { echo "${{ inputs.stores }}" | grep -qw "$1"; }
-          [[ "${{ needs.deploy-ios.result }}"     == "success" ]] && contains ios     && add_store ios     || true
-          [[ "${{ needs.deploy-macos.result }}"   == "success" ]] && contains macos   && add_store macos   || true
-          [[ "${{ needs.deploy-android.result }}" == "success" ]] && contains android && add_store android || true
+          [[ "${{ needs.deploy-ios.result }}"     == "success" ]] && [[ "${{ inputs.store_ios }}" == "true" ]] && add_store ios     || true
+          [[ "${{ needs.deploy-macos.result }}"   == "success" ]] && [[ "${{ inputs.store_macos }}" == "true" ]] && add_store macos   || true
+          [[ "${{ needs.deploy-android.result }}" == "success" ]] && [[ "${{ inputs.store_android }}" == "true" ]] && add_store android || true
 
 
           IFS=',' read -ra app_list <<< "$APPS"

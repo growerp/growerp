@@ -14,17 +14,50 @@ name: Publish Metadata to Stores
 on:
   workflow_dispatch:
     inputs:
-      apps:
-        description: "Apps to update (comma-separated: admin, hotel, freelance, health,
-          elearner, support, agents)"
-        required: true
-        default: "admin,hotel"
-        type: string
-      stores:
-        description: "Stores to update (comma-separated: ios, macos, android, windows)"
-        required: true
-        default: "ios,macos,android,windows"
-        type: string
+      app_admin:
+        description: "Admin App"
+        type: boolean
+        default: true
+      app_hotel:
+        description: "Hotel App"
+        type: boolean
+        default: true
+      app_freelance:
+        description: "Freelance App"
+        type: boolean
+        default: false
+      app_health:
+        description: "Health App"
+        type: boolean
+        default: false
+      app_elearner:
+        description: "eLearner App"
+        type: boolean
+        default: false
+      app_support:
+        description: "Support App"
+        type: boolean
+        default: false
+      app_agents:
+        description: "Agents App"
+        type: boolean
+        default: false
+      store_ios:
+        description: "iOS App Store"
+        type: boolean
+        default: true
+      store_macos:
+        description: "Mac App Store"
+        type: boolean
+        default: true
+      store_android:
+        description: "Google Play"
+        type: boolean
+        default: true
+      store_windows:
+        description: "Windows Store"
+        type: boolean
+        default: true
 
 concurrency:
   group: store-metadata-upload
@@ -46,8 +79,23 @@ jobs:
     steps:
       - id: params
         run: |
-          echo "apps=${{ inputs.apps }}"     >> "$GITHUB_OUTPUT"
-          echo "stores=${{ inputs.stores }}" >> "$GITHUB_OUTPUT"
+          APPS=""
+          [[ "${{ inputs.app_admin }}" == "true" ]] && APPS="${APPS}admin,"
+          [[ "${{ inputs.app_hotel }}" == "true" ]] && APPS="${APPS}hotel,"
+          [[ "${{ inputs.app_freelance }}" == "true" ]] && APPS="${APPS}freelance,"
+          [[ "${{ inputs.app_health }}" == "true" ]] && APPS="${APPS}health,"
+          [[ "${{ inputs.app_elearner }}" == "true" ]] && APPS="${APPS}elearner,"
+          [[ "${{ inputs.app_support }}" == "true" ]] && APPS="${APPS}support,"
+          [[ "${{ inputs.app_agents }}" == "true" ]] && APPS="${APPS}agents,"
+          
+          STORES=""
+          [[ "${{ inputs.store_ios }}" == "true" ]] && STORES="${STORES}ios,"
+          [[ "${{ inputs.store_macos }}" == "true" ]] && STORES="${STORES}macos,"
+          [[ "${{ inputs.store_android }}" == "true" ]] && STORES="${STORES}android,"
+          [[ "${{ inputs.store_windows }}" == "true" ]] && STORES="${STORES}windows,"
+          
+          echo "apps=${APPS%,}" >> "$GITHUB_OUTPUT"
+          echo "stores=${STORES%,}" >> "$GITHUB_OUTPUT"
 
   # ───────────────────────────────────────────────────────────────────────────
   # Convert comma-separated inputs into JSON arrays for downstream matrix jobs.

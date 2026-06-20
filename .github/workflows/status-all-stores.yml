@@ -23,18 +23,54 @@ name: Status all stores
 on:
     workflow_dispatch:
         inputs:
-            apps:
-                description: "Apps to check (comma-separated: admin, hotel, freelance, health,
-                    elearner, support, agents)"
-                required: true
-                default: "admin,hotel,freelance,health,elearner,support,agents"
-                type: string
-            stores:
-                description: "Stores to check (comma-separated: ios, macos, android, windows,
-                    snap)"
-                required: true
-                default: "ios,macos,android,windows,snap"
-                type: string
+      app_admin:
+        description: "Admin App"
+        type: boolean
+        default: true
+      app_hotel:
+        description: "Hotel App"
+        type: boolean
+        default: true
+      app_freelance:
+        description: "Freelance App"
+        type: boolean
+        default: false
+      app_health:
+        description: "Health App"
+        type: boolean
+        default: false
+      app_elearner:
+        description: "eLearner App"
+        type: boolean
+        default: false
+      app_support:
+        description: "Support App"
+        type: boolean
+        default: false
+      app_agents:
+        description: "Agents App"
+        type: boolean
+        default: false
+      store_ios:
+        description: "iOS App Store"
+        type: boolean
+        default: true
+      store_macos:
+        description: "Mac App Store"
+        type: boolean
+        default: true
+      store_android:
+        description: "Google Play"
+        type: boolean
+        default: true
+      store_windows:
+        description: "Windows Store"
+        type: boolean
+        default: true
+      store_snap:
+        description: "Snap Store"
+        type: boolean
+        default: true
 
 concurrency:
     group: store-status
@@ -64,18 +100,39 @@ jobs:
         steps:
             - id: matrix
               env:
-                  APPS: ${{ inputs.apps }}
-                  STORES: ${{ inputs.stores }}
+                  APP_ADMIN: ${{ inputs.app_admin }}
+                  APP_HOTEL: ${{ inputs.app_hotel }}
+                  APP_FREELANCE: ${{ inputs.app_freelance }}
+                  APP_HEALTH: ${{ inputs.app_health }}
+                  APP_ELEARNER: ${{ inputs.app_elearner }}
+                  APP_SUPPORT: ${{ inputs.app_support }}
+                  APP_AGENTS: ${{ inputs.app_agents }}
+                  STORE_IOS: ${{ inputs.store_ios }}
+                  STORE_MACOS: ${{ inputs.store_macos }}
+                  STORE_ANDROID: ${{ inputs.store_android }}
+                  STORE_WINDOWS: ${{ inputs.store_windows }}
+                  STORE_SNAP: ${{ inputs.store_snap }}
               run: |
-                  VALID_APPS="admin hotel freelance health elearner support agents"
-                  IFS=',' read -ra app_list <<< "$APPS"
-                  for app in "${app_list[@]}"; do
-                    app=$(echo "$app" | tr -d ' ')
-                    if ! echo "$VALID_APPS" | grep -qw "$app"; then
-                      echo "Invalid app: '$app'. Valid values: $VALID_APPS" >&2
-                      exit 1
-                    fi
-                  done
+                  APPS=""
+                  [[ "$APP_ADMIN" == "true" ]] && APPS="${APPS}admin,"
+                  [[ "$APP_HOTEL" == "true" ]] && APPS="${APPS}hotel,"
+                  [[ "$APP_FREELANCE" == "true" ]] && APPS="${APPS}freelance,"
+                  [[ "$APP_HEALTH" == "true" ]] && APPS="${APPS}health,"
+                  [[ "$APP_ELEARNER" == "true" ]] && APPS="${APPS}elearner,"
+                  [[ "$APP_SUPPORT" == "true" ]] && APPS="${APPS}support,"
+                  [[ "$APP_AGENTS" == "true" ]] && APPS="${APPS}agents,"
+                  APPS="${APPS%,}"
+                  
+                  STORES=""
+                  [[ "$STORE_IOS" == "true" ]] && STORES="${STORES}ios,"
+                  [[ "$STORE_MACOS" == "true" ]] && STORES="${STORES}macos,"
+                  [[ "$STORE_ANDROID" == "true" ]] && STORES="${STORES}android,"
+                  [[ "$STORE_WINDOWS" == "true" ]] && STORES="${STORES}windows,"
+                  [[ "$STORE_SNAP" == "true" ]] && STORES="${STORES}snap,"
+                  STORES="${STORES%,}"
+                  
+                  if [[ -z "$APPS" ]]; then echo "No apps selected" >&2; exit 1; fi
+                  if [[ -z "$STORES" ]]; then echo "No stores selected" >&2; exit 1; fi
 
                   build_matrix() {
                     local store_apps="$1"
@@ -689,8 +746,18 @@ jobs:
 
             - name: Build consolidated report and PDF
               env:
-                  APPS: ${{ inputs.apps }}
-                  STORES: ${{ inputs.stores }}
+                  APP_ADMIN: ${{ inputs.app_admin }}
+                  APP_HOTEL: ${{ inputs.app_hotel }}
+                  APP_FREELANCE: ${{ inputs.app_freelance }}
+                  APP_HEALTH: ${{ inputs.app_health }}
+                  APP_ELEARNER: ${{ inputs.app_elearner }}
+                  APP_SUPPORT: ${{ inputs.app_support }}
+                  APP_AGENTS: ${{ inputs.app_agents }}
+                  STORE_IOS: ${{ inputs.store_ios }}
+                  STORE_MACOS: ${{ inputs.store_macos }}
+                  STORE_ANDROID: ${{ inputs.store_android }}
+                  STORE_WINDOWS: ${{ inputs.store_windows }}
+                  STORE_SNAP: ${{ inputs.store_snap }}
               run: |
                   python3 << 'PYEOF'
                   import json, os
@@ -701,10 +768,24 @@ jobs:
                   STORE_ORDER = ['ios', 'macos', 'android', 'windows', 'snap']
                   APP_ORDER   = ['admin', 'hotel', 'freelance', 'health', 'elearner', 'support', 'agents']
 
-                  apps_input   = os.environ.get('APPS', '')
-                  stores_input = os.environ.get('STORES', '')
-                  selected_apps   = [a.strip() for a in apps_input.split(',') if a.strip()]
-                  selected_stores = [s.strip() for s in stores_input.split(',') if s.strip()]
+                  selected_apps = []
+                  if os.environ.get('APP_ADMIN') == 'true': selected_apps.append('admin')
+                  if os.environ.get('APP_HOTEL') == 'true': selected_apps.append('hotel')
+                  if os.environ.get('APP_FREELANCE') == 'true': selected_apps.append('freelance')
+                  if os.environ.get('APP_HEALTH') == 'true': selected_apps.append('health')
+                  if os.environ.get('APP_ELEARNER') == 'true': selected_apps.append('elearner')
+                  if os.environ.get('APP_SUPPORT') == 'true': selected_apps.append('support')
+                  if os.environ.get('APP_AGENTS') == 'true': selected_apps.append('agents')
+
+                  selected_stores = []
+                  if os.environ.get('STORE_IOS') == 'true': selected_stores.append('ios')
+                  if os.environ.get('STORE_MACOS') == 'true': selected_stores.append('macos')
+                  if os.environ.get('STORE_ANDROID') == 'true': selected_stores.append('android')
+                  if os.environ.get('STORE_WINDOWS') == 'true': selected_stores.append('windows')
+                  if os.environ.get('STORE_SNAP') == 'true': selected_stores.append('snap')
+                  
+                  apps_input = ','.join(selected_apps)
+                  stores_input = ','.join(selected_stores)
 
                   # Load all fragments: data[(store, app)] = rows list
                   data = {}
