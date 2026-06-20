@@ -246,7 +246,7 @@ class LandingPageTest {
     await tester.pumpAndSettle();
 
     // Navigate to sections tab if exists, or sections button
-    final sectionsKey = find.byKey(const Key('mobileSections'));
+    final sectionsKey = find.byKey(const Key('openSections'));
     if (sectionsKey.evaluate().isNotEmpty) {
       await tester.ensureVisible(sectionsKey);
       await tester.pumpAndSettle();
@@ -327,7 +327,7 @@ class LandingPageTest {
     await tester.pumpAndSettle();
 
     // Navigate to sections tab if exists
-    final sectionsKey = find.byKey(const Key('mobileSections'));
+    final sectionsKey = find.byKey(const Key('openSections'));
     if (sectionsKey.evaluate().isNotEmpty) {
       await tester.ensureVisible(sectionsKey);
       await tester.pumpAndSettle();
@@ -415,7 +415,7 @@ class LandingPageTest {
     await tester.pumpAndSettle();
 
     // Navigate to sections tab if exists
-    final sectionsKey = find.byKey(const Key('mobileSections'));
+    final sectionsKey = find.byKey(const Key('openSections'));
     if (sectionsKey.evaluate().isNotEmpty) {
       await tester.ensureVisible(sectionsKey);
       await tester.pumpAndSettle();
@@ -485,7 +485,7 @@ class LandingPageTest {
     await tester.pumpAndSettle();
 
     // Navigate to sections tab if exists
-    final sectionsKey = find.byKey(const Key('mobileSections'));
+    final sectionsKey = find.byKey(const Key('openSections'));
     if (sectionsKey.evaluate().isNotEmpty) {
       await tester.ensureVisible(sectionsKey);
       await tester.pumpAndSettle();
@@ -540,7 +540,7 @@ class LandingPageTest {
     await tester.pumpAndSettle();
 
     // Navigate to credibility tab if exists
-    final credibilityKey = find.byKey(const Key('mobileCredibility'));
+    final credibilityKey = find.byKey(const Key('openCredibility'));
     if (credibilityKey.evaluate().isNotEmpty) {
       await tester.ensureVisible(credibilityKey);
       await tester.pumpAndSettle();
@@ -632,7 +632,7 @@ class LandingPageTest {
     await tester.pumpAndSettle();
 
     // Navigate to credibility tab if exists
-    final credibilityKey = find.byKey(const Key('mobileCredibility'));
+    final credibilityKey = find.byKey(const Key('openCredibility'));
     if (credibilityKey.evaluate().isNotEmpty) {
       await tester.ensureVisible(credibilityKey);
       await tester.pumpAndSettle();
@@ -752,7 +752,7 @@ class LandingPageTest {
     await tester.pumpAndSettle();
 
     // Navigate to credibility tab if exists
-    final credibilityKey = find.byKey(const Key('mobileCredibility'));
+    final credibilityKey = find.byKey(const Key('openCredibility'));
     if (credibilityKey.evaluate().isNotEmpty) {
       await tester.ensureVisible(credibilityKey);
       await tester.pumpAndSettle();
@@ -833,7 +833,7 @@ class LandingPageTest {
     await tester.pumpAndSettle();
 
     // Navigate to credibility tab if exists
-    final credibilityKey = find.byKey(const Key('mobileCredibility'));
+    final credibilityKey = find.byKey(const Key('openCredibility'));
     if (credibilityKey.evaluate().isNotEmpty) {
       await tester.ensureVisible(credibilityKey);
       await tester.pumpAndSettle();
@@ -917,7 +917,7 @@ class LandingPageTest {
     await tester.pumpAndSettle();
 
     // Navigate to credibility tab if exists
-    final credibilityKey = find.byKey(const Key('mobileCredibility'));
+    final credibilityKey = find.byKey(const Key('openCredibility'));
     if (credibilityKey.evaluate().isNotEmpty) {
       await tester.ensureVisible(credibilityKey);
       await tester.pumpAndSettle();
@@ -979,7 +979,7 @@ class LandingPageTest {
     await tester.pumpAndSettle();
 
     // Navigate to credibility tab if exists
-    final credibilityKey = find.byKey(const Key('mobileCredibility'));
+    final credibilityKey = find.byKey(const Key('openCredibility'));
     if (credibilityKey.evaluate().isNotEmpty) {
       await tester.ensureVisible(credibilityKey);
       await tester.pumpAndSettle();

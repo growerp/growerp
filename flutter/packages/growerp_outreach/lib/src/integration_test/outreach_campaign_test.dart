@@ -194,11 +194,14 @@ class OutreachCampaignTest {
             .where((e) => e.isNotEmpty)
             .toList();
         for (var platform in platforms) {
-          // Use ensureVisible since chips might be wrapped
-          final chipFinder = find.text(platform);
+          // Target the selection FilterChip specifically: the bare platform
+          // text also appears in the campaign list row behind the (desktop)
+          // dialog, so a plain find.text matches several widgets and the
+          // ensureVisible below throws "Too many elements".
+          final chipFinder = find.widgetWithText(FilterChip, platform);
           if (tester.any(chipFinder)) {
-            await tester.ensureVisible(chipFinder);
-            await tester.tap(chipFinder);
+            await tester.ensureVisible(chipFinder.first);
+            await tester.tap(chipFinder.first);
             await tester.pumpAndSettle();
           }
         }

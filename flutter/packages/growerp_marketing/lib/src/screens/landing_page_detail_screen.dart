@@ -210,7 +210,7 @@ class LandingPageDetailScreenState extends State<LandingPageDetailScreen> {
                         children: [
                           const SizedBox(height: 10),
                           FloatingActionButton(
-                            key: const Key("sections"),
+                            key: const Key("openSections"),
                             tooltip: 'Page Sections',
                             heroTag: "pageSections",
                             backgroundColor: Colors.green,
@@ -234,7 +234,7 @@ class LandingPageDetailScreenState extends State<LandingPageDetailScreen> {
                           ),
                           const SizedBox(height: 10),
                           FloatingActionButton(
-                            key: const Key("credibility"),
+                            key: const Key("openCredibility"),
                             tooltip: 'Credibility Info',
                             heroTag: "credibilityInfo",
                             backgroundColor: Colors.green,
@@ -875,7 +875,7 @@ class LandingPageDetailScreenState extends State<LandingPageDetailScreen> {
         children: [
           Expanded(
             child: OutlinedButton.icon(
-              key: const Key("mobileSections"),
+              key: const Key("openSections"),
               icon: const Icon(Icons.view_list),
               label: const Text('Sections'),
               onPressed: () async => await showDialog(
@@ -899,7 +899,7 @@ class LandingPageDetailScreenState extends State<LandingPageDetailScreen> {
           const SizedBox(width: 10),
           Expanded(
             child: OutlinedButton.icon(
-              key: const Key("mobileCredibility"),
+              key: const Key("openCredibility"),
               icon: const Icon(Icons.verified_user),
               label: const Text('Credibility'),
               onPressed: () async => await showDialog(

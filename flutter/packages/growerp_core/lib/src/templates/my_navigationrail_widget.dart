@@ -437,7 +437,7 @@ Widget _buildThemeButton(
   return Material(
     color: Colors.transparent,
     child: InkWell(
-      key: const Key('theme'),
+      key: const Key('themeToggle'),
       onTap: () {
         showDialog(
           context: context,
