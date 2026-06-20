@@ -22,3 +22,5 @@ moqui/moqui-plus-runtime.war
 
 authkey.txt
 AuthKey_*.p8
+flutter/packages/*/example/linux/
+flutter/packages/*/example/test/
