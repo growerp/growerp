@@ -249,7 +249,9 @@ class CompanyFormState extends State<CompanyDialog> {
                   );
                 }
               }
-              if (widget.dialog == true && _nameController.text != '') {
+              if (widget.dialog == true &&
+                  _nameController.text != '' &&
+                  companyBloc.state.companies.isNotEmpty) {
                 Navigator.of(context).pop(companyBloc.state.companies[0]);
               }
               final translatedMessage = state.message != null

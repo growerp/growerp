@@ -629,8 +629,24 @@ class CommonTest {
         (w.axisDirection == AxisDirection.down ||
             w.axisDirection == AxisDirection.up));
     bool scrolled = false;
-    bool hasResultRow() =>
-        baseKeys.any((b) => tester.any(find.byKey(Key('${b}0'))));
+    // Signature of the currently visible keyed cells. Used to tell a stale list
+    // (left over from a previous search, or the pre-search state) apart from the
+    // freshly filtered result: the backend round-trip on slow CI can leave the
+    // old rows on screen for several pumps before they are replaced.
+    String rowSignature() {
+      final sb = StringBuffer();
+      for (int row = 0; row < 20; row++) {
+        for (final base in baseKeys) {
+          if (tester.any(find.byKey(Key('$base$row')))) {
+            sb.write('$base$row=${getTextField('$base$row')};');
+          }
+        }
+      }
+      return sb.toString();
+    }
+
+    String? prevSig;
+    int stablePolls = 0;
     for (int i = 0; i < 60; i++) {
       for (int row = 0; row < 20; row++) {
         for (final base in baseKeys) {
@@ -643,22 +659,31 @@ class CommonTest {
           }
         }
       }
-      // Results are present (the initial pumpAndSettle let the search settle)
-      // but none of the visible rows exactly match — stop polling and fall
-      // through to the row-0 fallback below. Continuing the full 60-iteration
-      // wait here just burns ~12s per call (e.g. an asset searched by assetName,
-      // whose row only keys the product name) and can blow the test time budget.
-      if (hasResultRow()) break;
-      // List still empty: the backend search round-trip (plus debounce) can
-      // exceed the settle above on slow CI runners (headless Linux + xvfb).
-      // Keep polling — scrolling to realize any lazily-built rows — until rows
-      // appear.
-      if (tester.any(scrollable)) {
-        await tester.drag(scrollable.first, const Offset(0, -200),
-            warnIfMissed: false);
-        await tester.pump();
-        scrolled = true;
+      final sig = rowSignature();
+      if (sig.isEmpty) {
+        // List still empty: the backend search round-trip (plus debounce) can
+        // exceed the settle above on slow CI runners (headless Linux + xvfb).
+        // Keep polling — scrolling to realize any lazily-built rows — until rows
+        // appear.
+        stablePolls = 0;
+        if (tester.any(scrollable)) {
+          await tester.drag(scrollable.first, const Offset(0, -200),
+              warnIfMissed: false);
+          await tester.pump();
+          scrolled = true;
+        }
+      } else if (sig == prevSig) {
+        // Rows are present and have stopped changing. Only stop polling once the
+        // list has been stable for a few consecutive polls AND we have waited
+        // long enough for the search round-trip to land — otherwise we would
+        // give up on a still-stale list and tap the wrong (leftover) record in
+        // the fallback below.
+        stablePolls++;
+        if (i >= 15 && stablePolls >= 3) break;
+      } else {
+        stablePolls = 0;
       }
+      prevSig = sig;
       await tester.pump(const Duration(milliseconds: 200));
     }
 
@@ -671,24 +696,39 @@ class CommonTest {
       await tester.pumpAndSettle();
     }
 
-    // No exact keyed-cell match was found. The exact-match poll above already
-    // gave the backend search time to settle, so the list now holds the filtered
-    // result and the top row (row 0) is the correct candidate — tap one of its
-    // keyed cells to open it. This also covers lookups whose search value is not
-    // shown as a keyed cell (e.g. an asset searched by assetName while the row
-    // only keys the product name).
+    // No exact keyed-cell match was found. Tapping row 0 blindly is only safe
+    // when the search narrowed to a SINGLE result row — otherwise the backend
+    // may have returned several rows in an order the bloc reshuffles (e.g. it
+    // prepends newly-added items), so row 0 is frequently the wrong record and
+    // the test silently verifies a neighbour. Count the visible result rows and
+    // only fall back to row 0 when exactly one exists; the single-result case
+    // also covers lookups whose search value is not shown as a keyed cell (e.g.
+    // an asset searched by assetName while the row only keys the product name).
     //
     // We must NOT fall back to `tapByText(searchString)` here: the search field
     // still contains `searchString`, so `find.text(searchString)` always matches
     // it and would tap the search field instead of a result row.
-    for (final key in ['id0', 'name0', 'title0', 'theme0', 'headline0']) {
-      if (tester.any(find.byKey(Key(key)))) {
-        await tester.ensureVisible(find.byKey(Key(key)).last);
-        await tester.tap(find.byKey(Key(key)).last);
-        await tester.pumpAndSettle(Duration(seconds: seconds));
-        return;
+    int resultRows = 0;
+    for (int row = 0; row < 20; row++) {
+      if (baseKeys.any((b) => tester.any(find.byKey(Key('$b$row'))))) {
+        resultRows++;
+      } else {
+        break;
       }
     }
+    if (resultRows == 1) {
+      for (final key in ['id0', 'name0', 'title0', 'theme0', 'headline0']) {
+        if (tester.any(find.byKey(Key(key)))) {
+          await tester.ensureVisible(find.byKey(Key(key)).last);
+          await tester.tap(find.byKey(Key(key)).last);
+          await tester.pumpAndSettle(Duration(seconds: seconds));
+          return;
+        }
+      }
+    }
+    fail('doNewSearch: no row exactly matched "$searchString" '
+        '($resultRows result row(s) visible); refusing to tap an ambiguous '
+        'row 0 which would verify the wrong record.');
   }
 
   static Future<void> doSearch(
