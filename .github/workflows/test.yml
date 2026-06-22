@@ -49,6 +49,7 @@ jobs:
         run: |
           if [ "${{ github.event_name }}" != "schedule" ]; then
             echo "should_run=true" >> "$GITHUB_OUTPUT"
+            echo "▶️ Integration tests running (event: ${{ github.event_name }})." >> "$GITHUB_STEP_SUMMARY"
           else
             SINCE=$(date -u -d '24 hours ago' '+%Y-%m-%dT%H:%M:%S')
             COUNT=$(git log --since="$SINCE" --oneline -- \
@@ -56,9 +57,11 @@ jobs:
             if [ "$COUNT" -gt 0 ]; then
               echo "should_run=true" >> "$GITHUB_OUTPUT"
               echo "$COUNT commit(s) with relevant changes found."
+              echo "▶️ Integration tests running — $COUNT commit(s) with relevant changes in the last 24h." >> "$GITHUB_STEP_SUMMARY"
             else
               echo "should_run=false" >> "$GITHUB_OUTPUT"
               echo "No relevant changes in the last 24 hours — skipping tests."
+              echo "⏭️ Integration tests skipped — no relevant changes (flutter/** or moqui/runtime/component/**) in the last 24h." >> "$GITHUB_STEP_SUMMARY"
             fi
           fi
 

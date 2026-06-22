@@ -60,8 +60,14 @@ void main() {
     // Add assets (using first 3 assets from test data)
     await AssetTest.addAssets(tester, assets.sublist(0, 3));
 
-    // Update assets
-    await AssetTest.updateAssets(tester);
+    // Update assets — change the (updatable) asset name on each record
+    await AssetTest.updateAssets(
+      tester,
+      assets
+          .sublist(0, 3)
+          .map((a) => a.copyWith(assetName: '${a.assetName} updated'))
+          .toList(),
+    );
 
     // Delete (deactivate) the last asset
     await AssetTest.deleteLastAsset(tester);
