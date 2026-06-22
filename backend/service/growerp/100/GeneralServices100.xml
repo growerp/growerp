@@ -1659,7 +1659,8 @@ along with this software (see the LICENSE.md file). If not, see
             <set field="ownerPartyId" from="relInfo.ownerPartyId"/>
             <if condition="!ownerPartyId"><return error="true" message="ownerPartyId not found for current user"/></if>
 
-            <entity-find-one entity-name="growerp.general.SystemSettings" value-field="ss">
+            <entity-find-one entity-name="growerp.general.SystemSettings" value-field="ss"
+                    cache="false">
                 <field-map field-name="ownerPartyId"/>
             </entity-find-one>
             <if condition="ss == null">
@@ -1745,7 +1746,10 @@ along with this software (see the LICENSE.md file). If not, see
 
             <!-- Sync to moqui.basic.email.EmailServer so poll#EmailServer / send#EmailMessage work -->
             <if condition="ss.smtpHost">
-                <entity-find-one entity-name="moqui.basic.email.EmailServer" value-field="es">
+                <!-- cache=false: EmailServer is a cacheable framework entity; a cached
+                     value is read-only and would throw "not mutable" on the update path. -->
+                <entity-find-one entity-name="moqui.basic.email.EmailServer" value-field="es"
+                        cache="false">
                     <field-map field-name="emailServerId" from="ownerPartyId"/>
                 </entity-find-one>
                 <if condition="es == null">

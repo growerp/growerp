@@ -383,12 +383,29 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
   /// Attached external MCP servers + a picker of the tenant registry. Only manageable on a
   /// saved agent (needs an id); for a new one, prompt to save first.
   Widget _mcpServersSection({required bool isNew}) {
+    // The built-in Moqui MCP server is hardcoded into every agent — show it
+    // first as a read-only, always-attached tile (no detach).
+    final builtinTile = ListTile(
+      key: const Key('builtinMcpServer'),
+      dense: true,
+      contentPadding: EdgeInsets.zero,
+      leading: Icon(Icons.verified,
+          color: Theme.of(context).colorScheme.primary),
+      title: const Text('Moqui (built-in)'),
+      subtitle: const Text('Always attached · read-only'),
+    );
     if (isNew) {
-      return const Padding(
-        padding: EdgeInsets.symmetric(vertical: 4),
-        child: Text(
-            'Save the agent first, then re-open it to attach MCP servers.',
-            style: TextStyle(fontStyle: FontStyle.italic)),
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          builtinTile,
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 4),
+            child: Text(
+                'Save the agent first, then re-open it to attach external MCP servers.',
+                style: TextStyle(fontStyle: FontStyle.italic)),
+          ),
+        ],
       );
     }
     final attachedIds =
@@ -399,11 +416,12 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        builtinTile,
         if (_mcpLoading) const LinearProgressIndicator(),
         if (_attachedServers.isEmpty && !_mcpLoading)
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 4),
-            child: Text('No MCP servers attached.'),
+            child: Text('No external MCP servers attached.'),
           ),
         ..._attachedServers.map((s) => ListTile(
               key: Key('mcpServer_${s.adkMcpServerId}'),

@@ -18,8 +18,11 @@ import 'package:growerp_core/growerp_core.dart';
 import 'adk_mcp_server_dialog.dart';
 import 'adk_config_service.dart';
 
-/// Screen that lists the tenant's external MCP servers and lets users
-/// create / edit / delete them. Attach them to agents from the agent dialog.
+/// Tools & integrations screen. Lists every tool an agent can use:
+/// the built-in Moqui MCP server (read-only), the auth-bearing built-in tools
+/// (Email, GitHub) with a configured/needs-setup status, and the tenant's
+/// external MCP servers (create / edit / delete). Attach external servers to
+/// agents from the agent dialog.
 class AdkMcpServerListView extends StatefulWidget {
   const AdkMcpServerListView({super.key});
 
@@ -29,6 +32,7 @@ class AdkMcpServerListView extends StatefulWidget {
 
 class _AdkMcpServerListViewState extends State<AdkMcpServerListView> {
   List<AdkMcpServer> _servers = [];
+  SystemSettings? _settings;
   bool _loading = true;
   String? _error;
   final _searchController = TextEditingController();
@@ -59,12 +63,35 @@ class _AdkMcpServerListViewState extends State<AdkMcpServerListView> {
       final svc = await AdkConfigService.create();
       final list =
           await svc.listMcpServers(search: _search.isEmpty ? null : _search);
-      if (mounted) setState(() => _servers = list);
+      // Best-effort: status badges for the built-in tools. Never block the list.
+      SystemSettings? settings;
+      try {
+        settings = await svc.getSystemSettings();
+      } catch (_) {}
+      if (mounted) {
+        setState(() {
+          _servers = list;
+          _settings = settings;
+        });
+      }
     } catch (e) {
       if (mounted) setState(() => _error = e.toString());
     } finally {
       if (mounted) setState(() => _loading = false);
     }
+  }
+
+  bool get _emailConfigured => (_settings?.smtpHost ?? '').isNotEmpty;
+  bool get _githubConfigured => (_settings?.githubToken ?? '') == '****';
+
+  Future<void> _configureEmail() async {
+    final ok = await EmailSettingsDialog.show(context);
+    if (ok == true) await _load();
+  }
+
+  Future<void> _configureGithub() async {
+    final ok = await GithubSettingsDialog.show(context);
+    if (ok == true) await _load();
   }
 
   Future<void> _create() async {
@@ -120,7 +147,7 @@ class _AdkMcpServerListViewState extends State<AdkMcpServerListView> {
     return Column(
       children: [
         ListFilterBar(
-          searchHint: 'Search MCP servers...',
+          searchHint: 'Search external MCP servers...',
           searchController: _searchController,
           focusNode: _searchFocusNode,
           onSearchChanged: (value) {
@@ -136,6 +163,7 @@ class _AdkMcpServerListViewState extends State<AdkMcpServerListView> {
             ),
           ],
         ),
+        _builtinToolsSection(),
         Expanded(
           child: Stack(
             children: [
@@ -152,6 +180,82 @@ class _AdkMcpServerListViewState extends State<AdkMcpServerListView> {
                 ),
               ),
             ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Fixed tiles for the always-present built-in tools: the Moqui MCP server
+  /// (read-only) and the auth-bearing Email / GitHub tools with a status badge
+  /// and a Configure action.
+  Widget _builtinToolsSection() {
+    final cs = Theme.of(context).colorScheme;
+
+    Widget badge({required bool ok, String okText = 'Configured'}) => Chip(
+          label: Text(ok ? okText : 'Needs setup'),
+          visualDensity: VisualDensity.compact,
+          backgroundColor: ok
+              ? cs.secondaryContainer
+              : cs.surfaceContainerHighest,
+          labelStyle: TextStyle(
+            fontSize: 12,
+            color: ok ? cs.onSecondaryContainer : cs.onSurfaceVariant,
+          ),
+        );
+
+    return Column(
+      children: [
+        ListTile(
+          key: const Key('builtinMcpServer'),
+          leading: Icon(Icons.verified, color: cs.primary),
+          title: const Text('Moqui (built-in)'),
+          subtitle: const Text('Always attached to every agent · read-only'),
+          trailing: badge(ok: true, okText: 'Built-in'),
+        ),
+        ListTile(
+          key: const Key('emailIntegration'),
+          leading: Icon(Icons.email_outlined, color: cs.onSurfaceVariant),
+          title: const Text('Email'),
+          subtitle: const Text('SMTP / IMAP for the AI email tool'),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              badge(ok: _emailConfigured),
+              const SizedBox(width: 8),
+              TextButton(
+                key: const Key('configureEmailIntegration'),
+                onPressed: _configureEmail,
+                child: const Text('Configure'),
+              ),
+            ],
+          ),
+        ),
+        ListTile(
+          key: const Key('githubIntegration'),
+          leading: Icon(Icons.code, color: cs.onSurfaceVariant),
+          title: const Text('GitHub'),
+          subtitle: const Text('Token / repository for the AI GitHub tool'),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              badge(ok: _githubConfigured),
+              const SizedBox(width: 8),
+              TextButton(
+                key: const Key('configureGithubIntegration'),
+                onPressed: _configureGithub,
+                child: const Text('Configure'),
+              ),
+            ],
+          ),
+        ),
+        const Divider(height: 1),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: Text('External MCP servers',
+                style: Theme.of(context).textTheme.titleSmall),
           ),
         ),
       ],

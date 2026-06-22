@@ -57,7 +57,7 @@ const adkMenuConfig = MenuConfiguration(
     MenuItem(
       menuItemId: 'ADK_MCPSERVERS',
       itemKey: 'ADK_MCPSERVERS',
-      title: 'MCP Servers',
+      title: 'Tools & integrations',
       route: '/adk-mcp-servers',
       iconName: 'dns',
       sequenceNum: 35,
