@@ -58,7 +58,7 @@ const agentsMenuConfig = MenuConfiguration(
     ),
     MenuItem(
       menuItemId: 'AGENTS_MCPSERVERS',
-      title: 'MCP Servers',
+      title: 'Tools & integrations',
       route: '/adk-mcp-servers',
       iconName: 'dns',
       sequenceNum: 35,

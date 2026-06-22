@@ -17,12 +17,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import '../functions/functions.dart';
 import '../widgets/widgets.dart';
 
-/// System Setup Screen — configures AI (Gemini API key) and email server settings.
+/// System Setup Screen — configures AI (LLM provider API keys).
 /// Settings are stored per-tenant in the backend via the SystemSettings REST endpoint.
+/// Email and GitHub credentials are configured from the ADK Tools & integrations
+/// screen (EmailSettingsDialog / GithubSettingsDialog).
 class SystemSetupDialog extends StatefulWidget {
   /// When shown modally (e.g. from the ADK chat as a Dialog) rather than as a
   /// full-screen menu route: adds a Cancel button and pops on a successful save.
@@ -62,29 +63,6 @@ class _SystemSetupDialogState extends State<SystemSetupDialog> {
   // AI — dynamic list of {providerCtrl, apiKeyCtrl, obscure, apiKeyIsSet}
   final List<Map<String, dynamic>> _llmRows = [];
 
-  // SMTP
-  final _smtpHostCtrl = TextEditingController();
-  final _smtpPortCtrl = TextEditingController();
-  String _smtpSecurity = 'none'; // none | starttls | ssl
-
-  // Credentials
-  final _mailUserCtrl = TextEditingController();
-  final _mailPassCtrl = TextEditingController();
-  bool _obscureMailPass = true;
-  bool _mailPassSet = false; // true when backend already has a password
-
-  // GitHub
-  final _githubTokenCtrl = TextEditingController();
-  bool _obscureGithubToken = true;
-  bool _githubTokenSet = false;
-  final _githubRepoCtrl = TextEditingController();
-
-  // IMAP / store
-  final _storeHostCtrl = TextEditingController();
-  final _storePortCtrl = TextEditingController();
-  String _storeProtocol = 'imaps';
-  final _storeFolderCtrl = TextEditingController();
-
   RestClient? _restClient;
 
   @override
@@ -102,15 +80,6 @@ class _SystemSetupDialogState extends State<SystemSetupDialog> {
       (row['providerCtrl'] as TextEditingController).dispose();
       (row['apiKeyCtrl'] as TextEditingController).dispose();
     }
-    _smtpHostCtrl.dispose();
-    _smtpPortCtrl.dispose();
-    _mailUserCtrl.dispose();
-    _mailPassCtrl.dispose();
-    _githubTokenCtrl.dispose();
-    _githubRepoCtrl.dispose();
-    _storeHostCtrl.dispose();
-    _storePortCtrl.dispose();
-    _storeFolderCtrl.dispose();
     super.dispose();
   }
 
@@ -154,25 +123,6 @@ class _SystemSetupDialogState extends State<SystemSetupDialog> {
       _llmRows
         ..clear()
         ..addAll(newRows);
-
-      _smtpHostCtrl.text = s.smtpHost ?? '';
-      _smtpPortCtrl.text = s.smtpPort ?? '';
-      _smtpSecurity = s.smtpSsl == 'Y'
-          ? 'ssl'
-          : s.smtpStartTls == 'Y'
-              ? 'starttls'
-              : 'none';
-      _mailUserCtrl.text = s.mailUsername ?? '';
-      _mailPassSet = (s.mailPassword ?? '').isNotEmpty;
-      _mailPassCtrl.text = _mailPassSet ? '****' : '';
-      _githubTokenSet = (s.githubToken ?? '').isNotEmpty;
-      _githubTokenCtrl.text = _githubTokenSet ? '****' : '';
-      _githubRepoCtrl.text = s.githubRepository ?? '';
-      _storeHostCtrl.text = s.storeHost ?? '';
-      _storePortCtrl.text = s.storePort ?? '';
-      _storeProtocol = s.storeProtocol.isNotEmpty ? s.storeProtocol : 'imaps';
-      _storeFolderCtrl.text =
-          (s.storeFolder.isNotEmpty) ? s.storeFolder : 'INBOX';
     } catch (e) {
       if (mounted) {
         HelperFunctions.showMessage(
@@ -190,8 +140,6 @@ class _SystemSetupDialogState extends State<SystemSetupDialog> {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _isSaving = true);
     try {
-      final pass = _mailPassCtrl.text;
-      final githubToken = _githubTokenCtrl.text;
       final llmConfigs = _llmRows
           .where((r) =>
               (r['providerCtrl'] as TextEditingController).text.isNotEmpty)
@@ -204,21 +152,9 @@ class _SystemSetupDialogState extends State<SystemSetupDialog> {
             return m;
           })
           .toList();
-      final payload = {
-        'llmConfigs': llmConfigs,
-        'smtpHost': _smtpHostCtrl.text,
-        'smtpPort': _smtpPortCtrl.text,
-        'smtpStartTls': _smtpSecurity == 'starttls' ? 'Y' : 'N',
-        'smtpSsl': _smtpSecurity == 'ssl' ? 'Y' : 'N',
-        'mailUsername': _mailUserCtrl.text,
-        if (pass.isNotEmpty && pass != '****') 'mailPassword': pass,
-        if (githubToken.isNotEmpty && githubToken != '****') 'githubToken': githubToken,
-        'githubRepository': _githubRepoCtrl.text,
-        'storeHost': _storeHostCtrl.text,
-        'storePort': _storePortCtrl.text,
-        'storeProtocol': _storeProtocol,
-        'storeFolder': _storeFolderCtrl.text,
-      };
+      // Only LLM keys are managed here. Email/GitHub credentials live in the ADK
+      // Tools & integrations screen; omitting them leaves those fields unchanged.
+      final payload = {'llmConfigs': llmConfigs};
       await _restClient!.updateSystemSettings(payload);
       if (mounted) {
         HelperFunctions.showMessage(
@@ -263,35 +199,20 @@ class _SystemSetupDialogState extends State<SystemSetupDialog> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(
-                  'System Setup',
+                  'AI Settings',
                   style: Theme.of(context).textTheme.headlineMedium,
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Configure AI and email server settings for your organisation',
+                  'Configure LLM provider API keys for your organisation',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: Theme.of(context).colorScheme.outline,
                   ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 32),
-                MasonryGridView.count(
-                  crossAxisCount: isPhone ? 1 : 2,
-                  mainAxisSpacing: 24,
-                  crossAxisSpacing: 24,
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: 3,
-                  itemBuilder: (context, index) {
-                    final widgets = [
-                      _aiSettingsSection(),
-                      _emailSettingsSection(),
-                      _githubSettingsSection(),
-                    ];
-                    return widgets[index];
-                  },
-                ),
+                _aiSettingsSection(),
                 const SizedBox(height: 32),
                 Center(
                   child: Row(
@@ -406,211 +327,6 @@ class _SystemSetupDialogState extends State<SystemSetupDialog> {
               apiKeyCtrl.dispose();
               _llmRows.removeAt(index);
             }),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ── Email server settings ────────────────────────────────────────────────────
-
-  Widget _emailSettingsSection() {
-    return GroupingDecorator(
-      decoratorKey: const Key('emailSettingsSection'),
-      labelText: 'Email Server',
-      icon: Icons.email_outlined,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Configure outgoing (SMTP) and incoming (IMAP/POP3) email for your organisation.',
-            style: TextStyle(
-              fontSize: 14,
-              color: Theme.of(context).colorScheme.outline,
-            ),
-          ),
-          const SizedBox(height: 16),
-
-          // SMTP
-          Text('Outgoing (SMTP)',
-              style: Theme.of(context).textTheme.titleSmall),
-          const SizedBox(height: 8),
-          Row(children: [
-            Expanded(
-              flex: 3,
-              child: TextFormField(
-                key: const Key('smtpHost'),
-                controller: _smtpHostCtrl,
-                decoration: const InputDecoration(
-                  labelText: 'SMTP Host',
-                  hintText: 'smtp.example.com',
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              flex: 1,
-              child: TextFormField(
-                key: const Key('smtpPort'),
-                controller: _smtpPortCtrl,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(labelText: 'Port'),
-              ),
-            ),
-          ]),
-          const SizedBox(height: 12),
-          DropdownButtonFormField<String>(
-            key: const Key('smtpSecurity'),
-            initialValue: _smtpSecurity,
-            decoration: const InputDecoration(labelText: 'Security'),
-            items: const [
-              DropdownMenuItem(value: 'none', child: Text('None')),
-              DropdownMenuItem(value: 'starttls', child: Text('STARTTLS')),
-              DropdownMenuItem(value: 'ssl', child: Text('SSL/TLS')),
-            ],
-            onChanged: (v) => setState(() => _smtpSecurity = v ?? 'none'),
-          ),
-
-          const SizedBox(height: 20),
-
-          // Credentials
-          Text('Credentials',
-              style: Theme.of(context).textTheme.titleSmall),
-          const SizedBox(height: 8),
-          TextFormField(
-            key: const Key('mailUsername'),
-            controller: _mailUserCtrl,
-            decoration: const InputDecoration(
-              labelText: 'Username / Email',
-              prefixIcon: Icon(Icons.person_outline),
-            ),
-          ),
-          const SizedBox(height: 12),
-          TextFormField(
-            key: const Key('mailPassword'),
-            controller: _mailPassCtrl,
-            obscureText: _obscureMailPass,
-            decoration: InputDecoration(
-              labelText: 'Password',
-              hintText: _mailPassSet ? '(leave as **** to keep current)' : '',
-              prefixIcon: const Icon(Icons.lock_outline),
-              suffixIcon: IconButton(
-                icon: Icon(_obscureMailPass
-                    ? Icons.visibility
-                    : Icons.visibility_off),
-                onPressed: () =>
-                    setState(() => _obscureMailPass = !_obscureMailPass),
-              ),
-            ),
-            onTap: () {
-              if (_mailPassCtrl.text == '****') {
-                _mailPassCtrl.clear();
-              }
-            },
-          ),
-
-          const SizedBox(height: 20),
-
-          // IMAP / store
-          Text('Incoming (IMAP / POP3)',
-              style: Theme.of(context).textTheme.titleSmall),
-          const SizedBox(height: 8),
-          Row(children: [
-            Expanded(
-              flex: 3,
-              child: TextFormField(
-                key: const Key('storeHost'),
-                controller: _storeHostCtrl,
-                decoration: const InputDecoration(
-                  labelText: 'IMAP Host',
-                  hintText: 'imap.example.com',
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              flex: 1,
-              child: TextFormField(
-                key: const Key('storePort'),
-                controller: _storePortCtrl,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(labelText: 'Port'),
-              ),
-            ),
-          ]),
-          const SizedBox(height: 12),
-          DropdownButtonFormField<String>(
-            key: const Key('storeProtocol'),
-            initialValue: _storeProtocol,
-            decoration: const InputDecoration(labelText: 'Protocol'),
-            items: const [
-              DropdownMenuItem(value: 'imaps', child: Text('IMAPS (secure)')),
-              DropdownMenuItem(value: 'imap', child: Text('IMAP')),
-              DropdownMenuItem(value: 'pop3', child: Text('POP3')),
-            ],
-            onChanged: (v) => setState(() => _storeProtocol = v ?? 'imaps'),
-          ),
-          const SizedBox(height: 12),
-          TextFormField(
-            key: const Key('storeFolder'),
-            controller: _storeFolderCtrl,
-            decoration: const InputDecoration(
-              labelText: 'Folder',
-              hintText: 'INBOX',
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _githubSettingsSection() {
-    return GroupingDecorator(
-      decoratorKey: const Key('githubSettingsSection'),
-      labelText: 'GitHub Settings',
-      icon: Icons.code,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Configure your GitHub personal access token (GITHUB_TOKEN) for system environments.',
-            style: TextStyle(
-              fontSize: 14,
-              color: Theme.of(context).colorScheme.outline,
-            ),
-          ),
-          const SizedBox(height: 16),
-          TextFormField(
-            key: const Key('githubToken'),
-            controller: _githubTokenCtrl,
-            obscureText: _obscureGithubToken,
-            decoration: InputDecoration(
-              labelText: 'GitHub Token (GITHUB_TOKEN)',
-              hintText: _githubTokenSet ? '(leave as **** to keep current)' : '',
-              prefixIcon: const Icon(Icons.security),
-              suffixIcon: IconButton(
-                icon: Icon(_obscureGithubToken
-                    ? Icons.visibility
-                    : Icons.visibility_off),
-                onPressed: () =>
-                    setState(() => _obscureGithubToken = !_obscureGithubToken),
-              ),
-            ),
-            onTap: () {
-              if (_githubTokenCtrl.text == '****') {
-                _githubTokenCtrl.clear();
-              }
-            },
-          ),
-          const SizedBox(height: 12),
-          TextFormField(
-            key: const Key('githubRepository'),
-            controller: _githubRepoCtrl,
-            decoration: const InputDecoration(
-              labelText: 'GitHub Repository',
-              hintText: 'owner/repository',
-              prefixIcon: Icon(Icons.source_outlined),
-            ),
           ),
         ],
       ),

@@ -97,6 +97,9 @@ class AdkConfigService {
   Future<void> removeTeamMember(String adkAgentTeamMemberId) async =>
       _client.deleteAdkAgentTeam(adkAgentTeamMemberId: adkAgentTeamMemberId);
 
+  // ── System settings (read-only here; used for tool-auth status badges) ─────
+  Future<SystemSettings> getSystemSettings() => _client.getSystemSettings();
+
   // ── External MCP server registry (tenant-level) ────────────────────────────
   Future<List<AdkMcpServer>> listMcpServers({String? search}) async {
     final r = await _client.getAdkMcpServers(search: search);
