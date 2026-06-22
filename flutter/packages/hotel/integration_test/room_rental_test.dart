@@ -130,13 +130,13 @@ const hotelTestMenuConfig = MenuConfiguration(
       children: [
         MenuItem(
           title: 'Check In',
-          widgetName: 'CheckIn',
+          widgetName: 'CheckInList',
           iconName: 'home',
           sequenceNum: 10,
         ),
         MenuItem(
           title: 'Check Out',
-          widgetName: 'CheckOut',
+          widgetName: 'CheckOutList',
           iconName: 'home',
           sequenceNum: 20,
         ),
@@ -202,14 +202,18 @@ GoRouter createHotelTestRouter() {
         sales: true,
         docType: FinDocType.invoice,
       ),
-      'CheckIn' => const FinDocList(
+      // The backend (HOTEL_CHECKINOUT) menu uses the registered order-list
+      // names CheckInList/CheckOutList (an order list filtered by status); the
+      // rendered widget keeps the Key('CheckIn')/Key('CheckOut') that
+      // selectCheckInOut/selectCheckOut wait on.
+      'CheckInList' => const FinDocList(
         key: Key('CheckIn'),
         sales: true,
         docType: FinDocType.order,
         onlyRental: true,
         status: FinDocStatusVal.created,
       ),
-      'CheckOut' => const FinDocList(
+      'CheckOutList' => const FinDocList(
         key: Key('CheckOut'),
         sales: true,
         docType: FinDocType.order,
