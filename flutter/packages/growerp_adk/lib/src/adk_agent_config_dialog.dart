@@ -57,6 +57,7 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
   // Trust foundation: safe-by-default for new agents.
   String _toolMode = 'readOnly'; // readOnly | scoped | full
   String _writePolicy = 'approve'; // block | approve | allow
+  bool _websiteChat = false; // answers the public website chat
   // Multi-agent orchestration (Phase 4).
   String _agentRole = 'specialist'; // specialist | coordinator
   String _orchestrationType = 'router'; // router | sequential | parallel | loop
@@ -91,6 +92,7 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
       _scheduleEnabled = e.scheduleEnabled;
       _toolMode = e.toolMode ?? 'readOnly';
       _writePolicy = e.writePolicy ?? 'approve';
+      _websiteChat = e.websiteChat;
       _allowlistCtrl.text = e.serviceAllowlist ?? '';
       _approvalRoomCtrl.text = e.approvalChatRoomId ?? '';
       _agentRole = e.agentRole ?? 'specialist';
@@ -276,6 +278,7 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
         approvalChatRoomId: _approvalRoomCtrl.text.trim().isEmpty
             ? null
             : _approvalRoomCtrl.text.trim(),
+        websiteChat: _websiteChat,
         agentRole: _agentRole,
         orchestrationType: _agentRole == 'specialist' ? null : _orchestrationType,
         loopMaxIterations:
@@ -598,6 +601,20 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
                           ),
                         ),
                       ],
+                      const SizedBox(height: 8),
+                      CheckboxListTile(
+                        key: const Key('websiteChat'),
+                        contentPadding: EdgeInsets.zero,
+                        controlAffinity: ListTileControlAffinity.leading,
+                        value: _websiteChat,
+                        title: const Text('Answer website chat'),
+                        subtitle: const Text(
+                          'This agent replies to the public website chat; one agent per company',
+                          style: TextStyle(fontSize: 12, color: Colors.grey),
+                        ),
+                        onChanged: (v) =>
+                            setState(() => _websiteChat = v ?? false),
+                      ),
                       const Divider(height: 24),
                       const Text('Team / orchestration',
                           style: TextStyle(fontWeight: FontWeight.bold)),

@@ -725,6 +725,15 @@ along with this software (see the LICENSE.md file). If not, see
             </entity-find-one>
             <set field="ownerPartyId" from="orgParty?.ownerPartyId ?: store.organizationPartyId" />
 
+            <!-- the tenant's website-chat agent, if one is flagged -->
+            <entity-find entity-name="moqui.adk.AdkAgentConfig" list="chatAgents" limit="1">
+                <econdition field-name="ownerPartyId" from="ownerPartyId" />
+                <econdition field-name="websiteChat" value="Y" />
+                <econdition field-name="enabled" value="Y" />
+            </entity-find>
+            <set field="chatAgentConfigId"
+                from="chatAgents ? chatAgents[0].adkAgentConfigId : null" />
+
             <!-- find the company's admin user; fall back to SYSTEM_SUPPORT -->
             <entity-find entity-name="growerp.party.OwnerPersonDetailAndCompany"
                 list="admins" limit="1">
@@ -821,7 +830,9 @@ along with this software (see the LICENSE.md file). If not, see
                         isPrivate: 'N',
                         isActive: 'Y',
                         visitorToken: visitorToken,
-                        visitorUserId: visitorUserId]" />
+                        visitorUserId: visitorUserId,
+                        chatAgentConfigId: chatAgentConfigId,
+                        agentActive: chatAgentConfigId ? 'Y' : 'N']" />
             <!-- add the company admin (unread) and the visitor (read) as members -->
             <if condition="adminUserId != visitorUserId">
                 <service-call name="create#growerp.general.ChatRoomMember"
@@ -831,6 +842,16 @@ along with this software (see the LICENSE.md file). If not, see
             <service-call name="create#growerp.general.ChatRoomMember"
                 in-map="[chatRoomId: chatRoomId, userId: visitorUserId,
                         isActive: 'Y', hasRead: 'Y']" />
+            <!-- add the website-chat agent as a member so its replies render as a sender -->
+            <if condition="chatAgentConfigId">
+                <service-call name="AdkChatServices.ensure#AgentChatUser" out-map="context"
+                    in-map="[adkAgentConfigId: chatAgentConfigId, ownerPartyId: ownerPartyId]" />
+                <if condition="agentUserId &amp;&amp; agentUserId != visitorUserId &amp;&amp; agentUserId != adminUserId">
+                    <service-call name="create#growerp.general.ChatRoomMember"
+                        in-map="[chatRoomId: chatRoomId, userId: agentUserId,
+                                isActive: 'Y', hasRead: 'Y']" />
+                </if>
+            </if>
 
             <!-- store the question as the first message from the visitor -->
             <service-call name="create#growerp.general.ChatMessage" out-map="context"
@@ -840,6 +861,11 @@ along with this software (see the LICENSE.md file). If not, see
                 in-map="[chatRoomId: chatRoomId, fromUserId: visitorUserId,
                         fromUserFullName: email, content: question,
                         chatMessageId: chatMessageId]" />
+            <!-- let the agent answer asynchronously so this POST returns fast -->
+            <if condition="chatAgentConfigId">
+                <service-call name="AdkChatServices.reply#WebsiteChatAgent" async="true"
+                    in-map="[chatRoomId: chatRoomId, ownerPartyId: ownerPartyId]" />
+            </if>
         </actions>
     </service>
 
@@ -957,10 +983,15 @@ along with this software (see the LICENSE.md file). If not, see
             </parameter>
         </out-parameters>
         <actions>
-            <service-call out-map="context"
+            <service-call out-map="roomOut" ignore-error="true"
                 name="growerp.100.ChatServices100.get#WebsiteChatRoom"
                 in-map="[productStoreId: productStoreId, chatRoomId: chatRoomId,
                         visitorToken: visitorToken]" />
+            <if condition="!roomOut?.room">
+                <return error="true" message="Chat room not found or access denied" />
+            </if>
+            <set field="visitorUserId" from="roomOut.visitorUserId" />
+            <set field="ownerPartyId" from="roomOut.ownerPartyId" />
             <entity-find entity-name="growerp.general.ChatRoomAndMessages" list="messages">
                 <econdition field-name="chatRoomId" from="chatRoomId" />
                 <order-by field-name="lastUpdatedStamp" />
@@ -1010,10 +1041,16 @@ along with this software (see the LICENSE.md file). If not, see
             </parameter>
         </out-parameters>
         <actions>
-            <service-call out-map="context"
+            <service-call out-map="roomOut" ignore-error="true"
                 name="growerp.100.ChatServices100.get#WebsiteChatRoom"
                 in-map="[productStoreId: productStoreId, chatRoomId: chatRoomId,
                         visitorToken: visitorToken]" />
+            <if condition="!roomOut?.room">
+                <return error="true" message="Chat room not found or access denied" />
+            </if>
+            <set field="visitorUserId" from="roomOut.visitorUserId" />
+            <set field="ownerPartyId" from="roomOut.ownerPartyId" />
+            <set field="room" from="roomOut.room" />
             <if condition="!visitorUserId">
                 <return error="true" message="Visitor account not found for this chat room" />
             </if>
@@ -1066,6 +1103,13 @@ along with this software (see the LICENSE.md file). If not, see
                 from="[chatMessageId: chatMessageId, fromUserId: visitorUserId,
                         content: content,
                         creationDate: ec.l10n.format(ec.user.nowTimestamp,'yyyy-MM-dd HH:mm')]" />
+            <!-- let the agent answer asynchronously, unless handed off to a human -->
+            <entity-find-one entity-name="growerp.general.ChatRoom" value-field="cr"
+                auto-field-map="[chatRoomId: chatRoomId]" />
+            <if condition="cr?.chatAgentConfigId &amp;&amp; cr.agentActive == 'Y'">
+                <service-call name="AdkChatServices.reply#WebsiteChatAgent" async="true"
+                    in-map="[chatRoomId: chatRoomId, ownerPartyId: ownerPartyId]" />
+            </if>
         </actions>
     </service>
 </services>

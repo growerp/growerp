@@ -3308,6 +3308,7 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="companyPartyId" />
             <parameter name="classificationId" required="true" />
             <parameter name="demoData" type="Boolean" default="false" />
+            <parameter name="agentDemoData" type="Boolean" default="false" />
             <parameter name="currencyId" />
             <parameter name="timeZoneOffset" />
         </in-parameters>
@@ -3354,9 +3355,17 @@ along with this software (see the LICENSE.md file). If not, see
                 <if condition="demoData">
                     <log message="Loading demo data for ownerPartyId: ${ownerPartyId}" />
                     <service-call name="growerp.100.PartyServices100.load#DemoData"
-                        in-map="[ownerPartyId: ownerPartyId, companyPartyId: companyPartyId, 
+                        in-map="[ownerPartyId: ownerPartyId, companyPartyId: companyPartyId,
                                  userPartyId: userPartyId, classificationId: classificationId,
                                  currencyId: currencyId, timeZoneOffset: timeZoneOffset]" />
+                </if>
+
+                <!-- Load Agent Control Center demo (clone _NA_ agent templates) if requested -->
+                <if condition="agentDemoData">
+                    <log message="Loading agent demo data for ownerPartyId: ${ownerPartyId}" />
+                    <service-call name="AdkDemoServices.load#AgentDemo"
+                        in-map="[ownerPartyId: ownerPartyId, companyPartyId: companyPartyId,
+                                 userPartyId: userPartyId]" />
                 </if>
 
                 <!-- any other specific app setup here -->

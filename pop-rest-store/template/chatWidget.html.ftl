@@ -220,18 +220,34 @@
     for (var i = 0; i < nodes.length; i++) nodes[i].parentNode.removeChild(nodes[i]);
   }
 
+  function resetToForm(){
+    stopPolling();
+    saveSession(null);
+    try { localStorage.removeItem(storeKey); } catch(e){}
+    seenIds = {};
+    msgsEl.innerHTML = '';
+    panel.classList.remove('growerp-mode-thread');
+    titleEl.textContent = 'Ask us a question';
+    questionEl.value = '';
+    sendBtn.disabled = false;
+    setStatus('Your previous conversation has expired. Please start a new one.', 'err');
+  }
   function fetchMessages(){
     if (!session || !session.chatRoomId) return;
     var url = apiBase + '/messages?productStoreId=' + encodeURIComponent(productStoreId) +
       '&chatRoomId=' + encodeURIComponent(session.chatRoomId) +
       '&visitorToken=' + encodeURIComponent(session.visitorToken);
     fetch(url, { headers: { 'Accept': 'application/json' } })
-      .then(function(r){ if (!r.ok) throw new Error('http ' + r.status); return r.json(); })
+      .then(function(r){
+        if (!r.ok) { resetToForm(); return null; }
+        return r.json();
+      })
       .then(function(d){
+        if (!d) return;
         // once the server thread is in, drop any pending optimistic bubbles
         if (d.chatMessages && d.chatMessages.length) clearOptimistic();
         (d.chatMessages || []).forEach(appendMessage);
-      }).catch(function(){ /* keep polling silently */ });
+      }).catch(function(){ resetToForm(); });
   }
   function startPolling(){
     if (pollTimer || !session || !session.chatRoomId) return;

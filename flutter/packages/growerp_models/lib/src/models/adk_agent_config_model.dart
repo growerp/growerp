@@ -44,6 +44,10 @@ class AdkAgentConfig {
   final String? approvalChatRoomId;
   final String? agentPartyId;
 
+  /// Y → this agent answers the tenant's public website chat.
+  @JsonKey(defaultValue: false)
+  final bool websiteChat;
+
   // Multi-agent orchestration (Phase 4).
   /// specialist | coordinator | workflow
   final String? agentRole;
@@ -73,6 +77,7 @@ class AdkAgentConfig {
     this.writePolicy,
     this.approvalChatRoomId,
     this.agentPartyId,
+    this.websiteChat = false,
     this.agentRole,
     this.orchestrationType,
     this.loopMaxIterations,
@@ -101,6 +106,7 @@ class AdkAgentConfig {
     String? writePolicy,
     String? approvalChatRoomId,
     String? agentPartyId,
+    bool? websiteChat,
     String? agentRole,
     String? orchestrationType,
     int? loopMaxIterations,
@@ -123,6 +129,7 @@ class AdkAgentConfig {
         writePolicy: writePolicy ?? this.writePolicy,
         approvalChatRoomId: approvalChatRoomId ?? this.approvalChatRoomId,
         agentPartyId: agentPartyId ?? this.agentPartyId,
+        websiteChat: websiteChat ?? this.websiteChat,
         agentRole: agentRole ?? this.agentRole,
         orchestrationType: orchestrationType ?? this.orchestrationType,
         loopMaxIterations: loopMaxIterations ?? this.loopMaxIterations,

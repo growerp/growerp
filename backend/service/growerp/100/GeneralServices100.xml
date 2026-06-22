@@ -827,6 +827,7 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="companyName"/>
             <parameter name="currencyId"/>
             <parameter name="demoData" type="Boolean" default="false"/>
+            <parameter name="agentDemoData" type="Boolean" default="false"/>
             <parameter name="timeZoneOffset"/>
             <!-- For testing: days offset for subscription checks -->
             <parameter name="testDaysOffset" type="Integer"/>
@@ -959,6 +960,7 @@ along with this software (see the LICENSE.md file). If not, see
                                 companyName: companyName,
                                 currencyId: currencyId,
                                 demoData: demoData,
+                                agentDemoData: agentDemoData,
                                 classificationId: classificationId,
                                 userPartyId: userAccount.partyId,
                                 hostName: ec.web?.getHostName(false),

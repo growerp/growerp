@@ -321,7 +321,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       PersistFunctions.removeAuthenticate();
 
       // Use extended timeout for demo data creation as it involves heavy database operations
-      final clientToUse = event.demoData == true
+      final clientToUse =
+          (event.demoData == true || event.agentDemoData == true)
           ? RestClient(
               await buildDioClient(timeout: const Duration(seconds: 900)),
             ) // 15 minutes for demo data
@@ -333,6 +334,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         companyName: event.companyName,
         currencyId: event.currency?.currencyId,
         demoData: event.demoData,
+        agentDemoData: event.agentDemoData,
         creditCardNumber: event.creditCardNumber,
         creditCardType: creditCardType,
         nameOnCard: event.nameOnCard,

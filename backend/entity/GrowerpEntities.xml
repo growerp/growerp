@@ -232,6 +232,10 @@ along with this software (see the LICENSE.md file). If not, see
              null for internal rooms -->
         <field name="visitorToken" type="text-medium" />
         <field name="visitorUserId" type="id" />
+        <!-- ADK agent serving this room (null = no agent); agentActive flips to N on
+             human handoff so the agent stops auto-replying -->
+        <field name="chatAgentConfigId" type="id" />
+        <field name="agentActive" type="text-indicator" />
         <relationship type="one" title="Owner" related="mantle.party.Party">
             <key-map field-name="ownerPartyId" />
         </relationship>

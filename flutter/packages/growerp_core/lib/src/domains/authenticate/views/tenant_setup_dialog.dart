@@ -37,6 +37,7 @@ class TenantSetupDialogState extends State<TenantSetupDialog> {
   final _formKey = GlobalKey<FormBuilderState>();
   Currency? _currencySelected;
   late bool _demoData;
+  late bool _agentDemoData;
   bool _isSubmitting = false;
   bool _isLoadingCurrencies = true;
 
@@ -44,6 +45,7 @@ class TenantSetupDialogState extends State<TenantSetupDialog> {
   void initState() {
     super.initState();
     _demoData = kReleaseMode ? false : true; // Demo data in debug mode
+    _agentDemoData = kReleaseMode ? false : true; // Demo data in debug mode
     _loadCurrencies();
   }
 
@@ -79,7 +81,7 @@ class TenantSetupDialogState extends State<TenantSetupDialog> {
     return popUp(
       context: context,
       title: 'Company Setup',
-      height: 450,
+      height: 550,
       width: 400,
       child: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) async {
@@ -120,8 +122,8 @@ class TenantSetupDialogState extends State<TenantSetupDialog> {
                             widget.authenticate.ownerPartyId == 'GROWERP'
                             ? 'GrowERP'
                             : kDebugMode
-                                ? 'Company ${widget.authenticate.user?.email?.split('@').first ?? ''}'
-                                : null,
+                            ? 'Company ${widget.authenticate.user?.email?.split('@').first ?? ''}'
+                            : null,
                         decoration: const InputDecoration(
                           labelText: 'Company Name',
                         ),
@@ -193,6 +195,30 @@ class TenantSetupDialogState extends State<TenantSetupDialog> {
                             setState(() => _demoData = value ?? false);
                           },
                         ),
+
+                      // Agent Control Center demo (separate selectable indicator)
+                      if ((!kReleaseMode ||
+                              widget.authenticate.user?.userGroup ==
+                                  UserGroup.admin) &&
+                          widget.authenticate.ownerPartyId != 'GROWERP')
+                        FormBuilderCheckbox(
+                          key: const Key('agentDemoData'),
+                          name: 'agentDemoData',
+                          initialValue: _agentDemoData,
+                          title: Text(
+                            'Load Agent Demo',
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
+                          subtitle: Text(
+                            'Add the Agent Control Center demo: an Operations '
+                            'Assistant that delegates to Sales, Inventory and '
+                            'Support specialists',
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                          onChanged: (value) {
+                            setState(() => _agentDemoData = value ?? false);
+                          },
+                        ),
                       const SizedBox(height: 20),
                     ],
                   ),
@@ -248,6 +274,7 @@ class TenantSetupDialogState extends State<TenantSetupDialog> {
       final companyName = formData['companyName'] as String;
       final currency = _currencySelected;
       final demoData = formData['demoData'] as bool? ?? false;
+      final agentDemoData = formData['agentDemoData'] as bool? ?? false;
 
       // Send setup data through login endpoint
       // The backend login service will call complete#TenantSetup internally
@@ -259,6 +286,7 @@ class TenantSetupDialogState extends State<TenantSetupDialog> {
             companyName: companyName,
             currency: currency,
             demoData: demoData,
+            agentDemoData: agentDemoData,
           ),
         );
       }

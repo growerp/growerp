@@ -70,6 +70,7 @@ abstract class RestClient {
     @Field() String? companyName,
     @Field() String? currencyId,
     @Field() bool? demoData,
+    @Field() bool? agentDemoData,
     @Field() required String classificationId,
     @Field() String? timeZoneOffset,
     @Field() int? testDaysOffset,
