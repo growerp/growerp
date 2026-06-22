@@ -317,12 +317,6 @@ jobs:
               new_build = int(pub_build) + 1
               new_ver = f'{major}.{minor}.{new_patch}+{new_build}'
               content = re.sub(r'^version:\s*[\d.+]+', f'version: {new_ver}', content, flags=re.MULTILINE)
-              # keep Windows msix_version in sync with version (semver + ".0"), no independent bump
-              content = re.sub(
-                  r'(?m)^(\s*msix_version:\s*)[\d.]+',
-                  rf'\g<1>{major}.{minor}.{new_patch}.0',
-                  content,
-              )
               with open(pubspec, 'w') as f:
                   f.write(content)
               print(f'  → {new_ver}')
