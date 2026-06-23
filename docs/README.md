@@ -82,6 +82,8 @@ This directory contains comprehensive documentation for extending and developing
 
 - **[GrowERP AI Development Instructions](./GrowERP_AI_Instructions.md)** - AI-assisted development
 - **[Generative AI Integration Guide](./GrowERP_AI_Integration_Guide.md)** - Guide to all AI-integrated features (Gemini, Vertex AI, Veo 2, GenUI Onboarding) ⭐ **NEW FEATURE!**
+- **[🧠 Agent Control Center (ADK)](./Agent_Control_Center_User_Guide.md)** - Guide to multi-agent orchestration, tool scoping, and RAG knowledge ingest ⭐ **NEW!**
+- **[🎮 Agent Demo Walkthrough](./Agent_Control_Center_Demo.md)** - Test the operations assistant and specialist agent team ⭐ **NEW!**
 - **[Model Context Protocol (MCP) Server](../moqui/runtime/component/growerp/docs/README.md)** - AI integration system
 - **[Invoice Scan Documentation](./Invoice_Scan_Documentation.md)** - AI-powered invoice processing ⭐ **NEW FEATURE!**
 
@@ -115,6 +117,25 @@ Financial documents (transactions) can now be filtered and posted by accounting 
 - **`getAcctgTransTypes()`** — new method on `RestClient` returns available types
 - **Filter by type** — `FinDocBloc` fetches transaction types when `docType == FinDocType.transaction` and passes `acctgTransTypeEnumId` to search calls
 - **Set on posting** — `finDoc.docSubType` drives `acctgTransTypeEnumId` when creating or updating a transaction
+
+---
+
+## 🔥 What's New (Agent Control Center & ADK)
+
+### AI Agent Orchestration & Integration ⭐ **NEW!**
+
+GrowERP now features a comprehensive **Agent Development Kit (ADK)** and an **Agent Control Center**:
+- **Multi-Agent Orchestration:** Create coordinator agents that route tasks to specialists.
+- **Permissions & Governance:** Read-only access, scoped tools, and human-in-the-loop approval queues for writing data.
+- **RAG Knowledge Ingestion:** Upload company policy docs for agents to retrieve and use in chat.
+- **Scheduled Autonomous Runs:** Trigger agents automatically via cron schedules.
+- **External MCP Servers:** Attach external servers via SSE or HTTP to grant agents extended capabilities.
+- **LLM System Tracking:** Built-in usage tracking, token logging, and monthly limits per tenant.
+- **Unified UI View:** Consolidated ADK tools, AI chat configuration, and integration views.
+
+**Quick Start:**
+1. Read: [Agent Control Center User Guide](./Agent_Control_Center_User_Guide.md)
+2. Try the Demo: [Agent Demo Walkthrough](./Agent_Control_Center_Demo.md)
 
 ---
 
@@ -307,6 +328,9 @@ BlocListener<UserBloc, UserState>(
 
 | Need to find | Document | Section |
 |---|---|---|
+| **Agent Control Center (ADK)** | [Agent Control Center User Guide](./Agent_Control_Center_User_Guide.md) | All sections |
+| **Agent Demo Walkthrough** | [Agent Demo Walkthrough](./Agent_Control_Center_Demo.md) | All sections |
+| **MCP Servers & Integration** | [Agent Control Center User Guide](./Agent_Control_Center_User_Guide.md) | MCP Servers |
 | **Dynamic menu system** | [Dynamic Menu System and Widget Repository](./Dynamic_Menu_System_And_Widget_Repository.md) | Complete guide |
 | **Widget registry pattern** | [Dynamic Menu System and Widget Repository](./Dynamic_Menu_System_And_Widget_Repository.md) | Widget Registry |
 | **Static vs dynamic router** | [Dynamic Menu System and Widget Repository](./Dynamic_Menu_System_And_Widget_Repository.md) | When to Use Each Pattern |
@@ -446,6 +470,9 @@ GrowERP is released under the CC0 1.0 Universal license.
 **Status:** ✅ COMPLETE & PRODUCTION-READY
 
 **Recent Updates Summary:**
+- ✅ Agent Control Center (ADK) multi-agent orchestration and UI integrations
+- ✅ External MCP servers support via SSE/HTTP
+- ✅ LLM system usage tracking and token limits
 - ✅ Release 1.15.0 across all apps
 - ✅ Moqui 4 / Docker support with root Dockerfile
 - ✅ Image deletion for companies, users, and products

@@ -48,6 +48,8 @@ GrowERP is an open-source, multi-platform ERP application built with a modular a
 - **[📡 Flutter-Moqui REST Backend Interface](./docs/Flutter_Moqui_REST_Backend_Interface.md)** - Complete guide to REST API communication with practical code examples
 - **[🤖 Invoice Scan & AI Extraction](./docs/Invoice_Scan_Documentation.md)** - Invoice scanning and AI-powered data extraction with Google Gemini
 - **[🤖 Generative AI Integration Guide](./docs/GrowERP_AI_Integration_Guide.md)** - Comprehensive architectural breakdown of all Gemini, Vertex AI (Veo 2), and GenUI features
+- **[🧠 Agent Control Center (ADK)](./docs/Agent_Control_Center_User_Guide.md)** - Guide to multi-agent orchestration, tool scoping, and RAG knowledge ingest
+- **[🎮 Agent Demo Walkthrough](./docs/Agent_Control_Center_Demo.md)** - Test the operations assistant and specialist agent team
 - **[✨ AI Landing Page Generation](./docs/AI_GENERATED_LANDING_PAGE_PLAN.md)** - Generate professional landing pages with AI and internet research
 - **[💳 Stripe Payment Processing](./docs/Stripe_Payment_Processing_Documentation.md)** - Complete payment integration guide
 - **[🌐 WebSocket Notifications](./docs/WebSocket_Notification_System.md)** - Real-time notification system
@@ -139,6 +141,8 @@ GrowERP uses a modular architecture that promotes reusability and extensibility:
 - **growerp_outreach** - Outreach and lead engagement
 
 ### ⚙️ Backend Components
+- **moqui-adk** - Agent Development Kit for multi-agent orchestration and governance
+- **moqui-mcp** - Model Context Protocol for external AI tool integration
 - **Moqui Framework** - Enterprise-grade backend framework
 - **REST APIs** - Automatic JSON serialization and authentication
 - **Entity Engine** - ORM with automatic CRUD operations
@@ -235,6 +239,8 @@ Complete ERP solution with:
 - User and company management
 - Website content management
 - Marketing campaigns
+- AI Agent orchestration and control center
+- LLM system usage tracking and token limits
 
 ### 🏨 Hotel Application
 Specialized for hospitality:
