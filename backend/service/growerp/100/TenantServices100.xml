@@ -239,10 +239,10 @@ along with this software (see the LICENSE.md file). If not, see
             <if condition="ownerPartyId == 'GROWERP'">
                 <script><![CDATA[
                     ec.entity.makeDataLoader().location("component://growerp/data/ErpLandingPageData.xml").load()
-                    ec.entity.makeDataLoader().location("component://growerp/data/ErpNeedAssessmentData.xml").load()
+                    ec.entity.makeDataLoader().location("component://growerp/data/ErpOnboardAssessmentData.xml").load()
                     ec.entity.makeDataLoader().location("component://growerp/data/GrowerpWebsiteSeedData.xml").load()
                 ]]></script>
-                <service-call name="update#growerp.Application" in-map="[applicationId: 'AppAdmin', assessmentId: 'ERP_NEED']"/>
+                <service-call name="update#growerp.Application" in-map="[applicationId: 'AppAdmin', assessmentId: 'ERP_ONBOARD']"/>
 
                 <!-- Repoint the GROWERP company store (created by setup#MainOrganization) at the
                      official marketing wiki/content just loaded, and let it serve the growerp.com

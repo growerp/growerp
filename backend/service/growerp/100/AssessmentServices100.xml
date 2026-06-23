@@ -887,7 +887,41 @@ Service definitions for assessment management and completion
                         message="====== Assessment results email not sent for ${respondentEmail}" />
                 </else>
             </if>
-            <!-- pseudoId, assessmentId, score, leadStatus, respondentName, respondentEmail, 
+
+            <!-- Onboarding only: feed the GROWERP onboarding agent. Ingest a readable org profile
+                 (plus any earlier ERP readiness verdict for the same prospect) into GROWERP knowledge
+                 so the agent retrieves it via searchKnowledge. Best-effort: never block submit, and a
+                 no-op when the moqui-adk component is absent. The onboarding result is GROWERP-owned. -->
+            <if condition="assessmentId == 'ERP_ONBOARD'">
+                <set field="readinessLine" from="''" />
+                <if condition="respondentEmail">
+                    <entity-find entity-name="growerp.assessment.AssessmentResult" list="priorReadiness">
+                        <econdition field-name="ownerPartyId" value="GROWERP" />
+                        <econdition field-name="assessmentId" value="ERP_READINESS" />
+                        <econdition field-name="respondentEmail" from="respondentEmail" />
+                        <order-by field-name="-createdDate" />
+                    </entity-find>
+                    <if condition="priorReadiness">
+                        <set field="pr" from="priorReadiness[0]" />
+                        <set field="readinessLine"
+                            from="'\nEarlier ERP Readiness result: score ' + pr.score + ', status ' + pr.leadStatus + '.'" />
+                    </if>
+                </if>
+                <script><![CDATA[
+                    def who = respondentCompany ?: (respondentName ?: respondentEmail)
+                    def profileLines = questionsWithAnswers.collect { "- ${it.questionText} -> ${it.selectedAnswer}" }
+                    profileText = "Onboarding profile for ${who}:\n" + profileLines.join('\n') + readinessLine
+                    knowledgeTitle = "Onboarding profile: ${who}"
+                ]]></script>
+                <service-call name="AdkKnowledgeServices.ingest#AdkKnowledge" async="true" ignore-error="true">
+                    <field-map field-name="ownerPartyId" value="GROWERP" />
+                    <field-map field-name="title" from="knowledgeTitle" />
+                    <field-map field-name="text" from="profileText" />
+                    <field-map field-name="sourceType" value="onboarding" />
+                    <field-map field-name="sourceId" from="assessmentResultId" />
+                </service-call>
+            </if>
+            <!-- pseudoId, assessmentId, score, leadStatus, respondentName, respondentEmail,
                  respondentPhone, respondentCompany, answersData, createdDate are already in context -->
         </actions>
     </service>
