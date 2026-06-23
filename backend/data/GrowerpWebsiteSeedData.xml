@@ -16,44 +16,59 @@
     <moqui.resource.DbResource filename="home.md.ftl" isFile="Y" resourceId="growerp_home"
         parentResourceId="growerp_content_dir">
         <file mimeType="text/markdown" versionName="01" rootVersionName="01">
-            <fileData><![CDATA[# Home
+            <fileData><![CDATA[# Welcome to GrowERP
 
-**Feeling overwhelmed by your ERP? You're not alone.**
+> **Feeling overwhelmed by your ERP? You're not alone.**
 
 Many business owners find accounting difficult and traditional ERP systems bloated with confusing features they'll never use. That's why we created GrowERP.
 
-We believe you deserve a clear view of your business performance. GrowERP is an intuitive, open-source AI supported assistant that provides accurate reports to guide your decisions and ensure regulatory compliance. While designed for simplicity from the start, it is built to grow with you through modular expansion. 
+We believe you deserve a clear view of your business performance. GrowERP is an intuitive, open-source AI-supported assistant that provides accurate reports to guide your decisions and ensure regulatory compliance. Designed for simplicity from the start, it is built to grow with you through modular expansion.
 
-**Welcome to the Future: The AI Native Company**
-GrowERP offers exactly the features you need to manage your company efficiently, now empowered with our latest **Agent Management System**. Transform your business into an **AI Native Company** by deploying intelligent agents that handle tedious tasks, automate workflows, and provide predictive insights. Our agents work seamlessly alongside your team to boost productivity and reduce operational friction.
+---
 
-GrowERP is for you.
+### Discover Your Needs
+Take our quick assessment to find the best setup for your business:
+**[Start the ERP Assessment](/assessmentLanding?landingPageId=ERP_LANDING_PAGE)**
 
-## Start your free trial.
-(NO credit card required)  
-***Full system:***
-1. Web browser at [https://admin.growerp.com](https://admin.growerp.com)
-2. Android [PlayStore](https://play.google.com/store/apps/details?id=org.growerp.admin)
-3. IOS & MacOS [AppStore](https://apps.apple.com/us/app/growerp-admin-open-source/id1545521755)
-4. Linux [SnapStore](https://snapcraft.io/growerp-admin)
-5. Windows [MS store](https://apps.microsoft.com/detail/9nwx6kftjnql?hl=en-US&gl=TH)
+---
 
-## Or try it at our next version limited availability test system
-*Full test system:*
-1. Web browser at [https://admin.growerp.org](https://admin.growerp.org)
-2. Linux: install with: `snap install growerp-admin --channel=beta`
+### Welcome to the Future: The AI Native Company
+GrowERP offers exactly the features you need to manage your company efficiently, now empowered with our latest **Agent Management System**. 
 
-Hotel test system:  [https://hotel.growerp.org](https://hotel.growerp.org)
+Transform your business into an **AI Native Company** by deploying intelligent agents that:
+- Handle tedious tasks automatically
+- Streamline complex workflows
+- Provide predictive insights
+
+Our agents work seamlessly alongside your team to boost productivity and reduce operational friction. GrowERP is built for *you*.
+
+---
+
+## Start your free trial
+*(NO credit card required)*
+
+**Full System Environments:**
+1. Web Browser: [admin.growerp.com](https://admin.growerp.com)
+2. Android: [PlayStore](https://play.google.com/store/apps/details?id=org.growerp.admin)
+3. iOS & MacOS: [AppStore](https://apps.apple.com/us/app/growerp-admin-open-source/id1545521755)
+4. Linux: [SnapStore](https://snapcraft.io/growerp-admin)
+5. Windows: [Microsoft Store](https://apps.microsoft.com/detail/9nwx6kftjnql?hl=en-US&gl=TH)
+
+**Beta & Specialized Testing:**
+- Next Version Test System: [admin.growerp.org](https://admin.growerp.org)
+- Linux Beta: `snap install growerp-admin --channel=beta`
+- Hotel Test System: [hotel.growerp.org](https://hotel.growerp.org)
+
+---
 
 ## Follow us backstage
-Interested in the GrowERP development and back stage operation?
-Follow us via social media:
-1. [Weekly Mailing list](https://birdsend.page/forms/6228/3tDTt3BLhY): Not Just ERP
-2. [Twitter/X](https://x.com/grow_erp/status/1694945989977895320)
-3. [Linked In Group](https://www.linkedin.com/groups/4576897/)
-4. [YouTube](https://www.youtube.com/channel/UCroM6tobneiB9zbMVnaVuTg)
-5. [Github](https://github.com/growerp)
-6. [Substack](https://substack.com/@notjusterp)
+Interested in GrowERP development and backstage operations? Follow us!
+- [Weekly Mailing list: Not Just ERP](https://birdsend.page/forms/6228/3tDTt3BLhY)
+- [Twitter/X](https://x.com/grow_erp/status/1694945989977895320)
+- [LinkedIn Group](https://www.linkedin.com/groups/4576897/)
+- [YouTube](https://www.youtube.com/channel/UCroM6tobneiB9zbMVnaVuTg)
+- [GitHub](https://github.com/growerp)
+- [Substack](https://substack.com/@notjusterp)
 ]]></fileData>
             <histories versionName="01" versionDate="1485028800000" isDiff="N" />
         </file>
