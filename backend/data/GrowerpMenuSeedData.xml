@@ -456,6 +456,8 @@ along with this software (see the LICENSE.md file). If not, see
         title="GenUi Catalog" route="/genui-catalog" iconName="widgets" widgetName="GenUiCatalogScreen" sequenceNum="35"/>
     <growerp.menu.MenuItem menuItemId="SUPPORT_ABOUT" menuConfigurationId="SUPPORT_DEFAULT"
         title="About" route="/about" iconName="info" widgetName="AboutForm" sequenceNum="40"/>
+    <growerp.menu.MenuItem menuItemId="SUPPORT_LLM_USAGE" menuConfigurationId="SUPPORT_DEFAULT"
+        title="LLM Usage" route="/llm-usage" iconName="assessment" widgetName="AdkSystemUsageView" sequenceNum="50"/>
     <growerp.menu.MenuItem menuItemId="SUPPORT_SYSTEM_SETUP" menuConfigurationId="SUPPORT_DEFAULT"
         title="System Setup" route="/systemSetup" iconName="settings" widgetName="SystemSetupDialog"
         userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="999"/>

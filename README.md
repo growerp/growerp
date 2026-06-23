@@ -186,7 +186,7 @@ GrowERP uses a modular architecture that promotes reusability and extensibility:
    git clone https://github.com/growerp/growerp
    cd growerp
    git submodule update --init --recursive
-   ./setup-backend.sh (or windows: ./setup-backend.ps1)
+   ./setup-backend.sh # (or windows: ./setup-backend.ps1)
    ```
 
 2. **Start the backend** (in separate terminal):
@@ -206,7 +206,7 @@ GrowERP uses a modular architecture that promotes reusability and extensibility:
    # First time only
    dart pub global activate melos
    export PATH="$PATH":"$HOME/.pub-cache/bin"
-   melos clean && melos bootstrap (windows: ignore error with flutter-startup.sh)
+   melos clean && melos bootstrap #(windows: ignore error with flutter-startup.sh)
    melos l10n --no-select
    melos build --no-select
 

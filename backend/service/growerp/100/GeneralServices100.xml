@@ -1612,7 +1612,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <return/>
             </if>
             <set field="systemSettings" from="ss.getMap()"/>
-            <script>systemSettings.mailPassword = ss.mailPassword ? '****' : ''; systemSettings.githubToken = ss.githubToken ? '****' : ''; systemSettings.githubRepository = ss.githubRepository ?: ''</script>
+            <script>systemSettings.mailPassword = ss.mailPassword ? '****' : ''; systemSettings.githubToken = ss.githubToken ? '****' : ''; systemSettings.githubRepository = ss.githubRepository ?: ''; systemSettings.llmSystemTokenLimit = ss.llmSystemTokenLimit</script>
             <entity-find entity-name="growerp.general.LlmConfig" list="llmConfigList">
                 <econdition field-name="ownerPartyId"/>
                 <order-by field-name="llmProvider"/>
@@ -1649,6 +1649,7 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="mailPassword"/>
             <parameter name="githubToken"/>
             <parameter name="githubRepository"/>
+            <parameter name="llmSystemTokenLimit" type="Integer"/>
         </in-parameters>
         <out-parameters>
             <parameter name="systemSettings" type="Map"/>
@@ -1696,6 +1697,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <set field="ss.githubRepository" from="githubRepository.take(255)"/>
                 <script>System.setProperty('growerp.github.repo', githubRepository.take(255))</script>
             </if>
+            <if condition="llmSystemTokenLimit != null"><set field="ss.llmSystemTokenLimit" from="llmSystemTokenLimit"/></if>
 
             <if condition="isNew"><then><script>ss.create()</script></then>
                 <else><script>ss.update()</script></else>

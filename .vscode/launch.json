@@ -54,7 +54,8 @@
             "program": "lib/main.dart",
             "toolArgs": [
                 "-d",
-                "linux"
+                "linux",
+                "--dart-define=BACKEND_PORT=8081"
             ]
         },
         {
@@ -85,7 +86,8 @@
             "program": "lib/main.dart",
             "toolArgs": [
                 "-d",
-                "linux"
+                "linux",
+                "--dart-define=BACKEND_PORT=8081"
             ]
         },
         {

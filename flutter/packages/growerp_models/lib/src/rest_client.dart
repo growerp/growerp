@@ -1853,6 +1853,12 @@ abstract class RestClient {
     @Query('limit') int? limit,
   });
 
+  @GET("rest/s1/growerp/100/AdkSystemUsage")
+  Future<AdkActionLogs> getAdkSystemUsage({
+    @Query('search') String? search,
+    @Query('limit') int? limit,
+  });
+
   @GET("rest/s1/growerp/100/AdkApproval")
   Future<AdkApprovals> getAdkApprovals({
     @Query('status') String? status,

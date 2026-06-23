@@ -1240,6 +1240,12 @@ along with this software (see the LICENSE.md file). If not, see
                 <service name="AdkServices100.get#AdkAction"/>
             </method>
         </resource>
+        <!-- System LLM action audit log -->
+        <resource name="AdkSystemUsage">
+            <method type="get">
+                <service name="AdkServices100.get#AdkSystemUsage"/>
+            </method>
+        </resource>
         <!-- Agent write approvals (tenant-scoped) -->
         <resource name="AdkApproval">
             <method type="get">
