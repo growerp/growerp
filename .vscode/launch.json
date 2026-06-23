@@ -55,7 +55,7 @@
             "toolArgs": [
                 "-d",
                 "linux",
-                "--dart-define=BACKEND_PORT=8081"
+                "--dart-define=BACKEND_PORT=8080"
             ]
         },
         {
@@ -87,7 +87,7 @@
             "toolArgs": [
                 "-d",
                 "linux",
-                "--dart-define=BACKEND_PORT=8081"
+                "--dart-define=BACKEND_PORT=8080"
             ]
         },
         {
