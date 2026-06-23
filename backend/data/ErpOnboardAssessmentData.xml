@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Post-login onboarding profiling assessment, owned by GROWERP.
+
+ERP_ONBOARD profiles the new customer's organisation so the GROWERP onboarding
+agent can tailor the main menu (show / minimise / hide existing items) for the
+tenant user. The result is
+GROWERP-owned (GROWERP uses it to understand each new customer); the respondent
+company identifies the tenant.
+
+The answer options are deliberately semantic: the agent maps them to GrowERP
+menu areas at runtime, so there is no machine-encoded mapping here. optionScore
+is unused for tailoring; a single catch-all ScoringThreshold covers the range so
+submit#Assessment always resolves a leadStatus.
+-->
+<entity-facade-xml type="demo">
+
+    <!-- Assessment -->
+    <growerp.assessment.Assessment assessmentId="ERP_ONBOARD" pseudoId="erp-onboard" ownerPartyId="GROWERP"
+        assessmentName="Set up GrowERP for your business"
+        description="A few quick questions about how your business is organised so we can tailor your menu to what you actually use."
+        status="Active" />
+
+    <!-- Q1: What the business does -->
+    <growerp.assessment.AssessmentQuestion assessmentQuestionId="ERPO_Q1" pseudoId="erpo-q1"
+        assessmentId="ERP_ONBOARD" questionSequence="1" questionType="MultipleChoice"
+        questionText="What does your business mainly do?"
+        isRequired="Y" defaultOption="ERPO_Q1_O1" />
+    <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERPO_Q1_O1"
+        pseudoId="erpo-q1-o1" assessmentQuestionId="ERPO_Q1" assessmentId="ERP_ONBOARD"
+        optionSequence="1" optionText="Sell physical products" optionScore="0" />
+    <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERPO_Q1_O2"
+        pseudoId="erpo-q1-o2" assessmentQuestionId="ERPO_Q1" assessmentId="ERP_ONBOARD"
+        optionSequence="2" optionText="Provide services or consulting" optionScore="0" />
+    <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERPO_Q1_O3"
+        pseudoId="erpo-q1-o3" assessmentQuestionId="ERPO_Q1" assessmentId="ERP_ONBOARD"
+        optionSequence="3" optionText="Both products and services" optionScore="0" />
+
+    <!-- Q2: Inventory / warehouse -->
+    <growerp.assessment.AssessmentQuestion assessmentQuestionId="ERPO_Q2" pseudoId="erpo-q2"
+        assessmentId="ERP_ONBOARD" questionSequence="2" questionType="MultipleChoice"
+        questionText="Do you hold stock or run a warehouse?"
+        isRequired="Y" defaultOption="ERPO_Q2_O1" />
+    <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERPO_Q2_O1"
+        pseudoId="erpo-q2-o1" assessmentQuestionId="ERPO_Q2" assessmentId="ERP_ONBOARD"
+        optionSequence="1" optionText="Yes, we manage inventory" optionScore="0" />
+    <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERPO_Q2_O2"
+        pseudoId="erpo-q2-o2" assessmentQuestionId="ERPO_Q2" assessmentId="ERP_ONBOARD"
+        optionSequence="2" optionText="No, we don't hold stock" optionScore="0" />
+
+    <!-- Q3: Accounting -->
+    <growerp.assessment.AssessmentQuestion assessmentQuestionId="ERPO_Q3" pseudoId="erpo-q3"
+        assessmentId="ERP_ONBOARD" questionSequence="3" questionType="MultipleChoice"
+        questionText="Will you keep your accounting and ledger in GrowERP?"
+        isRequired="Y" defaultOption="ERPO_Q3_O1" />
+    <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERPO_Q3_O1"
+        pseudoId="erpo-q3-o1" assessmentQuestionId="ERPO_Q3" assessmentId="ERP_ONBOARD"
+        optionSequence="1" optionText="Yes, full accounting" optionScore="0" />
+    <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERPO_Q3_O2"
+        pseudoId="erpo-q3-o2" assessmentQuestionId="ERPO_Q3" assessmentId="ERP_ONBOARD"
+        optionSequence="2" optionText="No, we use separate accounting software" optionScore="0" />
+
+    <!-- Q4: Sales & marketing -->
+    <growerp.assessment.AssessmentQuestion assessmentQuestionId="ERPO_Q4" pseudoId="erpo-q4"
+        assessmentId="ERP_ONBOARD" questionSequence="4" questionType="MultipleChoice"
+        questionText="Do you run sales &amp; marketing campaigns or manage leads?"
+        isRequired="Y" defaultOption="ERPO_Q4_O1" />
+    <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERPO_Q4_O1"
+        pseudoId="erpo-q4-o1" assessmentQuestionId="ERPO_Q4" assessmentId="ERP_ONBOARD"
+        optionSequence="1" optionText="Yes, we do marketing and CRM" optionScore="0" />
+    <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERPO_Q4_O2"
+        pseudoId="erpo-q4-o2" assessmentQuestionId="ERPO_Q4" assessmentId="ERP_ONBOARD"
+        optionSequence="2" optionText="Not for now" optionScore="0" />
+
+    <!-- Q5: Team size -->
+    <growerp.assessment.AssessmentQuestion assessmentQuestionId="ERPO_Q5" pseudoId="erpo-q5"
+        assessmentId="ERP_ONBOARD" questionSequence="5" questionType="MultipleChoice"
+        questionText="How big is your team?"
+        isRequired="Y" defaultOption="ERPO_Q5_O1" />
+    <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERPO_Q5_O1"
+        pseudoId="erpo-q5-o1" assessmentQuestionId="ERPO_Q5" assessmentId="ERP_ONBOARD"
+        optionSequence="1" optionText="Just me" optionScore="0" />
+    <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERPO_Q5_O2"
+        pseudoId="erpo-q5-o2" assessmentQuestionId="ERPO_Q5" assessmentId="ERP_ONBOARD"
+        optionSequence="2" optionText="2-10 people" optionScore="0" />
+    <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERPO_Q5_O3"
+        pseudoId="erpo-q5-o3" assessmentQuestionId="ERPO_Q5" assessmentId="ERP_ONBOARD"
+        optionSequence="3" optionText="More than 10" optionScore="0" />
+
+    <!-- Single catch-all threshold so submit#Assessment always resolves a status -->
+    <growerp.assessment.ScoringThreshold thresholdId="ERPO_T1" pseudoId="erpo-t1"
+        assessmentId="ERP_ONBOARD" minScore="0" maxScore="1000" leadStatus="PROFILED"
+        description="Thanks! We've captured how your business is organised and will tailor your menu to match." />
+
+</entity-facade-xml>

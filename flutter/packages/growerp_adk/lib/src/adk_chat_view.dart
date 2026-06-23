@@ -69,6 +69,22 @@ class ChatMenuEntry {
     final tab = d['tab'] is int
         ? d['tab'] as int
         : int.tryParse(d['tab']?.toString() ?? '');
+    // Onboarding menu tailoring: the agent proposes which existing menu items to
+    // show / minimize / hide; the chip lets the user confirm before it is applied.
+    if (action == 'menutailor') {
+      List<String> names(String k) =>
+          (d[k] is List) ? (d[k] as List).map((e) => e.toString()).toList() : const [];
+      final hide = names('hide');
+      final minimize = names('minimize');
+      final show = names('show');
+      if (hide.isEmpty && minimize.isEmpty && show.isEmpty) return null;
+      return ChatMenuEntry(
+        title: (d['label'] as String?) ?? 'Apply menu changes',
+        route: '',
+        action: 'menutailor',
+        params: {'hide': hide, 'minimize': minimize, 'show': show},
+      );
+    }
     if (action == 'dialog') {
       if (widget == null) return null;
       return ChatMenuEntry(
@@ -540,7 +556,72 @@ class _AdkChatViewState extends State<AdkChatView> {
   /// target screen). Dialog actions keep the chat open and stack the dialog on
   /// top, so a failed record lookup can fall back to a chat message
   /// (see [AsyncRecordDialog.messageSink]).
+  /// Apply an onboarding menu-tailoring proposal as the current (tenant) user:
+  /// toggle the matching menu items' visibility / minimized state on the live
+  /// [MenuConfigBloc], which persists a per-user override and reloads. Toggles
+  /// flip state, so only fire when the item is not already in the wanted state.
+  void _applyMenuTailor(Map<String, dynamic>? params) {
+    final bloc = context.read<MenuConfigBloc?>();
+    final config = bloc?.state.menuConfiguration;
+    if (bloc == null || config == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Menu is not available to tailor here.')),
+      );
+      return;
+    }
+    List<String> names(String k) =>
+        (params?[k] as List?)?.map((e) => e.toString()).toList() ?? const [];
+    // Match by exact (case-insensitive) title first, then a contains-fallback so
+    // an agent-proposed area name ("Accounting") still hits the real item ("Accounting / Ledger").
+    MenuItem? find(String name) {
+      final q = name.toLowerCase().trim();
+      for (final m in config.menuItems) {
+        if (m.title.toLowerCase() == q) return m;
+      }
+      for (final m in config.menuItems) {
+        final t = m.title.toLowerCase();
+        if (t.contains(q) || q.contains(t)) return m;
+      }
+      return null;
+    }
+
+    var changes = 0;
+    void setActive(String title, bool active) {
+      final m = find(title);
+      if (m?.menuItemId != null && m!.isActive != active) {
+        bloc.add(MenuItemToggleActive(m.menuItemId!));
+        changes++;
+      }
+    }
+
+    for (final t in names('hide')) {
+      setActive(t, false);
+    }
+    for (final t in names('show')) {
+      setActive(t, true);
+    }
+    for (final t in names('minimize')) {
+      final m = find(t);
+      if (m?.menuItemId != null && !m!.isMinimized) {
+        bloc.add(MenuItemToggleMinimize(m.menuItemId!));
+        changes++;
+      }
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(changes == 0
+            ? 'Your menu already matches the suggestion.'
+            : 'Tailored your menu ($changes change${changes == 1 ? '' : 's'}).'),
+      ),
+    );
+  }
+
   void _runAction(ChatMenuEntry e) {
+    if (e.action == 'menutailor') {
+      _applyMenuTailor(e.params);
+      return;
+    }
     final query = <String, String>{};
     e.params?.forEach((k, v) {
       if (v != null) query[k] = v.toString();

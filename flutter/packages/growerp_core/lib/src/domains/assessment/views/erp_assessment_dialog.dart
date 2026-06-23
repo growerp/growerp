@@ -19,23 +19,26 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 import '../../../services/get_dio_error.dart';
+import '../../common/bloc/menu_config_bloc.dart';
 import '../../common/widgets/popup.dart';
 
-/// Post-login assessment "Do you need an ERP system?".
+/// Post-login onboarding assessment "Set up GrowERP for your business".
 ///
-/// Replaces the old onboarding assistant. Loads the GROWERP-owned [ERP_NEED]
-/// assessment, lets the (already authenticated) user answer the questions and
-/// shows the scored result at the end. Self-contained: talks to [RestClient]
-/// directly, no dedicated bloc.
+/// Loads the GROWERP-owned [ERP_ONBOARD] assessment, which profiles the new
+/// customer's organisation so the onboarding agent can tailor the menu. The
+/// result is GROWERP-owned (GROWERP uses it to understand each new customer);
+/// the respondent company identifies the tenant. Self-contained: talks to
+/// [RestClient] directly, no dedicated bloc.
 class ErpAssessmentDialog extends StatefulWidget {
   const ErpAssessmentDialog({super.key, required this.authenticate});
   final Authenticate authenticate;
 
-  /// Owner of the assessment and its scoring thresholds.
+  /// Owner of the assessment, its thresholds, and the stored result (GROWERP
+  /// consumes onboarding results to understand each new customer).
   static const String ownerPartyId = 'GROWERP';
 
-  /// Assessment loaded for the post-login experience.
-  static const String assessmentId = 'ERP_NEED';
+  /// Assessment loaded for the post-login onboarding experience.
+  static const String assessmentId = 'ERP_ONBOARD';
 
   @override
   State<ErpAssessmentDialog> createState() => _ErpAssessmentDialogState();
@@ -47,7 +50,6 @@ class _ErpAssessmentDialogState extends State<ErpAssessmentDialog> {
   _Phase _phase = _Phase.loading;
   String? _message;
   Assessment? _assessment;
-  AssessmentResult? _result;
 
   /// Selected option per question: questionId -> optionId.
   final Map<String, String> _answers = {};
@@ -102,7 +104,9 @@ class _ErpAssessmentDialogState extends State<ErpAssessmentDialog> {
     final name =
         '${user?.firstName ?? ''} ${user?.lastName ?? ''}'.trim();
     try {
-      final result = await context.read<RestClient>().submitAssessment(
+      // Submit records the profile + (backend) ingests it into the GROWERP
+      // onboarding knowledge. We don't show a score — just confirm and move on.
+      await context.read<RestClient>().submitAssessment(
             assessmentId: ErpAssessmentDialog.assessmentId,
             answers: jsonEncode(_answers),
             respondentName: name.isEmpty ? 'Trial user' : name,
@@ -111,10 +115,8 @@ class _ErpAssessmentDialogState extends State<ErpAssessmentDialog> {
             ownerPartyId: ErpAssessmentDialog.ownerPartyId,
           );
       if (!mounted) return;
-      setState(() {
-        _result = result;
-        _phase = _Phase.result;
-      });
+      _applyMenuFromAnswers();
+      setState(() => _phase = _Phase.result);
     } catch (e) {
       final msg = await getDioError(e);
       if (!mounted) return;
@@ -125,15 +127,54 @@ class _ErpAssessmentDialogState extends State<ErpAssessmentDialog> {
     }
   }
 
-  /// Threshold whose [minScore, maxScore] range contains [score].
-  ScoringThreshold? _thresholdFor(double? score) {
-    if (score == null) return null;
-    for (final t in _assessment?.thresholds ?? <ScoringThreshold>[]) {
-      if ((t.minScore ?? 0) <= score && score <= (t.maxScore ?? 0)) {
-        return t;
+  /// Tailor the menu from the onboarding answers: hide/minimise the areas the
+  /// business said it doesn't use. Runs as the current (tenant) user via the live
+  /// [MenuConfigBloc], which persists a per-user override and reloads. Rule-based
+  /// and silent — no agent, no extra confirmation.
+  void _applyMenuFromAnswers() {
+    final bloc = context.read<MenuConfigBloc?>();
+    final config = bloc?.state.menuConfiguration;
+    if (bloc == null || config == null) return;
+
+    final hide = <String>{};
+    final minimize = <String>{};
+    // Services-only (Q1=O2) or no stock (Q2=O2) → no Inventory.
+    if (_answers['ERPO_Q1'] == 'ERPO_Q1_O2' ||
+        _answers['ERPO_Q2'] == 'ERPO_Q2_O2') {
+      hide.add('Inventory');
+    }
+    // Books kept in other software (Q3=O2) → no Accounting.
+    if (_answers['ERPO_Q3'] == 'ERPO_Q3_O2') hide.add('Accounting');
+    // No marketing/CRM (Q4=O2) → minimise Marketing.
+    if (_answers['ERPO_Q4'] == 'ERPO_Q4_O2') minimize.add('Marketing');
+
+    // Match a wanted area to a real top-level menu item by exact title, then by
+    // a contains-match on title or menuItemId (e.g. 'Inventory' → ADMIN_INVENTORY).
+    MenuItem? find(String kw) {
+      final q = kw.toLowerCase();
+      for (final m in config.menuItems) {
+        if (m.title.toLowerCase() == q) return m;
+      }
+      for (final m in config.menuItems) {
+        final t = m.title.toLowerCase();
+        final id = (m.menuItemId ?? '').toLowerCase();
+        if (t.contains(q) || q.contains(t) || id.contains(q)) return m;
+      }
+      return null;
+    }
+
+    for (final kw in hide) {
+      final m = find(kw);
+      if (m?.menuItemId != null && m!.isActive) {
+        bloc.add(MenuItemToggleActive(m.menuItemId!));
       }
     }
-    return null;
+    for (final kw in minimize) {
+      final m = find(kw);
+      if (m?.menuItemId != null && !m!.isMinimized) {
+        bloc.add(MenuItemToggleMinimize(m.menuItemId!));
+      }
+    }
   }
 
   void _close() => Navigator.of(context).pop();
@@ -146,7 +187,7 @@ class _ErpAssessmentDialogState extends State<ErpAssessmentDialog> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: popUp(
         context: context,
-        title: _assessment?.assessmentName ?? 'Do you need an ERP system?',
+        title: _assessment?.assessmentName ?? 'Set up GrowERP for your business',
         width: 600,
         height: MediaQuery.of(context).size.height * 0.85,
         actions: [
@@ -348,67 +389,44 @@ class _ErpAssessmentDialogState extends State<ErpAssessmentDialog> {
   }
 
   Widget _buildResult() {
+    // Onboarding is a profiling step, not a scored quiz: don't show a score or
+    // verdict. Confirm the profile was captured and that the menu will be tailored.
     final theme = Theme.of(context);
-    final result = _result;
-    final score = result?.score;
-    final threshold = _thresholdFor(score);
-    final status = result?.leadStatus;
-    final accent = _statusColor(status, theme);
     return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(24, 32, 24, 24),
+      padding: const EdgeInsets.fromLTRB(24, 40, 24, 24),
       child: Column(
         children: [
-          // Score badge.
           Container(
-            width: 120,
-            height: 120,
+            width: 96,
+            height: 96,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: accent.withValues(alpha: 0.12),
-              border: Border.all(color: accent, width: 3),
+              color: theme.colorScheme.primaryContainer,
             ),
-            child: Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(score?.toStringAsFixed(0) ?? '0',
-                      key: const Key('assessmentScore'),
-                      style: theme.textTheme.displaySmall?.copyWith(
-                          color: accent, fontWeight: FontWeight.bold)),
-                  Text('points',
-                      style: theme.textTheme.labelSmall
-                          ?.copyWith(color: accent)),
-                ],
-              ),
-            ),
+            child: Icon(Icons.tune,
+                size: 48, color: theme.colorScheme.onPrimaryContainer),
           ),
           const SizedBox(height: 24),
-          if (status != null)
-            Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-              decoration: BoxDecoration(
-                color: accent.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Text(status,
-                  style: theme.textTheme.titleSmall?.copyWith(
-                      color: accent, fontWeight: FontWeight.bold)),
-            ),
-          if (threshold?.description != null) ...[
-            const SizedBox(height: 20),
-            Text(threshold!.description!,
-                key: const Key('assessmentAdvice'),
-                textAlign: TextAlign.center,
-                style: theme.textTheme.bodyLarge),
-          ],
+          Text('Thanks — your answers are saved',
+              key: const Key('assessmentDone'),
+              textAlign: TextAlign.center,
+              style: theme.textTheme.titleLarge
+                  ?.copyWith(fontWeight: FontWeight.w600)),
+          const SizedBox(height: 12),
+          Text(
+            'We\'ll tailor your menu to match how your business works, '
+            'so you only see what you need.',
+            textAlign: TextAlign.center,
+            style: theme.textTheme.bodyLarge
+                ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+          ),
           const SizedBox(height: 32),
           SizedBox(
             width: double.infinity,
             child: FilledButton(
               key: const Key('doneAssessment'),
               onPressed: _close,
-              child: const Text('Done'),
+              child: const Text('Continue'),
             ),
           ),
         ],
@@ -434,17 +452,4 @@ class _ErpAssessmentDialogState extends State<ErpAssessmentDialog> {
     );
   }
 
-  /// Accent colour for a lead-status verdict.
-  Color _statusColor(String? status, ThemeData theme) {
-    switch (status?.toUpperCase()) {
-      case 'HOT':
-        return Colors.red.shade600;
-      case 'WARM':
-        return Colors.orange.shade700;
-      case 'LOW':
-        return Colors.green.shade600;
-      default:
-        return theme.colorScheme.primary;
-    }
-  }
 }
