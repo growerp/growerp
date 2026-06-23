@@ -62,6 +62,7 @@ class _SystemSetupDialogState extends State<SystemSetupDialog> {
 
   // AI — dynamic list of {providerCtrl, apiKeyCtrl, obscure, apiKeyIsSet}
   final List<Map<String, dynamic>> _llmRows = [];
+  final _llmTokenLimitCtrl = TextEditingController();
 
   RestClient? _restClient;
 
@@ -80,6 +81,7 @@ class _SystemSetupDialogState extends State<SystemSetupDialog> {
       (row['providerCtrl'] as TextEditingController).dispose();
       (row['apiKeyCtrl'] as TextEditingController).dispose();
     }
+    _llmTokenLimitCtrl.dispose();
     super.dispose();
   }
 
@@ -123,6 +125,7 @@ class _SystemSetupDialogState extends State<SystemSetupDialog> {
       _llmRows
         ..clear()
         ..addAll(newRows);
+      _llmTokenLimitCtrl.text = s.llmSystemTokenLimit?.toString() ?? '';
     } catch (e) {
       if (mounted) {
         HelperFunctions.showMessage(
@@ -154,7 +157,12 @@ class _SystemSetupDialogState extends State<SystemSetupDialog> {
           .toList();
       // Only LLM keys are managed here. Email/GitHub credentials live in the ADK
       // Tools & integrations screen; omitting them leaves those fields unchanged.
-      final payload = {'llmConfigs': llmConfigs};
+      final payload = <String, dynamic>{'llmConfigs': llmConfigs};
+      if (_llmTokenLimitCtrl.text.isNotEmpty) {
+        payload['llmSystemTokenLimit'] = int.tryParse(_llmTokenLimitCtrl.text);
+      } else {
+        payload['llmSystemTokenLimit'] = null;
+      }
       await _restClient!.updateSystemSettings(payload);
       if (mounted) {
         HelperFunctions.showMessage(
@@ -256,6 +264,17 @@ class _SystemSetupDialogState extends State<SystemSetupDialog> {
               fontSize: 14,
               color: Theme.of(context).colorScheme.outline,
             ),
+          ),
+          const SizedBox(height: 16),
+          TextFormField(
+            key: const Key('llmSystemTokenLimit'),
+            controller: _llmTokenLimitCtrl,
+            decoration: const InputDecoration(
+              labelText: 'System LLM Monthly Token Limit',
+              hintText: 'e.g. 5000000',
+              helperText: 'Leave empty for no limit. Applies only to tenants using the system LLM.',
+            ),
+            keyboardType: TextInputType.number,
           ),
           const SizedBox(height: 16),
           ..._llmRows.asMap().entries.map((e) => _llmProviderRow(e.key)),

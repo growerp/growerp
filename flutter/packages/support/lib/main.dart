@@ -25,6 +25,7 @@ import 'package:global_configuration/global_configuration.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:growerp_activity/growerp_activity.dart';
+import 'package:growerp_adk/growerp_adk.dart';
 
 import 'src/application/application.dart';
 import 'views/support_dashboard_content.dart';
@@ -201,6 +202,7 @@ List<Map<String, GrowerpWidgetBuilder>> supportWidgetRegistrations = [
   {
     'AboutForm': (args) => const AboutForm(),
     'ApplicationList': (args) => const ApplicationList(),
+    'AdkSystemUsageView': (args) => const AdkSystemUsageView(),
   },
 ];
 

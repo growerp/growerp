@@ -44,6 +44,8 @@ abstract class SystemSettings with _$SystemSettings {
     // GitHub
     String? githubToken,
     String? githubRepository,
+    // Quota
+    int? llmSystemTokenLimit,
   }) = _SystemSettings;
   SystemSettings._();
 
@@ -55,5 +57,6 @@ abstract class SystemSettings with _$SystemSettings {
       'SystemSettings smtpHost: $smtpHost storeHost: $storeHost '
       'geminiApiKey: ${geminiApiKey != null ? "set" : "unset"} '
       'githubToken: ${githubToken != null ? "set" : "unset"} '
-      'githubRepository: ${githubRepository ?? "unset"}';
+      'githubRepository: ${githubRepository ?? "unset"} '
+      'llmSystemTokenLimit: $llmSystemTokenLimit';
 }

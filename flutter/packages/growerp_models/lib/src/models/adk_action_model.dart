@@ -23,6 +23,8 @@ part 'adk_action_model.g.dart';
 class AdkActionLog {
   final String? adkActionLogId;
   final String? configId;
+  final String? ownerPartyId;
+  final String? tenantName;
   final String? agentPartyId;
   final String? toolName;
   final String? serviceName;
@@ -44,6 +46,8 @@ class AdkActionLog {
   const AdkActionLog({
     this.adkActionLogId,
     this.configId,
+    this.ownerPartyId,
+    this.tenantName,
     this.agentPartyId,
     this.toolName,
     this.serviceName,

@@ -3,13 +3,37 @@
 # Clones moqui-runtime (with its component submodules) if not already present,
 # then symlinks GrowERP custom components into the moqui runtime component directory.
 #
-# Run once after cloning growerp and initialising the moqui submodule:
-#   git clone https://github.com/growerp/growerp
-#   cd growerp
-#   git submodule update --init --recursive
-#   bash setup-backend.sh
+# Usage: ./setup-backend.sh [--help] [--ssh]
+#
+# Options:
+#   --help    Show this help message and exit
+#   --ssh     Use SSH to clone repositories instead of HTTPS
 
 set -euo pipefail
+
+USE_SSH=false
+
+while [[ "$#" -gt 0 ]]; do
+    case $1 in
+        --help)
+            echo "Usage: ./setup-backend.sh [--help] [--ssh]"
+            echo ""
+            echo "Options:"
+            echo "  --help    Show this help message and exit"
+            echo "  --ssh     Use SSH to clone repositories instead of HTTPS"
+            exit 0
+            ;;
+        --ssh)
+            USE_SSH=true
+            shift
+            ;;
+        *)
+            echo "Unknown parameter passed: $1"
+            echo "Usage: ./setup-backend.sh [--help] [--ssh]"
+            exit 1
+            ;;
+    esac
+done
 
 REPO_ROOT="$(cd "$(dirname "$0")" && pwd)"
 MOQUI_DIR="$REPO_ROOT/moqui"
@@ -25,12 +49,20 @@ fi
 # moqui-runtime is not a submodule of moqui-framework — clone it if missing
 if [ ! -d "$RUNTIME_DIR" ]; then
   echo "Cloning moqui-runtime into $RUNTIME_DIR ..."
-  git clone -b growerp https://github.com/growerp/moqui-runtime.git "$RUNTIME_DIR"
+  if [ "$USE_SSH" = true ]; then
+    git clone -b growerp git@github.com:growerp/moqui-runtime.git "$RUNTIME_DIR"
+  else
+    git clone -b growerp https://github.com/growerp/moqui-runtime.git "$RUNTIME_DIR"
+  fi
 fi
 
 # Initialise runtime's own submodules (mantle-udm, mantle-usl, moqui-fop)
 if [ -f "$RUNTIME_DIR/.gitmodules" ]; then
   echo "Initialising moqui-runtime submodules ..."
+  if [ "$USE_SSH" = true ]; then
+    sed -i 's|https://github.com/|git@github.com:|g' "$RUNTIME_DIR/.gitmodules"
+    git -C "$RUNTIME_DIR" submodule sync
+  fi
   git -C "$RUNTIME_DIR" submodule update --init --recursive
 fi
 
@@ -45,3 +77,4 @@ ln -sfn "../../../mantle-stripe"  "$COMP_DIR/mantle-stripe"
 
 echo "Custom components linked into $COMP_DIR:"
 ls -la "$COMP_DIR/growerp" "$COMP_DIR/PopRestStore" "$COMP_DIR/mantle-stripe"
+

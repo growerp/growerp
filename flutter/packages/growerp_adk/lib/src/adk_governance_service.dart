@@ -35,6 +35,13 @@ class AdkGovernanceService {
     return result.adkActions;
   }
 
+  Future<List<AdkActionLog>> systemUsage(
+      {String? search, int limit = 100}) async {
+    final result = await _client.getAdkSystemUsage(
+        search: search, limit: limit);
+    return result.adkActions;
+  }
+
   Future<List<AdkApproval>> approvals(
       {String status = 'pending', String? search}) async {
     final result = await _client.getAdkApprovals(status: status, search: search);
