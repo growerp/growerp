@@ -24,3 +24,8 @@ authkey.txt
 AuthKey_*.p8
 flutter/packages/*/example/linux/
 flutter/packages/*/example/test/
+
+# Gradle local cache / wrapper downloads (never commit)
+.gradle/
+# Stray root scratch file accidentally committed upstream
+/Test.java
