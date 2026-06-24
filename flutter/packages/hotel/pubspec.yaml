@@ -1,6 +1,6 @@
 name: hotel
 resolution: workspace
-version: 1.16.19+68
+version: 1.16.20+69
 repository: https://github.com/growerp/growerp
 homepage: https://www.growerp.com
 publish_to: none
