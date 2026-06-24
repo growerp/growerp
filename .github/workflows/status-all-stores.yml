@@ -586,7 +586,18 @@ jobs:
                   hdrs = {'Authorization': f"Bearer {auth.json()['access_token']}", 'Accept': 'application/json'}
                   base = f'https://manage.devcenter.microsoft.com/v1.0/my/applications/{app_id}'
 
-                  app_data = requests.get(base, headers=hdrs).json()
+                  def get_json(url):
+                      # Store API intermittently returns empty/non-JSON bodies; degrade gracefully
+                      # instead of failing the whole status job.
+                      try:
+                          r = requests.get(url, headers=hdrs, timeout=60)
+                          r.raise_for_status()
+                          return r.json()
+                      except (requests.RequestException, ValueError) as e:
+                          print(f'WARN: store read failed for {url}: {e}')
+                          return {}
+
+                  app_data = get_json(base)
 
                   def pkg_version(sub_data):
                       pkgs = sub_data.get('applicationPackages', [])
@@ -595,14 +606,14 @@ jobs:
                   rows = []
                   last = app_data.get('lastPublishedApplicationSubmission', {})
                   if last:
-                      sub = requests.get(f"{base}/submissions/{last['id']}", headers=hdrs).json()
+                      sub = get_json(f"{base}/submissions/{last['id']}")
                       rows.append({'label': 'published', 'version': pkg_version(sub), 'status': sub.get('status', '?')})
                   else:
                       rows.append({'label': 'published', 'version': '—', 'status': 'none'})
 
                   pending = app_data.get('pendingApplicationSubmission', {})
                   if pending:
-                      sub = requests.get(f"{base}/submissions/{pending['id']}", headers=hdrs).json()
+                      sub = get_json(f"{base}/submissions/{pending['id']}")
                       rows.append({'label': 'pending', 'version': pkg_version(sub), 'status': sub.get('status', '?')})
 
                   fragment = {'store': 'windows', 'app': app_name, 'rows': rows}
