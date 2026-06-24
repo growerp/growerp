@@ -21,6 +21,8 @@ import 'package:go_router/go_router.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_core/growerp_core.dart';
 
+import 'adk_config_service.dart';
+
 /// A single navigable menu entry passed to [AdkChatView].
 class ChatMenuEntry {
   final String title;
@@ -137,6 +139,10 @@ class _AdkChatViewState extends State<AdkChatView> {
   bool _ready = false;
   bool _busy = false;
   String? _sessionId;
+  // Active LLM provider/model for the tenant — used to tailor quota/limit errors
+  // (e.g. local-AI wording). Best-effort: stays null when the config can't be read.
+  String? _activeProvider;
+  String? _activeModel;
 
   @override
   void initState() {
@@ -196,6 +202,18 @@ class _AdkChatViewState extends State<AdkChatView> {
         _ready = true;
         _busy = false;
       });
+      // Record the tenant's active provider/model so quota/limit errors can be
+      // tailored (e.g. local-AI wording). Best-effort — ignore failures.
+      try {
+        final cfgs = await (await AdkConfigService.create()).list();
+        // The general/interactive agent claims the chat route (no agentName);
+        // fall back to the first configured agent.
+        final active = cfgs.where((c) => (c.agentName ?? '').isEmpty).isNotEmpty
+            ? cfgs.firstWhere((c) => (c.agentName ?? '').isEmpty)
+            : (cfgs.isNotEmpty ? cfgs.first : null);
+        _activeProvider = active?.llmProvider;
+        _activeModel = active?.modelName;
+      } catch (_) {/* provider stays null → generic wording */}
       // Put the cursor in the input field once the chat is ready.
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) _inputFocus.requestFocus();
@@ -332,6 +350,7 @@ class _AdkChatViewState extends State<AdkChatView> {
     final buffer = StringBuffer();
     String agentReply = '';
     bool missingKey = false;
+    bool quota = false;
     // Phase 4: which agents responded this turn (coordinator + delegated specialists).
     final Set<String> authors = {};
 
@@ -359,6 +378,10 @@ class _AdkChatViewState extends State<AdkChatView> {
             final err = event['error']?.toString();
             if (_isMissingKeyError(err)) {
               missingKey = true;
+              agentReply = '';
+            } else if (_isQuotaError(err)) {
+              missingKey = true;
+              quota = true;
               agentReply = '';
             } else {
               agentReply = '[Error: $err]';
@@ -398,7 +421,7 @@ class _AdkChatViewState extends State<AdkChatView> {
     if (missingKey) {
       // Drop the streaming placeholder and offer to open System Setup.
       setState(() => _messages.removeAt(msgIndex));
-      _addSetupNeeded();
+      _addSetupNeeded(message: quota ? _quotaMessage() : null);
       return;
     }
     if (agentReply.isEmpty) {
@@ -458,10 +481,16 @@ class _AdkChatViewState extends State<AdkChatView> {
     String reply = '';
     for (final event in events.reversed) {
       if (event is Map<String, dynamic>) {
-        if (event.containsKey('error') &&
-            _isMissingKeyError(event['error']?.toString())) {
-          _addSetupNeeded();
-          return;
+        if (event.containsKey('error')) {
+          final err = event['error']?.toString();
+          if (_isMissingKeyError(err)) {
+            _addSetupNeeded();
+            return;
+          }
+          if (_isQuotaError(err)) {
+            _addSetupNeeded(message: _quotaMessage());
+            return;
+          }
         }
         final content = event['content'] as Map<String, dynamic>?;
         if (content != null) {
@@ -703,10 +732,48 @@ class _AdkChatViewState extends State<AdkChatView> {
         s.contains('unauthenticated');
   }
 
+  /// True when a backend error means the active LLM hit its quota / rate limit.
+  /// Provider-agnostic — matches the common signals across cloud and local LLMs.
+  bool _isQuotaError(String? t) {
+    final s = (t ?? '').toLowerCase();
+    return s.contains('429') ||
+        s.contains('quota') ||
+        s.contains('rate limit') ||
+        s.contains('rate_limit') ||
+        s.contains('resource_exhausted') ||
+        s.contains('too many requests');
+  }
+
+  /// True when the tenant's active provider/model looks like a local/self-hosted
+  /// LLM (so quota/limit wording can be tailored).
+  bool _isLocalAi() {
+    final s = '${_activeProvider ?? ''} ${_activeModel ?? ''}'.toLowerCase();
+    return s.contains('ollama') ||
+        s.contains('litellm') ||
+        s.contains('lmstudio') ||
+        s.contains('local') ||
+        s.contains('localhost') ||
+        s.contains('127.0.0.1');
+  }
+
+  /// User-facing message for a quota / rate-limit error, naming the provider when
+  /// known and indicating a local AI separately.
+  String _quotaMessage() {
+    final p = _activeProvider?.trim();
+    final named = (p != null && p.isNotEmpty) ? ' ($p)' : '';
+    if (_isLocalAi()) {
+      return 'The local AI model$named has reached its current limit or is '
+          'overloaded. Wait and retry, or configure a different LLM provider in '
+          'System Setup.';
+    }
+    return 'The AI provider$named quota / rate limit was exceeded. Add or switch '
+        'to your own LLM provider API key in System Setup, then retry.';
+  }
+
   /// Prompt the user to add an LLM key, with a chip that opens System Setup as a
   /// dialog on top of the chat (so they can save a key and retry inline).
-  void _addSetupNeeded() {
-    _addMsg(_Msg.error(
+  void _addSetupNeeded({String? message}) {
+    _addMsg(_Msg.error(message ??
         'No AI key configured. Add an LLM API key in System Setup, then retry.'));
     _addMsg(_Msg.nav([
       ChatMenuEntry(
