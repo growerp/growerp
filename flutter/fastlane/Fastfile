@@ -21,7 +21,7 @@ def release_pending_versions(app, platform_filter)
   released = false
   versions.each do |ver|
     UI.message("Releasing #{ver.version_string} (#{platform_filter}) to free the submit slot")
-    Spaceship::ConnectAPI::AppStoreVersionReleaseRequest.create(app_store_version_id: ver.id)
+    ver.create_app_store_version_release_request
     UI.success("Released v#{ver.version_string}")
     released = true
   end
