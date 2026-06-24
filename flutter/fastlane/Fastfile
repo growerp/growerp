@@ -13,6 +13,42 @@ def optional_env(key)
   value.empty? ? nil : value
 end
 
+def release_pending_versions(app, platform_filter)
+  require "spaceship"
+  versions = app.get_app_store_versions(
+    filter: { "appStoreState" => "PENDING_DEVELOPER_RELEASE", "platform" => platform_filter }
+  )
+  released = false
+  versions.each do |ver|
+    UI.message("Releasing #{ver.version_string} (#{platform_filter}) to free the submit slot")
+    Spaceship::ConnectAPI::AppStoreVersionReleaseRequest.create(app_store_version_id: ver.id)
+    UI.success("Released v#{ver.version_string}")
+    released = true
+  end
+  released
+end
+
+# Make sure App Store Connect will accept a new version submission.
+# A version in PENDING_DEVELOPER_RELEASE blocks creating a new version, so
+# release it first and wait until it leaves that state.
+def ensure_submit_slot!(api_key, bundle_id, platform_filter)
+  require "spaceship"
+  Spaceship::ConnectAPI.token = Spaceship::ConnectAPI::Token.from(hash: api_key)
+  app = Spaceship::ConnectAPI::App.find(bundle_id)
+  UI.user_error!("App not found: #{bundle_id}") unless app
+
+  return unless release_pending_versions(app, platform_filter)
+
+  30.times do
+    pending = app.get_app_store_versions(
+      filter: { "appStoreState" => "PENDING_DEVELOPER_RELEASE", "platform" => platform_filter }
+    )
+    break if pending.empty?
+    UI.message("Waiting for previous version to leave PENDING_DEVELOPER_RELEASE...")
+    sleep(10)
+  end
+end
+
 lane :codesign do
   setup_ci if ENV["CI"]
   app_name = required_env!("APP_NAME")
@@ -85,6 +121,7 @@ lane :upload do
     # stable: create App Store version if missing, upload release notes, submit for review
     app_name      = required_env!("APP_NAME")
     metadata_path = File.expand_path("../packages/#{app_name}/ios/fastlane/metadata", __dir__)
+    ensure_submit_slot!(api_key, "org.growerp.#{app_name}", "IOS")
     upload_to_app_store(
       api_key:                    api_key,
       app_identifier:             "org.growerp.#{app_name}",
@@ -232,6 +269,7 @@ lane :upload_macos do
 
   if submit_for_review
     metadata_path = File.expand_path("../packages/#{app_name}/ios/fastlane/metadata", __dir__)
+    ensure_submit_slot!(api_key, "org.growerp.#{app_name}", "MAC_OS")
     upload_to_app_store(
       api_key:                    api_key,
       app_identifier:             "org.growerp.#{app_name}",
@@ -279,24 +317,8 @@ lane :release_approved do
   app = Spaceship::ConnectAPI::App.find(bundle_id)
   UI.user_error!("App not found for bundle ID: #{bundle_id}") unless app
 
-  versions = app.get_app_store_versions(
-    filter: {
-      "appStoreState" => "PENDING_DEVELOPER_RELEASE",
-      "platform"      => platform_filter
-    }
-  )
-
-  released = false
-  if versions.empty?
-    UI.message("No versions in PENDING_DEVELOPER_RELEASE for #{bundle_id} (#{platform_filter})")
-  else
-    versions.each do |ver|
-      UI.message("Releasing #{bundle_id} v#{ver.version_string} (#{platform_filter})")
-      Spaceship::ConnectAPI::AppStoreVersionReleaseRequest.create(app_store_version_id: ver.id)
-      UI.success("Released v#{ver.version_string}!")
-      released = true
-    end
-  end
+  released = release_pending_versions(app, platform_filter)
+  UI.message("No versions in PENDING_DEVELOPER_RELEASE for #{bundle_id} (#{platform_filter})") unless released
 
   if ENV["GITHUB_OUTPUT"]
     File.open(ENV["GITHUB_OUTPUT"], "a") { |f| f.puts "released=#{released}" }
