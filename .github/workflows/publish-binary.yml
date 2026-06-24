@@ -952,19 +952,60 @@ jobs:
         run: flutter pub get
         working-directory: flutter/packages/${{ matrix.app }}
 
-      - name: Sync msix_version from version field
+      # Compute a Windows version strictly greater than what is currently
+      # published in the store, so every submission is unique and meaningful
+      # (Windows-only runs don't go through the bump-version job). The pubspec
+      # version is the floor; if the published store version is >= that, bump
+      # its 3rd component. The 4th component is reserved by Microsoft — keep 0.
+      - name: Resolve next Windows msix_version
         shell: pwsh
+        env:
+          WINDOWS_TENANT_ID: ${{ secrets.WINDOWS_TENANT_ID }}
+          WINDOWS_CLIENT_ID: ${{ secrets.WINDOWS_CLIENT_ID }}
+          WINDOWS_CLIENT_SECRET: ${{ secrets.WINDOWS_CLIENT_SECRET }}
+          WINDOWS_ADMIN_PRODUCT_ID: ${{ secrets.WINDOWS_ADMIN_PRODUCT_ID }}
+          WINDOWS_HOTEL_PRODUCT_ID: ${{ secrets.WINDOWS_HOTEL_PRODUCT_ID }}
         run: |
+          $ErrorActionPreference = "Stop"
+
+          # Pubspec-derived floor: <semver>.0
           $content = Get-Content pubspec.yaml -Raw
-          if ($content -match 'version:\s*(\d+\.\d+\.\d+)\+') {
-            $semver = $Matches[1]
-            $msixVer = "$semver.0"
-            $content = $content -replace '(?m)^(\s*msix_version:\s*)[\d.]+', "`${1}$msixVer"
-            Set-Content pubspec.yaml $content -NoNewline
-            Write-Host "msix_version set to $msixVer"
-          } else {
+          if ($content -notmatch 'version:\s*(\d+\.\d+\.\d+)\+') {
             throw "Could not parse version from pubspec.yaml"
           }
+          [version]$floor = "$($Matches[1]).0"
+
+          # Query the published store version via Partner Center.
+          $appId = if ("${{ matrix.app }}" -eq "admin") { $env:WINDOWS_ADMIN_PRODUCT_ID } else { $env:WINDOWS_HOTEL_PRODUCT_ID }
+          $authBody = "grant_type=client_credentials" +
+            "&client_id=$([Uri]::EscapeDataString($env:WINDOWS_CLIENT_ID))" +
+            "&client_secret=$([Uri]::EscapeDataString($env:WINDOWS_CLIENT_SECRET))" +
+            "&resource=https%3A%2F%2Fmanage.devcenter.microsoft.com"
+          $authResp = Invoke-RestMethod `
+            -Uri "https://login.microsoftonline.com/$env:WINDOWS_TENANT_ID/oauth2/token" `
+            -Method POST -ContentType "application/x-www-form-urlencoded" -Body $authBody
+          $headers = @{ Authorization = "Bearer $($authResp.access_token)"; Accept = "application/json" }
+          $baseUri = "https://manage.devcenter.microsoft.com/v1.0/my/applications/$appId"
+          $app = Invoke-RestMethod -Uri $baseUri -Headers $headers
+
+          $published = $null
+          if ($app.lastPublishedApplicationSubmission.id) {
+            $sub = Invoke-RestMethod -Uri "$baseUri/submissions/$($app.lastPublishedApplicationSubmission.id)" -Headers $headers
+            $pkgVer = $sub.applicationPackages | Select-Object -First 1 -ExpandProperty version -ErrorAction SilentlyContinue
+            if ($pkgVer) { $published = [version]$pkgVer }
+          }
+          Write-Host "Published store version: $published; pubspec floor: $floor"
+
+          $msixVer = $floor
+          if ($published -and $published -ge $floor) {
+            # Bump the published 3rd component, reset revision to 0.
+            $msixVer = [version]::new($published.Major, $published.Minor, $published.Build + 1, 0)
+          }
+          Write-Host "Next msix_version: $msixVer"
+
+          $content = $content -replace '(?m)^(\s*msix_version:\s*)[\d.]+', "`${1}$msixVer"
+          Set-Content pubspec.yaml $content -NoNewline
+          "WINDOWS_MSIX_VERSION=$msixVer" >> $env:GITHUB_ENV
         working-directory: flutter/packages/${{ matrix.app }}
 
       - name: Decode code-signing certificate
@@ -1037,8 +1078,26 @@ jobs:
           }
 
           if ($app.pendingApplicationSubmission.id) {
-            Write-Host "Deleting pending submission $($app.pendingApplicationSubmission.id)..."
-            Invoke-RestMethod -Uri "$baseUri/submissions/$($app.pendingApplicationSubmission.id)" `
+            $pendingId = $app.pendingApplicationSubmission.id
+            $pending   = Invoke-RestMethod -Uri "$baseUri/submissions/$pendingId" -Headers $headers
+            $pendingStatus  = [string]$pending.status
+            $pendingVerRaw  = $pending.applicationPackages | Select-Object -First 1 -ExpandProperty version -ErrorAction SilentlyContinue
+            Write-Host "Pending submission $pendingId status=$pendingStatus version=$pendingVerRaw"
+
+            # States where the submission is actively progressing toward (or has reached)
+            # publication — clobbering these throws away certification work.
+            $healthyStates = @('PreProcessing','Certification','Release','PendingPublication','Publishing','Published')
+
+            $newVer     = if ($env:WINDOWS_MSIX_VERSION) { [version]$env:WINDOWS_MSIX_VERSION } else { $null }
+            $pendingVer = if ($pendingVerRaw) { [version]$pendingVerRaw } else { $null }
+
+            if (($healthyStates -contains $pendingStatus) -and $pendingVer -and $newVer -and ($pendingVer -ge $newVer)) {
+              Write-Host "Submission $pendingId (v$pendingVer) already in flight and >= v$newVer; not clobbering. Re-run after it publishes."
+              exit 0
+            }
+
+            Write-Host "Deleting pending submission $pendingId (blocking: status=$pendingStatus, version=$pendingVerRaw)..."
+            Invoke-RestMethod -Uri "$baseUri/submissions/$pendingId" `
               -Method DELETE -Headers $headers | Out-Null
           }
 
