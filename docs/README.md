@@ -8,19 +8,16 @@ This directory contains comprehensive documentation for extending and developing
 
 ## 📖 Quick Navigation
 
-### ⭐ Phase 12 - Assessment Landing Page Implementation (LATEST)
+### 🤖 AI Agents & Orchestration (NEW)
+
+- **[Agent Control Center & Moqui MCP Guide](./AGENT_CONTROL_CENTER_AND_MCP_GUIDE.md)** ⭐ **MUST READ** - Complete consolidated technical and operational guide to multi-agent orchestration, human-in-the-loop approvals, and Moqui MCP integration.
+
+### Assessment Landing Page Implementation (LATEST)
 
 - **[Assessment Landing Page Explanation](./Assessment_Landing_Page_Explanation.md)** ⭐ **PHASE 12** - Complete technical guide for FTL landing page + Flutter app integration (30 min read)
 - **[Start Here - Visual Overview](./00_START_HERE.md)** - Project status dashboard (10 min read)
 - **[GrowERP Assessment & Landing Page Architecture](./GROWERP_ASSESSMENT_AND_LANDING_PAGE_ARCHITECTURE.md)** - Package design & strategy (45 min read)
 
-**Phase 12 Highlights:**
-- ✅ Assessment Landing Page fully documented
-- ✅ FTL landing page + Flutter app integration complete
-- ✅ Package renamed to `assessment` for clarity
-- ✅ All deployment procedures updated and verified
-- ✅ MIME type configuration for WASM assets documented
-- ✅ Stack overflow bug fixes and BLoC initialization resolved
 
 ---
 
@@ -31,7 +28,7 @@ This directory contains comprehensive documentation for extending and developing
 - **[Building Blocks Development Guide](./Building_Blocks_Development_Guide.md)** - Create Flutter packages
 - **[Backend Components Development Guide](./Backend_Components_Development_Guide.md)** - Develop Moqui components
 
-### 📚 Phase 12 Specification Documents
+### 📚 Specification Documents
 
 - **[Architecture Update Summary](./ARCHITECTURE_UPDATE_SUMMARY.md)** (429 lines) - Session changes & migration path
 
@@ -80,8 +77,9 @@ This directory contains comprehensive documentation for extending and developing
 
 - **[GrowERP AI Development Instructions](./GrowERP_AI_Instructions.md)** - AI-assisted development
 - **[Generative AI Integration Guide](./GrowERP_AI_Integration_Guide.md)** - Guide to all AI-integrated features (Gemini, Vertex AI, Veo 2, GenUI Onboarding) ⭐ **NEW FEATURE!**
-- **[🧠 Agent Control Center (ADK)](./Agent_Control_Center_User_Guide.md)** - Guide to multi-agent orchestration, tool scoping, and RAG knowledge ingest ⭐ **NEW!**
-- **[🎮 Agent Demo Walkthrough](./Agent_Control_Center_Demo.md)** - Test the operations assistant and specialist agent team ⭐ **NEW!**
+- **[🤖 Agent Control Center & Moqui MCP Guide](./AGENT_CONTROL_CENTER_AND_MCP_GUIDE.md)** - Consolidated guide to multi-agent orchestration and MCP integration ⭐ **NEW!**
+- **[🧠 Agent Control Center (ADK) User Guide](./Agent_Control_Center_User_Guide.md)** - Original UI user guide
+- **[🎮 Agent Demo Walkthrough](./Agent_Control_Center_Demo.md)** - Test the operations assistant and specialist agent team
 - **[Model Context Protocol (MCP) Server](../moqui/runtime/component/growerp/docs/README.md)** - AI integration system
 - **[Invoice Scan Documentation](./Invoice_Scan_Documentation.md)** - AI-powered invoice processing ⭐ **NEW FEATURE!**
 
@@ -97,24 +95,6 @@ This directory contains comprehensive documentation for extending and developing
 - **[Management Summary: Open Source Extensibility](./Management_Summary_Open_Source_Extensibility.md)** - Executive overview
 - **[Examples](./examples/)** - Code examples and use cases
 
-## 🔥 What's New (Q1 2026)
-
-### Release 1.15.0
-
-- **Version bump** across all apps: admin, hotel, freelance, health, elearner, support
-- **Moqui 4 Docker support** — Dockerfile moved to repo root; updated docker-compose for Moqui 4
-- **Image deletion support** — companies, users, and products now support image deletion with full backend service integration and UI synchronisation
-- **Automated Flutter setup** — new `setup-flutter.sh` script; GTK FFI bindings generated automatically via `melos bootstrap` hook
-
-### Accounting Transaction Type Filtering ⭐ **NEW!**
-
-Financial documents (transactions) can now be filtered and posted by accounting transaction type:
-
-- **`AcctgTransType` enumeration** — backend exposes all accounting transaction types via new REST endpoint `GET /rest/s1/growerp/100/AcctgTransType`
-- **New `TransactionType` model** — `growerp_models` ships a freezed `TransactionType` / `TransactionTypes` model
-- **`getAcctgTransTypes()`** — new method on `RestClient` returns available types
-- **Filter by type** — `FinDocBloc` fetches transaction types when `docType == FinDocType.transaction` and passes `acctgTransTypeEnumId` to search calls
-- **Set on posting** — `finDoc.docSubType` drives `acctgTransTypeEnumId` when creating or updating a transaction
 
 ---
 
@@ -132,8 +112,9 @@ GrowERP now features a comprehensive **Agent Development Kit (ADK)** and an **Ag
 - **Unified UI View:** Consolidated ADK tools, AI chat configuration, and integration views.
 
 **Quick Start:**
-1. Read: [Agent Control Center User Guide](./Agent_Control_Center_User_Guide.md)
-2. Try the Demo: [Agent Demo Walkthrough](./Agent_Control_Center_Demo.md)
+1. Read: [Agent Control Center & Moqui MCP Guide](./AGENT_CONTROL_CENTER_AND_MCP_GUIDE.md) (Consolidated Guide)
+2. Read: [Agent Control Center User Guide](./Agent_Control_Center_User_Guide.md)
+3. Try the Demo: [Agent Demo Walkthrough](./Agent_Control_Center_Demo.md)
 
 ---
 
