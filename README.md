@@ -323,42 +323,34 @@ We welcome contributions from developers of all skill levels! Here's how you can
 <div align="center">
 
 #### Mobile Screenshots
-| Main Menu | Products | Website |
-|-----------|----------|---------|
-| <img src="https://raw.githubusercontent.com/growerp/growerp/master/flutter/packages/admin/android/fastlane/metadata/android/en-US/images/phoneScreenshots/Screenshot_main_menu.png" width="200"> | <img src="https://raw.githubusercontent.com/growerp/growerp/master/flutter/packages/admin/android/fastlane/metadata/android/en-US/images/phoneScreenshots/Screenshot_catalog_products.png" width="200"> | <img src="https://raw.githubusercontent.com/growerp/growerp/master/flutter/packages/admin/android/fastlane/metadata/android/en-US/images/phoneScreenshots/Screenshot_website.png" width="200"> |
+| Dashboard | Company | Ledger |
+|-----------|---------|--------|
+| <img src="https://raw.githubusercontent.com/growerp/growerp/master/flutter/packages/admin/android/fastlane/metadata/android/en-US/images/phoneScreenshots/Screenshot_main_menu.png" width="200"> | <img src="https://raw.githubusercontent.com/growerp/growerp/master/flutter/packages/admin/android/fastlane/metadata/android/en-US/images/phoneScreenshots/Screenshot_company.png" width="200"> | <img src="https://raw.githubusercontent.com/growerp/growerp/master/flutter/packages/admin/android/fastlane/metadata/android/en-US/images/phoneScreenshots/Screenshot_ledger.png" width="200"> |
 
-| Dynamic Menu System | Ledger | Company |
-|------------|--------|---------|
-| <img src="https://raw.githubusercontent.com/growerp/growerp/master/flutter/packages/admin/android/fastlane/metadata/android/en-US/images/phoneScreenshots/Screenshot_accounting.png" width="200"> | <img src="https://raw.githubusercontent.com/growerp/growerp/master/flutter/packages/admin/android/fastlane/metadata/android/en-US/images/phoneScreenshots/Screenshot_ledger.png" width="200"> | <img src="https://raw.githubusercontent.com/growerp/growerp/master/flutter/packages/admin/android/fastlane/metadata/android/en-US/images/phoneScreenshots/Screenshot_company.png" width="200"> |
+| Orders | Employees |
+|--------|-----------|
+| <img src="https://raw.githubusercontent.com/growerp/growerp/master/flutter/packages/admin/android/fastlane/metadata/android/en-US/images/phoneScreenshots/Screenshot_accounting.png" width="200"> | <img src="https://raw.githubusercontent.com/growerp/growerp/master/flutter/packages/admin/android/fastlane/metadata/android/en-US/images/phoneScreenshots/Screenshot_catalog_products.png" width="200"> |
 
 #### Web/Tablet Screenshots
-| Main Menu |
+| Dashboard |
 |-----------|
 | <img src="https://raw.githubusercontent.com/growerp/growerp/master/flutter/packages/admin/android/fastlane/metadata/android/en-US/images/tenInchScreenshots/Screenshot_main_menu.png" width="600"> |
 
-| Company Management |
-|-------------------|
+| Company |
+|---------|
 | <img src="https://raw.githubusercontent.com/growerp/growerp/master/flutter/packages/admin/android/fastlane/metadata/android/en-US/images/tenInchScreenshots/Screenshot_company.png" width="600"> |
 
-| Website Management |
-|-------------------|
-| <img src="https://raw.githubusercontent.com/growerp/growerp/master/flutter/packages/admin/android/fastlane/metadata/android/en-US/images/tenInchScreenshots/Screenshot_website.png" width="600"> |
-
-| Order Management |
-|------------------|
+| Orders |
+|--------|
 | <img src="https://raw.githubusercontent.com/growerp/growerp/master/flutter/packages/admin/android/fastlane/metadata/android/en-US/images/tenInchScreenshots/Screenshot_orders.png" width="600"> |
-
-| Dynamic Menu System |
-|------------|
-| <img src="https://raw.githubusercontent.com/growerp/growerp/master/flutter/packages/admin/android/fastlane/metadata/android/en-US/images/tenInchScreenshots/Screenshot_accounting.png" width="600"> |
 
 | Ledger |
 |--------|
 | <img src="https://raw.githubusercontent.com/growerp/growerp/master/flutter/packages/admin/android/fastlane/metadata/android/en-US/images/tenInchScreenshots/Screenshot_ledger.png" width="600"> |
 
-| Product Catalog |
-|-----------------|
-| <img src="https://raw.githubusercontent.com/growerp/growerp/master/flutter/packages/admin/android/fastlane/metadata/android/en-US/images/tenInchScreenshots/Screenshot_products.png" width="600"> |
+| Employees |
+|-----------|
+| <img src="https://raw.githubusercontent.com/growerp/growerp/master/flutter/packages/admin/android/fastlane/metadata/android/en-US/images/tenInchScreenshots/Screenshot_accounting.png" width="600"> |
 
 </div>
 
@@ -367,11 +359,11 @@ We welcome contributions from developers of all skill levels! Here's how you can
 <div align="center">
 
 #### Mobile Screenshots
-| Daily View | Weekly Menu | Rooms |
-|------------|-------------|-------|
+| Daily View | Room Categories | Rooms |
+|------------|-----------------|-------|
 | <img src="https://raw.githubusercontent.com/growerp/growerp/master/flutter/packages/hotel/android/fastlane/metadata/android/en-US/images/phoneScreenshots/main-day.png" width="200"> | <img src="https://raw.githubusercontent.com/growerp/growerp/master/flutter/packages/hotel/android/fastlane/metadata/android/en-US/images/phoneScreenshots/main-week-menu.png" width="200"> | <img src="https://raw.githubusercontent.com/growerp/growerp/master/flutter/packages/hotel/android/fastlane/metadata/android/en-US/images/phoneScreenshots/rooms.png" width="200"> |
 
-| Reservations | Orders | Ledger |
+| Reservations | Hotel Info | Ledger |
 |--------------|------------|--------|
 | <img src="https://raw.githubusercontent.com/growerp/growerp/master/flutter/packages/hotel/android/fastlane/metadata/android/en-US/images/phoneScreenshots/reservations.png" width="200"> | <img src="https://raw.githubusercontent.com/growerp/growerp/master/flutter/packages/hotel/android/fastlane/metadata/android/en-US/images/phoneScreenshots/accounting.png" width="200"> | <img src="https://raw.githubusercontent.com/growerp/growerp/master/flutter/packages/hotel/android/fastlane/metadata/android/en-US/images/phoneScreenshots/ledger.png" width="200"> |
 
@@ -380,24 +372,24 @@ We welcome contributions from developers of all skill levels! Here's how you can
 |------------|
 | <img src="https://raw.githubusercontent.com/growerp/growerp/master/flutter/packages/hotel/android/fastlane/metadata/android/en-US/images/tenInchScreenshots/main-day.png" width="600"> |
 
-| Weekly View |
-|-------------|
+| Room Categories |
+|-----------------|
 | <img src="https://raw.githubusercontent.com/growerp/growerp/master/flutter/packages/hotel/android/fastlane/metadata/android/en-US/images/tenInchScreenshots/main-week.png" width="600"> |
 
-| Room Management |
-|-----------------|
+| Rooms |
+|-------|
 | <img src="https://raw.githubusercontent.com/growerp/growerp/master/flutter/packages/hotel/android/fastlane/metadata/android/en-US/images/tenInchScreenshots/rooms.png" width="600"> |
 
-| Reservation System |
-|-------------------|
+| Reservations |
+|--------------|
 | <img src="https://raw.githubusercontent.com/growerp/growerp/master/flutter/packages/hotel/android/fastlane/metadata/android/en-US/images/tenInchScreenshots/reservations.png" width="600"> |
 
-| Hotel Information |
+| Hotel Info |
 |------------|
 | <img src="https://raw.githubusercontent.com/growerp/growerp/master/flutter/packages/hotel/android/fastlane/metadata/android/en-US/images/tenInchScreenshots/accounting.png" width="600"> |
 
-| Financial Ledger |
-|------------------|
+| Ledger |
+|--------|
 | <img src="https://raw.githubusercontent.com/growerp/growerp/master/flutter/packages/hotel/android/fastlane/metadata/android/en-US/images/tenInchScreenshots/ledger.png" width="600"> |
 
 </div>
