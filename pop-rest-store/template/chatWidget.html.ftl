@@ -114,6 +114,8 @@
   var msgsEl = document.getElementById('growerp-chat-msgs');
   var inputEl = document.getElementById('growerp-chat-input');
   var postBtn = document.getElementById('growerp-chat-post');
+  var labelEl = btn.querySelector('.growerp-chat-label');
+  var labelClosed = labelEl.innerHTML;   // "Question?…" prompt while panel is shut
 
   var session = loadSession();   // {chatRoomId, visitorToken, visitorUserId} or null
   var seenIds = {};
@@ -348,6 +350,7 @@
   function openPanel(remember){
     panel.classList.add('growerp-open');
     btn.classList.add('growerp-expanded');
+    labelEl.textContent = 'Close Chat';
     if (remember !== false) rememberOpen(true);
     if (session && session.chatRoomId){ startPolling(); inputEl.focus(); }
     else if (panel.classList.contains('growerp-mode-thread')) inputEl.focus();
@@ -356,6 +359,7 @@
   function closePanel(){
     panel.classList.remove('growerp-open');
     btn.classList.remove('growerp-expanded');
+    labelEl.innerHTML = labelClosed;
     stopPolling();
     rememberOpen(false);
   }
