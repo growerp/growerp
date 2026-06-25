@@ -265,17 +265,24 @@ along with this software (see the LICENSE.md file). If not, see
                             in-map="contentSetting + [settingValue: 'dbresource://GROWERP_ROOT']"/>
                     </iterate>
 
-                    <!-- Add the official growerp.com / growerp.org domains as extra PsstHostname
-                         rows so the public store also resolves on those hosts. The original
-                         cloned "<storeId>.localhost" row is left untouched and (being the newest)
-                         stays the human-readable URL shown in the admin Website Info screen.
-                         PsstHostname is matched as a regex by PopRestStore (StoreServices). -->
+                    <!-- Let the public store resolve on the official marketing hosts. These are
+                         explicit hostnames (not broad regex) so they match ONLY the GROWERP
+                         marketing site and never shadow a tenant store served on a
+                         *.growerp.com / *.growerp.org subdomain. The original cloned
+                         "<storeId>.localhost" row is left untouched. PsstHostname is matched as a
+                         regex by PopRestStore (StoreServices). -->
                     <service-call name="create#mantle.product.store.ProductStoreSetting"
                         in-map="[productStoreId: growerpStoreId, settingTypeEnumId: 'PsstHostname',
-                                 fromDate: java.sql.Timestamp.valueOf('2024-01-01 00:00:00'), settingValue: '.*growerp\\.com.*']"/>
+                                 fromDate: java.sql.Timestamp.valueOf('2024-01-01 00:00:00'), settingValue: 'growerp.com']"/>
                     <service-call name="create#mantle.product.store.ProductStoreSetting"
                         in-map="[productStoreId: growerpStoreId, settingTypeEnumId: 'PsstHostname',
-                                 fromDate: java.sql.Timestamp.valueOf('2024-01-02 00:00:00'), settingValue: '.*growerp\\.org.*']"/>
+                                 fromDate: java.sql.Timestamp.valueOf('2024-01-02 00:00:00'), settingValue: 'www.growerp.com']"/>
+                    <service-call name="create#mantle.product.store.ProductStoreSetting"
+                        in-map="[productStoreId: growerpStoreId, settingTypeEnumId: 'PsstHostname',
+                                 fromDate: java.sql.Timestamp.valueOf('2024-01-03 00:00:00'), settingValue: 'growerp.org']"/>
+                    <service-call name="create#mantle.product.store.ProductStoreSetting"
+                        in-map="[productStoreId: growerpStoreId, settingTypeEnumId: 'PsstHostname',
+                                 fromDate: java.sql.Timestamp.valueOf('2024-01-04 00:00:00'), settingValue: 'www.growerp.org']"/>
                 </if>
             </if>
 

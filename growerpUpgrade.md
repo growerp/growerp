@@ -16,9 +16,21 @@ The GrowERP release process consist out of the following workflows:
    submit for review
 6. When review ok,
     a. "Copy staging to production"
-       Backend upgrade from Staging
+       Backend upgrade from Staging run: ./sync-to-prod.sh  --apply
     b. Manually release apps in the IOS/MACOS/Android.Windows store
        No api available for this!
+       
+## when cleardb production
+
+1. apps-prod.yml set - DB_DATA=INSTALL
+2. run ./clearDb.sh prod --apply
+3. run https://backend.growerp.com/vapps change password 'SystemSupport'
+4. check tools -> entity 'application' -> admin backend.growerp.org latest version assm: business
+5. run: https://admin.growerp.com/
+    a. register info@growerp.com
+    b. login growerp
+    c. organisation -> website -> 100000 to www and statistics google G-D7KYT9456Z
+
 
 ## Manual
 
