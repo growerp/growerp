@@ -3,39 +3,46 @@
 # Clones moqui-runtime (with its component submodules) if not already present,
 # then symlinks GrowERP custom components into the moqui runtime component directory.
 #
-# Usage: ./setup-backend.sh [--help] [--ssh]
+# Usage: ./setup-backend.sh [--help]
+#
+# Clone protocol (SSH vs HTTPS) is inherited from the root growerp repo's
+# origin remote: SSH origin -> clone everything via SSH, HTTPS -> via HTTPS.
 #
 # Options:
 #   --help    Show this help message and exit
-#   --ssh     Use SSH to clone repositories instead of HTTPS
 
 set -euo pipefail
-
-USE_SSH=false
 
 while [[ "$#" -gt 0 ]]; do
     case $1 in
         --help)
-            echo "Usage: ./setup-backend.sh [--help] [--ssh]"
+            echo "Usage: ./setup-backend.sh [--help]"
+            echo ""
+            echo "Clone protocol is inherited from the root growerp repo's origin remote."
             echo ""
             echo "Options:"
             echo "  --help    Show this help message and exit"
-            echo "  --ssh     Use SSH to clone repositories instead of HTTPS"
             exit 0
-            ;;
-        --ssh)
-            USE_SSH=true
-            shift
             ;;
         *)
             echo "Unknown parameter passed: $1"
-            echo "Usage: ./setup-backend.sh [--help] [--ssh]"
+            echo "Usage: ./setup-backend.sh [--help]"
             exit 1
             ;;
     esac
 done
 
 REPO_ROOT="$(cd "$(dirname "$0")" && pwd)"
+
+# Inherit clone protocol from the root repo's origin remote
+ORIGIN_URL="$(git -C "$REPO_ROOT" remote get-url origin 2>/dev/null || echo "")"
+if [[ "$ORIGIN_URL" == git@* || "$ORIGIN_URL" == ssh://* ]]; then
+  USE_SSH=true
+  echo "Root origin is SSH -> cloning via SSH"
+else
+  USE_SSH=false
+  echo "Root origin is HTTPS -> cloning via HTTPS"
+fi
 MOQUI_DIR="$REPO_ROOT/moqui"
 RUNTIME_DIR="$MOQUI_DIR/runtime"
 COMP_DIR="$RUNTIME_DIR/component"
