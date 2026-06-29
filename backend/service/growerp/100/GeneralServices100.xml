@@ -122,7 +122,7 @@ along with this software (see the LICENSE.md file). If not, see
                         <!-- Set update URLs based on platform -->
                         <if condition="platform == 'android'">
                             <set field="updateUrl"
-                                value="https://play.google.com/store/apps/details?id=org.growerp.admin"/>
+                                from="'https://play.google.com/store/apps/details?id=org.growerp.' + applicationId.substring(3).toLowerCase()"/>
                             <else-if condition="platform == 'ios' || platform == 'macos'">
                                 <set field="updateUrl"
                                     value="https://apps.apple.com/us/app/growerp-admin-open-source/id1545521755"/>
