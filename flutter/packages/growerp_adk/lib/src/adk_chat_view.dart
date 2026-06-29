@@ -675,7 +675,12 @@ class _AdkChatViewState extends State<AdkChatView> {
     }
 
     if (e.dialogBuilder != null) {
-      openInDialog(e.dialogBuilder!);
+      // e.g. the "Open System Setup" chip shown when no LLM key is configured.
+      // Retry the connection once the dialog closes so a key just saved takes
+      // effect without the user having to reopen the chat.
+      showDialog(context: rootNav.context, builder: e.dialogBuilder!).then((_) {
+        if (mounted && !_ready && !_busy) _connect();
+      });
       return;
     }
 
