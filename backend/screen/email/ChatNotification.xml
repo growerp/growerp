@@ -1,0 +1,9 @@
+<screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-2.1.xsd">
+    <widgets>
+        <render-mode><text type="html"><![CDATA[<html><body>]]></text></render-mode>
+        <container><label text="You have a new chat message from ${senderName}:"/></container>
+        <container><label text="${messageContent}"/></container>
+        <container><label text="Log in to GrowERP to reply."/></container>
+        <render-mode><text type="html"><![CDATA[</body></html>]]></text></render-mode>
+    </widgets>
+</screen>

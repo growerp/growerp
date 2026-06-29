@@ -242,6 +242,16 @@ along with this software (see the LICENSE.md file). If not, see
             screenRenderMode="xsl-fo" />
     </moqui.basic.email.EmailTemplate>
 
+    <!-- Chat message notification email template -->
+    <moqui.basic.email.EmailTemplate emailTemplateId="CHAT_NOTIFICATION"
+        description="New chat message notification"
+        emailServerId="SYSTEM" emailTypeEnumId="EMT_NOTIFICATION"
+        bodyScreenLocation="component://growerp/screen/email/ChatNotification.xml"
+        webappName="webroot"
+        fromAddress="support@growerp.com" fromName="GrowERP system"
+        ccAddresses="" bccAddresses=""
+        subject="New chat message from ${senderName}" sendPartial="Y" />
+
     <!--<growerp.InstallServices.deleteAssetClass/>
     existing classes used in accounting -->
     <moqui.basic.Enumeration description="Hotel Room" enumId="AsClsRoom" enumTypeId="AssetClass" />

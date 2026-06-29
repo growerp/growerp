@@ -597,11 +597,11 @@ along with this software (see the LICENSE.md file). If not, see
                         <set field="toEmail" from="emailPcms ? emailPcms[0].contactMech.infoString : null" />
                         <if condition="toEmail &amp;&amp; !toEmail.contains('example.com')">
                             <service-call name="org.moqui.impl.EmailServices.send#EmailTemplate" async="true">
+                                <field-map field-name="emailTemplateId" value="CHAT_NOTIFICATION" />
                                 <field-map field-name="toAddresses" from="toEmail" />
-                                <field-map field-name="fromAddress" value="noreply@growerp.com" />
-                                <field-map field-name="subject"
-                                    from="'New chat message from ' + (senderUa?.userFullName ?: 'GrowERP')" />
-                                <field-map field-name="bodyText" from="chatMessage.content" />
+                                <field-map field-name="bodyParameters"
+                                    from="[senderName: (senderUa?.userFullName ?: 'GrowERP'),
+                                           messageContent: chatMessage.content]" />
                             </service-call>
                         </if>
                     </if>
@@ -1084,11 +1084,11 @@ along with this software (see the LICENSE.md file). If not, see
                         <set field="toEmail" from="emailPcms ? emailPcms[0].contactMech.infoString : null" />
                         <if condition="toEmail &amp;&amp; !toEmail.contains('example.com')">
                             <service-call name="org.moqui.impl.EmailServices.send#EmailTemplate" async="true">
+                                <field-map field-name="emailTemplateId" value="CHAT_NOTIFICATION" />
                                 <field-map field-name="toAddresses" from="toEmail" />
-                                <field-map field-name="fromAddress" value="noreply@growerp.com" />
-                                <field-map field-name="subject"
-                                    from="'New chat message from ' + (room?.chatRoomName ?: 'website visitor')" />
-                                <field-map field-name="bodyText" from="content" />
+                                <field-map field-name="bodyParameters"
+                                    from="[senderName: (room?.chatRoomName ?: 'website visitor'),
+                                           messageContent: content]" />
                             </service-call>
                         </if>
                     </if>
