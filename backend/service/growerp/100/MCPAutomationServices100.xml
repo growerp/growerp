@@ -68,19 +68,158 @@
         </actions>
     </service>
 
-    <service verb="process" noun="CampaignAutomation" type="interface">
+    <service verb="process" noun="CampaignAutomation">
         <description>
-            Process automation for a specific campaign
-            This is the main entry point called by the scheduler
+            Drain a campaign's PENDING messages, per platform, up to dailyLimitPerPlatform per day.
+            Main entry point called by the scheduler (run#AllCampaignAutomation) or manually.
+            Owner-scoped: only processes campaigns belonging to the calling user's company.
         </description>
         <in-parameters>
-            <parameter name="marketingCampaignId"/>
+            <parameter name="marketingCampaignId" required="true"/>
+            <parameter name="ownerPartyId">
+                <description>Pass explicitly from the headless scheduler; derived from the
+                    logged-in user when omitted.</description>
+            </parameter>
         </in-parameters>
         <out-parameters>
             <parameter name="messagesProcessed" type="Integer"/>
             <parameter name="messagesSent" type="Integer"/>
             <parameter name="messagesFailed" type="Integer"/>
         </out-parameters>
+        <actions>
+            <if condition="!ownerPartyId">
+                <service-call out-map="context"
+                    name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"/>
+            </if>
+
+            <entity-find-one entity-name="mantle.marketing.campaign.MarketingCampaign"
+                value-field="campaign">
+                <field-map field-name="marketingCampaignId"/>
+                <field-map field-name="ownerPartyId"/>
+            </entity-find-one>
+            <if condition="!campaign">
+                <return error="true" message="Campaign not found: ${marketingCampaignId}"/>
+            </if>
+
+            <set field="messagesProcessed" from="0" type="Integer"/>
+            <set field="messagesSent" from="0" type="Integer"/>
+            <set field="messagesFailed" from="0" type="Integer"/>
+
+            <!-- Skip paused campaigns -->
+            <if condition="campaign.isActive != 'Y'">
+                <return/>
+            </if>
+
+            <!-- Parse the JSON platforms array and compute start-of-day for the daily limit -->
+            <script><![CDATA[
+                import groovy.json.JsonSlurper
+                platformList = campaign.platforms ? new JsonSlurper().parseText(campaign.platforms) : []
+                def cal = ec.user.nowCalendar
+                cal.set(Calendar.HOUR_OF_DAY, 0); cal.set(Calendar.MINUTE, 0)
+                cal.set(Calendar.SECOND, 0); cal.set(Calendar.MILLISECOND, 0)
+                todayStart = new java.sql.Timestamp(cal.timeInMillis)
+            ]]></script>
+
+            <set field="dailyLimit" from="campaign.dailyLimitPerPlatform ?: 50" type="Integer"/>
+
+            <iterate list="platformList" entry="plat">
+                <!-- How many already went out today for this platform -->
+                <entity-find-count entity-name="growerp.marketing.OutreachMessage"
+                    count-field="sentToday">
+                    <econdition field-name="marketingCampaignId"/>
+                    <econdition field-name="platform" from="plat"/>
+                    <econdition field-name="status" value="SENT"/>
+                    <econdition field-name="sentDate" operator="greater-equals" from="todayStart"/>
+                </entity-find-count>
+                <set field="remaining" from="dailyLimit - sentToday" type="Integer"/>
+                <if condition="remaining &lt;= 0"><continue/></if>
+
+                <entity-find entity-name="growerp.marketing.OutreachMessage" list="pendingMessages"
+                    limit="remaining">
+                    <econdition field-name="marketingCampaignId"/>
+                    <econdition field-name="platform" from="plat"/>
+                    <econdition field-name="status" value="PENDING"/>
+                    <order-by field-name="createdDate"/>
+                </entity-find>
+
+                <iterate list="pendingMessages" entry="pmsg">
+                    <set field="messagesProcessed" from="messagesProcessed + 1"/>
+                    <service-call name="growerp.100.MCPAutomationServices100.send#OutreachMessageViaBrowser"
+                        in-map="[messageId: pmsg.messageId, platform: plat, ownerPartyId: ownerPartyId]"
+                        out-map="sendOut"/>
+                    <if condition="sendOut.success">
+                        <set field="messagesSent" from="messagesSent + 1"/>
+                        <service-call name="growerp.100.OutreachServices100.update#CampaignMetrics"
+                            in-map="[marketingCampaignId: marketingCampaignId, incrementMessagesSent: true]"/>
+                    </if>
+                    <else>
+                        <set field="messagesFailed" from="messagesFailed + 1"/>
+                    </else>
+                </iterate>
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="run" noun="AllCampaignAutomation" authenticate="anonymous">
+        <description>
+            Scheduler entry point: process every active campaign for an owner. Runs from a headless
+            ServiceJob (no logged-in user), so it logs in as the owner's main-company administrator
+            (GROWERP_M_ADMIN) before doing any work. Pass ownerPartyId as a ServiceJobParameter.
+        </description>
+        <in-parameters>
+            <parameter name="ownerPartyId">
+                <description>Required when run headless; derived from the logged-in user when omitted.</description>
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="campaignsProcessed" type="Integer"/>
+            <parameter name="messagesSent" type="Integer"/>
+        </out-parameters>
+        <actions>
+            <!-- Headless run: authenticate as the owner's main-company administrator -->
+            <if condition="!ec.user.userId">
+                <if condition="!ownerPartyId">
+                    <return error="true"
+                        message="ownerPartyId is required when run without a logged-in user"/>
+                </if>
+                <entity-find entity-name="growerp.party.OwnerPersonDetailAndCompany"
+                    list="adminList" limit="1" disable-authz="true">
+                    <econdition field-name="ownerPartyId"/>
+                    <econdition field-name="companyRole" value="OrgInternal"/>
+                    <econdition field-name="userGroupId" value="GROWERP_M_ADMIN"/>
+                    <econdition field-name="userDisabled" value="N" or-null="true"/>
+                    <order-by field-name="userId"/>
+                </entity-find>
+                <set field="adminLogin" from="adminList ? adminList[0].loginName : null"/>
+                <if condition="!adminLogin">
+                    <return error="true"
+                        message="No administrator user found for owner ${ownerPartyId}"/>
+                </if>
+                <script>ec.user.internalLoginUser(adminLogin)</script>
+            </if>
+
+            <if condition="!ownerPartyId">
+                <service-call out-map="context"
+                    name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"/>
+            </if>
+
+            <entity-find entity-name="mantle.marketing.campaign.MarketingCampaign"
+                list="activeCampaigns">
+                <econdition field-name="ownerPartyId"/>
+                <econdition field-name="isActive" value="Y"/>
+                <econdition field-name="statusId" value="MKTG_CAMP_INPROGRESS"/>
+            </entity-find>
+
+            <set field="campaignsProcessed" from="0" type="Integer"/>
+            <set field="messagesSent" from="0" type="Integer"/>
+            <iterate list="activeCampaigns" entry="camp">
+                <service-call name="growerp.100.MCPAutomationServices100.process#CampaignAutomation"
+                    in-map="[marketingCampaignId: camp.marketingCampaignId, ownerPartyId: ownerPartyId]"
+                    out-map="procOut"/>
+                <set field="campaignsProcessed" from="campaignsProcessed + 1"/>
+                <set field="messagesSent" from="messagesSent + (procOut.messagesSent ?: 0)"/>
+            </iterate>
+        </actions>
     </service>
 
     <service verb="send" noun="OutreachMessageViaBrowser">
@@ -93,6 +232,10 @@
             <parameter name="platform" required="true">
                 <description>TWITTER, LINKEDIN, EMAIL, etc.</description>
             </parameter>
+            <parameter name="ownerPartyId">
+                <description>Pass explicitly from the headless scheduler; derived from the
+                    logged-in user when omitted.</description>
+            </parameter>
         </in-parameters>
         <out-parameters>
             <parameter name="success" type="Boolean"/>
@@ -100,8 +243,10 @@
             <parameter name="screenshotPath"/>
         </out-parameters>
         <actions>
-            <service-call out-map="context"
-                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"/>
+            <if condition="!ownerPartyId">
+                <service-call out-map="context"
+                    name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"/>
+            </if>
 
             <!-- Get the message details -->
             <entity-find-one entity-name="growerp.marketing.OutreachMessage" value-field="message">
@@ -122,8 +267,30 @@
                     in-map="[message: message, ownerPartyId: ownerPartyId]" out-map="sendResult"/>
             </else-if>
             <else-if condition="platform == 'EMAIL'">
-                <!-- Email uses existing backend service -->
-                <return error="true" message="Email platform not yet implemented"/>
+                <!-- Send via Moqui email using the campaign subject + this message body.
+                     Operates on the existing PENDING message; status update happens below. -->
+                <if condition="!message.recipientEmail">
+                    <set field="sendResult"
+                        from="[success: false, errorMessage: 'Recipient has no email address']"/>
+                </if>
+                <else>
+                    <entity-find-one entity-name="mantle.marketing.campaign.MarketingCampaign"
+                        value-field="campaign">
+                        <field-map field-name="marketingCampaignId" from="message.marketingCampaignId"/>
+                    </entity-find-one>
+                    <set field="unsubscribeUrl"
+                        value="https://growerp.com/unsubscribe?email=${message.recipientEmail}&amp;campaign=${message.marketingCampaignId}"/>
+                    <set field="emailBody"
+                        from="message.messageContent + '\n\n---\n\n&lt;p style=&quot;font-size: 12px; color: #666;&quot;&gt;&lt;a href=&quot;' + unsubscribeUrl + '&quot;&gt;Unsubscribe&lt;/a&gt;&lt;/p&gt;'"/>
+                    <service-call name="org.moqui.impl.EmailServices.send#EmailTemplate"
+                        out-map="emailResult">
+                        <field-map field-name="toAddresses" from="message.recipientEmail"/>
+                        <field-map field-name="subject" from="campaign?.emailSubject ?: 'Hello from GrowERP'"/>
+                        <field-map field-name="bodyHtml" from="emailBody"/>
+                        <field-map field-name="fromAddress" value="noreply@growerp.com"/>
+                    </service-call>
+                    <set field="sendResult" from="[success: true]"/>
+                </else>
             </else-if>
             <else>
                 <return error="true" message="Unsupported platform: ${platform}"/>

@@ -728,6 +728,36 @@
         </actions>
     </service>
 
+    <service verb="update" noun="OutreachMessageContent">
+        <description>
+            Set the (AI-personalised) body of a PENDING outreach message. Used by the Outreach
+            Personalizer agent after generate#PlatformMessage. Refuses messages already sent.
+        </description>
+        <in-parameters>
+            <parameter name="messageId" required="true" />
+            <parameter name="messageContent" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="messageId" />
+            <parameter name="status" />
+        </out-parameters>
+        <actions>
+            <entity-find-one entity-name="growerp.marketing.OutreachMessage" value-field="message">
+                <field-map field-name="messageId" />
+            </entity-find-one>
+            <if condition="!message">
+                <return error="true" message="Message not found: ${messageId}" />
+            </if>
+            <if condition="message.status != 'PENDING'">
+                <return error="true"
+                    message="Can only edit PENDING messages; ${messageId} is ${message.status}" />
+            </if>
+            <service-call name="update#growerp.marketing.OutreachMessage"
+                in-map="[messageId: messageId, messageContent: messageContent]" />
+            <set field="status" from="message.status" />
+        </actions>
+    </service>
+
     <service verb="delete" noun="OutreachMessage">
         <description>Delete an outreach message</description>
         <in-parameters>
@@ -738,6 +768,76 @@
             <entity-delete-by-condition entity-name="growerp.marketing.OutreachMessage">
                 <econdition field-name="messageId" />
             </entity-delete-by-condition>
+        </actions>
+    </service>
+
+    <service verb="import" noun="OutreachRecipients">
+        <description>
+            Bulk-load recipients (e.g. a 4000-row LinkedIn/email CSV) as PENDING OutreachMessages
+            for a campaign. Each recipient becomes one OutreachMessage; messageContent is left empty
+            for later AI personalisation (generate#PlatformMessage).
+        </description>
+        <in-parameters>
+            <parameter name="marketingCampaignId" />
+            <parameter name="pseudoId" />
+            <parameter name="defaultPlatform" default-value="LINKEDIN">
+                <description>Platform to use when a recipient row omits one</description>
+            </parameter>
+            <parameter name="recipients" type="List" required="true">
+                <parameter name="recipient" type="Map">
+                    <parameter name="recipientName" />
+                    <parameter name="recipientProfileUrl" />
+                    <parameter name="recipientHandle" />
+                    <parameter name="recipientEmail" />
+                    <parameter name="platform" />
+                    <parameter name="messageContent" />
+                </parameter>
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="importedCount" type="Integer" />
+            <parameter name="skippedCount" type="Integer" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+
+            <!-- Resolve and owner-validate the campaign -->
+            <entity-find entity-name="mantle.marketing.campaign.MarketingCampaign"
+                list="campaignList">
+                <econdition field-name="pseudoId" ignore-if-empty="true" />
+                <econdition field-name="marketingCampaignId" ignore-if-empty="true" />
+                <econdition field-name="ownerPartyId" />
+            </entity-find>
+            <set field="campaign" from="campaignList?.first()" />
+            <if condition="!campaign">
+                <return error="true"
+                    message="Campaign not found: ${pseudoId} or ${marketingCampaignId}" />
+            </if>
+            <set field="marketingCampaignId" from="campaign.marketingCampaignId" />
+
+            <set field="importedCount" from="0" type="Integer" />
+            <set field="skippedCount" from="0" type="Integer" />
+            <iterate list="recipients" entry="recipient">
+                <set field="rcptPlatform" from="recipient.platform ?: defaultPlatform" />
+                <!-- A recipient is only usable with an address for its platform -->
+                <if condition="(rcptPlatform == 'EMAIL' &amp;&amp; !recipient.recipientEmail)
+                        || (rcptPlatform != 'EMAIL' &amp;&amp; !recipient.recipientProfileUrl &amp;&amp; !recipient.recipientHandle)">
+                    <set field="skippedCount" from="skippedCount + 1" />
+                    <continue />
+                </if>
+                <service-call name="create#growerp.marketing.OutreachMessage"
+                    in-map="[marketingCampaignId: marketingCampaignId,
+                             platform: rcptPlatform,
+                             recipientName: recipient.recipientName,
+                             recipientProfileUrl: recipient.recipientProfileUrl,
+                             recipientHandle: recipient.recipientHandle,
+                             recipientEmail: recipient.recipientEmail,
+                             messageContent: recipient.messageContent,
+                             status: 'PENDING',
+                             createdDate: ec.user.nowTimestamp]" />
+                <set field="importedCount" from="importedCount + 1" />
+            </iterate>
         </actions>
     </service>
 
