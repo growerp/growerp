@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- This software is in the public domain under CC0 1.0 Universal plus a 
+     Grant of Patent License.
+
+     To the extent possible under law, author(s) have dedicated all
+     copyright and related and neighboring rights to this software to the
+     public domain worldwide. This software is distributed without any
+     warranty.
+
+     You should have received a copy of the CC0 Public Domain Dedication
+     along with this software (see the LICENSE.md file). If not, see
+     <https://creativecommons.org/publicdomain/zero/1.0/>. -->
+
+<moqui-conf xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/moqui-conf-3.xsd">
+
+    <!-- Test-specific configuration for MCP services -->
+    <default-property name="instance_purpose" value="test"/>
+    <default-property name="webapp_http_port" value="8080"/>
+    <default-property name="entity_ds_db_conf" value="h2"/>
+    <default-property name="entity_ds_database" value="moqui_test"/>
+    <default-property name="entity_empty_db_load" value="seed"/>
+    <default-property name="entity_lock_track" value="false"/>
+
+    <!-- Test cache settings - faster expiration for testing -->
+    <cache-list warm-on-start="false">
+        <cache name="entity.definition" expire-time-idle="5"/>
+        <cache name="service.location" expire-time-idle="5"/>
+        <cache name="screen.location" expire-time-idle="5"/>
+        <cache name="l10n.message" expire-time-idle="60"/>
+    </cache-list>
+
+    <!-- Minimal server stats for testing -->
+    <server-stats stats-skip-condition="true">
+        <!-- Disable detailed stats for faster test execution -->
+    </server-stats>
+
+    <!-- Webapp configuration with MCP servlet for testing -->
+    <webapp-list>
+        <webapp name="webroot" http-port="${webapp_http_port}">
+            <!-- MCP Servlet for testing - ensure it loads with higher priority -->
+            <servlet name="EnhancedMcpServlet" class="org.moqui.mcp.EnhancedMcpServlet" 
+                     load-on-startup="1" async-supported="true">
+                <init-param name="keepAliveIntervalSeconds" value="10"/>
+                <init-param name="maxConnections" value="50"/>
+                <init-param name="testMode" value="true"/>
+                <url-pattern>/mcp/*</url-pattern>
+            </servlet>
+            
+            <!-- Test-specific servlet for health checks -->
+            <servlet name="TestHealthServlet" class="org.moqui.mcp.test.TestHealthServlet" 
+                     load-on-startup="2">
+                <url-pattern>/test/health</url-pattern>
+            </servlet>
+        </webapp>
+    </webapp-list>
+
+    <!-- Disable tarpit for faster test execution -->
+    <artifact-execution-facade>
+        <artifact-execution type="AT_XML_SCREEN" tarpit-enabled="false"/>
+        <artifact-execution type="AT_XML_SCREEN_TRANS" tarpit-enabled="false"/>
+        <artifact-execution type="AT_SERVICE" tarpit-enabled="false"/>
+        <artifact-execution type="AT_ENTITY" tarpit-enabled="false"/>
+    </artifact-execution-facade>
+
+    <!-- Test-optimized screen facade -->
+    <screen-facade boundary-comments="false">
+        <screen-text-output type="html" mime-type="text/html" 
+                macro-template-location="template/screen-macro/ScreenHtmlMacros.ftl"/>
+        <screen-text-output type="markdown" mime-type="text/markdown"
+                macro-template-location="template/screen-macro/DefaultScreenMacros.markdown.ftl"/>
+    </screen-facade>
+
+    <!-- Test entity facade with in-memory database -->
+    <entity-facade query-stats="false" entity-eca-enabled="true">
+        <!-- Use H2 in-memory database for fast tests -->
+        <datasource group-name="transactional" database-conf-name="h2" schema-name=""
+                runtime-add-missing="true" startup-add-missing="true">
+            <inline-jdbc><xa-properties url="jdbc:h2:mem:moqui_test;lock_timeout=30000" 
+                    user="sa" password=""/></inline-jdbc>
+        </datasource>
+        
+        <!-- Load test data -->
+        <load-data location="classpath://data/MoquiSetupData.xml"/>
+        <load-data location="component://moqui-mcp-2/data/McpSecuritySeedData.xml"/>
+    </entity-facade>
+
+    <!-- Test service facade -->
+    <service-facade scheduled-job-check-time="0" job-queue-max="0" 
+            job-pool-core="1" job-pool-max="2" job-pool-alive="60">
+        <!-- Disable scheduled jobs for testing -->
+    </service-facade>
+
+    <!-- Component list for testing -->
+    <component-list>
+        <component-dir location="base-component"/>
+        <component-dir location="mantle"/>
+        <component-dir location="component"/>
+        <!-- Ensure moqui-mcp-2 component is loaded -->
+        <component name="moqui-mcp-2" location="component://moqui-mcp-2"/>
+    </component-list>
+
+</moqui-conf>

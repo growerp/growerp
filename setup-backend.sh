@@ -81,7 +81,10 @@ fi
 ln -sfn "../../../backend"        "$COMP_DIR/growerp"
 ln -sfn "../../../pop-rest-store" "$COMP_DIR/PopRestStore"
 ln -sfn "../../../mantle-stripe"  "$COMP_DIR/mantle-stripe"
+ln -sfn "../../../moqui-adk"      "$COMP_DIR/moqui-adk"
+ln -sfn "../../../moqui-mcp"      "$COMP_DIR/moqui-mcp"
 
 echo "Custom components linked into $COMP_DIR:"
-ls -la "$COMP_DIR/growerp" "$COMP_DIR/PopRestStore" "$COMP_DIR/mantle-stripe"
+ls -la "$COMP_DIR/growerp" "$COMP_DIR/PopRestStore" "$COMP_DIR/mantle-stripe" \
+       "$COMP_DIR/moqui-adk" "$COMP_DIR/moqui-mcp"
 

@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
+
+    <service verb="update" noun="AgentConfig" authenticate="true">
+        <description>Save (or create) an ADK agent config and register it in the runtime registry.
+            Multiple configs can be active simultaneously — one per ownerPartyId (tenant).
+            Authentication is enforced at the servlet level (/adk/* requires AdkUsers/ADMIN).</description>
+        <in-parameters>
+            <parameter name="adkAgentConfigId"/>
+            <parameter name="ownerPartyId"/>
+            <parameter name="agentName"/>
+            <parameter name="modelName"   default-value="gemini-2.5-flash"/>
+            <parameter name="apiKey"/>
+            <parameter name="llmProvider"/>
+            <parameter name="instruction"/>
+            <parameter name="description"/>
+            <parameter name="scheduleExpression"/>
+            <parameter name="scheduleEnabled"    default-value="N"/>
+            <parameter name="schedulePrompt"/>
+            <parameter name="scheduleChatRoomId"/>
+            <!-- Trust foundation scoping -->
+            <parameter name="toolMode"/>
+            <parameter name="serviceAllowlist"/>
+            <parameter name="writePolicy"/>
+            <parameter name="approvalChatRoomId"/>
+            <parameter name="agentPartyId"/>
+            <!-- websiteChat: Y → this agent answers the tenant's public website chat -->
+            <parameter name="websiteChat"/>
+            <!-- Phase 4 orchestration -->
+            <parameter name="agentRole"/>
+            <parameter name="orchestrationType"/>
+            <parameter name="loopMaxIterations" type="Integer"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="adkAgentConfigId"/>
+        </out-parameters>
+        <actions>
+            <!-- Edit (id given) updates that exact row — so renames don't create a duplicate.
+                 Create (no id) upserts by (ownerPartyId, agentName). -->
+            <if condition="adkAgentConfigId">
+                <entity-find-one entity-name="moqui.adk.AdkAgentConfig" value-field="existing" for-update="true">
+                    <field-map field-name="adkAgentConfigId"/>
+                </entity-find-one>
+                <else>
+                    <entity-find entity-name="moqui.adk.AdkAgentConfig" list="existingList" for-update="true">
+                        <econdition field-name="agentName"   from="agentName"   ignore-if-empty="true"/>
+                        <econdition field-name="ownerPartyId" from="ownerPartyId" ignore-if-empty="true"/>
+                    </entity-find>
+                    <if condition="existingList"><set field="existing" from="existingList[0]"/></if>
+                </else>
+            </if>
+            <if condition="existing">
+                <if condition="agentName">
+                    <set field="existing.agentName" from="agentName"/>
+                </if>
+                <set field="existing.modelName"          from="modelName"/>
+                <if condition="apiKey"><set field="existing.apiKey" from="apiKey"/></if>
+                <if condition="llmProvider != null"><set field="existing.llmProvider" from="llmProvider"/></if>
+                <set field="existing.instruction"        from="instruction"/>
+                <set field="existing.description"        from="description"/>
+                <set field="existing.ownerPartyId"       from="ownerPartyId"/>
+                <set field="existing.enabled"            value="Y"/>
+                <set field="existing.scheduleExpression" from="scheduleExpression"/>
+                <set field="existing.scheduleEnabled"    from="scheduleEnabled"/>
+                <set field="existing.schedulePrompt"     from="schedulePrompt"/>
+                <set field="existing.scheduleChatRoomId" from="scheduleChatRoomId"/>
+                <if condition="toolMode != null"><set field="existing.toolMode" from="toolMode"/></if>
+                <if condition="serviceAllowlist != null"><set field="existing.serviceAllowlist" from="serviceAllowlist"/></if>
+                <if condition="writePolicy != null"><set field="existing.writePolicy" from="writePolicy"/></if>
+                <if condition="approvalChatRoomId != null"><set field="existing.approvalChatRoomId" from="approvalChatRoomId"/></if>
+                <if condition="agentPartyId != null"><set field="existing.agentPartyId" from="agentPartyId"/></if>
+                <if condition="websiteChat != null"><set field="existing.websiteChat" from="websiteChat"/></if>
+                <if condition="agentRole != null"><set field="existing.agentRole" from="agentRole"/></if>
+                <if condition="orchestrationType != null"><set field="existing.orchestrationType" from="orchestrationType"/></if>
+                <if condition="loopMaxIterations != null"><set field="existing.loopMaxIterations" from="loopMaxIterations"/></if>
+                <entity-update value-field="existing"/>
+                <set field="adkAgentConfigId" from="existing.adkAgentConfigId"/>
+                <else>
+                    <entity-make-value entity-name="moqui.adk.AdkAgentConfig" value-field="newCfg"/>
+                    <set field="newCfg.ownerPartyId"       from="ownerPartyId"/>
+                    <set field="newCfg.agentName"          from="agentName    ?: 'MoquiAgent'"/>
+                    <set field="newCfg.modelName"          from="modelName    ?: 'gemini-2.5-flash'"/>
+                    <set field="newCfg.apiKey"             from="apiKey"/>
+                    <set field="newCfg.llmProvider"        from="llmProvider  ?: 'gemini'"/>
+                    <set field="newCfg.instruction"        from="instruction  ?: 'You are a helpful assistant for the GrowERP ERP system.'"/>
+                    <set field="newCfg.description"        from="description  ?: 'ADK Agent'"/>
+                    <set field="newCfg.enabled"            value="Y"/>
+                    <set field="newCfg.scheduleExpression" from="scheduleExpression"/>
+                    <set field="newCfg.scheduleEnabled"    from="scheduleEnabled ?: 'N'"/>
+                    <set field="newCfg.schedulePrompt"     from="schedulePrompt"/>
+                    <set field="newCfg.scheduleChatRoomId" from="scheduleChatRoomId"/>
+                    <!-- Safe-by-default scoping: new agents are read-only, writes need approval -->
+                    <set field="newCfg.toolMode"           from="toolMode    ?: 'readOnly'"/>
+                    <set field="newCfg.serviceAllowlist"   from="serviceAllowlist"/>
+                    <set field="newCfg.writePolicy"        from="writePolicy ?: 'approve'"/>
+                    <set field="newCfg.approvalChatRoomId" from="approvalChatRoomId ?: scheduleChatRoomId"/>
+                    <set field="newCfg.agentPartyId"       from="agentPartyId"/>
+                    <set field="newCfg.websiteChat"        from="websiteChat ?: 'N'"/>
+                    <set field="newCfg.agentRole"          from="agentRole ?: 'specialist'"/>
+                    <set field="newCfg.orchestrationType"  from="orchestrationType"/>
+                    <set field="newCfg.loopMaxIterations"  from="loopMaxIterations"/>
+                    <entity-sequenced-id-primary value-field="newCfg"/>
+                    <entity-create value-field="newCfg"/>
+                    <set field="adkAgentConfigId" from="newCfg.adkAgentConfigId"/>
+                </else>
+            </if>
+
+            <!-- Re-read persisted record so initConfig always has the final apiKey -->
+            <entity-find-one entity-name="moqui.adk.AdkAgentConfig" value-field="savedCfg">
+                <field-map field-name="adkAgentConfigId"/>
+            </entity-find-one>
+
+            <!-- Sync per-agent ServiceJob (create/update/pause based on schedule fields) -->
+            <service-call name="AdkSchedulerServices.sync#AgentJob"
+                in-map="[adkAgentConfigId: adkAgentConfigId]"/>
+
+            <!-- Resolve API key: per-agent apiKey wins; else look up from LlmConfig list -->
+            <set field="resolvedApiKey" from="savedCfg.apiKey ?: ''"/>
+            <if condition="!resolvedApiKey">
+                <set field="resolvedProvider" from="savedCfg.llmProvider ?: 'gemini'"/>
+                <entity-find-one entity-name="growerp.general.LlmConfig" value-field="llmCfg">
+                    <field-map field-name="ownerPartyId" from="savedCfg.ownerPartyId"/>
+                    <field-map field-name="llmProvider" from="resolvedProvider"/>
+                </entity-find-one>
+                <set field="resolvedApiKey" from="llmCfg?.apiKey ?: ''"/>
+            </if>
+
+            <script><![CDATA[
+                org.moqui.adk.AdkManager.initSessionService(ec.factory)
+                org.moqui.adk.AdkManager.initConfig(
+                    adkAgentConfigId,
+                    savedCfg.ownerPartyId ?: null,
+                    savedCfg.agentName    ?: null,
+                    savedCfg.modelName    ?: 'gemini-2.5-flash',
+                    savedCfg.instruction  ?: '',
+                    resolvedApiKey,
+                    savedCfg.llmProvider  ?: 'gemini',
+                    savedCfg.description  ?: null
+                )
+            ]]></script>
+        </actions>
+    </service>
+
+    <service verb="create" noun="Session" authenticate="true">
+        <description>Create a new ADK chat session for the current user.</description>
+        <out-parameters>
+            <parameter name="sessionId"/>
+        </out-parameters>
+        <actions>
+            <script><![CDATA[
+                import org.moqui.adk.AdkManager
+                import org.moqui.adk.AdkSessionHolder
+
+                // Lazy-init: session service + all enabled agent configs
+                if (!AdkManager.isInitialized()) {
+                    AdkManager.lazyInit(ec.factory)
+                }
+
+                if (!AdkManager.isInitialized()) {
+                    ec.message.addError('ADK not configured — add API key in ADK → Configuration')
+                    return
+                }
+
+                Map contextState = [
+                    userId          : ec.user.userId   ?: 'anonymous',
+                    username        : ec.user.username ?: 'anonymous',
+                    userFullName    : '',
+                    organizationName: '',
+                    companyPseudoId : '',
+                    tenantId        : 'DEFAULT',
+                    timeZone        : ec.user.timeZone?.ID ?: 'UTC',
+                    locale          : ec.user.locale?.toString() ?: 'en_US',
+                ]
+                try {
+                    boolean wasDisabled = ec.artifactExecution.disableAuthz()
+                    try {
+                        def userAcct = ec.entity.find('moqui.security.UserAccount')
+                            .condition('userId', ec.user.userId)
+                            .selectField('userFullName').selectField('partyId')
+                            .one()
+                        contextState.userFullName = userAcct?.userFullName ?: ''
+
+                        String userPartyId = userAcct?.partyId
+                        if (userPartyId) {
+                            def userParty = ec.entity.find('mantle.party.Party')
+                                .condition('partyId', userPartyId)
+                                .selectField('ownerPartyId').one()
+                            String ownerPartyId = userParty?.ownerPartyId
+                            if (ownerPartyId) {
+                                contextState.tenantId = ownerPartyId
+
+                                // Load githubToken from SystemSettings into system property
+                                // so GithubTool.resolveGithubToken() can find it without a compile.
+                                if (!System.getenv('GITHUB_TOKEN')) {
+                                    def ss = ec.entity.find('growerp.general.SystemSettings')
+                                        .condition('ownerPartyId', ownerPartyId).one()
+                                    if (ss?.githubToken) {
+                                        System.setProperty('growerp.github.token', ss.githubToken)
+                                    }
+                                    if (ss?.githubRepository) {
+                                        System.setProperty('growerp.github.repo', ss.githubRepository)
+                                    }
+                                }
+
+                                def companyList = ec.entity.find('mantle.party.PartyDetailAndRole')
+                                    .condition('ownerPartyId', ownerPartyId)
+                                    .condition('partyTypeEnumId', 'PtyOrganization')
+                                    .condition('roleTypeId', 'OrgInternal')
+                                    .limit(1).list()
+                                String companyPartyId = companyList[0]?.partyId
+                                if (companyPartyId) {
+                                    def org = ec.entity.find('mantle.party.Organization')
+                                        .condition('partyId', companyPartyId).one()
+                                    contextState.organizationName = org?.organizationName ?: ''
+
+                                    def companyParty = ec.entity.find('mantle.party.Party')
+                                        .condition('partyId', companyPartyId)
+                                        .selectField('pseudoId').one()
+                                    contextState.companyPseudoId = companyParty?.pseudoId ?: ''
+                                }
+                            }
+                        }
+                    } finally { if (!wasDisabled) ec.artifactExecution.enableAuthz() }
+                } catch (Exception ignored) { /* best-effort */ }
+
+                def adkSession = AdkManager.createSession(ec.user.userId ?: 'anonymous', contextState)
+                sessionId = adkSession.id as String
+            ]]></script>
+        </actions>
+    </service>
+
+    <service verb="run" noun="Agent" authenticate="true">
+        <description>Send a message to the ADK agent and return its text reply.</description>
+        <in-parameters>
+            <parameter name="sessionId" required="true"/>
+            <parameter name="message"   required="true"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="response"/>
+        </out-parameters>
+        <actions>
+            <script><![CDATA[
+                import org.moqui.adk.AdkManager
+                import org.moqui.adk.AdkSessionHolder
+
+                if (!AdkManager.isInitialized()) {
+                    AdkManager.lazyInit(ec.factory)
+                }
+
+                if (!AdkManager.isInitialized()) {
+                    response = '[Error: ADK not configured — add API key in ADK → Configuration]'
+                    return
+                }
+
+                AdkSessionHolder.logEvent(sessionId, 'user_message', 'User message', [message: message])
+
+                String runUserId = ec.user.userId ?: 'anonymous'
+                def events = AdkManager.runAgent(runUserId, sessionId, message)
+
+                // Event author is the AGENT NAME (not 'model'); the echoed user prompt
+                // has author == runUserId. Collect text from all non-partial agent events.
+                StringBuilder sb = new StringBuilder()
+                events.each { e ->
+                    if (e.author != runUserId && e.partial != true) {
+                        e.content?.parts?.each { p -> if (p.text) sb.append(p.text) }
+                    }
+                }
+                response = sb.toString().trim()
+                if (!response) {
+                    def lastText = events.reverse().find { e ->
+                        e.author != runUserId && e.content?.parts?.find { it.text }
+                    }
+                    response = (lastText?.content?.parts?.findResults { it.text }?.join('') ?: '').trim()
+                }
+
+                if (!response) response = '[No response from agent]'
+                AdkSessionHolder.logEvent(sessionId, 'agent_response', 'Agent replied', [response: response])
+            ]]></script>
+        </actions>
+    </service>
+
+</services>

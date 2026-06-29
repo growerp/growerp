@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
+
+    <!-- Bridge between the public website chat (growerp ChatServices100) and the ADK runtime.
+         Lets the agent flagged websiteChat='Y' answer incoming website-chat messages, and hands
+         the conversation off to the human room member when the agent calls requestHumanHandoff. -->
+
+    <!-- Ensure a disabled "Support Assistant" UserAccount exists for an agent so its chat
+         messages render (the chat views inner-join UserAccount on fromUserId). Returns the
+         agent userId + display name used as the message sender. -->
+    <service verb="ensure" noun="AgentChatUser" authenticate="anonymous">
+        <in-parameters>
+            <parameter name="adkAgentConfigId" required="true"/>
+            <parameter name="ownerPartyId" required="true"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="agentUserId"/>
+            <parameter name="agentUserFullName"/>
+        </out-parameters>
+        <actions>
+            <entity-find-one entity-name="moqui.adk.AdkAgentConfig" value-field="cfg"
+                auto-field-map="[adkAgentConfigId: adkAgentConfigId]"/>
+            <set field="agentPartyId" from="cfg?.agentPartyId ?: ('AGENT_' + ownerPartyId)"/>
+            <set field="agentUserFullName" value="Support Assistant"/>
+            <!-- ensure the agent party exists (UserAccount.partyId FK) -->
+            <entity-find-one entity-name="mantle.party.Party" value-field="agentParty"
+                auto-field-map="[partyId: agentPartyId]"/>
+            <if condition="!agentParty">
+                <service-call name="create#mantle.party.Party"
+                    in-map="[partyId: agentPartyId, partyTypeEnumId: 'PtyPerson']"/>
+            </if>
+            <!-- ensure a disabled UserAccount for the agent party -->
+            <entity-find entity-name="moqui.security.UserAccount" list="agentAccts" limit="1">
+                <econdition field-name="partyId" from="agentPartyId"/>
+            </entity-find>
+            <if condition="agentAccts">
+                <set field="agentUserId" from="agentAccts[0].userId"/>
+                <else>
+                    <service-call name="create#moqui.security.UserAccount" out-map="newAcct"
+                        in-map="[partyId: agentPartyId, username: 'agent-' + agentPartyId,
+                                 userFullName: agentUserFullName, disabled: 'Y',
+                                 requirePasswordChange: 'N']"/>
+                    <set field="agentUserId" from="newAcct.userId"/>
+                </else>
+            </if>
+        </actions>
+    </service>
+
+    <!-- Run the room's agent on the latest visitor message and post the reply as the agent.
+         Called async from ChatServices100.submit#WebsiteChat / submit#WebsiteChatMessage, so the
+         visitor's POST never blocks on the LLM. No-op unless the room has an agent and is still
+         in agent mode (agentActive='Y'). -->
+    <service verb="reply" noun="WebsiteChatAgent" authenticate="anonymous" transaction-timeout="600">
+        <in-parameters>
+            <parameter name="chatRoomId" required="true"/>
+            <parameter name="ownerPartyId" required="true"/>
+        </in-parameters>
+        <actions>
+            <entity-find-one entity-name="growerp.general.ChatRoom" value-field="room"
+                auto-field-map="[chatRoomId: chatRoomId]"/>
+            <if condition="!room || !room.chatAgentConfigId || room.agentActive != 'Y'">
+                <return/>
+            </if>
+
+            <service-call name="AdkChatServices.ensure#AgentChatUser" out-map="context"
+                in-map="[adkAgentConfigId: room.chatAgentConfigId, ownerPartyId: ownerPartyId]"/>
+
+            <!-- recent transcript (runOneOff is stateless; feed it the last few turns) -->
+            <entity-find entity-name="growerp.general.ChatRoomAndMessages" list="recent">
+                <econdition field-name="chatRoomId" from="chatRoomId"/>
+                <order-by field-name="-lastUpdatedStamp"/>
+                <order-by field-name="-chatMessageId"/>
+                <limit>12</limit>
+            </entity-find>
+            <script><![CDATA[
+                // entity-find gave newest-first; reverse to chronological
+                def lines = []
+                recent.reverse().each { m ->
+                    def who = (m.fromUserId == agentUserId) ? 'Assistant' : 'Customer'
+                    if (m.content) lines.add("${who}: ${m.content}")
+                }
+                prompt = "You are chatting with a customer on the company website. " +
+                    "Conversation so far:\n" + lines.join('\n') +
+                    "\n\nReply to the latest Customer message."
+            ]]></script>
+
+            <script><![CDATA[
+                import org.moqui.adk.AdkManager
+                if (!AdkManager.isInitialized()) { AdkManager.lazyInit(ec.factory) }
+                replyText = ''
+                if (AdkManager.isInitialized()) {
+                    Map sessionCtx = [
+                        userId          : 'webchat',
+                        username        : 'webchat',
+                        userFullName    : (room.chatRoomName ?: 'Website visitor') as String,
+                        organizationName: '',
+                        companyPseudoId : '',
+                        tenantId        : (ownerPartyId ?: 'DEFAULT') as String,
+                        timeZone        : 'UTC',
+                        locale          : 'en_US',
+                        chatRoomId      : chatRoomId as String,
+                    ]
+                    List events = AdkManager.runOneOff(room.chatAgentConfigId as String,
+                        'webchat-' + chatRoomId, prompt as String, sessionCtx)
+                    StringBuilder sb = new StringBuilder()
+                    events.each { e ->
+                        if (e.author != 'webchat' && e.partial != true) {
+                            e.content?.parts?.each { p -> if (p.text) sb.append(p.text) }
+                        }
+                    }
+                    replyText = sb.toString().trim()
+                    if (!replyText) {
+                        sb = new StringBuilder()
+                        events.each { e ->
+                            if (e.author != 'webchat') {
+                                e.content?.parts?.each { p -> if (p.text) sb.append(p.text) }
+                            }
+                        }
+                        replyText = sb.toString().trim()
+                    }
+                } else {
+                    ec.logger.warn("AdkChat: ADK not initialised — no website-chat reply")
+                }
+            ]]></script>
+
+            <if condition="replyText">
+                <service-call name="create#growerp.general.ChatMessage" out-map="context"
+                    in-map="[chatRoomId: chatRoomId, fromUserId: agentUserId, content: replyText]"
+                    disable-authz="true"/>
+                <service-call name="growerp.100.ChatServices100.push#WebsiteChatWs"
+                    in-map="[chatRoomId: chatRoomId, fromUserId: agentUserId,
+                             fromUserFullName: agentUserFullName, content: replyText,
+                             chatMessageId: chatMessageId]"/>
+            </if>
+        </actions>
+    </service>
+
+    <!-- Hand the conversation off to the human room member. Called by the requestHumanHandoff
+         FunctionTool. Stops the agent (agentActive='N'), posts a notice, and pings the human. -->
+    <service verb="escalate" noun="WebsiteChat" authenticate="anonymous">
+        <in-parameters>
+            <parameter name="chatRoomId" required="true"/>
+            <parameter name="ownerPartyId" required="true"/>
+            <parameter name="reason"/>
+        </in-parameters>
+        <out-parameters><parameter name="escalated" type="Boolean"/></out-parameters>
+        <actions>
+            <entity-find-one entity-name="growerp.general.ChatRoom" value-field="room"
+                for-update="true" auto-field-map="[chatRoomId: chatRoomId]"/>
+            <if condition="!room">
+                <set field="escalated" from="false"/>
+                <return/>
+            </if>
+            <set field="room.agentActive" value="N"/>
+            <entity-update value-field="room"/>
+
+            <service-call name="AdkChatServices.ensure#AgentChatUser" out-map="context"
+                in-map="[adkAgentConfigId: room.chatAgentConfigId, ownerPartyId: ownerPartyId]"/>
+            <set field="notice"
+                value="Connecting you to a support agent — someone from our team will reply here shortly."/>
+            <service-call name="create#growerp.general.ChatMessage" out-map="context"
+                in-map="[chatRoomId: chatRoomId, fromUserId: agentUserId, content: notice]"
+                disable-authz="true"/>
+
+            <!-- mark the human members unread + push so the admin app lights up -->
+            <entity-find entity-name="growerp.general.ChatRoomMember" list="roomMembers">
+                <econdition field-name="chatRoomId" from="chatRoomId"/>
+            </entity-find>
+            <iterate list="roomMembers" entry="member">
+                <if condition="member.userId != agentUserId &amp;&amp; member.userId != room.visitorUserId">
+                    <service-call name="update#growerp.general.ChatRoomMember"
+                        in-map="[chatRoomId: chatRoomId, userId: member.userId, hasRead: 'N', isActive: 'Y']"
+                        disable-authz="true"/>
+                </if>
+            </iterate>
+            <service-call name="growerp.100.ChatServices100.push#WebsiteChatWs"
+                in-map="[chatRoomId: chatRoomId, fromUserId: agentUserId,
+                         fromUserFullName: agentUserFullName, content: notice,
+                         chatMessageId: chatMessageId]"/>
+            <set field="escalated" from="true"/>
+        </actions>
+    </service>
+
+</services>

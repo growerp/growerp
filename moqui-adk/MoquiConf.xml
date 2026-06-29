@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<moqui-conf xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/moqui-conf-3.xsd">
+
+    <webapp-list>
+        <webapp name="webroot">
+            <!-- ADK DevUI servlet: serves Angular SPA + ADK REST API at /adk/* -->
+            <servlet name="AdkDevServlet" class="org.moqui.adk.AdkDevServlet"
+                load-on-startup="6" async-supported="true">
+                <url-pattern>/adk</url-pattern>
+                <url-pattern>/adk/*</url-pattern>
+            </servlet>
+        </webapp>
+    </webapp-list>
+
+    <screen-facade>
+        <screen location="component://webroot/screen/webroot/apps.xml">
+            <subscreens-item name="adk" menu-title="ADK" menu-index="96"
+                location="component://moqui-adk/screen/Adk.xml"/>
+        </screen>
+    </screen-facade>
+
+</moqui-conf>

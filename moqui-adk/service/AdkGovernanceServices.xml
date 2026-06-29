@@ -1,0 +1,364 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Agent trust foundation: gate, scope, tenant-pin, log and (when required) queue for
+     human approval every tool/service action an ADK agent attempts. Lives in moqui-adk
+     because it owns AdkAgentConfig / AdkActionLog / AdkApproval and the GrowERP ChatRoom.
+     moqui-mcp calls govern#AgentAction only when it is defined (isServiceDefined guard),
+     so the MCP server still works when moqui-adk is not installed. -->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
+
+    <!-- ─────────────────────────────────────────────────────────────────────────
+         govern#AgentAction — pre-execution decision for one agent service call.
+         Returns decision = allowed | blocked | pending, plus owner-pinned parameters.
+         Always writes an AdkActionLog row; for pending it also creates an AdkApproval
+         and posts an approval card to the agent's approval chat room.
+         ───────────────────────────────────────────────────────────────────────── -->
+    <service verb="govern" noun="AgentAction" authenticate="false" transaction-timeout="60">
+        <description>Gate an agent's service call: classify verb, enforce scope, pin tenant,
+            audit-log, and queue write actions for human approval per the agent's writePolicy.</description>
+        <in-parameters>
+            <parameter name="configId"/>
+            <!-- coordinator that delegated to this agent, when part of a team (Phase 4) -->
+            <parameter name="parentConfigId"/>
+            <parameter name="toolName"/>
+            <parameter name="serviceName" required="true"/>
+            <parameter name="parameters" type="Map"><default>[:]</default></parameter>
+            <parameter name="adkSessionId"/>
+        </in-parameters>
+        <out-parameters>
+            <!-- allowed: caller may execute serviceName(parameters)
+                 blocked: caller must NOT execute; surface message to the agent
+                 pending: queued for approval; caller must NOT execute -->
+            <parameter name="decision"/>
+            <parameter name="parameters" type="Map"/>
+            <parameter name="message"/>
+            <parameter name="adkActionLogId"/>
+        </out-parameters>
+        <actions>
+            <!-- Resolve the agent config (and therefore the tenant) -->
+            <if condition="configId">
+                <entity-find-one entity-name="moqui.adk.AdkAgentConfig" value-field="cfg"
+                    auto-field-map="[adkAgentConfigId: configId]"/>
+            </if>
+
+            <!-- Classify + decide. Uses the Moqui service-definition API (Java), so Groovy. -->
+            <script><![CDATA[
+                def sd = ec.service.getServiceDefinition(serviceName)
+                // Moqui verb convention mirrors authz-action derivation: these are reads,
+                // everything else (create/update/delete/store/send/...) is a write.
+                def READ_VERBS = ['get','find','search','view','list','check','calculate',
+                                  'validate','count','export'] as Set
+                // Implicit entity-auto CRUD (create#/get#/update#/delete#<Entity>) has NO
+                // ServiceDefinition, so fall back to the verb prefix of the service name —
+                // otherwise every entity-auto call is misclassified as a write.
+                def verb = sd?.verb ?: (serviceName?.contains('#') ? serviceName.substring(0, serviceName.indexOf('#')) : '')
+                verbClass = READ_VERBS.contains(verb) ? 'read' : 'write'
+
+                def pinned = new LinkedHashMap(parameters ?: [:])
+                ownerPartyId = cfg?.ownerPartyId
+                agentPartyId = cfg?.agentPartyId
+                // Does the target accept an ownerPartyId? Defined services: read the in-params.
+                // Entity-auto CRUD: inspect the entity's fields so tenant-pinning still applies.
+                def acceptsOwner = false
+                if (sd != null) {
+                    acceptsOwner = sd.getInParameterNames()?.contains('ownerPartyId') ?: false
+                } else if (serviceName?.contains('#')) {
+                    try {
+                        String entName = serviceName.substring(serviceName.indexOf('#') + 1)
+                        def ed = ec.entity.getEntityDefinition(entName)
+                        acceptsOwner = ed?.getAllFieldNames()?.contains('ownerPartyId') ?: false
+                    } catch (ignored) { }
+                }
+                tenantViolation = false
+                if (ownerPartyId && acceptsOwner) {
+                    if (pinned.ownerPartyId && (pinned.ownerPartyId as String) != (ownerPartyId as String))
+                        tenantViolation = true
+                    pinned.ownerPartyId = ownerPartyId   // pin to the agent's own tenant
+                }
+                parameters = pinned
+
+                // New agents are created with explicit safe defaults (readOnly/approve) by
+                // AdkServices.update#AgentConfig. A null here therefore means a legacy row
+                // created before governance existed → treat as unrestricted so existing
+                // agents (e.g. the CI Monitor) keep working until an admin scopes them.
+                def toolMode    = cfg?.toolMode ?: 'full'
+                def writePolicy = cfg?.writePolicy ?: 'allow'
+                decision = 'allowed'
+                message  = null
+
+                if (tenantViolation) {
+                    decision = 'blocked'
+                    message  = "Cross-tenant access denied: agent may only act on its own company."
+                } else if (cfg == null) {
+                    // No agent config resolved (e.g. MCP called outside an ADK agent, or
+                    // configId not propagated). Allow but flag — preserves legacy behaviour.
+                    decision = 'allowed'
+                    message  = 'ungoverned: no agent config resolved'
+                } else {
+                    if (toolMode == 'readOnly' && verbClass == 'write') {
+                        decision = 'blocked'
+                        message  = "This agent is read-only and may not run '${serviceName}'."
+                    } else if (toolMode == 'scoped') {
+                        def globs = ((cfg.serviceAllowlist ?: '') as String).split(/[,\s]+/).findAll { it }
+                        def ok = globs.any { g ->
+                            def rx = '^' + java.util.regex.Pattern.quote(g).replace('\\*', '\\E.*\\Q') + '$'
+                            serviceName ==~ rx
+                        }
+                        if (!ok) {
+                            decision = 'blocked'
+                            message  = "'${serviceName}' is not in this agent's allowed-service list."
+                        }
+                    }
+                    if (decision == 'allowed') {
+                        def hasCustomLlm = false
+                        if (cfg?.apiKey) hasCustomLlm = true
+                        if (!hasCustomLlm && ownerPartyId) {
+                            def lc = ec.entity.find('growerp.general.LlmConfig')
+                                .condition('ownerPartyId', ownerPartyId)
+                                .condition('llmProvider', 'gemini').one()
+                            if (lc?.apiKey) hasCustomLlm = true
+                        }
+                        if (!hasCustomLlm && ownerPartyId) {
+                            def ss = ec.entity.find('growerp.general.SystemSettings').condition('ownerPartyId', ownerPartyId).one()
+                            if (ss?.llmSystemTokenLimit != null && ss.llmSystemTokenLimit > 0) {
+                                def cal = Calendar.getInstance()
+                                cal.set(Calendar.DAY_OF_MONTH, 1)
+                                cal.set(Calendar.HOUR_OF_DAY, 0)
+                                cal.set(Calendar.MINUTE, 0)
+                                cal.set(Calendar.SECOND, 0)
+                                def startOfMonth = new java.sql.Timestamp(cal.getTimeInMillis())
+                                
+                                def iter = ec.entity.find('moqui.adk.AdkActionLog')
+                                    .condition('ownerPartyId', ownerPartyId)
+                                    .condition('actionTime', org.moqui.entity.EntityCondition.GREATER_THAN_EQUAL_TO, startOfMonth)
+                                    .selectField('tokensTotal').iterator()
+                                long totalUsed = 0
+                                while (iter.hasNext()) {
+                                    def r = iter.next()
+                                    totalUsed += (r.tokensTotal ?: 0)
+                                }
+                                iter.close()
+                                
+                                if (totalUsed >= ss.llmSystemTokenLimit) {
+                                    decision = 'blocked'
+                                    message = "System LLM token limit exceeded for this month (${totalUsed} >= ${ss.llmSystemTokenLimit}). Please add your own API Key."
+                                }
+                            }
+                        }
+                    }
+                    if (decision == 'allowed' && verbClass == 'write') {
+                        if (writePolicy == 'block') {
+                            decision = 'blocked'
+                            message  = "Write actions are disabled for this agent."
+                        } else if (writePolicy == 'approve') {
+                            decision = 'pending'
+                            message  = "Action queued for human approval before it runs."
+                        }
+                    }
+                }
+                argsJson = groovy.json.JsonOutput.toJson(pinned)
+            ]]></script>
+
+            <!-- Audit log (always) -->
+            <service-call name="create#moqui.adk.AdkActionLog" out-map="logOut"
+                in-map="[ownerPartyId: ownerPartyId, configId: configId, parentConfigId: parentConfigId,
+                         adkSessionId: adkSessionId, agentPartyId: agentPartyId, toolName: toolName,
+                         serviceName: serviceName, argsJson: argsJson, verbClass: verbClass,
+                         decision: decision, reason: message, actionTime: ec.user.nowTimestamp,
+                         tokensIn: 0, tokensOut: 0, tokensTotal: 0]"/>
+            <set field="adkActionLogId" from="logOut.adkActionLogId"/>
+
+            <!-- Pending → create approval + post an approval card to the agent's chat room -->
+            <if condition="decision == 'pending'">
+                <service-call name="create#moqui.adk.AdkApproval" out-map="apprOut"
+                    in-map="[ownerPartyId: ownerPartyId, adkActionLogId: adkActionLogId,
+                             configId: configId, serviceName: serviceName, argsJson: argsJson,
+                             status: 'pending', requestedByUserId: ec.user.userId,
+                             requestTime: ec.user.nowTimestamp]"/>
+                <if condition="cfg?.approvalChatRoomId">
+                    <set field="cardText" from="'🔔 Approval needed — agent &quot;' + (cfg.agentName ?: 'Agent') +
+                        '&quot; wants to run ' + serviceName + '\n' + argsJson +
+                        '\nApprove/Reject in ADK → Approvals (id ' + apprOut.adkApprovalId + ').'"/>
+                    <service-call name="AdkGovernanceServices.post#AgentChatMessage"
+                        in-map="[chatRoomId: cfg.approvalChatRoomId, ownerPartyId: ownerPartyId,
+                                 agentName: cfg.agentName, content: cardText]"/>
+                </if>
+            </if>
+        </actions>
+    </service>
+
+    <!-- record#AgentResult — post-execution: stash a short result + token usage on the log row -->
+    <service verb="record" noun="AgentResult" authenticate="false">
+        <description>Attach execution result summary and token usage to an AdkActionLog row.</description>
+        <in-parameters>
+            <parameter name="adkActionLogId" required="true"/>
+            <parameter name="resultSummary"/>
+            <parameter name="tokensIn"  type="Long"/>
+            <parameter name="tokensOut" type="Long"/>
+        </in-parameters>
+        <actions>
+            <entity-find-one entity-name="moqui.adk.AdkActionLog" value-field="row" for-update="true"/>
+            <if condition="row">
+                <set field="row.resultSummary" from="resultSummary != null ? (resultSummary.toString().take(2000)) : row.resultSummary"/>
+                <if condition="tokensIn != null"><set field="row.tokensIn" from="tokensIn"/></if>
+                <if condition="tokensOut != null"><set field="row.tokensOut" from="tokensOut"/></if>
+                <if condition="tokensIn != null || tokensOut != null">
+                    <set field="row.tokensTotal" from="(row.tokensIn ?: 0) + (row.tokensOut ?: 0)"/>
+                </if>
+                <entity-update value-field="row"/>
+            </if>
+        </actions>
+    </service>
+
+    <!-- ─────────────────────────────────────────────────────────────────────────
+         approve / reject — decide a pending AdkApproval. Owner-scoped: callerOwnerPartyId
+         must match the approval's ownerPartyId. On approve, runs the stored service.
+         ───────────────────────────────────────────────────────────────────────── -->
+    <service verb="approve" noun="AdkApproval" authenticate="false" transaction-timeout="300">
+        <description>Approve a pending agent action and execute the stored service.</description>
+        <in-parameters>
+            <parameter name="adkApprovalId" required="true"/>
+            <parameter name="callerOwnerPartyId"/>
+            <parameter name="decidedByUserId"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="status"/>
+            <parameter name="resultSummary"/>
+        </out-parameters>
+        <actions>
+            <entity-find-one entity-name="moqui.adk.AdkApproval" value-field="appr" for-update="true"/>
+            <if condition="appr == null"><return error="true" message="Approval not found"/></if>
+            <if condition="callerOwnerPartyId &amp;&amp; appr.ownerPartyId != callerOwnerPartyId">
+                <return error="true" message="Not authorized: approval belongs to another company."/>
+            </if>
+            <if condition="appr.status != 'pending'">
+                <return error="true" message="Approval already ${appr.status}."/>
+            </if>
+            <script><![CDATA[
+                def args = appr.argsJson ? new groovy.json.JsonSlurper().parseText(appr.argsJson as String) : [:]
+                def res
+                try {
+                    res = ec.service.sync().name(appr.serviceName as String).parameters(args).call()
+                    resultSummary = groovy.json.JsonOutput.toJson(res).take(2000)
+                    status = 'approved'
+                } catch (Exception e) {
+                    resultSummary = "Execution failed: ${e.message}"
+                    status = 'approved'   // decision stands; record the failure
+                }
+            ]]></script>
+            <set field="appr.status" value="approved"/>
+            <set field="appr.decidedByUserId" from="decidedByUserId ?: ec.user.userId"/>
+            <set field="appr.decisionTime" from="ec.user.nowTimestamp"/>
+            <entity-update value-field="appr"/>
+            <if condition="appr.adkActionLogId">
+                <service-call name="AdkGovernanceServices.record#AgentResult"
+                    in-map="[adkActionLogId: appr.adkActionLogId, resultSummary: resultSummary]"/>
+                <entity-find-one entity-name="moqui.adk.AdkActionLog" value-field="lg" for-update="true"
+                    auto-field-map="[adkActionLogId: appr.adkActionLogId]"/>
+                <if condition="lg"><set field="lg.decision" value="approved"/><entity-update value-field="lg"/></if>
+            </if>
+        </actions>
+    </service>
+
+    <service verb="reject" noun="AdkApproval" authenticate="false">
+        <description>Reject a pending agent action; the stored service is never run.</description>
+        <in-parameters>
+            <parameter name="adkApprovalId" required="true"/>
+            <parameter name="callerOwnerPartyId"/>
+            <parameter name="decidedByUserId"/>
+        </in-parameters>
+        <out-parameters><parameter name="status"/></out-parameters>
+        <actions>
+            <entity-find-one entity-name="moqui.adk.AdkApproval" value-field="appr" for-update="true"/>
+            <if condition="appr == null"><return error="true" message="Approval not found"/></if>
+            <if condition="callerOwnerPartyId &amp;&amp; appr.ownerPartyId != callerOwnerPartyId">
+                <return error="true" message="Not authorized: approval belongs to another company."/>
+            </if>
+            <if condition="appr.status != 'pending'">
+                <return error="true" message="Approval already ${appr.status}."/>
+            </if>
+            <set field="appr.status" value="rejected"/>
+            <set field="appr.decidedByUserId" from="decidedByUserId ?: ec.user.userId"/>
+            <set field="appr.decisionTime" from="ec.user.nowTimestamp"/>
+            <entity-update value-field="appr"/>
+            <set field="status" value="rejected"/>
+            <if condition="appr.adkActionLogId">
+                <entity-find-one entity-name="moqui.adk.AdkActionLog" value-field="lg" for-update="true"
+                    auto-field-map="[adkActionLogId: appr.adkActionLogId]"/>
+                <if condition="lg"><set field="lg.decision" value="rejected"/><entity-update value-field="lg"/></if>
+            </if>
+        </actions>
+    </service>
+
+    <!-- post#AgentChatMessage — shared helper: post a system message to a GrowERP chat room
+         (creating the room if needed) and push it over WebSocket to the other members.
+         Mirrors the proven path in AdkSchedulerServices. -->
+    <service verb="post" noun="AgentChatMessage" authenticate="false">
+        <in-parameters>
+            <parameter name="chatRoomId" required="true"/>
+            <parameter name="ownerPartyId"/>
+            <parameter name="agentName"/>
+            <parameter name="content" required="true"/>
+        </in-parameters>
+        <actions>
+            <entity-find-one entity-name="growerp.general.ChatRoom" value-field="chatRoom"
+                auto-field-map="[chatRoomId: chatRoomId]" disable-authz="true"/>
+            <if condition="!chatRoom">
+                <entity-make-value entity-name="growerp.general.ChatRoom" value-field="newRoom"/>
+                <set field="newRoom.chatRoomId"   from="chatRoomId"/>
+                <set field="newRoom.chatRoomName" value="ADK: ${agentName ?: 'Agent'}"/>
+                <set field="newRoom.isPrivate"    value="N"/>
+                <set field="newRoom.isActive"     value="Y"/>
+                <set field="newRoom.ownerPartyId" from="ownerPartyId"/>
+                <entity-create value-field="newRoom"/>
+            </if>
+            <entity-find entity-name="moqui.security.UserAccount" list="sysUserList">
+                <econdition field-name="username" value="SystemSupport"/>
+                <limit>1</limit>
+            </entity-find>
+            <set field="fromUserId" from="sysUserList ? sysUserList[0].userId : null"/>
+            <if condition="!fromUserId"><return/></if>
+            <service-call name="create#growerp.general.ChatMessage" disable-authz="true"
+                in-map="[chatRoomId: chatRoomId, fromUserId: fromUserId, content: content]"/>
+            <entity-find entity-name="growerp.general.ChatRoomMember" list="chatMembers" for-update="true">
+                <econdition field-name="chatRoomId" from="chatRoomId"/>
+                <econdition field-name="isActive" value="Y"/>
+            </entity-find>
+            <set field="pushUserIds" from="[]"/>
+            <iterate list="chatMembers" entry="member">
+                <if condition="member.userId != fromUserId">
+                    <set field="member.hasRead" value="N"/>
+                    <entity-update value-field="member"/>
+                    <script>pushUserIds.add(member.userId as String)</script>
+                </if>
+            </iterate>
+            <if condition="pushUserIds">
+                <script><![CDATA[
+                    org.moqui.impl.webapp.ChatEndpoint.pushToMembers(
+                        groovy.json.JsonOutput.toJson([
+                            chatRoom  : [chatRoomId: chatRoomId],
+                            fromUserId: fromUserId,
+                            content   : content,
+                        ]),
+                        pushUserIds)
+                ]]></script>
+            </if>
+        </actions>
+    </service>
+
+    <!-- expire#AdkApprovals — housekeeping: flip stale pending rows to expired -->
+    <service verb="expire" noun="AdkApprovals" authenticate="false">
+        <actions>
+            <entity-find entity-name="moqui.adk.AdkApproval" list="stale" for-update="true">
+                <econdition field-name="status" value="pending"/>
+                <econdition field-name="expireTime" operator="less" from="ec.user.nowTimestamp"/>
+                <econdition field-name="expireTime" operator="is-not-null"/>
+            </entity-find>
+            <iterate list="stale" entry="row">
+                <set field="row.status" value="expired"/>
+                <entity-update value-field="row"/>
+            </iterate>
+        </actions>
+    </service>
+
+</services>

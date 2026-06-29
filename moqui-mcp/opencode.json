@@ -1,0 +1,13 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "moqui_mcp": {
+      "type": "remote", 
+      "url": "http://localhost:8080/mcp",
+      "enabled": true,
+      "headers": {
+        "Authorization": "Basic am9obi5zYWxlczptb3F1aQ=="
+      }
+    }
+  }
+}

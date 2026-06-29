@@ -1,0 +1,363 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Phase 3 RAG: per-tenant knowledge base. Documents are chunked and embedded
+     (Gemini text-embedding-004); the searchKnowledge MCP tool retrieves the most
+     similar chunks for the agent's owner. In-DB cosine similarity — no ES. All
+     services are tenant-isolated by ownerPartyId. -->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
+
+    <!-- Resolve the tenant's Gemini API key (per-owner LlmConfig, else env). -->
+    <service verb="get" noun="TenantLlmKey" authenticate="false">
+        <in-parameters><parameter name="ownerPartyId"/></in-parameters>
+        <out-parameters><parameter name="apiKey"/></out-parameters>
+        <actions>
+            <entity-find-one entity-name="growerp.general.LlmConfig" value-field="llm">
+                <field-map field-name="ownerPartyId"/>
+                <field-map field-name="llmProvider" value="gemini"/>
+            </entity-find-one>
+            <set field="apiKey" from="llm?.apiKey ?: System.getenv('GOOGLE_API_KEY') ?: System.getProperty('GOOGLE_API_KEY')"/>
+        </actions>
+    </service>
+
+    <!-- Embed one text with Gemini text-embedding-004. Returns a List&lt;Double&gt;. -->
+    <service verb="embed" noun="Text" authenticate="false" transaction-timeout="60">
+        <in-parameters>
+            <parameter name="text" required="true"/>
+            <parameter name="ownerPartyId"/>
+            <parameter name="apiKey"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="embedding" type="List"/>
+            <parameter name="model"/>
+        </out-parameters>
+        <actions>
+            <if condition="!apiKey">
+                <service-call name="AdkKnowledgeServices.get#TenantLlmKey"
+                    in-map="[ownerPartyId: ownerPartyId]" out-map="context"/>
+            </if>
+            <if condition="!apiKey"><return error="true" message="No Gemini API key configured for this company."/></if>
+            <!-- Embedding model (overridable via env). gemini-embedding-001 is the current
+                 GA model; older text-embedding-004 is rejected by some keys/API versions. -->
+            <set field="model" from="System.getenv('GEMINI_EMBED_MODEL') ?: System.getProperty('GEMINI_EMBED_MODEL') ?: 'gemini-embedding-001'"/>
+            <script><![CDATA[
+                import groovy.json.JsonOutput
+                import groovy.json.JsonSlurper
+                String url = "https://generativelanguage.googleapis.com/v1beta/models/${model}:embedContent?key=${apiKey}"
+                String body = JsonOutput.toJson([content: [parts: [[text: text]]]])
+                HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection()
+                conn.setRequestMethod('POST')
+                conn.setRequestProperty('Content-Type', 'application/json')
+                conn.setConnectTimeout(15000); conn.setReadTimeout(30000)
+                conn.doOutput = true
+                conn.outputStream.withWriter('UTF-8') { it.write(body) }
+                int code = conn.responseCode
+                String resp = ((code >= 200 && code < 300) ? conn.inputStream : conn.errorStream)?.getText('UTF-8')
+                if (code < 200 || code >= 300) {
+                    ec.message.addError("Embedding request failed (${code}): ${resp?.take(300)}")
+                    return
+                }
+                def parsed = new JsonSlurper().parseText(resp)
+                embedding = parsed?.embedding?.values
+                if (embedding == null) ec.message.addError("No embedding in response: ${resp?.take(200)}")
+            ]]></script>
+        </actions>
+    </service>
+
+    <!-- Ingest a document/note: chunk, embed each chunk, store. -->
+    <service verb="ingest" noun="AdkKnowledge" authenticate="false" transaction-timeout="600">
+        <in-parameters>
+            <parameter name="ownerPartyId" required="true"/>
+            <parameter name="title" required="true"/>
+            <parameter name="text" required="true"/>
+            <parameter name="sourceType" default-value="note"/>
+            <parameter name="sourceId"/>
+            <parameter name="mimeType" default-value="text/plain"/>
+            <parameter name="createdByUserId"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="adkKnowledgeDocId"/>
+            <parameter name="chunkCount" type="Integer"/>
+        </out-parameters>
+        <actions>
+            <service-call name="create#moqui.adk.AdkKnowledgeDoc" out-map="context"
+                in-map="[ownerPartyId: ownerPartyId, sourceType: sourceType, sourceId: sourceId,
+                         title: title, mimeType: mimeType, enabled: 'Y',
+                         createdByUserId: createdByUserId ?: ec.user.userId,
+                         createdDate: ec.user.nowTimestamp]"/>
+            <service-call name="AdkKnowledgeServices.index#AdkKnowledgeChunks" out-map="context"
+                in-map="[adkKnowledgeDocId: adkKnowledgeDocId, ownerPartyId: ownerPartyId, text: text]"/>
+        </actions>
+    </service>
+
+    <!-- (Re)build the chunk+embedding set for a doc: drop existing chunks, then
+         chunk the text (~2000 chars, ~200 overlap) and embed each. Shared by
+         ingest and update. -->
+    <service verb="index" noun="AdkKnowledgeChunks" authenticate="false" transaction-timeout="600">
+        <in-parameters>
+            <parameter name="adkKnowledgeDocId" required="true"/>
+            <parameter name="ownerPartyId" required="true"/>
+            <parameter name="text" required="true"/>
+        </in-parameters>
+        <out-parameters><parameter name="chunkCount" type="Integer"/></out-parameters>
+        <actions>
+            <entity-find entity-name="moqui.adk.AdkKnowledgeChunk" list="oldChunks">
+                <econdition field-name="adkKnowledgeDocId"/>
+            </entity-find>
+            <iterate list="oldChunks" entry="oc"><entity-delete value-field="oc"/></iterate>
+            <script><![CDATA[
+                String t = (text as String).trim()
+                int size = 2000, overlap = 200
+                chunks = []
+                if (t.length() <= size) { chunks = [t] }
+                else {
+                    int i = 0
+                    while (i < t.length()) {
+                        int end = Math.min(i + size, t.length())
+                        if (end < t.length()) {
+                            int ws = t.lastIndexOf(' ', end)
+                            if (ws > i + (size/2 as int)) end = ws
+                        }
+                        chunks.add(t.substring(i, end).trim())
+                        if (end >= t.length()) break
+                        i = end - overlap
+                        if (i < 0) i = 0
+                    }
+                }
+                chunks = chunks.findAll { it }
+            ]]></script>
+            <set field="seq" from="0"/>
+            <iterate list="chunks" entry="chunkText">
+                <service-call name="AdkKnowledgeServices.embed#Text"
+                    in-map="[text: chunkText, ownerPartyId: ownerPartyId]" out-map="embedOut"/>
+                <set field="embJson" from="groovy.json.JsonOutput.toJson(embedOut.embedding)"/>
+                <service-call name="create#moqui.adk.AdkKnowledgeChunk"
+                    in-map="[ownerPartyId: ownerPartyId, adkKnowledgeDocId: adkKnowledgeDocId,
+                             seq: seq, text: chunkText, embeddingJson: embJson,
+                             embeddingModel: embedOut.model, tokens: (chunkText.length() / 4) as int]"/>
+                <set field="seq" from="seq + 1"/>
+            </iterate>
+            <set field="chunkCount" from="seq"/>
+        </actions>
+    </service>
+
+    <!-- Update a doc's title and/or text (re-chunks + re-embeds on text change). -->
+    <service verb="update" noun="AdkKnowledge" authenticate="false" transaction-timeout="600">
+        <in-parameters>
+            <parameter name="adkKnowledgeDocId" required="true"/>
+            <parameter name="ownerPartyId" required="true"/>
+            <parameter name="title"/>
+            <parameter name="text"/>
+        </in-parameters>
+        <out-parameters><parameter name="chunkCount" type="Integer"/></out-parameters>
+        <actions>
+            <entity-find-one entity-name="moqui.adk.AdkKnowledgeDoc" value-field="doc"/>
+            <if condition="!doc || doc.ownerPartyId != ownerPartyId">
+                <return error="true" message="Knowledge document not found"/>
+            </if>
+            <if condition="title != null">
+                <set field="doc.title" from="title"/>
+                <entity-update value-field="doc"/>
+            </if>
+            <if condition="text != null">
+                <service-call name="AdkKnowledgeServices.index#AdkKnowledgeChunks" out-map="context"
+                    in-map="[adkKnowledgeDocId: adkKnowledgeDocId, ownerPartyId: ownerPartyId, text: text]"/>
+            </if>
+        </actions>
+    </service>
+
+    <!-- Semantic search over the owner's chunks. Returns top-K {text,title,sourceType,score}. -->
+    <service verb="search" noun="AdkKnowledge" authenticate="false" transaction-timeout="60">
+        <in-parameters>
+            <parameter name="ownerPartyId" required="true"/>
+            <parameter name="query" required="true"/>
+            <parameter name="limit" type="Integer" default="5"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="results" type="List"/>
+        </out-parameters>
+        <actions>
+            <service-call name="AdkKnowledgeServices.embed#Text"
+                in-map="[text: query, ownerPartyId: ownerPartyId]" out-map="qEmbed"/>
+            <entity-find entity-name="moqui.adk.AdkKnowledgeChunk" list="chunkList">
+                <econdition field-name="ownerPartyId"/>
+            </entity-find>
+            <script><![CDATA[
+                import groovy.json.JsonSlurper
+                def q = qEmbed.embedding?.collect { (it as Number).doubleValue() }
+                results = []
+                if (q == null) return
+                double qNorm = Math.sqrt(q.sum { it * it } as double)
+                def slurper = new JsonSlurper()
+                def scored = []
+                for (chunk in chunkList) {
+                    def v = slurper.parseText(chunk.embeddingJson as String)?.collect { (it as Number).doubleValue() }
+                    if (v == null || v.size() != q.size()) continue
+                    double dot = 0.0, vNorm = 0.0
+                    for (int i = 0; i < q.size(); i++) { dot += q[i] * v[i]; vNorm += v[i] * v[i] }
+                    vNorm = Math.sqrt(vNorm)
+                    double score = (qNorm == 0 || vNorm == 0) ? 0.0 : dot / (qNorm * vNorm)
+                    scored.add([chunk: chunk, score: score])
+                }
+                scored.sort { -it.score }
+                def docTitles = [:]
+                results = scored.take(limit as int).collect { s ->
+                    def c = s.chunk
+                    String title = docTitles[c.adkKnowledgeDocId]
+                    if (title == null) {
+                        def d = ec.entity.find('moqui.adk.AdkKnowledgeDoc')
+                                .condition('adkKnowledgeDocId', c.adkKnowledgeDocId).one()
+                        title = d?.title ?: ''
+                        docTitles[c.adkKnowledgeDocId] = title
+                    }
+                    [text: c.text, title: title, sourceType: null, score: s.score]
+                }
+            ]]></script>
+        </actions>
+    </service>
+
+    <service verb="delete" noun="AdkKnowledgeDoc" authenticate="false">
+        <in-parameters><parameter name="adkKnowledgeDocId" required="true"/></in-parameters>
+        <actions>
+            <entity-find entity-name="moqui.adk.AdkKnowledgeChunk" list="chs">
+                <econdition field-name="adkKnowledgeDocId"/>
+            </entity-find>
+            <iterate list="chs" entry="ch"><entity-delete value-field="ch"/></iterate>
+            <entity-find-one entity-name="moqui.adk.AdkKnowledgeDoc" value-field="doc"/>
+            <if condition="doc"><entity-delete value-field="doc"/></if>
+        </actions>
+    </service>
+
+    <!-- ── Memory ──────────────────────────────────────────────────────────────
+         generate#Text — one-shot Gemini generateContent (used by summarisation). -->
+    <service verb="generate" noun="Text" authenticate="false" transaction-timeout="120">
+        <in-parameters>
+            <parameter name="prompt" required="true"/>
+            <parameter name="ownerPartyId"/>
+            <parameter name="apiKey"/>
+            <parameter name="model" default-value="gemini-2.5-flash"/>
+        </in-parameters>
+        <out-parameters><parameter name="text"/></out-parameters>
+        <actions>
+            <if condition="!apiKey">
+                <service-call name="AdkKnowledgeServices.get#TenantLlmKey"
+                    in-map="[ownerPartyId: ownerPartyId]" out-map="context"/>
+            </if>
+            <if condition="!apiKey"><return error="true" message="No Gemini API key configured."/></if>
+            <script><![CDATA[
+                import groovy.json.JsonOutput
+                import groovy.json.JsonSlurper
+                String url = "https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}"
+                String body = JsonOutput.toJson([contents: [[parts: [[text: prompt]]]]])
+                HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection()
+                conn.setRequestMethod('POST'); conn.setRequestProperty('Content-Type', 'application/json')
+                conn.setConnectTimeout(15000); conn.setReadTimeout(60000); conn.doOutput = true
+                conn.outputStream.withWriter('UTF-8') { it.write(body) }
+                int code = conn.responseCode
+                String resp = ((code >= 200 && code < 300) ? conn.inputStream : conn.errorStream)?.getText('UTF-8')
+                if (code < 200 || code >= 300) { ec.message.addError("generateContent failed (${code}): ${resp?.take(300)}"); return }
+                def p = new JsonSlurper().parseText(resp)
+                text = p?.candidates?.getAt(0)?.content?.parts?.getAt(0)?.text ?: ''
+            ]]></script>
+        </actions>
+    </service>
+
+    <!-- Summarise a session's events into the rolling AdkMemory for (owner,user). -->
+    <service verb="summarize" noun="AdkSession" authenticate="false" transaction-timeout="180">
+        <in-parameters><parameter name="adkSessionId" required="true"/></in-parameters>
+        <out-parameters><parameter name="adkMemoryId"/><parameter name="updated" type="Boolean"/></out-parameters>
+        <actions>
+            <entity-find-one entity-name="moqui.adk.AdkSession" value-field="sess"/>
+            <if condition="!sess"><return/></if>
+            <set field="userId" from="sess.userId"/>
+            <!-- owner from the user's party (robust for the default interactive config too) -->
+            <entity-find-one entity-name="moqui.security.UserAccount" value-field="ua"
+                auto-field-map="[userId: userId]"/>
+            <entity-find-one entity-name="mantle.party.Party" value-field="party"
+                auto-field-map="[partyId: ua?.partyId]"/>
+            <set field="ownerPartyId" from="party?.ownerPartyId"/>
+            <if condition="!ownerPartyId || !userId"><return/></if>
+
+            <entity-find entity-name="moqui.adk.AdkSessionEvent" list="events">
+                <econdition field-name="adkSessionId"/>
+                <order-by field-name="eventTime"/>
+                <limit>80</limit>
+            </entity-find>
+            <if condition="!events"><return/></if>
+            <entity-find-one entity-name="moqui.adk.AdkMemory" value-field="mem">
+                <field-map field-name="ownerPartyId"/>
+                <field-map field-name="userId"/>
+            </entity-find-one>
+            <script><![CDATA[
+                def sb = new StringBuilder()
+                events.each { e -> if (e.eventJson) sb.append(e.eventJson as String).append('\n') }
+                String transcript = sb.toString()
+                if (transcript.length() > 12000) transcript = transcript.substring(transcript.length() - 12000)
+                prompt = """You maintain a concise running memory about a user and their company for an ERP assistant.
+Existing memory (may be empty):
+${mem?.summaryText ?: '(none)'}
+
+New conversation events (raw JSON, newest last):
+${transcript}
+
+Update the memory: output 4-8 short bullet points capturing durable facts and preferences worth
+remembering for future conversations (names, roles, recurring requests, stated preferences,
+ongoing tasks). Exclude one-off chit-chat and anything secret (keys, tokens). Output only the bullets."""
+            ]]></script>
+            <service-call name="AdkKnowledgeServices.generate#Text"
+                in-map="[prompt: prompt, ownerPartyId: ownerPartyId]" out-map="genOut"/>
+            <if condition="!genOut.text"><return/></if>
+            <if condition="mem">
+                <set field="mem.summaryText" from="genOut.text"/>
+                <set field="mem.lastUpdated" from="ec.user.nowTimestamp"/>
+                <entity-update value-field="mem"/>
+                <set field="adkMemoryId" from="mem.adkMemoryId"/>
+                <else>
+                    <service-call name="create#moqui.adk.AdkMemory" out-map="context"
+                        in-map="[ownerPartyId: ownerPartyId, userId: userId, summaryText: genOut.text,
+                                 lastUpdated: ec.user.nowTimestamp]"/>
+                </else>
+            </if>
+            <set field="updated" from="true"/>
+        </actions>
+    </service>
+
+    <!-- Auto-ingest the tenant's product catalog as knowledge docs (one per product,
+         sourceType=product). Upserts by sourceId so re-running re-indexes in place
+         instead of duplicating. -->
+    <service verb="ingest" noun="ProductCatalog" authenticate="false" transaction-timeout="3600">
+        <in-parameters><parameter name="ownerPartyId" required="true"/></in-parameters>
+        <out-parameters><parameter name="productCount" type="Integer"/></out-parameters>
+        <actions>
+            <entity-find entity-name="mantle.product.Product" list="products">
+                <econdition field-name="ownerPartyId"/>
+                <order-by field-name="productName"/>
+                <limit>1000</limit>
+            </entity-find>
+            <set field="productCount" from="0"/>
+            <iterate list="products" entry="prod">
+                <set field="title" from="prod.productName ?: prod.pseudoId ?: prod.productId"/>
+                <set field="bodyText" from="'Product: ' + (prod.productName ?: '') + ' (ID: ' + (prod.pseudoId ?: prod.productId) + ')\n' + (prod.description ?: '')"/>
+                <entity-find entity-name="moqui.adk.AdkKnowledgeDoc" list="existing">
+                    <econdition field-name="ownerPartyId"/>
+                    <econdition field-name="sourceType" value="product"/>
+                    <econdition field-name="sourceId" from="prod.productId"/>
+                    <limit>1</limit>
+                </entity-find>
+                <if condition="existing">
+                    <set field="doc" from="existing[0]"/>
+                    <set field="doc.title" from="title"/>
+                    <entity-update value-field="doc"/>
+                    <service-call name="AdkKnowledgeServices.index#AdkKnowledgeChunks"
+                        in-map="[adkKnowledgeDocId: doc.adkKnowledgeDocId, ownerPartyId: ownerPartyId, text: bodyText]"/>
+                    <else>
+                        <service-call name="AdkKnowledgeServices.ingest#AdkKnowledge"
+                            in-map="[ownerPartyId: ownerPartyId, title: title, text: bodyText,
+                                     sourceType: 'product', sourceId: prod.productId]"/>
+                    </else>
+                </if>
+                <set field="productCount" from="productCount + 1"/>
+            </iterate>
+        </actions>
+    </service>
+
+</services>

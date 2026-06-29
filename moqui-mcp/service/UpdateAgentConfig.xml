@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
+
+    <service verb="update" noun="ModelName" authenticate="false">
+        <description>Update modelName in ProductStoreAiConfig</description>
+        <actions>
+            <script><![CDATA[
+                def config = ec.entity.find("moqui.mcp.agent.ProductStoreAiConfig")
+                    .condition("productStoreId", "POPC_DEFAULT")
+                    .condition("aiConfigId", "DEFAULT")
+                    .one()
+                
+                if (config) {
+                    ec.logger.info("UPDATE MODEL NAME: Current=${config.modelName}")
+                    config.modelName = "devstral"
+                    config.update()
+                    ec.logger.info("UPDATE MODEL NAME: Updated to=${config.modelName}")
+                    return "Updated modelName to devstral"
+                } else {
+                    ec.logger.warn("UPDATE MODEL NAME: Config not found")
+                    return "Config not found"
+                }
+            ]]></script>
+        </actions>
+    </service>
+</services>

@@ -1,0 +1,316 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
+
+    <!-- MCP Test Services for comprehensive testing -->
+
+    <service verb="create" noun="TestProduct" authenticate="true" transaction-timeout="300">
+        <description>Create a test product for MCP testing</description>
+        <in-parameters>
+            <parameter name="productName" required="true" type="String"/>
+            <parameter name="description" type="String"/>
+            <parameter name="price" type="BigDecimal" default="19.99"/>
+            <parameter name="category" type="String" default="Test"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="productId" type="String"/>
+            <parameter name="success" type="Boolean"/>
+            <parameter name="message" type="String"/>
+        </out-parameters>
+        <actions>
+            <set field="productId" from="'TEST-' + System.currentTimeMillis()"/>
+
+            <entity-create entity-name="mantle.product.Product" value-field="product">
+                <field-map field-name="productId" from="productId"/>
+                <field-map field-name="productName" from="productName"/>
+                <field-map field-name="description" from="description"/>
+                <field-map field-name="internalName" from="productName"/>
+            </entity-create>
+
+            <entity-create entity-name="mantle.product.ProductPrice" value-field="priceRec">
+                <field-map field-name="productId" from="productId"/>
+                <field-map field-name="productPriceTypeId" value="DEFAULT_PRICE"/>
+                <field-map field-name="price" from="price"/>
+                <field-map field-name="fromDate" from="ec.user.nowTimestamp"/>
+            </entity-create>
+
+            <set field="success" value="true"/>
+            <set field="message" value="Test product created successfully"/>
+            <log level="info" message="Created test product ${productId} for MCP testing"/>
+        </actions>
+    </service>
+
+    <service verb="create" noun="TestCustomer" authenticate="true" transaction-timeout="300">
+        <description>Create a test customer for MCP testing</description>
+        <in-parameters>
+            <parameter name="firstName" required="true" type="String"/>
+            <parameter name="lastName" required="true" type="String"/>
+            <parameter name="email" required="true" type="String"/>
+            <parameter name="phoneNumber" type="String"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="partyId" type="String"/>
+            <parameter name="success" type="Boolean"/>
+            <parameter name="message" type="String"/>
+        </out-parameters>
+        <actions>
+            <set field="partyId" from="'TEST-' + System.currentTimeMillis()"/>
+
+            <entity-create entity-name="mantle.party.Party" value-field="party">
+                <field-map field-name="partyId" from="partyId"/>
+                <field-map field-name="partyTypeEnumId" value="PtyIndividual"/>
+                <field-map field-name="statusId" value="PartActive"/>
+            </entity-create>
+
+            <entity-create entity-name="mantle.party.Person" value-field="person">
+                <field-map field-name="partyId" from="partyId"/>
+                <field-map field-name="firstName" from="firstName"/>
+                <field-map field-name="lastName" from="lastName"/>
+            </entity-create>
+
+            <entity-create entity-name="mantle.party.PartyContactMech" value-field="pcm">
+                <field-map field-name="partyId" from="partyId"/>
+                <field-map field-name="contactMechId" from="'EMAIL-' + partyId"/>
+                <field-map field-name="contactMechTypeEnumId" value="CmtEmail"/>
+                <field-map field-name="fromDate" from="ec.user.nowTimestamp"/>
+            </entity-create>
+
+            <entity-create entity-name="mantle.party.ContactMech" value-field="cm">
+                <field-map field-name="contactMechId" from="'EMAIL-' + partyId"/>
+                <field-map field-name="infoString" from="email"/>
+            </entity-create>
+
+            <set field="success" value="true"/>
+            <set field="message" value="Test customer created successfully"/>
+            <log level="info" message="Created test customer ${partyId} for MCP testing"/>
+        </actions>
+    </service>
+
+    <service verb="create" noun="TestOrder" authenticate="true" transaction-timeout="300">
+        <description>Create a test order for MCP testing</description>
+        <in-parameters>
+            <parameter name="customerId" required="true" type="String"/>
+            <parameter name="productId" required="true" type="String"/>
+            <parameter name="quantity" type="Integer" default="1"/>
+            <parameter name="price" type="BigDecimal"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="orderId" type="String"/>
+            <parameter name="success" type="Boolean"/>
+            <parameter name="message" type="String"/>
+        </out-parameters>
+        <actions>
+            <set field="orderId" from="'TEST-ORD-' + System.currentTimeMillis()"/>
+
+            <!-- Get product price if not provided -->
+            <if condition="price == null">
+                <entity-find-one entity-name="mantle.product.ProductPrice"
+                    value-field="productPrice">
+                    <field-map field-name="productId" from="productId"/>
+                    <field-map field-name="productPriceTypeId" value="DEFAULT_PRICE"/>
+                </entity-find-one>
+                <set field="price" from="productPrice?.price ?: 19.99"/>
+            </if>
+
+            <!-- Create order header -->
+            <entity-create entity-name="mantle.order.OrderHeader" value-field="orderHeader">
+                <field-map field-name="orderId" from="orderId"/>
+                <field-map field-name="orderTypeEnumId" value="OrdSales"/>
+                <field-map field-name="statusId" value="OrdCreated"/>
+                <field-map field-name="partyId" from="customerId"/>
+                <field-map field-name="entryDate" from="ec.user.nowTimestamp"/>
+                <field-map field-name="grandTotal" from="price * quantity"/>
+            </entity-create>
+
+            <!-- Create order item -->
+            <entity-create entity-name="mantle.order.OrderItem" value-field="orderItem">
+                <field-map field-name="orderId" from="orderId"/>
+                <field-map field-name="orderItemSeqId" value="00001"/>
+                <field-map field-name="productId" from="productId"/>
+                <field-map field-name="quantity" from="quantity"/>
+                <field-map field-name="unitAmount" from="price"/>
+                <field-map field-name="itemTypeEnumId" value="OrdItemProduct"/>
+            </entity-create>
+
+            <set field="success" value="true"/>
+            <set field="message" value="Test order created successfully"/>
+            <log level="info" message="Created test order ${orderId} for MCP testing"/>
+        </actions>
+    </service>
+
+    <service verb="get" noun="TestProducts" authenticate="true">
+        <description>Get test products for MCP testing</description>
+        <in-parameters>
+            <parameter name="limit" type="Integer" default="10"/>
+            <parameter name="category" type="String"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="products" type="List"/>
+            <parameter name="count" type="Integer"/>
+        </out-parameters>
+        <actions>
+            <entity-find entity-name="mantle.product.Product" list="products" limit="limit">
+                <econdition field-name="productName" operator="like" value="%${category}%"/>
+                <order-by field-name="createdDate"/>
+            </entity-find>
+            <set field="count" from="products.size()"/>
+        </actions>
+    </service>
+
+    <service verb="get" noun="TestOrders" authenticate="true">
+        <description>Get test orders for MCP testing</description>
+        <in-parameters>
+            <parameter name="customerId" type="String"/>
+            <parameter name="limit" type="Integer" default="10"/>
+            <parameter name="status" type="String"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="orders" type="List"/>
+            <parameter name="count" type="Integer"/>
+        </out-parameters>
+        <actions>
+            <entity-find entity-name="mantle.order.OrderHeader" list="orders" limit="limit">
+                <econdition field-name="partyId" from="customerId"/>
+                <econdition field-name="statusId" from="status"/>
+                <order-by field-name="entryDate" descending="true"/>
+            </entity-find>
+            <set field="count" from="orders.size()"/>
+        </actions>
+    </service>
+
+    <service verb="run" noun="EcommerceWorkflow" authenticate="true" transaction-timeout="600">
+        <description>Run complete e-commerce workflow for MCP testing</description>
+        <in-parameters>
+            <parameter name="productName" required="true" type="String"/>
+            <parameter name="customerFirstName" required="true" type="String"/>
+            <parameter name="customerLastName" required="true" type="String"/>
+            <parameter name="customerEmail" required="true" type="String"/>
+            <parameter name="quantity" type="Integer" default="1"/>
+            <parameter name="price" type="BigDecimal" default="29.99"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="workflowId" type="String"/>
+            <parameter name="productId" type="String"/>
+            <parameter name="customerId" type="String"/>
+            <parameter name="orderId" type="String"/>
+            <parameter name="success" type="Boolean"/>
+            <parameter name="message" type="String"/>
+            <parameter name="steps" type="List"/>
+        </out-parameters>
+        <actions>
+            <set field="workflowId" from="'WF-' + System.currentTimeMillis()"/>
+            <set field="steps" from="[]"/>
+
+            <!-- Step 1: Create test product -->
+            <service-call name="org.moqui.mcp.McpTestServices.create#TestProduct"
+                in-map="[productName:productName, description:'Test product for workflow', price:price]"
+                out-map="productResult"/>
+            <script>steps.add(['step':'Create Product', 'success':productResult.success, 'message':productResult.message])</script>
+            <set field="productId" from="productResult.productId"/>
+
+            <!-- Step 2: Create test customer -->
+            <service-call name="org.moqui.mcp.McpTestServices.create#TestCustomer"
+                in-map="[firstName:customerFirstName, lastName:customerLastName, email:customerEmail]"
+                out-map="customerResult"/>
+            <script>steps.add(['step':'Create Customer', 'success':customerResult.success, 'message':customerResult.message])</script>
+            <set field="customerId" from="customerResult.partyId"/>
+
+            <!-- Step 3: Create test order -->
+            <service-call name="org.moqui.mcp.McpTestServices.create#TestOrder"
+                in-map="[customerId:customerId, productId:productId, quantity:quantity, price:price]"
+                out-map="orderResult"/>
+            <script>steps.add(['step':'Create Order', 'success':orderResult.success, 'message':orderResult.message])</script>
+            <set field="orderId" from="orderResult.orderId"/>
+
+            <!-- Determine overall success -->
+            <set field="success"
+                from="productResult.success &amp;&amp; customerResult.success &amp;&amp; orderResult.success"/>
+            <set field="message"
+                from="success ? 'E-commerce workflow completed successfully' : 'E-commerce workflow failed'"/>
+
+            <log level="info" message="Completed e-commerce workflow ${workflowId}: ${message}"/>
+        </actions>
+    </service>
+
+    <service verb="cleanup" noun="TestData" authenticate="true" transaction-timeout="300">
+        <description>Cleanup test data created by MCP tests</description>
+        <in-parameters>
+            <parameter name="olderThanHours" type="Integer" default="24"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="deletedOrders" type="Integer"/>
+            <parameter name="deletedProducts" type="Integer"/>
+            <parameter name="deletedCustomers" type="Integer"/>
+            <parameter name="success" type="Boolean"/>
+            <parameter name="message" type="String"/>
+        </out-parameters>
+        <actions>
+            <set field="cutoffTime"
+                from="new Date(System.currentTimeMillis() - (olderThanHours * 60 * 60 * 1000))"/>
+            <set field="deletedOrders" value="0"/>
+            <set field="deletedProducts" value="0"/>
+            <set field="deletedCustomers" value="0"/>
+
+            <!-- Delete test orders -->
+            <entity-find entity-name="mantle.order.OrderHeader" list="testOrders">
+                <econdition field-name="orderId" operator="like" value="TEST-ORD-%"/>
+                <econdition field-name="entryDate" operator="less" from="cutoffTime"/>
+            </entity-find>
+            <iterate list="testOrders" entry="order">
+                <entity-delete entity-name="mantle.order.OrderItem" value-field="order">
+                    <field-map field-name="orderId" from="order.orderId"/>
+                </entity-delete>
+                <entity-delete value-field="order"/>
+                <script>deletedOrders++</script>
+            </iterate>
+
+            <!-- Delete test products -->
+            <entity-find entity-name="mantle.product.Product" list="testProducts">
+                <econdition field-name="productId" operator="like" value="TEST-%"/>
+                <econdition field-name="createdDate" operator="less" from="cutoffTime"/>
+            </entity-find>
+            <iterate list="testProducts" entry="product">
+                <entity-delete entity-name="mantle.product.ProductPrice" value-field="product">
+                    <field-map field-name="productId" from="product.productId"/>
+                </entity-delete>
+                <entity-delete value-field="product"/>
+                <script>deletedProducts++</script>
+            </iterate>
+
+            <!-- Delete test customers -->
+            <entity-find entity-name="mantle.party.Party" list="testCustomers">
+                <econdition field-name="partyId" operator="like" value="TEST-%"/>
+                <econdition field-name="createdDate" operator="less" from="cutoffTime"/>
+            </entity-find>
+            <iterate list="testCustomers" entry="customer">
+                <entity-delete entity-name="mantle.party.PartyContactMech" value-field="customer">
+                    <field-map field-name="partyId" from="customer.partyId"/>
+                </entity-delete>
+                <entity-delete entity-name="mantle.party.Person" value-field="customer">
+                    <field-map field-name="partyId" from="customer.partyId"/>
+                </entity-delete>
+                <entity-delete value-field="customer"/>
+                <script>deletedCustomers++</script>
+            </iterate>
+
+            <set field="success" value="true"/>
+            <set field="message" value="Test data cleanup completed"/>
+            <log level="info"
+                message="Cleaned up test data: ${deletedOrders} orders, ${deletedProducts} products, ${deletedCustomers} customers"/>
+        </actions>
+    </service>
+
+</services>

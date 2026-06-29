@@ -1,0 +1,538 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
+
+    <!-- ========================================================= -->
+    <!-- Agent Tool Bridge (The Secure Gateway)                    -->
+    <!-- ========================================================= -->
+    
+    <service verb="call" noun="McpToolWithDelegation" authenticate="false">
+        <description>
+            Securely executes an MCP tool by impersonating target user (runAsUserId).
+            The calling agent must have permission to use this service, but 
+            tool execution itself is subject to target user's permissions.
+        </description>
+        <in-parameters>
+            <parameter name="toolName" required="true"/>
+            <parameter name="arguments" type="Map"/>
+            <parameter name="runAsUserId" required="true">
+                <description>The UserAccount ID to impersonate.</description>
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="result" type="Map"/>
+        </out-parameters>
+        <actions>
+            <script><![CDATA[
+                import org.moqui.mcp.adapter.McpToolAdapter
+                import org.moqui.context.ArtifactAuthorizationException
+                
+                // 1. Capture current agent identity
+                String agentUsername = ec.user.username
+                
+                try {
+                    // 2. Switch identity to target user
+                    boolean loggedIn = ec.user.internalLoginUser(runAsUserId, false)
+                    if (!loggedIn) throw new Exception("Could not switch to user ${runAsUserId}")
+                    
+                    ec.logger.info("Agent ${agentUsername} executing ${toolName} AS ${ec.user.username} (${runAsUserId})")
+                    
+                    // 3. Execute Tool
+                    McpToolAdapter adapter = new McpToolAdapter()
+                    result = adapter.callTool(ec, toolName, arguments)
+                    
+                } finally {
+                    // 4. Restore Agent Identity
+                    if (agentUsername) {
+                        ec.user.internalLoginUser(agentUsername, false)
+                    }
+                }
+            ]]></script>
+        </actions>
+    </service>
+
+    <!-- ========================================================= -->
+    <!-- Agent Client (OpenAI-Compatible API Wrapper)              -->
+    <!-- ========================================================= -->
+
+    <service verb="call" noun="OpenAiChatCompletion" authenticate="false">
+        <description>Generic wrapper for OpenAI-compatible chat completions (VLLM, OpenAI, etc.)</description>
+        <in-parameters>
+            <parameter name="endpointUrl" required="true"/>
+            <parameter name="apiKey"/>
+            <parameter name="model" required="true"/>
+            <parameter name="messages" type="List" required="true"/>
+            <parameter name="tools" type="List"/>
+            <parameter name="temperature" type="BigDecimal" default="0.7"/>
+            <parameter name="maxTokens" type="Integer"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="response" type="Map"/>
+            <parameter name="httpStatus" type="Integer"/>
+            <parameter name="error" type="String"/>
+        </out-parameters>
+        <actions>
+            <script><![CDATA[
+                import groovy.json.JsonBuilder
+                import groovy.json.JsonSlurper
+                
+                def payloadMap = [
+                    model: model,
+                    messages: messages,
+                    temperature: temperature,
+                    stream: false
+                ]
+                
+                if (maxTokens) payloadMap.max_tokens = maxTokens
+                if (tools) payloadMap.tools = tools
+                
+                String jsonPayload = new JsonBuilder(payloadMap).toString()
+                
+                URL url = new URL(endpointUrl + "/chat/completions")
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection()
+                conn.setRequestMethod("POST")
+                conn.setRequestProperty("Content-Type", "application/json")
+                if (apiKey) conn.setRequestProperty("Authorization", "Bearer " + apiKey)
+                conn.setDoOutput(true)
+                conn.setConnectTimeout(10000)
+                conn.setReadTimeout(60000)
+                
+                try {
+                    conn.outputStream.write(jsonPayload.getBytes("UTF-8"))
+                    httpStatus = conn.responseCode
+                    InputStream is = (httpStatus >= 200 && httpStatus < 300) ? conn.inputStream : conn.errorStream
+                    String responseText = is?.text
+                    if (responseText) response = new JsonSlurper().parseText(responseText)
+                    if (httpStatus >= 300) error = "HTTP ${httpStatus}: ${responseText}"
+                } catch (Exception e) {
+                    error = e.message
+                    httpStatus = 500
+                    ec.logger.error("OpenAI Client Exception", e)
+                }
+            ]]></script>
+        </actions>
+    </service>
+    
+    <service verb="test" noun="Log" authenticate="false">
+        <in-parameters><parameter name="message"/></in-parameters>
+        <actions><script>ec.logger.info("TEST LOG SERVICE: ${message}")</script></actions>
+    </service>
+
+    <!-- ========================================================= -->
+    <!-- LLM Request Service (General Purpose Async)             -->
+    <!-- ========================================================= -->
+    
+    <service verb="process" noun="LLMRequest" authenticate="false">
+        <description>
+            Creates a general-purpose LLM request as SystemMessage.
+            Any trigger (SECA, UI, Order, etc.) can call this service.
+            Processing happens asynchronously via AgentQueuePoller.
+            When LLM responds, callback service is invoked with result.
+            Agent can use MCP tools to access any Moqui screen.
+        </description>
+        <in-parameters>
+            <parameter name="prompt" required="true" type="String">
+                <description>Prompt or question to send to LLM.</description>
+            </parameter>
+            <parameter name="modelName" type="String">
+                <description>Override default model name from ProductStoreAiConfig.</description>
+            </parameter>
+            <parameter name="tools" type="List">
+                <description>List of tools/definitions to provide to LLM (default: MCP tools).</description>
+            </parameter>
+            <parameter name="productStoreId" type="id" default-value="POPC_DEFAULT"/>
+            <parameter name="aiConfigId" type="id" default-value="DEFAULT"/>
+            <parameter name="requestedByPartyId" type="id" required="true">
+                <description>Party ID of user making the request (for RBAC context).</description>
+            </parameter>
+            <parameter name="effectiveUserId" type="id">
+                <description>UserAccount ID to impersonate during execution.</description>
+            </parameter>
+            <parameter name="callbackServiceName" type="String" required="true">
+                <description>Service to call when LLM response is ready.</description>
+            </parameter>
+            <parameter name="callbackParameters" type="Map">
+                <description>Parameters to pass to callback service (merged with LLM response).</description>
+            </parameter>
+            <parameter name="sourceTypeEnumId" type="id">
+                <description>Type of triggering entity (e.g., Order, CommunicationEvent).</description>
+            </parameter>
+            <parameter name="sourceId" type="id">
+                <description>ID of triggering entity (orderId, communicationEventId, etc.).</description>
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="systemMessageId" type="id">
+                <description>ID of created SystemMessage (SmtyLlmRequest).</description>
+            </parameter>
+        </out-parameters>
+        <actions>
+            <script><![CDATA[
+                ec.logger.info("PROCESS LLM REQUEST: Creating LLM request SystemMessage")
+                ec.logger.info("PROCESS LLM REQUEST: Prompt: ${prompt?.take(100)}...")
+                ec.logger.info("PROCESS LLM REQUEST: Callback: ${callbackServiceName}")
+                
+                // Validate callback service exists
+                def callbackExists = ec.service.isServiceExists(callbackServiceName)
+                if (!callbackExists) {
+                    throw new Exception("Callback service '${callbackServiceName}' does not exist")
+                }
+                
+                // Create SystemMessage for LLM Request
+                def result = ec.service.sync().name("create#moqui.service.message.SystemMessage").parameters([
+                    systemMessageTypeId: "SmtyLlmRequest",
+                    statusId: "SmsgReceived",
+                    messageText: prompt,
+                    requestedByPartyId: requestedByPartyId,
+                    effectiveUserId: effectiveUserId ?: ec.user.userId,
+                    productStoreId: productStoreId,
+                    aiConfigId: aiConfigId,
+                    callbackServiceName: callbackServiceName,
+                    callbackParameters: callbackParameters ? new groovy.json.JsonBuilder(callbackParameters).toString() : null,
+                    sourceTypeEnumId: sourceTypeEnumId,
+                    sourceId: sourceId
+                ]).call()
+                
+                ec.logger.info("PROCESS LLM REQUEST: Created SystemMessage ${result.systemMessageId}")
+                
+                return result
+            ]]></script>
+        </actions>
+    </service>
+
+    <!-- ========================================================= -->
+    <!-- Agent Runner (Single Turn State Machine)                  -->
+    <!-- ========================================================= -->
+    
+    <service verb="run" noun="AgentTaskTurn" authenticate="false">
+        <description>
+            Processes ONE turn of an Agent Task. 
+            Supports two patterns:
+            1. SmtyAgentTask: CommEvent-based conversation with history
+            2. SmtyLlmRequest: Generic async request with callback
+            Agent ALWAYS has MCP tools available to browse screens and perform actions.
+        </description>
+        <in-parameters>
+            <parameter name="systemMessageId" required="true"/>
+        </in-parameters>
+        <actions>
+            <script><![CDATA[
+                import groovy.json.JsonOutput
+                import groovy.json.JsonSlurper
+                import org.moqui.mcp.adapter.McpToolAdapter
+ 
+                ec.logger.info("AGENT TASK TURN: Starting turn for SystemMessage ${systemMessageId}")
+ 
+                // 1. Load SystemMessage Task
+                def taskMsg = ec.entity.find("moqui.service.message.SystemMessage")
+                    .condition("systemMessageId", systemMessageId).one()
+                
+                if (!taskMsg) {
+                    ec.logger.warn("AGENT TASK TURN: SystemMessage ${systemMessageId} not found.")
+                    return
+                }
+                
+                if (taskMsg.statusId != "SmsgReceived" && taskMsg.statusId != "SmsgError") {
+                    ec.logger.warn("AGENT TASK TURN: SystemMessage ${systemMessageId} has status ${taskMsg.statusId}, expected SmsgReceived or SmsgError.")
+                    return
+                }
+ 
+                // Get AI Config
+                def aiConfig = ec.entity.find("moqui.mcp.agent.ProductStoreAiConfig")
+                    .condition("productStoreId", taskMsg.productStoreId)
+                    .condition("aiConfigId", taskMsg.aiConfigId).one()
+                
+                if (!aiConfig?.endpointUrl || !aiConfig?.modelName) {
+                    ec.logger.error("AGENT TASK TURN: Missing AI config for task ${systemMessageId}")
+                    taskMsg.statusId = "SmsgError"; taskMsg.update()
+                    return
+                }
+ 
+                ec.logger.info("AGENT TASK TURN: Using AI Config ${aiConfig.aiConfigId} for ProductStore ${taskMsg.productStoreId}")
+                ec.logger.info("AGENT TASK TURN: Message Type: ${taskMsg.systemMessageTypeId}")
+ 
+                // Temporary fix: Correct model name
+                if (aiConfig.modelName == "bf-ai") {
+                    ec.logger.warn("AGENT TASK TURN: Fixing incorrect model name 'bf-ai' to 'devstral'")
+                    aiConfig.modelName = "devstral"
+                    aiConfig.update()
+                }
+ 
+                // 2. Build Messages for LLM
+                def messages = []
+                messages.add([role: "system", content: "You are a helpful Moqui ERP assistant. You act as user ${taskMsg.effectiveUserId}."])
+                
+                if (taskMsg.systemMessageTypeId == "SmtyAgentTask") {
+                    // OLD PATTERN: Load conversation history from CommEvents
+                    if (taskMsg.rootCommEventId) {
+                        ec.logger.info("AGENT TASK TURN: Loading thread history for RootCommEvent ${taskMsg.rootCommEventId}")
+                        def threadEvents = ec.entity.find("mantle.party.communication.CommunicationEvent")
+                            .condition("rootCommEventId", taskMsg.rootCommEventId)
+                            .orderBy("entryDate").list()
+                        
+                        ec.logger.info("AGENT TASK TURN: Found ${threadEvents.size()} history events.")
+                        
+                        threadEvents.each { ev ->
+                            String role = (ev.fromPartyId == "AGENT_CLAUDE_PARTY") ? "assistant" : "user"
+                            if (ev.contentType == "application/json") {
+                                def json = new JsonSlurper().parseText(ev.body)
+                                if (json.tool_call_id) {
+                                    messages.add([role: "tool", tool_call_id: json.tool_call_id, content: json.content])
+                                } else if (json.tool_calls) {
+                                    messages.add([role: "assistant", tool_calls: json.tool_calls])
+                                }
+                            } else {
+                                messages.add([role: role, content: ev.body])
+                            }
+                        }
+                    } else {
+                        ec.logger.info("AGENT TASK TURN: No rootCommEventId, using messageText from task.")
+                        messages.add([role: "user", content: taskMsg.messageText])
+                    }
+                } else {
+                    // NEW PATTERN: Just use the prompt
+                    ec.logger.info("AGENT TASK TURN: Using LLM request message: ${taskMsg.messageText?.take(100)}...")
+                    messages.add([role: "user", content: taskMsg.messageText])
+                }
+ 
+                // 3. ALWAYS Prepare MCP Tools (available for BOTH patterns)
+                ec.logger.info("AGENT TASK TURN: Preparing MCP tools...")
+                def mcpToolAdapter = new org.moqui.mcp.adapter.McpToolAdapter()
+                def moquiTools = mcpToolAdapter.listTools()
+                def openAiTools = moquiTools.collect { tool ->
+                    [type: "function", function: [
+                        name: tool.name, description: tool.description,
+                        parameters: [type: "object", properties: [
+                            path: [type: "string"], action: [type: "string"], parameters: [type: "object"]
+                        ]]
+                    ]]
+                }
+                
+                ec.logger.info("AGENT TASK TURN: Available tools: ${moquiTools.size()}")
+ 
+                // 4. Call LLM
+                ec.logger.info("AGENT TASK TURN: Calling VLLM at ${aiConfig.endpointUrl} with model ${aiConfig.modelName}...")
+                def llmResult = ec.service.sync().name("AgentServices.call#OpenAiChatCompletion").parameters([
+                    endpointUrl: aiConfig.endpointUrl, apiKey: aiConfig.apiKey,
+                    model: aiConfig.modelName, messages: messages, tools: openAiTools,
+                    temperature: aiConfig.temperature
+                ]).call()
+ 
+                if (llmResult.error) {
+                    ec.logger.error("AGENT TASK TURN: LLM Error: ${llmResult.error}")
+                    taskMsg.statusId = "SmsgError"; taskMsg.update()
+                    return
+                }
+ 
+                def responseMsg = llmResult.response.choices[0].message
+                ec.logger.info("AGENT TASK TURN: LLM Response received. Tool calls: ${responseMsg.tool_calls?.size() ?: 0}")
+                
+                // 5. Handle Response based on pattern
+                if (taskMsg.systemMessageTypeId == "SmtyAgentTask") {
+                    // OLD PATTERN: Tool calls or CommEvent response
+                    if (responseMsg.tool_calls) {
+                        // SAVE Assistant "Thought" (Tool Calls)
+                        def assistantComm = ec.service.sync().name("create#mantle.party.communication.CommunicationEvent").parameters([
+                            fromPartyId: "AGENT_CLAUDE_PARTY", toPartyId: taskMsg.requestedByPartyId,
+                            rootCommEventId: taskMsg.rootCommEventId, parentCommEventId: taskMsg.rootCommEventId,
+                            communicationEventTypeId: "Message", contentType: "application/json",
+                            body: JsonOutput.toJson([tool_calls: responseMsg.tool_calls]),
+                            entryDate: ec.user.nowTimestamp, statusId: "CeReceived"
+                        ]).call()
+ 
+                        // EXECUTE Tools and Save Results
+                        responseMsg.tool_calls.each { toolCall ->
+                            def result = [:]
+                            try {
+                                ec.logger.info("AGENT TASK TURN: Executing tool ${toolCall.function.name} with args ${toolCall.function.arguments}")
+                                def runResult = ec.service.sync().name("AgentServices.call#McpToolWithDelegation").parameters([
+                                    toolName: toolCall.function.name, arguments: new JsonSlurper().parseText(toolCall.function.arguments),
+                                    runAsUserId: taskMsg.effectiveUserId
+                                ]).call()
+                                result = runResult.result
+                            } catch (Exception e) { 
+                                ec.logger.error("AGENT TASK TURN: Tool execution error", e)
+                                result = [error: e.message] 
+                            }
+ 
+                            // Save Tool Result as CommEvent
+                            ec.service.sync().name("create#mantle.party.communication.CommunicationEvent").parameters([
+                                fromPartyId: taskMsg.requestedByPartyId, toPartyId: "AGENT_CLAUDE_PARTY",
+                                rootCommEventId: taskMsg.rootCommEventId, parentCommEventId: assistantComm.communicationEventId,
+                                communicationEventTypeId: "Message", contentType: "application/json",
+                                body: JsonOutput.toJson([tool_call_id: toolCall.id, content: JsonOutput.toJson(result)]),
+                                entryDate: ec.user.nowTimestamp, statusId: "CeReceived"
+                            ]).call()
+                        }
+ 
+                        // RE-QUEUE: Create next turn message
+                        ec.logger.info("AGENT TASK TURN: Re-queuing for next turn...")
+                        ec.service.sync().name("create#moqui.service.message.SystemMessage").parameters([
+                            systemMessageTypeId: "SmtyAgentTask", statusId: "SmsgReceived",
+                            productStoreId: taskMsg.productStoreId, aiConfigId: taskMsg.aiConfigId,
+                            requestedByPartyId: taskMsg.requestedByPartyId, effectiveUserId: taskMsg.effectiveUserId,
+                            rootCommEventId: taskMsg.rootCommEventId, isOutgoing: "N"
+                        ]).call()
+ 
+                        taskMsg.statusId = "SmsgConsumed"; taskMsg.update()
+ 
+                    } else {
+                        // FINAL Response
+                        ec.logger.info("AGENT TASK TURN: Final response from LLM: ${responseMsg.content}")
+                        ec.service.sync().name("create#mantle.party.communication.CommunicationEvent").parameters([
+                            fromPartyId: "AGENT_CLAUDE_PARTY", toPartyId: taskMsg.requestedByPartyId,
+                            rootCommEventId: taskMsg.rootCommEventId, parentCommEventId: taskMsg.rootCommEventId,
+                            communicationEventTypeId: "Message", contentType: "text/plain",
+                            body: responseMsg.content, entryDate: ec.user.nowTimestamp, statusId: "CeReceived"
+                        ]).call()
+ 
+                        taskMsg.statusId = "SmsgConfirmed"; taskMsg.update()
+                    }
+                } else {
+                    // NEW PATTERN: Create LlmResponse SystemMessage and call callback
+                    ec.logger.info("AGENT TASK TURN: Creating LLM Response SystemMessage...")
+                    
+                    def responseMsgContent = responseMsg.content ?: ""
+                    
+                    // Save response as SystemMessage
+                    def responseSystemMsg = ec.service.sync().name("create#moqui.service.message.SystemMessage").parameters([
+                        systemMessageTypeId: "SmtyLlmResponse",
+                        statusId: "SmsgConfirmed",
+                        messageText: responseMsgContent,
+                        parentSystemMessageId: taskMsg.systemMessageId,
+                        llmResponse: responseMsgContent,
+                        productStoreId: taskMsg.productStoreId,
+                        aiConfigId: taskMsg.aiConfigId
+                    ]).call()
+                    
+                    ec.logger.info("AGENT TASK TURN: Created response SystemMessage ${responseSystemMsg.systemMessageId}")
+                    
+                    // Mark request as consumed
+                    taskMsg.statusId = "SmsgConsumed"
+                    taskMsg.update()
+                    
+                    // Call callback service if provided
+                    if (taskMsg.callbackServiceName) {
+                        ec.logger.info("AGENT TASK TURN: Calling callback service: ${taskMsg.callbackServiceName}")
+                        
+                        def callbackParams = taskMsg.callbackParameters ? 
+                            new JsonSlurper().parseText(taskMsg.callbackParameters) : [:]
+                        
+                        // Add response to callback parameters
+                        callbackParams.llmResponse = responseMsgContent
+                        callbackParams.llmResponseSystemMessageId = responseSystemMsg.systemMessageId
+                        callbackParams.llmRequestSystemMessageId = taskMsg.systemMessageId
+                        
+                        ec.service.sync().name(taskMsg.callbackServiceName).parameters(callbackParams).call()
+                        
+                        ec.logger.info("AGENT TASK TURN: Callback service completed")
+                    }
+                }
+            ]]></script>
+        </actions>
+    </service>
+
+    <!-- ========================================================= -->
+    <!-- Callback Services for Different Trigger Types          -->
+    <!-- ========================================================= -->
+    
+    <service verb="callback" noun="CommunicationEvent" authenticate="false">
+        <description>
+            Callback for CommunicationEvent-triggered LLM requests.
+            Saves LLM response as a new CommunicationEvent in conversation thread.
+        </description>
+        <in-parameters>
+            <parameter name="llmResponse" type="String"/>
+            <parameter name="llmResponseSystemMessageId" type="id"/>
+            <parameter name="llmRequestSystemMessageId" type="id"/>
+            <parameter name="rootCommEventId" type="id"/>
+            <parameter name="communicationEventId" type="id"/>
+        </in-parameters>
+        <actions>
+            <script><![CDATA[
+                ec.logger.info("CALLBACK CommEvent: Saving LLM response to CommunicationEvent")
+                ec.logger.info("CALLBACK CommEvent: Response: ${llmResponse?.take(100)}...")
+                
+                // Get original CommunicationEvent to get context
+                def originalCommEvent = ec.entity.find("mantle.party.communication.CommunicationEvent")
+                    .condition("communicationEventId", communicationEventId).one()
+                
+                if (!originalCommEvent) {
+                    ec.logger.error("CALLBACK CommEvent: Original CommunicationEvent ${communicationEventId} not found")
+                    return
+                }
+                
+                // Save LLM response as new CommunicationEvent
+                ec.service.sync().name("create#mantle.party.communication.CommunicationEvent").parameters([
+                    fromPartyId: "AGENT_CLAUDE_PARTY",
+                    toPartyId: originalCommEvent.fromPartyId,
+                    rootCommEventId: rootCommEventId ?: communicationEventId,
+                    parentCommEventId: rootCommEventId ?: communicationEventId,
+                    communicationEventTypeId: "Message",
+                    contentType: "text/plain",
+                    body: llmResponse,
+                    entryDate: ec.user.nowTimestamp,
+                    statusId: "CeReceived"
+                ]).call()
+                
+                ec.logger.info("CALLBACK CommEvent: Created CommunicationEvent with LLM response")
+            ]]></script>
+        </actions>
+    </service>
+
+    <!-- ========================================================= -->
+    <!-- Task Scheduler (Polls Queue)                              -->
+    <!-- ========================================================= -->
+    
+    <service verb="poll" noun="AgentQueue" authenticate="false">
+        <description>Scheduled service to pick up pending LLM requests and process them.</description>
+        <actions>
+            <script><![CDATA[
+                // Cap retries: a task that keeps failing (SmsgError, or stuck on SmsgReceived because the
+                // turn threw and rolled back) would otherwise be re-run — and re-billed to the LLM — every
+                // poll forever. After MAX_ATTEMPTS it is parked as SmsgRejected and ignored.
+                int MAX_ATTEMPTS = (System.getenv('AGENT_QUEUE_MAX_ATTEMPTS') ?: '3') as int
+                ec.logger.info("POLL AGENT QUEUE: Checking for LLM request messages...")
+
+                // Find pending LLM requests (both patterns)
+                def pendingTasks = ec.entity.find("moqui.service.message.SystemMessage")
+                    .condition("statusId", "in", ["SmsgReceived", "SmsgError"])
+                    .condition("systemMessageTypeId", "in", ["SmtyAgentTask", "SmtyLlmRequest"])
+                    .orderBy("initDate")
+                    .limit(5)
+                    .disableAuthz()
+                    .list()
+
+                ec.logger.info("POLL AGENT QUEUE: Found ${pendingTasks.size()} tasks to process.")
+
+                pendingTasks.each { task ->
+                    int attempts = (task.failCount ?: 0) as int
+                    if (attempts >= MAX_ATTEMPTS) {
+                        ec.service.sync().name("update#moqui.service.message.SystemMessage")
+                            .parameters([systemMessageId: task.systemMessageId, statusId: "SmsgRejected"])
+                            .disableAuthz().requireNewTransaction(true).call()
+                        ec.logger.warn("POLL AGENT QUEUE: task ${task.systemMessageId} exceeded ${MAX_ATTEMPTS} attempts; parked as SmsgRejected")
+                        return  // skip to next task
+                    }
+
+                    // Record the attempt in its OWN transaction so the count survives even if the
+                    // turn below throws and rolls back (otherwise the counter would never advance).
+                    ec.service.sync().name("update#moqui.service.message.SystemMessage")
+                        .parameters([systemMessageId: task.systemMessageId,
+                                     failCount: attempts + 1, lastAttemptDate: ec.user.nowTimestamp])
+                        .disableAuthz().requireNewTransaction(true).call()
+
+                    ec.logger.info("POLL AGENT QUEUE: Processing task ${task.systemMessageId} (attempt ${attempts + 1}/${MAX_ATTEMPTS})")
+                    try {
+                        ec.service.sync().name("AgentServices.run#AgentTaskTurn")
+                            .parameters([systemMessageId: task.systemMessageId])
+                            .call()
+                    } catch (Throwable t) {
+                        ec.logger.error("POLL AGENT QUEUE: turn failed for ${task.systemMessageId}: ${t.message}", t)
+                    }
+                }
+            ]]></script>
+        </actions>
+    </service>
+
+</services>

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-facade-xml type="seed">
+
+    <!-- User group for ADK access -->
+    <userGroups userGroupId="AdkUsers" description="ADK Web UI Users"/>
+
+    <!-- ADK Moqui screen group -->
+    <artifactGroups artifactGroupId="ADK_APP" description="ADK Application">
+        <artifacts artifactName="component://moqui-adk/screen/Adk.xml"
+                   artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/>
+        <authz artifactAuthzId="ADK_APP_ADMIN" userGroupId="ADMIN"
+               authzTypeEnumId="AUTHZT_ALWAYS" authzActionEnumId="AUTHZA_ALL"/>
+        <authz artifactAuthzId="ADK_APP_USERS" userGroupId="AdkUsers"
+               authzTypeEnumId="AUTHZT_ALWAYS" authzActionEnumId="AUTHZA_ALL"/>
+    </artifactGroups>
+
+    <!-- ADK DevUI servlet paths (/adk and /adk/*) -->
+    <artifactGroups artifactGroupId="ADK_DEV_UI" description="ADK DevUI Servlet">
+        <artifacts artifactName="/adk"  artifactTypeEnumId="AT_REST_PATH" inheritAuthz="Y"/>
+        <artifacts artifactName="/adk/*" artifactTypeEnumId="AT_REST_PATH" inheritAuthz="Y"/>
+        <authz artifactAuthzId="ADK_DEV_UI_ADMIN" userGroupId="ADMIN"
+               authzTypeEnumId="AUTHZT_ALWAYS" authzActionEnumId="AUTHZA_ALL"/>
+        <authz artifactAuthzId="ADK_DEV_UI_USERS" userGroupId="AdkUsers"
+               authzTypeEnumId="AUTHZT_ALWAYS" authzActionEnumId="AUTHZA_ALL"/>
+    </artifactGroups>
+
+    <!-- ADK service artifact group — grants AdkUsers permission to call ADK services
+         directly (e.g. when invoked from AdkDevServlet rather than via REST path) -->
+    <artifactGroups artifactGroupId="ADK_SERVICES" description="ADK Services">
+        <artifacts artifactName="AdkServices%"          artifactTypeEnumId="AT_SERVICE" inheritAuthz="Y"/>
+        <artifacts artifactName="AdkSchedulerServices%" artifactTypeEnumId="AT_SERVICE" inheritAuthz="Y"/>
+        <authz artifactAuthzId="ADK_SVC_ADMIN" userGroupId="ADMIN"
+               authzTypeEnumId="AUTHZT_ALWAYS" authzActionEnumId="AUTHZA_ALL"/>
+        <authz artifactAuthzId="ADK_SVC_USERS" userGroupId="AdkUsers"
+               authzTypeEnumId="AUTHZT_ALWAYS" authzActionEnumId="AUTHZA_ALL"/>
+    </artifactGroups>
+
+</entity-facade-xml>

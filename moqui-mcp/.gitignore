@@ -1,0 +1,44 @@
+# Compiled classes and build artifacts
+build/
+classes/
+*.class
+*.jar
+
+# IDE files
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.settings/
+.project
+.classpath
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Gradle
+.gradle/
+gradlew
+gradlew.bat
+
+# Runtime
+runtime/
+log/

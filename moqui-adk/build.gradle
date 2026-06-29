@@ -1,0 +1,119 @@
+/*
+ * This software is in the public domain under CC0 1.0 Universal plus a
+ * Grant of Patent License.
+ *
+ * To the extent possible under law, the author(s) have dedicated all
+ * copyright and related and neighboring rights to this software to the
+ * public domain worldwide. This software is distributed without any
+ * warranty.
+ *
+ * You should have received a copy of the CC0 Public Domain Dedication
+ * along with this software (see the LICENSE.md file). If not, see
+ * <http://creativecommons.org/publicdomain/zero/1.0/>.
+ */
+
+apply plugin: 'groovy'
+
+def componentNode = parseComponent(project)
+version = componentNode.'@version'
+def jarBaseName = componentNode.'@name'
+def moquiDir = projectDir.parentFile.parentFile.parentFile
+def frameworkDir = file(moquiDir.absolutePath + '/framework')
+
+repositories {
+    flatDir name: 'localLib', dirs: frameworkDir.absolutePath + '/lib'
+    mavenCentral()
+}
+
+// Separate config for dev assets — only used to extract Angular SPA at build time,
+// not included in the runtime classpath (avoids bundling Spring Boot into Moqui).
+configurations { adkDevAssets }
+
+tasks.withType(JavaCompile) { options.compilerArgs << "-proc:none" << "-parameters" }
+tasks.withType(GroovyCompile) { options.compilerArgs << "-proc:none" }
+
+dependencies {
+    compileOnly project(':framework')
+    compileOnly 'jakarta.servlet:jakarta.servlet-api:6.1.0'
+
+    // google-adk is declared runtimeOnly in the Moqui framework so it ships in moqui.war.
+    // Declare it compileOnly here so AdkManager and AdkDevServlet can compile against it,
+    // without bundling extra JARs in the component lib/ directory.
+    compileOnly 'com.google.adk:google-adk:1.3.0'
+
+    // Dev module — only used to extract the Angular DevUI browser assets at build time
+    adkDevAssets 'com.google.adk:google-adk-dev:1.3.0'
+}
+
+check.dependsOn.clear()
+
+task cleanLib(type: Delete) { delete fileTree(dir: projectDir.absolutePath + '/lib', include: '*.jar') }
+clean.dependsOn cleanLib
+
+// Extract the Angular DevUI SPA from google-adk-dev JAR into screen/adk-ui/.
+// Also patches index.html (<base href>) and assets/config/runtime-config.json (backendUrl)
+// so the SPA works when served from Moqui at /adk/*.
+task extractAdkBrowserAssets {
+    dependsOn configurations.adkDevAssets
+    def outDir = file(projectDir.absolutePath + '/screen/adk-ui')
+    outputs.dir outDir
+    doLast {
+        def devJar = configurations.adkDevAssets.resolvedConfiguration.resolvedArtifacts
+            .find { it.name == 'google-adk-dev' }?.file
+        if (!devJar) throw new GradleException("google-adk-dev JAR not found in adkDevAssets")
+        // Clean and re-extract
+        delete outDir
+        outDir.mkdirs()
+        copy {
+            from zipTree(devJar)
+            include 'browser/**'
+            into outDir
+            eachFile { details -> details.path = details.path.replaceFirst('^browser/', '') }
+            includeEmptyDirs = false
+        }
+        // Patch <base href> → /adk/ so Angular router uses the correct mount path
+        def indexFile = new File(outDir, 'index.html')
+        if (indexFile.exists()) {
+            def html = indexFile.text
+            // The bundled ADK app ships with <base href="./"> (relative); replace with absolute /adk/
+            def patched = html.replaceAll('<base href="[^"]*">', '<base href="/adk/">')
+            if (patched != html) {
+                indexFile.text = patched
+                logger.lifecycle("Patched index.html base href to /adk/")
+            }
+        }
+        // Patch runtime-config.json: set backendUrl so Angular app calls /adk/list-apps, /adk/run, etc.
+        def configFile = new File(outDir, 'assets/config/runtime-config.json')
+        if (configFile.exists()) {
+            def parsed = new groovy.json.JsonSlurper().parse(configFile)
+            parsed['backendUrl'] = '/adk'
+            configFile.text = groovy.json.JsonOutput.toJson(parsed)
+            logger.lifecycle("Patched runtime-config.json backendUrl to /adk")
+        }
+        logger.lifecycle("Extracted ADK browser assets to ${outDir}")
+    }
+}
+
+// Copy ADK class patches to the Moqui working directory (next to moqui.war).
+// These override classes in the embedded google-adk JAR. They must be on the
+// JVM classpath before the WAR (via `java -cp . moqui.war`), so they cannot
+// live in the component lib/ — they must be in the working directory itself.
+task copyAdkPatches {
+    description = 'Copy ADK class patches to the Moqui working directory'
+    def patchesDir = file(projectDir.absolutePath + '/patches')
+    inputs.dir patchesDir
+    outputs.dir file("${moquiDir}/com")
+    doLast {
+        copy {
+            from fileTree(dir: patchesDir)
+            into moquiDir
+        }
+    }
+}
+
+jar {
+    destinationDirectory = file(projectDir.absolutePath + '/lib')
+    archiveBaseName = jarBaseName
+}
+jar.dependsOn extractAdkBrowserAssets
+jar.dependsOn copyAdkPatches

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-facade-xml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/entity-facade-3.xsd" type="seed">
+
+    <moqui.security.UserGroup userGroupId="AgentUsers" description="AI Agent Users"/>
+
+    <!-- Agent Party -->
+    <mantle.party.Party partyId="AGENT_CLAUDE_PARTY" partyTypeEnumId="PtyPerson"/>
+    <mantle.party.Person partyId="AGENT_CLAUDE_PARTY" firstName="Claude" lastName="Agent"/>
+    <mantle.party.PartyRole partyId="AGENT_CLAUDE_PARTY" roleTypeId="Agent"/>
+
+    <moqui.security.UserAccount userId="AGENT_CLAUDE" username="agent-claude" partyId="AGENT_CLAUDE_PARTY"
+        currentPassword="16ac58bbfa332c1c55bd98b53e60720bfa90d394" passwordHashType="SHA"/>
+    <moqui.security.UserGroupMember userGroupId="AgentUsers" userId="AGENT_CLAUDE" fromDate="2026-02-04 00:00:00.000"/>
+
+    <!-- Agent users have permission to execute delegation service -->
+    <moqui.security.ArtifactGroup artifactGroupId="AgentDelegationServices" description="Agent Tool Delegation Services"/>
+    <moqui.security.ArtifactGroupMember artifactGroupId="AgentDelegationServices" artifactName="AgentServices.call#McpToolWithDelegation" artifactTypeEnumId="AT_SERVICE"/>
+    <moqui.security.ArtifactAuthz userGroupId="AgentUsers" artifactGroupId="AgentDelegationServices" authzTypeEnumId="AUTHZT_ALLOW" authzActionEnumId="AUTHZA_ALL"/>
+
+    <!-- Agent Queue Poller Job -->
+    <moqui.service.job.ServiceJob jobName="AgentQueuePoller" description="Poll Agent Queue and process tasks with AI"
+        serviceName="AgentServices.poll#AgentQueue" cronExpression="0/30 * * * * ?" paused="N"/>
+
+    <!-- Agent Task Message Type -->
+    <moqui.service.message.SystemMessageType systemMessageTypeId="SmtyAgentTask" description="Agent Task"
+        contentType="application/json"
+        consumeServiceName="AgentServices.run#AgentTaskTurn"/>
+    
+    <!-- LLM Request/Response Message Types -->
+    <moqui.service.message.SystemMessageType systemMessageTypeId="SmtyLlmRequest" description="LLM Request"
+        consumeServiceName="AgentServices.run#AgentTaskTurn"/>
+    
+    <moqui.service.message.SystemMessageType systemMessageTypeId="SmtyLlmResponse" description="LLM Response"/>
+    
+</entity-facade-xml>

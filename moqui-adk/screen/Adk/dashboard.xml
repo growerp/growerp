@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-3.xsd"
+        default-menu-index="1" menu-image="fa fa-dashboard" menu-image-type="icon"
+        default-menu-title="Dashboard">
+
+    <actions>
+        <script><![CDATA[
+            configValue = ec.entity.find("moqui.adk.AdkAgentConfig").condition("enabled", "Y").one()
+            String dbKey  = configValue?.apiKey ?: ""
+            String envKey = System.getenv("GOOGLE_API_KEY") ?: System.getenv("GOOGLE_GENAI_API_KEY") ?: System.getenv("GEMINI_API_KEY") ?: ""
+            configured  = (dbKey.length() > 0 || envKey.length() > 0)
+            agentName   = configValue?.agentName ?: "MoquiAgent"
+            modelName   = configValue?.modelName ?: "gemini-2.0-flash"
+        ]]></script>
+    </actions>
+
+    <widgets>
+        <container-row>
+            <row-col lg="6" md="12">
+                <container-box>
+                    <box-header title="ADK Agent Status"/>
+                    <box-body>
+                        <label text="Agent: ${agentName}" type="p"/>
+                        <label text="Model: ${modelName}" type="p"/>
+                        <label text="Status: ${configured ? 'Configured' : 'Not configured — add API key'}"
+                               type="p" style="${configured ? 'color:green;font-weight:bold' : 'color:red'}"/>
+                    </box-body>
+                    <box-toolbar>
+                        <link url="/adk/" text="Open DevUI" btn-type="primary" url-type="plain" target-window="_blank"/>
+                        <link url="../Configuration" text="Configure" btn-type="default"/>
+                    </box-toolbar>
+                </container-box>
+            </row-col>
+            <row-col lg="6" md="12">
+                <container-box>
+                    <box-header title="${configured ? 'Ready' : 'Quick Start'}"/>
+                    <box-body>
+                        <section name="ReadySection" condition="configured">
+                            <widgets>
+                                <label text="Agent is configured and ready to chat." type="p" style="color:green"/>
+                                <label text="Use the Chat UI tab to interact with your agent." type="p"/>
+                            </widgets>
+                            <fail-widgets>
+                                <label text="1. Go to Configuration and enter your Google Gemini API key." type="p"/>
+                                <label text="2. Optionally set the model and system instruction." type="p"/>
+                                <label text="3. Save, then open the Chat UI." type="p"/>
+                            </fail-widgets>
+                        </section>
+                    </box-body>
+                </container-box>
+            </row-col>
+        </container-row>
+    </widgets>
+</screen>

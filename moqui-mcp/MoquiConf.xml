@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- This software is in the public domain under CC0 1.0 Universal plus a 
+     Grant of Patent License.
+
+     To the extent possible under law, the author(s) have dedicated all
+     copyright and related and neighboring rights to this software to the
+     public domain worldwide. This software is distributed without any warranty.
+
+     You should have received a copy of the CC0 Public Domain Dedication
+     along with this software (see the LICENSE.md file). If not, see
+     <https://creativecommons.org/publicdomain/zero/1.0/>. -->
+
+<moqui-conf xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/moqui-conf-3.xsd">
+
+    <webapp-list>
+        <webapp name="webroot" http-port="${webapp_http_port}">
+            <!-- No McpAuthFilter here: EnhancedMcpServlet handles authentication
+                 itself, allowing the unauthenticated MCP handshake (initialize/ping)
+                 to pass through before requiring credentials for other methods. -->
+            <servlet name="EnhancedMcpServlet" class="org.moqui.mcp.EnhancedMcpServlet"
+                load-on-startup="5" async-supported="true">
+                <init-param name="keepAliveIntervalSeconds" value="30"/>
+                <init-param name="maxConnections" value="100"/>
+                <url-pattern>/mcp/*</url-pattern>
+            </servlet>
+        </webapp>
+    </webapp-list>
+
+    <screen-facade>
+        <!-- DEPRECATED: json mode now uses mcp template for unified semantic capture -->
+        <screen-text-output type="mcp" mime-type="text/markdown" always-standalone="true"
+            macro-template-location="component://moqui-mcp-2/screen/macro/DefaultScreenMacros.mcp.ftl"/>
+        <screen-text-output type="json" mime-type="application/json" always-standalone="true"
+            macro-template-location="component://moqui-mcp-2/screen/macro/DefaultScreenMacros.mcp.ftl"/>
+        <widget-render-mode type="mcp"
+            widget-render-class="org.moqui.impl.screen.ScreenWidgetRenderFtl"/>
+        <widget-render-mode type="json"
+            widget-render-class="org.moqui.impl.screen.ScreenWidgetRenderFtl"/>
+    </screen-facade>
+
+</moqui-conf>

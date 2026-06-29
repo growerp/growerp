@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+-->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-3.xsd">
+
+    <service verb="mcp" noun="ExecuteScreenAction" authenticate="true" allow-remote="true" transaction-timeout="60">
+        <description>Execute a screen action (transition or CRUD convention) with parameters.</description>
+        <in-parameters>
+            <parameter name="path" required="true"/>
+            <parameter name="action" required="true"/>
+            <parameter name="parameters" type="Map"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="result" type="Map"/>
+        </out-parameters>
+        <actions>
+            <script><![CDATA[
+                import org.moqui.context.ExecutionContext
+                
+                ExecutionContext ec = context.ec
+                def actionResult = null
+                def actionError = null
+                def actionParams = parameters ?: [:]
+                
+                try {
+                    // First, resolve the screen path
+                    def resolveResult = ec.service.sync().name("McpServices.mcp#ResolveScreenPath")
+                        .parameter("path", path).call()
+                    
+                    def screenPath = resolveResult.screenPath
+                    def screenDef = resolveResult.screenDef
+                    
+                    if (!screenDef) {
+                        actionError = "Could not resolve screen for path '${path}'"
+                        result = [actionResult: actionResult, actionError: actionError]
+                        return
+                    }
+                    
+                    if (action == "submit") {
+                        // Special handling for form submit - just acknowledge receipt
+                        actionResult = [
+                            action: "submit",
+                            status: "success",
+                            message: "Form parameters submitted",
+                            parametersProcessed: actionParams.keySet()
+                        ]
+                    } else {
+                        // Check if action matches CRUD convention for ProductPrice
+                        def actionPrefix = action?.take(6)
+                        if (actionPrefix && actionPrefix in ['update', 'create', 'delete']) {
+                            // Convention: updateProductPrice -> update#mantle.product.ProductPrice
+                            def serviceName = "${actionPrefix}#mantle.product.ProductPrice"
+                            ec.logger.info("ExecuteScreenAction: Calling service by convention: ${serviceName}")
+                            
+                            try {
+                                def serviceCallResult = ec.service.sync().name(serviceName).parameters(actionParams).call()
+                                actionResult = [
+                                    action: action,
+                                    status: "executed",
+                                    message: "Executed service ${serviceName}",
+                                    result: serviceCallResult
+                                ]
+                            } catch (Exception e) {
+                                actionError = "Service call failed: ${e.message}"
+                            }
+                        } else {
+                            // Look for matching transition on screen
+                            def foundTransition = null
+                            def allTransitions = screenDef.getAllTransitions()
+                            if (allTransitions) {
+                                for (def transition : allTransitions) {
+                                    if (transition.getName() == action) {
+                                        foundTransition = transition
+                                        break
+                                    }
+                                }
+                            }
+                            
+                            if (foundTransition) {
+                                // Try to find and execute the transition's service
+                                def serviceName = null
+                                if (foundTransition.xmlTransition) {
+                                    def serviceCallNode = foundTransition.xmlTransition.first("service-call")
+                                    if (serviceCallNode) serviceName = serviceCallNode.attribute("name")
+                                }
+                                
+                                if (serviceName) {
+                                    ec.logger.info("ExecuteScreenAction: Executing transition '${action}' service: ${serviceName}")
+                                    try {
+                                        def serviceCallResult = ec.service.sync().name(serviceName).parameters(actionParams).call()
+                                        actionResult = [
+                                            action: action,
+                                            status: "executed",
+                                            message: "Executed service ${serviceName}",
+                                            result: serviceCallResult
+                                        ]
+                                    } catch (Exception e) {
+                                        actionError = "Service call failed: ${e.message}"
+                                    }
+                                } else {
+                                    actionResult = [
+                                        action: action,
+                                        status: "success",
+                                        message: "Transition '${action}' ready (no direct service)"
+                                    ]
+                                }
+                            } else {
+                                actionError = "Transition '${action}' not found on screen"
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    actionError = "Action execution failed: ${e.message}"
+                    ec.logger.warn("ExecuteScreenAction error: ${e.message}")
+                }
+                
+                result = [actionResult: actionResult, actionError: actionError]
+            ]]></script>
+        </actions>
+    </service>
+
+</services>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-facade-xml type="seed">
+    <!-- Run all enabled scheduled ADK agents every minute -->
+    <moqui.service.job.ServiceJob
+        jobName="AdkScheduledAgents"
+        description="Run all ADK agents that have scheduleEnabled=Y"
+        serviceName="AdkSchedulerServices.run#AllScheduledAgents"
+        cronExpression="0 * * * * ?"
+        paused="N"/>
+</entity-facade-xml>

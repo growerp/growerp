@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-3.xsd"
+        default-menu-title="Configuration" menu-image="fa fa-cog" menu-image-type="icon"
+        default-menu-index="3" require-authentication="true">
+
+    <transition name="updateConfig">
+        <service-call name="AdkServices.update#AgentConfig"/>
+        <default-response url="."/>
+    </transition>
+
+    <actions>
+        <set field="configValue" from="ec.entity.find('moqui.adk.AdkAgentConfig').condition('enabled', 'Y').one()"/>
+    </actions>
+
+    <widgets>
+        <container-row>
+            <row-col lg="8" md="12">
+                <container-box>
+                    <box-header title="ADK Agent Configuration"/>
+                    <box-body>
+                        <form-single name="AdkConfigForm" transition="updateConfig">
+                            <field name="agentName">
+                                <default-field title="Agent Name"
+                                    tooltip="Leave blank to use the built-in HelloTime example agent">
+                                    <text-line size="40" default-value="${configValue?.agentName ?: ''}"/>
+                                </default-field>
+                            </field>
+                            <field name="modelName">
+                                <default-field title="Model">
+                                    <text-line size="40" default-value="${configValue?.modelName ?: 'gemini-2.0-flash'}"/>
+                                </default-field>
+                            </field>
+                            <field name="apiKey">
+                                <default-field title="Google API Key">
+                                    <password size="60" default-value="${configValue?.apiKey ?: ''}"/>
+                                </default-field>
+                            </field>
+                            <field name="instruction">
+                                <default-field title="System Instruction">
+                                    <text-area rows="4" cols="60" default-value="${configValue?.instruction ?: 'You are a helpful assistant for the GrowERP ERP system.'}"/>
+                                </default-field>
+                            </field>
+                            <field name="description">
+                                <default-field title="Description">
+                                    <text-line size="60" default-value="${configValue?.description ?: 'ADK Agent'}"/>
+                                </default-field>
+                            </field>
+                            <field name="submitButton">
+                                <default-field title="">
+                                    <submit text="Save Configuration"/>
+                                </default-field>
+                            </field>
+                        </form-single>
+                    </box-body>
+                </container-box>
+            </row-col>
+        </container-row>
+    </widgets>
+</screen>

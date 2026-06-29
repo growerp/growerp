@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-facade-xml type="seed">
+
+    <!-- ════════════════════════════════════════════════════════════════════════
+         Agent Control Center DEMO — "GrowERP Operations Assistant" team.
+
+         These are TEMPLATE rows (ownerPartyId="_NA_"). They are never run directly;
+         AdkDemoServices.load#AgentDemo clones them into a tenant when the admin ticks
+         "Load Agent Demo" on the tenant setup dialog (parallel to the demoData flow).
+
+         The scenario lights up every control-center capability:
+           - coordinator + 3 specialists  → multi-agent orchestration (routes by description)
+           - Sales scoped + writePolicy=approve → tool scoping + human-in-the-loop approvals
+           - Inventory readOnly            → safe read-only MCP use + action audit log
+           - Support readOnly + knowledge  → RAG (docs ingested live at clone time, key permitting)
+           - Ops Digest scheduleEnabled=Y  → scheduled jobs
+         ════════════════════════════════════════════════════════════════════════ -->
+
+    <!-- ── Coordinator ─────────────────────────────────────────────────────────
+         Routes each request to the right specialist. Orchestration picks the member
+         by its DESCRIPTION, so member descriptions below are written as routing hints. -->
+    <moqui.adk.AdkAgentConfig
+        ownerPartyId="_NA_"
+        adkAgentConfigId="ADK_DEMO_COORD"
+        agentName="Operations Assistant"
+        modelName="gemini-2.5-flash"
+        llmProvider="gemini"
+        enabled="Y"
+        agentRole="coordinator"
+        orchestrationType="router"
+        toolMode="readOnly"
+        description="Front-desk operations coordinator for the company. Delegates to the right specialist."
+        instruction="You are the GrowERP Operations Assistant, the coordinator for this company.
+You do not answer business questions yourself — you route each request to the specialist whose
+description best matches it:
+- Stock, inventory, warehouse, product availability → the Inventory specialist.
+- Sales orders, quotes, customers, pricing → the Sales specialist.
+- Company policy, returns, shipping, support hours → the Support specialist.
+Delegate to exactly one specialist, then relay their answer to the user concisely. If a request
+spans several areas, delegate them in turn. Never invent data."/>
+
+    <!-- ── Sales specialist: scoped writes, approval-gated ─────────────────────── -->
+    <moqui.adk.AdkAgentConfig
+        ownerPartyId="_NA_"
+        adkAgentConfigId="ADK_DEMO_SALES"
+        agentName="Sales Specialist"
+        modelName="gemini-2.5-flash"
+        llmProvider="gemini"
+        enabled="Y"
+        agentRole="specialist"
+        toolMode="scoped"
+        serviceAllowlist="*get#FinDoc,*create#FinDoc,*update#FinDoc,*get#Product,*get#Companies,*get#Users"
+        writePolicy="approve"
+        description="Use for sales orders, quotes, customer pricing and creating/updating sales documents (FinDoc)."
+        instruction="You are the Sales specialist for this company. You may read products, customers
+and financial documents, and you may create or update sales quotes and orders (FinDoc). Every write
+you propose is queued for a human to approve before it runs — tell the user when an action is awaiting
+approval. Confirm the customer, items and amounts before proposing any create/update. Never guess
+prices; look them up."/>
+
+    <!-- ── Inventory specialist: read-only ──────────────────────────────────────── -->
+    <moqui.adk.AdkAgentConfig
+        ownerPartyId="_NA_"
+        adkAgentConfigId="ADK_DEMO_INV"
+        agentName="Inventory Specialist"
+        modelName="gemini-2.5-flash"
+        llmProvider="gemini"
+        enabled="Y"
+        agentRole="specialist"
+        toolMode="readOnly"
+        description="Use for stock levels, product availability, warehouse locations and inventory questions."
+        instruction="You are the Inventory specialist for this company. You answer questions about
+stock levels, product availability and warehouse locations using read-only tools only. You cannot
+change any data. If asked to change stock, explain that you are read-only and that a write must go
+through the Sales specialist with approval."/>
+
+    <!-- ── Support specialist: read-only + RAG knowledge ───────────────────────── -->
+    <moqui.adk.AdkAgentConfig
+        ownerPartyId="_NA_"
+        adkAgentConfigId="ADK_DEMO_SUPPORT"
+        agentName="Support Specialist"
+        modelName="gemini-2.5-flash"
+        llmProvider="gemini"
+        enabled="Y"
+        agentRole="specialist"
+        toolMode="readOnly"
+        websiteChat="Y"
+        description="Use for company policy: returns, refunds, shipping times, support hours and FAQs."
+        instruction="You are the Support specialist for this company. Answer customer-policy questions
+(returns, refunds, shipping times, support hours, FAQs) by calling the searchKnowledge tool and
+quoting the company's own policy documents. If searchKnowledge returns nothing relevant, say you have
+no policy on record rather than guessing.
+If the customer asks to speak to a person/human/representative, or you cannot help them, call the
+requestHumanHandoff tool with a short reason, then tell them a member of the team will follow up here."/>
+
+    <!-- ── Ops Digest: scheduled standalone agent ──────────────────────────────── -->
+    <!-- scheduleEnabled=Y → run#AllScheduledAgents picks it up every minute. scheduleChatRoomId is
+         left unset by the clone (it is tenant-specific); set it on the agent, or trigger
+         run#ScheduledAgent manually, to see the digest delivered to a chat room. -->
+    <moqui.adk.AdkAgentConfig
+        ownerPartyId="_NA_"
+        adkAgentConfigId="ADK_DEMO_DIGEST"
+        agentName="Ops Digest"
+        modelName="gemini-2.5-flash"
+        llmProvider="gemini"
+        enabled="Y"
+        agentRole="specialist"
+        toolMode="readOnly"
+        scheduleEnabled="Y"
+        scheduleExpression="0 0 9 * * ?"
+        schedulePrompt="Summarise today's open sales orders and any low-stock products in 5 bullet points for the operations team."
+        description="Scheduled daily operations digest (open orders + low stock)."
+        instruction="You produce a short daily operations digest for this company using read-only tools:
+list the open sales orders and flag any products that look low on stock. Keep it to a few bullet
+points. Read-only only — never change data."/>
+
+    <!-- ── Team membership: coordinator delegates to the three specialists ──────────
+         delegationMode=tool → each specialist is exposed to the coordinator as a callable tool. -->
+    <moqui.adk.AdkAgentTeamMember
+        ownerPartyId="_NA_"
+        adkAgentTeamMemberId="ADK_DEMO_TM_1"
+        coordinatorConfigId="ADK_DEMO_COORD"
+        memberConfigId="ADK_DEMO_INV"
+        sequenceNum="1"
+        delegationMode="tool"
+        enabled="Y"/>
+    <moqui.adk.AdkAgentTeamMember
+        ownerPartyId="_NA_"
+        adkAgentTeamMemberId="ADK_DEMO_TM_2"
+        coordinatorConfigId="ADK_DEMO_COORD"
+        memberConfigId="ADK_DEMO_SALES"
+        sequenceNum="2"
+        delegationMode="tool"
+        enabled="Y"/>
+    <moqui.adk.AdkAgentTeamMember
+        ownerPartyId="_NA_"
+        adkAgentTeamMemberId="ADK_DEMO_TM_3"
+        coordinatorConfigId="ADK_DEMO_COORD"
+        memberConfigId="ADK_DEMO_SUPPORT"
+        sequenceNum="3"
+        delegationMode="tool"
+        enabled="Y"/>
+
+</entity-facade-xml>

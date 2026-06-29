@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+-->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-3.xsd">
+
+    <service verb="mcp" noun="ResolveScreenPath" authenticate="false" allow-remote="true" transaction-timeout="30">
+        <description>Resolve a simple screen path to component path, subscreen name, and screen definition.</description>
+        <in-parameters>
+            <parameter name="path" required="true"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="result" type="Map"/>
+        </out-parameters>
+        <actions>
+            <script><![CDATA[
+                import org.moqui.context.ExecutionContext
+                
+                ExecutionContext ec = context.ec
+                def resolvedPath = null
+                def subscreenName = null
+                def screenDef = null
+                
+                if (!path || path == "root") {
+                    return [
+                        screenPath: null,
+                        subscreenName: null,
+                        screenDef: null
+                    ]
+                }
+                
+                // Support both dot and slash notation
+                def pathParts = path.contains('/') 
+                    ? path.split('/') 
+                    : path.split('\\.')
+                def componentName = pathParts[0]
+                
+                // Use longest prefix match to find actual screen file
+                for (int i = pathParts.size(); i >= 1; i--) {
+                    def subPath = i > 1 ? pathParts[0] + "/" + (pathParts[1..<i].join('/')) : pathParts[0]
+                    def currentTry = "component://${componentName}/screen/${subPath}.xml"
+                    if (ec.resource.getLocationReference(currentTry).getExists()) {
+                        resolvedPath = currentTry
+                        // If we found a screen matching the full path, we're already at the target
+                        if (i < pathParts.size()) {
+                            def remainingParts = pathParts[i..-1]
+                            subscreenName = remainingParts.size() > 1 ? remainingParts.join('_') : remainingParts[0]
+                        }
+                        break
+                    }
+                }
+                
+                // Fallback to component root screen if no match found
+                if (!resolvedPath) {
+                    resolvedPath = "component://${componentName}/screen/${componentName}.xml"
+                    if (pathParts.size() > 1) {
+                        subscreenName = pathParts[1..-1].join('_')
+                    }
+                }
+                
+                // Navigate to subscreen if needed
+                if (resolvedPath) {
+                    try {
+                        screenDef = ec.screen.getScreenDefinition(resolvedPath)
+                        if (subscreenName && screenDef) {
+                            for (subName in subscreenName.split('_')) {
+                                def subItem = screenDef?.getSubscreensItem(subName)
+                                if (subItem && subItem.getLocation()) {
+                                    screenDef = ec.screen.getScreenDefinition(subItem.getLocation())
+                                } else {
+                                    break
+                                }
+                            }
+                        }
+                    } catch (Exception e) {
+                        ec.logger.warn("ResolveScreenPath: Error loading screen definition: ${e.message}")
+                    }
+                }
+                
+                result = [
+                    screenPath: resolvedPath,
+                    subscreenName: subscreenName,
+                    screenDef: screenDef
+                ]
+            ]]></script>
+        </actions>
+    </service>
+
+</services>

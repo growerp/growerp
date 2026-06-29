@@ -1,0 +1,545 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  This software is in the public domain under CC0 1.0 Universal plus a
+   Grant of Patent License.
+
+   To the extent possible under law, the author(s) have dedicated all
+   copyright and related and neighboring rights to this software to the
+   public domain worldwide. This software is distributed without any warranty.
+
+   You should have received a copy of the CC0 Public Domain Dedication
+   along with this software. If not, see
+   <http://creativecommons.org/publicdomain/zero/1.0/>.
+ -->
+<entity-facade-xml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/entity-facade-3.xsd" type="seed">
+
+    <!-- Business Processes Wiki Space -->
+    <moqui.resource.wiki.WikiSpace wikiSpaceId="BUSINESS_PROCESSES"
+        description="Business Process Workflows - Step-by-step guides for common business operations"
+        restrictView="N"
+        restrictUpdate="Y"
+        rootPageLocation="dbresource://WikiSpace/BUSINESS_PROCESSES.md"/>
+
+    <!-- WikiSpace Root Page -->
+    <moqui.resource.DbResource
+        resourceId="WIKI_BUSINESS_PROCESSES"
+        parentResourceId="WIKI_SPACE_ROOT"
+        filename="BUSINESS_PROCESSES.md"
+        isFile="Y"/>
+    <moqui.resource.DbResourceFile
+        resourceId="WIKI_BUSINESS_PROCESSES"
+        mimeType="text/markdown"
+        versionName="v1">
+        <fileData><![CDATA[# Business Process Workflows
+
+Step-by-step guides for common Moqui ERP operations.
+
+Each workflow includes:
+- Exact MCP tool calls with complete parameters
+- Expected responses and how to interpret them
+- Common pitfalls and troubleshooting
+
+## Available Workflows
+
+- **[Add Product Variant](Product-Variant-Creation)**: Create new product variants with proper features, pricing, and associations
+- **[Enter an Order](Order-Entry)**: Open the GrowERP order entry screen for a new sales/purchase order
+- **[Approve an Order](Order-Approval)**: Open an existing order with status preset to Approved for user confirmation
+- **[Receive a Shipment](Shipment-Receive)**: Show incoming shipments or open a shipment's receive screen
+
+## Opening GrowERP front-end screens (generic)
+
+The orders/shipments workflows above are specific examples of a general convention. For ANY
+entity the GrowERP Flutter client exposes a screen catalog (widgetName, description, keywords,
+parameters). To fulfil a request emit a `growerp-action` directive:
+- View/list → `{"action":"navigate","widget":"<Entity>List"}`
+- Create → `{"action":"dialog","widget":"<Entity>Dialog"}` (no id)
+- Open/edit → `{"action":"dialog","widget":"<Entity>Dialog","params":{"<idParam>":"<id>"}}`
+  using the id parameter named in that widget's catalog `parameters` (e.g. productId, partyId).
+Navigate/open only — the user confirms any write on the opened, pre-filled screen.
+
+## How to Use These Guides
+
+These workflows are designed to be **executable by LLMs**. Each step provides:
+
+1. **Exact Tool Call**: The complete `moqui_browse_screens` or `moqui_get_screen_details` call
+2. **Parameters**: All required and optional parameters with example values
+3. **Expected Result**: What the response looks like and how to extract needed data
+4. **Next Step**: How to use the result in the next operation
+
+Copy the tool calls exactly as shown, replacing example values with your specific data.
+
+## Key Concepts
+
+- **productId vs pseudoId**: Always use internal `productId` (returned from create operations), NOT user-visible `pseudoId`
+- **Action vs Service**: Use screen `action` parameters, not direct service calls
+- **Feature Application**: Use `applyProductFeatures` for existing features, `createProductFeature` only for new features
+- **Variant Associations**: Link variants to virtual parent using `PatVariant` association type
+
+## Getting Help
+
+- Use `moqui_get_screen_details` to see available fields and dropdown options
+- Use `moqui_get_help` with `wiki:service:EntityName` for service documentation
+- Check `validationErrors` in action responses for failure reasons]]></fileData>
+    </moqui.resource.DbResourceFile>
+
+    <!-- Root Wiki Page -->
+    <moqui.resource.wiki.WikiPage
+        wikiPageId="BUSINESS_PROCESSES/root"
+        wikiSpaceId="BUSINESS_PROCESSES"
+        pagePath="root"
+        publishedVersionName="v1"
+        restrictView="N">
+    </moqui.resource.wiki.WikiPage>
+
+    <moqui.resource.wiki.WikiPageHistory
+        wikiPageId="BUSINESS_PROCESSES/root"
+        historySeqId="1"
+        versionName="v1"
+        userId="EX_JOHN_DOE"
+        changeDateTime="2026-01-23 00:00:00.000"/>
+
+    <!-- ========================================== -->
+    <!-- Product Variant Creation Workflow          -->
+    <!-- ========================================== -->
+
+    <!-- Product Variant Creation Page -->
+    <moqui.resource.DbResource
+        resourceId="WIKI_BP_PRODUCT_VARIANT"
+        parentResourceId="WIKI_BUSINESS_PROCESSES"
+        filename="Product-Variant-Creation.md"
+        isFile="Y"/>
+    <moqui.resource.DbResourceFile
+        resourceId="WIKI_BP_PRODUCT_VARIANT"
+        mimeType="text/markdown"
+        versionName="v1">
+        <fileData><![CDATA[# Add Product Variant
+
+Complete workflow for creating a new product variant with features, pricing, and association to parent.
+
+## Prerequisites
+
+- A virtual parent product exists (e.g., `DEMO_VAR`)
+- Parent has selectable features defined (e.g., Color, Size options)
+- You know the feature IDs to apply (e.g., `ColorPurple`, `SizeSmall`)
+
+## Overview
+
+This workflow creates a new variant product by:
+1. Finding an existing variant to clone from (not the virtual parent)
+2. Cloning the variant to create a new one with the same structure
+3. Updating distinguishing features to identify this variant
+4. Setting pricing (if different from cloned variant)
+5. Linking variant to virtual parent
+
+**Important:** Always clone from an existing variant (e.g., `DEMO_VAR_BU_SM`), not the virtual parent. This ensures the new product has the correct product type, asset settings, and feature structure.
+
+## Step 1: Find an Existing Variant to Clone
+
+Locate an existing variant product to use as a template. Choose one with the same size if possible.
+
+```bash
+moqui_browse_screens(
+    path="PopCommerce/PopCommerceAdmin/Catalog/Product/EditAssocs",
+    parameters={productId: "DEMO_VAR"}
+)
+```
+
+**Expected Result:**
+- Shows parent's selectable features and existing variant associations
+- Find a variant to clone (e.g., `DEMO_VAR_BU_SM` for Blue Small)
+- Note the variant's pseudoId for the next step
+
+**Next Step:** Navigate to the variant and clone it.
+
+## Step 2: Clone Existing Variant
+
+Navigate to an existing variant's EditProduct screen and clone it.
+
+```bash
+moqui_browse_screens(
+    path="PopCommerce/PopCommerceAdmin/Catalog/Product/EditProduct",
+    action="cloneProduct",
+    parameters={
+        productId: "DEMO_VAR_BU_SM",
+        pseudoId: "DEMO_VAR_PUR_SM",
+        productName: "Demo with Variants Purple Small",
+        copyFeatures: "Y",
+        copyPrices: "Y",
+        copyCategories: "Y"
+    }
+)
+```
+
+**Parameters:**
+- `productId`: Existing variant to clone (use pseudoId or internal ID)
+- `pseudoId`: New product's pseudoId (user-visible identifier)
+- `productName`: Display name for the new variant
+- `copyFeatures`: "Y" to copy features (will need to update color)
+- `copyPrices`: "Y" to copy pricing from source variant
+
+**Expected Result:**
+- Response with `status: "executed"`
+- New variant created with same structure as source
+
+**Next Step:** Find the new variant and update its features.
+
+## Step 3: Find New Variant Product
+
+Search for the newly created variant.
+
+```bash
+moqui_browse_screens(
+    path="PopCommerce/PopCommerceAdmin/Catalog/Product/FindProduct",
+    parameters={productId: "DEMO_VAR_PUR_SM"}
+)
+```
+
+**Expected Result:**
+- Product list shows `DEMO_VAR_PUR_SM`
+- Note the internal `productId` from the row ref
+- The cloned product has Blue features that need to be changed to Purple
+
+**Next Step:** Update the distinguishing features.
+
+## Step 4: Update Distinguishing Features
+
+Remove the copied color feature and apply the correct one. The cloned product has Blue - change to Purple.
+
+First, view current features:
+```bash
+moqui_browse_screens(
+    path="PopCommerce/PopCommerceAdmin/Catalog/Product/EditProduct",
+    parameters={productId: "DEMO_VAR_PUR_SM"}
+)
+```
+
+Then update the color feature using `updateProductFeatureAppl` to expire the old one and `applyProductFeatures` to add the new one:
+
+```bash
+moqui_browse_screens(
+    path="PopCommerce/PopCommerceAdmin/Catalog/Product/EditProduct",
+    action="applyProductFeatures",
+    parameters={
+        productId: "DEMO_VAR_PUR_SM",
+        productFeatureIdList: ["ColorPurple"],
+        applTypeEnumId: "PfatDistinguishing"
+    }
+)
+```
+
+**Parameters:**
+- `productId`: The new variant's ID
+- `productFeatureIdList`: Array of feature IDs to apply
+- `applTypeEnumId`: "PfatDistinguishing" for variants
+
+**Available Feature Types:**
+- Colors: `ColorRed`, `ColorBlue`, `ColorGreen`, `ColorPurple`, `ColorBlack`, `ColorWhite`
+- Sizes: `SizeSmall`, `SizeMedium`, `SizeLarge`, `SizeXL`
+
+**Next Step:** Update pricing if needed.
+
+## Step 5: Add Current Price
+
+Set the selling price for the variant.
+
+```bash
+moqui_browse_screens(
+    path="PopCommerce/PopCommerceAdmin/Catalog/Product/EditPrices",
+    action="createProductPrice",
+    parameters={
+        productId: "100000",
+        priceTypeEnumId: "PptCurrent",
+        pricePurposeEnumId: "PppSales",
+        price: "26.99",
+        priceUomId: "USD",
+        minQuantity: "1",
+        fromDate: "2026-01-23"
+    }
+)
+```
+
+**Parameters:**
+- `productId`: **Internal product ID** from Step 3
+- `priceTypeEnumId`: "PptCurrent" for selling price
+- `pricePurposeEnumId`: "PppSales" for sales transactions
+- `price`: Decimal amount (e.g., "26.99")
+- `priceUomId`: Currency code (default: "USD")
+- `minQuantity`: Minimum quantity for this price (1 for standard pricing)
+
+**Expected Result:**
+- Response with `status: "executed"`
+- ProductPrice record created
+
+**Next Step:** Add list price for MSRP display.
+
+## Step 6: Add List Price
+
+Set the list price (MSRP) for the variant.
+
+```bash
+moqui_browse_screens(
+    path="PopCommerce/PopCommerceAdmin/Catalog/Product/EditPrices",
+    action="createProductPrice",
+    parameters={
+        productId: "100000",
+        priceTypeEnumId: "PptList",
+        pricePurposeEnumId: "PppSales",
+        price: "31.99",
+        priceUomId: "USD",
+        minQuantity: "1",
+        fromDate: "2026-01-23"
+    }
+)
+```
+
+**Parameters:**
+- `priceTypeEnumId`: "PptList" for list price
+- All other parameters same as Step 5
+
+**Expected Result:**
+- Response with `status: "executed"`
+- Variant now has both Current and List prices
+
+**Next Step:** Link variant to virtual parent.
+
+## Step 7: Link Variant to Parent
+
+Create an association between the variant and the virtual parent product.
+
+```bash
+moqui_browse_screens(
+    path="PopCommerce/PopCommerceAdmin/Catalog/Product/EditAssocs",
+    action="createProductAssoc",
+    parameters={
+        productId: "DEMO_VAR",
+        toProductId: "100000",
+        productAssocTypeEnumId: "PatVariant",
+        fromDate: "2026-01-23"
+    }
+)
+```
+
+**Parameters:**
+- `productId`: Parent product pseudoId or internal ID (the virtual product)
+- `toProductId`: **Internal product ID** of the variant (from Step 3)
+- `productAssocTypeEnumId`: "PatVariant" for variant relationship
+- `fromDate`: Optional, defaults to current date
+
+**Expected Result:**
+- Response with `status: "executed"`
+- ProductAssoc record created linking parent to variant
+
+**Next Step:** Verify the complete setup.
+
+## Step 8: Verify Setup
+
+Verify that the variant is properly configured.
+
+```bash
+moqui_browse_screens(
+    path="PopCommerce/PopCommerceAdmin/Catalog/Product/EditProduct",
+    parameters={productId: "100000"}
+)
+```
+
+**Check:**
+1. **Features tab**: Shows `ColorPurple` and `SizeSmall` with `PfatDistinguishing` type
+2. **Prices tab**: Shows both Current ($26.99) and List ($31.99) prices
+3. **Assocs tab**: Shows association to `DEMO_VAR` with type `PatVariant`
+
+**Expected Result:**
+- All features, prices, and associations are visible
+- Variant is ready for use in catalog
+
+## Quick Reference: Common Variant Patterns
+
+### Purple Small (Example)
+- PseudoId: `DEMO_VAR_PUR_SM`
+- Features: `["ColorPurple", "SizeSmall"]`
+- Current: $26.99, List: $31.99
+
+### Purple Medium
+- PseudoId: `DEMO_VAR_PUR_MD`
+- Features: `["ColorPurple", "SizeMedium"]`
+- Current: $28.99, List: $33.99
+
+### Purple Large
+- PseudoId: `DEMO_VAR_PUR_LG`
+- Features: `["ColorPurple", "SizeLarge"]`
+- Current: $30.99, List: $35.99
+
+### Purple XL
+- PseudoId: `DEMO_VAR_PUR_XL`
+- Features: `["ColorPurple", "SizeXL"]`
+- Current: $32.99, List: $37.99
+
+## Troubleshooting
+
+### Error: "Product already has feature"
+The feature is already applied. Check existing features and remove or use different features.
+
+### Error: "No product found with ID"
+You're using `pseudoId` instead of internal `productId`. Always use the internal `productId` returned from create operations.
+
+### Error: "Invalid productFeatureId"
+The feature ID doesn't exist. Use `moqui_get_screen_details` on EditProduct to see available features:
+```bash
+moqui_get_screen_details(
+    path="PopCommerce/PopCommerceAdmin/Catalog/Product/EditProduct",
+    fieldName="productFeatureIdList"
+)
+```
+
+### Variant not showing on parent
+Check that:
+1. `PatVariant` association exists (Step 7)
+2. Parent has `PfatSelectable` features for the same feature type
+3. Variant has `PfatDistinguishing` features, not `PfatSelectable`
+
+### Missing pricing
+Prices are optional. If not set, the variant will use parent's default pricing or no pricing.]]></fileData>
+    </moqui.resource.DbResourceFile>
+
+    <moqui.resource.wiki.WikiPage
+        wikiPageId="BP/ProductVariant"
+        wikiSpaceId="BUSINESS_PROCESSES"
+        pagePath="Product-Variant-Creation"
+        publishedVersionName="v1"
+        restrictView="N">
+    </moqui.resource.wiki.WikiPage>
+
+    <moqui.resource.wiki.WikiPageHistory
+        wikiPageId="BP/ProductVariant"
+        historySeqId="1"
+        versionName="v1"
+        userId="EX_JOHN_DOE"
+        changeDateTime="2026-01-23 00:00:00.000"/>
+
+    <!-- ========================================== -->
+    <!-- Order Entry Workflow (GrowERP front-end)   -->
+    <!-- ========================================== -->
+    <moqui.resource.DbResource resourceId="WIKI_BP_ORDER_ENTRY"
+        parentResourceId="WIKI_BUSINESS_PROCESSES" filename="Order-Entry.md" isFile="Y"/>
+    <moqui.resource.DbResourceFile resourceId="WIKI_BP_ORDER_ENTRY"
+        mimeType="text/markdown" versionName="v1">
+        <fileData><![CDATA[# Enter an Order (GrowERP)
+
+Goal: let the user create a new sales or purchase order on the operational GrowERP
+Flutter screen. The agent does NOT create the order via a service — it opens the order
+entry screen pre-set to "new" and the user fills in and submits it.
+
+## When to use
+User says: "enter an order", "create a sales order", "new purchase order", "add an order".
+
+## What to emit
+Open the order list screen with the new-order dialog auto-opened. Sales is the default;
+use PurchaseOrderList when the user clearly means a purchase/supplier order.
+
+```growerp-action
+{"action":"navigate","widget":"SalesOrderList","params":{"openNew":true},"label":"Enter sales order"}
+```
+
+Purchase variant:
+```growerp-action
+{"action":"navigate","widget":"PurchaseOrderList","params":{"openNew":true},"label":"Enter purchase order"}
+```
+
+## Background (do not call unless asked to inspect data)
+The screen ultimately calls growerp service `create#Order`
+(`growerp.100.FinDocServices100.create#Order`), which returns an `orderId` and creates the
+order in status `OrderOpen`. You only navigate; the user submits.]]></fileData>
+    </moqui.resource.DbResourceFile>
+    <moqui.resource.wiki.WikiPage wikiPageId="BP/OrderEntry" wikiSpaceId="BUSINESS_PROCESSES"
+        pagePath="Order-Entry" publishedVersionName="v1" restrictView="N"/>
+    <moqui.resource.wiki.WikiPageHistory wikiPageId="BP/OrderEntry" historySeqId="1"
+        versionName="v1" userId="EX_JOHN_DOE" changeDateTime="2026-06-03 00:00:00.000"/>
+
+    <!-- ========================================== -->
+    <!-- Order Approval Workflow (GrowERP)          -->
+    <!-- ========================================== -->
+    <moqui.resource.DbResource resourceId="WIKI_BP_ORDER_APPROVAL"
+        parentResourceId="WIKI_BUSINESS_PROCESSES" filename="Order-Approval.md" isFile="Y"/>
+    <moqui.resource.DbResourceFile resourceId="WIKI_BP_ORDER_APPROVAL"
+        mimeType="text/markdown" versionName="v1">
+        <fileData><![CDATA[# Approve an Order (GrowERP)
+
+Goal: open an existing order on its operational screen with the status dropdown preset to
+Approved, so the user confirms with one tap. The agent must NOT call the approval service.
+
+## When to use
+User says: "approve order <id>", "approve the order for <customer>", "approve PO <id>".
+
+## Step 1 — resolve the order id (only if needed)
+If the user gives an order id/pseudoId, use it directly. If they refer to it by customer
+or description, look it up (read-only):
+
+```bash
+moqui_search_services(query="FinDoc")
+moqui_execute_service(name="growerp.100.FinDocServices100.get#FinDoc",
+    parameters={docType:"order", sales:true, search:"Acme"})
+```
+Take the order's `pseudoId` (or id) from the result.
+
+## Step 2 — navigate with status preset (DO NOT write)
+```growerp-action
+{"action":"navigate","widget":"SalesOrderList","params":{"finDocId":"<id>","presetStatus":"approved"},"label":"Approve order <id>"}
+```
+Use PurchaseOrderList for purchase orders. The order opens with status = Approved; the user
+taps Update to commit.
+
+## Do NOT do
+Never call `mantle.order.OrderServices.approve#Order` or `update#Order` yourself — approval
+is a user-confirmed write performed on the opened screen. Order status flow:
+OrderOpen → OrderPlaced → OrderApproved → OrderCompleted.]]></fileData>
+    </moqui.resource.DbResourceFile>
+    <moqui.resource.wiki.WikiPage wikiPageId="BP/OrderApproval" wikiSpaceId="BUSINESS_PROCESSES"
+        pagePath="Order-Approval" publishedVersionName="v1" restrictView="N"/>
+    <moqui.resource.wiki.WikiPageHistory wikiPageId="BP/OrderApproval" historySeqId="1"
+        versionName="v1" userId="EX_JOHN_DOE" changeDateTime="2026-06-03 00:00:00.000"/>
+
+    <!-- ========================================== -->
+    <!-- Shipment Receive Workflow (GrowERP)        -->
+    <!-- ========================================== -->
+    <moqui.resource.DbResource resourceId="WIKI_BP_SHIPMENT_RECEIVE"
+        parentResourceId="WIKI_BUSINESS_PROCESSES" filename="Shipment-Receive.md" isFile="Y"/>
+    <moqui.resource.DbResourceFile resourceId="WIKI_BP_SHIPMENT_RECEIVE"
+        mimeType="text/markdown" versionName="v1">
+        <fileData><![CDATA[# Receive a Shipment / Show Incoming Shipments (GrowERP)
+
+Goal: show the incoming (purchase) shipment list, or open a specific incoming shipment's
+receive screen. The agent NAVIGATES only; the user performs the receive on the screen.
+
+## When to use
+User says: "show incoming shipments", "receive a shipment", "receive shipment <id>".
+
+## Show the incoming shipment list
+```growerp-action
+{"action":"navigate","widget":"IncomingShipmentList","label":"Incoming shipments"}
+```
+
+## Receive a specific shipment
+Pass its id. An approved incoming shipment opens directly in the receive dialog (where the
+user assigns locations and confirms):
+```growerp-action
+{"action":"navigate","widget":"IncomingShipmentList","params":{"finDocId":"<shipmentId>"},"label":"Receive shipment <shipmentId>"}
+```
+
+If the user names the supplier instead of an id, look it up first (read-only):
+```bash
+moqui_execute_service(name="growerp.100.FinDocServices100.get#FinDoc",
+    parameters={docType:"shipment", sales:false, open:true})
+```
+
+## Background (do not call)
+The receive screen calls growerp `receive#Shipment`
+(`growerp.100.FinDocServices100.receive#Shipment`). Shipment status flow:
+ShipInput → ShipScheduled → ShipPacked → ShipShipped → ShipDelivered. Do not call the
+receive service yourself; it is a user-confirmed write on the opened screen.]]></fileData>
+    </moqui.resource.DbResourceFile>
+    <moqui.resource.wiki.WikiPage wikiPageId="BP/ShipmentReceive" wikiSpaceId="BUSINESS_PROCESSES"
+        pagePath="Shipment-Receive" publishedVersionName="v1" restrictView="N"/>
+    <moqui.resource.wiki.WikiPageHistory wikiPageId="BP/ShipmentReceive" historySeqId="1"
+        versionName="v1" userId="EX_JOHN_DOE" changeDateTime="2026-06-03 00:00:00.000"/>
+
+</entity-facade-xml>

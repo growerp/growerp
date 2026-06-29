@@ -93,13 +93,13 @@ growerp_[domain]/lib/src/[entity]/
 - `moqui/runtime/component/mantle-udm/` → growerp/mantle-udm (submodule of moqui-runtime)
 - `moqui/runtime/component/mantle-usl/` → growerp/mantle-usl (submodule of moqui-runtime)
 - `moqui/runtime/component/moqui-fop/` → growerp/moqui-fop (submodule of moqui-runtime)
-- `moqui/runtime/component/moqui-mcp/` → growerp/moqui-mcp (submodule of moqui-runtime)
-- `moqui/runtime/component/moqui-adk/` → growerp/moqui-adk (submodule of moqui-runtime)
 
 Custom components tracked in growerp root, symlinked by `setup-backend.sh`:
 - `backend/` → symlinked as `moqui/runtime/component/growerp`
 - `pop-rest-store/` → symlinked as `moqui/runtime/component/PopRestStore`
 - `mantle-stripe/` → symlinked as `moqui/runtime/component/mantle-stripe`
+- `moqui-adk/` → symlinked as `moqui/runtime/component/moqui-adk`
+- `moqui-mcp/` → symlinked as `moqui/runtime/component/moqui-mcp`
 
 ## Key Docs
 

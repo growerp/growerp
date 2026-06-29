@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  This software is in the public domain under CC0 1.0 Universal plus a
+  Grant of Patent License.
+
+  To the extent possible under law, the author(s) have dedicated all
+  copyright and related and neighboring rights to this software to the
+  public domain worldwide. This software is distributed without any warranty.
+
+  You should have received a copy of the CC0 Public Domain Dedication
+  along with this software. If not, see
+  <http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<entity-facade-xml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/entity-facade-3.xsd" type="seed">
+
+    <!-- MCP Prompts Wiki Space -->
+    <moqui.resource.wiki.WikiSpace wikiSpaceId="MCP_PROMPTS"
+        description="MCP Prompt Templates for AI assistants"
+        restrictView="N"
+        restrictUpdate="Y"
+        rootPageLocation="dbresource://WikiSpace/MCP_PROMPTS.md"/>
+
+    <!-- Parent DbResource for WikiSpace -->
+    <moqui.resource.DbResource
+        resourceId="WIKI_MCP_PROMPTS"
+        parentResourceId=""
+        filename="MCP_PROMPTS.md"
+        isFile="Y"/>
+    <moqui.resource.DbResourceFile
+        resourceId="WIKI_MCP_PROMPTS"
+        mimeType="text/markdown"
+        versionName="v1">This server provides access to Moqui ERP through MCP.
+    </moqui.resource.DbResourceFile>
+
+    <!-- DbResource for root page -->
+    <moqui.resource.DbResource
+        resourceId="WIKI_MCP_PROMPTS_ROOT"
+        parentResourceId="WIKI_MCP_PROMPTS"
+        filename="get-started.md"
+        isFile="Y"/>
+
+    <!-- "Get Started" Prompt Template -->
+    <moqui.resource.wiki.WikiPage
+        wikiPageId="MCP_PROMPTS/get-started"
+        wikiSpaceId="MCP_PROMPTS"
+        pagePath="get-started"
+        publishedVersionName="v1"
+        restrictView="N">
+    </moqui.resource.wiki.WikiPage>
+
+    <!-- WikiPageHistory for version tracking -->
+    <moqui.resource.wiki.WikiPageHistory
+        wikiPageId="MCP_PROMPTS/get-started"
+        historySeqId="1"
+        versionName="v1"
+        userId="EX_JOHN_DOE"
+        changeDateTime="2025-12-29 00:00:00.000"/>
+
+    <!-- DbResourceFile: Template content with Groovy GString syntax -->
+    <moqui.resource.DbResourceFile
+        resourceId="WIKI_MCP_PROMPTS_ROOT"
+        mimeType="text/markdown"
+        versionName="v1">
+This server provides access to Moqui ERP through MCP.
+For ${focus?.capitalize() ?: 'General'} operations:
+
+${focus == 'catalog' ? '''
+## Catalog Operations
+- **FindProduct**: Use `/PopCommerce/PopCommerceAdmin/Catalog/Product/FindProduct` for product catalog
+- **FindFeature**: Use `/PopCommerce/PopCommerceAdmin/Catalog/Feature/FindFeature` to search by features like color or size
+- **EditPrices**: Use `/PopCommerce/PopCommerceAdmin/Catalog/Product/EditPrices` to check prices
+''' : ''}
+
+${focus == 'orders' ? '''
+## Order Operations
+- **FindOrder**: Use `/PopCommerce/PopCommerceAdmin/Order/FindOrder` for order status and lookup
+- **QuickSearch**: Use `/PopCommerce/PopCommerceAdmin/QuickSearch` for general order searches
+''' : ''}
+
+${focus == 'customers' ? '''
+## Customer Operations
+- **CustomerRoot**: Use `/PopCommerce/PopCommerceRoot/Customer` for customer management
+- **QuickSearch**: Use `/PopCommerce/PopCommerceAdmin/QuickSearch` for customer lookup
+''' : ''}
+
+${detailLevel == 'advanced' ? '''
+## Advanced Features
+- Use screen rendering for complex workflows with `moqui_render_screen`
+- Subscribe to wiki and document resources for real-time updates
+- All screens support parameterized queries for filtering results
+''' : ''}
+
+Use following discovery tools to explore available functionality:
+- `moqui_browse_screens`: Browse Moqui screen hierarchy
+- `moqui_search_screens`: Search for screens by name to find their paths.
+- `moqui_get_screen_details`: Get input parameters for specific screens.
+    </moqui.resource.DbResourceFile>
+
+    <!-- Argument Schema Attachment -->
+    <moqui.resource.DbResource
+        resourceId="WIKI_MCP_GET_STARTED_ARGS"
+        parentResourceId="WIKI_MCP_PROMPTS"
+        filename="get-started/arguments.json"
+        isFile="Y"/>
+    <moqui.resource.DbResourceFile
+        resourceId="WIKI_MCP_GET_STARTED_ARGS"
+        mimeType="application/json"
+        versionName="v1">[
+  {
+    "name": "focus",
+    "title": "Focus Area",
+    "description": "Area of operations to focus on",
+    "type": "string",
+    "enum": ["general", "catalog", "orders", "customers"],
+    "required": false
+  },
+  {
+    "name": "detailLevel",
+    "title": "Detail Level",
+    "description": "Level of instruction detail",
+    "type": "string",
+    "enum": ["basic", "advanced"],
+    "required": false
+  }
+]
+    </moqui.resource.DbResourceFile>
+</entity-facade-xml>

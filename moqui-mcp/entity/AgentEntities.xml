@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entities xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/entity-definition-3.xsd">
+
+    <!-- ========================================================= -->
+    <!-- System Message Extensions for Agent Tasks -->
+    <!-- ========================================================= -->
+
+    <extend-entity entity-name="SystemMessage" package="moqui.service.message">
+        <field name="requestedByPartyId" type="id">
+            <description>The human user (Party) who requested this agent task.</description>
+        </field>
+        <field name="effectiveUserId" type="id">
+            <description>The UserAccount ID to impersonate during execution (RBAC context).</description>
+        </field>
+        <field name="productStoreId" type="id">
+            <description>The context ProductStore for this task (determines AI config).</description>
+        </field>
+        <field name="aiConfigId" type="id">
+            <description>Specific AI configuration used for this task.</description>
+        </field>
+        <field name="rootCommEventId" type="id">
+            <description>The root CommunicationEvent ID for conversation thread.</description>
+        </field>
+        
+        <!-- Callback and Audit Fields for LLM Request/Response Pattern -->
+        <field name="parentSystemMessageId" type="id">
+            <description>Parent SystemMessage ID (links Response to Request).</description>
+        </field>
+        <field name="callbackServiceName" type="text-medium">
+            <description>Service to call with LLM response when complete.</description>
+        </field>
+        <field name="callbackParameters" type="text-very-long">
+            <description>JSON parameters to pass to callback service.</description>
+        </field>
+        <field name="sourceTypeEnumId" type="id">
+            <description>Type of entity that triggered this request (Order, CommEvent, etc.).</description>
+        </field>
+        <field name="sourceId" type="id">
+            <description>ID of the triggering entity (orderId, communicationEventId, etc.).</description>
+        </field>
+        <field name="llmResponse" type="text-very-long">
+            <description>Raw LLM response content (stored for audit/debug).</description>
+        </field>
+  
+        <relationship type="one" title="RequestedBy" related="mantle.party.Party">
+            <key-map field-name="requestedByPartyId" related="partyId"/>
+        </relationship>
+        <relationship type="one" title="ParentSystemMessage" related="moqui.service.message.SystemMessage">
+            <key-map field-name="parentSystemMessageId" related="systemMessageId"/>
+        </relationship>
+        <relationship type="many" title="ChildSystemMessages" related="moqui.service.message.SystemMessage" fk-name="SysMsgToSysMsg">
+            <key-map field-name="systemMessageId" related="parentSystemMessageId"/>
+        </relationship>
+        <!-- Note: effectiveUserId links to UserAccount, but we don't force FK to allow system users -->
+        <relationship type="one" related="mantle.product.store.ProductStore">
+            <key-map field-name="productStoreId"/>
+        </relationship>
+        <relationship type="one" related="moqui.mcp.agent.ProductStoreAiConfig">
+            <key-map field-name="productStoreId"/>
+            <key-map field-name="aiConfigId"/>
+        </relationship>
+    </extend-entity>
+
+    <!-- ========================================================= -->
+    <!-- AI Gateway Configuration (Per Store) -->
+    <!-- ========================================================= -->
+
+    <entity entity-name="ProductStoreAiConfig" package="moqui.mcp.agent">
+        <description>Configures AI Service Providers (OpenAI, VLLM, etc.) per Product Store.</description>
+        
+        <field name="productStoreId" type="id" is-pk="true"/>
+        <field name="aiConfigId" type="id" is-pk="true"/>
+        
+        <field name="serviceTypeEnumId" type="id"/>
+        <field name="description" type="text-medium"/>
+        
+        <!-- Connection Details -->
+        <field name="endpointUrl" type="text-medium"/>
+        <field name="apiKey" type="text-medium" encrypt="true"/>
+        <field name="organizationId" type="text-short"/>
+        
+        <!-- Model Parameters -->
+        <field name="modelName" type="text-short"/>
+        <field name="temperature" type="number-decimal"/>
+        <field name="maxTokens" type="number-integer"/>
+        
+        <!-- System Prompt Template -->
+        <field name="systemMessageId" type="id">
+             <description>Template for the system prompt (instruction set)</description>
+        </field>
+
+        <relationship type="one" related="mantle.product.store.ProductStore">
+            <key-map field-name="productStoreId"/>
+        </relationship>
+        <relationship type="one" title="AiServiceType" related="moqui.basic.Enumeration">
+            <key-map field-name="serviceTypeEnumId" related="enumId"/>
+        </relationship>
+        <relationship type="one" title="PromptTemplate" related="moqui.service.message.SystemMessage">
+            <key-map field-name="systemMessageId"/>
+        </relationship>
+        
+        <seed-data>
+            <!-- AI Service Types -->
+            <moqui.basic.EnumerationType description="AI Service Type" enumTypeId="AiServiceType"/>
+            <moqui.basic.Enumeration enumId="AistOpenAi" description="OpenAI" enumTypeId="AiServiceType"/>
+            <moqui.basic.Enumeration enumId="AistVllm" description="VLLM (OpenAI Compatible)" enumTypeId="AiServiceType"/>
+            <moqui.basic.Enumeration enumId="AistAnthropic" description="Anthropic" enumTypeId="AiServiceType"/>
+            <moqui.basic.Enumeration enumId="AistOllama" description="Ollama" enumTypeId="AiServiceType"/>
+        </seed-data>
+    </entity>
+
+</entities>

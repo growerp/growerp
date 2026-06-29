@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entities xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/entity-definition-3.xsd">
+
+
+    <entity entity-name="AdkAgentConfig" package="moqui.adk" use="configuration">
+        <field name="adkAgentConfigId" type="id" is-pk="true"/>
+        <field name="ownerPartyId" type="id"/>
+        <field name="agentName"   type="text-short"/>
+        <field name="modelName"   type="text-short"/>
+        <field name="apiKey"      type="text-medium"/>
+        <field name="llmProvider" type="text-short"/>
+        <field name="instruction" type="text-long"/>
+        <field name="description" type="text-medium"/>
+        <field name="enabled"          type="text-indicator"/>
+        <field name="scheduleExpression" type="text-short"/>
+        <field name="scheduleEnabled"    type="text-indicator"/>
+        <field name="schedulePrompt"     type="text-medium"/>
+        <field name="scheduleChatRoomId" type="id"/>
+        <!-- Trust foundation: per-agent tool/service scoping + write governance -->
+        <!-- toolMode: readOnly | scoped | full  (default readOnly) -->
+        <field name="toolMode"         type="text-short"/>
+        <!-- serviceAllowlist: CSV/JSON of service-name globs allowed when toolMode=scoped -->
+        <field name="serviceAllowlist" type="text-long"/>
+        <!-- writePolicy: block | approve | allow  (default approve) -->
+        <field name="writePolicy"      type="text-short"/>
+        <!-- chat room where approval requests are posted -->
+        <field name="approvalChatRoomId" type="id"/>
+        <!-- party the agent acts as (audit attribution); default AGENT_<ownerPartyId> -->
+        <field name="agentPartyId"     type="id"/>
+        <!-- websiteChat: Y → this agent answers the tenant's public website chat -->
+        <field name="websiteChat"      type="text-indicator"/>
+        <!-- Multi-agent orchestration (Phase 4) -->
+        <!-- agentRole: specialist (default) | coordinator | workflow -->
+        <field name="agentRole"          type="text-short"/>
+        <!-- orchestrationType (coordinator/workflow only): router | sequential | parallel | loop -->
+        <field name="orchestrationType"  type="text-short"/>
+        <!-- loop orchestration safety cap -->
+        <field name="loopMaxIterations"  type="number-integer"/>
+    </entity>
+
+    <!-- Phase 4: members of a coordinator/workflow agent's team. A coordinator delegates to
+         each member (default as an AgentTool; transfer optional). Tenant-keyed: a member's
+         owner must equal the coordinator's owner (no cross-tenant teams). -->
+    <entity entity-name="AdkAgentTeamMember" package="moqui.adk" use="configuration">
+        <field name="adkAgentTeamMemberId" type="id" is-pk="true"/>
+        <field name="ownerPartyId"         type="id"/>
+        <field name="coordinatorConfigId"  type="id"/>
+        <field name="memberConfigId"       type="id"/>
+        <field name="sequenceNum"          type="number-integer"/>
+        <!-- delegationMode: tool (default) | transfer -->
+        <field name="delegationMode"       type="text-short"/>
+        <field name="enabled"              type="text-indicator"/>
+        <index name="ADKTEAM_COORD"><index-field name="coordinatorConfigId"/></index>
+        <index name="ADKTEAM_OWNER"><index-field name="ownerPartyId"/></index>
+    </entity>
+
+    <!-- Tenant-level registry of external (remote) MCP servers. A server is reachable over
+         SSE / streamable-HTTP and may carry an auth headers map (encrypted, never returned to
+         the client). Servers are attached to agents via AdkAgentMcpServer. Tenant-keyed. -->
+    <entity entity-name="AdkMcpServer" package="moqui.adk" use="configuration">
+        <field name="adkMcpServerId" type="id" is-pk="true"/>
+        <field name="ownerPartyId"   type="id"/>
+        <field name="serverName"     type="text-short"/>
+        <field name="url"            type="text-medium"/>
+        <!-- transport: sse (default) | http (streamable-HTTP) -->
+        <field name="transport"      type="text-short"/>
+        <!-- JSON object of header-name -> value, sent on connect. Encrypted at rest;
+             write-only via the API (get# never returns it). -->
+        <field name="headersJson"    type="text-long" encrypt="true"/>
+        <field name="enabled"        type="text-indicator"/>
+        <index name="ADKMCP_OWNER"><index-field name="ownerPartyId"/></index>
+    </entity>
+
+    <!-- Attach an AdkMcpServer to an agent. The agent gains that server's tools at runtime.
+         Tenant-keyed: the server's owner must equal the agent's owner (no cross-tenant use). -->
+    <entity entity-name="AdkAgentMcpServer" package="moqui.adk" use="configuration">
+        <field name="adkAgentMcpServerId" type="id" is-pk="true"/>
+        <field name="ownerPartyId"        type="id"/>
+        <field name="configId"            type="id"/>
+        <field name="adkMcpServerId"      type="id"/>
+        <field name="sequenceNum"         type="number-integer"/>
+        <field name="enabled"             type="text-indicator"/>
+        <index name="ADKAMCP_CFG"><index-field name="configId"/></index>
+        <index name="ADKAMCP_OWNER"><index-field name="ownerPartyId"/></index>
+    </entity>
+
+    <!-- Persistent ADK sessions (replaces in-memory InMemorySessionService) -->
+    <entity entity-name="AdkSession" package="moqui.adk" use="transactional">
+        <field name="adkSessionId"   type="id" is-pk="true"/>
+        <field name="appName"        type="text-short"/>
+        <field name="userId"         type="text-short"/>
+        <field name="configId"       type="id"/>
+        <field name="stateJson"      type="text-very-long"/>
+        <field name="lastUpdateTime" type="date-time"/>
+    </entity>
+
+    <entity entity-name="AdkSessionEvent" package="moqui.adk" use="transactional">
+        <field name="adkSessionEventId" type="id" is-pk="true"/>
+        <field name="adkSessionId"      type="id"/>
+        <field name="eventJson"         type="text-very-long"/>
+        <field name="eventTime"         type="date-time"/>
+        <index name="ADKSESEV_SID"><index-field name="adkSessionId"/></index>
+    </entity>
+
+    <!-- Audit trail of every agent tool/service action (read, write, blocked, approval).
+         ownerPartyId enforces tenant isolation: a company only ever sees its own rows. -->
+    <entity entity-name="AdkActionLog" package="moqui.adk" use="transactional">
+        <field name="adkActionLogId" type="id" is-pk="true"/>
+        <field name="ownerPartyId"   type="id"/>
+        <field name="configId"       type="id"/>
+        <!-- coordinator that delegated to this agent, when part of a team (Phase 4) -->
+        <field name="parentConfigId" type="id"/>
+        <field name="adkSessionId"   type="id"/>
+        <field name="agentPartyId"   type="id"/>
+        <field name="toolName"       type="text-short"/>
+        <field name="serviceName"    type="text-medium"/>
+        <field name="argsJson"       type="text-very-long"/>
+        <!-- verbClass: read | write -->
+        <field name="verbClass"      type="text-short"/>
+        <!-- decision: allowed | blocked | pending | approved | rejected -->
+        <field name="decision"       type="text-short"/>
+        <field name="reason"         type="text-medium"/>
+        <field name="resultSummary"  type="text-long"/>
+        <field name="tokensIn"       type="number-integer"/>
+        <field name="tokensOut"      type="number-integer"/>
+        <field name="tokensTotal"    type="number-integer"/>
+        <field name="actionTime"     type="date-time"/>
+        <index name="ADKACTLOG_OWNER"><index-field name="ownerPartyId"/></index>
+        <index name="ADKACTLOG_CFG"><index-field name="configId"/></index>
+        <index name="ADKACTLOG_SID"><index-field name="adkSessionId"/></index>
+    </entity>
+
+    <!-- Pending human-in-the-loop approvals for agent write actions.
+         ownerPartyId enforces tenant isolation on who may decide. -->
+    <entity entity-name="AdkApproval" package="moqui.adk" use="transactional">
+        <field name="adkApprovalId"    type="id" is-pk="true"/>
+        <field name="ownerPartyId"     type="id"/>
+        <field name="adkActionLogId"   type="id"/>
+        <field name="configId"         type="id"/>
+        <field name="serviceName"      type="text-medium"/>
+        <field name="argsJson"         type="text-very-long"/>
+        <!-- status: pending | approved | rejected | expired -->
+        <field name="status"           type="text-short"/>
+        <field name="requestedByUserId" type="id"/>
+        <field name="decidedByUserId"  type="id"/>
+        <field name="requestTime"      type="date-time"/>
+        <field name="decisionTime"     type="date-time"/>
+        <field name="expireTime"       type="date-time"/>
+        <index name="ADKAPPR_OWNER"><index-field name="ownerPartyId"/></index>
+        <index name="ADKAPPR_STATUS"><index-field name="status"/></index>
+    </entity>
+
+    <!-- ── Phase 3: Knowledge / RAG ──────────────────────────────────────────
+         Per-tenant knowledge base. Documents are chunked and embedded; the
+         searchKnowledge MCP tool retrieves the most similar chunks for an owner.
+         Tenant-isolated by ownerPartyId. -->
+    <entity entity-name="AdkKnowledgeDoc" package="moqui.adk" use="transactional">
+        <field name="adkKnowledgeDocId" type="id" is-pk="true"/>
+        <field name="ownerPartyId"      type="id"/>
+        <!-- sourceType: note | upload | product | policy | chat -->
+        <field name="sourceType"        type="text-short"/>
+        <field name="sourceId"          type="text-medium"/>
+        <field name="title"             type="text-medium"/>
+        <field name="mimeType"          type="text-short"/>
+        <field name="enabled"           type="text-indicator"/>
+        <field name="createdByUserId"   type="id"/>
+        <field name="createdDate"       type="date-time"/>
+        <index name="ADKKDOC_OWNER"><index-field name="ownerPartyId"/></index>
+    </entity>
+
+    <entity entity-name="AdkKnowledgeChunk" package="moqui.adk" use="transactional">
+        <field name="adkKnowledgeChunkId" type="id" is-pk="true"/>
+        <field name="ownerPartyId"        type="id"/>
+        <field name="adkKnowledgeDocId"   type="id"/>
+        <field name="seq"                 type="number-integer"/>
+        <field name="text"                type="text-very-long"/>
+        <!-- JSON array of floats; cosine computed in the search service -->
+        <field name="embeddingJson"       type="text-very-long"/>
+        <field name="embeddingModel"      type="text-short"/>
+        <field name="tokens"              type="number-integer"/>
+        <index name="ADKKCH_OWNER"><index-field name="ownerPartyId"/></index>
+        <index name="ADKKCH_DOC"><index-field name="adkKnowledgeDocId"/></index>
+    </entity>
+
+    <!-- Rolling per-(owner,user) memory summary, injected into the agent context. -->
+    <entity entity-name="AdkMemory" package="moqui.adk" use="transactional">
+        <field name="adkMemoryId"  type="id" is-pk="true"/>
+        <field name="ownerPartyId" type="id"/>
+        <field name="userId"       type="id"/>
+        <field name="summaryText"  type="text-very-long"/>
+        <field name="factsJson"    type="text-very-long"/>
+        <field name="lastUpdated"  type="date-time"/>
+        <index name="ADKMEM_OWNER_USER"><index-field name="ownerPartyId"/><index-field name="userId"/></index>
+    </entity>
+
+    <view-entity entity-name="AdkSystemUsageView" package="moqui.adk">
+        <member-entity entity-alias="AAL" entity-name="moqui.adk.AdkActionLog"/>
+        <member-entity entity-alias="AAC" entity-name="moqui.adk.AdkAgentConfig" join-from-alias="AAL" join-optional="true">
+            <key-map field-name="configId" related="adkAgentConfigId"/>
+        </member-entity>
+        <member-entity entity-alias="LLM" entity-name="growerp.general.LlmConfig" join-from-alias="AAL" join-optional="true">
+            <key-map field-name="ownerPartyId"/>
+        </member-entity>
+        <alias-all entity-alias="AAL"/>
+        <alias name="agentApiKey" entity-alias="AAC" field="apiKey"/>
+        <alias name="llmApiKey" entity-alias="LLM" field="apiKey"/>
+    </view-entity>
+
+</entities>

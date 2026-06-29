@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<secas xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-eca-3.xsd">
+    <!-- SECA for CommunicationEvent to Agent (uses SmtyAgentTask pattern) -->
+    <seca id="AgentTriggerOnCommunication" service="create#mantle.party.communication.CommunicationEvent" when="post-service">
+        <actions>
+            <script><![CDATA[
+                ec.logger.info("SECA AgentTriggerOnCommunication fired for CommEvent ${communicationEventId} to Party ${toPartyId}")
+                if (toPartyId == 'AGENT_CLAUDE_PARTY') {
+                    def rootId = rootCommEventId ?: communicationEventId
+                    if (!rootCommEventId) {
+                        ec.service.sync().name("update#mantle.party.communication.CommunicationEvent")
+                            .parameters([communicationEventId: communicationEventId, rootCommEventId: rootId])
+                            .call()
+                    }
+                    
+                    ec.logger.info("SECA AgentTriggerOnCommunication: Creating SmtyAgentTask SystemMessage for thread ${rootId}")
+                    
+                    // Create Agent Task using process#LLMRequest with callback
+                    ec.service.async().name("AgentServices.process#LLMRequest").parameters([
+                        prompt: body,
+                        requestedByPartyId: fromPartyId,
+                        effectiveUserId: ec.user.userId,
+                        productStoreId: 'POPC_DEFAULT',
+                        aiConfigId: 'DEFAULT',
+                        callbackServiceName: "AgentServices.callback#CommunicationEvent",
+                        callbackParameters: [rootCommEventId: rootId, communicationEventId: communicationEventId],
+                        sourceTypeEnumId: "CommunicationEvent",
+                        sourceId: communicationEventId
+                    ]).call()
+                }
+            ]]></script>
+        </actions>
+    </seca>
+</secas>

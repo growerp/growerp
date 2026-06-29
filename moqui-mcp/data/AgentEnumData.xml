@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-facade-xml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/entity-facade-3.xsd" type="seed">
+
+    <!-- AI Service Type Enumeration -->
+    <moqui.basic.EnumerationType enumTypeId="AiServiceType" description="AI Service Type"/>
+    <moqui.basic.Enumeration enumId="AistOpenAi" description="OpenAI" enumTypeId="AiServiceType"/>
+    <moqui.basic.Enumeration enumId="AistVllm" description="VLLM (OpenAI Compatible)" enumTypeId="AiServiceType"/>
+    <moqui.basic.Enumeration enumId="AistAnthropic" description="Anthropic" enumTypeId="AiServiceType"/>
+    <moqui.basic.Enumeration enumId="AistOllama" description="Ollama" enumTypeId="AiServiceType"/>
+
+    <!-- Agent Task Message Type -->
+    <moqui.service.message.SystemMessageType systemMessageTypeId="SmtyAgentTask" description="Agent Task"/>
+    
+    <!-- LLM Request/Response Message Types -->
+    <moqui.service.message.SystemMessageType systemMessageTypeId="SmtyLlmRequest" description="LLM Request"/>
+    <moqui.service.message.SystemMessageType systemMessageTypeId="SmtyLlmResponse" description="LLM Response"/>
+    
+</entity-facade-xml>

@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- This software is in the public domain under CC0 1.0 Universal plus a 
+     Grant of Patent License.
+
+     To the extent possible under law, the author(s) have dedicated all
+     copyright and related and neighboring rights to this software to the
+     public domain worldwide. This software is distributed without any warranty.
+
+     You should have received a copy of the CC0 Public Domain Dedication
+     along with this software (see the LICENSE.md file). If not, see
+     <https://creativecommons.org/publicdomain/zero/1.0/>. -->
+
+<entity-facade-xml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/entity-facade-3.xsd" type="seed-initial">
+
+     <!-- MCP User Groups -->
+     <moqui.security.UserGroup userGroupId="McpUser" description="MCP Server Users"/>
+     <moqui.security.UserGroup userGroupId="MCP_ALL_ACCESS" description="MCP All Access (Testing)"/>
+
+     <!-- MCP Artifact Groups -->
+     <moqui.security.ArtifactGroup artifactGroupId="McpServices" description="MCP JSON-RPC Services"/>
+     <moqui.security.ArtifactGroup artifactGroupId="McpRestPaths" description="MCP REST API Paths"/>
+
+     <!-- MCP Artifact Group Members -->
+     <moqui.security.ArtifactGroupMember artifactGroupId="McpServices" artifactName="McpServices.*"
+          artifactTypeEnumId="AT_SERVICE"/>
+     <moqui.security.ArtifactGroupMember artifactGroupId="McpServices" artifactName="mcp#Initialize"
+          artifactTypeEnumId="AT_SERVICE"/>
+     <moqui.security.ArtifactGroupMember artifactGroupId="McpServices" artifactName="list#Tools"
+          artifactTypeEnumId="AT_SERVICE"/>
+     <moqui.security.ArtifactGroupMember artifactGroupId="McpServices" artifactName="mcp#ToolsCall"
+          artifactTypeEnumId="AT_SERVICE"/>
+     <moqui.security.ArtifactGroupMember artifactGroupId="McpServices" artifactName="mcp#Ping"
+          artifactTypeEnumId="AT_SERVICE"/>
+
+     <!-- Basic Services -->
+     <moqui.security.ArtifactGroupMember artifactGroupId="McpServices"
+          artifactName="org.moqui.impl.BasicServices.get#ServerNodeInfo"
+          artifactTypeEnumId="AT_SERVICE"/>
+     <moqui.security.ArtifactGroupMember artifactGroupId="McpServices"
+          artifactName="org.moqui.impl.BasicServices.get#SystemInfo" artifactTypeEnumId="AT_SERVICE"/>
+     <moqui.security.ArtifactGroupMember artifactGroupId="McpRestPaths" artifactName="/mcp"
+          artifactTypeEnumId="AT_REST_PATH"/>
+     <moqui.security.ArtifactGroupMember artifactGroupId="McpRestPaths" artifactName="/mcp/*"
+          artifactTypeEnumId="AT_REST_PATH"/>
+
+     <!-- MCP Artifact Authz -->
+     <moqui.security.ArtifactAuthz userGroupId="McpUser" artifactGroupId="McpServices"
+          authzTypeEnumId="AUTHZT_ALLOW" authzActionEnumId="AUTHZA_ALL"/>
+     <moqui.security.ArtifactAuthz userGroupId="McpUser" artifactGroupId="McpRestPaths"
+          authzTypeEnumId="AUTHZT_ALLOW" authzActionEnumId="AUTHZA_ALL"/>
+
+     <!-- Ensure ADMIN user always has access to MCP services -->
+     <moqui.security.ArtifactAuthz userGroupId="ADMIN" artifactGroupId="McpServices"
+          authzTypeEnumId="AUTHZT_ALWAYS" authzActionEnumId="AUTHZA_ALL"/>
+
+
+     <!-- MCP User Accounts -->
+     <moqui.security.UserAccount userId="MCP_USER" username="mcp-user"
+          currentPassword="16ac58bbfa332c1c55bd98b53e60720bfa90d394" passwordHashType="SHA"/>
+
+     <!-- Add MCP users to MCP user groups -->
+     <moqui.security.UserGroupMember userGroupId="McpUser" userId="MCP_USER"
+          fromDate="2025-01-01 00:00:00.000"/>
+     <moqui.security.UserGroupMember userGroupId="McpUser" userId="JohnSales"
+          fromDate="2025-01-01 00:00:00.000"/>
+     <moqui.security.UserGroupMember userGroupId="MCP_ALL_ACCESS" userId="JohnSales"
+          fromDate="2025-01-01 00:00:00.000"/>
+
+     <!-- Permissions for ALL_ACCESS group -->
+     <!--<moqui.security.ArtifactAuthz
+     userGroupId="MCP_ALL_ACCESS" artifactGroupId="McpServices" authzTypeEnumId="AUTHZT_ALLOW"
+     authzActionEnumId="AUTHZA_ALL"/>-->
+     <!-- ADMIN user doesn't need to be in MCP groups - should have full access by default -->
+
+     <!-- Add existing demo users to MCP business group for focused testing -->
+     <!--
+    <moqui.security.UserGroupMember userGroupId="MCP_BUSINESS" userId="ORG_ZIZI_JD"
+     fromDate="2025-01-01 00:00:00.000"/>
+    <moqui.security.UserGroupMember userGroupId="MCP_BUSINESS" userId="ORG_ZIZI_BD"
+     fromDate="2025-01-01 00:00:00.000"/>
+    -->
+
+     <!-- Add EX_JOHN_DOE to PopcAdminSales so JohnSales can see/message John Doe in searches -->
+     <!--<moqui.security.UserGroupMember
+     userGroupId="PopcAdminSales" userId="EX_JOHN_DOE" fromDate="2025-01-01 00:00:00.000"/>-->
+
+     <!-- Set EX_JOHN_DOE's ownerPartyId to ORG_ZIZI_RETAIL so they appear in org-filtered searches -->
+     <!--<mantle.party.Party
+     partyId="EX_JOHN_DOE" ownerPartyId="ORG_ZIZI_RETAIL"/>-->
+</entity-facade-xml>

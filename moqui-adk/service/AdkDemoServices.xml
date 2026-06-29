@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
+
+    <!-- Clone the Agent Control Center demo (the "_NA_" template rows in AgentDemoData.xml)
+         into a tenant. Called from growerp.100.PartyServices100.setup#SpecificApp when the admin
+         ticks "Load Agent Demo" on the tenant setup dialog — the agentDemoData equivalent of
+         load#DemoData. Idempotent: re-running upserts agents by (ownerPartyId, agentName) and
+         skips team links / knowledge docs that already exist. -->
+    <service verb="load" noun="AgentDemo" transaction-timeout="600">
+        <in-parameters>
+            <parameter name="ownerPartyId" required="true"/>
+            <parameter name="companyPartyId"/>
+            <parameter name="userPartyId"/>
+        </in-parameters>
+        <actions>
+            <if condition="ownerPartyId == '_NA_' || ownerPartyId == 'GROWERP'">
+                <return message="Agent demo not loaded for owner ${ownerPartyId}"/>
+            </if>
+
+            <!-- 1. Clone each template agent config into the tenant. update#AgentConfig (no id)
+                 upserts by (ownerPartyId, agentName), assigns agentPartyId and registers the
+                 runtime. Map template id -> new tenant id for the team links below. -->
+            <set field="idMap" from="[:]"/>
+            <entity-find entity-name="moqui.adk.AdkAgentConfig" list="templates">
+                <econdition field-name="ownerPartyId" value="_NA_"/>
+                <order-by field-name="adkAgentConfigId"/>
+            </entity-find>
+            <iterate list="templates" entry="tmpl">
+                <service-call name="AdkServices.update#AgentConfig" out-map="cfgOut"
+                    in-map="[ownerPartyId: ownerPartyId,
+                             agentName: tmpl.agentName, modelName: tmpl.modelName,
+                             llmProvider: tmpl.llmProvider, instruction: tmpl.instruction,
+                             description: tmpl.description,
+                             scheduleExpression: tmpl.scheduleExpression,
+                             scheduleEnabled: tmpl.scheduleEnabled,
+                             schedulePrompt: tmpl.schedulePrompt,
+                             toolMode: tmpl.toolMode, serviceAllowlist: tmpl.serviceAllowlist,
+                             writePolicy: tmpl.writePolicy, websiteChat: tmpl.websiteChat,
+                             agentRole: tmpl.agentRole, orchestrationType: tmpl.orchestrationType,
+                             loopMaxIterations: tmpl.loopMaxIterations]"/>
+                <script>idMap[tmpl.adkAgentConfigId] = cfgOut.adkAgentConfigId</script>
+            </iterate>
+
+            <!-- 2. Clone team membership with remapped coordinator/member ids. -->
+            <set field="coordIds" from="[] as Set"/>
+            <entity-find entity-name="moqui.adk.AdkAgentTeamMember" list="teamTemplates">
+                <econdition field-name="ownerPartyId" value="_NA_"/>
+                <order-by field-name="sequenceNum"/>
+            </entity-find>
+            <iterate list="teamTemplates" entry="tm">
+                <set field="newCoord"  from="idMap[tm.coordinatorConfigId]"/>
+                <set field="newMember" from="idMap[tm.memberConfigId]"/>
+                <if condition="newCoord &amp;&amp; newMember">
+                    <entity-find entity-name="moqui.adk.AdkAgentTeamMember" list="existing">
+                        <econdition field-name="ownerPartyId" from="ownerPartyId"/>
+                        <econdition field-name="coordinatorConfigId" from="newCoord"/>
+                        <econdition field-name="memberConfigId" from="newMember"/>
+                    </entity-find>
+                    <if condition="!existing">
+                        <service-call name="create#moqui.adk.AdkAgentTeamMember"
+                            in-map="[ownerPartyId: ownerPartyId, coordinatorConfigId: newCoord,
+                                     memberConfigId: newMember, sequenceNum: tm.sequenceNum,
+                                     delegationMode: tm.delegationMode ?: 'tool', enabled: 'Y']"/>
+                    </if>
+                    <script>coordIds.add(newCoord)</script>
+                </if>
+            </iterate>
+            <!-- rebuild each coordinator runtime so it picks up its team members -->
+            <iterate list="coordIds" entry="cid">
+                <script>org.moqui.adk.AdkManager.reloadConfig(cid as String)</script>
+            </iterate>
+
+            <!-- 3. Ingest demo policy docs for the Support specialist's RAG — only when a
+                 Gemini key is available (embeddings need it). Failures here must never break
+                 tenant setup, so each ingest is best-effort. -->
+            <service-call name="AdkKnowledgeServices.get#TenantLlmKey" out-map="keyOut"
+                in-map="[ownerPartyId: ownerPartyId]"/>
+            <if condition="keyOut.apiKey">
+                <set field="demoDocs" from="[
+                    ['Return policy': 'Customers may return any item within 30 days of delivery for a full refund, provided it is unused and in its original packaging. Refunds are issued to the original payment method within 5 business days of us receiving the return. Sale items are final and cannot be returned.'],
+                    ['Shipping policy': 'Standard shipping takes 3-5 business days. Express shipping (1-2 business days) is available at checkout for an extra fee. Orders placed before 2pm ship the same day. We currently ship only within the country; international shipping is not yet offered.'],
+                    ['Support hours': 'Customer support is available Monday to Friday, 9am to 6pm. We are closed on weekends and public holidays. Urgent order issues can be flagged in the chat and are picked up the next business day.']
+                ]"/>
+                <iterate list="demoDocs" entry="doc">
+                    <script>
+                        def title = doc.keySet().iterator().next()
+                        def body = doc[title]
+                        // skip if a doc with this title already exists for the tenant
+                        def existingDoc = ec.entity.find('moqui.adk.AdkKnowledgeDoc')
+                            .condition('ownerPartyId', ownerPartyId).condition('title', title).one()
+                        if (existingDoc == null) {
+                            try {
+                                ec.service.sync().name('AdkKnowledgeServices.ingest#AdkKnowledge')
+                                    .parameters([ownerPartyId: ownerPartyId, title: title,
+                                                 text: body, sourceType: 'policy']).call()
+                            } catch (Throwable t) {
+                                ec.logger.warn("Agent demo: knowledge ingest of '${title}' failed: ${t.message}")
+                            }
+                        }
+                    </script>
+                </iterate>
+            </if>
+        </actions>
+    </service>
+
+</services>

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- This software is in the public domain under CC0 1.0 Universal plus a 
+     Grant of Patent License.
+
+     To the extent possible under law, the author(s) have dedicated all
+     copyright and related and neighboring rights to this software to the
+     public domain worldwide. This software is distributed without any warranty.
+
+     You should have received a copy of the CC0 Public Domain Dedication
+     along with this software (see the LICENSE.md file). If not, see
+     <https://creativecommons.org/publicdomain/zero/1.0/>. -->
+
+<component xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/moqui-conf-3.xsd"
+          name="moqui-mcp-2" version="1.0.0">
+
+    <entity-factory load-path="entity/" />
+    <service-factory load-path="service/" />
+    <screen-factory load-path="screen/" />
+    
+      <!-- Load seed data -->
+      <entity-factory load-data="data/McpSecuritySeedData.xml" />
+    <entity-factory load-data="data/McpPromptsData.xml" />
+    <entity-factory load-data="data/McpScreenDocsData.xml" />
+    <entity-factory load-data="data/AgentData.xml" />
+    <entity-factory load-data="data/AgentEnumData.xml" />
+
+    <!-- Webapp Configuration -->
+    <!-- No McpAuthFilter: EnhancedMcpServlet handles authentication itself,
+         allowing the unauthenticated MCP handshake (initialize/ping) to pass
+         through before requiring credentials for other methods. -->
+    <webapp-list>
+        <webapp name="webroot">
+            <servlet name="EnhancedMcpServlet" class="org.moqui.mcp.EnhancedMcpServlet" 
+                     load-on-startup="5" async-supported="true">
+                <init-param name="keepAliveIntervalSeconds" value="30"/>
+                <init-param name="maxConnections" value="100"/>
+                <url-pattern>/mcp/*</url-pattern>
+            </servlet>
+        </webapp>
+    </webapp-list>
+
+</component>

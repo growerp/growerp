@@ -1,0 +1,285 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
+
+    <!-- Sync a config's per-agent ServiceJob: create/update when scheduleEnabled=Y with a
+         scheduleExpression, pause otherwise. The per-agent job (cron = scheduleExpression) is
+         the source of truth for the schedule. Called from create#/update#AdkAgentConfig and
+         from run#AllScheduledAgents (to backfill seed/legacy configs that never went through
+         the save path). -->
+    <service verb="sync" noun="AgentJob" authenticate="anonymous">
+        <description>Create/update/pause the per-agent ServiceJob for an ADK agent config.</description>
+        <in-parameters>
+            <parameter name="adkAgentConfigId" required="true"/>
+        </in-parameters>
+        <actions>
+            <entity-find-one entity-name="moqui.adk.AdkAgentConfig" value-field="savedCfg">
+                <field-map field-name="adkAgentConfigId"/>
+            </entity-find-one>
+            <if condition="!savedCfg"><return/></if>
+
+            <set field="jobName" value="adk_scheduled_${adkAgentConfigId}"/>
+            <entity-find-one entity-name="moqui.service.job.ServiceJob" value-field="existingJob"
+                for-update="true" auto-field-map="[jobName: jobName]"/>
+            <if condition="savedCfg.scheduleEnabled == 'Y' &amp;&amp; savedCfg.scheduleExpression">
+                <if condition="existingJob">
+                    <set field="existingJob.cronExpression" from="savedCfg.scheduleExpression"/>
+                    <set field="existingJob.paused" value="N"/>
+                    <entity-update value-field="existingJob"/>
+                    <else>
+                        <entity-make-value entity-name="moqui.service.job.ServiceJob" value-field="newJob"/>
+                        <set field="newJob.jobName"         from="jobName"/>
+                        <set field="newJob.description"     value="ADK Agent: ${savedCfg.agentName ?: ''}"/>
+                        <set field="newJob.serviceName"     value="AdkSchedulerServices.run#ScheduledAgent"/>
+                        <set field="newJob.cronExpression"  from="savedCfg.scheduleExpression"/>
+                        <set field="newJob.paused"          value="N"/>
+                        <entity-create value-field="newJob"/>
+                        <entity-make-value entity-name="moqui.service.job.ServiceJobParameter" value-field="jobParam"/>
+                        <set field="jobParam.jobName"        from="jobName"/>
+                        <set field="jobParam.parameterName"  value="adkAgentConfigId"/>
+                        <set field="jobParam.parameterValue" from="adkAgentConfigId"/>
+                        <entity-create value-field="jobParam"/>
+                    </else>
+                </if>
+                <else>
+                    <if condition="existingJob &amp;&amp; existingJob.paused != 'Y'">
+                        <set field="existingJob.paused" value="Y"/>
+                        <entity-update value-field="existingJob"/>
+                    </if>
+                </else>
+            </if>
+        </actions>
+    </service>
+
+    <!-- Called by ServiceJob every minute. Configs WITH a scheduleExpression are owned by their
+         own per-agent ServiceJob (created/backfilled via sync#AgentJob) and must NOT be run
+         here. Only legacy configs with no scheduleExpression are run inline every minute. -->
+    <service verb="run" noun="AllScheduledAgents" authenticate="anonymous">
+        <description>Backfill per-agent jobs for scheduled configs; run only legacy (expression-less) configs inline.</description>
+        <actions>
+            <entity-find entity-name="moqui.adk.AdkAgentConfig" list="cfgList">
+                <econdition field-name="scheduleEnabled" value="Y"/>
+                <econdition field-name="enabled"         value="Y"/>
+            </entity-find>
+            <iterate list="cfgList" entry="cfg">
+                <if condition="cfg.scheduleExpression">
+                    <!-- Has a cron: ensure its per-agent job exists (the job owns the schedule);
+                         never run inline, or it would fire every minute. -->
+                    <service-call name="AdkSchedulerServices.sync#AgentJob"
+                        in-map="[adkAgentConfigId: cfg.adkAgentConfigId]"/>
+                    <else>
+                        <!-- Legacy expression-less config: run inline unless it has its own job. -->
+                        <entity-find-one entity-name="moqui.service.job.ServiceJob" value-field="perAgentJob"
+                            auto-field-map="[jobName: 'adk_scheduled_' + cfg.adkAgentConfigId]"/>
+                        <if condition="!perAgentJob">
+                            <service-call name="AdkSchedulerServices.run#ScheduledAgent"
+                                in-map="[adkAgentConfigId: cfg.adkAgentConfigId]" async="true"/>
+                        </if>
+                    </else>
+                </if>
+            </iterate>
+        </actions>
+    </service>
+
+    <!-- Run a single scheduled agent and post result to its chat room.
+         transaction-timeout is generous (10 min): the agent turn does real LLM round-trips +
+         nested MCP tool calls that can take many seconds. With the default (~60s) timeout the
+         service transaction would be reaped mid-run, so the post-run chat write + notification
+         sends would execute against a dead transaction and never reach clients. -->
+    <service verb="run" noun="ScheduledAgent" authenticate="anonymous" transaction-timeout="600">
+        <description>Run one scheduled ADK agent turn and deliver the result to the configured chat room.</description>
+        <in-parameters>
+            <parameter name="adkAgentConfigId" required="true"/>
+        </in-parameters>
+        <actions>
+            <entity-find-one entity-name="moqui.adk.AdkAgentConfig" value-field="cfg">
+                <field-map field-name="adkAgentConfigId"/>
+            </entity-find-one>
+            <if condition="!cfg">
+                <log level="warn" message="AdkSchedulerServices.run#ScheduledAgent: config ${adkAgentConfigId} not found"/>
+                <return/>
+            </if>
+
+            <!-- Notify Flutter jobs list that job has started/is now locked -->
+            <entity-find entity-name="mantle.party.Party" list="startOwnerParties">
+                <econdition field-name="ownerPartyId" from="cfg.ownerPartyId"/>
+                <econdition field-name="partyTypeEnumId" value="PtyPerson"/>
+            </entity-find>
+            <set field="startNotifyUids" from="[] as Set"/>
+            <iterate list="startOwnerParties" entry="p">
+                <entity-find-one entity-name="moqui.security.UserAccount" value-field="pAcct"
+                    auto-field-map="[partyId: p.partyId]"/>
+                <if condition="pAcct?.userId"><script>startNotifyUids.add(pAcct.userId as String)</script></if>
+            </iterate>
+            <if condition="startNotifyUids">
+                <script>ec.makeNotificationMessage().topic('adkJobUpdate').userIds(startNotifyUids)
+                    .message([jobName: 'adk_scheduled_' + adkAgentConfigId, status: 'started']).send()</script>
+            </if>
+
+            <script><![CDATA[
+                import org.moqui.adk.AdkManager
+
+                if (!AdkManager.isInitialized()) {
+                    AdkManager.lazyInit(ec.factory)
+                }
+                if (!AdkManager.isInitialized()) {
+                    ec.logger.warn("ADK not initialized — skipping scheduled run for ${cfg.agentName}")
+                    return
+                }
+
+                // The agent already carries cfg.instruction as its SYSTEM instruction (set in
+                // initConfig). The scheduled user message must be ONLY the per-run task prompt;
+                // echoing the instruction again here made the model reply with meta-comments
+                // like "I have already provided the output by calling the getCurrentTime tool".
+                String prompt = cfg.schedulePrompt ?: cfg.instruction ?: 'Perform your scheduled task.'
+
+                // runOneOff builds a fresh Runner with InMemorySessionService, avoiding the
+                // DB transaction-isolation issue where a subsequent IO thread cannot read back
+                // the just-created session from MoquiSessionService (uncommitted transaction).
+                // Seed session state with the CONTEXT_PREAMBLE keys (all non-null — ConcurrentHashMap
+                // rejects null values) so the agent instruction's {userId}/{username}/... resolve.
+                Map sessionCtx = [
+                    userId          : 'scheduler',
+                    username        : 'scheduler',
+                    userFullName    : 'Scheduler',
+                    organizationName: '',
+                    companyPseudoId : '',
+                    tenantId        : (cfg.ownerPartyId ?: 'DEFAULT') as String,
+                    timeZone        : 'UTC',
+                    locale          : 'en_US',
+                ]
+                List events = AdkManager.runOneOff(cfg.adkAgentConfigId as String, 'scheduler', prompt, sessionCtx)
+
+                // Primary: non-partial agent events (final responses).
+                // Event author is the AGENT NAME (e.g. 'test'); echoed user prompt has author='scheduler'.
+                StringBuilder sb = new StringBuilder()
+                events.each { e ->
+                    if (e.author != 'scheduler' && e.partial != true) {
+                        e.content?.parts?.each { p -> if (p.text) sb.append(p.text) }
+                    }
+                }
+                String result = sb.toString().trim()
+                // Fallback: some SDK versions emit text only in partial=true streaming events.
+                if (!result) {
+                    sb = new StringBuilder()
+                    events.each { e ->
+                        if (e.author != 'scheduler') {
+                            e.content?.parts?.each { p -> if (p.text) sb.append(p.text) }
+                        }
+                    }
+                    result = sb.toString().trim()
+                }
+                if (!result) {
+                    ec.logger.warn("AdkScheduler: no text from agent '${cfg.agentName}'. " +
+                        "Events (${events.size()}): " +
+                        events.collect { e -> "author=${e.author}/partial=${e.partial}/parts=${e.content?.parts?.size() ?: 0}" }.join(', '))
+                    result = '[No response]'
+                }
+
+                agentName = cfg.agentName ?: 'ADK Agent'
+                chatRoomId = cfg.scheduleChatRoomId as String
+                resultText = "[${agentName}] ${result}"
+            ]]></script>
+
+            <!-- Post result to chat room if configured -->
+            <if condition="chatRoomId">
+                <entity-find-one entity-name="growerp.general.ChatRoom" value-field="chatRoom"
+                    auto-field-map="[chatRoomId: chatRoomId]" disable-authz="true"/>
+                <if condition="!chatRoom">
+                    <entity-make-value entity-name="growerp.general.ChatRoom" value-field="newRoom"/>
+                    <set field="newRoom.chatRoomId"   from="chatRoomId"/>
+                    <set field="newRoom.chatRoomName" value="ADK: ${cfg.agentName ?: 'Agent'}"/>
+                    <set field="newRoom.isPrivate"    value="N"/>
+                    <set field="newRoom.isActive"     value="Y"/>
+                    <set field="newRoom.ownerPartyId" from="cfg.ownerPartyId"/>
+                    <entity-create value-field="newRoom"/>
+                    <entity-find-one entity-name="moqui.security.UserAccount" value-field="sysAcct"
+                        auto-field-map="[username: 'SystemSupport']"/>
+                    <if condition="sysAcct">
+                        <entity-make-value entity-name="growerp.general.ChatRoomMember" value-field="sysMember"/>
+                        <set field="sysMember.chatRoomId" from="chatRoomId"/>
+                        <set field="sysMember.userId"     from="sysAcct.userId"/>
+                        <set field="sysMember.isActive"   value="Y"/>
+                        <set field="sysMember.hasRead"    value="Y"/>
+                        <entity-create value-field="sysMember"/>
+                    </if>
+                    <entity-find entity-name="mantle.party.Party" list="ownerPersons">
+                        <econdition field-name="ownerPartyId" from="cfg.ownerPartyId"/>
+                        <econdition field-name="partyTypeEnumId" value="PtyPerson"/>
+                        <limit>1</limit>
+                    </entity-find>
+                    <if condition="ownerPersons">
+                        <entity-find-one entity-name="moqui.security.UserAccount" value-field="ownerAcct"
+                            auto-field-map="[partyId: ownerPersons[0].partyId]"/>
+                        <if condition="ownerAcct &amp;&amp; ownerAcct.userId != sysAcct?.userId">
+                            <entity-make-value entity-name="growerp.general.ChatRoomMember" value-field="ownerMember"/>
+                            <set field="ownerMember.chatRoomId" from="chatRoomId"/>
+                            <set field="ownerMember.userId"     from="ownerAcct.userId"/>
+                            <set field="ownerMember.isActive"   value="Y"/>
+                            <set field="ownerMember.hasRead"    value="N"/>
+                            <entity-create value-field="ownerMember"/>
+                        </if>
+                    </if>
+                    <log level="info" message="AdkScheduler: created chatRoom '${chatRoomId}' for agent ${cfg.agentName}"/>
+                </if>
+            </if>
+            <if condition="chatRoomId">
+                <entity-find entity-name="moqui.security.UserAccount" list="sysUserList">
+                    <econdition field-name="username" value="SystemSupport"/>
+                    <limit>1</limit>
+                </entity-find>
+                <set field="fromUserId" from="sysUserList ? sysUserList[0].userId : null"/>
+                <if condition="fromUserId">
+                    <service-call name="create#growerp.general.ChatMessage" disable-authz="true"
+                        in-map="[chatRoomId: chatRoomId, fromUserId: fromUserId, content: resultText]"/>
+                    <!-- Mark unread and push WebSocket notification to all other members -->
+                    <entity-find entity-name="growerp.general.ChatRoomMember" list="chatMembers" for-update="true">
+                        <econdition field-name="chatRoomId" from="chatRoomId"/>
+                        <econdition field-name="isActive" value="Y"/>
+                    </entity-find>
+                    <set field="pushUserIds" from="[]"/>
+                    <iterate list="chatMembers" entry="member">
+                        <if condition="member.userId != fromUserId">
+                            <set field="member.hasRead" value="N"/>
+                            <entity-update value-field="member"/>
+                            <script>pushUserIds.add(member.userId as String)</script>
+                        </if>
+                    </iterate>
+                    <if condition="pushUserIds">
+                        <script><![CDATA[
+                            org.moqui.impl.webapp.ChatEndpoint.pushToMembers(
+                                groovy.json.JsonOutput.toJson([
+                                    chatRoom  : [chatRoomId: chatRoomId],
+                                    fromUserId: fromUserId,
+                                    content   : resultText,
+                                ]),
+                                pushUserIds)
+                        ]]></script>
+                    </if>
+                </if>
+                <else>
+                    <log level="warn" message="AdkScheduler: SystemSupport user not found, cannot post to chatRoom ${chatRoomId}"/>
+                </else>
+            </if>
+            <if condition="!chatRoomId">
+                <log level="info" message="AdkScheduler: ${agentName} ran — no chatRoomId set, result: ${resultText}"/>
+            </if>
+            <!-- Notify Flutter jobs list to refresh -->
+            <entity-find entity-name="mantle.party.Party" list="ownerParties">
+                <econdition field-name="ownerPartyId" from="cfg.ownerPartyId"/>
+                <econdition field-name="partyTypeEnumId" value="PtyPerson"/>
+            </entity-find>
+            <set field="notifyUids" from="[] as Set"/>
+            <iterate list="ownerParties" entry="p">
+                <entity-find-one entity-name="moqui.security.UserAccount" value-field="pAcct"
+                    auto-field-map="[partyId: p.partyId]"/>
+                <if condition="pAcct?.userId"><script>notifyUids.add(pAcct.userId as String)</script></if>
+            </iterate>
+            <if condition="notifyUids">
+                <script>ec.makeNotificationMessage().topic('adkJobUpdate').userIds(notifyUids)
+                    .message([jobName: 'adk_scheduled_' + adkAgentConfigId, status: 'completed']).send()</script>
+            </if>
+        </actions>
+    </service>
+
+</services>
