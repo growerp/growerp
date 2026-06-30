@@ -129,6 +129,7 @@ class DisplayMenuItemState extends State<DisplayMenuItem>
   late AuthBloc authBloc;
   List<MenuItem> menuList = [];
   int menuIndex = 0;
+  String? _currentMenuConfigId;
   CoreLocalizations? _localizations;
   bool _isInitialized = false;
   MenuConfiguration? _lastMenuConfig;
@@ -178,6 +179,7 @@ class DisplayMenuItemState extends State<DisplayMenuItem>
 
   void _initialize(BuildContext context, MenuConfiguration menuConfiguration) {
     authBloc = context.read<AuthBloc>();
+    _currentMenuConfigId = menuConfiguration.menuConfigurationId;
 
     // Get the target menu option
     MenuItem? targetOption;
@@ -496,6 +498,53 @@ class DisplayMenuItemState extends State<DisplayMenuItem>
           tooltip: _localizations!.goHome,
           onPressed: () => context.go('/'),
         ),
+      );
+    }
+
+    // Add "restore menu" button on the main menu only, when a dynamic
+    // MenuConfigBloc is present (i.e. menus are DB-backed and customizable).
+    // Wipes the user's menu modifications and reloads the seed default.
+    if (currentRoute == '/' &&
+        _currentMenuConfigId != null &&
+        context.read<MenuConfigBloc?>() != null) {
+      actions.add(
+        IconButton(
+          key: const Key('restoreMenuButton'),
+          icon: const Icon(Icons.settings_backup_restore),
+          tooltip: 'Restore default menu',
+          onPressed: _confirmRestoreMenu,
+        ),
+      );
+    }
+  }
+
+  /// Confirm, then reset the menu configuration to the seed default.
+  Future<void> _confirmRestoreMenu() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        key: const Key('restoreMenuDialog'),
+        title: const Text('Restore default menu'),
+        content: const Text(
+          'This wipes all your menu changes and reloads the default. Continue?',
+        ),
+        actions: [
+          TextButton(
+            key: const Key('restoreMenuCancel'),
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            key: const Key('restoreMenuConfirm'),
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('Restore'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true && mounted && _currentMenuConfigId != null) {
+      context.read<MenuConfigBloc>().add(
+        MenuConfigReset(_currentMenuConfigId!),
       );
     }
   }

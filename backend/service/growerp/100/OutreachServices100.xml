@@ -142,7 +142,7 @@
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
 
             <!-- Find campaign by ID or pseudoId -->
-            <if condition="!campaignValue &amp;&amp; pseudoId">
+            <if condition="!campaignValue &amp;&amp; (pseudoId || marketingCampaignId)">
                 <entity-find entity-name="mantle.marketing.campaign.MarketingCampaign"
                     list="campaignList">
                     <econdition field-name="pseudoId" ignore-if-empty="true" />

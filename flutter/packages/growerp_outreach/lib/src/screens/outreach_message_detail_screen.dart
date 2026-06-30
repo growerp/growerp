@@ -114,6 +114,21 @@ class OutreachMessageDetailScreenState
     }
   }
 
+  /// Human-readable campaign label for an existing message. Falls back to the
+  /// raw id until [_availableCampaigns] has loaded.
+  String _campaignLabel() {
+    final id = widget.message.campaignId;
+    if (id == null || id.isEmpty) return '(none)';
+    final campaign = _availableCampaigns.firstWhere(
+      (c) => c.campaignId == id,
+      orElse: () =>
+          const OutreachCampaign(name: '', platforms: '', status: ''),
+    );
+    return campaign.name.isNotEmpty
+        ? '${campaign.name} (${campaign.pseudoId ?? id})'
+        : id;
+  }
+
   @override
   void dispose() {
     _recipientNameController.dispose();
@@ -353,6 +368,20 @@ class OutreachMessageDetailScreenState
                       },
                     ),
                   if (isNewMessage) const SizedBox(height: 20),
+
+                  // For existing messages: show the (read-only) campaign it belongs to
+                  if (!isNewMessage)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 20),
+                      child: InputDecorator(
+                        decoration:
+                            const InputDecoration(labelText: 'Campaign'),
+                        child: Text(
+                          _campaignLabel(),
+                          key: const Key('campaignDisplay'),
+                        ),
+                      ),
+                    ),
 
                   // For desktop (existing message): Status and Platform in one row
                   if (!isPhone && !isNewMessage)

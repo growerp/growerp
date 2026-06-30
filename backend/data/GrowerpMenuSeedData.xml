@@ -134,6 +134,8 @@ along with this software (see the LICENSE.md file). If not, see
         title="Platforms" iconName="public" widgetName="PlatformConfigListScreen" sequenceNum="30"/>
     <growerp.menu.MenuItem menuItemId="ADMIN_OUT_MESSAGES" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_OUTREACH"
         title="Messages" iconName="message" widgetName="OutreachMessageList" sequenceNum="40"/>
+    <growerp.menu.MenuItem menuItemId="ADMIN_OUT_SEND_QUEUE" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_OUTREACH"
+        title="Send Queue" iconName="send" widgetName="LinkedInSendQueueScreen" sequenceNum="50"/>
 
     <!-- ADMIN_COURSES children -->
     <growerp.menu.MenuItem menuItemId="ADMIN_COURSES_LIST" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_COURSES"

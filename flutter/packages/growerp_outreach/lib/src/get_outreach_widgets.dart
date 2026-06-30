@@ -13,6 +13,7 @@ Map<String, GrowerpWidgetBuilder> getOutreachWidgets() {
     'AutomationScreen': (args) => const AutomationScreen(),
     'PlatformConfigListScreen': (args) => const PlatformConfigListScreen(),
     'OutreachMessageList': (args) => const OutreachMessageList(),
+    'LinkedInSendQueueScreen': (args) => const LinkedInSendQueueScreen(),
   };
 }
 
@@ -46,6 +47,13 @@ List<WidgetMetadata> getOutreachWidgetsWithMetadata() {
       iconName: 'message',
       keywords: ['message', 'outreach', 'communication', 'email'],
       builder: (args) => const OutreachMessageList(),
+    ),
+    WidgetMetadata(
+      widgetName: 'LinkedInSendQueueScreen',
+      description: 'Assisted 1-click LinkedIn send queue',
+      iconName: 'send',
+      keywords: ['linkedin', 'send', 'queue', 'outreach', 'message'],
+      builder: (args) => const LinkedInSendQueueScreen(),
     ),
   ];
 }
