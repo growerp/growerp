@@ -20,6 +20,7 @@ import 'package:responsive_framework/responsive_framework.dart';
 
 import '../bloc/outreach_campaign_bloc.dart';
 import '../models/platform_settings.dart';
+import 'linkedin_lead_import_dialog.dart';
 
 /// Formats backend status for display
 /// 'MKTG_CAMP_PLANNED' -> 'Planned'
@@ -169,6 +170,16 @@ class CampaignDetailScreenState extends State<CampaignDetailScreen> {
     }
   }
 
+  /// Import a LinkedIn connections CSV as leads (company created if new + linked).
+  Future<void> _importLinkedInLeads() async {
+    await showDialog(
+      context: context,
+      builder: (_) => LinkedInLeadImportDialog(
+        restClient: RepositoryProvider.of<RestClient>(context, listen: false),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final isPhone = ResponsiveBreakpoints.of(context).isMobile;
@@ -312,6 +323,19 @@ class CampaignDetailScreenState extends State<CampaignDetailScreen> {
                         ],
                       ),
                       const SizedBox(height: 20),
+                      if (widget.campaign.campaignId != null) ...[
+                        Row(
+                          children: [
+                            OutlinedButton.icon(
+                              key: const Key('importLeads'),
+                              icon: const Icon(Icons.upload_file, size: 18),
+                              label: const Text('Import LinkedIn leads'),
+                              onPressed: _importLinkedInLeads,
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 20),
+                      ],
                       Row(
                         children: [
                           Text('Platforms',

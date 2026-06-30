@@ -475,10 +475,12 @@ along with this software (see the LICENSE.md file). If not, see
                         message="Invalid role value: ${companyUser.role} valid: 'Customer','Lead','Supplier'" />
                 </if>
 
-                <!-- check if company exist for either company or company within user -->
+                <!-- check if company exist for either company or company within user.
+                     Match on pseudoId when given, else on company name (LinkedIn-style imports
+                     only carry a name) so the same company is reused, not duplicated. -->
                 <if
-                    condition="(companyUser.type == 'Company' &amp;&amp; companyUser.pseudoId != null) || 
-                                                companyUser.company?.pseudoId != null">
+                    condition="(companyUser.type == 'Company' &amp;&amp; (companyUser.pseudoId || companyUser.name)) ||
+                                                companyUser.company?.pseudoId || companyUser.company?.name">
                     <if condition="companyUser.type == 'Company'">
                         <set field="pseudoId" from="companyUser.pseudoId" />
                         <set field="name" from="companyUser.name" />
@@ -524,7 +526,7 @@ along with this software (see the LICENSE.md file). If not, see
                             from="companyUser + [
                                         firstName: firstName,
                                         lastName: lastName,
-                                        company: company,
+                                        company: companyUser.company,
                                     ]" />
                         <service-call name="growerp.100.PartyServices100.create#User"
                             out-map="result"
