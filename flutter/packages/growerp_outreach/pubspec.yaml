@@ -21,6 +21,7 @@ dependencies:
   mcp_dart: ^1.2.0
   bloc_concurrency: ^0.3.0
   stream_transform: ^2.1.0
+  url_launcher: ^6.1.4
 
 dev_dependencies:
   flutter_test:

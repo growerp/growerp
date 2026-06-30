@@ -663,6 +663,7 @@
             <parameter name="messageId" required="true" />
             <parameter name="status" required="true" />
             <parameter name="responseDate" />
+            <parameter name="sentDate" />
             <parameter name="errorMessage" />
         </in-parameters>
         <out-parameters>
@@ -693,6 +694,7 @@
             <service-call name="update#growerp.marketing.OutreachMessage"
                 in-map="[messageId: messageId,
                          status: status,
+                         sentDate: sentDate ?: (status == 'SENT' ? ec.user.nowTimestamp : null),
                          responseDate: responseDate ?: (status == 'RESPONDED' ? ec.user.nowTimestamp : null),
                          errorMessage: errorMessage]" />
 
@@ -700,6 +702,12 @@
             <if condition="status == 'RESPONDED' &amp;&amp; message.marketingCampaignId">
                 <service-call name="growerp.100.OutreachServices100.update#CampaignMetrics"
                     in-map="[marketingCampaignId: message.marketingCampaignId, incrementResponses: true]" />
+            </if>
+
+            <!-- Bump sent counter when an assisted/manual send is marked SENT -->
+            <if condition="status == 'SENT' &amp;&amp; message.marketingCampaignId">
+                <service-call name="growerp.100.OutreachServices100.update#CampaignMetrics"
+                    in-map="[marketingCampaignId: message.marketingCampaignId, incrementMessagesSent: true]" />
             </if>
 
             <!-- Fetch updated message -->

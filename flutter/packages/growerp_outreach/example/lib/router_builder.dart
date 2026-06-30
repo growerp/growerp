@@ -54,6 +54,14 @@ const outreachMenuConfig = MenuConfiguration(
       widgetName: 'OutreachMessageList',
     ),
     MenuItem(
+      menuItemId: 'OUT_SEND_QUEUE',
+      title: 'Send Queue',
+      route: '/sendQueue',
+      iconName: 'send',
+      sequenceNum: 35,
+      widgetName: 'LinkedInSendQueueScreen',
+    ),
+    MenuItem(
       menuItemId: 'OUT_AUTOMATION',
       title: 'Automation',
       route: '/automation',
@@ -99,6 +107,7 @@ GoRouter createOutreachExampleRouter() {
     widgetBuilder: (route) => switch (route) {
       '/campaigns' => const CampaignListScreen(),
       '/messages' => const OutreachMessageList(),
+      '/sendQueue' => const LinkedInSendQueueScreen(),
       '/automation' => const AutomationScreen(),
       '/website' => const LandingPageList(),
       '/leads' => const UserList(key: Key('Lead'), role: Role.lead),
