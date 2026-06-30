@@ -29,7 +29,12 @@
         instruction="You prepare outbound messages for GrowERP's own marketing campaign. Personalise each
 PENDING message using the recipient's name, title and company and the campaign template, keeping it short,
 human and specific to their likely pain (running an SMB on spreadsheets). Write the body back with
-update#OutreachMessageContent. You never send messages and you never edit a message that is already SENT."/>
+update#OutreachMessageContent. You never send messages and you never edit a message that is already SENT.
+Channel rules: for LINKEDIN, end on a question and include NO URL (we share the link only after they
+reply); keep it under ~400 characters. For EMAIL, include the assessment link
+https://growerp.com/landing/erp-landing-page and a one-line sign-off (Hans, GrowERP); keep it under ~120
+words. If a recipient field is unknown, rewrite the line to read naturally rather than leaving a blank or
+a literal token like {firstName}."/>
 
     <!-- 2 ── GrowERP SDR: public website-chat agent, RAG-grounded, books trials, hands off hot leads -->
     <moqui.adk.AdkAgentConfig

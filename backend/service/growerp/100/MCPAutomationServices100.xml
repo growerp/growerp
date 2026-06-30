@@ -113,7 +113,15 @@
             <!-- Parse the JSON platforms array and compute start-of-day for the daily limit -->
             <script><![CDATA[
                 import groovy.json.JsonSlurper
-                platformList = campaign.platforms ? new JsonSlurper().parseText(campaign.platforms) : []
+                // platforms is usually a JSON array (["LINKEDIN","EMAIL"]) but the UI sometimes
+                // stores a bare List string ([LINKEDIN]); tolerate both plus a plain CSV.
+                def raw = (campaign.platforms ?: '').toString().trim()
+                if (raw.startsWith('[') && raw.contains('"')) {
+                    platformList = new JsonSlurper().parseText(raw)
+                } else {
+                    platformList = raw.replaceAll(/[\[\]"']/, '').split(',')
+                        .collect { it.trim().toUpperCase() }.findAll { it }
+                }
                 def cal = ec.user.nowCalendar
                 cal.set(Calendar.HOUR_OF_DAY, 0); cal.set(Calendar.MINUTE, 0)
                 cal.set(Calendar.SECOND, 0); cal.set(Calendar.MILLISECOND, 0)

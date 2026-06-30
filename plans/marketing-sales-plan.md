@@ -184,3 +184,29 @@ Set each scheduled agent's `scheduleChatRoomId` in `/adk` to receive output; age
 
 Still operational/runtime (needs Hans): create the campaign + import the real CSV, ingest GrowERP
 knowledge for the SDR, run the 5+5 pilot before `start#CampaignAutomation`.
+
+## Week 2 — message template (approved: pain-led / assessment CTA / LinkedIn link-on-reply)
+
+Live state: landing page `ERP_LANDING_PAGE` (pseudoId `erp-landing-page`, assessment
+`ERP_READINESS_ASSESSMENT`, Published) → `assessmentUrl = https://growerp.com/landing/erp-landing-page`.
+Campaign already exists: `marketingCampaignId=100000` "4 week sprint" (platforms `[LINKEDIN]`, no template).
+
+Apply to campaign 100000 via `update#OutreachCampaign` (UI or REST `PATCH /OutreachCampaign`):
+- `platforms`: `["LINKEDIN","EMAIL"]`, `dailyLimitPerPlatform`: `25`, `landingPageId`: `ERP_LANDING_PAGE`
+- `emailSubject`: `{company}: outgrowing spreadsheets?`
+- `messageTemplate` (link-free seed):
+  `{firstName}, quick question about {company}. Most {title}s I speak with start on spreadsheets and a few
+  separate tools — fine until it isn't: numbers that don't reconcile, no live view of stock or cash, hours
+  re-keying. We made a 2-minute check — "5 Signs You've Outgrown Spreadsheets" — that tells you whether
+  {company} is at that tipping point. Worth me sending it over?`
+- `platformSettings`: `{"LINKEDIN":{"actionType":"send_dms","dailyLimit":25},"EMAIL":{"actionType":"send_email","dailyLimit":100}}`
+
+Done in code this week:
+- `process#CampaignAutomation` now tolerates non-JSON `platforms` (`[LINKEDIN]` as well as `["LINKEDIN"]`
+  and CSV) — campaign 100000's value would otherwise have thrown in JsonSlurper.
+- Personalizer instruction now carries the channel rules: LinkedIn = question, no URL (link-on-reply);
+  EMAIL = include `https://growerp.com/landing/erp-landing-page` + "Hans, GrowERP" sign-off.
+  (Re-load `GrowerpMarketingAgentsData.xml` to apply the new instruction.)
+
+Full template detail (subjects A/B, example DM1/email/DM2 outputs, A/B + compliance) in the plan-mode
+file `~/.claude/plans/write-a-marketing-and-cheerful-hejlsberg.md` § "Week 2 — Message Template Proposal".
