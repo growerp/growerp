@@ -91,6 +91,7 @@ class UserDialogState extends State<UserDialogStateFull> {
   late final GlobalKey<FormState> _userDialogFormKey;
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
+  final _personalTitleController = TextEditingController();
   final _idController = TextEditingController();
   final _loginNameController = TextEditingController();
   final _telephoneController = TextEditingController();
@@ -131,6 +132,7 @@ class UserDialogState extends State<UserDialogStateFull> {
     // firstName/email on a new user), so prefilled values are shown.
     _firstNameController.text = widget.user.firstName ?? '';
     _lastNameController.text = widget.user.lastName ?? '';
+    _personalTitleController.text = widget.user.personalTitle ?? '';
     _telephoneController.text = widget.user.telephoneNr ?? '';
     _emailController.text = widget.user.email ?? '';
     _urlController.text = widget.user.url ?? '';
@@ -400,6 +402,16 @@ class UserDialogState extends State<UserDialogStateFull> {
               children: [
                 Expanded(
                   child: TextFormField(
+                    key: const Key('personalTitle'),
+                    decoration: const InputDecoration(
+                      labelText: 'Job Title / Position',
+                    ),
+                    controller: _personalTitleController,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: TextFormField(
                     key: const Key('userEmail'),
                     decoration: InputDecoration(
                       labelText: localizations.emailAddress,
@@ -420,7 +432,10 @@ class UserDialogState extends State<UserDialogStateFull> {
                     },
                   ),
                 ),
-                const SizedBox(width: 10),
+              ],
+            ),
+            Row(
+              children: [
                 Expanded(
                   child: TextFormField(
                     key: const Key('userUrl'),
@@ -941,6 +956,7 @@ class UserDialogState extends State<UserDialogStateFull> {
         pseudoId: _idController.text,
         firstName: _firstNameController.text,
         lastName: _lastNameController.text,
+        personalTitle: _personalTitleController.text,
         email: _emailController.text,
         url: _urlController.text,
         loginName: _loginNameController.text,

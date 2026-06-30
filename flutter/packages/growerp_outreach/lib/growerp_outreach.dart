@@ -13,6 +13,7 @@ export 'src/screens/platform_config_detail_screen.dart';
 export 'src/screens/outreach_message_list.dart';
 export 'src/screens/outreach_message_detail_screen.dart';
 export 'src/screens/linkedin_send_queue_screen.dart';
+export 'src/screens/linkedin_lead_import_dialog.dart';
 
 // Widget exports
 export 'src/widgets/campaign_metrics_card.dart';

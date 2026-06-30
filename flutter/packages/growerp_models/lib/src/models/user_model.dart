@@ -33,6 +33,7 @@ abstract class User with _$User {
     String? userId, // allocated by system cannot be changed.
     String? firstName,
     String? lastName,
+    String? personalTitle, // job title / position (e.g. LinkedIn 'Position')
 
     /// login account
     bool? loginDisabled,

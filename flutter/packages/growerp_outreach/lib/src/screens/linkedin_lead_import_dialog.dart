@@ -12,7 +12,7 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import 'dart:math';
+import 'dart:convert';
 import 'package:universal_io/io.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:fast_csv/fast_csv.dart' as fast_csv;
@@ -56,29 +56,28 @@ class _LinkedInLeadImportDialogState extends State<LinkedInLeadImportDialog> {
     }
 
     try {
-      final leads = _parseLinkedInCsv(fileString);
+      final leads = parseLinkedInConnectionsCsv(fileString);
       if (leads.isEmpty) {
         setState(() => _status = 'No leads found in the file.');
         return;
       }
       setState(() {
         _busy = true;
-        _status = 'Importing ${leads.length} leads…';
+        _status = 'Submitting ${leads.length} leads…';
       });
 
-      const batch = 500;
-      int done = 0;
-      for (var i = 0; i < leads.length; i += batch) {
-        final chunk = leads.sublist(i, min(i + batch, leads.length));
-        await widget.restClient.importCompanyUsers(chunk);
-        done += chunk.length;
-        if (mounted) setState(() => _status = 'Imported $done / ${leads.length}…');
+      // The import runs in the background; the succeeded/failed result arrives
+      // later as a notification. This call returns the submitted count.
+      final raw = await widget.restClient.importCompanyUsers(leads);
+      final result = raw is String ? jsonDecode(raw) : raw;
+      String message = 'File submitted, ${leads.length} records';
+      if (result is Map && result['message'] != null) {
+        message = result['message'].toString();
       }
 
       if (!mounted) return;
-      HelperFunctions.showMessage(
-          context, 'Imported $done leads', Colors.green);
-      Navigator.of(context).pop(done);
+      HelperFunctions.showMessage(context, message, Colors.green);
+      Navigator.of(context).pop(leads.length);
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -87,43 +86,6 @@ class _LinkedInLeadImportDialogState extends State<LinkedInLeadImportDialog> {
       });
       HelperFunctions.showMessage(context, 'Import failed: $e', Colors.red);
     }
-  }
-
-  /// Parse a LinkedIn Connections CSV (skips the notes preamble, maps columns by
-  /// header name so column order does not matter).
-  List<CompanyUser> _parseLinkedInCsv(String fileString) {
-    final rows = fast_csv.parse(fileString);
-    final headerIdx = rows.indexWhere(
-        (r) => r.any((c) => c.trim().toLowerCase() == 'first name'));
-    if (headerIdx == -1) {
-      throw 'No "First Name" header row found — is this a LinkedIn connections export?';
-    }
-    final header = rows[headerIdx].map((c) => c.trim().toLowerCase()).toList();
-    int col(String name) => header.indexOf(name);
-    final iFirst = col('first name'),
-        iLast = col('last name'),
-        iUrl = col('url'),
-        iEmail = col('email address'),
-        iCompany = col('company');
-
-    final leads = <CompanyUser>[];
-    for (var i = headerIdx + 1; i < rows.length; i++) {
-      final r = rows[i];
-      String cell(int idx) => (idx >= 0 && idx < r.length) ? r[idx].trim() : '';
-      final first = cell(iFirst), last = cell(iLast);
-      if (first.isEmpty && last.isEmpty) continue;
-      final company = cell(iCompany);
-      leads.add(CompanyUser(
-        type: PartyType.user,
-        role: Role.lead,
-        name: '$first $last'.trim(),
-        email: cell(iEmail),
-        url: cell(iUrl),
-        company:
-            company.isNotEmpty ? Company(name: company, role: Role.lead) : null,
-      ));
-    }
-    return leads;
   }
 
   @override
@@ -154,4 +116,46 @@ class _LinkedInLeadImportDialogState extends State<LinkedInLeadImportDialog> {
       ],
     );
   }
+}
+
+/// Parse a LinkedIn "Connections" CSV export into lead [CompanyUser]s.
+///
+/// Skips the notes preamble, maps columns by header name (so column order does
+/// not matter), joins First/Last name, maps Position -> personalTitle, and only
+/// attaches a company when the row has one. Each result is a Lead.
+List<CompanyUser> parseLinkedInConnectionsCsv(String fileString) {
+  final rows = fast_csv.parse(fileString);
+  final headerIdx = rows
+      .indexWhere((r) => r.any((c) => c.trim().toLowerCase() == 'first name'));
+  if (headerIdx == -1) {
+    throw 'No "First Name" header row found — is this a LinkedIn connections export?';
+  }
+  final header = rows[headerIdx].map((c) => c.trim().toLowerCase()).toList();
+  int col(String name) => header.indexOf(name);
+  final iFirst = col('first name'),
+      iLast = col('last name'),
+      iUrl = col('url'),
+      iEmail = col('email address'),
+      iCompany = col('company'),
+      iPosition = col('position');
+
+  final leads = <CompanyUser>[];
+  for (var i = headerIdx + 1; i < rows.length; i++) {
+    final r = rows[i];
+    String cell(int idx) => (idx >= 0 && idx < r.length) ? r[idx].trim() : '';
+    final first = cell(iFirst), last = cell(iLast);
+    if (first.isEmpty && last.isEmpty) continue;
+    final company = cell(iCompany);
+    leads.add(CompanyUser(
+      type: PartyType.user,
+      role: Role.lead,
+      name: '$first $last'.trim(),
+      personalTitle: cell(iPosition),
+      email: cell(iEmail),
+      url: cell(iUrl),
+      company:
+          company.isNotEmpty ? Company(name: company, role: Role.lead) : null,
+    ));
+  }
+  return leads;
 }

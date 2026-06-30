@@ -1251,6 +1251,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <parameter name="role" />
                     <parameter name="firstName" />
                     <parameter name="lastName" />
+                    <parameter name="personalTitle" />
                     <parameter name="loginDisabled" type="Boolean" />
                     <parameter name="loginName" />
                     <parameter name="userGroupId" />
@@ -1491,6 +1492,7 @@ along with this software (see the LICENSE.md file). If not, see
                                 emailContactMechId: userInfo.emailContactMechId,
                                 firstName: userInfo?.firstName,
                                 lastName: userInfo?.lastName,
+                                personalTitle: userInfo?.personalTitle,
                                 loginDisabled: userInfo?.loginDisabled == 'Y'? true : false,
                                 loginName: userInfo?.loginName,
                                 fullName: userInfo?.userFullName,
@@ -1529,6 +1531,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="role" />
                 <parameter name="firstName" />
                 <parameter name="lastName" />
+                <parameter name="personalTitle" />
                 <parameter name="loginDisabled" type="Boolean" />
                 <parameter name="loginName" />
                 <parameter name="userGroupId" />
@@ -1606,6 +1609,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="role" />
                 <parameter name="firstName" />
                 <parameter name="lastName" />
+                <parameter name="personalTitle" />
                 <parameter name="loginDisabled" type="Boolean" />
                 <parameter name="loginName" />
                 <parameter name="userGroupId" />
@@ -1704,6 +1708,11 @@ along with this software (see the LICENSE.md file). If not, see
             <if condition="customerStatusId">
                 <service-call name="update#mantle.party.Party"
                     in-map="[partyId: userPartyId, customerStatusId: customerStatusId]" />
+            </if>
+            <!-- job title / position (LinkedIn 'Position') stored on the Person -->
+            <if condition="user.personalTitle">
+                <service-call name="update#mantle.party.Person"
+                    in-map="[partyId: userPartyId, personalTitle: user.personalTitle]" />
             </if>
             <if condition="user.loginDisabled">
                 <service-call name="update#moqui.security.UserAccount"
@@ -2011,9 +2020,10 @@ along with this software (see the LICENSE.md file). If not, see
             </if>
             <!-- update person -->
             <service-call name="update#mantle.party.Person"
-                in-map="[   partyId: user.partyId, 
-                            firstName: user.firstName ? user.firstName : oldValue.user.firstName, 
-                            lastName: user.lastName ? user.lastName : oldValue.user.lastName]" />
+                in-map="[   partyId: user.partyId,
+                            firstName: user.firstName ? user.firstName : oldValue.user.firstName,
+                            lastName: user.lastName ? user.lastName : oldValue.user.lastName,
+                            personalTitle: user.personalTitle ? user.personalTitle : oldValue.user.personalTitle]" />
             <!-- update account -->
             <entity-find-one entity-name="mantle.party.PersonAndUserAccount"
                 value-field="userAccount">

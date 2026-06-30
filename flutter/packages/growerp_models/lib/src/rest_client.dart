@@ -207,7 +207,7 @@ abstract class RestClient {
   });
 
   @POST("rest/s1/growerp/100/ImportExport/companyUsers")
-  Future<String> importCompanyUsers(@Field() List<CompanyUser> companyUsers);
+  Future<dynamic> importCompanyUsers(@Field() List<CompanyUser> companyUsers);
 
   @GET("rest/s1/growerp/100/ImportExport")
   Future<String> exportScreenCompanyUsers({

@@ -1,0 +1,9 @@
+Notes:
+"When exporting your connection data, you may notice that some of the fields are blank. This is because we hide email addresses for members who chose not to share them."
+
+First Name,Last Name,URL,Email Address,Company,Position,Connected On
+Alice,Anderson,https://www.linkedin.com/in/alice-anderson,alice@acme.com,Acme Corp,CEO,01 Jan 2024
+Bob,Brown,https://www.linkedin.com/in/bob-brown,bob@acme.com,Acme Corp,COO,02 Jan 2024
+Carol,Clark,https://www.linkedin.com/in/carol-clark,,Globex,Operations Manager,03 Jan 2024
+Dan,Davis,https://www.linkedin.com/in/dan-davis,dan@initech.com,Initech,Founder,04 Jan 2024
+Eve,Evans,https://www.linkedin.com/in/eve-evans,,,Consultant,05 Jan 2024

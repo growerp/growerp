@@ -426,6 +426,9 @@ along with this software (see the LICENSE.md file). If not, see
     </service>
 
     <service verb="import" noun="CompanyUsers">
+        <description>Submit a company/user (or LinkedIn lead) import. The work runs in the
+            background and the succeeded/failed result is delivered to the caller as a
+            notification; this call returns immediately with the submitted record count.</description>
         <in-parameters>
             <parameter name="companyUsers" type="List" required="true">
                 <parameter name="pseudoId" />
@@ -434,6 +437,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="email" />
                 <parameter name="url" />
                 <parameter name="name" />
+                <parameter name="personalTitle" />
                 <parameter name="telephoneNr" />
                 <parameter name="address" type="Map">
                     <parameter name="address1" />
@@ -455,108 +459,171 @@ along with this software (see the LICENSE.md file). If not, see
                 </parameter>
             </parameter>
         </in-parameters>
+        <out-parameters>
+            <parameter name="submitted" type="Integer" />
+            <parameter name="message" />
+        </out-parameters>
         <actions>
-            <script>System.out.println(">>>>importing ${companysUsers?.size()} company/users")</script>
             <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
                 out-map="context" />
-            <set field="imported" type="Integer" value="0" />
+            <set field="submitted" from="companyUsers?.size() ?: 0" type="Integer" />
+            <!-- run the import in the background, notify the caller when done -->
+            <script>
+                ec.service.async()
+                    .name('growerp.100.ImportExportServices100.process#CompanyUserImport')
+                    .parameters([companyUsers: companyUsers, ownerPartyId: ownerPartyId,
+                                 classificationId: classificationId,
+                                 notifyUserId: ec.user.userId, username: ec.user.username])
+                    .call()
+            </script>
+            <set field="message" value="File submitted, ${submitted} records" />
+        </actions>
+    </service>
+
+    <service verb="process" noun="CompanyUserImport" authenticate="anonymous">
+        <description>Background worker: import each company/user row in its own transaction so a
+            single bad row does not roll back the batch, then notify the user of the result.</description>
+        <in-parameters>
+            <parameter name="companyUsers" type="List" required="true" />
+            <parameter name="ownerPartyId" required="true" />
+            <parameter name="classificationId" />
+            <parameter name="notifyUserId" />
+            <parameter name="username" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="imported" type="Integer" />
+            <parameter name="failed" type="Integer" />
+        </out-parameters>
+        <actions>
+            <!-- async worker has no web session: log in as the submitting user for authz -->
+            <if condition="!ec.user.userId &amp;&amp; username">
+                <script>ec.user.internalLoginUser(username)</script>
+            </if>
+            <set field="imported" from="0" type="Integer" />
+            <set field="failed" from="0" type="Integer" />
             <iterate list="companyUsers" entry="companyUser">
                 <if condition="companyUser.toString().replaceAll(' ','').isEmpty()">
                     <continue />
                 </if>
-                <!-- validate -->
-                <if condition="!['Company','User'].contains(companyUser.type)">
-                    <return error="true"
-                        message="Invalid type value: ${companyUser.type} valid: 'Company','User'" />
-                </if>
-                <if
-                    condition="!['OrgInternal','Customer','Lead','Supplier'].contains(companyUser.role)">
-                    <return error="true"
-                        message="Invalid role value: ${companyUser.role} valid: 'Customer','Lead','Supplier'" />
-                </if>
-
-                <!-- check if company exist for either company or company within user.
-                     Match on pseudoId when given, else on company name (LinkedIn-style imports
-                     only carry a name) so the same company is reused, not duplicated. -->
-                <if
-                    condition="(companyUser.type == 'Company' &amp;&amp; (companyUser.pseudoId || companyUser.name)) ||
-                                                companyUser.company?.pseudoId || companyUser.company?.name">
-                    <if condition="companyUser.type == 'Company'">
-                        <set field="pseudoId" from="companyUser.pseudoId" />
-                        <set field="name" from="companyUser.name" />
-                        <else>
-                            <set field="pseudoId" from="companyUser.company?.pseudoId" />
-                            <set field="name" from="companyUser.company?.name" />
-                        </else>
-                    </if>
-                    <entity-find entity-name="growerp.party.OwnerCompany"
-                        list="companies" limit="1">
-                        <econdition field-name="ownerPartyId" from="ownerPartyId" />
-                        <econdition field-name="pseudoId"
-                            from="pseudoId"
-                            ignore-if-empty="true" />
-                        <econdition field-name="name"
-                            from="name"
-                            ignore-if-empty="true" />
-                    </entity-find>
-                </if>
-
-                <if condition="companyUser.type == 'User'">
-                    <then>
-                        <if condition="companies">
-                            <set field="companyUser.company"
-                                from="companyUser.company + [partyId: companies[0].partyId]" />
-                        </if>
-                        <!-- process first/last name -->
-                        <if condition="companyUser.name">
-                            <if condition="!companyUser.name.contains(',')">
-                                <if condition="companyUser.name.contains(' ')">
-                                    <set field="companyUser.name"
-                                        from="companyUser.name.replace(' ',',')" />
-                                </if>
-                            </if>
-                            <set field="companyUser.name"
-                                from="companyUser.name.replace(' ','')" />
-                            <if condition="companyUser.name.split(',').size() &gt; 1">
-                                <set field="firstName" from="companyUser.name.split(',')[0]" />
-                                <set field="lastName" from="companyUser.name.split(',')[1]" />
-                            </if>
-                        </if>
-                        <set field="user"
-                            from="companyUser + [
-                                        firstName: firstName,
-                                        lastName: lastName,
-                                        company: companyUser.company,
-                                    ]" />
-                        <service-call name="growerp.100.PartyServices100.create#User"
-                            out-map="result"
-                            in-map="[user: user, classificationId: classificationId]" />
-                    </then>
-
-                    <else-if condition="companyUser.type == 'Company'">
-                        <if condition="!companies">
-                            <service-call
-                                name="growerp.100.PartyServices100.create#Company"
-                                out-map="result"
-                                in-map="[company: companyUser, classificationId: classificationId]" />
-                            <else>
-                                <service-call
-                                    name="growerp.100.PartyServices100.update#Company"
-                                    out-map="result"
-                                    in-map="[company: companyUser, classificationId: classificationId]" />
-                            </else>
-                        </if>
-                    </else-if>
-
+                <service-call name="growerp.100.ImportExportServices100.import#CompanyUser"
+                    in-map="[companyUser: companyUser, ownerPartyId: ownerPartyId,
+                             classificationId: classificationId]" />
+                <if condition="ec.message.hasError()">
+                    <set field="failed" from="failed + 1" />
+                    <script>ec.message.clearErrors()</script>
                     <else>
-                        <log level="error" message="Unknown party type: ${companyUser.type}" />
+                        <set field="imported" from="imported + 1" />
                     </else>
                 </if>
-                <set field="imported" from="imported + 1" />
             </iterate>
+            <log message="import#CompanyUsers: ${imported} imported, ${failed} failed" />
+            <if condition="notifyUserId">
+                <script>ec.makeNotificationMessage().topic('companyUserImport')
+                    .userId(notifyUserId as String).title('Import complete')
+                    .message([imported: imported, failed: failed,
+                        message: "Import complete: ${imported} imported, ${failed} failed"]).send()</script>
+            </if>
+        </actions>
+    </service>
 
-            <if condition="!ec.message.hasError()">
-                <script>System.out.println(">>>${imported} companies/users imported")</script>
+    <service verb="import" noun="CompanyUser" transaction="force-new">
+        <description>Import one company-or-user row in its own transaction so a failure isolates to
+            that row. Creates the company if new (matched by pseudoId or name) and links the user.</description>
+        <in-parameters>
+            <parameter name="companyUser" type="Map" required="true" />
+            <parameter name="ownerPartyId" required="true" />
+            <parameter name="classificationId" />
+        </in-parameters>
+        <actions>
+            <!-- validate -->
+            <if condition="!['Company','User'].contains(companyUser.type)">
+                <return error="true"
+                    message="Invalid type value: ${companyUser.type} valid: 'Company','User'" />
+            </if>
+            <if
+                condition="!['OrgInternal','Customer','Lead','Supplier'].contains(companyUser.role)">
+                <return error="true"
+                    message="Invalid role value: ${companyUser.role} valid: 'Customer','Lead','Supplier'" />
+            </if>
+
+            <!-- check if company exist for either company or company within user.
+                 Match on pseudoId when given, else on company name (LinkedIn-style imports
+                 only carry a name) so the same company is reused, not duplicated. -->
+            <if
+                condition="(companyUser.type == 'Company' &amp;&amp; (companyUser.pseudoId || companyUser.name)) ||
+                                            companyUser.company?.pseudoId || companyUser.company?.name">
+                <if condition="companyUser.type == 'Company'">
+                    <set field="pseudoId" from="companyUser.pseudoId" />
+                    <set field="name" from="companyUser.name" />
+                    <else>
+                        <set field="pseudoId" from="companyUser.company?.pseudoId" />
+                        <set field="name" from="companyUser.company?.name" />
+                    </else>
+                </if>
+                <entity-find entity-name="growerp.party.OwnerCompany"
+                    list="companies" limit="1">
+                    <econdition field-name="ownerPartyId" from="ownerPartyId" />
+                    <econdition field-name="pseudoId"
+                        from="pseudoId"
+                        ignore-if-empty="true" />
+                    <econdition field-name="name"
+                        from="name"
+                        ignore-if-empty="true" />
+                </entity-find>
+            </if>
+
+            <if condition="companyUser.type == 'User'">
+                <then>
+                    <if condition="companies">
+                        <set field="companyUser.company"
+                            from="companyUser.company + [partyId: companies[0].partyId]" />
+                    </if>
+                    <!-- process first/last name -->
+                    <if condition="companyUser.name">
+                        <if condition="!companyUser.name.contains(',')">
+                            <if condition="companyUser.name.contains(' ')">
+                                <set field="companyUser.name"
+                                    from="companyUser.name.replace(' ',',')" />
+                            </if>
+                        </if>
+                        <set field="companyUser.name"
+                            from="companyUser.name.replace(' ','')" />
+                        <if condition="companyUser.name.split(',').size() &gt; 1">
+                            <set field="firstName" from="companyUser.name.split(',')[0]" />
+                            <set field="lastName" from="companyUser.name.split(',')[1]" />
+                        </if>
+                    </if>
+                    <!-- Drop an obviously-malformed email so the row still imports (without it). -->
+                    <if condition="companyUser.email &amp;&amp; !(companyUser.email.toString() ==~ /(?i)^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,24}$/)">
+                        <log level="warn"
+                            message="import#CompanyUser: skipping invalid email '${companyUser.email}' for ${companyUser.name}" />
+                        <set field="companyUser" from="companyUser + [email: null]" />
+                    </if>
+                    <set field="user"
+                        from="companyUser + [
+                                    firstName: firstName,
+                                    lastName: lastName,
+                                    company: companyUser.company,
+                                ]" />
+                    <service-call name="growerp.100.PartyServices100.create#User"
+                        out-map="result"
+                        in-map="[user: user, classificationId: classificationId]" />
+                </then>
+
+                <else-if condition="companyUser.type == 'Company'">
+                    <if condition="!companies">
+                        <service-call
+                            name="growerp.100.PartyServices100.create#Company"
+                            out-map="result"
+                            in-map="[company: companyUser, classificationId: classificationId]" />
+                        <else>
+                            <service-call
+                                name="growerp.100.PartyServices100.update#Company"
+                                out-map="result"
+                                in-map="[company: companyUser, classificationId: classificationId]" />
+                        </else>
+                    </if>
+                </else-if>
             </if>
         </actions>
     </service>

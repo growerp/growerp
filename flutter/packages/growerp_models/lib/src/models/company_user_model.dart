@@ -31,6 +31,7 @@ abstract class CompanyUser with _$CompanyUser {
     @RoleConverter() Role? role,
     @Uint8ListConverter() Uint8List? image,
     String? name, // either first/last name or company name
+    String? personalTitle, // job title / position (e.g. LinkedIn 'Position')
     String? email,
     String? url,
     String? telephoneNr,

@@ -74,6 +74,7 @@ class UserDialogState extends State<UserDialog> {
   late UserCompanyLocalizations _localizations;
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
+  final _personalTitleController = TextEditingController();
   final _idController = TextEditingController();
   final _loginNameController = TextEditingController();
   final _telephoneController = TextEditingController();
@@ -111,6 +112,7 @@ class UserDialogState extends State<UserDialog> {
       _idController.text = widget.user.pseudoId ?? '';
       _firstNameController.text = widget.user.firstName ?? '';
       _lastNameController.text = widget.user.lastName ?? '';
+      _personalTitleController.text = widget.user.personalTitle ?? '';
       _loginNameController.text = widget.user.loginName ?? '';
       _telephoneController.text = widget.user.telephoneNr ?? '';
       _emailController.text = widget.user.email ?? '';
@@ -332,6 +334,16 @@ class UserDialogState extends State<UserDialog> {
               children: [
                 Expanded(
                   child: TextFormField(
+                    key: const Key('personalTitle'),
+                    decoration: const InputDecoration(
+                      labelText: 'Job Title / Position',
+                    ),
+                    controller: _personalTitleController,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: TextFormField(
                     key: const Key('userEmail'),
                     decoration: InputDecoration(
                       labelText: _localizations.emailAddress,
@@ -352,7 +364,10 @@ class UserDialogState extends State<UserDialog> {
                     },
                   ),
                 ),
-                const SizedBox(width: 10),
+              ],
+            ),
+            Row(
+              children: [
                 Expanded(
                   child: TextFormField(
                     key: const Key('userUrl'),
@@ -781,6 +796,7 @@ class UserDialogState extends State<UserDialog> {
                 updatedUser = updatedUser.copyWith(
                   firstName: _firstNameController.text,
                   lastName: _lastNameController.text,
+                  personalTitle: _personalTitleController.text,
                   email: _emailController.text,
                   url: _urlController.text,
                   loginName: _loginNameController.text,
