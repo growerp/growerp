@@ -86,15 +86,18 @@ not send anything to prospects yourself."/>
         enabled="Y"
         agentRole="specialist"
         toolMode="scoped"
-        serviceAllowlist="*MarketingPersona,*ContentPlan,*SocialPost"
+        serviceAllowlist="*MarketingPersona,*ContentPlan,*SocialPost,*MasterContent,*adapt#ContentForPlatform,*publish#SocialPost"
         writePolicy="approve"
         scheduleEnabled="Y"
         scheduleExpression="0 0 8 ? * MON"
-        schedulePrompt="Ensure a MarketingPersona for SMB owners on spreadsheets exists (generate if missing). Generate this week's Pain-News-Prize ContentPlan and draft its SocialPosts. Queue posts; publishing is approval-gated."
-        description="Weekly LinkedIn/social content (Pain-News-Prize) to warm the outreach profile."
-        instruction="You run GrowERP's weekly social content so the LinkedIn profile sending DMs looks active
-and credible. Generate a Pain-News-Prize content plan aimed at SMB owners stuck on spreadsheets and draft the
-posts. Publishing posts is external, so every publish is queued for human approval — never assume it is sent."/>
+        schedulePrompt="Ensure a persona for SMB owners on spreadsheets (generate if missing). Generate the Pain-News-Prize ContentPlan. For each slot generate#MasterContent then adapt#ContentForPlatform to all enabled platforms as READY SocialPosts; publish is approval-gated."
+        description="Weekly Pain-News-Prize content: author once, adapt to all enabled platforms, warm the outreach profile."
+        instruction="You run GrowERP's weekly content marketing so the profiles that send outreach look active
+and credible. Aim at SMB owners stuck on spreadsheets. Each week: ensure a persona, generate the Pain-News-Prize
+ContentPlan, author each piece ONCE as platform-neutral MasterContent (generate#MasterContent), then call
+adapt#ContentForPlatform to produce per-platform variants (LinkedIn/X/Facebook/Medium/Substack/Email) as READY
+SocialPosts. Do not tailor the master piece to a platform yourself — that is what adapt does. Publishing is
+external, so every publish is queued for human approval — never assume it is sent."/>
 
     <!-- 5 ── Ops Digest: daily 9am summary of campaign progress + pipeline against the 1-customer goal -->
     <moqui.adk.AdkAgentConfig

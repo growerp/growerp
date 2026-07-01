@@ -76,13 +76,15 @@ const marketingMenuConfig = MenuConfiguration(
       widgetName: 'ContentPlanList',
     ),
     MenuItem(
-      itemKey: 'MKT_SOCIAL',
-      title: 'Social Posts',
-      route: '/socialPosts',
-      iconName: 'share',
-      sequenceNum: 70,
-      widgetName: 'SocialPostList',
+      itemKey: 'MKT_CONTENT_HUB',
+      title: 'Content',
+      route: '/masterContent',
+      iconName: 'auto_awesome',
+      sequenceNum: 65,
+      widgetName: 'MasterContentList',
     ),
+    // Social Posts are managed as platform variants inside a Content piece;
+    // the route/widget stay registered so the variant dialog can open them.
   ],
 );
 
@@ -100,6 +102,7 @@ GoRouter createMarketingExampleRouter() {
       '/takeAssessment' => const TakeAssessmentMenu(),
       '/personas' => const PersonaList(),
       '/contentPlans' => const ContentPlanList(),
+      '/masterContent' => const MasterContentList(),
       '/socialPosts' => const SocialPostList(),
       _ => const MarketingDashboard(),
     },

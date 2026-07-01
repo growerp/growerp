@@ -1,0 +1,457 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
+
+    <!-- ========================================================= -->
+    <!--  Master Content Services                                  -->
+    <!--  Author one platform-neutral piece, then adapt it into    -->
+    <!--  per-platform SocialPost / campaign-message children.     -->
+    <!--  Designed as agent tools: scoped verb#Noun, idempotent,   -->
+    <!--  owner-scoped, REST-registered (growerp.rest.xml).        -->
+    <!-- ========================================================= -->
+
+    <service verb="list" noun="MasterContents" authenticate="true">
+        <description>List platform-neutral master content pieces for the owner.</description>
+        <in-parameters>
+            <parameter name="searchString" />
+            <parameter name="masterContentId" />
+            <parameter name="pseudoId" />
+            <parameter name="planId" />
+            <parameter name="contentType" />
+            <parameter name="status" />
+            <parameter name="start" type="Integer" />
+            <parameter name="limit" type="Integer" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="masterContents" type="List" />
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="context" />
+
+            <entity-find entity-name="growerp.marketing.MasterContent" list="masterContents"
+                offset="start" limit="limit">
+                <econdition field-name="ownerPartyId" />
+                <econdition field-name="masterContentId" from="masterContentId" ignore-if-empty="true" />
+                <econdition field-name="planId" from="planId" ignore-if-empty="true" />
+                <econdition field-name="contentType" from="contentType" ignore-if-empty="true" />
+                <econdition field-name="status" from="status" ignore-if-empty="true" />
+                <econditions combine="or">
+                    <econdition field-name="pseudoId" operator="like" value="%${searchString}%"
+                        ignore-if-empty="true" ignore-case="true" />
+                    <econdition field-name="title" operator="like" value="%${searchString}%"
+                        ignore-if-empty="true" ignore-case="true" />
+                    <econdition field-name="pnpType" operator="like" value="%${searchString}%"
+                        ignore-if-empty="true" ignore-case="true" />
+                </econditions>
+                <order-by field-name="-lastModifiedDate" />
+            </entity-find>
+        </actions>
+    </service>
+
+    <service verb="create" noun="MasterContent" authenticate="true">
+        <description>Create a platform-neutral master content piece.</description>
+        <in-parameters>
+            <parameter name="pseudoId" />
+            <parameter name="planId" />
+            <parameter name="contentType" default-value="POSTING">
+                <description>POSTING, ARTICLE or MESSAGE</description>
+            </parameter>
+            <parameter name="pnpType" default-value="OTHER">
+                <description>PAIN, NEWS, PRIZE or OTHER</description>
+            </parameter>
+            <parameter name="title" />
+            <parameter name="body" />
+            <parameter name="callToAction" />
+            <parameter name="targetUrl" />
+            <parameter name="status" default-value="DRAFT" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="masterContentId" />
+            <parameter name="pseudoId" />
+            <parameter name="planId" />
+            <parameter name="contentType" />
+            <parameter name="pnpType" />
+            <parameter name="title" />
+            <parameter name="body" />
+            <parameter name="callToAction" />
+            <parameter name="targetUrl" />
+            <parameter name="status" />
+            <parameter name="createdDate" type="Timestamp" />
+            <parameter name="lastModifiedDate" type="Timestamp" />
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="context" />
+            <if condition="!ownerPartyId">
+                <return error="true" message="User not authenticated or no party associated" />
+            </if>
+
+            <if condition="!pseudoId">
+                <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                    in-map="[ownerPartyId: ownerPartyId, seqName: 'MasterContent']"
+                    out-map="context" />
+                <set field="pseudoId" from="seqNum" />
+            </if>
+
+            <service-call name="create#growerp.marketing.MasterContent" out-map="context"
+                in-map="[
+                    ownerPartyId: ownerPartyId,
+                    pseudoId: pseudoId,
+                    planId: planId,
+                    contentType: contentType,
+                    pnpType: pnpType,
+                    title: title,
+                    body: body,
+                    callToAction: callToAction,
+                    targetUrl: targetUrl,
+                    status: status,
+                    createdDate: ec.user.nowTimestamp,
+                    lastModifiedDate: ec.user.nowTimestamp
+                ]" />
+
+            <entity-find-one entity-name="growerp.marketing.MasterContent" value-field="mc">
+                <field-map field-name="masterContentId" />
+            </entity-find-one>
+            <set field="planId" from="mc.planId" />
+            <set field="contentType" from="mc.contentType" />
+            <set field="pnpType" from="mc.pnpType" />
+            <set field="title" from="mc.title" />
+            <set field="body" from="mc.body" />
+            <set field="callToAction" from="mc.callToAction" />
+            <set field="targetUrl" from="mc.targetUrl" />
+            <set field="status" from="mc.status" />
+            <set field="createdDate" from="mc.createdDate" />
+            <set field="lastModifiedDate" from="mc.lastModifiedDate" />
+        </actions>
+    </service>
+
+    <service verb="update" noun="MasterContent" authenticate="true">
+        <in-parameters>
+            <parameter name="masterContentId" required="true" />
+            <parameter name="pseudoId" />
+            <parameter name="planId" />
+            <parameter name="contentType" />
+            <parameter name="pnpType" />
+            <parameter name="title" />
+            <parameter name="body" />
+            <parameter name="callToAction" />
+            <parameter name="targetUrl" />
+            <parameter name="status" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="masterContentId" />
+            <parameter name="pseudoId" />
+            <parameter name="planId" />
+            <parameter name="contentType" />
+            <parameter name="pnpType" />
+            <parameter name="title" />
+            <parameter name="body" />
+            <parameter name="callToAction" />
+            <parameter name="targetUrl" />
+            <parameter name="status" />
+            <parameter name="createdDate" type="Timestamp" />
+            <parameter name="lastModifiedDate" type="Timestamp" />
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="context" />
+
+            <entity-find-one entity-name="growerp.marketing.MasterContent" value-field="mc">
+                <field-map field-name="masterContentId" />
+            </entity-find-one>
+            <if condition="!mc">
+                <return error="true" message="Master content not found" />
+            </if>
+            <if condition="mc.ownerPartyId != ownerPartyId">
+                <return error="true" message="Access denied to this master content" />
+            </if>
+
+            <service-call name="update#growerp.marketing.MasterContent"
+                in-map="[
+                    masterContentId: masterContentId,
+                    pseudoId: pseudoId ?: mc.pseudoId,
+                    planId: planId ?: mc.planId,
+                    contentType: contentType ?: mc.contentType,
+                    pnpType: pnpType ?: mc.pnpType,
+                    title: title ?: mc.title,
+                    body: body ?: mc.body,
+                    callToAction: callToAction ?: mc.callToAction,
+                    targetUrl: targetUrl ?: mc.targetUrl,
+                    status: status ?: mc.status,
+                    lastModifiedDate: ec.user.nowTimestamp
+                ]" />
+
+            <entity-find-one entity-name="growerp.marketing.MasterContent" value-field="updated">
+                <field-map field-name="masterContentId" />
+            </entity-find-one>
+            <set field="pseudoId" from="updated.pseudoId" />
+            <set field="planId" from="updated.planId" />
+            <set field="contentType" from="updated.contentType" />
+            <set field="pnpType" from="updated.pnpType" />
+            <set field="title" from="updated.title" />
+            <set field="body" from="updated.body" />
+            <set field="callToAction" from="updated.callToAction" />
+            <set field="targetUrl" from="updated.targetUrl" />
+            <set field="status" from="updated.status" />
+            <set field="createdDate" from="updated.createdDate" />
+            <set field="lastModifiedDate" from="updated.lastModifiedDate" />
+        </actions>
+    </service>
+
+    <service verb="delete" noun="MasterContent" authenticate="true">
+        <in-parameters>
+            <parameter name="masterContentId" required="true" />
+        </in-parameters>
+        <actions>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="context" />
+            <entity-find-one entity-name="growerp.marketing.MasterContent" value-field="mc">
+                <field-map field-name="masterContentId" />
+            </entity-find-one>
+            <if condition="!mc">
+                <return error="true" message="Master content not found" />
+            </if>
+            <if condition="mc.ownerPartyId != ownerPartyId">
+                <return error="true" message="Access denied to this master content" />
+            </if>
+            <service-call name="delete#growerp.marketing.MasterContent"
+                in-map="[masterContentId: masterContentId]" />
+        </actions>
+    </service>
+
+    <service verb="generate" noun="MasterContent" authenticate="true">
+        <description>AI-write one platform-neutral master content piece for a persona and PNP angle.</description>
+        <in-parameters>
+            <parameter name="personaId" />
+            <parameter name="planId" />
+            <parameter name="contentType" default-value="POSTING">
+                <description>POSTING, ARTICLE or MESSAGE</description>
+            </parameter>
+            <parameter name="pnpType" default-value="OTHER">
+                <description>PAIN, NEWS, PRIZE or OTHER</description>
+            </parameter>
+            <parameter name="title" />
+            <parameter name="brief" />
+            <parameter name="targetUrl" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="masterContentId" />
+            <parameter name="pseudoId" />
+            <parameter name="title" />
+            <parameter name="body" />
+            <parameter name="callToAction" />
+        </out-parameters>
+        <actions>
+            <script location="component://growerp/service/generateMasterContentWithAI.groovy" />
+        </actions>
+    </service>
+
+    <!-- ========================================================= -->
+    <!--  adapt#ContentForPlatform: the "author once → fan out"    -->
+    <!--  core. For each platform, AI-adapts the master body and:  -->
+    <!--    POSTING / ARTICLE  -> creates a READY SocialPost        -->
+    <!--    MESSAGE (+campaign) -> merges adapted text into the     -->
+    <!--                            campaign platformSettings        -->
+    <!--  Idempotent: skips a platform that already has a SocialPost -->
+    <!--  for this master piece.                                    -->
+    <!-- ========================================================= -->
+    <!-- AI adaptation of one piece for one platform. Isolated as its own
+         service so the GeminiAiUtil class resolves at script scope (the same
+         proven pattern as generate#PlatformMessage) — it does not resolve
+         inside a closure in the loop below. -->
+    <service verb="adapt" noun="PlatformContent" authenticate="true">
+        <in-parameters>
+            <parameter name="title" />
+            <parameter name="body" required="true" />
+            <parameter name="platform" required="true" />
+            <parameter name="contentType" required="true" />
+            <parameter name="callToAction" />
+            <parameter name="targetUrl" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="adaptedContent" />
+        </out-parameters>
+        <actions>
+            <script location="component://growerp/service/GeminiAiUtil.groovy" />
+            <script>
+                adaptedContent = GeminiAiUtil.generateAdaptedContent(ec, title, body,
+                    platform, contentType, callToAction, targetUrl)
+            </script>
+        </actions>
+    </service>
+
+    <service verb="adapt" noun="ContentForPlatform" authenticate="true">
+        <description>Adapt one MasterContent piece to per-platform children. Default platforms =
+            all enabled PlatformConfiguration for the owner. Creates READY SocialPost items for
+            POSTING/ARTICLE; for MESSAGE merges the adapted template into the given campaign's
+            platformSettings. Skips platforms already adapted (idempotent).</description>
+        <in-parameters>
+            <parameter name="masterContentId" required="true" />
+            <parameter name="platforms" type="List">
+                <description>Subset of EMAIL,LINKEDIN,TWITTER,MEDIUM,SUBSTACK,FACEBOOK; default = all enabled</description>
+            </parameter>
+            <parameter name="campaignId">
+                <description>For MESSAGE content: the campaign whose platformSettings to update</description>
+            </parameter>
+            <parameter name="scheduledDate" type="Long">
+                <description>Optional schedule for the created SocialPosts (epoch ms)</description>
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="adaptedCount" type="Integer" />
+            <parameter name="skippedCount" type="Integer" />
+            <parameter name="socialPostIds" type="List" />
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="context" />
+            <if condition="!ownerPartyId">
+                <return error="true" message="User not authenticated or no party associated" />
+            </if>
+
+            <entity-find-one entity-name="growerp.marketing.MasterContent" value-field="mc">
+                <field-map field-name="masterContentId" />
+            </entity-find-one>
+            <if condition="!mc">
+                <return error="true" message="Master content not found: ${masterContentId}" />
+            </if>
+            <if condition="mc.ownerPartyId != ownerPartyId">
+                <return error="true" message="Access denied to this master content" />
+            </if>
+            <if condition="!mc.body">
+                <return error="true" message="Master content has no body to adapt" />
+            </if>
+
+            <!-- Default platform list = enabled PlatformConfiguration for this owner -->
+            <if condition="!platforms">
+                <entity-find entity-name="growerp.marketing.PlatformConfiguration" list="configs">
+                    <econdition field-name="ownerPartyId" />
+                    <econdition field-name="isEnabled" value="Y" />
+                </entity-find>
+                <set field="platforms" from="configs.collect { it.platform }" />
+            </if>
+            <if condition="!platforms">
+                <return error="true"
+                    message="No platforms given and no enabled PlatformConfiguration found for owner" />
+            </if>
+
+            <!-- Preflight: the AI key must be set (user preference, then env,
+                 then system property) — the same resolution GeminiAiUtil uses. -->
+            <set field="aiKey" from="ec.user.getPreference('GEMINI_API_KEY')" />
+            <if condition="!aiKey">
+                <set field="aiKey" from="System.getenv('GEMINI_API_KEY')" />
+            </if>
+            <if condition="!aiKey">
+                <set field="aiKey" from="System.getProperty('GEMINI_API_KEY')" />
+            </if>
+            <if condition="!aiKey">
+                <return error="true"
+                    message="AI key not configured: set GEMINI_API_KEY in the environment or in user preferences before adapting content." />
+            </if>
+
+            <set field="adaptedCount" from="0" type="Integer" />
+            <set field="skippedCount" from="0" type="Integer" />
+            <set field="socialPostIds" from="[]" />
+
+            <iterate list="platforms" entry="platformRaw">
+                <set field="platform" from="platformRaw.toString().toUpperCase()" />
+
+                <!-- AI-adapt the body for this platform; ignore-error so one
+                     platform failing does not abort the rest of the loop -->
+                <set field="adaptedContent" from="null" />
+                <service-call out-map="context" ignore-error="true"
+                    name="growerp.100.MasterContentServices100.adapt#PlatformContent"
+                    in-map="[title: mc.title, body: mc.body, platform: platform,
+                             contentType: mc.contentType, callToAction: mc.callToAction,
+                             targetUrl: mc.targetUrl]" />
+                <if condition="!adaptedContent"><continue /></if>
+
+                <if condition="mc.contentType == 'MESSAGE' &amp;&amp; campaignId">
+                    <!-- 1:1 message: merge the adapted template into the campaign settings -->
+                    <service-call
+                        name="growerp.100.MasterContentServices100.merge#CampaignPlatformMessage"
+                        in-map="[campaignId: campaignId, platform: platform,
+                                 messageTemplate: adaptedContent]" />
+                    <set field="adaptedCount" from="adaptedCount + 1" type="Integer" />
+                <else>
+                    <!-- POSTING / ARTICLE: idempotent create of a READY SocialPost -->
+                    <entity-find-one entity-name="growerp.marketing.SocialPost"
+                        value-field="existingPost">
+                        <field-map field-name="masterContentId" />
+                        <field-map field-name="platform" />
+                        <field-map field-name="ownerPartyId" />
+                    </entity-find-one>
+                    <if condition="existingPost">
+                        <set field="skippedCount" from="skippedCount + 1" type="Integer" />
+                    <else>
+                        <service-call out-map="createResult"
+                            name="growerp.100.MarketingServices100.create#SocialPost"
+                            in-map="[planId: mc.planId, type: mc.pnpType ?: 'OTHER',
+                                     platform: platform, headline: mc.title,
+                                     draftContent: mc.callToAction, finalContent: adaptedContent,
+                                     status: 'READY', scheduledDate: scheduledDate]" />
+                        <!-- stamp the source master piece onto the post -->
+                        <service-call name="update#growerp.marketing.SocialPost"
+                            in-map="[postId: createResult.postId,
+                                     masterContentId: masterContentId]" />
+                        <set field="socialPostIds" from="socialPostIds + [createResult.postId]" />
+                        <set field="adaptedCount" from="adaptedCount + 1" type="Integer" />
+                    </else>
+                    </if>
+                </else>
+                </if>
+            </iterate>
+
+            <!-- Nothing created and nothing skipped => every AI adaptation failed -->
+            <if condition="adaptedCount == 0 &amp;&amp; skippedCount == 0">
+                <return error="true"
+                    message="No content was adapted — the AI call failed for every platform. Check the server log and the AI key." />
+            </if>
+
+            <!-- Mark the master piece adapted if anything succeeded -->
+            <if condition="adaptedCount > 0">
+                <service-call name="update#growerp.marketing.MasterContent"
+                    in-map="[masterContentId: masterContentId, status: 'ADAPTED',
+                             lastModifiedDate: ec.user.nowTimestamp]" />
+            </if>
+        </actions>
+    </service>
+
+    <!-- Merge an adapted 1:1 message template into a campaign's platformSettings
+         JSON. Groovy is used only for the JSON parse/serialize (Java API). -->
+    <service verb="merge" noun="CampaignPlatformMessage" authenticate="true">
+        <in-parameters>
+            <parameter name="campaignId" required="true" />
+            <parameter name="platform" required="true" />
+            <parameter name="messageTemplate" required="true" />
+        </in-parameters>
+        <actions>
+            <entity-find-one entity-name="mantle.marketing.campaign.MarketingCampaign"
+                value-field="campaign">
+                <field-map field-name="marketingCampaignId" from="campaignId" />
+            </entity-find-one>
+            <if condition="!campaign">
+                <return error="true" message="Campaign ${campaignId} not found" />
+            </if>
+            <script><![CDATA[
+                import groovy.json.JsonSlurper
+                import groovy.json.JsonOutput
+                def settings = [:]
+                if (campaign.platformSettings) {
+                    try { settings = new JsonSlurper().parseText(campaign.platformSettings as String) }
+                    catch (ignored) { settings = [:] }
+                }
+                def key = platform.toLowerCase()
+                def entry = (settings[key] instanceof Map) ? settings[key] : [:]
+                entry.messageTemplate = messageTemplate
+                settings[key] = entry
+                newPlatformSettings = JsonOutput.toJson(settings)
+            ]]></script>
+            <service-call name="update#mantle.marketing.campaign.MarketingCampaign"
+                in-map="[marketingCampaignId: campaignId,
+                         platformSettings: newPlatformSettings]" />
+        </actions>
+    </service>
+
+</services>

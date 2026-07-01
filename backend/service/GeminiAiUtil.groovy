@@ -203,6 +203,69 @@ Keep the core message but optimize for the platform's style and constraints.
                 return "- Professional and concise\n- Clear message\n- Include call-to-action"
         }
     }
+
+    /**
+     * Adapt one platform-neutral MasterContent piece for a specific platform,
+     * honouring the content type (POSTING / ARTICLE / MESSAGE) and the
+     * per-platform adaptation rules (see plans/marketing-content-plan.md).
+     *
+     * @param ec ExecutionContext
+     * @param title The master content title/headline
+     * @param body The canonical platform-neutral body
+     * @param platform Target platform: LINKEDIN, TWITTER, FACEBOOK, MEDIUM, SUBSTACK, EMAIL
+     * @param contentType POSTING | ARTICLE | MESSAGE
+     * @param callToAction Optional CTA text
+     * @param targetUrl Optional link (withheld for LinkedIn/DM by the rules below)
+     * @return The adapted, ready-to-publish text for that platform
+     */
+    static String generateAdaptedContent(def ec, String title, String body, String platform,
+            String contentType, String callToAction = null, String targetUrl = null) {
+        def prompt = """
+Adapt the following platform-neutral marketing content for the ${platform} platform.
+Keep the core message and facts intact; rewrite tone, length and format to fit the platform.
+
+TITLE: ${title ?: '(none)'}
+CONTENT TYPE: ${contentType}
+CALL TO ACTION: ${callToAction ?: '(none)'}
+LINK: ${targetUrl ?: '(none)'}
+
+MASTER CONTENT:
+${body}
+
+PLATFORM + FORMAT REQUIREMENTS:
+${getAdaptationRules(platform, contentType, targetUrl)}
+
+Return ONLY the adapted content text, no explanations, no markdown code fences.
+"""
+        return callGeminiApi(ec, prompt, [temperature: 0.7, maxOutputTokens: 4096])
+    }
+
+    /**
+     * Per-platform + per-content-type adaptation rules.
+     * Encodes the reference table in plans/marketing-content-plan.md.
+     */
+    private static String getAdaptationRules(String platform, String contentType, String targetUrl) {
+        def hasUrl = targetUrl != null && !targetUrl.trim().isEmpty()
+        switch (platform.toUpperCase()) {
+            case 'LINKEDIN':
+                if (contentType == 'MESSAGE') {
+                    return "- 1:1 DM tone: short, human, specific\n- Under ~400 characters\n- End on a question\n- Include NO URL (we share the link only after they reply)"
+                }
+                return "- Professional post, up to ~1300 characters\n- Short paragraphs, 1-2 relevant emojis\n- 3-5 topical hashtags at the end\n- ${hasUrl ? 'Include the link near the end' : 'No link needed'}\n- End with an engaging question"
+            case 'TWITTER':
+                return "- Thread of tweets, each MAX 280 characters, separated by a blank line\n- Hook in the first tweet\n- 1-2 hashtags total\n- ${hasUrl ? 'Put the link in the last tweet' : 'No link needed'}"
+            case 'FACEBOOK':
+                return "- Conversational, community tone\n- ~400 characters plus a link preview\n- Minimal hashtags\n- ${hasUrl ? 'End with the link (it renders a preview)' : 'No link needed'}"
+            case 'MEDIUM':
+                return "- Long-form ARTICLE, 700-1500 words\n- SEO-friendly headline as the first line\n- Sub-headings and short paragraphs\n- ${hasUrl ? 'Include the link inline where natural' : 'No link needed'}"
+            case 'SUBSTACK':
+                return "- Newsletter voice, thoughtful and conversational\n- ${contentType == 'ARTICLE' ? 'Full issue with intro, body, sign-off' : 'Short note under 500 characters'}\n- ${hasUrl ? 'Include a subscribe/CTA link' : 'No link needed'}"
+            case 'EMAIL':
+                return "- ${contentType == 'MESSAGE' ? '1:1 email under ~120 words' : 'Broadcast newsletter, 200-400 words'}\n- Clear greeting and a one-line sign-off (Hans, GrowERP)\n- Single clear call-to-action\n- ${hasUrl ? 'Include the link once' : 'No link needed'}"
+            default:
+                return "- Professional and concise\n- Clear single call-to-action"
+        }
+    }
 }
 
 // Return the utility class for use by other scripts

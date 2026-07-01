@@ -403,6 +403,7 @@
             <parameter name="postId" />
             <parameter name="pseudoId" />
             <parameter name="planId" />
+            <parameter name="masterContentId" />
             <parameter name="start" type="Integer" />
             <parameter name="limit" type="Integer" />
         </in-parameters>
@@ -421,6 +422,8 @@
                 offset="start" limit="limit">
                 <econdition field-name="ownerPartyId" />
                 <econdition field-name="planId" from="planId" ignore-if-empty="true" />
+                <econdition field-name="masterContentId" from="masterContentId"
+                    ignore-if-empty="true" />
                 <econditions combine="or">
                     <econdition field-name="pseudoId" operator="like" value="%${searchString}%"
                         ignore-if-empty="true" ignore-case="true" />

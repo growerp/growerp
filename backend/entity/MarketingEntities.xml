@@ -58,7 +58,8 @@
         <field name="ownerPartyId" type="id" />
         <field name="planId" type="id" />
         <field name="type" type="text-short" /> <!-- PAIN, NEWS, PRIZE, OTHER -->
-        <field name="platform" type="text-short" /> <!-- LINKEDIN, TWITTER, FACEBOOK -->
+        <field name="platform" type="text-short" /> <!-- LINKEDIN, TWITTER, FACEBOOK, MEDIUM, SUBSTACK, EMAIL -->
+        <field name="masterContentId" type="id" /> <!-- source MasterContent this was adapted from -->
         <field name="headline" type="text-medium" />
         <field name="draftContent" type="text-very-long" />
         <field name="finalContent" type="text-very-long" />
@@ -67,6 +68,35 @@
         <field name="publishedDate" type="date-time" />
         <field name="publishedUrl" type="text-medium" />
         <field name="publishError" type="text-long" />
+
+        <field name="createdDate" type="date-time" />
+        <field name="lastModifiedDate" type="date-time" />
+
+        <relationship type="one" related="growerp.marketing.ContentPlan">
+            <key-map field-name="planId" />
+        </relationship>
+        <relationship type="one" related="mantle.party.Party">
+            <key-map field-name="ownerPartyId" related="partyId" />
+        </relationship>
+    </entity>
+
+    <!-- ========================================================= -->
+    <!--  Master Content (platform-agnostic source piece)         -->
+    <!-- ========================================================= -->
+    <entity entity-name="MasterContent" package="growerp.marketing">
+        <description>Platform-neutral content authored once, then adapted per platform
+            into SocialPost (broadcast) or OutreachMessage (1:1) children.</description>
+        <field name="masterContentId" type="id" is-pk="true" />
+        <field name="pseudoId" type="id" />
+        <field name="ownerPartyId" type="id" />
+        <field name="planId" type="id" /> <!-- optional link to weekly PNP ContentPlan -->
+        <field name="contentType" type="text-short" /> <!-- POSTING, ARTICLE, MESSAGE -->
+        <field name="pnpType" type="text-short" /> <!-- PAIN, NEWS, PRIZE, OTHER -->
+        <field name="title" type="text-medium" />
+        <field name="body" type="text-very-long" /> <!-- canonical platform-neutral copy -->
+        <field name="callToAction" type="text-long" />
+        <field name="targetUrl" type="text-medium" />
+        <field name="status" type="text-short" /> <!-- DRAFT, APPROVED, ADAPTED -->
 
         <field name="createdDate" type="date-time" />
         <field name="lastModifiedDate" type="date-time" />

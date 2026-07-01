@@ -51,6 +51,7 @@ abstract class SaveTest with _$SaveTest {
     @Default([]) List<Persona> personas,
     @Default([]) List<ContentPlan> contentPlans,
     @Default([]) List<SocialPost> socialPosts,
+    @Default([]) List<MasterContent> masterContents,
     @Default([]) List<OutreachCampaign> outreachCampaigns,
     @Default([]) List<MenuItem> menuItems,
     @Default([]) List<AdkAgentConfig> adkAgentConfigs,

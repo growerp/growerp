@@ -11,6 +11,7 @@ Map<String, GrowerpWidgetBuilder> getMarketingWidgets() {
   return {
     'ContentPlanList': (args) => const ContentPlanList(),
     'SocialPostList': (args) => const SocialPostList(),
+    'MasterContentList': (args) => const MasterContentList(),
     'PersonaList': (args) => const PersonaList(),
     'LandingPageList': (args) => const LandingPageList(),
     'AssessmentList': (args) => const AssessmentList(),
@@ -33,6 +34,13 @@ List<WidgetMetadata> getMarketingWidgetsWithMetadata() {
       iconName: 'share',
       keywords: ['social', 'post', 'media', 'facebook', 'twitter'],
       builder: (args) => const SocialPostList(),
+    ),
+    WidgetMetadata(
+      widgetName: 'MasterContentList',
+      description: 'Platform-neutral content authored once, adapted to all platforms',
+      iconName: 'auto_awesome',
+      keywords: ['master', 'content', 'adapt', 'platform', 'article', 'posting'],
+      builder: (args) => const MasterContentList(),
     ),
     WidgetMetadata(
       widgetName: 'PersonaList',

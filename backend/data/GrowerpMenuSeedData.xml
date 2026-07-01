@@ -116,8 +116,10 @@ along with this software (see the LICENSE.md file). If not, see
     <!-- ADMIN_MARKETING children -->
     <growerp.menu.MenuItem menuItemId="ADMIN_MKTG_CONTENT" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_MARKETING"
         title="Content Plans" iconName="list" widgetName="ContentPlanList" sequenceNum="10"/>
+    <!-- Content hub: author once, adapt per platform. Social Posts are managed
+         as platform variants inside a Content piece. -->
     <growerp.menu.MenuItem menuItemId="ADMIN_MKTG_SOCIAL" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_MARKETING"
-        title="Social Posts" iconName="share" widgetName="SocialPostList" sequenceNum="20"/>
+        title="Content" iconName="auto_awesome" widgetName="MasterContentList" sequenceNum="20"/>
     <growerp.menu.MenuItem menuItemId="ADMIN_MKTG_PERSONA" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_MARKETING"
         title="Personas" iconName="people" widgetName="PersonaList" sequenceNum="30"/>
     <growerp.menu.MenuItem menuItemId="ADMIN_MKTG_LANDING" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_MARKETING"
@@ -284,8 +286,10 @@ along with this software (see the LICENSE.md file). If not, see
         title="customers" iconName="school" widgetName="UserListCustomer" sequenceNum="30"/>
     <growerp.menu.MenuItem menuItemId="FREELANCE_MKTG_CONTENT" menuConfigurationId="FREELANCE_DEFAULT" parentMenuItemId="FREELANCE_MARKETING"
         title="Content Plans" iconName="list" widgetName="ContentPlanList" sequenceNum="10"/>
+    <!-- Content hub: author once, adapt per platform. Social Posts are managed
+         as platform variants inside a Content piece. -->
     <growerp.menu.MenuItem menuItemId="FREELANCE_MKTG_SOCIAL" menuConfigurationId="FREELANCE_DEFAULT" parentMenuItemId="FREELANCE_MARKETING"
-        title="Social Posts" iconName="share" widgetName="SocialPostList" sequenceNum="20"/>
+        title="Content" iconName="auto_awesome" widgetName="MasterContentList" sequenceNum="20"/>
     <growerp.menu.MenuItem menuItemId="FREELANCE_MKTG_PERSONA" menuConfigurationId="FREELANCE_DEFAULT" parentMenuItemId="FREELANCE_MARKETING"
         title="Personas" iconName="people" widgetName="PersonaList" sequenceNum="30"/>
     <growerp.menu.MenuItem menuItemId="FREELANCE_MKTG_LANDING" menuConfigurationId="FREELANCE_DEFAULT" parentMenuItemId="FREELANCE_MARKETING"

@@ -523,6 +523,34 @@ along with this software (see the LICENSE.md file). If not, see
             </resource>
         </resource>
 
+        <!-- Master Content (author once -> adapt per platform) -->
+        <resource name="MasterContents">
+            <method type="get">
+                <service name="growerp.100.MasterContentServices100.list#MasterContents" />
+            </method>
+        </resource>
+        <resource name="MasterContent">
+            <method type="post">
+                <service name="growerp.100.MasterContentServices100.create#MasterContent" />
+            </method>
+            <method type="patch">
+                <service name="growerp.100.MasterContentServices100.update#MasterContent" />
+            </method>
+            <method type="delete">
+                <service name="growerp.100.MasterContentServices100.delete#MasterContent" />
+            </method>
+            <resource name="generateWithAI">
+                <method type="post">
+                    <service name="growerp.100.MasterContentServices100.generate#MasterContent" />
+                </method>
+            </resource>
+            <resource name="adaptForPlatform">
+                <method type="post">
+                    <service name="growerp.100.MasterContentServices100.adapt#ContentForPlatform" />
+                </method>
+            </resource>
+        </resource>
+
         <!-- Outreach Campaign -->
         <resource name="OutreachCampaigns">
             <method type="get">

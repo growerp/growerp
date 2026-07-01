@@ -21,7 +21,9 @@ export 'package:growerp_models/growerp_models.dart'
         ContentPlan,
         ContentPlans,
         SocialPost,
-        SocialPosts;
+        SocialPosts,
+        MasterContent,
+        MasterContents;
 
 // BLoC exports
 export 'src/bloc/assessment_bloc.dart';
@@ -47,6 +49,9 @@ export 'src/bloc/content_plan_state.dart';
 export 'src/bloc/social_post_bloc.dart';
 export 'src/bloc/social_post_event.dart';
 export 'src/bloc/social_post_state.dart';
+export 'src/bloc/master_content_bloc.dart';
+export 'src/bloc/master_content_event.dart';
+export 'src/bloc/master_content_state.dart';
 
 export 'src/get_marketing_bloc_providers.dart';
 

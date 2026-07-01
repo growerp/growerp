@@ -1053,6 +1053,7 @@ abstract class RestClient {
   Future<SocialPosts> getSocialPosts({
     @Query('searchString') String? searchString,
     @Query('planId') String? planId,
+    @Query('masterContentId') String? masterContentId,
     @Query('start') int? start,
     @Query('limit') int? limit,
   });
@@ -1095,6 +1096,66 @@ abstract class RestClient {
 
   @POST("rest/s1/growerp/100/SocialPost/publishScheduled")
   Future<void> publishScheduledSocialPosts();
+
+  // Master Content endpoints (author once -> adapt per platform)
+  @GET("rest/s1/growerp/100/MasterContents")
+  Future<MasterContents> getMasterContents({
+    @Query('searchString') String? searchString,
+    @Query('planId') String? planId,
+    @Query('contentType') String? contentType,
+    @Query('status') String? status,
+    @Query('start') int? start,
+    @Query('limit') int? limit,
+  });
+
+  @POST("rest/s1/growerp/100/MasterContent")
+  Future<MasterContent> createMasterContent({
+    @Field() String? pseudoId,
+    @Field() String? planId,
+    @Field() String? contentType,
+    @Field() String? pnpType,
+    @Field() String? title,
+    @Field() String? body,
+    @Field() String? callToAction,
+    @Field() String? targetUrl,
+    @Field() String? status,
+  });
+
+  @PATCH("rest/s1/growerp/100/MasterContent")
+  Future<MasterContent> updateMasterContent({
+    @Field() required String masterContentId,
+    @Field() String? pseudoId,
+    @Field() String? planId,
+    @Field() String? contentType,
+    @Field() String? pnpType,
+    @Field() String? title,
+    @Field() String? body,
+    @Field() String? callToAction,
+    @Field() String? targetUrl,
+    @Field() String? status,
+  });
+
+  @DELETE("rest/s1/growerp/100/MasterContent")
+  Future<void> deleteMasterContent({@Field() required String masterContentId});
+
+  @POST("rest/s1/growerp/100/MasterContent/generateWithAI")
+  Future<MasterContent> generateMasterContentWithAI({
+    @Field() String? personaId,
+    @Field() String? planId,
+    @Field() String? contentType,
+    @Field() String? pnpType,
+    @Field() String? title,
+    @Field() String? brief,
+    @Field() String? targetUrl,
+  });
+
+  @POST("rest/s1/growerp/100/MasterContent/adaptForPlatform")
+  Future<dynamic> adaptContentForPlatform({
+    @Field() required String masterContentId,
+    @Field() List<String>? platforms,
+    @Field() String? campaignId,
+    @Field() int? scheduledDate,
+  });
 
   // Assessment Result endpoints
   @GET("rest/s1/growerp/100/Assessment/Results")

@@ -378,3 +378,70 @@ List<SocialPost> updatedSocialPosts = [
     status: 'READY',
   ),
 ];
+
+/// Master Content test data (platform-neutral, author-once)
+List<MasterContent> masterContents = [
+  const MasterContent(
+    contentType: 'POSTING',
+    pnpType: 'PAIN',
+    title: 'Your spreadsheet is a single point of failure',
+    body:
+        'When the whole business runs on one spreadsheet, one wrong cell or a '
+        'laptop crash can stop everything. There is a better way to run an SMB.',
+    callToAction: 'See how GrowERP helps',
+    status: 'DRAFT',
+  ),
+  const MasterContent(
+    contentType: 'ARTICLE',
+    pnpType: 'NEWS',
+    title: 'How one SMB replaced six tools with one system',
+    body:
+        'A small distributor was juggling six disconnected tools. Here is how '
+        'moving to a single ERP cut re-keying, errors and cost.',
+    callToAction: 'Read the story',
+    status: 'DRAFT',
+  ),
+  const MasterContent(
+    contentType: 'MESSAGE',
+    pnpType: 'PRIZE',
+    title: 'Start the free assessment',
+    body:
+        'Curious whether GrowERP fits how you run your business? The free '
+        'assessment takes two minutes and shows your ERP fit.',
+    callToAction: 'Start the free assessment',
+    status: 'DRAFT',
+  ),
+];
+
+List<MasterContent> updatedMasterContents = [
+  const MasterContent(
+    contentType: 'POSTING',
+    pnpType: 'PAIN',
+    title: 'Still running the company on a spreadsheet?',
+    body:
+        'Updated: When the whole business runs on one spreadsheet, one wrong '
+        'cell can stop everything. There is a better way to run an SMB.',
+    callToAction: 'See how GrowERP helps',
+    status: 'APPROVED',
+  ),
+  const MasterContent(
+    contentType: 'ARTICLE',
+    pnpType: 'NEWS',
+    title: 'One system instead of six tools: an SMB story',
+    body:
+        'Updated: A small distributor was juggling six disconnected tools. '
+        'Here is how a single ERP cut re-keying, errors and cost.',
+    callToAction: 'Read the story',
+    status: 'APPROVED',
+  ),
+  const MasterContent(
+    contentType: 'MESSAGE',
+    pnpType: 'PRIZE',
+    title: 'Two-minute free assessment',
+    body:
+        'Updated: Curious whether GrowERP fits how you run your business? The '
+        'free assessment takes two minutes and shows your ERP fit.',
+    callToAction: 'Start the free assessment',
+    status: 'APPROVED',
+  ),
+];

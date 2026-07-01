@@ -4,7 +4,9 @@
 
     <!-- ========================================================= -->
     <!--  Social Post Publishing Services                          -->
-    <!--  Supports: SUBSTACK (direct API), LINKEDIN (OAuth v2)    -->
+    <!--  API publish: SUBSTACK, LINKEDIN, FACEBOOK, MEDIUM.       -->
+    <!--  TWITTER and EMAIL have no safe write API here and are    -->
+    <!--  left READY for the assisted content send-queue.          -->
     <!-- ========================================================= -->
 
     <service verb="publish" noun="ScheduledSocialPosts" authenticate="false" allow-remote="false">
@@ -21,7 +23,7 @@
         <actions>
             <entity-find entity-name="growerp.marketing.SocialPost" list="readyPosts">
                 <econdition field-name="status" value="READY"/>
-                <econdition field-name="platform" operator="in" value="SUBSTACK,LINKEDIN"/>
+                <econdition field-name="platform" operator="in" value="SUBSTACK,LINKEDIN,FACEBOOK,MEDIUM"/>
                 <order-by field-name="scheduledDate"/>
             </entity-find>
 
@@ -57,6 +59,18 @@
                 <else-if condition="post.platform == 'LINKEDIN'">
                     <service-call
                         name="growerp.100.SocialPostPublishingServices100.publish#SocialPostToLinkedIn"
+                        in-map="[post: post, platformConfig: platformConfig]"
+                        out-map="publishResult" ignore-error="true"/>
+                </else-if>
+                <else-if condition="post.platform == 'FACEBOOK'">
+                    <service-call
+                        name="growerp.100.SocialPostPublishingServices100.publish#SocialPostToFacebook"
+                        in-map="[post: post, platformConfig: platformConfig]"
+                        out-map="publishResult" ignore-error="true"/>
+                </else-if>
+                <else-if condition="post.platform == 'MEDIUM'">
+                    <service-call
+                        name="growerp.100.SocialPostPublishingServices100.publish#SocialPostToMedium"
                         in-map="[post: post, platformConfig: platformConfig]"
                         out-map="publishResult" ignore-error="true"/>
                 </else-if>
@@ -141,8 +155,21 @@
                     in-map="[post: post, platformConfig: platformConfig]"
                     out-map="publishResult"/>
             </else-if>
+            <else-if condition="post.platform == 'FACEBOOK'">
+                <service-call
+                    name="growerp.100.SocialPostPublishingServices100.publish#SocialPostToFacebook"
+                    in-map="[post: post, platformConfig: platformConfig]"
+                    out-map="publishResult"/>
+            </else-if>
+            <else-if condition="post.platform == 'MEDIUM'">
+                <service-call
+                    name="growerp.100.SocialPostPublishingServices100.publish#SocialPostToMedium"
+                    in-map="[post: post, platformConfig: platformConfig]"
+                    out-map="publishResult"/>
+            </else-if>
             <else>
-                <return error="true" message="Publishing not supported for platform ${post.platform}"/>
+                <return error="true"
+                    message="No API publisher for ${post.platform}; use the assisted content send-queue for this platform"/>
             </else>
 
             <!-- Update entity based on result -->
@@ -385,6 +412,153 @@
                 } catch (Exception e) {
                     errorMessage = "LinkedIn publishing failed: ${e.message}"
                     ec.logger.error("LinkedIn publish error", e)
+                }
+            ]]></script>
+        </actions>
+    </service>
+
+    <!-- ========================================================= -->
+    <!--  Facebook: POST graph.facebook.com/{pageId}/feed          -->
+    <!--  Auth: Page access token                                  -->
+    <!--  PlatformConfiguration fields used:                       -->
+    <!--    apiKey   = Page access token                           -->
+    <!--    username = Facebook Page id                            -->
+    <!-- ========================================================= -->
+    <service verb="publish" noun="SocialPostToFacebook">
+        <description>Publish a post to a Facebook Page via the Graph API</description>
+        <in-parameters>
+            <parameter name="post" type="org.moqui.entity.EntityValue" required="true"/>
+            <parameter name="platformConfig" type="org.moqui.entity.EntityValue" required="true"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="success" type="Boolean"/>
+            <parameter name="publishedUrl"/>
+            <parameter name="errorMessage"/>
+        </out-parameters>
+        <actions>
+            <script><![CDATA[
+                import groovy.json.JsonSlurper
+                import java.net.http.HttpClient
+                import java.net.http.HttpRequest
+                import java.net.http.HttpResponse
+                import java.time.Duration
+                import java.net.URLEncoder
+
+                success = false
+                publishedUrl = null
+                errorMessage = null
+
+                try {
+                    def accessToken = platformConfig.apiKey
+                    def pageId      = platformConfig.username
+
+                    if (!accessToken) { errorMessage = "Facebook page access token (apiKey) not configured"; return }
+                    if (!pageId)      { errorMessage = "Facebook Page id (username) not configured"; return }
+
+                    def message = new StringBuilder()
+                    if (post.headline) message.append(post.headline).append("\n\n")
+                    message.append(post.finalContent ?: "")
+
+                    def form = "message=" + URLEncoder.encode(message.toString(), "UTF-8") +
+                               "&access_token=" + URLEncoder.encode(accessToken as String, "UTF-8")
+
+                    def httpClient = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(15)).build()
+                    def request = HttpRequest.newBuilder()
+                        .uri(URI.create("https://graph.facebook.com/v19.0/${pageId}/feed"))
+                        .header("Content-Type", "application/x-www-form-urlencoded")
+                        .POST(HttpRequest.BodyPublishers.ofString(form))
+                        .timeout(Duration.ofSeconds(30))
+                        .build()
+
+                    def response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
+                    def responseBody = response.body()
+                    ec.logger.info("Facebook API response [${response.statusCode()}]: ${responseBody?.take(500)}")
+
+                    if (response.statusCode() == 200) {
+                        def parsed = new JsonSlurper().parseText(responseBody)
+                        def id = parsed?.id
+                        publishedUrl = id ? "https://www.facebook.com/${id}" : "https://www.facebook.com/${pageId}"
+                        success = true
+                    } else {
+                        errorMessage = "Facebook API error ${response.statusCode()}: ${responseBody?.take(300)}"
+                    }
+                } catch (Exception e) {
+                    errorMessage = "Facebook publishing failed: ${e.message}"
+                    ec.logger.error("Facebook publish error", e)
+                }
+            ]]></script>
+        </actions>
+    </service>
+
+    <!-- ========================================================= -->
+    <!--  Medium: POST https://api.medium.com/v1/users/{id}/posts  -->
+    <!--  Auth: Integration token (Bearer)                         -->
+    <!--  PlatformConfiguration fields used:                       -->
+    <!--    apiKey   = Medium integration token                    -->
+    <!--    username = Medium authorId                             -->
+    <!-- ========================================================= -->
+    <service verb="publish" noun="SocialPostToMedium">
+        <description>Publish an article to Medium via the Medium API</description>
+        <in-parameters>
+            <parameter name="post" type="org.moqui.entity.EntityValue" required="true"/>
+            <parameter name="platformConfig" type="org.moqui.entity.EntityValue" required="true"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="success" type="Boolean"/>
+            <parameter name="publishedUrl"/>
+            <parameter name="errorMessage"/>
+        </out-parameters>
+        <actions>
+            <script><![CDATA[
+                import groovy.json.JsonOutput
+                import groovy.json.JsonSlurper
+                import java.net.http.HttpClient
+                import java.net.http.HttpRequest
+                import java.net.http.HttpResponse
+                import java.time.Duration
+
+                success = false
+                publishedUrl = null
+                errorMessage = null
+
+                try {
+                    def token    = platformConfig.apiKey
+                    def authorId = platformConfig.username
+
+                    if (!token)    { errorMessage = "Medium integration token (apiKey) not configured"; return }
+                    if (!authorId) { errorMessage = "Medium authorId (username) not configured"; return }
+
+                    def requestBody = [
+                        title:         post.headline ?: "Untitled",
+                        contentFormat: "markdown",
+                        content:       post.finalContent ?: "",
+                        publishStatus: "draft"
+                    ]
+
+                    def httpClient = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(15)).build()
+                    def request = HttpRequest.newBuilder()
+                        .uri(URI.create("https://api.medium.com/v1/users/${authorId}/posts"))
+                        .header("Authorization", "Bearer ${token}")
+                        .header("Content-Type", "application/json")
+                        .header("Accept", "application/json")
+                        .POST(HttpRequest.BodyPublishers.ofString(JsonOutput.toJson(requestBody)))
+                        .timeout(Duration.ofSeconds(30))
+                        .build()
+
+                    def response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
+                    def responseBody = response.body()
+                    ec.logger.info("Medium API response [${response.statusCode()}]: ${responseBody?.take(500)}")
+
+                    if (response.statusCode() in [200, 201]) {
+                        def parsed = new JsonSlurper().parseText(responseBody)
+                        publishedUrl = parsed?.data?.url ?: "https://medium.com/"
+                        success = true
+                    } else {
+                        errorMessage = "Medium API error ${response.statusCode()}: ${responseBody?.take(300)}"
+                    }
+                } catch (Exception e) {
+                    errorMessage = "Medium publishing failed: ${e.message}"
+                    ec.logger.error("Medium publish error", e)
                 }
             ]]></script>
         </actions>

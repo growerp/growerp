@@ -57,3 +57,8 @@ export 'content_plan_detail_screen.dart';
 // Social Post screens
 export 'social_post_list.dart';
 export 'social_post_detail_screen.dart';
+
+// Master Content screens
+export 'master_content_list.dart';
+export 'master_content_detail_screen.dart';
+export 'master_content_list_styled_data.dart';
