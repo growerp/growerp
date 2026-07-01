@@ -173,6 +173,7 @@ class CommonTest {
   static Future<void> createCompanyAndAdmin(
     WidgetTester tester, {
     bool demoData = false,
+    bool agentDemoData = false,
     Map testData = const {},
   }) async {
     SaveTest test = await PersistFunctions.getTest();
@@ -223,7 +224,12 @@ class CommonTest {
         admin: admin.copyWith(email: email, loginName: email),
       ),
     );
-    await login(tester, testData: testData, demoData: demoData);
+    await login(
+      tester,
+      testData: testData,
+      demoData: demoData,
+      agentDemoData: agentDemoData,
+    );
     // check for notification message
     if (hasKey('dismiss')) {
       await tapByKey(tester, 'dismiss');
@@ -235,6 +241,7 @@ class CommonTest {
     String? username,
     String? password,
     bool demoData = false,
+    bool agentDemoData = false,
     int days = 0,
     Map testData = const {},
   }) async {
@@ -341,6 +348,9 @@ class CommonTest {
         );
         if (!demoData) {
           await tapByKey(tester, 'demoData', settle: false);
+        }
+        if (!agentDemoData) {
+          await tapByKey(tester, 'agentDemoData', settle: false);
         }
 
         // Tap submit - don't wait here, the dialog will close when auth completes
