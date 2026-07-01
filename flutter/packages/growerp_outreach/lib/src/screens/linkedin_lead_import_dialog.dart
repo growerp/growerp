@@ -12,7 +12,6 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import 'dart:convert';
 import 'package:universal_io/io.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:fast_csv/fast_csv.dart' as fast_csv;
@@ -37,6 +36,10 @@ class LinkedInLeadImportDialog extends StatefulWidget {
 }
 
 class _LinkedInLeadImportDialogState extends State<LinkedInLeadImportDialog> {
+  /// Import at most this many leads per file (keeps batches manageable and in
+  /// line with safe outreach volumes).
+  static const _maxLeads = 4000;
+
   bool _busy = false;
   String? _status;
 
@@ -48,32 +51,41 @@ class _LinkedInLeadImportDialogState extends State<LinkedInLeadImportDialog> {
     );
     if (result == null) return;
 
-    String fileString;
-    if (foundation.kIsWeb) {
-      fileString = String.fromCharCodes(result.files.first.bytes!);
-    } else {
-      fileString = await File(result.files.single.path!).readAsString();
-    }
-
+    // Busy from the moment a file is chosen: reading + parsing + submitting.
+    setState(() {
+      _busy = true;
+      _status = 'Processing file…';
+    });
     try {
-      final leads = parseLinkedInConnectionsCsv(fileString);
+      String fileString;
+      if (foundation.kIsWeb) {
+        fileString = String.fromCharCodes(result.files.first.bytes!);
+      } else {
+        fileString = await File(result.files.single.path!).readAsString();
+      }
+
+      var leads = parseLinkedInConnectionsCsv(fileString);
       if (leads.isEmpty) {
-        setState(() => _status = 'No leads found in the file.');
+        setState(() {
+          _busy = false;
+          _status = 'No leads found in the file.';
+        });
         return;
       }
-      setState(() {
-        _busy = true;
-        _status = 'Submitting ${leads.length} leads…';
-      });
+      // Cap the batch: import at most _maxLeads leads at a time.
+      final total = leads.length;
+      final capped = total > _maxLeads;
+      if (capped) leads = leads.sublist(0, _maxLeads);
+      setState(() => _status = 'Submitting ${leads.length} leads…');
 
       // The import runs in the background; the succeeded/failed result arrives
-      // later as a notification. This call returns the submitted count.
-      final raw = await widget.restClient.importCompanyUsers(leads);
-      final result = raw is String ? jsonDecode(raw) : raw;
-      String message = 'File submitted, ${leads.length} records';
-      if (result is Map && result['message'] != null) {
-        message = result['message'].toString();
-      }
+      // later as a notification. This call returns immediately.
+      await widget.restClient.importCompanyUsers(leads);
+
+      final message = capped
+          ? 'File submitted: ${leads.length} of $total records '
+                '(limited to $_maxLeads per import)'
+          : 'File submitted: ${leads.length} records';
 
       if (!mounted) return;
       HelperFunctions.showMessage(context, message, Colors.green);
@@ -118,6 +130,22 @@ class _LinkedInLeadImportDialogState extends State<LinkedInLeadImportDialog> {
   }
 }
 
+/// Normalize a profile url to a valid ASCII URL so the backend WebAddress
+/// validation accepts it. LinkedIn exports a non-Latin vanity name either
+/// already percent-encoded or as raw unicode; decode first to collapse any
+/// double-encoding, then re-encode so non-ASCII bytes become valid %-escapes.
+String _normalizeUrl(String u) {
+  if (u.isEmpty) return u;
+  try {
+    // collapse any existing %-encoding first, then re-encode so the result is
+    // always valid ASCII whether the export gave us %-escapes or raw unicode.
+    final decoded = u.contains('%') ? Uri.decodeFull(u) : u;
+    return Uri.encodeFull(decoded);
+  } catch (_) {
+    return u;
+  }
+}
+
 /// Parse a LinkedIn "Connections" CSV export into lead [CompanyUser]s.
 ///
 /// Skips the notes preamble, maps columns by header name (so column order does
@@ -152,7 +180,7 @@ List<CompanyUser> parseLinkedInConnectionsCsv(String fileString) {
       name: '$first $last'.trim(),
       personalTitle: cell(iPosition),
       email: cell(iEmail),
-      url: cell(iUrl),
+      url: _normalizeUrl(cell(iUrl)),
       company:
           company.isNotEmpty ? Company(name: company, role: Role.lead) : null,
     ));
