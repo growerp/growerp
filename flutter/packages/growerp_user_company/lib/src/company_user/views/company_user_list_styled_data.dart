@@ -91,7 +91,7 @@ List<Widget> getCompanyUserListRow({
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text("${companyUser.name.truncate(20)} ", key: Key('name$index')),
+          Text(companyUser.name.truncate(20), key: Key('name$index')),
           Text(companyUser.email.truncate(20), key: const Key("companyEmail")),
         ],
       ),

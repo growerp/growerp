@@ -125,11 +125,16 @@ class CommonTest {
       final exception = details.exception;
       final isOverflowError =
           exception is FlutterError && exception.message.contains('overflowed');
-      if (!isOverflowError) {
-        // For non-overflow errors, use the original handler
+      // Network images (e.g. logos in seeded landing-page data) are not
+      // reachable/reliable from the headless CI environment; a failed image
+      // load must not fail an integration test (same reason Google Fonts
+      // runtime fetching is disabled above).
+      final isNetworkImageError = exception is NetworkImageLoadException;
+      if (!isOverflowError && !isNetworkImageError) {
+        // For other errors, use the original handler
         originalOnError?.call(details);
       }
-      // Silently ignore overflow errors in tests
+      // Silently ignore overflow and network-image errors in tests
     };
 
     int seq = Random.secure().nextInt(1024);
@@ -592,6 +597,20 @@ class CommonTest {
       }
       formFound = await waitForKey(tester, formName);
     }
+    if (!formFound) {
+      final keys =
+          tester.allWidgets
+              .map((w) => w.key)
+              .whereType<ValueKey<String>>()
+              .map((k) => k.value)
+              .toSet()
+              .toList()
+            ..sort();
+      debugPrint(
+        '=== selectOption debug: option=$option formName=$formName '
+        'widget keys in tree: $keys',
+      );
+    }
     expect(
       formFound,
       true,
@@ -661,9 +680,11 @@ class CommonTest {
       for (int row = 0; row < 20; row++) {
         for (final base in baseKeys) {
           final finder = find.byKey(Key('$base$row'));
-          if (tester.any(finder) && getTextField('$base$row') == searchString) {
-            await tester.ensureVisible(finder.last);
-            await tester.tap(finder.last);
+          // trim: some list cells render the value with padding whitespace
+          if (tester.any(finder) &&
+              getTextField('$base$row').trim() == searchString) {
+            final target = await readyTarget(tester, finder);
+            await tester.tap(target);
             await tester.pumpAndSettle(Duration(seconds: seconds));
             return;
           }
@@ -729,8 +750,8 @@ class CommonTest {
     if (resultRows == 1) {
       for (final key in ['id0', 'name0', 'title0', 'theme0', 'headline0']) {
         if (tester.any(find.byKey(Key(key)))) {
-          await tester.ensureVisible(find.byKey(Key(key)).last);
-          await tester.tap(find.byKey(Key(key)).last);
+          final target = await readyTarget(tester, find.byKey(Key(key)));
+          await tester.tap(target);
           await tester.pumpAndSettle(Duration(seconds: seconds));
           return;
         }
@@ -961,6 +982,20 @@ class CommonTest {
     String key,
     String value,
   ) async {
+    await _enterAutocompleteValue(tester, key, value);
+    // The options overlay can stay open after selecting (or when the typed
+    // text still matches several options). It renders on top of the dialog
+    // and would absorb the next tap (e.g. the update button) — unfocus so
+    // RawAutocomplete closes it.
+    FocusManager.instance.primaryFocus?.unfocus();
+    await tester.pumpAndSettle();
+  }
+
+  static Future<void> _enterAutocompleteValue(
+    WidgetTester tester,
+    String key,
+    String value,
+  ) async {
     final autocomplete = find.byKey(Key(key));
     if (!tester.any(autocomplete)) {
       debugPrint('Warning: Autocomplete with key $key not found');
@@ -1126,6 +1161,36 @@ class CommonTest {
     await tester.pumpAndSettle();
   }
 
+  /// Resolve [finder] to a tap-ready target. Prefers the hit-testable match
+  /// when a key resolves to more than one widget (desktop TabBarView keeps
+  /// neighboring tab pages alive, so e.g. 'searchField' also exists on a
+  /// hidden sibling tab and `.last` may target the wrong one).
+  ///
+  /// Only scrolls (ensureVisible)
+  /// when no match is hit-testable yet: ensureVisible walks ALL ancestor
+  /// scrollables — on desktop that includes the TabBarView's PageView — so
+  /// calling it on an already-visible target can drag the page to a
+  /// neighboring tab and silently switch screens.
+  static Future<Finder> readyTarget(WidgetTester tester, Finder finder) async {
+    var visible = finder.hitTestable();
+    if (tester.any(visible)) return visible.last;
+    // A lingering autocomplete options overlay can cover the target: the
+    // async optionsBuilder may complete after the field was unfocused and
+    // re-open the overlay. Dismiss it before scrolling to the target.
+    final overlayOption = find.byKey(const Key('autocompleteOption0'));
+    for (int i = 0; i < 5 && tester.any(overlayOption); i++) {
+      await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+      FocusManager.instance.primaryFocus?.unfocus();
+      await tester.pumpAndSettle(const Duration(milliseconds: 200));
+    }
+    visible = finder.hitTestable();
+    if (tester.any(visible)) return visible.last;
+    await tester.ensureVisible(finder.last);
+    await tester.pumpAndSettle();
+    visible = finder.hitTestable();
+    return tester.any(visible) ? visible.last : finder.last;
+  }
+
   static Future<void> enterText(
     WidgetTester tester,
     String key,
@@ -1142,15 +1207,13 @@ class CommonTest {
         throw StateError('Widget with key "$key" not found');
       }
     }
-    // Ensure the widget is visible before interacting
-    await tester.ensureVisible(finder);
-    await tester.pumpAndSettle();
+    final target = await readyTarget(tester, finder);
     // Tap to focus, clear existing content, then enter new text
-    await tester.tap(finder.last);
+    await tester.tap(target);
     await tester.pump();
-    await tester.enterText(finder.last, '');
+    await tester.enterText(target, '');
     await tester.pump();
-    await tester.enterText(finder.last, value);
+    await tester.enterText(target, value);
     // Wait for the debounce timer (usually 300ms) to fire so the bloc emits
     // the loading state. This prevents tests from seeing stale results from
     // the clear ('') search above.
@@ -1319,7 +1382,14 @@ class CommonTest {
       findsWidgets,
       reason: 'No Text widget found with key "$key")}',
     );
-    final widget = finder.last.evaluate().single.widget;
+    // Desktop TabBarView keeps neighboring tab pages alive, so a key can
+    // resolve to a hidden sibling as well; prefer the visible match.
+    final visible = finder.hitTestable();
+    final widget = (visible.evaluate().isNotEmpty ? visible : finder)
+        .last
+        .evaluate()
+        .single
+        .widget;
     if (widget is StatusChip) return widget.label;
     return (widget as Text).data!;
   }
@@ -1450,8 +1520,8 @@ class CommonTest {
       true,
       reason: "could not find key: $key to tap on",
     );
-    await tester.ensureVisible(find.byKey(Key(key)).last);
-    await tester.tap(find.byKey(Key(key)).last);
+    final target = await readyTarget(tester, find.byKey(Key(key)));
+    await tester.tap(target);
     await tester.pump();
     if (settle) {
       await tester.pumpAndSettle(Duration(seconds: seconds));
@@ -1516,9 +1586,7 @@ class CommonTest {
       true,
       reason: "could not find text: '$text' to tap on",
     );
-    final finder = baseFinder.last;
-    await tester.ensureVisible(finder);
-    await tester.pumpAndSettle();
+    final finder = await readyTarget(tester, baseFinder);
     await tester.tap(finder);
     await tester.pumpAndSettle(Duration(seconds: seconds));
   }

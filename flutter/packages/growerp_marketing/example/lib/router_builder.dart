@@ -83,8 +83,17 @@ const marketingMenuConfig = MenuConfiguration(
       sequenceNum: 65,
       widgetName: 'MasterContentList',
     ),
-    // Social Posts are managed as platform variants inside a Content piece;
-    // the route/widget stay registered so the variant dialog can open them.
+    // Social Posts are primarily managed as platform variants inside a
+    // Content piece; this direct entry keeps the standalone CRUD screen
+    // reachable (and navigable for the social post integration test).
+    MenuItem(
+      itemKey: 'MKT_SOCIAL',
+      title: 'Social Posts',
+      route: '/socialPosts',
+      iconName: 'share',
+      sequenceNum: 70,
+      widgetName: 'SocialPostList',
+    ),
   ],
 );
 

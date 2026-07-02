@@ -121,14 +121,17 @@ List<Widget> getContentPlanListRow({
       ),
     );
   } else {
-    // ID
-    cells.add(Text(plan.pseudoId ?? '', key: Key('id$index')));
+    // ID (the SizedBox carries the per-row marker key used to count rows)
+    cells.add(SizedBox(
+      key: const Key('contentPlanItem'),
+      child: Text(plan.pseudoId ?? '', key: Key('id$index')),
+    ));
 
     // Theme
     cells.add(
       Text(
         plan.theme ?? 'No theme',
-        key: const Key('contentPlanItem'),
+        key: Key('theme$index'),
         style: const TextStyle(fontWeight: FontWeight.w500),
         maxLines: 1,
         overflow: TextOverflow.ellipsis,

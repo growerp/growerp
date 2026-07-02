@@ -44,32 +44,23 @@ class _LazyTabChildState extends State<_LazyTabChild> {
   Widget? _child;
 
   @override
-  void initState() {
-    super.initState();
-    if (widget.tabController.index == widget.index) {
-      _child = widget.builder();
-    } else {
-      widget.tabController.addListener(_onTabChange);
+  void didUpdateWidget(covariant _LazyTabChild oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // A new TabController means the tab set changed (e.g. navigation to a
+    // route with different tabs re-ran _initialize): the cached child was
+    // built from the previous configuration's builder — drop it. No
+    // listener is needed: the parent rebuilds on every controller index
+    // change, so build() below realizes the child once the tab activates.
+    if (oldWidget.tabController != widget.tabController) {
+      _child = null;
     }
-  }
-
-  void _onTabChange() {
-    if (!mounted) return;
-    if (widget.tabController.index == widget.index && _child == null) {
-      setState(() {
-        _child = widget.builder();
-      });
-    }
-  }
-
-  @override
-  void dispose() {
-    widget.tabController.removeListener(_onTabChange);
-    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_child == null && widget.tabController.index == widget.index) {
+      _child = widget.builder();
+    }
     return _child ?? const SizedBox.shrink();
   }
 }
@@ -725,8 +716,13 @@ class DisplayMenuItemState extends State<DisplayMenuItem>
                       children: List.generate(tabItems.length, (index) {
                         if (widget.tabWidgetLoader != null) {
                           return _LazyTabChild(
+                            // Include the route: menuItemId can be null (e.g.
+                            // static test menus), and a bare index key would
+                            // let a page from the PREVIOUS route reuse this
+                            // state and keep showing its cached child.
                             key: ValueKey(
-                              tabItems[index].menuItemId ?? '$index',
+                              '$currentRoute#'
+                              '${tabItems[index].menuItemId ?? index}',
                             ),
                             index: index,
                             tabController: _controller!,

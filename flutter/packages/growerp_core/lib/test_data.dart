@@ -397,12 +397,16 @@ List<User> leads = [
   ),
 ];
 
+// Note: supplier users get their OWN companies, named differently from the
+// standalone supplierCompanies (same convention as the leads data): the
+// company/user tests create both sets, and duplicate company names make the
+// list search ambiguous (two identical rows -> wrong record opened).
 List<User> suppliers = [
   User(
     firstName: 'supplier1',
     lastName: 'last Name1',
     role: Role.supplier,
-    company: supplierCompanies[0],
+    company: Company(role: Role.supplier, name: 'company of supplier 1'),
     email: 'emailXXX@example.org',
     url: 'https://nXXX.example.org',
     telephoneNr: '99999999999999',
@@ -411,7 +415,7 @@ List<User> suppliers = [
     firstName: 'supplier2',
     lastName: 'last Name2',
     role: Role.supplier,
-    company: supplierCompanies[1],
+    company: Company(role: Role.supplier, name: 'company of supplier 2'),
     telephoneNr: '10101010101010',
   ),
   User(
@@ -419,7 +423,7 @@ List<User> suppliers = [
     lastName: 'last Name3',
     loginDisabled: true,
     role: Role.supplier,
-    company: supplierCompanies[2],
+    company: Company(role: Role.supplier, name: 'company of supplier 3'),
     email: 'emailXXX@example.org',
     url: 'https://nXXX.example.org',
     telephoneNr: '99999999999999',
@@ -428,7 +432,7 @@ List<User> suppliers = [
     firstName: 'supplier4',
     lastName: 'last Name4',
     role: Role.supplier,
-    company: supplierCompanies[3],
+    company: Company(role: Role.supplier, name: 'company of supplier 4'),
     email: 'emailXXX@example.org',
     telephoneNr: '202020202020',
   ),
