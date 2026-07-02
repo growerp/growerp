@@ -130,7 +130,8 @@ RUN rm -rf .git && \
 RUN ./gradlew addRunTime
 
 # Resolve absolute symlinks to real copies so COPY --from works in the final stage
-RUN for link in runtime/component/growerp runtime/component/PopRestStore runtime/component/mantle-stripe; do \
+RUN for link in runtime/component/growerp runtime/component/PopRestStore runtime/component/mantle-stripe \
+    runtime/component/moqui-adk runtime/component/moqui-mcp; do \
     if [ -L "$link" ]; then \
     target=$(readlink -f "$link") && rm "$link" && cp -a "$target" "$link"; \
     fi; \

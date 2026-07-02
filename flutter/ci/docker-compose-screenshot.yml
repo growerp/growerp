@@ -45,6 +45,8 @@ services:
       - ../../backend:/opt/moqui/runtime/component/growerp
       - ../../pop-rest-store:/opt/moqui/runtime/component/PopRestStore
       - ../../mantle-stripe:/opt/moqui/runtime/component/mantle-stripe
+      - ../../moqui-adk:/opt/moqui/runtime/component/moqui-adk
+      - ../../moqui-mcp:/opt/moqui/runtime/component/moqui-mcp
     environment:
       - instance_purpose=test
       - entity_ds_db_conf=postgres
