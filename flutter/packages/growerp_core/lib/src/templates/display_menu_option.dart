@@ -498,7 +498,8 @@ class DisplayMenuItemState extends State<DisplayMenuItem>
     if (currentRoute == '/' &&
         _currentMenuConfigId != null &&
         context.read<MenuConfigBloc?>() != null) {
-      actions.add(
+      actions.insert(
+        0,
         IconButton(
           key: const Key('restoreMenuButton'),
           icon: const Icon(Icons.settings_backup_restore),
