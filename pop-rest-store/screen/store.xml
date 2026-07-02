@@ -222,14 +222,15 @@ var storeInfo = ${storeInfoJson};
         </if>
 
         <!-- get settings used in subscreens -->
-        <set field="template_server_root" from="storeInfo.settings.template_server_root" default-value="component://PopRestStore/template/store/root.html.ftl"/>
-        <set field="template_server_header" from="storeInfo.settings.template_server_header" default-value="component://PopRestStore/template/store/navbar.html.ftl"/>
-        <set field="template_server_footer" from="storeInfo.settings.template_server_footer" default-value="component://PopRestStore/template/store/footer.html.ftl"/>
-        <set field="template_server_home" from="storeInfo.settings.template_server_home" default-value="component://PopRestStore/template/store/home.html.ftl"/>
-        <set field="template_server_category" from="storeInfo.settings.template_server_category" default-value="component://PopRestStore/template/store/category.html.ftl"/>
-        <set field="template_server_product" from="storeInfo.settings.template_server_product" default-value="component://PopRestStore/template/store/product.html.ftl"/>
-        <set field="template_server_content" from="storeInfo.settings.template_server_content" default-value="component://PopRestStore/template/store/help.html.ftl"/>
-        <set field="template_server_search" from="storeInfo.settings.template_server_search" default-value="component://PopRestStore/template/store/search.html.ftl"/>
+        <set field="templateId" from="storeInfo.settings.PsstTemplateId" default-value="legacy"/>
+        <set field="template_server_root" from="storeInfo.settings.template_server_root" default-value="component://PopRestStore/template/store/${templateId}/root.html.ftl"/>
+        <set field="template_server_header" from="storeInfo.settings.template_server_header" default-value="component://PopRestStore/template/store/${templateId}/navbar.html.ftl"/>
+        <set field="template_server_footer" from="storeInfo.settings.template_server_footer" default-value="component://PopRestStore/template/store/${templateId}/footer.html.ftl"/>
+        <set field="template_server_home" from="storeInfo.settings.template_server_home" default-value="component://PopRestStore/template/store/${templateId}/home.html.ftl"/>
+        <set field="template_server_category" from="storeInfo.settings.template_server_category" default-value="component://PopRestStore/template/store/${templateId}/category.html.ftl"/>
+        <set field="template_server_product" from="storeInfo.settings.template_server_product" default-value="component://PopRestStore/template/store/${templateId}/product.html.ftl"/>
+        <set field="template_server_content" from="storeInfo.settings.template_server_content" default-value="component://PopRestStore/template/store/${templateId}/help.html.ftl"/>
+        <set field="template_server_search" from="storeInfo.settings.template_server_search" default-value="component://PopRestStore/template/store/${templateId}/search.html.ftl"/>
     </pre-actions>
 
     <widgets>

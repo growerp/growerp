@@ -62,6 +62,7 @@ class WebsiteDialogState extends State<WebsiteDialog> {
   late RestClient restClient;
   late WebsiteLocalizations _localizations;
   List<LandingPage> _landingPages = [];
+  String? _templateId;
 
   @override
   void initState() {
@@ -525,6 +526,21 @@ class WebsiteDialogState extends State<WebsiteDialog> {
                     ),
                   ),
                   const SizedBox(height: 8),
+                  DropdownButtonFormField<String>(
+                    key: const Key('templateId'),
+                    decoration: const InputDecoration(labelText: 'Website Template'),
+                    value: _templateId ?? state.website!.templateId,
+                    items: const [
+                      DropdownMenuItem(value: 'legacy', child: Text('Legacy')),
+                      DropdownMenuItem(value: 'modern', child: Text('Modern Tailwind')),
+                    ],
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        _templateId = newValue;
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 8),
                   TextFormField(
                     key: const Key('twitterUrl'),
                     controller: _twitterController,
@@ -614,6 +630,7 @@ class WebsiteDialogState extends State<WebsiteDialog> {
                           title: _titleController.text,
                           measurementId: _measurementIdController.text,
                           stripeApiKey: _stripeApiKeyController.text,
+                          templateId: _templateId ?? state.website!.templateId,
                           colorJson: jsonEncode(updatedColor),
                         ),
                       ),

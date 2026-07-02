@@ -494,6 +494,9 @@ along with this software (see the LICENSE.md file). If not, see
     <moqui.basic.Enumeration enumCode="product_store_id_from_hostname"
         description="Product Store ID From Hostname" enumId="PsstHostname"
         enumTypeId="ProductStoreSettingType" />
+    <moqui.basic.Enumeration enumCode="templateId"
+        description="Website Template ID" enumId="PsstTemplateId"
+        enumTypeId="ProductStoreSettingType" />
     <moqui.basic.Enumeration enumCode="template_server_content"
         description="Template Server Content" enumId="PsstContentLocation"
         enumTypeId="ProductStoreSettingType" />

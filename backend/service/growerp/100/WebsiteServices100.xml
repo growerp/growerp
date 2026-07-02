@@ -51,6 +51,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="obsidianName" />
                 <parameter name="measurementId" />
                 <parameter name="stripeApiKey" />
+                <parameter name="templateId" />
             </parameter>
         </out-parameters>
         <actions>
@@ -214,6 +215,14 @@ along with this software (see the LICENSE.md file). If not, see
                 <field-map field-name="ownerPartyId" />
             </entity-find-one>
             <set field="website.stripeApiKey" from="paymentGateway?.secretKey" />
+            <!-- template id -->
+            <entity-find entity-name="mantle.product.store.ProductStoreSetting" list="templateIdList">
+                <econdition field-name="productStoreId" from="stores[0].productStoreId" />
+                <econdition field-name="settingTypeEnumId" value="PsstTemplateId" />
+                <date-filter/>
+                <order-by field-name="-fromDate"/>
+            </entity-find>
+            <set field="website.templateId" from="templateIdList ? templateIdList[0].settingValue : 'legacy'" />
         </actions>
     </service>
 
@@ -254,6 +263,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="obsidianName" />
                 <parameter name="measurementId" />
                 <parameter name="stripeApiKey" />
+                <parameter name="templateId" />
             </parameter>
         </in-parameters>
         <out-parameters>
@@ -291,6 +301,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="obsidianName" />
                 <parameter name="measurementId" />
                 <parameter name="stripeApiKey" />
+                <parameter name="templateId" />
             </parameter>
         </out-parameters>
         <actions>
@@ -446,6 +457,24 @@ along with this software (see the LICENSE.md file). If not, see
                                     in-map="[productStoreId: stores[0].productStoreId,
                                             settingTypeEnumId: 'PsstMeasurementId',
                                             settingValue: website.measurementId]" />
+                            </else>
+                        </if>
+                    </if>
+                    <!-- templateId -->
+                    <if condition="website.templateId">
+                        <entity-find entity-name="mantle.product.store.ProductStoreSetting"
+                            list="templateIdList" for-update="true">
+                            <econdition field-name="productStoreId" from="stores[0].productStoreId" />
+                            <econdition field-name="settingTypeEnumId" value="PsstTemplateId" />
+                        </entity-find>
+                        <if condition="templateIdList">
+                            <set field="templateIdList[0].settingValue" from="website.templateId" />
+                            <entity-update value-field="templateIdList[0]" />
+                            <else>
+                                <service-call name="create#mantle.product.store.ProductStoreSetting"
+                                    in-map="[productStoreId: stores[0].productStoreId,
+                                            settingTypeEnumId: 'PsstTemplateId',
+                                            settingValue: website.templateId]" />
                             </else>
                         </if>
                     </if>

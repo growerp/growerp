@@ -1553,3 +1553,450 @@ hr {
         display: none !important;
     }
 }
+
+
+/* ===================================================================
+   GROWERP MARKETING HOMEPAGE STYLES (STITCH REDESIGN)
+   Dark Mode Glassmorphism with Flutter Green Theme
+   Scoped to the GrowERP official store (productStoreId 100000)
+   =================================================================== */
+
+:root {
+    /* Flutter Green Theme Palette */
+    --gx-primary: #62a66c;
+    --gx-secondary: #429281;
+    --gx-tertiary: #73a492;
+    --gx-dark: #246532;
+    
+    /* Dark Surface Palette */
+    --gx-surface-bg: #0b1326;
+    --gx-surface-card: rgba(30, 41, 59, 0.4);
+    --gx-surface-border: rgba(255, 255, 255, 0.1);
+    --gx-text-main: #f8fafc;
+    --gx-text-muted: #94a3b8;
+}
+
+/* Global Body Override for Store 100000 */
+body.growerp-store-100000 {
+    background-color: var(--gx-surface-bg);
+    color: var(--gx-text-main);
+}
+
+/* --- Hero Section --- */
+.growerp-hero {
+    background: radial-gradient(circle at top right, rgba(66, 146, 129, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at bottom left, rgba(36, 101, 50, 0.2) 0%, var(--gx-surface-bg) 60%);
+    padding: 6rem 1rem 5rem;
+    position: relative;
+    overflow: hidden;
+    color: var(--gx-text-main);
+}
+
+.growerp-hero-content {
+    position: relative;
+    z-index: 1;
+}
+
+.growerp-hero-title {
+    font-family: 'Inter', sans-serif;
+    font-size: 3.5rem;
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 1.5rem;
+    letter-spacing: -0.03em;
+    background: linear-gradient(to right, #ffffff, var(--gx-primary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.growerp-hero-subtitle {
+    font-family: 'Inter', sans-serif;
+    font-size: 1.25rem;
+    color: var(--gx-text-muted);
+    line-height: 1.6;
+    margin-bottom: 2.5rem;
+    max-width: 600px;
+}
+
+.growerp-hero-cta {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+}
+
+.growerp-hero-note {
+    font-size: 0.9rem;
+    color: var(--gx-tertiary);
+    margin-bottom: 0;
+}
+
+/* --- Buttons --- */
+.growerp-btn-primary {
+    background: linear-gradient(135deg, var(--gx-primary), var(--gx-secondary));
+    color: #ffffff !important;
+    border: none;
+    padding: 0.85rem 2.2rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(98, 166, 108, 0.3);
+}
+
+.growerp-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(66, 146, 129, 0.4);
+    background: linear-gradient(135deg, var(--gx-secondary), var(--gx-primary));
+}
+
+.growerp-btn-secondary {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--gx-text-main) !important;
+    border: 1px solid var(--gx-surface-border);
+    padding: 0.85rem 2.2rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(12px);
+}
+
+.growerp-btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+}
+
+/* --- Glassmorphic Cards --- */
+.growerp-glass-card, .growerp-benefit-card, .growerp-app-card, .growerp-testimonial-card, .growerp-pricing-card {
+    background: var(--gx-surface-card);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--gx-surface-border);
+    border-radius: 16px;
+    padding: 2rem;
+    transition: all 0.3s ease;
+    color: var(--gx-text-main);
+    height: 100%;
+}
+
+.growerp-glass-card:hover, .growerp-benefit-card:hover, .growerp-app-card:hover, .growerp-testimonial-card:hover, .growerp-pricing-card:hover {
+    transform: translateY(-5px);
+    background: rgba(30, 41, 59, 0.6);
+    border-color: rgba(98, 166, 108, 0.4);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3), 0 0 15px rgba(98, 166, 108, 0.1);
+}
+
+/* --- Benefits Section --- */
+.growerp-benefits {
+    padding: 5rem 0;
+    background: var(--gx-surface-bg);
+}
+
+.growerp-benefit-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+    background: rgba(98, 166, 108, 0.15);
+    border: 1px solid rgba(98, 166, 108, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
+    color: var(--gx-primary);
+    transition: all 0.3s ease;
+}
+
+.growerp-glass-card:hover .growerp-benefit-icon {
+    background: var(--gx-primary);
+    color: #ffffff;
+    box-shadow: 0 0 20px rgba(98, 166, 108, 0.4);
+}
+
+.growerp-benefit-card h5 {
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+    color: var(--gx-text-main);
+}
+
+.growerp-benefit-card p {
+    color: var(--gx-text-muted);
+    line-height: 1.6;
+    margin-bottom: 0;
+}
+
+/* --- Section Titles --- */
+.growerp-section-title {
+    font-family: 'Inter', sans-serif;
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--gx-text-main);
+    margin-bottom: 1rem;
+    letter-spacing: -0.02em;
+}
+
+.growerp-section-subtitle {
+    font-size: 1.15rem;
+    color: var(--gx-text-muted);
+    margin-bottom: 3rem;
+}
+
+/* --- Apps Showcase --- */
+.growerp-apps {
+    padding: 5rem 0;
+    background: var(--gx-surface-bg);
+    position: relative;
+}
+
+.growerp-app-card {
+    display: block;
+    text-decoration: none !important;
+    height: 100%;
+}
+
+.growerp-app-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    background: rgba(66, 146, 129, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.25rem;
+    font-size: 1.25rem;
+    color: var(--gx-secondary);
+}
+
+.growerp-app-card h5 {
+    font-weight: 600;
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+    color: var(--gx-text-main);
+}
+
+.growerp-app-link {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--gx-primary);
+    margin-top: 1rem;
+    display: inline-block;
+}
+
+/* --- Testimonials --- */
+.growerp-testimonials {
+    padding: 5rem 0;
+    background: #060b17;
+}
+
+.growerp-testimonial-text {
+    font-style: italic;
+    color: var(--gx-text-muted);
+    font-size: 1.05rem;
+    line-height: 1.7;
+    margin-bottom: 1.5rem;
+}
+
+.growerp-testimonial-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--gx-primary), var(--gx-secondary));
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.2rem;
+    margin-right: 1rem;
+}
+
+.growerp-testimonial-author {
+    display: flex;
+    align-items: center;
+}
+
+.growerp-testimonial-author h6 {
+    color: var(--gx-text-main);
+    margin-bottom: 0;
+    font-weight: 700;
+}
+
+.growerp-testimonial-author small {
+    color: var(--gx-tertiary);
+}
+
+/* --- Stats Bar --- */
+.growerp-stats-bar {
+    display: flex;
+    justify-content: center;
+    gap: 4rem;
+    margin-bottom: 3rem;
+    flex-wrap: wrap;
+}
+
+.growerp-stat-item {
+    text-align: center;
+}
+
+.growerp-stat-number {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--gx-primary);
+    font-family: 'Inter', sans-serif;
+    line-height: 1.2;
+}
+
+.growerp-stat-label {
+    font-size: 0.95rem;
+    color: var(--gx-text-muted);
+    font-weight: 500;
+}
+
+/* --- Footer CTA --- */
+.growerp-footer-cta {
+    padding: 4rem 0;
+    background: linear-gradient(to right, var(--gx-dark), var(--gx-surface-bg));
+    border-top: 1px solid rgba(98, 166, 108, 0.2);
+}
+
+.growerp-footer-cta-title {
+    font-family: 'Inter', sans-serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+/* --- Navbar Trial Button --- */
+.growerp-nav-trial-btn {
+    background: rgba(98, 166, 108, 0.15) !important;
+    border: 1px solid rgba(98, 166, 108, 0.4) !important;
+    border-radius: 8px !important;
+    padding: 0.5rem 1.25rem !important;
+    font-weight: 600 !important;
+    color: var(--gx-primary) !important;
+    backdrop-filter: blur(8px);
+}
+
+.growerp-nav-trial-btn:hover {
+    background: var(--gx-primary) !important;
+    color: #ffffff !important;
+    transform: translateY(-1px);
+}
+
+/* --- Pricing Table (Dark Mode Glass) --- */
+.growerp-pricing-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-top: 2rem;
+}
+.growerp-pricing-table th, .growerp-pricing-table td {
+    padding: 1.25rem;
+    border-bottom: 1px solid var(--gx-surface-border);
+    text-align: center;
+    color: var(--gx-text-muted);
+}
+.growerp-pricing-table th {
+    background: rgba(255,255,255,0.02);
+    color: var(--gx-text-main);
+    font-weight: 600;
+}
+.growerp-pricing-table th:first-child, .growerp-pricing-table td:first-child {
+    text-align: left;
+}
+
+/* --- Responsive --- */
+@media (max-width: 991px) {
+    .growerp-hero-title { font-size: 2.75rem; }
+    .growerp-section-title { font-size: 2rem; }
+    .growerp-stats-bar { gap: 2rem; }
+}
+
+@media (max-width: 767px) {
+    .growerp-hero { padding: 4rem 1rem 3rem; }
+    .growerp-hero-title { font-size: 2.25rem; }
+    .growerp-hero-cta { flex-direction: column; }
+    .growerp-hero-cta .btn { width: 100%; }
+    .growerp-stats-bar { flex-direction: column; gap: 1.5rem; }
+}
+
+/* --- Content Page Layout (Sidebar & Main Area) --- */
+body.growerp-store-100000 .content-breadcrumb-home {
+    color: var(--gx-primary);
+}
+body.growerp-store-100000 .content-breadcrumb-active {
+    color: var(--gx-text-muted);
+}
+body.growerp-store-100000 .content-sidebar-title {
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    color: var(--gx-text-main);
+    margin-bottom: 1rem;
+}
+body.growerp-store-100000 .content-sidebar-icon {
+    color: var(--gx-secondary);
+}
+body.growerp-store-100000 .content-sidebar-link {
+    color: var(--gx-text-main);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+body.growerp-store-100000 .content-sidebar-link:hover {
+    color: var(--gx-primary);
+}
+body.growerp-store-100000 .content-sidebar-link-sub {
+    color: var(--gx-text-muted);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+body.growerp-store-100000 .content-sidebar-link-sub:hover {
+    color: var(--gx-primary);
+}
+body.growerp-store-100000 .content-sidebar-bullet {
+    font-size: 0.7rem;
+    color: var(--gx-tertiary);
+}
+body.growerp-store-100000 .growerp-content-area {
+    color: var(--gx-text-main);
+    line-height: 1.7;
+}
+body.growerp-store-100000 .growerp-content-area h1,
+body.growerp-store-100000 .growerp-content-area h2,
+body.growerp-store-100000 .growerp-content-area h3 {
+    color: var(--gx-text-main);
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+}
+body.growerp-store-100000 .growerp-content-area a {
+    color: var(--gx-primary);
+    text-decoration: none;
+}
+body.growerp-store-100000 .growerp-content-area a:hover {
+    text-decoration: underline;
+}
+
+/* Fallback for light mode / other stores */
+body:not(.growerp-store-100000) .content-breadcrumb-home { color: var(--primary-600); }
+body:not(.growerp-store-100000) .content-breadcrumb-active { color: var(--neutral-500); }
+body:not(.growerp-store-100000) .content-sidebar-title { font-family: 'Outfit', sans-serif; font-weight: 600; color: var(--neutral-800); margin-bottom: 1rem; }
+body:not(.growerp-store-100000) .content-sidebar-icon { color: var(--primary-500); }
+body:not(.growerp-store-100000) .content-sidebar-link { color: inherit; }
+body:not(.growerp-store-100000) .content-sidebar-link-sub { color: inherit; }
+body:not(.growerp-store-100000) .content-sidebar-bullet { font-size: 0.7rem; color: var(--primary-400); }
+
+/* Fix opaque layout wrappers in dark mode */
+body.growerp-store-100000 #store-root {
+    background: transparent !important;
+}
+body.growerp-store-100000 .customer-menu {
+    background: var(--gx-surface-card) !important;
+    border: 1px solid var(--gx-surface-border) !important;
+    border-radius: 12px;
+    padding: 1.5rem;
+}
