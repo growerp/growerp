@@ -1172,8 +1172,18 @@ class CommonTest {
   /// calling it on an already-visible target can drag the page to a
   /// neighboring tab and silently switch screens.
   static Future<Finder> readyTarget(WidgetTester tester, Finder finder) async {
+    // Pin the chosen match to its Element: finders are lazy and get
+    // re-evaluated by every WidgetTester call (tap, enterText/showKeyboard),
+    // so a hitTestable()-based finder can suddenly match nothing when a
+    // transient overlay/keyboard covers the field between our resolution and
+    // that re-evaluation ("Bad state: No element" from .last).
+    Finder pin(Finder chosen) {
+      final element = chosen.evaluate().last;
+      return find.byElementPredicate((e) => e == element, skipOffstage: false);
+    }
+
     var visible = finder.hitTestable();
-    if (tester.any(visible)) return visible.last;
+    if (tester.any(visible)) return pin(visible);
     // A lingering autocomplete options overlay can cover the target: the
     // async optionsBuilder may complete after the field was unfocused and
     // re-open the overlay. Dismiss it before scrolling to the target.
@@ -1184,11 +1194,11 @@ class CommonTest {
       await tester.pumpAndSettle(const Duration(milliseconds: 200));
     }
     visible = finder.hitTestable();
-    if (tester.any(visible)) return visible.last;
+    if (tester.any(visible)) return pin(visible);
     await tester.ensureVisible(finder.last);
     await tester.pumpAndSettle();
     visible = finder.hitTestable();
-    return tester.any(visible) ? visible.last : finder.last;
+    return pin(tester.any(visible) ? visible : finder);
   }
 
   static Future<void> enterText(

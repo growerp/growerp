@@ -152,11 +152,12 @@ class AssetTest {
       seconds: CommonTest.waitTime,
     );
     await CommonTest.waitForSnackbarToGo(tester);
-    // Check that the asset is now deactivated (status shows 'N')
+    // Check that the asset is now deactivated: the status chip shows 'N' on
+    // the phone layout and 'No' on the desktop layout.
     final statusFinder = find.byKey(Key('status${count - 1}'));
     expect(statusFinder, findsOneWidget);
     final statusChip = statusFinder.evaluate().single.widget as StatusChip;
-    expect(statusChip.label, equals('N'));
+    expect(statusChip.label, anyOf(equals('N'), equals('No')));
     await PersistFunctions.persistTest(
       test.copyWith(assets: test.assets.sublist(0, test.assets.length - 1)),
     );
