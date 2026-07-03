@@ -176,6 +176,7 @@ class CampaignDetailScreenState extends State<CampaignDetailScreen> {
       context: context,
       builder: (_) => LinkedInLeadImportDialog(
         restClient: RepositoryProvider.of<RestClient>(context, listen: false),
+        campaignId: widget.campaign.campaignId,
       ),
     );
   }
@@ -400,8 +401,14 @@ class CampaignDetailScreenState extends State<CampaignDetailScreen> {
                       TextFormField(
                         key: const Key('messageTemplate'),
                         controller: _messageTemplateController,
-                        decoration: const InputDecoration(
-                            labelText: 'Message Template'),
+                        decoration: InputDecoration(
+                          labelText: 'Message Template',
+                          hintText: _selectedPlatforms.contains('LINKEDIN')
+                              ? "Hi {name} — noticed you're {title} at "
+                                  '{company} and wanted to connect...'
+                              : null,
+                          helperText: 'Placeholders: {name}, {company}, {title}',
+                        ),
                         maxLines: 5,
                       ),
                       const SizedBox(height: 20),
@@ -443,6 +450,16 @@ class CampaignDetailScreenState extends State<CampaignDetailScreen> {
                               key: const Key('update'),
                               onPressed: () {
                                 if (_formKey.currentState!.validate()) {
+                                  if (_selectedPlatforms.isEmpty) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                            'Please select at least one platform.'),
+                                        backgroundColor: Colors.red,
+                                      ),
+                                    );
+                                    return;
+                                  }
                                   final platforms =
                                       _selectedPlatforms.toList().toString();
                                   if (widget.campaign.campaignId == null) {

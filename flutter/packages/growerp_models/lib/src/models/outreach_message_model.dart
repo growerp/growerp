@@ -27,6 +27,12 @@ class OutreachMessage {
   /// Recipient email address
   final String? recipientEmail;
 
+  /// Recipient's company name
+  final String? recipientCompany;
+
+  /// Recipient's job title
+  final String? recipientTitle;
+
   /// Message content sent
   final String messageContent;
 
@@ -62,6 +68,8 @@ class OutreachMessage {
     this.recipientProfileUrl,
     this.recipientHandle,
     this.recipientEmail,
+    this.recipientCompany,
+    this.recipientTitle,
     required this.messageContent,
     this.sentDate,
     this.responseDate,

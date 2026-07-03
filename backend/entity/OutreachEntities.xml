@@ -54,6 +54,8 @@
             <description>Platform-specific handle (e.g., @username for Twitter)</description>
         </field>
         <field name="recipientEmail" type="text-medium" />
+        <field name="recipientCompany" type="text-medium" />
+        <field name="recipientTitle" type="text-medium" />
         <field name="messageContent" type="text-very-long" />
         <field name="sentDate" type="date-time" />
         <field name="responseDate" type="date-time" />

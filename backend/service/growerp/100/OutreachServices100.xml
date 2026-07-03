@@ -67,6 +67,10 @@
 
             <set field="campaigns" from="[]" />
             <iterate list="campaignList" entry="camp">
+                <entity-find-count entity-name="growerp.marketing.OutreachMessage"
+                    count-field="totalMessages">
+                    <econdition field-name="marketingCampaignId" from="camp.marketingCampaignId" />
+                </entity-find-count>
                 <script>campaigns.add([
                     marketingCampaignId: camp.marketingCampaignId,
                     pseudoId: camp.pseudoId,
@@ -81,13 +85,13 @@
                     platformSettings: camp.platformSettings,
                     statusId: camp.statusId ?: 'MKTG_CAMP_PLANNED',
                     dailyLimitPerPlatform: camp.dailyLimitPerPlatform ?: 50,
-                    budgetedCost: camp.budgetedCost,
-                    actualCost: camp.actualCost,
-                    estimatedCost: camp.estimatedCost,
-                    expectedRevenue: camp.expectedRevenue,
-                    numSent: camp.numSent ?: 0,
-                    convertedLeads: camp.convertedLeads,
-                    expectedResponsePercent: camp.expectedResponsePercent,
+                    budgetedCost: camp.budgetedCost?.toString(),
+                    actualCost: camp.actualCost?.toString(),
+                    estimatedCost: camp.estimatedCost?.toString(),
+                    expectedRevenue: camp.expectedRevenue?.toString(),
+                    numSent: totalMessages,
+                    convertedLeads: camp.convertedLeads?.toString(),
+                    expectedResponsePercent: camp.expectedResponsePercent?.toString(),
                     isActive: camp.isActive,
                     fromDate: camp.fromDate ? ec.l10n.format(camp.fromDate, 'yyyy-MM-dd HH:mm:ssZ') : null,
                     thruDate: camp.thruDate ? ec.l10n.format(camp.thruDate, 'yyyy-MM-dd HH:mm:ssZ') : null,
@@ -171,13 +175,13 @@
                 platformSettings: campaignValue.platformSettings,
                 statusId: campaignValue.statusId ?: 'MKTG_CAMP_PLANNED',
                 dailyLimitPerPlatform: campaignValue.dailyLimitPerPlatform ?: 50,
-                budgetedCost: campaignValue.budgetedCost,
-                actualCost: campaignValue.actualCost,
-                estimatedCost: campaignValue.estimatedCost,
-                expectedRevenue: campaignValue.expectedRevenue,
+                budgetedCost: campaignValue.budgetedCost?.toString(),
+                actualCost: campaignValue.actualCost?.toString(),
+                estimatedCost: campaignValue.estimatedCost?.toString(),
+                expectedRevenue: campaignValue.expectedRevenue?.toString(),
                 numSent: campaignValue.numSent ?: 0,
-                convertedLeads: campaignValue.convertedLeads,
-                expectedResponsePercent: campaignValue.expectedResponsePercent,
+                convertedLeads: campaignValue.convertedLeads?.toString(),
+                expectedResponsePercent: campaignValue.expectedResponsePercent?.toString(),
                 isActive: campaignValue.isActive,
                 fromDate: campaignValue.fromDate ? ec.l10n.format(campaignValue.fromDate, 'yyyy-MM-dd HH:mm:ssZ') : null,
                 thruDate: campaignValue.thruDate ? ec.l10n.format(campaignValue.thruDate, 'yyyy-MM-dd HH:mm:ssZ') : null,
@@ -186,10 +190,31 @@
             <set field="marketingCampaignId" from="campaignValue.marketingCampaignId" />
 
             <!-- Get messages -->
-            <entity-find entity-name="growerp.marketing.OutreachMessage" list="messages">
+            <entity-find entity-name="growerp.marketing.OutreachMessage" list="messageList">
                 <econdition field-name="marketingCampaignId" />
                 <order-by field-name="-sentDate" />
             </entity-find>
+            
+            <set field="messages" from="[]" />
+            <iterate list="messageList" entry="msg">
+                <script>messages.add([
+                    messageId: msg.messageId,
+                    marketingCampaignId: msg.marketingCampaignId,
+                    platform: msg.platform,
+                    recipientName: msg.recipientName,
+                    recipientProfileUrl: msg.recipientProfileUrl,
+                    recipientHandle: msg.recipientHandle,
+                    recipientEmail: msg.recipientEmail,
+                    recipientCompany: msg.recipientCompany,
+                    recipientTitle: msg.recipientTitle,
+                    messageContent: msg.messageContent,
+                    sentDate: msg.sentDate?.toString(),
+                    responseDate: msg.responseDate?.toString(),
+                    status: msg.status,
+                    errorMessage: msg.errorMessage,
+                    convertedPartyId: msg.convertedPartyId
+                ])</script>
+            </iterate>
 
             <!-- Get metrics -->
             <entity-find-one entity-name="growerp.marketing.CampaignMetrics"
@@ -218,7 +243,7 @@
                 messagesFailed: messagesFailed,
                 responsesReceived: metricsEntity?.responsesReceived ?: 0,
                 leadsGenerated: metricsEntity?.leadsGenerated ?: 0,
-                lastUpdated: metricsEntity?.lastUpdated
+                lastUpdated: metricsEntity?.lastUpdated?.toString()
             ]" />
         </actions>
     </service>
@@ -365,10 +390,10 @@
                 platformSettings: platformSettings,
                 statusId: 'MKTG_CAMP_PLANNED',
                 dailyLimitPerPlatform: dailyLimitPerPlatform,
-                budgetedCost: budgetedCost,
-                estimatedCost: estimatedCost,
-                expectedRevenue: expectedRevenue,
-                expectedResponsePercent: expectedResponsePercent,
+                budgetedCost: budgetedCost?.toString(),
+                estimatedCost: estimatedCost?.toString(),
+                expectedRevenue: expectedRevenue?.toString(),
+                expectedResponsePercent: expectedResponsePercent?.toString(),
                 fromDate: ec.l10n.format(ec.user.nowTimestamp, 'yyyy-MM-dd HH:mm:ssZ'),
                 startDate: null
             ]" />
@@ -455,8 +480,6 @@
             <if condition="pseudoId == ''">
                 <set field="pseudoid" from="null" />
             </if>
-            <log
-                message="===looking for id ${marketingCampaignId} and pseudoId ${pseudoId} and ownerPartyId ${ownerPartyId}" />
             <entity-find entity-name="mantle.marketing.campaign.MarketingCampaign"
                 list="campaignList">
                 <econdition field-name="pseudoId" ignore-if-empty="true" />
@@ -528,11 +551,11 @@
                 platformSettings: platformSettings ?: existingCampaign.platformSettings,
                 statusId: statusId ?: existingCampaign.statusId ?: 'MKTG_CAMP_PLANNED',
                 dailyLimitPerPlatform: dailyLimitPerPlatform ?: existingCampaign.dailyLimitPerPlatform ?: 50,
-                budgetedCost: budgetedCost ?: existingCampaign.budgetedCost,
-                actualCost: actualCost ?: existingCampaign.actualCost,
-                estimatedCost: estimatedCost ?: existingCampaign.estimatedCost,
-                expectedRevenue: expectedRevenue ?: existingCampaign.expectedRevenue,
-                expectedResponsePercent: expectedResponsePercent ?: existingCampaign.expectedResponsePercent,
+                budgetedCost: (budgetedCost ?: existingCampaign.budgetedCost)?.toString(),
+                actualCost: (actualCost ?: existingCampaign.actualCost)?.toString(),
+                estimatedCost: (estimatedCost ?: existingCampaign.estimatedCost)?.toString(),
+                expectedRevenue: (expectedRevenue ?: existingCampaign.expectedRevenue)?.toString(),
+                expectedResponsePercent: (expectedResponsePercent ?: existingCampaign.expectedResponsePercent)?.toString(),
                 isActive: isActive ?: existingCampaign.isActive,
                 fromDate: existingCampaign.fromDate ? ec.l10n.format(existingCampaign.fromDate, 'yyyy-MM-dd HH:mm:ssZ') : null,
                 thruDate: existingCampaign.thruDate ? ec.l10n.format(existingCampaign.thruDate, 'yyyy-MM-dd HH:mm:ssZ') : null,
@@ -585,6 +608,86 @@
     <!--  Outreach Message Services                               -->
     <!-- ========================================================= -->
 
+    <service verb="create" noun="OpportunityFromOutreach">
+        <description>Create a Sales Opportunity from a responded OutreachMessage.</description>
+        <in-parameters>
+            <parameter name="messageId" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="salesOpportunityId" />
+        </out-parameters>
+        <actions>
+            <entity-find-one entity-name="growerp.marketing.OutreachMessage" value-field="message">
+                <field-map field-name="messageId" />
+            </entity-find-one>
+            <if condition="!message">
+                <return error="true" message="Message not found: ${messageId}" />
+            </if>
+            <if condition="!message.marketingCampaignId">
+                <log level="info" message="Message ${messageId} has no campaign linked. Cannot create opportunity." />
+                <return />
+            </if>
+            
+            <set field="marketingCampaignId" from="message.marketingCampaignId" />
+            
+            <!-- Lookup or create a person -->
+            <set field="partyId" from="null" />
+            
+            <if condition="message.recipientEmail">
+                <entity-find entity-name="mantle.party.contact.PartyContactMechInfo" list="emailPcmList">
+                    <econdition field-name="infoString" from="message.recipientEmail" />
+                    <econdition field-name="contactMechTypeEnumId" value="CmtEmailAddress" />
+                </entity-find>
+                <if condition="emailPcmList">
+                    <set field="partyId" from="emailPcmList[0].partyId" />
+                </if>
+            </if>
+            
+            <!-- Fallback to create person -->
+            <if condition="!partyId">
+                <set field="firstName" from="message.recipientName ? message.recipientName.split(' ')[0] : 'Unknown'" />
+                <set field="lastName" from="message.recipientName &amp;&amp; message.recipientName.contains(' ') ? message.recipientName.substring(message.recipientName.indexOf(' ') + 1) : 'Lead'" />
+                <service-call name="create#mantle.party.Person" out-map="personOut"
+                    in-map="[firstName: firstName, lastName: lastName]" />
+                <set field="partyId" from="personOut.partyId" />
+                
+                <!-- Create email contact mech if available -->
+                <if condition="message.recipientEmail">
+                    <service-call name="mantle.party.ContactServices.create#EmailAddress"
+                        in-map="[partyId: partyId, emailAddress: message.recipientEmail, contactMechPurposeId: 'EmailPrimary']" />
+                </if>
+                <!-- Create Prospect Role -->
+                <service-call name="create#mantle.party.PartyRole"
+                    in-map="[partyId: partyId, roleTypeId: 'Prospect']" />
+            </if>
+            
+            <!-- Deduplicate: Check if a SalesOpportunity already exists for this campaign and party -->
+            <entity-find entity-name="mantle.sales.opportunity.SalesOpportunity" list="existingOppList">
+                <econdition field-name="marketingCampaignId" from="marketingCampaignId" />
+                <econdition field-name="accountPartyId" from="partyId" />
+            </entity-find>
+            
+            <if condition="existingOppList">
+                <log level="info" message="SalesOpportunity already exists for campaign ${marketingCampaignId} and party ${partyId}. Skipping creation." />
+                <set field="salesOpportunityId" from="existingOppList[0].salesOpportunityId" />
+                <return />
+            </if>
+            
+            <!-- Create Sales Opportunity -->
+            <set field="oppName" from="message.recipientName ? 'Outreach Lead: ' + message.recipientName : 'Outreach Lead'" />
+            <service-call name="create#mantle.sales.opportunity.SalesOpportunity" out-map="oppOut"
+                in-map="[
+                    marketingCampaignId: marketingCampaignId,
+                    accountPartyId: partyId,
+                    opportunityName: oppName,
+                    opportunityStageId: 'Qualification',
+                    description: 'Generated from OutreachMessage ' + messageId
+                ]" />
+            <set field="salesOpportunityId" from="oppOut.salesOpportunityId" />
+            <log level="info" message="Created SalesOpportunity ${salesOpportunityId} for message ${messageId}" />
+        </actions>
+    </service>
+
     <service verb="create" noun="OutreachMessage">
         <description>Record a sent outreach message</description>
         <in-parameters>
@@ -594,6 +697,8 @@
             <parameter name="recipientProfileUrl" />
             <parameter name="recipientHandle" />
             <parameter name="recipientEmail" />
+            <parameter name="recipientCompany" />
+            <parameter name="recipientTitle" />
             <parameter name="messageContent" required="true" />
             <parameter name="status" default-value="PENDING" />
         </in-parameters>
@@ -605,6 +710,8 @@
             <parameter name="recipientProfileUrl" />
             <parameter name="recipientHandle" />
             <parameter name="recipientEmail" />
+            <parameter name="recipientCompany" />
+            <parameter name="recipientTitle" />
             <parameter name="messageContent" />
             <parameter name="status" />
             <parameter name="sentDate" />
@@ -621,6 +728,8 @@
                          recipientProfileUrl: recipientProfileUrl,
                          recipientHandle: recipientHandle,
                          recipientEmail: recipientEmail,
+                         recipientCompany: recipientCompany,
+                         recipientTitle: recipientTitle,
                          messageContent: messageContent,
                          sentDate: status == 'SENT' ? ec.user.nowTimestamp : null,
                          status: status,
@@ -645,6 +754,8 @@
             <set field="recipientProfileUrl" from="message.recipientProfileUrl" />
             <set field="recipientHandle" from="message.recipientHandle" />
             <set field="recipientEmail" from="message.recipientEmail" />
+            <set field="recipientCompany" from="message.recipientCompany" />
+            <set field="recipientTitle" from="message.recipientTitle" />
             <set field="messageContent" from="message.messageContent" />
             <set field="status" from="message.status" />
             <set field="sentDate"
@@ -674,6 +785,8 @@
             <parameter name="recipientProfileUrl" />
             <parameter name="recipientHandle" />
             <parameter name="recipientEmail" />
+            <parameter name="recipientCompany" />
+            <parameter name="recipientTitle" />
             <parameter name="messageContent" />
             <parameter name="status" />
             <parameter name="sentDate" />
@@ -724,6 +837,8 @@
             <set field="recipientProfileUrl" from="updatedMessage.recipientProfileUrl" />
             <set field="recipientHandle" from="updatedMessage.recipientHandle" />
             <set field="recipientEmail" from="updatedMessage.recipientEmail" />
+            <set field="recipientCompany" from="updatedMessage.recipientCompany" />
+            <set field="recipientTitle" from="updatedMessage.recipientTitle" />
             <set field="messageContent" from="updatedMessage.messageContent" />
             <set field="status" from="updatedMessage.status" />
             <set field="sentDate"
@@ -782,8 +897,11 @@
     <service verb="import" noun="OutreachRecipients">
         <description>
             Bulk-load recipients (e.g. a 4000-row LinkedIn/email CSV) as PENDING OutreachMessages
-            for a campaign. Each recipient becomes one OutreachMessage; messageContent is left empty
-            for later AI personalisation (generate#PlatformMessage).
+            for a campaign. Each recipient becomes one OutreachMessage; messageContent is
+            auto-personalised from the campaign's (or per-platform) messageTemplate by substituting
+            {name}/{company}/{title} with the recipient's fields, unless the row already supplies an
+            explicit messageContent. An optional AI polish pass can refine tone afterwards
+            (polish#OutreachMessage).
         </description>
         <in-parameters>
             <parameter name="marketingCampaignId" />
@@ -797,6 +915,8 @@
                     <parameter name="recipientProfileUrl" />
                     <parameter name="recipientHandle" />
                     <parameter name="recipientEmail" />
+                    <parameter name="recipientCompany" />
+                    <parameter name="recipientTitle" />
                     <parameter name="platform" />
                     <parameter name="messageContent" />
                 </parameter>
@@ -824,6 +944,23 @@
             </if>
             <set field="marketingCampaignId" from="campaign.marketingCampaignId" />
 
+            <!-- Parse per-platform message templates (same JSON shape as PlatformSettings.fromJson) -->
+            <script><![CDATA[
+                platformTemplates = [:]
+                try {
+                    if (campaign.platformSettings) {
+                        def parsed = new groovy.json.JsonSlurper().parseText(campaign.platformSettings)
+                        parsed.each { key, value ->
+                            if (value instanceof Map && value.messageTemplate) {
+                                platformTemplates[key.toString().toLowerCase()] = value.messageTemplate
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    platformTemplates = [:]
+                }
+            ]]></script>
+
             <set field="importedCount" from="0" type="Integer" />
             <set field="skippedCount" from="0" type="Integer" />
             <iterate list="recipients" entry="recipient">
@@ -834,6 +971,14 @@
                     <set field="skippedCount" from="skippedCount + 1" />
                     <continue />
                 </if>
+                <!-- Personalise messageContent from the template unless explicitly supplied -->
+                <script><![CDATA[
+                    def tmpl = platformTemplates[rcptPlatform.toLowerCase()] ?: (campaign.messageTemplate ?: '')
+                    def autoContent = tmpl.replace('{name}', recipient.recipientName ?: '')
+                            .replace('{company}', recipient.recipientCompany ?: '')
+                            .replace('{title}', recipient.recipientTitle ?: '')
+                    computedMessageContent = recipient.messageContent ? recipient.messageContent : autoContent
+                ]]></script>
                 <service-call name="create#growerp.marketing.OutreachMessage"
                     in-map="[marketingCampaignId: marketingCampaignId,
                              platform: rcptPlatform,
@@ -841,7 +986,9 @@
                              recipientProfileUrl: recipient.recipientProfileUrl,
                              recipientHandle: recipient.recipientHandle,
                              recipientEmail: recipient.recipientEmail,
-                             messageContent: recipient.messageContent,
+                             recipientCompany: recipient.recipientCompany,
+                             recipientTitle: recipient.recipientTitle,
+                             messageContent: computedMessageContent,
                              status: 'PENDING',
                              createdDate: ec.user.nowTimestamp]" />
                 <set field="importedCount" from="importedCount + 1" />
@@ -1319,6 +1466,8 @@
                 <parameter name="recipientHandle" />
                 <parameter name="recipientProfileUrl" />
                 <parameter name="recipientEmail" />
+                <parameter name="recipientCompany" />
+                <parameter name="recipientTitle" />
                 <parameter name="messageContent" />
                 <parameter name="status" />
                 <parameter name="sentDate" />
@@ -1347,6 +1496,8 @@
                     recipientHandle: msg.recipientHandle,
                     recipientProfileUrl: msg.recipientProfileUrl,
                     recipientEmail: msg.recipientEmail,
+                    recipientCompany: msg.recipientCompany,
+                    recipientTitle: msg.recipientTitle,
                     messageContent: msg.messageContent,
                     status: msg.status,
                     sentDate: msg.sentDate ? ec.l10n.format(msg.sentDate, 'yyyy-MM-dd HH:mm:ssZ') : null,
@@ -1376,6 +1527,27 @@
             <script>
                 def result = GeminiAiUtil.generatePlatformMessage(ec, campaignTemplate, platform, actionType)
                 platformMessage = result
+            </script>
+        </actions>
+    </service>
+
+    <!-- AI-polish an already-personalised outreach message draft's tone -->
+    <service verb="polish" noun="OutreachMessage">
+        <description>AI-polish an already-personalised outreach message draft's tone (does not persist).</description>
+        <in-parameters>
+            <parameter name="draftMessage" required="true" type="String" />
+            <parameter name="platform" required="true" type="String" />
+            <parameter name="recipientName" />
+            <parameter name="recipientCompany" />
+            <parameter name="recipientTitle" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="polishedMessage" type="String" />
+        </out-parameters>
+        <actions>
+            <script location="component://growerp/service/GeminiAiUtil.groovy" />
+            <script>
+                polishedMessage = GeminiAiUtil.polishMessage(ec, draftMessage, platform, recipientName, recipientCompany, recipientTitle)
             </script>
         </actions>
     </service>

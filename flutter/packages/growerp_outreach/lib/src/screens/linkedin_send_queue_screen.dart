@@ -53,6 +53,8 @@ class _LinkedInSendQueueScreenState extends State<LinkedInSendQueueScreen> {
   /// messageId whose body is currently loaded into [_bodyController].
   String? _loadedMessageId;
 
+  bool _polishing = false;
+
   @override
   void initState() {
     super.initState();
@@ -116,6 +118,34 @@ class _LinkedInSendQueueScreenState extends State<LinkedInSendQueueScreen> {
         'Message copied — paste it in LinkedIn',
         Colors.green,
       );
+    }
+  }
+
+  Future<void> _polish(OutreachMessage m) async {
+    if (m.messageId == null || _bodyController.text.isEmpty) return;
+    setState(() => _polishing = true);
+    try {
+      final result = await _messageBloc.restClient.polishOutreachMessage(
+        draftMessage: _bodyController.text,
+        platform: m.platform,
+        recipientName: m.recipientName,
+        recipientCompany: m.recipientCompany,
+        recipientTitle: m.recipientTitle,
+      );
+      final polished = result['polishedMessage'];
+      if (polished != null && polished.isNotEmpty) {
+        await _messageBloc.restClient.updateOutreachMessageContent(
+          messageId: m.messageId!,
+          messageContent: polished,
+        );
+        setState(() => _bodyController.text = polished);
+      }
+    } catch (e) {
+      if (mounted) {
+        HelperFunctions.showMessage(context, 'AI polish failed: $e', Colors.red);
+      }
+    } finally {
+      if (mounted) setState(() => _polishing = false);
     }
   }
 
@@ -220,6 +250,19 @@ class _LinkedInSendQueueScreenState extends State<LinkedInSendQueueScreen> {
             m.recipientName ?? 'Unknown',
             style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
+          if ((m.recipientCompany ?? '').isNotEmpty ||
+              (m.recipientTitle ?? '').isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 2),
+              child: Text(
+                [
+                  if ((m.recipientTitle ?? '').isNotEmpty) m.recipientTitle,
+                  if ((m.recipientCompany ?? '').isNotEmpty)
+                    'at ${m.recipientCompany}',
+                ].join(' '),
+                style: TextStyle(color: Theme.of(context).hintColor),
+              ),
+            ),
           if ((m.recipientProfileUrl ?? '').isNotEmpty)
             Padding(
               padding: const EdgeInsets.only(top: 4),
@@ -249,6 +292,18 @@ class _LinkedInSendQueueScreenState extends State<LinkedInSendQueueScreen> {
                 onPressed: () => _copyAndOpen(m),
                 icon: const Icon(Icons.open_in_new),
                 label: const Text('Copy & Open LinkedIn'),
+              ),
+              ElevatedButton.icon(
+                key: const Key('polishMessage'),
+                onPressed: _polishing ? null : () => _polish(m),
+                icon: _polishing
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.auto_awesome),
+                label: const Text('AI Polish'),
               ),
               ElevatedButton.icon(
                 key: const Key('markSentNext'),

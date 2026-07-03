@@ -27,7 +27,7 @@ List<StyledColumn> getCampaignListColumns(BuildContext context) {
     StyledColumn(header: 'Status', flex: 1),
     StyledColumn(header: 'Sent', flex: 1),
     StyledColumn(header: 'Resp', flex: 1),
-    StyledColumn(header: 'Leads', flex: 1),
+    StyledColumn(header: 'Targets', flex: 1),
     StyledColumn(header: 'Platforms', flex: 2),
     StyledColumn(header: '', flex: 1), // Actions
   ];
@@ -200,10 +200,10 @@ List<Widget> getCampaignListRow({
       ),
     );
 
-    // Leads
+    // Targets (total uploaded outreach messages/prospects)
     cells.add(
       Text(
-        campaign.leadsGenerated.toString(),
+        campaign.numSent.toString(),
         key: Key('leads$index'),
         textAlign: TextAlign.center,
       ),

@@ -1398,6 +1398,8 @@ abstract class RestClient {
     @Field() String? recipientProfileUrl,
     @Field() String? recipientHandle,
     @Field() String? recipientEmail,
+    @Field() String? recipientCompany,
+    @Field() String? recipientTitle,
     @Field() required String messageContent,
     @Field() String? status,
   });
@@ -1412,6 +1414,34 @@ abstract class RestClient {
     /// Set when status == 'CONVERTED'; the partyId of the newly created
     /// User(role: lead) that this cold prospect was promoted to.
     @Field() String? convertedPartyId,
+  });
+
+  /// Bulk-import recipients (e.g. a LinkedIn CSV) as PENDING OutreachMessages for
+  /// a campaign. messageContent is auto-personalized server-side from the
+  /// campaign's messageTemplate using {name}/{company}/{title} substitution.
+  @POST("rest/s1/growerp/100/OutreachRecipients")
+  Future<dynamic> importOutreachRecipients({
+    @Field() String? marketingCampaignId,
+    @Field() String? pseudoId,
+    @Field() String? defaultPlatform,
+    @Field() required List<Map<String, dynamic>> recipients,
+  });
+
+  /// Persist an edited/AI-polished PENDING message body.
+  @PATCH("rest/s1/growerp/100/OutreachMessageContent")
+  Future<dynamic> updateOutreachMessageContent({
+    @Field() required String messageId,
+    @Field() required String messageContent,
+  });
+
+  /// AI-polish the tone of an already-personalized message draft (does not persist).
+  @POST("rest/s1/growerp/100/PolishOutreachMessage")
+  Future<Map<String, String>> polishOutreachMessage({
+    @Field() required String draftMessage,
+    @Field() required String platform,
+    @Field() String? recipientName,
+    @Field() String? recipientCompany,
+    @Field() String? recipientTitle,
   });
 
   // Campaign Metrics endpoints

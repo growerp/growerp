@@ -181,7 +181,37 @@ Keep the core message but optimize for the platform's style and constraints.
         
         return callGeminiApi(ec, prompt, [temperature: 0.6, maxOutputTokens: 1024])
     }
-    
+
+    /**
+     * Polish the tone of an already-personalised outreach message draft (e.g. one produced by
+     * {name}/{company}/{title} template substitution) without altering its facts or length.
+     *
+     * @param ec ExecutionContext
+     * @param draftMessage The already-personalised message body to polish
+     * @param platform The target platform (LINKEDIN, EMAIL, etc.)
+     * @param recipientName Optional recipient name for context
+     * @param recipientCompany Optional recipient company for context
+     * @param recipientTitle Optional recipient job title for context
+     * @return The polished message
+     */
+    static String polishMessage(def ec, String draftMessage, String platform,
+            String recipientName = null, String recipientCompany = null, String recipientTitle = null) {
+        def prompt = """
+Improve the tone and flow of the following already-personalized ${platform} outreach message.
+Keep it roughly the same length and keep all specific facts (names, companies, titles) intact.
+Do not add claims that aren't already present. Do not add a greeting/sign-off if the draft doesn't have one.
+
+RECIPIENT: ${recipientName ?: '(unknown)'}${recipientTitle ? ' - ' + recipientTitle : ''}${recipientCompany ? ' at ' + recipientCompany : ''}
+
+DRAFT MESSAGE:
+${draftMessage}
+
+Return ONLY the revised message text, no explanations or markdown.
+"""
+
+        return callGeminiApi(ec, prompt, [temperature: 0.5, maxOutputTokens: 1024])
+    }
+
     /**
      * Get platform-specific requirements for message adaptation.
      */

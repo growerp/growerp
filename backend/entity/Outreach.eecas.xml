@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<eecas xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/entity-eca-3.xsd">
+    <eeca id="OutreachMessageResponded" entity="growerp.marketing.OutreachMessage" on-update="true" get-original-value="true">
+        <condition>
+            <expression>status == 'RESPONDED' &amp;&amp; originalValue?.status != 'RESPONDED'</expression>
+        </condition>
+        <actions>
+            <!-- Run asynchronously so the status update commits instantly -->
+            <service-call name="growerp.100.OutreachServices100.create#OpportunityFromOutreach"
+                in-map="[messageId: messageId]" async="true" />
+        </actions>
+    </eeca>
+</eecas>

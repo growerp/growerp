@@ -26,9 +26,17 @@ import 'package:growerp_models/growerp_models.dart';
 /// When the row has a Company, the backend import#CompanyUsers creates that
 /// company if it does not yet exist (matched by name) and links the person to it.
 class LinkedInLeadImportDialog extends StatefulWidget {
-  const LinkedInLeadImportDialog({super.key, required this.restClient});
+  const LinkedInLeadImportDialog({
+    super.key,
+    required this.restClient,
+    this.campaignId,
+  });
 
   final RestClient restClient;
+
+  /// When set, imported rows are also queued as PENDING [OutreachMessage]s
+  /// for this campaign, personalized from its messageTemplate.
+  final String? campaignId;
 
   @override
   State<LinkedInLeadImportDialog> createState() =>
@@ -82,10 +90,35 @@ class _LinkedInLeadImportDialogState extends State<LinkedInLeadImportDialog> {
       // later as a notification. This call returns immediately.
       await widget.restClient.importCompanyUsers(leads);
 
-      final message = capped
-          ? 'File submitted: ${leads.length} of $total records '
-                '(limited to $_maxLeads per import)'
-          : 'File submitted: ${leads.length} records';
+      final base = capped
+          ? '${leads.length} of $total records (limited to $_maxLeads per import)'
+          : '${leads.length} records';
+      var message = 'Importing $base in the background — '
+          "you'll be notified when it completes.";
+
+      // Also queue the same rows as personalized campaign recipients. Kept in
+      // its own try/catch so a failure here doesn't undo the CRM-lead import.
+      if (widget.campaignId != null) {
+        try {
+          final recipients = leads
+              .map((l) => {
+                    'recipientName': l.name,
+                    'recipientProfileUrl': l.url,
+                    'recipientEmail': l.email,
+                    'recipientCompany': l.company?.name,
+                    'recipientTitle': l.personalTitle,
+                    'platform': 'LINKEDIN',
+                  })
+              .toList();
+          await widget.restClient.importOutreachRecipients(
+            marketingCampaignId: widget.campaignId,
+            recipients: recipients,
+          );
+          message += ' ${leads.length} recipients also queued for this campaign.';
+        } catch (e) {
+          message += ' (Could not queue recipients for this campaign: $e)';
+        }
+      }
 
       if (!mounted) return;
       HelperFunctions.showMessage(context, message, Colors.green);
