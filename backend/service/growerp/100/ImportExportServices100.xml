@@ -480,7 +480,8 @@ along with this software (see the LICENSE.md file). If not, see
         </actions>
     </service>
 
-    <service verb="process" noun="CompanyUserImport" authenticate="anonymous">
+    <service verb="process" noun="CompanyUserImport" authenticate="anonymous"
+            transaction="ignore">
         <description>Background worker: import each company/user row in its own transaction so a
             single bad row does not roll back the batch, then notify the user of the result.</description>
         <in-parameters>
@@ -598,6 +599,36 @@ along with this software (see the LICENSE.md file). If not, see
                         <log level="warn"
                             message="import#CompanyUser: skipping invalid email '${companyUser.email}' for ${companyUser.name}" />
                         <set field="companyUser" from="companyUser + [email: null]" />
+                    </if>
+                    <!-- Drop a url that is not a valid http(s) address (e.g. a leaked
+                         header cell like 'URL') so create#WebAddress does not roll back
+                         the whole row; the lead still imports without the url. -->
+                    <if condition="companyUser.url &amp;&amp; !(companyUser.url.toString() ==~ /(?i)^https?:\/\/[^\s.]+\.[^\s]+$/)">
+                        <log level="warn"
+                            message="import#CompanyUser: skipping invalid url '${companyUser.url}' for ${companyUser.name}" />
+                        <set field="companyUser" from="companyUser + [url: null]" />
+                    </if>
+                    <!-- Keep text fields within their VARCHAR(255) columns so a long value
+                         (e.g. a URL-encoded LinkedIn profile url) never aborts the row.
+                         The url is dropped (a truncated url is useless); names/title truncate. -->
+                    <if condition="companyUser.url &amp;&amp; companyUser.url.toString().length() &gt; 255">
+                        <log level="warn"
+                            message="import#CompanyUser: dropping over-long url (${companyUser.url.toString().length()} chars) for ${companyUser.name}" />
+                        <set field="companyUser" from="companyUser + [url: null]" />
+                    </if>
+                    <if condition="firstName &amp;&amp; firstName.length() &gt; 255">
+                        <set field="firstName" from="firstName.substring(0, 255)" />
+                    </if>
+                    <if condition="lastName &amp;&amp; lastName.length() &gt; 255">
+                        <set field="lastName" from="lastName.substring(0, 255)" />
+                    </if>
+                    <if condition="companyUser.personalTitle &amp;&amp; companyUser.personalTitle.toString().length() &gt; 255">
+                        <set field="companyUser"
+                            from="companyUser + [personalTitle: companyUser.personalTitle.toString().substring(0, 255)]" />
+                    </if>
+                    <if condition="companyUser.company?.name &amp;&amp; companyUser.company.name.toString().length() &gt; 255">
+                        <set field="companyUser.company"
+                            from="companyUser.company + [name: companyUser.company.name.toString().substring(0, 255)]" />
                     </if>
                     <set field="user"
                         from="companyUser + [

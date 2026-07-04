@@ -141,6 +141,8 @@ along with this software (see the LICENSE.md file). If not, see
     <service verb="create" noun="Opportunity">
         <description> Create a Opportunity with a price in a category</description>
         <in-parameters>
+            <parameter name="userPartyId"><description>Optional. Used in async/no-user contexts
+                (e.g. EECA triggers) so get#RelatedCompanyAndOwner can resolve the company.</description></parameter>
             <parameter name="opportunity" type="Map" required="true">
                 <parameter name="opportunityId" />
                 <parameter name="pseudoId" />

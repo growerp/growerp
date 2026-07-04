@@ -19,7 +19,7 @@ The Flutter admin web application had not been built and deployed to the Moqui b
 Ran the build and deployment script:
 ```bash
 cd /home/hans/growerp/flutter/packages/admin
-./build-and-deploy-web.sh
+./build-and-deploy-all.sh
 ```
 
 This script:

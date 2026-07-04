@@ -1,61 +1,50 @@
-<div class="container container-top">
-    <div class="row mt-4">
-        <!-- Breadcrumb -->
-        <div class="col-12 mb-3">
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb" style="background: transparent; padding: 0; margin: 0; font-size: 0.9rem;">
-                    <li class="breadcrumb-item"><a href="/" class="content-breadcrumb-home"><i class="fas fa-home mr-1"></i>Home</a></li>
-                    <li class="breadcrumb-item active content-breadcrumb-active" aria-current="page">Content</li>
-                </ol>
-            </nav>
-        </div>
+<div class="max-w-container mx-auto px-4 md:px-12 pt-24 pb-8">
+    <div class="flex flex-col lg:flex-row gap-10 mt-4">
         <!-- Sidebar Navigation -->
-        <div class="customer-menu col-lg-3 col-md-4 mb-5">
-            <h5 class="content-sidebar-title">
-                <i class="fas fa-book-open mr-2 content-sidebar-icon"></i>Navigation
-            </h5>
+        <aside class="lg:w-72 shrink-0">
+            <div class="l-glass rounded-2xl p-6 lg:sticky lg:top-24">
+                <h5 class="font-display font-semibold text-on-surface mb-4 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary text-[20px]">menu_book</span>Navigation
+                </h5>
 <#list storeInfo.menu1 as topMenu>
     <#if topMenu.title != 'obsidian'>
-            <div class="menu-section mb-3">
-                <span class="modal-text" style="font-size: 1.1rem;">
-                    <a href="/content/${topMenu.path}#${topMenu.anchor}" class="d-flex align-items-center content-sidebar-link">
-                        <i class="fas fa-folder mr-2" style="font-size: 0.9rem;"></i>${topMenu.title}
+                <div class="mb-4">
+                    <a href="/content/${topMenu.path}#${topMenu.anchor}" class="flex items-center gap-2 font-label text-sm font-medium text-on-surface hover:text-primary transition-colors">
+                        <span class="material-symbols-outlined text-primary text-[16px]">folder</span>${topMenu.title}
                     </a>
-                </span>
-                <ul class="customer-orders-ul mt-2">
-                <#list topMenu.items as item>
-                    <li>
-                        <a href="/content/${topMenu.path}#${item.anchor}" class="d-flex align-items-center content-sidebar-link-sub">
-                            <i class="fas fa-chevron-right mr-2 content-sidebar-bullet"></i>
-                            ${item.text}
-                        </a>
-                    </li>
-                </#list>
-                </ul>
-            </div>
+                    <ul class="mt-2 ml-2 space-y-1 border-l border-white/10 pl-3">
+                    <#list topMenu.items as item>
+                        <li>
+                            <a href="/content/${topMenu.path}#${item.anchor}" class="flex items-center gap-2 text-sm text-on-surface-variant hover:text-primary transition-colors">
+                                <span class="material-symbols-outlined text-primary/60 text-[12px]">chevron_right</span>${item.text}
+                            </a>
+                        </li>
+                    </#list>
+                    </ul>
+                </div>
     <#else>
         <#list topMenu.items as item>
-            <ul class="customer-orders-ul">
-            <@showPage item />
-            </ul>
+                <ul class="space-y-1">
+                <@showPage item />
+                </ul>
         </#list>
     </#if>
 </#list>
-        </div>
-        
+            </div>
+        </aside>
+
         <!-- Main Content Area -->
-        <div class="col-lg-8 offset-lg-1 col-md-8 col-12 growerp-content-area">
+        <article class="prose-lumina min-w-0 flex-1">
 
 <#macro showPage page>
     <li>
-        <a href="/content/${page.path}" class="d-flex align-items-center content-sidebar-link-sub">
-            <i class="fas fa-file-alt mr-2 content-sidebar-bullet"></i>${page.title}
+        <a href="/content/${page.path}" class="flex items-center gap-2 text-sm text-on-surface-variant hover:text-primary transition-colors">
+            <span class="material-symbols-outlined text-primary/60 text-[14px]">description</span>${page.title}
         </a>
     </li>
     <#list page.items as item>
-        <ul class="customer-orders-ul ml-3">
+        <ul class="ml-4 space-y-1">
         <@showPage item />
         </ul>
     </#list>
 </#macro>
-

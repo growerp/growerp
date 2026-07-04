@@ -35,7 +35,7 @@ moqui/runtime/component/PopRestStore/screen/store/
 
 ```bash
 cd flutter/packages/admin
-./build-and-deploy-web.sh
+./build-and-deploy-all.sh
 ```
 
 This script will:
@@ -125,7 +125,7 @@ This enables:
    ```
 3. **Build and deploy**:
    ```bash
-   ./build-and-deploy-web.sh
+   ./build-and-deploy-all.sh
    ```
 4. **Restart Moqui** (if needed):
    ```bash

@@ -14,7 +14,7 @@ along with this software (see the LICENSE.md file). If not, see
 -->
 <screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-2.1.xsd"
-    require-authentication="anonymous-view" allow-extra-path="true">
+    require-authentication="anonymous-view" allow-extra-path="true" history="false">
     <parameter name="productId"/>
     <parameter name="addedCorrect"/>
     <parameter name="categoryId"/>

@@ -178,6 +178,32 @@ var storeInfo = ${storeInfoJson};
             // get settings
             JsonSlurper slurper = new JsonSlurper()
             context.putAll(slurper.parseText(style))
+            // Lumina design tokens for the 'modern' template set: defaults below,
+            // overridable per store via a "lumina" object of hex colors in websiteColor.json.
+            // Emitted as "R G B" channel strings so Tailwind opacity modifiers work.
+            Map luminaDefaults = [
+                surface: '#0b1326', surfaceContainerLowest: '#060e20', surfaceContainerLow: '#131b2e',
+                surfaceContainer: '#171f33', surfaceContainerHigh: '#222a3d', surfaceContainerHighest: '#2d3449',
+                onSurface: '#dae2fd', onSurfaceVariant: '#bccac0', primary: '#68dba9', onPrimary: '#003825',
+                primaryContainer: '#25a475', secondary: '#4edea3', tertiary: '#45dfa4', error: '#ffb4ab',
+                outline: '#87948b', outlineVariant: '#3d4a42']
+            Map luminaOverrides = context.lumina instanceof Map ? (Map) context.lumina : [:]
+            Map luminaChannels = [:]
+            luminaDefaults.each { String key, String defaultHex ->
+                String value = (luminaOverrides[key] ?: defaultHex).toString().trim()
+                try {
+                    if (value ==~ /\d+ \d+ \d+/) {
+                        luminaChannels[key] = value
+                    } else {
+                        String hex = value.startsWith('#') ? value.substring(1) : value
+                        luminaChannels[key] = "${Integer.parseInt(hex.substring(0,2),16)} ${Integer.parseInt(hex.substring(2,4),16)} ${Integer.parseInt(hex.substring(4,6),16)}".toString()
+                    }
+                } catch (Exception e) {
+                    String hex = defaultHex.substring(1)
+                    luminaChannels[key] = "${Integer.parseInt(hex.substring(0,2),16)} ${Integer.parseInt(hex.substring(2,4),16)} ${Integer.parseInt(hex.substring(4,6),16)}".toString()
+                }
+            }
+            context.lumina = luminaChannels
             // get target filepath
             newRef = ec.resource.getLocationReference("component://PopRestStore/screen/store/components/styles/${storeInfo.productStore.productStoreId}.css")
             String newFilePath = newRef.getUrl().toExternalForm().substring(5)

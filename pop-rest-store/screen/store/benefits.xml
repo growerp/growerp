@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-2.1.xsd"
-        require-authentication="anonymous-view">
+        require-authentication="anonymous-view" history="false">
 
     <widgets>
         <section name="benefits">
             <widgets>
                 <render-mode><text type="html" location="${template_server_header}"/></render-mode>
-                <render-mode><text type="html" location="component://PopRestStore/template/store/benefits.html.ftl"/></render-mode>
+                <render-mode><text type="html" location="component://PopRestStore/template/store/${templateId}/benefits.html.ftl"/></render-mode>
                 <render-mode><text type="html" location="${template_server_footer}"/></render-mode>
             </widgets>
         </section>

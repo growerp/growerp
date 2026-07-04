@@ -13,7 +13,7 @@ along with this software (see the LICENSE.md file). If not, see
 <http://creativecommons.org/publicdomain/zero/1.0/>.
 -->
 <screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-2.1.xsd"
-        require-authentication="anonymous-view" allow-extra-path="true">
+        require-authentication="anonymous-view" allow-extra-path="true" history="false">
 
     <subscreens always-use-full-path="true"/>
 

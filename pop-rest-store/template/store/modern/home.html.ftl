@@ -1,230 +1,201 @@
-<!-- Hero Section -->
-<div class="growerp-hero">
-    <div class="container">
-        <div class="row align-items-center">
-            <div class="col-lg-6 mb-5 mb-lg-0">
-                <div class="growerp-hero-content text-left">
-                    <h1 class="growerp-hero-title">Run Your Entire Business<br>From One Screen</h1>
-                    <p class="growerp-hero-subtitle" style="margin-left: 0; margin-right: 0;">
-                        Open-source, AI-powered ERP that unifies accounting, inventory, orders, CRM, 
-                        marketing, and more — across Web, Android, iOS, and desktop.
-                    </p>
-                    <div class="growerp-hero-cta" style="justify-content: flex-start;">
-                        <a href="https://admin.growerp.com" class="btn growerp-btn-primary">
-                            <i class="fas fa-rocket mr-2"></i>Start Free Trial
-                        </a>
-                        <a href="/assessmentLanding?landingPageId=ERP_LANDING_PAGE" class="btn growerp-btn-secondary">
-                            <i class="fas fa-clipboard-check mr-2"></i>Take Assessment
-                        </a>
+<#assign isMarketing = storeInfo.productStore.productStoreId == "100000">
+
+<#macro productCard product>
+    <a href="/product/${product.productId}" class="group block l-glass rounded-xl p-3 hover:border-primary/40 transition-all duration-300">
+        <div class="aspect-square rounded-lg overflow-hidden bg-surface-container-high flex items-center justify-center mb-3">
+            <#if product.mediumImageInfo??>
+                <img class="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-300" src="/content/productImage/${product.mediumImageInfo.productContentId}" alt="${product.productName}">
+            <#elseif product.smallImageInfo??>
+                <img class="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-300" src="/content/productImage/${product.smallImageInfo.productContentId}" alt="${product.productName}">
+            <#else>
+                <span class="material-symbols-outlined text-outline text-[48px]">image</span>
+            </#if>
+        </div>
+        <h6 class="text-sm font-medium text-on-surface line-clamp-2 min-h-[2.5rem] mb-1 group-hover:text-primary transition-colors">${product.productName}</h6>
+        <#if product.numberOfRatings??>
+        <div class="flex items-center gap-0.5 mb-1">
+            <#list 1..5 as x>
+                <#if (product.numberOfRatings >= x)>
+                    <span class="material-symbols-outlined icon-fill text-tertiary text-[14px]">star</span>
+                <#else>
+                    <span class="material-symbols-outlined text-tertiary text-[14px]">star</span>
+                </#if>
+            </#list>
+        </div>
+        </#if>
+        <div class="flex items-baseline gap-2">
+            <#if product.price?? && product.price gt 0>
+                <span class="text-primary font-semibold text-base">${ec.l10n.formatCurrency(product.price,product.priceUomId)}</span>
+                <#if product.listPrice?? && product.listPrice gt product.price>
+                    <span class="text-on-surface-variant text-sm line-through">${ec.l10n.formatCurrency(product.listPrice,product.priceUomId)}</span>
+                </#if>
+            <#elseif product.listPrice?? && product.listPrice gt 0>
+                <span class="text-primary font-semibold text-base">${ec.l10n.formatCurrency(product.listPrice,product.priceUomId)}</span>
+            <#else>
+                <span class="text-primary font-semibold text-base">Free</span>
+            </#if>
+        </div>
+    </a>
+</#macro>
+
+<#if isMarketing>
+<!-- ==================== Marketing landing (GrowERP) ==================== -->
+<main class="pt-24 pb-16 relative">
+    <!-- Ambient background glows -->
+    <div class="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
+        <div class="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-primary/5 blur-[120px]"></div>
+        <div class="absolute bottom-[-20%] right-[-10%] w-[40%] h-[40%] rounded-full bg-tertiary/5 blur-[100px]"></div>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="max-w-container mx-auto px-4 md:px-12 min-h-[75vh] flex flex-col justify-center py-16 relative">
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary/10 rounded-full blur-[120px] pointer-events-none -z-10"></div>
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center w-full">
+            <!-- Text Content -->
+            <div class="lg:col-span-5 flex flex-col z-10">
+                <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-container border border-outline-variant/50 w-fit mb-6">
+                    <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+                    <span class="font-label text-xs text-on-surface-variant">v2.0 Open Source Released</span>
+                </div>
+                <h1 class="font-display text-4xl md:text-5xl font-bold tracking-tight leading-tight text-on-surface">
+                    Run Your Entire<br>
+                    <span class="l-gradient-text">Business From One Screen</span>
+                </h1>
+                <p class="text-lg text-on-surface-variant mt-6 max-w-xl leading-relaxed">
+                    The open-source, AI-powered ERP that scales with you. Eliminate data silos, automate workflows, and
+                    gain intelligent insights across your entire organization with unparalleled clarity.
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4 mt-8">
+                    <a href="https://admin.growerp.com" class="bg-primary hover:bg-primary/90 text-on-primary font-label text-sm font-medium px-8 py-4 rounded-lg l-glow transition-all active:scale-95 text-center">
+                        Start Free Trial
+                    </a>
+                    <a href="/assessmentLanding?landingPageId=ERP_LANDING_PAGE" class="l-glass hover:bg-surface-container text-on-surface font-label text-sm font-medium px-8 py-4 rounded-lg transition-all active:scale-95 text-center flex items-center justify-center gap-2">
+                        <span class="material-symbols-outlined text-[20px]">play_circle</span>
+                        View Demo
+                    </a>
+                </div>
+                <p class="text-sm text-on-surface-variant/70 mt-4">No credit card required &bull; 2 weeks free</p>
+            </div>
+
+            <!-- Dashboard Mockup -->
+            <div class="lg:col-span-7 relative z-10">
+                <div class="relative rounded-2xl overflow-hidden border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] bg-surface lg:rotate-1 hover:rotate-0 transition-transform duration-500">
+                    <div class="absolute inset-0 bg-gradient-to-tr from-primary/5 to-transparent mix-blend-overlay z-10 pointer-events-none"></div>
+                    <!-- Browser chrome -->
+                    <div class="h-8 bg-surface-container-highest border-b border-white/5 flex items-center px-4 gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-error"></span>
+                        <span class="w-2.5 h-2.5 rounded-full bg-tertiary"></span>
+                        <span class="w-2.5 h-2.5 rounded-full bg-primary"></span>
                     </div>
-                    <p class="growerp-hero-note text-left">No credit card required &bull; 2 weeks free</p>
-                </div>
-            </div>
-            <div class="col-lg-6">
-                <div class="growerp-hero-image-wrapper">
-                    <img src="https://raw.githubusercontent.com/growerp/growerp/master/flutter/packages/admin/android/fastlane/metadata/android/en-US/images/tenInchScreenshots/Screenshot_main_menu.png" alt="GrowERP Admin Dashboard" class="img-fluid growerp-hero-image" style="border-radius: 12px; box-shadow: 0 20px 40px rgba(0,0,0,0.3); border: 4px solid rgba(255,255,255,0.1);">
+                    <img class="w-full object-cover bg-surface h-auto" src="/assets/dashboard-screenshot.png" alt="GrowERP Admin Dashboard">
                 </div>
             </div>
         </div>
-    </div>
-</div>
+    </section>
 
-<!-- Benefits Section -->
-<div class="growerp-benefits">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-3 col-md-6 mb-4">
-                <div class="growerp-benefit-card">
-                    <div class="growerp-benefit-icon"><i class="fas fa-th-large"></i></div>
-                    <h5>All-in-One Platform</h5>
-                    <p>From quote to paid invoice — dashboard, catalog, orders, inventory, accounting, marketing, and website in one place.</p>
+    <!-- Benefits Bento Grid -->
+    <section id="benefits" class="max-w-container mx-auto px-4 md:px-12 py-24 relative">
+        <div class="text-center mb-16 max-w-2xl mx-auto">
+            <h2 class="font-display text-3xl font-semibold tracking-tight text-on-surface mb-4">Intelligence Engineered for Scale</h2>
+            <p class="text-on-surface-variant">Built on modern architecture to provide unprecedented visibility and control over every facet of your enterprise.</p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div class="l-glass p-8 rounded-2xl flex flex-col gap-4 hover:bg-surface-container-low/60 transition-colors group relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-[40px] group-hover:bg-primary/10 transition-all"></div>
+                <div class="w-12 h-12 rounded-lg bg-surface-container flex items-center justify-center border border-outline-variant/30 text-primary mb-2">
+                    <span class="material-symbols-outlined icon-fill text-[24px]">sync</span>
                 </div>
+                <h3 class="font-display text-xl font-semibold text-on-surface">All-in-One</h3>
+                <p class="text-on-surface-variant leading-relaxed">Your whole business in sync. Connect sales, operations, and finance in a single unified workflow ecosystem.</p>
             </div>
-            <div class="col-lg-3 col-md-6 mb-4">
-                <div class="growerp-benefit-card">
-                    <div class="growerp-benefit-icon"><i class="fas fa-robot"></i></div>
-                    <h5>AI-Powered</h5>
-                    <p>Deploy intelligent agents that automate tasks, personalize outreach, triage leads, and provide predictive insights.</p>
+            <div class="l-glass p-8 rounded-2xl flex flex-col gap-4 hover:bg-surface-container-low/60 transition-colors group relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-tertiary/5 rounded-full blur-[40px] group-hover:bg-tertiary/10 transition-all"></div>
+                <div class="w-12 h-12 rounded-lg bg-surface-container flex items-center justify-center border border-outline-variant/30 text-tertiary mb-2">
+                    <span class="material-symbols-outlined icon-fill text-[24px]">psychology</span>
                 </div>
+                <h3 class="font-display text-xl font-semibold text-on-surface">AI-Powered</h3>
+                <p class="text-on-surface-variant leading-relaxed">Intelligent insights at your fingertips. Predictive analytics and automated reporting out-of-the-box.</p>
             </div>
-            <div class="col-lg-3 col-md-6 mb-4">
-                <div class="growerp-benefit-card">
-                    <div class="growerp-benefit-icon"><i class="fas fa-code-branch"></i></div>
-                    <h5>Open Source</h5>
-                    <p>No vendor lock-in, no licensing fees. Full source code access under CC0 1.0 Universal license.</p>
+            <div class="l-glass p-8 rounded-2xl flex flex-col gap-4 hover:bg-surface-container-low/60 transition-colors group relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-secondary/5 rounded-full blur-[40px] group-hover:bg-secondary/10 transition-all"></div>
+                <div class="w-12 h-12 rounded-lg bg-surface-container flex items-center justify-center border border-outline-variant/30 text-secondary mb-2">
+                    <span class="material-symbols-outlined icon-fill text-[24px]">code</span>
                 </div>
+                <h3 class="font-display text-xl font-semibold text-on-surface">Open Source</h3>
+                <p class="text-on-surface-variant leading-relaxed">Full control and transparency. Inspect the code, customize modules, and truly own your infrastructure.</p>
             </div>
-            <div class="col-lg-3 col-md-6 mb-4">
-                <div class="growerp-benefit-card">
-                    <div class="growerp-benefit-icon"><i class="fas fa-mobile-alt"></i></div>
-                    <h5>Run Anywhere</h5>
-                    <p>One codebase for Web, Android, iOS, Mac, Linux, and Windows. Your data syncs across all devices.</p>
+            <div class="l-glass p-8 rounded-2xl flex flex-col gap-4 hover:bg-surface-container-low/60 transition-colors group relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-[40px] group-hover:bg-primary/10 transition-all"></div>
+                <div class="w-12 h-12 rounded-lg bg-surface-container flex items-center justify-center border border-outline-variant/30 text-primary mb-2">
+                    <span class="material-symbols-outlined icon-fill text-[24px]">cloud_done</span>
                 </div>
+                <h3 class="font-display text-xl font-semibold text-on-surface">Run Anywhere</h3>
+                <p class="text-on-surface-variant leading-relaxed">Cloud or on-premise flexibility. Deploy on our secure managed cloud or your own private servers instantly.</p>
             </div>
         </div>
-    </div>
-</div>
+    </section>
+</main>
 
-<!-- Applications Showcase -->
-<div class="growerp-apps">
-    <div class="container">
-        <div class="text-center mb-5">
-            <h2 class="growerp-section-title">Purpose-Built Applications</h2>
-            <p class="growerp-section-subtitle">Choose the application that fits your industry</p>
+<#else>
+<!-- ==================== Commerce home ==================== -->
+<main class="pt-24 pb-8 max-w-container mx-auto px-4 md:px-12">
+    <#-- This Week's Deals Section -->
+    <#if promoProductList?has_content>
+        <div class="mb-6 mt-8">
+            <h2 class="font-display text-2xl font-semibold text-on-surface flex items-center gap-2">
+                <span class="material-symbols-outlined icon-fill text-primary text-[28px]">local_fire_department</span>
+                This Week's Deals
+            </h2>
+            <p class="text-on-surface-variant mt-1">Don't miss out on these exclusive offers</p>
         </div>
-        <div class="row">
-            <div class="col-lg-4 col-md-6 mb-4">
-                <a href="https://admin.growerp.com" class="growerp-app-card" target="_blank">
-                    <div class="growerp-app-icon"><i class="fas fa-briefcase"></i></div>
-                    <h5>Admin ERP</h5>
-                    <p>Complete business management with accounting, inventory, orders, CRM, marketing, AI agents, and generated website.</p>
-                    <span class="growerp-app-link">Try it free <i class="fas fa-arrow-right ml-1"></i></span>
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+            <#list promoProductList as product>
+                <#if product?index < 4>
+                    <@productCard product=product/>
+                </#if>
+            </#list>
+        </div>
+        <#if promoProductList?size gt 4>
+        <div class="text-center mt-6 mb-4">
+            <#if (storeInfo.categoryByType.PsctPromotions.productCategoryId)??>
+                <a href="/category/${storeInfo.categoryByType.PsctPromotions.productCategoryId}" class="inline-flex items-center gap-2 border border-primary/50 text-primary hover:bg-primary/10 font-label text-sm font-medium px-6 py-3 rounded-lg transition-colors">
+                    View All Deals <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
                 </a>
-            </div>
-            <div class="col-lg-4 col-md-6 mb-4">
-                <a href="https://hotel.growerp.org" class="growerp-app-card" target="_blank">
-                    <div class="growerp-app-icon"><i class="fas fa-hotel"></i></div>
-                    <h5>Hotel</h5>
-                    <p>Room management, visual reservation calendar, guest services, housekeeping, and integrated billing.</p>
-                    <span class="growerp-app-link">Try it free <i class="fas fa-arrow-right ml-1"></i></span>
+            </#if>
+        </div>
+        </#if>
+    </#if>
+
+    <#-- Separator -->
+    <#if promoProductList?has_content && featureProductList?has_content>
+        <hr class="my-10 border-white/10">
+    </#if>
+
+    <#-- Featured Products Section -->
+    <#if featureProductList?has_content>
+        <div class="mb-6 mt-8">
+            <h2 class="font-display text-2xl font-semibold text-on-surface flex items-center gap-2">
+                <span class="material-symbols-outlined icon-fill text-tertiary text-[28px]">star</span>
+                Featured Products
+            </h2>
+            <p class="text-on-surface-variant mt-1">Handpicked selections just for you</p>
+        </div>
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+            <#list featureProductList as product>
+                <#if product?index < 4>
+                    <@productCard product=product/>
+                </#if>
+            </#list>
+        </div>
+        <#if featureProductList?size gt 4>
+        <div class="text-center mt-6 mb-4">
+            <#if (storeInfo.categoryByType.PsctFeatured.productCategoryId)??>
+                <a href="/category/${storeInfo.categoryByType.PsctFeatured.productCategoryId}" class="inline-flex items-center gap-2 border border-primary/50 text-primary hover:bg-primary/10 font-label text-sm font-medium px-6 py-3 rounded-lg transition-colors">
+                    View All Featured <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
                 </a>
-            </div>
-            <div class="col-lg-4 col-md-6 mb-4">
-                <a href="https://freelance.growerp.org" class="growerp-app-card" target="_blank">
-                    <div class="growerp-app-icon"><i class="fas fa-laptop-code"></i></div>
-                    <h5>Freelance</h5>
-                    <p>Client management, time tracking, project organization, invoicing, and activity monitoring.</p>
-                    <span class="growerp-app-link">Try it free <i class="fas fa-arrow-right ml-1"></i></span>
-                </a>
-            </div>
-            <div class="col-lg-4 col-md-6 mb-4">
-                <div class="growerp-app-card">
-                    <div class="growerp-app-icon"><i class="fas fa-graduation-cap"></i></div>
-                    <h5>eLearner</h5>
-                    <p>Course enrollment, learning progress, content delivery, and instructor management.</p>
-                    <span class="growerp-app-link growerp-coming-soon">Coming soon</span>
-                </div>
-            </div>
-            <div class="col-lg-4 col-md-6 mb-4">
-                <div class="growerp-app-card">
-                    <div class="growerp-app-icon"><i class="fas fa-heartbeat"></i></div>
-                    <h5>Health</h5>
-                    <p>Patient management, appointment scheduling, health records, and billing integration.</p>
-                    <span class="growerp-app-link growerp-coming-soon">Coming soon</span>
-                </div>
-            </div>
-            <div class="col-lg-4 col-md-6 mb-4">
-                <div class="growerp-app-card">
-                    <div class="growerp-app-icon"><i class="fas fa-headset"></i></div>
-                    <h5>Support</h5>
-                    <p>Ticket management, customer communication, issue tracking, and performance reporting.</p>
-                    <span class="growerp-app-link growerp-coming-soon">Coming soon</span>
-                </div>
-            </div>
+            </#if>
         </div>
-    </div>
-</div>
-
-<!-- Stats Bar -->
-<div class="growerp-stats">
-    <div class="container">
-        <div class="row text-center">
-            <div class="col-md-3 col-6 mb-3">
-                <div class="growerp-stat-number">6+</div>
-                <div class="growerp-stat-label">Platforms</div>
-            </div>
-            <div class="col-md-3 col-6 mb-3">
-                <div class="growerp-stat-number">15+</div>
-                <div class="growerp-stat-label">Modules</div>
-            </div>
-            <div class="col-md-3 col-6 mb-3">
-                <div class="growerp-stat-number">100%</div>
-                <div class="growerp-stat-label">Open Source</div>
-            </div>
-            <div class="col-md-3 col-6 mb-3">
-                <div class="growerp-stat-number">CC0</div>
-                <div class="growerp-stat-label">License</div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Testimonials Section -->
-<div class="growerp-testimonials py-5 bg-light">
-    <div class="container">
-        <div class="text-center mb-5">
-            <h2 class="growerp-section-title">What Our Users Say</h2>
-            <p class="growerp-section-subtitle">Real businesses growing with GrowERP</p>
-        </div>
-        <div class="row">
-            <div class="col-md-4 mb-4">
-                <div class="card h-100 border-0 shadow-sm" style="border-radius: 12px; padding: 1.5rem;">
-                    <div class="mb-3 text-warning">
-                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
-                    </div>
-                    <p class="card-text mb-4" style="font-style: italic; color: #4a5568;">"Since switching to GrowERP, we've finally been able to connect our inventory directly to our accounting. The AI agents alone save us 10 hours a week in lead follow-ups. It's transformed how we work."</p>
-                    <div class="d-flex align-items-center mt-auto">
-                        <div class="bg-primary text-white rounded-circle d-flex justify-content-center align-items-center mr-3" style="width: 48px; height: 48px; font-weight: bold;">JD</div>
-                        <div>
-                            <h6 class="mb-0 font-weight-bold">James Davies</h6>
-                            <small class="text-muted">Operations Director, Retail Tech</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4 mb-4">
-                <div class="card h-100 border-0 shadow-sm" style="border-radius: 12px; padding: 1.5rem;">
-                    <div class="mb-3 text-warning">
-                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
-                    </div>
-                    <p class="card-text mb-4" style="font-style: italic; color: #4a5568;">"The fact that it's open source was the selling point, but the Flutter multi-platform support is what kept us. Being able to check live sales data from my phone while traveling is invaluable."</p>
-                    <div class="d-flex align-items-center mt-auto">
-                        <div class="bg-success text-white rounded-circle d-flex justify-content-center align-items-center mr-3" style="width: 48px; height: 48px; font-weight: bold;">SM</div>
-                        <div>
-                            <h6 class="mb-0 font-weight-bold">Sarah Martinez</h6>
-                            <small class="text-muted">Founder, EcoGoods</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4 mb-4">
-                <div class="card h-100 border-0 shadow-sm" style="border-radius: 12px; padding: 1.5rem;">
-                    <div class="mb-3 text-warning">
-                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
-                    </div>
-                    <p class="card-text mb-4" style="font-style: italic; color: #4a5568;">"We were using three different tools for CRM, projects, and invoicing. The Freelance app unified everything instantly. Best of all, I own my data and don't pay per-user license fees."</p>
-                    <div class="d-flex align-items-center mt-auto">
-                        <div class="bg-info text-white rounded-circle d-flex justify-content-center align-items-center mr-3" style="width: 48px; height: 48px; font-weight: bold;">TC</div>
-                        <div>
-                            <h6 class="mb-0 font-weight-bold">Tom Chen</h6>
-                            <small class="text-muted">Digital Agency Owner</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- CTA Section -->
-<div class="growerp-cta-section">
-    <div class="container text-center">
-        <h2 class="growerp-cta-title">Ready to simplify your business?</h2>
-        <p class="growerp-cta-text">Start your free 2-week trial today. No credit card required.</p>
-        <div class="growerp-cta-buttons">
-            <a href="https://admin.growerp.com" class="btn growerp-btn-primary">
-                <i class="fas fa-rocket mr-2"></i>Start Free Trial
-            </a>
-            <a href="/pricing" class="btn growerp-btn-outline">
-                View Pricing
-            </a>
-        </div>
-        <div class="growerp-platform-links mt-4">
-            <span class="growerp-platform-label">Also available on:</span>
-            <a href="https://play.google.com/store/apps/details?id=org.growerp.admin" target="_blank" title="Google Play"><i class="fab fa-google-play"></i></a>
-            <a href="https://apps.apple.com/us/app/growerp-admin-open-source/id1545521755" target="_blank" title="App Store"><i class="fab fa-app-store"></i></a>
-            <a href="https://snapcraft.io/growerp-admin" target="_blank" title="Snap Store"><i class="fab fa-linux"></i></a>
-            <a href="https://apps.microsoft.com/detail/9nwx6kftjnql" target="_blank" title="Microsoft Store"><i class="fab fa-windows"></i></a>
-        </div>
-    </div>
-</div>
+        </#if>
+    </#if>
+</main>
+</#if>

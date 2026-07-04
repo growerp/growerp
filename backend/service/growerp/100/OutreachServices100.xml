@@ -609,7 +609,8 @@
     <!-- ========================================================= -->
 
     <service verb="create" noun="OpportunityFromOutreach">
-        <description>Create a Sales Opportunity from a responded OutreachMessage.</description>
+        <description>Create a Sales Opportunity from a responded OutreachMessage.
+            Delegates to the standard CRM create#Opportunity service.</description>
         <in-parameters>
             <parameter name="messageId" required="true" />
         </in-parameters>
@@ -627,12 +628,42 @@
                 <log level="info" message="Message ${messageId} has no campaign linked. Cannot create opportunity." />
                 <return />
             </if>
-            
+
             <set field="marketingCampaignId" from="message.marketingCampaignId" />
-            
-            <!-- Lookup or create a person -->
+
+            <!-- Get campaign to resolve ownerPartyId and a valid userPartyId
+                 (EECA runs async so ec.user is empty) -->
+            <entity-find-one entity-name="mantle.marketing.campaign.MarketingCampaign" value-field="campaign">
+                <field-map field-name="marketingCampaignId" />
+            </entity-find-one>
+            <if condition="!campaign?.ownerPartyId">
+                <log level="warn" message="Campaign ${marketingCampaignId} has no ownerPartyId. Cannot create opportunity." />
+                <return />
+            </if>
+
+            <!-- Resolve campaign creator's partyId so get#RelatedCompanyAndOwner works -->
+            <if condition="campaign.createdByUserLogin">
+                <entity-find-one entity-name="moqui.security.UserAccount" value-field="creatorAccount">
+                    <field-map field-name="userId" from="campaign.createdByUserLogin" />
+                </entity-find-one>
+                <set field="userPartyId" from="creatorAccount?.partyId" />
+            </if>
+            <if condition="!userPartyId">
+                <!-- Fallback: find any user that belongs to this owner -->
+                <entity-find entity-name="mantle.party.Party" list="ownerParties" limit="1">
+                    <econdition field-name="ownerPartyId" from="campaign.ownerPartyId" />
+                </entity-find>
+                <set field="userPartyId" from="ownerParties ? ownerParties[0].partyId : null" />
+            </if>
+            <if condition="!userPartyId">
+                <log level="warn" message="Cannot resolve a userPartyId for campaign ${marketingCampaignId}. Cannot create opportunity." />
+                <return />
+            </if>
+
+            <!-- Lookup or create prospect person -->
             <set field="partyId" from="null" />
-            
+
+            <!-- 1. Try email lookup -->
             <if condition="message.recipientEmail">
                 <entity-find entity-name="mantle.party.contact.PartyContactMechInfo" list="emailPcmList">
                     <econdition field-name="infoString" from="message.recipientEmail" />
@@ -642,49 +673,55 @@
                     <set field="partyId" from="emailPcmList[0].partyId" />
                 </if>
             </if>
-            
-            <!-- Fallback to create person -->
+
+            <!-- 2. Try name lookup (scoped to same owner to avoid cross-tenant matches) -->
+            <set field="firstName" from="message.recipientName ? message.recipientName.split(' ')[0] : 'Unknown'" />
+            <set field="lastName" from="message.recipientName &amp;&amp; message.recipientName.contains(' ') ? message.recipientName.substring(message.recipientName.indexOf(' ') + 1) : 'Lead'" />
             <if condition="!partyId">
-                <set field="firstName" from="message.recipientName ? message.recipientName.split(' ')[0] : 'Unknown'" />
-                <set field="lastName" from="message.recipientName &amp;&amp; message.recipientName.contains(' ') ? message.recipientName.substring(message.recipientName.indexOf(' ') + 1) : 'Lead'" />
-                <service-call name="create#mantle.party.Person" out-map="personOut"
-                    in-map="[firstName: firstName, lastName: lastName]" />
-                <set field="partyId" from="personOut.partyId" />
-                
-                <!-- Create email contact mech if available -->
-                <if condition="message.recipientEmail">
-                    <service-call name="mantle.party.ContactServices.create#EmailAddress"
-                        in-map="[partyId: partyId, emailAddress: message.recipientEmail, contactMechPurposeId: 'EmailPrimary']" />
+                <entity-find entity-name="mantle.party.PartyDetail" list="nameMatchList" limit="1">
+                    <econdition field-name="firstName" />
+                    <econdition field-name="lastName" />
+                    <econdition field-name="ownerPartyId" from="campaign.ownerPartyId" />
+                    <econdition field-name="partyTypeEnumId" value="PtyPerson" />
+                </entity-find>
+                <if condition="nameMatchList">
+                    <set field="partyId" from="nameMatchList[0].partyId" />
                 </if>
-                <!-- Create Prospect Role -->
-                <service-call name="create#mantle.party.PartyRole"
-                    in-map="[partyId: partyId, roleTypeId: 'Prospect']" />
             </if>
-            
-            <!-- Deduplicate: Check if a SalesOpportunity already exists for this campaign and party -->
+
+            <!-- 3. Last resort: create person -->
+            <if condition="!partyId">
+                <service-call name="growerp.100.PartyServices100.create#User" out-map="userOut"
+                    in-map="[ownerPartyId: campaign.ownerPartyId,
+                             user: [firstName: firstName, lastName: lastName, role: 'Prospect', email: message.recipientEmail]]" />
+                <set field="partyId" from="userOut.user.partyId" />
+            </if>
+
+            <!-- Deduplicate: skip if opportunity already exists for this campaign + party -->
             <entity-find entity-name="mantle.sales.opportunity.SalesOpportunity" list="existingOppList">
                 <econdition field-name="marketingCampaignId" from="marketingCampaignId" />
                 <econdition field-name="accountPartyId" from="partyId" />
             </entity-find>
-            
+
             <if condition="existingOppList">
                 <log level="info" message="SalesOpportunity already exists for campaign ${marketingCampaignId} and party ${partyId}. Skipping creation." />
                 <set field="salesOpportunityId" from="existingOppList[0].salesOpportunityId" />
                 <return />
             </if>
-            
-            <!-- Create Sales Opportunity -->
+
+            <!-- Delegate to the standard CRM create#Opportunity service.
+                 userPartyId is in context so get#RelatedCompanyAndOwner picks it up. -->
             <set field="oppName" from="message.recipientName ? 'Outreach Lead: ' + message.recipientName : 'Outreach Lead'" />
-            <service-call name="create#mantle.sales.opportunity.SalesOpportunity" out-map="oppOut"
-                in-map="[
-                    marketingCampaignId: marketingCampaignId,
-                    accountPartyId: partyId,
-                    opportunityName: oppName,
-                    opportunityStageId: 'Qualification',
-                    description: 'Generated from OutreachMessage ' + messageId
-                ]" />
-            <set field="salesOpportunityId" from="oppOut.salesOpportunityId" />
-            <log level="info" message="Created SalesOpportunity ${salesOpportunityId} for message ${messageId}" />
+            <service-call name="growerp.100.CrmServices100.create#Opportunity" out-map="crmOut"
+                in-map="[userPartyId: userPartyId,
+                         opportunity: [
+                             opportunityName: oppName,
+                             stageId: 'Qualification',
+                             description: 'Generated from OutreachMessage ' + messageId,
+                             employeeUser: [partyId: partyId]
+                         ]]" />
+            <set field="salesOpportunityId" from="crmOut.opportunity?.opportunityId" />
+            <log level="info" message="Created SalesOpportunity ${salesOpportunityId} for message ${messageId} via CRM service" />
         </actions>
     </service>
 

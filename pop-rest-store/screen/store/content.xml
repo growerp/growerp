@@ -14,7 +14,7 @@ along with this software (see the LICENSE.md file). If not, see
 -->
 <screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-2.1.xsd"
-    require-authentication="anonymous-view" allow-extra-path="true">
+    require-authentication="anonymous-view" allow-extra-path="true" history="false">
 
     <transition name="attachment" read-only="true"><actions>
         <set field="extraPathNameList" from="new ArrayList(sri.screenUrlInfo.extraPathNameList)"/>
@@ -171,7 +171,7 @@ along with this software (see the LICENSE.md file). If not, see
         <render-mode><text type="html" location="${template_server_header}"/></render-mode>
         <section name="PageTextSection" condition="pageText">
             <widgets>
-                <render-mode><text type="html" location="component://PopRestStore/template/store/content1.html.ftl"/></render-mode>
+                <render-mode><text type="html" location="component://PopRestStore/template/store/${templateId}/content1.html.ftl"/></render-mode>
                 <section name="MarkdownHtmlSection" condition="markdownHtml">
                     <widgets>
                         <render-mode><text type="html">${markdownHtml!}</text></render-mode>
@@ -181,10 +181,10 @@ along with this software (see the LICENSE.md file). If not, see
                         <render-mode><text type="html" location="${location}"/></render-mode>
                     </fail-widgets>
                 </section>
-                <render-mode><text type="html" location="component://PopRestStore/template/store/content2.html.ftl"/></render-mode>
+                <render-mode><text type="html" location="component://PopRestStore/template/store/${templateId}/content2.html.ftl"/></render-mode>
             </widgets>
             <fail-widgets>
-                <render-mode><text type="html" location="component://PopRestStore/template/store/error.html.ftl"/></render-mode>
+                <render-mode><text type="html" location="component://PopRestStore/template/store/${templateId}/error.html.ftl"/></render-mode>
             </fail-widgets>
         </section>
         <render-mode><text type="html" location="${template_server_footer}"/></render-mode>

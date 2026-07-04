@@ -528,11 +528,16 @@ class WebsiteDialogState extends State<WebsiteDialog> {
                   const SizedBox(height: 8),
                   DropdownButtonFormField<String>(
                     key: const Key('templateId'),
-                    decoration: const InputDecoration(labelText: 'Website Template'),
-                    value: _templateId ?? state.website!.templateId,
+                    decoration: const InputDecoration(
+                      labelText: 'Website Template',
+                    ),
+                    initialValue: _templateId ?? state.website!.templateId,
                     items: const [
                       DropdownMenuItem(value: 'legacy', child: Text('Legacy')),
-                      DropdownMenuItem(value: 'modern', child: Text('Modern Tailwind')),
+                      DropdownMenuItem(
+                        value: 'modern',
+                        child: Text('Modern Tailwind'),
+                      ),
                     ],
                     onChanged: (String? newValue) {
                       setState(() {

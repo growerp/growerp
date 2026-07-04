@@ -13,7 +13,7 @@ along with this software (see the LICENSE.md file). If not, see
 <http://creativecommons.org/publicdomain/zero/1.0/>.
 -->
 <screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-2.1.xsd"
-        require-authentication="anonymous-view">
+        require-authentication="anonymous-view" history="false">
     <pre-actions>
          <set field="star" from="5"/>
          <service-call name="popstore.StoreServices.get#ProductStoreIdFromHostName" in-map="[
@@ -130,9 +130,9 @@ along with this software (see the LICENSE.md file). If not, see
                 <render-mode><text type="html" location="${template_server_header}"/></render-mode>
                 <section name="HomeContentSection" condition="!promoProductList &amp;&amp; !featureProductList &amp;&amp; productStoreId != '100000'">
                     <widgets>
-                        <render-mode><text type="html" location="component://PopRestStore/template/store/content1.html.ftl"/></render-mode>
+                        <render-mode><text type="html" location="component://PopRestStore/template/store/${templateId}/content1.html.ftl"/></render-mode>
                         <render-mode><text type="html" location="${homeLocation}"/></render-mode>
-                        <render-mode><text type="html" location="component://PopRestStore/template/store/content2.html.ftl"/></render-mode>
+                        <render-mode><text type="html" location="component://PopRestStore/template/store/${templateId}/content2.html.ftl"/></render-mode>
                     </widgets>
                 </section>
                 <render-mode><text type="html" location="${template_server_home}"/></render-mode>

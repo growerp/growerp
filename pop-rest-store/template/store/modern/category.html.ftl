@@ -1,185 +1,109 @@
-<div class="container" style="padding-top: 1.5rem;">
+<div class="max-w-container mx-auto px-4 md:px-12 pt-24 pb-8">
     <!-- Breadcrumb Navigation -->
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb" style="background: none; padding: 0; margin-bottom: 1.5rem;">
-            <li class="breadcrumb-item">
-                <a href="/" class="customer-link" style="color: var(--primary-600);">
-                    <i class="fas fa-home mr-1"></i>Home
+    <nav aria-label="breadcrumb" class="mb-6">
+        <ol class="flex items-center gap-2 text-sm">
+            <li>
+                <a href="/" class="flex items-center gap-1 text-primary hover:text-primary/80 transition-colors">
+                    <span class="material-symbols-outlined text-[16px]">home</span>Home
                 </a>
             </li>
-            <li class="breadcrumb-item active" aria-current="page" style="color: var(--neutral-500);">
-                ${category.categoryName}
-            </li>
+            <li class="text-outline">/</li>
+            <li class="text-on-surface-variant" aria-current="page">${category.categoryName}</li>
         </ol>
     </nav>
-    
-    <div class="row">
+
+    <div class="flex flex-col md:flex-row gap-8">
         <!-- Sidebar Filters -->
-        <div class="col-lg-3 col-md-4 col-12 mb-4">
-            <div class="customer-menu" style="position: sticky; top: 100px;">
-                <h5 style="font-family: 'Outfit', sans-serif; font-weight: 600; color: var(--neutral-800); margin-bottom: 1.25rem;">
-                    <i class="fas fa-filter mr-2" style="color: var(--primary-500);"></i>Shop By
-                </h5>
-                
-                <ul class="deals-ul" style="border-left: 2px solid var(--neutral-200); padding-left: 1rem;">
-                    <#if (storeInfo.categoryByType.PsctSearch.productCategoryId)??>
-                        <li class="mb-2">
-                            <a href="/category/${storeInfo.categoryByType.PsctSearch.productCategoryId}" 
-                                class="d-flex align-items-center <#if storeInfo.categoryByType.PsctSearch.productCategoryId == categoryId>active-category</#if>" 
-                                style="<#if storeInfo.categoryByType.PsctSearch.productCategoryId == categoryId>color: var(--primary-600); font-weight: 600;<#else>color: var(--neutral-600);</#if>">
-                                <i class="fas fa-th mr-2" style="width: 18px;"></i>All Products
-                            </a>
-                        </li>
-                    </#if>
-                    <#if (storeInfo.categoryByType.PsctPromotions.productCategoryId)??>
-                        <li class="mb-2">
-                            <a href="/category/${storeInfo.categoryByType.PsctPromotions.productCategoryId}" 
-                                class="d-flex align-items-center <#if storeInfo.categoryByType.PsctPromotions.productCategoryId == categoryId>active-category</#if>"
-                                style="<#if storeInfo.categoryByType.PsctPromotions.productCategoryId == categoryId>color: var(--primary-600); font-weight: 600;<#else>color: var(--neutral-600);</#if>">
-                                <i class="fas fa-fire mr-2" style="width: 18px; color: var(--accent-500);"></i>Deals
-                            </a>
-                        </li>
-                    </#if>
-                    <#if (storeInfo.categoryByType.PsctNewProducts.productCategoryId)??>
-                        <li class="mb-2">
-                            <a href="/category/${storeInfo.categoryByType.PsctNewProducts.productCategoryId}" 
-                                class="d-flex align-items-center <#if storeInfo.categoryByType.PsctNewProducts.productCategoryId == categoryId>active-category</#if>"
-                                style="<#if storeInfo.categoryByType.PsctNewProducts.productCategoryId == categoryId>color: var(--primary-600); font-weight: 600;<#else>color: var(--neutral-600);</#if>">
-                                <i class="fas fa-tag mr-2" style="width: 18px; color: var(--success);"></i>New Arrivals
-                            </a>
-                        </li>
-                    </#if>
-                    <#if (storeInfo.categoryByType.PsctFeatured.productCategoryId)??>
-                        <li class="mb-2">
-                            <a href="/category/${storeInfo.categoryByType.PsctFeatured.productCategoryId}" 
-                                class="d-flex align-items-center <#if storeInfo.categoryByType.PsctFeatured.productCategoryId == categoryId>active-category</#if>"
-                                style="<#if storeInfo.categoryByType.PsctFeatured.productCategoryId == categoryId>color: var(--primary-600); font-weight: 600;<#else>color: var(--neutral-600);</#if>">
-                                <i class="fas fa-star mr-2" style="width: 18px; color: var(--gold);"></i>Best Sellers
-                            </a>
-                        </li>
-                    </#if>
-                </ul>
-                
-                <hr style="margin: 1.25rem 0; border-color: var(--neutral-200);">
-                
-                <h6 style="font-weight: 600; color: var(--neutral-500); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px; margin-bottom: 1rem;">
-                    Categories
-                </h6>
-                <ul class="deals-ul" style="padding-left: 0;">
-                    <#list browseRootCategoryInfo.subCategoryList as cat>
-                        <li class="mb-2">
-                            <a href="/category/${cat.productCategoryId}" 
-                                class="d-flex align-items-center"
-                                style="<#if cat.productCategoryId == categoryId>color: var(--primary-600); font-weight: 600;<#else>color: var(--neutral-600);</#if> transition: all 0.2s ease;">
-                                <i class="fas fa-chevron-right mr-2" style="font-size: 0.7rem; color: var(--primary-400);"></i>
-                                ${cat.categoryName}
-                            </a>
-                        </li>
-                    </#list>
-                </ul>
-            </div>
-        </div>
-        
-        <!-- Product Grid -->
-        <div class="col-lg-9 col-md-8 col-12">
-            <!-- Category Header -->
-            <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap">
-                <h1 class="customer-orders-title mb-2" style="font-size: 2rem;">${category.categoryName}</h1>
-            </div>
-            
-            <!-- Results Bar -->
-            <div class="deals-sellers mb-4" style="padding: 1rem 1.5rem; border-radius: var(--radius-md);">
-                <div class="d-flex justify-content-between align-items-center">
-                    <span class="deals-sortby-text">
-                        <i class="fas fa-box-open mr-2" style="color: var(--primary-500);"></i>
-                        <strong>${products.productListCount!0}</strong> product<#if (products.productListCount!0) != 1>s</#if> found
-                    </span>
+        <aside class="md:w-64 shrink-0">
+            <details class="md:hidden l-glass rounded-xl mb-4" open>
+                <summary class="px-4 py-3 font-display font-semibold text-on-surface cursor-pointer flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary text-[20px]">filter_list</span>Shop By
+                </summary>
+                <div class="px-4 pb-4">
+                    <@sidebarLinks/>
                 </div>
+            </details>
+            <div class="hidden md:block l-glass rounded-2xl p-6 sticky top-24">
+                <h5 class="font-display font-semibold text-on-surface mb-4 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary text-[20px]">filter_list</span>Shop By
+                </h5>
+                <@sidebarLinks/>
             </div>
-            
-            <!-- Product Grid -->
-            <div class="row">
-                <#if products?? && products.productList?has_content>
+        </aside>
+
+        <!-- Product Grid -->
+        <div class="flex-1 min-w-0">
+            <h1 class="font-display text-3xl font-bold text-on-surface mb-4">${category.categoryName}</h1>
+
+            <!-- Results Bar -->
+            <div class="l-glass rounded-xl px-5 py-3 mb-6 flex items-center gap-2 text-sm text-on-surface-variant">
+                <span class="material-symbols-outlined text-primary text-[18px]">package_2</span>
+                <strong class="text-on-surface">${products.productListCount!0}</strong> product<#if (products.productListCount!0) != 1>s</#if> found
+            </div>
+
+            <#if products?? && products.productList?has_content>
+                <div class="grid grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                     <#list products.productList as localProd>
-                        <div class="col-lg-4 col-md-6 col-6 mb-4">
-                            <a href="/product/${localProd.productId}" class="category-product">
-                                <figure class="figure" style="margin: 0;">
-                                    <!-- Product Image -->
-                                    <div class="product-image-wrapper" style="overflow: hidden; border-radius: var(--radius-md); background: #fff;">
-                                        <#if localProd.mediumImageInfo?? || localProd.smallImageInfo??>
-                                            <#assign img = localProd.smallImageInfo! localProd.mediumImageInfo>
-                                            <img class="figure-img img-fluid w-100"
-                                                src="/content/productImage/${img.productContentId}"
-                                                alt="${localProd.productName}"
-                                                style="aspect-ratio: 1; object-fit: cover;">
-                                        <#else>
-                                            <div class="placeholder-image d-flex align-items-center justify-content-center" 
-                                                style="aspect-ratio: 1; background: var(--neutral-100);">
-                                                <i class="fas fa-image fa-3x" style="color: var(--neutral-300);"></i>
-                                            </div>
-                                        </#if>
-                                    </div>
-                                    
-                                    <!-- Product Info -->
-                                    <figcaption class="text-left title-product-text figure-caption mt-3" style="min-height: 48px;">
-                                        ${localProd.productName}
-                                    </figcaption>
-                                    
-                                    <!-- Price -->
-                                    <figcaption class="text-left figure-caption mt-2">
-                                        <#if localProd.price?? && localProd.price gt 0>
-                                            <span class="product-price-text">${ec.l10n.formatCurrency(localProd.price, localProd.priceUomId)}</span>
-                                            <#if localProd.listPrice?? && localProd.listPrice gt localProd.price>
-                                                <span class="product-last-price ml-2">
-                                                    <del>${ec.l10n.formatCurrency(localProd.listPrice, localProd.priceUomId)}</del>
-                                                </span>
-                                            </#if>
-                                        <#elseif localProd.listPrice?? && localProd.listPrice gt 0>
-                                            <span class="product-price-text">${ec.l10n.formatCurrency(localProd.listPrice,localProd.priceUomId)}</span>
-                                        <#else>
-                                            <span class="product-price-text">Free</span>
-                                        </#if>
-                                    </figcaption>
-                                </figure>
-                            </a>
-                        </div>
+                        <a href="/product/${localProd.productId}" class="group block l-glass rounded-xl p-3 hover:border-primary/40 transition-all duration-300">
+                            <div class="aspect-square rounded-lg overflow-hidden bg-surface-container-high flex items-center justify-center mb-3">
+                                <#if localProd.mediumImageInfo?? || localProd.smallImageInfo??>
+                                    <#assign img = localProd.smallImageInfo! localProd.mediumImageInfo>
+                                    <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                        src="/content/productImage/${img.productContentId}"
+                                        alt="${localProd.productName}">
+                                <#else>
+                                    <span class="material-symbols-outlined text-outline text-[48px]">image</span>
+                                </#if>
+                            </div>
+                            <h6 class="text-sm font-medium text-on-surface line-clamp-2 min-h-[2.5rem] mb-1 group-hover:text-primary transition-colors">${localProd.productName}</h6>
+                            <div class="flex items-baseline gap-2">
+                                <#if localProd.price?? && localProd.price gt 0>
+                                    <span class="text-primary font-semibold text-base">${ec.l10n.formatCurrency(localProd.price, localProd.priceUomId)}</span>
+                                    <#if localProd.listPrice?? && localProd.listPrice gt localProd.price>
+                                        <span class="text-on-surface-variant text-sm line-through">${ec.l10n.formatCurrency(localProd.listPrice, localProd.priceUomId)}</span>
+                                    </#if>
+                                <#elseif localProd.listPrice?? && localProd.listPrice gt 0>
+                                    <span class="text-primary font-semibold text-base">${ec.l10n.formatCurrency(localProd.listPrice,localProd.priceUomId)}</span>
+                                <#else>
+                                    <span class="text-primary font-semibold text-base">Free</span>
+                                </#if>
+                            </div>
+                        </a>
                     </#list>
-                <#else>
-                    <div class="col-12">
-                        <div class="text-center py-5" style="background: var(--neutral-50); border-radius: var(--radius-lg);">
-                            <i class="fas fa-box-open fa-4x mb-3" style="color: var(--neutral-300);"></i>
-                            <h4 style="color: var(--neutral-500);">No products found</h4>
-                            <p style="color: var(--neutral-400);">Check back later for new arrivals!</p>
-                            <a href="/" class="btn btn-continue mt-2">
-                                <i class="fas fa-home mr-2"></i>Back to Home
-                            </a>
-                        </div>
-                    </div>
-                </#if>
-            </div>
-            
+                </div>
+            <#else>
+                <div class="l-glass rounded-2xl p-12 text-center">
+                    <span class="material-symbols-outlined text-outline text-[64px] mb-3">package_2</span>
+                    <h4 class="font-display text-xl font-semibold text-on-surface mb-2">No products found</h4>
+                    <p class="text-on-surface-variant mb-6">Check back later for new arrivals!</p>
+                    <a href="/" class="inline-flex items-center gap-2 bg-primary hover:bg-primary/90 text-on-primary font-label text-sm font-medium px-6 py-3 rounded-lg transition-all active:scale-95">
+                        <span class="material-symbols-outlined text-[18px]">home</span>Back to Home
+                    </a>
+                </div>
+            </#if>
+
             <!-- Pagination -->
             <#if products?? && products.productListCount?? && products.productListCount gt 5>
-                <nav aria-label="Page navigation" class="mt-4">
-                    <ul class="pagination justify-content-center">
-                        <li class="page-item <#if pageIndex?number == 0>disabled</#if>">
-                            <a class="page-link" href="/category/${categoryId}?pageIndex=${pageIndex?number - 1}" 
-                                style="border-radius: var(--radius-md) 0 0 var(--radius-md); border-color: var(--neutral-200);">
-                                <i class="fas fa-chevron-left mr-1"></i>Previous
+                <nav aria-label="Page navigation" class="mt-8">
+                    <ul class="flex items-center justify-center gap-1 flex-wrap">
+                        <li>
+                            <a href="/category/${categoryId}?pageIndex=${pageIndex?number - 1}"
+                               class="flex items-center gap-1 px-3 py-2 rounded-lg border border-white/10 text-sm text-on-surface-variant hover:border-primary/40 hover:text-primary transition-colors <#if pageIndex?number == 0>pointer-events-none opacity-40</#if>">
+                                <span class="material-symbols-outlined text-[16px]">chevron_left</span>Previous
                             </a>
                         </li>
                         <#list 0..(products.productListCount / products.productListPageSize)?floor as n>
-                            <li class="page-item <#if pageIndex?number == n>active</#if>">
-                                <a class="page-link" href="/category/${categoryId}?pageIndex=${n}" 
-                                    style="border-color: var(--neutral-200); <#if pageIndex?number == n>background: var(--primary-500); border-color: var(--primary-500);</#if>">
+                            <li>
+                                <a href="/category/${categoryId}?pageIndex=${n}"
+                                   class="flex items-center justify-center min-w-[38px] px-3 py-2 rounded-lg border text-sm transition-colors <#if pageIndex?number == n>bg-primary border-primary text-on-primary font-semibold<#else>border-white/10 text-on-surface-variant hover:border-primary/40 hover:text-primary</#if>">
                                     ${n + 1}
                                 </a>
                             </li>
                         </#list>
-                        <li class="page-item <#if products.productListCount == products.productListPageRangeHigh>disabled</#if>">
-                            <a class="page-link" href="/category/${categoryId}?pageIndex=${pageIndex?number + 1}" 
-                                style="border-radius: 0 var(--radius-md) var(--radius-md) 0; border-color: var(--neutral-200);">
-                                Next<i class="fas fa-chevron-right ml-1"></i>
+                        <li>
+                            <a href="/category/${categoryId}?pageIndex=${pageIndex?number + 1}"
+                               class="flex items-center gap-1 px-3 py-2 rounded-lg border border-white/10 text-sm text-on-surface-variant hover:border-primary/40 hover:text-primary transition-colors <#if products.productListCount == products.productListPageRangeHigh>pointer-events-none opacity-40</#if>">
+                                Next<span class="material-symbols-outlined text-[16px]">chevron_right</span>
                             </a>
                         </li>
                     </ul>
@@ -188,3 +112,54 @@
         </div>
     </div>
 </div>
+
+<#macro sidebarLinks>
+    <ul class="space-y-1 border-l border-white/10 pl-3">
+        <#if (storeInfo.categoryByType.PsctSearch.productCategoryId)??>
+            <li>
+                <a href="/category/${storeInfo.categoryByType.PsctSearch.productCategoryId}"
+                   class="flex items-center gap-2 px-2 py-1.5 rounded-lg text-sm transition-colors <#if storeInfo.categoryByType.PsctSearch.productCategoryId == categoryId>bg-primary/10 text-primary font-semibold<#else>text-on-surface-variant hover:text-primary</#if>">
+                    <span class="material-symbols-outlined text-[18px]">apps</span>All Products
+                </a>
+            </li>
+        </#if>
+        <#if (storeInfo.categoryByType.PsctPromotions.productCategoryId)??>
+            <li>
+                <a href="/category/${storeInfo.categoryByType.PsctPromotions.productCategoryId}"
+                   class="flex items-center gap-2 px-2 py-1.5 rounded-lg text-sm transition-colors <#if storeInfo.categoryByType.PsctPromotions.productCategoryId == categoryId>bg-primary/10 text-primary font-semibold<#else>text-on-surface-variant hover:text-primary</#if>">
+                    <span class="material-symbols-outlined text-[18px]">local_fire_department</span>Deals
+                </a>
+            </li>
+        </#if>
+        <#if (storeInfo.categoryByType.PsctNewProducts.productCategoryId)??>
+            <li>
+                <a href="/category/${storeInfo.categoryByType.PsctNewProducts.productCategoryId}"
+                   class="flex items-center gap-2 px-2 py-1.5 rounded-lg text-sm transition-colors <#if storeInfo.categoryByType.PsctNewProducts.productCategoryId == categoryId>bg-primary/10 text-primary font-semibold<#else>text-on-surface-variant hover:text-primary</#if>">
+                    <span class="material-symbols-outlined text-[18px]">new_releases</span>New Arrivals
+                </a>
+            </li>
+        </#if>
+        <#if (storeInfo.categoryByType.PsctFeatured.productCategoryId)??>
+            <li>
+                <a href="/category/${storeInfo.categoryByType.PsctFeatured.productCategoryId}"
+                   class="flex items-center gap-2 px-2 py-1.5 rounded-lg text-sm transition-colors <#if storeInfo.categoryByType.PsctFeatured.productCategoryId == categoryId>bg-primary/10 text-primary font-semibold<#else>text-on-surface-variant hover:text-primary</#if>">
+                    <span class="material-symbols-outlined text-[18px]">star</span>Best Sellers
+                </a>
+            </li>
+        </#if>
+    </ul>
+
+    <hr class="my-5 border-white/10">
+
+    <h6 class="font-label text-xs font-semibold text-outline uppercase tracking-widest mb-3">Categories</h6>
+    <ul class="space-y-1">
+        <#list browseRootCategoryInfo.subCategoryList as cat>
+            <li>
+                <a href="/category/${cat.productCategoryId}"
+                   class="flex items-center gap-2 px-2 py-1.5 rounded-lg text-sm transition-colors <#if cat.productCategoryId == categoryId>bg-primary/10 text-primary font-semibold<#else>text-on-surface-variant hover:text-primary</#if>">
+                    <span class="material-symbols-outlined text-primary/60 text-[14px]">chevron_right</span>${cat.categoryName}
+                </a>
+            </li>
+        </#list>
+    </ul>
+</#macro>

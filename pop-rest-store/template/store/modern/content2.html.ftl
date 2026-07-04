@@ -3,6 +3,6 @@
     <#else>
         <#assign top = storeInfo.menu1?filter(p -> p.path ==  ec.web.getPathInfo()[1])>
     </#if>
-            </div>
-        </div>
+        </article>
     </div>
+</div>

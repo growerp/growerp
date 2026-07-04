@@ -13,6 +13,7 @@ class OutreachMessage {
   final String? campaignId;
 
   /// Platform: EMAIL, LINKEDIN, TWITTER, etc.
+  @JsonKey(defaultValue: '')
   final String platform;
 
   /// Recipient name
@@ -34,6 +35,7 @@ class OutreachMessage {
   final String? recipientTitle;
 
   /// Message content sent
+  @JsonKey(defaultValue: '')
   final String messageContent;
 
   /// When message was sent

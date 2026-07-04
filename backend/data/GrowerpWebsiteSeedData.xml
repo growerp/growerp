@@ -8,7 +8,9 @@
     <moqui.resource.wiki.WikiSpace wikiSpaceId="GROWERP_WS" description="GrowERP Official Website Content"
         rootWikiPageId="growerp_home" allowAnyHtml="Y" rootPageLocation="dbresource://GROWERP_ROOT"/>
 
-    <!-- Home Page -->
+    <!-- ================================================================
+         HOME PAGE
+         ================================================================ -->
     <moqui.resource.wiki.WikiPage wikiPageId="growerp_home" wikiSpaceId="GROWERP_WS" pagePath="home"
         publishedVersionName="01" sequenceNum="1">
         <histories historySeqId="01" versionName="01" changeDateTime="1485028800000" />
@@ -16,55 +18,72 @@
     <moqui.resource.DbResource filename="home.md.ftl" isFile="Y" resourceId="growerp_home"
         parentResourceId="growerp_content_dir">
         <file mimeType="text/markdown" versionName="01" rootVersionName="01">
-            <fileData><![CDATA[# Welcome to GrowERP
+            <fileData><![CDATA[# Run Your Entire Business From One Screen
 
-> **Feeling overwhelmed by your ERP? You're not alone.**
-
-Many business owners find accounting difficult and traditional ERP systems bloated with confusing features they'll never use. That's why we created GrowERP.
-
-We believe you deserve a clear view of your business performance. GrowERP is an intuitive, open-source AI-supported assistant that provides accurate reports to guide your decisions and ensure regulatory compliance. Designed for simplicity from the start, it is built to grow with you through modular expansion.
+> **Stop juggling spreadsheets, disconnected tools, and manual processes.** GrowERP is the open-source, AI-powered ERP that unifies your operations — accounting, inventory, orders, CRM, marketing, and more — in a single, intuitive platform.
 
 ---
 
-### Discover Your Needs
-Take our quick assessment to find the best setup for your business:
-**[Start the ERP Assessment](/assessmentLanding?landingPageId=ERP_LANDING_PAGE)**
+### Is Your Business Ready to Level Up?
+Take our free 2-minute assessment and discover how GrowERP can transform your operations:
+
+**[Take the ERP Readiness Assessment](/assessmentLanding?landingPageId=ERP_LANDING_PAGE)**
 
 ---
 
-### Welcome to the Future: The AI Native Company
-GrowERP offers exactly the features you need to manage your company efficiently, now empowered with our latest **Agent Management System**. 
+## Why GrowERP?
 
-Transform your business into an **AI Native Company** by deploying intelligent agents that:
-- Handle tedious tasks automatically
-- Streamline complex workflows
-- Provide predictive insights
+### All-in-One Platform
+From quote to paid invoice, from warehouse to website — manage every aspect of your business without switching between tools. Dashboard, catalog, orders, inventory, accounting, marketing, and website management all in one place.
 
-Our agents work seamlessly alongside your team to boost productivity and reduce operational friction. GrowERP is built for *you*.
+### AI-Powered Automation
+Transform your business into an **AI Native Company**. Our Agent Control Center lets you deploy intelligent agents that handle repetitive tasks, personalize outreach, triage leads, and provide predictive insights — all working alongside your team.
+
+### Truly Open Source
+No vendor lock-in. No licensing fees. Full access to the source code under CC0 1.0 Universal license. Customize everything to fit your exact needs. Built on the rock-solid [Moqui Framework](https://www.moqui.org/) backend and [Flutter](https://flutter.dev/) frontend.
+
+### Run Anywhere
+One codebase, every platform. Access GrowERP from your Web browser, Android phone, iPhone, iPad, Mac, Linux desktop, or Windows PC. Your data syncs seamlessly across all devices.
 
 ---
 
-## Start your free trial
-*(NO credit card required)*
+## Purpose-Built Applications
 
-**Full System Environments:**
+GrowERP isn't one-size-fits-all. Choose the application that fits your industry:
+
+- **Admin ERP** — Complete business management with accounting, inventory, orders, CRM, marketing, AI agents, and a generated business website
+- **Hotel Management** — Room management, reservations with visual calendar, guest services, housekeeping, and integrated billing
+- **Freelance** — Client management, time tracking, project organization, invoicing, and activity monitoring
+- **eLearner** — Course enrollment, learning progress tracking, content delivery, and instructor management
+- **Health** — Patient management, appointment scheduling, health records, and billing
+- **Support** — Ticket management, customer communication, issue tracking, and reporting
+
+---
+
+## Start Your Free Trial
+*(NO credit card required — 2 weeks free)*
+
+**Production Apps:**
 1. Web Browser: [admin.growerp.com](https://admin.growerp.com)
-2. Android: [PlayStore](https://play.google.com/store/apps/details?id=org.growerp.admin)
-3. iOS & MacOS: [AppStore](https://apps.apple.com/us/app/growerp-admin-open-source/id1545521755)
-4. Linux: [SnapStore](https://snapcraft.io/growerp-admin)
-5. Windows: [Microsoft Store](https://apps.microsoft.com/detail/9nwx6kftjnql?hl=en-US&gl=TH)
+2. Android: [Google Play](https://play.google.com/store/apps/details?id=org.growerp.admin)
+3. iOS &amp; MacOS: [App Store](https://apps.apple.com/us/app/growerp-admin-open-source/id1545521755)
+4. Linux: [Snap Store](https://snapcraft.io/growerp-admin)
+5. Windows: [Microsoft Store](https://apps.microsoft.com/detail/9nwx6kftjnql?hl=en-US&amp;gl=TH)
 
-**Beta & Specialized Testing:**
-- Next Version Test System: [admin.growerp.org](https://admin.growerp.org)
-- Linux Beta: `snap install growerp-admin --channel=beta`
-- Hotel Test System: [hotel.growerp.org](https://hotel.growerp.org)
+**Beta &amp; Specialized Testing:**
+- Next Version: [admin.growerp.org](https://admin.growerp.org)
+- Hotel: [hotel.growerp.org](https://hotel.growerp.org)
+- Freelance: [freelance.growerp.org](https://freelance.growerp.org)
+
+*Create a new company, select demo data, and explore! Login credentials will be sent to your email.*
 
 ---
 
-## Follow us backstage
-Interested in GrowERP development and backstage operations? Follow us!
-- [Weekly Mailing list: Not Just ERP](https://birdsend.page/forms/6228/3tDTt3BLhY)
-- [Twitter/X](https://x.com/grow_erp/status/1694945989977895320)
+## Follow Us
+
+Stay updated on GrowERP development, features, and community news:
+- [Weekly Newsletter: Not Just ERP](https://birdsend.page/forms/6228/3tDTt3BLhY)
+- [Twitter/X](https://x.com/grow_erp)
 - [LinkedIn Group](https://www.linkedin.com/groups/4576897/)
 - [YouTube](https://www.youtube.com/channel/UCroM6tobneiB9zbMVnaVuTg)
 - [GitHub](https://github.com/growerp)
@@ -74,7 +93,9 @@ Interested in GrowERP development and backstage operations? Follow us!
         </file>
     </moqui.resource.DbResource>
 
-    <!-- Features Page -->
+    <!-- ================================================================
+         FEATURES PAGE
+         ================================================================ -->
     <moqui.resource.wiki.WikiPage wikiPageId="growerp_features" wikiSpaceId="GROWERP_WS" pagePath="features"
         publishedVersionName="01" sequenceNum="2">
         <histories historySeqId="01" versionName="01" changeDateTime="1485028800000" />
@@ -84,39 +105,72 @@ Interested in GrowERP development and backstage operations? Follow us!
         <file mimeType="text/markdown" versionName="01" rootVersionName="01">
             <fileData><![CDATA[# Features
 
-- **Agent Management System (NEW!):** Empower your business to become an **AI Native Company**. Define, deploy, and manage AI agents that execute specialized tasks automatically. Our agent framework natively integrates with all ERP modules, transforming your entire workflow.
-- **Open Source:** GrowERP is a fully open-source ERP system, allowing for complete customization and community-driven development.
-- **Multi-Platform:** Built with Flutter, the application offers a consistent user experience across Web, Android, iOS, Linux, and Windows.
-- **Multi-Tenancy:** Supports multi-company, multi-currency, and multi-language setups for SAAS installations.
-- **Two Main Applications:** Admin Application for comprehensive ERP management, and a specialized Hotel Application.
-- **Demo Data:** The system can be initialized with demo data for quick exploration.
-- **Local Installation:** Streamlined command-line installer, manual instructions, and full Docker support.
-- **Backend:** Powered by the robust and scalable [Moqui Framework](https://www.moqui.org/).
-- **Frontend:** Built with [Flutter](https://flutter.dev/) for a modern, responsive experience.
-- **Generated Business Website:** Automatically generate a professional, customer-facing website based on your ERP data.
+GrowERP is a comprehensive, modular ERP platform. Use only the modules you need — and add more as your business grows.
 
-## Core Modules (Admin Application)
+---
 
-- **Dashboard:** A centralized and customizable dashboard.
-- **User and Company Management:** Manage contact persons, employees, suppliers, and customers.
-- **Catalog Management:** Support for Services, Physical, and Rental product types.
-- **Order Management:** Manage purchase and sales orders with flexible items and automated document creation.
-- **Inventory Management:** Handle multiple locations, shipments, and asset tracking.
-- **Accounting:** Full cycle accounting, automated posting, double-entry ledger.
-- **Marketing:** Opportunity tracking, task management, and lead/customer management.
-- **Website Management:** Seamlessly manage the content of your automatically generated business website.
+## AI Agent Control Center (NEW)
 
-## Hotel Application Modules
-- **Dashboard:** Specialized dashboard for hotel operations.
-- **Room Management:** Manage rooms, bed configurations, and availability.
-- **Reservation Management:** Visual reservation calendar with day/week views.
-- **Accounting:** Integrated accounting tailored for the hospitality industry.
+Empower your business to become an **AI Native Company**. The Agent Control Center provides:
+
+- **Multi-Agent Orchestration** — Deploy coordinator and specialist agent teams that work together on complex tasks
+- **Scheduled Automation** — Cron-based agent execution for recurring tasks (daily digests, lead triage, content publishing)
+- **Scoped Tool Access** — Fine-grained allowlists control exactly which services each agent can access
+- **Write-Approval Governance** — Agents request human approval before executing sensitive operations
+- **RAG Knowledge Base** — Ingest your business documents so agents can answer questions with grounded, accurate responses
+- **Website Chat AI** — An always-on AI assistant that greets website visitors, answers questions, and captures leads
+
+---
+
+## Core ERP Modules
+
+### Dashboard
+A centralized, customizable dashboard giving you real-time visibility into your business KPIs.
+
+### User &amp; Company Management
+Manage contact persons, employees, suppliers, and customers. Multi-company and multi-tenancy support with role-based access control.
+
+### Catalog Management
+Support for **Services**, **Physical Products**, and **Rental** product types. Categories, variants, pricing rules, and rich product content.
+
+### Order Management
+End-to-end purchase and sales order processing. Flexible line items, automated document creation (invoices, shipments), and order status tracking.
+
+### Inventory Management
+Multiple warehouse locations, inbound/outbound shipments, asset tracking, and real-time stock visibility.
+
+### Accounting
+Full-cycle double-entry accounting with automated posting, chart of accounts, general ledger, and financial reporting. Multi-currency support.
+
+### Marketing &amp; CRM
+- **Sales Pipeline** — Opportunity tracking from lead to close
+- **Campaign Management** — Omnichannel outreach campaigns (LinkedIn, Email, Social)
+- **Content Studio** — Author-once, publish-everywhere content creation
+- **Lead Scoring** — AI-powered lead scoring and triage
+
+### Website Management
+Automatically generate and manage a professional, customer-facing website directly from your ERP data. Content pages, product catalogs, and e-commerce — all managed from the admin app.
+
+---
+
+## Platform Capabilities
+
+- **Open Source** — CC0 1.0 Universal license. No vendor lock-in, full customization
+- **Multi-Platform** — Web, Android, iOS, Linux, Windows, and macOS from a single Flutter codebase
+- **Multi-Tenancy** — Multi-company, multi-currency, and multi-language for SaaS installations
+- **Extensible Architecture** — Modular building blocks (growerp_* packages) and backend components
+- **Demo Data** — Initialize with demo data for instant exploration
+- **Local or Cloud** — Run locally, in Docker, or deploy to the cloud
+- **Robust Backend** — Powered by [Moqui Framework](https://www.moqui.org/) with Entity Engine ORM, Service Engine, and enterprise-grade security
+- **Modern Frontend** — Built with [Flutter](https://flutter.dev/) for responsive, native-quality experiences
 ]]></fileData>
             <histories versionName="01" versionDate="1485028800000" isDiff="N" />
         </file>
     </moqui.resource.DbResource>
 
-    <!-- Getting Started -->
+    <!-- ================================================================
+         GETTING STARTED PAGE
+         ================================================================ -->
     <moqui.resource.wiki.WikiPage wikiPageId="growerp_getting_started" wikiSpaceId="GROWERP_WS" pagePath="getting-started"
         publishedVersionName="01" sequenceNum="3">
         <histories historySeqId="01" versionName="01" changeDateTime="1485028800000" />
@@ -126,34 +180,80 @@ Interested in GrowERP development and backstage operations? Follow us!
         <file mimeType="text/markdown" versionName="01" rootVersionName="01">
             <fileData><![CDATA[# Getting Started
 
-To get up to speed quickly, follow the checklist below. If you need assistance, we provide support via email at support@growerp.com.
+Get up and running with GrowERP in minutes. No credit card required.
 
-## Quick Setup Guide
+---
 
-1. **Select Your App:** Navigate to the home page of this site and choose your application under **"Start your free trial."**
-2. **Register:** Click "Register" at the bottom of the screen and enter your email and desired password.
-3. **Check Your Email:** After registering, the system will send you a password. Use these credentials to log in for the first time.
-4. **Initial Configuration:** The system will prompt you for your company name and preferred currency. If you simply want to explore, select the option to **generate demo data.**
-5. **Explore the Dashboard:** Once setup is complete, you will be directed to the main menu.
+## Quick Setup (5 Minutes)
 
-**Give it a spin:** Look around, enter a test order, view your generated website, and send us your feedback!
+### Step 1: Choose Your App
+Visit [admin.growerp.com](https://admin.growerp.com) or download the app from your platform's store (see links on the home page).
+
+### Step 2: Register
+Click **"Register"** at the bottom of the login screen. Enter your email address and choose a password.
+
+### Step 3: Check Your Email
+The system will send you login credentials. Use them to sign in for the first time.
+
+### Step 4: Configure Your Company
+You'll be prompted for your company name and preferred currency. Want to explore first? Select the option to **generate demo data** — it populates the system with sample products, orders, and customers so you can see everything in action.
+
+### Step 5: Explore
+You'll land on the main dashboard. From here you can:
+- Browse the product catalog
+- Create a test order
+- View your auto-generated business website
+- Try the AI Agent Control Center
+- Explore accounting, inventory, and CRM modules
+
+---
+
+## For Developers
+
+Want to run GrowERP locally or contribute to the project?
+
+### Prerequisites
+- OpenJDK 21
+- Flutter stable
+- Git
+
+### Local Installation
+```
+git clone https://github.com/growerp/growerp
+cd growerp
+git submodule update --init --recursive
+./setup-backend.sh
+```
+
+See the full [Developer Documentation](https://github.com/growerp/growerp/blob/master/docs/README.md) for detailed guides on building blocks, backend components, and AI integrations.
+
+---
+
+## Need Help?
+
+- **Email Support:** support@growerp.com
+- **GitHub Issues:** [Report bugs or request features](https://github.com/growerp/growerp/issues)
+- **GitHub Discussions:** [Ask questions and share ideas](https://github.com/growerp/growerp/discussions)
+- **Documentation:** [41+ guides covering all aspects](https://github.com/growerp/growerp/blob/master/docs/README.md)
 
 ---
 
 ## Deleting Your Data
 
-If you no longer wish to use the system and want to remove your information, follow these steps:
-- **Access Settings:** Log in as the administrator. Navigate to your **Personal Screen** (found under "Company" in the employee section) or click the menu in the **top-left corner**.
-- **The Delete Button:** You will find a delete button here.
-- **Scope of Deletion:** Clicking this will delete your user profile. If you are the sole administrator, it will also permanently delete the associated company data.
+If you decide GrowERP isn't for you:
+1. Log in as the administrator
+2. Navigate to your **Personal Screen** (found under "Company" in the employee section)
+3. Click the **Delete** button
 
-> **Warning:** Please be certain before proceeding, as this action is **irreversible** and data cannot be recovered.
+> **Warning:** If you are the sole administrator, this permanently deletes the company data. This action is irreversible.
 ]]></fileData>
             <histories versionName="01" versionDate="1485028800000" isDiff="N" />
         </file>
     </moqui.resource.DbResource>
 
-    <!-- Pricing Page -->
+    <!-- ================================================================
+         PRICING PAGE
+         ================================================================ -->
     <moqui.resource.wiki.WikiPage wikiPageId="growerp_pricing" wikiSpaceId="GROWERP_WS" pagePath="pricing"
         publishedVersionName="01" sequenceNum="4">
         <histories historySeqId="01" versionName="01" changeDateTime="1485028800000" />
@@ -163,40 +263,281 @@ If you no longer wish to use the system and want to remove your information, fol
         <file mimeType="text/markdown" versionName="01" rootVersionName="01">
             <fileData><![CDATA[# Pricing
 
-Choose the perfect plan for your business needs.
+All plans include a **free 2-week trial** — no credit card required. Every plan gives you access to all features with no user limits.
 
-## The 'Do It Yourself' (DIY) Plan
-- $49.99 monthly
-- All features
+*(Note: Pricing plans are configured as products in our catalog. See the Shop for current purchase options.)*
+
+---
+
+## Do It Yourself (DIY)
+**$49.99 / month**
+
+Perfect for tech-savvy business owners who want full control.
+
+- All features included
 - No user limit
-- Email support $75 per hour. 48 hours response time
+- Email support: $75/hour (48-hour response time)
+- Full access to documentation and community resources
 
-## The 'Do it With You' (DWY) Plan
-- $499 monthly
-- All Features
+---
+
+## Do It With You (DWY)
+**$499 / month**
+
+Ideal for businesses that want expert guidance during setup and ongoing operations.
+
+- All features included
 - No user limit
-- Includes 20 hours monthly support for:
-  - data conversion
-  - user support
-  - specific reporting
-  - data entry
-  - customization
-- Extra support $50 per hour.
+- **20 hours monthly support** included for:
+  - Data conversion and migration
+  - User training and support
+  - Custom reporting
+  - Data entry assistance
+  - System customization
+- Additional support: $50/hour
 
-## The 'Do it For You' (DFY) Company Plan
-- $999 monthly
-- Same as the DWY plan however with 40 hours monthly included
+---
 
-## Enterprise Plan
-- Contact support at support@growerp.com
+## Do It For You (DFY)
+**$999 / month**
+
+The white-glove experience — we handle the heavy lifting so you can focus on your business.
+
+- All features included
+- No user limit
+- **40 hours monthly support** included
+- Same services as DWY with double the support hours
+- Priority response times
+
+---
+
+## Enterprise
+**Custom Pricing**
+
+For organizations with specialized requirements, high-volume needs, or complex integrations.
+
+- Custom SLA and support agreements
+- On-premise or private cloud deployment options
+- Dedicated account manager
+- Custom module development
+
+**[Contact us at support@growerp.com](mailto:support@growerp.com)**
 ]]></fileData>
             <histories versionName="01" versionDate="1485028800000" isDiff="N" />
         </file>
     </moqui.resource.DbResource>
 
-    <!-- Privacy Policy Page -->
-    <moqui.resource.wiki.WikiPage wikiPageId="growerp_privacy" wikiSpaceId="GROWERP_WS" pagePath="privacy"
+    <!-- ================================================================
+         AI AGENTS PAGE (NEW)
+         ================================================================ -->
+    <moqui.resource.wiki.WikiPage wikiPageId="growerp_ai_agents" wikiSpaceId="GROWERP_WS" pagePath="ai-agents"
+        publishedVersionName="01" sequenceNum="4.5">
+        <histories historySeqId="01" versionName="01" changeDateTime="1485028800000" />
+    </moqui.resource.wiki.WikiPage>
+    <moqui.resource.DbResource filename="ai-agents.md.ftl" isFile="Y" resourceId="growerp_ai_agents"
+        parentResourceId="growerp_content_dir">
+        <file mimeType="text/markdown" versionName="01" rootVersionName="01">
+            <fileData><![CDATA[# AI Agent Control Center
+
+Transform your business into an **AI Native Company**. GrowERP's built-in Agent Control Center allows you to deploy intelligent agents that execute tasks, automate workflows, and provide critical insights.
+
+---
+
+## What is Possible?
+
+Our AI agents can seamlessly integrate into your daily operations:
+
+### 🤖 Website Chat Assistant
+An always-on AI assistant that greets visitors, answers questions based on your knowledge base, and captures leads directly into your CRM.
+
+### 📧 Outreach & Personalization
+Automate your marketing campaigns. Agents can generate highly personalized outreach messages (for LinkedIn or Email) based on a prospect's profile, increasing your response rates dramatically.
+
+### 📊 Automated Triage & Lead Scoring
+Automatically scan incoming inquiries and replies. Our agents rank leads by priority (hot, warm, cold) and draft follow-up responses, notifying your team when human intervention is needed.
+
+### 📅 Content Publishing
+Set up agents to automatically generate and publish social media content based on your marketing strategy, keeping your brand active online effortlessly.
+
+### 📈 Daily Operations Digest
+A scheduled agent that reviews your daily performance — sales, leads, inventory issues — and delivers a concise summary to your chat room or email every morning.
+
+---
+
+## Secure & Governed
+
+You are always in control:
+- **Scoped Permissions:** Restrict agents to only the API endpoints they need.
+- **Human-in-the-Loop:** Require human approval before agents can execute sensitive actions (like sending emails or processing refunds).
+- **RAG Knowledge Base:** Upload your own documents so agents answer questions accurately based on *your* business data.
+
+## Need Help Setting Up AI?
+Our team can help you configure and deploy specialized agents tailored to your business needs. **[Contact Support](mailto:support@growerp.com)** to learn more.
+]]></fileData>
+            <histories versionName="01" versionDate="1485028800000" isDiff="N" />
+        </file>
+    </moqui.resource.DbResource>
+
+    <!-- ================================================================
+         USE CASES PAGE (NEW)
+         ================================================================ -->
+    <moqui.resource.wiki.WikiPage wikiPageId="growerp_usecases" wikiSpaceId="GROWERP_WS" pagePath="use-cases"
         publishedVersionName="01" sequenceNum="5">
+        <histories historySeqId="01" versionName="01" changeDateTime="1485028800000" />
+    </moqui.resource.wiki.WikiPage>
+    <moqui.resource.DbResource filename="use-cases.md.ftl" isFile="Y" resourceId="growerp_usecases"
+        parentResourceId="growerp_content_dir">
+        <file mimeType="text/markdown" versionName="01" rootVersionName="01">
+            <fileData><![CDATA[# Use Cases
+
+GrowERP ships purpose-built applications for different industries. Each application uses the same modular building blocks, customized for specific workflows.
+
+---
+
+## Admin ERP
+The complete business management solution.
+
+- **Dashboard** — Real-time KPIs and business overview
+- **Catalog** — Products, services, and rental items with variants and pricing rules
+- **Orders** — Purchase and sales order lifecycle management
+- **Inventory** — Multi-location warehouse management and shipment tracking
+- **Accounting** — Double-entry ledger, automated posting, financial reports
+- **CRM &amp; Marketing** — Sales pipeline, campaign management, AI-powered outreach
+- **Website** — Auto-generated business website managed from the admin panel
+- **AI Agents** — Control center for deploying AI assistants and automations
+
+**[Try Admin ERP](https://admin.growerp.com)**
+
+---
+
+## Hotel Management
+Specialized for the hospitality industry.
+
+- **Room Management** — Room types, bed configurations, amenities, and availability
+- **Reservations** — Visual day/week calendar with drag-and-drop booking
+- **Guest Services** — Check-in/out, special requests, and guest communication
+- **Housekeeping** — Room status tracking and task assignment
+- **Billing** — Integrated invoicing and payment processing
+
+**[Try Hotel App](https://hotel.growerp.org)**
+
+---
+
+## Freelance Management
+Built for independent professionals and small agencies.
+
+- **Client Management** — Contact database with communication history
+- **Time Tracking** — Log hours against projects and tasks
+- **Project Organization** — Tasks, milestones, and deliverables
+- **Invoicing** — Generate professional invoices from tracked time
+- **Activity Monitoring** — Workload visibility and productivity insights
+
+**[Try Freelance App](https://freelance.growerp.org)**
+
+---
+
+## eLearner
+A student-facing learning platform.
+
+- **Course Enrollment** — Browse and enroll in available courses
+- **Progress Tracking** — Visual learning progress and completion status
+- **Content Delivery** — Structured lessons, materials, and assessments
+- **Instructor Management** — Manage educators and course assignments
+
+---
+
+## Health
+Healthcare practice management.
+
+- **Patient Management** — Patient records and contact information
+- **Appointment Scheduling** — Calendar-based scheduling with reminders
+- **Health Records** — Secure storage of patient health data
+- **Billing** — Insurance and direct billing with accounting integration
+
+---
+
+## Support
+Customer support and ticketing.
+
+- **Ticket Management** — Create, assign, and track support tickets
+- **Customer Communication** — Threaded conversations with customers
+- **Issue Tracking** — Categorization, priority levels, and resolution tracking
+- **Reporting** — Response times, resolution rates, and team performance
+
+---
+
+## Build Your Own
+GrowERP's modular architecture means you can build custom applications using existing building blocks:
+
+- Mix and match `growerp_*` Flutter packages
+- Create custom backend components for Moqui
+- Define industry-specific workflows
+- Design tailored user interfaces
+
+See the [Developer Documentation](https://github.com/growerp/growerp/blob/master/docs/README.md) for guides on creating custom applications.
+]]></fileData>
+            <histories versionName="01" versionDate="1485028800000" isDiff="N" />
+        </file>
+    </moqui.resource.DbResource>
+
+    <!-- ================================================================
+         ABOUT PAGE (NEW)
+         ================================================================ -->
+    <moqui.resource.wiki.WikiPage wikiPageId="growerp_about" wikiSpaceId="GROWERP_WS" pagePath="about"
+        publishedVersionName="01" sequenceNum="6">
+        <histories historySeqId="01" versionName="01" changeDateTime="1485028800000" />
+    </moqui.resource.wiki.WikiPage>
+    <moqui.resource.DbResource filename="about.md.ftl" isFile="Y" resourceId="growerp_about"
+        parentResourceId="growerp_content_dir">
+        <file mimeType="text/markdown" versionName="01" rootVersionName="01">
+            <fileData><![CDATA[# About Us
+
+GrowERP is brought to you by **AntWebsystems Co., Ltd**, an officially registered software development company in Thailand under European management.
+
+## Our Expertise
+
+With years of experience developing and extending business applications, we have deep expertise in building enterprise-grade ERP and CRM systems. We are currently supporting installations in North America, Europe, and Asia.
+
+Our extensive background as top contributors and committers to major open-source frameworks has shaped our approach: we build highly capable, modular systems designed for scale and flexibility. GrowERP is the culmination of our mission to bring advanced, AI-powered business management to everyone.
+
+## How We Work
+
+We believe in transparency and rapid iteration. We utilize agile software development methodologies (like Scrum) to ensure our partners and customers can see progress on a daily basis. 
+
+When you work with us for customization or support, you benefit from:
+- Clear, time-boxed delivery cycles (1-4 weeks)
+- Daily visibility into the development process
+- Flexible requirement changes with minimal impact on implementation
+- Quality support at competitive rates
+
+## Open Source Philosophy
+
+GrowERP is released under the **CC0 1.0 Universal** (Public Domain) license. This means:
+- **No licensing fees** — ever
+- **Full source code access** — customize anything
+- **No vendor lock-in** — you own your data and your deployment
+- **Community-driven** — contributions from developers worldwide improve the platform for everyone
+
+## Contact & Support
+
+Whether you need requirements gathering, implementation, custom interfacing, or managed production systems, we are ready to help.
+
+- **Email Support:** support@growerp.com / support@antwebsystems.com
+- **GitHub:** [github.com/growerp](https://github.com/growerp)
+- **LinkedIn:** [GrowERP Group](https://www.linkedin.com/groups/4576897/)
+- **Twitter/X:** [@grow_erp](https://x.com/grow_erp)
+
+**[Let us know how we can help you within 24 hours.](mailto:support@antwebsystems.com)**
+]]></fileData>
+            <histories versionName="01" versionDate="1485028800000" isDiff="N" />
+        </file>
+    </moqui.resource.DbResource>
+
+    <!-- ================================================================
+         PRIVACY POLICY PAGE
+         ================================================================ -->
+    <moqui.resource.wiki.WikiPage wikiPageId="growerp_privacy" wikiSpaceId="GROWERP_WS" pagePath="privacy"
+        publishedVersionName="01" sequenceNum="7">
         <histories historySeqId="01" versionName="01" changeDateTime="1485028800000" />
     </moqui.resource.wiki.WikiPage>
     <moqui.resource.DbResource filename="privacy.md.ftl" isFile="Y" resourceId="growerp_privacy"

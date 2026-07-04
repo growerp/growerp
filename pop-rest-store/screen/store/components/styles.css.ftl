@@ -2000,3 +2000,116 @@ body.growerp-store-100000 .customer-menu {
     border-radius: 12px;
     padding: 1.5rem;
 }
+
+/* ==================================================================== */
+/* ==== LUMINA design tokens & helpers (modern template set only) ==== */
+/* Tokens are "R G B" channel triplets so Tailwind can apply opacity    */
+/* modifiers via rgb(var(--l-x) / <alpha>). Defaults = Lumina palette;  */
+/* per-store override via "lumina" object in websiteColor.json.         */
+/* Scoped with --l- prefix + body.lumina so legacy set is unaffected.  */
+/* ==================================================================== */
+:root {
+    --l-surface: ${(lumina.surface)!'11 19 38'};
+    --l-surface-container-lowest: ${(lumina.surfaceContainerLowest)!'6 14 32'};
+    --l-surface-container-low: ${(lumina.surfaceContainerLow)!'19 27 46'};
+    --l-surface-container: ${(lumina.surfaceContainer)!'23 31 51'};
+    --l-surface-container-high: ${(lumina.surfaceContainerHigh)!'34 42 61'};
+    --l-surface-container-highest: ${(lumina.surfaceContainerHighest)!'45 52 73'};
+    --l-on-surface: ${(lumina.onSurface)!'218 226 253'};
+    --l-on-surface-variant: ${(lumina.onSurfaceVariant)!'188 202 192'};
+    --l-primary: ${(lumina.primary)!'104 219 169'};
+    --l-on-primary: ${(lumina.onPrimary)!'0 56 37'};
+    --l-primary-container: ${(lumina.primaryContainer)!'37 164 117'};
+    --l-secondary: ${(lumina.secondary)!'78 222 163'};
+    --l-tertiary: ${(lumina.tertiary)!'69 223 164'};
+    --l-error: ${(lumina.error)!'255 180 171'};
+    --l-outline: ${(lumina.outline)!'135 148 139'};
+    --l-outline-variant: ${(lumina.outlineVariant)!'61 74 66'};
+}
+
+body.lumina {
+    background: rgb(var(--l-surface));
+    color: rgb(var(--l-on-surface));
+    scroll-behavior: smooth;
+}
+body.lumina :where(h1, h2, h3, h4, h5, h6)[id], body.lumina a[name] { scroll-margin-top: 6rem; }
+
+/* Glassmorphic card / panel */
+body.lumina .l-glass {
+    background: rgb(var(--l-surface-container-low) / 0.55);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgb(255 255 255 / 0.10);
+}
+/* Primary button glow */
+body.lumina .l-glow { box-shadow: 0 0 20px rgb(var(--l-primary) / 0.30); }
+body.lumina .l-glow:hover { box-shadow: 0 0 30px rgb(var(--l-primary) / 0.45); }
+/* Gradient headline text */
+body.lumina .l-gradient-text {
+    background: linear-gradient(90deg, rgb(var(--l-primary)), rgb(var(--l-tertiary)));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+/* Native dialog styling */
+body.lumina dialog::backdrop { background: rgb(0 0 0 / 0.6); -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); }
+body.lumina dialog {
+    background: rgb(var(--l-surface-container));
+    color: rgb(var(--l-on-surface));
+    border: 1px solid rgb(255 255 255 / 0.10);
+    border-radius: 1rem;
+}
+/* Toast */
+body.lumina .l-toast {
+    position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 100;
+    background: rgb(var(--l-surface-container-high) / 0.9);
+    -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+    border: 1px solid rgb(var(--l-primary) / 0.4);
+    color: rgb(var(--l-on-surface));
+    padding: 0.75rem 1.25rem; border-radius: 0.75rem;
+    box-shadow: 0 10px 30px rgb(0 0 0 / 0.4);
+}
+body.lumina .l-toast.l-toast-error { border-color: rgb(var(--l-error) / 0.5); }
+
+/* Server-rendered markdown/wiki content (Tailwind preflight resets everything) */
+body.lumina .prose-lumina { color: rgb(var(--l-on-surface-variant)); line-height: 1.75; }
+body.lumina .prose-lumina h1, body.lumina .prose-lumina h2, body.lumina .prose-lumina h3,
+body.lumina .prose-lumina h4, body.lumina .prose-lumina h5 {
+    color: rgb(var(--l-on-surface)); font-weight: 600; letter-spacing: -0.01em;
+    margin: 1.75rem 0 0.75rem 0; line-height: 1.25;
+}
+body.lumina .prose-lumina h1 { font-size: 2.25rem; font-weight: 700; letter-spacing: -0.02em; }
+body.lumina .prose-lumina h2 { font-size: 1.75rem; }
+body.lumina .prose-lumina h3 { font-size: 1.375rem; }
+body.lumina .prose-lumina h4 { font-size: 1.125rem; }
+body.lumina .prose-lumina p { margin: 0 0 1rem 0; }
+body.lumina .prose-lumina a { color: rgb(var(--l-primary)); text-decoration: none; }
+body.lumina .prose-lumina a:hover { text-decoration: underline; }
+body.lumina .prose-lumina strong { color: rgb(var(--l-on-surface)); font-weight: 600; }
+body.lumina .prose-lumina ul, body.lumina .prose-lumina ol { margin: 0 0 1rem 0; padding-left: 1.5rem; }
+body.lumina .prose-lumina ul { list-style: disc; }
+body.lumina .prose-lumina ol { list-style: decimal; }
+body.lumina .prose-lumina li { margin-bottom: 0.375rem; }
+body.lumina .prose-lumina code {
+    font-family: 'Geist', monospace; font-size: 0.85em;
+    background: rgb(var(--l-surface-container-high));
+    border: 1px solid rgb(255 255 255 / 0.08);
+    border-radius: 0.375rem; padding: 0.125rem 0.375rem;
+}
+body.lumina .prose-lumina pre {
+    background: rgb(var(--l-surface-container-lowest));
+    border: 1px solid rgb(255 255 255 / 0.08);
+    border-radius: 0.75rem; padding: 1rem; overflow-x: auto; margin: 0 0 1rem 0;
+}
+body.lumina .prose-lumina pre code { background: none; border: none; padding: 0; }
+body.lumina .prose-lumina blockquote {
+    border-left: 3px solid rgb(var(--l-primary));
+    padding-left: 1rem; margin: 0 0 1rem 0; font-style: italic;
+}
+body.lumina .prose-lumina table { width: 100%; border-collapse: collapse; margin: 0 0 1rem 0; }
+body.lumina .prose-lumina th, body.lumina .prose-lumina td {
+    border: 1px solid rgb(255 255 255 / 0.10); padding: 0.5rem 0.75rem; text-align: left;
+}
+body.lumina .prose-lumina th { color: rgb(var(--l-on-surface)); background: rgb(var(--l-surface-container)); }
+body.lumina .prose-lumina img { max-width: 100%; border-radius: 0.75rem; margin: 1rem 0; }
+body.lumina .prose-lumina hr { border: none; border-top: 1px solid rgb(255 255 255 / 0.10); margin: 2rem 0; }
