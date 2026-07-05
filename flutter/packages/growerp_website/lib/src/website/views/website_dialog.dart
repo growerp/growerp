@@ -23,6 +23,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:reorderables/reorderables.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:from_css_color/from_css_color.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
@@ -63,6 +64,7 @@ class WebsiteDialogState extends State<WebsiteDialog> {
   late WebsiteLocalizations _localizations;
   List<LandingPage> _landingPages = [];
   String? _templateId;
+  bool? _websiteThemeDark;
 
   @override
   void initState() {
@@ -94,6 +96,66 @@ class WebsiteDialogState extends State<WebsiteDialog> {
     } catch (e) {
       // Silently fail, landing pages will be empty
     }
+  }
+
+  /// Lumina design tokens used by the 'modern' website template set;
+  /// names must match luminaDefaults in PopRestStore screen/store.xml.
+  static String _toCssHex(Color color) =>
+      '#${(color.toARGB32() & 0xFFFFFF).toRadixString(16).padLeft(6, '0')}';
+
+  static Map<String, String> _luminaFromScheme(ColorScheme cs) => {
+    'surface': _toCssHex(cs.surface),
+    'surfaceContainerLowest': _toCssHex(cs.surfaceContainerLowest),
+    'surfaceContainerLow': _toCssHex(cs.surfaceContainerLow),
+    'surfaceContainer': _toCssHex(cs.surfaceContainer),
+    'surfaceContainerHigh': _toCssHex(cs.surfaceContainerHigh),
+    'surfaceContainerHighest': _toCssHex(cs.surfaceContainerHighest),
+    'onSurface': _toCssHex(cs.onSurface),
+    'onSurfaceVariant': _toCssHex(cs.onSurfaceVariant),
+    'primary': _toCssHex(cs.primary),
+    'onPrimary': _toCssHex(cs.onPrimary),
+    'primaryContainer': _toCssHex(cs.primaryContainer),
+    'secondary': _toCssHex(cs.secondary),
+    'tertiary': _toCssHex(cs.tertiary),
+    'error': _toCssHex(cs.error),
+    'outline': _toCssHex(cs.outline),
+    'outlineVariant': _toCssHex(cs.outlineVariant),
+  };
+
+  Future<String?> _pickCssColor(String currentCss) async {
+    return await showDialog<String>(
+      context: context,
+      builder: (BuildContext context) {
+        String cssColor = '';
+        return AlertDialog(
+          title: Text(_localizations.websiteColor),
+          content: SingleChildScrollView(
+            child: MaterialPicker(
+              pickerColor: fromCssColor(currentCss), //default color
+              onColorChanged: (Color color) {
+                cssColor = _toCssHex(color);
+              },
+            ),
+          ),
+          actions: <Widget>[
+            OutlinedButton(
+              child: Text(_localizations.cancel),
+              onPressed: () {
+                Navigator.of(context).pop(); //dismiss the color picker
+              },
+            ),
+            OutlinedButton(
+              child: Text(_localizations.save),
+              onPressed: () {
+                Navigator.of(
+                  context,
+                ).pop(cssColor); //dismiss the color picker
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -154,6 +216,129 @@ class WebsiteDialogState extends State<WebsiteDialog> {
             return const LoadingIndicator();
         }
       },
+    );
+  }
+
+  /// Flutter color-theme picker for the website: writes the selected
+  /// scheme's Material 3 colors as the 'lumina' object in colorJson,
+  /// consumed by the modern website template CSS.
+  Widget _websiteThemePicker(WebsiteState state, Map websiteColor) {
+    final bool dark =
+        _websiteThemeDark ?? websiteColor['luminaBrightness'] != 'light';
+    final String? selectedScheme = websiteColor['luminaScheme'] as String?;
+
+    void saveTheme(FlexScheme scheme) {
+      final colors = dark
+          ? FlexThemeData.dark(scheme: scheme).colorScheme
+          : FlexThemeData.light(scheme: scheme).colorScheme;
+      final updated = Map.of(websiteColor);
+      updated['lumina'] = _luminaFromScheme(colors);
+      updated['luminaScheme'] = scheme.name;
+      updated['luminaBrightness'] = dark ? 'dark' : 'light';
+      _websiteBloc.add(
+        WebsiteUpdate(
+          Website(id: state.website!.id, colorJson: jsonEncode(updated)),
+        ),
+      );
+    }
+
+    List<Widget> tiles = [];
+    for (final scheme in curatedSchemes) {
+      final colors = dark
+          ? FlexThemeData.dark(scheme: scheme).colorScheme
+          : FlexThemeData.light(scheme: scheme).colorScheme;
+      final isSelected = scheme.name == selectedScheme;
+      tiles.add(
+        Tooltip(
+          message: scheme.name,
+          child: InkWell(
+            key: Key('websiteTheme${scheme.name}'),
+            onTap: () => saveTheme(scheme),
+            child: Container(
+              width: 56,
+              height: 40,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: isSelected
+                      ? Theme.of(context).colorScheme.primary
+                      : Theme.of(
+                          context,
+                        ).colorScheme.outline.withValues(alpha: 0.3),
+                  width: isSelected ? 3 : 1,
+                ),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(6),
+                child: Column(
+                  children: [
+                    Expanded(
+                      child: Row(
+                        children: [
+                          Expanded(child: Container(color: colors.primary)),
+                          Expanded(child: Container(color: colors.secondary)),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      child: Row(
+                        children: [
+                          Expanded(child: Container(color: colors.tertiary)),
+                          Expanded(child: Container(color: colors.surface)),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            SegmentedButton<bool>(
+              key: const Key('websiteThemeBrightness'),
+              showSelectedIcon: false,
+              segments: const [
+                ButtonSegment(value: false, label: Text('Light')),
+                ButtonSegment(value: true, label: Text('Dark')),
+              ],
+              selected: {dark},
+              onSelectionChanged: (selection) {
+                setState(() => _websiteThemeDark = selection.first);
+              },
+            ),
+            const Spacer(),
+            OutlinedButton(
+              key: const Key('resetWebsiteColors'),
+              onPressed: () {
+                final updated = Map.of(websiteColor)
+                  ..remove('lumina')
+                  ..remove('luminaScheme')
+                  ..remove('luminaBrightness');
+                setState(() => _websiteThemeDark = null);
+                _websiteBloc.add(
+                  WebsiteUpdate(
+                    Website(
+                      id: state.website!.id,
+                      colorJson: jsonEncode(updated),
+                    ),
+                  ),
+                );
+              },
+              child: const Text('Reset to defaults'),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Wrap(spacing: 8, runSpacing: 8, children: tiles),
+      ],
     );
   }
 
@@ -380,54 +565,26 @@ class WebsiteDialogState extends State<WebsiteDialog> {
         : websiteColor['HeaderFooterText'] ?? '#ff5722';
     websiteColor.forEach((key, value) {
       if (key.toString().endsWith('Url')) return;
+      // skip theme bookkeeping keys and the nested lumina color map
+      if (value is! String ||
+          key == 'luminaScheme' ||
+          key == 'luminaBrightness') {
+        return;
+      }
       colorCatButtons.add(
         InputChip(
-          backgroundColor: fromCssColor(websiteColor[key]),
+          backgroundColor: fromCssColor(value),
           label: Text(
             key,
             key: Key(key),
             style: TextStyle(
-              color: fromCssColor(websiteColor[key]).computeLuminance() < 0.5
+              color: fromCssColor(value).computeLuminance() < 0.5
                   ? Colors.white
                   : Colors.black,
             ),
           ),
           onPressed: () async {
-            var result = await showDialog(
-              context: context,
-              builder: (BuildContext context) {
-                String cssColor = '';
-                return AlertDialog(
-                  title: Text(_localizations.websiteColor),
-                  content: SingleChildScrollView(
-                    child: MaterialPicker(
-                      pickerColor: fromCssColor(value), //default color
-                      onColorChanged: (Color color) {
-                        setState(() {
-                          cssColor = color.toCssString();
-                        });
-                      },
-                    ),
-                  ),
-                  actions: <Widget>[
-                    OutlinedButton(
-                      child: Text(_localizations.cancel),
-                      onPressed: () {
-                        Navigator.of(context).pop(); //dismiss the color picker
-                      },
-                    ),
-                    OutlinedButton(
-                      child: Text(_localizations.save),
-                      onPressed: () {
-                        Navigator.of(
-                          context,
-                        ).pop(cssColor); //dismiss the color picker
-                      },
-                    ),
-                  ],
-                );
-              },
-            );
+            var result = await _pickCssColor(value);
             if (result != null) {
               setState(() {
                 websiteColor[key] = result;
@@ -445,6 +602,45 @@ class WebsiteDialogState extends State<WebsiteDialog> {
         ),
       );
     });
+
+    // individual color chips for the modern (Lumina) template tokens
+    List<Widget> luminaChips = [];
+    final luminaColors = websiteColor['lumina'];
+    if (luminaColors is Map) {
+      luminaColors.forEach((key, value) {
+        if (value is! String) return;
+        luminaChips.add(
+          InputChip(
+            backgroundColor: fromCssColor(value),
+            label: Text(
+              key,
+              key: Key('lumina$key'),
+              style: TextStyle(
+                color: fromCssColor(value).computeLuminance() < 0.5
+                    ? Colors.white
+                    : Colors.black,
+              ),
+            ),
+            onPressed: () async {
+              var result = await _pickCssColor(value);
+              if (result != null) {
+                setState(() {
+                  luminaColors[key] = result;
+                  _websiteBloc.add(
+                    WebsiteUpdate(
+                      Website(
+                        id: state.website!.id,
+                        colorJson: jsonEncode(websiteColor),
+                      ),
+                    ),
+                  );
+                });
+              }
+            },
+          ),
+        );
+      });
+    }
 
     final Uri url = Uri.parse(
       foundation.kReleaseMode
@@ -607,6 +803,20 @@ class WebsiteDialogState extends State<WebsiteDialog> {
             ),
             const SizedBox(height: 8),
             Wrap(spacing: 10, children: colorCatButtons),
+            const SizedBox(height: 16),
+            Text(
+              'Website theme (modern template)',
+              style: TextStyle(
+                fontSize: 12,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 8),
+            _websiteThemePicker(state, websiteColor),
+            if (luminaChips.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              Wrap(spacing: 10, runSpacing: 5, children: luminaChips),
+            ],
             const SizedBox(height: 16),
             Align(
               alignment: Alignment.centerRight,

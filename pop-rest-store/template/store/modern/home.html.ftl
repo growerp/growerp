@@ -81,13 +81,13 @@
             <div class="lg:col-span-7 relative z-10">
                 <div class="relative rounded-2xl overflow-hidden border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] bg-surface lg:rotate-1 hover:rotate-0 transition-transform duration-500">
                     <div class="absolute inset-0 bg-gradient-to-tr from-primary/5 to-transparent mix-blend-overlay z-10 pointer-events-none"></div>
-                    <!-- Browser chrome -->
-                    <div class="h-8 bg-surface-container-highest border-b border-white/5 flex items-center px-4 gap-2">
-                        <span class="w-2.5 h-2.5 rounded-full bg-error"></span>
-                        <span class="w-2.5 h-2.5 rounded-full bg-tertiary"></span>
-                        <span class="w-2.5 h-2.5 rounded-full bg-primary"></span>
-                    </div>
                     <img class="w-full object-cover bg-surface h-auto" src="/assets/dashboard-screenshot.png" alt="GrowERP Admin Dashboard">
+                </div>
+                <!-- Mobile main menu -->
+                <div class="absolute -bottom-10 -right-2 md:right-8 w-32 md:w-44 z-20 rotate-3 hover:rotate-0 transition-transform duration-500">
+                    <div class="absolute inset-0 bg-primary/20 rounded-[2rem] blur-[30px] -z-10"></div>
+                    <img class="w-full h-auto rounded-[1.5rem] border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.6)]"
+                        src="/assets/mobile-main-menu.png" alt="GrowERP mobile main menu">
                 </div>
             </div>
         </div>

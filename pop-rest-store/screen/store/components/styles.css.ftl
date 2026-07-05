@@ -2032,6 +2032,12 @@ body.lumina {
     color: rgb(var(--l-on-surface));
     scroll-behavior: smooth;
 }
+/* The legacy base sheet above paints #store-root with a light gradient and
+   dark text; neutralise it inside the modern set so the Lumina surface shows */
+body.lumina #store-root {
+    background: transparent;
+    color: inherit;
+}
 body.lumina :where(h1, h2, h3, h4, h5, h6)[id], body.lumina a[name] { scroll-margin-top: 6rem; }
 
 /* Glassmorphic card / panel */

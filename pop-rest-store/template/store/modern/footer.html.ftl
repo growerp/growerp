@@ -48,7 +48,7 @@
             <!-- Quick Links -->
             <div>
                 <h5 class="font-display font-semibold text-on-surface mb-4">Quick Links</h5>
-                <ul class="space-y-2">
+                <ul class="grid grid-cols-2 gap-x-4 gap-y-2">
                     <li><a href="/" class="font-label text-sm text-on-surface-variant hover:text-primary transition-colors">Home</a></li>
                     <#if isMarketing>
                     <li><a href="/modules" class="font-label text-sm text-on-surface-variant hover:text-primary transition-colors">Apps</a></li>

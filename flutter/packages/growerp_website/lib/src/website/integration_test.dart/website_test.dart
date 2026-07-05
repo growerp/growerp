@@ -64,6 +64,37 @@ class WebsiteTest {
     expect(CommonTest.getTextFormField('title'), equals('Test Company'));
   }
 
+  /// Selects a Flutter color theme for the website (writes the 'lumina'
+  /// color map into colorJson), checks the token chips appear, then
+  /// resets back to the template defaults.
+  static Future<void> updateThemeColors(WidgetTester tester) async {
+    await CommonTest.dragUntil(tester, key: 'websiteThemejungle');
+    await CommonTest.tapByKey(
+      tester,
+      'websiteThemejungle',
+      seconds: CommonTest.waitTime,
+    );
+    await CommonTest.waitForSnackbarToGo(tester);
+    await CommonTest.dragUntil(tester, key: 'luminaprimary');
+    expect(
+      tester.any(find.byKey(const Key('luminaprimary'))),
+      equals(true),
+      reason: 'lumina color chips shown after theme select?',
+    );
+    await CommonTest.dragUntil(tester, key: 'resetWebsiteColors');
+    await CommonTest.tapByKey(
+      tester,
+      'resetWebsiteColors',
+      seconds: CommonTest.waitTime,
+    );
+    await CommonTest.waitForSnackbarToGo(tester);
+    expect(
+      tester.any(find.byKey(const Key('luminaprimary'))),
+      equals(false),
+      reason: 'lumina color chips gone after reset?',
+    );
+  }
+
   static Future<void> updateTextSection(WidgetTester tester) async {
     while (tester.any(find.byKey(const Key("deleteTextChip")))) {
       await CommonTest.tapByKey(tester, "deleteTextChip");

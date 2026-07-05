@@ -58,6 +58,7 @@ void main() {
     await WebsiteTest.updateWeburl(tester);
     await WebsiteTest.updateTitle(tester);
     await WebsiteTest.updateFollowUs(tester);
+    await WebsiteTest.updateThemeColors(tester);
     await WebsiteTest.updateTextSection(tester);
     await WebsiteTest.checkTextSectionPubliclyUpdated(tester, restClient);
     await WebsiteTest.updateImages(tester);
