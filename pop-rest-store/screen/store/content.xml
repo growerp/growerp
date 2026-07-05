@@ -159,8 +159,12 @@ along with this software (see the LICENSE.md file). If not, see
                 </script>
             </else>
         </if>
+        <!-- ftl content type: full FreeMarker/HTML page, rendered directly without prose wrapper -->
+        <if condition="pageText &amp;&amp; pageLocation?.endsWith('.html.ftl')">
+            <set field="ftlPageLocation" from="pageLocation"/>
+        </if>
         <!-- convert markdown to HTML for non-obsidian content pages -->
-        <if condition="pageText &amp;&amp; extraPathNameList[0] != 'obsidian'">
+        <if condition="pageText &amp;&amp; !ftlPageLocation &amp;&amp; extraPathNameList[0] != 'obsidian'">
             <script>
                 def document = org.moqui.impl.context.renderer.MarkdownTemplateRenderer.PARSER.parse(pageText)
                 markdownHtml = org.moqui.impl.context.renderer.MarkdownTemplateRenderer.RENDERER.render(document)
@@ -171,17 +175,25 @@ along with this software (see the LICENSE.md file). If not, see
         <render-mode><text type="html" location="${template_server_header}"/></render-mode>
         <section name="PageTextSection" condition="pageText">
             <widgets>
-                <render-mode><text type="html" location="component://PopRestStore/template/store/${templateId}/content1.html.ftl"/></render-mode>
-                <section name="MarkdownHtmlSection" condition="markdownHtml">
+                <section name="FtlPageSection" condition="ftlPageLocation">
                     <widgets>
-                        <render-mode><text type="html">${markdownHtml!}</text></render-mode>
+                        <!-- ftl content type: full-width page between header and footer -->
+                        <render-mode><text type="html" location="${ftlPageLocation}"/></render-mode>
                     </widgets>
                     <fail-widgets>
-                        <!-- obsidian or fallback: render location directly -->
-                        <render-mode><text type="html" location="${location}"/></render-mode>
+                        <render-mode><text type="html" location="component://PopRestStore/template/store/${templateId}/content1.html.ftl"/></render-mode>
+                        <section name="MarkdownHtmlSection" condition="markdownHtml">
+                            <widgets>
+                                <render-mode><text type="html">${markdownHtml!}</text></render-mode>
+                            </widgets>
+                            <fail-widgets>
+                                <!-- obsidian or fallback: render location directly -->
+                                <render-mode><text type="html" location="${location}"/></render-mode>
+                            </fail-widgets>
+                        </section>
+                        <render-mode><text type="html" location="component://PopRestStore/template/store/${templateId}/content2.html.ftl"/></render-mode>
                     </fail-widgets>
                 </section>
-                <render-mode><text type="html" location="component://PopRestStore/template/store/${templateId}/content2.html.ftl"/></render-mode>
             </widgets>
             <fail-widgets>
                 <render-mode><text type="html" location="component://PopRestStore/template/store/${templateId}/error.html.ftl"/></render-mode>

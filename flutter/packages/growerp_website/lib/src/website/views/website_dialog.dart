@@ -413,6 +413,32 @@ class WebsiteDialogState extends State<WebsiteDialog> {
         },
       ),
     );
+    // full FreeMarker/HTML page (ftl content type)
+    textButtons.add(
+      IconButton(
+        key: const Key('addFtl'),
+        iconSize: 30,
+        tooltip: 'Add FreeMarker/HTML page',
+        icon: const Icon(Icons.code),
+        color: Colors.deepOrange,
+        onPressed: () async {
+          var updContent = await showDialog(
+            barrierDismissible: true,
+            context: context,
+            builder: (BuildContext context) {
+              return WebsiteContentDialog(
+                state.website!.id,
+                Content(contentType: 'ftl', text: '<#-- title: New Page -->\n'),
+              );
+            },
+          );
+
+          if (updContent != null) {
+            _websiteBloc.add(WebsiteFetch());
+          }
+        },
+      ),
+    );
 
     // create image buttons
     List<Widget> imageButtons = [];

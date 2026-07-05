@@ -202,6 +202,85 @@ class WebsiteTest {
     );
   }
 
+  /// Creates a 'ftl' (FreeMarker/HTML) content page, checks the chip shows
+  /// the title from the <#-- title: ... --> comment, updates it, verifies the
+  /// public website renders it full-width (raw HTML marker served), then
+  /// deletes all text chips.
+  static Future<void> updateFtlSection(
+    WidgetTester tester,
+    RestClient restClient,
+  ) async {
+    await CommonTest.tapByKey(tester, 'addFtl');
+    await CommonTest.enterText(
+      tester,
+      'mdInput',
+      '<#-- title: Testingftl -->\n<div>FtlMarker123</div>',
+    );
+    await CommonTest.tapByKey(tester, 'update', seconds: CommonTest.waitTime);
+    expect(CommonTest.getTextField("Testingftl"), equals('Testingftl'));
+    // update the page
+    await CommonTest.tapByKey(
+      tester,
+      'Testingftl',
+      seconds: CommonTest.waitTime,
+    );
+    await CommonTest.enterText(
+      tester,
+      'mdInput',
+      '<#-- title: Testingftl -->\n<div>FtlMarker456</div>',
+    );
+    await CommonTest.tapByKey(tester, 'update', seconds: CommonTest.waitTime);
+    expect(CommonTest.getTextField("Testingftl"), equals('Testingftl'));
+
+    // check the public website serves the rendered ftl page
+    final Website website = await restClient.getWebsite();
+    final Content ftlContent = website.websiteContent.firstWhere(
+      (c) => c.title == 'Testingftl',
+      orElse: () => throw Exception(
+        'ftl content "Testingftl" not found in websiteContent list',
+      ),
+    );
+    final Dio configuredDio = await buildDioClient();
+    final dio = Dio(
+      BaseOptions(
+        baseUrl: configuredDio.options.baseUrl,
+        responseType: ResponseType.plain,
+      ),
+    );
+    final response = await dio.get(
+      '/content/${ftlContent.path}',
+      options: Options(
+        headers: {'Host': website.hostName},
+        validateStatus: (status) => status != null,
+      ),
+    );
+    final body = response.data as String;
+    expect(
+      body.contains('FtlMarker456'),
+      isTrue,
+      reason:
+          'Public /content/${ftlContent.path} should contain rendered ftl '
+          'marker, got HTTP ${response.statusCode}: '
+          '${body.length > 300 ? '${body.substring(0, 300)}…' : body}',
+    );
+
+    // cleanup: delete remaining text chips (markdown + ftl)
+    while (tester.any(find.byKey(const Key("deleteTextChip")))) {
+      await CommonTest.tapByKey(tester, "deleteTextChip");
+      await CommonTest.tapByKey(
+        tester,
+        "continue",
+        seconds: CommonTest.waitTime,
+      );
+      await CommonTest.waitForSnackbarToGo(tester);
+    }
+    expect(
+      tester.any(find.byKey(const Key('Testingftl'))),
+      equals(false),
+      reason: 'Testingftl deleted?',
+    );
+  }
+
   static Future<void> updateImages(WidgetTester tester) async {
     while (tester.any(find.byKey(const Key("deleteImageChip")))) {
       await CommonTest.tapByKey(tester, "deleteImageChip");

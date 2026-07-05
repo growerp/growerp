@@ -26,6 +26,7 @@ abstract class Content extends Equatable with _$Content {
     @Default("") String path, // filename when image
     @Default("") String title,
     @Default("") String text,
+    @Default("") String contentType, // '' or 'md' = markdown, 'ftl' = FreeMarker
     @Uint8ListConverter() Uint8List? image,
     @Default(0) int seqId,
   }) = _Content;

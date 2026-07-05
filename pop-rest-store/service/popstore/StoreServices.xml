@@ -149,16 +149,28 @@ along with this software (see the LICENSE.md file). If not, see
             <set field="menu1" from="[]"/><!-- needed for actual content in content.xml -->
             <iterate list="menuPages" entry="page">
                 <set field="location" value="${page.rootPageLocation}/content/${page.pagePath}.md.ftl"/>
+                <set field="pageType" value="md"/>
                 <set field="docRr" from="ec.resource.getLocationReference(location)"/>
-                <if condition="docRr == null"><continue/></if>
+                <if condition="docRr == null || !docRr.exists">
+                    <!-- ftl content type: full FreeMarker/HTML page -->
+                    <set field="location" value="${page.rootPageLocation}/content/${page.pagePath}.html.ftl"/>
+                    <set field="pageType" value="ftl"/>
+                    <set field="docRr" from="ec.resource.getLocationReference(location)"/>
+                </if>
+                <if condition="docRr == null || !docRr.exists"><continue/></if>
                 <set field="lines" from="docRr.getText()"/>
                 <if condition="lines">
                     <script>
                         Map menuItem = [items: [], path: page.pagePath];
-                        lines.eachLine {
-                            if (it.startsWith('# ') || it.startsWith('## ')) {
-                                if (!menuItem.containsKey("title"))
-                                    menuItem['title'] = it.substring(it.indexOf(' ') + 1);
+                        if (pageType == 'ftl') {
+                            def titleMatch = (lines =~ /title:\s*(.*?)\s*-->/);
+                            menuItem['title'] = titleMatch.find() ? titleMatch.group(1) : page.pagePath;
+                        } else {
+                            lines.eachLine {
+                                if (it.startsWith('# ') || it.startsWith('## ')) {
+                                    if (!menuItem.containsKey("title"))
+                                        menuItem['title'] = it.substring(it.indexOf(' ') + 1);
+                                }
                             }
                         }
                         menu.add(menuItem);

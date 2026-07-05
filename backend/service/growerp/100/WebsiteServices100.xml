@@ -27,6 +27,7 @@ along with this software (see the LICENSE.md file). If not, see
                         <parameter name="path" />
                         <parameter name="title" />
                         <parameter name="text" /><!-- dummy value to indicate this is text content -->
+                        <parameter name="contentType" /><!-- md (default) or ftl -->
                     </parameter>
                 </parameter>
                 <parameter name="websiteCategories" type="List">
@@ -93,25 +94,36 @@ along with this software (see the LICENSE.md file). If not, see
             <iterate list="pages" entry="page">
                 <set field="location"
                     value="${page.rootPageLocation}/content/${page.pagePath}.md.ftl" />
+                <set field="contentType" value="md" />
                 <set field="contentRef" from="ec.resource.getLocationReference(location)" />
-                <if condition="contentRef != null">
-                    <set field="contentText" from="contentRef.getText()" />
+                <if condition="contentRef == null || !contentRef.exists">
+                    <!-- ftl content type: full FreeMarker/HTML page -->
+                    <set field="location"
+                        value="${page.rootPageLocation}/content/${page.pagePath}.html.ftl" />
+                    <set field="contentType" value="ftl" />
+                    <set field="contentRef" from="ec.resource.getLocationReference(location)" />
                 </if>
-                <if condition="!contentText">
-                    <set field="contentText" value="" />
+                <set field="contentText" value="" />
+                <if condition="contentRef != null &amp;&amp; contentRef.exists">
+                    <set field="contentText" from="contentRef.getText() ?: ''" />
                 </if>
                 <script>
                     String title = '';
-                    contentText.eachLine {
-                        if (it.startsWith('# ') || it.startsWith('## ')) {
-                            if (title == '')
-                                title = it.substring(it.indexOf(' ') + 1);
+                    if (contentType == 'ftl') {
+                        def titleMatch = (contentText =~ /title:\s*(.*?)\s*-->/);
+                        title = titleMatch.find() ? titleMatch.group(1) : page.pagePath;
+                    } else {
+                        contentText.eachLine {
+                            if (it.startsWith('# ') || it.startsWith('## ')) {
+                                if (title == '')
+                                    title = it.substring(it.indexOf(' ') + 1);
+                            }
                         }
                     }
                 </script>
                 <!-- 'x' just to indicate that the content is text otherwise is image-->
                 <script>websiteContent.add([path: page.pagePath, title: title,
-                        text: "x", seqId: page.sequenceNum])</script>
+                        text: "x", contentType: contentType, seqId: page.sequenceNum])</script>
             </iterate>
             <entity-find entity-name="growerp.store.ProductStoreContent" list="images">
                 <econdition field-name="productStoreId" from="stores[0].productStoreId" />
@@ -536,7 +548,8 @@ along with this software (see the LICENSE.md file). If not, see
         <description>get the content, text and images from the website</description>
         <in-parameters>
             <parameter name="path" />
-            <parameter name="text" /><!-- not empty to indicate text otherwise image-->
+            <!-- not empty to indicate text otherwise image; may hold full FreeMarker/HTML -->
+            <parameter name="text" allow-html="any" />
         </in-parameters>
         <out-parameters>
             <parameter name="content" type="Map">
@@ -544,6 +557,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="title" />
                 <parameter name="text" />
                 <parameter name="image" />
+                <parameter name="contentType" />
                 <parameter name="seqId" type="Integer" />
             </parameter>
         </out-parameters>
@@ -572,21 +586,36 @@ along with this software (see the LICENSE.md file). If not, see
                     <set field="content" from="[:]" />
                     <set field="location"
                         value="${pages[0].rootPageLocation}/content/${pages[0].pagePath}.md.ftl" />
+                    <set field="contentType" value="md" />
                     <set field="contentRef" from="ec.resource.getLocationReference(location)" />
-                    <if condition="contentRef != null">
-                        <set field="contentText" from="contentRef.getText()" />
+                    <if condition="contentRef == null || !contentRef.exists">
+                        <!-- ftl content type: full FreeMarker/HTML page -->
+                        <set field="location"
+                            value="${pages[0].rootPageLocation}/content/${pages[0].pagePath}.html.ftl" />
+                        <set field="contentType" value="ftl" />
+                        <set field="contentRef" from="ec.resource.getLocationReference(location)" />
+                    </if>
+                    <set field="contentText" value="" />
+                    <if condition="contentRef != null &amp;&amp; contentRef.exists">
+                        <set field="contentText" from="contentRef.getText() ?: ''" />
                     </if>
                     <script>
                         String title = '';
-                        contentText.eachLine {
-                            if (it.startsWith('# ') || it.startsWith('## ')) {
-                                if (title == '')
-                                    title = it.substring(it.indexOf(' ') + 1);
+                        if (contentType == 'ftl') {
+                            def titleMatch = (contentText =~ /title:\s*(.*?)\s*-->/);
+                            title = titleMatch.find() ? titleMatch.group(1) : pages[0].pagePath;
+                        } else {
+                            contentText.eachLine {
+                                if (it.startsWith('# ') || it.startsWith('## ')) {
+                                    if (title == '')
+                                        title = it.substring(it.indexOf(' ') + 1);
+                                }
                             }
                         }
                     </script>
                     <set field="content"
-                        from="[path: pages[0].pagePath, title: title, text: contentText, seqId: pages[0].sequenceNum]" />
+                        from="[path: pages[0].pagePath, title: title, text: contentText,
+                            contentType: contentType, seqId: pages[0].sequenceNum]" />
                 </then>
                 <else>
                     <!-- image content -->
@@ -616,8 +645,10 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="content" type="Map" required="true">
                 <parameter name="path" />
                 <parameter name="title" />
-                <parameter name="text" />
+                <!-- ftl content type pages contain full FreeMarker/HTML -->
+                <parameter name="text" allow-html="any" />
                 <parameter name="image" />
+                <parameter name="contentType" />
                 <parameter name="seqId" type="Integer" />
             </parameter>
         </in-parameters>
@@ -627,6 +658,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="title" />
                 <parameter name="text" />
                 <parameter name="image" />
+                <parameter name="contentType" />
                 <parameter name="seqId" type="Integer" />
             </parameter>
         </out-parameters>
@@ -673,10 +705,19 @@ along with this software (see the LICENSE.md file). If not, see
                                         <return error="true" message="path: $path not found!" />
                                     </if>
                                     <set field="root" from="pages[0].rootPageLocation" />
+                                    <!-- existing file extension determines the content type -->
+                                    <set field="fileExt" value=".md.ftl" />
                                     <set field="location"
-                                        value="${root}/content/${content.path}.md.ftl" />
+                                        value="${root}/content/${content.path}${fileExt}" />
                                     <set field="docRr"
                                         from="ec.resource.getLocationReference(location)" />
+                                    <if condition="docRr == null || !docRr.exists">
+                                        <set field="fileExt" value=".html.ftl" />
+                                        <set field="location"
+                                            value="${root}/content/${content.path}${fileExt}" />
+                                        <set field="docRr"
+                                            from="ec.resource.getLocationReference(location)" />
+                                    </if>
                                     <if condition="content.text != docRr.getText()">
                                         <script>docRr.putText(content.text)</script>
                                         <!-- Update WikiPage.publishedVersionName to the new version
@@ -684,7 +725,7 @@ along with this software (see the LICENSE.md file). If not, see
                                         <script>
                                             def dbres = ec.entity.find('moqui.resource.DbResource')
                                                 .condition('parentResourceId', topResourceContent[0].resourceId)
-                                                .condition('filename', content.path + '.md.ftl')
+                                                .condition('filename', content.path + fileExt)
                                                 .useCache(false).one()
                                             if (dbres) {
                                                 def dbrf = ec.entity.find('moqui.resource.DbResourceFile')
@@ -723,14 +764,25 @@ along with this software (see the LICENSE.md file). If not, see
                                 in-map="[wikiPageId: wikiPageId,
                                 pagePath:  wikiPageId]" />
                             <set field="content.path" from="wikiPageId" />
+                            <!-- file extension / mime type by content type (md default, ftl) -->
+                            <if condition="content.contentType == 'ftl'">
+                                <then>
+                                    <set field="fileExt" value=".html.ftl" />
+                                    <set field="mimeType" value="text/html" />
+                                </then>
+                                <else>
+                                    <set field="fileExt" value=".md.ftl" />
+                                    <set field="mimeType" value="text/markdown" />
+                                </else>
+                            </if>
                             <!-- create db resource -->
                             <service-call name="create#moqui.resource.DbResource" out-map="context"
                                 in-map="[parentResourceId: topResourceContent[0].resourceId,
-                            isFile: 'Y', filename: wikiPageId + '.md.ftl']" />
+                            isFile: 'Y', filename: wikiPageId + fileExt]" />
                             <!-- file -->
                             <service-call name="create#moqui.resource.DbResourceFile"
                                 in-map="[resourceId: resourceId,
-                                    mimeType: 'text/markdown',
+                                    mimeType: mimeType,
                                     versionName: '01',
                                     rootVersionName: '01',
                                     fileData: content.text]" />

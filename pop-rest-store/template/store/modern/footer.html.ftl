@@ -52,12 +52,10 @@
                     <li><a href="/" class="font-label text-sm text-on-surface-variant hover:text-primary transition-colors">Home</a></li>
                     <#if isMarketing>
                     <li><a href="/modules" class="font-label text-sm text-on-surface-variant hover:text-primary transition-colors">Apps</a></li>
-                    <li><a href="/benefits" class="font-label text-sm text-on-surface-variant hover:text-primary transition-colors">Benefits</a></li>
-                    <li><a href="/pricing" class="font-label text-sm text-on-surface-variant hover:text-primary transition-colors">Pricing</a></li>
                     <li><a href="https://github.com/growerp/growerp" target="_blank" rel="noopener" class="font-label text-sm text-on-surface-variant hover:text-primary transition-colors">GitHub</a></li>
                     </#if>
                     <#list storeInfo.menu as topItem>
-                    <#if !topItem.title?has_content || topItem.title?lower_case?starts_with('home')><#continue></#if>
+                    <#if !topItem.title?has_content || topItem.path == 'home'><#continue></#if>
                     <li>
                         <#if topItem.path == 'obsidian'>
                         <a href="/${topItem.path}" class="font-label text-sm text-on-surface-variant hover:text-primary transition-colors">${topItem.title!topItem.path}</a>

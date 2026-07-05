@@ -12,8 +12,6 @@
             <div class="hidden md:flex items-center gap-6">
                 <#if isMarketing>
                     <a href="/modules" class="font-label text-sm text-on-surface-variant hover:text-primary transition-colors">Apps</a>
-                    <a href="/benefits" class="font-label text-sm text-on-surface-variant hover:text-primary transition-colors">Benefits</a>
-                    <a href="/pricing" class="font-label text-sm text-on-surface-variant hover:text-primary transition-colors">Pricing</a>
                 <#else>
                     <#-- Shop Categories Dropdown -->
                     <#if browseRootCategoryInfo.subCategoryList?has_content>
@@ -43,7 +41,7 @@
 
                 <#-- Content Menu Items (both modes) -->
                 <#list storeInfo.menu as topItem>
-                <#if !topItem.title?has_content || topItem.title?lower_case?starts_with('home')><#continue></#if>
+                <#if !topItem.title?has_content || topItem.path == 'home'><#continue></#if>
                 <#if topItem.items?has_content>
                 <div class="relative">
                     <button type="button" data-menu-button="menuDropdown${topItem?index}" aria-expanded="false"
@@ -152,8 +150,6 @@
         <div id="mobileMenu" data-dropdown-panel class="hidden md:hidden border-t border-white/10 bg-surface-container-lowest/90 px-4 py-4 space-y-1">
             <#if isMarketing>
                 <a href="/modules" class="block px-2 py-2 rounded-lg font-label text-sm text-on-surface hover:bg-primary/10 hover:text-primary transition-colors">Apps</a>
-                <a href="/benefits" class="block px-2 py-2 rounded-lg font-label text-sm text-on-surface hover:bg-primary/10 hover:text-primary transition-colors">Benefits</a>
-                <a href="/pricing" class="block px-2 py-2 rounded-lg font-label text-sm text-on-surface hover:bg-primary/10 hover:text-primary transition-colors">Pricing</a>
                 <a href="https://admin.growerp.com" class="block px-2 py-2 rounded-lg font-label text-sm text-on-surface hover:bg-primary/10 hover:text-primary transition-colors">Sign In</a>
             <#else>
                 <#if browseRootCategoryInfo.subCategoryList?has_content>
@@ -166,7 +162,7 @@
                     <a href="/category/${storeInfo.categoryByType.PsctPromotions.productCategoryId}" class="block px-2 py-2 rounded-lg font-label text-sm text-on-surface hover:bg-primary/10 hover:text-primary transition-colors">${storeInfo.categoryByType.PsctPromotions.categoryName}</a>
                 </#if>
                 <#list storeInfo.menu as topItem>
-                <#if !topItem.title?has_content || topItem.title?lower_case?starts_with('home')><#continue></#if>
+                <#if !topItem.title?has_content || topItem.path == 'home'><#continue></#if>
                 <#if topItem.items?has_content>
                     <span class="block px-2 pt-2 pb-1 text-xs uppercase tracking-wider text-outline">${topItem.title!topItem.path}</span>
                     <#list topItem.items as item>

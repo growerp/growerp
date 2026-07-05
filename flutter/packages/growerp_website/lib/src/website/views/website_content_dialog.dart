@@ -247,9 +247,12 @@ class WebsiteContentState extends State<WebsiteContent> {
   }
 
   Widget _showMdTextForm(bool isPhone) {
+    // ftl content: raw FreeMarker/HTML page, no client-side preview possible
+    final bool isFtl = widget.content.contentType == 'ftl';
     Widget input = TextFormField(
       key: const Key('mdInput'),
       autofocus: true,
+      style: isFtl ? const TextStyle(fontFamily: 'monospace', fontSize: 13) : null,
       decoration: InputDecoration(labelText: _localizations.description),
       expands: true,
       maxLines: null,
@@ -264,7 +267,9 @@ class WebsiteContentState extends State<WebsiteContent> {
     );
     return Column(
       children: [
-        isPhone
+        isFtl
+            ? Expanded(child: input)
+            : isPhone
             ? Expanded(
                 child: Column(
                   children: [

@@ -46,7 +46,7 @@
 
                 <#-- Content Menu Items -->
                 <#list storeInfo.menu as topItem>
-                <#if !topItem.title?has_content || topItem.title?lower_case?starts_with('home')><#continue></#if>
+                <#if !topItem.title?has_content || topItem.path == 'home'><#continue></#if>
                 <#if topItem.items?has_content>
                 <li class="nav-item dropdown">
                     <a class="nav-link" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">

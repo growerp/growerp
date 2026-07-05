@@ -61,6 +61,7 @@ void main() {
     await WebsiteTest.updateThemeColors(tester);
     await WebsiteTest.updateTextSection(tester);
     await WebsiteTest.checkTextSectionPubliclyUpdated(tester, restClient);
+    await WebsiteTest.updateFtlSection(tester, restClient);
     await WebsiteTest.updateImages(tester);
     await WebsiteTest.updateHomePageCategories(tester, "Deals", products);
     await WebsiteTest.updateHomePageCategories(tester, "Featured", products);
