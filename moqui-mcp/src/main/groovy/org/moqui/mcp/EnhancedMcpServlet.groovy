@@ -408,6 +408,16 @@ class EnhancedMcpServlet extends HttpServlet {
             // endpoint event forever and times out (300s) instead of POSTing initialize/tools/list.
             response.flushBuffer()
 
+            // Invalidate the per-connection HTTP session now, while it is still resident.
+            // SSE clients are stateless (API key / header auth, no cookie); the Jetty session is
+            // only a byproduct of request init. Invalidating early means at shutdown the session
+            // is already INVALID so Jetty's release() skips passivation ("not resident" warning).
+            // isNew() guard: leave pre-existing cookie sessions (browser/Visit auth) alone.
+            try {
+                def httpSession = request.getSession(false)
+                if (httpSession?.isNew()) httpSession.invalidate()
+            } catch (Exception ignored) {}
+
             // Keep connection alive with periodic pings.
             // NOTE: response.isCommitted() is TRUE once headers are flushed, so we must NOT
             // use !isCommitted() as the loop condition — that would exit immediately.
@@ -446,8 +456,6 @@ class EnhancedMcpServlet extends HttpServlet {
         } finally {
             transport.unregisterSseWriter(sessionId)
             adkSessionHeaders.remove(sessionId)
-            // Invalidate HTTP session before completing to prevent Jetty session passivation race on shutdown
-            try { request.getSession(false)?.invalidate() } catch (Exception ignored) {}
             if (request.isAsyncStarted()) {
                 try {
                     request.getAsyncContext().complete()
