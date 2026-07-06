@@ -10,9 +10,11 @@
             background-color: #f8f9fa;
             display: flex;
             justify-content: center;
-            align-items: center;
-            height: 100vh;
+            align-items: flex-start;
+            min-height: 100vh;
             margin: 0;
+            padding: 12px;
+            box-sizing: border-box;
         }
         .checkout-container {
             background-color: #ffffff;
@@ -20,7 +22,7 @@
             border-radius: 8px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.08);
             width: 100%;
-            max-width: 350px;
+            max-width: 640px;
         }
         h1 {
             font-size: 28px;
@@ -314,6 +316,12 @@
 
             <section class="order-summary">
                 <h2>Order Summary</h2>
+                <#if product?has_content>
+                <div class="form-group">
+                    <label for="product">Product</label>
+                    <input type="text" id="product" name="product" readonly value="${product}">
+                </div>
+                </#if>
                 <#--div class="summary-item">
                     <span>Subtotal:</span>
                     <span>$150.00</span>
@@ -328,6 +336,9 @@
                 </div>
             </section>
 
+            <#if !product?has_content>
+            <input type="hidden" id="product" name="product" value="">
+            </#if>
             <input type="hidden" id="currencyId" name="currencyId" value="USD">
             <input type="hidden" id="creditCardType" name="creditCardType" value="${creditCardType!}">
             <input type="hidden" id="amount" name="amount" value="${amount!}">

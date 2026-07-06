@@ -10,9 +10,7 @@
 
             <!-- Desktop navigation -->
             <div class="hidden md:flex items-center gap-6">
-                <#if isMarketing>
-                    <a href="/modules" class="font-label text-sm text-on-surface-variant hover:text-primary transition-colors">Apps</a>
-                <#else>
+                <#if !isMarketing>
                     <#-- Shop Categories Dropdown -->
                     <#if browseRootCategoryInfo.subCategoryList?has_content>
                     <div class="relative">
@@ -39,9 +37,12 @@
                     </#if>
                 </#if>
 
-                <#-- Content Menu Items (both modes) -->
+                <#-- Content Menu Items (both modes); marketing Apps link inserted before pricing -->
                 <#list storeInfo.menu as topItem>
                 <#if !topItem.title?has_content || topItem.path == 'home'><#continue></#if>
+                <#if isMarketing && topItem.path == 'pricing'>
+                    <a href="/modules" class="font-label text-sm text-on-surface-variant hover:text-primary transition-colors">Apps</a>
+                </#if>
                 <#if topItem.items?has_content>
                 <div class="relative">
                     <button type="button" data-menu-button="menuDropdown${topItem?index}" aria-expanded="false"
@@ -151,7 +152,13 @@
         <!-- Mobile menu panel -->
         <div id="mobileMenu" data-dropdown-panel class="hidden md:hidden border-t border-white/10 bg-surface-container-lowest/90 px-4 py-4 space-y-1">
             <#if isMarketing>
-                <a href="/modules" class="block px-2 py-2 rounded-lg font-label text-sm text-on-surface hover:bg-primary/10 hover:text-primary transition-colors">Apps</a>
+                <#list storeInfo.menu as topItem>
+                <#if !topItem.title?has_content || topItem.path == 'home'><#continue></#if>
+                <#if topItem.path == 'pricing'>
+                    <a href="/modules" class="block px-2 py-2 rounded-lg font-label text-sm text-on-surface hover:bg-primary/10 hover:text-primary transition-colors">Apps</a>
+                </#if>
+                <a href="/content/${topItem.path}" class="block px-2 py-2 rounded-lg font-label text-sm text-on-surface hover:bg-primary/10 hover:text-primary transition-colors">${topItem.title!topItem.path}</a>
+                </#list>
                 <#if (storeOwnerPartyId!'') != 'GROWERP'>
                 <a href="https://admin.growerp.com" class="block px-2 py-2 rounded-lg font-label text-sm text-on-surface hover:bg-primary/10 hover:text-primary transition-colors">Sign In</a>
                 </#if>

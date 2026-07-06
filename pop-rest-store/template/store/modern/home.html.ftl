@@ -58,8 +58,8 @@
                     <span class="font-label text-xs text-on-surface-variant">v2.0 Open Source Released</span>
                 </div>
                 <h1 class="font-display text-4xl md:text-5xl font-bold tracking-tight leading-tight text-on-surface">
-                    Run Your Entire<br>
-                    <span class="l-gradient-text">Business From One Screen</span>
+                    Feeling overwhelmed by your ERP?<br>
+                    <span class="l-gradient-text">You're not alone.</span>
                 </h1>
                 <p class="text-lg text-on-surface-variant mt-6 max-w-xl leading-relaxed">
                     The open-source, AI-powered ERP that scales with you. Eliminate data silos, automate workflows, and
@@ -70,8 +70,8 @@
                         Start Free Trial
                     </a>
                     <a href="/assessmentLanding?landingPageId=ERP_LANDING_PAGE" class="l-glass hover:bg-surface-container text-on-surface font-label text-sm font-medium px-8 py-4 rounded-lg transition-all active:scale-95 text-center flex items-center justify-center gap-2">
-                        <span class="material-symbols-outlined text-[20px]">play_circle</span>
-                        View Demo
+                        <span class="material-symbols-outlined text-[20px]">quiz</span>
+                        Start the ERP Assessment
                     </a>
                 </div>
                 <p class="text-sm text-on-surface-variant/70 mt-4">No credit card required &bull; 2 weeks free</p>
@@ -131,6 +131,31 @@
                 </div>
                 <h3 class="font-display text-xl font-semibold text-on-surface">Run Anywhere</h3>
                 <p class="text-on-surface-variant leading-relaxed">Cloud or on-premise flexibility. Deploy on our secure managed cloud or your own private servers instantly.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Platform Downloads -->
+    <section class="max-w-container mx-auto px-4 md:px-12 pb-8 relative">
+        <div class="l-glass rounded-2xl p-8 text-center">
+            <h3 class="font-display text-xl font-semibold text-on-surface mb-2">Get GrowERP on every platform</h3>
+            <p class="text-sm text-on-surface-variant mb-6">One codebase, every device &mdash; your data syncs seamlessly.</p>
+            <div class="flex flex-wrap justify-center gap-3">
+                <a href="https://admin.growerp.com" target="_blank" rel="noopener" class="inline-flex items-center gap-2 border border-white/15 hover:border-primary/50 hover:text-primary text-on-surface font-label text-sm px-5 py-2.5 rounded-full transition-colors">
+                    <span class="material-symbols-outlined text-[18px]">language</span>Web Browser
+                </a>
+                <a href="https://play.google.com/store/apps/details?id=org.growerp.admin" target="_blank" rel="noopener" class="inline-flex items-center gap-2 border border-white/15 hover:border-primary/50 hover:text-primary text-on-surface font-label text-sm px-5 py-2.5 rounded-full transition-colors">
+                    <span class="material-symbols-outlined text-[18px]">android</span>Android
+                </a>
+                <a href="https://apps.apple.com/us/app/growerp-admin-open-source/id1545521755" target="_blank" rel="noopener" class="inline-flex items-center gap-2 border border-white/15 hover:border-primary/50 hover:text-primary text-on-surface font-label text-sm px-5 py-2.5 rounded-full transition-colors">
+                    <span class="material-symbols-outlined text-[18px]">phone_iphone</span>iOS &amp; macOS
+                </a>
+                <a href="https://snapcraft.io/growerp-admin" target="_blank" rel="noopener" class="inline-flex items-center gap-2 border border-white/15 hover:border-primary/50 hover:text-primary text-on-surface font-label text-sm px-5 py-2.5 rounded-full transition-colors">
+                    <span class="material-symbols-outlined text-[18px]">terminal</span>Linux
+                </a>
+                <a href="https://apps.microsoft.com/detail/9nwx6kftjnql" target="_blank" rel="noopener" class="inline-flex items-center gap-2 border border-white/15 hover:border-primary/50 hover:text-primary text-on-surface font-label text-sm px-5 py-2.5 rounded-full transition-colors">
+                    <span class="material-symbols-outlined text-[18px]">grid_view</span>Windows
+                </a>
             </div>
         </div>
     </section>

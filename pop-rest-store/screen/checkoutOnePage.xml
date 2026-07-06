@@ -37,7 +37,8 @@ along with this software (see the LICENSE.md file). If not, see
         <default-response url="." save-parameters="true"
             parameter-map="[result: result,
                 resultMessage: resultMessage,
-                amount: amount]"/>
+                amount: amount,
+                product: product]"/>
         <error-response url="." save-parameters="true"
             parameter-map="[result: false,
                 resultMessage: ec.message.hasError()? ec.message.getErrorsString() : resultMessage ?: 'Backend problem, please try later']"/>
@@ -45,6 +46,8 @@ along with this software (see the LICENSE.md file). If not, see
 
     <actions>
         <log message="====$productStoreId  $resultMessage $checkoutResult"/>
+        <!-- allow same-origin framing: the pricing page opens this checkout in an overlay iframe -->
+        <script>ec.web.response.setHeader('Content-Security-Policy', "frame-ancestors 'self'; form-action 'self';")</script>
     </actions>
     <widgets>
         <!-- top path name is defined in MoquiConf.xml -->

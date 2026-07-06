@@ -38,8 +38,8 @@
                     <span class="font-label text-xs text-on-surface-variant">v2.0 Open Source Released</span>
                 </div>
                 <h1 class="font-display text-4xl md:text-5xl font-bold tracking-tight leading-tight text-on-surface">
-                    Run Your Entire<br>
-                    <span class="l-gradient-text">Business From One Screen</span>
+                    Feeling overwhelmed by your ERP?<br>
+                    <span class="l-gradient-text">You're not alone.</span>
                 </h1>
                 <p class="text-lg text-on-surface-variant mt-6 max-w-xl leading-relaxed">
                     The open-source, AI-powered ERP that scales with you. Eliminate data silos, automate workflows, and
@@ -50,8 +50,8 @@
                         Start Free Trial
                     </a>
                     <a href="/assessmentLanding?landingPageId=ERP_LANDING_PAGE" class="l-glass hover:bg-surface-container text-on-surface font-label text-sm font-medium px-8 py-4 rounded-lg transition-all active:scale-95 text-center flex items-center justify-center gap-2">
-                        <span class="material-symbols-outlined text-[20px]">play_circle</span>
-                        View Demo
+                        <span class="material-symbols-outlined text-[20px]">quiz</span>
+                        Start the ERP Assessment
                     </a>
                 </div>
                 <p class="text-sm text-on-surface-variant/70 mt-4">No credit card required &bull; 2 weeks free</p>
@@ -114,6 +114,31 @@
             </div>
         </div>
     </section>
+
+    <!-- Platform Downloads -->
+    <section class="max-w-container mx-auto px-4 md:px-12 pb-8 relative">
+        <div class="l-glass rounded-2xl p-8 text-center">
+            <h3 class="font-display text-xl font-semibold text-on-surface mb-2">Get GrowERP on every platform</h3>
+            <p class="text-sm text-on-surface-variant mb-6">One codebase, every device &mdash; your data syncs seamlessly.</p>
+            <div class="flex flex-wrap justify-center gap-3">
+                <a href="https://admin.growerp.com" target="_blank" rel="noopener" class="inline-flex items-center gap-2 border border-white/15 hover:border-primary/50 hover:text-primary text-on-surface font-label text-sm px-5 py-2.5 rounded-full transition-colors">
+                    <span class="material-symbols-outlined text-[18px]">language</span>Web Browser
+                </a>
+                <a href="https://play.google.com/store/apps/details?id=org.growerp.admin" target="_blank" rel="noopener" class="inline-flex items-center gap-2 border border-white/15 hover:border-primary/50 hover:text-primary text-on-surface font-label text-sm px-5 py-2.5 rounded-full transition-colors">
+                    <span class="material-symbols-outlined text-[18px]">android</span>Android
+                </a>
+                <a href="https://apps.apple.com/us/app/growerp-admin-open-source/id1545521755" target="_blank" rel="noopener" class="inline-flex items-center gap-2 border border-white/15 hover:border-primary/50 hover:text-primary text-on-surface font-label text-sm px-5 py-2.5 rounded-full transition-colors">
+                    <span class="material-symbols-outlined text-[18px]">phone_iphone</span>iOS &amp; macOS
+                </a>
+                <a href="https://snapcraft.io/growerp-admin" target="_blank" rel="noopener" class="inline-flex items-center gap-2 border border-white/15 hover:border-primary/50 hover:text-primary text-on-surface font-label text-sm px-5 py-2.5 rounded-full transition-colors">
+                    <span class="material-symbols-outlined text-[18px]">terminal</span>Linux
+                </a>
+                <a href="https://apps.microsoft.com/detail/9nwx6kftjnql" target="_blank" rel="noopener" class="inline-flex items-center gap-2 border border-white/15 hover:border-primary/50 hover:text-primary text-on-surface font-label text-sm px-5 py-2.5 rounded-full transition-colors">
+                    <span class="material-symbols-outlined text-[18px]">grid_view</span>Windows
+                </a>
+            </div>
+        </div>
+    </section>
 </main>
 ]]></fileData>
             <histories versionName="01" versionDate="1485028800000" isDiff="N" />
@@ -124,7 +149,7 @@
          FEATURES PAGE
          ================================================================ -->
     <moqui.resource.wiki.WikiPage wikiPageId="growerp_features" wikiSpaceId="GROWERP_WS" pagePath="features"
-        publishedVersionName="01" sequenceNum="2">
+        publishedVersionName="01" sequenceNum="3">
         <histories historySeqId="01" versionName="01" changeDateTime="1485028800000" />
     </moqui.resource.wiki.WikiPage>
     <moqui.resource.DbResource filename="features.md.ftl" isFile="Y" resourceId="growerp_features"
@@ -199,7 +224,7 @@ Automatically generate and manage a professional, customer-facing website direct
          GETTING STARTED PAGE
          ================================================================ -->
     <moqui.resource.wiki.WikiPage wikiPageId="growerp_getting_started" wikiSpaceId="GROWERP_WS" pagePath="getting-started"
-        publishedVersionName="01" sequenceNum="3">
+        publishedVersionName="01" sequenceNum="4">
         <histories historySeqId="01" versionName="01" changeDateTime="1485028800000" />
     </moqui.resource.wiki.WikiPage>
     <moqui.resource.DbResource filename="getting-started.md.ftl" isFile="Y" resourceId="growerp_getting_started"
@@ -282,7 +307,7 @@ If you decide GrowERP isn't for you:
          BENEFITS PAGE (ftl content type: full FreeMarker/HTML page)
          ================================================================ -->
     <moqui.resource.wiki.WikiPage wikiPageId="growerp_benefits" wikiSpaceId="GROWERP_WS" pagePath="benefits"
-        publishedVersionName="01" sequenceNum="3.5">
+        publishedVersionName="01" sequenceNum="2">
         <histories historySeqId="01" versionName="01" changeDateTime="1485028800000" />
     </moqui.resource.wiki.WikiPage>
     <moqui.resource.DbResource filename="benefits.html.ftl" isFile="Y" resourceId="growerp_benefits"
@@ -459,7 +484,7 @@ If you decide GrowERP isn't for you:
          PRICING PAGE
          ================================================================ -->
     <moqui.resource.wiki.WikiPage wikiPageId="growerp_pricing" wikiSpaceId="GROWERP_WS" pagePath="pricing"
-        publishedVersionName="01" sequenceNum="4">
+        publishedVersionName="01" sequenceNum="5">
         <histories historySeqId="01" versionName="01" changeDateTime="1485028800000" />
     </moqui.resource.wiki.WikiPage>
     <moqui.resource.DbResource filename="pricing.html.ftl" isFile="Y" resourceId="growerp_pricing"
@@ -508,14 +533,13 @@ If you decide GrowERP isn't for you:
                     <span class="text-sm text-on-surface">Standard Documentation</span>
                 </li>
             </ul>
-            <a href="https://admin.growerp.com" class="w-full py-3 rounded-lg border border-white/20 text-on-surface font-label text-sm font-medium hover:bg-white/5 transition-colors mt-auto text-center">
+            <a href="/checkoutOnePage?amount=49.99&product=Do%20It%20Yourself%20(DIY)" onclick="openCheckout(this.getAttribute('href'), this); return false;" class="w-full py-3 rounded-lg border border-white/20 text-on-surface font-label text-sm font-medium hover:bg-white/5 transition-colors mt-auto text-center">
                 Choose DIY
             </a>
         </div>
 
         <!-- DWY Card (Highlighted) -->
-        <div class="l-glass rounded-xl p-8 flex flex-col relative group md:-translate-y-4 !border-primary/50">
-            <div class="absolute inset-0 bg-gradient-to-b from-primary/10 to-transparent rounded-xl pointer-events-none"></div>
+        <div class="l-glass rounded-xl p-8 flex flex-col relative group plan-selected">
             <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-on-primary px-3 py-1 rounded-full font-label text-xs font-semibold tracking-wider uppercase">Most Popular</div>
             <div class="mb-8 relative z-10">
                 <h3 class="font-display text-xl font-semibold text-on-surface mb-2">Do It With You (DWY)</h3>
@@ -543,7 +567,7 @@ If you decide GrowERP isn't for you:
                     <span class="text-sm text-on-surface">Guided Data Migration</span>
                 </li>
             </ul>
-            <a href="https://admin.growerp.com" class="w-full py-3 rounded-lg bg-primary text-on-primary font-label text-sm font-medium hover:bg-primary/90 transition-all mt-auto relative z-10 l-glow text-center">
+            <a href="/checkoutOnePage?amount=499&product=Do%20It%20With%20You%20(DWY)" onclick="openCheckout(this.getAttribute('href'), this); return false;" class="w-full py-3 rounded-lg border border-white/20 text-on-surface font-label text-sm font-medium hover:bg-white/5 transition-colors mt-auto relative z-10 text-center">
                 Choose DWY
             </a>
         </div>
@@ -576,7 +600,7 @@ If you decide GrowERP isn't for you:
                     <span class="text-sm text-on-surface">24/7 Phone Support</span>
                 </li>
             </ul>
-            <a href="https://admin.growerp.com" class="w-full py-3 rounded-lg border border-white/20 text-on-surface font-label text-sm font-medium hover:bg-white/5 transition-colors mt-auto text-center">
+            <a href="/checkoutOnePage?amount=999&product=Do%20It%20For%20You%20(DFY)" onclick="openCheckout(this.getAttribute('href'), this); return false;" class="w-full py-3 rounded-lg border border-white/20 text-on-surface font-label text-sm font-medium hover:bg-white/5 transition-colors mt-auto text-center">
                 Choose DFY
             </a>
         </div>
@@ -608,7 +632,7 @@ If you decide GrowERP isn't for you:
                     <span class="text-sm text-on-surface">SLA Guarantees</span>
                 </li>
             </ul>
-            <a href="/content/contact" class="w-full py-3 rounded-lg bg-white/10 text-on-surface font-label text-sm font-medium hover:bg-white/20 transition-colors mt-auto border border-white/10 text-center">
+            <a href="mailto:support@growerp.com" class="w-full py-3 rounded-lg bg-white/10 text-on-surface font-label text-sm font-medium hover:bg-white/20 transition-colors mt-auto border border-white/10 text-center">
                 Contact Sales
             </a>
         </div>
@@ -616,6 +640,56 @@ If you decide GrowERP isn't for you:
 
     <p class="text-center text-sm text-on-surface-variant/70">No credit card required &bull; 2 weeks free on all plans</p>
 </main>
+
+<!-- Checkout overlay: shows the checkout with this pricing page in the background -->
+<dialog id="checkoutDialog" class="l-glass p-0 w-[95vw] max-w-2xl">
+    <div class="flex items-center justify-between px-4 py-2 border-b border-white/10">
+        <span class="font-display font-semibold text-on-surface">Checkout</span>
+        <button type="button" onclick="document.getElementById('checkoutDialog').close()" aria-label="Close"
+                class="text-on-surface-variant hover:text-on-surface transition-colors flex items-center">
+            <span class="material-symbols-outlined">close</span>
+        </button>
+    </div>
+    <iframe id="checkoutFrame" src="about:blank" class="w-full h-[80vh] bg-white" title="Checkout"></iframe>
+</dialog>
+<style>
+    /* selected plan pops up like the highlighted DWY card */
+    .plan-selected {
+        border-color: rgb(var(--l-primary)) !important;
+        box-shadow: 0 0 25px rgb(var(--l-primary) / 0.35);
+        transform: translateY(-1rem);
+        transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+    }
+    /* action button turns green only on the selected card */
+    .plan-selected a[href*="checkoutOnePage"],
+    .plan-selected a[href^="mailto:"] {
+        background: rgb(var(--l-primary)) !important;
+        color: rgb(var(--l-on-primary)) !important;
+        border-color: transparent !important;
+        box-shadow: 0 0 20px rgb(var(--l-primary) / 0.3);
+    }
+</style>
+<script>
+    // only one plan can be selected at a time
+    function selectPlan(card) {
+        document.querySelectorAll('.plan-selected').forEach(function(c) {
+            c.classList.remove('plan-selected');
+        });
+        if (card) card.classList.add('plan-selected');
+    }
+    function openCheckout(url, button) {
+        selectPlan(button ? button.closest('.l-glass') : null);
+        document.getElementById('checkoutFrame').src = url;
+        document.getElementById('checkoutDialog').showModal();
+    }
+    // clicking anywhere inside a plan card border selects that plan
+    document.querySelectorAll('main .l-glass').forEach(function(card) {
+        if (card.querySelector('a[href*="checkoutOnePage"], a[href^="mailto:"]')) {
+            card.style.cursor = 'pointer';
+            card.addEventListener('click', function() { selectPlan(card); });
+        }
+    });
+</script>
 ]]></fileData>
             <histories versionName="01" versionDate="1485028800000" isDiff="N" />
         </file>
@@ -623,156 +697,9 @@ If you decide GrowERP isn't for you:
 
     <!-- ================================================================
          AI AGENTS PAGE (NEW)
-         ================================================================ -->
-    <moqui.resource.wiki.WikiPage wikiPageId="growerp_ai_agents" wikiSpaceId="GROWERP_WS" pagePath="ai-agents"
-        publishedVersionName="01" sequenceNum="4.5">
-        <histories historySeqId="01" versionName="01" changeDateTime="1485028800000" />
-    </moqui.resource.wiki.WikiPage>
-    <moqui.resource.DbResource filename="ai-agents.md.ftl" isFile="Y" resourceId="growerp_ai_agents"
-        parentResourceId="growerp_content_dir">
-        <file mimeType="text/markdown" versionName="01" rootVersionName="01">
-            <fileData><![CDATA[# AI Agent Control Center
-
-Transform your business into an **AI Native Company**. GrowERP's built-in Agent Control Center allows you to deploy intelligent agents that execute tasks, automate workflows, and provide critical insights.
-
----
-
-## What is Possible?
-
-Our AI agents can seamlessly integrate into your daily operations:
-
-### 🤖 Website Chat Assistant
-An always-on AI assistant that greets visitors, answers questions based on your knowledge base, and captures leads directly into your CRM.
-
-### 📧 Outreach & Personalization
-Automate your marketing campaigns. Agents can generate highly personalized outreach messages (for LinkedIn or Email) based on a prospect's profile, increasing your response rates dramatically.
-
-### 📊 Automated Triage & Lead Scoring
-Automatically scan incoming inquiries and replies. Our agents rank leads by priority (hot, warm, cold) and draft follow-up responses, notifying your team when human intervention is needed.
-
-### 📅 Content Publishing
-Set up agents to automatically generate and publish social media content based on your marketing strategy, keeping your brand active online effortlessly.
-
-### 📈 Daily Operations Digest
-A scheduled agent that reviews your daily performance — sales, leads, inventory issues — and delivers a concise summary to your chat room or email every morning.
-
----
-
-## Secure & Governed
-
-You are always in control:
-- **Scoped Permissions:** Restrict agents to only the API endpoints they need.
-- **Human-in-the-Loop:** Require human approval before agents can execute sensitive actions (like sending emails or processing refunds).
-- **RAG Knowledge Base:** Upload your own documents so agents answer questions accurately based on *your* business data.
-
-## Need Help Setting Up AI?
-Our team can help you configure and deploy specialized agents tailored to your business needs. **[Contact Support](mailto:support@growerp.com)** to learn more.
-]]></fileData>
-            <histories versionName="01" versionDate="1485028800000" isDiff="N" />
-        </file>
-    </moqui.resource.DbResource>
 
     <!-- ================================================================
          USE CASES PAGE (NEW)
-         ================================================================ -->
-    <moqui.resource.wiki.WikiPage wikiPageId="growerp_usecases" wikiSpaceId="GROWERP_WS" pagePath="use-cases"
-        publishedVersionName="01" sequenceNum="5">
-        <histories historySeqId="01" versionName="01" changeDateTime="1485028800000" />
-    </moqui.resource.wiki.WikiPage>
-    <moqui.resource.DbResource filename="use-cases.md.ftl" isFile="Y" resourceId="growerp_usecases"
-        parentResourceId="growerp_content_dir">
-        <file mimeType="text/markdown" versionName="01" rootVersionName="01">
-            <fileData><![CDATA[# Use Cases
-
-GrowERP ships purpose-built applications for different industries. Each application uses the same modular building blocks, customized for specific workflows.
-
----
-
-## Admin ERP
-The complete business management solution.
-
-- **Dashboard** — Real-time KPIs and business overview
-- **Catalog** — Products, services, and rental items with variants and pricing rules
-- **Orders** — Purchase and sales order lifecycle management
-- **Inventory** — Multi-location warehouse management and shipment tracking
-- **Accounting** — Double-entry ledger, automated posting, financial reports
-- **CRM &amp; Marketing** — Sales pipeline, campaign management, AI-powered outreach
-- **Website** — Auto-generated business website managed from the admin panel
-- **AI Agents** — Control center for deploying AI assistants and automations
-
-**[Try Admin ERP](https://admin.growerp.com)**
-
----
-
-## Hotel Management
-Specialized for the hospitality industry.
-
-- **Room Management** — Room types, bed configurations, amenities, and availability
-- **Reservations** — Visual day/week calendar with drag-and-drop booking
-- **Guest Services** — Check-in/out, special requests, and guest communication
-- **Housekeeping** — Room status tracking and task assignment
-- **Billing** — Integrated invoicing and payment processing
-
-**[Try Hotel App](https://hotel.growerp.org)**
-
----
-
-## Freelance Management
-Built for independent professionals and small agencies.
-
-- **Client Management** — Contact database with communication history
-- **Time Tracking** — Log hours against projects and tasks
-- **Project Organization** — Tasks, milestones, and deliverables
-- **Invoicing** — Generate professional invoices from tracked time
-- **Activity Monitoring** — Workload visibility and productivity insights
-
-**[Try Freelance App](https://freelance.growerp.org)**
-
----
-
-## eLearner
-A student-facing learning platform.
-
-- **Course Enrollment** — Browse and enroll in available courses
-- **Progress Tracking** — Visual learning progress and completion status
-- **Content Delivery** — Structured lessons, materials, and assessments
-- **Instructor Management** — Manage educators and course assignments
-
----
-
-## Health
-Healthcare practice management.
-
-- **Patient Management** — Patient records and contact information
-- **Appointment Scheduling** — Calendar-based scheduling with reminders
-- **Health Records** — Secure storage of patient health data
-- **Billing** — Insurance and direct billing with accounting integration
-
----
-
-## Support
-Customer support and ticketing.
-
-- **Ticket Management** — Create, assign, and track support tickets
-- **Customer Communication** — Threaded conversations with customers
-- **Issue Tracking** — Categorization, priority levels, and resolution tracking
-- **Reporting** — Response times, resolution rates, and team performance
-
----
-
-## Build Your Own
-GrowERP's modular architecture means you can build custom applications using existing building blocks:
-
-- Mix and match `growerp_*` Flutter packages
-- Create custom backend components for Moqui
-- Define industry-specific workflows
-- Design tailored user interfaces
-
-See the [Developer Documentation](https://github.com/growerp/growerp/blob/master/docs/README.md) for guides on creating custom applications.
-]]></fileData>
-            <histories versionName="01" versionDate="1485028800000" isDiff="N" />
-        </file>
-    </moqui.resource.DbResource>
 
     <!-- ================================================================
          ABOUT PAGE (NEW)
@@ -816,6 +743,7 @@ GrowERP is released under the **CC0 1.0 Universal** (Public Domain) license. Thi
 
 Whether you need requirements gathering, implementation, custom interfacing, or managed production systems, we are ready to help.
 
+- **Company Website:** [www.antwebsystems.com](https://www.antwebsystems.com)
 - **Email Support:** support@growerp.com / support@antwebsystems.com
 - **GitHub:** [github.com/growerp](https://github.com/growerp)
 - **LinkedIn:** [GrowERP Group](https://www.linkedin.com/groups/4576897/)

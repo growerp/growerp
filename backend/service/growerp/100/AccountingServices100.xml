@@ -1694,6 +1694,9 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="country" />
             <parameter name="couponCode" />
             <parameter name="amount" />
+            <parameter name="product">
+                <description>product/plan name selected on the pricing page</description>
+            </parameter>
         </in-parameters>
         <out-parameters>
             <parameter name="result" type="Boolean" default-value="false" />
@@ -1772,6 +1775,9 @@ along with this software (see the LICENSE.md file). If not, see
                 </else>
             </if>
             <!-- create payment -->
+            <if condition="product">
+                <set field="memo" value="GrowERP plan: ${product}" />
+            </if>
             <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
                 in-map="[ownerPartyId: ownerPartyId, seqName: 'payment']" out-map="context" />
             <service-call name="create#mantle.account.payment.Payment"
