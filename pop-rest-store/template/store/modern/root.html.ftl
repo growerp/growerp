@@ -21,8 +21,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet">
 
-    <!-- Per-store generated styles (includes --l-* Lumina design tokens) -->
-    <link rel="stylesheet" href="/components/styles/${storeInfo.productStore.productStoreId}.css">
+    <!-- Per-store generated styles (includes --l-* Lumina design tokens);
+         version query defeats the 24h browser cache so theme changes show immediately -->
+    <link rel="stylesheet" href="/components/styles/${storeInfo.productStore.productStoreId}.css?v=${.now?long?c}">
 
     <!-- Anti-FOUC: paint dark surface before Tailwind CDN JIT runs -->
     <style>

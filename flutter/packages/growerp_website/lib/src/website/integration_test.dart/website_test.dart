@@ -64,9 +64,10 @@ class WebsiteTest {
     expect(CommonTest.getTextFormField('title'), equals('Test Company'));
   }
 
-  /// Selects a Flutter color theme for the website (writes the 'lumina'
-  /// color map into colorJson), checks the token chips appear, then
-  /// resets back to the template defaults.
+  /// Selects a color theme in the unified "Website theme" section (writes
+  /// the 'lumina' color map into colorJson, applied to both Legacy and
+  /// Modern template sets), checks the token chips appear, then resets
+  /// back to the template defaults.
   static Future<void> updateThemeColors(WidgetTester tester) async {
     await CommonTest.dragUntil(tester, key: 'websiteThemejungle');
     await CommonTest.tapByKey(

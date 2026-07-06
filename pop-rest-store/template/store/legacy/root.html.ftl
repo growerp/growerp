@@ -21,8 +21,8 @@
     <!-- Font Awesome 5 -->
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.9/css/all.css" integrity="sha384-5SOiIsAziJl6AWe0HWRKTXlfcSHKmYV4RBF18PPJ173Kzn7jzMyFuTtk8JA7QQG1" crossorigin="anonymous">
     
-    <!-- Custom Store Styles -->
-    <link rel="stylesheet" href="/components/styles/${storeInfo.productStore.productStoreId}.css">
+    <!-- Custom Store Styles; version query defeats the 24h browser cache so theme changes show immediately -->
+    <link rel="stylesheet" href="/components/styles/${storeInfo.productStore.productStoreId}.css?v=${.now?long?c}">
     
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="/assets/favicon.png" sizes="32x32"/>

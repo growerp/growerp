@@ -885,8 +885,6 @@ If you have any questions about this Privacy Policy, please contact us at: suppo
         parentResourceId="growerp_content_dir">
         <file mimeType="application/json" versionName="01" rootVersionName="01">
             <fileData><![CDATA[{
-  "HeaderFooterBg": "#064e3b",
-  "HeaderFooterText": "#ffffff",
   "TwitterUrl": "https://x.com/grow_erp",
   "FacebookUrl": "https://www.facebook.com/growerp/",
   "InstagramUrl": "https://www.instagram.com/notjusterp",

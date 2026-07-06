@@ -276,8 +276,6 @@ along with this software (see the LICENSE.md file). If not, see
         parentResourceId="default_content_dir">
         <file mimeType="application/json" versionName="01" rootVersionName="01">
             <fileData><![CDATA[{
-  "HeaderFooterBg": "#1f2937",
-  "HeaderFooterText": "#ffffff",
   "TwitterUrl": "",
   "FacebookUrl": "",
   "InstagramUrl": "",

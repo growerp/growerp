@@ -227,14 +227,15 @@ class WebsiteDialogState extends State<WebsiteDialog> {
         _websiteThemeDark ?? websiteColor['luminaBrightness'] != 'light';
     final String? selectedScheme = websiteColor['luminaScheme'] as String?;
 
-    void saveTheme(FlexScheme scheme) {
-      final colors = dark
+    void saveTheme(FlexScheme scheme, {bool? asDark}) {
+      final bool useDark = asDark ?? dark;
+      final colors = useDark
           ? FlexThemeData.dark(scheme: scheme).colorScheme
           : FlexThemeData.light(scheme: scheme).colorScheme;
       final updated = Map.of(websiteColor);
       updated['lumina'] = _luminaFromScheme(colors);
       updated['luminaScheme'] = scheme.name;
-      updated['luminaBrightness'] = dark ? 'dark' : 'light';
+      updated['luminaBrightness'] = useDark ? 'dark' : 'light';
       _websiteBloc.add(
         WebsiteUpdate(
           Website(id: state.website!.id, colorJson: jsonEncode(updated)),
@@ -297,6 +298,45 @@ class WebsiteDialogState extends State<WebsiteDialog> {
       );
     }
 
+    // individual fine-tune chips for the theme (Lumina) tokens
+    List<Widget> luminaChips = [];
+    final luminaColors = websiteColor['lumina'];
+    if (luminaColors is Map) {
+      luminaColors.forEach((key, value) {
+        if (value is! String) return;
+        luminaChips.add(
+          InputChip(
+            backgroundColor: fromCssColor(value),
+            label: Text(
+              key,
+              key: Key('lumina$key'),
+              style: TextStyle(
+                color: fromCssColor(value).computeLuminance() < 0.5
+                    ? Colors.white
+                    : Colors.black,
+              ),
+            ),
+            onPressed: () async {
+              var result = await _pickCssColor(value);
+              if (result != null) {
+                setState(() {
+                  luminaColors[key] = result;
+                  _websiteBloc.add(
+                    WebsiteUpdate(
+                      Website(
+                        id: state.website!.id,
+                        colorJson: jsonEncode(websiteColor),
+                      ),
+                    ),
+                  );
+                });
+              }
+            },
+          ),
+        );
+      });
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -311,7 +351,18 @@ class WebsiteDialogState extends State<WebsiteDialog> {
               ],
               selected: {dark},
               onSelectionChanged: (selection) {
-                setState(() => _websiteThemeDark = selection.first);
+                final bool newDark = selection.first;
+                setState(() => _websiteThemeDark = newDark);
+                // re-apply the currently selected scheme in the new
+                // brightness so the website theme changes immediately
+                if (selectedScheme != null) {
+                  for (final scheme in curatedSchemes) {
+                    if (scheme.name == selectedScheme) {
+                      saveTheme(scheme, asDark: newDark);
+                      break;
+                    }
+                  }
+                }
               },
             ),
             const Spacer(),
@@ -338,6 +389,10 @@ class WebsiteDialogState extends State<WebsiteDialog> {
         ),
         const SizedBox(height: 8),
         Wrap(spacing: 8, runSpacing: 8, children: tiles),
+        if (luminaChips.isNotEmpty) ...[
+          const SizedBox(height: 8),
+          Wrap(spacing: 10, runSpacing: 5, children: luminaChips),
+        ],
       ],
     );
   }
@@ -577,95 +632,10 @@ class WebsiteDialogState extends State<WebsiteDialog> {
       );
     });
 
-    // create product browse categories
-    List<Widget> colorCatButtons = [];
+    // website theme colors (lumina tokens, applied to both template sets)
     Map websiteColor = {};
     if (state.website!.colorJson.isNotEmpty) {
       websiteColor = jsonDecode(state.website!.colorJson);
-    }
-    websiteColor['HeaderFooterBg'] = websiteColor['HeaderFooterBg'] == ''
-        ? '#ffeb3b'
-        : websiteColor['HeaderFooterBg'] ?? '#ffeb3b';
-    websiteColor['HeaderFooterText'] = websiteColor['HeaderFooterText'] == ''
-        ? '#ff5722'
-        : websiteColor['HeaderFooterText'] ?? '#ff5722';
-    websiteColor.forEach((key, value) {
-      if (key.toString().endsWith('Url')) return;
-      // skip theme bookkeeping keys and the nested lumina color map
-      if (value is! String ||
-          key == 'luminaScheme' ||
-          key == 'luminaBrightness') {
-        return;
-      }
-      colorCatButtons.add(
-        InputChip(
-          backgroundColor: fromCssColor(value),
-          label: Text(
-            key,
-            key: Key(key),
-            style: TextStyle(
-              color: fromCssColor(value).computeLuminance() < 0.5
-                  ? Colors.white
-                  : Colors.black,
-            ),
-          ),
-          onPressed: () async {
-            var result = await _pickCssColor(value);
-            if (result != null) {
-              setState(() {
-                websiteColor[key] = result;
-                _websiteBloc.add(
-                  WebsiteUpdate(
-                    Website(
-                      id: state.website!.id,
-                      colorJson: jsonEncode(websiteColor),
-                    ),
-                  ),
-                );
-              });
-            }
-          },
-        ),
-      );
-    });
-
-    // individual color chips for the modern (Lumina) template tokens
-    List<Widget> luminaChips = [];
-    final luminaColors = websiteColor['lumina'];
-    if (luminaColors is Map) {
-      luminaColors.forEach((key, value) {
-        if (value is! String) return;
-        luminaChips.add(
-          InputChip(
-            backgroundColor: fromCssColor(value),
-            label: Text(
-              key,
-              key: Key('lumina$key'),
-              style: TextStyle(
-                color: fromCssColor(value).computeLuminance() < 0.5
-                    ? Colors.white
-                    : Colors.black,
-              ),
-            ),
-            onPressed: () async {
-              var result = await _pickCssColor(value);
-              if (result != null) {
-                setState(() {
-                  luminaColors[key] = result;
-                  _websiteBloc.add(
-                    WebsiteUpdate(
-                      Website(
-                        id: state.website!.id,
-                        colorJson: jsonEncode(websiteColor),
-                      ),
-                    ),
-                  );
-                });
-              }
-            },
-          ),
-        );
-      });
     }
 
     final Uri url = Uri.parse(
@@ -821,17 +791,7 @@ class WebsiteDialogState extends State<WebsiteDialog> {
             ),
             const SizedBox(height: 16),
             Text(
-              _localizations.websiteColor,
-              style: TextStyle(
-                fontSize: 12,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Wrap(spacing: 10, children: colorCatButtons),
-            const SizedBox(height: 16),
-            Text(
-              'Website theme (modern template)',
+              'Website theme (applies to both Legacy and Modern templates)',
               style: TextStyle(
                 fontSize: 12,
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -839,10 +799,6 @@ class WebsiteDialogState extends State<WebsiteDialog> {
             ),
             const SizedBox(height: 8),
             _websiteThemePicker(state, websiteColor),
-            if (luminaChips.isNotEmpty) ...[
-              const SizedBox(height: 8),
-              Wrap(spacing: 10, runSpacing: 5, children: luminaChips),
-            ],
             const SizedBox(height: 16),
             Align(
               alignment: Alignment.centerRight,

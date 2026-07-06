@@ -14,7 +14,8 @@ Major changes:
 5. orders on company partyId, customer person on orderparty entity
 6. uses a Growerp API call
 7. removed store from the url added store dependent subdomain name using the productStoreId.
-8. Can change the website colors from the growerp admin app
+8. Can change the website theme from the growerp admin app: one unified "Website theme" (lumina) color set applies to both the legacy and modern template sets
+9. Website template spec + LLM conversion guide: see [docs/Website_Template_Definition.md](../docs/Website_Template_Definition.md)
 
 [![license](http://img.shields.io/badge/license-CC0%201.0%20Universal-blue.svg)](https://github.com/moqui/PopRestStore/blob/master/LICENSE.md)
 [![release](http://img.shields.io/github/release/moqui/PopRestStore.svg)](https://github.com/moqui/PopRestStore/releases)

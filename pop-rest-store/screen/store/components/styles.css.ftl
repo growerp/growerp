@@ -5,9 +5,10 @@
 
 /* CSS Custom Properties - Design Tokens */
 :root {
-    /* Dynamic Header/Footer colors from website settings */
-    --header-footer-bg: ${HeaderFooterBg!'#1e293b'};
-    --header-footer-text: ${HeaderFooterText!'#ffffff'};
+    /* Dynamic Header/Footer colors derived from the Lumina theme (websiteColor.json
+       "lumina" map, defaults from store.xml); values are "R G B" channel strings */
+    --header-footer-bg: rgb(${(lumina.surfaceContainerLowest)!'6 14 32'});
+    --header-footer-text: rgb(${(lumina.onSurface)!'218 226 253'});
     
     /* Primary Palette - Deep Emerald/Teal */
     --primary-50: #e6f7f5;
