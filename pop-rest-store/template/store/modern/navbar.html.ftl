@@ -70,7 +70,9 @@
             <!-- Right block -->
             <div class="flex items-center gap-3">
                 <#if isMarketing>
+                    <#if (storeOwnerPartyId!'') != 'GROWERP'>
                     <a href="https://admin.growerp.com" class="hidden sm:inline-flex font-label text-sm text-on-surface hover:text-primary transition-colors">Sign In</a>
+                    </#if>
                     <a href="https://admin.growerp.com" class="bg-primary hover:bg-primary/90 text-on-primary font-label text-sm font-medium px-5 py-2.5 rounded-lg l-glow transition-all active:scale-95 flex items-center gap-2">
                         Get Started
                         <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
@@ -150,7 +152,9 @@
         <div id="mobileMenu" data-dropdown-panel class="hidden md:hidden border-t border-white/10 bg-surface-container-lowest/90 px-4 py-4 space-y-1">
             <#if isMarketing>
                 <a href="/modules" class="block px-2 py-2 rounded-lg font-label text-sm text-on-surface hover:bg-primary/10 hover:text-primary transition-colors">Apps</a>
+                <#if (storeOwnerPartyId!'') != 'GROWERP'>
                 <a href="https://admin.growerp.com" class="block px-2 py-2 rounded-lg font-label text-sm text-on-surface hover:bg-primary/10 hover:text-primary transition-colors">Sign In</a>
+                </#if>
             <#else>
                 <#if browseRootCategoryInfo.subCategoryList?has_content>
                     <span class="block px-2 pt-2 pb-1 text-xs uppercase tracking-wider text-outline">Shop</span>

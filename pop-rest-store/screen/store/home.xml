@@ -88,6 +88,13 @@ along with this software (see the LICENSE.md file). If not, see
             <set field="path" from="storeInfo.menu[0].path"/>
         </if>
         <set field="homeLocation" value="${storeInfo.settings.PsstContentLocation}/content/${path}.md.ftl"/>
+        <!-- ftl content type: full FreeMarker/HTML home page stored in the database (editable
+             via the website dialog); when present it replaces the built-in home template -->
+        <set field="homeFtlLocation" value="${storeInfo.settings.PsstContentLocation}/content/${path}.html.ftl"/>
+        <set field="homeFtlRr" from="ec.resource.getLocationReference(homeFtlLocation)"/>
+        <if condition="homeFtlRr == null || !homeFtlRr.exists">
+            <set field="homeFtlLocation" from="null"/>
+        </if>
         <!-- create content menu -->
         <set field="docRr" from="ec.resource.getLocationReference(homeLocation)"/>
         <if condition="docRr != null">
@@ -128,14 +135,22 @@ along with this software (see the LICENSE.md file). If not, see
         <section name="home" condition="homeLocation">
             <widgets>
                 <render-mode><text type="html" location="${template_server_header}"/></render-mode>
-                <section name="HomeContentSection" condition="!promoProductList &amp;&amp; !featureProductList &amp;&amp; productStoreId != '100000'">
+                <section name="HomeFtlSection" condition="homeFtlLocation">
                     <widgets>
-                        <render-mode><text type="html" location="component://PopRestStore/template/store/${templateId}/content1.html.ftl"/></render-mode>
-                        <render-mode><text type="html" location="${homeLocation}"/></render-mode>
-                        <render-mode><text type="html" location="component://PopRestStore/template/store/${templateId}/content2.html.ftl"/></render-mode>
+                        <!-- ftl content type: full-width page between header and footer -->
+                        <render-mode><text type="html" location="${homeFtlLocation}"/></render-mode>
                     </widgets>
+                    <fail-widgets>
+                        <section name="HomeContentSection" condition="!promoProductList &amp;&amp; !featureProductList &amp;&amp; productStoreId != '100000'">
+                            <widgets>
+                                <render-mode><text type="html" location="component://PopRestStore/template/store/${templateId}/content1.html.ftl"/></render-mode>
+                                <render-mode><text type="html" location="${homeLocation}"/></render-mode>
+                                <render-mode><text type="html" location="component://PopRestStore/template/store/${templateId}/content2.html.ftl"/></render-mode>
+                            </widgets>
+                        </section>
+                        <render-mode><text type="html" location="${template_server_home}"/></render-mode>
+                    </fail-widgets>
                 </section>
-                <render-mode><text type="html" location="${template_server_home}"/></render-mode>
                 <render-mode><text type="html" location="${template_server_footer}"/></render-mode>
             </widgets>
             <fail-widgets>

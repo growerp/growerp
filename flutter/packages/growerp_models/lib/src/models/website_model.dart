@@ -36,7 +36,7 @@ abstract class Website with _$Website {
     @Default('') String obsidianName,
     @Default('') String measurementId,
     @Default('') String stripeApiKey,
-    @Default('legacy') String templateId,
+    @Default('') String templateId,
   }) = _Website;
 
   factory Website.fromJson(Map<String, dynamic> json) =>

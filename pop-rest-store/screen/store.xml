@@ -29,6 +29,12 @@ along with this software (see the LICENSE.md file). If not, see
         <set field="productStore" from="storeInfo.productStore"/>
         <set field="wikiSpaceId" from="productStore?.wikiSpaceId"/>
 
+        <!-- owner of the store's organization (e.g. 'GROWERP' for the marketing site) -->
+        <entity-find-one entity-name="mantle.party.Party" value-field="organizationParty">
+            <field-map field-name="partyId" from="productStore?.organizationPartyId"/>
+        </entity-find-one>
+        <set field="storeOwnerPartyId" from="organizationParty?.ownerPartyId"/>
+
         <if condition="ec.user.userAccount">
             <entity-find-one entity-name="mantle.party.PartyDetail" value-field="partyDetail">
                 <field-map field-name="partyId" from="ec.user.userAccount.partyId"/>
