@@ -9,7 +9,7 @@
     <#else>
     <meta name="description" content="Welcome to ${storeInfo.productStore.storeName} - Your trusted online store">
     </#if>
-    <meta name="theme-color" content="#0b1326">
+    <meta name="theme-color" content="${luminaSurfaceHex!'#0b1326'}">
 
     <title>${storeInfo.productStore.storeName}</title>
 
@@ -25,14 +25,14 @@
          version query defeats the 24h browser cache so theme changes show immediately -->
     <link rel="stylesheet" href="/components/styles/${storeInfo.productStore.productStoreId}.css?v=${.now?long?c}">
 
-    <!-- Anti-FOUC: paint dark surface before Tailwind CDN JIT runs -->
+    <!-- Anti-FOUC: paint the store surface before Tailwind CDN JIT runs -->
     <style>
-        html { background: rgb(var(--l-surface, 11 19 38)); color: rgb(var(--l-on-surface, 218 226 253)); }
+        html { background: rgb(var(--l-surface, ${(lumina.surface)!'11 19 38'})); color: rgb(var(--l-on-surface, ${(lumina.onSurface)!'218 226 253'})); color-scheme: ${luminaBrightness!'dark'}; }
         .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
         .icon-fill { font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
         ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: rgb(var(--l-surface, 11 19 38)); }
-        ::-webkit-scrollbar-thumb { background: rgb(var(--l-surface-container-highest, 45 52 73)); border-radius: 4px; }
+        ::-webkit-scrollbar-track { background: rgb(var(--l-surface, ${(lumina.surface)!'11 19 38'})); }
+        ::-webkit-scrollbar-thumb { background: rgb(var(--l-surface-container-highest, ${(lumina.surfaceContainerHighest)!'45 52 73'})); border-radius: 4px; }
     </style>
 
     <!-- Tailwind CDN with Lumina token theme; colors reference the per-store CSS variables -->
@@ -58,7 +58,8 @@
                         "tertiary": "rgb(var(--l-tertiary) / <alpha-value>)",
                         "error": "rgb(var(--l-error) / <alpha-value>)",
                         "outline": "rgb(var(--l-outline) / <alpha-value>)",
-                        "outline-variant": "rgb(var(--l-outline-variant) / <alpha-value>)"
+                        "outline-variant": "rgb(var(--l-outline-variant) / <alpha-value>)",
+                        "white": "rgb(var(--l-contrast) / <alpha-value>)"
                     },
                     fontFamily: {
                         display: ["Inter", "sans-serif"],

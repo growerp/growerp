@@ -1,0 +1,337 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- AntWebsystems demo website: conversion of www.antwebsystems.com to the GrowERP
+     'modern' template set, per docs/Website_Template_Definition.md.
+     Self-contained: organization, product store, hostname mapping, wiki content, theme.
+     Load explicitly (not part of seed/install):
+        java -jar moqui.war load location=component://growerp/data/AntWebsysDemoData.xml no-run-es
+     Notes:
+     - The organization has no GrowERP owner (ownerPartyId), so it does not appear in any
+       tenant's admin app; this file exists to serve the public website only.
+     - No logo is loaded; /getLogo falls back to the default GrowERP logo.
+     - The source site's blog (posts fetched from mobile.growerp.com/rest/) is NOT converted:
+       the template system has no blog/post-list page type yet (documented gap). -->
+<entity-facade-xml type="demo">
+
+    <!-- ================= organization + footer contact info ================= -->
+    <mantle.party.Party partyId="ANTWEB_ORG" partyTypeEnumId="PtyOrganization"/>
+    <mantle.party.Organization partyId="ANTWEB_ORG" organizationName="AntWebsystems Co.,Ltd."/>
+    <mantle.party.contact.ContactMech contactMechId="ANTWEB_EM" contactMechTypeEnumId="CmtEmailAddress"
+        infoString="info@antwebsystems.com"/>
+    <mantle.party.contact.PartyContactMech partyId="ANTWEB_ORG" contactMechId="ANTWEB_EM"
+        contactMechPurposeId="EmailPrimary" fromDate="2024-01-01 00:00:00"/>
+
+    <!-- ================= content tree + wiki space ================= -->
+    <moqui.resource.DbResource filename="ANTWEB_ROOT" isFile="N" resourceId="ANTWEB_ROOT" parentResourceId=""/>
+    <moqui.resource.DbResource filename="content" isFile="N" resourceId="antweb_content_dir" parentResourceId="ANTWEB_ROOT"/>
+    <moqui.resource.wiki.WikiSpace wikiSpaceId="ANTWEB_WS" description="AntWebsystems Website Content"
+        allowAnyHtml="Y" rootPageLocation="dbresource://ANTWEB_ROOT"/>
+
+    <!-- ================= product store + website wiring ================= -->
+    <mantle.product.store.ProductStore productStoreId="ANTWEB_STORE" storeName="AntWebsystems"
+        organizationPartyId="ANTWEB_ORG" wikiSpaceId="ANTWEB_WS"
+        defaultCurrencyUomId="USD" defaultLocale="en"/>
+    <mantle.product.store.ProductStoreSetting productStoreId="ANTWEB_STORE" settingTypeEnumId="PsstContentLocation"
+        fromDate="2024-01-01 00:00:00" settingValue="dbresource://ANTWEB_ROOT"/>
+    <mantle.product.store.ProductStoreSetting productStoreId="ANTWEB_STORE" settingTypeEnumId="PsstTemplateId"
+        fromDate="2024-01-01 00:00:00" settingValue="modern"/>
+    <mantle.product.store.ProductStoreSetting productStoreId="ANTWEB_STORE" settingTypeEnumId="PsstHostname"
+        fromDate="2024-01-01 00:00:00" settingValue="www.antwebsystems.com"/>
+    <mantle.product.store.ProductStoreSetting productStoreId="ANTWEB_STORE" settingTypeEnumId="PsstHostname"
+        fromDate="2024-01-02 00:00:00" settingValue="antwebsystems.com"/>
+    <mantle.product.store.ProductStoreSetting productStoreId="ANTWEB_STORE" settingTypeEnumId="PsstHostname"
+        fromDate="2024-01-03 00:00:00" settingValue="antwebsystems.localhost:8080"/>
+
+    <!-- ================================================================
+         HOME PAGE
+         ================================================================ -->
+    <moqui.resource.wiki.WikiPage wikiPageId="antweb_home" wikiSpaceId="ANTWEB_WS" pagePath="home"
+        publishedVersionName="01" sequenceNum="1">
+        <histories historySeqId="01" versionName="01" changeDateTime="1704067200000"/>
+    </moqui.resource.wiki.WikiPage>
+    <moqui.resource.DbResource filename="home.html.ftl" isFile="Y" resourceId="antweb_home"
+        parentResourceId="antweb_content_dir">
+        <file mimeType="text/html" versionName="01" rootVersionName="01">
+            <fileData><![CDATA[<#-- title: Home -->
+<main class="pt-24 pb-16 relative">
+    <!-- Ambient background glows -->
+    <div class="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
+        <div class="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-primary/5 blur-[120px]"></div>
+        <div class="absolute bottom-[-20%] right-[-10%] w-[40%] h-[40%] rounded-full bg-tertiary/5 blur-[100px]"></div>
+    </div>
+
+    <!-- Hero -->
+    <section class="max-w-container mx-auto px-4 md:px-12 min-h-[70vh] flex flex-col justify-center py-16 relative">
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-primary/10 rounded-full blur-[120px] pointer-events-none -z-10"></div>
+        <div class="max-w-3xl">
+            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-container border border-outline-variant/50 w-fit mb-6">
+                <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+                <span class="font-label text-xs text-on-surface-variant">Apache OFBiz &amp; Moqui specialists since 2003</span>
+            </div>
+            <h1 class="font-display text-4xl md:text-6xl font-bold tracking-tight leading-tight text-on-surface">
+                Looking for a<br>
+                <span class="l-gradient-text">low cost ERP alternative?</span>
+            </h1>
+            <p class="text-lg text-on-surface-variant mt-6 max-w-xl leading-relaxed">
+                Ready for quality support with competitive rates? AntWebsystems delivers open-source
+                ERP implementation and development with a proven OFBiz/Moqui methodology.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 mt-10">
+                <a href="/content/contact" class="bg-primary hover:bg-primary/90 text-on-primary font-label text-sm font-medium px-8 py-4 rounded-lg l-glow transition-all active:scale-95 inline-flex items-center justify-center gap-2">
+                    Get in touch
+                    <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+                </a>
+                <a href="https://www.growerp.com" target="_blank" rel="noopener" class="l-glass hover:bg-surface-container-high/60 text-on-surface font-label text-sm font-medium px-8 py-4 rounded-lg transition-all active:scale-95 inline-flex items-center justify-center gap-2">
+                    Discover GrowERP
+                    <span class="material-symbols-outlined text-[18px]">open_in_new</span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Value propositions (from the original home carousel) -->
+    <section class="max-w-container mx-auto px-4 md:px-12 py-16">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="l-glass rounded-2xl p-8">
+                <span class="material-symbols-outlined text-primary text-[36px] mb-4">support_agent</span>
+                <h3 class="font-display text-xl font-semibold text-on-surface mb-2">Quality support, competitive rates</h3>
+                <p class="text-sm text-on-surface-variant leading-relaxed">
+                    Long-term production support for Apache OFBiz and Moqui systems by a dedicated team
+                    that has operated ERP back-ends for two decades.
+                </p>
+            </div>
+            <div class="l-glass rounded-2xl p-8">
+                <span class="material-symbols-outlined text-primary text-[36px] mb-4">verified</span>
+                <h3 class="font-display text-xl font-semibold text-on-surface mb-2">Proven implementation methodology</h3>
+                <p class="text-sm text-on-surface-variant leading-relaxed">
+                    A proven OFBiz/Moqui ERP implementation methodology: requirements, gap analysis,
+                    phased delivery and user training &mdash; on time and on budget.
+                </p>
+            </div>
+            <div class="l-glass rounded-2xl p-8">
+                <span class="material-symbols-outlined text-primary text-[36px] mb-4">sync_alt</span>
+                <h3 class="font-display text-xl font-semibold text-on-surface mb-2">Transparent agile development</h3>
+                <p class="text-sm text-on-surface-variant leading-relaxed">
+                    Transparent agile software development: short iterations, direct access to the
+                    developers, and progress you can inspect in a running system every week.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services -->
+    <section class="max-w-container mx-auto px-4 md:px-12 py-16">
+        <div class="text-center mb-12">
+            <h2 class="font-display text-3xl md:text-4xl font-bold text-on-surface">What we do</h2>
+            <p class="text-on-surface-variant mt-3 max-w-2xl mx-auto">Open-source business systems, from first install to full custom product.</p>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div class="l-glass rounded-2xl p-6">
+                <span class="material-symbols-outlined text-secondary text-[32px] mb-3">rocket_launch</span>
+                <h4 class="font-display font-semibold text-on-surface mb-1">ERP implementation</h4>
+                <p class="text-sm text-on-surface-variant">Apache OFBiz and Moqui installation, configuration and data migration.</p>
+            </div>
+            <div class="l-glass rounded-2xl p-6">
+                <span class="material-symbols-outlined text-secondary text-[32px] mb-3">code</span>
+                <h4 class="font-display font-semibold text-on-surface mb-1">Custom development</h4>
+                <p class="text-sm text-on-surface-variant">Components, integrations and mobile front-ends built on your ERP back-end.</p>
+            </div>
+            <div class="l-glass rounded-2xl p-6">
+                <span class="material-symbols-outlined text-secondary text-[32px] mb-3">cloud_done</span>
+                <h4 class="font-display font-semibold text-on-surface mb-1">Hosting &amp; operations</h4>
+                <p class="text-sm text-on-surface-variant">Cloud hosting, monitoring, upgrades and daily operation of your system.</p>
+            </div>
+            <div class="l-glass rounded-2xl p-6">
+                <span class="material-symbols-outlined text-secondary text-[32px] mb-3">smartphone</span>
+                <h4 class="font-display font-semibold text-on-surface mb-1">GrowERP</h4>
+                <p class="text-sm text-on-surface-variant">Our open-source Flutter ERP front-end for Android, iOS, web and desktop.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA band -->
+    <section class="max-w-container mx-auto px-4 md:px-12 py-16">
+        <div class="l-glass rounded-2xl p-10 md:p-14 text-center relative overflow-hidden">
+            <div class="absolute inset-0 bg-primary/5 pointer-events-none"></div>
+            <h2 class="font-display text-3xl font-bold text-on-surface mb-4">Start your ERP conversation today</h2>
+            <p class="text-on-surface-variant max-w-xl mx-auto mb-8">
+                Tell us about your business and we will show you what open-source ERP can do &mdash;
+                use the chat button in the corner or send us a message.
+            </p>
+            <a href="/content/contact" class="bg-primary hover:bg-primary/90 text-on-primary font-label text-sm font-medium px-8 py-4 rounded-lg l-glow transition-all active:scale-95 inline-flex items-center gap-2">
+                Contact us
+                <span class="material-symbols-outlined text-[18px]">chat</span>
+            </a>
+        </div>
+    </section>
+</main>]]></fileData>
+            <histories versionName="01" versionDate="1704067200000" isDiff="N"/>
+        </file>
+    </moqui.resource.DbResource>
+
+    <!-- ================================================================
+         CONTACT PAGE
+         ================================================================ -->
+    <moqui.resource.wiki.WikiPage wikiPageId="antweb_contact" wikiSpaceId="ANTWEB_WS" pagePath="contact"
+        publishedVersionName="01" sequenceNum="2">
+        <histories historySeqId="01" versionName="01" changeDateTime="1704067200000"/>
+    </moqui.resource.wiki.WikiPage>
+    <moqui.resource.DbResource filename="contact.html.ftl" isFile="Y" resourceId="antweb_contact"
+        parentResourceId="antweb_content_dir">
+        <file mimeType="text/html" versionName="01" rootVersionName="01">
+            <fileData><![CDATA[<#-- title: Contact -->
+<main class="pt-28 pb-16">
+    <section class="max-w-container mx-auto px-4 md:px-12 py-8">
+        <h1 class="font-display text-4xl font-bold text-on-surface mb-4">Comments or questions?</h1>
+        <p class="text-on-surface-variant max-w-2xl mb-10">
+            We are happy to hear from you. Use the chat button in the bottom corner of this page and
+            we will get back to you by email, usually within one business day.
+        </p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl">
+            <div class="l-glass rounded-2xl p-8">
+                <span class="material-symbols-outlined text-primary text-[32px] mb-3">mail</span>
+                <h3 class="font-display font-semibold text-on-surface mb-1">Email</h3>
+                <a href="mailto:info@antwebsystems.com" class="text-sm text-primary hover:underline">info@antwebsystems.com</a>
+            </div>
+            <div class="l-glass rounded-2xl p-8">
+                <span class="material-symbols-outlined text-primary text-[32px] mb-3">forum</span>
+                <h3 class="font-display font-semibold text-on-surface mb-1">Chat</h3>
+                <p class="text-sm text-on-surface-variant">Open the chat widget on this page and leave your question with your email address.</p>
+            </div>
+        </div>
+    </section>
+</main>]]></fileData>
+            <histories versionName="01" versionDate="1704067200000" isDiff="N"/>
+        </file>
+    </moqui.resource.DbResource>
+
+    <!-- ================================================================
+         PRIVACY POLICY (markdown page)
+         ================================================================ -->
+    <moqui.resource.wiki.WikiPage wikiPageId="antweb_privacy" wikiSpaceId="ANTWEB_WS" pagePath="privacy"
+        publishedVersionName="01" sequenceNum="3">
+        <histories historySeqId="01" versionName="01" changeDateTime="1704067200000"/>
+    </moqui.resource.wiki.WikiPage>
+    <moqui.resource.DbResource filename="privacy.md.ftl" isFile="Y" resourceId="antweb_privacy"
+        parentResourceId="antweb_content_dir">
+        <file mimeType="text/markdown" versionName="01" rootVersionName="01">
+            <fileData><![CDATA[# Privacy Policy
+
+AntWebsystems Co.,Ltd. provides this website and related application services. This page
+informs visitors of our policies regarding the collection, use and disclosure of personal
+information.
+
+## Information Collection and Use
+
+We only collect the information you give us directly, such as an email address left in the
+chat widget. We use it solely to answer your question and do not share it with third parties.
+
+## Log Data
+
+Like most websites we collect standard access logs (IP address, browser type, pages visited,
+time and date). Log data is used for operating and improving the service only.
+
+## Service Providers
+
+We may employ third-party companies and individuals to facilitate our service, to provide the
+service on our behalf, or to assist us in analyzing how our service is used. These parties
+have access only to the information needed to perform their tasks.
+
+## Links to Other Sites
+
+This site may contain links to other sites. If you click a third-party link you will be
+directed to that site; we strongly advise you to review the privacy policy of every site you
+visit.
+
+## Changes to This Privacy Policy
+
+We may update this policy from time to time. Changes are effective immediately after they are
+posted on this page. Questions? Contact us at info@antwebsystems.com.]]></fileData>
+            <histories versionName="01" versionDate="1704067200000" isDiff="N"/>
+        </file>
+    </moqui.resource.DbResource>
+
+    <!-- ================================================================
+         TERMS OF USE (markdown page)
+         ================================================================ -->
+    <moqui.resource.wiki.WikiPage wikiPageId="antweb_terms" wikiSpaceId="ANTWEB_WS" pagePath="terms"
+        publishedVersionName="01" sequenceNum="4">
+        <histories historySeqId="01" versionName="01" changeDateTime="1704067200000"/>
+    </moqui.resource.wiki.WikiPage>
+    <moqui.resource.DbResource filename="terms.md.ftl" isFile="Y" resourceId="antweb_terms"
+        parentResourceId="antweb_content_dir">
+        <file mimeType="text/markdown" versionName="01" rootVersionName="01">
+            <fileData><![CDATA[# Terms of Use
+
+We provide this website and related services to you subject to the conditions stated below.
+Every time you visit this site or use its services, you accept the following conditions.
+
+## License and Site Access
+
+We grant you a limited license to access and make personal use of this site. You are not
+allowed to download or modify it except with written consent from us.
+
+## Your Account
+
+If you are an owner of an account on this site, you are solely responsible for maintaining
+the confidentiality of your private user details (username and password) and for all
+activities that occur under your account.
+
+## Communication
+
+The entire communication with us is electronic. Every time you send us an email or visit our
+site, you are going to be communicating with us. You hereby consent to receive communications
+from us.
+
+## Content
+
+Content published on this site (images, texts, graphics, logos) is the property of
+AntWebsystems Co.,Ltd. and/or its content creators and protected by international copyright
+laws.
+
+## Applicable Law
+
+Any dispute related in any way to your visit to this site shall be arbitrated by the state
+courts of Thailand and you consent to the exclusive jurisdiction and venue of such courts.]]></fileData>
+            <histories versionName="01" versionDate="1704067200000" isDiff="N"/>
+        </file>
+    </moqui.resource.DbResource>
+
+    <!-- ================================================================
+         THEME: websiteColor.json (dark, AntWebsystems blues)
+         ================================================================ -->
+    <moqui.resource.DbResource filename="websiteColor.json" isFile="Y" resourceId="antweb_website_color"
+        parentResourceId="antweb_content_dir">
+        <file mimeType="application/json" versionName="01" rootVersionName="01">
+            <fileData><![CDATA[{
+  "lumina": {
+    "surface": "#0a1828",
+    "surfaceContainerLowest": "#05131f",
+    "surfaceContainerLow": "#122132",
+    "surfaceContainer": "#17273a",
+    "surfaceContainerHigh": "#213348",
+    "surfaceContainerHighest": "#2a3744",
+    "onSurface": "#dbe7f5",
+    "onSurfaceVariant": "#a8bcd0",
+    "primary": "#3cb0fd",
+    "onPrimary": "#002843",
+    "primaryContainer": "#2980b9",
+    "secondary": "#3498db",
+    "tertiary": "#6ad0ff",
+    "error": "#ffb4ab",
+    "outline": "#85919e",
+    "outlineVariant": "#344354"
+  },
+  "luminaScheme": "custom",
+  "luminaBrightness": "dark",
+  "TwitterUrl": "",
+  "FacebookUrl": "",
+  "InstagramUrl": "",
+  "YouTubeUrl": "",
+  "LinkedInUrl": "",
+  "SubstackUrl": ""
+}]]></fileData>
+            <histories versionName="01" versionDate="1704067200000" isDiff="N"/>
+        </file>
+    </moqui.resource.DbResource>
+
+</entity-facade-xml>

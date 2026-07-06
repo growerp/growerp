@@ -2026,6 +2026,9 @@ body.growerp-store-100000 .customer-menu {
     --l-error: ${(lumina.error)!'255 180 171'};
     --l-outline: ${(lumina.outline)!'135 148 139'};
     --l-outline-variant: ${(lumina.outlineVariant)!'61 74 66'};
+    /* server-derived (from luminaBrightness), not part of the 16-token contract:
+       white on dark themes, black on light themes */
+    --l-contrast: ${(lumina.contrast)!'255 255 255'};
 }
 
 body.lumina {
@@ -2046,7 +2049,7 @@ body.lumina .l-glass {
     background: rgb(var(--l-surface-container-low) / 0.55);
     -webkit-backdrop-filter: blur(12px);
     backdrop-filter: blur(12px);
-    border: 1px solid rgb(255 255 255 / 0.10);
+    border: 1px solid rgb(var(--l-contrast) / 0.10);
 }
 /* Primary button glow */
 body.lumina .l-glow { box-shadow: 0 0 20px rgb(var(--l-primary) / 0.30); }
@@ -2063,7 +2066,7 @@ body.lumina dialog::backdrop { background: rgb(0 0 0 / 0.6); -webkit-backdrop-fi
 body.lumina dialog {
     background: rgb(var(--l-surface-container));
     color: rgb(var(--l-on-surface));
-    border: 1px solid rgb(255 255 255 / 0.10);
+    border: 1px solid rgb(var(--l-contrast) / 0.10);
     border-radius: 1rem;
 }
 /* Toast */
@@ -2100,12 +2103,12 @@ body.lumina .prose-lumina li { margin-bottom: 0.375rem; }
 body.lumina .prose-lumina code {
     font-family: 'Geist', monospace; font-size: 0.85em;
     background: rgb(var(--l-surface-container-high));
-    border: 1px solid rgb(255 255 255 / 0.08);
+    border: 1px solid rgb(var(--l-contrast) / 0.08);
     border-radius: 0.375rem; padding: 0.125rem 0.375rem;
 }
 body.lumina .prose-lumina pre {
     background: rgb(var(--l-surface-container-lowest));
-    border: 1px solid rgb(255 255 255 / 0.08);
+    border: 1px solid rgb(var(--l-contrast) / 0.08);
     border-radius: 0.75rem; padding: 1rem; overflow-x: auto; margin: 0 0 1rem 0;
 }
 body.lumina .prose-lumina pre code { background: none; border: none; padding: 0; }
@@ -2115,8 +2118,8 @@ body.lumina .prose-lumina blockquote {
 }
 body.lumina .prose-lumina table { width: 100%; border-collapse: collapse; margin: 0 0 1rem 0; }
 body.lumina .prose-lumina th, body.lumina .prose-lumina td {
-    border: 1px solid rgb(255 255 255 / 0.10); padding: 0.5rem 0.75rem; text-align: left;
+    border: 1px solid rgb(var(--l-contrast) / 0.10); padding: 0.5rem 0.75rem; text-align: left;
 }
 body.lumina .prose-lumina th { color: rgb(var(--l-on-surface)); background: rgb(var(--l-surface-container)); }
 body.lumina .prose-lumina img { max-width: 100%; border-radius: 0.75rem; margin: 1rem 0; }
-body.lumina .prose-lumina hr { border: none; border-top: 1px solid rgb(255 255 255 / 0.10); margin: 2rem 0; }
+body.lumina .prose-lumina hr { border: none; border-top: 1px solid rgb(var(--l-contrast) / 0.10); margin: 2rem 0; }

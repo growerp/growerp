@@ -1,4 +1,6 @@
 <#assign isMarketing = storeInfo.productStore.productStoreId == "100000">
+<#-- brochure-only stores (no browse-root categories) get no shop/search/cart/login UI -->
+<#assign hasCommerce = (browseRootCategoryInfo.subCategoryList)?has_content>
 <header class="fixed top-0 inset-x-0 z-40">
     <nav class="l-glass bg-surface-container-lowest/40 border-b border-white/10">
         <div class="max-w-container mx-auto px-4 md:px-12 h-16 flex items-center justify-between gap-4">
@@ -12,7 +14,7 @@
             <div class="hidden md:flex items-center gap-6">
                 <#if !isMarketing>
                     <#-- Shop Categories Dropdown -->
-                    <#if browseRootCategoryInfo.subCategoryList?has_content>
+                    <#if hasCommerce>
                     <div class="relative">
                         <button type="button" data-menu-button="shopDropdown" aria-expanded="false"
                                 class="flex items-center gap-1 font-label text-sm text-on-surface-variant hover:text-primary transition-colors">
@@ -30,7 +32,7 @@
                     </#if>
 
                     <#-- Deals Button -->
-                    <#if storeInfo.categoryByType.PsctPromotions.nbrOfProducts != 0>
+                    <#if ((storeInfo.categoryByType.PsctPromotions.nbrOfProducts)!0) != 0>
                         <a href="/category/${storeInfo.categoryByType.PsctPromotions.productCategoryId}" class="flex items-center gap-1 font-label text-sm text-on-surface-variant hover:text-primary transition-colors">
                             <span class="material-symbols-outlined text-[18px]">local_fire_department</span>${storeInfo.categoryByType.PsctPromotions.categoryName}
                         </a>
@@ -52,7 +54,11 @@
                     </button>
                     <div id="menuDropdown${topItem?index}" data-dropdown-panel class="hidden absolute left-0 top-full mt-2 w-56 l-glass bg-surface-container/90 rounded-xl py-2 shadow-2xl">
                         <#list topItem.items as item>
+                            <#if item.path??>
+                            <a href="/content/${item.path}" class="block px-4 py-2 text-sm text-on-surface hover:bg-primary/10 hover:text-primary transition-colors">${item.title!item.path}</a>
+                            <#else>
                             <a href="/content/${topItem.path}#${item.anchor}" class="block px-4 py-2 text-sm text-on-surface hover:bg-primary/10 hover:text-primary transition-colors">${item.text}</a>
+                            </#if>
                         </#list>
                     </div>
                 </div>
@@ -78,7 +84,7 @@
                         Get Started
                         <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
                     </a>
-                <#else>
+                <#elseif hasCommerce>
                     <#-- Desktop search -->
                     <form id="form-search" class="hidden lg:flex items-center bg-surface-container-high/60 border border-white/10 rounded-lg px-3 py-1.5 focus-within:border-primary/50 transition-colors">
                         <input type="text" name="search" placeholder="Search products..."
@@ -163,13 +169,13 @@
                 <a href="https://admin.growerp.com" class="block px-2 py-2 rounded-lg font-label text-sm text-on-surface hover:bg-primary/10 hover:text-primary transition-colors">Sign In</a>
                 </#if>
             <#else>
-                <#if browseRootCategoryInfo.subCategoryList?has_content>
+                <#if hasCommerce>
                     <span class="block px-2 pt-2 pb-1 text-xs uppercase tracking-wider text-outline">Shop</span>
                     <#list browseRootCategoryInfo.subCategoryList as category>
                         <a href="/category/${category.productCategoryId}" class="block px-2 py-2 rounded-lg font-label text-sm text-on-surface hover:bg-primary/10 hover:text-primary transition-colors">${category.categoryName}</a>
                     </#list>
                 </#if>
-                <#if storeInfo.categoryByType.PsctPromotions.nbrOfProducts != 0>
+                <#if ((storeInfo.categoryByType.PsctPromotions.nbrOfProducts)!0) != 0>
                     <a href="/category/${storeInfo.categoryByType.PsctPromotions.productCategoryId}" class="block px-2 py-2 rounded-lg font-label text-sm text-on-surface hover:bg-primary/10 hover:text-primary transition-colors">${storeInfo.categoryByType.PsctPromotions.categoryName}</a>
                 </#if>
                 <#list storeInfo.menu as topItem>
@@ -177,7 +183,11 @@
                 <#if topItem.items?has_content>
                     <span class="block px-2 pt-2 pb-1 text-xs uppercase tracking-wider text-outline">${topItem.title!topItem.path}</span>
                     <#list topItem.items as item>
+                        <#if item.path??>
+                        <a href="/content/${item.path}" class="block px-2 py-2 rounded-lg font-label text-sm text-on-surface hover:bg-primary/10 hover:text-primary transition-colors">${item.title!item.path}</a>
+                        <#else>
                         <a href="/content/${topItem.path}#${item.anchor}" class="block px-2 py-2 rounded-lg font-label text-sm text-on-surface hover:bg-primary/10 hover:text-primary transition-colors">${item.text}</a>
+                        </#if>
                     </#list>
                 <#else>
                     <#if topItem.path == 'obsidian'>
@@ -189,6 +199,7 @@
                     </a>
                 </#if>
                 </#list>
+                <#if hasCommerce>
                 <form id="form-search-mobile" class="flex items-center bg-surface-container-high/60 border border-white/10 rounded-lg px-3 py-2 mt-3">
                     <input type="text" name="search" placeholder="Search products..."
                            class="bg-transparent outline-none text-sm text-on-surface placeholder:text-outline flex-1">
@@ -196,12 +207,13 @@
                         <span class="material-symbols-outlined text-[20px]">search</span>
                     </button>
                 </form>
+                </#if>
             </#if>
         </div>
     </nav>
 </header>
 
-<#if !isMarketing>
+<#if !isMarketing && hasCommerce>
 <!-- Empty Cart Dialog -->
 <dialog id="emptyCartModal" class="l-glass max-w-sm w-[90vw] p-0">
     <div class="p-6">

@@ -148,6 +148,8 @@ along with this software (see the LICENSE.md file). If not, see
             <set field="menu" from="[]"/>
             <set field="menu1" from="[]"/><!-- needed for actual content in content.xml -->
             <iterate list="menuPages" entry="page">
+                <!-- pages with any path segment starting with '_' are routable but hidden from navbar/footer -->
+                <if condition="page.pagePath.split('/').any({ it.startsWith('_') })"><continue/></if>
                 <set field="location" value="${page.rootPageLocation}/content/${page.pagePath}.md.ftl"/>
                 <set field="pageType" value="md"/>
                 <set field="docRr" from="ec.resource.getLocationReference(location)"/>
@@ -177,6 +179,38 @@ along with this software (see the LICENSE.md file). If not, see
                     </script>
                 </if>
             </iterate>
+            <!-- group nested pagePaths (two levels: first segment = group) into dropdown menus;
+                 a page whose path equals a group key becomes the group title + first item -->
+            <script>
+                List grouped = []
+                Map groupsByKey = [:]
+                for (Object miObj in menu) {
+                    Map mi = (Map) miObj
+                    String p = (String) mi.path
+                    int slash = p.indexOf('/')
+                    if (slash &lt; 0) { grouped.add(mi); continue }
+                    String key = p.substring(0, slash)
+                    Map group = (Map) groupsByKey[key]
+                    if (group == null) {
+                        group = [items: [], path: key,
+                            title: key.split(/[-_]/).collect({ it.length() > 0 ? it.substring(0,1).toUpperCase() + it.substring(1) : it }).join(' ')]
+                        groupsByKey[key] = group
+                        grouped.add(group)
+                    }
+                    ((List) group.items).add([title: mi.title, path: p])
+                }
+                for (int i = grouped.size() - 1; i >= 0; i--) {
+                    Map mi = (Map) grouped[i]
+                    if (mi.items) continue
+                    Map group = (Map) groupsByKey[(String) mi.path]
+                    if (group != null &amp;&amp; !group.is(mi)) {
+                        group.title = mi.title
+                        ((List) group.items).add(0, [title: mi.title, path: mi.path])
+                        grouped.remove(i)
+                    }
+                }
+                menu = grouped
+            </script>
             <!-- check if obsidian uploaded -->
             <entity-find entity-name="moqui.resource.wiki.WikiPage" list="checkObsidian" limit="1">
                 <econdition field-name="pagePath" operator="like" value="obsidian/%"/>

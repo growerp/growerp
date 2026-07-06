@@ -34,6 +34,8 @@ No template code deployment is needed: the pages and theme are plain data, loade
 
 - **First line must be exactly**: `<#-- title: Your Page Title -->` — this title becomes the navbar menu entry, the footer quick-link label, and the page's name in the Website dialog.
 - The home page's title should be `Home` (pages titled "home…" are excluded from the navbar menu).
+- **Grouped menus (nested paths)**: a page path may contain one `/` (two levels, e.g. `products/pvc`). All pages sharing a first segment become a navbar **dropdown** named after that segment (`lakes_and_ponds` → "Lakes And Ponds"); if a page exists at exactly the group path (e.g. `products`), its title names the group and it becomes the dropdown's first entry. In the footer, group children are listed as individual quick links. Menu position of a group = position of its first member (by `sequenceNum`).
+- **Hidden pages**: any path segment starting with `_` (e.g. `products/_pvc-spec`) makes the page routable at `/content/{path}` but excluded from the navbar and footer — use for detail/spec pages linked only from other pages.
 - Body-only fragment; top-level wrapper should be `<main class="pt-28 pb-16"> … </main>` (`pt-28` clears the fixed navbar; use `pt-24` for the home page).
 - Page sections within a page — recommended structure (all optional except one main section):
   - ambient background glows (decorative, optional)
@@ -78,7 +80,7 @@ One JSON file per store. The **`lumina` map is the single color vocabulary** —
 ```
 
 - Token semantics follow Material 3: `surface*` = page/panel backgrounds from deepest (`surfaceContainerLowest`) to most elevated (`surfaceContainerHighest`); `onSurface`/`onSurfaceVariant` = text colors guaranteed readable on the surfaces; `primary` = brand/action color with `onPrimary` text; `secondary`/`tertiary` = supporting accents; `outline*` = borders.
-- `luminaScheme`/`luminaBrightness` are bookkeeping for the admin theme picker (any string / `"dark"`|`"light"`).
+- `luminaScheme` is bookkeeping for the admin theme picker (any string). `luminaBrightness` (`"dark"`|`"light"`) **is honored by the server**: it drives the browser `color-scheme`, the `theme-color` meta tag, the anti-FOUC background, and a server-derived `--l-contrast` channel variable (white on dark themes, black on light themes) used for the chrome's hairline borders and any `white`-named Tailwind utilities. Light themes therefore work end-to-end — supply a light `lumina` map **and** `"luminaBrightness": "light"`. `--l-contrast` is derived; do not add a `contrast` key to the `lumina` map.
 - The six `*Url` keys populate footer social icons (empty string hides an icon).
 - If the `lumina` map is omitted entirely, the server uses the default dark Lumina palette (the values shown above).
 - The server converts hex to CSS `R G B` channel variables named `--l-surface`, `--l-primary`, etc. (kebab-case with `--l-` prefix), so Tailwind opacity modifiers work.
@@ -145,7 +147,7 @@ Pages are FreeMarker templates, so they *may* use dynamic values. For a static m
 
 Given an existing website (URL or HTML dump), produce the conversion as follows:
 
-1. **Inventory** the source site's pages; map each to the page-type matrix (§2). Merge or drop pages that correspond to system-provided routes (product listings, search).
+1. **Inventory** the source site's pages; map each to the page-type matrix (§2). Merge or drop pages that correspond to system-provided routes (product listings, search). For sites with many pages, organize them into two-level groups (`products/pvc`, `applications/canals`) to get navbar dropdowns, and prefix rarely-visited detail pages with `_` to keep them out of the menus. **Known gaps** (not yet supported): dated blog/news post lists, and bulk page import (pages are registered one by one, or via a seed/demo XML file).
 2. **Extract the brand palette** from the source site (background, text, brand/accent colors). Fill **all 16** lumina tokens (§3): choose `luminaBrightness`; derive the six `surface*` steps as a monotonic elevation ramp from the page background; pick `onSurface`/`onSurfaceVariant` with ≥ 7:1 / 4.5:1 contrast against the surfaces; map the brand color to `primary` (+ readable `onPrimary`), secondary accents to `secondary`/`tertiary`. Emit `websiteColor.json`.
 3. **Author `home.html.ftl`**: `<#-- title: Home -->`, then hero (headline, subtitle, primary + secondary CTA), followed by the site's key selling-point sections as glass-card grids. Body-only, `<main class="pt-24 …">`.
 4. **Author one `.html.ftl` per remaining page** (`<#-- title: X -->`, `<main class="pt-28 …">`), converting the source content into the styling contract (§4) — no hardcoded colors, no external CSS/JS, images either external URLs or uploaded via the Website dialog's image section.
@@ -173,5 +175,7 @@ Given an existing website (URL or HTML dump), produce the conversion as follows:
 6. **Verify**: every route returns 200; view-source contains no raw `<#` or unresolved `${`; navbar menu lists all pages in order; theme contrast readable in both a wide and a 400-px viewport; mobile hamburger menu works.
 
 ---
+
+*Worked examples: `backend/data/AntWebsysDemoData.xml` (dark theme, conversion of www.antwebsystems.com) and `backend/data/AccuGeoDemoData.xml` (light theme, grouped menus, hidden page — conversion of www.accugeo.com); load with `java -jar moqui.war load location=component://growerp/data/<file> no-run-es` and test with `curl -H 'Host: www.accugeo.com' http://localhost:8080/`.*
 
 *Architecture references (for maintainers with repo access): template sets in `pop-rest-store/template/store/{legacy,modern}/`; set selection + theme pipeline in `pop-rest-store/screen/store.xml` (websiteColor.json → `styles.css.ftl` → per-store CSS with `--l-*` vars); content rendering in `screen/store/home.xml` and `screen/store/content.xml`; dialog backend `backend/service/growerp/100/WebsiteServices100.xml`; Flutter dialog `flutter/packages/growerp_website/.../website_dialog.dart`. The 16 lumina token names must stay in sync across `store.xml` (defaults), `styles.css.ftl` (emission), and `_luminaFromScheme` in the Flutter dialog.*

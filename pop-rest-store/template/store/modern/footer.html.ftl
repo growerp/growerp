@@ -56,6 +56,14 @@
                     </#if>
                     <#list storeInfo.menu as topItem>
                     <#if !topItem.title?has_content || topItem.path == 'home'><#continue></#if>
+                    <#if topItem.items?has_content>
+                        <#-- grouped pages: list children as individual links; a bare group path has no route -->
+                        <#list topItem.items as item>
+                        <#if item.path??>
+                        <li><a href="/content/${item.path}" class="font-label text-sm text-on-surface-variant hover:text-primary transition-colors">${item.title!item.path}</a></li>
+                        </#if>
+                        </#list>
+                    <#else>
                     <li>
                         <#if topItem.path == 'obsidian'>
                         <a href="/${topItem.path}" class="font-label text-sm text-on-surface-variant hover:text-primary transition-colors">${topItem.title!topItem.path}</a>
@@ -63,6 +71,7 @@
                         <a href="/content/${topItem.path}" class="font-label text-sm text-on-surface-variant hover:text-primary transition-colors">${topItem.title!topItem.path}</a>
                         </#if>
                     </li>
+                    </#if>
                     </#list>
                 </ul>
             </div>

@@ -209,6 +209,12 @@ var storeInfo = ${storeInfoJson};
                     luminaChannels[key] = "${Integer.parseInt(hex.substring(0,2),16)} ${Integer.parseInt(hex.substring(2,4),16)} ${Integer.parseInt(hex.substring(4,6),16)}".toString()
                 }
             }
+            // brightness-aware chrome: contrast channel (white on dark, black on light) and
+            // the surface hex used for the theme-color meta tag / anti-FOUC style
+            String luminaBrightness = (context.luminaBrightness ?: 'dark').toString()
+            luminaChannels.contrast = (luminaBrightness == 'light') ? '0 0 0' : '255 255 255'
+            context.luminaBrightness = luminaBrightness
+            context.luminaSurfaceHex = '#' + luminaChannels.surface.split(' ').collect{ String.format('%02x', it as Integer) }.join('')
             context.lumina = luminaChannels
             // get target filepath
             newRef = ec.resource.getLocationReference("component://PopRestStore/screen/store/components/styles/${storeInfo.productStore.productStoreId}.css")

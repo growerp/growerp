@@ -1,0 +1,640 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- AccuGeo Liner demo website: conversion of www.accugeo.com (subset) to the GrowERP
+     'modern' template set, per docs/Website_Template_Definition.md.
+     Demonstrates: light theme (luminaBrightness "light"), grouped navbar dropdowns from
+     nested pagePaths (products/*, applications/*), and a hidden page (_ path segment).
+     Self-contained: organization + contacts, product store, hostname mapping, wiki content, theme.
+     Load explicitly (not part of seed/install):
+        java -jar moqui.war load location=component://growerp/data/AccuGeoDemoData.xml no-run-es
+     Notes:
+     - Subset of the ~46 source pages: home, about, contact, 3 products, 3 applications,
+       1 hidden spec page. Remaining pages follow the same pattern.
+     - The organization has no GrowERP owner (ownerPartyId), so it does not appear in any
+       tenant's admin app; this file exists to serve the public website only.
+     - No images scraped; product photos can be uploaded later via the Website dialog. -->
+<entity-facade-xml type="demo">
+
+    <!-- ================= organization + footer contact info ================= -->
+    <mantle.party.Party partyId="ACCUGEO_ORG" partyTypeEnumId="PtyOrganization"/>
+    <mantle.party.Organization partyId="ACCUGEO_ORG" organizationName="AccuGeo Liner, Inc."/>
+    <mantle.party.contact.ContactMech contactMechId="ACCUGEO_PA" contactMechTypeEnumId="CmtPostalAddress"/>
+    <mantle.party.contact.PostalAddress contactMechId="ACCUGEO_PA" address1="321 Industrial St."
+        city="Bakersfield" stateProvinceGeoId="USA_CA" postalCode="93307" countryGeoId="USA"/>
+    <mantle.party.contact.PartyContactMech partyId="ACCUGEO_ORG" contactMechId="ACCUGEO_PA"
+        contactMechPurposeId="PostalPrimary" fromDate="2024-01-01 00:00:00"/>
+    <mantle.party.contact.ContactMech contactMechId="ACCUGEO_TN" contactMechTypeEnumId="CmtTelecomNumber"/>
+    <mantle.party.contact.TelecomNumber contactMechId="ACCUGEO_TN" countryCode="1" areaCode="661" contactNumber="321-0447"/>
+    <mantle.party.contact.PartyContactMech partyId="ACCUGEO_ORG" contactMechId="ACCUGEO_TN"
+        contactMechPurposeId="PhonePrimary" fromDate="2024-01-01 00:00:00"/>
+    <mantle.party.contact.ContactMech contactMechId="ACCUGEO_EM" contactMechTypeEnumId="CmtEmailAddress"
+        infoString="accugeo@aol.com"/>
+    <mantle.party.contact.PartyContactMech partyId="ACCUGEO_ORG" contactMechId="ACCUGEO_EM"
+        contactMechPurposeId="EmailPrimary" fromDate="2024-01-01 00:00:00"/>
+
+    <!-- ================= content tree + wiki space ================= -->
+    <moqui.resource.DbResource filename="ACCUGEO_ROOT" isFile="N" resourceId="ACCUGEO_ROOT" parentResourceId=""/>
+    <moqui.resource.DbResource filename="content" isFile="N" resourceId="accugeo_content_dir" parentResourceId="ACCUGEO_ROOT"/>
+    <moqui.resource.DbResource filename="products" isFile="N" resourceId="accugeo_products_dir" parentResourceId="accugeo_content_dir"/>
+    <moqui.resource.DbResource filename="applications" isFile="N" resourceId="accugeo_applications_dir" parentResourceId="accugeo_content_dir"/>
+    <moqui.resource.wiki.WikiSpace wikiSpaceId="ACCUGEO_WS" description="AccuGeo Liner Website Content"
+        allowAnyHtml="Y" rootPageLocation="dbresource://ACCUGEO_ROOT"/>
+
+    <!-- ================= product store + website wiring ================= -->
+    <mantle.product.store.ProductStore productStoreId="ACCUGEO_STORE" storeName="AccuGeo Liner"
+        organizationPartyId="ACCUGEO_ORG" wikiSpaceId="ACCUGEO_WS"
+        defaultCurrencyUomId="USD" defaultLocale="en"/>
+    <mantle.product.store.ProductStoreSetting productStoreId="ACCUGEO_STORE" settingTypeEnumId="PsstContentLocation"
+        fromDate="2024-01-01 00:00:00" settingValue="dbresource://ACCUGEO_ROOT"/>
+    <mantle.product.store.ProductStoreSetting productStoreId="ACCUGEO_STORE" settingTypeEnumId="PsstTemplateId"
+        fromDate="2024-01-01 00:00:00" settingValue="modern"/>
+    <mantle.product.store.ProductStoreSetting productStoreId="ACCUGEO_STORE" settingTypeEnumId="PsstHostname"
+        fromDate="2024-01-01 00:00:00" settingValue="www.accugeo.com"/>
+    <mantle.product.store.ProductStoreSetting productStoreId="ACCUGEO_STORE" settingTypeEnumId="PsstHostname"
+        fromDate="2024-01-02 00:00:00" settingValue="accugeo.com"/>
+    <mantle.product.store.ProductStoreSetting productStoreId="ACCUGEO_STORE" settingTypeEnumId="PsstHostname"
+        fromDate="2024-01-03 00:00:00" settingValue="accugeo.localhost:8080"/>
+
+    <!-- ================================================================
+         HOME PAGE
+         ================================================================ -->
+    <moqui.resource.wiki.WikiPage wikiPageId="accugeo_home" wikiSpaceId="ACCUGEO_WS" pagePath="home"
+        publishedVersionName="01" sequenceNum="1">
+        <histories historySeqId="01" versionName="01" changeDateTime="1704067200000"/>
+    </moqui.resource.wiki.WikiPage>
+    <moqui.resource.DbResource filename="home.html.ftl" isFile="Y" resourceId="accugeo_home"
+        parentResourceId="accugeo_content_dir">
+        <file mimeType="text/html" versionName="01" rootVersionName="01">
+            <fileData><![CDATA[<#-- title: Home -->
+<main class="pt-24 pb-16 relative">
+    <!-- Ambient background glows -->
+    <div class="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
+        <div class="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-primary/5 blur-[120px]"></div>
+        <div class="absolute bottom-[-20%] right-[-10%] w-[40%] h-[40%] rounded-full bg-secondary/5 blur-[100px]"></div>
+    </div>
+
+    <!-- Hero -->
+    <section class="max-w-container mx-auto px-4 md:px-12 min-h-[65vh] flex flex-col justify-center py-16">
+        <div class="max-w-3xl">
+            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-container border border-outline-variant/50 w-fit mb-6">
+                <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+                <span class="font-label text-xs text-on-surface-variant">Custom fabrication &mdash; Bakersfield, California</span>
+            </div>
+            <h1 class="font-display text-4xl md:text-6xl font-bold tracking-tight leading-tight text-on-surface">
+                Dependable liners for<br>
+                <span class="l-gradient-text">every application.</span>
+            </h1>
+            <p class="text-lg text-on-surface-variant mt-6 max-w-xl leading-relaxed">
+                AccuGeo is your complete source for geomembrane liners and accessories. We custom
+                fabricate liners of any size with rigorous inspection and testing to ensure our
+                products meet and exceed your project's specifications.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 mt-10">
+                <a href="/content/contact" class="bg-primary hover:bg-primary/90 text-on-primary font-label text-sm font-medium px-8 py-4 rounded-lg l-glow transition-all active:scale-95 inline-flex items-center justify-center gap-2">
+                    Request a quote
+                    <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+                </a>
+                <a href="/content/about" class="l-glass hover:bg-surface-container-high/60 text-on-surface font-label text-sm font-medium px-8 py-4 rounded-lg transition-all active:scale-95 inline-flex items-center justify-center gap-2">
+                    About AccuGeo
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Why AccuGeo -->
+    <section class="max-w-container mx-auto px-4 md:px-12 py-16">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="l-glass rounded-2xl p-8">
+                <span class="material-symbols-outlined text-primary text-[36px] mb-4">precision_manufacturing</span>
+                <h3 class="font-display text-xl font-semibold text-on-surface mb-2">Custom fabrication</h3>
+                <p class="text-sm text-on-surface-variant leading-relaxed">
+                    Liners of any size, fabricated to your project's specifications with rigorous
+                    inspection and testing at every step.
+                </p>
+            </div>
+            <div class="l-glass rounded-2xl p-8">
+                <span class="material-symbols-outlined text-primary text-[36px] mb-4">payments</span>
+                <h3 class="font-display text-xl font-semibold text-on-surface mb-2">Competitive prices</h3>
+                <p class="text-sm text-on-surface-variant leading-relaxed">
+                    Low overhead costs and efficient automation keep our prices competitive, and our
+                    flexible production process runs your order quickly on short notice.
+                </p>
+            </div>
+            <div class="l-glass rounded-2xl p-8">
+                <span class="material-symbols-outlined text-primary text-[36px] mb-4">handshake</span>
+                <h3 class="font-display text-xl font-semibold text-on-surface mb-2">Real customer service</h3>
+                <p class="text-sm text-on-surface-variant leading-relaxed">
+                    Everyone at AccuGeo is dedicated to providing you with the best customer service
+                    possible &mdash; we support installers, we do not compete with them.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Products / Applications overview -->
+    <section class="max-w-container mx-auto px-4 md:px-12 py-16">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="l-glass rounded-2xl p-8">
+                <h2 class="font-display text-2xl font-bold text-on-surface mb-4 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary">layers</span>Products
+                </h2>
+                <p class="text-sm text-on-surface-variant mb-6">Geomembrane materials for every containment need.</p>
+                <div class="flex flex-wrap gap-2">
+                    <a href="/content/products/pvc" class="inline-flex items-center px-4 py-2 rounded-full bg-surface-container border border-outline-variant/50 text-sm text-on-surface hover:border-primary hover:text-primary transition-colors">PVC</a>
+                    <a href="/content/products/hdpe" class="inline-flex items-center px-4 py-2 rounded-full bg-surface-container border border-outline-variant/50 text-sm text-on-surface hover:border-primary hover:text-primary transition-colors">HDPE</a>
+                    <a href="/content/products/epdm" class="inline-flex items-center px-4 py-2 rounded-full bg-surface-container border border-outline-variant/50 text-sm text-on-surface hover:border-primary hover:text-primary transition-colors">EPDM</a>
+                </div>
+            </div>
+            <div class="l-glass rounded-2xl p-8">
+                <h2 class="font-display text-2xl font-bold text-on-surface mb-4 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary">water</span>Applications
+                </h2>
+                <p class="text-sm text-on-surface-variant mb-6">From koi ponds to canals, potable water to secondary containment.</p>
+                <div class="flex flex-wrap gap-2">
+                    <a href="/content/applications/lakes_and_ponds" class="inline-flex items-center px-4 py-2 rounded-full bg-surface-container border border-outline-variant/50 text-sm text-on-surface hover:border-primary hover:text-primary transition-colors">Lakes &amp; Ponds</a>
+                    <a href="/content/applications/potable_water" class="inline-flex items-center px-4 py-2 rounded-full bg-surface-container border border-outline-variant/50 text-sm text-on-surface hover:border-primary hover:text-primary transition-colors">Potable Water</a>
+                    <a href="/content/applications/canals" class="inline-flex items-center px-4 py-2 rounded-full bg-surface-container border border-outline-variant/50 text-sm text-on-surface hover:border-primary hover:text-primary transition-colors">Canals</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA band -->
+    <section class="max-w-container mx-auto px-4 md:px-12 py-16">
+        <div class="l-glass rounded-2xl p-10 md:p-14 text-center relative overflow-hidden">
+            <div class="absolute inset-0 bg-primary/5 pointer-events-none"></div>
+            <h2 class="font-display text-3xl font-bold text-on-surface mb-4">Need a liner on short notice?</h2>
+            <p class="text-on-surface-variant max-w-xl mx-auto mb-8">
+                Call us at (800) 955-4637 or (661) 321-0447 &mdash; our flexible production process
+                lets us set up and run your order quickly when you need it.
+            </p>
+            <a href="/content/contact" class="bg-primary hover:bg-primary/90 text-on-primary font-label text-sm font-medium px-8 py-4 rounded-lg l-glow transition-all active:scale-95 inline-flex items-center gap-2">
+                Contact us
+                <span class="material-symbols-outlined text-[18px]">call</span>
+            </a>
+        </div>
+    </section>
+</main>]]></fileData>
+            <histories versionName="01" versionDate="1704067200000" isDiff="N"/>
+        </file>
+    </moqui.resource.DbResource>
+
+    <!-- ================================================================
+         ABOUT PAGE
+         ================================================================ -->
+    <moqui.resource.wiki.WikiPage wikiPageId="accugeo_about" wikiSpaceId="ACCUGEO_WS" pagePath="about"
+        publishedVersionName="01" sequenceNum="2">
+        <histories historySeqId="01" versionName="01" changeDateTime="1704067200000"/>
+    </moqui.resource.wiki.WikiPage>
+    <moqui.resource.DbResource filename="about.html.ftl" isFile="Y" resourceId="accugeo_about"
+        parentResourceId="accugeo_content_dir">
+        <file mimeType="text/html" versionName="01" rootVersionName="01">
+            <fileData><![CDATA[<#-- title: About -->
+<main class="pt-28 pb-16">
+    <section class="max-w-container mx-auto px-4 md:px-12 py-8">
+        <h1 class="font-display text-4xl font-bold text-on-surface mb-6">About AccuGeo</h1>
+        <div class="max-w-3xl space-y-5 text-on-surface-variant leading-relaxed">
+            <p>
+                AccuGeo Liner, Inc. is a fabricator of quality, dependable geomembranes. We use our
+                specialized expertise in the geomembrane industry to help our clients deliver their
+                projects on time and on budget.
+            </p>
+            <p>
+                You can build your professional reputation on quality of materials, service and
+                technical assistance at AccuGeo. We offer a wide variety of geomembrane materials to
+                meet your company's individual containment needs.
+            </p>
+            <p>
+                AccuGeo focuses on manufacturing high quality liners and supporting our customers as
+                they focus on high quality installations. We do not compete with our customers. We
+                produce the best possible solution for you.
+            </p>
+        </div>
+        <div class="mt-10">
+            <a href="/content/contact" class="bg-primary hover:bg-primary/90 text-on-primary font-label text-sm font-medium px-8 py-4 rounded-lg l-glow transition-all active:scale-95 inline-flex items-center gap-2">
+                Work with us
+                <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+            </a>
+        </div>
+    </section>
+</main>]]></fileData>
+            <histories versionName="01" versionDate="1704067200000" isDiff="N"/>
+        </file>
+    </moqui.resource.DbResource>
+
+    <!-- ================================================================
+         PRODUCTS: PVC (grouped under "Products" navbar dropdown)
+         ================================================================ -->
+    <moqui.resource.wiki.WikiPage wikiPageId="accugeo_pvc" wikiSpaceId="ACCUGEO_WS" pagePath="products/pvc"
+        publishedVersionName="01" sequenceNum="3">
+        <histories historySeqId="01" versionName="01" changeDateTime="1704067200000"/>
+    </moqui.resource.wiki.WikiPage>
+    <moqui.resource.DbResource filename="pvc.html.ftl" isFile="Y" resourceId="accugeo_pvc"
+        parentResourceId="accugeo_products_dir">
+        <file mimeType="text/html" versionName="01" rootVersionName="01">
+            <fileData><![CDATA[<#-- title: PVC -->
+<main class="pt-28 pb-16">
+    <section class="max-w-container mx-auto px-4 md:px-12 py-8">
+        <h1 class="font-display text-4xl font-bold text-on-surface mb-6">PVC Liners</h1>
+        <div class="max-w-3xl space-y-5 text-on-surface-variant leading-relaxed">
+            <p>
+                PVC is durable and easy to use, making it a perfect liner for beginners. Adhesive
+                will seam and patch PVC and requires no expensive equipment.
+            </p>
+            <p>
+                PVC liners should be buried, the same as PVC pipe. PVC has carbon black as a UV
+                inhibitor, however prolonged UV exposure will degrade PVC over time. Buried PVC
+                liners will have a life of 20 years or more. Exposed PVC liners last a few months to
+                a year, depending on the thickness of the liner.
+            </p>
+            <p>
+                PVC roll stock is 7.083 feet wide. After subtracting for the seam, the width of the
+                liner panels will be in increments of 7'. For example, a panel could be 14' wide or
+                21' wide, etc. The maximum panel width is 140'. The length can be any value.
+            </p>
+        </div>
+        <div class="l-glass rounded-2xl p-8 mt-10 max-w-3xl">
+            <h2 class="font-display text-xl font-semibold text-on-surface mb-4">At a glance</h2>
+            <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3 text-sm">
+                <div><dt class="text-outline font-label">Standard thicknesses</dt><dd class="text-on-surface">10, 20, 30, 40, 60 mil</dd></div>
+                <div><dt class="text-outline font-label">Panel width increments</dt><dd class="text-on-surface">7' (max 140')</dd></div>
+                <div><dt class="text-outline font-label">Seaming methods</dt><dd class="text-on-surface">RF welding, heat welding, adhesive</dd></div>
+                <div><dt class="text-outline font-label">Standard warranty</dt><dd class="text-on-surface">20 years when buried (not on 10 mil)</dd></div>
+                <div><dt class="text-outline font-label">Minimum order</dt><dd class="text-on-surface">None</dd></div>
+            </dl>
+        </div>
+        <div class="mt-8 flex flex-wrap gap-4">
+            <a href="/content/products/_pvc-spec" class="l-glass hover:bg-surface-container-high/60 text-on-surface font-label text-sm font-medium px-6 py-3 rounded-lg transition-all inline-flex items-center gap-2">
+                <span class="material-symbols-outlined text-[18px]">description</span>
+                PVC specification sheet
+            </a>
+            <a href="/content/contact" class="bg-primary hover:bg-primary/90 text-on-primary font-label text-sm font-medium px-6 py-3 rounded-lg l-glow transition-all inline-flex items-center gap-2">
+                Get a quote
+            </a>
+        </div>
+    </section>
+</main>]]></fileData>
+            <histories versionName="01" versionDate="1704067200000" isDiff="N"/>
+        </file>
+    </moqui.resource.DbResource>
+
+    <!-- ================================================================
+         PRODUCTS: HDPE
+         ================================================================ -->
+    <moqui.resource.wiki.WikiPage wikiPageId="accugeo_hdpe" wikiSpaceId="ACCUGEO_WS" pagePath="products/hdpe"
+        publishedVersionName="01" sequenceNum="4">
+        <histories historySeqId="01" versionName="01" changeDateTime="1704067200000"/>
+    </moqui.resource.wiki.WikiPage>
+    <moqui.resource.DbResource filename="hdpe.html.ftl" isFile="Y" resourceId="accugeo_hdpe"
+        parentResourceId="accugeo_products_dir">
+        <file mimeType="text/html" versionName="01" rootVersionName="01">
+            <fileData><![CDATA[<#-- title: HDPE -->
+<main class="pt-28 pb-16">
+    <section class="max-w-container mx-auto px-4 md:px-12 py-8">
+        <h1 class="font-display text-4xl font-bold text-on-surface mb-6">HDPE Liners</h1>
+        <div class="max-w-3xl space-y-5 text-on-surface-variant leading-relaxed">
+            <p>
+                HDPE (High Density Polyethylene) is a special form of polyethylene that has longer
+                carbon strings with less branching. The result is a more compactable molecule and a
+                higher density. HDPE is available smooth or with texturing called Microspike&reg; to
+                increase the slip coefficient.
+            </p>
+            <p>
+                HDPE is shipped in large rolls and mechanically deployed. All seams are made in the
+                field using heat fusion or a tape designed for geosynthetics. HDPE is slightly less
+                expensive than other materials, but has a higher cost of installation. It can be
+                cost effective in large projects. HDPE should only be installed by qualified
+                professionals.
+            </p>
+        </div>
+        <div class="l-glass rounded-2xl p-8 mt-10 max-w-3xl">
+            <h2 class="font-display text-xl font-semibold text-on-surface mb-4">At a glance</h2>
+            <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3 text-sm">
+                <div><dt class="text-outline font-label">Standard thicknesses</dt><dd class="text-on-surface">12, 20, 30, 40, 60, 80, 100 mil</dd></div>
+                <div><dt class="text-outline font-label">Roll width</dt><dd class="text-on-surface">19' (12&ndash;20 mil), 23' (other)</dd></div>
+                <div><dt class="text-outline font-label">Seaming methods</dt><dd class="text-on-surface">Heat welding, tape</dd></div>
+                <div><dt class="text-outline font-label">Standard warranty</dt><dd class="text-on-surface">1 year, extensions available</dd></div>
+                <div><dt class="text-outline font-label">Minimum order</dt><dd class="text-on-surface">None</dd></div>
+            </dl>
+            <p class="text-xs text-outline mt-4">Microspike&reg; is a registered trademark of Agru America, Inc.</p>
+        </div>
+        <div class="mt-8">
+            <a href="/content/contact" class="bg-primary hover:bg-primary/90 text-on-primary font-label text-sm font-medium px-6 py-3 rounded-lg l-glow transition-all inline-flex items-center gap-2">
+                Get a quote
+            </a>
+        </div>
+    </section>
+</main>]]></fileData>
+            <histories versionName="01" versionDate="1704067200000" isDiff="N"/>
+        </file>
+    </moqui.resource.DbResource>
+
+    <!-- ================================================================
+         PRODUCTS: EPDM
+         ================================================================ -->
+    <moqui.resource.wiki.WikiPage wikiPageId="accugeo_epdm" wikiSpaceId="ACCUGEO_WS" pagePath="products/epdm"
+        publishedVersionName="01" sequenceNum="5">
+        <histories historySeqId="01" versionName="01" changeDateTime="1704067200000"/>
+    </moqui.resource.wiki.WikiPage>
+    <moqui.resource.DbResource filename="epdm.html.ftl" isFile="Y" resourceId="accugeo_epdm"
+        parentResourceId="accugeo_products_dir">
+        <file mimeType="text/html" versionName="01" rootVersionName="01">
+            <fileData><![CDATA[<#-- title: EPDM -->
+<main class="pt-28 pb-16">
+    <section class="max-w-container mx-auto px-4 md:px-12 py-8">
+        <h1 class="font-display text-4xl font-bold text-on-surface mb-6">EPDM Liners</h1>
+        <div class="max-w-3xl space-y-5 text-on-surface-variant leading-relaxed">
+            <p>
+                EPDM (Ethylene Propylene Diene Terpolymer) is a synthetic rubber, which gives it much
+                more elasticity than other liner materials. EPDM is a beginner-friendly material that
+                is most common in small koi ponds, with excellent resistance to UV and harsh
+                environmental conditions.
+            </p>
+            <p>
+                Pipe penetrations are made easily by cutting an undersized hole and stretching the
+                liner over the pipe. Note that the hole must be round to evenly distribute the stress
+                around the circumference.
+            </p>
+        </div>
+        <div class="l-glass rounded-2xl p-8 mt-10 max-w-3xl">
+            <h2 class="font-display text-xl font-semibold text-on-surface mb-4">At a glance</h2>
+            <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3 text-sm">
+                <div><dt class="text-outline font-label">Standard thickness</dt><dd class="text-on-surface">45 mil</dd></div>
+                <div><dt class="text-outline font-label">Standard roll sizes</dt><dd class="text-on-surface">10'&ndash;50' wide, 100'&ndash;200' long</dd></div>
+                <div><dt class="text-outline font-label">Seaming method</dt><dd class="text-on-surface">Tape</dd></div>
+                <div><dt class="text-outline font-label">Minimum order</dt><dd class="text-on-surface">None, partial rolls available</dd></div>
+            </dl>
+        </div>
+        <div class="mt-8">
+            <a href="/content/contact" class="bg-primary hover:bg-primary/90 text-on-primary font-label text-sm font-medium px-6 py-3 rounded-lg l-glow transition-all inline-flex items-center gap-2">
+                Get a quote
+            </a>
+        </div>
+    </section>
+</main>]]></fileData>
+            <histories versionName="01" versionDate="1704067200000" isDiff="N"/>
+        </file>
+    </moqui.resource.DbResource>
+
+    <!-- ================================================================
+         APPLICATIONS: LAKES & PONDS (grouped under "Applications" dropdown)
+         ================================================================ -->
+    <moqui.resource.wiki.WikiPage wikiPageId="accugeo_lakes" wikiSpaceId="ACCUGEO_WS" pagePath="applications/lakes_and_ponds"
+        publishedVersionName="01" sequenceNum="6">
+        <histories historySeqId="01" versionName="01" changeDateTime="1704067200000"/>
+    </moqui.resource.wiki.WikiPage>
+    <moqui.resource.DbResource filename="lakes_and_ponds.html.ftl" isFile="Y" resourceId="accugeo_lakes"
+        parentResourceId="accugeo_applications_dir">
+        <file mimeType="text/html" versionName="01" rootVersionName="01">
+            <fileData><![CDATA[<#-- title: Lakes & Ponds -->
+<main class="pt-28 pb-16">
+    <section class="max-w-container mx-auto px-4 md:px-12 py-8">
+        <h1 class="font-display text-4xl font-bold text-on-surface mb-6">Lake and Pond Liners</h1>
+        <div class="max-w-3xl space-y-5 text-on-surface-variant leading-relaxed">
+            <p>
+                Lakes and ponds transform otherwise boring property into beautiful terrain.
+                Upgrading your landscape is easy even for beginners with AccuGeo's liners.
+                Installing a liner can be intimidating at first, but many times it is as simple as
+                unfolding a liner and pulling it into place.
+            </p>
+            <p>
+                The two most popular materials for lake and pond liners are
+                <a href="/content/products/pvc" class="text-primary hover:underline">PVC</a> and
+                Polypropylene. These materials are reliable, inexpensive and easy to install. Use PVC
+                if you are going to bury the liner and make the pond look natural. Use Polypropylene
+                if any part of the liner will be exposed to sunlight.
+            </p>
+            <p>
+                PVC is easy to patch with adhesive and costs less, but degrades from the ultraviolet
+                rays (UV) in sunlight. Polypropylene has excellent UV resistance, but has to be
+                patched with a hot air welder. Some pond designers prefer to use polypropylene in
+                case the liner accidentally becomes exposed to sunlight for an extended period.
+            </p>
+        </div>
+        <div class="mt-8">
+            <a href="/content/contact" class="bg-primary hover:bg-primary/90 text-on-primary font-label text-sm font-medium px-6 py-3 rounded-lg l-glow transition-all inline-flex items-center gap-2">
+                Plan your pond with us
+            </a>
+        </div>
+    </section>
+</main>]]></fileData>
+            <histories versionName="01" versionDate="1704067200000" isDiff="N"/>
+        </file>
+    </moqui.resource.DbResource>
+
+    <!-- ================================================================
+         APPLICATIONS: POTABLE WATER
+         ================================================================ -->
+    <moqui.resource.wiki.WikiPage wikiPageId="accugeo_potable" wikiSpaceId="ACCUGEO_WS" pagePath="applications/potable_water"
+        publishedVersionName="01" sequenceNum="7">
+        <histories historySeqId="01" versionName="01" changeDateTime="1704067200000"/>
+    </moqui.resource.wiki.WikiPage>
+    <moqui.resource.DbResource filename="potable_water.html.ftl" isFile="Y" resourceId="accugeo_potable"
+        parentResourceId="accugeo_applications_dir">
+        <file mimeType="text/html" versionName="01" rootVersionName="01">
+            <fileData><![CDATA[<#-- title: Potable Water -->
+<main class="pt-28 pb-16">
+    <section class="max-w-container mx-auto px-4 md:px-12 py-8">
+        <h1 class="font-display text-4xl font-bold text-on-surface mb-6">Potable Water Liners</h1>
+        <div class="max-w-3xl space-y-5 text-on-surface-variant leading-relaxed">
+            <p>
+                Potable water is water that must be safe for human consumption. Check local
+                regulations for the liner materials approved for use in your area.
+            </p>
+            <p>
+                Most areas require that liners for potable water are certified by the National
+                Sanitation Foundation (NSF) to meet the NSF/ANSI 61 standard. NSF certified liners
+                are inspected to ensure that all ingredients, including the polymer and additives
+                such as UV stabilizers, heat stabilizers and antioxidants, are safe for contact with
+                drinking water.
+            </p>
+            <p>
+                Common liner materials for potable water are NSF certified 36 and 45 mil
+                Polypropylene.
+            </p>
+        </div>
+        <div class="mt-8">
+            <a href="/content/contact" class="bg-primary hover:bg-primary/90 text-on-primary font-label text-sm font-medium px-6 py-3 rounded-lg l-glow transition-all inline-flex items-center gap-2">
+                Ask about NSF certified liners
+            </a>
+        </div>
+    </section>
+</main>]]></fileData>
+            <histories versionName="01" versionDate="1704067200000" isDiff="N"/>
+        </file>
+    </moqui.resource.DbResource>
+
+    <!-- ================================================================
+         APPLICATIONS: CANALS
+         ================================================================ -->
+    <moqui.resource.wiki.WikiPage wikiPageId="accugeo_canals" wikiSpaceId="ACCUGEO_WS" pagePath="applications/canals"
+        publishedVersionName="01" sequenceNum="8">
+        <histories historySeqId="01" versionName="01" changeDateTime="1704067200000"/>
+    </moqui.resource.wiki.WikiPage>
+    <moqui.resource.DbResource filename="canals.html.ftl" isFile="Y" resourceId="accugeo_canals"
+        parentResourceId="accugeo_applications_dir">
+        <file mimeType="text/html" versionName="01" rootVersionName="01">
+            <fileData><![CDATA[<#-- title: Canals -->
+<main class="pt-28 pb-16">
+    <section class="max-w-container mx-auto px-4 md:px-12 py-8">
+        <h1 class="font-display text-4xl font-bold text-on-surface mb-6">Canal Liners</h1>
+        <div class="max-w-3xl space-y-5 text-on-surface-variant leading-relaxed">
+            <p>
+                Canal liners are a cost effective solution whether you want to replace traditional
+                concrete or just be prepared when it cracks. Plastic liners are a fraction of the
+                cost of concrete and completely stop seepage losses. However, care should be taken
+                to protect the liner from animals, vandalism and other potential damage. The canal
+                liner can be protected with a layer of backfill or by placing the liner under a
+                traditional concrete canal.
+            </p>
+            <p>
+                AccuGeo can custom fabricate long canal liners that are cheap and easy to install as
+                a large panel. <a href="/content/products/pvc" class="text-primary hover:underline">PVC</a>
+                is a popular choice for canal liners under concrete or backfill. Polypropylene and
+                <a href="/content/products/hdpe" class="text-primary hover:underline">HDPE</a> are
+                popular choices for liners that will be left exposed.
+            </p>
+            <p>
+                Both Polypropylene and HDPE will float on water if the liner gets a leak. This can
+                lead to bank erosion if the liner is not weighted down to prevent water from flowing
+                under the liner.
+            </p>
+        </div>
+        <div class="mt-8">
+            <a href="/content/contact" class="bg-primary hover:bg-primary/90 text-on-primary font-label text-sm font-medium px-6 py-3 rounded-lg l-glow transition-all inline-flex items-center gap-2">
+                Discuss your canal project
+            </a>
+        </div>
+    </section>
+</main>]]></fileData>
+            <histories versionName="01" versionDate="1704067200000" isDiff="N"/>
+        </file>
+    </moqui.resource.DbResource>
+
+    <!-- ================================================================
+         CONTACT PAGE
+         ================================================================ -->
+    <moqui.resource.wiki.WikiPage wikiPageId="accugeo_contact" wikiSpaceId="ACCUGEO_WS" pagePath="contact"
+        publishedVersionName="01" sequenceNum="9">
+        <histories historySeqId="01" versionName="01" changeDateTime="1704067200000"/>
+    </moqui.resource.wiki.WikiPage>
+    <moqui.resource.DbResource filename="contact.html.ftl" isFile="Y" resourceId="accugeo_contact"
+        parentResourceId="accugeo_content_dir">
+        <file mimeType="text/html" versionName="01" rootVersionName="01">
+            <fileData><![CDATA[<#-- title: Contact -->
+<main class="pt-28 pb-16">
+    <section class="max-w-container mx-auto px-4 md:px-12 py-8">
+        <h1 class="font-display text-4xl font-bold text-on-surface mb-4">Contact Us</h1>
+        <p class="text-on-surface-variant max-w-2xl mb-10">
+            Talk to a fabricator, not a call center. You can also leave a question in the chat
+            widget in the corner of this page.
+        </p>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl">
+            <div class="l-glass rounded-2xl p-8">
+                <span class="material-symbols-outlined text-primary text-[32px] mb-3">location_on</span>
+                <h3 class="font-display font-semibold text-on-surface mb-1">Address</h3>
+                <p class="text-sm text-on-surface-variant">AccuGeo Liner, Inc.<br>321 Industrial St.<br>Bakersfield, CA 93307</p>
+            </div>
+            <div class="l-glass rounded-2xl p-8">
+                <span class="material-symbols-outlined text-primary text-[32px] mb-3">call</span>
+                <h3 class="font-display font-semibold text-on-surface mb-1">Phone</h3>
+                <p class="text-sm text-on-surface-variant">
+                    Phone (661) 321-0447<br>Toll free (800) 955-4637<br>Fax (661) 321-0449
+                </p>
+            </div>
+            <div class="l-glass rounded-2xl p-8">
+                <span class="material-symbols-outlined text-primary text-[32px] mb-3">mail</span>
+                <h3 class="font-display font-semibold text-on-surface mb-1">Email</h3>
+                <a href="mailto:accugeo@aol.com" class="text-sm text-primary hover:underline">accugeo@aol.com</a>
+            </div>
+        </div>
+    </section>
+</main>]]></fileData>
+            <histories versionName="01" versionDate="1704067200000" isDiff="N"/>
+        </file>
+    </moqui.resource.DbResource>
+
+    <!-- ================================================================
+         HIDDEN PAGE: PVC SPEC (leading '_' segment: routable, not in menus)
+         ================================================================ -->
+    <moqui.resource.wiki.WikiPage wikiPageId="accugeo_pvc_spec" wikiSpaceId="ACCUGEO_WS" pagePath="products/_pvc-spec"
+        publishedVersionName="01" sequenceNum="10">
+        <histories historySeqId="01" versionName="01" changeDateTime="1704067200000"/>
+    </moqui.resource.wiki.WikiPage>
+    <moqui.resource.DbResource filename="_pvc-spec.md.ftl" isFile="Y" resourceId="accugeo_pvc_spec"
+        parentResourceId="accugeo_products_dir">
+        <file mimeType="text/markdown" versionName="01" rootVersionName="01">
+            <fileData><![CDATA[# PVC Specification Sheet
+
+Reference values for AccuGeo fabricated PVC geomembrane liners.
+
+## Material
+
+| Property | Value |
+| --- | --- |
+| Material | Polyvinyl chloride (PVC), carbon black UV inhibitor |
+| Standard thicknesses | 10, 20, 30, 40, 60 mil (1 mil = 1/1000 inch) |
+| Roll stock width | 7.083 ft |
+| Panel width increments | 7 ft |
+| Maximum panel width | 140 ft |
+| Maximum panel weight | ideally under 6,000 lbs |
+
+## Fabrication
+
+| Property | Value |
+| --- | --- |
+| Seaming methods | RF welding, heat welding, adhesive |
+| Recommended installation | buried, like PVC pipe |
+| Service life (buried) | 20 years or more |
+| Service life (exposed) | months to a year, thickness dependent |
+
+## Commercial
+
+| Property | Value |
+| --- | --- |
+| Standard warranty | 20 years when buried (not offered on 10 mil) |
+| Minimum order quantity | none |
+
+Back to the [PVC product page](/content/products/pvc).]]></fileData>
+            <histories versionName="01" versionDate="1704067200000" isDiff="N"/>
+        </file>
+    </moqui.resource.DbResource>
+
+    <!-- ================================================================
+         THEME: websiteColor.json (LIGHT, AccuGeo blue #004BB8 on white)
+         ================================================================ -->
+    <moqui.resource.DbResource filename="websiteColor.json" isFile="Y" resourceId="accugeo_website_color"
+        parentResourceId="accugeo_content_dir">
+        <file mimeType="application/json" versionName="01" rootVersionName="01">
+            <fileData><![CDATA[{
+  "lumina": {
+    "surface": "#f9f9ff",
+    "surfaceContainerLowest": "#ffffff",
+    "surfaceContainerLow": "#f3f4fb",
+    "surfaceContainer": "#edeff7",
+    "surfaceContainerHigh": "#e7e9f2",
+    "surfaceContainerHighest": "#e1e3ec",
+    "onSurface": "#191c22",
+    "onSurfaceVariant": "#43474e",
+    "primary": "#004bb8",
+    "onPrimary": "#ffffff",
+    "primaryContainer": "#d8e2ff",
+    "secondary": "#158ee7",
+    "tertiary": "#c62828",
+    "error": "#ba1a1a",
+    "outline": "#74777f",
+    "outlineVariant": "#c4c6d0"
+  },
+  "luminaScheme": "custom",
+  "luminaBrightness": "light",
+  "TwitterUrl": "",
+  "FacebookUrl": "",
+  "InstagramUrl": "",
+  "YouTubeUrl": "",
+  "LinkedInUrl": "",
+  "SubstackUrl": ""
+}]]></fileData>
+            <histories versionName="01" versionDate="1704067200000" isDiff="N"/>
+        </file>
+    </moqui.resource.DbResource>
+
+</entity-facade-xml>
