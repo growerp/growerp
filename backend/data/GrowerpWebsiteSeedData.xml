@@ -6,7 +6,7 @@
 
     <!-- Wiki Space -->
     <moqui.resource.wiki.WikiSpace wikiSpaceId="GROWERP_WS" description="GrowERP Official Website Content"
-        rootWikiPageId="growerp_home" allowAnyHtml="Y" rootPageLocation="dbresource://GROWERP_ROOT"/>
+        allowAnyHtml="Y" rootPageLocation="dbresource://GROWERP_ROOT"/>
 
     <!-- ================================================================
          HOME PAGE

@@ -88,7 +88,7 @@ submit#Assessment always resolves a leadStatus.
         optionSequence="3" optionText="More than 10" optionScore="0" />
 
     <!-- Single catch-all threshold so submit#Assessment always resolves a status -->
-    <growerp.assessment.ScoringThreshold thresholdId="ERPO_T1" pseudoId="erpo-t1"
+    <growerp.assessment.ScoringThreshold scoringThresholdId="ERPO_T1" pseudoId="erpo-t1"
         assessmentId="ERP_ONBOARD" minScore="0" maxScore="1000" leadStatus="PROFILED"
         description="Thanks! We've captured how your business is organised and will tailor your menu to match." />
 
