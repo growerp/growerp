@@ -266,6 +266,20 @@ along with this software (see the LICENSE.md file). If not, see
                     <service-call name="update#mantle.product.store.ProductStore"
                         in-map="[productStoreId: growerpStoreId, storeName: 'GrowERP Official', wikiSpaceId: 'GROWERP_WS']"/>
 
+                    <!-- serve the marketing site with the modern (Tailwind/Lumina) template set -->
+                    <entity-find entity-name="mantle.product.store.ProductStoreSetting" list="templateIdSettings">
+                        <econdition field-name="productStoreId" from="growerpStoreId"/>
+                        <econdition field-name="settingTypeEnumId" value="PsstTemplateId"/>
+                    </entity-find>
+                    <if condition="templateIdSettings">
+                        <service-call name="update#mantle.product.store.ProductStoreSetting"
+                            in-map="templateIdSettings[0] + [settingValue: 'modern']"/>
+                        <else>
+                            <service-call name="create#mantle.product.store.ProductStoreSetting"
+                                in-map="[productStoreId: growerpStoreId, settingTypeEnumId: 'PsstTemplateId', settingValue: 'modern']"/>
+                        </else>
+                    </if>
+
                     <!-- point content location at the marketing DbResource tree -->
                     <entity-find entity-name="mantle.product.store.ProductStoreSetting" list="contentSettings">
                         <econdition field-name="productStoreId" from="growerpStoreId"/>
