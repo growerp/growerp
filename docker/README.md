@@ -1,6 +1,6 @@
 # Docker files
 
-## To run locally (Java 11 sdk, Flutter)
+## To run locally (Java 21 sdk, Flutter)
 
 add to /etc/hosts file: 
 ```

@@ -33,7 +33,7 @@ services:
       # - SSL_POLICY=AWS-TLS-1-1-2017-01
 
   moqui-server:
-    image: growerp/growerp-moqui
+    image: ghcr.io/growerp/growerp-moqui:latest
     container_name: moqui
     build:
       context: ..
@@ -106,7 +106,7 @@ services:
 
   admin:
     container_name: admin
-    image: growerp/admin
+    image: ghcr.io/growerp/admin
     build:
       context: ../flutter
       dockerfile: ../flutter/packages/admin/Dockerfile
@@ -121,7 +121,7 @@ services:
 
   hotel:
     container_name: hotel
-    image: growerp/hotel
+    image: ghcr.io/growerp/hotel
     build:
       context: ../flutter
       dockerfile: ../flutter/packages/hotel/Dockerfile
