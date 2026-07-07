@@ -252,6 +252,17 @@ along with this software (see the LICENSE.md file). If not, see
                 </entity-find>
                 <if condition="growerpStores">
                     <set field="growerpStoreId" from="growerpStores[0].productStoreId"/>
+                    <!-- GROWERP_WS normally comes from GrowerpWebsiteSeedData.xml loaded above;
+                         create a minimal space when absent (e.g. that load failed) so the
+                         ProductStore foreign key below can never abort tenant setup -->
+                    <entity-find-one entity-name="moqui.resource.wiki.WikiSpace" value-field="growerpWikiSpace">
+                        <field-map field-name="wikiSpaceId" value="GROWERP_WS"/>
+                    </entity-find-one>
+                    <if condition="growerpWikiSpace == null">
+                        <service-call name="create#moqui.resource.wiki.WikiSpace"
+                            in-map="[wikiSpaceId: 'GROWERP_WS', description: 'GrowERP Official Website Content',
+                                allowAnyHtml: 'Y', rootPageLocation: 'dbresource://GROWERP_ROOT']"/>
+                    </if>
                     <service-call name="update#mantle.product.store.ProductStore"
                         in-map="[productStoreId: growerpStoreId, storeName: 'GrowERP Official', wikiSpaceId: 'GROWERP_WS']"/>
 
