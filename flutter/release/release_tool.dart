@@ -416,6 +416,11 @@ Future<Map<String, bool>> getPushConfiguration(
     };
   }
 
+  var bumpNone =
+      versionConfig['patch'] == false &&
+      versionConfig['minor'] == false &&
+      versionConfig['major'] == false;
+
   var pushToDockerHub =
       ask(
         'Push to Docker Hub? (Y/n)',
@@ -427,17 +432,17 @@ Future<Map<String, bool>> getPushConfiguration(
   // This ensures Docker builds from the repository with versioned code
   var pushToGitHub = pushToDockerHub;
 
-  if (versionConfig['patch'] == false) {
+  if (bumpNone) {
     pushToGitHub = false;
     print(
-      "   Note: Not pushing to GitHub because patch version is not incremented.",
+      "   Note: Bump is 'none' — skipping version file update and git push.",
     );
   }
 
   return {
     'pushToDockerHub': pushToDockerHub,
     'pushToGitHub': pushToGitHub,
-    'bumpNone': false,
+    'bumpNone': bumpNone,
     'buildDocker': true,
   };
 }
