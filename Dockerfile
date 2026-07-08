@@ -21,6 +21,7 @@
 FROM ghcr.io/cirruslabs/flutter:stable AS build-flutter
 
 ARG BRANCH=master
+ARG DOCKER_TAG=NOTSET1
 USER root
 
 # Install linux dependencies
@@ -41,6 +42,13 @@ WORKDIR /root
 RUN git clone --depth 1 -b $BRANCH https://github.com/growerp/growerp.git
 
 WORKDIR /root/growerp/flutter
+# The clone is at the last committed version; the release bump is only committed
+# after this build succeeds. Stamp the release version (DOCKER_TAG) into the
+# embedded web apps so their internal version matches the image tag.
+RUN if [ "$DOCKER_TAG" != "NOTSET1" ]; then \
+    for app in admin assessment freelance; do \
+    sed -i "s/^version: .*/version: $DOCKER_TAG/" packages/$app/pubspec.yaml; \
+    done; fi
 RUN sed -i 's\//webactivate \\' packages/admin/lib/main.dart
 # Clean any existing dart tool caches
 RUN find . -name ".dart_tool" -type d -exec rm -rf {} + 2>/dev/null || true
@@ -86,6 +94,10 @@ RUN git submodule update --init --recursive
 COPY setup-backend.sh /root/growerp/setup-backend.sh
 # Clone moqui-runtime + create symlinks for custom components
 RUN bash setup-backend.sh
+# Stamp the release version (DOCKER_TAG) into the growerp component so the
+# internal version matches the image tag (the clone predates the bump commit).
+RUN if [ "$DOCKER_TAG" != "NOTSET1" ]; then \
+    sed -i "s|name=\"growerp\" version=\"[^\"]*\"|name=\"growerp\" version=\"$DOCKER_TAG\"|" backend/component.xml; fi
 
 # AntWebsystems website (public repo — no PAT required)
 RUN git clone --depth 1 https://github.com/AntWebsystems-Co-Ltd/vueWebsite.git /root/vueWebsite
