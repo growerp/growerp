@@ -685,10 +685,20 @@ Future<void> executeRelease(
   var newVersions = <String, String>{};
   for (var app in selectedApps) {
     var currentVersion = versionInfo['current'][app];
-    var buildSuffix = currentVersion.contains('+')
-        ? currentVersion.substring(currentVersion.indexOf('+'))
-        : '+1';
-    newVersions[app] = "${versionInfo['newBase']}$buildSuffix";
+    if (pushConfig['bumpNone'] == true) {
+      // No bump requested — build/tag this app at its OWN current version,
+      // not the monorepo-wide 'newBase'. newBase is the highest version across
+      // ALL apps, which can be ahead of this specific app if a previous
+      // release run bumped other apps without including this one; tagging
+      // with newBase here would push a version number that doesn't match
+      // what's actually baked into this app's build (its own current files).
+      newVersions[app] = currentVersion;
+    } else {
+      var buildSuffix = currentVersion.contains('+')
+          ? currentVersion.substring(currentVersion.indexOf('+'))
+          : '+1';
+      newVersions[app] = "${versionInfo['newBase']}$buildSuffix";
+    }
   }
 
   // Step 1: Update version files in workspace (skipped for bump=none)
@@ -765,7 +775,7 @@ Future<void> executeRelease(
 
     // Push to Docker Hub
     if (pushConfig['pushToDockerHub'] == true) {
-      await pushDockerImage(app, versionInfo['newBase']);
+      await pushDockerImage(app, newVersion);
     }
 
     completedApps.add(app);
