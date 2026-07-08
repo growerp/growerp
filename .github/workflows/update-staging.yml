@@ -197,6 +197,13 @@ jobs:
           name: bumped-pubspecs
           path: flutter
 
+      - name: Download bumped component.xml
+        if: inputs.bump != 'none'
+        uses: actions/download-artifact@v4
+        with:
+          name: bumped-component-xml
+          path: backend
+
       - uses: dart-lang/setup-dart@v1
 
       - name: Install dcli
