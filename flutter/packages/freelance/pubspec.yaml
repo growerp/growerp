@@ -1,6 +1,6 @@
 name: freelance
 resolution: workspace
-version: 1.16.22+1
+version: 1.16.23+1
 publish_to: none
 
 environment:
