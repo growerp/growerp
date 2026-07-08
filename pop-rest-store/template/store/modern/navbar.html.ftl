@@ -7,7 +7,7 @@
             <!-- Logo and Brand -->
             <a href="/" class="flex items-center gap-3 shrink-0">
                 <img src="/getLogo" alt="Home" class="h-9 w-9 object-contain rounded">
-                <span class="font-display font-bold text-lg tracking-tight text-on-surface hidden sm:block">${storeInfo.productStore.storeName}</span>
+                <span class="font-display font-bold text-lg tracking-tight text-on-surface truncate max-w-[8ch] sm:max-w-none">${storeInfo.productStore.storeName}</span>
             </a>
 
             <!-- Desktop navigation -->

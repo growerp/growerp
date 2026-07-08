@@ -49,7 +49,7 @@
 
     <!-- Hero Section -->
     <section class="max-w-container mx-auto px-4 md:px-12 min-h-[75vh] flex flex-col justify-center py-16 relative">
-        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary/10 rounded-full blur-[120px] pointer-events-none -z-10"></div>
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] max-w-full h-[800px] bg-primary/10 rounded-full blur-[120px] pointer-events-none -z-10"></div>
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center w-full">
             <!-- Text Content -->
             <div class="lg:col-span-5 flex flex-col z-10">

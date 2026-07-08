@@ -264,7 +264,7 @@ along with this software (see the LICENSE.md file). If not, see
                                 allowAnyHtml: 'Y', rootPageLocation: 'dbresource://GROWERP_ROOT']"/>
                     </if>
                     <service-call name="update#mantle.product.store.ProductStore"
-                        in-map="[productStoreId: growerpStoreId, storeName: 'GrowERP Official', wikiSpaceId: 'GROWERP_WS']"/>
+                        in-map="[productStoreId: growerpStoreId, storeName: 'GrowERP', wikiSpaceId: 'GROWERP_WS']"/>
 
                     <!-- serve the marketing site with the modern (Tailwind/Lumina) template set -->
                     <entity-find entity-name="mantle.product.store.ProductStoreSetting" list="templateIdSettings">

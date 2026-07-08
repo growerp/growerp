@@ -61,7 +61,7 @@
 
     <!-- Hero -->
     <section class="max-w-container mx-auto px-4 md:px-12 min-h-[70vh] flex flex-col justify-center py-16 relative">
-        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-primary/10 rounded-full blur-[120px] pointer-events-none -z-10"></div>
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] max-w-full h-[700px] bg-primary/10 rounded-full blur-[120px] pointer-events-none -z-10"></div>
         <div class="max-w-3xl">
             <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-container border border-outline-variant/50 w-fit mb-6">
                 <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
