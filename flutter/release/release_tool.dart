@@ -885,14 +885,19 @@ Future<String> buildDockerImage(
 Future<void> pushDockerImage(String app, String version) async {
   var dockerImage = '${config['dockerRegistry']}/$app';
 
+  // Docker image tags may only contain [a-zA-Z0-9_.-], but our version
+  // strings carry a pub/dart-style build suffix (e.g. "1.16.23+0") which
+  // includes '+' — invalid in a Docker reference. Strip it for the tag.
+  var dockerTag = version.contains('+') ? version.split('+')[0] : version;
+
   print("   Pushing to Docker Hub: $dockerImage:latest");
   try {
     run('docker push $dockerImage:latest');
     print("   ✓ Latest image pushed successfully");
 
-    print("   Tagging and pushing version: $dockerImage:$version");
-    run('docker tag $dockerImage:latest $dockerImage:$version');
-    run('docker push $dockerImage:$version');
+    print("   Tagging and pushing version: $dockerImage:$dockerTag");
+    run('docker tag $dockerImage:latest $dockerImage:$dockerTag');
+    run('docker push $dockerImage:$dockerTag');
     print("   ✓ Version image pushed successfully");
   } catch (e) {
     print("   ❌ Failed to push Docker image: $e");
