@@ -66,6 +66,86 @@ jobs:
           fi
 
   # ------------------------------------------------------------------
+  # 1a. Backend Spock tests (growerp component)
+  #     Boots an embedded Moqui against a freshly loaded H2 database, no
+  #     docker/flutter needed. Covers currency conversion (one-page
+  #     checkout) and tenant subscription renewal.
+  # ------------------------------------------------------------------
+  backend-tests:
+    needs: check-changes
+    if: needs.check-changes.outputs.should_run == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Init submodules (SSH → HTTPS rewrite)
+        run: |
+          git config --global url."https://github.com/".insteadOf "git@github.com:"
+          git submodule update --init --recursive
+
+      - name: Set up backend component symlinks
+        run: bash setup-backend.sh
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: gradle
+
+      - name: Build moqui
+        working-directory: moqui
+        run: |
+          WRAPPER=gradle/wrapper/gradle-wrapper.properties
+          # services.gradle.org regularly times out / returns 504 from CI.
+          sed -i 's/^networkTimeout=.*/networkTimeout=60000/' "$WRAPPER"
+          sed -i 's/^validateDistributionUrl=.*/validateDistributionUrl=false/' "$WRAPPER"
+          MIRRORS=(
+            'https\://services.gradle.org/distributions/gradle-9.2.0-bin.zip'
+            'https\://mirrors.cloud.tencent.com/gradle/gradle-9.2.0-bin.zip'
+          )
+          ok=0
+          for url in "${MIRRORS[@]}"; do
+            sed -i "s|^distributionUrl=.*|distributionUrl=$url|" "$WRAPPER"
+            for attempt in 1 2 3; do
+              if ./gradlew build; then ok=1; break; fi
+              echo "gradlew attempt $attempt via $url failed; retrying in 20s..."
+              sleep 20
+            done
+            [ "$ok" = 1 ] && break
+            echo "all attempts on $url failed; trying next mirror..."
+          done
+          [ "$ok" = 1 ] || { echo "gradlew failed on all mirrors"; exit 1; }
+
+      - name: Load seed data (H2)
+        working-directory: moqui
+        run: java -jar moqui.war load types=seed,seed-initial,install no-run-es
+
+      - name: Run growerp backend tests
+        working-directory: moqui
+        run: ./gradlew :runtime:component:growerp:test --console=plain
+
+      - name: Backend test summary
+        if: always()
+        working-directory: moqui
+        run: |
+          echo "## Backend Spock Tests" >> "$GITHUB_STEP_SUMMARY"
+          REPORT=runtime/component/growerp/build/test-results/test
+          if ls "$REPORT"/TEST-*.xml >/dev/null 2>&1; then
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+            grep -h "<testcase" "$REPORT"/TEST-*.xml \
+              | sed -E 's/.*name="([^"]+)".*/\1/' >> "$GITHUB_STEP_SUMMARY"
+            grep -h "<testsuite " "$REPORT"/TEST-*.xml \
+              | sed -E 's/.*tests="([0-9]+)" skipped="([0-9]+)" failures="([0-9]+)" errors="([0-9]+)".*/tests: \1, skipped: \2, failures: \3, errors: \4/' \
+              >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "No test report generated." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+  # ------------------------------------------------------------------
   # 1. Integration tests
   #    Full run: 4 parallel slices, each with its own Moqui backend.
   #    Filtered run (package_filter set): single job using PACKAGE_FILTER.
