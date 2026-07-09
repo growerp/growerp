@@ -586,7 +586,7 @@ If you decide GrowERP isn't for you:
             </p>
             <div class="flex flex-col sm:flex-row gap-4 justify-center">
                 <a href="https://admin.growerp.com" class="bg-primary hover:bg-primary/90 text-on-primary px-8 py-4 rounded-lg font-label text-sm font-semibold l-glow transition-all active:scale-95">Start Free Trial</a>
-                <a href="/assessmentLanding?landingPageId=ERP_LANDING_PAGE" class="bg-surface-container-high px-8 py-4 rounded-lg border border-white/10 hover:bg-surface-container-highest transition-colors font-label text-sm font-semibold text-on-surface">Request Demo</a>
+                <a href="https://calendar.app.google/DqduYuVLkZ4A8Gbr7" class="bg-surface-container-high px-8 py-4 rounded-lg border border-white/10 hover:bg-surface-container-highest transition-colors font-label text-sm font-semibold text-on-surface">Request Demo</a>
             </div>
         </div>
     </section>

@@ -80,8 +80,8 @@
                     <#if (storeOwnerPartyId!'') != 'GROWERP'>
                     <a href="https://admin.growerp.com" class="hidden sm:inline-flex font-label text-sm text-on-surface hover:text-primary transition-colors">Sign In</a>
                     </#if>
-                    <a href="https://admin.growerp.com" class="bg-primary hover:bg-primary/90 text-on-primary font-label text-sm font-medium px-5 py-2.5 rounded-lg l-glow transition-all active:scale-95 flex items-center gap-2">
-                        Get Started
+                    <a href="https://admin.growerp.com" class="bg-primary hover:bg-primary/90 text-on-primary font-label text-sm font-medium px-3 sm:px-5 py-2.5 rounded-lg l-glow transition-all active:scale-95 flex items-center gap-2 shrink-0">
+                        <span class="hidden sm:inline">Get Started</span>
                         <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
                     </a>
                 <#elseif hasCommerce>
@@ -149,7 +149,7 @@
 
                 <!-- Mobile hamburger -->
                 <button type="button" data-menu-button="mobileMenu" aria-expanded="false" aria-label="Toggle navigation"
-                        class="md:hidden flex items-center text-on-surface hover:text-primary transition-colors">
+                        class="md:hidden flex items-center text-on-surface hover:text-primary transition-colors shrink-0">
                     <span class="material-symbols-outlined text-[26px]">menu</span>
                 </button>
             </div>
