@@ -115,6 +115,9 @@ class PaymentDialogState extends State<PaymentDialog> {
     _amountController.text = finDoc.grandTotal == null
         ? ''
         : finDoc.grandTotal.currency(currencyId: ''); // not show currency
+    _origAmountController.text = finDoc.originalGrandTotal == null
+        ? ''
+        : finDoc.originalGrandTotal.currency(currencyId: '');
     _pseudoIdController.text = finDoc.pseudoId == null
         ? ''
         : finDoc.pseudoId.toString();
@@ -464,18 +467,21 @@ class PaymentDialogState extends State<PaymentDialog> {
                           value!.isEmpty ? _localizations!.enterAmount : null,
                     ),
                   ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: TextFormField(
-                      enabled: !readOnly,
-                      key: const Key('origAmount'),
-                      decoration: InputDecoration(
-                        labelText: 'OrigAmount($origCurrencySymbol)',
+                  // original amount/currency, only shown when filled
+                  if (widget.finDoc.originalGrandTotal != null) ...[
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: TextFormField(
+                        enabled: !readOnly,
+                        key: const Key('origAmount'),
+                        decoration: InputDecoration(
+                          labelText: 'OrigAmount($origCurrencySymbol)',
+                        ),
+                        controller: _origAmountController,
+                        keyboardType: TextInputType.number,
                       ),
-                      controller: _origAmountController,
-                      keyboardType: TextInputType.number,
                     ),
-                  ),
+                  ],
                 ],
               ),
             ),
@@ -740,6 +746,12 @@ class PaymentDialogState extends State<PaymentDialog> {
                                 grandTotal: Decimal.parse(
                                   _amountController.text,
                                 ),
+                                originalGrandTotal:
+                                    _origAmountController.text.isEmpty
+                                    ? null
+                                    : Decimal.parse(
+                                        _origAmountController.text,
+                                      ),
                                 pseudoId: _pseudoIdController.text,
                                 status: _updatedStatus,
                                 paymentInstrument: _paymentInstrument,

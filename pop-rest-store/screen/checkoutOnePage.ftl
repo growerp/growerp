@@ -183,8 +183,8 @@
     function getCardType(number) {
         number = number.replace(/\D/g, '');
         if (/^4[0-9]{12}(?:[0-9]{3})?$/.test(number)) return 'Visa';
-        if (/^5[1-5][0-9]{14}$/.test(number)) return 'MasterCard';
-        if (/^3[47][0-9]{13}$/.test(number)) return 'Amex';
+        if (/^5[1-5][0-9]{14}$/.test(number)) return 'Master Card';
+        if (/^3[47][0-9]{13}$/.test(number)) return 'American Express';
         if (/^6(?:011|5[0-9]{2})[0-9]{12}$/.test(number)) return 'Discover';
         return '';
     }

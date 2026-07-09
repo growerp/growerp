@@ -1709,6 +1709,12 @@ along with this software (see the LICENSE.md file). If not, see
             <entity-find-one entity-name="mantle.product.store.ProductStore"
                 value-field="productStore" />
             <set field="companyPartyId" from="productStore.organizationPartyId" />
+            <!-- receiving company base currency -->
+            <entity-find-one entity-name="mantle.ledger.config.PartyAcctgPreference"
+                value-field="acctgPref">
+                <field-map field-name="organizationPartyId" from="companyPartyId" />
+            </entity-find-one>
+            <set field="baseCurrencyUomId" from="acctgPref?.baseCurrencyUomId ?: 'USD'" />
             <!-- get company owner-->
             <entity-find-one entity-name="mantle.party.Party" value-field="party">
                 <field-map field-name="partyId" from="companyPartyId" />
@@ -1762,7 +1768,8 @@ along with this software (see the LICENSE.md file). If not, see
                                 paymentMethodTypeEnumId: 'PmtCreditCard',
                                 ownerPartyId: userPartyId,
                                 cardNumber: creditCardNumber,
-                                creditCardTypeEnumId: 'Cct' + creditCardType,
+                                creditCardTypeEnumId: ec.entity.find('moqui.basic.Enumeration')
+                                        .condition('description', creditCardType).one().enumId,
                                 expireDate: expireDate,
                                 firstNameOnAccount: nameOnCard,
                                 lastNameOnAccount: '',
@@ -1778,6 +1785,21 @@ along with this software (see the LICENSE.md file). If not, see
             <if condition="product">
                 <set field="memo" value="GrowERP plan: ${product}" />
             </if>
+            <!-- payment comes in as USD, convert to company base currency when different -->
+            <set field="paymentAmount" from="amount" />
+            <set field="paymentCurrencyUomId" value="USD" />
+            <if condition="baseCurrencyUomId != 'USD'">
+                <service-call name="growerp.100.GeneralServices100.convert#Currency"
+                    in-map="[amount: amount, fromCurrencyUomId: 'USD',
+                        toCurrencyUomId: baseCurrencyUomId]"
+                    out-map="conversion" />
+                <if condition="conversion.converted">
+                    <set field="paymentAmount" from="conversion.convertedAmount" />
+                    <set field="paymentCurrencyUomId" from="baseCurrencyUomId" />
+                    <set field="originalCurrencyAmount" from="amount" />
+                    <set field="originalCurrencyUomId" value="USD" />
+                </if>
+            </if>
             <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
                 in-map="[ownerPartyId: ownerPartyId, seqName: 'payment']" out-map="context" />
             <service-call name="create#mantle.account.payment.Payment"
@@ -1785,8 +1807,10 @@ along with this software (see the LICENSE.md file). If not, see
                             pseudoId: seqNum,
                             paymentType: 'PtPrePayment',
                             paymentMethodId: paymentMethodId,
-                            amount: amount,
-                            amountUomId: 'USD',
+                            amount: paymentAmount,
+                            amountUomId: paymentCurrencyUomId,
+                            originalCurrencyAmount: originalCurrencyAmount,
+                            originalCurrencyUomId: originalCurrencyUomId,
                             paymentInstrumentEnumId: 'PiCreditCard',
                             effectiveDate: ec.user.nowTimestamp,
                             paymentTypeEnumId: 'PmtCreditCard',

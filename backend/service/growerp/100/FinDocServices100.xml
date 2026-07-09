@@ -1094,7 +1094,7 @@ along with this software (see the LICENSE.md file). If not, see
                         otherUser: userOut?.partyId ? userOut : null,
                         otherCompany: company?.partyId ? company : null,
                         grandTotal: item.amount ? item.amount.toString() : '0.00',
-                        originalGrandTotal: item.originalAmount ? item.originalAmount.toString() : '0.00',
+                        originalGrandTotal: item.originalAmount ? item.originalAmount.toString() : null,
                         originalCurrency: item.originalCurrency ? [currencyId : item.originalCurrency] : null,
                         items: [[paymentType: paymentType, glAccount: glAccount]],
                         gatewayResponses: gatewayResponses

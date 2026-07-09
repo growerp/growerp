@@ -769,6 +769,111 @@ along with this software (see the LICENSE.md file). If not, see
         </actions>
     </service>
 
+    <service verb="convert" noun="Currency">
+        <description>
+            Convert an amount between currencies. Uses a cached rate from
+            moqui.basic.UomConversion when less than 24 hours old, otherwise fetches a
+            live rate via the Stripe Exchange Rate API and caches it as a new
+            UomConversion record. Falls back to the newest cached rate when no live
+            rate is available; when no rate exists at all returns the amount
+            unconverted with converted=false.
+        </description>
+        <in-parameters>
+            <parameter name="amount" type="BigDecimal" required="true" />
+            <parameter name="fromCurrencyUomId" required="true" />
+            <parameter name="toCurrencyUomId" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="convertedAmount" type="BigDecimal" />
+            <parameter name="exchangeRate" type="BigDecimal" />
+            <parameter name="converted" type="Boolean" default-value="false" />
+        </out-parameters>
+        <actions>
+            <if condition="fromCurrencyUomId == toCurrencyUomId">
+                <set field="convertedAmount" from="amount" />
+                <set field="exchangeRate" from="BigDecimal.ONE" />
+                <set field="converted" from="true" />
+                <return />
+            </if>
+            <!-- newest cached rate -->
+            <entity-find entity-name="moqui.basic.UomConversion" list="rateList" limit="1">
+                <econdition field-name="uomId" from="fromCurrencyUomId" />
+                <econdition field-name="toUomId" from="toCurrencyUomId" />
+                <order-by field-name="-fromDate" />
+            </entity-find>
+            <set field="rateRow" from="rateList ? rateList[0] : null" />
+            <set field="rateFresh"
+                from="rateRow?.fromDate != null &amp;&amp; rateRow.fromDate.time &gt; System.currentTimeMillis() - 86400000L" />
+            <if condition="!rateFresh &amp;&amp; System.getProperty('paymentGatewayConfigId') == 'STRIPE'">
+                <!-- fetch live rate from Stripe and cache it -->
+                <service-call name="Stripe.StripePaymentServices.get#StripeGatewayInfo"
+                    in-map="[paymentGatewayConfigId: System.getProperty('paymentGatewayConfigId')]"
+                    out-map="context" />
+                <if condition="stripeGatewayInfoMap?.secretKey">
+                    <service-call name="Stripe.StripePaymentServices.convert#Currency"
+                        in-map="[secretKey: stripeGatewayInfoMap.secretKey, amount: amount,
+                            fromCurrencyUomId: fromCurrencyUomId, toCurrencyUomId: toCurrencyUomId]"
+                        out-map="stripeOut" />
+                    <if condition="stripeOut.convertedAmount != null">
+                        <set field="convertedAmount" from="stripeOut.convertedAmount" />
+                        <set field="exchangeRate"
+                            from="stripeOut.responseMap?.conversionInfo?.exchangeRate" />
+                        <set field="converted" from="true" />
+                        <service-call name="create#moqui.basic.UomConversion"
+                            in-map="[uomId: fromCurrencyUomId, toUomId: toCurrencyUomId,
+                                conversionFactor: exchangeRate, fromDate: ec.user.nowTimestamp]" />
+                        <return />
+                        <else>
+                            <log level="warn"
+                                message="Live currency rate ${fromCurrencyUomId} to ${toCurrencyUomId} failed: ${stripeOut.responseMap?.errorInfo?.reasonMessage}" />
+                        </else>
+                    </if>
+                </if>
+            </if>
+            <!-- free daily-rate API fallback (no key needed) when Stripe not configured -->
+            <if condition="!rateFresh">
+                <script><![CDATA[
+                    try {
+                        def conn = new java.net.URL('https://open.er-api.com/v6/latest/' + fromCurrencyUomId).openConnection()
+                        conn.connectTimeout = 10000
+                        conn.readTimeout = 10000
+                        conn.setRequestProperty('Accept', 'application/json')
+                        def rates = new groovy.json.JsonSlurper().parseText(conn.inputStream.getText('UTF-8'))?.rates
+                        def rate = rates ? rates[toCurrencyUomId] : null
+                        if (rate) apiExchangeRate = rate as BigDecimal
+                    } catch (Exception e) {
+                        ec.logger.warn("Exchange rate API call failed: ${e.message}")
+                    }
+                ]]></script>
+                <if condition="apiExchangeRate">
+                    <set field="exchangeRate" from="apiExchangeRate" />
+                    <set field="convertedAmount"
+                        from="(amount * exchangeRate).setScale(2, java.math.RoundingMode.HALF_UP)" />
+                    <set field="converted" from="true" />
+                    <service-call name="create#moqui.basic.UomConversion"
+                        in-map="[uomId: fromCurrencyUomId, toUomId: toCurrencyUomId,
+                            conversionFactor: exchangeRate, fromDate: ec.user.nowTimestamp]" />
+                    <return />
+                </if>
+            </if>
+            <!-- cached rate: fresh, or stale as fallback when no live rate -->
+            <if condition="rateRow">
+                <if condition="!rateFresh">
+                    <log level="warn"
+                        message="Using stale cached currency rate ${fromCurrencyUomId} to ${toCurrencyUomId} from ${rateRow.fromDate}" />
+                </if>
+                <set field="exchangeRate" from="rateRow.conversionFactor as BigDecimal" />
+                <set field="convertedAmount"
+                    from="(amount * exchangeRate).setScale(2, java.math.RoundingMode.HALF_UP)" />
+                <set field="converted" from="true" />
+                <return />
+            </if>
+            <log level="warn"
+                message="No exchange rate available from ${fromCurrencyUomId} to ${toCurrencyUomId}, returning unconverted amount" />
+            <set field="convertedAmount" from="amount" />
+        </actions>
+    </service>
+
     <service verb="get" noun="CountryList" authenticate="anonymous-all">
         <description>
             Get country list for registration.
