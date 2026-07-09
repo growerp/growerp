@@ -23,6 +23,7 @@ import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_core/l10n/generated/core_localizations.dart';
 
 import '../../../domains/domains.dart';
+import '../../../extensions.dart';
 
 /// Dialog for handling subscription renewal and payment
 class PaymentSubscriptionDialog extends StatefulWidget {
@@ -393,6 +394,12 @@ class PaymentSubscriptionDialogState extends State<PaymentSubscriptionDialog> {
 
       final formData = _formKey.currentState!.value;
 
+      // When testing with a shifted clock (CustomizableDateTime) the backend
+      // must evaluate the subscription at the same shifted time, otherwise the
+      // trial still looks active and the renewal is skipped.
+      final timeShift = CustomizableDateTime.current.difference(DateTime.now());
+      final testDaysOffset = (timeShift.inHours / 24).round();
+
       // Trigger login with payment information
       // The backend will handle subscription creation
       context.read<AuthBloc>().add(
@@ -405,6 +412,7 @@ class PaymentSubscriptionDialogState extends State<PaymentSubscriptionDialog> {
           expireYear: formData['expireYear'] as String,
           cVC: formData['cvc'] as String,
           plan: _selectedPlan,
+          testDaysOffset: testDaysOffset == 0 ? null : testDaysOffset,
         ),
       );
     }

@@ -934,6 +934,16 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="demoData" type="Boolean" default="false"/>
             <parameter name="agentDemoData" type="Boolean" default="false"/>
             <parameter name="timeZoneOffset"/>
+            <!-- Parameters for renewing an expired subscription -->
+            <parameter name="plan">
+                <description>productId of the GROWERP subscription plan</description>
+            </parameter>
+            <parameter name="creditCardNumber"/>
+            <parameter name="creditCardType"/>
+            <parameter name="nameOnCard"/>
+            <parameter name="expireMonth"/>
+            <parameter name="expireYear"/>
+            <parameter name="cVC"/>
             <!-- For testing: days offset for subscription checks -->
             <parameter name="testDaysOffset" type="Integer"/>
         </in-parameters>
@@ -1110,6 +1120,15 @@ along with this software (see the LICENSE.md file). If not, see
                     in-map="[ownerPartyId: ownerPartyId]"
                     out-map="subscriptionStatus"/>
 
+                <if condition="!subscriptionStatus.hasActiveSubscription &amp;&amp; creditCardNumber &amp;&amp; plan">
+                    <!-- expired subscription with payment data provided: renew, then continue login -->
+                    <service-call name="growerp.100.TenantServices100.renew#TenantSubscription"
+                        in-map="[ownerPartyId: ownerPartyId, plan: plan,
+                            creditCardNumber: creditCardNumber, creditCardType: creditCardType,
+                            nameOnCard: nameOnCard, expireMonth: expireMonth,
+                            expireYear: expireYear, cVC: cVC]"/>
+                    <set field="subscriptionStatus" from="[hasActiveSubscription: true]"/>
+                </if>
                 <if condition="!subscriptionStatus.hasActiveSubscription">
                     <!-- No active subscription -->
                     <set field="evaluationDays"

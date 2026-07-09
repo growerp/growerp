@@ -808,6 +808,31 @@ void main() {
         reason: 'Payment should succeed and grant dashboard access',
       );
 
+      // The renewal must be persisted by the backend: log out and log in
+      // again with the clock still 15 days ahead (CustomizableDateTime) —
+      // the renewed subscription runs one month from the shifted 'now', so
+      // no payment form may appear this time.
+      await CommonTest.logout(tester);
+      EvaluationTest.setTestDaysOffset(15);
+
+      await CommonTest.pressLoginButton(tester);
+      await CommonTest.enterText(tester, 'username', adminEmail);
+      await CommonTest.enterText(tester, 'password', testPassword);
+      await CommonTest.pressLogin(tester);
+
+      expect(
+        await EvaluationTest.isPaymentFormDisplayed(tester),
+        isFalse,
+        reason:
+            'Renewed subscription must be active on re-login: '
+            'payment form may not appear again',
+      );
+      expect(
+        await CommonTest.doesExistKey(tester, 'HomeFormAuth'),
+        isTrue,
+        reason: 'Re-login after renewal must reach the dashboard',
+      );
+
       EvaluationTest.resetTestDaysOffset();
 
       debugPrint('✓ TC-TRIAL-003: Payment after expiry grants access');

@@ -391,6 +391,173 @@ along with this software (see the LICENSE.md file). If not, see
         </actions>
     </service>
 
+    <service verb="renew" noun="TenantSubscription">
+        <description>
+            Renew an expired tenant subscription: charge the selected plan (converted from
+            the plan price currency to the receiving GROWERP company base currency) and
+            extend the subscription in the GROWERP tenant by one month.
+            Called from login#User when the subscription is expired and card data is provided.
+        </description>
+        <in-parameters>
+            <parameter name="ownerPartyId" required="true" />
+            <parameter name="plan" required="true">
+                <description>productId of the GROWERP subscription plan</description>
+            </parameter>
+            <parameter name="creditCardNumber" required="true" />
+            <parameter name="creditCardType" />
+            <parameter name="nameOnCard" />
+            <parameter name="expireMonth" />
+            <parameter name="expireYear" />
+            <parameter name="cVC" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="subscriptionId" />
+            <parameter name="paymentId" />
+        </out-parameters>
+        <actions>
+            <!-- validate the plan is a GROWERP-owned plan product and get its current price -->
+            <entity-find-one entity-name="mantle.product.Product" value-field="planProduct">
+                <field-map field-name="productId" from="plan" />
+            </entity-find-one>
+            <if condition="!planProduct || planProduct.ownerPartyId != 'GROWERP'">
+                <return error="true" message="Invalid subscription plan ${plan}" />
+            </if>
+            <entity-find entity-name="mantle.product.ProductPrice" list="planPrices">
+                <econdition field-name="productId" from="plan" />
+                <econdition field-name="priceTypeEnumId" value="PptCurrent" />
+                <econdition field-name="pricePurposeEnumId" value="PppPurchase" />
+                <date-filter />
+                <order-by field-name="-fromDate" />
+            </entity-find>
+            <if condition="!planPrices">
+                <return error="true" message="No price found for subscription plan ${plan}" />
+            </if>
+            <set field="amount" from="planPrices[0].price" />
+            <set field="priceCurrencyUomId" from="planPrices[0].priceUomId ?: 'USD'" />
+
+            <!-- the GROWERP main company receives the payment -->
+            <entity-find entity-name="mantle.party.PartyDetailAndRole" limit="1" list="companyList">
+                <econdition field-name="ownerPartyId" value="GROWERP" />
+                <econdition field-name="partyTypeEnumId" value="PtyOrganization" />
+                <econdition field-name="roleTypeId" value="OrgInternal" />
+            </entity-find>
+            <if condition="!companyList">
+                <return error="true" message="GROWERP company not found" />
+            </if>
+            <set field="companyPartyId" from="companyList[0].partyId" />
+            <entity-find-one entity-name="mantle.ledger.config.PartyAcctgPreference"
+                value-field="acctgPref">
+                <field-map field-name="organizationPartyId" from="companyPartyId" />
+            </entity-find-one>
+            <set field="baseCurrencyUomId"
+                from="acctgPref?.baseCurrencyUomId ?: priceCurrencyUomId" />
+
+            <!-- the tenant's customer party in GROWERP, created with the trial subscription -->
+            <entity-find entity-name="mantle.product.subscription.Subscription"
+                list="subscriptions" cache="false">
+                <econdition field-name="ownerPartyId" value="GROWERP" />
+                <econdition field-name="externalSubscriptionId" from="ownerPartyId" />
+                <order-by field-name="-fromDate" />
+            </entity-find>
+            <if condition="!subscriptions">
+                <return error="true"
+                    message="No subscription found for tenant ${ownerPartyId}, cannot renew" />
+            </if>
+            <set field="subscription" from="subscriptions[0]" />
+            <set field="subscriberPartyId" from="subscription.subscriberPartyId" />
+
+            <!-- find or create the payment method -->
+            <entity-find entity-name="mantle.account.method.PaymentMethod" list="pms">
+                <econdition field-name="ownerPartyId" from="subscriberPartyId" />
+            </entity-find>
+            <if condition="pms">
+                <set field="paymentMethodId" from="pms[0].paymentMethodId" />
+                <else>
+                    <!-- match card type against Enumeration description ignoring spaces/case
+                         (frontend sends e.g. 'Mastercard', seed description is 'Master Card') -->
+                    <entity-find entity-name="moqui.basic.Enumeration" list="cctEnums" cache="true">
+                        <econdition field-name="enumTypeId" value="CreditCardType" />
+                    </entity-find>
+                    <set field="creditCardTypeEnumId" from="cctEnums.find {
+                            it.description.replace(' ', '').equalsIgnoreCase((creditCardType ?: '').replace(' ', ''))
+                        }?.enumId" />
+                    <set field="expireDate" value="${expireMonth}/20${expireYear}" />
+                    <service-call name="mantle.account.PaymentMethodServices.create#CreditCard"
+                        in-map="[
+                                paymentMethodTypeEnumId: 'PmtCreditCard',
+                                ownerPartyId: subscriberPartyId,
+                                cardNumber: creditCardNumber,
+                                creditCardTypeEnumId: creditCardTypeEnumId,
+                                expireDate: expireDate,
+                                firstNameOnAccount: nameOnCard,
+                                lastNameOnAccount: '',
+                                paymentGatewayConfigId: System.getProperty('paymentGatewayConfigId'),
+                                ]"
+                        out-map="ccOut" />
+                    <set field="paymentMethodId" from="ccOut.paymentMethodId" />
+                </else>
+            </if>
+
+            <!-- convert the plan price to the receiving company base currency -->
+            <set field="paymentAmount" from="amount" />
+            <set field="paymentCurrencyUomId" from="priceCurrencyUomId" />
+            <if condition="baseCurrencyUomId != priceCurrencyUomId">
+                <service-call name="growerp.100.GeneralServices100.convert#Currency"
+                    in-map="[amount: amount, fromCurrencyUomId: priceCurrencyUomId,
+                        toCurrencyUomId: baseCurrencyUomId]"
+                    out-map="conversion" />
+                <if condition="conversion.converted">
+                    <set field="paymentAmount" from="conversion.convertedAmount" />
+                    <set field="paymentCurrencyUomId" from="baseCurrencyUomId" />
+                    <set field="originalCurrencyAmount" from="amount" />
+                    <set field="originalCurrencyUomId" from="priceCurrencyUomId" />
+                </if>
+            </if>
+
+            <!-- create and capture the payment -->
+            <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                in-map="[ownerPartyId: 'GROWERP', seqName: 'payment']" out-map="context" />
+            <service-call name="create#mantle.account.payment.Payment"
+                in-map="[   statusId: 'PmntPromised',
+                            pseudoId: seqNum,
+                            paymentType: 'PtPrePayment',
+                            paymentMethodId: paymentMethodId,
+                            amount: paymentAmount,
+                            amountUomId: paymentCurrencyUomId,
+                            originalCurrencyAmount: originalCurrencyAmount,
+                            originalCurrencyUomId: originalCurrencyUomId,
+                            paymentInstrumentEnumId: 'PiCreditCard',
+                            effectiveDate: ec.user.nowTimestamp,
+                            paymentTypeEnumId: 'PmtCreditCard',
+                            fromPartyId: subscriberPartyId,
+                            toPartyId: companyPartyId,
+                            memo: 'GrowERP plan renewal: ' + (planProduct.productName ?: plan),
+                            ]"
+                out-map="paymentInfo" />
+            <set field="paymentId" from="paymentInfo.paymentId" />
+            <if condition="System.getProperty('paymentGatewayConfigId') == 'STRIPE'">
+                <service-call name="Stripe.StripePaymentServices.authorizeAndCapture#Payment"
+                    in-map="[paymentId: paymentId,
+                        paymentGatewayConfigId: System.getProperty('paymentGatewayConfigId')]" />
+            </if>
+
+            <!-- extend the subscription one month from now (or from thruDate when still in the future) -->
+            <set field="extendFrom"
+                from="subscription.thruDate != null &amp;&amp; subscription.thruDate.time &gt; ec.user.nowTimestamp.time ?
+                    subscription.thruDate : ec.user.nowTimestamp" />
+            <set field="newThruDate"
+                from="java.sql.Timestamp.valueOf(extendFrom.toLocalDateTime().plusMonths(1))" />
+            <service-call name="update#mantle.product.subscription.Subscription"
+                in-map="[subscriptionId: subscription.subscriptionId,
+                    productId: plan,
+                    thruDate: newThruDate,
+                    description: 'GrowERP plan: ' + (planProduct.productName ?: plan)]" />
+            <set field="subscriptionId" from="subscription.subscriptionId" />
+            <log
+                message="Renewed subscription ${subscriptionId} for tenant ${ownerPartyId} until ${newThruDate}, payment ${paymentId} ${paymentAmount} ${paymentCurrencyUomId}" />
+        </actions>
+    </service>
+
     <service verb="check" noun="TenantSetupStatus">
         <description>
             Check if tenant setup is complete.

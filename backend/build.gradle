@@ -17,10 +17,31 @@ tasks.withType(GroovyCompile) { options.compilerArgs << "-proc:none" }
 
 dependencies {
     implementation project(':framework')
+    testImplementation project(':framework').configurations.testImplementation.allDependencies
 }
 
 // by default the Java plugin runs test on build, change to not do that
 check.dependsOn.clear()
+
+test {
+    useJUnitPlatform()
+    testLogging { events "passed", "skipped", "failed" }
+    testLogging.showStandardStreams = true; testLogging.showExceptions = true
+    maxParallelForks = 1
+
+    dependsOn cleanTest
+    include '**/CurrencyAndSubscriptionTests.class'
+
+    systemProperty 'moqui.runtime', moquiDir.absolutePath + '/runtime'
+    systemProperty 'moqui.conf', 'conf/MoquiDevConf.xml'
+    systemProperty 'moqui.init.static', 'true'
+
+    classpath += files(sourceSets.main.output.classesDirs)
+    // filter out classpath entries that don't exist (gradle adds a bunch of these), or ElasticSearch JarHell will blow up
+    classpath = classpath.filter { it.exists() }
+
+    beforeTest { descriptor -> logger.lifecycle("Running test: ${descriptor}") }
+}
 
 task cleanLib(type: Delete) { delete fileTree(dir: projectDir.absolutePath+'/lib', include: '*') }
 clean.dependsOn cleanLib
