@@ -1,8 +1,9 @@
 name: Publish Metadata to Stores
 
 # Uploads store listing metadata (descriptions, screenshots) to iOS App Store,
-# Mac App Store, and Google Play. Runs independently of binary publishing —
-# metadata can be updated for the currently live version at any time.
+# Mac App Store, Google Play, Windows Store, and Snap Store. Runs independently
+# of binary publishing — metadata can be updated for the currently live
+# version at any time.
 #
 # Screenshots must already be framed and resized by the "Create Store
 # Screenshots" workflow. The framed-screenshots artifact is downloaded
@@ -58,6 +59,10 @@ on:
         description: "Windows Store"
         type: boolean
         default: true
+      store_snap:
+        description: "Snap Store"
+        type: boolean
+        default: true
 
 concurrency:
   group: store-metadata-upload
@@ -93,7 +98,8 @@ jobs:
           [[ "${{ inputs.store_macos }}" == "true" ]] && STORES="${STORES}macos,"
           [[ "${{ inputs.store_android }}" == "true" ]] && STORES="${STORES}android,"
           [[ "${{ inputs.store_windows }}" == "true" ]] && STORES="${STORES}windows,"
-          
+          [[ "${{ inputs.store_snap }}" == "true" ]] && STORES="${STORES}snap,"
+
           echo "apps=${APPS%,}" >> "$GITHUB_OUTPUT"
           echo "stores=${STORES%,}" >> "$GITHUB_OUTPUT"
 
@@ -109,10 +115,12 @@ jobs:
       run_ios: ${{ steps.matrix.outputs.run_ios }}
       run_macos: ${{ steps.matrix.outputs.run_macos }}
       run_windows: ${{ steps.matrix.outputs.run_windows }}
+      run_snap: ${{ steps.matrix.outputs.run_snap }}
       android_matrix: ${{ steps.matrix.outputs.android_matrix }}
       ios_matrix: ${{ steps.matrix.outputs.ios_matrix }}
       macos_matrix: ${{ steps.matrix.outputs.macos_matrix }}
       windows_matrix: ${{ steps.matrix.outputs.windows_matrix }}
+      snap_matrix: ${{ steps.matrix.outputs.snap_matrix }}
     steps:
       - id: matrix
         env:
@@ -145,7 +153,7 @@ jobs:
 
           contains() { echo "$STORES" | grep -qw "$1"; }
 
-          for store in ios macos android windows; do
+          for store in ios macos android windows snap; do
             if contains "$store"; then
               echo "run_${store}=true"               >> "$GITHUB_OUTPUT"
               echo "${store}_matrix=$(build_matrix)" >> "$GITHUB_OUTPUT"
@@ -447,7 +455,29 @@ jobs:
           import requests
           import json
           import os
+          import time
           from pathlib import Path
+
+          # Partner Center sits behind Azure Front Door which intermittently
+          # returns 5xx (e.g. 504 OriginTimeout). Retry those; 4xx fail fast.
+          def call(method, url, retries=4, **kwargs):
+              kwargs.setdefault('timeout', 120)
+              for attempt in range(retries + 1):
+                  try:
+                      resp = requests.request(method, url, **kwargs)
+                      if resp.status_code < 500:
+                          return resp
+                      status = resp.status_code
+                  except requests.ConnectionError:
+                      resp = None
+                      status = 'connection error'
+                  if attempt < retries:
+                      wait = 30 * (attempt + 1)
+                      print(f'{method} got {status}, retry in {wait}s ({attempt + 1}/{retries})')
+                      time.sleep(wait)
+              if resp is None:
+                  raise RuntimeError(f'{method} request failed: connection errors after {retries} retries')
+              return resp
 
           app_name = os.environ['APP_NAME']
           product_ids = {
@@ -467,7 +497,8 @@ jobs:
               'client_secret': os.environ['WINDOWS_CLIENT_SECRET'],
               'resource': 'https://manage.devcenter.microsoft.com',
           }
-          auth_resp = requests.post(
+          auth_resp = call(
+              'POST',
               f"https://login.microsoftonline.com/{os.environ['WINDOWS_TENANT_ID']}/oauth2/token",
               data=auth_data
           )
@@ -493,22 +524,38 @@ jobs:
               print(f'Found {len(screenshots)} screenshots')
 
           base_url = f'https://manage.devcenter.microsoft.com/v1.0/my/applications/{app_id}'
-          app_resp = requests.get(base_url, headers=headers)
-          app_resp.raise_for_status()
-          app_data = app_resp.json()
 
-          # Delete pending submission if exists
-          pending_sub = app_data.get('pendingApplicationSubmission')
-          if pending_sub and pending_sub.get('id'):
-              old_sub_id = pending_sub['id']
-              print(f'Deleting existing pending submission {old_sub_id}...')
-              requests.delete(f'{base_url}/submissions/{old_sub_id}', headers=headers).raise_for_status()
+          def delete_pending_submission():
+              app_resp = call('GET', base_url, headers=headers)
+              app_resp.raise_for_status()
+              pending_sub = app_resp.json().get('pendingApplicationSubmission')
+              if pending_sub and pending_sub.get('id'):
+                  old_sub_id = pending_sub['id']
+                  print(f'Deleting existing pending submission {old_sub_id}...')
+                  call('DELETE', f'{base_url}/submissions/{old_sub_id}', headers=headers).raise_for_status()
 
           # Create new submission (clones last published).
           # Do NOT send json={} — an empty body tells the API to clone from
           # the last published submission; json={} is interpreted as "create
           # with these (empty) settings" which fails listing validation.
-          sub_resp = requests.post(f'{base_url}/submissions', headers=headers)
+          # A failed response may still have created the submission
+          # server-side, so delete any pending submission before each attempt
+          # (retries=0: this loop replaces call()'s blind retry).
+          for attempt in range(4):
+              delete_pending_submission()
+              try:
+                  sub_resp = call('POST', f'{base_url}/submissions', headers=headers, retries=0)
+              except RuntimeError:
+                  sub_resp = None
+              if sub_resp is not None and sub_resp.status_code < 500:
+                  break
+              if attempt < 3:
+                  wait = 30 * (attempt + 1)
+                  status = sub_resp.status_code if sub_resp is not None else 'connection error'
+                  print(f'Create submission got {status}, retry in {wait}s ({attempt + 1}/3)')
+                  time.sleep(wait)
+          if sub_resp is None:
+              raise RuntimeError('Could not create submission: connection errors')
           if not sub_resp.ok:
               print(f'Error creating submission: {sub_resp.text}')
               sub_resp.raise_for_status()
@@ -533,7 +580,8 @@ jobs:
           sub['listings'] = listings
 
           # Update submission
-          update_resp = requests.put(
+          update_resp = call(
+              'PUT',
               f'{base_url}/submissions/{sub_id}',
               headers=headers,
               json=sub
@@ -553,7 +601,8 @@ jobs:
                       continue
 
                   # Get file upload URL
-                  file_resp = requests.post(
+                  file_resp = call(
+                      'POST',
                       f'{base_url}/submissions/{sub_id}/files',
                       headers=headers,
                       json={'fileName': file_name, 'fileStatus': 'PendingUpload'}
@@ -567,23 +616,31 @@ jobs:
                       print(f'Warning: No upload URL for {file_name}')
                       continue
 
-                  # Upload file
-                  with open(file_path, 'rb') as f:
-                      upload_resp = requests.put(
-                          upload_url,
-                          data=f,
-                          headers={'x-ms-blob-type': 'BlockBlob'}
-                      )
-                      upload_resp.raise_for_status()
-                      print(f'Uploaded {file_name}')
+                  # Upload file (read bytes so call() can safely retry)
+                  upload_resp = call(
+                      'PUT',
+                      upload_url,
+                      data=file_path.read_bytes(),
+                      headers={'x-ms-blob-type': 'BlockBlob'}
+                  )
+                  upload_resp.raise_for_status()
+                  print(f'Uploaded {file_name}')
 
-          # Commit submission
-          commit_resp = requests.post(
+          # Commit submission. A retried commit can fail because the first
+          # attempt landed despite a 5xx response — check status before failing.
+          commit_resp = call(
+              'POST',
               f'{base_url}/submissions/{sub_id}/commit',
               headers=headers,
               json={}
           )
-          commit_resp.raise_for_status()
+          if not commit_resp.ok:
+              status_resp = call('GET', f'{base_url}/submissions/{sub_id}/status', headers=headers)
+              status = status_resp.json().get('status', '') if status_resp.ok else ''
+              if status == 'CommitStarted' or status.startswith('PreProcessing') or status.startswith('Certification'):
+                  print(f'Commit response failed but submission status is {status}; treating as committed')
+              else:
+                  raise RuntimeError(f'Error committing submission (status={status}): {commit_resp.text}')
           print(f'Committed submission')
 
           print('Windows metadata + screenshots uploaded successfully')
