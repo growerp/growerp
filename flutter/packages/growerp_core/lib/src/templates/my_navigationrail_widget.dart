@@ -237,17 +237,25 @@ Widget _buildNavDestination(
           const SizedBox(height: 2),
           SizedBox(
             width: 80,
-            child: Text(
-              HelperFunctions.translateMenuTitle(localizations, option.title),
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w500,
-                letterSpacing: 0.2,
-                color: isSelected ? colorScheme.primary : colorScheme.onSurface,
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                HelperFunctions.translateMenuTitle(
+                  localizations,
+                  option.title,
+                ),
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                  letterSpacing: 0.2,
+                  color: isSelected
+                      ? colorScheme.primary
+                      : colorScheme.onSurface,
+                ),
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                softWrap: false,
               ),
-              textAlign: TextAlign.center,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],
