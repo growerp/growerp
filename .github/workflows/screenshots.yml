@@ -15,6 +15,10 @@ on:
         required: true
         default: "admin,hotel"
         type: string
+      commit_screenshots:
+        description: "Commit refreshed screenshots to README assets + website hero"
+        type: boolean
+        default: true
 
 concurrency:
   group: screenshots-${{ github.ref }}
@@ -621,3 +625,80 @@ jobs:
           echo "$TOTAL framed PNGs produced." >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "Run **Publish Metadata to Stores** to upload them to the stores (or it auto-fires via workflow_run)." >> "$GITHUB_STEP_SUMMARY"
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # 3. Commit the produced screenshots back into the repo so the root README
+  #    images and the storefront hero image stay current:
+  #    - README's committed Fastlane PNGs (admin + hotel, phone + 10")
+  #    - website hero pop-rest-store/.../assets/dashboard-screenshot.png
+  #
+  #  Screen→filename mapping mirrors the README markdown; keep them in sync.
+  # ──────────────────────────────────────────────────────────────────────────
+  update-repo-screenshots:
+    needs: frame-screenshots
+    if: ${{ github.event.inputs.commit_screenshots != 'false' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download framed screenshots
+        uses: actions/download-artifact@v4
+        with:
+          name: framed-screenshots
+          path: framed
+
+      - name: Map framed screenshots onto committed README + website assets
+        run: |
+          set -euo pipefail
+          S=framed
+          cp_if() { if [ -f "$S/$1" ]; then cp "$S/$1" "$2"; echo "  $1 -> $2"; else echo "  (skip missing) $1"; fi; }
+          AP=flutter/packages/admin/android/fastlane/metadata/android/en-US/images
+          HP=flutter/packages/hotel/android/fastlane/metadata/android/en-US/images
+
+          # ADMIN phone -> phoneScreenshots
+          cp_if phone-admin-dashboard_framed.png         "$AP/phoneScreenshots/Screenshot_main_menu.png"
+          cp_if phone-admin-company_detail_framed.png    "$AP/phoneScreenshots/Screenshot_company.png"
+          cp_if phone-admin-ledger_framed.png            "$AP/phoneScreenshots/Screenshot_ledger.png"
+          cp_if phone-admin-orders_framed.png            "$AP/phoneScreenshots/Screenshot_accounting.png"
+          cp_if phone-admin-company_employees_framed.png "$AP/phoneScreenshots/Screenshot_catalog_products.png"
+          # ADMIN tablet10 -> tenInchScreenshots
+          cp_if tablet10-admin-dashboard_framed.png         "$AP/tenInchScreenshots/Screenshot_main_menu.png"
+          cp_if tablet10-admin-company_detail_framed.png    "$AP/tenInchScreenshots/Screenshot_company.png"
+          cp_if tablet10-admin-orders_framed.png            "$AP/tenInchScreenshots/Screenshot_orders.png"
+          cp_if tablet10-admin-ledger_framed.png            "$AP/tenInchScreenshots/Screenshot_ledger.png"
+          cp_if tablet10-admin-company_employees_framed.png "$AP/tenInchScreenshots/Screenshot_accounting.png"
+
+          # HOTEL phone -> phoneScreenshots
+          cp_if phone-hotel-dashboard_framed.png       "$HP/phoneScreenshots/main-day.png"
+          cp_if phone-hotel-room_categories_framed.png "$HP/phoneScreenshots/main-week-menu.png"
+          cp_if phone-hotel-room_list_framed.png       "$HP/phoneScreenshots/rooms.png"
+          cp_if phone-hotel-reservations_framed.png    "$HP/phoneScreenshots/reservations.png"
+          cp_if phone-hotel-hotel_detail_framed.png    "$HP/phoneScreenshots/accounting.png"
+          cp_if phone-hotel-ledger_framed.png          "$HP/phoneScreenshots/ledger.png"
+          # HOTEL tablet10 -> tenInchScreenshots
+          cp_if tablet10-hotel-dashboard_framed.png       "$HP/tenInchScreenshots/main-day.png"
+          cp_if tablet10-hotel-room_categories_framed.png "$HP/tenInchScreenshots/main-week.png"
+          cp_if tablet10-hotel-room_list_framed.png       "$HP/tenInchScreenshots/rooms.png"
+          cp_if tablet10-hotel-reservations_framed.png    "$HP/tenInchScreenshots/reservations.png"
+          cp_if tablet10-hotel-hotel_detail_framed.png    "$HP/tenInchScreenshots/accounting.png"
+          cp_if tablet10-hotel-ledger_framed.png          "$HP/tenInchScreenshots/ledger.png"
+
+          # WEBSITE hero (1344x864 == tablet10 framed dims)
+          cp_if tablet10-admin-dashboard_framed.png "pop-rest-store/screen/store/assets/dashboard-screenshot.png"
+
+      - name: Commit refreshed screenshots
+        run: |
+          set -euo pipefail
+          rm -rf framed
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add \
+            flutter/packages/admin/android/fastlane/metadata/android/en-US/images \
+            flutter/packages/hotel/android/fastlane/metadata/android/en-US/images \
+            pop-rest-store/screen/store/assets/dashboard-screenshot.png
+          git status --short
+          git diff --cached --quiet && { echo "Nothing to commit — screenshots already current"; exit 0; }
+          git commit -m "chore: refresh README + website screenshots from screenshots.yml [skip ci]"
+          git push origin HEAD:${{ github.ref_name }}
