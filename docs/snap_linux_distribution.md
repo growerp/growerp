@@ -102,6 +102,11 @@ To publish to the Snap Store:
    snapcraft upload growerp-admin_*.snap --release=edge
    ```
 
+Binary uploads are also automated by `deploy-snap` in `publish-binary.yml`. Listing
+metadata (summary, description, screenshots) is separate from the binary and is
+pushed by the `upload-metadata-snap` job in `publish-metadata.yml` — dispatch that
+workflow with **Snap Store** checked to update the listing without a new release.
+
 ## Channel Management
 
 ### Switching Between Channels

@@ -645,3 +645,136 @@ jobs:
 
           print('Windows metadata + screenshots uploaded successfully')
           PYEOF
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # Snap Store — upload listing metadata + screenshots via the dashboard API
+  # Secrets: SNAPCRAFT_STORE_CREDENTIALS (package_upload ACL, same token used
+  #          by publish-binary.yml's deploy-snap job)
+  # Only apps with a flutter/packages/<app>/snapcraft.yaml are published; the
+  # admin app is additionally pushed to the bare 'growerp' snap alias.
+  # ───────────────────────────────────────────────────────────────────────────
+  upload-metadata-snap:
+    needs: [ set-params, resolve-matrix ]
+    if: needs.resolve-matrix.outputs.run_snap == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.resolve-matrix.outputs.snap_matrix) }}
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download framed screenshots
+        uses: dawidd6/action-download-artifact@v6
+        with:
+          workflow: screenshots.yml
+          name: framed-screenshots
+          path: framed-screenshots/
+          if_no_artifact_found: warn
+        continue-on-error: true
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install craft-store
+        run: pip install craft-store pyyaml requests
+
+      - name: Upload Snap Store metadata
+        env:
+          APP_NAME: ${{ matrix.app }}
+          SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}
+        run: |
+          python3 << 'PYEOF'
+          import glob
+          import hashlib
+          import json
+          import os
+          import requests
+          import yaml
+          from craft_store import StoreClient, endpoints
+
+          app_name = os.environ['APP_NAME']
+          snapcraft_yaml_path = f'flutter/packages/{app_name}/snapcraft.yaml'
+
+          if not os.path.exists(snapcraft_yaml_path):
+              print(f'No snapcraft.yaml for {app_name}. Skipping.')
+              exit(0)
+
+          with open(snapcraft_yaml_path) as f:
+              snap_conf = yaml.safe_load(f)
+
+          metadata = {
+              'summary': snap_conf.get('summary', ''),
+              'description': snap_conf.get('description', ''),
+          }
+
+          # Reuse the desktop (1920x1080) screenshots captured for the Windows
+          # Store listing — same aspect ratio, same source screenshots.yml run.
+          screenshot_paths = sorted(
+              glob.glob(f'framed-screenshots/windows-{app_name}-*_framed.png')
+          )[:5]
+
+          base_url = 'https://dashboard.snapcraft.io'
+          client = StoreClient(
+              base_url=base_url,
+              storage_base_url='https://storage.snapcraftcontent.com',
+              endpoints=endpoints.U1_SNAP_STORE,
+              user_agent='growerp-ci/1.0',
+              application_name='growerp-ci',
+              environment_auth='SNAPCRAFT_STORE_CREDENTIALS',
+          )
+
+          snap_names = [f'growerp-{app_name}']
+          if app_name == 'admin':
+              snap_names.append('growerp')
+
+          for snap_name in snap_names:
+              info_resp = requests.get(
+                  f'https://api.snapcraft.io/v2/snaps/info/{snap_name}',
+                  headers={'Snap-Device-Series': '16'},
+              )
+              if info_resp.status_code == 404:
+                  print(f'{snap_name}: not found in Snap Store. Skipping.')
+                  continue
+              info_resp.raise_for_status()
+              snap_id = info_resp.json()['snap-id']
+
+              client.request('PUT', f'{base_url}/dev/api/snaps/{snap_id}/metadata', json=metadata)
+              print(f'{snap_name}: updated summary + description')
+
+              if not screenshot_paths:
+                  continue
+
+              existing = client.request(
+                  'GET', f'{base_url}/dev/api/snaps/{snap_id}/binary-metadata'
+              ).json()
+              icon_entries = [e for e in existing if e.get('type') == 'icon']
+
+              info = list(icon_entries)
+              files = {}
+              for i, path in enumerate(screenshot_paths):
+                  filename = os.path.basename(path)
+                  with open(path, 'rb') as f:
+                      content = f.read()
+                  key = f'screenshot-{i}'
+                  info.append({
+                      'key': key,
+                      'type': 'screenshot',
+                      'filename': filename,
+                      'hash': hashlib.sha256(content).hexdigest(),
+                  })
+                  files[key] = (filename, content)
+
+              client.request(
+                  'PUT',
+                  f'{base_url}/dev/api/snaps/{snap_id}/binary-metadata',
+                  headers={},
+                  data={'info': json.dumps(info)},
+                  files=files,
+              )
+              print(f'{snap_name}: updated {len(screenshot_paths)} screenshot(s)')
+
+          print('Snap Store metadata upload complete')
+          PYEOF

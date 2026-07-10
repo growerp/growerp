@@ -235,7 +235,7 @@ snapcraft export-login --snaps=growerp-admin,growerp-hotel \
 ```
 Copy the printed token as the secret value. The token expires after 1 year by default.
 
-> `package_upload` is required by **Publish to Stores**. `package_release` is additionally required by **Release Approved Submissions** to promote a beta revision to stable.
+> `package_upload` is required by **Publish to Stores** and also covers listing text + screenshot updates in **Publish Metadata to Stores**. `package_release` is additionally required by **Release Approved Submissions** to promote a beta revision to stable.
 
 ---
 

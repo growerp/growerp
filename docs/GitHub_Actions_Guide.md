@@ -428,11 +428,11 @@ Authentication uses an Azure AD app registration with the Partner Center API.
 
 ### Snap Store Secrets
 
-Used by: `deploy-snap`
+Used by: `deploy-snap`, `upload-metadata-snap`
 
 | Secret | Format | Where to find / how to generate |
 |--------|--------|----------------------------------|
-| `SNAPCRAFT_STORE_CREDENTIALS` | Snapcraft credentials token | On a machine with `snapcraft` installed and logged in, run: `snapcraft export-login --snaps growerp-admin,growerp-hotel --channels beta,stable,edge --acls package_upload,package_release - 2>/dev/null`. This prints a credentials token to stdout. Paste that token as the secret value. `package_upload` is needed by Publish to Stores; `package_release` is additionally needed by Release Approved Submissions to promote beta → stable. Credentials expire — regenerate periodically. |
+| `SNAPCRAFT_STORE_CREDENTIALS` | Snapcraft credentials token | On a machine with `snapcraft` installed and logged in, run: `snapcraft export-login --snaps growerp-admin,growerp-hotel --channels beta,stable,edge --acls package_upload,package_release - 2>/dev/null`. This prints a credentials token to stdout. Paste that token as the secret value. `package_upload` is needed by Publish to Stores (binary uploads and, via `upload-metadata-snap`, listing text/screenshots); `package_release` is additionally needed by Release Approved Submissions to promote beta → stable. Credentials expire — regenerate periodically. |
 
 > **Snapcraft login:** `snapcraft login` uses your [Ubuntu One](https://login.ubuntu.com) / Snap Store developer account.
 
@@ -468,6 +468,6 @@ For organisation-wide secrets (shared across repos):
 | App Store Connect | API key with **App Manager** role | iOS + macOS deploy |
 | Google Play Console | Service account with **Release Manager** role | Android deploy |
 | Microsoft Partner Center | Azure AD app with **Manager** role | Windows deploy |
-| Snap Store | `package_upload` ACL for the relevant snaps | Snap deploy |
+| Snap Store | `package_upload` ACL for the relevant snaps | Snap deploy + Snap metadata upload |
 | Production server | SSH access for `PROD_SSH_USER` | Stage-to-production + Revert |
 | Match certs repository | GitHub PAT with `repo` scope | iOS deploy |
