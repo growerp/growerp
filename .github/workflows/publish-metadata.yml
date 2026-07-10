@@ -693,7 +693,7 @@ jobs:
           import os
           import requests
           import yaml
-          from craft_store import StoreClient, endpoints
+          from craft_store import UbuntuOneStoreClient, endpoints
 
           app_name = os.environ['APP_NAME']
           snapcraft_yaml_path = f'flutter/packages/{app_name}/snapcraft.yaml'
@@ -717,9 +717,10 @@ jobs:
           )[:5]
 
           base_url = 'https://dashboard.snapcraft.io'
-          client = StoreClient(
+          client = UbuntuOneStoreClient(
               base_url=base_url,
-              storage_base_url='https://storage.snapcraftcontent.com',
+              storage_base_url='https://upload.apps.ubuntu.com',
+              auth_url='https://login.ubuntu.com',
               endpoints=endpoints.U1_SNAP_STORE,
               user_agent='growerp-ci/1.0',
               application_name='growerp-ci',
