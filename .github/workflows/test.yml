@@ -145,6 +145,15 @@ jobs:
             echo "No test report generated." >> "$GITHUB_STEP_SUMMARY"
           fi
 
+      - name: Upload backend test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-test-results
+          path: moqui/runtime/component/growerp/build/test-results/test/TEST-*.xml
+          if-no-files-found: ignore
+          retention-days: 7
+
   # ------------------------------------------------------------------
   # 1. Integration tests
   #    Full run: 4 parallel slices, each with its own Moqui backend.
@@ -343,9 +352,13 @@ jobs:
   # 2. Combined summary across all slices
   # ------------------------------------------------------------------
   summarize:
-    needs: integration-tests
+    needs: [integration-tests, backend-tests]
     if: always() && needs.integration-tests.result != 'skipped'
     runs-on: ubuntu-latest
+    # A stuck/cancelled summarize run (e.g. a GitHub runner-allocation hiccup)
+    # is just a reporting step — it must not flip an otherwise-green run to
+    # failure when every real test job already passed.
+    continue-on-error: true
     steps:
       - name: Download all test logs
         uses: actions/download-artifact@v4
@@ -353,12 +366,35 @@ jobs:
           pattern: test-output-*
           path: test-logs/
 
+      - name: Download backend test results
+        uses: actions/download-artifact@v4
+        with:
+          name: backend-test-results
+          path: backend-test-logs/
+        continue-on-error: true
+
       - name: Combined summary
+        env:
+          BACKEND_RESULT: ${{ needs.backend-tests.result }}
         run: |
           FAIL_FILE=$(mktemp)
           echo "0" > "$FAIL_FILE"
+          if [ "$BACKEND_RESULT" = "failure" ]; then
+            echo "1" > "$FAIL_FILE"
+          fi
 
           {
+          echo "## Backend Spock Tests"
+          echo '```'
+          if ls backend-test-logs/TEST-*.xml >/dev/null 2>&1; then
+            grep -h "<testsuite " backend-test-logs/TEST-*.xml \
+              | sed -E 's/.*tests="([0-9]+)" skipped="([0-9]+)" failures="([0-9]+)" errors="([0-9]+)".*/tests: \1, skipped: \2, failures: \3, errors: \4/'
+          else
+            echo "No backend test report found (job result: ${BACKEND_RESULT})"
+          fi
+          echo '```'
+          echo ""
+
           echo "## Overall Test Results"
 
           for FORMAT in mobile desktop; do
