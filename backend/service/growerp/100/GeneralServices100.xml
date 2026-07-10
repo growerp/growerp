@@ -1394,8 +1394,8 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="hitId"/><!-- specific REST request hit ID -->
             <parameter name="userId"/><!-- filter by user ID -->
             <parameter name="ownerPartyId"/><!-- filter by owner party ID -->
-            <parameter name="startDateTime"/><!-- filter by start date -->
-            <parameter name="endDateTime"/><!-- filter by end date -->
+            <parameter name="startDateTime" type="Timestamp"/><!-- filter by start date -->
+            <parameter name="endDateTime" type="Timestamp"/><!-- filter by end date -->
             <parameter name="search"/><!-- search by user name or company name -->
             <parameter name="start" type="Integer" default-value="0"/>
             <parameter name="limit" type="Integer" default-value="20"/>
