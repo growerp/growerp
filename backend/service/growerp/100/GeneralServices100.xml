@@ -1397,8 +1397,6 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="startDateTime"/><!-- filter by start date -->
             <parameter name="endDateTime"/><!-- filter by end date -->
             <parameter name="search"/><!-- search by user name or company name -->
-            <parameter name="externalOnly" type="Boolean" default-value="false"/><!-- if true, only
-            return external REST API requests (excludes internal web UI hits) -->
             <parameter name="start" type="Integer" default-value="0"/>
             <parameter name="limit" type="Integer" default-value="20"/>
         </in-parameters>
@@ -1432,16 +1430,20 @@ along with this software (see the LICENSE.md file). If not, see
             <if condition="search">
                 <set field="search" value="%${search}%"/>
             </if>
-            <if condition="externalOnly">
-                <set field="requestUrlFilter" value="%/rest/%"/>
-            </if>
+
+            <!-- Restrict to services exposed via growerp.rest.xml, excludes internal hits -->
+            <script><![CDATA[
+                def restXml = new groovy.xml.XmlSlurper().parse(
+                    ec.resource.getLocationReference('component://growerp/service/growerp.rest.xml').openStream())
+                externalServiceNames = restXml.'**'.findAll { it.name() == 'service' }
+                    .collect { it.@name.text() } as Set
+            ]]></script>
 
             <!-- Query OwnerPersonRestRequest entity -->
             <entity-find entity-name="growerp.party.OwnerPersonRestRequest" list="restRequestData"
                 offset="start" limit="limit">
                 <econdition field-name="ownerPartyId" from="ownerPartyId" ignore-if-empty="true"/>
-                <econdition field-name="requestUrl" operator="like" from="requestUrlFilter"
-                    ignore-if-empty="true"/>
+                <econdition field-name="artifactName" operator="in" from="externalServiceNames"/>
                 <econdition field-name="hitId" ignore-if-empty="true"/>
                 <econdition field-name="userId" ignore-if-empty="true"/>
                 <econdition field-name="startDateTime" operator="greater-equals"
@@ -1459,17 +1461,6 @@ along with this software (see the LICENSE.md file). If not, see
                 </econditions>
                 <order-by field-name="-startDateTime"/>
             </entity-find>
-
-            <!-- When externalOnly, filter to services defined in growerp.rest.xml -->
-            <if condition="externalOnly">
-                <script><![CDATA[
-                    def restXml = new groovy.xml.XmlSlurper().parse(
-                        ec.resource.getLocationReference('component://growerp/service/growerp.rest.xml').openStream())
-                    def externalServices = restXml.'**'.findAll { it.name() == 'service' }
-                        .collect { it.@name.text() } as Set
-                    restRequestData = restRequestData.findAll { externalServices.contains(it.artifactName) }
-                ]]></script>
-            </if>
 
             <!-- Convert to RestRequest model format -->
             <set field="restRequests" from="[]"/>

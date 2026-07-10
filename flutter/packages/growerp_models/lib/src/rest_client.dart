@@ -114,7 +114,6 @@ abstract class RestClient {
     @Query('startDateTime') String? startDateTime,
     @Query('endDateTime') String? endDateTime,
     @Query('search') String? searchString,
-    @Query('externalOnly') bool? externalOnly,
     @Query('start') int? start,
     @Query('limit') int? limit,
   });
