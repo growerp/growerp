@@ -1439,7 +1439,7 @@ along with this software (see the LICENSE.md file). If not, see
             <!-- Query OwnerPersonRestRequest entity -->
             <entity-find entity-name="growerp.party.OwnerPersonRestRequest" list="restRequestData"
                 offset="start" limit="limit">
-                <econdition field-name="ownerPartyId" from="onlyOwnerPartyId" ignore-if-empty="true"/>
+                <econdition field-name="ownerPartyId" from="ownerPartyId" ignore-if-empty="true"/>
                 <econdition field-name="requestUrl" operator="like" from="requestUrlFilter"
                     ignore-if-empty="true"/>
                 <econdition field-name="hitId" ignore-if-empty="true"/>
