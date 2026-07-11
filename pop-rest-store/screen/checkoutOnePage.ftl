@@ -159,6 +159,24 @@
             cursor: pointer;
             margin-top: 10px;
         }
+        .place-order-btn:disabled {
+            background-color: #6c9ee8;
+            cursor: not-allowed;
+        }
+        .btn-spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            margin-right: 8px;
+            border: 2px solid rgba(255,255,255,0.4);
+            border-top-color: white;
+            border-radius: 50%;
+            vertical-align: -2px;
+            animation: btn-spin 0.8s linear infinite;
+        }
+        @keyframes btn-spin {
+            to { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
@@ -232,8 +250,16 @@
             return false;
         } else {
             ccError.style.display = 'none';
+            showProcessing();
             return true;
         }
+    }
+
+    // show spinner and block double submits while the payment is processed
+    function showProcessing() {
+        var btn = document.getElementById('placeOrderBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="btn-spinner"></span>Processing payment...';
     }
     </script>
             <section>
@@ -342,7 +368,7 @@
             <input type="hidden" id="currencyId" name="currencyId" value="USD">
             <input type="hidden" id="creditCardType" name="creditCardType" value="${creditCardType!}">
             <input type="hidden" id="amount" name="amount" value="${amount!}">
-            <button class="place-order-btn">Place Order Now</button>
+            <button id="placeOrderBtn" class="place-order-btn">Place Order Now</button>
         </form>
     </div>
 
