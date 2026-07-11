@@ -1491,6 +1491,10 @@ along with this software (see the LICENSE.md file). If not, see
                     </parameter>
                 </parameter>
                 <parameter name="grandTotal" />
+                <parameter name="originalGrandTotal" />
+                <parameter name="originalCurrency" type="Map">
+                    <parameter name="currencyId" />
+                </parameter>
                 <parameter name="classificationId" />
                 <parameter name="isPosted" type="Boolean" />
                 <parameter name="journal">
@@ -2199,6 +2203,10 @@ along with this software (see the LICENSE.md file). If not, see
                     </parameter>
                 </parameter>
                 <parameter name="grandTotal" />
+                <parameter name="originalGrandTotal" />
+                <parameter name="originalCurrency" type="Map">
+                    <parameter name="currencyId" />
+                </parameter>
                 <parameter name="classificationId" />
                 <parameter name="items" type="List">
                     <parameter name="item" type="Map">
@@ -3122,12 +3130,16 @@ along with this software (see the LICENSE.md file). If not, see
                         </else>
                     </if>
                     <set field="amount" from="payment.grandTotal" type="BigDecimal" />
-                    <set field="originalCurrencyAmount" from="payment.originalGrandTotal"
-                        type="BigDecimal" />
                     <set field="paymentOld.amount" from="amount" />
-                    <set field="paymentOld.originalCurrencyAmount" from="originalCurrencyAmount" />
-                    <set field="paymentOld.originalCurrencyUomId"
-                        from="payment.originalCurrency?.currencyId" />
+                    <!-- keep stored original-currency values unless the client sends new ones -->
+                    <if condition="payment.originalGrandTotal != null">
+                        <set field="originalCurrencyAmount" from="payment.originalGrandTotal"
+                            type="BigDecimal" />
+                        <set field="paymentOld.originalCurrencyAmount"
+                            from="originalCurrencyAmount" />
+                        <set field="paymentOld.originalCurrencyUomId"
+                            from="payment.originalCurrency?.currencyId" />
+                    </if>
                     <!-- first item stores the paymentType needed for posting -->
                     <if condition="payment.items &amp;&amp; payment.items[0].paymentType">
                         <entity-find entity-name="mantle.ledger.config.PaymentTypeGlAccount"
