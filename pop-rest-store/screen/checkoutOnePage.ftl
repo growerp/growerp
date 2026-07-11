@@ -196,7 +196,7 @@
           </#if>
         </#if>
         <p id="ccError" style="display:none; color:red; font-weight:bold; margin-bottom:10px;"></p>
-        <form id="checkoutForm" method="post" action="/checkoutOnePage/payOnePage" onsubmit="return validateCreditCard();">
+        <form id="checkoutForm" method="post" action="/checkoutOnePage/payOnePage" onsubmit="return validateCreditCard(this);">
     <script>
     function getCardType(number) {
         number = number.replace(/\D/g, '');
@@ -236,7 +236,7 @@
         return (sum % 10) === 0;
     }
 
-    function validateCreditCard() {
+    function validateCreditCard(form) {
         var ccInput = document.getElementById('card-number');
         var ccError = document.getElementById('ccError');
         var ccValue = ccInput.value.replace(/\s+/g, '');
@@ -248,11 +248,18 @@
             ccError.style.display = 'block';
             ccInput.focus();
             return false;
-        } else {
-            ccError.style.display = 'none';
-            showProcessing();
-            return true;
         }
+        ccError.style.display = 'none';
+        showProcessing();
+        // the form POST navigates the page synchronously; a fast (local/test)
+        // backend can respond before the browser paints the disabled/spinner
+        // state, so force a paint via double rAF before submitting for real
+        requestAnimationFrame(function() {
+            requestAnimationFrame(function() {
+                form.submit();
+            });
+        });
+        return false;
     }
 
     // show spinner and block double submits while the payment is processed
