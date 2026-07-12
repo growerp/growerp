@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entities xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/entity-definition-3.xsd">
+
+    <!-- ========================================================= -->
+    <!--  Website lead-capture forms                               -->
+    <!-- ========================================================= -->
+    <entity entity-name="WebsiteForm" package="growerp.website">
+        <description>A lead-capture form rendered on the public website; submissions create Lead users.</description>
+        <field name="formId" type="id" is-pk="true" />
+        <field name="pseudoId" type="id" />
+        <field name="ownerPartyId" type="id" />
+        <field name="productStoreId" type="id" />
+        <field name="formName" type="text-medium" />
+        <field name="title" type="text-medium" />
+        <field name="submitLabel" type="text-short" />
+        <field name="successMessage" type="text-medium" />
+        <!-- optional nurture sequence to enroll leads into on submit -->
+        <field name="emailSequenceId" type="id" />
+        <field name="createdDate" type="date-time" />
+
+        <relationship type="one" related="mantle.party.Party">
+            <key-map field-name="ownerPartyId" related="partyId" />
+        </relationship>
+        <relationship type="one" related="mantle.product.store.ProductStore">
+            <key-map field-name="productStoreId" />
+        </relationship>
+    </entity>
+
+    <entity entity-name="WebsiteFormField" package="growerp.website">
+        <description>A single input field of a website lead-capture form.</description>
+        <field name="formId" type="id" is-pk="true" />
+        <field name="fieldId" type="id" is-pk="true" />
+        <field name="sequenceNum" type="number-integer" />
+        <field name="label" type="text-medium" />
+        <field name="fieldType" type="text-short" /> <!-- text, email, phone, textarea -->
+        <field name="isRequired" type="text-indicator" />
+
+        <relationship type="one" related="growerp.website.WebsiteForm">
+            <key-map field-name="formId" />
+        </relationship>
+    </entity>
+
+    <entity entity-name="WebsiteFormSubmission" package="growerp.website">
+        <description>A visitor submission of a website form; partyId is the created/matched Lead.</description>
+        <field name="submissionId" type="id" is-pk="true" />
+        <field name="formId" type="id" />
+        <field name="ownerPartyId" type="id" />
+        <field name="partyId" type="id" />
+        <field name="submittedDate" type="date-time" />
+        <field name="valuesJson" type="text-very-long" />
+
+        <relationship type="one" related="growerp.website.WebsiteForm">
+            <key-map field-name="formId" />
+        </relationship>
+        <relationship type="one" related="mantle.party.Party">
+            <key-map field-name="partyId" />
+        </relationship>
+    </entity>
+</entities>

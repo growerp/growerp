@@ -555,6 +555,7 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="content" type="Map">
                 <parameter name="path" />
                 <parameter name="title" />
+                <parameter name="description" />
                 <parameter name="text" />
                 <parameter name="image" />
                 <parameter name="contentType" />
@@ -601,6 +602,7 @@ along with this software (see the LICENSE.md file). If not, see
                     </if>
                     <script>
                         String title = '';
+                        String description = '';
                         if (contentType == 'ftl') {
                             def titleMatch = (contentText =~ /title:\s*(.*?)\s*-->/);
                             title = titleMatch.find() ? titleMatch.group(1) : pages[0].pagePath;
@@ -612,9 +614,12 @@ along with this software (see the LICENSE.md file). If not, see
                                 }
                             }
                         }
+                        def descMatch = (contentText =~ /(?i)description:\s*(.*?)\s*-->/);
+                        if (descMatch.find()) description = descMatch.group(1);
                     </script>
                     <set field="content"
-                        from="[path: pages[0].pagePath, title: title, text: contentText,
+                        from="[path: pages[0].pagePath, title: title, description: description,
+                            text: contentText,
                             contentType: contentType, seqId: pages[0].sequenceNum]" />
                 </then>
                 <else>
@@ -1122,6 +1127,371 @@ along with this software (see the LICENSE.md file). If not, see
             }
             </script>
             <service-call name="growerp.100.WebsiteServices100.get#Website" out-map="context" />
+        </actions>
+    </service>
+
+    <!-- ================= website lead-capture forms ================= -->
+
+    <service verb="get" noun="WebsiteForm">
+        <description>Get a single or all website lead-capture forms of the company</description>
+        <in-parameters>
+            <parameter name="formId" />
+            <parameter name="start" type="Integer" default-value="0" />
+            <parameter name="limit" type="Integer" default-value="20" />
+            <parameter name="search" default="null" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="webForms" type="List">
+                <parameter name="webForm" type="Map">
+                    <parameter name="formId" />
+                    <parameter name="pseudoId" />
+                    <parameter name="formName" />
+                    <parameter name="title" />
+                    <parameter name="submitLabel" />
+                    <parameter name="successMessage" />
+                    <parameter name="emailSequenceId" />
+                    <parameter name="submissionCount" />
+                    <parameter name="fields" type="List" />
+                </parameter>
+            </parameter>
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <if condition="search != null">
+                <set field="search" value="%${search}%" />
+            </if>
+            <entity-find entity-name="growerp.website.WebsiteForm" list="forms"
+                offset="start" limit="limit">
+                <econdition field-name="ownerPartyId" from="companyPartyId" />
+                <econdition field-name="formId" ignore-if-empty="true" />
+                <econditions combine="or">
+                    <econdition field-name="pseudoId" ignore-case="true"
+                        operator="like" from="search" ignore-if-empty="true" />
+                    <econdition field-name="formName" ignore-case="true"
+                        operator="like" from="search" ignore-if-empty="true" />
+                    <econdition field-name="title" ignore-case="true"
+                        operator="like" from="search" ignore-if-empty="true" />
+                </econditions>
+                <order-by field-name="pseudoId" />
+            </entity-find>
+            <set field="webForms" from="[]" />
+            <iterate list="forms" entry="form">
+                <entity-find entity-name="growerp.website.WebsiteFormField" list="formFields">
+                    <econdition field-name="formId" from="form.formId" />
+                    <order-by field-name="sequenceNum" />
+                </entity-find>
+                <entity-find-count entity-name="growerp.website.WebsiteFormSubmission"
+                    count-field="submissionCount">
+                    <econdition field-name="formId" from="form.formId" />
+                </entity-find-count>
+                <set field="fields" from="[]" />
+                <iterate list="formFields" entry="formField">
+                    <script>fields.add([fieldId: formField.fieldId,
+                        sequenceNum: formField.sequenceNum,
+                        label: formField.label, fieldType: formField.fieldType,
+                        isRequired: formField.isRequired])</script>
+                </iterate>
+                <script>webForms.add([formId: form.formId, pseudoId: form.pseudoId,
+                    formName: form.formName, title: form.title,
+                    submitLabel: form.submitLabel, successMessage: form.successMessage,
+                    emailSequenceId: form.emailSequenceId,
+                    submissionCount: submissionCount, fields: fields])</script>
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="create" noun="WebsiteForm">
+        <description>Create a website lead-capture form with its fields</description>
+        <in-parameters>
+            <parameter name="webForm" type="Map" required="true">
+                <parameter name="pseudoId" />
+                <parameter name="formName" />
+                <parameter name="title" />
+                <parameter name="submitLabel" />
+                <parameter name="successMessage" />
+                <parameter name="emailSequenceId" />
+                <parameter name="fields" type="List">
+                    <parameter name="field" type="Map">
+                        <parameter name="fieldId" />
+                        <parameter name="sequenceNum" />
+                        <parameter name="label" />
+                        <parameter name="fieldType" />
+                        <parameter name="isRequired" />
+                    </parameter>
+                </parameter>
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="webForm" type="Map" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <entity-find entity-name="mantle.product.store.ProductStore" list="stores">
+                <econdition field-name="organizationPartyId" from="companyPartyId" />
+            </entity-find>
+            <if condition="!webForm.pseudoId || webForm.pseudoId == ''">
+                <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                    in-map="[ownerPartyId: ownerPartyId, seqName: 'websiteForm']"
+                    out-map="context" />
+                <set field="webForm.pseudoId" from="seqNum" />
+            </if>
+            <service-call name="create#growerp.website.WebsiteForm" out-map="context"
+                in-map="[pseudoId: webForm.pseudoId,
+                    ownerPartyId: companyPartyId,
+                    productStoreId: stores ? stores[0].productStoreId : null,
+                    formName: webForm.formName,
+                    title: webForm.title,
+                    submitLabel: webForm.submitLabel,
+                    successMessage: webForm.successMessage,
+                    emailSequenceId: webForm.emailSequenceId,
+                    createdDate: ec.user.nowTimestamp]" />
+            <iterate list="webForm.fields" entry="field">
+                <service-call name="create#growerp.website.WebsiteFormField"
+                    in-map="[formId: formId,
+                        fieldId: field.fieldId ?: ('F' + (webForm.fields.indexOf(field) + 1)),
+                        sequenceNum: field.sequenceNum ?: (webForm.fields.indexOf(field) + 1),
+                        label: field.label, fieldType: field.fieldType ?: 'text',
+                        isRequired: field.isRequired ?: 'N']" />
+            </iterate>
+            <service-call name="growerp.100.WebsiteServices100.get#WebsiteForm"
+                in-map="[formId: formId]" out-map="context" />
+            <set field="webForm" from="webForms[0]" />
+        </actions>
+    </service>
+
+    <service verb="update" noun="WebsiteForm">
+        <description>Update a website form; the fields list replaces all existing fields</description>
+        <in-parameters>
+            <parameter name="webForm" type="Map" required="true">
+                <parameter name="formId" />
+                <parameter name="pseudoId" />
+                <parameter name="formName" />
+                <parameter name="title" />
+                <parameter name="submitLabel" />
+                <parameter name="successMessage" />
+                <parameter name="emailSequenceId" />
+                <parameter name="fields" type="List">
+                    <parameter name="field" type="Map">
+                        <parameter name="fieldId" />
+                        <parameter name="sequenceNum" />
+                        <parameter name="label" />
+                        <parameter name="fieldType" />
+                        <parameter name="isRequired" />
+                    </parameter>
+                </parameter>
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="webForm" type="Map" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <entity-find list="forms" for-update="true" limit="1"
+                entity-name="growerp.website.WebsiteForm">
+                <econdition field-name="formId" from="webForm.formId" />
+                <econdition field-name="ownerPartyId" from="companyPartyId" />
+            </entity-find>
+            <if condition="!forms">
+                <return error="true" message="form ${webForm.formId} not found!" />
+            </if>
+            <set field="forms[0].formName" from="webForm.formName" />
+            <set field="forms[0].title" from="webForm.title" />
+            <set field="forms[0].submitLabel" from="webForm.submitLabel" />
+            <set field="forms[0].successMessage" from="webForm.successMessage" />
+            <set field="forms[0].emailSequenceId" from="webForm.emailSequenceId" />
+            <entity-update value-field="forms[0]" />
+            <!-- replace fields -->
+            <entity-delete-by-condition entity-name="growerp.website.WebsiteFormField">
+                <econdition field-name="formId" from="webForm.formId" />
+            </entity-delete-by-condition>
+            <iterate list="webForm.fields" entry="field">
+                <service-call name="create#growerp.website.WebsiteFormField"
+                    in-map="[formId: webForm.formId,
+                        fieldId: field.fieldId ?: ('F' + (webForm.fields.indexOf(field) + 1)),
+                        sequenceNum: field.sequenceNum ?: (webForm.fields.indexOf(field) + 1),
+                        label: field.label, fieldType: field.fieldType ?: 'text',
+                        isRequired: field.isRequired ?: 'N']" />
+            </iterate>
+            <service-call name="growerp.100.WebsiteServices100.get#WebsiteForm"
+                in-map="[formId: webForm.formId]" out-map="context" />
+            <set field="webForm" from="webForms[0]" />
+        </actions>
+    </service>
+
+    <service verb="delete" noun="WebsiteForm">
+        <description>Delete a website form with its fields and submissions</description>
+        <in-parameters>
+            <parameter name="webForm" type="Map" required="true">
+                <parameter name="formId" />
+            </parameter>
+        </in-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <entity-find list="forms" limit="1" entity-name="growerp.website.WebsiteForm">
+                <econdition field-name="formId" from="webForm.formId" />
+                <econdition field-name="ownerPartyId" from="companyPartyId" />
+            </entity-find>
+            <if condition="!forms">
+                <return error="true" message="form ${webForm.formId} not found!" />
+            </if>
+            <entity-delete-by-condition entity-name="growerp.website.WebsiteFormSubmission">
+                <econdition field-name="formId" from="webForm.formId" />
+            </entity-delete-by-condition>
+            <entity-delete-by-condition entity-name="growerp.website.WebsiteFormField">
+                <econdition field-name="formId" from="webForm.formId" />
+            </entity-delete-by-condition>
+            <entity-delete value-field="forms[0]" />
+        </actions>
+    </service>
+
+    <service verb="get" noun="PublicWebsiteForm" authenticate="false">
+        <description>Public form definition for rendering on the generated website</description>
+        <in-parameters>
+            <parameter name="formId" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="webForm" type="Map" />
+        </out-parameters>
+        <actions>
+            <entity-find-one entity-name="growerp.website.WebsiteForm" value-field="form" />
+            <if condition="!form">
+                <return error="true" message="form ${formId} not found!" />
+            </if>
+            <entity-find entity-name="growerp.website.WebsiteFormField" list="formFields">
+                <econdition field-name="formId" from="formId" />
+                <order-by field-name="sequenceNum" />
+            </entity-find>
+            <set field="fields" from="[]" />
+            <iterate list="formFields" entry="formField">
+                <script>fields.add([fieldId: formField.fieldId,
+                    sequenceNum: formField.sequenceNum,
+                    label: formField.label, fieldType: formField.fieldType,
+                    isRequired: formField.isRequired])</script>
+            </iterate>
+            <set field="webForm"
+                from="[formId: form.formId, title: form.title,
+                    submitLabel: form.submitLabel ?: 'Send',
+                    successMessage: form.successMessage ?: 'Thank you!',
+                    fields: fields]" />
+        </actions>
+    </service>
+
+    <service verb="submit" noun="WebsiteForm" authenticate="false">
+        <description>
+            Public endpoint for website lead-capture forms. Creates (or reuses) a Lead
+            user for the submitted email address, owned by the website's company, and
+            records the submission. No authentication required.
+        </description>
+        <in-parameters>
+            <parameter name="formId" required="true" />
+            <!-- JSON object string: {"fieldId": "value", ...} -->
+            <parameter name="valuesJson" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="successMessage" />
+        </out-parameters>
+        <actions>
+            <entity-find-one entity-name="growerp.website.WebsiteForm" value-field="form" />
+            <if condition="!form">
+                <return error="true" message="form ${formId} not found!" />
+            </if>
+            <entity-find entity-name="growerp.website.WebsiteFormField" list="formFields">
+                <econdition field-name="formId" from="formId" />
+                <order-by field-name="sequenceNum" />
+            </entity-find>
+            <script>
+                Map values = [:]
+                try { values = new groovy.json.JsonSlurper().parseText(valuesJson) }
+                catch (Exception e) { /* invalid json handled below */ }
+                context.values = values
+                String email = null
+                String name = null
+                formFields.each {
+                    String v = values[it.fieldId]?.toString()?.trim()
+                    if (it.fieldType == 'email' &amp;&amp; !email &amp;&amp; v) email = v
+                    if (it.fieldType == 'text' &amp;&amp; !name &amp;&amp; v) name = v
+                }
+                context.email = email
+                context.visitorName = name ?: (email &amp;&amp; email.contains('@')
+                    ? email.substring(0, email.indexOf('@')) : 'website')
+            </script>
+            <iterate list="formFields" entry="formField">
+                <if condition="formField.isRequired == 'Y' &amp;&amp;
+                        !values[formField.fieldId]">
+                    <return error="true"
+                        message="Field '${formField.label}' is required" />
+                </if>
+            </iterate>
+            <if condition="!email">
+                <return error="true" message="An email address is required" />
+            </if>
+            <!-- company owner of the form -->
+            <set field="ownerPartyId" from="form.ownerPartyId" />
+            <!-- resolve (or create) the visitor as a Lead (same pattern as submit#WebsiteChat):
+                 no loginName so no enabled login or password email is created -->
+            <entity-find entity-name="mantle.party.contact.ContactMech" list="emailContacts">
+                <econdition field-name="infoString" from="email" />
+                <econdition field-name="contactMechTypeEnumId" value="CmtEmailAddress" />
+            </entity-find>
+            <if condition="!emailContacts">
+                <service-call name="growerp.100.PartyServices100.create#User" ignore-error="true">
+                    <field-map field-name="ownerPartyId" from="ownerPartyId" />
+                    <field-map field-name="user"
+                        from="[
+                            firstName: visitorName,
+                            lastName: 'website',
+                            email: email,
+                            role: 'Lead',
+                            userGroupId: 'GROWERP_M_LEAD',
+                        ]" />
+                </service-call>
+                <entity-find entity-name="mantle.party.contact.ContactMech" list="emailContacts">
+                    <econdition field-name="infoString" from="email" />
+                    <econdition field-name="contactMechTypeEnumId" value="CmtEmailAddress" />
+                </entity-find>
+            </if>
+            <set field="visitorPartyId" from="null" />
+            <if condition="emailContacts">
+                <entity-find entity-name="mantle.party.contact.PartyContactMech"
+                    list="partyContacts" limit="1">
+                    <econdition field-name="contactMechId" from="emailContacts[0].contactMechId" />
+                    <date-filter />
+                </entity-find>
+                <if condition="partyContacts">
+                    <set field="visitorPartyId" from="partyContacts[0].partyId" />
+                </if>
+            </if>
+            <service-call name="create#growerp.website.WebsiteFormSubmission"
+                in-map="[formId: formId, ownerPartyId: ownerPartyId,
+                    partyId: visitorPartyId, submittedDate: ec.user.nowTimestamp,
+                    valuesJson: valuesJson]" />
+            <!-- notify the company admin when email is configured -->
+            <entity-find-one entity-name="moqui.basic.email.EmailServer" value-field="emailServer">
+                <field-map field-name="emailServerId" value="SYSTEM" />
+            </entity-find-one>
+            <entity-find entity-name="growerp.party.OwnerPersonDetailAndCompany"
+                list="admins" limit="1">
+                <econdition field-name="ownerPartyId" from="ownerPartyId" />
+                <econdition field-name="userGroupId" value="GROWERP_M_ADMIN" />
+                <econdition field-name="emailAddress" operator="is-not-null" />
+            </entity-find>
+            <if condition="emailServer &amp;&amp; emailServer.mailPassword != 'SMTP_PASSWORD'
+                    &amp;&amp; admins">
+                <service-call name="org.moqui.impl.EmailServices.send#EmailTemplate"
+                    async="true" ignore-error="true"
+                    in-map="[emailTemplateId: 'NOTIFICATION',
+                        toAddresses: admins[0].emailAddress,
+                        bodyParameters: [
+                            title: 'New website form submission on form: ' +
+                                (form.formName ?: form.formId) + ' from: ' + email,
+                            topic: 'WebsiteForm', type: 'info',
+                            sentDate: ec.user.nowTimestamp]]" />
+            </if>
+            <set field="successMessage" from="form.successMessage ?: 'Thank you!'" />
         </actions>
     </service>
 </services>

@@ -25,6 +25,8 @@ abstract class Content extends Equatable with _$Content {
   factory Content({
     @Default("") String path, // filename when image
     @Default("") String title,
+    // SEO meta description, stored as a <!-- description: ... --> comment in text
+    @Default("") String description,
     @Default("") String text,
     @Default("") String contentType, // '' or 'md' = markdown, 'ftl' = FreeMarker
     @Uint8ListConverter() Uint8List? image,

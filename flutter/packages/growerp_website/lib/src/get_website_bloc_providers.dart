@@ -6,6 +6,9 @@ import '../growerp_website.dart';
 List<BlocProvider> getWebsiteBlocProviders(RestClient restClient) {
   List<BlocProvider> blocProviders = [
     BlocProvider<WebsiteBloc>(create: (context) => WebsiteBloc(restClient)),
+    BlocProvider<WebsiteFormBloc>(
+      create: (context) => WebsiteFormBloc(restClient),
+    ),
   ];
   return blocProviders;
 }

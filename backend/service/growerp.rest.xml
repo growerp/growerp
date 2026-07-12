@@ -134,6 +134,15 @@ along with this software (see the LICENSE.md file). If not, see
                 <service name="growerp.100.PartyServices100.get#CompanyFromHost" />
             </method>
         </resource>
+        <!-- public website lead-capture form: definition + submit -->
+        <resource name="SubmitWebsiteForm" require-authentication="anonymous-all">
+            <method type="get">
+                <service name="growerp.100.WebsiteServices100.get#PublicWebsiteForm" />
+            </method>
+            <method type="post">
+                <service name="growerp.100.WebsiteServices100.submit#WebsiteForm" />
+            </method>
+        </resource>
         <resource name="WebsiteChat" require-authentication="anonymous-all">
             <method type="post">
                 <service name="growerp.100.ChatServices100.submit#WebsiteChat" />
@@ -892,6 +901,21 @@ along with this software (see the LICENSE.md file). If not, see
         <resource name="Obsidian">
             <method type="post">
                 <service name="growerp.100.WebsiteServices100.upload#Obsidian" />
+            </method>
+        </resource>
+        <!-- website lead-capture forms (management) -->
+        <resource name="WebsiteForm">
+            <method type="get">
+                <service name="growerp.100.WebsiteServices100.get#WebsiteForm" />
+            </method>
+            <method type="post">
+                <service name="growerp.100.WebsiteServices100.create#WebsiteForm" />
+            </method>
+            <method type="patch">
+                <service name="growerp.100.WebsiteServices100.update#WebsiteForm" />
+            </method>
+            <method type="delete">
+                <service name="growerp.100.WebsiteServices100.delete#WebsiteForm" />
             </method>
         </resource>
         <!-- import/export -->

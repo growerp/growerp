@@ -102,6 +102,8 @@ along with this software (see the LICENSE.md file). If not, see
         title="employees" iconName="school" widgetName="UserListEmployee" sequenceNum="20"/>
     <growerp.menu.MenuItem menuItemId="ADMIN_ORG_WEBSITE" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_ORG"
         title="Website" iconName="webhook" widgetName="WebsiteDialog" sequenceNum="30"/>
+    <growerp.menu.MenuItem menuItemId="ADMIN_ORG_WEBFORMS" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_ORG"
+        title="Web Forms" iconName="dynamic_form" widgetName="WebsiteFormList" sequenceNum="35"/>
     
     <!-- ADMIN_CRM children -->
     <growerp.menu.MenuItem menuItemId="ADMIN_CRM_ACTIVITIES" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_CRM"

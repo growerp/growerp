@@ -22,7 +22,7 @@ All entity/service/file references below were verified against the codebase.
 
 ---
 
-## #7 Opportunity nextStep → Activity auto-link (S) — Phase A
+## #7 Opportunity nextStep → Activity auto-link (S) — Phase A ✅ shipped
 
 **Goal:** setting/changing `nextStep` on an opportunity automatically creates a linked to-do Activity, so follow-ups land in the assignee's task list.
 
@@ -37,7 +37,7 @@ All entity/service/file references below were verified against the codebase.
 
 ---
 
-## #2 Pipeline board + funnel report (M) — Phase A
+## #2 Pipeline board + funnel report (M) — Phase A ✅ shipped
 
 **Goal:** kanban view of opportunities by stage with drag-to-move, plus a per-stage funnel summary (count, total, weighted value).
 
@@ -57,7 +57,7 @@ All entity/service/file references below were verified against the codebase.
 
 ---
 
-## #3 Website SEO metadata + lead-capture form builder (M) — Phase B
+## #3 Website SEO metadata + lead-capture form builder (M) — Phase B ✅ shipped
 
 **Goal:** per-page `<title>`/meta description/OG tags on the generated website; embeddable lead-capture forms that create Lead users.
 

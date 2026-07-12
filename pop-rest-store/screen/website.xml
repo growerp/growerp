@@ -80,6 +80,10 @@ along with this software (see the LICENSE.md file). If not, see
                 <render-mode>
                     <text type="html" location="component://PopRestStore/template/chatWidget.html.ftl"/>
                 </render-mode>
+                <!-- lead-capture form renderer for data-growerp-form markers in page content -->
+                <render-mode>
+                    <text type="html" location="component://PopRestStore/template/formWidget.html.ftl"/>
+                </render-mode>
             </widgets>
         </section>
     </widgets>

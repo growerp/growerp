@@ -3,10 +3,27 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <#-- per-page description (content front-matter) > store setting > default -->
+    <#if pageDescription?has_content>
+    <meta name="description" content="${pageDescription?html}">
+    <#elseif storeInfo.settings.PsstMetaDescription?has_content>
+    <meta name="description" content="${storeInfo.settings.PsstMetaDescription?html}">
+    <#else>
     <meta name="description" content="Welcome to ${storeInfo.productStore.storeName} - Your trusted online store">
+    </#if>
     <meta name="theme-color" content="#1e293b">
-    
+
+    <#if pageTitle?has_content>
+    <title>${pageTitle?html} — ${storeInfo.productStore.storeName}</title>
+    <#else>
     <title>${storeInfo.productStore.storeName}</title>
+    </#if>
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="${storeInfo.productStore.storeName?html}">
+    <meta property="og:title" content="${(pageTitle?has_content)?then(pageTitle?html, storeInfo.productStore.storeName?html)}">
+    <#if pageDescription?has_content><meta property="og:description" content="${pageDescription?html}"></#if>
+    <#if ec.web??><meta property="og:url" content="${ec.web.requestUrl?html}">
+    <link rel="canonical" href="${ec.web.requestUrl?html}"></#if>
     
     <!-- Preconnect for performance -->
     <link rel="preconnect" href="https://fonts.googleapis.com">

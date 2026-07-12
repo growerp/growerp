@@ -3,7 +3,12 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <#if storeInfo.productStore.productStoreId == "100000">
+    <#-- per-page description (content front-matter) > store setting > legacy defaults -->
+    <#if pageDescription?has_content>
+    <meta name="description" content="${pageDescription?html}">
+    <#elseif storeInfo.settings.PsstMetaDescription?has_content>
+    <meta name="description" content="${storeInfo.settings.PsstMetaDescription?html}">
+    <#elseif storeInfo.productStore.productStoreId == "100000">
     <meta name="description" content="GrowERP — Open Source AI-Powered ERP for Small & Medium Businesses. Manage accounting, inventory, orders, CRM, and marketing from one platform. Free 2-week trial.">
     <meta name="keywords" content="ERP, open source ERP, small business ERP, AI ERP, Flutter ERP, Moqui, GrowERP, business management">
     <#else>
@@ -11,7 +16,17 @@
     </#if>
     <meta name="theme-color" content="${luminaSurfaceHex!'#0b1326'}">
 
+    <#if pageTitle?has_content>
+    <title>${pageTitle?html} — ${storeInfo.productStore.storeName}</title>
+    <#else>
     <title>${storeInfo.productStore.storeName}</title>
+    </#if>
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="${storeInfo.productStore.storeName?html}">
+    <meta property="og:title" content="${(pageTitle?has_content)?then(pageTitle?html, storeInfo.productStore.storeName?html)}">
+    <#if pageDescription?has_content><meta property="og:description" content="${pageDescription?html}"></#if>
+    <#if ec.web??><meta property="og:url" content="${ec.web.requestUrl?html}">
+    <link rel="canonical" href="${ec.web.requestUrl?html}"></#if>
 
     <!-- Preconnect for performance -->
     <link rel="preconnect" href="https://fonts.googleapis.com">

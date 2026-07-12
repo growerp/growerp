@@ -48,6 +48,7 @@ export 'ledger_report_model.dart';
 export 'opportunity_stages_model.dart';
 export 'opportunity_model.dart';
 export 'opportunity_summary_model.dart';
+export 'website_form_model.dart';
 export 'outreach_campaign_model.dart';
 export 'outreach_message_model.dart';
 export 'campaign_metrics_model.dart';

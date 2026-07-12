@@ -8,7 +8,10 @@ import '../growerp_website.dart';
 
 /// Returns widget mappings for the website package
 Map<String, GrowerpWidgetBuilder> getWebsiteWidgets() {
-  return {'WebsiteDialog': (args) => const WebsiteDialog()};
+  return {
+    'WebsiteDialog': (args) => const WebsiteDialog(),
+    'WebsiteFormList': (args) => WebsiteFormList(key: getKeyFromArgs(args)),
+  };
 }
 
 /// Returns widget metadata with icons for the website package
@@ -20,6 +23,14 @@ List<WidgetMetadata> getWebsiteWidgetsWithMetadata() {
       iconName: 'web',
       keywords: ['website', 'site', 'web', 'online'],
       builder: (args) => const WebsiteDialog(),
+    ),
+    WidgetMetadata(
+      widgetName: 'WebsiteFormList',
+      description: 'Website lead-capture forms: create forms and embed them '
+          'on website pages to collect leads',
+      iconName: 'dynamic_form',
+      keywords: ['form', 'lead capture', 'website form', 'signup'],
+      builder: (args) => WebsiteFormList(key: getKeyFromArgs(args)),
     ),
   ];
 }

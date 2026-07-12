@@ -269,6 +269,30 @@ var storeInfo = ${storeInfoJson};
         <set field="template_server_product" from="storeInfo.settings.template_server_product" default-value="component://PopRestStore/template/store/${templateId}/product.html.ftl"/>
         <set field="template_server_content" from="storeInfo.settings.template_server_content" default-value="component://PopRestStore/template/store/${templateId}/help.html.ftl"/>
         <set field="template_server_search" from="storeInfo.settings.template_server_search" default-value="component://PopRestStore/template/store/${templateId}/search.html.ftl"/>
+
+        <!-- per-page SEO title/description for content pages; must be resolved here because
+             root.html.ftl renders the <head> before the content subscreen actions run -->
+        <script><![CDATA[
+            String seoPathInfo = ec.web.getPathInfo() ?: ''
+            if (wikiSpaceId && seoPathInfo.startsWith('/content/')) {
+                String seoPagePath = seoPathInfo.substring('/content/'.length())
+                if (seoPagePath) try {
+                    Map seoOut = ec.service.sync().name('org.moqui.impl.WikiServices.get#PublishedWikiPageText')
+                            .parameters([wikiSpaceId: wikiSpaceId, pagePath: seoPagePath]).call()
+                    String seoText = seoOut?.pageText
+                    if (seoText) {
+                        def dMatch = (seoText =~ /(?i)description:\s*(.*?)\s*-->/)
+                        if (dMatch.find()) context.pageDescription = dMatch.group(1)
+                        def tMatch = (seoText =~ /(?i)title:\s*(.*?)\s*-->/)
+                        if (tMatch.find()) context.pageTitle = tMatch.group(1)
+                        if (!context.pageTitle) seoText.eachLine {
+                            if (!context.pageTitle && (it.startsWith('# ') || it.startsWith('## ')))
+                                context.pageTitle = it.substring(it.indexOf(' ') + 1)
+                        }
+                    }
+                } catch (Exception e) { ec.logger.warn("Page SEO meta lookup failed: ${e.message}") }
+            }
+        ]]></script>
     </pre-actions>
 
     <widgets>
@@ -286,6 +310,10 @@ var storeInfo = ${storeInfoJson};
                 <!-- shared widget, also used by website.xml; see template/chatWidget.html.ftl -->
                 <render-mode>
                     <text type="html" location="component://PopRestStore/template/chatWidget.html.ftl"/>
+                </render-mode>
+                <!-- lead-capture form renderer for data-growerp-form markers in page content -->
+                <render-mode>
+                    <text type="html" location="component://PopRestStore/template/formWidget.html.ftl"/>
                 </render-mode>
             </widgets>
         </section>

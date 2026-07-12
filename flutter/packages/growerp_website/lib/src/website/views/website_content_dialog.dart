@@ -33,6 +33,14 @@ class WebsiteContent extends StatefulWidget {
 
 class WebsiteContentState extends State<WebsiteContent> {
   final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _seoDescriptionController =
+      TextEditingController();
+  bool _seoDescriptionLoaded = false;
+  static final RegExp _descriptionComment = RegExp(
+    r'<!--\s*description:.*?-->\s*\n?',
+    caseSensitive: false,
+    dotAll: true,
+  );
   final _websiteContFormKey = GlobalKey<FormState>();
   XFile? _imageFile;
   late Content newContent;
@@ -113,6 +121,10 @@ class WebsiteContentState extends State<WebsiteContent> {
             newContent = state.content!;
             data = state.content!.text;
             if (newData.isEmpty) newData = data;
+            if (!_seoDescriptionLoaded) {
+              _seoDescriptionController.text = state.content!.description;
+              _seoDescriptionLoaded = true;
+            }
             if (widget.content.text.isNotEmpty) {
               return Dialog(
                 key: const Key('WebsiteContentText'),
@@ -267,6 +279,14 @@ class WebsiteContentState extends State<WebsiteContent> {
     );
     return Column(
       children: [
+        TextFormField(
+          key: const Key('seoDescription'),
+          controller: _seoDescriptionController,
+          decoration: const InputDecoration(
+            labelText: 'SEO description (search engines & link previews)',
+          ),
+        ),
+        const SizedBox(height: 10),
         isFtl
             ? Expanded(child: input)
             : isPhone
@@ -322,10 +342,20 @@ class WebsiteContentState extends State<WebsiteContent> {
           ),
           onPressed: () async {
             if (newData != '') {
+              // description lives in the page text as a comment so the
+              // public site can render it as <meta name="description">
+              String text = newData.replaceAll(_descriptionComment, '');
+              final seoDescription = _seoDescriptionController.text.trim();
+              if (seoDescription.isNotEmpty) {
+                text = '<!-- description: $seoDescription -->\n$text';
+              }
               _contentBloc.add(
                 ContentUpdate(
                   widget.websiteId,
-                  widget.content.copyWith(text: newData),
+                  widget.content.copyWith(
+                    description: seoDescription,
+                    text: text,
+                  ),
                 ),
               );
             } else {

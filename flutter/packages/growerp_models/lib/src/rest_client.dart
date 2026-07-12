@@ -808,6 +808,28 @@ abstract class RestClient {
   @GET("rest/s1/growerp/100/Opportunity/Summary")
   Future<OpportunitySummary> getOpportunitySummary();
 
+  // website lead-capture forms
+  @GET("rest/s1/growerp/100/WebsiteForm")
+  Future<WebsiteForms> getWebsiteForm({
+    @Query('start') int? start,
+    @Query('limit') int? limit,
+    @Query('formId') String? formId,
+    @Query('search') String? searchString,
+  });
+
+  @POST("rest/s1/growerp/100/WebsiteForm")
+  Future<WebsiteForm> createWebsiteForm({
+    @Field() required WebsiteForm webForm,
+  });
+
+  @PATCH("rest/s1/growerp/100/WebsiteForm")
+  Future<WebsiteForm> updateWebsiteForm({
+    @Field() required WebsiteForm webForm,
+  });
+
+  @DELETE("rest/s1/growerp/100/WebsiteForm")
+  Future<void> deleteWebsiteForm({@Field() required WebsiteForm webForm});
+
   @POST("rest/s1/growerp/100/Opportunity")
   Future<Opportunity> createOpportunity({
     @Field() required Opportunity opportunity,
