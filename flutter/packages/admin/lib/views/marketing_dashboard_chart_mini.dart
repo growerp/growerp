@@ -73,20 +73,37 @@ class _MarketingDashboardChartMiniState
       child: Column(
         key: const Key('marketingDashboardMini'),
         children: [
-          Expanded(child: SalesFunnelChart(summary: dashboard!.stageSummary)),
-          const SizedBox(height: 4),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: [
-                counter('leads', dashboard!.totalLeads),
-                counter('assessments', dashboard!.assessmentCompletions),
-                counter('nurturing', dashboard!.activeEnrollments),
-                counter(
-                  'nurtured',
-                  dashboard!.completedEnrollments,
+          // funnel rows have fixed height (7 stages > small tile): scale the
+          // whole funnel down so every stage stays visible without scrolling
+          Expanded(
+            child: LayoutBuilder(
+              builder: (context, constraints) => FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.topCenter,
+                child: SizedBox(
+                  width: constraints.maxWidth,
+                  child: SalesFunnelChart(summary: dashboard!.stageSummary),
                 ),
-              ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 4),
+          // Flexible+FittedBox: counters scale down instead of overflowing
+          // when the tile is a fraction too small (was 0.2px bottom overflow)
+          Flexible(
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Row(
+                children: [
+                  counter('leads', dashboard!.totalLeads),
+                  counter('assessments', dashboard!.assessmentCompletions),
+                  counter('nurturing', dashboard!.activeEnrollments),
+                  counter(
+                    'nurtured',
+                    dashboard!.completedEnrollments,
+                  ),
+                ],
+              ),
             ),
           ),
         ],
