@@ -29,6 +29,12 @@ This component is does not contain an admin application, for that use the POP Co
 in the XML data files in this component. Most configuration is associated with a (Product) Store for multi-store support with 
 different settings from product categories to use to full support for overriding all server and client rendered templates.
 
+Product/content full-text search uses ElasticSearch/OpenSearch when available, but it is OPTIONAL and off by default in GrowERP
+(the backend runs with `no-run-es` and nothing is installed in `runtime/opensearch`; an OpenSearch JVM needs 1GB+ heap). Without
+it, product search falls back to a database like-search on the store's search category (see `popstore.SearchServices.search#Products`);
+content/blog search returns empty results. To enable full-text search install it via `./gradlew downloadOpenSearch` in the moqui
+directory and start Moqui without the `no-run-es` argument.
+
 To customize this ecommerce application the recommended approach is to include the component but not modify it. XML Screens in this
 component can be included and/or overridden in the component for your ecommerce app without duplicating or modifying files. You can
 also fork and modify this git repository but for significant changes that takes more effort to maintain and upgrade over time.

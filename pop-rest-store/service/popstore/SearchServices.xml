@@ -96,30 +96,67 @@ along with this software (see the LICENSE.md file). If not, see
             </if>
             <if condition="!productCategoryId"><return type="danger" message="No search category found for store ${productStoreId}"/></if>
 
-            <!-- TODO/FUTURE: better handling of search input for more natural results -->
-            <set field="queryString" from="searchParameter ? searchParameter.split(' ').collect({ (!it || it in ['AND', 'OR', 'NOT'] || it.contains('*')) ? it : it + '*' }).join(' ') : ''"/>
-            <!-- NOTE: with ElasticSearch and a date range query like this there is a time zone issue, reliable by date but not exact time -->
-            <set field="nowTimeLong" from="ec.user.nowTimestamp.time"/>
-            <script><![CDATA[
-                nestedQueryMap = [categories:"""{"bool":{"must":[ {"match":{"categories.productCategoryId":"${productCategoryId}"}},
-                        {"range":{"categories.categoryFromDate":{"lte":${nowTimeLong}}}},
-                        {"bool":{"should":[{"range":{"categories.categoryThruDate":{"gte":${nowTimeLong}}}}, {"bool":{"must_not":{"exists":{"field":"categories.categoryThruDate"}}}}]}}
-                    ]}}"""]
-            ]]></script>
-            <log level="warn" message="productDataDocumentId: ${productDataDocumentId}\n queryString: ${queryString}\n nestedQueryMap: ${nestedQueryMap}"/>
+            <!-- ElasticSearch/OpenSearch is optional (off by default): when no elastic client is
+                 available fall back to an entity-based like-search on the search category members -->
+            <set field="elasticClient" from="ec.factory.elastic.getClient('default')"/>
+            <if condition="elasticClient == null">
+                <set field="likeSearch" from="searchParameter ? '%' + searchParameter.trim() + '%' : null"/>
+                <entity-find-count entity-name="mantle.product.category.ProductCategoryMemberProduct" count-field="fallbackCount">
+                    <date-filter/>
+                    <econdition field-name="productCategoryId"/>
+                    <econditions combine="or">
+                        <econdition field-name="productName" operator="like" from="likeSearch" ignore-case="true" ignore-if-empty="true"/>
+                        <econdition field-name="description" operator="like" from="likeSearch" ignore-case="true" ignore-if-empty="true"/>
+                        <econdition field-name="pseudoId" operator="like" from="likeSearch" ignore-case="true" ignore-if-empty="true"/>
+                    </econditions>
+                </entity-find-count>
+                <entity-find entity-name="mantle.product.category.ProductCategoryMemberProduct" list="fallbackList"
+                        distinct="true" offset="pageIndex * pageSize" limit="pageSize">
+                    <select-field field-name="productId"/><select-field field-name="productName"/>
+                    <date-filter/>
+                    <econdition field-name="productCategoryId"/>
+                    <econditions combine="or">
+                        <econdition field-name="productName" operator="like" from="likeSearch" ignore-case="true" ignore-if-empty="true"/>
+                        <econdition field-name="description" operator="like" from="likeSearch" ignore-case="true" ignore-if-empty="true"/>
+                        <econdition field-name="pseudoId" operator="like" from="likeSearch" ignore-case="true" ignore-if-empty="true"/>
+                    </econditions>
+                    <order-by field-name="productName"/>
+                </entity-find>
+                <set field="productList" from="fallbackList.collect({ [productId:it.productId, name:it.productName] })"/>
+                <set field="productListCount" from="fallbackCount ?: 0"/>
+                <set field="productListPageIndex" from="pageIndex"/>
+                <set field="productListPageSize" from="pageSize"/>
+                <set field="productListPageMaxIndex" from="fallbackCount ? ((fallbackCount - 1).intdiv(pageSize) as int) : 0"/>
+                <set field="productListPageRangeLow" from="pageIndex * pageSize + 1"/>
+                <set field="productListPageRangeHigh" from="Math.min(fallbackCount ?: 0, (pageIndex + 1) * pageSize) as int"/>
 
-            <entity-find-one entity-name="moqui.entity.document.DataDocument" value-field="productDataDocument" cache="true">
-                <field-map field-name="dataDocumentId" from="productDataDocumentId"/></entity-find-one>
-            <service-call name="org.moqui.search.SearchServices.search#DataDocuments" out-map="productSearchOut"
-                    in-map="[queryString:queryString, nestedQueryMap:nestedQueryMap, indexName:productDataDocument.indexName,
-                        documentType:productDataDocument.dataDocumentId, pageIndex:pageIndex, pageSize:pageSize]"/>
-            <set field="productList" from="productSearchOut.documentList"/>
-            <set field="productListCount" from="productSearchOut.documentListCount"/>
-            <set field="productListPageIndex" from="productSearchOut.documentListPageIndex"/>
-            <set field="productListPageSize" from="productSearchOut.documentListPageSize"/>
-            <set field="productListPageMaxIndex" from="productSearchOut.documentListPageMaxIndex"/>
-            <set field="productListPageRangeLow" from="productSearchOut.documentListPageRangeLow"/>
-            <set field="productListPageRangeHigh" from="productSearchOut.documentListPageRangeHigh"/>
+                <else>
+                    <!-- TODO/FUTURE: better handling of search input for more natural results -->
+                    <set field="queryString" from="searchParameter ? searchParameter.split(' ').collect({ (!it || it in ['AND', 'OR', 'NOT'] || it.contains('*')) ? it : it + '*' }).join(' ') : ''"/>
+                    <!-- NOTE: with ElasticSearch and a date range query like this there is a time zone issue, reliable by date but not exact time -->
+                    <set field="nowTimeLong" from="ec.user.nowTimestamp.time"/>
+                    <script><![CDATA[
+                        nestedQueryMap = [categories:"""{"bool":{"must":[ {"match":{"categories.productCategoryId":"${productCategoryId}"}},
+                                {"range":{"categories.categoryFromDate":{"lte":${nowTimeLong}}}},
+                                {"bool":{"should":[{"range":{"categories.categoryThruDate":{"gte":${nowTimeLong}}}}, {"bool":{"must_not":{"exists":{"field":"categories.categoryThruDate"}}}}]}}
+                            ]}}"""]
+                    ]]></script>
+                    <log level="warn" message="productDataDocumentId: ${productDataDocumentId}\n queryString: ${queryString}\n nestedQueryMap: ${nestedQueryMap}"/>
+
+                    <entity-find-one entity-name="moqui.entity.document.DataDocument" value-field="productDataDocument" cache="true">
+                        <field-map field-name="dataDocumentId" from="productDataDocumentId"/></entity-find-one>
+                    <service-call name="org.moqui.search.SearchServices.search#DataDocuments" out-map="productSearchOut"
+                            in-map="[queryString:queryString, nestedQueryMap:nestedQueryMap, indexName:productDataDocument.indexName,
+                                documentType:productDataDocument.dataDocumentId, pageIndex:pageIndex, pageSize:pageSize]"/>
+                    <set field="productList" from="productSearchOut.documentList"/>
+                    <set field="productListCount" from="productSearchOut.documentListCount"/>
+                    <set field="productListPageIndex" from="productSearchOut.documentListPageIndex"/>
+                    <set field="productListPageSize" from="productSearchOut.documentListPageSize"/>
+                    <set field="productListPageMaxIndex" from="productSearchOut.documentListPageMaxIndex"/>
+                    <set field="productListPageRangeLow" from="productSearchOut.documentListPageRangeLow"/>
+                    <set field="productListPageRangeHigh" from="productSearchOut.documentListPageRangeHigh"/>
+                </else>
+            </if>
 
             <!-- get prices, small/medium image info for products -->
             <iterate list="productList" entry="productInfo">
@@ -169,6 +206,11 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="contentDocumentList"/>
         </out-parameters>
         <actions>
+            <!-- content full-text search needs ElasticSearch/OpenSearch (optional); degrade to empty result -->
+            <if condition="ec.factory.elastic.getClient('default') == null">
+                <set field="contentDocumentList" from="[]"/>
+                <return/>
+            </if>
             <entity-find-one entity-name="moqui.entity.document.DataDocument" value-field="contentDataDocument" cache="true">
                 <field-map field-name="dataDocumentId" from="contentDataDocumentId"/></entity-find-one>
             <service-call name="org.moqui.search.SearchServices.search#DataDocuments" out-map="contentSearchOut"
@@ -186,6 +228,11 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="blogDocumentList"/>
         </out-parameters>
         <actions>
+            <!-- blog full-text search needs ElasticSearch/OpenSearch (optional); degrade to empty result -->
+            <if condition="ec.factory.elastic.getClient('default') == null">
+                <set field="blogDocumentList" from="[]"/>
+                <return/>
+            </if>
             <entity-find-one entity-name="moqui.entity.document.DataDocument" value-field="blogDataDocument" cache="true">
                 <field-map field-name="dataDocumentId" from="blogDataDocumentId"/></entity-find-one>
             <service-call name="org.moqui.search.SearchServices.search#DataDocuments" out-map="blogSearchOut"
