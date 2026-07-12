@@ -162,6 +162,16 @@ along with this software (see the LICENSE.md file). If not, see
 
     <!-- email templates -->
     <!-- EmailTemplate for general notifications -->
+    <!-- EmailTemplate for failed subscription auto-renewal (dunning) -->
+    <moqui.basic.email.EmailTemplate emailTemplateId="PAYMENT_FAILED"
+        description="Subscription payment failed" emailServerId="SYSTEM"
+        emailTypeEnumId="EMT_NOTIFICATION"
+        bodyScreenLocation="component://growerp/screen/email/PaymentFailed.xml"
+        webappName="webroot"
+        fromAddress="support@growerp.com" fromName="GrowERP system"
+        ccAddresses="" bccAddresses=""
+        subject="Action needed: your GrowERP subscription payment failed"
+        sendPartial="Y" />
     <moqui.basic.email.EmailTemplate emailTemplateId="NOTIFICATION"
         description="Default Notification" emailServerId="SYSTEM"
         emailTypeEnumId="EMT_NOTIFICATION"

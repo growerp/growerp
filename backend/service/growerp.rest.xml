@@ -134,6 +134,12 @@ along with this software (see the LICENSE.md file). If not, see
                 <service name="growerp.100.PartyServices100.get#CompanyFromHost" />
             </method>
         </resource>
+        <!-- public subscription plan list for pricing pages -->
+        <resource name="SubscriptionPlans" require-authentication="anonymous-all">
+            <method type="get">
+                <service name="growerp.100.TenantServices100.get#SubscriptionPlans" />
+            </method>
+        </resource>
         <!-- public website lead-capture form: definition + submit -->
         <resource name="SubmitWebsiteForm" require-authentication="anonymous-all">
             <method type="get">

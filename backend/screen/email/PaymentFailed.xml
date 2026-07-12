@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License.
+-->
+<screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-2.1.xsd"
+    require-authentication="false">
+    <widgets>
+        <render-mode>
+            <text type="html"><![CDATA[
+<html>
+<body style="font-family: Arial, sans-serif; color: #222;">
+    <h2>Your GrowERP subscription payment failed</h2>
+    <p>Hello ${firstName!''},</p>
+    <p>We tried to renew your GrowERP subscription but the payment could not be
+        processed. Your subscription expires on <b>${expiryDate!''}</b>.</p>
+    <p>We will retry daily during the grace period. To keep access to your
+        system, please log in to GrowERP and update your payment details —
+        you will be asked for them automatically when the subscription expires.</p>
+    <p>Questions? Just reply to this email.</p>
+    <p>The GrowERP team</p>
+</body>
+</html>
+            ]]></text>
+        </render-mode>
+    </widgets>
+</screen>

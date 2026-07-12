@@ -108,7 +108,16 @@ All entity/service/file references below were verified against the codebase.
 
 ---
 
-## #4 Self-serve pricing page + plan-tier checkout (M–L) — Phase D
+## #4 Self-serve pricing page + plan-tier checkout (M–L) — Phase D ✅ shipped (partial)
+
+> Shipped: anonymous `get#SubscriptionPlans` + `/rest/s1/growerp/100/SubscriptionPlans`;
+> pricing pages embed plan cards with `<div data-growerp-plans></div>` (plansWidget.html.ftl);
+> `renew#TenantSubscription` card params now optional (reuses the stored payment method);
+> daily `renew#DueTenantSubscriptions` auto-renews subscriptions expiring within ±3 days and
+> sends the new PAYMENT_FAILED dunning email on charge failure.
+> Deferred: a pre-expiry in-app "Subscription" settings screen — `PaymentSubscriptionDialog`
+> is coupled to the login/AuthBloc flow; reusing it outside the expiry paywall needs an
+> auth-flow refactor. The expiry paywall itself already handles plan choice + payment.
 
 **Goal:** visitor sees pricing, picks a plan, pays; trial converts without manual intervention; renewals charge automatically with dunning.
 

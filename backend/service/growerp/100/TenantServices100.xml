@@ -391,19 +391,62 @@ along with this software (see the LICENSE.md file). If not, see
         </actions>
     </service>
 
+    <service verb="get" noun="SubscriptionPlans" authenticate="anonymous-all">
+        <description>Public list of the GROWERP subscription plan products with their
+            current purchase price, for pricing pages and plan selection.</description>
+        <out-parameters>
+            <parameter name="plans" type="List">
+                <parameter name="planEntry" type="Map">
+                    <parameter name="productId" />
+                    <parameter name="productName" />
+                    <parameter name="description" />
+                    <parameter name="price" />
+                    <parameter name="currencyUomId" />
+                </parameter>
+            </parameter>
+        </out-parameters>
+        <actions>
+            <entity-find entity-name="mantle.product.Product" list="planProducts">
+                <econdition field-name="ownerPartyId" value="GROWERP" />
+                <econdition field-name="productTypeEnumId" value="PtService" />
+                <order-by field-name="productId" />
+            </entity-find>
+            <set field="plans" from="[]" />
+            <iterate list="planProducts" entry="planProduct">
+                <entity-find entity-name="mantle.product.ProductPrice" list="planPrices">
+                    <econdition field-name="productId" from="planProduct.productId" />
+                    <econdition field-name="priceTypeEnumId" value="PptCurrent" />
+                    <econdition field-name="pricePurposeEnumId" value="PppPurchase" />
+                    <date-filter />
+                    <order-by field-name="-fromDate" />
+                </entity-find>
+                <if condition="planPrices">
+                    <script>plans.add([productId: planProduct.productId,
+                        productName: planProduct.productName,
+                        description: planProduct.description,
+                        price: planPrices[0].price.toString(),
+                        currencyUomId: planPrices[0].priceUomId ?: 'USD'])</script>
+                </if>
+            </iterate>
+        </actions>
+    </service>
+
     <service verb="renew" noun="TenantSubscription">
         <description>
             Renew an expired tenant subscription: charge the selected plan (converted from
             the plan price currency to the receiving GROWERP company base currency) and
             extend the subscription in the GROWERP tenant by one month.
-            Called from login#User when the subscription is expired and card data is provided.
+            Called from login#User when the subscription is expired and card data is
+            provided, and from renew#DueTenantSubscriptions (auto-renewal) without card
+            data when the subscriber already has a stored payment method.
         </description>
         <in-parameters>
             <parameter name="ownerPartyId" required="true" />
             <parameter name="plan" required="true">
                 <description>productId of the GROWERP subscription plan</description>
             </parameter>
-            <parameter name="creditCardNumber" required="true" />
+            <!-- card fields optional: not needed when a payment method is stored -->
+            <parameter name="creditCardNumber" />
             <parameter name="creditCardType" />
             <parameter name="nameOnCard" />
             <parameter name="expireMonth" />
@@ -473,6 +516,10 @@ along with this software (see the LICENSE.md file). If not, see
             <if condition="pms">
                 <set field="paymentMethodId" from="pms[0].paymentMethodId" />
                 <else>
+                    <if condition="!creditCardNumber">
+                        <return error="true"
+                            message="No stored payment method and no card data provided for tenant ${ownerPartyId}" />
+                    </if>
                     <!-- match card type against Enumeration description ignoring spaces/case
                          (frontend sends e.g. 'Mastercard', seed description is 'Master Card') -->
                     <entity-find entity-name="moqui.basic.Enumeration" list="cctEnums" cache="true">
@@ -555,6 +602,92 @@ along with this software (see the LICENSE.md file). If not, see
             <set field="subscriptionId" from="subscription.subscriptionId" />
             <log
                 message="Renewed subscription ${subscriptionId} for tenant ${ownerPartyId} until ${newThruDate}, payment ${paymentId} ${paymentAmount} ${paymentCurrencyUomId}" />
+        </actions>
+    </service>
+
+    <service verb="renew" noun="DueTenantSubscriptions" authenticate="false"
+        allow-remote="false" transaction-timeout="600">
+        <description>Auto-renewal batch (daily cron): renew tenant subscriptions that
+            expire within 3 days (or expired up to 3 days ago, the dunning grace window)
+            when the subscriber has a stored payment method. On a failed charge the
+            tenant admin gets a PAYMENT_FAILED email; after the grace window the login
+            paywall takes over.</description>
+        <out-parameters>
+            <parameter name="renewedCount" type="Integer" />
+            <parameter name="failedCount" type="Integer" />
+        </out-parameters>
+        <actions>
+            <set field="windowStart"
+                from="new java.sql.Timestamp(ec.user.nowTimestamp.time - 3L * 86400000L)" />
+            <set field="windowEnd"
+                from="new java.sql.Timestamp(ec.user.nowTimestamp.time + 3L * 86400000L)" />
+            <entity-find entity-name="mantle.product.subscription.Subscription"
+                list="dueSubscriptions" cache="false">
+                <econdition field-name="ownerPartyId" value="GROWERP" />
+                <econdition field-name="externalSubscriptionId" operator="is-not-null" />
+                <econdition field-name="thruDate" operator="greater-equals"
+                    from="windowStart" />
+                <econdition field-name="thruDate" operator="less-equals" from="windowEnd" />
+            </entity-find>
+            <set field="renewedCount" from="0" />
+            <set field="failedCount" from="0" />
+            <iterate list="dueSubscriptions" entry="dueSubscription">
+                <!-- only auto-renew when a payment method is stored -->
+                <entity-find entity-name="mantle.account.method.PaymentMethod" list="pms"
+                    limit="1">
+                    <econdition field-name="ownerPartyId"
+                        from="dueSubscription.subscriberPartyId" />
+                </entity-find>
+                <if condition="!pms">
+                    <continue />
+                </if>
+                <set field="oldThruDate" from="dueSubscription.thruDate" />
+                <service-call name="growerp.100.TenantServices100.renew#TenantSubscription"
+                    ignore-error="true"
+                    in-map="[ownerPartyId: dueSubscription.externalSubscriptionId,
+                        plan: dueSubscription.productId]" />
+                <!-- detect the outcome by whether the thruDate moved -->
+                <entity-find-one entity-name="mantle.product.subscription.Subscription"
+                    value-field="checkSubscription" cache="false">
+                    <field-map field-name="subscriptionId"
+                        from="dueSubscription.subscriptionId" />
+                </entity-find-one>
+                <if condition="checkSubscription.thruDate != oldThruDate">
+                    <then>
+                        <set field="renewedCount" from="renewedCount + 1" />
+                    </then>
+                    <else>
+                        <set field="failedCount" from="failedCount + 1" />
+                        <!-- dunning email to the tenant admin when email is configured -->
+                        <entity-find-one entity-name="moqui.basic.email.EmailServer"
+                            value-field="emailServer">
+                            <field-map field-name="emailServerId" value="SYSTEM" />
+                        </entity-find-one>
+                        <entity-find entity-name="growerp.party.OwnerPersonDetailAndCompany"
+                            list="admins" limit="1">
+                            <econdition field-name="ownerPartyId"
+                                from="dueSubscription.externalSubscriptionId" />
+                            <econdition field-name="userGroupId" value="GROWERP_M_ADMIN" />
+                            <econdition field-name="emailAddress" operator="is-not-null" />
+                        </entity-find>
+                        <if condition="emailServer &amp;&amp;
+                                emailServer.mailPassword != 'SMTP_PASSWORD'
+                                &amp;&amp; admins">
+                            <service-call
+                                name="org.moqui.impl.EmailServices.send#EmailTemplate"
+                                async="true" ignore-error="true"
+                                in-map="[emailTemplateId: 'PAYMENT_FAILED',
+                                    toAddresses: admins[0].emailAddress,
+                                    bodyParameters: [
+                                        firstName: admins[0].firstName,
+                                        expiryDate:
+                                            dueSubscription.thruDate.toString()]]" />
+                        </if>
+                    </else>
+                </if>
+            </iterate>
+            <log
+                message="renew#DueTenantSubscriptions: renewed ${renewedCount}, failed ${failedCount}" />
         </actions>
     </service>
 

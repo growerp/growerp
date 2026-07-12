@@ -21,6 +21,12 @@ along with this software (see the LICENSE.md file). If not, see
         paused="N"
         transactionTimeout="1800" />
 
+    <!-- Service Job: Auto-renew tenant subscriptions expiring within 3 days - daily -->
+    <moqui.service.job.ServiceJob jobName="renew_due_tenant_subscriptions"
+        description="Auto-renew tenant subscriptions expiring soon using their stored payment method; dunning email on failure"
+        serviceName="growerp.100.TenantServices100.renew#DueTenantSubscriptions"
+        cronExpression="0 30 4 * * ?" paused="N" transactionTimeout="600" />
+
     <!-- Service Job: Send due nurture-sequence emails - every 15 minutes -->
     <moqui.service.job.ServiceJob jobName="process_due_sequence_emails"
         description="Send the next nurture-sequence step to enrollments whose nextSendDate has passed"

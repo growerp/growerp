@@ -315,6 +315,10 @@ var storeInfo = ${storeInfoJson};
                 <render-mode>
                     <text type="html" location="component://PopRestStore/template/formWidget.html.ftl"/>
                 </render-mode>
+                <!-- pricing plan renderer for data-growerp-plans markers in page content -->
+                <render-mode>
+                    <text type="html" location="component://PopRestStore/template/plansWidget.html.ftl"/>
+                </render-mode>
             </widgets>
         </section>
     </widgets>
