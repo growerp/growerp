@@ -1444,6 +1444,44 @@ along with this software (see the LICENSE.md file). If not, see
                 <service name="AdkServices100.update#AdkMemory"/>
             </method>
         </resource>
+        <!-- Wiki spaces + pages (OKF bundle browse/edit from the growerp_wiki block) -->
+        <resource name="WikiSpaces">
+            <method type="get">
+                <service name="growerp.100.WikiServices100.get#WikiSpaces" />
+            </method>
+        </resource>
+        <resource name="WikiPages">
+            <method type="get">
+                <service name="growerp.100.WikiServices100.get#WikiPages" />
+            </method>
+        </resource>
+        <resource name="WikiPage">
+            <method type="get">
+                <service name="growerp.100.WikiServices100.get#WikiPage" />
+            </method>
+            <method type="post">
+                <service name="growerp.100.WikiServices100.update#WikiPage" />
+            </method>
+            <method type="patch">
+                <service name="growerp.100.WikiServices100.update#WikiPage" />
+            </method>
+            <method type="delete">
+                <service name="growerp.100.WikiServices100.delete#WikiPage" />
+            </method>
+        </resource>
+        <!-- OKF (Open Knowledge Format) bundle: export + machine read path -->
+        <resource name="Okf">
+            <resource name="Export">
+                <method type="get">
+                    <service name="growerp.100.OkfServices100.export#OkfBundle" />
+                </method>
+            </resource>
+            <resource name="Page">
+                <method type="get">
+                    <service name="growerp.100.OkfServices100.get#OkfPageText" />
+                </method>
+            </resource>
+        </resource>
     </resource>
     <!-- Antwebsystems website -->
     <resource name="storecontents" require-authentication="anonymous-view">

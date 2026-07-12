@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-2.1.xsd">
+
+    <!-- ============ OKF (Open Knowledge Format) bundle export + serving ============ -->
+
+    <service verb="export" noun="OkfBundle" transaction-timeout="600">
+        <description>Walk the runtime entity definitions and write an OKF v0.1 bundle
+            (markdown files with YAML frontmatter) under a WikiSpace root, creating the
+            WikiSpace and per-page WikiPage rows (with publishedVersionName) so the bundle
+            is served by the standard wiki services.</description>
+        <in-parameters>
+            <parameter name="wikiSpaceId" default-value="GROWERP_OKF" />
+            <parameter name="rootPageLocation" default-value="growerp-okf/growerp.md">
+                <description>Only used when the WikiSpace does not exist yet; an existing
+                    space keeps its own rootPageLocation. No scheme = relative to the moqui
+                    runtime directory.</description>
+            </parameter>
+            <parameter name="packagePrefixes" default-value="mantle.,growerp.">
+                <description>Comma-separated package prefixes to include; keeps the export
+                    away from the thousands of framework entities.</description>
+            </parameter>
+            <parameter name="includeViewEntities" type="Boolean" default="false" />
+            <parameter name="baseUrl">
+                <description>Base URL for the frontmatter resource: link; defaults to the
+                    webapp root URL.</description>
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="wikiSpaceId" />
+            <parameter name="outputPath" />
+            <parameter name="entityCount" type="Integer" />
+        </out-parameters>
+        <actions>
+            <entity-find-one entity-name="moqui.resource.wiki.WikiSpace" value-field="wikiSpace" />
+            <if condition="wikiSpace == null">
+                <service-call name="create#moqui.resource.wiki.WikiSpace"
+                    in-map="[wikiSpaceId:wikiSpaceId, description:'GrowERP OKF knowledge bundle',
+                        rootPageLocation:rootPageLocation]" />
+                <else><set field="rootPageLocation" from="wikiSpace.rootPageLocation" /></else>
+            </if>
+            <if condition="!baseUrl"><set field="baseUrl" from="ec.web?.getWebappRootUrl(true, null) ?: 'http://localhost:8080'" /></if>
+            <script location="component://growerp/service/OkfExport.groovy" />
+        </actions>
+    </service>
+
+    <service verb="get" noun="OkfPageText">
+        <description>Read one published page of the OKF bundle (or any wiki space) as raw
+            markdown text - the machine/agent read path.</description>
+        <in-parameters>
+            <parameter name="wikiSpaceId" default-value="GROWERP_OKF" />
+            <parameter name="pagePath">
+                <description>Path without .md extension, e.g. 'tables/Party' or 'index';
+                    empty for the space root page.</description>
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="pagePath" />
+            <parameter name="pageLocation" />
+            <parameter name="pageText" />
+        </out-parameters>
+        <actions>
+            <service-call name="org.moqui.impl.WikiServices.get#PublishedWikiPageText"
+                in-map="[wikiSpaceId:wikiSpaceId, pagePath:pagePath]" out-map="context" />
+        </actions>
+    </service>
+</services>
