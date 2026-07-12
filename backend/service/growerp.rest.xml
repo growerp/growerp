@@ -909,6 +909,12 @@ along with this software (see the LICENSE.md file). If not, see
                 <service name="growerp.100.WebsiteServices100.upload#Obsidian" />
             </method>
         </resource>
+        <!-- marketing dashboard aggregates -->
+        <resource name="MarketingDashboard">
+            <method type="get">
+                <service name="growerp.100.MarketingServices100.get#MarketingDashboard" />
+            </method>
+        </resource>
         <!-- email nurture sequences -->
         <resource name="EmailSequence">
             <method type="get">

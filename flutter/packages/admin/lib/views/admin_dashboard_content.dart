@@ -17,6 +17,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 
+import 'marketing_dashboard_chart_mini.dart';
+
 /// Admin dashboard content - displays dashboard panels with statistics.
 /// This is the content-only version for use with ShellRoute.
 ///
@@ -78,6 +80,9 @@ class AdminDashboardContent extends StatelessWidget {
                       route == '/accounting' ||
                       route == '/accounting/reports') {
                     return const RevenueExpenseChartMini();
+                  }
+                  if (route == '/marketing') {
+                    return const MarketingDashboardChartMini();
                   }
                   return null;
                 },

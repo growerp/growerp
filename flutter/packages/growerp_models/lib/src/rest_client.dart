@@ -854,6 +854,9 @@ abstract class RestClient {
     @Field() required EmailSequence emailSequence,
   });
 
+  @GET("rest/s1/growerp/100/MarketingDashboard")
+  Future<MarketingDashboard> getMarketingDashboard();
+
   @POST("rest/s1/growerp/100/Opportunity")
   Future<Opportunity> createOpportunity({
     @Field() required Opportunity opportunity,

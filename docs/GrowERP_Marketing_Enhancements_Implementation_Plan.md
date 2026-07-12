@@ -156,7 +156,12 @@ All entity/service/file references below were verified against the codebase.
 
 ---
 
-## #9 Marketing/sales dashboard (M) — Phase E
+## #9 Marketing/sales dashboard (M) — Phase E ✅ shipped
+
+> Shipped: `get#MarketingDashboard` (funnel via get#OpportunitySummary, campaign rollup,
+> lead count, assessment completions, nurture enrollment counts) + REST GET
+> `MarketingDashboard`; admin dashboard `/marketing` tile auto-upgrades to a graphic tile
+> rendering `MarketingDashboardChartMini` (funnel bars + counters, reuses SalesFunnelChart).
 
 **Goal:** one dashboard pane: funnel by stage, campaign metrics, new leads, assessment completions, trial signups.
 

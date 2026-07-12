@@ -50,6 +50,7 @@ export 'opportunity_model.dart';
 export 'opportunity_summary_model.dart';
 export 'website_form_model.dart';
 export 'email_sequence_model.dart';
+export 'marketing_dashboard_model.dart';
 export 'outreach_campaign_model.dart';
 export 'outreach_message_model.dart';
 export 'campaign_metrics_model.dart';
