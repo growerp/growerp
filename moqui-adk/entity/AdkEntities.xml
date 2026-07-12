@@ -15,7 +15,9 @@
         <field name="enabled"          type="text-indicator"/>
         <field name="scheduleExpression" type="text-short"/>
         <field name="scheduleEnabled"    type="text-indicator"/>
-        <field name="schedulePrompt"     type="text-medium"/>
+        <!-- text-long: prompts are prose and exceed the 255-char text-medium
+             (GROWERP_OPS_DIGEST seed failed to load at 285 chars) -->
+        <field name="schedulePrompt"     type="text-long"/>
         <field name="scheduleChatRoomId" type="id"/>
         <!-- Trust foundation: per-agent tool/service scoping + write governance -->
         <!-- toolMode: readOnly | scoped | full  (default readOnly) -->
