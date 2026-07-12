@@ -25,7 +25,8 @@ import 'marketing_dashboard_chart_mini.dart';
 /// Tile sizing is driven by [MenuItem.tileType]:
 /// - 'navigation' (default) → 1×1
 /// - 'statistic' → 2×1 (shows stats text)
-/// - 'graphic' → 2×2 (shows chart widget)
+/// - 'graphic' → 2×2 (shows chart widget), or 2×1 with icon+title beside the
+///   chart for routes in compactGraphicRoutes (marketing)
 ///
 /// Any tile whose route is matched by [chartBuilder] is automatically
 /// upgraded to 'graphic' type — no backend config change required.
@@ -73,6 +74,7 @@ class AdminDashboardContent extends StatelessWidget {
                 onRefresh: () async {
                   context.read<AuthBloc>().add(AuthLoad());
                 },
+                compactGraphicRoutes: const {'/marketing'},
                 // Provide the revenue/expense mini-chart for the accounting tile.
                 // DashboardGrid auto-upgrades it to full-width 4-row graphic tile.
                 chartBuilder: (route) {

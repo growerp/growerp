@@ -57,6 +57,11 @@ Color _accentForRoute(String? route, Color fallback) {
 /// When [isMinimized] is true the tile is compact (1×1), greyed, and shows a
 /// restore button. The minimize/restore button is always visible in the
 /// top-right corner.
+/// Width (desktop) / height (phone) the icon+title overlay occupies in a
+/// compact graphic tile's top-left corner; the chart widget should keep this
+/// area clear.
+const double compactGraphicLogoInset = 100;
+
 class DashboardCard extends StatefulWidget {
   final String title;
   final String iconName;
@@ -70,6 +75,10 @@ class DashboardCard extends StatefulWidget {
 
   /// Tile display type: 'navigation', 'statistic', or 'graphic'
   final String tileType;
+
+  /// Half-height graphic tile: icon+title on the left, chart on the right
+  /// (statistic-tile style split) instead of the stacked header + chart.
+  final bool compactGraphic;
 
   /// Whether this tile is in minimized state (compact, at end of grid)
   final bool isMinimized;
@@ -89,6 +98,7 @@ class DashboardCard extends StatefulWidget {
     this.stats,
     this.chartWidget,
     this.tileType = 'navigation',
+    this.compactGraphic = false,
     this.isMinimized = false,
     this.onToggleMinimize,
     this.animationIndex = 0,
@@ -349,6 +359,10 @@ class _DashboardCardState extends State<DashboardCard>
       return _buildStatisticContent(context, colorScheme, isDark, accent);
     }
 
+    if (isGraphic && widget.compactGraphic) {
+      return _buildCompactGraphicContent(context, colorScheme, accent, isPhone);
+    }
+
     return Stack(
       children: [
         Column(
@@ -454,6 +468,69 @@ class _DashboardCardState extends State<DashboardCard>
               color: accent.withValues(alpha: 0.5),
             ),
           ),
+      ],
+    );
+  }
+
+  /// Half-height graphic tiles: the chart fills the whole tile and the
+  /// icon+title overlay the top-left corner (vertical badge+label on
+  /// desktop, a small horizontal row on phones). The chart widget must keep
+  /// the top-left corner clear (see compactGraphicLogoInset).
+  Widget _buildCompactGraphicContent(
+    BuildContext context,
+    ColorScheme colorScheme,
+    Color accent,
+    bool isPhone,
+  ) {
+    final badge = Container(
+      padding: EdgeInsets.all(isPhone ? 6 : 12),
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: RadialGradient(
+          colors: [
+            accent.withValues(alpha: 0.25),
+            accent.withValues(alpha: 0.05),
+          ],
+        ),
+      ),
+      child: IconTheme(
+        data: IconThemeData(color: accent, size: isPhone ? 18 : 28),
+        child: getIconFromRegistry(widget.iconName) ??
+            const Icon(Icons.dashboard),
+      ),
+    );
+    final title = Text(
+      widget.title,
+      style: TextStyle(
+        fontSize: 13,
+        fontWeight: FontWeight.w600,
+        letterSpacing: 0.3,
+        color: colorScheme.onSurface,
+      ),
+      overflow: TextOverflow.ellipsis,
+      maxLines: 2,
+    );
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: widget.chartWidget!,
+        ),
+        // Logo top-left
+        Align(
+          alignment: Alignment.topLeft,
+          child: isPhone
+              ? Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [badge, const SizedBox(width: 6), title],
+                )
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [badge, const SizedBox(height: 6), title],
+                ),
+        ),
       ],
     );
   }
@@ -636,7 +713,7 @@ class _DashboardCardState extends State<DashboardCard>
 /// Tile sizes are driven by [MenuItem.tileType]:
 /// - `'navigation'` → 1×1
 /// - `'statistic'`  → 2×1
-/// - `'graphic'`    → 2×2
+/// - `'graphic'`    → 2×2 (or 2×1 when the route is in [compactGraphicRoutes])
 ///
 /// Non-minimized tiles can be long-press dragged to reorder. The new order is
 /// persisted immediately via [MenuConfigBloc] (optimistic local update + backend
@@ -655,6 +732,10 @@ class DashboardGrid extends StatefulWidget {
   /// wraps the scroll view.
   final Future<void> Function()? onRefresh;
 
+  /// Routes whose graphic tile renders half height (2×1 instead of 2×2)
+  /// with the icon+title beside the chart.
+  final Set<String> compactGraphicRoutes;
+
   const DashboardGrid({
     super.key,
     required this.items,
@@ -662,6 +743,7 @@ class DashboardGrid extends StatefulWidget {
     this.chartBuilder,
     this.onToggleMinimize,
     this.onRefresh,
+    this.compactGraphicRoutes = const {},
   });
 
   @override
@@ -778,8 +860,10 @@ class _DashboardGridState extends State<DashboardGrid> {
     String et,
     Widget? chartWidget,
   ) {
+    final compact =
+        et == 'graphic' && widget.compactGraphicRoutes.contains(item.route);
     final cc = switch (et) { 'statistic' => 2, 'graphic' => 2, _ => 1 };
-    final mc = et == 'graphic' ? 2 : 1;
+    final mc = et == 'graphic' && !(compact && !isAPhone(context)) ? 2 : 1;
     const spacing = 16.0;
     final w = cc * _colWidth + (cc - 1) * spacing;
     final h = mc * _colWidth + (mc - 1) * spacing;
@@ -798,6 +882,7 @@ class _DashboardGridState extends State<DashboardGrid> {
             iconName: item.iconName ?? 'dashboard',
             route: item.route,
             tileType: et,
+            compactGraphic: compact,
             isMinimized: false,
             stats: getStatsForRoute(item.route, widget.stats),
             chartWidget: chartWidget,
@@ -971,7 +1056,16 @@ class _DashboardGridState extends State<DashboardGrid> {
       _ => 1,
     };
 
-    int mainCells(MenuItem m) => effectiveType(m) == 'graphic' ? 2 : 1;
+    bool isCompactGraphic(MenuItem m) =>
+        effectiveType(m) == 'graphic' &&
+        widget.compactGraphicRoutes.contains(m.route);
+
+    // Compact graphic tiles are half height on desktop only: on phones the
+    // full 2×2 height is kept so the chart stays readable.
+    int mainCells(MenuItem m) =>
+        effectiveType(m) == 'graphic' && !(isCompactGraphic(m) && !isPhone)
+        ? 2
+        : 1;
 
     final scrollContent = SingleChildScrollView(
       key: const Key('dashboard_scroll'),
@@ -1027,6 +1121,7 @@ class _DashboardGridState extends State<DashboardGrid> {
                             iconName: item.iconName ?? 'dashboard',
                             route: item.route,
                             tileType: et,
+                            compactGraphic: isCompactGraphic(item),
                             isMinimized: false,
                             stats: getStatsForRoute(item.route, widget.stats),
                             chartWidget: chartWidget,

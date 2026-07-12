@@ -14,12 +14,13 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
-import 'package:growerp_sales/growerp_sales.dart';
 
-/// Compact marketing dashboard for the 'Marketing' dashboard tile:
-/// sales funnel bars plus lead/enrollment/assessment counters.
-/// Set the tile's tileType='graphic' (auto via chartBuilder route match).
+/// Compact marketing dashboard for the half-height 'Marketing' dashboard
+/// tile: dense funnel bars (stage + count only) with the lead/enrollment/
+/// assessment counters in a row at the bottom. The tile route must be listed
+/// in DashboardGrid.compactGraphicRoutes so the icon+title render beside it.
 class MarketingDashboardChartMini extends StatefulWidget {
   const MarketingDashboardChartMini({super.key});
 
@@ -48,6 +49,84 @@ class _MarketingDashboardChartMiniState
     }
   }
 
+  Widget _funnel(BuildContext context, List<OpportunitySummaryItem> summary) {
+    final colorScheme = Theme.of(context).colorScheme;
+    if (summary.isEmpty) {
+      return const Center(child: Text('No pipeline data'));
+    }
+    int maxCount = 1;
+    for (final item in summary) {
+      if (item.opportunityCount > maxCount) maxCount = item.opportunityCount;
+    }
+    // Rows share the available height evenly so all stages always fit
+    // without scaling, however small the tile gets.
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final rowHeight = constraints.maxHeight / summary.length;
+        final barHeight = (rowHeight - 4).clamp(4.0, 12.0);
+        final labelStyle = Theme.of(context).textTheme.bodySmall?.copyWith(
+          fontSize: (rowHeight - 4).clamp(8.0, 12.0),
+        );
+        return Column(
+          children: summary.asMap().entries.map((entry) {
+            final index = entry.key;
+            final item = entry.value;
+            final barColor = colorScheme.primary.withValues(
+              alpha: 1.0 - (index * 0.6 / summary.length),
+            );
+            return SizedBox(
+              height: rowHeight,
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: 86,
+                    child: Text(
+                      item.stageId,
+                      overflow: TextOverflow.ellipsis,
+                      style: labelStyle,
+                    ),
+                  ),
+                  Expanded(
+                    child: Stack(
+                      alignment: Alignment.centerLeft,
+                      children: [
+                        Container(
+                          height: barHeight,
+                          decoration: BoxDecoration(
+                            color: colorScheme.surfaceContainerHighest,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                        ),
+                        FractionallySizedBox(
+                          widthFactor: item.opportunityCount / maxCount,
+                          child: Container(
+                            height: barHeight,
+                            decoration: BoxDecoration(
+                              color: barColor,
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 6),
+                    child: Text(
+                      '${item.opportunityCount}',
+                      key: Key('funnelStage${item.stageId}'),
+                      style: labelStyle,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }).toList(),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (error != null) {
@@ -59,7 +138,7 @@ class _MarketingDashboardChartMiniState
       return const Center(child: CircularProgressIndicator());
     }
     Widget counter(String label, int value) => Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 6),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -68,43 +147,52 @@ class _MarketingDashboardChartMiniState
         ],
       ),
     );
+    final counters = [
+      counter('leads', dashboard!.totalLeads),
+      counter('assessments', dashboard!.assessmentCompletions),
+      counter('nurturing', dashboard!.activeEnrollments),
+      counter('nurtured', dashboard!.completedEnrollments),
+    ];
+    // Phones show the logo as a horizontal top-left strip, desktop as a
+    // vertical badge on the left: inset the funnel accordingly.
+    final isPhone = isAPhone(context);
     return Padding(
-      padding: const EdgeInsets.all(8),
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
       child: Column(
         key: const Key('marketingDashboardMini'),
         children: [
-          // funnel rows have fixed height (7 stages > small tile): scale the
-          // whole funnel down so every stage stays visible without scrolling
+          // Keep the top-left corner clear: DashboardCard overlays the
+          // icon+title there for compact graphic tiles.
           Expanded(
-            child: LayoutBuilder(
-              builder: (context, constraints) => FittedBox(
-                fit: BoxFit.scaleDown,
-                alignment: Alignment.topCenter,
-                child: SizedBox(
-                  width: constraints.maxWidth,
-                  child: SalesFunnelChart(summary: dashboard!.stageSummary),
-                ),
-              ),
+            child: Padding(
+              padding: isPhone
+                  ? const EdgeInsets.only(top: 36)
+                  : const EdgeInsets.only(left: compactGraphicLogoInset),
+              child: _funnel(context, dashboard!.stageSummary),
             ),
           ),
-          const SizedBox(height: 4),
-          // Flexible+FittedBox: counters scale down instead of overflowing
-          // when the tile is a fraction too small (was 0.2px bottom overflow)
-          Flexible(
-            child: FittedBox(
-              fit: BoxFit.scaleDown,
-              child: Row(
-                children: [
-                  counter('leads', dashboard!.totalLeads),
-                  counter('assessments', dashboard!.assessmentCompletions),
-                  counter('nurturing', dashboard!.activeEnrollments),
-                  counter(
-                    'nurtured',
-                    dashboard!.completedEnrollments,
+          const SizedBox(height: 10),
+          // Totals span the full tile width, also under the logo. On phones
+          // one FittedBox scales the whole row so all counters stay the same
+          // size; per-counter FittedBoxes would shrink only the wide labels.
+          SizedBox(
+            height: 38,
+            child: isPhone
+                ? Center(
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Row(mainAxisSize: MainAxisSize.min,
+                          children: counters),
+                    ),
+                  )
+                : Row(
+                    children: [
+                      for (final c in counters)
+                        Expanded(
+                          child: FittedBox(fit: BoxFit.scaleDown, child: c),
+                        ),
+                    ],
                   ),
-                ],
-              ),
-            ),
           ),
         ],
       ),
