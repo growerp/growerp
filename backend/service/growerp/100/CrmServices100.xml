@@ -138,6 +138,57 @@ along with this software (see the LICENSE.md file). If not, see
             </iterate>
         </actions>
     </service>
+    <service verb="get" noun="OpportunitySummary">
+        <description> Opportunity counts and amounts grouped by pipeline stage</description>
+        <out-parameters>
+            <parameter name="stageSummary" type="List">
+                <parameter name="stage" type="Map">
+                    <parameter name="stageId" />
+                    <parameter name="sequenceNum" />
+                    <parameter name="opportunityCount" />
+                    <parameter name="totalAmount" />
+                    <parameter name="weightedAmount" />
+                </parameter>
+            </parameter>
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <entity-find list="stages"
+                entity-name="mantle.sales.opportunity.SalesOpportunityStage">
+                <econdition field-name="opportunityStageId" operator="not-equals"
+                    value="Deleted" />
+                <order-by field-name="sequenceNum" />
+            </entity-find>
+            <set field="stageSummary" from="[]" />
+            <iterate list="stages" entry="stage">
+                <entity-find list="opps"
+                    entity-name="mantle.sales.opportunity.SalesOpportunity">
+                    <econdition field-name="ownerPartyId" from="companyPartyId" />
+                    <econdition field-name="opportunityStageId"
+                        from="stage.opportunityStageId" />
+                </entity-find>
+                <set field="totalAmount" from="new BigDecimal(0)" />
+                <set field="weightedAmount" from="new BigDecimal(0)" />
+                <iterate list="opps" entry="opp">
+                    <set field="totalAmount"
+                        from="totalAmount + (opp.estimatedAmount ?: 0)" />
+                    <set field="weightedAmount"
+                        from="weightedAmount + ((opp.estimatedAmount ?: 0) *
+                            (opp.estimatedProbability ?: 0) / 100)" />
+                </iterate>
+                <set field="stageOut"
+                    from="[stageId: stage.opportunityStageId,
+                        sequenceNum: stage.sequenceNum,
+                        opportunityCount: opps.size(),
+                        totalAmount: totalAmount.toString(),
+                        weightedAmount: weightedAmount.setScale(2,
+                            java.math.RoundingMode.HALF_UP).toString()]" />
+                <script>stageSummary.add(stageOut)</script>
+            </iterate>
+        </actions>
+    </service>
+
     <service verb="create" noun="Opportunity">
         <description> Create a Opportunity with a price in a category</description>
         <in-parameters>
@@ -238,6 +289,18 @@ along with this software (see the LICENSE.md file). If not, see
                         roleTypeId: 'Customer',
                         fromDate: ec.user.nowTimestamp]"
                     out-map="context" />
+            </if>
+            <!-- create a follow-up to-do for the next step -->
+            <if condition="opportunity.nextStep">
+                <service-call name="growerp.100.ActivityServices100.create#Activity"
+                    in-map="[activity: [
+                        activityType: 'todo',
+                        activityName: opportunity.nextStep,
+                        statusId: 'planning',
+                        description: 'Next step for opportunity: ' +
+                            (opportunity.opportunityName ?: ''),
+                        opportunityId: salesOpportunityId,
+                        assignee: [partyId: opportunity.employeeUser?.partyId]]]" />
             </if>
             <service-call name="growerp.100.CrmServices100.get#Opportunity"
                 in-map="[opportunityId: salesOpportunityId]" out-map="context" />
@@ -349,6 +412,7 @@ along with this software (see the LICENSE.md file). If not, see
             <if condition="oldValue.nextStep != opportunity.nextStep">
                 <set field="oldValue.nextStep" from="opportunity.nextStep" />
                 <set field="update" value="true" />
+                <set field="nextStepChanged" value="true" />
             </if>
             <if condition="oldValue.opportunityStageId != opportunity.stageId">
                 <set field="oldValue.opportunityStageId" from="opportunity.stageId" />
@@ -356,6 +420,18 @@ along with this software (see the LICENSE.md file). If not, see
             </if>
             <if condition="update == 'true'">
                 <entity-update value-field="oldValue" />
+            </if>
+            <!-- create a follow-up to-do when the next step changed -->
+            <if condition="nextStepChanged == 'true' &amp;&amp; opportunity.nextStep">
+                <service-call name="growerp.100.ActivityServices100.create#Activity"
+                    in-map="[activity: [
+                        activityType: 'todo',
+                        activityName: opportunity.nextStep,
+                        statusId: 'planning',
+                        description: 'Next step for opportunity: ' +
+                            (opportunity.opportunityName ?: ''),
+                        opportunityId: opportunity.opportunityId,
+                        assignee: [partyId: opportunity.employeeUser?.partyId]]]" />
             </if>
             <entity-find list="oldValues"
                 entity-name="mantle.sales.opportunity.SalesOpportunityParty" for-update="true">

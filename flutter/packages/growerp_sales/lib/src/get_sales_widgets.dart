@@ -12,6 +12,8 @@ import '../growerp_sales.dart';
 Map<String, GrowerpWidgetBuilder> getSalesWidgets() {
   return {
     'OpportunityList': (args) => OpportunityList(key: getKeyFromArgs(args)),
+    'OpportunityPipeline': (args) =>
+        OpportunityPipeline(key: getKeyFromArgs(args)),
   };
 }
 
@@ -24,6 +26,14 @@ List<WidgetMetadata> getSalesWidgetsWithMetadata() {
       iconName: 'trending_up',
       keywords: ['opportunity', 'sales', 'deal', 'lead', 'prospect'],
       builder: (args) => OpportunityList(key: getKeyFromArgs(args)),
+    ),
+    WidgetMetadata(
+      widgetName: 'OpportunityPipeline',
+      description: 'Kanban pipeline board of opportunities by stage '
+          'with a funnel summary',
+      iconName: 'view_kanban',
+      keywords: ['pipeline', 'kanban', 'funnel', 'stage', 'forecast'],
+      builder: (args) => OpportunityPipeline(key: getKeyFromArgs(args)),
     ),
     WidgetMetadata(
       widgetName: 'OpportunityDialog',

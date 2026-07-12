@@ -49,6 +49,7 @@ class OpportunityBloc extends Bloc<OpportunityEvent, OpportunityState> {
       _onOpportunityFetch,
       transformer: opportunityDroppable(const Duration(milliseconds: 100)),
     );
+    on<OpportunitySummaryFetch>(_onOpportunitySummaryFetch);
     on<OpportunityUpdate>(_onOpportunityUpdate);
     on<OpportunityDelete>(_onOpportunityDelete);
     on<OpportunityConvertToOrder>(_onOpportunityConvertToOrder);
@@ -119,6 +120,28 @@ class OpportunityBloc extends Bloc<OpportunityEvent, OpportunityState> {
           ),
         );
       }
+    } on DioException catch (e) {
+      emit(
+        state.copyWith(
+          status: OpportunityStatus.failure,
+          message: await getDioError(e),
+        ),
+      );
+    }
+  }
+
+  Future<void> _onOpportunitySummaryFetch(
+    OpportunitySummaryFetch event,
+    Emitter<OpportunityState> emit,
+  ) async {
+    try {
+      OpportunitySummary result = await restClient.getOpportunitySummary();
+      emit(
+        state.copyWith(
+          status: OpportunityStatus.summarySuccess,
+          summary: result.stageSummary,
+        ),
+      );
     } on DioException catch (e) {
       emit(
         state.copyWith(

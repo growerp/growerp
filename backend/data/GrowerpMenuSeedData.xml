@@ -108,6 +108,8 @@ along with this software (see the LICENSE.md file). If not, see
         title="My To Do, tasks" iconName="task" widgetName="ActivityList" sequenceNum="10"/>
     <growerp.menu.MenuItem menuItemId="ADMIN_CRM_OPPORTUNITIES" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_CRM"
         title="Opportunities" iconName="home" widgetName="OpportunityList" sequenceNum="20"/>
+    <growerp.menu.MenuItem menuItemId="ADMIN_CRM_PIPELINE" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_CRM"
+        title="Pipeline" iconName="view_kanban" widgetName="OpportunityPipeline" sequenceNum="25"/>
     <growerp.menu.MenuItem menuItemId="ADMIN_CRM_LEADS" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_CRM"
         title="leads" iconName="business" widgetName="UserListLead" sequenceNum="30"/>
     <growerp.menu.MenuItem menuItemId="ADMIN_CRM_CUSTOMERS" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_CRM"

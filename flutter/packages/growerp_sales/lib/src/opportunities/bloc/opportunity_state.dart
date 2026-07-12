@@ -14,13 +14,16 @@
 
 part of 'opportunity_bloc.dart';
 
-enum OpportunityStatus { initial, loading, success, failure }
+// summarySuccess is separate from success so views listening for success
+// (e.g. the dialog pop) do not react to a background summary refresh
+enum OpportunityStatus { initial, loading, success, summarySuccess, failure }
 
 class OpportunityState extends Equatable {
   const OpportunityState({
     this.status = OpportunityStatus.initial,
     this.opportunities = const <Opportunity>[],
     this.searchResults = const <Opportunity>[],
+    this.summary = const <OpportunitySummaryItem>[],
     this.message,
     this.hasReachedMax = false,
     this.searchString = '',
@@ -32,6 +35,7 @@ class OpportunityState extends Equatable {
   final String? message;
   final List<Opportunity> opportunities;
   final List<Opportunity> searchResults;
+  final List<OpportunitySummaryItem> summary;
   final bool hasReachedMax;
   final String searchString;
   final String? convertedOrderId;
@@ -42,6 +46,7 @@ class OpportunityState extends Equatable {
     String? message,
     List<Opportunity>? opportunities,
     List<Opportunity>? searchResults,
+    List<OpportunitySummaryItem>? summary,
     bool error = false,
     bool? hasReachedMax,
     String? searchString,
@@ -52,6 +57,7 @@ class OpportunityState extends Equatable {
       status: status ?? this.status,
       opportunities: opportunities ?? this.opportunities,
       searchResults: searchResults ?? this.searchResults,
+      summary: summary ?? this.summary,
       message: message,
       hasReachedMax: hasReachedMax ?? this.hasReachedMax,
       searchString: searchString ?? this.searchString,
@@ -66,6 +72,7 @@ class OpportunityState extends Equatable {
     message,
     opportunities,
     searchResults,
+    summary,
     hasReachedMax,
     convertedOrderId,
     convertedPseudoId,

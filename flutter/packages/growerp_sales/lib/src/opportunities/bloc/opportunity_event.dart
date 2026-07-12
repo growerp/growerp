@@ -33,6 +33,10 @@ class OpportunityFetch extends OpportunityEvent {
   List<Object> get props => [searchString, refresh];
 }
 
+class OpportunitySummaryFetch extends OpportunityEvent {
+  const OpportunitySummaryFetch();
+}
+
 class OpportunityUpdate extends OpportunityEvent {
   const OpportunityUpdate(this.opportunity);
   final Opportunity opportunity;

@@ -478,6 +478,8 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="estimatedStartDate" />
                 <parameter name="estimatedEndDate" />
                 <parameter name="unInvoicedHours" />
+                <!-- optional link to a sales opportunity -->
+                <parameter name="opportunityId" />
                 <parameter name="originator" type="Map">
                     <parameter name="partyId" />
                     <parameter name="pseudoId" />
@@ -615,6 +617,12 @@ along with this software (see the LICENSE.md file). If not, see
                     roleTypeId: 'ThirdParty',
                     statusId: 'WeptAssigned'
                 ]" />
+            </if>
+            <!-- link to opportunity when provided -->
+            <if condition="activity.opportunityId">
+                <service-call name="create#mantle.sales.opportunity.SalesOpportunityWorkEffort"
+                    in-map="[salesOpportunityId: activity.opportunityId,
+                            workEffortId: workEffortId]" />
             </if>
             <service-call name="growerp.100.ActivityServices100.get#Activity"
                 in-map="[activityId: workEffortId, activityType: activity.activityType]"

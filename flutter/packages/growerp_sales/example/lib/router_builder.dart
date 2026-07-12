@@ -44,6 +44,14 @@ const salesMenuConfig = MenuConfiguration(
       sequenceNum: 20,
       widgetName: 'OpportunityList',
     ),
+    MenuItem(
+      menuItemId: 'SALES_PIPELINE',
+      title: 'Pipeline',
+      route: '/pipeline',
+      iconName: 'view_kanban',
+      sequenceNum: 30,
+      widgetName: 'OpportunityPipeline',
+    ),
   ],
 );
 
@@ -57,6 +65,7 @@ GoRouter createSalesExampleRouter() {
     dashboard: const SalesDashboard(),
     widgetBuilder: (route) => switch (route) {
       '/crm' => const OpportunityList(),
+      '/pipeline' => const OpportunityPipeline(),
       _ => const SalesDashboard(),
     },
   );

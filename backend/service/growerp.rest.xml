@@ -359,6 +359,11 @@ along with this software (see the LICENSE.md file). If not, see
         </resource>
         <!-- opportunity -->
         <resource name="Opportunity">
+            <resource name="Summary">
+                <method type="get">
+                    <service name="growerp.100.CrmServices100.get#OpportunitySummary" />
+                </method>
+            </resource>
             <method type="get">
                 <service name="growerp.100.CrmServices100.get#Opportunity" />
             </method>

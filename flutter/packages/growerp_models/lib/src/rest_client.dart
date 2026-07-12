@@ -805,6 +805,9 @@ abstract class RestClient {
     @Query('search') String? searchString,
   });
 
+  @GET("rest/s1/growerp/100/Opportunity/Summary")
+  Future<OpportunitySummary> getOpportunitySummary();
+
   @POST("rest/s1/growerp/100/Opportunity")
   Future<Opportunity> createOpportunity({
     @Field() required Opportunity opportunity,

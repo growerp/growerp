@@ -88,7 +88,11 @@ along with this software (see the LICENSE.md file). If not, see
         sequenceNum="3" />
     <mantle.sales.opportunity.SalesOpportunityStage opportunityStageId="Proposal" sequenceNum="4" />
     <mantle.sales.opportunity.SalesOpportunityStage opportunityStageId="Quote" sequenceNum="5" />
-    <mantle.sales.opportunity.SalesOpportunityStage opportunityStageId="Deleted" sequenceNum="5" />
+    <mantle.sales.opportunity.SalesOpportunityStage opportunityStageId="Closed Won"
+        sequenceNum="6" />
+    <mantle.sales.opportunity.SalesOpportunityStage opportunityStageId="Closed Lost"
+        sequenceNum="7" />
+    <mantle.sales.opportunity.SalesOpportunityStage opportunityStageId="Deleted" sequenceNum="99" />
     <!-- added thumbnail image size for party -->
     <moqui.basic.Enumeration description="Logo Image Thump Nail" enumId="PcntLogoThumbImage"
         enumTypeId="PartyContentType" />
