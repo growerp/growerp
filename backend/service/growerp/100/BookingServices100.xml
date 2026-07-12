@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-2.1.xsd">
+
+    <!-- ============ appointment slots + public booking ============ -->
+
+    <service verb="get" noun="AppointmentSlot">
+        <description>Get the company's appointment slots (management view)</description>
+        <in-parameters>
+            <parameter name="start" type="Integer" default-value="0" />
+            <parameter name="limit" type="Integer" default-value="50" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="appointmentSlots" type="List" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <entity-find entity-name="growerp.marketing.AppointmentSlot" list="slots"
+                offset="start" limit="limit">
+                <econdition field-name="ownerPartyId" from="companyPartyId" />
+                <order-by field-name="startDateTime" />
+            </entity-find>
+            <set field="appointmentSlots" from="[]" />
+            <iterate list="slots" entry="slot">
+                <script>appointmentSlots.add([slotId: slot.slotId,
+                    startDateTime: slot.startDateTime.toString() + 'z',
+                    endDateTime: slot.endDateTime.toString() + 'z',
+                    status: slot.status, workEffortId: slot.workEffortId])</script>
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="create" noun="AppointmentSlot">
+        <description>Create an available appointment slot</description>
+        <in-parameters>
+            <parameter name="appointmentSlot" type="Map" required="true">
+                <parameter name="startDateTime" />
+                <parameter name="endDateTime" />
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="slotId" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <service-call name="create#growerp.marketing.AppointmentSlot" out-map="context"
+                in-map="[ownerPartyId: companyPartyId,
+                    startDateTime: appointmentSlot.startDateTime?.replace('T', ' ')
+                        ?.substring(0, 19),
+                    endDateTime: appointmentSlot.endDateTime?.replace('T', ' ')
+                        ?.substring(0, 19),
+                    status: 'AVAILABLE']" />
+        </actions>
+    </service>
+
+    <service verb="delete" noun="AppointmentSlot">
+        <description>Delete an appointment slot</description>
+        <in-parameters>
+            <parameter name="appointmentSlot" type="Map" required="true">
+                <parameter name="slotId" />
+            </parameter>
+        </in-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <entity-find entity-name="growerp.marketing.AppointmentSlot" list="slots"
+                limit="1">
+                <econdition field-name="slotId" from="appointmentSlot.slotId" />
+                <econdition field-name="ownerPartyId" from="companyPartyId" />
+            </entity-find>
+            <if condition="!slots">
+                <return error="true" message="slot ${appointmentSlot.slotId} not found!" />
+            </if>
+            <entity-delete value-field="slots[0]" />
+        </actions>
+    </service>
+
+    <service verb="get" noun="AvailableSlots" authenticate="false">
+        <description>Public list of AVAILABLE future slots for a company (by store)</description>
+        <in-parameters>
+            <parameter name="productStoreId" required="true" />
+            <parameter name="limit" type="Integer" default-value="20" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="slots" type="List" />
+        </out-parameters>
+        <actions>
+            <entity-find-one entity-name="mantle.product.store.ProductStore"
+                value-field="store" />
+            <if condition="!store">
+                <return error="true" message="store ${productStoreId} not found!" />
+            </if>
+            <entity-find entity-name="growerp.marketing.AppointmentSlot" list="slotList"
+                limit="limit">
+                <econdition field-name="ownerPartyId" from="store.organizationPartyId" />
+                <econdition field-name="status" value="AVAILABLE" />
+                <econdition field-name="startDateTime" operator="greater"
+                    from="ec.user.nowTimestamp" />
+                <order-by field-name="startDateTime" />
+            </entity-find>
+            <set field="slots" from="[]" />
+            <iterate list="slotList" entry="slot">
+                <script>slots.add([slotId: slot.slotId,
+                    startDateTime: slot.startDateTime.toString() + 'z',
+                    endDateTime: slot.endDateTime.toString() + 'z'])</script>
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="book" noun="Appointment" authenticate="false">
+        <description>
+            Public booking of an AVAILABLE slot: creates (or reuses) a Lead for the
+            email, creates a calendar event (WorkEffort WetEvent) with the lead as
+            attendee, marks the slot BOOKED and emails a confirmation to both sides.
+        </description>
+        <in-parameters>
+            <parameter name="slotId" required="true" />
+            <parameter name="name" required="true" />
+            <parameter name="email" required="true" />
+            <parameter name="phone" />
+            <parameter name="note" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="workEffortId" />
+        </out-parameters>
+        <actions>
+            <entity-find entity-name="growerp.marketing.AppointmentSlot" list="slots"
+                for-update="true" limit="1">
+                <econdition field-name="slotId" from="slotId" />
+            </entity-find>
+            <if condition="!slots">
+                <return error="true" message="slot ${slotId} not found!" />
+            </if>
+            <set field="slot" from="slots[0]" />
+            <if condition="slot.status != 'AVAILABLE'">
+                <return error="true" message="This time slot is no longer available" />
+            </if>
+            <set field="ownerPartyId" from="slot.ownerPartyId" />
+
+            <!-- resolve (or create) the visitor as a Lead (chat/form pattern) -->
+            <entity-find entity-name="mantle.party.contact.ContactMech" list="emailContacts">
+                <econdition field-name="infoString" from="email" />
+                <econdition field-name="contactMechTypeEnumId" value="CmtEmailAddress" />
+            </entity-find>
+            <if condition="!emailContacts">
+                <service-call name="growerp.100.PartyServices100.create#User" ignore-error="true">
+                    <field-map field-name="ownerPartyId" from="ownerPartyId" />
+                    <field-map field-name="user"
+                        from="[
+                            firstName: name,
+                            lastName: 'website',
+                            email: email,
+                            role: 'Lead',
+                            userGroupId: 'GROWERP_M_LEAD',
+                        ]" />
+                </service-call>
+                <entity-find entity-name="mantle.party.contact.ContactMech" list="emailContacts">
+                    <econdition field-name="infoString" from="email" />
+                    <econdition field-name="contactMechTypeEnumId" value="CmtEmailAddress" />
+                </entity-find>
+            </if>
+            <set field="visitorPartyId" from="null" />
+            <if condition="emailContacts">
+                <entity-find entity-name="mantle.party.contact.PartyContactMech"
+                    list="partyContacts" limit="1">
+                    <econdition field-name="contactMechId" from="emailContacts[0].contactMechId" />
+                    <date-filter />
+                </entity-find>
+                <if condition="partyContacts">
+                    <set field="visitorPartyId" from="partyContacts[0].partyId" />
+                </if>
+            </if>
+
+            <!-- calendar event owned by the company with the lead as attendee -->
+            <service-call name="create#mantle.work.effort.WorkEffort" out-map="context"
+                in-map="[workEffortTypeEnumId: 'WetEvent',
+                    workEffortName: 'Appointment: ' + name,
+                    description: note,
+                    ownerPartyId: ownerPartyId,
+                    estimatedStartDate: slot.startDateTime,
+                    estimatedCompletionDate: slot.endDateTime]" />
+            <if condition="visitorPartyId">
+                <service-call name="create#mantle.work.effort.WorkEffortParty"
+                    in-map="[workEffortId: workEffortId,
+                        partyId: visitorPartyId,
+                        roleTypeId: 'ThirdParty',
+                        statusId: 'WeptAssigned']" />
+            </if>
+            <set field="slot.status" value="BOOKED" />
+            <set field="slot.workEffortId" from="workEffortId" />
+            <entity-update value-field="slot" />
+
+            <!-- confirmation emails when configured -->
+            <entity-find-one entity-name="moqui.basic.email.EmailServer"
+                value-field="emailServer">
+                <field-map field-name="emailServerId" value="SYSTEM" />
+            </entity-find-one>
+            <if condition="emailServer &amp;&amp; emailServer.mailPassword != 'SMTP_PASSWORD'">
+                <service-call name="org.moqui.impl.EmailServices.send#EmailTemplate"
+                    async="true" ignore-error="true"
+                    in-map="[emailTemplateId: 'APPOINTMENT_CONFIRM',
+                        toAddresses: email,
+                        bodyParameters: [name: name,
+                            startDateTime: slot.startDateTime.toString(),
+                            endDateTime: slot.endDateTime.toString()]]" />
+                <entity-find entity-name="growerp.party.OwnerPersonDetailAndCompany"
+                    list="admins" limit="1">
+                    <econdition field-name="ownerPartyId" from="ownerPartyId" />
+                    <econdition field-name="userGroupId" value="GROWERP_M_ADMIN" />
+                    <econdition field-name="emailAddress" operator="is-not-null" />
+                </entity-find>
+                <if condition="admins">
+                    <service-call name="org.moqui.impl.EmailServices.send#EmailTemplate"
+                        async="true" ignore-error="true"
+                        in-map="[emailTemplateId: 'APPOINTMENT_CONFIRM',
+                            toAddresses: admins[0].emailAddress,
+                            bodyParameters: [name: name + ' (' + email + ')',
+                                startDateTime: slot.startDateTime.toString(),
+                                endDateTime: slot.endDateTime.toString()]]" />
+                </if>
+            </if>
+        </actions>
+    </service>
+</services>

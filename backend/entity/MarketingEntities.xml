@@ -109,4 +109,20 @@
         </relationship>
     </entity>
 
+    <!-- ========================================================= -->
+    <!--  Appointment slots (public demo/consult booking)           -->
+    <!-- ========================================================= -->
+    <entity entity-name="AppointmentSlot" package="growerp.marketing">
+        <description>A bookable time slot offered by the company; booking creates a
+            WorkEffort event (workEffortId) with the lead as attendee.</description>
+        <field name="slotId" type="id" is-pk="true" />
+        <field name="ownerPartyId" type="id" />
+        <field name="startDateTime" type="date-time" />
+        <field name="endDateTime" type="date-time" />
+        <field name="status" type="text-short" /> <!-- AVAILABLE, BOOKED -->
+        <field name="workEffortId" type="id" />
+        <relationship type="one" related="mantle.party.Party">
+            <key-map field-name="ownerPartyId" related="partyId" />
+        </relationship>
+    </entity>
 </entities>

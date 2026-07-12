@@ -134,6 +134,15 @@ along with this software (see the LICENSE.md file). If not, see
                 <service name="growerp.100.PartyServices100.get#CompanyFromHost" />
             </method>
         </resource>
+        <!-- public appointment booking -->
+        <resource name="Booking" require-authentication="anonymous-all">
+            <method type="get">
+                <service name="growerp.100.BookingServices100.get#AvailableSlots" />
+            </method>
+            <method type="post">
+                <service name="growerp.100.BookingServices100.book#Appointment" />
+            </method>
+        </resource>
         <!-- public subscription plan list for pricing pages -->
         <resource name="SubscriptionPlans" require-authentication="anonymous-all">
             <method type="get">
@@ -907,6 +916,18 @@ along with this software (see the LICENSE.md file). If not, see
         <resource name="Obsidian">
             <method type="post">
                 <service name="growerp.100.WebsiteServices100.upload#Obsidian" />
+            </method>
+        </resource>
+        <!-- appointment slot management -->
+        <resource name="AppointmentSlot">
+            <method type="get">
+                <service name="growerp.100.BookingServices100.get#AppointmentSlot" />
+            </method>
+            <method type="post">
+                <service name="growerp.100.BookingServices100.create#AppointmentSlot" />
+            </method>
+            <method type="delete">
+                <service name="growerp.100.BookingServices100.delete#AppointmentSlot" />
             </method>
         </resource>
         <!-- marketing dashboard aggregates -->

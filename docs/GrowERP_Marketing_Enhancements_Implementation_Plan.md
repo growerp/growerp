@@ -175,7 +175,13 @@ All entity/service/file references below were verified against the codebase.
 
 ---
 
-## #5 Appointment booking (M) — Phase F
+## #5 Appointment booking (M) — Phase F ✅ shipped
+
+> Shipped: `AppointmentSlot` entity + management CRUD, anonymous `Booking` REST
+> (GET available slots by store, POST book), public `/booking` page on the generated
+> website (slot picker + form), booked slots become WetEvent WorkEfforts with the lead
+> attached, APPOINTMENT_CONFIRM emails to both sides; warm/hot assessment results emails
+> include a "Book a free consultation" button; Booking Slots admin screen + menu row.
 
 **Goal:** warm/hot leads book a demo slot; booking creates a calendar event linked to the lead and opportunity.
 

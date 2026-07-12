@@ -162,6 +162,15 @@ along with this software (see the LICENSE.md file). If not, see
 
     <!-- email templates -->
     <!-- EmailTemplate for general notifications -->
+    <!-- EmailTemplate for appointment booking confirmation -->
+    <moqui.basic.email.EmailTemplate emailTemplateId="APPOINTMENT_CONFIRM"
+        description="Appointment booking confirmation" emailServerId="SYSTEM"
+        emailTypeEnumId="EMT_NOTIFICATION"
+        bodyScreenLocation="component://growerp/screen/email/AppointmentConfirm.xml"
+        webappName="webroot"
+        fromAddress="support@growerp.com" fromName="GrowERP system"
+        ccAddresses="" bccAddresses=""
+        subject="Appointment confirmed: ${startDateTime}" sendPartial="Y" />
     <!-- EmailTemplate for failed subscription auto-renewal (dunning) -->
     <moqui.basic.email.EmailTemplate emailTemplateId="PAYMENT_FAILED"
         description="Subscription payment failed" emailServerId="SYSTEM"

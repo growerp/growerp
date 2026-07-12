@@ -41,7 +41,15 @@ Assessment email template for sending results with PDF attachment
             <p><strong>Status:</strong> ${leadStatus}</p>
             
             <p>The attached PDF contains comprehensive information about your assessment results.</p>
-            
+
+            <#if bookingUrl?has_content>
+            <p style="text-align:center;margin:24px 0;">
+                <a href="${bookingUrl}" style="background:#2962ff;color:#fff;padding:12px 24px;
+                    border-radius:8px;text-decoration:none;font-weight:bold;">
+                    Book a free consultation</a>
+            </p>
+            </#if>
+
             <p>If you have any questions about your results, please don't hesitate to contact us.</p>
             
             <p>Best regards,<br>

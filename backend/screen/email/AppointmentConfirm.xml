@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License.
+-->
+<screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-2.1.xsd"
+    require-authentication="false">
+    <widgets>
+        <render-mode>
+            <text type="html"><![CDATA[
+<html>
+<body style="font-family: Arial, sans-serif; color: #222;">
+    <h2>Appointment confirmed</h2>
+    <p>Hello ${name!''},</p>
+    <p>Your appointment is confirmed:</p>
+    <p><b>From:</b> ${startDateTime!''} (UTC)<br/>
+       <b>Until:</b> ${endDateTime!''} (UTC)</p>
+    <p>Need to reschedule? Just reply to this email.</p>
+</body>
+</html>
+            ]]></text>
+        </render-mode>
+    </widgets>
+</screen>
