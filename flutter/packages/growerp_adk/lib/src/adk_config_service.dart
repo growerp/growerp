@@ -80,6 +80,11 @@ class AdkConfigService {
     await _client.deleteAdkAgentConfig(adkAgentConfigId: configId);
   }
 
+  /// Clone the GROWERP marketing agent team into this tenant (idempotent).
+  Future<void> enableMarketingTeam() async {
+    await _client.enableMarketingAgentTeam();
+  }
+
   // ── Phase 4: team membership ───────────────────────────────────────────────
   Future<List<AdkAgentTeamMember>> teamMembers(String coordinatorConfigId) async {
     final r = await _client.getAdkAgentTeam(coordinatorConfigId: coordinatorConfigId);

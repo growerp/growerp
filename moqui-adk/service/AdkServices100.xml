@@ -920,4 +920,58 @@
         </actions>
     </service>
 
+    <!-- Clone the GROWERP marketing agent team (Outreach Personalizer, SDR, Lead Triage,
+         Content and Social, Marketing Ops Digest — seeded in GrowerpMarketingAgentsData.xml)
+         into the calling admin's tenant. Same pattern as AdkDemoServices.load#AgentDemo:
+         update#AgentConfig with no id upserts by (ownerPartyId, agentName), so re-running
+         is idempotent. Schedules are cloned disabled except the Ops Digest so a fresh
+         tenant does not immediately start consuming LLM tokens. -->
+    <service verb="enable" noun="MarketingAgentTeam" transaction-timeout="600">
+        <out-parameters>
+            <parameter name="enabledCount" type="Integer"/>
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"/>
+            <if condition="ownerPartyId == 'GROWERP'">
+                <return error="true"
+                    message="The GROWERP owner already has the marketing team"/>
+            </if>
+            <entity-find entity-name="moqui.adk.AdkAgentConfig" list="templates">
+                <econdition field-name="ownerPartyId" value="GROWERP"/>
+                <econdition field-name="adkAgentConfigId" operator="like"
+                    value="GROWERP\_%"/>
+                <order-by field-name="adkAgentConfigId"/>
+            </entity-find>
+            <if condition="!templates">
+                <return error="true" message="No marketing agent templates found"/>
+            </if>
+            <set field="enabledCount" from="0"/>
+            <iterate list="templates" entry="tmpl">
+                <!-- only the digest keeps its schedule enabled on a fresh clone -->
+                <set field="cloneScheduleEnabled"
+                    from="tmpl.adkAgentConfigId == 'GROWERP_OPS_DIGEST'
+                        ? (tmpl.scheduleEnabled ?: 'N') : 'N'"/>
+                <service-call name="AdkServices.update#AgentConfig" out-map="cfgOut"
+                    in-map="[ownerPartyId: ownerPartyId,
+                             agentName: tmpl.agentName, modelName: tmpl.modelName,
+                             llmProvider: tmpl.llmProvider, instruction: tmpl.instruction,
+                             description: tmpl.description,
+                             scheduleExpression: tmpl.scheduleExpression,
+                             scheduleEnabled: cloneScheduleEnabled,
+                             schedulePrompt: tmpl.schedulePrompt,
+                             toolMode: tmpl.toolMode,
+                             serviceAllowlist: tmpl.serviceAllowlist,
+                             writePolicy: tmpl.writePolicy,
+                             websiteChat: tmpl.websiteChat,
+                             agentRole: tmpl.agentRole,
+                             orchestrationType: tmpl.orchestrationType,
+                             loopMaxIterations: tmpl.loopMaxIterations]"/>
+                <service-call name="AdkSchedulerServices.sync#AgentJob" ignore-error="true"
+                    in-map="[adkAgentConfigId: cfgOut.adkAgentConfigId]"/>
+                <set field="enabledCount" from="enabledCount + 1"/>
+            </iterate>
+        </actions>
+    </service>
+
 </services>

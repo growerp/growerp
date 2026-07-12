@@ -65,7 +65,7 @@ run their business today. When a visitor shows buying intent, asks for a person/
         enabled="Y"
         agentRole="specialist"
         toolMode="scoped"
-        serviceAllowlist="*list#OutreachMessages,*get#Opportunity,*get#CampaignProgress,*create#ChatMessage"
+        serviceAllowlist="*list#OutreachMessages,*get#Opportunity,*get#CampaignProgress,*create#ChatMessage,*enroll#EmailSequence,*create#Activity"
         writePolicy="allow"
         scheduleEnabled="Y"
         scheduleExpression="0 0,30 9-18 * * ?"
@@ -109,11 +109,11 @@ external, so every publish is queued for human approval — never assume it is s
         enabled="Y"
         agentRole="specialist"
         toolMode="scoped"
-        serviceAllowlist="*list#OutreachCampaigns,*get#CampaignProgress,*list#OutreachMessages,*get#Opportunity"
+        serviceAllowlist="*list#OutreachCampaigns,*get#CampaignProgress,*list#OutreachMessages,*get#Opportunity,*get#OpportunitySummary,*get#MarketingDashboard"
         writePolicy="allow"
         scheduleEnabled="Y"
         scheduleExpression="0 0 9 * * ?"
-        schedulePrompt="Daily GrowERP marketing digest, 5-7 bullets: messages sent today (LinkedIn vs email), reply/response rate (get#CampaignProgress), new and advancing opportunities, and progress toward 1 new customer. Flag anything stalled."
+        schedulePrompt="Daily GrowERP marketing digest, 5-7 bullets: messages sent today (LinkedIn vs email), reply/response rate (get#CampaignProgress), pipeline by stage with weighted value (get#OpportunitySummary), new and advancing opportunities, and progress toward 1 new customer. Flag anything stalled."
         description="Daily marketing digest: sends, replies, pipeline, progress to 1-customer goal."
         instruction="You write a short daily marketing operations digest for GrowERP's own campaign using
 read-only data: messages sent (by channel), reply/response rate, new and advancing opportunities, and how

@@ -1856,6 +1856,9 @@ abstract class RestClient {
   @GET("rest/s1/growerp/100/AdkAgentConfig")
   Future<AdkAgentConfigs> getAdkAgentConfigs({@Query('search') String? search});
 
+  @POST("rest/s1/growerp/100/AdkAgentConfig/EnableMarketingTeam")
+  Future<void> enableMarketingAgentTeam();
+
   @POST("rest/s1/growerp/100/AdkAgentConfig")
   Future<AdkAgentConfig> createAdkAgentConfig({
     @Field() String? agentName,

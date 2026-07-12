@@ -134,7 +134,13 @@ All entity/service/file references below were verified against the codebase.
 
 ---
 
-## #8 ADK marketing-agent toolset (M) — Phase E
+## #8 ADK marketing-agent toolset (M) — Phase E ✅ shipped
+
+> Shipped: `AdkServices100.enable#MarketingAgentTeam` clones the 5 GROWERP marketing
+> agents into any tenant (idempotent upsert by owner+agentName; schedules cloned disabled
+> except the Ops Digest), REST `AdkAgentConfig/EnableMarketingTeam`, rocket button in the
+> agents list; OPS_DIGEST allowlist/prompt now include `get#OpportunitySummary` +
+> `get#MarketingDashboard`, LEAD_TRIAGE can `enroll#EmailSequence` + `create#Activity`.
 
 **Goal:** every tenant can enable the marketing agent team; agents can use the new services from #1/#2/#9.
 

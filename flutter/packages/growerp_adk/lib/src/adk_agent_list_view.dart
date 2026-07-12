@@ -79,6 +79,53 @@ class _AdkAgentListViewState extends State<AdkAgentListView> {
     if (result != null) await _load();
   }
 
+  Future<void> _enableMarketingTeam() async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Enable marketing agent team?'),
+        content: const Text(
+          'Adds the five GrowERP marketing agents (Outreach Personalizer, '
+          'SDR, Lead Triage, Content and Social, Marketing Ops Digest) to '
+          'your company. Schedules start disabled except the daily digest. '
+          'Safe to run again: existing agents are updated, not duplicated.',
+        ),
+        actions: [
+          TextButton(
+            key: const Key('cancelEnableTeam'),
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            key: const Key('confirmEnableTeam'),
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const Text('Enable'),
+          ),
+        ],
+      ),
+    );
+    if (confirm != true) return;
+    try {
+      final svc = await AdkConfigService.create();
+      await svc.enableMarketingTeam();
+      await _load();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Marketing agent team enabled')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Enable failed: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
   Future<void> _edit(AdkAgentConfig cfg) async {
     final result = await AdkAgentConfigDialog.show(context, existing: cfg);
     if (result != null) await _load();
@@ -139,6 +186,12 @@ class _AdkAgentListViewState extends State<AdkAgentListView> {
             _load();
           },
           actions: [
+            IconButton(
+              key: const Key('enableMarketingTeam'),
+              icon: const Icon(Icons.rocket_launch),
+              tooltip: 'Enable marketing agent team',
+              onPressed: _enableMarketingTeam,
+            ),
             IconButton(
               key: const Key('refreshAdkAgents'),
               icon: const Icon(Icons.refresh),
