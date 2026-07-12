@@ -1429,8 +1429,12 @@ along with this software (see the LICENSE.md file). If not, see
             <if condition="!email">
                 <return error="true" message="An email address is required" />
             </if>
-            <!-- company owner of the form -->
-            <set field="ownerPartyId" from="form.ownerPartyId" />
+            <!-- tenant owner: the company Party's ownerPartyId, so the lead shows up
+                 in the same scope the lead lists query (chat-widget pattern) -->
+            <entity-find-one entity-name="mantle.party.Party" value-field="orgParty">
+                <field-map field-name="partyId" from="form.ownerPartyId" />
+            </entity-find-one>
+            <set field="ownerPartyId" from="orgParty?.ownerPartyId ?: form.ownerPartyId" />
             <!-- resolve (or create) the visitor as a Lead (same pattern as submit#WebsiteChat):
                  no loginName so no enabled login or password email is created -->
             <entity-find entity-name="mantle.party.contact.ContactMech" list="emailContacts">

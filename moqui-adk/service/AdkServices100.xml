@@ -940,7 +940,7 @@
             <entity-find entity-name="moqui.adk.AdkAgentConfig" list="templates">
                 <econdition field-name="ownerPartyId" value="GROWERP"/>
                 <econdition field-name="adkAgentConfigId" operator="like"
-                    value="GROWERP\_%"/>
+                    value="GROWERP_%"/>
                 <order-by field-name="adkAgentConfigId"/>
             </entity-find>
             <if condition="!templates">

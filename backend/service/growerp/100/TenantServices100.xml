@@ -409,6 +409,7 @@ along with this software (see the LICENSE.md file). If not, see
             <entity-find entity-name="mantle.product.Product" list="planProducts">
                 <econdition field-name="ownerPartyId" value="GROWERP" />
                 <econdition field-name="productTypeEnumId" value="PtService" />
+                <econdition field-name="productId" operator="like" value="GROWERP_%" />
                 <order-by field-name="productId" />
             </entity-find>
             <set field="plans" from="[]" />
