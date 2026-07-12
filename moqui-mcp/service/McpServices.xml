@@ -397,6 +397,94 @@
                         return
                     }
 
+                    if (name == "okf_index" || name == "okf_load_concept" || name == "okf_follow") {
+                        // OKF (Open Knowledge Format) bundle navigation: curated stable domain
+                        // knowledge hosted under a WikiSpace (default GROWERP_OKF). Progressive
+                        // disclosure: index -> load_concept -> follow. Per the OKF spec the
+                        // consumer tolerates broken links, unknown types and missing fields.
+                        String spaceId = (arguments?.wikiSpaceId ?: "GROWERP_OKF") as String
+                        def okfSpace = ec.entity.find("moqui.resource.wiki.WikiSpace")
+                                .condition("wikiSpaceId", spaceId).useCache(true).one()
+                        if (okfSpace == null) {
+                            result = [content: [[type: "text", text: "No OKF bundle found (wiki space '${spaceId}' does not exist). Run the OKF export first (growerp.100.OkfServices100.export#OkfBundle)."]], isError: true]
+                            return
+                        }
+                        String rootLoc = okfSpace.rootPageLocation
+                        String bundleDirLoc = rootLoc.endsWith('.md') ? rootLoc.substring(0, rootLoc.length() - 3) : rootLoc
+                        // normalize a bundle-relative concept path; resolves ./.. segments,
+                        // null = rejected (escapes the bundle root or has a scheme)
+                        def normPath = { String p ->
+                            if (p == null) return null
+                            String n = p.trim()
+                            if (!n || n.contains(':')) return null
+                            List parts = []
+                            for (seg in n.split('/')) {
+                                if (seg == '' || seg == '.') continue
+                                if (seg == '..') {
+                                    if (!parts) return null
+                                    parts.remove(parts.size() - 1)
+                                } else { parts.add(seg) }
+                            }
+                            if (!parts) return null
+                            n = parts.join('/')
+                            if (!n.endsWith('.md')) n = n + '.md'
+                            return n
+                        }
+                        def readConcept = { String rel ->
+                            try { return ec.resource.getLocationReference(bundleDirLoc + '/' + rel)?.getText() }
+                            catch (Exception e) { return null }
+                        }
+
+                        if (name == "okf_index") {
+                            String idx = readConcept('index.md')
+                            result = idx ?
+                                [content: [[type: "text", text: idx]], isError: false] :
+                                [content: [[type: "text", text: "OKF bundle '${spaceId}' has no index.md."]], isError: true]
+                            return
+                        }
+
+                        String rel = normPath(arguments?.path as String)
+                        if (rel == null) {
+                            result = [content: [[type: "text", text: "Invalid or missing 'path'. Use a bundle-relative path from okf_index, e.g. 'tables/OrderHeader.md'."]], isError: true]
+                            return
+                        }
+                        String conceptText = readConcept(rel)
+                        if (conceptText == null) {
+                            // broken links are allowed in OKF — degrade gracefully, don't error hard
+                            result = [content: [[type: "text", text: "Concept '${rel}' not found in bundle '${spaceId}' (broken links are permitted by the OKF spec). Use okf_index to see what exists."]], isError: false]
+                            return
+                        }
+
+                        if (name == "okf_load_concept") {
+                            result = [content: [[type: "text", text: conceptText]], isError: false]
+                            return
+                        }
+
+                        // okf_follow: resolve the concept's markdown links to navigable neighbours
+                        String conceptDir = rel.contains('/') ? rel.substring(0, rel.lastIndexOf('/')) : ''
+                        def seen = new LinkedHashSet()
+                        List lines = []
+                        def linkMatcher = (conceptText =~ /\[([^\]]*)\]\(([^)]+)\)/)
+                        while (linkMatcher.find()) {
+                            String label = linkMatcher.group(1)
+                            String target = linkMatcher.group(2).trim()
+                            if (target.startsWith('http://') || target.startsWith('https://') || target.startsWith('#')) continue
+                            if (!target.contains('.md')) continue
+                            // absolute = bundle-root-relative; otherwise relative to the concept's dir
+                            String tRel = target.startsWith('/') ? target.substring(1) :
+                                    (conceptDir ? conceptDir + '/' + target : target)
+                            tRel = normPath(tRel)
+                            if (tRel == null || !seen.add(tRel)) continue
+                            boolean exists = readConcept(tRel) != null
+                            lines.add("- ${tRel}${label ? ' — ' + label : ''}${exists ? '' : ' (missing: broken link, tolerated)'}")
+                        }
+                        String followTxt = lines.isEmpty() ?
+                                "Concept '${rel}' has no outgoing concept links." :
+                                "Concepts linked from '${rel}' (load one with okf_load_concept):\n" + lines.join('\n')
+                        result = [content: [[type: "text", text: followTxt]], isError: false]
+                        return
+                    }
+
                     if (name == "moqui_search_services") {
                         def query = arguments?.query?.toLowerCase()
                         if (!query) throw new Exception("Missing query")
@@ -3521,6 +3609,43 @@ def wikiInstructions = getWikiInstructions(inputScreenPath)
                                 "limit": [type: "integer", description: "Max passages to return (default 5)"]
                             ],
                             required: ["query"]
+                        ]
+                    ],
+                    [
+                        name: "okf_index",
+                        title: "OKF Bundle Index",
+                        description: "Return the index of the curated OKF knowledge bundle (stable domain knowledge: entity/data-model definitions, schemas, relationships). Start here to see which concepts exist, then load one with okf_load_concept. Prefer OKF over searchKnowledge for data-model/domain-structure questions.",
+                        inputSchema: [
+                            type: "object",
+                            properties: [
+                                "wikiSpaceId": [type: "string", description: "OKF bundle wiki space (default GROWERP_OKF)"]
+                            ]
+                        ]
+                    ],
+                    [
+                        name: "okf_load_concept",
+                        title: "Load OKF Concept",
+                        description: "Load one concept of the OKF knowledge bundle: a markdown file with YAML frontmatter, e.g. an entity definition with its # Schema table and # Relationships links. Use the bundle-relative path from okf_index or okf_follow, e.g. 'tables/OrderHeader.md'. Load only the concepts you need (progressive disclosure).",
+                        inputSchema: [
+                            type: "object",
+                            properties: [
+                                "path": [type: "string", description: "Bundle-relative concept path, e.g. 'tables/OrderHeader.md'"],
+                                "wikiSpaceId": [type: "string", description: "OKF bundle wiki space (default GROWERP_OKF)"]
+                            ],
+                            required: ["path"]
+                        ]
+                    ],
+                    [
+                        name: "okf_follow",
+                        title: "Follow OKF Concept Links",
+                        description: "List the concepts linked from one OKF concept (its graph neighbours, e.g. related entities), so you can navigate the knowledge graph without loading whole documents. Broken links are reported, not errors.",
+                        inputSchema: [
+                            type: "object",
+                            properties: [
+                                "path": [type: "string", description: "Bundle-relative concept path whose links to resolve, e.g. 'tables/OrderHeader.md'"],
+                                "wikiSpaceId": [type: "string", description: "OKF bundle wiki space (default GROWERP_OKF)"]
+                            ],
+                            required: ["path"]
                         ]
                     ]
                 ]

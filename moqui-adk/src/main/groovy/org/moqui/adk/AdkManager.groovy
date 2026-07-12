@@ -80,6 +80,9 @@ class AdkManager {
     private static final Map<String, Map>      providerRegistry = new ConcurrentHashMap<>()
 
     private static volatile MoquiSessionService sharedSessionService
+    // ADK ArtifactService backed by the AdkArtifact entity: large binaries (PDFs/images)
+    // stay out of the conversation context; agents load them on demand (LoadArtifactsTool).
+    private static volatile MoquiArtifactService sharedArtifactService
     private static volatile com.google.adk.tools.mcp.McpToolset mcpToolset
     // Set true at process exit (JVM shutdown hook / destroy). Guards tool-loading so an
     // in-flight google-adk McpToolset SSE connect isn't retried while the server tears down.
@@ -116,12 +119,21 @@ Do not call any tool for this.
 MEMORY (continuity across conversations):
 {memory}
 
+STABLE DOMAIN KNOWLEDGE (OKF):
+The curated OKF knowledge bundle holds stable domain knowledge: entity/data-model definitions
+with schemas and relationships, business structure, module relationships. For questions like
+"what fields does X have?", "what is related/joined to X?", "how is the data model structured?"
+use 'okf_index' to orient, 'okf_load_concept' (path, e.g. 'tables/OrderHeader.md') to read one
+concept, and 'okf_follow' to see a concept's related concepts. Load only the concepts you need;
+cite the concept path in your answer. Prefer OKF over searchKnowledge for these questions.
+
 COMPANY KNOWLEDGE (RAG):
 Use the 'searchKnowledge' tool to answer questions about THIS company's own documents, policies,
 procedures or product information that are NOT in the live ERP data. Pass the user's question as
 'query'. Answer ONLY from the returned passages and cite them; if nothing relevant is returned,
 say you don't have that information rather than guessing. Use the Moqui tools for live ERP data
-(orders, parties, products) and searchKnowledge for documents/policies.
+(orders, parties, products), OKF for stable data-model/domain structure, and searchKnowledge for
+documents/policies and bulk/operational content.
 
 SCREEN NAVIGATION — opening operational app screens
 The GrowERP front-end (Flutter) screens available in this session are listed in this
@@ -295,6 +307,7 @@ CRITICAL tool-use rules — follow exactly:
                     .agent(agent)
                     .appName(APP_NAME)
                     .sessionService(sharedSessionService ?: new InMemorySessionService())
+                    .artifactService(sharedArtifactService ?: new com.google.adk.artifacts.InMemoryArtifactService())
                     .build()
 
             registry[configId]      = runner
@@ -344,6 +357,9 @@ CRITICAL tool-use rules — follow exactly:
     static void initSessionService(ExecutionContextFactory ecf) {
         if (sharedSessionService == null) {
             sharedSessionService = new MoquiSessionService(ecf)
+        }
+        if (sharedArtifactService == null) {
+            sharedArtifactService = new MoquiArtifactService(ecf)
         }
     }
 
@@ -808,6 +824,7 @@ CRITICAL tool-use rules — follow exactly:
                 .agent(agent)
                 .appName(APP_NAME)
                 .sessionService(inMemSvc)
+                .artifactService(sharedArtifactService ?: new com.google.adk.artifacts.InMemoryArtifactService())
                 .build()
 
         Content userContent = buildUserContent(text)
@@ -1168,6 +1185,8 @@ CRITICAL tool-use rules — follow exactly:
     /** The in-process FunctionTools every agent gets (read-only set, plus write tools when allowed). */
     private static List assembleFunctionTools(boolean allowWrites) {
         List allTools = new ArrayList()
+        // lets the agent pull saved artifacts (PDFs/images) into context only when needed
+        allTools.add(com.google.adk.tools.LoadArtifactsTool.INSTANCE)
         allTools.addAll(com.google.adk.tools.FunctionTool.create(HelloTimeAgent.class, 'getCurrentTime'))
         // Website-chat human handoff: safe (routes a conversation, no business-data write), so the
         // read-only Support agent can call it. Reads the active room from session state.

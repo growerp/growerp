@@ -73,6 +73,7 @@
             <parameter name="sourceId"/>
             <parameter name="mimeType" default-value="text/plain"/>
             <parameter name="createdByUserId"/>
+            <parameter name="metadataJson" allow-html="any"/>
         </in-parameters>
         <out-parameters>
             <parameter name="adkKnowledgeDocId"/>
@@ -83,7 +84,7 @@
                 in-map="[ownerPartyId: ownerPartyId, sourceType: sourceType, sourceId: sourceId,
                          title: title, mimeType: mimeType, enabled: 'Y',
                          createdByUserId: createdByUserId ?: ec.user.userId,
-                         createdDate: ec.user.nowTimestamp]"/>
+                         createdDate: ec.user.nowTimestamp, metadataJson: metadataJson]"/>
             <service-call name="AdkKnowledgeServices.index#AdkKnowledgeChunks" out-map="context"
                 in-map="[adkKnowledgeDocId: adkKnowledgeDocId, ownerPartyId: ownerPartyId, text: text]"/>
         </actions>
@@ -162,6 +163,91 @@
                 <service-call name="AdkKnowledgeServices.index#AdkKnowledgeChunks" out-map="context"
                     in-map="[adkKnowledgeDocId: adkKnowledgeDocId, ownerPartyId: ownerPartyId, text: text]"/>
             </if>
+        </actions>
+    </service>
+
+    <!-- Ingest an OKF bundle (hosted under a WikiSpace) into the owner's knowledge base:
+         one AdkKnowledgeDoc per concept file, YAML frontmatter round-tripped in metadataJson,
+         body chunked+embedded via the standard pipeline. Re-running updates existing docs
+         (matched on sourceType='okf' + sourceId=bundle-relative path). -->
+    <service verb="ingest" noun="OkfBundle" authenticate="false" transaction-timeout="3600">
+        <in-parameters>
+            <parameter name="ownerPartyId" required="true"/>
+            <parameter name="wikiSpaceId" default-value="GROWERP_OKF"/>
+            <parameter name="pathPrefix">
+                <description>Only ingest concepts whose bundle-relative path starts with
+                    this, e.g. 'tables/Order' — useful for scoped/testing runs.</description>
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="docCount" type="Integer"/>
+            <parameter name="chunkCount" type="Integer"/>
+        </out-parameters>
+        <actions>
+            <entity-find-one entity-name="moqui.resource.wiki.WikiSpace" value-field="wikiSpace"/>
+            <if condition="wikiSpace == null"><return error="true" message="Wiki space ${wikiSpaceId} not found"/></if>
+            <script><![CDATA[
+                import org.moqui.resource.ResourceReference
+
+                String rootLoc = wikiSpace.rootPageLocation
+                String bundleDirLoc = rootLoc.endsWith('.md') ? rootLoc.substring(0, rootLoc.length() - 3) : rootLoc
+                ResourceReference bundleDir = ec.resource.getLocationReference(bundleDirLoc)
+
+                List files = []
+                def walk
+                walk = { ResourceReference dir, String rel ->
+                    for (child in dir.getDirectoryEntries()) {
+                        String childRel = rel ? rel + '/' + child.fileName : child.fileName
+                        if (child.isDirectory()) { walk(child, childRel) }
+                        else if (child.fileName.endsWith('.md') &&
+                                child.fileName != 'index.md' && child.fileName != 'log.md') {
+                            files.add([ref: child, rel: childRel])
+                        }
+                    }
+                }
+                walk(bundleDir, '')
+
+                def yaml = new org.yaml.snakeyaml.Yaml()
+                int docs = 0
+                int chunksTotal = 0
+                for (f in files) {
+                    if (pathPrefix && !f.rel.startsWith(pathPrefix)) continue
+                    String text = f.ref.getText()
+                    if (!text) continue
+                    Map fm = [:]
+                    String body = text
+                    def m = (text =~ /(?s)\A---\n(.*?)\n---\n?(.*)/)
+                    if (m.matches()) {
+                        try { fm = (yaml.load(m.group(1)) as Map) ?: [:] } catch (Exception e) { fm = [:] }
+                        body = m.group(2)
+                    }
+                    String title = (fm.title ?: f.rel) as String
+                    String metadataJson = groovy.json.JsonOutput.toJson(fm)
+                    def existing = ec.entity.find('moqui.adk.AdkKnowledgeDoc')
+                            .condition('ownerPartyId', ownerPartyId).condition('sourceType', 'okf')
+                            .condition('sourceId', f.rel).one()
+                    Map out
+                    if (existing != null) {
+                        existing.title = title
+                        existing.mimeType = 'text/markdown'
+                        existing.metadataJson = metadataJson
+                        existing.update()
+                        out = ec.service.sync().name('AdkKnowledgeServices.update#AdkKnowledge')
+                                .parameters([adkKnowledgeDocId: existing.adkKnowledgeDocId,
+                                             ownerPartyId: ownerPartyId, text: body]).call()
+                    } else {
+                        out = ec.service.sync().name('AdkKnowledgeServices.ingest#AdkKnowledge')
+                                .parameters([ownerPartyId: ownerPartyId, title: title, text: body,
+                                             sourceType: 'okf', sourceId: f.rel, mimeType: 'text/markdown',
+                                             metadataJson: metadataJson]).call()
+                    }
+                    docs++
+                    chunksTotal += (out?.chunkCount ?: 0) as int
+                }
+                docCount = docs
+                chunkCount = chunksTotal
+                ec.logger.info("OKF ingest: ${docs} concepts, ${chunksTotal} chunks (space ${wikiSpaceId}, owner ${ownerPartyId})")
+            ]]></script>
         </actions>
     </service>
 

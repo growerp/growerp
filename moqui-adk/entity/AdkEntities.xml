@@ -158,7 +158,7 @@
     <entity entity-name="AdkKnowledgeDoc" package="moqui.adk" use="transactional">
         <field name="adkKnowledgeDocId" type="id" is-pk="true"/>
         <field name="ownerPartyId"      type="id"/>
-        <!-- sourceType: note | upload | product | policy | chat -->
+        <!-- sourceType: note | upload | product | policy | chat | okf -->
         <field name="sourceType"        type="text-short"/>
         <field name="sourceId"          type="text-medium"/>
         <field name="title"             type="text-medium"/>
@@ -166,6 +166,8 @@
         <field name="enabled"           type="text-indicator"/>
         <field name="createdByUserId"   type="id"/>
         <field name="createdDate"       type="date-time"/>
+        <!-- round-trip of source metadata, e.g. OKF YAML frontmatter (type/title/tags/resource) -->
+        <field name="metadataJson"      type="text-very-long"/>
         <index name="ADKKDOC_OWNER"><index-field name="ownerPartyId"/></index>
     </entity>
 
@@ -181,6 +183,25 @@
         <field name="tokens"              type="number-integer"/>
         <index name="ADKKCH_OWNER"><index-field name="ownerPartyId"/></index>
         <index name="ADKKCH_DOC"><index-field name="adkKnowledgeDocId"/></index>
+    </entity>
+
+    <!-- ADK ArtifactService storage: versioned binary artifacts (PDFs, images) kept out
+         of the conversation context; the agent loads them on demand (LoadArtifactsTool).
+         filename values starting with "user:" are user-scoped (shared across sessions). -->
+    <entity entity-name="AdkArtifact" package="moqui.adk" use="transactional">
+        <field name="adkArtifactId" type="id" is-pk="true"/>
+        <field name="appName"       type="text-short"/>
+        <field name="userId"        type="text-short"/>
+        <field name="sessionId"     type="text-medium"/>
+        <field name="filename"      type="text-medium"/>
+        <field name="version"       type="number-integer"/>
+        <field name="mimeType"      type="text-short"/>
+        <field name="data"          type="binary-very-long"/>
+        <field name="createdDate"   type="date-time"/>
+        <index name="ADKART_KEY">
+            <index-field name="appName"/><index-field name="userId"/>
+            <index-field name="sessionId"/><index-field name="filename"/>
+        </index>
     </entity>
 
     <!-- Rolling per-(owner,user) memory summary, injected into the agent context. -->
