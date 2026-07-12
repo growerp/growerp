@@ -41,7 +41,8 @@ GrowERP's ADK already has most of the pieces (Google ADK Java):
 - **Missing (to add):** OKF-navigation tooling for direct context loading, file-based **skills**
   (`load_skill_resource` analog), an OKF→RAG ingest path, ADK **Artifacts** for large binaries.
 
-Phases:
+Phases (status 2026-07-12: 0–4 implemented and verified; 5 drafted, posting left to a human —
+see `plans/okf_upstream_contributions.md`):
 - **Phase 0 — Read the real spec (#1):** validate assumptions against canonical `SPEC.md`.
 - **Phase 1 — Producer (#2):** backend exporter → OKF bundle hosted as a Moqui `WikiSpace`;
   frontmatter `type` uses title-case human strings (`Moqui Entity`, `Reference`, `Playbook`);
@@ -62,10 +63,13 @@ merge base + GrowERP extensions) via Moqui's `EntityFacade` and emit markdown.
 `WikiPage`, framework-level) is itself a tree of CommonMark `.md` files: a `WikiSpace` has a
 `rootPageLocation`, and pages are `<rootPageLocation>/<pagePath>.md` rendered by flexmark with
 GFM tables. That is exactly the OKF substrate. So the produced bundle is registered as a
-`WikiSpace` and becomes immediately **AI-consumable** — `McpServices.xml:62` reads wiki pages
-via `pageRef.getText()`, `moqui_get_help(uri="wiki:...")` exposes them, and growerp REST already
-serves `get#PublishedWikiPageText` (backend/service/growerp.rest.xml:1307).
-So no new serving layer is needed for machines. Note: this runtime has **no Moqui wiki render
+`WikiSpace` and becomes **AI-consumable** — `McpServices.xml:79` reads wiki pages via
+`pageRef.getText()`. Two caveats found in verification: the growerp REST wiki resource
+(backend/service/growerp.rest.xml:1467) points at `growerp.website.WebSiteRestServices`, which
+**does not exist in the repo** (dangling ref → "Service not found"), so Phase 1 adds a thin
+read wrapper around framework `org.moqui.impl.WikiServices.get#PublishedWikiPageText`; and all
+wiki serving paths require **`WikiPage` rows with `publishedVersionName` set** — files on disk
+alone are invisible (see Phase 1 step 2). Note: this runtime has **no Moqui wiki render
 screen** (no SimpleScreens/HiveMind wiki component), so there is no human browse UI yet — that
 is exactly what Phase 2 provides.
 
@@ -153,9 +157,15 @@ Returns `outputPath`, `wikiSpaceId`, `entityCount`. Admin-auth only.
 
 After writing files, **register the WikiSpace**: ensure a `moqui.resource.wiki.WikiSpace`
 row exists with `wikiSpaceId=GROWERP_OKF`, `rootPageLocation` = the bundle parent, and a
-`publicPageUrl`. The bundle's `index.md` becomes the space root page; the folder tree maps to
-the wiki page hierarchy automatically (no per-page `WikiPage` rows needed — pages resolve from
-the filesystem under `rootPageLocation`).
+`publicPageUrl`. The bundle's `index.md` becomes the space root page. **Per-page `WikiPage`
+rows ARE required**: `get#PublishedWikiPageText` (WikiServices.xml:40) returns "No page found"
+without a `WikiPage` row and a non-null `publishedVersionName`, and MCP wiki reads also look up
+rows. The exporter therefore idempotently ensures a `WikiPage` row per generated page
+(framework `get#WikiPageId createIfMissing=true` + `set#PublishedVersion`, or direct
+entity-auto creates). Any non-null version name works — base
+`ResourceReference.getText(versionName)` (ResourceReference.java:506) falls back to plain
+`getText()` for file resources, so a plain-dir `rootPageLocation` serves fine. The bundle
+stays "just files"; rows are only serving metadata.
 
 ### 2. New Groovy script — `backend/src/main/groovy/.../OkfExport.groovy`
 (called via `<script>` from the service). Core loop, using the confirmed APIs:
@@ -175,6 +185,8 @@ the filesystem under `rootPageLocation`).
     `[<RelatedShortName>](/tables/<RelatedShortName>.md)` (graph edges).
 - Write files via `java.nio` / `File`. Generate the three `index.md`, `datasets/growerp.md`,
   and `log.md` after the loop.
+- After writing each file, idempotently ensure its `WikiPage` row with `publishedVersionName`
+  set (see Phase 1 step 1 — required for every serving path).
 
 **Reuse / reference (do not duplicate):**
 - `moqui/framework/.../util/RestSchemaUtil.groovy` — reference for field-type handling and
@@ -187,7 +199,9 @@ the filesystem under `rootPageLocation`).
 ### 3. Renderer fix — `moqui/framework/.../renderer/MarkdownTemplateRenderer.groovy`
 flexmark currently loads only `TablesExtension` + `TocExtension`, so OKF's `---` YAML
 frontmatter renders as raw text / a thematic break in the wiki UI. Add flexmark's
-`YamlFrontMatterExtension` to the extension list so frontmatter is parsed/stripped cleanly
+`YamlFrontMatterExtension` to the extension list AND
+`api 'com.vladsch.flexmark:flexmark-ext-yaml-front-matter:0.64.8'` to
+`moqui/framework/build.gradle` (85–87 dependency block) so frontmatter is parsed/stripped cleanly
 (GitHub already hides it). **This is an upstream change to `moqui/framework`** → must be made
 on the growerp fork and pulled back via `sync-submodules.sh` (see CLAUDE.md). Cosmetic only —
 the OKF files are valid with or without it.
@@ -197,9 +211,14 @@ Add a `moqui.resource.wiki.WikiSpace` seed row for `GROWERP_OKF` (or create it i
 the service per step 1). This makes the bundle browsable at its `publicPageUrl` and reachable
 via the existing MCP wiki tools — the native "data sharing" surface.
 
-### 5. (Optional) REST trigger — `backend/service/growerp.rest.xml`
-Add an `Okf` resource (admin auth) with `GET` → calls `export#OkfBundle` for on-demand
-regeneration. Optional; the service + wiki space already satisfy "produce and serve a bundle".
+### 5. REST trigger + read wrapper — `backend/service/growerp.rest.xml` (required)
+The existing wiki REST resource (growerp.rest.xml:1467) is a dangling ref to nonexistent
+`growerp.website.WebSiteRestServices` — there is currently **no working REST read path**. Add
+an `Okf` resource (admin auth, leave the dangling refs alone — surgical-change rule):
+- `GET .../Okf/Export` → calls `export#OkfBundle` for on-demand regeneration.
+- `GET .../Okf/Page` → new wrapper service in `OkfServices100.xml` calling framework
+  `org.moqui.impl.WikiServices.get#PublishedWikiPageText` (reference:
+  `pop-rest-store/service/popstore/StoreServices.xml` already calls it).
 
 ### Phase 1 verification
 
@@ -209,11 +228,16 @@ regeneration. Optional; the service + wiki space already satisfy "produce and se
    - `tables/Party.md` exists, has valid YAML frontmatter with **`type:`** present,
      a `# Schema` table, and `# Relationships` markdown links pointing at real sibling files.
    - `index.md` / `datasets/growerp.md` link to existing table files (no dead links).
-3. Wiki serving (machine): call `growerp.website.WebSiteRestServices.get#PublishedWikiPageText`
-   for `GROWERP_OKF` / `tables/Party` — returns rendered text, frontmatter hidden (renderer fix),
-   schema as a GFM table.
-4. AI consumption: `moqui_get_help(uri="wiki:GROWERP_OKF/tables/Party")` (or `moqui_rest_call`)
-   returns the page text — confirms agents reach the bundle.
+3. Wiki serving (machine): call the new `Okf/Page` REST wrapper (step 5) for `GROWERP_OKF` /
+   `tables/Party` — returns rendered text, frontmatter hidden (renderer fix), schema as a GFM
+   table; also confirms the `WikiPage` rows + `publishedVersionName` were created
+   (`e1/moqui.resource.wiki.WikiPage?wikiSpaceId=GROWERP_OKF` via moqui MCP).
+4. AI consumption: `moqui_rest_call` on the `Okf/Page` wrapper returns the page text — confirms
+   agents reach the bundle. (`moqui_get_help` wiki URIs use a hardcoded `wiki:<type>:<name>`
+   space switch — MCP_SCREEN_DOCS/MCP_SERVICE_DOCS/BUSINESS_PROCESSES — so `GROWERP_OKF` is not
+   reachable through it; full agent access arrives with the Phase 3 `okf_*` tools, which read
+   files under `rootPageLocation` directly. Optionally add an `okf` case to the GetHelp switch
+   in Phase 3.)
 5. Conformance smoke test: render a file on GitHub (frontmatter hides); optionally run Google's
    OKF **static HTML visualizer** (knowledge-catalog/okf reference impl) over the bundle dir.
 6. Re-run with `packagePrefixes=growerp.` to confirm scoping narrows output.
@@ -227,7 +251,8 @@ template. Purpose: browse the OKF/wiki page tree and manually author/enrich page
 GrowERP app.
 
 ### Backend REST (extend, don't duplicate)
-A read path already exists (`get#PublishedWikiPageText`); add the missing pieces in
+The read path is the Phase 1 `Okf/Page` wrapper (there was no working pre-existing one — see
+Phase 1 step 5); add the missing pieces in
 `backend/service/growerp/100/` + `growerp.rest.xml`, wrapping framework `WikiServices.xml`:
 - `get#WikiSpaces` / `get#WikiPageTree` (list spaces + page hierarchy — wraps
   `get#WikiPageChildren`).
@@ -278,8 +303,9 @@ These read the same files the wiki hosts (`<rootPageLocation>`), so no second st
 into `AdkKnowledgeDoc` metadata, then chunks + embeds the body via the **existing**
 `embed#Text`/`ingest#AdkKnowledge` pipeline. This realizes "index high-quality OKF, not messy
 docs": curated OKF becomes the preferred RAG source. `search#AdkKnowledge` and `searchKnowledge`
-**stay** as the retrieval path for large/changing/user-specific/permissioned data. Add a small
-`sourceType='okf'` + optional `metadataJson` field on `AdkKnowledgeDoc` to round-trip frontmatter.
+**stay** as the retrieval path for large/changing/user-specific/permissioned data.
+`AdkKnowledgeDoc.sourceType` already exists (AdkEntities.xml:162) — just use a new `'okf'`
+value; add only an optional `metadataJson` field to round-trip frontmatter.
 
 **Routing.** Agent instruction: *load stable domain knowledge directly via `okf_index` →
 `okf_load_concept`/`okf_follow`; fall back to `searchKnowledge` (RAG) for bulk/operational data
