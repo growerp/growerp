@@ -24,6 +24,7 @@ import 'package:growerp_marketing/growerp_marketing.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_user_company/growerp_user_company.dart';
 import 'package:growerp_website/growerp_website.dart';
+import 'package:growerp_wiki/growerp_wiki.dart';
 import 'package:growerp_manufacturing/growerp_manufacturing.dart';
 import 'package:growerp_manuf_liner/growerp_manuf_liner.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
@@ -250,6 +251,7 @@ List<Map<String, GrowerpWidgetBuilder>> adminWidgetRegistrations = [
   getOutreachWidgets(),
   getSalesWidgets(),
   getWebsiteWidgets(),
+  getWikiWidgets(),
   getCoursesWidgets(),
   // App-specific widgets
   {
@@ -282,6 +284,7 @@ List<WidgetMetadata> adminWidgetMetadata = [
   ...getOutreachWidgetsWithMetadata(),
   ...getSalesWidgetsWithMetadata(),
   ...getWebsiteWidgetsWithMetadata(),
+  ...getWikiWidgetsWithMetadata(),
   ...getCoursesWidgetsWithMetadata(),
 ];
 

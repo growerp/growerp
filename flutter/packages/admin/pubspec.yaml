@@ -13,6 +13,7 @@ dependencies:
   growerp_sales: ^1.9.0
   growerp_marketing: ^1.9.0
   growerp_website: ^1.9.0
+  growerp_wiki: ^1.9.0
   growerp_inventory: ^1.9.0
   growerp_catalog: ^1.9.0
   growerp_manufacturing: ^1.0.0

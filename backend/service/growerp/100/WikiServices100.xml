@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-2.1.xsd">
+
+    <!-- ============ wiki spaces + pages (OKF bundle browse/edit) ============
+         Thin wrappers around framework org.moqui.impl.WikiServices; storage and
+         versioning stay in the framework. -->
+
+    <service verb="get" noun="WikiSpaces">
+        <description>List wiki spaces, optional search on id/description.</description>
+        <in-parameters>
+            <parameter name="searchString"/>
+            <parameter name="start" type="Integer" default-value="0"/>
+            <parameter name="limit" type="Integer" default-value="20"/>
+        </in-parameters>
+        <out-parameters><parameter name="wikiSpaces" type="List"/></out-parameters>
+        <actions>
+            <entity-find entity-name="moqui.resource.wiki.WikiSpace" list="spaceList"
+                    offset="start" limit="limit">
+                <econditions combine="or">
+                    <econdition field-name="wikiSpaceId" operator="like"
+                        value="%${searchString ?: ''}%" ignore-case="true"/>
+                    <econdition field-name="description" operator="like"
+                        value="%${searchString ?: ''}%" ignore-case="true"/>
+                </econditions>
+                <order-by field-name="wikiSpaceId"/>
+            </entity-find>
+            <set field="wikiSpaces" from="[]"/>
+            <iterate list="spaceList" entry="sp">
+                <script>wikiSpaces.add([wikiSpaceId: sp.wikiSpaceId, description: sp.description,
+                    rootPageLocation: sp.rootPageLocation, publicPageUrl: sp.publicPageUrl])</script>
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="get" noun="WikiPages">
+        <description>List the pages of a wiki space, optional search on pagePath.</description>
+        <in-parameters>
+            <parameter name="wikiSpaceId" required="true"/>
+            <parameter name="searchString"/>
+            <parameter name="start" type="Integer" default-value="0"/>
+            <parameter name="limit" type="Integer" default-value="20"/>
+        </in-parameters>
+        <out-parameters><parameter name="wikiPages" type="List"/></out-parameters>
+        <actions>
+            <entity-find entity-name="moqui.resource.wiki.WikiPage" list="pageList"
+                    offset="start" limit="limit">
+                <econdition field-name="wikiSpaceId"/>
+                <econdition field-name="pagePath" operator="like"
+                    value="%${searchString ?: ''}%" ignore-case="true"/>
+                <order-by field-name="pagePath"/>
+            </entity-find>
+            <set field="wikiPages" from="[]"/>
+            <iterate list="pageList" entry="wp">
+                <script>wikiPages.add([wikiPageId: wp.wikiPageId, wikiSpaceId: wp.wikiSpaceId,
+                    pagePath: wp.pagePath, publishedVersionName: wp.publishedVersionName])</script>
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="get" noun="WikiPage">
+        <description>Read one published wiki page (text included).</description>
+        <in-parameters>
+            <parameter name="wikiSpaceId" required="true"/>
+            <parameter name="pagePath"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="wikiPage" type="Map"/>
+        </out-parameters>
+        <actions>
+            <service-call name="org.moqui.impl.WikiServices.get#PublishedWikiPageText"
+                in-map="[wikiSpaceId: wikiSpaceId, pagePath: pagePath]" out-map="pageOut"/>
+            <set field="wikiPage" from="[wikiPageId: pageOut.wikiPageId, wikiSpaceId: wikiSpaceId,
+                pagePath: pagePath, publishedVersionName: pageOut.publishedVersionName,
+                pageText: pageOut.pageText]"/>
+        </actions>
+    </service>
+
+    <service verb="update" noun="WikiPage">
+        <description>Create or update a wiki page (writes the .md under the space root via the
+            framework service) and publish it so the read path serves it.</description>
+        <in-parameters>
+            <parameter name="wikiSpaceId" required="true"/>
+            <parameter name="pagePath" required="true"/>
+            <parameter name="pageText" allow-html="any"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="wikiPage" type="Map"/>
+        </out-parameters>
+        <actions>
+            <set field="pageName" from="pagePath.contains('/') ? pagePath.substring(pagePath.lastIndexOf('/')+1) : pagePath"/>
+            <set field="parentPath" from="pagePath.contains('/') ? pagePath.substring(0, pagePath.lastIndexOf('/')) : null"/>
+            <service-call name="org.moqui.impl.WikiServices.update#WikiPage" out-map="updOut"
+                in-map="[wikiSpaceId: wikiSpaceId, pagePath: pagePath, pageName: pageName,
+                         parentPath: parentPath, pageText: pageText]"/>
+            <!-- publish: versioned resources give a versionName, plain files do not - use '1' -->
+            <service-call name="org.moqui.impl.WikiServices.set#PublishedVersion"
+                in-map="[wikiPageId: updOut.wikiPageId, publishedVersionName: (updOut.versionName ?: '1')]"/>
+            <service-call name="growerp.100.WikiServices100.get#WikiPage" out-map="context"
+                in-map="[wikiSpaceId: wikiSpaceId, pagePath: updOut.pagePath ?: pagePath]"/>
+        </actions>
+    </service>
+
+    <service verb="delete" noun="WikiPage">
+        <description>Delete a wiki page (row + file) via the framework service.</description>
+        <in-parameters>
+            <parameter name="wikiPageId" required="true"/>
+        </in-parameters>
+        <actions>
+            <service-call name="org.moqui.impl.WikiServices.delete#WikiPage"
+                in-map="[wikiPageId: wikiPageId]"/>
+        </actions>
+    </service>
+</services>

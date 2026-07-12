@@ -102,5 +102,7 @@ export 'adk_job_model.dart';
 export 'adk_action_model.dart';
 export 'adk_approval_model.dart';
 export 'adk_knowledge_model.dart';
+// Wiki / OKF knowledge bundle models
+export 'wiki_model.dart';
 // Course models
 export 'course_model.dart';

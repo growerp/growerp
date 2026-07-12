@@ -39,6 +39,8 @@ workspace:
   - packages/growerp_user_company/example
   - packages/growerp_website
   - packages/growerp_website/example
+  - packages/growerp_wiki
+  - packages/growerp_wiki/example
   - packages/health
   - packages/hotel
   - packages/support
@@ -74,6 +76,8 @@ melos:
     - packages/growerp_order_accounting/example
     - packages/growerp_website
     - packages/growerp_website/example
+    - packages/growerp_wiki
+    - packages/growerp_wiki/example
     - packages/growerp_activity
     - packages/growerp_activity/example
     - packages/growerp_adk

@@ -1,0 +1,30 @@
+name: growerp_wiki
+resolution: workspace
+description: Wiki / OKF knowledge bundle browse and edit module for GrowERP
+version: 1.9.0
+publish_to: "none"
+
+environment:
+  sdk: ^3.10.0
+  flutter: ^3.33.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Core packages (dependency on growerp ecosystem)
+  growerp_models: ^1.11.6
+  growerp_core: ^1.9.0
+
+  # State management & utilities
+  flutter_bloc: ^9.1.1
+
+  # Markdown rendering (same version as growerp_core)
+  markdown_widget: ^2.3.1
+
+  # test helper class in lib/src/integration_test is part of the public API
+  flutter_test:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_lints: ^6.0.0

@@ -255,6 +255,8 @@ along with this software (see the LICENSE.md file). If not, see
         title="Agent Actions" iconName="history" widgetName="AdkActionsListView" sequenceNum="40"/>
     <growerp.menu.MenuItem menuItemId="ADMIN_ADK_KNOWLEDGE" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_AGENT_CONTROL"
         title="Knowledge" iconName="menu_book" widgetName="AdkKnowledgeView" sequenceNum="50"/>
+    <growerp.menu.MenuItem menuItemId="ADMIN_ADK_WIKI" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_AGENT_CONTROL"
+        title="Wiki" iconName="menu_book" widgetName="WikiList" sequenceNum="55"/>
 
     <!-- ====================== FREELANCE_DEFAULT Menu Items ====================== -->
     <!-- Top-level -->
