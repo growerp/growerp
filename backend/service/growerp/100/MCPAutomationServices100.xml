@@ -286,8 +286,11 @@
                         value-field="campaign">
                         <field-map field-name="marketingCampaignId" from="message.marketingCampaignId"/>
                     </entity-find-one>
+                    <!-- unsubscribe served by pop-rest-store /nurture screen -->
+                    <service-call name="growerp.100.NurtureServices100.get#TenantBaseUrl"
+                        in-map="[ownerPartyId: ownerPartyId]" out-map="context"/>
                     <set field="unsubscribeUrl"
-                        value="https://growerp.com/unsubscribe?email=${message.recipientEmail}&amp;campaign=${message.marketingCampaignId}"/>
+                        value="${baseUrl}/nurture/unsubscribe?email=${message.recipientEmail}&amp;campaign=${message.marketingCampaignId}"/>
                     <set field="emailBody"
                         from="message.messageContent + '\n\n---\n\n&lt;p style=&quot;font-size: 12px; color: #666;&quot;&gt;&lt;a href=&quot;' + unsubscribeUrl + '&quot;&gt;Unsubscribe&lt;/a&gt;&lt;/p&gt;'"/>
                     <service-call name="org.moqui.impl.EmailServices.send#EmailTemplate"

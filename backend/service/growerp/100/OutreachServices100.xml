@@ -1311,9 +1311,11 @@
                 </if>
             </if>
 
-            <!-- Add unsubscribe link to body -->
+            <!-- Add unsubscribe link to body (served by pop-rest-store /nurture screen) -->
+            <service-call name="growerp.100.NurtureServices100.get#TenantBaseUrl"
+                in-map="[ownerPartyId: companyPartyId]" out-map="context" />
             <set field="unsubscribeUrl"
-                value="https://growerp.com/unsubscribe?email=${toEmail}&amp;campaign=${marketingCampaignId}" />
+                value="${baseUrl}/nurture/unsubscribe?email=${toEmail}&amp;campaign=${marketingCampaignId}" />
             <set field="emailBody"
                 from="body + '\n\n---\n\n&lt;p style=&quot;font-size: 12px; color: #666;&quot;&gt;&lt;a href=&quot;' + unsubscribeUrl + '&quot;&gt;Unsubscribe&lt;/a&gt;&lt;/p&gt;'" />
 

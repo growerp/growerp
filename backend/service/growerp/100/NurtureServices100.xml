@@ -1,0 +1,516 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-2.1.xsd">
+
+    <!-- ============ email nurture sequences (drip campaigns) ============ -->
+
+    <service verb="get" noun="TenantBaseUrl" authenticate="false" allow-remote="false">
+        <description>Public base URL for a tenant company, from its store's first
+            PsstHostname setting; used for links in outgoing emails.</description>
+        <in-parameters>
+            <parameter name="ownerPartyId" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="baseUrl" />
+        </out-parameters>
+        <actions>
+            <set field="baseUrl" value="https://growerp.com" />
+            <entity-find entity-name="mantle.product.store.ProductStore" list="stores"
+                limit="1">
+                <econdition field-name="organizationPartyId" from="ownerPartyId" />
+            </entity-find>
+            <if condition="stores">
+                <entity-find entity-name="mantle.product.store.ProductStoreSetting"
+                    list="hostnames" limit="1">
+                    <econdition field-name="productStoreId" from="stores[0].productStoreId" />
+                    <econdition field-name="settingTypeEnumId" value="PsstHostname" />
+                    <date-filter />
+                    <order-by field-name="fromDate" />
+                </entity-find>
+                <if condition="hostnames">
+                    <set field="baseUrl" value="https://${hostnames[0].settingValue}" />
+                </if>
+            </if>
+        </actions>
+    </service>
+
+    <service verb="get" noun="EmailSequence">
+        <description>Get a single or all email nurture sequences of the company</description>
+        <in-parameters>
+            <parameter name="emailSequenceId" />
+            <parameter name="start" type="Integer" default-value="0" />
+            <parameter name="limit" type="Integer" default-value="20" />
+            <parameter name="search" default="null" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="emailSequences" type="List">
+                <parameter name="emailSequence" type="Map">
+                    <parameter name="emailSequenceId" />
+                    <parameter name="pseudoId" />
+                    <parameter name="sequenceName" />
+                    <parameter name="status" />
+                    <parameter name="marketingCampaignId" />
+                    <parameter name="activeEnrollments" />
+                    <parameter name="completedEnrollments" />
+                    <parameter name="steps" type="List" />
+                </parameter>
+            </parameter>
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <if condition="search != null">
+                <set field="search" value="%${search}%" />
+            </if>
+            <entity-find entity-name="growerp.marketing.EmailSequence" list="sequences"
+                offset="start" limit="limit">
+                <econdition field-name="ownerPartyId" from="companyPartyId" />
+                <econdition field-name="emailSequenceId" ignore-if-empty="true" />
+                <econditions combine="or">
+                    <econdition field-name="pseudoId" ignore-case="true"
+                        operator="like" from="search" ignore-if-empty="true" />
+                    <econdition field-name="sequenceName" ignore-case="true"
+                        operator="like" from="search" ignore-if-empty="true" />
+                </econditions>
+                <order-by field-name="pseudoId" />
+            </entity-find>
+            <set field="emailSequences" from="[]" />
+            <iterate list="sequences" entry="sequence">
+                <entity-find entity-name="growerp.marketing.EmailSequenceStep" list="stepList">
+                    <econdition field-name="emailSequenceId" from="sequence.emailSequenceId" />
+                    <order-by field-name="stepSeq" />
+                </entity-find>
+                <entity-find-count entity-name="growerp.marketing.EmailSequenceEnrollment"
+                    count-field="activeEnrollments">
+                    <econdition field-name="emailSequenceId" from="sequence.emailSequenceId" />
+                    <econdition field-name="status" value="ACTIVE" />
+                </entity-find-count>
+                <entity-find-count entity-name="growerp.marketing.EmailSequenceEnrollment"
+                    count-field="completedEnrollments">
+                    <econdition field-name="emailSequenceId" from="sequence.emailSequenceId" />
+                    <econdition field-name="status" value="COMPLETED" />
+                </entity-find-count>
+                <set field="steps" from="[]" />
+                <iterate list="stepList" entry="step">
+                    <script>steps.add([stepSeq: step.stepSeq, delayDays: step.delayDays,
+                        subject: step.subject, bodyHtml: step.bodyHtml])</script>
+                </iterate>
+                <script>emailSequences.add([emailSequenceId: sequence.emailSequenceId,
+                    pseudoId: sequence.pseudoId, sequenceName: sequence.sequenceName,
+                    status: sequence.status,
+                    marketingCampaignId: sequence.marketingCampaignId,
+                    activeEnrollments: activeEnrollments,
+                    completedEnrollments: completedEnrollments, steps: steps])</script>
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="create" noun="EmailSequence">
+        <description>Create an email nurture sequence with its steps</description>
+        <in-parameters>
+            <parameter name="emailSequence" type="Map" required="true">
+                <parameter name="pseudoId" />
+                <parameter name="sequenceName" />
+                <parameter name="status" />
+                <parameter name="marketingCampaignId" />
+                <parameter name="steps" type="List">
+                    <parameter name="step" type="Map">
+                        <parameter name="stepSeq" />
+                        <parameter name="delayDays" />
+                        <parameter name="subject" />
+                        <parameter name="bodyHtml" allow-html="safe" />
+                    </parameter>
+                </parameter>
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="emailSequence" type="Map" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <if condition="!emailSequence.pseudoId || emailSequence.pseudoId == ''">
+                <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                    in-map="[ownerPartyId: ownerPartyId, seqName: 'emailSequence']"
+                    out-map="context" />
+                <set field="emailSequence.pseudoId" from="seqNum" />
+            </if>
+            <service-call name="create#growerp.marketing.EmailSequence" out-map="context"
+                in-map="[pseudoId: emailSequence.pseudoId,
+                    ownerPartyId: companyPartyId,
+                    sequenceName: emailSequence.sequenceName,
+                    status: emailSequence.status ?: 'ACTIVE',
+                    marketingCampaignId: emailSequence.marketingCampaignId,
+                    createdDate: ec.user.nowTimestamp]" />
+            <iterate list="emailSequence.steps" entry="step">
+                <service-call name="create#growerp.marketing.EmailSequenceStep"
+                    in-map="[emailSequenceId: emailSequenceId,
+                        stepSeq: step.stepSeq ?: (emailSequence.steps.indexOf(step) + 1),
+                        delayDays: step.delayDays ?: 0,
+                        subject: step.subject, bodyHtml: step.bodyHtml]" />
+            </iterate>
+            <service-call name="growerp.100.NurtureServices100.get#EmailSequence"
+                in-map="[emailSequenceId: emailSequenceId]" out-map="context" />
+            <set field="emailSequence" from="emailSequences[0]" />
+        </actions>
+    </service>
+
+    <service verb="update" noun="EmailSequence">
+        <description>Update a sequence; the steps list replaces all existing steps</description>
+        <in-parameters>
+            <parameter name="emailSequence" type="Map" required="true">
+                <parameter name="emailSequenceId" />
+                <parameter name="pseudoId" />
+                <parameter name="sequenceName" />
+                <parameter name="status" />
+                <parameter name="marketingCampaignId" />
+                <parameter name="steps" type="List">
+                    <parameter name="step" type="Map">
+                        <parameter name="stepSeq" />
+                        <parameter name="delayDays" />
+                        <parameter name="subject" />
+                        <parameter name="bodyHtml" allow-html="safe" />
+                    </parameter>
+                </parameter>
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="emailSequence" type="Map" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <entity-find list="sequences" for-update="true" limit="1"
+                entity-name="growerp.marketing.EmailSequence">
+                <econdition field-name="emailSequenceId" from="emailSequence.emailSequenceId" />
+                <econdition field-name="ownerPartyId" from="companyPartyId" />
+            </entity-find>
+            <if condition="!sequences">
+                <return error="true"
+                    message="sequence ${emailSequence.emailSequenceId} not found!" />
+            </if>
+            <set field="sequences[0].sequenceName" from="emailSequence.sequenceName" />
+            <set field="sequences[0].status" from="emailSequence.status ?: 'ACTIVE'" />
+            <set field="sequences[0].marketingCampaignId"
+                from="emailSequence.marketingCampaignId" />
+            <entity-update value-field="sequences[0]" />
+            <entity-delete-by-condition entity-name="growerp.marketing.EmailSequenceStep">
+                <econdition field-name="emailSequenceId" from="emailSequence.emailSequenceId" />
+            </entity-delete-by-condition>
+            <iterate list="emailSequence.steps" entry="step">
+                <service-call name="create#growerp.marketing.EmailSequenceStep"
+                    in-map="[emailSequenceId: emailSequence.emailSequenceId,
+                        stepSeq: step.stepSeq ?: (emailSequence.steps.indexOf(step) + 1),
+                        delayDays: step.delayDays ?: 0,
+                        subject: step.subject, bodyHtml: step.bodyHtml]" />
+            </iterate>
+            <service-call name="growerp.100.NurtureServices100.get#EmailSequence"
+                in-map="[emailSequenceId: emailSequence.emailSequenceId]" out-map="context" />
+            <set field="emailSequence" from="emailSequences[0]" />
+        </actions>
+    </service>
+
+    <service verb="delete" noun="EmailSequence">
+        <description>Delete a sequence with its steps and enrollments</description>
+        <in-parameters>
+            <parameter name="emailSequence" type="Map" required="true">
+                <parameter name="emailSequenceId" />
+            </parameter>
+        </in-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <entity-find list="sequences" limit="1"
+                entity-name="growerp.marketing.EmailSequence">
+                <econdition field-name="emailSequenceId" from="emailSequence.emailSequenceId" />
+                <econdition field-name="ownerPartyId" from="companyPartyId" />
+            </entity-find>
+            <if condition="!sequences">
+                <return error="true"
+                    message="sequence ${emailSequence.emailSequenceId} not found!" />
+            </if>
+            <entity-delete-by-condition
+                entity-name="growerp.marketing.EmailSequenceEnrollment">
+                <econdition field-name="emailSequenceId" from="emailSequence.emailSequenceId" />
+            </entity-delete-by-condition>
+            <entity-delete-by-condition entity-name="growerp.marketing.EmailSequenceStep">
+                <econdition field-name="emailSequenceId" from="emailSequence.emailSequenceId" />
+            </entity-delete-by-condition>
+            <entity-delete value-field="sequences[0]" />
+        </actions>
+    </service>
+
+    <service verb="enroll" noun="EmailSequence" authenticate="false">
+        <description>Enroll an email address in a nurture sequence. Called from lead
+            capture flows (website forms etc.); deduplicates on sequence + email.</description>
+        <in-parameters>
+            <parameter name="emailSequenceId" required="true" />
+            <parameter name="emailAddress" required="true" />
+            <parameter name="firstName" />
+            <parameter name="partyId" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="enrollmentId" />
+        </out-parameters>
+        <actions>
+            <entity-find-one entity-name="growerp.marketing.EmailSequence"
+                value-field="sequence" />
+            <if condition="!sequence">
+                <return error="true" message="sequence ${emailSequenceId} not found!" />
+            </if>
+            <!-- dedupe: any prior enrollment for this sequence + email wins -->
+            <entity-find entity-name="growerp.marketing.EmailSequenceEnrollment"
+                list="existing" limit="1">
+                <econdition field-name="emailSequenceId" from="emailSequenceId" />
+                <econdition field-name="emailAddress" from="emailAddress" ignore-case="true" />
+            </entity-find>
+            <if condition="existing">
+                <set field="enrollmentId" from="existing[0].enrollmentId" />
+                <return />
+            </if>
+            <entity-find entity-name="growerp.marketing.EmailSequenceStep" list="steps">
+                <econdition field-name="emailSequenceId" from="emailSequenceId" />
+                <order-by field-name="stepSeq" />
+            </entity-find>
+            <set field="firstDelayDays" from="steps ? (steps[0].delayDays ?: 0) : 0" />
+            <service-call name="create#growerp.marketing.EmailSequenceEnrollment"
+                out-map="context"
+                in-map="[emailSequenceId: emailSequenceId,
+                    ownerPartyId: sequence.ownerPartyId,
+                    partyId: partyId, emailAddress: emailAddress,
+                    firstName: firstName, currentStep: 0, status: 'ACTIVE',
+                    nextSendDate: new java.sql.Timestamp(ec.user.nowTimestamp.time +
+                        firstDelayDays * 86400000L),
+                    opens: 0, clicks: 0,
+                    unsubscribeToken:
+                        java.util.UUID.randomUUID().toString().replace('-',''),
+                    createdDate: ec.user.nowTimestamp]" />
+        </actions>
+    </service>
+
+    <service verb="unsubscribe" noun="Enrollment" authenticate="false">
+        <description>Unsubscribe: by enrollmentId + token (sequence emails), or by
+            email address (outreach campaign emails).</description>
+        <in-parameters>
+            <parameter name="enrollmentId" />
+            <parameter name="token" />
+            <parameter name="emailAddress" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="unsubscribed" type="Boolean" />
+        </out-parameters>
+        <actions>
+            <set field="unsubscribed" from="false" />
+            <if condition="enrollmentId &amp;&amp; token">
+                <entity-find entity-name="growerp.marketing.EmailSequenceEnrollment"
+                    list="enrollments" for-update="true" limit="1">
+                    <econdition field-name="enrollmentId" from="enrollmentId" />
+                    <econdition field-name="unsubscribeToken" from="token" />
+                </entity-find>
+                <if condition="enrollments">
+                    <set field="enrollments[0].status" value="UNSUBSCRIBED" />
+                    <entity-update value-field="enrollments[0]" />
+                    <set field="unsubscribed" from="true" />
+                </if>
+            </if>
+            <if condition="!enrollmentId &amp;&amp; emailAddress">
+                <entity-find entity-name="growerp.marketing.EmailSequenceEnrollment"
+                    list="byEmail" for-update="true">
+                    <econdition field-name="emailAddress" from="emailAddress"
+                        ignore-case="true" />
+                    <econdition field-name="status" value="ACTIVE" />
+                </entity-find>
+                <iterate list="byEmail" entry="enrollment">
+                    <set field="enrollment.status" value="UNSUBSCRIBED" />
+                    <entity-update value-field="enrollment" />
+                    <set field="unsubscribed" from="true" />
+                </iterate>
+                <!-- always report success for email-based requests: an outreach
+                     recipient may have no enrollment rows at all -->
+                <set field="unsubscribed" from="true" />
+            </if>
+        </actions>
+    </service>
+
+    <service verb="track" noun="EmailOpen" authenticate="false">
+        <in-parameters>
+            <parameter name="enrollmentId" required="true" />
+            <parameter name="token" required="true" />
+        </in-parameters>
+        <actions>
+            <entity-find entity-name="growerp.marketing.EmailSequenceEnrollment"
+                list="enrollments" for-update="true" limit="1">
+                <econdition field-name="enrollmentId" from="enrollmentId" />
+                <econdition field-name="unsubscribeToken" from="token" />
+            </entity-find>
+            <if condition="enrollments">
+                <set field="enrollments[0].opens" from="(enrollments[0].opens ?: 0) + 1" />
+                <entity-update value-field="enrollments[0]" />
+            </if>
+        </actions>
+    </service>
+
+    <service verb="track" noun="EmailClick" authenticate="false">
+        <in-parameters>
+            <parameter name="enrollmentId" required="true" />
+            <parameter name="token" required="true" />
+        </in-parameters>
+        <actions>
+            <entity-find entity-name="growerp.marketing.EmailSequenceEnrollment"
+                list="enrollments" for-update="true" limit="1">
+                <econdition field-name="enrollmentId" from="enrollmentId" />
+                <econdition field-name="unsubscribeToken" from="token" />
+            </entity-find>
+            <if condition="enrollments">
+                <set field="enrollments[0].clicks" from="(enrollments[0].clicks ?: 0) + 1" />
+                <entity-update value-field="enrollments[0]" />
+            </if>
+        </actions>
+    </service>
+
+    <service verb="process" noun="DueSequenceEmails" authenticate="false"
+        allow-remote="false" transaction-timeout="300">
+        <description>Batch processor (cron): send the next step to every ACTIVE
+            enrollment whose nextSendDate has passed, across all tenants.
+            One failing enrollment does not abort the batch.</description>
+        <out-parameters>
+            <parameter name="processedCount" type="Integer" />
+        </out-parameters>
+        <actions>
+            <entity-find entity-name="growerp.marketing.EmailSequenceEnrollment"
+                list="dueEnrollments" limit="100">
+                <econdition field-name="status" value="ACTIVE" />
+                <econdition field-name="nextSendDate" operator="less-equals"
+                    from="ec.user.nowTimestamp" />
+                <order-by field-name="nextSendDate" />
+            </entity-find>
+            <set field="processedCount" from="0" />
+            <iterate list="dueEnrollments" entry="enrollment">
+                <service-call name="growerp.100.NurtureServices100.process#SequenceEnrollment"
+                    in-map="[enrollmentId: enrollment.enrollmentId]" ignore-error="true" />
+                <set field="processedCount" from="processedCount + 1" />
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="process" noun="SequenceEnrollment" authenticate="false"
+        allow-remote="false">
+        <description>Send the next sequence step for one enrollment and advance it.</description>
+        <in-parameters>
+            <parameter name="enrollmentId" required="true" />
+        </in-parameters>
+        <actions>
+            <entity-find entity-name="growerp.marketing.EmailSequenceEnrollment"
+                list="enrollments" for-update="true" limit="1">
+                <econdition field-name="enrollmentId" from="enrollmentId" />
+                <econdition field-name="status" value="ACTIVE" />
+            </entity-find>
+            <if condition="!enrollments">
+                <return />
+            </if>
+            <set field="enrollment" from="enrollments[0]" />
+            <entity-find-one entity-name="growerp.marketing.EmailSequence"
+                value-field="sequence">
+                <field-map field-name="emailSequenceId" from="enrollment.emailSequenceId" />
+            </entity-find-one>
+            <if condition="!sequence || sequence.status != 'ACTIVE'">
+                <return /><!-- paused or deleted sequence: leave enrollment untouched -->
+            </if>
+            <set field="nextStepSeq" from="(enrollment.currentStep ?: 0) + 1" />
+            <entity-find entity-name="growerp.marketing.EmailSequenceStep" list="steps"
+                limit="1">
+                <econdition field-name="emailSequenceId" from="enrollment.emailSequenceId" />
+                <econdition field-name="stepSeq" from="nextStepSeq" />
+            </entity-find>
+            <if condition="!steps">
+                <set field="enrollment.status" value="COMPLETED" />
+                <entity-update value-field="enrollment" />
+                <return />
+            </if>
+            <set field="step" from="steps[0]" />
+
+            <!-- per-tenant base URL from the owner company's store hostname -->
+            <service-call name="growerp.100.NurtureServices100.get#TenantBaseUrl"
+                in-map="[ownerPartyId: enrollment.ownerPartyId]" out-map="context" />
+
+            <script><![CDATA[
+                String body = step.bodyHtml ?: ''
+                String subject = step.subject ?: ''
+                String name = enrollment.firstName ?: 'there'
+                body = body.replace('{name}', name)
+                subject = subject.replace('{name}', name)
+                String trk = enrollment.enrollmentId + '&token=' + enrollment.unsubscribeToken
+                // {track:URL} placeholders become click-tracked redirects
+                body = body.replaceAll(/\{track:(.*?)\}/) { all, url ->
+                    baseUrl + '/nurture/click?id=' + trk +
+                        '&url=' + java.net.URLEncoder.encode(url, 'UTF-8')
+                }
+                body += '<img src="' + baseUrl + '/nurture/open?id=' + trk +
+                    '" width="1" height="1" alt=""/>' +
+                    '<p style="font-size:12px;color:#666;"><a href="' + baseUrl +
+                    '/nurture/unsubscribe?id=' + trk + '">Unsubscribe</a></p>'
+                context.emailBody = body
+                context.emailSubject = subject
+            ]]></script>
+
+            <!-- send only when an email server is configured; state advances anyway -->
+            <entity-find-one entity-name="moqui.basic.email.EmailServer"
+                value-field="emailServer">
+                <field-map field-name="emailServerId" value="SYSTEM" />
+            </entity-find-one>
+            <set field="emailConfigured" from="emailServer != null &amp;&amp;
+                emailServer.mailPassword != 'SMTP_PASSWORD'" />
+            <if condition="emailConfigured">
+                <service-call name="org.moqui.impl.EmailServices.send#EmailTemplate"
+                    ignore-error="true"
+                    in-map="[toAddresses: enrollment.emailAddress,
+                        subject: emailSubject, bodyHtml: emailBody,
+                        fromAddress: 'noreply@growerp.com']" />
+            </if>
+            <!-- record on the linked campaign when there is one -->
+            <if condition="sequence.marketingCampaignId">
+                <service-call name="create#growerp.marketing.OutreachMessage"
+                    ignore-error="true"
+                    in-map="[marketingCampaignId: sequence.marketingCampaignId,
+                        platform: 'EMAIL', recipientName: enrollment.firstName,
+                        recipientEmail: enrollment.emailAddress,
+                        messageContent: emailSubject,
+                        sentDate: ec.user.nowTimestamp,
+                        status: emailConfigured ? 'SENT' : 'PENDING',
+                        createdDate: ec.user.nowTimestamp]" />
+            </if>
+
+            <!-- advance to the next step or complete -->
+            <entity-find entity-name="growerp.marketing.EmailSequenceStep" list="nextSteps"
+                limit="1">
+                <econdition field-name="emailSequenceId" from="enrollment.emailSequenceId" />
+                <econdition field-name="stepSeq" from="nextStepSeq + 1" />
+            </entity-find>
+            <set field="enrollment.currentStep" from="nextStepSeq" />
+            <if condition="nextSteps">
+                <then>
+                    <set field="enrollment.nextSendDate"
+                        from="new java.sql.Timestamp(ec.user.nowTimestamp.time +
+                            (nextSteps[0].delayDays ?: 0) * 86400000L)" />
+                </then>
+                <else>
+                    <set field="enrollment.status" value="COMPLETED" />
+                </else>
+            </if>
+            <entity-update value-field="enrollment" />
+        </actions>
+    </service>
+</services>

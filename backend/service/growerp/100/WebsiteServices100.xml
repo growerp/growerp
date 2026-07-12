@@ -1469,6 +1469,14 @@ along with this software (see the LICENSE.md file). If not, see
                 in-map="[formId: formId, ownerPartyId: ownerPartyId,
                     partyId: visitorPartyId, submittedDate: ec.user.nowTimestamp,
                     valuesJson: valuesJson]" />
+            <!-- enroll into the form's nurture sequence when configured -->
+            <if condition="form.emailSequenceId">
+                <service-call name="growerp.100.NurtureServices100.enroll#EmailSequence"
+                    ignore-error="true"
+                    in-map="[emailSequenceId: form.emailSequenceId,
+                        emailAddress: email, firstName: visitorName,
+                        partyId: visitorPartyId]" />
+            </if>
             <!-- notify the company admin when email is configured -->
             <entity-find-one entity-name="moqui.basic.email.EmailServer" value-field="emailServer">
                 <field-map field-name="emailServerId" value="SYSTEM" />

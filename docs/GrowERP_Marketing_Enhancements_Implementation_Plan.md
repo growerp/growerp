@@ -80,7 +80,14 @@ All entity/service/file references below were verified against the codebase.
 
 ---
 
-## #1 Native email nurture-sequence engine (L) — Phase C
+## #1 Native email nurture-sequence engine (L) — Phase C ✅ shipped
+
+> Shipped notes: processor sends via `send#EmailTemplate` directly (not `send#OutreachEmail`,
+> which needs an authenticated user + campaign); browser endpoints live at `/nurture/*`
+> (pop-rest-store screen) and the previously dead outreach unsubscribe links now point there
+> with the tenant's store hostname. Enrollment hooks v1 = website forms
+> (`WebsiteForm.emailSequenceId`); chat/assessment/register hooks deferred until a per-owner
+> default-sequence setting exists.
 
 **Goal:** multi-step drip campaigns run natively (enroll on capture, timed sends, unsubscribe, open/click metrics) — replaces BirdSend/MailerLight (`registerAdd#UserToGroup` external push, `BirdSendServices100.xml`/`MailerLightServices100.xml`).
 

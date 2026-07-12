@@ -126,6 +126,8 @@ along with this software (see the LICENSE.md file). If not, see
         title="Content" iconName="auto_awesome" widgetName="MasterContentList" sequenceNum="20"/>
     <growerp.menu.MenuItem menuItemId="ADMIN_MKTG_PERSONA" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_MARKETING"
         title="Personas" iconName="people" widgetName="PersonaList" sequenceNum="30"/>
+    <growerp.menu.MenuItem menuItemId="ADMIN_MKTG_SEQUENCES" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_MARKETING"
+        title="Email Sequences" iconName="schedule_send" widgetName="EmailSequenceList" sequenceNum="35"/>
     <growerp.menu.MenuItem menuItemId="ADMIN_MKTG_LANDING" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_MARKETING"
         title="Landing Pages" iconName="web" widgetName="LandingPageList" sequenceNum="40"/>
     <growerp.menu.MenuItem menuItemId="ADMIN_MKTG_ASSESS" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_MARKETING"

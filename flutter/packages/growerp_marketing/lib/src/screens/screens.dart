@@ -62,3 +62,7 @@ export 'social_post_detail_screen.dart';
 export 'master_content_list.dart';
 export 'master_content_detail_screen.dart';
 export 'master_content_list_styled_data.dart';
+
+// Email nurture sequences
+export 'email_sequence_list.dart';
+export 'email_sequence_dialog.dart';

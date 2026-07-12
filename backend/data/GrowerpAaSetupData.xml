@@ -21,6 +21,12 @@ along with this software (see the LICENSE.md file). If not, see
         paused="N"
         transactionTimeout="1800" />
 
+    <!-- Service Job: Send due nurture-sequence emails - every 15 minutes -->
+    <moqui.service.job.ServiceJob jobName="process_due_sequence_emails"
+        description="Send the next nurture-sequence step to enrollments whose nextSendDate has passed"
+        serviceName="growerp.100.NurtureServices100.process#DueSequenceEmails"
+        cronExpression="0 5/15 * * * ?" paused="N" transactionTimeout="300" />
+
     <!-- Service Job: Publish scheduled social posts - every 15 minutes -->
     <moqui.service.job.ServiceJob jobName="publish_scheduled_social_posts"
         description="Publish READY social posts whose scheduled time has arrived (Substack, LinkedIn)"

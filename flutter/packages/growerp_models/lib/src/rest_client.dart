@@ -830,6 +830,30 @@ abstract class RestClient {
   @DELETE("rest/s1/growerp/100/WebsiteForm")
   Future<void> deleteWebsiteForm({@Field() required WebsiteForm webForm});
 
+  // email nurture sequences
+  @GET("rest/s1/growerp/100/EmailSequence")
+  Future<EmailSequences> getEmailSequence({
+    @Query('start') int? start,
+    @Query('limit') int? limit,
+    @Query('emailSequenceId') String? emailSequenceId,
+    @Query('search') String? searchString,
+  });
+
+  @POST("rest/s1/growerp/100/EmailSequence")
+  Future<EmailSequence> createEmailSequence({
+    @Field() required EmailSequence emailSequence,
+  });
+
+  @PATCH("rest/s1/growerp/100/EmailSequence")
+  Future<EmailSequence> updateEmailSequence({
+    @Field() required EmailSequence emailSequence,
+  });
+
+  @DELETE("rest/s1/growerp/100/EmailSequence")
+  Future<void> deleteEmailSequence({
+    @Field() required EmailSequence emailSequence,
+  });
+
   @POST("rest/s1/growerp/100/Opportunity")
   Future<Opportunity> createOpportunity({
     @Field() required Opportunity opportunity,

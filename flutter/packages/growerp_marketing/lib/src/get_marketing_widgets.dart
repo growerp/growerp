@@ -13,6 +13,7 @@ Map<String, GrowerpWidgetBuilder> getMarketingWidgets() {
     'SocialPostList': (args) => const SocialPostList(),
     'MasterContentList': (args) => const MasterContentList(),
     'PersonaList': (args) => const PersonaList(),
+    'EmailSequenceList': (args) => const EmailSequenceList(),
     'LandingPageList': (args) => const LandingPageList(),
     'AssessmentList': (args) => const AssessmentList(),
   };

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entities xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/entity-definition-3.xsd">
+
+    <!-- ========================================================= -->
+    <!--  Email nurture sequences (drip campaigns)                 -->
+    <!-- ========================================================= -->
+    <entity entity-name="EmailSequence" package="growerp.marketing">
+        <description>A multi-step email drip sequence; leads are enrolled and receive
+            the steps spaced by their delayDays.</description>
+        <field name="emailSequenceId" type="id" is-pk="true" />
+        <field name="pseudoId" type="id" />
+        <field name="ownerPartyId" type="id" />
+        <field name="marketingCampaignId" type="id" />
+        <field name="sequenceName" type="text-medium" />
+        <field name="status" type="text-short" /> <!-- ACTIVE, PAUSED -->
+        <field name="createdDate" type="date-time" />
+
+        <relationship type="one" related="mantle.party.Party">
+            <key-map field-name="ownerPartyId" related="partyId" />
+        </relationship>
+        <relationship type="one" related="mantle.marketing.campaign.MarketingCampaign">
+            <key-map field-name="marketingCampaignId" />
+        </relationship>
+    </entity>
+
+    <entity entity-name="EmailSequenceStep" package="growerp.marketing">
+        <description>One email in a sequence; delayDays counts from the previous
+            step (or from enrollment for the first step).</description>
+        <field name="emailSequenceId" type="id" is-pk="true" />
+        <field name="stepSeq" type="number-integer" is-pk="true" />
+        <field name="delayDays" type="number-integer" />
+        <field name="subject" type="text-medium" />
+        <field name="bodyHtml" type="text-very-long" />
+
+        <relationship type="one" related="growerp.marketing.EmailSequence">
+            <key-map field-name="emailSequenceId" />
+        </relationship>
+    </entity>
+
+    <entity entity-name="EmailSequenceEnrollment" package="growerp.marketing">
+        <description>A lead enrolled in a sequence; currentStep is the last step
+            sent (0 = none yet).</description>
+        <field name="enrollmentId" type="id" is-pk="true" />
+        <field name="emailSequenceId" type="id" />
+        <field name="ownerPartyId" type="id" />
+        <field name="partyId" type="id" />
+        <field name="emailAddress" type="text-medium" />
+        <field name="firstName" type="text-medium" />
+        <field name="currentStep" type="number-integer" />
+        <!-- ACTIVE, COMPLETED, UNSUBSCRIBED, CONVERTED -->
+        <field name="status" type="text-short" />
+        <field name="nextSendDate" type="date-time" />
+        <field name="opens" type="number-integer" />
+        <field name="clicks" type="number-integer" />
+        <field name="unsubscribeToken" type="text-short" />
+        <field name="createdDate" type="date-time" />
+
+        <relationship type="one" related="growerp.marketing.EmailSequence">
+            <key-map field-name="emailSequenceId" />
+        </relationship>
+        <relationship type="one" related="mantle.party.Party">
+            <key-map field-name="partyId" />
+        </relationship>
+        <index name="EMSEQENR_SEQEML">
+            <index-field name="emailSequenceId" />
+            <index-field name="emailAddress" />
+        </index>
+    </entity>
+</entities>

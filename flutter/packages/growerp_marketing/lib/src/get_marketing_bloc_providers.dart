@@ -28,6 +28,9 @@ List<BlocProvider> getMarketingBlocProviders(RestClient restClient,
     BlocProvider<PersonaBloc>(
       create: (context) => PersonaBloc(restClient),
     ),
+    BlocProvider<EmailSequenceBloc>(
+      create: (context) => EmailSequenceBloc(restClient),
+    ),
     BlocProvider<ContentPlanBloc>(
       create: (context) => ContentPlanBloc(restClient),
     ),

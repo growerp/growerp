@@ -52,6 +52,9 @@ export 'src/bloc/social_post_state.dart';
 export 'src/bloc/master_content_bloc.dart';
 export 'src/bloc/master_content_event.dart';
 export 'src/bloc/master_content_state.dart';
+export 'src/bloc/email_sequence_bloc.dart';
+export 'src/bloc/email_sequence_event.dart';
+export 'src/bloc/email_sequence_state.dart';
 
 export 'src/get_marketing_bloc_providers.dart';
 
