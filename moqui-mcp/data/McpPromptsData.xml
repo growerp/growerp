@@ -62,39 +62,37 @@
         resourceId="WIKI_MCP_PROMPTS_ROOT"
         mimeType="text/markdown"
         versionName="v1">
-This server provides access to Moqui ERP through MCP.
+This server provides access to GrowERP (Moqui backend) through MCP.
 For ${focus?.capitalize() ?: 'General'} operations:
 
 ${focus == 'catalog' ? '''
 ## Catalog Operations
-- **FindProduct**: Use `/PopCommerce/PopCommerceAdmin/Catalog/Product/FindProduct` for product catalog
-- **FindFeature**: Use `/PopCommerce/PopCommerceAdmin/Catalog/Feature/FindFeature` to search by features like color or size
-- **EditPrices**: Use `/PopCommerce/PopCommerceAdmin/Catalog/Product/EditPrices` to check prices
+- Search for catalog services: `moqui_search_services(query="product")` or `query="category"`
+- Product prices, features and assets are managed via the growerp CatalogServices
 ''' : ''}
 
 ${focus == 'orders' ? '''
 ## Order Operations
-- **FindOrder**: Use `/PopCommerce/PopCommerceAdmin/Order/FindOrder` for order status and lookup
-- **QuickSearch**: Use `/PopCommerce/PopCommerceAdmin/QuickSearch` for general order searches
+- Orders, invoices, shipments, payments and transactions are all "financial documents":
+  list them with `growerp.100.FinDocServices100.get#FinDoc` (set docType e.g. 'order' and sales=true/false)
 ''' : ''}
 
 ${focus == 'customers' ? '''
 ## Customer Operations
-- **CustomerRoot**: Use `/PopCommerce/PopCommerceRoot/Customer` for customer management
-- **QuickSearch**: Use `/PopCommerce/PopCommerceAdmin/QuickSearch` for customer lookup
+- Search for party services: `moqui_search_services(query="user")` or `query="company"`
 ''' : ''}
 
 ${detailLevel == 'advanced' ? '''
 ## Advanced Features
-- Use screen rendering for complex workflows with `moqui_render_screen`
-- Subscribe to wiki and document resources for real-time updates
-- All screens support parameterized queries for filtering results
+- Inspect raw data read-only with `moqui_rest_call` (e1/{Entity}, s1/moqui, s1/mantle)
+- Fetch step-by-step workflow guides with `moqui_get_help(uri="wiki:workflow:Order-Entry")`
+- Search company documents with `searchKnowledge`; navigate the data model with `okf_index`
 ''' : ''}
 
 Use following discovery tools to explore available functionality:
-- `moqui_browse_screens`: Browse Moqui screen hierarchy
-- `moqui_search_screens`: Search for screens by name to find their paths.
-- `moqui_get_screen_details`: Get input parameters for specific screens.
+- `moqui_search_services`: Find growerp.* services by keyword
+- `moqui_get_service_details`: Get input/output parameters for a service
+- `moqui_execute_service`: Run a growerp.* service
     </moqui.resource.DbResourceFile>
 
     <!-- Argument Schema Attachment -->

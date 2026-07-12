@@ -24,14 +24,6 @@ import org.slf4j.LoggerFactory
 class McpToolAdapter {
     protected final static Logger logger = LoggerFactory.getLogger(McpToolAdapter.class)
 
-    // MCP tool name → Moqui service name mapping
-    private static final Map<String, String> TOOL_SERVICE_MAP = [
-        'moqui_browse_screens': 'McpServices.mcp#BrowseScreens',
-        'moqui_search_screens': 'McpServices.mcp#SearchScreens',
-        'moqui_get_screen_details': 'McpServices.mcp#GetScreenDetails',
-        'moqui_get_help': 'McpServices.mcp#GetHelp'
-    ]
-
     // MCP method → Moqui service name mapping for JSON-RPC methods
     private static final Map<String, String> METHOD_SERVICE_MAP = [
         'initialize': 'McpServices.mcp#Initialize',
@@ -49,16 +41,6 @@ class McpToolAdapter {
         'sampling/createMessage': 'McpServices.mcp#SamplingCreateMessage',
         'elicitation/create': 'McpServices.mcp#ElicitationCreate'
     ]
-
-    // Tool descriptions for MCP tool definitions
-    private static final Map<String, String> TOOL_DESCRIPTIONS = [
-        'moqui_browse_screens': 'Browse Moqui screen hierarchy and render screen content',
-        'moqui_search_screens': 'Search for screens by name to find their paths',
-        'moqui_get_screen_details': 'Get screen field details including dropdown options',
-        'moqui_get_help': 'Fetch extended documentation for a screen or service'
-    ]
-
-    private static final Map<String, Map> TOOL_SCHEMAS = [:]
 
     // Static cache: computed once per JVM, avoids repeated filesystem scans in getKnownServiceNames()
     private static volatile List<String> cachedGroWerpServiceNames = null
@@ -81,64 +63,6 @@ class McpToolAdapter {
     static void clearServiceNameCache() {
         cachedGroWerpServiceNames = null
         logger.info("McpToolAdapter: cleared growerp service name cache")
-    }
-
-    static void registerTool(String name, String serviceName, String description, Map schema) {
-        TOOL_SERVICE_MAP.put(name, serviceName)
-        if (description) TOOL_DESCRIPTIONS.put(name, description)
-        if (schema) TOOL_SCHEMAS.put(name, schema)
-        logger.info("McpToolAdapter: registered plugin tool '${name}' -> ${serviceName}")
-    }
-
-    /**
-     * Call an MCP tool, translating to the appropriate Moqui service
-     * @param ec The execution context
-     * @param toolName The MCP tool name
-     * @param arguments The tool arguments
-     * @return The result map or error map
-     */
-    Map callTool(ExecutionContext ec, String toolName, Map arguments) {
-        String serviceName = TOOL_SERVICE_MAP.get(toolName)
-        if (!serviceName) {
-            logger.warn("Unknown tool: ${toolName}")
-            return [error: [code: -32601, message: "Unknown tool: ${toolName}"]]
-        }
-
-        logger.debug("Calling tool ${toolName} -> service ${serviceName} with args: ${arguments}")
-
-        try {
-            // NOTE: Authorization is NOT disabled here.
-            // Tools run with the current user's permissions (or the impersonated user's permissions).
-            def result = ec.service.sync()
-                .name(serviceName)
-                .parameters(arguments ?: [:])
-                .call()
-
-            logger.debug("Tool ${toolName} completed successfully")
-
-            // Extract result from service response if wrapped
-            if (result?.containsKey('result')) {
-                return result.result
-            }
-            return result ?: [:]
-
-        } catch (org.moqui.context.ArtifactAuthorizationException e) {
-            logger.warn("Security rejection for tool ${toolName} (user: ${ec.user.username}): ${e.message}")
-            return [
-                error: [
-                    code: -32001,
-                    message: "Permission Denied: You do not have access to ${e.artifactName}",
-                    data: [
-                        artifact: e.artifactName, 
-                        action: e.authzActionEnumId,
-                        message: e.message
-                    ]
-                ]
-            ]
-        } catch (Exception e) {
-            logger.error("Error calling tool ${toolName}: ${e.message}", e)
-            return [error: [code: -32000, message: e.message]]
-        }
     }
 
     /**
@@ -182,15 +106,6 @@ class McpToolAdapter {
     }
 
     /**
-     * Check if a tool name is valid
-     * @param toolName The tool name to check
-     * @return true if the tool is known
-     */
-    boolean isValidTool(String toolName) {
-        return TOOL_SERVICE_MAP.containsKey(toolName)
-    }
-
-    /**
      * Check if a method name is valid (has a service mapping)
      * @param method The method name to check
      * @return true if the method has a service mapping
@@ -200,53 +115,12 @@ class McpToolAdapter {
     }
 
     /**
-     * Get the service name for a given tool
-     * @param toolName The tool name
-     * @return The service name or null if not found
-     */
-    String getServiceForTool(String toolName) {
-        return TOOL_SERVICE_MAP.get(toolName)
-    }
-
-    /**
      * Get the service name for a given method
      * @param method The method name
      * @return The service name or null if not found
      */
     String getServiceForMethod(String method) {
         return METHOD_SERVICE_MAP.get(method)
-    }
-
-    /**
-     * Get the list of available tools with their definitions
-     * @return List of tool definition maps
-     */
-    static List<Map> listTools() {
-        return TOOL_SERVICE_MAP.keySet().collect { toolName ->
-            Map toolDef = [
-                name: toolName,
-                description: TOOL_DESCRIPTIONS.get(toolName) ?: "MCP tool: ${toolName}"
-            ]
-            toolDef.inputSchema = TOOL_SCHEMAS.get(toolName) ?: [type: "object", properties: [:]]
-            return toolDef
-        }
-    }
-
-    /**
-     * Get tool description
-     * @param toolName The tool name
-     * @return The tool description or null if not found
-     */
-    String getToolDescription(String toolName) {
-        return TOOL_DESCRIPTIONS.get(toolName)
-    }
-
-    /**
-     * Get all supported tool names
-     * @return Set of tool names
-     */
-    Set<String> getToolNames() {
-        return TOOL_SERVICE_MAP.keySet()
     }
 
     /**

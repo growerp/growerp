@@ -85,12 +85,12 @@ TEST_TYPE="$1"
 case "$TEST_TYPE" in
     "infrastructure"|"infra")
         echo -e "${BLUE}🏗️ Running infrastructure tests only...${NC}"
-        TEST_CLASS="org.moqui.mcp.test.McpTestSuite"
+        TEST_CLASS="org.moqui.mcp.test.McpIntegrationTest"
         TEST_ARGS="infrastructure"
         ;;
     "workflow"|"popcommerce")
         echo -e "${BLUE}🛒 Running PopCommerce workflow tests only...${NC}"
-        TEST_CLASS="org.moqui.mcp.test.McpTestSuite"
+        TEST_CLASS="org.moqui.mcp.test.McpIntegrationTest"
         TEST_ARGS="workflow"
         ;;
     "help"|"-h"|"--help")
@@ -109,7 +109,7 @@ case "$TEST_TYPE" in
         ;;
     "")
         echo -e "${BLUE}🧪 Running all MCP tests...${NC}"
-        TEST_CLASS="org.moqui.mcp.test.McpTestSuite"
+        TEST_CLASS="org.moqui.mcp.test.McpIntegrationTest"
         TEST_ARGS=""
         ;;
     *)

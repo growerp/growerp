@@ -681,7 +681,7 @@ class EnhancedMcpServlet extends HttpServlet {
 
         // Validate MCP protocol version
         String protocolVersion = request.getHeader("MCP-Protocol-Version")
-        def supportedVersions = ["2025-06-18", "2025-11-25", "2024-11-05", "2024-10-07", "2023-06-05"]
+        def supportedVersions = ["2025-11-25", "2025-06-18", "2024-11-05", "2024-10-07", "2023-06-05"]
         if (protocolVersion && !supportedVersions.contains(protocolVersion)) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST)
             response.setContentType("application/json")

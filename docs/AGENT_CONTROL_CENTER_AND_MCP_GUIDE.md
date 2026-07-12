@@ -22,18 +22,10 @@ Agents reach Moqui and GrowERP automatically through a built-in MCP toolset. The
 
 1. **The LLM (e.g., Gemini 2.5 Flash)** processes user requests and determines which tools to call.
 2. **The Agent Control Center (ADK)** manages the agent's persona, its system prompt, its memory across sessions, and its assigned team members.
-3. **Moqui MCP** acts as the secure bridge. It exposes Moqui services (e.g., `moqui_execute_service`) and screens (e.g., `moqui_browse_screens`) to the LLM as structured JSON-RPC endpoints.
+3. **Moqui MCP** acts as the secure bridge. It exposes Moqui services (e.g., `moqui_execute_service`), a read-only REST proxy (`moqui_rest_call`) and knowledge tools to the LLM as structured JSON-RPC endpoints.
 4. **The Security Gate** ensures the LLM's tool calls are strictly governed by the agent's assigned permissions and the underlying user's artifact authorizations.
 
-### The MARIA Format (Moqui MCP)
-Enterprise screens are built for humans with visual context. AI agents need structured semantics. Moqui MCP solves this with **MARIA**, a JSON format based on W3C accessibility standards.
-
-MARIA transforms Moqui screens into accessibility trees that LLMs naturally understand. For example, an agent sees a form, its required fields, and the available actions (like `createPerson`) without needing a vision model or browser automation. 
-
-**Why MARIA beats browser automation (like Playwright):**
-- **Latency & Token Cost**: Direct JSON-RPC round-trips with semantic-only payloads, saving massive token costs.
-- **Reliability**: No brittle CSS selectors or DOM scraping. Stable semantic contracts.
-- **Security**: Direct enforcement of fine-grained artifact authorization.
+GrowERP uses a Flutter frontend; the Moqui web UI (and its screen-browsing MCP tools) is not used. Agents work directly against Moqui services, which gives stable semantic contracts, low token cost and direct enforcement of fine-grained artifact authorization.
 
 ---
 
@@ -77,10 +69,11 @@ Agents use specific tools to interact with the system.
 - `moqui_get_service_details`: Get a service's input/output parameters and types.
 - `moqui_execute_service`: Execute a Moqui service (respecting authorizations).
 
-**Screen Tools** (Used for browsing dynamic application hierarchies):
-- `moqui_browse_screens`: Navigate screens and execute actions.
-- `moqui_search_screens`: Find screens by name.
-- `moqui_get_screen_details`: Get field metadata and dropdown options.
+**Data & Documentation Tools**:
+- `moqui_rest_call`: Read-only (GET) access to the Moqui REST API for data inspection.
+- `moqui_get_help`: Wiki docs for services (`wiki:service:*`) and step-by-step business workflows (`wiki:workflow:*`).
+- `searchKnowledge`: RAG search over the company's ingested knowledge base.
+- `okf_index` / `okf_load_concept` / `okf_follow`: Navigate the curated OKF domain-knowledge bundle.
 
 ---
 

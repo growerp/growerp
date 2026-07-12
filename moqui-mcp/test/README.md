@@ -1,13 +1,9 @@
 # MCP Test Suite
 
-This directory contains the Java-based test suite for the Moqui MCP (Model Context Protocol) implementation. The tests validate that the screen infrastructure works correctly through deterministic workflows.
+This directory contains the Java-based test suite for the Moqui MCP (Model Context Protocol) implementation. The tests validate MCP connectivity, session handling and the service-based tools.
 
-## Overview
-
-The test suite provides a Java equivalent to the `mcp.sh` script and includes comprehensive tests for:
-
-1. **Screen Infrastructure Tests** - Basic MCP connectivity, screen discovery, rendering, and parameter handling
-2. **PopCommerce Workflow Tests** - Complete business workflow: product lookup → order placement for John Doe
+Note: Moqui screens are not used in GrowERP; the former screen-infrastructure and
+PopCommerce screen workflow tests were removed together with the screen tools.
 
 ## Test Structure
 
@@ -15,9 +11,7 @@ The test suite provides a Java equivalent to the `mcp.sh` script and includes co
 test/
 ├── java/org/moqui/mcp/test/
 │   ├── McpJavaClient.java          # Java MCP client (equivalent to mcp.sh)
-│   ├── ScreenInfrastructureTest.java  # Screen infrastructure validation
-│   ├── PopCommerceOrderTest.java   # PopCommerce order workflow test
-│   └── McpTestSuite.java           # Main test runner
+│   └── McpIntegrationTest.java     # MCP initialize/session/tools list tests
 ├── resources/
 │   └── test-config.properties      # Test configuration
 ├── run-tests.sh                    # Test execution script
@@ -56,7 +50,7 @@ cd moqui-mcp-2
 
 # Set up classpath and run tests
 java -cp "build/classes/java/main:build/resources/main:test/build/classes/java/test:test/resources:../moqui-framework/runtime/lib/*:../moqui-framework/framework/build/libs/*" \
-     org.moqui.mcp.test.McpTestSuite
+     org.moqui.mcp.test.McpIntegrationTest
 ```
 
 ## Test Configuration
@@ -186,8 +180,7 @@ For detailed debugging, you can run individual test classes:
 
 ```bash
 java -cp "..." org.moqui.mcp.test.McpJavaClient
-java -cp "..." org.moqui.mcp.test.ScreenInfrastructureTest
-java -cp "..." org.moqui.mcp.test.PopCommerceOrderTest
+java -cp "..." org.moqui.mcp.test.McpIntegrationTest
 ```
 
 ## Future Enhancements
