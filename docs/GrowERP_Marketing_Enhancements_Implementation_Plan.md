@@ -198,7 +198,12 @@ All entity/service/file references below were verified against the codebase.
 
 ---
 
-## #6 Social engagement monitor (M) — Phase F
+## #6 Social engagement monitor (M) — Phase F ✅ shipped
+
+> Shipped: `SocialEngagement` entity + record/list services and
+> `convert#EngagementToLead` (creates a Lead + follow-up to-do, marks CONTACTED);
+> REST `SocialEngagement` (+`/Convert`); Engagements admin screen + menu row.
+> Platform pollers deferred (manual-first as planned; API access per platform varies).
 
 **Goal:** record likes/comments/shares/DM-replies per SocialPost as signals; convert signals to leads and follow-up tasks.
 

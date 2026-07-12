@@ -69,3 +69,6 @@ export 'email_sequence_dialog.dart';
 
 // Appointment booking
 export 'appointment_slot_list.dart';
+
+// Social engagement signals
+export 'social_engagement_list.dart';

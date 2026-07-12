@@ -125,4 +125,27 @@
             <key-map field-name="ownerPartyId" related="partyId" />
         </relationship>
     </entity>
+
+    <!-- ========================================================= -->
+    <!--  Social engagement signals (likes/comments/shares/DMs)     -->
+    <!-- ========================================================= -->
+    <entity entity-name="SocialEngagement" package="growerp.marketing">
+        <description>A signal of interest on a social post; converting it creates a
+            Lead and a follow-up Activity.</description>
+        <field name="engagementId" type="id" is-pk="true" />
+        <field name="ownerPartyId" type="id" />
+        <field name="postId" type="id" />
+        <field name="platform" type="text-short" />
+        <!-- LIKE, COMMENT, SHARE, DM_REPLY -->
+        <field name="engagementType" type="text-short" />
+        <field name="userName" type="text-medium" />
+        <field name="userProfileUrl" type="text-medium" />
+        <field name="note" type="text-long" />
+        <!-- NEW, CONTACTED, CONVERTED -->
+        <field name="status" type="text-short" />
+        <field name="createdDate" type="date-time" />
+        <relationship type="one" related="growerp.marketing.SocialPost">
+            <key-map field-name="postId" />
+        </relationship>
+    </entity>
 </entities>

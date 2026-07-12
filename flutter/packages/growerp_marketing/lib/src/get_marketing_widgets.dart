@@ -15,6 +15,7 @@ Map<String, GrowerpWidgetBuilder> getMarketingWidgets() {
     'PersonaList': (args) => const PersonaList(),
     'EmailSequenceList': (args) => const EmailSequenceList(),
     'AppointmentSlotList': (args) => const AppointmentSlotList(),
+    'SocialEngagementList': (args) => const SocialEngagementList(),
     'LandingPageList': (args) => const LandingPageList(),
     'AssessmentList': (args) => const AssessmentList(),
   };

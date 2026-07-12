@@ -874,6 +874,25 @@ abstract class RestClient {
     @Field() required AppointmentSlot appointmentSlot,
   });
 
+  // social engagement signals
+  @GET("rest/s1/growerp/100/SocialEngagement")
+  Future<SocialEngagements> getSocialEngagement({
+    @Query('postId') String? postId,
+    @Query('start') int? start,
+    @Query('limit') int? limit,
+  });
+
+  @POST("rest/s1/growerp/100/SocialEngagement")
+  Future<void> createSocialEngagement({
+    @Field() required SocialEngagement socialEngagement,
+  });
+
+  @POST("rest/s1/growerp/100/SocialEngagement/Convert")
+  Future<void> convertEngagementToLead({
+    @Field() required String engagementId,
+    @Field() required String email,
+  });
+
   @POST("rest/s1/growerp/100/Opportunity")
   Future<Opportunity> createOpportunity({
     @Field() required Opportunity opportunity,

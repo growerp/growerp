@@ -713,4 +713,117 @@
         </actions>
     </service>
 
+    <!-- ============ social engagement signals ============ -->
+
+    <service verb="get" noun="SocialEngagement">
+        <description>Engagement signals recorded on the company's social posts</description>
+        <in-parameters>
+            <parameter name="postId" />
+            <parameter name="start" type="Integer" default-value="0" />
+            <parameter name="limit" type="Integer" default-value="50" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="socialEngagements" type="List" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <entity-find entity-name="growerp.marketing.SocialEngagement" list="engagements"
+                offset="start" limit="limit">
+                <econdition field-name="ownerPartyId" from="ownerPartyId" />
+                <econdition field-name="postId" ignore-if-empty="true" />
+                <order-by field-name="-createdDate" />
+            </entity-find>
+            <set field="socialEngagements" from="[]" />
+            <iterate list="engagements" entry="engagement">
+                <script>socialEngagements.add([engagementId: engagement.engagementId,
+                    postId: engagement.postId, platform: engagement.platform,
+                    engagementType: engagement.engagementType,
+                    userName: engagement.userName,
+                    userProfileUrl: engagement.userProfileUrl,
+                    note: engagement.note, status: engagement.status,
+                    createdDate: engagement.createdDate
+                        ? engagement.createdDate.toString() + 'z' : null])</script>
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="create" noun="SocialEngagement">
+        <description>Record an engagement signal (like/comment/share/DM reply) on a post</description>
+        <in-parameters>
+            <parameter name="socialEngagement" type="Map" required="true">
+                <parameter name="postId" />
+                <parameter name="platform" />
+                <parameter name="engagementType" />
+                <parameter name="userName" />
+                <parameter name="userProfileUrl" />
+                <parameter name="note" />
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="engagementId" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <service-call name="create#growerp.marketing.SocialEngagement" out-map="context"
+                in-map="[ownerPartyId: ownerPartyId,
+                    postId: socialEngagement.postId,
+                    platform: socialEngagement.platform,
+                    engagementType: socialEngagement.engagementType ?: 'COMMENT',
+                    userName: socialEngagement.userName,
+                    userProfileUrl: socialEngagement.userProfileUrl,
+                    note: socialEngagement.note,
+                    status: 'NEW', createdDate: ec.user.nowTimestamp]" />
+        </actions>
+    </service>
+
+    <service verb="convert" noun="EngagementToLead">
+        <description>Convert an engagement signal into a Lead with a follow-up to-do</description>
+        <in-parameters>
+            <parameter name="engagementId" required="true" />
+            <parameter name="email" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="partyId" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <entity-find entity-name="growerp.marketing.SocialEngagement" list="engagements"
+                for-update="true" limit="1">
+                <econdition field-name="engagementId" from="engagementId" />
+                <econdition field-name="ownerPartyId" from="ownerPartyId" />
+            </entity-find>
+            <if condition="!engagements">
+                <return error="true" message="engagement ${engagementId} not found!" />
+            </if>
+            <set field="engagement" from="engagements[0]" />
+            <service-call name="growerp.100.PartyServices100.create#User" out-map="userOut"
+                ignore-error="true">
+                <field-map field-name="user"
+                    from="[
+                        firstName: engagement.userName ?: 'social',
+                        lastName: engagement.platform ?: 'engagement',
+                        email: email,
+                        role: 'Lead',
+                        userGroupId: 'GROWERP_M_LEAD',
+                    ]" />
+            </service-call>
+            <set field="partyId" from="userOut?.user?.partyId" />
+            <service-call name="growerp.100.ActivityServices100.create#Activity"
+                ignore-error="true"
+                in-map="[activity: [
+                    activityType: 'todo',
+                    activityName: 'Follow up ' + (engagement.userName ?: 'engagement') +
+                        ' (' + (engagement.platform ?: '') + ' ' +
+                        (engagement.engagementType ?: '') + ')',
+                    statusId: 'planning',
+                    description: engagement.note,
+                    thirdParty: partyId ? [partyId: partyId] : null]]" />
+            <set field="engagement.status" value="CONTACTED" />
+            <entity-update value-field="engagement" />
+        </actions>
+    </service>
+
 </services>
