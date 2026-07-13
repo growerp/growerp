@@ -227,7 +227,7 @@ pre-filled dialog. Order/shipment specifics still work: "enter a sales order" �
             // calling agent and its tenant.
             def agentMcpToolset = buildMcpToolset(configId, ownerPartyId)
 
-            String envModel = System.getenv('GEMINI_MODEL') ?: System.getProperty('GEMINI_MODEL') ?: 'gemini-2.5-flash'
+            String envModel = System.getenv('GEMINI_MODEL') ?: System.getProperty('GEMINI_MODEL') ?: 'gemini-2.5-flash-lite'
             String modelId = modelName ?: envModel
             // google-genai reads the key from the GOOGLE_API_KEY/GEMINI_API_KEY *environment*
             // variable (not a System property), so a key from System Setup must be passed to the
@@ -391,7 +391,7 @@ CRITICAL tool-use rules — follow exactly:
         String defaultKey = System.getenv('GOOGLE_API_KEY') ?:
                             System.getenv('GOOGLE_GENAI_API_KEY') ?:
                             System.getenv('GEMINI_API_KEY') ?: ''
-        String defaultModel = 'gemini-2.5-flash'
+        String defaultModel = 'gemini-2.5-flash-lite'
 
         if (cfgList) {
             def ec2 = null
@@ -439,7 +439,7 @@ CRITICAL tool-use rules — follow exactly:
     /// its key from (in order) [seedKey], env vars, then the gemini growerp.general.LlmConfig.
     /// No-op when the runner already exists. Called by lazyInit and reloadInteractive.
     private static void ensureInteractiveDefault(ExecutionContextFactory ecf, String seedKey = null,
-                                                 String model = 'gemini-2.5-flash') {
+                                                 String model = 'gemini-2.5-flash-lite') {
         if (registry.containsKey(DEFAULT_CONFIG)) return
         // Precedence for the shared interactive runner: explicit env var → key saved via
         // System Setup (growerp.general.LlmConfig) → key borrowed from a specialised agent
@@ -491,7 +491,7 @@ CRITICAL tool-use rules — follow exactly:
         }
         // agentName=null → builds the general 'growerp-agent'; ownerPartyId set + unnamed →
         // claims tenantRegistry[owner] and its McpToolset carries adk_owner_party_id.
-        initConfig(cid, ownerPartyId, null, 'gemini-2.5-flash', '', key)
+        initConfig(cid, ownerPartyId, null, 'gemini-2.5-flash-lite', '', key)
         logger.info("Registered per-tenant interactive agent configId='${cid}' (owner=${ownerPartyId})")
     }
 

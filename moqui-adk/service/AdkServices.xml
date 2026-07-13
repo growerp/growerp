@@ -10,7 +10,7 @@
             <parameter name="adkAgentConfigId"/>
             <parameter name="ownerPartyId"/>
             <parameter name="agentName"/>
-            <parameter name="modelName"   default-value="gemini-2.5-flash"/>
+            <parameter name="modelName"   default-value="gemini-2.5-flash-lite"/>
             <parameter name="apiKey"/>
             <parameter name="llmProvider"/>
             <parameter name="instruction"/>
@@ -80,7 +80,7 @@
                     <entity-make-value entity-name="moqui.adk.AdkAgentConfig" value-field="newCfg"/>
                     <set field="newCfg.ownerPartyId"       from="ownerPartyId"/>
                     <set field="newCfg.agentName"          from="agentName    ?: 'MoquiAgent'"/>
-                    <set field="newCfg.modelName"          from="modelName    ?: 'gemini-2.5-flash'"/>
+                    <set field="newCfg.modelName"          from="modelName    ?: 'gemini-2.5-flash-lite'"/>
                     <set field="newCfg.apiKey"             from="apiKey"/>
                     <set field="newCfg.llmProvider"        from="llmProvider  ?: 'gemini'"/>
                     <set field="newCfg.instruction"        from="instruction  ?: 'You are a helpful assistant for the GrowERP ERP system.'"/>
@@ -132,7 +132,7 @@
                     adkAgentConfigId,
                     savedCfg.ownerPartyId ?: null,
                     savedCfg.agentName    ?: null,
-                    savedCfg.modelName    ?: 'gemini-2.5-flash',
+                    savedCfg.modelName    ?: 'gemini-2.5-flash-lite',
                     savedCfg.instruction  ?: '',
                     resolvedApiKey,
                     savedCfg.llmProvider  ?: 'gemini',

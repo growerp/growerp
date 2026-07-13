@@ -414,6 +414,10 @@ along with this software (see the LICENSE.md file). If not, see
         <field name="githubToken"      type="text-medium" encrypt="true" enable-audit-log="true"/>
         <field name="githubRepository" type="text-medium"/>
         <field name="llmSystemTokenLimit" type="number-integer"/>
+        <field name="aiModelName" type="text-short">
+            <description>Tenant-wide default Gemini model for AI content generation (e.g.
+                gemini-2.5-flash-lite); empty uses the system default.</description>
+        </field>
         <field name="googleClientId"     type="text-medium"/>
         <field name="googleClientSecret" type="text-medium" encrypt="true" enable-audit-log="true"/>
         <field name="googleRefreshToken" type="text-medium" encrypt="true" enable-audit-log="true"/>

@@ -264,7 +264,7 @@ class AdkDevServlet extends HttpServlet {
                     Map params = [
                         ownerPartyId      : ownerPartyId ?: body.ownerPartyId,
                         agentName         : body.agentName,
-                        modelName         : body.modelName ?: 'gemini-2.5-flash',
+                        modelName         : body.modelName ?: 'gemini-2.5-flash-lite',
                         instruction       : body.instruction,
                         description       : body.description,
                         scheduleExpression: body.scheduleExpression,

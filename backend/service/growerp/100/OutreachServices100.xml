@@ -1562,9 +1562,10 @@
             <parameter name="platformMessage" type="String" />
         </out-parameters>
         <actions>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" out-map="relInfo" />
             <script location="component://growerp/service/GeminiAiUtil.groovy" />
             <script>
-                def result = GeminiAiUtil.generatePlatformMessage(ec, campaignTemplate, platform, actionType)
+                def result = GeminiAiUtil.generatePlatformMessage(ec, campaignTemplate, platform, actionType, relInfo.ownerPartyId)
                 platformMessage = result
             </script>
         </actions>
@@ -1584,9 +1585,10 @@
             <parameter name="polishedMessage" type="String" />
         </out-parameters>
         <actions>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" out-map="relInfo" />
             <script location="component://growerp/service/GeminiAiUtil.groovy" />
             <script>
-                polishedMessage = GeminiAiUtil.polishMessage(ec, draftMessage, platform, recipientName, recipientCompany, recipientTitle)
+                polishedMessage = GeminiAiUtil.polishMessage(ec, draftMessage, platform, recipientName, recipientCompany, recipientTitle, relInfo.ownerPartyId)
             </script>
         </actions>
     </service>

@@ -69,6 +69,8 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
   List<AdkMcpServer> _allServers = [];
   bool _mcpLoading = false;
 
+  static const _geminiModels = ['gemini-2.5-flash', 'gemini-2.5-flash-lite'];
+
   static const _cronHints = [
     ('Every minute', '0 * * * * ?'),
     ('Every 5 minutes', '0 */5 * * * ?'),
@@ -82,7 +84,7 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
     final e = widget.existing;
     if (e != null) {
       _nameCtrl.text = e.agentName ?? '';
-      _modelCtrl.text = e.modelName ?? 'gemini-2.5-flash';
+      _modelCtrl.text = e.modelName ?? 'gemini-2.5-flash-lite';
       _llmProviderCtrl.text = e.llmProvider ?? 'gemini';
       _instructionCtrl.text = e.instruction ?? '';
       _descriptionCtrl.text = e.description ?? '';
@@ -101,7 +103,7 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
       if (_agentRole != 'specialist' && e.adkAgentConfigId != null) _loadTeam();
       if (e.adkAgentConfigId != null) _loadMcpServers();
     } else {
-      _modelCtrl.text = 'gemini-2.5-flash';
+      _modelCtrl.text = 'gemini-2.5-flash-lite';
       _llmProviderCtrl.text = 'gemini';
     }
   }
@@ -507,9 +509,22 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
                       TextFormField(
                         key: const Key('modelName'),
                         controller: _modelCtrl,
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           labelText: 'Model',
-                          hintText: 'gemini-2.5-flash',
+                          hintText: 'gemini-2.5-flash-lite',
+                          suffixIcon: PopupMenuButton<String>(
+                            key: const Key('modelNameMenu'),
+                            tooltip: 'Pick a Gemini model',
+                            icon: const Icon(Icons.arrow_drop_down),
+                            itemBuilder: (context) => _geminiModels
+                                .map((m) => PopupMenuItem<String>(
+                                      value: m,
+                                      child: Text(m),
+                                    ))
+                                .toList(),
+                            onSelected: (m) =>
+                                setState(() => _modelCtrl.text = m),
+                          ),
                         ),
                       ),
                       const SizedBox(height: 8),

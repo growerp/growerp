@@ -77,7 +77,7 @@ This directory contains comprehensive documentation for extending and developing
 ### 🤖 AI Integration
 
 - **[GrowERP AI Development Instructions](./GrowERP_AI_Instructions.md)** - AI-assisted development
-- **[Generative AI Integration Guide](./GrowERP_AI_Integration_Guide.md)** - Guide to all AI-integrated features (Gemini, Vertex AI, Veo 2, GenUI Onboarding) ⭐ **NEW FEATURE!**
+- **[LLM & API Key Architecture](./GrowERP_LLM_And_API_Key_Architecture.md)** - How GrowERP uses LLMs, resolves API keys, and enforces token limits, plus a catalog of AI-integrated features (Gemini, Vertex AI, Veo 2, GenUI Onboarding) ⭐ **NEW FEATURE!**
 - **[🤖 Agent Control Center & Moqui MCP Guide](./AGENT_CONTROL_CENTER_AND_MCP_GUIDE.md)** - Consolidated guide to multi-agent orchestration and MCP integration ⭐ **NEW!**
 - **[🧠 Agent Control Center (ADK) User Guide](./Agent_Control_Center_User_Guide.md)** - Original UI user guide
 - **[🎮 Agent Demo Walkthrough](./Agent_Control_Center_Demo.md)** - Test the operations assistant and specialist agent team

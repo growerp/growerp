@@ -32,15 +32,31 @@ import groovy.json.JsonOutput
 
 class GeminiAiUtil {
     
-    static final String DEFAULT_MODEL = "gemini-3.5-flash"
+    static final String DEFAULT_MODEL = "gemini-2.5-flash-lite"
     static final String API_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models"
-    
+
+    /**
+     * Resolve which Gemini model to use. Precedence: an explicit model (caller override) >
+     * the tenant's SystemSettings.aiModelName (set via System Setup) > a per-user Moqui
+     * preference > env var / system property > DEFAULT_MODEL.
+     */
+    static String resolveModel(def ec, String ownerPartyId, String explicitModel = null) {
+        if (explicitModel) return explicitModel
+        if (ownerPartyId) {
+            def settings = ec.entity.find("growerp.general.SystemSettings")
+                .condition("ownerPartyId", ownerPartyId).one()
+            if (settings?.aiModelName) return settings.aiModelName as String
+        }
+        return ec.user.getPreference("GEMINI_MODEL") ?: System.getenv("GEMINI_MODEL") ?:
+            System.getProperty("GEMINI_MODEL") ?: DEFAULT_MODEL
+    }
+
     /**
      * Call Gemini API with a prompt and optional configuration.
-     * 
+     *
      * @param ec ExecutionContext from Moqui
      * @param prompt The text prompt to send to Gemini
-     * @param options Optional map with: apiKey, model, temperature, topK, topP, maxOutputTokens, jsonMode
+     * @param options Optional map with: apiKey, model, ownerPartyId, temperature, topK, topP, maxOutputTokens, jsonMode
      * @return The generated text response (cleaned of markdown code blocks if JSON)
      * @throws Exception if API key not found or API call fails
      */
@@ -53,9 +69,9 @@ class GeminiAiUtil {
         if (apiKey == null || apiKey.isEmpty()) {
             throw new Exception("GEMINI_API_KEY not configured. Set in user preferences or environment.")
         }
-        
+
         // Configuration with defaults
-        def model = options.model ?: ec.user.getPreference("GEMINI_MODEL") ?: System.getenv("GEMINI_MODEL") ?: System.getProperty("GEMINI_MODEL") ?: DEFAULT_MODEL
+        def model = resolveModel(ec, options.ownerPartyId as String, options.model as String)
         def temperature = options.temperature ?: 0.7
         def topK = options.topK ?: 40
         def topP = options.topP ?: 0.95
@@ -161,9 +177,11 @@ class GeminiAiUtil {
      * @param campaignTemplate The base campaign message template
      * @param platform The target platform (TWITTER, LINKEDIN, EMAIL, etc.)
      * @param actionType The action type (post_tweet, send_dms, etc.)
+     * @param ownerPartyId Optional tenant id, used to resolve SystemSettings.aiModelName
      * @return A platform-optimized message
      */
-    static String generatePlatformMessage(def ec, String campaignTemplate, String platform, String actionType) {
+    static String generatePlatformMessage(def ec, String campaignTemplate, String platform, String actionType,
+            String ownerPartyId = null) {
         def prompt = """
 Adapt the following marketing message for the ${platform} platform.
 
@@ -179,7 +197,7 @@ Return ONLY the adapted message text, no explanations or formatting.
 Keep the core message but optimize for the platform's style and constraints.
 """
         
-        return callGeminiApi(ec, prompt, [temperature: 0.6, maxOutputTokens: 1024])
+        return callGeminiApi(ec, prompt, [temperature: 0.6, maxOutputTokens: 1024, ownerPartyId: ownerPartyId])
     }
 
     /**
@@ -192,10 +210,12 @@ Keep the core message but optimize for the platform's style and constraints.
      * @param recipientName Optional recipient name for context
      * @param recipientCompany Optional recipient company for context
      * @param recipientTitle Optional recipient job title for context
+     * @param ownerPartyId Optional tenant id, used to resolve SystemSettings.aiModelName
      * @return The polished message
      */
     static String polishMessage(def ec, String draftMessage, String platform,
-            String recipientName = null, String recipientCompany = null, String recipientTitle = null) {
+            String recipientName = null, String recipientCompany = null, String recipientTitle = null,
+            String ownerPartyId = null) {
         def prompt = """
 Improve the tone and flow of the following already-personalized ${platform} outreach message.
 Keep it roughly the same length and keep all specific facts (names, companies, titles) intact.
@@ -209,7 +229,7 @@ ${draftMessage}
 Return ONLY the revised message text, no explanations or markdown.
 """
 
-        return callGeminiApi(ec, prompt, [temperature: 0.5, maxOutputTokens: 1024])
+        return callGeminiApi(ec, prompt, [temperature: 0.5, maxOutputTokens: 1024, ownerPartyId: ownerPartyId])
     }
 
     /**
@@ -246,10 +266,12 @@ Return ONLY the revised message text, no explanations or markdown.
      * @param contentType POSTING | ARTICLE | MESSAGE
      * @param callToAction Optional CTA text
      * @param targetUrl Optional link (withheld for LinkedIn/DM by the rules below)
+     * @param ownerPartyId Optional tenant id, used to resolve SystemSettings.aiModelName
      * @return The adapted, ready-to-publish text for that platform
      */
     static String generateAdaptedContent(def ec, String title, String body, String platform,
-            String contentType, String callToAction = null, String targetUrl = null) {
+            String contentType, String callToAction = null, String targetUrl = null,
+            String ownerPartyId = null) {
         def prompt = """
 Adapt the following platform-neutral marketing content for the ${platform} platform.
 Keep the core message and facts intact; rewrite tone, length and format to fit the platform.
@@ -267,7 +289,7 @@ ${getAdaptationRules(platform, contentType, targetUrl)}
 
 Return ONLY the adapted content text, no explanations, no markdown code fences.
 """
-        return callGeminiApi(ec, prompt, [temperature: 0.7, maxOutputTokens: 4096])
+        return callGeminiApi(ec, prompt, [temperature: 0.7, maxOutputTokens: 4096, ownerPartyId: ownerPartyId])
     }
 
     /**

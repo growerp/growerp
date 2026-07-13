@@ -320,7 +320,7 @@
             <parameter name="prompt" required="true"/>
             <parameter name="ownerPartyId"/>
             <parameter name="apiKey"/>
-            <parameter name="model" default-value="gemini-2.5-flash"/>
+            <parameter name="model" default-value="gemini-2.5-flash-lite"/>
         </in-parameters>
         <out-parameters><parameter name="text"/></out-parameters>
         <actions>

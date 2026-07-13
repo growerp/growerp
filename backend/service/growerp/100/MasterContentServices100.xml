@@ -273,10 +273,11 @@
             <parameter name="adaptedContent" />
         </out-parameters>
         <actions>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" out-map="relInfo" />
             <script location="component://growerp/service/GeminiAiUtil.groovy" />
             <script>
                 adaptedContent = GeminiAiUtil.generateAdaptedContent(ec, title, body,
-                    platform, contentType, callToAction, targetUrl)
+                    platform, contentType, callToAction, targetUrl, relInfo.ownerPartyId)
             </script>
         </actions>
     </service>

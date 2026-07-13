@@ -63,6 +63,8 @@ class _SystemSetupDialogState extends State<SystemSetupDialog> {
   // AI — dynamic list of {providerCtrl, apiKeyCtrl, obscure, apiKeyIsSet}
   final List<Map<String, dynamic>> _llmRows = [];
   final _llmTokenLimitCtrl = TextEditingController();
+  static const _geminiModels = ['gemini-2.5-flash', 'gemini-2.5-flash-lite'];
+  String? _aiModelName;
 
   RestClient? _restClient;
 
@@ -126,6 +128,8 @@ class _SystemSetupDialogState extends State<SystemSetupDialog> {
         ..clear()
         ..addAll(newRows);
       _llmTokenLimitCtrl.text = s.llmSystemTokenLimit?.toString() ?? '';
+      _aiModelName =
+          _geminiModels.contains(s.aiModelName) ? s.aiModelName : null;
     } catch (e) {
       if (mounted) {
         HelperFunctions.showMessage(
@@ -163,6 +167,7 @@ class _SystemSetupDialogState extends State<SystemSetupDialog> {
       } else {
         payload['llmSystemTokenLimit'] = null;
       }
+      payload['aiModelName'] = _aiModelName ?? '';
       await _restClient!.updateSystemSettings(payload);
       if (mounted) {
         HelperFunctions.showMessage(
@@ -275,6 +280,25 @@ class _SystemSetupDialogState extends State<SystemSetupDialog> {
               helperText: 'Leave empty for no limit. Applies only to tenants using the system LLM.',
             ),
             keyboardType: TextInputType.number,
+          ),
+          const SizedBox(height: 16),
+          DropdownButtonFormField<String>(
+            key: const Key('aiModelName'),
+            initialValue: _aiModelName,
+            decoration: const InputDecoration(
+              labelText: 'Default AI Model',
+              helperText: 'Gemini model used for AI content generation across this tenant.',
+            ),
+            items: [
+              const DropdownMenuItem<String>(
+                value: null,
+                child: Text('System default'),
+              ),
+              ..._geminiModels.map(
+                (m) => DropdownMenuItem<String>(value: m, child: Text(m)),
+              ),
+            ],
+            onChanged: (v) => setState(() => _aiModelName = v),
           ),
           const SizedBox(height: 16),
           ..._llmRows.asMap().entries.map((e) => _llmProviderRow(e.key)),

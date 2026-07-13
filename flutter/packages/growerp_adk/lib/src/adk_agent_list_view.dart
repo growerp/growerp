@@ -320,7 +320,7 @@ class _AdkAgentListViewState extends State<AdkAgentListView> {
                 style: const TextStyle(fontWeight: FontWeight.w500),
               ),
               Text(
-                cfg.modelName ?? 'gemini-2.5-flash',
+                cfg.modelName ?? 'gemini-2.5-flash-lite',
                 style: TextStyle(fontSize: 11, color: cs.onSurfaceVariant),
               ),
               if (cfg.instruction != null && cfg.instruction!.isNotEmpty)
@@ -341,7 +341,7 @@ class _AdkAgentListViewState extends State<AdkAgentListView> {
         // 'name$i' (same as phone) so doNewSearch can find/open the row on desktop
         Text(cfg.agentName ?? '(unnamed)', key: Key('name$i')),
         Text(
-          cfg.modelName ?? 'gemini-2.5-flash',
+          cfg.modelName ?? 'gemini-2.5-flash-lite',
           style: TextStyle(fontSize: 13, color: cs.onSurfaceVariant),
         ),
         Text(

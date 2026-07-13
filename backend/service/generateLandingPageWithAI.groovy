@@ -149,7 +149,8 @@ RETURN FORMAT: Return ONLY valid JSON (no markdown, no code blocks) with this ex
 """
     
     // Step 4: Call Gemini API
-    def modelName = ec.user.getPreference("GEMINI_MODEL") ?: System.getenv("GEMINI_MODEL") ?: System.getProperty("GEMINI_MODEL") ?: "gemini-3.5-flash"
+    def tenantModel = ec.entity.find("growerp.general.SystemSettings").condition("ownerPartyId", ownerPartyId).one()?.aiModelName
+    def modelName = tenantModel ?: ec.user.getPreference("GEMINI_MODEL") ?: System.getenv("GEMINI_MODEL") ?: System.getProperty("GEMINI_MODEL") ?: "gemini-2.5-flash-lite"
     def apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}"
     
     def requestBody = [

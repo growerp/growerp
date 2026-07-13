@@ -53,6 +53,8 @@ abstract class SystemSettings with _$SystemSettings {
     String? googleCalendarId,
     // Quota
     int? llmSystemTokenLimit,
+    // Tenant-wide default Gemini model for AI content generation; empty uses the system default.
+    String? aiModelName,
   }) = _SystemSettings;
   SystemSettings._();
 

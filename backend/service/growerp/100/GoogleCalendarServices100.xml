@@ -380,7 +380,7 @@ Return [] when there are no action items.
 MEETING NOTES:
 ${notesText.take(20000)}"""
                 def response = GeminiAiUtil.callGeminiApi(ec, prompt,
-                    [apiKey: geminiKey, temperature: 0.2, jsonMode: true])
+                    [apiKey: geminiKey, temperature: 0.2, jsonMode: true, ownerPartyId: ownerPartyId])
                 actionItems = GeminiAiUtil.parseJsonResponse(response)
             ]]></script>
             <iterate list="actionItems" entry="actionItem">
