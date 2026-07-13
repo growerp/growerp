@@ -241,6 +241,9 @@ along with this software (see the LICENSE.md file). If not, see
                     ec.entity.makeDataLoader().location("component://growerp/data/ErpLandingPageData.xml").load()
                     ec.entity.makeDataLoader().location("component://growerp/data/ErpOnboardAssessmentData.xml").load()
                     ec.entity.makeDataLoader().location("component://growerp/data/GrowerpWebsiteSeedData.xml").load()
+                    // self-marketing sprint content: MarketingCampaign references
+                    // landingPageId=ERP_LANDING_PAGE just loaded above
+                    ec.entity.makeDataLoader().location("component://growerp/data/GrowerpMarketingContentData.xml").load()
                 ]]></script>
                 <service-call name="update#growerp.Application" in-map="[applicationId: 'AppAdmin', assessmentId: 'ERP_ONBOARD']"/>
 

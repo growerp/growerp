@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<entity-facade-xml type="install">
+<entity-facade-xml type="demo">
 
     <!-- ════════════════════════════════════════════════════════════════════════
          GrowERP self-marketing sprint — personas, outreach campaigns + week-1 newsletter.
-         Owner: GROWERP. Load after the GROWERP company exists (companion to
-         GrowerpMarketingAgentsData.xml):
-           java -jar moqui.war load types=install file=.../GrowerpMarketingContentData.xml
+         Owner: GROWERP. type="demo" (not bulk "install"): MarketingCampaign here
+         references landingPageId=ERP_LANDING_PAGE, which only exists after the
+         GROWERP tenant is set up. Loaded explicitly by TenantServices100.xml
+         alongside ErpLandingPageData.xml — see the ownerPartyId=='GROWERP' block.
          Personas: docs/GrowERP_Marketing_Sales_Plan.md §3 (4 sprint personas).
          Channel rules (Outreach Personalizer): LINKEDIN DM ≤400 chars, ends on a
          question, NO URL until reply; EMAIL ≤120 words, assessment link + sign-off.
