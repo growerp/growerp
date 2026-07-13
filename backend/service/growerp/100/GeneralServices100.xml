@@ -1727,7 +1727,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <return/>
             </if>
             <set field="systemSettings" from="ss.getMap()"/>
-            <script>systemSettings.mailPassword = ss.mailPassword ? '****' : ''; systemSettings.githubToken = ss.githubToken ? '****' : ''; systemSettings.githubRepository = ss.githubRepository ?: ''; systemSettings.llmSystemTokenLimit = ss.llmSystemTokenLimit</script>
+            <script>systemSettings.mailPassword = ss.mailPassword ? '****' : ''; systemSettings.githubToken = ss.githubToken ? '****' : ''; systemSettings.githubRepository = ss.githubRepository ?: ''; systemSettings.llmSystemTokenLimit = ss.llmSystemTokenLimit; systemSettings.googleClientSecret = ss.googleClientSecret ? '****' : ''; systemSettings.googleRefreshToken = ss.googleRefreshToken ? '****' : ''</script>
             <entity-find entity-name="growerp.general.LlmConfig" list="llmConfigList">
                 <econdition field-name="ownerPartyId"/>
                 <order-by field-name="llmProvider"/>
@@ -1765,6 +1765,10 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="githubToken"/>
             <parameter name="githubRepository"/>
             <parameter name="llmSystemTokenLimit" type="Integer"/>
+            <parameter name="googleClientId"/>
+            <parameter name="googleClientSecret"/>
+            <parameter name="googleRefreshToken"/>
+            <parameter name="googleCalendarId"/>
         </in-parameters>
         <out-parameters>
             <parameter name="systemSettings" type="Map"/>
@@ -1813,6 +1817,14 @@ along with this software (see the LICENSE.md file). If not, see
                 <script>System.setProperty('growerp.github.repo', githubRepository.take(255))</script>
             </if>
             <if condition="llmSystemTokenLimit != null"><set field="ss.llmSystemTokenLimit" from="llmSystemTokenLimit"/></if>
+            <if condition="googleClientId != null"><set field="ss.googleClientId" from="googleClientId"/></if>
+            <if condition="googleClientSecret &amp;&amp; googleClientSecret != '****'">
+                <set field="ss.googleClientSecret" from="googleClientSecret"/>
+            </if>
+            <if condition="googleRefreshToken &amp;&amp; googleRefreshToken != '****'">
+                <set field="ss.googleRefreshToken" from="googleRefreshToken"/>
+            </if>
+            <if condition="googleCalendarId != null"><set field="ss.googleCalendarId" from="googleCalendarId"/></if>
 
             <if condition="isNew"><then><script>ss.create()</script></then>
                 <else><script>ss.update()</script></else>

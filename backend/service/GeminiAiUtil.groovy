@@ -40,13 +40,13 @@ class GeminiAiUtil {
      * 
      * @param ec ExecutionContext from Moqui
      * @param prompt The text prompt to send to Gemini
-     * @param options Optional map with: model, temperature, topK, topP, maxOutputTokens, jsonMode
+     * @param options Optional map with: apiKey, model, temperature, topK, topP, maxOutputTokens, jsonMode
      * @return The generated text response (cleaned of markdown code blocks if JSON)
      * @throws Exception if API key not found or API call fails
      */
     static String callGeminiApi(def ec, String prompt, Map options = [:]) {
-        // Get API key from user preference or environment
-        def apiKey = ec.user.getPreference("GEMINI_API_KEY")
+        // Get API key from options (batch/cron callers), user preference or environment
+        def apiKey = options.apiKey ?: ec.user.getPreference("GEMINI_API_KEY")
         if (apiKey == null || apiKey.isEmpty()) {
             apiKey = System.getenv("GEMINI_API_KEY")
         }

@@ -41,6 +41,12 @@ along with this software (see the LICENSE.md file). If not, see
         paused="N"
         transactionTimeout="300" />
 
+    <!-- Service Job: Import Google Meet bookings + meeting minutes - every 15 minutes -->
+    <moqui.service.job.ServiceJob jobName="google_calendar_sync"
+        description="Import Google Calendar Meet bookings as lead activities and attach Gemini meeting notes"
+        serviceName="growerp.100.GoogleCalendarServices100.sync#GoogleCalendarEvents"
+        cronExpression="0 8/15 * * * ?" paused="N" transactionTimeout="300" />
+
     <!-- format time period name -->
     <moqui.basic.LocalizedMessage locale="default" original="TimePeriodBaseNameTemplate"
         localized="Y${fromLocalDate.getYear()}${timePeriodType?.lengthUomId!='TF_yr'?(timePeriodType.description.split('(?=[A-Z])')[1][0].toLowerCase())+(periodNum as String).padLeft(2,'0'):''}" />

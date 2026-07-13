@@ -44,6 +44,13 @@ abstract class SystemSettings with _$SystemSettings {
     // GitHub
     String? githubToken,
     String? githubRepository,
+    // Google Workspace (calendar booking capture + Gemini meeting notes)
+    String? googleClientId,
+    // write-only: backend returns '****' when set
+    String? googleClientSecret,
+    // write-only: backend returns '****' when set
+    String? googleRefreshToken,
+    String? googleCalendarId,
     // Quota
     int? llmSystemTokenLimit,
   }) = _SystemSettings;

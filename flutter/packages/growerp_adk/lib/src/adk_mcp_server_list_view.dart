@@ -83,6 +83,7 @@ class _AdkMcpServerListViewState extends State<AdkMcpServerListView> {
 
   bool get _emailConfigured => (_settings?.smtpHost ?? '').isNotEmpty;
   bool get _githubConfigured => (_settings?.githubToken ?? '') == '****';
+  bool get _googleConfigured => (_settings?.googleRefreshToken ?? '') == '****';
 
   Future<void> _configureEmail() async {
     final ok = await EmailSettingsDialog.show(context);
@@ -91,6 +92,11 @@ class _AdkMcpServerListViewState extends State<AdkMcpServerListView> {
 
   Future<void> _configureGithub() async {
     final ok = await GithubSettingsDialog.show(context);
+    if (ok == true) await _load();
+  }
+
+  Future<void> _configureGoogle() async {
+    final ok = await GoogleWorkspaceSettingsDialog.show(context);
     if (ok == true) await _load();
   }
 
@@ -244,6 +250,25 @@ class _AdkMcpServerListViewState extends State<AdkMcpServerListView> {
               TextButton(
                 key: const Key('configureGithubIntegration'),
                 onPressed: _configureGithub,
+                child: const Text('Configure'),
+              ),
+            ],
+          ),
+        ),
+        ListTile(
+          key: const Key('googleWorkspaceIntegration'),
+          leading: Icon(Icons.calendar_month, color: cs.onSurfaceVariant),
+          title: const Text('Google Workspace'),
+          subtitle: const Text(
+              'Calendar booking capture + Gemini meeting notes'),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              badge(ok: _googleConfigured),
+              const SizedBox(width: 8),
+              TextButton(
+                key: const Key('configureGoogleWorkspaceIntegration'),
+                onPressed: _configureGoogle,
                 child: const Text('Configure'),
               ),
             ],

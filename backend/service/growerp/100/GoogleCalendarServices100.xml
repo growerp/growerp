@@ -1,0 +1,412 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-2.1.xsd">
+
+    <!-- ============ Google Meet booking capture + meeting minutes ============
+         Prospects book via a Google Calendar appointment schedule; events with a
+         Meet link land in the company Google Calendar. These services import them
+         as CRM activities (Lead + WetEvent) and afterwards attach the Gemini
+         "take notes" doc from Drive as meeting minutes plus follow-up todos.
+         Credentials per tenant in growerp.general.SystemSettings (googleClientId,
+         googleClientSecret, googleRefreshToken, googleCalendarId). -->
+
+    <service verb="sync" noun="GoogleCalendarEvents" authenticate="false"
+        allow-remote="false" transaction-timeout="300">
+        <description>Batch processor (cron): for every tenant with Google credentials
+            import new/changed calendar events and attach meeting minutes.
+            One failing tenant does not abort the batch.</description>
+        <out-parameters>
+            <parameter name="tenantCount" type="Integer" />
+        </out-parameters>
+        <actions>
+            <entity-find entity-name="growerp.general.SystemSettings" list="settingsList">
+                <econdition field-name="googleRefreshToken" operator="is-not-null" />
+            </entity-find>
+            <set field="tenantCount" from="0" />
+            <iterate list="settingsList" entry="settings">
+                <service-call name="growerp.100.GoogleCalendarServices100.sync#TenantCalendar"
+                    in-map="[ownerPartyId: settings.ownerPartyId]" ignore-error="true" />
+                <service-call name="growerp.100.GoogleCalendarServices100.attach#MeetingMinutes"
+                    in-map="[ownerPartyId: settings.ownerPartyId]" ignore-error="true" />
+                <set field="tenantCount" from="tenantCount + 1" />
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="sync" noun="TenantCalendar" authenticate="false" allow-remote="false">
+        <description>Import new/changed Google Calendar events for one tenant.</description>
+        <in-parameters>
+            <parameter name="ownerPartyId" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="importedCount" type="Integer" />
+        </out-parameters>
+        <actions>
+            <entity-find-one entity-name="growerp.general.SystemSettings" value-field="settings">
+                <field-map field-name="ownerPartyId" />
+            </entity-find-one>
+            <if condition="!settings?.googleRefreshToken">
+                <return message="no google credentials for ${ownerPartyId}" />
+            </if>
+            <!-- incremental: last imported update time minus 10 min overlap, fallback 30 days -->
+            <entity-find entity-name="growerp.crm.CalendarEventSync" list="lastSyncList" limit="1">
+                <econdition field-name="ownerPartyId" />
+                <order-by field-name="-googleUpdated" />
+            </entity-find>
+            <script><![CDATA[
+                def lastUpdated = lastSyncList ? lastSyncList[0].googleUpdated : null
+                def fromInstant = lastUpdated ?
+                    lastUpdated.toInstant().minusSeconds(600) :
+                    ec.user.nowTimestamp.toInstant().minusSeconds(30L * 24 * 3600)
+                updatedMinIso = fromInstant.toString()
+            ]]></script>
+            <script location="component://growerp/service/GoogleWorkspaceUtil.groovy"/>
+            <script>
+                def GoogleWorkspaceUtil = _scriptResult
+                events = GoogleWorkspaceUtil.listEvents(ec, ownerPartyId,
+                    settings.googleCalendarId ?: 'primary', updatedMinIso)
+            </script>
+            <set field="importedCount" from="0" />
+            <iterate list="events" entry="event">
+                <service-call name="growerp.100.GoogleCalendarServices100.import#CalendarEvent"
+                    in-map="[ownerPartyId: ownerPartyId, event: event]" ignore-error="true" />
+                <set field="importedCount" from="importedCount + 1" />
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="import" noun="CalendarEvent" authenticate="false" allow-remote="false">
+        <description>Import one Google Calendar event: find-or-create a Lead from the
+            first external attendee, create a calendar event activity (WorkEffort
+            WetEvent) with the lead as ThirdParty, dedup on the google event id.</description>
+        <in-parameters>
+            <parameter name="ownerPartyId" required="true" />
+            <parameter name="event" type="Map" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="workEffortId" />
+        </out-parameters>
+        <actions>
+            <if condition="!event.id"><return /></if>
+
+            <!-- parse google timestamps -->
+            <script><![CDATA[
+                def parseGDate = { m ->
+                    if (m?.dateTime) return java.sql.Timestamp.from(
+                        java.time.OffsetDateTime.parse((String) m.dateTime).toInstant())
+                    if (m?.date) return java.sql.Timestamp.valueOf(m.date + ' 00:00:00')
+                    return null
+                }
+                startTs = parseGDate(event.start)
+                endTs = parseGDate(event.end)
+                updatedTs = event.updated ?
+                    java.sql.Timestamp.from(java.time.Instant.parse((String) event.updated)) :
+                    ec.user.nowTimestamp
+                attendeeList = (event.attendees ?: []).findAll {
+                    !it.organizer && !it.self && !it.resource && it.email }
+            ]]></script>
+
+            <!-- already imported? -->
+            <entity-find entity-name="growerp.crm.CalendarEventSync" list="syncRows"
+                for-update="true" limit="1">
+                <econdition field-name="ownerPartyId" />
+                <econdition field-name="googleEventId" from="event.id" />
+            </entity-find>
+            <if condition="syncRows">
+                <set field="syncRow" from="syncRows[0]" />
+                <set field="workEffortId" from="syncRow.workEffortId" />
+                <if condition="updatedTs &lt;= syncRow.googleUpdated"><return /></if>
+                <entity-find-one entity-name="mantle.work.effort.WorkEffort"
+                    value-field="workEffort" cache="false">
+                    <field-map field-name="workEffortId" />
+                </entity-find-one>
+                <if condition="workEffort">
+                    <if condition="event.status == 'cancelled'"><then>
+                        <set field="workEffort.statusId" value="WeCancelled" />
+                    </then><else>
+                        <if condition="event.summary">
+                            <set field="workEffort.workEffortName" from="event.summary" /></if>
+                        <if condition="startTs">
+                            <set field="workEffort.estimatedStartDate" from="startTs" /></if>
+                        <if condition="endTs">
+                            <set field="workEffort.estimatedCompletionDate" from="endTs" /></if>
+                    </else></if>
+                    <entity-update value-field="workEffort" />
+                </if>
+                <set field="syncRow.googleUpdated" from="updatedTs" />
+                <if condition="endTs"><set field="syncRow.eventEnd" from="endTs" /></if>
+                <entity-update value-field="syncRow" />
+                <return />
+            </if>
+
+            <!-- new events: only future-relevant Meet bookings with an external attendee -->
+            <if condition="event.status == 'cancelled' || !event.hangoutLink"><return /></if>
+
+            <!-- first attendee that is not an internal user of this tenant -->
+            <set field="externalEmail" from="null" />
+            <iterate list="attendeeList" entry="attendee">
+                <if condition="!externalEmail">
+                    <entity-find entity-name="growerp.party.OwnerPersonDetailAndCompany"
+                        list="internals" limit="1">
+                        <econdition field-name="ownerPartyId" />
+                        <econdition field-name="emailAddress" from="attendee.email" />
+                        <econdition field-name="userGroupId" operator="in"
+                            value="GROWERP_M_ADMIN,GROWERP_M_EMPLOYEE" />
+                    </entity-find>
+                    <if condition="!internals">
+                        <set field="externalEmail" from="attendee.email" />
+                        <set field="externalName"
+                            from="attendee.displayName ?: attendee.email.split('@')[0]" />
+                    </if>
+                </if>
+            </iterate>
+            <if condition="!externalEmail"><return /></if>
+
+            <!-- resolve (or create) the attendee as a Lead (chat/booking pattern) -->
+            <set field="visitorPartyId" from="null" />
+            <entity-find entity-name="mantle.party.contact.ContactMech" list="emailContacts">
+                <econdition field-name="infoString" from="externalEmail" />
+                <econdition field-name="contactMechTypeEnumId" value="CmtEmailAddress" />
+            </entity-find>
+            <if condition="!emailContacts">
+                <service-call name="growerp.100.PartyServices100.create#User" ignore-error="true">
+                    <field-map field-name="ownerPartyId" from="ownerPartyId" />
+                    <field-map field-name="user"
+                        from="[
+                            firstName: externalName,
+                            lastName: 'googleMeet',
+                            email: externalEmail,
+                            role: 'Lead',
+                            userGroupId: 'GROWERP_M_LEAD',
+                        ]" />
+                </service-call>
+                <entity-find entity-name="mantle.party.contact.ContactMech" list="emailContacts">
+                    <econdition field-name="infoString" from="externalEmail" />
+                    <econdition field-name="contactMechTypeEnumId" value="CmtEmailAddress" />
+                </entity-find>
+            </if>
+            <iterate list="emailContacts" entry="emailContact">
+                <if condition="!visitorPartyId">
+                    <entity-find entity-name="mantle.party.contact.PartyContactMech"
+                        list="partyContacts" limit="1">
+                        <econdition field-name="contactMechId" from="emailContact.contactMechId" />
+                        <date-filter />
+                    </entity-find>
+                    <if condition="partyContacts">
+                        <entity-find-one entity-name="mantle.party.Party" value-field="candidate">
+                            <field-map field-name="partyId" from="partyContacts[0].partyId" />
+                        </entity-find-one>
+                        <if condition="candidate?.ownerPartyId == ownerPartyId">
+                            <set field="visitorPartyId" from="candidate.partyId" />
+                        </if>
+                    </if>
+                </if>
+            </iterate>
+
+            <!-- calendar event activity owned by the company with the lead as attendee -->
+            <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                in-map="[ownerPartyId: ownerPartyId, seqName: 'activity.activityType']"
+                out-map="context" />
+            <set field="description"
+                from="(event.description ? event.description + '\n\n' : '') +
+                    'Google Meet: ' + event.hangoutLink" />
+            <service-call name="create#mantle.work.effort.WorkEffort" out-map="context"
+                in-map="[workEffortTypeEnumId: 'WetEvent',
+                    workEffortPseudoId: seqNum,
+                    workEffortName: event.summary ?: 'Google Meet with ' + externalName,
+                    description: description,
+                    statusId: 'WeApproved',
+                    ownerPartyId: ownerPartyId,
+                    estimatedStartDate: startTs,
+                    estimatedCompletionDate: endTs]" />
+            <if condition="visitorPartyId">
+                <service-call name="create#mantle.work.effort.WorkEffortParty"
+                    in-map="[workEffortId: workEffortId,
+                        partyId: visitorPartyId,
+                        roleTypeId: 'ThirdParty',
+                        statusId: 'WeptAssigned']" />
+            </if>
+            <service-call name="create#growerp.crm.CalendarEventSync"
+                in-map="[ownerPartyId: ownerPartyId,
+                    googleEventId: event.id,
+                    workEffortId: workEffortId,
+                    googleUpdated: updatedTs,
+                    eventEnd: endTs,
+                    minutesAttached: 'N']" />
+        </actions>
+    </service>
+
+    <service verb="attach" noun="MeetingMinutes" authenticate="false" allow-remote="false">
+        <description>For recently ended imported meetings without minutes: fetch the
+            Gemini notes doc and append it to the activity. Retries every run until
+            the notes appear or the event is 14 days old.</description>
+        <in-parameters>
+            <parameter name="ownerPartyId" required="true" />
+        </in-parameters>
+        <actions>
+            <entity-find entity-name="growerp.crm.CalendarEventSync" list="pendingRows">
+                <econdition field-name="ownerPartyId" />
+                <econdition field-name="minutesAttached" operator="not-equals" value="Y"
+                    or-null="true" />
+                <econdition field-name="eventEnd" operator="less-equals"
+                    from="ec.user.nowTimestamp" />
+                <econdition field-name="eventEnd" operator="greater"
+                    from="new java.sql.Timestamp(ec.user.nowTimestamp.time - 14L * 24 * 3600 * 1000)" />
+            </entity-find>
+            <iterate list="pendingRows" entry="pendingRow">
+                <service-call name="growerp.100.GoogleCalendarServices100.attach#EventMinutes"
+                    in-map="[calendarEventSyncId: pendingRow.calendarEventSyncId]"
+                    ignore-error="true" />
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="attach" noun="EventMinutes" authenticate="false" allow-remote="false">
+        <description>Attach the Gemini notes doc text to one meeting activity and
+            extract follow-up todos.</description>
+        <in-parameters>
+            <parameter name="calendarEventSyncId" required="true" />
+        </in-parameters>
+        <actions>
+            <entity-find-one entity-name="growerp.crm.CalendarEventSync" value-field="syncRow"
+                cache="false">
+                <field-map field-name="calendarEventSyncId" />
+            </entity-find-one>
+            <if condition="!syncRow || syncRow.minutesAttached == 'Y'"><return /></if>
+            <set field="ownerPartyId" from="syncRow.ownerPartyId" />
+            <entity-find-one entity-name="growerp.general.SystemSettings" value-field="settings">
+                <field-map field-name="ownerPartyId" />
+            </entity-find-one>
+            <entity-find-one entity-name="mantle.work.effort.WorkEffort" value-field="workEffort"
+                cache="false">
+                <field-map field-name="workEffortId" from="syncRow.workEffortId" />
+            </entity-find-one>
+            <if condition="!workEffort"><return /></if>
+
+            <script location="component://growerp/service/GoogleWorkspaceUtil.groovy"/>
+            <script><![CDATA[
+                def GoogleWorkspaceUtil = _scriptResult
+                def calendarId = settings?.googleCalendarId ?: 'primary'
+                def docId = syncRow.minutesDocId
+                if (!docId) {
+                    // attachment on the calendar event (Gemini attaches the notes doc)
+                    def event = GoogleWorkspaceUtil.getEvent(ec, ownerPartyId, calendarId,
+                        syncRow.googleEventId)
+                    def attachments = event?.attachments ?: []
+                    def att = attachments.find { (it.title ?: '').contains('Notes by Gemini') } ?:
+                        attachments.find { it.mimeType == 'application/vnd.google-apps.document' }
+                    docId = att?.fileId
+                }
+                if (!docId) {
+                    // fallback: search Drive by event title
+                    docId = GoogleWorkspaceUtil.findNotesDoc(ec, ownerPartyId,
+                        (String) workEffort.workEffortName)
+                }
+                notesText = docId ?
+                    GoogleWorkspaceUtil.exportDocText(ec, ownerPartyId, docId) : null
+                minutesDocId = docId
+            ]]></script>
+            <if condition="!notesText"><return /></if><!-- not there yet, retry next run -->
+
+            <set field="workEffort.description"
+                from="(workEffort.description ?: '') +
+                    '\n\n--- Meeting notes (Gemini) ---\n' + notesText" />
+            <entity-update value-field="workEffort" />
+            <set field="syncRow.minutesAttached" value="Y" />
+            <set field="syncRow.minutesDocId" from="minutesDocId" />
+            <entity-update value-field="syncRow" />
+
+            <service-call name="growerp.100.GoogleCalendarServices100.extract#FollowUpTodos"
+                in-map="[ownerPartyId: ownerPartyId,
+                    workEffortId: syncRow.workEffortId,
+                    notesText: notesText]" ignore-error="true" />
+        </actions>
+    </service>
+
+    <service verb="extract" noun="FollowUpTodos" authenticate="false" allow-remote="false">
+        <description>Use Gemini to extract action items from meeting notes and create
+            them as todo activities linked to the meeting's lead.</description>
+        <in-parameters>
+            <parameter name="ownerPartyId" required="true" />
+            <parameter name="workEffortId" required="true" />
+            <parameter name="notesText" required="true" allow-html="safe" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="todoCount" type="Integer" />
+        </out-parameters>
+        <actions>
+            <!-- tenant Gemini key: LlmConfig 'gemini' first, legacy SystemSettings second -->
+            <entity-find-one entity-name="growerp.general.LlmConfig" value-field="llmConfig">
+                <field-map field-name="ownerPartyId" />
+                <field-map field-name="llmProvider" value="gemini" />
+            </entity-find-one>
+            <entity-find-one entity-name="growerp.general.SystemSettings" value-field="settings">
+                <field-map field-name="ownerPartyId" />
+            </entity-find-one>
+            <set field="geminiKey" from="llmConfig?.apiKey ?: settings?.geminiApiKey" />
+            <set field="todoCount" from="0" />
+            <if condition="!geminiKey"><return message="no gemini key for ${ownerPartyId}" /></if>
+
+            <!-- lead attached to the meeting -->
+            <entity-find entity-name="mantle.work.effort.WorkEffortParty" list="thirdParties"
+                limit="1">
+                <econdition field-name="workEffortId" />
+                <econdition field-name="roleTypeId" value="ThirdParty" />
+            </entity-find>
+            <set field="leadPartyId" from="thirdParties ? thirdParties[0].partyId : null" />
+
+            <script location="component://growerp/service/GeminiAiUtil.groovy"/>
+            <script><![CDATA[
+                def GeminiAiUtil = _scriptResult
+                def prompt = """Extract the concrete action items from the meeting notes below.
+Return ONLY a JSON array (no markdown) of at most 10 objects with fields:
+  "title": short imperative task title (max 80 chars)
+  "description": one or two sentences of detail
+Return [] when there are no action items.
+
+MEETING NOTES:
+${notesText.take(20000)}"""
+                def response = GeminiAiUtil.callGeminiApi(ec, prompt,
+                    [apiKey: geminiKey, temperature: 0.2, jsonMode: true])
+                actionItems = GeminiAiUtil.parseJsonResponse(response)
+            ]]></script>
+            <iterate list="actionItems" entry="actionItem">
+                <if condition="actionItem.title">
+                    <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                        in-map="[ownerPartyId: ownerPartyId, seqName: 'activity.activityType']"
+                        out-map="context" />
+                    <service-call name="create#mantle.work.effort.WorkEffort"
+                        out-map="todoOut"
+                        in-map="[workEffortTypeEnumId: 'WetTask',
+                            workEffortPseudoId: seqNum,
+                            parentWorkEffortId: workEffortId,
+                            workEffortName: actionItem.title,
+                            description: actionItem.description,
+                            statusId: 'WeInProgress',
+                            ownerPartyId: ownerPartyId]" />
+                    <if condition="leadPartyId">
+                        <service-call name="create#mantle.work.effort.WorkEffortParty"
+                            in-map="[workEffortId: todoOut.workEffortId,
+                                partyId: leadPartyId,
+                                roleTypeId: 'ThirdParty',
+                                statusId: 'WeptAssigned']" />
+                    </if>
+                    <set field="todoCount" from="todoCount + 1" />
+                </if>
+            </iterate>
+        </actions>
+    </service>
+</services>

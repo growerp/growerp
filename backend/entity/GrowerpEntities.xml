@@ -414,6 +414,31 @@ along with this software (see the LICENSE.md file). If not, see
         <field name="githubToken"      type="text-medium" encrypt="true" enable-audit-log="true"/>
         <field name="githubRepository" type="text-medium"/>
         <field name="llmSystemTokenLimit" type="number-integer"/>
+        <field name="googleClientId"     type="text-medium"/>
+        <field name="googleClientSecret" type="text-medium" encrypt="true" enable-audit-log="true"/>
+        <field name="googleRefreshToken" type="text-medium" encrypt="true" enable-audit-log="true"/>
+        <field name="googleCalendarId"   type="text-medium">
+            <description>Google Calendar id to sync bookings from; 'primary' when empty</description>
+        </field>
+    </entity>
+
+    <entity entity-name="CalendarEventSync" package="growerp.crm"
+            sequence-primary-prefix="ces">
+        <description>Maps an imported Google Calendar event to its WorkEffort activity;
+            also carries incremental-sync and minutes-attachment state per tenant.</description>
+        <field name="calendarEventSyncId" type="id" is-pk="true"/>
+        <field name="ownerPartyId"    type="id"/>
+        <field name="googleEventId"   type="text-medium"/>
+        <field name="workEffortId"    type="id"/>
+        <field name="googleUpdated"   type="date-time"/>
+        <field name="eventEnd"        type="date-time"/>
+        <field name="minutesDocId"    type="text-medium"/>
+        <field name="minutesAttached" type="text-indicator"/>
+        <relationship type="one" related="mantle.work.effort.WorkEffort"/>
+        <index name="CAL_EVT_SYNC_OWNER_EVT" unique="true">
+            <index-field name="ownerPartyId"/>
+            <index-field name="googleEventId"/>
+        </index>
     </entity>
 
     <entity entity-name="LlmConfig" package="growerp.general"
