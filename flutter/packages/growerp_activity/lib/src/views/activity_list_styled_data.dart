@@ -40,12 +40,18 @@ List<Widget> getActivityListRow({
     Text(activity.activityName, key: Key('name$index')),
     if (!isPhone && activity.activityType == ActivityType.todo)
       Text(
-        "${activity.originator?.firstName} ${activity.originator?.lastName}",
+        [
+          activity.originator?.firstName,
+          activity.originator?.lastName,
+        ].where((s) => s != null && s.isNotEmpty).join(' '),
         key: Key('assignee$index'),
       ),
     if (!isPhone)
       Text(
-        "${activity.thirdParty?.firstName} ${activity.thirdParty?.lastName}",
+        [
+          activity.thirdParty?.firstName,
+          activity.thirdParty?.lastName,
+        ].where((s) => s != null && s.isNotEmpty).join(' '),
         key: Key('thirdParty$index'),
       ),
     if (activity.activityType == ActivityType.todo)

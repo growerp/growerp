@@ -818,7 +818,7 @@
                     activityName: 'Follow up ' + (engagement.userName ?: 'engagement') +
                         ' (' + (engagement.platform ?: '') + ' ' +
                         (engagement.engagementType ?: '') + ')',
-                    statusId: 'planning',
+                    statusId: 'progress',
                     description: engagement.note,
                     thirdParty: partyId ? [partyId: partyId] : null]]" />
             <set field="engagement.status" value="CONTACTED" />

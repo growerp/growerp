@@ -292,7 +292,10 @@ class ActivityDialogState extends State<ActivityDialog> {
                           );
                         },
                         displayStringForOption: (User u) =>
-                            " ${u.firstName} ${u.lastName} "
+                            " ${[
+                              u.firstName,
+                              u.lastName,
+                            ].where((s) => s != null && s.isNotEmpty).join(' ')} "
                             "${u.company?.name ?? ''}",
                         onSelected: (User? newValue) {
                           setState(() {
@@ -348,7 +351,10 @@ class ActivityDialogState extends State<ActivityDialog> {
                           );
                         },
                         displayStringForOption: (User u) =>
-                            " ${u.firstName} ${u.lastName} "
+                            " ${[
+                              u.firstName,
+                              u.lastName,
+                            ].where((s) => s != null && s.isNotEmpty).join(' ')} "
                             "${u.company?.name ?? ''}",
                         onSelected: (User? newValue) {
                           setState(() {
