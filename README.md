@@ -64,6 +64,7 @@ GrowERP is an open-source, multi-platform ERP application built with a modular a
 ### 📋 Business & Management
 
 - **[📣 Marketing & Sales Plan](./docs/GrowERP_Marketing_Sales_Plan.md)** - Master go-to-market plan, dogfooded on GrowERP itself
+- **[📖 Marketing, Outreach & CRM User Manual](./docs/GrowERP_User_Manual_Marketing_CRM.md)** - End-user guide for the marketing, outreach and CRM modules
 - **[📊 Management Summary](./docs/Management_Summary_Open_Source_Extensibility.md)** - Strategic overview for decision makers
 - **[📈 Leads Management](./docs/leads_upload_process.md)** - Lead import and export processes
 - **[💰 Subscription Functions](./docs/Moqui_Subscription_Function.md)** - Subscription and billing management
