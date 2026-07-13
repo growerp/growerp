@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-facade-xml type="install">
+
+    <!-- ════════════════════════════════════════════════════════════════════════
+         GrowERP self-marketing sprint — personas, outreach campaigns + week-1 newsletter.
+         Owner: GROWERP. Load after the GROWERP company exists (companion to
+         GrowerpMarketingAgentsData.xml):
+           java -jar moqui.war load types=install file=.../GrowerpMarketingContentData.xml
+         Personas: docs/GrowERP_Marketing_Sales_Plan.md §3 (4 sprint personas).
+         Channel rules (Outreach Personalizer): LINKEDIN DM ≤400 chars, ends on a
+         question, NO URL until reply; EMAIL ≤120 words, assessment link + sign-off.
+         Campaigns load as MKTG_CAMP_PLANNED / isActive=N — a human activates them.
+         Newsletter SUBSTACK post loads as DRAFT — approve (set READY) to let the
+         15-min publish job send it; EMAIL post is READY for the assisted send-queue.
+         ════════════════════════════════════════════════════════════════════════ -->
+
+    <!-- ══════════════ 1 ── Marketing personas (target avatars) ══════════════ -->
+
+    <growerp.marketing.MarketingPersona personaId="GROWERP_OLIVIA" pseudoId="olivia-smb"
+        ownerPartyId="GROWERP" name="Overwhelmed Olivia — SMB owner on spreadsheets"
+        demographics="Owner or general manager of a 5–50 person product or service business. Runs the company on spreadsheets plus an accounting package plus email. Wears every hat; buys only when shown time saved and a credible migration path."
+        painPoints="Double data entry across spreadsheet, accounting package and email; no real-time stock or cash visibility; month-end chaos; everything breaks when the one person who knows the sheet is away."
+        goals="One source of truth for orders, stock, invoices and accounting; hours of admin back per week; a low-risk migration path; scale without hiring back office."
+        toneOfVoice="Plain, empathetic, concrete. No ERP jargon — talk hours saved and errors avoided. Short sentences, end on a question." />
+
+    <growerp.marketing.MarketingPersona personaId="GROWERP_HENRI" pseudoId="henri-hotel"
+        ownerPartyId="GROWERP" name="Hotel Henri — independent hotel manager"
+        demographics="Manager or owner of an independent hotel or guesthouse, 5–80 rooms, small front-desk team. Q1 flagship vertical."
+        painPoints="OTA-only visibility on his own occupancy; paper housekeeping lists; bookkeeping separate from reservations; re-typing between channel manager, front desk and the books."
+        goals="More direct bookings; live room status shared by front desk and housekeeping; reservations and the general ledger in one system."
+        toneOfVoice="Peer-to-peer hospitality talk, practical and respectful of a busy season. Concrete hotel situations, not software features." />
+
+    <growerp.marketing.MarketingPersona personaId="GROWERP_BEN" pseudoId="ben-dev"
+        ownerPartyId="GROWERP" name="Builder Ben — developer / integrator"
+        demographics="Flutter or Java/Groovy developer, freelancer or small software house, wants to ship business apps fast without writing an ERP backend."
+        painPoints="Writing a business backend from scratch for every app; license and CLA friction that limits resale; long time-to-first-demo for clients."
+        goals="Ship vertical business apps in days from proven building blocks; resell without restriction (CC0); become a contributor, integrator or partner."
+        toneOfVoice="Technical and direct, zero marketing fluff. Architecture, code and links to the repo and docs. Respect their time." />
+
+    <growerp.marketing.MarketingPersona personaId="GROWERP_AARON" pseudoId="aaron-ai"
+        ownerPartyId="GROWERP" name="Automation Aaron — AI-forward operator"
+        demographics="Tech-savvy founder or operations lead who evaluates software by what the AI can do for the business. Uses the agents app plus admin."
+        painPoints="Repetitive admin (content, follow-ups, reporting) eats the week; AI tools live next to the business data instead of inside it; no governance over what AI is allowed to send."
+        goals="Agents that draft content, chase invoices and summarize the business — with approval gates, audit trail and per-agent tool scoping."
+        toneOfVoice="Sharp and future-facing but concrete: real demos over hype, always name the governance controls." />
+
+    <!-- ══════════════ 2 ── Outreach campaigns (LinkedIn DM + email) ══════════════
+         platformSettings JSON shape matches what merge#CampaignPlatformMessage writes
+         and the Outreach Personalizer reads: lowercase platform key → messageTemplate.
+         {firstName}/{companyName} tokens are rewritten naturally by the Personalizer
+         when a recipient field is unknown. -->
+
+    <mantle.marketing.campaign.MarketingCampaign marketingCampaignId="GROWERP_SPRINT_OLIVIA"
+        pseudoId="sprint-olivia" ownerPartyId="GROWERP" statusId="MKTG_CAMP_PLANNED" isActive="N"
+        campaignName="SMB: Escape the Spreadsheet"
+        campaignSummary="Outbound to SMB owners/GMs (5–50 people) running the business on spreadsheets. Persona: Overwhelmed Olivia (GROWERP_OLIVIA)."
+        targetAudience="Owners and general managers of 5–50 person product or service businesses running operations on spreadsheets plus a separate accounting package."
+        landingPageId="ERP_LANDING_PAGE" dailyLimitPerPlatform="25"
+        emailSubject="How many times does {companyName} re-key the same order?">
+        <messageTemplate><![CDATA[GrowERP replaces the spreadsheet + accounting package + email-thread patchwork with one open-source ERP: orders, stock, invoices and accounting in one system. Live in a day, free 2-week trial, no card. Hook: the 2-minute assessment "5 Signs You've Outgrown Spreadsheets".]]></messageTemplate>
+        <platformSettings><![CDATA[{"linkedin":{"actionType":"send_dms","messageTemplate":"Hi {firstName} — quick question about {companyName}: when an order comes in, how many places does someone type it? Most 5–50 person teams tell us three — the spreadsheet, the accounting package, and an email thread. We built an open-source ERP that makes it one. How are you keeping stock, orders and the books in sync today?"},"email":{"actionType":"send_email","messageTemplate":"Hi {firstName},\n\nMost owners of 5–50 person businesses tell us the same thing: orders live in a spreadsheet, money lives in the accounting package, and the truth lives in someone's head. Double entry, no stock visibility, month-end chaos.\n\nGrowERP is an open-source ERP that puts orders, stock, invoices and accounting in one system — live in a day, free 2-week trial, no card.\n\nTake the 2-minute check: 5 Signs You've Outgrown Spreadsheets → https://growerp.com/landing/erp-landing-page\n\nHans, GrowERP"}}]]></platformSettings>
+        <platforms><![CDATA[["LINKEDIN","EMAIL"]]]></platforms>
+    </mantle.marketing.campaign.MarketingCampaign>
+
+    <mantle.marketing.campaign.MarketingCampaign marketingCampaignId="GROWERP_SPRINT_HENRI"
+        pseudoId="sprint-henri" ownerPartyId="GROWERP" statusId="MKTG_CAMP_PLANNED" isActive="N"
+        campaignName="Hotel: One Screen, Front Desk to Ledger"
+        campaignSummary="Outbound to independent hotel/guesthouse managers (5–80 rooms). Persona: Hotel Henri (GROWERP_HENRI). Q1 flagship vertical."
+        targetAudience="Managers and owners of independent hotels and guesthouses, 5–80 rooms, running reservations, housekeeping and bookkeeping in separate systems."
+        landingPageId="ERP_LANDING_PAGE" dailyLimitPerPlatform="25"
+        emailSubject="Reservations, housekeeping and the books — one screen">
+        <messageTemplate><![CDATA[GrowERP's hotel app puts reservations, live room status and the general ledger in one open-source system, replacing the channel-manager + paper housekeeping + separate bookkeeping trio. Free 2-week trial, no card.]]></messageTemplate>
+        <platformSettings><![CDATA[{"linkedin":{"actionType":"send_dms","messageTemplate":"Hi {firstName} — question for a fellow hotelier: when housekeeping finishes a room, how long before the front desk knows? If the answer involves paper or a phone call, you're in good company. We built an open-source system where reservations, housekeeping and the books share one screen. How does {companyName} handle it today?"},"email":{"actionType":"send_email","messageTemplate":"Hi {firstName},\n\nIndependent hotels usually run three systems that don't talk: the channel manager, a paper housekeeping list, and separate bookkeeping. Every gap between them costs a sold room or an evening of re-typing.\n\nGrowERP's hotel app puts reservations, room status and the general ledger in one open-source system — free 2-week trial, no card.\n\nSee where your setup stands in 2 minutes → https://growerp.com/landing/erp-landing-page\n\nHans, GrowERP"}}]]></platformSettings>
+        <platforms><![CDATA[["LINKEDIN","EMAIL"]]]></platforms>
+    </mantle.marketing.campaign.MarketingCampaign>
+
+    <mantle.marketing.campaign.MarketingCampaign marketingCampaignId="GROWERP_SPRINT_BEN"
+        pseudoId="sprint-ben" ownerPartyId="GROWERP" statusId="MKTG_CAMP_PLANNED" isActive="N"
+        campaignName="Developers: Ship a Business App in Days"
+        campaignSummary="Outbound to Flutter / Java-Groovy developers and small software houses. Persona: Builder Ben (GROWERP_BEN). Email CTA deviates to the GitHub repo — the right offer for this persona."
+        targetAudience="Flutter or Java/Groovy developers, freelancers and small software houses building business apps for clients."
+        landingPageId="ERP_LANDING_PAGE" dailyLimitPerPlatform="25"
+        emailSubject="CC0 Flutter + Moqui building blocks — ship a business app in a day">
+        <messageTemplate><![CDATA[GrowERP is a CC0 (public-domain, patent-granted) stack: Flutter ERP building blocks — accounting, catalog, orders, users — on a Moqui REST backend. Compose vertical apps in days, resell without restriction, 6 platforms from one codebase. CTA: github.com/growerp/growerp.]]></messageTemplate>
+        <platformSettings><![CDATA[{"linkedin":{"actionType":"send_dms","messageTemplate":"Hi {firstName} — you build business apps in Flutter? We open-sourced a full set of ERP building blocks (CC0, no CLA): drop in accounting, catalog, orders and user management, and ship a vertical app in days instead of months. Resell without restriction. What are you building right now?"},"email":{"actionType":"send_email","messageTemplate":"Hi {firstName},\n\nWriting an ERP backend to ship one business app is the worst part of the job. GrowERP is a CC0 (public-domain, patent-granted) stack: Flutter building blocks — accounting, catalog, orders, users — on a Moqui REST backend. Compose them into your own vertical app and resell without restriction. Web, Android, iOS, Windows, macOS, Linux from one codebase.\n\nStart here: https://github.com/growerp/growerp — the \"build an app in a day\" tutorial is in the docs.\n\nHans, GrowERP"}}]]></platformSettings>
+        <platforms><![CDATA[["LINKEDIN","EMAIL"]]]></platforms>
+    </mantle.marketing.campaign.MarketingCampaign>
+
+    <mantle.marketing.campaign.MarketingCampaign marketingCampaignId="GROWERP_SPRINT_AARON"
+        pseudoId="sprint-aaron" ownerPartyId="GROWERP" statusId="MKTG_CAMP_PLANNED" isActive="N"
+        campaignName="AI-first: The ERP That Works for You"
+        campaignSummary="Outbound to tech-savvy founders/ops leads who evaluate software by what the AI can do. Persona: Automation Aaron (GROWERP_AARON)."
+        targetAudience="Tech-savvy founders and operations leads evaluating software by its AI capabilities, wanting governed agents inside the business system."
+        landingPageId="ERP_LANDING_PAGE" dailyLimitPerPlatform="25"
+        emailSubject="Governed AI agents inside your ERP — not bolted on">
+        <messageTemplate><![CDATA[GrowERP puts governed AI agents inside the business system: they draft content, personalize outreach, triage replies and email a daily ops digest — every write approval-gated, every action logged. Open-source; GrowERP runs its own marketing on it.]]></messageTemplate>
+        <platformSettings><![CDATA[{"linkedin":{"actionType":"send_dms","messageTemplate":"Hi {firstName} — if your business system could draft your campaigns, chase late invoices and send you a Monday-morning digest, what would you hand it first? We shipped an Agent Control Center inside our open-source ERP that does exactly that — with approval gates, so nothing sends itself. What's the most repetitive admin in your week?"},"email":{"actionType":"send_email","messageTemplate":"Hi {firstName},\n\nMost \"AI features\" are a chatbot next to your data. GrowERP puts governed agents inside the business system: they draft content, personalize outreach, triage replies and email you a daily ops digest — every write approval-gated, every action logged.\n\nIt's open-source, and we run our own marketing on it (this email included).\n\nSee your AI-readiness in 2 minutes → https://growerp.com/landing/erp-landing-page\n\nHans, GrowERP"}}]]></platformSettings>
+        <platforms><![CDATA[["LINKEDIN","EMAIL"]]]></platforms>
+    </mantle.marketing.campaign.MarketingCampaign>
+
+    <!-- ══════════════ 3 ── Week-1 newsletter (PAIN theme) ══════════════
+         Edition #1 seeded so the weekly newsletter starts now; later editions come
+         from the Content Studio agent's Monday run. -->
+
+    <growerp.marketing.MasterContent masterContentId="GROWERP_NL_W1" pseudoId="newsletter-w1-pain"
+        ownerPartyId="GROWERP" contentType="ARTICLE" pnpType="PAIN" status="APPROVED"
+        title="Your spreadsheet is a single point of failure"
+        callToAction="Take the free 2-minute assessment: 5 Signs You've Outgrown Spreadsheets"
+        targetUrl="https://growerp.com/landing/erp-landing-page">
+        <body><![CDATA[Somewhere in your business there is a spreadsheet that everything depends on. Orders go into it. Stock counts come out of it. Someone copies numbers from it into the accounting package at month-end, and someone else keeps a private copy "just in case".
+
+That spreadsheet is a single point of failure — three ways at once.
+
+One broken formula. A sort applied to half the columns, a row deleted in the wrong filter view, a =SUM that silently stopped one row short in March. Nobody notices until a customer, or the tax office, does.
+
+One laptop. The file lives where the file lives. When it's on a machine that's off, lost, or on holiday with its owner, the business is too.
+
+One person. Every serious spreadsheet has exactly one person who knows why column Q is special. The day they leave, you don't have a system — you have an artifact.
+
+The usual "fix" makes it worse: add an accounting package for the money, email for the coordination, and now the same order is typed three times into three tools that don't talk. Double entry isn't just wasted hours — it's where the errors breed.
+
+The alternative isn't a two-year ERP project. GrowERP is an open-source ERP built for 5–50 person businesses: orders, stock, invoices and accounting in one system, with one source of truth. It's live in a day, the trial is free for two weeks, and there's no credit card wall.
+
+Not sure whether you're there yet? That's exactly what the assessment is for: five questions, two minutes, and an honest score of whether the spreadsheet still fits your business — or whether it's quietly running it.]]></body>
+    </growerp.marketing.MasterContent>
+
+    <!-- SUBSTACK variant — DRAFT: approve (set READY) and the 15-min publish job sends it. -->
+    <growerp.marketing.SocialPost postId="GROWERP_NL_W1_SUB" pseudoId="newsletter-w1-substack"
+        ownerPartyId="GROWERP" masterContentId="GROWERP_NL_W1" type="PAIN" platform="SUBSTACK"
+        status="DRAFT" headline="Your spreadsheet is a single point of failure">
+        <draftContent><![CDATA[Welcome to the first GrowERP weekly — short, practical notes on running a small business without drowning in admin. This week: the spreadsheet everything depends on.
+
+Somewhere in your business there is a spreadsheet that everything depends on. Orders go into it, stock counts come out of it, and someone copies its numbers into the accounting package at month-end.
+
+That spreadsheet is a single point of failure — three ways at once:
+
+**One broken formula.** A sort applied to half the columns, a deleted row, a =SUM that silently stopped one row short in March. Nobody notices until a customer, or the tax office, does.
+
+**One laptop.** The file lives where the file lives. When that machine is off, lost, or on holiday with its owner, so is the business.
+
+**One person.** Every serious spreadsheet has exactly one person who knows why column Q is special. The day they leave, you don't have a system — you have an artifact.
+
+The usual "fix" makes it worse: add an accounting package for the money and email for the coordination, and now the same order is typed three times into three tools that don't talk. Double entry isn't just wasted hours — it's where the errors breed.
+
+The alternative isn't a two-year ERP project. GrowERP is an open-source ERP built for 5–50 person businesses: orders, stock, invoices and accounting in one system. Live in a day, free two-week trial, no card.
+
+Wondering if you're there yet? Take the 2-minute check: https://growerp.com/landing/erp-landing-page
+
+If this landed in your inbox from a friend — subscribe to get one of these every week.
+
+Until next week,
+Hans, GrowERP]]></draftContent>
+    </growerp.marketing.SocialPost>
+
+    <!-- EMAIL variant — READY for the assisted send-queue (never auto-sent). -->
+    <growerp.marketing.SocialPost postId="GROWERP_NL_W1_EMAIL" pseudoId="newsletter-w1-email"
+        ownerPartyId="GROWERP" masterContentId="GROWERP_NL_W1" type="PAIN" platform="EMAIL"
+        status="READY" headline="Your spreadsheet is a single point of failure">
+        <draftContent><![CDATA[Hi there,
+
+First edition of the GrowERP weekly — one practical note per week on running a small business without drowning in admin.
+
+Somewhere in your business there's a spreadsheet everything depends on. It's a single point of failure three ways at once:
+
+1. One broken formula — a bad sort, a deleted row, a =SUM one row short — and nobody notices until a customer or the tax office does.
+2. One laptop — when the machine holding the file is off, lost, or on holiday, so is the business.
+3. One person — the only one who knows why column Q is special. When they leave, you have an artifact, not a system.
+
+The usual fix makes it worse: bolt on an accounting package and email threads, and the same order gets typed three times into tools that don't talk. Double entry is where the errors breed.
+
+The alternative isn't a two-year ERP project. GrowERP puts orders, stock, invoices and accounting in one open-source system — live in a day, free 2-week trial, no card.
+
+Is your business there yet? Find out in 2 minutes:
+https://growerp.com/landing/erp-landing-page
+
+Until next week,
+Hans, GrowERP]]></draftContent>
+    </growerp.marketing.SocialPost>
+
+</entity-facade-xml>
