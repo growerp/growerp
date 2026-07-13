@@ -208,7 +208,7 @@ along with this software (see the LICENSE.md file). If not, see
             <!-- translate frontend activity type with backend-->
             <set field="typeConvert"
                 from="[ event: 'WetEvent',WetEvent: 'event',
-                                ToDo: 'WetTask', WetTask: 'todo']"
+                                todo: 'WetTask', WetTask: 'todo']"
                 type="NewMap" />
 
             <set field="activities" from="[]" />
