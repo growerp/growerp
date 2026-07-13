@@ -37,7 +37,7 @@ graph TD
         Msg -->|Links to| LP[Landing Page]
         LP -->|Hosts| Scorecard[Assessment / Scorecard]
         Scorecard -->|Qualifies| Lead[Warm Lead]
-        Lead -->|Books| Appt[Appointment - Planned]
+        Lead -->|Books| Appt[Appointment - Google Calendar]
     end
 ```
 
@@ -158,16 +158,8 @@ Leverages existing GrowERP capabilities with extensions for Booking.
 *   **`ScoringThreshold`**: Configurable lead status logic (Cold/Warm/Hot).
     *   *Ref*: `AssessmentEntities.xml`
 
-#### New Components (Booking) 🔜 Planned
-*   **`AppointmentSlot`**: Available times for consultation.
-    *   Fields: `slotId`, `startDateTime`, `endDateTime`, `status` (Available/Booked).
-*   **`Appointment`**: A booked meeting.
-    *   Fields: `appointmentId`, `slotId`, `leadPartyId`, `notes`.
-*   **Note**: Future integration with Google Calendar API for appointment scheduling.
-
-#### Services (Planned)
-*   **`getAvailableSlots`**: Returns open slots.
-*   **`bookAppointment`**: Reserves a slot for a lead (potentially auto-created from Assessment submission).
+#### Booking
+*   Handled externally via Google Calendar appointment scheduling — no internal booking entities/services (a previous internal `AppointmentSlot` implementation was removed).
 
 ## Integration Strategy
 
@@ -184,4 +176,4 @@ Leverages existing GrowERP capabilities with extensions for Booking.
 
 3.  **External Integrations**:
     *   **LinkedIn/Socials**: Browser-based automation via platform adapters. Future: API integration.
-    *   **Calendar**: Planned internal `AppointmentSlot`. Future: Google Calendar/Calendly integration.
+    *   **Calendar**: External — Google Calendar appointment scheduling (no internal booking).

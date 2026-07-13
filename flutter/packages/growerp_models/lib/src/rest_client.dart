@@ -857,23 +857,6 @@ abstract class RestClient {
   @GET("rest/s1/growerp/100/MarketingDashboard")
   Future<MarketingDashboard> getMarketingDashboard();
 
-  // appointment slots
-  @GET("rest/s1/growerp/100/AppointmentSlot")
-  Future<AppointmentSlots> getAppointmentSlot({
-    @Query('start') int? start,
-    @Query('limit') int? limit,
-  });
-
-  @POST("rest/s1/growerp/100/AppointmentSlot")
-  Future<void> createAppointmentSlot({
-    @Field() required AppointmentSlot appointmentSlot,
-  });
-
-  @DELETE("rest/s1/growerp/100/AppointmentSlot")
-  Future<void> deleteAppointmentSlot({
-    @Field() required AppointmentSlot appointmentSlot,
-  });
-
   // social engagement signals
   @GET("rest/s1/growerp/100/SocialEngagement")
   Future<SocialEngagements> getSocialEngagement({

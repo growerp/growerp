@@ -67,8 +67,6 @@ export 'master_content_list_styled_data.dart';
 export 'email_sequence_list.dart';
 export 'email_sequence_dialog.dart';
 
-// Appointment booking
-export 'appointment_slot_list.dart';
 
 // Social engagement signals
 export 'social_engagement_list.dart';

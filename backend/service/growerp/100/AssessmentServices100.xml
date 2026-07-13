@@ -873,16 +873,6 @@ Service definitions for assessment management and completion
 
 
 
-                <!-- warm/hot leads get a booking link to schedule a consult -->
-                <set field="bookingUrl" value="" />
-                <if condition="leadStatus?.toString()?.toUpperCase() in ['WARM', 'HOT']">
-                    <service-call name="growerp.100.NurtureServices100.get#TenantBaseUrl"
-                        ignore-error="true" in-map="[ownerPartyId: ownerPartyId]"
-                        out-map="context" />
-                    <if condition="baseUrl">
-                        <set field="bookingUrl" value="${baseUrl}/booking" />
-                    </if>
-                </if>
                 <service-call name="org.moqui.impl.EmailServices.send#EmailTemplate" async="true">
                     <field-map field-name="emailTemplateId" value="ASSESSMENT_RESULTS" />
                     <field-map field-name="toAddresses" from="respondentEmail" />
@@ -890,7 +880,6 @@ Service definitions for assessment management and completion
                         from="[respondentName: respondentName, assessmentName: assessmentName,
                                score: score, maxScore: maxScore, percentage: percentage,
                                leadStatus: leadStatus, assessmentResultId: assessmentResultId,
-                               bookingUrl: bookingUrl,
                                questionsWithAnswers: questionsWithAnswers, adviceDescription: adviceDescription]" />
                 </service-call>
                 <else>

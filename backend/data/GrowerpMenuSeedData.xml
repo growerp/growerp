@@ -128,8 +128,6 @@ along with this software (see the LICENSE.md file). If not, see
         title="Personas" iconName="people" widgetName="PersonaList" sequenceNum="30"/>
     <growerp.menu.MenuItem menuItemId="ADMIN_MKTG_SEQUENCES" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_MARKETING"
         title="Email Sequences" iconName="schedule_send" widgetName="EmailSequenceList" sequenceNum="35"/>
-    <growerp.menu.MenuItem menuItemId="ADMIN_MKTG_BOOKING" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_MARKETING"
-        title="Booking Slots" iconName="event_available" widgetName="AppointmentSlotList" sequenceNum="37"/>
     <growerp.menu.MenuItem menuItemId="ADMIN_MKTG_ENGAGEMENT" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_MARKETING"
         title="Engagements" iconName="thumb_up" widgetName="SocialEngagementList" sequenceNum="38"/>
     <growerp.menu.MenuItem menuItemId="ADMIN_MKTG_LANDING" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_MARKETING"

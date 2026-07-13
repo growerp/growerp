@@ -175,9 +175,11 @@ All entity/service/file references below were verified against the codebase.
 
 ---
 
-## #5 Appointment booking (M) — Phase F ✅ shipped
+## #5 Appointment booking (M) — Phase F ❌ removed
 
-> Shipped: `AppointmentSlot` entity + management CRUD, anonymous `Booking` REST
+> Shipped then removed (2026-07): booking is now handled externally via Google Calendar
+> appointment scheduling instead of internal slots. Original scope for reference:
+> `AppointmentSlot` entity + management CRUD, anonymous `Booking` REST
 > (GET available slots by store, POST book), public `/booking` page on the generated
 > website (slot picker + form), booked slots become WetEvent WorkEfforts with the lead
 > attached, APPOINTMENT_CONFIRM emails to both sides; warm/hot assessment results emails
