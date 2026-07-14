@@ -209,15 +209,27 @@ jobs:
               iphone)   required="1284x2778" ;;
               ipad_pro) required="2732x2048" ;;
             esac
-            for src in framed-screenshots/${prefix}-${APP}-*_framed.png; do
+            # dashboard (main menu) first, so it also sorts first once numbered
+            # — App Store Connect orders screenshots by filename.
+            dashboard="framed-screenshots/${prefix}-${APP}-dashboard_framed.png"
+            count=0
+            while IFS= read -r src; do
               base=$(basename "$src" "_framed.png")
-              name="${base/-${APP}-/-}.png"
+              shot="${base#${prefix}-${APP}-}"
+              name="${prefix}-$((count+1))_${shot}.png"
               dest="$ios_dir/$name"
               convert "$src" -background white -flatten \
                 -resize "${required}" -gravity center -extent "${required}" \
                 -type TrueColor "$dest"
               echo "  → $dest (${required})"
-            done
+              (( count++ )) || true
+            done < <(
+              [[ -f "$dashboard" ]] && echo "$dashboard"
+              for src in framed-screenshots/${prefix}-${APP}-*_framed.png; do
+                [[ "$src" == "$dashboard" ]] && continue
+                echo "$src"
+              done
+            )
           done
           echo "iOS screenshots ready: $(ls "$ios_dir" | wc -l) files"
 
@@ -273,12 +285,24 @@ jobs:
           macos_dir="flutter/packages/$APP/macos/fastlane/screenshots/en-US"
           mkdir -p "$macos_dir"
           shopt -s nullglob
-          for src in framed-screenshots/macos-${APP}-*_framed.png; do
+          # dashboard (main menu) first, so it also sorts first once numbered
+          # — App Store Connect orders screenshots by filename.
+          dashboard="framed-screenshots/macos-${APP}-dashboard_framed.png"
+          count=0
+          while IFS= read -r src; do
             base=$(basename "$src" "_framed.png")
-            name="${base/-${APP}-/-}.png"
+            shot="${base#macos-${APP}-}"
+            name="$((count+1))_${shot}.png"
             convert "$src" -background white -gravity center -extent 1280x800 -flatten -type TrueColor "$macos_dir/$name"
             echo "  $name"
-          done
+            (( count++ )) || true
+          done < <(
+            [[ -f "$dashboard" ]] && echo "$dashboard"
+            for src in framed-screenshots/macos-${APP}-*_framed.png; do
+              [[ "$src" == "$dashboard" ]] && continue
+              echo "$src"
+            done
+          )
           echo "macOS screenshots ready: $(ls "$macos_dir" | wc -l) files"
 
       - uses: ruby/setup-ruby@v1
@@ -337,32 +361,43 @@ jobs:
           mkdir -p "$phone_dir" "$seven_dir" "$ten_dir"
           rm -f "$phone_dir"/*.png "$seven_dir"/*.png "$ten_dir"/*.png
 
+          # ordered_sources: dashboard (main menu) first, so it also sorts first
+          # once numbered — Play Store orders screenshots by filename.
+          ordered_sources() {
+            local prefix="$1" dashboard src
+            shopt -s nullglob
+            dashboard="framed-screenshots/${prefix}-${APP}-dashboard_framed.png"
+            [[ -f "$dashboard" ]] && echo "$dashboard"
+            for src in framed-screenshots/${prefix}-${APP}-*_framed.png; do
+              [[ "$src" == "$dashboard" ]] && continue
+              echo "$src"
+            done
+          }
+
           # copy_device: copy phone screenshots as-is (already 1080×1920 from screenshots.yml)
           copy_device() {
             local prefix="$1" dest_dir="$2" base name src count=0
-            shopt -s nullglob
-            for src in framed-screenshots/${prefix}-${APP}-*_framed.png; do
+            while IFS= read -r src; do
               [[ $count -ge 8 ]] && break
               base=$(basename "$src" "_framed.png")
-              name="${base#${prefix}-${APP}-}.png"
+              name="$((count+1))_${base#${prefix}-${APP}-}.png"
               cp "$src" "$dest_dir/$name"
               echo "  → $dest_dir/$name"
               (( count++ )) || true
-            done
+            done < <(ordered_sources "$prefix")
           }
 
           # resize_device: resize tablet screenshots so shorter side ≥ 1080px (Play Store min)
           resize_device() {
             local prefix="$1" dest_dir="$2" base name src count=0
-            shopt -s nullglob
-            for src in framed-screenshots/${prefix}-${APP}-*_framed.png; do
+            while IFS= read -r src; do
               [[ $count -ge 8 ]] && break
               base=$(basename "$src" "_framed.png")
-              name="${base#${prefix}-${APP}-}.png"
+              name="$((count+1))_${base#${prefix}-${APP}-}.png"
               convert "$src" -resize "x1080" -background white -flatten "$dest_dir/$name"
               echo "  → $dest_dir/$name (resized to min 1080px)"
               (( count++ )) || true
-            done
+            done < <(ordered_sources "$prefix")
           }
 
           copy_device  "phone"    "$phone_dir"
@@ -434,12 +469,20 @@ jobs:
 
           count=0
           shopt -s nullglob
-          for src in framed-screenshots/windows-${APP}-*_framed.png; do
+          # dashboard (main menu) first, so it's screenshot_1
+          dashboard="framed-screenshots/windows-${APP}-dashboard_framed.png"
+          while IFS= read -r src; do
             [[ $count -ge 9 ]] && break
             convert "$src" -background white -gravity center -extent 1920x1080 -flatten -type TrueColor "$base/screenshot_$((count+1)).png"
             echo "  → $base/screenshot_$((count+1)).png"
             (( count++ )) || true
-          done
+          done < <(
+            [[ -f "$dashboard" ]] && echo "$dashboard"
+            for src in framed-screenshots/windows-${APP}-*_framed.png; do
+              [[ "$src" == "$dashboard" ]] && continue
+              echo "$src"
+            done
+          )
           echo "Extracted $count Windows screenshots"
 
       - name: Upload Windows metadata to Partner Center

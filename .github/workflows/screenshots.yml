@@ -568,7 +568,17 @@ jobs:
           python3 - << 'PYEOF'
           import glob, os
 
-          raw    = sorted(f for f in glob.glob("*.png") if not f.endswith("_framed.png"))
+          def sort_key(f):
+              stem = f[:-4]
+              parts = stem.split('-', 2)
+              device, app, shot = parts if len(parts) == 3 else (stem, '', '')
+              # dashboard (main menu) always first within its device/app group
+              return (device, app, 0 if shot == 'dashboard' else 1, shot)
+
+          raw    = sorted(
+              (f for f in glob.glob("*.png") if not f.endswith("_framed.png")),
+              key=sort_key,
+          )
           # For each raw PNG prefer the framed version when it exists.
           files  = []
           n_framed = 0
