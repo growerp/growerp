@@ -915,6 +915,12 @@ along with this software (see the LICENSE.md file). If not, see
                 <service name="growerp.100.MarketingServices100.get#MarketingDashboard" />
             </method>
         </resource>
+        <!-- outreach dashboard aggregates -->
+        <resource name="OutreachDashboard">
+            <method type="get">
+                <service name="growerp.100.OutreachServices100.get#OutreachDashboard" />
+            </method>
+        </resource>
         <!-- social engagement signals -->
         <resource name="SocialEngagement">
             <resource name="Convert">

@@ -18,6 +18,7 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 
 import 'marketing_dashboard_chart_mini.dart';
+import 'outreach_dashboard_chart_mini.dart';
 
 /// Admin dashboard content - displays dashboard panels with statistics.
 /// This is the content-only version for use with ShellRoute.
@@ -74,7 +75,7 @@ class AdminDashboardContent extends StatelessWidget {
                 onRefresh: () async {
                   context.read<AuthBloc>().add(AuthLoad());
                 },
-                compactGraphicRoutes: const {'/marketing'},
+                compactGraphicRoutes: const {'/marketing', '/outreach'},
                 // Provide the revenue/expense mini-chart for the accounting tile.
                 // DashboardGrid auto-upgrades it to full-width 4-row graphic tile.
                 chartBuilder: (route) {
@@ -85,6 +86,9 @@ class AdminDashboardContent extends StatelessWidget {
                   }
                   if (route == '/marketing') {
                     return const MarketingDashboardChartMini();
+                  }
+                  if (route == '/outreach') {
+                    return const OutreachDashboardChartMini();
                   }
                   return null;
                 },

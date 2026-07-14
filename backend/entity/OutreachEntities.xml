@@ -129,6 +129,17 @@
     <!--  Marketing Campaign View Entities                        -->
     <!-- ========================================================= -->
 
+    <view-entity entity-name="OutreachMessageAndCampaign" package="growerp.marketing">
+        <member-entity entity-alias="OM" entity-name="growerp.marketing.OutreachMessage" />
+        <member-entity entity-alias="MC" entity-name="mantle.marketing.campaign.MarketingCampaign"
+            join-from-alias="OM">
+            <key-map field-name="marketingCampaignId" />
+        </member-entity>
+        <alias-all entity-alias="OM" />
+        <alias entity-alias="MC" name="ownerPartyId" />
+        <alias entity-alias="MC" name="campaignStatusId" field="statusId" />
+    </view-entity>
+
     <view-entity entity-name="MarketingCampaignAndMetrics" package="growerp.marketing">
         <member-entity entity-alias="MC" entity-name="mantle.marketing.campaign.MarketingCampaign" />
         <member-entity entity-alias="CM" entity-name="growerp.marketing.CampaignMetrics"
