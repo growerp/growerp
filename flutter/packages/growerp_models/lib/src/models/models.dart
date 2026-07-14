@@ -52,6 +52,7 @@ export 'website_form_model.dart';
 export 'email_sequence_model.dart';
 export 'marketing_dashboard_model.dart';
 export 'crm_dashboard_model.dart';
+export 'catalog_dashboard_model.dart';
 export 'social_engagement_model.dart';
 export 'outreach_campaign_model.dart';
 export 'outreach_dashboard_model.dart';

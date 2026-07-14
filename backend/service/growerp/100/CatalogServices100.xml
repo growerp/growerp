@@ -1045,4 +1045,78 @@ along with this software (see the LICENSE.md file). If not, see
         </actions>
     </service>
 
+    <service verb="get" noun="CatalogDashboard">
+        <description>Aggregates for the catalog dashboard tile: product mix by
+            type and category/lifecycle counters, scoped to the owner company.</description>
+        <out-parameters>
+            <parameter name="stageSummary" type="List" />
+            <parameter name="categories" type="Integer" />
+            <parameter name="activeProducts" type="Integer" />
+            <parameter name="assets" type="Integer" />
+            <parameter name="discontinuedProducts" type="Integer" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+
+            <!-- product mix by type, fixed bucket order -->
+            <entity-find-count count-field="goodsCount"
+                entity-name="mantle.product.Product">
+                <econdition field-name="ownerPartyId" />
+                <econdition field-name="productTypeEnumId" operator="in"
+                    from="['PtAsset', 'PtVirtual', 'PtConfigurable', 'PtPickAssembly']" />
+            </entity-find-count>
+            <entity-find-count count-field="servicesCount"
+                entity-name="mantle.product.Product">
+                <econdition field-name="ownerPartyId" />
+                <econdition field-name="productTypeEnumId" value="PtService" />
+            </entity-find-count>
+            <entity-find-count count-field="rentalCount"
+                entity-name="mantle.product.Product">
+                <econdition field-name="ownerPartyId" />
+                <econdition field-name="productTypeEnumId" operator="in"
+                    from="['PtFixedAssetUse', 'PtAssetUse', 'PtFacilityUse']" />
+            </entity-find-count>
+            <entity-find-count count-field="digitalCount"
+                entity-name="mantle.product.Product">
+                <econdition field-name="ownerPartyId" />
+                <econdition field-name="productTypeEnumId" operator="in"
+                    from="['PtDigital', 'PtDigitalAsset']" />
+            </entity-find-count>
+            <set field="stageSummary" from="[
+                [stageId: 'GOODS', stageName: 'Goods', count: goodsCount],
+                [stageId: 'SERVICES', stageName: 'Services', count: servicesCount],
+                [stageId: 'RENTAL', stageName: 'Rental', count: rentalCount],
+                [stageId: 'DIGITAL', stageName: 'Digital', count: digitalCount]]" />
+
+            <!-- lifecycle / other counters -->
+            <entity-find-count count-field="categories"
+                entity-name="growerp.mobile.party.category.ProductCategoryParentsAndChild">
+                <econdition field-name="ownerPartyId" />
+                <date-filter />
+            </entity-find-count>
+            <entity-find-count count-field="activeProducts"
+                entity-name="mantle.product.Product">
+                <econditions combine="or">
+                    <econdition field-name="salesDiscontinuationDate" operator="is-null" />
+                    <econdition field-name="salesDiscontinuationDate"
+                        operator="greater" from="ec.user.nowTimestamp" />
+                </econditions>
+                <econdition field-name="ownerPartyId" />
+            </entity-find-count>
+            <entity-find-count count-field="discontinuedProducts"
+                entity-name="mantle.product.Product">
+                <econdition field-name="salesDiscontinuationDate" operator="less-equals"
+                    from="ec.user.nowTimestamp" />
+                <econdition field-name="ownerPartyId" />
+            </entity-find-count>
+            <entity-find-count entity-name="mantle.product.asset.Asset"
+                count-field="assets">
+                <econdition field-name="statusId"
+                    operator="not-equals" value="AstDeactivated" />
+                <econdition field-name="ownerPartyId" />
+            </entity-find-count>
+        </actions>
+    </service>
+
 </services>

@@ -862,6 +862,9 @@ abstract class RestClient {
   @GET("rest/s1/growerp/100/CrmDashboard")
   Future<CrmDashboard> getCrmDashboard();
 
+  @GET("rest/s1/growerp/100/CatalogDashboard")
+  Future<CatalogDashboard> getCatalogDashboard();
+
   // social engagement signals
   @GET("rest/s1/growerp/100/SocialEngagement")
   Future<SocialEngagements> getSocialEngagement({

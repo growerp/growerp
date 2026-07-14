@@ -927,6 +927,12 @@ along with this software (see the LICENSE.md file). If not, see
                 <service name="growerp.100.CrmServices100.get#CrmDashboard" />
             </method>
         </resource>
+        <!-- catalog dashboard aggregates -->
+        <resource name="CatalogDashboard">
+            <method type="get">
+                <service name="growerp.100.CatalogServices100.get#CatalogDashboard" />
+            </method>
+        </resource>
         <!-- social engagement signals -->
         <resource name="SocialEngagement">
             <resource name="Convert">
