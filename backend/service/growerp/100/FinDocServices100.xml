@@ -3469,5 +3469,89 @@ along with this software (see the LICENSE.md file). If not, see
             <set field="finDoc" from="finDocs[0]" />
         </actions>
     </service>
+
+    <service verb="get" noun="OrderDashboard">
+        <description>Aggregates for the order dashboard tile: order status
+            funnel (placed/approved/completed/cancelled) and sales/purchase
+            counters, scoped to the owner company.</description>
+        <out-parameters>
+            <parameter name="stageSummary" type="List" />
+            <parameter name="salesOrders" type="Integer" />
+            <parameter name="purchaseOrders" type="Integer" />
+            <parameter name="salesInvoicesNotPaidCount" type="Integer" />
+            <parameter name="purchInvoicesNotPaidCount" type="Integer" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+
+            <!-- order status funnel, fixed stage order (sales + purchase combined) -->
+            <entity-find-count count-field="placedCount"
+                entity-name="mantle.order.OrderPart">
+                <econditions combine="or">
+                    <econdition field-name="vendorPartyId" from="companyPartyId" />
+                    <econdition field-name="customerPartyId" from="companyPartyId" />
+                </econditions>
+                <econdition field-name="statusId" value="OrderPlaced" />
+            </entity-find-count>
+            <entity-find-count count-field="approvedCount"
+                entity-name="mantle.order.OrderPart">
+                <econditions combine="or">
+                    <econdition field-name="vendorPartyId" from="companyPartyId" />
+                    <econdition field-name="customerPartyId" from="companyPartyId" />
+                </econditions>
+                <econdition field-name="statusId" value="OrderApproved" />
+            </entity-find-count>
+            <entity-find-count count-field="completedCount"
+                entity-name="mantle.order.OrderPart">
+                <econditions combine="or">
+                    <econdition field-name="vendorPartyId" from="companyPartyId" />
+                    <econdition field-name="customerPartyId" from="companyPartyId" />
+                </econditions>
+                <econdition field-name="statusId" value="OrderCompleted" />
+            </entity-find-count>
+            <entity-find-count count-field="cancelledCount"
+                entity-name="mantle.order.OrderPart">
+                <econditions combine="or">
+                    <econdition field-name="vendorPartyId" from="companyPartyId" />
+                    <econdition field-name="customerPartyId" from="companyPartyId" />
+                </econditions>
+                <econdition field-name="statusId" value="OrderCancelled" />
+            </entity-find-count>
+            <set field="stageSummary" from="[
+                [stageId: 'OrderPlaced', stageName: 'Placed', count: placedCount],
+                [stageId: 'OrderApproved', stageName: 'Approved', count: approvedCount],
+                [stageId: 'OrderCompleted', stageName: 'Completed', count: completedCount],
+                [stageId: 'OrderCancelled', stageName: 'Cancelled', count: cancelledCount]]" />
+
+            <!-- sales / purchase counters -->
+            <entity-find-count entity-name="mantle.order.OrderPart"
+                count-field="salesOrders">
+                <econdition field-name="vendorPartyId" from="companyPartyId" />
+            </entity-find-count>
+            <entity-find-count entity-name="mantle.order.OrderPart"
+                count-field="purchaseOrders">
+                <econdition field-name="customerPartyId" from="companyPartyId" />
+            </entity-find-count>
+            <entity-find entity-name="mantle.account.invoice.InvoiceSummary"
+                list="allRecInvList" use-clone="true">
+                <econdition field-name="fromPartyId" from="companyPartyId" />
+                <econdition field-name="statusId" operator="in"
+                    value="InvoiceFinalized,InvoiceSent,InvoiceAcked" />
+                <select-field field-name="fromPartyId,invoiceCount" />
+            </entity-find>
+            <entity-find entity-name="mantle.account.invoice.InvoiceSummary"
+                list="allPblInvList" use-clone="true">
+                <econdition field-name="toPartyId" from="companyPartyId" />
+                <econdition field-name="statusId" operator="in"
+                    value="InvoiceReceived,InvoiceApproved" />
+                <select-field field-name="toPartyId,invoiceCount" />
+            </entity-find>
+            <set field="salesInvoicesNotPaidCount"
+                from="allRecInvList ? (allRecInvList[0].invoiceCount as Integer) : 0" />
+            <set field="purchInvoicesNotPaidCount"
+                from="allPblInvList ? (allPblInvList[0].invoiceCount as Integer) : 0" />
+        </actions>
+    </service>
 </services>
  

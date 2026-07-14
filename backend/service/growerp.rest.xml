@@ -933,6 +933,12 @@ along with this software (see the LICENSE.md file). If not, see
                 <service name="growerp.100.CatalogServices100.get#CatalogDashboard" />
             </method>
         </resource>
+        <!-- order dashboard aggregates -->
+        <resource name="OrderDashboard">
+            <method type="get">
+                <service name="growerp.100.FinDocServices100.get#OrderDashboard" />
+            </method>
+        </resource>
         <!-- social engagement signals -->
         <resource name="SocialEngagement">
             <resource name="Convert">
