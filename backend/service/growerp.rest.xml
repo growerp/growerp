@@ -1346,6 +1346,12 @@ along with this software (see the LICENSE.md file). If not, see
                 <service name="growerp.100.LinerServices100.delete#LinerPanel" />
             </method>
         </resource>
+        <!-- agent control dashboard aggregates -->
+        <resource name="AgentControlDashboard">
+            <method type="get">
+                <service name="AdkServices100.get#AdkControlDashboard"/>
+            </method>
+        </resource>
         <!-- ADK Agent Config & Job management -->
         <resource name="AdkAgentConfig">
             <resource name="EnableMarketingTeam">

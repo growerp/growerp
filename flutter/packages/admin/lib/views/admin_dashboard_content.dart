@@ -19,6 +19,7 @@ import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 
 import 'acct_purchase_dashboard_chart_mini.dart';
 import 'acct_sales_dashboard_chart_mini.dart';
+import 'agent_control_dashboard_chart_mini.dart';
 import 'catalog_dashboard_chart_mini.dart';
 import 'crm_dashboard_chart_mini.dart';
 import 'inventory_dashboard_chart_mini.dart';
@@ -94,6 +95,7 @@ class AdminDashboardContent extends StatelessWidget {
                   '/acct-purchase',
                   '/acct-ledger',
                   '/manufacturing',
+                  '/agent-control',
                 },
                 // Provide the revenue/expense mini-chart for the accounting tile.
                 // DashboardGrid auto-upgrades it to full-width 4-row graphic tile.
@@ -132,6 +134,9 @@ class AdminDashboardContent extends StatelessWidget {
                   }
                   if (route == '/manufacturing') {
                     return const ManufacturingDashboardChartMini();
+                  }
+                  if (route == '/agent-control') {
+                    return const AgentControlDashboardChartMini();
                   }
                   return null;
                 },

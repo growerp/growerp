@@ -59,6 +59,7 @@ export 'acct_sales_dashboard_model.dart';
 export 'acct_purchase_dashboard_model.dart';
 export 'ledger_dashboard_model.dart';
 export 'manufacturing_dashboard_model.dart';
+export 'agent_control_dashboard_model.dart';
 export 'social_engagement_model.dart';
 export 'outreach_campaign_model.dart';
 export 'outreach_dashboard_model.dart';
