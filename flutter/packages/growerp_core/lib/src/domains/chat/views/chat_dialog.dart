@@ -252,7 +252,7 @@ class ChatState extends State<ChatDialog> {
 
   Widget _buildContent(String raw, Color textColor, Color bubbleColor) {
     final text = _stripContent(raw);
-    return Text(text, style: TextStyle(fontSize: 15, color: textColor));
+    return SelectableText(text, style: TextStyle(fontSize: 15, color: textColor));
   }
 
   void _onScroll() {
