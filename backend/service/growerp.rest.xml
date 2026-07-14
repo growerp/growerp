@@ -1299,6 +1299,11 @@ along with this software (see the LICENSE.md file). If not, see
                     <service name="AdkServices100.enable#MarketingAgentTeam"/>
                 </method>
             </resource>
+            <resource name="LoadAgentDemo">
+                <method type="post">
+                    <service name="AdkServices100.load#AgentDemo"/>
+                </method>
+            </resource>
             <method type="get">
                 <service name="AdkServices100.get#AdkAgentConfig"/>
             </method>

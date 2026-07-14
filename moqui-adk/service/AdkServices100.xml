@@ -974,4 +974,22 @@
         </actions>
     </service>
 
+    <!-- Load the Agent Control Center demo (Operations Assistant + Sales, Inventory and
+         Support specialists) into the calling admin's tenant on demand. Thin REST wrapper
+         around AdkDemoServices.load#AgentDemo, which is idempotent (upserts by
+         (ownerPartyId, agentName)). -->
+    <service verb="load" noun="AgentDemo" transaction-timeout="600">
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"/>
+            <if condition="ownerPartyId == 'GROWERP'">
+                <return error="true"
+                    message="The agent demo cannot be loaded for the GROWERP owner"/>
+            </if>
+            <service-call name="AdkDemoServices.load#AgentDemo"
+                in-map="[ownerPartyId: ownerPartyId, companyPartyId: companyPartyId,
+                         userPartyId: userPartyId]"/>
+        </actions>
+    </service>
+
 </services>

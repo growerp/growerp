@@ -126,6 +126,52 @@ class _AdkAgentListViewState extends State<AdkAgentListView> {
     }
   }
 
+  Future<void> _loadAgentDemo() async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Load agent demo?'),
+        content: const Text(
+          'Adds the Agent Control Center demo: an Operations Assistant that '
+          'delegates to Sales, Inventory and Support specialists. '
+          'Safe to run again: existing agents are updated, not duplicated.',
+        ),
+        actions: [
+          TextButton(
+            key: const Key('cancelLoadAgentDemo'),
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            key: const Key('confirmLoadAgentDemo'),
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const Text('Load'),
+          ),
+        ],
+      ),
+    );
+    if (confirm != true) return;
+    try {
+      final svc = await AdkConfigService.create();
+      await svc.loadAgentDemo();
+      await _load();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Agent demo loaded')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Load failed: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
   Future<void> _edit(AdkAgentConfig cfg) async {
     final result = await AdkAgentConfigDialog.show(context, existing: cfg);
     if (result != null) await _load();
@@ -186,6 +232,12 @@ class _AdkAgentListViewState extends State<AdkAgentListView> {
             _load();
           },
           actions: [
+            IconButton(
+              key: const Key('loadAgentDemo'),
+              icon: const Icon(Icons.science),
+              tooltip: 'Load agent demo',
+              onPressed: _loadAgentDemo,
+            ),
             IconButton(
               key: const Key('enableMarketingTeam'),
               icon: const Icon(Icons.rocket_launch),

@@ -17,14 +17,14 @@ log**, and **cross-session memory**.
 
 ## How it loads
 
-The demo rides the same path as ordinary demo data: template rows
-(`ownerPartyId="_NA_"` in `moqui/runtime/component/moqui-adk/data/AgentDemoData.xml`) are
-**cloned into a tenant** when the admin ticks a checkbox at tenant setup. It has its own
-selectable indicator — **Load Agent Demo** — next to the existing **Load Demo Data**.
+Template rows (`ownerPartyId="_NA_"` in
+`moqui/runtime/component/moqui-adk/data/AgentDemoData.xml`) are **cloned into a tenant** on
+demand: the admin taps the **Load agent demo** button (flask icon, key `loadAgentDemo`) on the
+**AI Agents** screen — next to the rocket that enables the marketing agent team.
 
-Flag path: `tenant_setup_dialog` (`agentDemoData`) → `AuthLogin` → `auth_bloc` → `Login` REST →
-`GeneralServices100.login#User` → `TenantServices100.complete#TenantSetup` →
-`PartyServices100.setup#SpecificApp` → `AdkDemoServices.load#AgentDemo` (the clone service).
+Call path: `AdkAgentListView` → `AdkConfigService.loadAgentDemo()` →
+`POST rest/s1/growerp/100/AdkAgentConfig/LoadAgentDemo` → `AdkServices100.load#AgentDemo`
+(resolves the calling admin's tenant) → `AdkDemoServices.load#AgentDemo` (the clone service).
 
 ## Prerequisites
 
@@ -34,14 +34,12 @@ Flag path: `tenant_setup_dialog` (`agentDemoData`) → `AuthLogin` → `auth_blo
 - For the RAG part only: a Gemini key — `GOOGLE_API_KEY` env var, or a `gemini` `LlmConfig`
   for the tenant. Without it the agents still load; only the Support knowledge docs are skipped.
 
-## Step 0 — Load the demo into a new tenant
+## Step 0 — Load the demo into your tenant
 
-1. Run the **agents** app (`flutter/packages/agents/`) — or any GrowERP app — and start
-   registration for a brand-new company (not the GROWERP system tenant; the flag is forced off
-   for GROWERP).
-2. On the tenant setup dialog, tick **Load Agent Demo** (key `agentDemoData`) and complete
-   setup. (Setup uses a 15-minute client timeout because knowledge ingest + embedding can be
-   slow.)
+1. Run the **agents** app (`flutter/packages/agents/`) — or any GrowERP app — logged in as a
+   tenant admin (not the GROWERP system tenant; the service refuses the GROWERP owner).
+2. Open **AI Agents** and tap the **Load agent demo** button (flask icon) in the top bar, then
+   confirm. Idempotent: re-running updates existing agents instead of duplicating them.
 3. The clone service creates the 5 agents and 3 team links for your tenant, and — if a key is
    present — ingests the demo policy docs.
 
@@ -97,5 +95,5 @@ assistant recalls it.
 ## What this demo does not add
 
 No new ADK entities, screens, or capabilities — the platform already exposes all of the above.
-The demo is one dialog checkbox + flag threading, one clone service
+The demo is one button on the AI Agents screen, one clone service
 (`AdkDemoServices.load#AgentDemo`), one template-seed file (`AgentDemoData.xml`), and this doc.

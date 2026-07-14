@@ -122,7 +122,6 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="companyName" required="true"/>
             <parameter name="currencyId" required="true"/>
             <parameter name="demoData" type="Boolean" default="false"/>
-            <parameter name="agentDemoData" type="Boolean" default="false"/>
             <parameter name="classificationId" required="true"/>
             <parameter name="userPartyId" required="true"/>
             <parameter name="hostName"/>
@@ -136,7 +135,6 @@ along with this software (see the LICENSE.md file). If not, see
             <if condition="ownerPartyId == 'GROWERP'">
                 <!-- Force no demo data for GROWERP -->
                 <set field="demoData" value="false" type="Boolean"/>
-                <set field="agentDemoData" value="false" type="Boolean"/>
             </if>
 
             <!-- Update company name -->
@@ -160,7 +158,7 @@ along with this software (see the LICENSE.md file). If not, see
             <service-call name="growerp.100.PartyServices100.setup#SpecificApp"
                 in-map="[ownerPartyId: ownerPartyId, companyPartyId: companyPartyId,
                          userPartyId: userPartyId, classificationId: classificationId,
-                         demoData: demoData, agentDemoData: agentDemoData,
+                         demoData: demoData,
                          currencyId: currencyId, timeZoneOffset: timeZoneOffset]"/>
 
             <!-- Create trial subscription for new tenants (not GROWERP) -->

@@ -70,7 +70,6 @@ abstract class RestClient {
     @Field() String? companyName,
     @Field() String? currencyId,
     @Field() bool? demoData,
-    @Field() bool? agentDemoData,
     @Field() required String classificationId,
     @Field() String? timeZoneOffset,
     @Field() int? testDaysOffset,
@@ -1880,6 +1879,9 @@ abstract class RestClient {
 
   @POST("rest/s1/growerp/100/AdkAgentConfig/EnableMarketingTeam")
   Future<void> enableMarketingAgentTeam();
+
+  @POST("rest/s1/growerp/100/AdkAgentConfig/LoadAgentDemo")
+  Future<void> loadAgentDemo();
 
   @POST("rest/s1/growerp/100/AdkAgentConfig")
   Future<AdkAgentConfig> createAdkAgentConfig({

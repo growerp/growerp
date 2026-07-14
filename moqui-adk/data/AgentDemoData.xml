@@ -5,8 +5,8 @@
          Agent Control Center DEMO — "GrowERP Operations Assistant" team.
 
          These are TEMPLATE rows (ownerPartyId="_NA_"). They are never run directly;
-         AdkDemoServices.load#AgentDemo clones them into a tenant when the admin ticks
-         "Load Agent Demo" on the tenant setup dialog (parallel to the demoData flow).
+         AdkDemoServices.load#AgentDemo clones them into a tenant when the admin taps
+         "Load agent demo" on the AI Agents screen (via AdkServices100.load#AgentDemo).
 
          The scenario lights up every control-center capability:
            - coordinator + 3 specialists  → multi-agent orchestration (routes by description)
@@ -23,7 +23,7 @@
         ownerPartyId="_NA_"
         adkAgentConfigId="ADK_DEMO_COORD"
         agentName="Operations Assistant"
-        modelName="gemini-2.5-flash"
+        modelName="gemini-2.5-flash-lite"
         llmProvider="gemini"
         enabled="Y"
         agentRole="coordinator"
@@ -44,7 +44,7 @@ spans several areas, delegate them in turn. Never invent data."/>
         ownerPartyId="_NA_"
         adkAgentConfigId="ADK_DEMO_SALES"
         agentName="Sales Specialist"
-        modelName="gemini-2.5-flash"
+        modelName="gemini-2.5-flash-lite"
         llmProvider="gemini"
         enabled="Y"
         agentRole="specialist"
@@ -63,7 +63,7 @@ prices; look them up."/>
         ownerPartyId="_NA_"
         adkAgentConfigId="ADK_DEMO_INV"
         agentName="Inventory Specialist"
-        modelName="gemini-2.5-flash"
+        modelName="gemini-2.5-flash-lite"
         llmProvider="gemini"
         enabled="Y"
         agentRole="specialist"
@@ -79,7 +79,7 @@ through the Sales specialist with approval."/>
         ownerPartyId="_NA_"
         adkAgentConfigId="ADK_DEMO_SUPPORT"
         agentName="Support Specialist"
-        modelName="gemini-2.5-flash"
+        modelName="gemini-2.5-flash-lite"
         llmProvider="gemini"
         enabled="Y"
         agentRole="specialist"
@@ -101,7 +101,7 @@ requestHumanHandoff tool with a short reason, then tell them a member of the tea
         ownerPartyId="_NA_"
         adkAgentConfigId="ADK_DEMO_DIGEST"
         agentName="Ops Digest"
-        modelName="gemini-2.5-flash"
+        modelName="gemini-2.5-flash-lite"
         llmProvider="gemini"
         enabled="Y"
         agentRole="specialist"

@@ -85,6 +85,11 @@ class AdkConfigService {
     await _client.enableMarketingAgentTeam();
   }
 
+  /// Load the Agent Control Center demo into this tenant (idempotent).
+  Future<void> loadAgentDemo() async {
+    await _client.loadAgentDemo();
+  }
+
   // ── Phase 4: team membership ───────────────────────────────────────────────
   Future<List<AdkAgentTeamMember>> teamMembers(String coordinatorConfigId) async {
     final r = await _client.getAdkAgentTeam(coordinatorConfigId: coordinatorConfigId);

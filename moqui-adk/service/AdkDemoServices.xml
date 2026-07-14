@@ -3,10 +3,9 @@
           xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
 
     <!-- Clone the Agent Control Center demo (the "_NA_" template rows in AgentDemoData.xml)
-         into a tenant. Called from growerp.100.PartyServices100.setup#SpecificApp when the admin
-         ticks "Load Agent Demo" on the tenant setup dialog — the agentDemoData equivalent of
-         load#DemoData. Idempotent: re-running upserts agents by (ownerPartyId, agentName) and
-         skips team links / knowledge docs that already exist. -->
+         into a tenant. Called from AdkServices100.load#AgentDemo when the admin taps
+         "Load agent demo" on the Agent Control screen. Idempotent: re-running upserts agents
+         by (ownerPartyId, agentName) and skips team links / knowledge docs that already exist. -->
     <service verb="load" noun="AgentDemo" transaction-timeout="600">
         <in-parameters>
             <parameter name="ownerPartyId" required="true"/>

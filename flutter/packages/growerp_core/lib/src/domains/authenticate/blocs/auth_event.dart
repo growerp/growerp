@@ -54,8 +54,6 @@ class AuthLogin extends AuthEvent {
   final String? expireMonth;
   final String? expireYear;
   final bool? demoData;
-  // load the Agent Control Center demo (separate from demoData)
-  final bool? agentDemoData;
   // for testing: offset backend effective time by this many days
   final int? testDaysOffset;
   const AuthLogin(
@@ -64,7 +62,6 @@ class AuthLogin extends AuthEvent {
     this.companyName,
     this.currency,
     this.demoData,
-    this.agentDemoData,
     this.creditCardNumber,
     this.nameOnCard,
     this.cVC,
