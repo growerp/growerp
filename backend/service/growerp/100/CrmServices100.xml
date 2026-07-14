@@ -189,6 +189,96 @@ along with this software (see the LICENSE.md file). If not, see
         </actions>
     </service>
 
+    <service verb="get" noun="CrmDashboard">
+        <description>Aggregates for the CRM dashboard tile: customer lifecycle
+            funnel (assigned/qualified/converted) and party-role counters,
+            scoped to the owner company.</description>
+        <out-parameters>
+            <parameter name="stageSummary" type="List" />
+            <parameter name="suppliers" type="Integer" />
+            <parameter name="employees" type="Integer" />
+            <parameter name="admins" type="Integer" />
+            <parameter name="totalContacts" type="Integer" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+
+            <!-- customer lifecycle funnel, fixed stage order -->
+            <entity-find-count count-field="assignedCount"
+                entity-name="growerp.party.OwnerPersonDetailAndCompany">
+                <econdition field-name="ownerPartyId" />
+                <econdition field-name="userDisabled" value="N" or-null="true" />
+                <econdition field-name="ownerDisabled" value="N" or-null="true" />
+                <econditions combine="or">
+                    <econdition field-name="role" value="Customer" />
+                    <econdition field-name="companyRole" value="Customer" />
+                </econditions>
+                <econditions combine="or">
+                    <econdition field-name="customerStatusId" value="CUSTOMER_ASSIGNED" />
+                    <econdition field-name="companyCustomerStatusId" value="CUSTOMER_ASSIGNED" />
+                </econditions>
+            </entity-find-count>
+            <entity-find-count count-field="qualifiedCount"
+                entity-name="growerp.party.OwnerPersonDetailAndCompany">
+                <econdition field-name="ownerPartyId" />
+                <econdition field-name="userDisabled" value="N" or-null="true" />
+                <econdition field-name="ownerDisabled" value="N" or-null="true" />
+                <econditions combine="or">
+                    <econdition field-name="role" value="Customer" />
+                    <econdition field-name="companyRole" value="Customer" />
+                </econditions>
+                <econditions combine="or">
+                    <econdition field-name="customerStatusId" value="CUSTOMER_QUALIFIED" />
+                    <econdition field-name="companyCustomerStatusId" value="CUSTOMER_QUALIFIED" />
+                </econditions>
+            </entity-find-count>
+            <entity-find-count count-field="convertedCount"
+                entity-name="growerp.party.OwnerPersonDetailAndCompany">
+                <econdition field-name="ownerPartyId" />
+                <econdition field-name="userDisabled" value="N" or-null="true" />
+                <econdition field-name="ownerDisabled" value="N" or-null="true" />
+                <econditions combine="or">
+                    <econdition field-name="role" value="Customer" />
+                    <econdition field-name="companyRole" value="Customer" />
+                </econditions>
+                <econditions combine="or">
+                    <econdition field-name="customerStatusId" value="CUSTOMER_CONVERTED" />
+                    <econdition field-name="companyCustomerStatusId" value="CUSTOMER_CONVERTED" />
+                </econditions>
+            </entity-find-count>
+            <set field="stageSummary" from="[
+                [stageId: 'CUSTOMER_ASSIGNED', stageName: 'Assigned', count: assignedCount],
+                [stageId: 'CUSTOMER_QUALIFIED', stageName: 'Qualified', count: qualifiedCount],
+                [stageId: 'CUSTOMER_CONVERTED', stageName: 'Converted', count: convertedCount]]" />
+            <set field="totalContacts" from="assignedCount + qualifiedCount + convertedCount" />
+
+            <!-- other party-role counters -->
+            <entity-find-count count-field="suppliers"
+                entity-name="mantle.party.PartyDetailAndRole">
+                <econdition field-name="ownerPartyId" />
+                <econdition field-name="disabled" value="N" or-null="true" />
+                <econdition field-name="roleTypeId" value="Supplier" />
+                <econdition field-name="partyTypeEnumId" value="PtyOrganization" />
+            </entity-find-count>
+            <entity-find-count count-field="employees"
+                entity-name="growerp.party.OwnerPersonDetailAndCompany">
+                <econdition field-name="ownerPartyId" />
+                <econdition field-name="userDisabled" value="N" or-null="true" />
+                <econdition field-name="ownerDisabled" value="N" or-null="true" />
+                <econdition field-name="companyRole" value="OrgInternal" />
+            </entity-find-count>
+            <entity-find-count count-field="admins"
+                entity-name="growerp.party.OwnerPersonDetailAndCompany">
+                <econdition field-name="ownerPartyId" />
+                <econdition field-name="userDisabled" value="N" or-null="true" />
+                <econdition field-name="ownerDisabled" value="N" or-null="true" />
+                <econdition field-name="companyRole" value="OrgInternal" />
+                <econdition field-name="userGroupId" value="GROWERP_M_ADMIN" />
+            </entity-find-count>
+        </actions>
+    </service>
+
     <service verb="create" noun="Opportunity">
         <description> Create a Opportunity with a price in a category</description>
         <in-parameters>

@@ -17,6 +17,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 
+import 'crm_dashboard_chart_mini.dart';
 import 'marketing_dashboard_chart_mini.dart';
 import 'outreach_dashboard_chart_mini.dart';
 
@@ -75,7 +76,7 @@ class AdminDashboardContent extends StatelessWidget {
                 onRefresh: () async {
                   context.read<AuthBloc>().add(AuthLoad());
                 },
-                compactGraphicRoutes: const {'/marketing', '/outreach'},
+                compactGraphicRoutes: const {'/marketing', '/outreach', '/crm'},
                 // Provide the revenue/expense mini-chart for the accounting tile.
                 // DashboardGrid auto-upgrades it to full-width 4-row graphic tile.
                 chartBuilder: (route) {
@@ -89,6 +90,9 @@ class AdminDashboardContent extends StatelessWidget {
                   }
                   if (route == '/outreach') {
                     return const OutreachDashboardChartMini();
+                  }
+                  if (route == '/crm') {
+                    return const CrmDashboardChartMini();
                   }
                   return null;
                 },
