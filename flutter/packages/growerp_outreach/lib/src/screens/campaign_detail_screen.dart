@@ -601,9 +601,15 @@ class _PlatformConfigDialogState extends State<_PlatformConfigDialog>
       _keywordsControllers[platform] = TextEditingController(
         text: config?.searchKeywords ?? '',
       );
-      _selectedActions[platform] = config?.actionType ??
-          (_platformActions[platform.toUpperCase()]?.first['value'] ??
-              'send_message');
+      final validActions = _platformActions[platform.toUpperCase()] ?? [];
+      final savedAction = config?.actionType;
+      final defaultAction = validActions.isNotEmpty
+          ? validActions.first['value']
+          : 'send_message';
+      _selectedActions[platform] =
+          validActions.any((a) => a['value'] == savedAction)
+              ? savedAction!
+              : defaultAction!;
       _messageLists[platform] = List<Map<String, String>>.from(
         config?.messageList ?? [],
       );
