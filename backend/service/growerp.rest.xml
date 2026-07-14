@@ -945,6 +945,12 @@ along with this software (see the LICENSE.md file). If not, see
                 <service name="growerp.100.InventoryServices100.get#InventoryDashboard" />
             </method>
         </resource>
+        <!-- acct purchase dashboard aggregates -->
+        <resource name="AcctPurchaseDashboard">
+            <method type="get">
+                <service name="growerp.100.FinDocServices100.get#AcctPurchaseDashboard" />
+            </method>
+        </resource>
         <!-- social engagement signals -->
         <resource name="SocialEngagement">
             <resource name="Convert">

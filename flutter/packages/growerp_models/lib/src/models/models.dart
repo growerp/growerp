@@ -55,6 +55,7 @@ export 'crm_dashboard_model.dart';
 export 'catalog_dashboard_model.dart';
 export 'order_dashboard_model.dart';
 export 'inventory_dashboard_model.dart';
+export 'acct_purchase_dashboard_model.dart';
 export 'social_engagement_model.dart';
 export 'outreach_campaign_model.dart';
 export 'outreach_dashboard_model.dart';

@@ -17,6 +17,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 
+import 'acct_purchase_dashboard_chart_mini.dart';
 import 'catalog_dashboard_chart_mini.dart';
 import 'crm_dashboard_chart_mini.dart';
 import 'inventory_dashboard_chart_mini.dart';
@@ -86,6 +87,7 @@ class AdminDashboardContent extends StatelessWidget {
                   '/catalog',
                   '/orders',
                   '/inventory',
+                  '/acct-purchase',
                 },
                 // Provide the revenue/expense mini-chart for the accounting tile.
                 // DashboardGrid auto-upgrades it to full-width 4-row graphic tile.
@@ -112,6 +114,9 @@ class AdminDashboardContent extends StatelessWidget {
                   }
                   if (route == '/inventory') {
                     return const InventoryDashboardChartMini();
+                  }
+                  if (route == '/acct-purchase') {
+                    return const AcctPurchaseDashboardChartMini();
                   }
                   return null;
                 },
