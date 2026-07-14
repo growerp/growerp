@@ -2528,6 +2528,46 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="fullName" field="userFullName" entity-alias="ACCOUNT" />
     </view-entity>
 
+    <view-entity entity-name="ChatRoomMemberDetail" package="growerp.general">
+        <description>All members of the chat rooms a given user (MINE) belongs to, with
+            account/person/email detail resolved in one query. One row per (room, member);
+            filter on myUserId and group by chatRoomId.</description>
+        <member-entity entity-alias="MINE" entity-name="growerp.general.ChatRoomMember" />
+        <member-entity entity-alias="CR" entity-name="growerp.general.ChatRoom"
+            join-from-alias="MINE">
+            <key-map field-name="chatRoomId" />
+        </member-entity>
+        <member-entity entity-alias="CMEM" entity-name="growerp.general.ChatRoomMember"
+            join-from-alias="CR">
+            <key-map field-name="chatRoomId" />
+        </member-entity>
+        <member-entity entity-alias="ACCT" entity-name="moqui.security.UserAccount"
+            join-from-alias="CMEM" join-optional="true">
+            <key-map field-name="userId" />
+        </member-entity>
+        <member-entity entity-alias="PERSON" entity-name="mantle.party.Person"
+            join-from-alias="ACCT" join-optional="true">
+            <key-map field-name="partyId" />
+        </member-entity>
+        <alias name="myUserId" field="userId" entity-alias="MINE" />
+        <alias name="myIsActive" field="isActive" entity-alias="MINE" />
+        <alias name="myHasRead" field="hasRead" entity-alias="MINE" />
+        <alias name="chatRoomId" entity-alias="CR" />
+        <alias name="chatRoomName" entity-alias="CR" />
+        <alias name="isPrivate" entity-alias="CR" />
+        <alias name="ownerPartyId" entity-alias="CR" />
+        <alias name="isActiveChatRoom" field="isActive" entity-alias="CR" />
+        <alias name="userId" entity-alias="CMEM" />
+        <alias name="isActive" entity-alias="CMEM" />
+        <alias name="hasRead" entity-alias="CMEM" />
+        <alias name="userPartyId" field="partyId" entity-alias="ACCT" />
+        <alias name="loginName" field="username" entity-alias="ACCT" />
+        <alias name="fullName" field="userFullName" entity-alias="ACCT" />
+        <alias name="firstName" entity-alias="PERSON" />
+        <alias name="lastName" entity-alias="PERSON" />
+        <alias name="emailAddress" entity-alias="ACCT" />
+    </view-entity>
+
     <view-entity entity-name="ChatRoomAndMessages" package="growerp.general">
         <member-entity entity-alias="CR" entity-name="growerp.general.ChatRoom" />
         <member-entity entity-alias="CMSGS" entity-name="growerp.general.ChatMessage"

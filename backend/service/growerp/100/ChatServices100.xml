@@ -120,91 +120,78 @@ along with this software (see the LICENSE.md file). If not, see
                 <set field="partnerRoomIds"
                     from="partnerMemberships ? partnerMemberships.collect{ it.chatRoomId } : ['__none__']" />
             </if>
+            <!-- single query: rooms of the current user x all their members with
+                 account/person/email detail; one row per (room, member) -->
             <if condition="ec.user.userAccount.userId == 'SYSTEM_SUPPORT'">
-                <entity-find entity-name="growerp.general.ChatRoomsAndMembers" list="rooms">
+                <entity-find entity-name="growerp.general.ChatRoomMemberDetail" list="rows">
                     <econdition field-name="isPrivate" value="Y" />
                     <econditions combine="or">
-                        <econdition field-name="isActive" value="Y" />
-                        <econdition field-name="hasRead" value="N" />
+                        <econdition field-name="myIsActive" value="Y" />
+                        <econdition field-name="myHasRead" value="N" />
                     </econditions>
-                    <econdition field-name="userId" value="SYSTEM_SUPPORT" />
+                    <econdition field-name="myUserId" value="SYSTEM_SUPPORT" />
                     <econdition field-name="chatRoomName" operator="like" from="namePrefixLike" ignore-if-empty="true" />
                 </entity-find>
                 <else>
-                    <entity-find entity-name="growerp.general.ChatRoomsAndMembers" list="rooms">
+                    <entity-find entity-name="growerp.general.ChatRoomMemberDetail" list="rows">
                         <econdition field-name="ownerPartyId" from="ownerPartyId" />
                         <econdition field-name="chatRoomId" from="chatRoomId" ignore-if-empty="true" />
                         <econdition field-name="isPrivate" from="isPriv" ignore-if-empty="true" />
                         <econdition field-name="chatRoomName" from="filter" ignore-if-empty="true" />
                         <econdition field-name="chatRoomName" operator="like" from="namePrefixLike" ignore-if-empty="true" />
-                        <econdition field-name="isActive" value="Y" />
-                        <econdition field-name="userId" from="ec.user.userAccount.userId" />
+                        <econdition field-name="myIsActive" value="Y" />
+                        <econdition field-name="myUserId" from="ec.user.userAccount.userId" />
                         <econdition field-name="chatRoomId" operator="in"
                             from="partnerRoomIds" ignore-if-empty="true" />
                     </entity-find>
                 </else>
             </if>
             <set field="chatRooms" from="[]" />
-            <iterate list="rooms" entry="room">
-                <if condition="room.isPrivate == 'Y'">
-                    <!-- get roomName from other private member-->
-                    <entity-find entity-name="growerp.general.ChatRoomsAndMembers" list="others">
-                        <econdition field-name="chatRoomId" from="room.chatRoomId" />
-                        <econdition field-name="userId" operator="not-equals"
-                            from="ec.user.userAccount.userId" />
-                    </entity-find>
+            <set field="rowsByRoom" from="rows.groupBy{ it.chatRoomId }" />
+            <iterate list="rowsByRoom" entry="roomRows" key="roomId">
+                <!-- guard against row duplication from the optional email join -->
+                <set field="roomRows" from="roomRows.unique(false){ it.userId }" />
+                <set field="first" from="roomRows[0]" />
+                <set field="roomName" from="null" />
+                <if condition="first.isPrivate == 'Y'">
+                    <!-- private room shows the other member's name -->
+                    <set field="other"
+                        from="roomRows.find{ it.userId != ec.user.userAccount.userId }" />
                     <if condition="ec.user.userAccount.userId == 'SYSTEM_SUPPORT'">
                         <set field="roomName"
-                            value="${others[0].ownerPartyId} ${others[0].fullName}" />
+                            value="${other?.ownerPartyId} ${other?.fullName}" />
                         <else>
-                            <set field="roomName" from="others[0].fullName" />
+                            <set field="roomName" from="other?.fullName" />
                         </else>
                     </if>
                 </if>
-                <!-- get members -->
-                <entity-find entity-name="growerp.general.ChatRoomMember" list="memberList">
-                    <econdition field-name="chatRoomId" from="room.chatRoomId" />
-                </entity-find>
                 <set field="members" from="[]" />
-                <set field="hasRead" from="null" />
-                <iterate list="memberList" entry="member">
-                    <if condition="member.userId == ec.user.userAccount.userId">
-                        <set field="hasRead" from="member.hasRead" />
-                    </if>
-                    <!-- the member is stored by userId only; resolve its login +
-                         name for display. OwnerPersonDetailAndCompany has
-                         loginName/first/last; fall back to UserAccount for
-                         non-person accounts (e.g. SYSTEM_SUPPORT). -->
-                    <entity-find entity-name="growerp.party.OwnerPersonDetailAndCompany"
-                        list="mInfos" limit="1">
-                        <econdition field-name="userId" from="member.userId" />
-                    </entity-find>
-                    <if condition="mInfos">
+                <iterate list="roomRows" entry="row">
+                    <!-- Person detail when available; fall back to the UserAccount
+                         full name for non-person accounts (e.g. SYSTEM_SUPPORT) -->
+                    <if condition="row.firstName || row.lastName">
                         <set field="memberUser"
-                            from="[userId: member.userId, partyId: mInfos[0].userPartyId,
-                                loginName: mInfos[0].loginName, firstName: mInfos[0].firstName,
-                                lastName: mInfos[0].lastName, email: mInfos[0].emailAddress]" />
+                            from="[userId: row.userId, partyId: row.userPartyId,
+                                loginName: row.loginName, firstName: row.firstName,
+                                lastName: row.lastName, email: row.emailAddress]" />
                         <else>
-                            <entity-find-one entity-name="moqui.security.UserAccount"
-                                value-field="mUa">
-                                <field-map field-name="userId" from="member.userId" />
-                            </entity-find-one>
                             <set field="memberUser"
-                                from="[userId: member.userId, loginName: mUa?.username,
-                                    firstName: mUa?.userFullName]" />
+                                from="[userId: row.userId, partyId: row.userPartyId,
+                                    loginName: row.loginName, firstName: row.fullName,
+                                    email: row.emailAddress]" />
                         </else>
                     </if>
                     <set field="memberOut"
                         from="[user: memberUser,
-                        hasRead: member.hasRead == 'Y' ? true : false,
-                        isActive: member.isActive == 'Y' ? true : false]" />
+                        hasRead: row.hasRead == 'Y' ? true : false,
+                        isActive: row.isActive == 'Y' ? true : false]" />
                     <script>members.add(memberOut)</script>
                 </iterate>
                 <set field="roomOut"
                     from="[
-                        chatRoomId: room.chatRoomId, chatRoomName: room.chatRoomName ?: roomName,
-                        hasRead: hasRead == 'Y' ? true : false,
-                        isPrivate: room.isPrivate == 'Y' ? true : false,
+                        chatRoomId: roomId, chatRoomName: first.chatRoomName ?: roomName,
+                        hasRead: first.myHasRead == 'Y' ? true : false,
+                        isPrivate: first.isPrivate == 'Y' ? true : false,
                         members: members]" />
                 <script>chatRooms.add(roomOut)</script>
             </iterate>
