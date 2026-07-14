@@ -34,7 +34,7 @@ Channel rules: for LINKEDIN, end on a question and include NO URL (we share the 
 reply); keep it under ~400 characters. For EMAIL, include the assessment link
 https://growerp.com/landing/erp-landing-page and a one-line sign-off (Hans, GrowERP); keep it under ~120
 words. If a recipient field is unknown, rewrite the line to read naturally rather than leaving a blank or
-a literal token like {firstName}."/>
+a literal placeholder token."/>
 
     <!-- 2 ── GrowERP SDR: public website-chat agent, RAG-grounded, books trials, hands off hot leads -->
     <moqui.adk.AdkAgentConfig
