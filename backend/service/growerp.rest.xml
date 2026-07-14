@@ -963,6 +963,12 @@ along with this software (see the LICENSE.md file). If not, see
                 <service name="growerp.100.AccountingServices100.get#LedgerDashboard" />
             </method>
         </resource>
+        <!-- manufacturing dashboard aggregates -->
+        <resource name="ManufacturingDashboard">
+            <method type="get">
+                <service name="growerp.100.ManufacturingServices100.get#ManufacturingDashboard" />
+            </method>
+        </resource>
         <!-- social engagement signals -->
         <resource name="SocialEngagement">
             <resource name="Convert">
