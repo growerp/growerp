@@ -39,11 +39,11 @@
                     </#if>
                 </#if>
 
-                <#-- Content Menu Items (both modes); marketing Apps link inserted before pricing -->
+                <#-- Content Menu Items (both modes); marketing Features link inserted before getting-started -->
                 <#list storeInfo.menu as topItem>
                 <#if !topItem.title?has_content || topItem.path == 'home'><#continue></#if>
-                <#if isMarketing && topItem.path == 'pricing'>
-                    <a href="/modules" class="font-label text-sm text-on-surface-variant hover:text-primary transition-colors">Apps</a>
+                <#if isMarketing && topItem.path == 'getting-started'>
+                    <a href="/modules" class="font-label text-sm text-on-surface-variant hover:text-primary transition-colors">Features</a>
                 </#if>
                 <#if topItem.items?has_content>
                 <div class="relative">
@@ -160,8 +160,8 @@
             <#if isMarketing>
                 <#list storeInfo.menu as topItem>
                 <#if !topItem.title?has_content || topItem.path == 'home'><#continue></#if>
-                <#if topItem.path == 'pricing'>
-                    <a href="/modules" class="block px-2 py-2 rounded-lg font-label text-sm text-on-surface hover:bg-primary/10 hover:text-primary transition-colors">Apps</a>
+                <#if topItem.path == 'getting-started'>
+                    <a href="/modules" class="block px-2 py-2 rounded-lg font-label text-sm text-on-surface hover:bg-primary/10 hover:text-primary transition-colors">Features</a>
                 </#if>
                 <a href="/content/${topItem.path}" class="block px-2 py-2 rounded-lg font-label text-sm text-on-surface hover:bg-primary/10 hover:text-primary transition-colors">${topItem.title!topItem.path}</a>
                 </#list>
