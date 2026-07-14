@@ -3554,6 +3554,68 @@ along with this software (see the LICENSE.md file). If not, see
         </actions>
     </service>
 
+    <service verb="get" noun="AcctSalesDashboard">
+        <description>Aggregates for the accounts-receivable dashboard tile:
+            sales invoice status funnel (in process/finalized/sent/paid) and
+            counters, scoped to the owner company.</description>
+        <out-parameters>
+            <parameter name="stageSummary" type="List" />
+            <parameter name="totalInvoices" type="Integer" />
+            <parameter name="unpaidInvoices" type="Integer" />
+            <parameter name="paidInvoices" type="Integer" />
+            <parameter name="cancelledInvoices" type="Integer" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+
+            <!-- AR invoice status funnel, fixed stage order -->
+            <entity-find-count count-field="inProcessCount"
+                entity-name="mantle.account.invoice.Invoice">
+                <econdition field-name="fromPartyId" from="companyPartyId" />
+                <econdition field-name="statusId" value="InvoiceInProcess" />
+            </entity-find-count>
+            <entity-find-count count-field="finalizedCount"
+                entity-name="mantle.account.invoice.Invoice">
+                <econdition field-name="fromPartyId" from="companyPartyId" />
+                <econdition field-name="statusId" value="InvoiceFinalized" />
+            </entity-find-count>
+            <entity-find-count count-field="sentCount"
+                entity-name="mantle.account.invoice.Invoice">
+                <econdition field-name="fromPartyId" from="companyPartyId" />
+                <econdition field-name="statusId" value="InvoiceSent" />
+            </entity-find-count>
+            <entity-find-count count-field="paidCount"
+                entity-name="mantle.account.invoice.Invoice">
+                <econdition field-name="fromPartyId" from="companyPartyId" />
+                <econdition field-name="statusId" value="InvoicePmtRecvd" />
+            </entity-find-count>
+            <set field="stageSummary" from="[
+                [stageId: 'InvoiceInProcess', stageName: 'In Process', count: inProcessCount],
+                [stageId: 'InvoiceFinalized', stageName: 'Finalized', count: finalizedCount],
+                [stageId: 'InvoiceSent', stageName: 'Sent', count: sentCount],
+                [stageId: 'InvoicePmtRecvd', stageName: 'Paid', count: paidCount]]" />
+            <set field="paidInvoices" from="paidCount" />
+
+            <!-- other counters -->
+            <entity-find-count count-field="totalInvoices"
+                entity-name="mantle.account.invoice.Invoice">
+                <econdition field-name="fromPartyId" from="companyPartyId" />
+            </entity-find-count>
+            <entity-find-count count-field="unpaidInvoices"
+                entity-name="mantle.account.invoice.Invoice">
+                <econdition field-name="fromPartyId" from="companyPartyId" />
+                <econdition field-name="statusId" operator="in"
+                    value="InvoiceFinalized,InvoiceSent,InvoiceAcked" />
+            </entity-find-count>
+            <entity-find-count count-field="cancelledInvoices"
+                entity-name="mantle.account.invoice.Invoice">
+                <econdition field-name="fromPartyId" from="companyPartyId" />
+                <econdition field-name="statusId" value="InvoiceCancelled" />
+            </entity-find-count>
+        </actions>
+    </service>
+
     <service verb="get" noun="AcctPurchaseDashboard">
         <description>Aggregates for the accounts-payable dashboard tile:
             purchase invoice status funnel (received/approved/paid) and

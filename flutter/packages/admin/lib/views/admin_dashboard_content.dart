@@ -18,6 +18,7 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 
 import 'acct_purchase_dashboard_chart_mini.dart';
+import 'acct_sales_dashboard_chart_mini.dart';
 import 'catalog_dashboard_chart_mini.dart';
 import 'crm_dashboard_chart_mini.dart';
 import 'inventory_dashboard_chart_mini.dart';
@@ -87,6 +88,7 @@ class AdminDashboardContent extends StatelessWidget {
                   '/catalog',
                   '/orders',
                   '/inventory',
+                  '/acct-sales',
                   '/acct-purchase',
                 },
                 // Provide the revenue/expense mini-chart for the accounting tile.
@@ -114,6 +116,9 @@ class AdminDashboardContent extends StatelessWidget {
                   }
                   if (route == '/inventory') {
                     return const InventoryDashboardChartMini();
+                  }
+                  if (route == '/acct-sales') {
+                    return const AcctSalesDashboardChartMini();
                   }
                   if (route == '/acct-purchase') {
                     return const AcctPurchaseDashboardChartMini();
