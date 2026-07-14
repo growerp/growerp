@@ -57,43 +57,43 @@ along with this software (see the LICENSE.md file). If not, see
     <!-- Top-level menu items -->
     <growerp.menu.MenuItem menuItemId="ADMIN_MAIN" menuConfigurationId="ADMIN_DEFAULT" 
         title="main" route="/" iconName="dashboard" widgetName="AdminDashboard" sequenceNum="10"/>
-    <growerp.menu.MenuItem menuItemId="ADMIN_ORG" menuConfigurationId="ADMIN_DEFAULT" 
-        title="organization" route="/companies" iconName="business" widgetName="ShowCompanyDialog" sequenceNum="20"/>
     <growerp.menu.MenuItem menuItemId="ADMIN_CRM" menuConfigurationId="ADMIN_DEFAULT" itemKey="myOpportunities"
-        title="crm" route="/crm" iconName="people" widgetName="ActivityList" sequenceNum="30"/>
-    <growerp.menu.MenuItem menuItemId="ADMIN_MARKETING" menuConfigurationId="ADMIN_DEFAULT" 
-        title="Marketing" route="/marketing" iconName="campaign" widgetName="ContentPlanList" sequenceNum="35"/>
-    <growerp.menu.MenuItem menuItemId="ADMIN_OUTREACH" menuConfigurationId="ADMIN_DEFAULT" 
-        title="Outreach" route="/outreach" iconName="send" widgetName="CampaignListScreen" sequenceNum="38"/>
-    <growerp.menu.MenuItem menuItemId="ADMIN_COURSES" menuConfigurationId="ADMIN_DEFAULT" 
-        title="Courses" route="/courses" iconName="school" widgetName="CourseList" sequenceNum="39"/>
-    <growerp.menu.MenuItem menuItemId="ADMIN_CATALOG" menuConfigurationId="ADMIN_DEFAULT" itemKey="products"
-        title="catalog" route="/catalog" iconName="category" widgetName="ProductList" sequenceNum="40"/>
-    <growerp.menu.MenuItem menuItemId="ADMIN_ORDERS" menuConfigurationId="ADMIN_DEFAULT" itemKey="openSlsOrders"
-        title="orders" route="/orders" iconName="shopping_cart" widgetName="SalesOrderList" sequenceNum="50"/>
-    <growerp.menu.MenuItem menuItemId="ADMIN_INVENTORY" menuConfigurationId="ADMIN_DEFAULT" itemKey="outgoingShipments"
-        title="inventory" route="/inventory" iconName="warehouse" widgetName="OutgoingShipmentList" sequenceNum="60"/>
-    <growerp.menu.MenuItem menuItemId="ADMIN_MANUFACTURING" menuConfigurationId="ADMIN_DEFAULT"
-        title="Manufacturing" route="/manufacturing" iconName="precision_manufacturing" widgetName="WorkOrderList" sequenceNum="65"/>
-    <growerp.menu.MenuItem menuItemId="ADMIN_ACC_SALES" menuConfigurationId="ADMIN_DEFAULT" itemKey="salesInvoicesNotPaidCount"
-        title="Acct Sales" route="/acct-sales" iconName="receipt_long" widgetName="SalesInvoiceList" sequenceNum="70"/>
-    <growerp.menu.MenuItem menuItemId="ADMIN_ACC_PURCHASE" menuConfigurationId="ADMIN_DEFAULT" itemKey="purchInvoicesNotPaidCount"
-        title="Acct Purchase" route="/acct-purchase" iconName="receipt" widgetName="PurchaseInvoiceList" sequenceNum="71"/>
-    <growerp.menu.MenuItem menuItemId="ADMIN_ACC_LEDGER" menuConfigurationId="ADMIN_DEFAULT" 
-        title="Acct Ledger" route="/acct-ledger" iconName="account_balance" widgetName="LedgerTreeForm" sequenceNum="72"/>
-    <growerp.menu.MenuItem menuItemId="ADMIN_ACC_REPORTS" menuConfigurationId="ADMIN_DEFAULT" 
-        title="Acct Reports" route="/acct-reports" iconName="assessment" widgetName="RevenueExpenseChart" sequenceNum="73"/>
-    <growerp.menu.MenuItem menuItemId="ADMIN_ACC_SETUP" menuConfigurationId="ADMIN_DEFAULT" 
-        title="Acct Setup" route="/acct-setup" iconName="settings" widgetName="TimePeriodListForm" sequenceNum="74"/>
-    <growerp.menu.MenuItem menuItemId="ADMIN_ABOUT" menuConfigurationId="ADMIN_DEFAULT"
-        title="about" route="/about" iconName="info" widgetName="AboutForm" image="packages/growerp_core/images/infoGrey.png" selectedImage="packages/growerp_core/images/info.png" sequenceNum="80"/>
+        title="crm" route="/crm" iconName="people" widgetName="ActivityList" sequenceNum="20"/>
+    <growerp.menu.MenuItem menuItemId="ADMIN_MARKETING" menuConfigurationId="ADMIN_DEFAULT"
+        title="Marketing" route="/marketing" iconName="campaign" widgetName="ContentPlanList" sequenceNum="30"/>
+    <growerp.menu.MenuItem menuItemId="ADMIN_OUTREACH" menuConfigurationId="ADMIN_DEFAULT"
+        title="Outreach" route="/outreach" iconName="send" widgetName="CampaignListScreen" sequenceNum="40"/>
+    <growerp.menu.MenuItem menuItemId="ADMIN_ACC_REPORTS" menuConfigurationId="ADMIN_DEFAULT"
+        title="Acct Reports" route="/acct-reports" iconName="assessment" widgetName="RevenueExpenseChart" sequenceNum="50"/>
     <growerp.menu.MenuItem menuItemId="ADMIN_AGENT_CONTROL" menuConfigurationId="ADMIN_DEFAULT"
-        title="Agent Control" route="/agent-control" iconName="smart_toy" widgetName="AdkAgentListView" sequenceNum="85"/>
+        title="Agent Control" route="/agent-control" iconName="smart_toy" widgetName="AdkAgentListView" sequenceNum="60"/>
     <growerp.menu.MenuItem menuItemId="ADMIN_DEMO" menuConfigurationId="ADMIN_DEFAULT"
-        title="Demos" route="/demos" iconName="play_circle" widgetName="DemoList" sequenceNum="90"/>
+        title="Demos" route="/demos" iconName="play_circle" widgetName="DemoList" sequenceNum="70"/>
+    <growerp.menu.MenuItem menuItemId="ADMIN_ORG" menuConfigurationId="ADMIN_DEFAULT"
+        title="organization" route="/companies" iconName="business" widgetName="ShowCompanyDialog" sequenceNum="80"/>
+    <growerp.menu.MenuItem menuItemId="ADMIN_CATALOG" menuConfigurationId="ADMIN_DEFAULT" itemKey="products"
+        title="catalog" route="/catalog" iconName="category" widgetName="ProductList" sequenceNum="90"/>
+    <growerp.menu.MenuItem menuItemId="ADMIN_ORDERS" menuConfigurationId="ADMIN_DEFAULT" itemKey="openSlsOrders"
+        title="orders" route="/orders" iconName="shopping_cart" widgetName="SalesOrderList" sequenceNum="100"/>
+    <growerp.menu.MenuItem menuItemId="ADMIN_MANUFACTURING" menuConfigurationId="ADMIN_DEFAULT"
+        title="Manufacturing" route="/manufacturing" iconName="precision_manufacturing" widgetName="WorkOrderList" sequenceNum="110"/>
+    <growerp.menu.MenuItem menuItemId="ADMIN_INVENTORY" menuConfigurationId="ADMIN_DEFAULT" itemKey="outgoingShipments"
+        title="inventory" route="/inventory" iconName="warehouse" widgetName="OutgoingShipmentList" sequenceNum="120"/>
+    <growerp.menu.MenuItem menuItemId="ADMIN_ACC_SALES" menuConfigurationId="ADMIN_DEFAULT" itemKey="salesInvoicesNotPaidCount"
+        title="Acct Sales" route="/acct-sales" iconName="receipt_long" widgetName="SalesInvoiceList" sequenceNum="130"/>
+    <growerp.menu.MenuItem menuItemId="ADMIN_ACC_PURCHASE" menuConfigurationId="ADMIN_DEFAULT" itemKey="purchInvoicesNotPaidCount"
+        title="Acct Purchase" route="/acct-purchase" iconName="receipt" widgetName="PurchaseInvoiceList" sequenceNum="140"/>
+    <growerp.menu.MenuItem menuItemId="ADMIN_ACC_LEDGER" menuConfigurationId="ADMIN_DEFAULT"
+        title="Acct Ledger" route="/acct-ledger" iconName="account_balance" widgetName="LedgerTreeForm" sequenceNum="150"/>
+    <growerp.menu.MenuItem menuItemId="ADMIN_COURSES" menuConfigurationId="ADMIN_DEFAULT"
+        title="Courses" route="/courses" iconName="school" widgetName="CourseList" sequenceNum="160"/>
     <growerp.menu.MenuItem menuItemId="ADMIN_SYSTEM_SETUP" menuConfigurationId="ADMIN_DEFAULT"
         title="System Setup" route="/systemSetup" iconName="settings" widgetName="SystemSetupDialog"
-        userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="95"/>
+        userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="170"/>
+    <growerp.menu.MenuItem menuItemId="ADMIN_ACC_SETUP" menuConfigurationId="ADMIN_DEFAULT"
+        title="Acct Setup" route="/acct-setup" iconName="settings" widgetName="TimePeriodListForm" sequenceNum="180"/>
+    <growerp.menu.MenuItem menuItemId="ADMIN_ABOUT" menuConfigurationId="ADMIN_DEFAULT"
+        title="about" route="/about" iconName="info" widgetName="AboutForm" image="packages/growerp_core/images/infoGrey.png" selectedImage="packages/growerp_core/images/info.png" sequenceNum="190"/>
 
     <!-- ADMIN_ORG children (tabs) -->
     <growerp.menu.MenuItem menuItemId="ADMIN_ORG_COMPANY" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_ORG"
