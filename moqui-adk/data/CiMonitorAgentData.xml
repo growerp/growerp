@@ -8,10 +8,11 @@
         ownerPartyId="GROWERP"
         adkAgentConfigId="CI_MONITOR_AGENT"
         agentName="GrowERP CI Monitor"
-        modelName="gemini-2.5-flash"
+        modelName="gemini-2.5-flash-lite"
         llmProvider="gemini"
         enabled="Y"
         scheduleEnabled="N"
+        scheduleChatRoomId="CI_MONITOR_ROOM"
         description="CI monitor: auto-fix Flutter exceptions via PR"
         schedulePrompt="Check for CI failures and create a fix PR for the first Flutter exception found."
         instruction="You are the GrowERP CI Monitor Agent. Token budget is limited — handle ONE exception per run.

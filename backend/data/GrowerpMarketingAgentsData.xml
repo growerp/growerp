@@ -6,7 +6,7 @@
          Owner: GROWERP. Load after the GROWERP company exists:
            java -jar moqui.war load types=install file=.../GrowerpMarketingAgentsData.xml
          Agents need an LLM key (config/AdkAgentConfig.apiKey or GOOGLE_API_KEY env).
-         Scheduled agents deliver to scheduleChatRoomId — set per agent in /adk to receive output.
+         Each scheduled agent ships with a default scheduleChatRoomId; change it per agent in /adk if needed.
          See plans/marketing-sales-plan.md.
          ════════════════════════════════════════════════════════════════════════ -->
 
@@ -15,7 +15,7 @@
         ownerPartyId="GROWERP"
         adkAgentConfigId="GROWERP_OUTREACH_PERSONALIZER"
         agentName="Outreach Personalizer"
-        modelName="gemini-2.5-flash"
+        modelName="gemini-2.5-flash-lite"
         llmProvider="gemini"
         enabled="Y"
         agentRole="specialist"
@@ -23,6 +23,7 @@
         serviceAllowlist="*list#OutreachMessages,*get#OutreachCampaign,*generate#PlatformMessage,*update#OutreachMessageContent"
         writePolicy="allow"
         scheduleEnabled="Y"
+        scheduleChatRoomId="GROWERP_OUTREACH_ROOM"
         scheduleExpression="0 0 9-17 * * ?"
         schedulePrompt="Personalise up to 50 PENDING outreach messages with an empty body: for each call generate#PlatformMessage from the campaign template + recipient name/title/company, then save with update#OutreachMessageContent. Skip SENT messages."
         description="Personalises pending outreach message bodies for the active campaign."
@@ -41,7 +42,7 @@ a literal placeholder token."/>
         ownerPartyId="GROWERP"
         adkAgentConfigId="GROWERP_SDR"
         agentName="GrowERP SDR"
-        modelName="gemini-2.5-flash"
+        modelName="gemini-2.5-flash-lite"
         llmProvider="gemini"
         enabled="Y"
         agentRole="specialist"
@@ -60,7 +61,7 @@ run their business today. When a visitor shows buying intent, asks for a person/
         ownerPartyId="GROWERP"
         adkAgentConfigId="GROWERP_LEAD_TRIAGE"
         agentName="Lead Triage"
-        modelName="gemini-2.5-flash"
+        modelName="gemini-2.5-flash-lite"
         llmProvider="gemini"
         enabled="Y"
         agentRole="specialist"
@@ -68,6 +69,7 @@ run their business today. When a visitor shows buying intent, asks for a person/
         serviceAllowlist="*list#OutreachMessages,*get#Opportunity,*get#CampaignProgress,*create#ChatMessage,*enroll#EmailSequence,*create#Activity"
         writePolicy="allow"
         scheduleEnabled="Y"
+        scheduleChatRoomId="GROWERP_LEAD_TRIAGE_ROOM"
         scheduleExpression="0 0,30 9-18 * * ?"
         schedulePrompt="List RESPONDED outreach messages and new opportunities; rank hottest-first by fit and intent; draft a short follow-up for the top few and post a ranked summary to team chat (create#ChatMessage)."
         description="Scheduled lead triage: ranks replies + new opportunities and drafts follow-ups for Hans."
@@ -81,7 +83,7 @@ not send anything to prospects yourself."/>
         ownerPartyId="GROWERP"
         adkAgentConfigId="GROWERP_CONTENT_SOCIAL"
         agentName="Content and Social"
-        modelName="gemini-2.5-flash"
+        modelName="gemini-2.5-flash-lite"
         llmProvider="gemini"
         enabled="Y"
         agentRole="specialist"
@@ -89,6 +91,7 @@ not send anything to prospects yourself."/>
         serviceAllowlist="*MarketingPersona,*ContentPlan,*SocialPost,*MasterContent,*adapt#ContentForPlatform,*publish#SocialPost"
         writePolicy="approve"
         scheduleEnabled="Y"
+        scheduleChatRoomId="GROWERP_CONTENT_ROOM"
         scheduleExpression="0 0 8 ? * MON"
         schedulePrompt="Ensure a persona for SMB owners on spreadsheets (generate if missing). Generate the Pain-News-Prize ContentPlan. For each slot generate#MasterContent then adapt#ContentForPlatform to all enabled platforms as READY SocialPosts; publish is approval-gated."
         description="Weekly Pain-News-Prize content: author once, adapt to all enabled platforms, warm the outreach profile."
@@ -104,7 +107,7 @@ external, so every publish is queued for human approval — never assume it is s
         ownerPartyId="GROWERP"
         adkAgentConfigId="GROWERP_OPS_DIGEST"
         agentName="Marketing Ops Digest"
-        modelName="gemini-2.5-flash"
+        modelName="gemini-2.5-flash-lite"
         llmProvider="gemini"
         enabled="Y"
         agentRole="specialist"
@@ -112,6 +115,7 @@ external, so every publish is queued for human approval — never assume it is s
         serviceAllowlist="*list#OutreachCampaigns,*get#CampaignProgress,*list#OutreachMessages,*get#Opportunity,*get#OpportunitySummary,*get#MarketingDashboard"
         writePolicy="allow"
         scheduleEnabled="Y"
+        scheduleChatRoomId="GROWERP_OPS_DIGEST_ROOM"
         scheduleExpression="0 0 9 * * ?"
         schedulePrompt="Daily GrowERP marketing digest, 5-7 bullets: messages sent today (LinkedIn vs email), reply/response rate (get#CampaignProgress), pipeline by stage with weighted value (get#OpportunitySummary), new and advancing opportunities, and progress toward 1 new customer. Flag anything stalled."
         description="Daily marketing digest: sends, replies, pipeline, progress to 1-customer goal."

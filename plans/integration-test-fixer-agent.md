@@ -21,7 +21,7 @@ After manually root-causing and fixing the whole Integration Tests CI baseline (
 
 ### 2. Replace the agent seed record
 Rewrite `moqui-adk/data/CiMonitorAgentData.xml` (keep file name so `component.xml` stays untouched) with ONE new record:
-- `adkAgentConfigId="INTEGRATION_TEST_FIXER"`, `agentName="Integration Test Fixer"`, `ownerPartyId="GROWERP"`, `modelName="gemini-2.5-flash"`, `llmProvider="gemini"`, `enabled="Y"`.
+- `adkAgentConfigId="INTEGRATION_TEST_FIXER"`, `agentName="Integration Test Fixer"`, `ownerPartyId="GROWERP"`, `modelName="gemini-2.5-flash-lite"`, `llmProvider="gemini"`, `enabled="Y"`.
 - Schedule: `scheduleEnabled="Y" scheduleExpression="0 0 9 * * ?"` (daily 09:00, after the ~03:00 nightly CI run), `schedulePrompt` = "Check last night's Integration Tests run; triage failures and create a fix PR if a clear fix exists; email the digest."
 - No `toolMode` (same as old agent → full in-process tools incl. GitHub writes + sendEmail).
 - `instruction`: keep the old agent's step structure but upgrade with the triage method proven in this session:

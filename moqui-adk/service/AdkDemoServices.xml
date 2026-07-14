@@ -39,6 +39,25 @@
                              agentRole: tmpl.agentRole, orchestrationType: tmpl.orchestrationType,
                              loopMaxIterations: tmpl.loopMaxIterations]"/>
                 <script>idMap[tmpl.adkAgentConfigId] = cfgOut.adkAgentConfigId</script>
+                <!-- Scheduled agents need a room to report output/errors to. ChatRoom ids are a
+                     global PK, so a literal id can't be hardcoded in the _NA_ template (it would
+                     collide across tenants) — self-reference the newly-sequenced config id instead,
+                     which is unique per tenant. -->
+                <if condition="tmpl.scheduleEnabled == 'Y'">
+                    <service-call name="AdkServices.update#AgentConfig"
+                        in-map="[adkAgentConfigId: cfgOut.adkAgentConfigId, ownerPartyId: ownerPartyId,
+                                 agentName: tmpl.agentName, modelName: tmpl.modelName,
+                                 llmProvider: tmpl.llmProvider, instruction: tmpl.instruction,
+                                 description: tmpl.description,
+                                 scheduleExpression: tmpl.scheduleExpression,
+                                 scheduleEnabled: tmpl.scheduleEnabled,
+                                 schedulePrompt: tmpl.schedulePrompt,
+                                 scheduleChatRoomId: cfgOut.adkAgentConfigId,
+                                 toolMode: tmpl.toolMode, serviceAllowlist: tmpl.serviceAllowlist,
+                                 writePolicy: tmpl.writePolicy, websiteChat: tmpl.websiteChat,
+                                 agentRole: tmpl.agentRole, orchestrationType: tmpl.orchestrationType,
+                                 loopMaxIterations: tmpl.loopMaxIterations]"/>
+                </if>
             </iterate>
 
             <!-- 2. Clone team membership with remapped coordinator/member ids. -->

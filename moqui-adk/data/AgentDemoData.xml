@@ -95,8 +95,10 @@ requestHumanHandoff tool with a short reason, then tell them a member of the tea
 
     <!-- ── Ops Digest: scheduled standalone agent ──────────────────────────────── -->
     <!-- scheduleEnabled=Y → run#AllScheduledAgents picks it up every minute. scheduleChatRoomId is
-         left unset by the clone (it is tenant-specific); set it on the agent, or trigger
-         run#ScheduledAgent manually, to see the digest delivered to a chat room. -->
+         left unset on this template row (a literal id here would collide across tenants); the clone
+         in AdkDemoServices.load#AgentDemo assigns each tenant's copy its own room id automatically
+         (self-referencing its new adkAgentConfigId), so no manual setup is needed to see output/errors
+         delivered to a chat room. -->
     <moqui.adk.AdkAgentConfig
         ownerPartyId="_NA_"
         adkAgentConfigId="ADK_DEMO_DIGEST"
