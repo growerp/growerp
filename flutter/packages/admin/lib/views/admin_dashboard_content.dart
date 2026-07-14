@@ -19,6 +19,7 @@ import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 
 import 'catalog_dashboard_chart_mini.dart';
 import 'crm_dashboard_chart_mini.dart';
+import 'inventory_dashboard_chart_mini.dart';
 import 'marketing_dashboard_chart_mini.dart';
 import 'order_dashboard_chart_mini.dart';
 import 'outreach_dashboard_chart_mini.dart';
@@ -84,6 +85,7 @@ class AdminDashboardContent extends StatelessWidget {
                   '/crm',
                   '/catalog',
                   '/orders',
+                  '/inventory',
                 },
                 // Provide the revenue/expense mini-chart for the accounting tile.
                 // DashboardGrid auto-upgrades it to full-width 4-row graphic tile.
@@ -107,6 +109,9 @@ class AdminDashboardContent extends StatelessWidget {
                   }
                   if (route == '/orders') {
                     return const OrderDashboardChartMini();
+                  }
+                  if (route == '/inventory') {
+                    return const InventoryDashboardChartMini();
                   }
                   return null;
                 },

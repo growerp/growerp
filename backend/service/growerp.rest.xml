@@ -939,6 +939,12 @@ along with this software (see the LICENSE.md file). If not, see
                 <service name="growerp.100.FinDocServices100.get#OrderDashboard" />
             </method>
         </resource>
+        <!-- inventory dashboard aggregates -->
+        <resource name="InventoryDashboard">
+            <method type="get">
+                <service name="growerp.100.InventoryServices100.get#InventoryDashboard" />
+            </method>
+        </resource>
         <!-- social engagement signals -->
         <resource name="SocialEngagement">
             <resource name="Convert">
