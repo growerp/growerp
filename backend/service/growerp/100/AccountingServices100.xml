@@ -1898,4 +1898,65 @@ along with this software (see the LICENSE.md file). If not, see
                 in-map="[paymentId: paymentId, action: 'authorize']" />
         </actions>
     </service>
+
+    <service verb="get" noun="LedgerDashboard">
+        <description>Aggregates for the ledger dashboard tile: transaction
+            mix by type (sales/purchase invoice, incoming/outgoing payment)
+            and posting counters, scoped to the owner company.</description>
+        <out-parameters>
+            <parameter name="stageSummary" type="List" />
+            <parameter name="accounts" type="Integer" />
+            <parameter name="posted" type="Integer" />
+            <parameter name="unposted" type="Integer" />
+            <parameter name="totalTransactions" type="Integer" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+
+            <!-- transaction mix, fixed type order -->
+            <entity-find-count count-field="salesInvoiceCount"
+                entity-name="mantle.ledger.transaction.AcctgTrans">
+                <econdition field-name="organizationPartyId" from="companyPartyId" />
+                <econdition field-name="acctgTransTypeEnumId" value="AttSalesInvoice" />
+            </entity-find-count>
+            <entity-find-count count-field="purchaseInvoiceCount"
+                entity-name="mantle.ledger.transaction.AcctgTrans">
+                <econdition field-name="organizationPartyId" from="companyPartyId" />
+                <econdition field-name="acctgTransTypeEnumId" value="AttPurchaseInvoice" />
+            </entity-find-count>
+            <entity-find-count count-field="incomingPaymentCount"
+                entity-name="mantle.ledger.transaction.AcctgTrans">
+                <econdition field-name="organizationPartyId" from="companyPartyId" />
+                <econdition field-name="acctgTransTypeEnumId" value="AttIncomingPayment" />
+            </entity-find-count>
+            <entity-find-count count-field="outgoingPaymentCount"
+                entity-name="mantle.ledger.transaction.AcctgTrans">
+                <econdition field-name="organizationPartyId" from="companyPartyId" />
+                <econdition field-name="acctgTransTypeEnumId" value="AttOutgoingPayment" />
+            </entity-find-count>
+            <set field="stageSummary" from="[
+                [stageId: 'AttSalesInvoice', stageName: 'Sales Inv', count: salesInvoiceCount],
+                [stageId: 'AttPurchaseInvoice', stageName: 'Purch Inv', count: purchaseInvoiceCount],
+                [stageId: 'AttIncomingPayment', stageName: 'Incoming', count: incomingPaymentCount],
+                [stageId: 'AttOutgoingPayment', stageName: 'Outgoing', count: outgoingPaymentCount]]" />
+
+            <!-- posting / chart-of-accounts counters -->
+            <entity-find-count count-field="accounts"
+                entity-name="growerp.ledger.account.GlAccountAndOrganization">
+                <econdition field-name="organizationPartyId" from="companyPartyId" />
+            </entity-find-count>
+            <entity-find-count count-field="posted"
+                entity-name="mantle.ledger.transaction.AcctgTrans">
+                <econdition field-name="organizationPartyId" from="companyPartyId" />
+                <econdition field-name="isPosted" value="Y" />
+            </entity-find-count>
+            <entity-find-count count-field="unposted"
+                entity-name="mantle.ledger.transaction.AcctgTrans">
+                <econdition field-name="organizationPartyId" from="companyPartyId" />
+                <econdition field-name="isPosted" operator="not-equals" value="Y" or-null="true" />
+            </entity-find-count>
+            <set field="totalTransactions" from="posted + unposted" />
+        </actions>
+    </service>
 </services>

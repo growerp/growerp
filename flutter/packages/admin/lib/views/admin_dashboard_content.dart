@@ -22,6 +22,7 @@ import 'acct_sales_dashboard_chart_mini.dart';
 import 'catalog_dashboard_chart_mini.dart';
 import 'crm_dashboard_chart_mini.dart';
 import 'inventory_dashboard_chart_mini.dart';
+import 'ledger_dashboard_chart_mini.dart';
 import 'marketing_dashboard_chart_mini.dart';
 import 'order_dashboard_chart_mini.dart';
 import 'outreach_dashboard_chart_mini.dart';
@@ -90,6 +91,7 @@ class AdminDashboardContent extends StatelessWidget {
                   '/inventory',
                   '/acct-sales',
                   '/acct-purchase',
+                  '/acct-ledger',
                 },
                 // Provide the revenue/expense mini-chart for the accounting tile.
                 // DashboardGrid auto-upgrades it to full-width 4-row graphic tile.
@@ -122,6 +124,9 @@ class AdminDashboardContent extends StatelessWidget {
                   }
                   if (route == '/acct-purchase') {
                     return const AcctPurchaseDashboardChartMini();
+                  }
+                  if (route == '/acct-ledger') {
+                    return const LedgerDashboardChartMini();
                   }
                   return null;
                 },
