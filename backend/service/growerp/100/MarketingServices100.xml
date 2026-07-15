@@ -414,9 +414,9 @@
             <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
                 out-map="context" />
 
-            <if condition="searchString">
-                <set field="searchString" value="%$searchString%" />
-            </if>
+            <!-- normalize null (param omitted) to '' so the LIKE conditions below become
+                 the benign '%%' wildcard instead of the literal string '%null%' -->
+            <set field="searchString" from="searchString ?: ''" />
 
             <entity-find entity-name="growerp.marketing.SocialPost" list="socialPosts"
                 offset="start" limit="limit">
