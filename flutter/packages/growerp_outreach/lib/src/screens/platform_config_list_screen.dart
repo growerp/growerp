@@ -114,7 +114,9 @@ class _PlatformConfigListScreenState extends State<PlatformConfigListScreen> {
           platformData = OutreachPlatform.values.map((platform) {
             final config =
                 state.configs.cast<PlatformConfiguration?>().firstWhere(
-                      (c) => c?.platform == platform.name,
+                      (c) =>
+                          c?.platform.toUpperCase() ==
+                          platform.name.toUpperCase(),
                       orElse: () => null,
                     );
             return PlatformConfigData(platform: platform, config: config);

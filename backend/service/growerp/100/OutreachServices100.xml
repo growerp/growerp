@@ -1131,6 +1131,10 @@
         <actions>
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <!-- normalize to the uppercase convention used everywhere else
+                 (SocialPost.platform, PlatformConfiguration lookups) — clients
+                 such as the OutreachPlatform enum submit lowercase/camelCase -->
+            <set field="platform" from="platform?.toUpperCase()" />
             <service-call name="create#growerp.marketing.PlatformConfiguration" out-map="context"
                 in-map="[
                          ownerPartyId: ownerPartyId,
