@@ -36,6 +36,10 @@ abstract class ChatRoom with _$ChatRoom {
     /// if all messages were read
     @Default(true) bool hasRead,
 
+    /// userId of the anonymous website visitor, when this room originated
+    /// from the public website chat widget (submit#WebsiteChat)
+    String? visitorUserId,
+
     /// list of members in the chat room
     @Default([]) List<ChatRoomMember> members,
   }) = _ChatRoom;

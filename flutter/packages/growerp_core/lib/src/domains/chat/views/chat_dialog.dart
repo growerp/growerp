@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:growerp_models/growerp_models.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:growerp_core/growerp_core.dart';
@@ -120,6 +121,8 @@ class ChatState extends State<ChatDialog> {
                 final raw = ordered[index].content ?? '';
                 final msgFromUserId = ordered[index].fromUserId;
                 final onRight = msgFromUserId == authenticate.user!.userId;
+                final fromWebsite = msgFromUserId != null &&
+                    msgFromUserId == widget.chatRoom.visitorUserId;
                 final bubbleColor = onRight
                     ? theme.colorScheme.primary
                     : theme.colorScheme.secondaryContainer;
@@ -150,15 +153,30 @@ class ChatState extends State<ChatDialog> {
                           Padding(
                             padding: const EdgeInsets.only(
                                 left: 4, right: 4, bottom: 2),
-                            child: Text(
-                              msgFromUserId == 'SYSTEM_SUPPORT'
-                                  ? 'System Support'
-                                  : onRight
-                                      ? 'You'
-                                      : ordered[index].fromUserFullName ??
-                                          'Other',
-                              style: theme.textTheme.labelSmall
-                                  ?.copyWith(color: theme.hintColor),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                if (fromWebsite) ...[
+                                  Icon(Icons.language,
+                                      size: 12, color: theme.hintColor),
+                                  const SizedBox(width: 3),
+                                ],
+                                Flexible(
+                                  child: Text(
+                                    '${msgFromUserId == 'SYSTEM_SUPPORT'
+                                        ? 'System Support'
+                                        : onRight
+                                            ? 'You'
+                                            : ordered[index]
+                                                    .fromUserFullName ??
+                                                'Other'}'
+                                    '${fromWebsite ? ' (via Website)' : ''}'
+                                    '${ordered[index].creationDate != null ? ' · ${_formatMessageTime(ordered[index].creationDate!, context)}' : ''}',
+                                    style: theme.textTheme.labelSmall
+                                        ?.copyWith(color: theme.hintColor),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                           Container(
@@ -173,10 +191,42 @@ class ChatState extends State<ChatDialog> {
                               ),
                               color: bubbleColor,
                             ),
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 14, vertical: 10),
-                            child: _buildContent(
-                                raw, textColor, bubbleColor),
+                            padding: const EdgeInsets.only(
+                                left: 14, right: 4, top: 10, bottom: 10),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Flexible(
+                                  child: _buildContent(
+                                      raw, textColor, bubbleColor),
+                                ),
+                                SizedBox(
+                                  width: 28,
+                                  height: 28,
+                                  child: IconButton(
+                                    key: Key('copyMessage$index'),
+                                    padding: EdgeInsets.zero,
+                                    iconSize: 16,
+                                    icon: Icon(Icons.copy,
+                                        color: textColor.withValues(
+                                            alpha: 0.7)),
+                                    tooltip: 'Copy',
+                                    onPressed: () async {
+                                      await Clipboard.setData(
+                                          ClipboardData(
+                                              text: _stripContent(raw)));
+                                      if (context.mounted) {
+                                        HelperFunctions.showMessage(
+                                            context,
+                                            'Copied to clipboard',
+                                            Colors.green);
+                                      }
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ],
                       ),
@@ -195,6 +245,10 @@ class ChatState extends State<ChatDialog> {
                 key: const Key('messageContent'),
                 autofocus: true,
                 controller: messageController,
+                minLines: 1,
+                maxLines: 5,
+                keyboardType: TextInputType.multiline,
+                textInputAction: TextInputAction.newline,
                 decoration: InputDecoration(
                   labelText: _localizations?.messageText ?? 'Message text',
                 ),
@@ -237,6 +291,17 @@ class ChatState extends State<ChatDialog> {
         ),
       ],
     );
+  }
+
+  String _formatMessageTime(DateTime dt, BuildContext context) {
+    final local = dt.toLocal();
+    final now = DateTime.now();
+    final isToday = local.year == now.year &&
+        local.month == now.month &&
+        local.day == now.day;
+    return isToday
+        ? dt.toLocalizedString(context, format: 'HH:mm')
+        : dt.toLocalizedDateTime(context);
   }
 
   String _stripContent(String raw) {

@@ -23,7 +23,10 @@
 #growerp-chat-panel label{font-size:12px;color:#555}
 #growerp-chat-panel input,#growerp-chat-panel textarea{
   width:100%;box-sizing:border-box;border:1px solid #ccc;border-radius:6px;
-  padding:8px;font-size:14px;font-family:inherit}
+  padding:8px;font-size:14px;font-family:inherit;background:#fff;color:#222}
+#growerp-chat-panel input::placeholder,#growerp-chat-panel textarea::placeholder{color:#888;opacity:1}
+#growerp-chat-panel input:focus,#growerp-chat-panel textarea:focus{outline:none;border-color:#2962ff}
+#growerp-chat-panel input:invalid,#growerp-chat-panel textarea:invalid{box-shadow:none}
 #growerp-chat-panel textarea{resize:vertical;min-height:72px}
 #growerp-chat-panel button.growerp-chat-send{background:#2962ff;color:#fff;border:none;
   border-radius:6px;padding:10px;font-size:14px;cursor:pointer}
@@ -50,7 +53,9 @@
   align-items:flex-end}
 #growerp-chat-compose textarea{flex:1 1 auto;min-height:38px;max-height:96px;
   box-sizing:border-box;border:1px solid #ccc;border-radius:8px;padding:8px;
-  font-size:14px;font-family:inherit;resize:none}
+  font-size:14px;font-family:inherit;resize:none;background:#fff;color:#222}
+#growerp-chat-compose textarea::placeholder{color:#888;opacity:1}
+#growerp-chat-compose textarea:focus{outline:none;border-color:#2962ff}
 #growerp-chat-compose button{flex:0 0 auto;background:#2962ff;color:#fff;border:none;
   border-radius:8px;padding:0 16px;height:38px;font-size:14px;cursor:pointer}
 #growerp-chat-compose button:disabled{opacity:.6;cursor:default}

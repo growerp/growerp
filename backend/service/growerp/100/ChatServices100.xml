@@ -35,6 +35,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="chatRoomName" />
                 <parameter name="hasRead" type="Boolean" />
                 <parameter name="isPrivate" type="Boolean" />
+                <parameter name="visitorUserId" />
                 <parameter name="members" type="List">
                     <parameter name="partyId" />
                     <parameter name="email" />
@@ -192,6 +193,7 @@ along with this software (see the LICENSE.md file). If not, see
                         chatRoomId: roomId, chatRoomName: first.chatRoomName ?: roomName,
                         hasRead: first.myHasRead == 'Y' ? true : false,
                         isPrivate: first.isPrivate == 'Y' ? true : false,
+                        visitorUserId: first.visitorUserId,
                         members: members]" />
                 <script>chatRooms.add(roomOut)</script>
             </iterate>
@@ -506,7 +508,7 @@ along with this software (see the LICENSE.md file). If not, see
                     fromUserFullName: message.fromUserFullName,
                     content: message.content,
                     creationDate: message.lastUpdatedStamp
-                        ? ec.l10n.format(message.lastUpdatedStamp,'yyyy-MM-dd')
+                        ? ec.l10n.format(message.lastUpdatedStamp,'yyyy-MM-dd HH:mm')
                         : null,
                     ]" />
                 <script>chatMessages.add(chatMessage)</script>
@@ -694,6 +696,8 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="visitorUserId" />
         </out-parameters>
         <actions>
+            <!-- normalize so 'Erik@X.com' and 'erik@x.com' resolve to the same Lead/party -->
+            <set field="email" from="email?.toLowerCase()" />
             <!-- resolve the company (owner) from the product store -->
             <entity-find-one entity-name="mantle.product.store.ProductStore" value-field="store">
                 <field-map field-name="productStoreId" from="productStoreId" />
