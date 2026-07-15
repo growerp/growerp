@@ -260,10 +260,10 @@ Return ONLY the prompt text, no explanations.
 def callGeminiApiDirect(def ec, String prompt, int retryCount = 0) {
     def apiKey = ec.user.getPreference("GEMINI_API_KEY")
     if (apiKey == null || apiKey.isEmpty()) {
-        apiKey = System.getenv("GEMINI_API_KEY")
+        apiKey = System.getenv("GEMINI_API_KEY") ?: System.getenv("GOOGLE_API_KEY")
     }
     if (apiKey == null || apiKey.isEmpty()) {
-        throw new Exception("GEMINI_API_KEY not configured. Set it as environment variable or user preference.")
+        throw new Exception("GEMINI_API_KEY (or GOOGLE_API_KEY) not configured. Set it as environment variable or user preference.")
     }
     
     // Default model, overridable via user preference or environment
@@ -411,10 +411,10 @@ def callVeoApi(def ec, String accessToken, String projectId, String location, St
  */
 def tryGeminiVideoGeneration(def ec, String accessToken, String projectId, String location, String prompt) {
     // Use Gemini 2.0 Flash with video generation capability
-    def apiKey = ec.user.getPreference("GEMINI_API_KEY") ?: System.getenv("GEMINI_API_KEY")
-    
+    def apiKey = ec.user.getPreference("GEMINI_API_KEY") ?: System.getenv("GEMINI_API_KEY") ?: System.getenv("GOOGLE_API_KEY")
+
     if (!apiKey) {
-        return [error: "Video generation requires Veo access or GEMINI_API_KEY for Gemini video generation"]
+        return [error: "Video generation requires Veo access or GEMINI_API_KEY (or GOOGLE_API_KEY) for Gemini video generation"]
     }
     
     // For now, since direct video generation may not be available,

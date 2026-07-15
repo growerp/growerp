@@ -337,18 +337,21 @@
                     message="No platforms given and no enabled PlatformConfiguration found for owner" />
             </if>
 
-            <!-- Preflight: the AI key must be set (user preference, then env,
-                 then system property) — the same resolution GeminiAiUtil uses. -->
+            <!-- Preflight: the AI key must be set (user preference, then GEMINI_API_KEY env,
+                 then GOOGLE_API_KEY env, then system property). -->
             <set field="aiKey" from="ec.user.getPreference('GEMINI_API_KEY')" />
             <if condition="!aiKey">
                 <set field="aiKey" from="System.getenv('GEMINI_API_KEY')" />
+            </if>
+            <if condition="!aiKey">
+                <set field="aiKey" from="System.getenv('GOOGLE_API_KEY')" />
             </if>
             <if condition="!aiKey">
                 <set field="aiKey" from="System.getProperty('GEMINI_API_KEY')" />
             </if>
             <if condition="!aiKey">
                 <return error="true"
-                    message="AI key not configured: set GEMINI_API_KEY in the environment or in user preferences before adapting content." />
+                    message="AI key not configured: set GEMINI_API_KEY (or GOOGLE_API_KEY) in the environment or in user preferences before adapting content." />
             </if>
 
             <set field="adaptedCount" from="0" type="Integer" />

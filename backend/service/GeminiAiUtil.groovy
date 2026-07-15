@@ -64,10 +64,10 @@ class GeminiAiUtil {
         // Get API key from options (batch/cron callers), user preference or environment
         def apiKey = options.apiKey ?: ec.user.getPreference("GEMINI_API_KEY")
         if (apiKey == null || apiKey.isEmpty()) {
-            apiKey = System.getenv("GEMINI_API_KEY")
+            apiKey = System.getenv("GEMINI_API_KEY") ?: System.getenv("GOOGLE_API_KEY")
         }
         if (apiKey == null || apiKey.isEmpty()) {
-            throw new Exception("GEMINI_API_KEY not configured. Set in user preferences or environment.")
+            throw new Exception("GEMINI_API_KEY (or GOOGLE_API_KEY) not configured. Set in user preferences or environment.")
         }
 
         // Configuration with defaults

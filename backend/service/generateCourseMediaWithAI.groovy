@@ -83,10 +83,10 @@ Tone of Voice: ${persona.toneOfVoice}
     // Step 5: Get Gemini API key
     def apiKey = ec.user.getPreference("GEMINI_API_KEY")
     if (apiKey == null || apiKey.isEmpty()) {
-        apiKey = System.getenv("GEMINI_API_KEY")
+        apiKey = System.getenv("GEMINI_API_KEY") ?: System.getenv("GOOGLE_API_KEY")
     }
     if (apiKey == null || apiKey.isEmpty()) {
-        ec.message.addError("Gemini API key not found. Please set GEMINI_API_KEY in user preferences or environment.")
+        ec.message.addError("Gemini API key not found. Please set GEMINI_API_KEY (or GOOGLE_API_KEY) in user preferences or environment.")
         return
     }
     
