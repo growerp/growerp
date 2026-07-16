@@ -379,7 +379,7 @@
         <description>Generate a weekly content plan (PNP) for a persona.</description>
         <in-parameters>
             <parameter name="personaId" required="true" />
-            <parameter name="weekStartDate" type="Date" />
+            <parameter name="weekStartDate" type="Long" />
         </in-parameters>
         <out-parameters>
             <parameter name="planId" />

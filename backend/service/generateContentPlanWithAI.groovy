@@ -58,7 +58,17 @@ try {
     }
     
     // Step 4: Determine week start date
-    def weekStart = weekStartDate ? LocalDate.parse(weekStartDate as String) : LocalDate.now()
+    // Flutter sends weekStartDate as epoch milliseconds (Long); fall back to today
+    LocalDate weekStart
+    if (weekStartDate) {
+        weekStart = new java.util.Date(weekStartDate as long)
+            .toInstant()
+            .atZone(java.time.ZoneId.of("UTC"))
+            .toLocalDate()
+    } else {
+        weekStart = LocalDate.now()
+    }
+
     def formatter = DateTimeFormatter.ISO_LOCAL_DATE
     
     // Step 5: Construct prompt for content plan generation
