@@ -376,7 +376,9 @@
     <!-- ============================================ -->
 
     <service verb="generate" noun="ContentPlan" authenticate="true">
-        <description>Generate a weekly content plan (PNP) for a persona.</description>
+        <description>Generate a weekly content plan (PNP) for a persona. Creates one
+            MasterContent piece per PNP angle; social posts are created later by
+            adapt#ContentForPlatform.</description>
         <in-parameters>
             <parameter name="personaId" required="true" />
             <parameter name="weekStartDate" type="Long" />
@@ -386,7 +388,7 @@
             <parameter name="pseudoId" />
             <parameter name="theme" />
             <parameter name="weekStartDate" />
-            <parameter name="posts" type="List" />
+            <parameter name="masterContents" type="List" />
         </out-parameters>
         <actions>
             <script location="component://growerp/service/generateContentPlanWithAI.groovy" />

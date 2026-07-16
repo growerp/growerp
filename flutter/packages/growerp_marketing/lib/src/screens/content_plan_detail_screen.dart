@@ -23,13 +23,13 @@ import 'package:responsive_framework/responsive_framework.dart';
 import '../bloc/content_plan_bloc.dart';
 import '../bloc/content_plan_event.dart';
 import '../bloc/content_plan_state.dart';
+import '../bloc/master_content_bloc.dart';
+import '../bloc/master_content_event.dart';
+import '../bloc/master_content_state.dart';
 import '../bloc/persona_bloc.dart';
 import '../bloc/persona_event.dart';
 import '../bloc/persona_state.dart';
-import '../bloc/social_post_bloc.dart';
-import '../bloc/social_post_event.dart';
-import '../bloc/social_post_state.dart';
-import 'social_post_detail_screen.dart';
+import 'master_content_detail_screen.dart';
 
 class ContentPlanDetailScreen extends StatefulWidget {
   final ContentPlan? contentPlan;
@@ -84,10 +84,10 @@ class ContentPlanDetailScreenState extends State<ContentPlanDetailScreen> {
         .read<PersonaBloc>()
         .add(const PersonaFetch(refresh: true, limit: 100));
 
-    // Fetch posts for this plan
+    // Fetch master content pieces for this plan
     if (widget.contentPlan?.planId != null) {
-      context.read<SocialPostBloc>().add(
-            SocialPostFetch(
+      context.read<MasterContentBloc>().add(
+            MasterContentFetch(
               refresh: true,
               planId: widget.contentPlan!.planId,
             ),
@@ -315,8 +315,8 @@ class ContentPlanDetailScreenState extends State<ContentPlanDetailScreen> {
               ),
             ),
             const SizedBox(height: 20),
-            // Posts section — only show for existing plans
-            if (widget.contentPlan?.planId != null) _buildPostsSection(),
+            // Content section — only show for existing plans
+            if (widget.contentPlan?.planId != null) _buildContentSection(),
             const SizedBox(height: 20),
             _updateButton(),
             const SizedBox(height: 20),
@@ -328,9 +328,9 @@ class ContentPlanDetailScreenState extends State<ContentPlanDetailScreen> {
 
   Color _statusColor(String status) {
     switch (status.toUpperCase()) {
-      case 'PUBLISHED':
+      case 'ADAPTED':
         return Colors.green;
-      case 'SCHEDULED':
+      case 'APPROVED':
         return Colors.blue;
       case 'DRAFT':
         return Colors.orange;
@@ -339,48 +339,50 @@ class ContentPlanDetailScreenState extends State<ContentPlanDetailScreen> {
     }
   }
 
-  Widget _buildPostsSection() {
-    return BlocBuilder<SocialPostBloc, SocialPostState>(
-      builder: (context, postState) {
-        final posts = postState.socialPosts;
+  Widget _buildContentSection() {
+    return BlocBuilder<MasterContentBloc, MasterContentState>(
+      builder: (context, contentState) {
+        final contents = contentState.masterContents;
         return GroupingDecorator(
-          labelText: 'Posts',
+          labelText: 'Content',
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              if (postState.status == SocialPostStatus.loading)
+              if (contentState.status == MasterContentStatus.loading)
                 const Padding(
                   padding: EdgeInsets.all(16),
                   child: Center(child: CircularProgressIndicator()),
                 )
-              else if (posts.isEmpty)
+              else if (contents.isEmpty)
                 const Padding(
                   padding: EdgeInsets.symmetric(vertical: 12),
                   child: Center(
                     child: Text(
-                      'No posts yet',
+                      'No content yet',
                       style: TextStyle(color: Colors.grey),
                     ),
                   ),
                 )
               else
-                ...posts.asMap().entries.map((entry) {
+                ...contents.asMap().entries.map((entry) {
                   final i = entry.key;
-                  final post = entry.value;
+                  final content = entry.value;
                   return InkWell(
-                    key: Key('postRow$i'),
+                    key: Key('contentRow$i'),
                     onTap: () async {
-                      final socialPostBloc = context.read<SocialPostBloc>();
+                      final masterContentBloc =
+                          context.read<MasterContentBloc>();
                       await showDialog(
                         context: context,
                         barrierDismissible: true,
                         builder: (_) => BlocProvider.value(
-                          value: socialPostBloc,
-                          child: SocialPostDetailScreen(socialPost: post),
+                          value: masterContentBloc,
+                          child: MasterContentDetailScreen(
+                              masterContent: content),
                         ),
                       );
                       if (mounted && widget.contentPlan?.planId != null) {
-                        socialPostBloc.add(SocialPostFetch(
+                        masterContentBloc.add(MasterContentFetch(
                           refresh: true,
                           planId: widget.contentPlan!.planId,
                         ));
@@ -390,7 +392,7 @@ class ContentPlanDetailScreenState extends State<ContentPlanDetailScreen> {
                       padding: const EdgeInsets.symmetric(vertical: 8),
                       child: Row(
                         children: [
-                          // Type badge
+                          // PNP type badge
                           Container(
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 8, vertical: 3),
@@ -401,8 +403,8 @@ class ContentPlanDetailScreenState extends State<ContentPlanDetailScreen> {
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text(
-                              post.type,
-                              key: Key('postType$i'),
+                              content.pnpType,
+                              key: Key('contentPnpType$i'),
                               style: TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.bold,
@@ -413,11 +415,11 @@ class ContentPlanDetailScreenState extends State<ContentPlanDetailScreen> {
                             ),
                           ),
                           const SizedBox(width: 8),
-                          // Headline
+                          // Title
                           Expanded(
                             child: Text(
-                              post.headline ?? 'No headline',
-                              key: Key('postHeadline$i'),
+                              content.title ?? 'No title',
+                              key: Key('contentTitle$i'),
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                               style: const TextStyle(fontSize: 13),
@@ -429,16 +431,16 @@ class ContentPlanDetailScreenState extends State<ContentPlanDetailScreen> {
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 6, vertical: 2),
                             decoration: BoxDecoration(
-                              color: _statusColor(post.status)
+                              color: _statusColor(content.status)
                                   .withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text(
-                              post.status,
-                              key: Key('postStatus$i'),
+                              content.status,
+                              key: Key('contentStatus$i'),
                               style: TextStyle(
                                 fontSize: 10,
-                                color: _statusColor(post.status),
+                                color: _statusColor(content.status),
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
@@ -448,31 +450,32 @@ class ContentPlanDetailScreenState extends State<ContentPlanDetailScreen> {
                     ),
                   );
                 }),
-              // Add post button
+              // Add content button
               Align(
                 alignment: Alignment.centerRight,
                 child: TextButton.icon(
-                  key: const Key('addPost'),
+                  key: const Key('addContent'),
                   icon: const Icon(Icons.add, size: 18),
-                  label: const Text('Add Post'),
+                  label: const Text('Add Content'),
                   onPressed: () async {
-                    final socialPostBloc = context.read<SocialPostBloc>();
+                    final masterContentBloc = context.read<MasterContentBloc>();
                     await showDialog(
                       context: context,
                       barrierDismissible: true,
                       builder: (_) => BlocProvider.value(
-                        value: socialPostBloc,
-                        child: SocialPostDetailScreen(
-                          socialPost: SocialPost(
+                        value: masterContentBloc,
+                        child: MasterContentDetailScreen(
+                          masterContent: MasterContent(
                             planId: widget.contentPlan?.planId,
-                            type: 'PAIN',
+                            contentType: 'POSTING',
+                            pnpType: 'PAIN',
                             status: 'DRAFT',
                           ),
                         ),
                       ),
                     );
                     if (mounted && widget.contentPlan?.planId != null) {
-                      socialPostBloc.add(SocialPostFetch(
+                      masterContentBloc.add(MasterContentFetch(
                         refresh: true,
                         planId: widget.contentPlan!.planId,
                       ));

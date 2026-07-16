@@ -90,16 +90,17 @@ CONTENT FORMULA (PNP):
 - Friday: PRIZE - Offer value, solutions, or a call-to-action (e.g., free resource, consultation)
 
 REQUIREMENTS:
-1. Generate a theme for the week that ties all three posts together
+1. Generate a theme for the week that ties all three pieces together
 2. For each day (Monday, Wednesday, Friday), create:
    - A compelling headline (10-15 words)
-   - Post type (PAIN, NEWS, or PRIZE)
-   - Brief content outline (2-3 sentences)
+   - Content type (PAIN, NEWS, or PRIZE)
+   - Platform-neutral body copy (100-180 words) that can later be adapted per platform
+   - A one-line call to action
 3. Ensure the content:
    - Speaks directly to the persona's pain points and goals
    - Uses the specified tone of voice
-   - Includes a clear call-to-action for the PRIZE post
-   - Is suitable for LinkedIn and other professional social media
+   - Includes a clear call-to-action for the PRIZE piece
+   - Is platform-neutral: no hashtags, no platform-specific formatting
 
 RETURN FORMAT: Return ONLY valid JSON (no markdown, no code blocks) with this exact structure:
 {
@@ -109,19 +110,22 @@ RETURN FORMAT: Return ONLY valid JSON (no markdown, no code blocks) with this ex
       "day": "Monday",
       "type": "PAIN",
       "headline": "Compelling headline addressing pain point",
-      "outline": "Brief content outline"
+      "body": "Platform-neutral body copy",
+      "callToAction": "One-line call to action"
     },
     {
       "day": "Wednesday",
       "type": "NEWS",
       "headline": "Headline about industry news or trend",
-      "outline": "Brief content outline"
+      "body": "Platform-neutral body copy",
+      "callToAction": "One-line call to action"
     },
     {
       "day": "Friday",
       "type": "PRIZE",
       "headline": "Headline offering value or solution",
-      "outline": "Brief content outline with CTA"
+      "body": "Platform-neutral body copy",
+      "callToAction": "One-line call to action"
     }
   ]
 }
@@ -152,7 +156,7 @@ Generate the content plan now.
             temperature: 0.8,
             topK: 40,
             topP: 0.95,
-            maxOutputTokens: 2048
+            maxOutputTokens: 4096
         ]
     ])
     
@@ -202,47 +206,49 @@ Generate the content plan now.
         ])
         .call()
     
-    def planId = createPlanResult.planId
+    planId = createPlanResult.planId
     ec.logger.info("Created ContentPlan with ID: ${planId}")
     
-    // Step 10: Create SocialPost entities for each post in the plan
-    def createdPosts = []
+    // Step 10: Create a MasterContent piece per PNP angle; social posts are
+    // created later by adapt#ContentForPlatform (author once -> fan out)
+    def createdContents = []
     planData.posts.each { post ->
-        def postPseudoIdResult = ec.service.sync().name("growerp.100.GeneralServices100.getNext#PseudoId")
-            .parameters([ownerPartyId: ownerPartyId, seqName: 'SocialPost'])
+        def contentPseudoIdResult = ec.service.sync().name("growerp.100.GeneralServices100.getNext#PseudoId")
+            .parameters([ownerPartyId: ownerPartyId, seqName: 'MasterContent'])
             .call()
-        
-        def createPostResult = ec.service.sync().name("create#growerp.marketing.SocialPost")
+
+        def createContentResult = ec.service.sync().name("create#growerp.marketing.MasterContent")
             .parameters([
-                pseudoId: postPseudoIdResult.seqNum,
+                pseudoId: contentPseudoIdResult.seqNum,
                 ownerPartyId: ownerPartyId,
                 planId: planId,
-                type: post.type,
-                headline: post.headline,
-                draftContent: post.outline,
+                contentType: 'POSTING',
+                pnpType: post.type,
+                title: post.headline,
+                body: post.body,
+                callToAction: post.callToAction,
                 status: 'DRAFT',
                 createdDate: ec.user.nowTimestamp,
                 lastModifiedDate: ec.user.nowTimestamp
             ])
             .call()
-        
-        createdPosts.add([
-            postId: createPostResult.postId,
-            type: post.type,
-            headline: post.headline
+
+        createdContents.add([
+            masterContentId: createContentResult.masterContentId,
+            pnpType: post.type,
+            title: post.headline
         ])
-        
-        ec.logger.info("Created SocialPost (${post.type}) with ID: ${createPostResult.postId}")
+
+        ec.logger.info("Created MasterContent (${post.type}) with ID: ${createContentResult.masterContentId}")
     }
-    
+
     // Return the created plan
-    planId = planId
     pseudoId = pseudoIdResult.seqNum
     theme = planData.theme
     weekStartDate = weekStart.format(formatter)
-    posts = createdPosts
-    
-    ec.message.addMessage("Content plan for week of ${weekStart.format(formatter)} generated successfully with ${createdPosts.size()} posts!")
+    masterContents = createdContents
+
+    ec.message.addMessage("Content plan for week of ${weekStart.format(formatter)} generated successfully with ${createdContents.size()} content pieces!")
     
 } catch (Exception e) {
     ec.logger.error("Error generating content plan with AI", e)

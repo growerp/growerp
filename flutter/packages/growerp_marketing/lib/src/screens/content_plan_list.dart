@@ -20,10 +20,10 @@ import 'package:growerp_models/growerp_models.dart';
 import '../bloc/content_plan_bloc.dart';
 import '../bloc/content_plan_event.dart';
 import '../bloc/content_plan_state.dart';
+import '../bloc/master_content_bloc.dart';
 import '../bloc/persona_bloc.dart';
 import '../bloc/persona_event.dart';
 import '../bloc/persona_state.dart';
-import '../bloc/social_post_bloc.dart';
 import 'content_plan_detail_screen.dart';
 import 'content_plan_list_styled_data.dart';
 
@@ -84,7 +84,7 @@ class ContentPlanListState extends State<ContentPlanList> {
         scrollController: _scrollController,
         rowHeight: isPhone ? 72 : 56,
         onRowTap: (index) async {
-          final socialPostBloc = context.read<SocialPostBloc>();
+          final masterContentBloc = context.read<MasterContentBloc>();
           await showDialog(
             barrierDismissible: true,
             context: context,
@@ -95,7 +95,7 @@ class ContentPlanListState extends State<ContentPlanList> {
                 child: MultiBlocProvider(
                   providers: [
                     BlocProvider.value(value: _contentPlanBloc),
-                    BlocProvider.value(value: socialPostBloc),
+                    BlocProvider.value(value: masterContentBloc),
                   ],
                   child: ContentPlanDetailScreen(
                     contentPlan: contentPlans[index],
@@ -188,7 +188,7 @@ class ContentPlanListState extends State<ContentPlanList> {
                                           value: _contentPlanBloc),
                                       BlocProvider.value(
                                           value: context
-                                              .read<SocialPostBloc>()),
+                                              .read<MasterContentBloc>()),
                                     ],
                                     child: const ContentPlanDetailScreen(
                                       contentPlan: null,
