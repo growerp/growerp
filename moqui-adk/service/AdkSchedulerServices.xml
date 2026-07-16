@@ -21,7 +21,9 @@
             <set field="jobName" value="adk_scheduled_${adkAgentConfigId}"/>
             <entity-find-one entity-name="moqui.service.job.ServiceJob" value-field="existingJob"
                 for-update="true" auto-field-map="[jobName: jobName]"/>
-            <if condition="savedCfg.scheduleEnabled == 'Y' &amp;&amp; savedCfg.scheduleExpression">
+            <!-- _NA_ rows are cross-tenant templates: never scheduled themselves, only their
+                 per-tenant clones are. Falls through to the pause branch below. -->
+            <if condition="savedCfg.scheduleEnabled == 'Y' &amp;&amp; savedCfg.scheduleExpression &amp;&amp; savedCfg.ownerPartyId != '_NA_'">
                 <if condition="existingJob">
                     <set field="existingJob.cronExpression" from="savedCfg.scheduleExpression"/>
                     <set field="existingJob.paused" value="N"/>
@@ -71,7 +73,7 @@
                         <!-- Legacy expression-less config: run inline unless it has its own job. -->
                         <entity-find-one entity-name="moqui.service.job.ServiceJob" value-field="perAgentJob"
                             auto-field-map="[jobName: 'adk_scheduled_' + cfg.adkAgentConfigId]"/>
-                        <if condition="!perAgentJob">
+                        <if condition="!perAgentJob &amp;&amp; cfg.ownerPartyId != '_NA_'">
                             <service-call name="AdkSchedulerServices.run#ScheduledAgent"
                                 in-map="[adkAgentConfigId: cfg.adkAgentConfigId]" async="true"/>
                         </if>

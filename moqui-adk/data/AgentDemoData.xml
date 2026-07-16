@@ -94,7 +94,9 @@ If the customer asks to speak to a person/human/representative, or you cannot he
 requestHumanHandoff tool with a short reason, then tell them a member of the team will follow up here."/>
 
     <!-- ── Ops Digest: scheduled standalone agent ──────────────────────────────── -->
-    <!-- scheduleEnabled=Y → run#AllScheduledAgents picks it up every minute. scheduleChatRoomId is
+    <!-- scheduleEnabled=Y is copied to each tenant clone, which gets its own per-agent ServiceJob;
+         this _NA_ template row itself is never scheduled (the scheduler skips _NA_ owners).
+         scheduleChatRoomId is
          left unset on this template row (a literal id here would collide across tenants); the clone
          in AdkDemoServices.load#AgentDemo assigns each tenant's copy its own room id automatically
          (self-referencing its new adkAgentConfigId), so no manual setup is needed to see output/errors
@@ -114,7 +116,9 @@ requestHumanHandoff tool with a short reason, then tell them a member of the tea
         description="Scheduled daily operations digest (open orders + low stock)."
         instruction="You produce a short daily operations digest for this company using read-only tools:
 list the open sales orders and flag any products that look low on stock. Keep it to a few bullet
-points. Read-only only — never change data."/>
+points. Read-only only — never change data. Only growerp.* services exist — never invent a service
+name; first find the right service with the service search tool (e.g. search for 'order' or
+'product'), then execute it."/>
 
     <!-- ── Team membership: coordinator delegates to the three specialists ──────────
          delegationMode=tool → each specialist is exposed to the coordinator as a callable tool. -->
