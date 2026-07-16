@@ -26,6 +26,10 @@ import '../bloc/content_plan_state.dart';
 import '../bloc/persona_bloc.dart';
 import '../bloc/persona_event.dart';
 import '../bloc/persona_state.dart';
+import '../bloc/social_post_bloc.dart';
+import '../bloc/social_post_event.dart';
+import '../bloc/social_post_state.dart';
+import 'social_post_detail_screen.dart';
 
 class ContentPlanDetailScreen extends StatefulWidget {
   final ContentPlan? contentPlan;
@@ -79,6 +83,16 @@ class ContentPlanDetailScreenState extends State<ContentPlanDetailScreen> {
     context
         .read<PersonaBloc>()
         .add(const PersonaFetch(refresh: true, limit: 100));
+
+    // Fetch posts for this plan
+    if (widget.contentPlan?.planId != null) {
+      context.read<SocialPostBloc>().add(
+            SocialPostFetch(
+              refresh: true,
+              planId: widget.contentPlan!.planId,
+            ),
+          );
+    }
 
     _scrollController.addListener(() {
       if (isVisible &&
@@ -301,11 +315,175 @@ class ContentPlanDetailScreenState extends State<ContentPlanDetailScreen> {
               ),
             ),
             const SizedBox(height: 20),
+            // Posts section — only show for existing plans
+            if (widget.contentPlan?.planId != null) _buildPostsSection(),
+            const SizedBox(height: 20),
             _updateButton(),
             const SizedBox(height: 20),
           ],
         ),
       ),
+    );
+  }
+
+  Color _statusColor(String status) {
+    switch (status.toUpperCase()) {
+      case 'PUBLISHED':
+        return Colors.green;
+      case 'SCHEDULED':
+        return Colors.blue;
+      case 'DRAFT':
+        return Colors.orange;
+      default:
+        return Colors.grey;
+    }
+  }
+
+  Widget _buildPostsSection() {
+    return BlocBuilder<SocialPostBloc, SocialPostState>(
+      builder: (context, postState) {
+        final posts = postState.socialPosts;
+        return GroupingDecorator(
+          labelText: 'Posts',
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (postState.status == SocialPostStatus.loading && posts.isEmpty)
+                const Padding(
+                  padding: EdgeInsets.all(16),
+                  child: Center(child: CircularProgressIndicator()),
+                )
+              else if (posts.isEmpty)
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 12),
+                  child: Center(
+                    child: Text(
+                      'No posts yet',
+                      style: TextStyle(color: Colors.grey),
+                    ),
+                  ),
+                )
+              else
+                ...posts.asMap().entries.map((entry) {
+                  final i = entry.key;
+                  final post = entry.value;
+                  return InkWell(
+                    key: Key('postRow$i'),
+                    onTap: () async {
+                      final socialPostBloc = context.read<SocialPostBloc>();
+                      await showDialog(
+                        context: context,
+                        barrierDismissible: true,
+                        builder: (_) => BlocProvider.value(
+                          value: socialPostBloc,
+                          child: SocialPostDetailScreen(socialPost: post),
+                        ),
+                      );
+                      if (mounted && widget.contentPlan?.planId != null) {
+                        socialPostBloc.add(SocialPostFetch(
+                          refresh: true,
+                          planId: widget.contentPlan!.planId,
+                        ));
+                      }
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: Row(
+                        children: [
+                          // Type badge
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .primaryContainer,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              post.type,
+                              key: Key('postType$i'),
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onPrimaryContainer,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          // Headline
+                          Expanded(
+                            child: Text(
+                              post.headline ?? 'No headline',
+                              key: Key('postHeadline$i'),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(fontSize: 13),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          // Status chip
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: _statusColor(post.status)
+                                  .withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              post.status,
+                              key: Key('postStatus$i'),
+                              style: TextStyle(
+                                fontSize: 10,
+                                color: _statusColor(post.status),
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }),
+              // Add post button
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton.icon(
+                  key: const Key('addPost'),
+                  icon: const Icon(Icons.add, size: 18),
+                  label: const Text('Add Post'),
+                  onPressed: () async {
+                    final socialPostBloc = context.read<SocialPostBloc>();
+                    await showDialog(
+                      context: context,
+                      barrierDismissible: true,
+                      builder: (_) => BlocProvider.value(
+                        value: socialPostBloc,
+                        child: SocialPostDetailScreen(
+                          socialPost: SocialPost(
+                            planId: widget.contentPlan?.planId,
+                            type: 'PAIN',
+                            status: 'DRAFT',
+                          ),
+                        ),
+                      ),
+                    );
+                    if (mounted && widget.contentPlan?.planId != null) {
+                      socialPostBloc.add(SocialPostFetch(
+                        refresh: true,
+                        planId: widget.contentPlan!.planId,
+                      ));
+                    }
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 

@@ -23,6 +23,7 @@ import '../bloc/content_plan_state.dart';
 import '../bloc/persona_bloc.dart';
 import '../bloc/persona_event.dart';
 import '../bloc/persona_state.dart';
+import '../bloc/social_post_bloc.dart';
 import 'content_plan_detail_screen.dart';
 import 'content_plan_list_styled_data.dart';
 
@@ -83,6 +84,7 @@ class ContentPlanListState extends State<ContentPlanList> {
         scrollController: _scrollController,
         rowHeight: isPhone ? 72 : 56,
         onRowTap: (index) async {
+          final socialPostBloc = context.read<SocialPostBloc>();
           await showDialog(
             barrierDismissible: true,
             context: context,
@@ -90,8 +92,11 @@ class ContentPlanListState extends State<ContentPlanList> {
               return Dismissible(
                 key: const Key('contentPlanDetailScreen'),
                 direction: DismissDirection.startToEnd,
-                child: BlocProvider.value(
-                  value: _contentPlanBloc,
+                child: MultiBlocProvider(
+                  providers: [
+                    BlocProvider.value(value: _contentPlanBloc),
+                    BlocProvider.value(value: socialPostBloc),
+                  ],
                   child: ContentPlanDetailScreen(
                     contentPlan: contentPlans[index],
                   ),
@@ -177,8 +182,14 @@ class ContentPlanListState extends State<ContentPlanList> {
                                 barrierDismissible: true,
                                 context: context,
                                 builder: (BuildContext context) {
-                                  return BlocProvider.value(
-                                    value: _contentPlanBloc,
+                                  return MultiBlocProvider(
+                                    providers: [
+                                      BlocProvider.value(
+                                          value: _contentPlanBloc),
+                                      BlocProvider.value(
+                                          value: context
+                                              .read<SocialPostBloc>()),
+                                    ],
                                     child: const ContentPlanDetailScreen(
                                       contentPlan: null,
                                     ),
