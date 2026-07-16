@@ -1196,12 +1196,19 @@ CRITICAL tool-use rules — follow exactly:
         allTools.addAll(com.google.adk.tools.FunctionTool.create(GithubTool.class, 'getTestExceptions'))
         allTools.addAll(com.google.adk.tools.FunctionTool.create(GithubTool.class, 'getMainSha'))
         allTools.addAll(com.google.adk.tools.FunctionTool.create(GithubTool.class, 'getFileContent'))
+        allTools.addAll(com.google.adk.tools.FunctionTool.create(SubstackTool.class, 'listSubstackPosts'))
+        allTools.addAll(com.google.adk.tools.FunctionTool.create(SubstackTool.class, 'getSubstackPostComments'))
+        allTools.addAll(com.google.adk.tools.FunctionTool.create(SubstackTool.class, 'getSubstackEngagements'))
+        allTools.addAll(com.google.adk.tools.FunctionTool.create(SubstackTool.class, 'getSubscriberSyncStats'))
         if (allowWrites) {
             allTools.addAll(com.google.adk.tools.FunctionTool.create(EmailTool.class, 'sendEmail'))
             allTools.addAll(com.google.adk.tools.FunctionTool.create(GithubTool.class, 'createBranch'))
             allTools.addAll(com.google.adk.tools.FunctionTool.create(GithubTool.class, 'updateFileContent'))
             allTools.addAll(com.google.adk.tools.FunctionTool.create(GithubTool.class, 'createPullRequest'))
             allTools.addAll(com.google.adk.tools.FunctionTool.create(GithubTool.class, 'addComment'))
+            allTools.addAll(com.google.adk.tools.FunctionTool.create(SubstackTool.class, 'postSubstackNote'))
+            allTools.addAll(com.google.adk.tools.FunctionTool.create(SubstackTool.class, 'publishSubstackArticle'))
+            allTools.addAll(com.google.adk.tools.FunctionTool.create(SubstackTool.class, 'addSubstackSubscriber'))
         }
         return allTools
     }

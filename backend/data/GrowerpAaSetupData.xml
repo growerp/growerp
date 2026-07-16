@@ -41,6 +41,18 @@ along with this software (see the LICENSE.md file). If not, see
         paused="N"
         transactionTimeout="300" />
 
+    <!-- Service Job: Add new GrowERP trial signups as Substack free subscribers - hourly -->
+    <moqui.service.job.ServiceJob jobName="substack_subscriber_sync"
+        description="Add everyone who tried GrowERP (trial tenants) as a Substack free subscriber, idempotently"
+        serviceName="growerp.100.SubstackServices100.sync#NewSignupsToSubstack"
+        cronExpression="0 25 * * * ?" paused="N" transactionTimeout="300" />
+
+    <!-- Service Job: Collect Substack comments/restacks into SocialEngagement - every 4 hours -->
+    <moqui.service.job.ServiceJob jobName="substack_engagement_collect"
+        description="Pull comments and restacks for recently published Substack posts into SocialEngagement"
+        serviceName="growerp.100.SubstackServices100.collect#SubstackEngagements"
+        cronExpression="0 45 1/4 * * ?" paused="N" transactionTimeout="600" />
+
     <!-- Service Job: Import Google Meet bookings + meeting minutes - every 15 minutes -->
     <moqui.service.job.ServiceJob jobName="google_calendar_sync"
         description="Import Google Calendar Meet bookings as lead activities and attach Gemini meeting notes"

@@ -4,7 +4,8 @@
 
     <!-- ========================================================= -->
     <!--  Social Post Publishing Services                          -->
-    <!--  API publish: SUBSTACK, LINKEDIN, FACEBOOK, MEDIUM.       -->
+    <!--  API publish: SUBSTACK, SUBSTACK_NOTE, LINKEDIN,          -->
+    <!--  FACEBOOK, MEDIUM.                                        -->
     <!--  TWITTER and EMAIL have no safe write API here and are    -->
     <!--  left READY for the assisted content send-queue.          -->
     <!-- ========================================================= -->
@@ -23,7 +24,7 @@
         <actions>
             <entity-find entity-name="growerp.marketing.SocialPost" list="readyPosts">
                 <econdition field-name="status" value="READY"/>
-                <econdition field-name="platform" operator="in" value="SUBSTACK,LINKEDIN,FACEBOOK,MEDIUM"/>
+                <econdition field-name="platform" operator="in" value="SUBSTACK,SUBSTACK_NOTE,LINKEDIN,FACEBOOK,MEDIUM"/>
                 <order-by field-name="scheduledDate"/>
             </entity-find>
 
@@ -39,47 +40,59 @@
                     <continue/>
                 </if>
 
-                <!-- Load credentials using the post's own ownerPartyId -->
+                <!-- Load credentials using the post's own ownerPartyId;
+                     SUBSTACK_NOTE shares the SUBSTACK configuration -->
+                <set field="configPlatform"
+                    from="post.platform == 'SUBSTACK_NOTE' ? 'SUBSTACK' : post.platform"/>
                 <entity-find-one entity-name="growerp.marketing.PlatformConfiguration"
                     value-field="platformConfig">
                     <field-map field-name="ownerPartyId" from="post.ownerPartyId"/>
-                    <field-map field-name="platform" from="post.platform"/>
+                    <field-map field-name="platform" from="configPlatform"/>
                 </entity-find-one>
                 <if condition="!platformConfig || platformConfig.isEnabled != 'Y'">
                     <continue/>
                 </if>
 
                 <set field="publishResult" from="[:]"/>
+                <!-- else-if / else must be nested INSIDE the <if> to fire; a sibling
+                     <else-if> after </if> is a silent no-op in Moqui xml-actions -->
                 <if condition="post.platform == 'SUBSTACK'">
                     <service-call
                         name="growerp.100.SocialPostPublishingServices100.publish#SocialPostToSubstack"
                         in-map="[post: post, platformConfig: platformConfig]"
                         out-map="publishResult" ignore-error="true"/>
+                    <else-if condition="post.platform == 'SUBSTACK_NOTE'">
+                        <service-call
+                            name="growerp.100.SubstackServices100.publish#SubstackNote"
+                            in-map="[post: post, platformConfig: platformConfig]"
+                            out-map="publishResult" ignore-error="true"/>
+                    </else-if>
+                    <else-if condition="post.platform == 'LINKEDIN'">
+                        <service-call
+                            name="growerp.100.SocialPostPublishingServices100.publish#SocialPostToLinkedIn"
+                            in-map="[post: post, platformConfig: platformConfig]"
+                            out-map="publishResult" ignore-error="true"/>
+                    </else-if>
+                    <else-if condition="post.platform == 'FACEBOOK'">
+                        <service-call
+                            name="growerp.100.SocialPostPublishingServices100.publish#SocialPostToFacebook"
+                            in-map="[post: post, platformConfig: platformConfig]"
+                            out-map="publishResult" ignore-error="true"/>
+                    </else-if>
+                    <else-if condition="post.platform == 'MEDIUM'">
+                        <service-call
+                            name="growerp.100.SocialPostPublishingServices100.publish#SocialPostToMedium"
+                            in-map="[post: post, platformConfig: platformConfig]"
+                            out-map="publishResult" ignore-error="true"/>
+                    </else-if>
                 </if>
-                <else-if condition="post.platform == 'LINKEDIN'">
-                    <service-call
-                        name="growerp.100.SocialPostPublishingServices100.publish#SocialPostToLinkedIn"
-                        in-map="[post: post, platformConfig: platformConfig]"
-                        out-map="publishResult" ignore-error="true"/>
-                </else-if>
-                <else-if condition="post.platform == 'FACEBOOK'">
-                    <service-call
-                        name="growerp.100.SocialPostPublishingServices100.publish#SocialPostToFacebook"
-                        in-map="[post: post, platformConfig: platformConfig]"
-                        out-map="publishResult" ignore-error="true"/>
-                </else-if>
-                <else-if condition="post.platform == 'MEDIUM'">
-                    <service-call
-                        name="growerp.100.SocialPostPublishingServices100.publish#SocialPostToMedium"
-                        in-map="[post: post, platformConfig: platformConfig]"
-                        out-map="publishResult" ignore-error="true"/>
-                </else-if>
 
                 <if condition="publishResult.success">
                     <service-call name="update#growerp.marketing.SocialPost"
                         in-map="[postId: post.postId, status: 'PUBLISHED',
                                  publishedDate: ec.user.nowTimestamp,
                                  publishedUrl: publishResult.publishedUrl,
+                                 externalPostId: publishResult.externalPostId,
                                  publishError: null,
                                  lastModifiedDate: ec.user.nowTimestamp]"/>
                     <set field="publishedCount" from="publishedCount + 1" type="Integer"/>
@@ -128,11 +141,13 @@
                 <return error="true" message="finalContent is required before publishing"/>
             </if>
 
-            <!-- Load platform credentials -->
+            <!-- Load platform credentials; SUBSTACK_NOTE shares the SUBSTACK configuration -->
+            <set field="configPlatform"
+                from="post.platform == 'SUBSTACK_NOTE' ? 'SUBSTACK' : post.platform"/>
             <entity-find-one entity-name="growerp.marketing.PlatformConfiguration"
                 value-field="platformConfig">
                 <field-map field-name="ownerPartyId"/>
-                <field-map field-name="platform" from="post.platform"/>
+                <field-map field-name="platform" from="configPlatform"/>
             </entity-find-one>
             <if condition="!platformConfig">
                 <return error="true"
@@ -142,35 +157,43 @@
                 <return error="true" message="Platform ${post.platform} is disabled in configuration"/>
             </if>
 
-            <!-- Dispatch to platform-specific service -->
+            <!-- Dispatch to platform-specific service.
+                 else-if / else must be nested INSIDE the <if> to fire; a sibling
+                 <else-if> after </if> is a silent no-op in Moqui xml-actions -->
             <if condition="post.platform == 'SUBSTACK'">
                 <service-call
                     name="growerp.100.SocialPostPublishingServices100.publish#SocialPostToSubstack"
                     in-map="[post: post, platformConfig: platformConfig]"
                     out-map="publishResult"/>
+                <else-if condition="post.platform == 'SUBSTACK_NOTE'">
+                    <service-call
+                        name="growerp.100.SubstackServices100.publish#SubstackNote"
+                        in-map="[post: post, platformConfig: platformConfig]"
+                        out-map="publishResult"/>
+                </else-if>
+                <else-if condition="post.platform == 'LINKEDIN'">
+                    <service-call
+                        name="growerp.100.SocialPostPublishingServices100.publish#SocialPostToLinkedIn"
+                        in-map="[post: post, platformConfig: platformConfig]"
+                        out-map="publishResult"/>
+                </else-if>
+                <else-if condition="post.platform == 'FACEBOOK'">
+                    <service-call
+                        name="growerp.100.SocialPostPublishingServices100.publish#SocialPostToFacebook"
+                        in-map="[post: post, platformConfig: platformConfig]"
+                        out-map="publishResult"/>
+                </else-if>
+                <else-if condition="post.platform == 'MEDIUM'">
+                    <service-call
+                        name="growerp.100.SocialPostPublishingServices100.publish#SocialPostToMedium"
+                        in-map="[post: post, platformConfig: platformConfig]"
+                        out-map="publishResult"/>
+                </else-if>
+                <else>
+                    <return error="true"
+                        message="No API publisher for ${post.platform}; use the assisted content send-queue for this platform"/>
+                </else>
             </if>
-            <else-if condition="post.platform == 'LINKEDIN'">
-                <service-call
-                    name="growerp.100.SocialPostPublishingServices100.publish#SocialPostToLinkedIn"
-                    in-map="[post: post, platformConfig: platformConfig]"
-                    out-map="publishResult"/>
-            </else-if>
-            <else-if condition="post.platform == 'FACEBOOK'">
-                <service-call
-                    name="growerp.100.SocialPostPublishingServices100.publish#SocialPostToFacebook"
-                    in-map="[post: post, platformConfig: platformConfig]"
-                    out-map="publishResult"/>
-            </else-if>
-            <else-if condition="post.platform == 'MEDIUM'">
-                <service-call
-                    name="growerp.100.SocialPostPublishingServices100.publish#SocialPostToMedium"
-                    in-map="[post: post, platformConfig: platformConfig]"
-                    out-map="publishResult"/>
-            </else-if>
-            <else>
-                <return error="true"
-                    message="No API publisher for ${post.platform}; use the assisted content send-queue for this platform"/>
-            </else>
 
             <!-- Update entity based on result -->
             <if condition="publishResult.success">
@@ -180,6 +203,7 @@
                         status: 'PUBLISHED',
                         publishedDate: ec.user.nowTimestamp,
                         publishedUrl: publishResult.publishedUrl,
+                        externalPostId: publishResult.externalPostId,
                         publishError: null,
                         lastModifiedDate: ec.user.nowTimestamp
                     ]"/>
@@ -210,7 +234,9 @@
     <!-- ========================================================= -->
 
     <service verb="publish" noun="SocialPostToSubstack">
-        <description>Create a draft post on Substack via private API</description>
+        <description>Create a draft post on Substack via private API, then publish it
+            (send: true also emails all subscribers). If the publish step fails the
+            draft remains recoverable on Substack and the error includes the draft URL.</description>
         <in-parameters>
             <parameter name="post" type="org.moqui.entity.EntityValue" required="true"/>
             <parameter name="platformConfig" type="org.moqui.entity.EntityValue" required="true"/>
@@ -218,6 +244,7 @@
         <out-parameters>
             <parameter name="success" type="Boolean"/>
             <parameter name="publishedUrl"/>
+            <parameter name="externalPostId"/>
             <parameter name="errorMessage"/>
         </out-parameters>
         <actions>
@@ -231,6 +258,7 @@
 
                 success = false
                 publishedUrl = null
+                externalPostId = null
                 errorMessage = null
 
                 try {
@@ -293,13 +321,43 @@
 
                     ec.logger.info("Substack API response [${response.statusCode()}]: ${responseBody?.take(500)}")
 
-                    if (response.statusCode() in [200, 201]) {
-                        def parsed = new JsonSlurper().parseText(responseBody)
-                        def draftId = parsed?.id
-                        publishedUrl = draftId ? "${publicationUrl}/publish/post/${draftId}" : "${publicationUrl}/publish"
+                    if (!(response.statusCode() in [200, 201])) {
+                        errorMessage = "Substack API error ${response.statusCode()}: ${responseBody?.take(300)}"
+                        return
+                    }
+                    def parsed = new JsonSlurper().parseText(responseBody)
+                    def draftId = parsed?.id
+                    if (!draftId) {
+                        errorMessage = "Substack draft created but no id in response: ${responseBody?.take(300)}"
+                        return
+                    }
+
+                    // Publish the draft; send: true also emails the post to all subscribers
+                    def publishRequest = HttpRequest.newBuilder()
+                        .uri(URI.create("${publicationUrl}/api/v1/drafts/${draftId}/publish"))
+                        .header("Content-Type", "application/json")
+                        .header("Cookie", cookieHeader)
+                        .header("Referer", "${publicationUrl}/publish/post/${draftId}")
+                        .header("Origin", publicationUrl)
+                        .POST(HttpRequest.BodyPublishers.ofString(JsonOutput.toJson([send: true])))
+                        .timeout(Duration.ofSeconds(30))
+                        .build()
+
+                    def publishResponse = httpClient.send(publishRequest, HttpResponse.BodyHandlers.ofString())
+                    def publishBody = publishResponse.body()
+
+                    ec.logger.info("Substack publish response [${publishResponse.statusCode()}]: ${publishBody?.take(500)}")
+
+                    if (publishResponse.statusCode() in [200, 201]) {
+                        def published = new JsonSlurper().parseText(publishBody)
+                        externalPostId = (published?.id ?: draftId) as String
+                        publishedUrl = published?.canonical_url ?:
+                            (published?.slug ? "${publicationUrl}/p/${published.slug}" :
+                                "${publicationUrl}/publish/post/${draftId}")
                         success = true
                     } else {
-                        errorMessage = "Substack API error ${response.statusCode()}: ${responseBody?.take(300)}"
+                        errorMessage = "Substack publish step failed ${publishResponse.statusCode()}: " +
+                            "${publishBody?.take(300)} — draft kept at ${publicationUrl}/publish/post/${draftId}"
                     }
 
                 } catch (Exception e) {

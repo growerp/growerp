@@ -1,0 +1,427 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
+
+    <!-- ========================================================= -->
+    <!--  Substack automation services                             -->
+    <!--  - Notes publishing (short-form, account-level)           -->
+    <!--  - Subscriber sync (new GrowERP trial signups)            -->
+    <!--  - Engagement collection (comments/restacks)              -->
+    <!--  Auth: substack.sid session cookie stored in              -->
+    <!--  PlatformConfiguration (platform SUBSTACK):               -->
+    <!--    apiKey   = substack.sid session cookie value           -->
+    <!--    username = publication URL (https://pub.substack.com)  -->
+    <!--  All endpoints are Substack's private API (no official    -->
+    <!--  API exists) — each uncertain endpoint is isolated in     -->
+    <!--  one helper service.                                      -->
+    <!-- ========================================================= -->
+
+    <service verb="publish" noun="SubstackNote">
+        <description>Post a Substack Note (short-form) via the private API.
+            Notes are account-level: they go to https://substack.com, not the
+            publication host. Base URL overridable with system property
+            growerp.substack.notesBaseUrl (for tests).</description>
+        <in-parameters>
+            <parameter name="post" type="org.moqui.entity.EntityValue" required="true"/>
+            <parameter name="platformConfig" type="org.moqui.entity.EntityValue" required="true"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="success" type="Boolean"/>
+            <parameter name="publishedUrl"/>
+            <parameter name="externalPostId"/>
+            <parameter name="errorMessage"/>
+        </out-parameters>
+        <actions>
+            <script><![CDATA[
+                import groovy.json.JsonOutput
+                import groovy.json.JsonSlurper
+                import java.net.http.HttpClient
+                import java.net.http.HttpRequest
+                import java.net.http.HttpResponse
+                import java.time.Duration
+
+                success = false
+                publishedUrl = null
+                externalPostId = null
+                errorMessage = null
+
+                try {
+                    def sessionToken = platformConfig.apiKey
+                    if (!sessionToken) {
+                        errorMessage = "Substack session token (apiKey) not configured"
+                        return
+                    }
+
+                    def notesBaseUrl = (System.getProperty('growerp.substack.notesBaseUrl') ?:
+                        'https://substack.com').replaceAll('/+$', '')
+
+                    // Prosemirror doc: blank-line separated paragraphs (same as article publisher)
+                    def paragraphs = (post.finalContent as String).split(/\n\n+/).collect { para ->
+                        def lines = para.trim()
+                        if (!lines) return null
+                        [type: "paragraph", content: [[type: "text", text: lines]]]
+                    }.findAll { it != null }
+                    if (!paragraphs) {
+                        paragraphs = [[type: "paragraph", content: [[type: "text", text: post.finalContent as String]]]]
+                    }
+
+                    def requestBody = [
+                        bodyJson: [type: "doc", attrs: [schemaVersion: "v1"], content: paragraphs],
+                        tabId: "for-you",
+                        surface: "feed",
+                        replyMinimumRole: "everyone"
+                    ]
+
+                    def httpClient = HttpClient.newBuilder()
+                        .connectTimeout(Duration.ofSeconds(15))
+                        .build()
+
+                    def request = HttpRequest.newBuilder()
+                        .uri(URI.create("${notesBaseUrl}/api/v1/comment/feed"))
+                        .header("Content-Type", "application/json")
+                        .header("Cookie", "substack.sid=${sessionToken}; connect.sid=${sessionToken}")
+                        .header("Referer", notesBaseUrl)
+                        .header("Origin", notesBaseUrl)
+                        .POST(HttpRequest.BodyPublishers.ofString(JsonOutput.toJson(requestBody)))
+                        .timeout(Duration.ofSeconds(30))
+                        .build()
+
+                    def response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
+                    def responseBody = response.body()
+
+                    ec.logger.info("Substack note response [${response.statusCode()}]: ${responseBody?.take(500)}")
+
+                    if (response.statusCode() in [200, 201]) {
+                        def parsed = new JsonSlurper().parseText(responseBody)
+                        externalPostId = parsed?.id as String
+                        publishedUrl = externalPostId ? "${notesBaseUrl}/note/c-${externalPostId}" : notesBaseUrl
+                        success = true
+                    } else {
+                        errorMessage = "Substack note API error ${response.statusCode()}: ${responseBody?.take(300)}"
+                    }
+                } catch (Exception e) {
+                    errorMessage = "Substack note publishing failed: ${e.message}"
+                    ec.logger.error("Substack note publish error", e)
+                }
+            ]]></script>
+        </actions>
+    </service>
+
+    <service verb="subscribe" noun="EmailToSubstack">
+        <description>Add one email as a free subscriber to the publication. This is the
+            ONLY place that knows the subscriber endpoint. Primary: the public embed
+            signup endpoint POST {publicationUrl}/api/v1/free (no auth, most stable).
+            Fallback if that breaks: authenticated POST
+            {publicationUrl}/api/v1/publication/import with the sid cookie.</description>
+        <in-parameters>
+            <parameter name="emailAddress" required="true"/>
+            <parameter name="platformConfig" type="org.moqui.entity.EntityValue" required="true"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="success" type="Boolean"/>
+            <parameter name="errorMessage"/>
+        </out-parameters>
+        <actions>
+            <script><![CDATA[
+                import groovy.json.JsonOutput
+                import java.net.http.HttpClient
+                import java.net.http.HttpRequest
+                import java.net.http.HttpResponse
+                import java.time.Duration
+
+                success = false
+                errorMessage = null
+
+                try {
+                    def publicationUrl = platformConfig.username?.replaceAll('/+$', '')
+                    if (!publicationUrl) {
+                        errorMessage = "Substack publication URL (username) not configured"
+                        return
+                    }
+
+                    def httpClient = HttpClient.newBuilder()
+                        .connectTimeout(Duration.ofSeconds(15))
+                        .build()
+
+                    def request = HttpRequest.newBuilder()
+                        .uri(URI.create("${publicationUrl}/api/v1/free"))
+                        .header("Content-Type", "application/json")
+                        .header("Referer", publicationUrl)
+                        .header("Origin", publicationUrl)
+                        .POST(HttpRequest.BodyPublishers.ofString(JsonOutput.toJson([email: emailAddress])))
+                        .timeout(Duration.ofSeconds(30))
+                        .build()
+
+                    def response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
+                    def responseBody = response.body()
+
+                    ec.logger.info("Substack subscribe response [${response.statusCode()}] for " +
+                        "${emailAddress}: ${responseBody?.take(300)}")
+
+                    if (response.statusCode() in [200, 201]) {
+                        success = true
+                    } else {
+                        errorMessage = "Substack subscribe error ${response.statusCode()}: ${responseBody?.take(300)}"
+                    }
+                } catch (Exception e) {
+                    errorMessage = "Substack subscribe failed: ${e.message}"
+                    ec.logger.error("Substack subscribe error", e)
+                }
+            ]]></script>
+        </actions>
+    </service>
+
+    <service verb="add" noun="SubstackSubscriber" authenticate="false" allow-remote="false">
+        <description>Idempotently add one email as a Substack free subscriber and record
+            the result in SubstackSubscriberSync. Skips test data (example.com) and
+            already-SYNCED emails; FAILED rows are retried. Skips silently when no
+            enabled SUBSTACK PlatformConfiguration exists (dev/test instances).</description>
+        <in-parameters>
+            <parameter name="emailAddress" required="true"/>
+            <parameter name="ownerPartyId" default-value="GROWERP"/>
+            <parameter name="tenantPartyId"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="resultStatus"/> <!-- SYNCED, SKIPPED, FAILED -->
+            <parameter name="errorMessage"/>
+        </out-parameters>
+        <actions>
+            <set field="emailAddress" from="emailAddress.trim().toLowerCase()"/>
+            <if condition="!emailAddress.contains('@') || emailAddress.contains('example.com')">
+                <set field="resultStatus" value="SKIPPED"/>
+                <return/>
+            </if>
+
+            <entity-find-one entity-name="growerp.marketing.SubstackSubscriberSync"
+                value-field="syncRecord">
+                <field-map field-name="ownerPartyId"/>
+                <field-map field-name="emailAddress"/>
+            </entity-find-one>
+            <if condition="syncRecord?.status == 'SYNCED'">
+                <set field="resultStatus" value="SKIPPED"/>
+                <return/>
+            </if>
+
+            <entity-find-one entity-name="growerp.marketing.PlatformConfiguration"
+                value-field="platformConfig">
+                <field-map field-name="ownerPartyId"/>
+                <field-map field-name="platform" value="SUBSTACK"/>
+            </entity-find-one>
+            <if condition="!platformConfig || platformConfig.isEnabled != 'Y'">
+                <set field="resultStatus" value="SKIPPED"/>
+                <return/>
+            </if>
+
+            <service-call name="growerp.100.SubstackServices100.subscribe#EmailToSubstack"
+                in-map="[emailAddress: emailAddress, platformConfig: platformConfig]"
+                out-map="subscribeResult" ignore-error="true"/>
+
+            <set field="resultStatus" from="subscribeResult.success ? 'SYNCED' : 'FAILED'"/>
+            <set field="errorMessage" from="subscribeResult.errorMessage"/>
+            <service-call name="store#growerp.marketing.SubstackSubscriberSync"
+                in-map="[ownerPartyId: ownerPartyId, emailAddress: emailAddress,
+                         tenantPartyId: tenantPartyId, status: resultStatus,
+                         errorMessage: errorMessage, syncedDate: ec.user.nowTimestamp]"/>
+        </actions>
+    </service>
+
+    <service verb="sync" noun="NewSignupsToSubstack" authenticate="false" allow-remote="false">
+        <description>Backend job: add everyone who tried GrowERP as a Substack free
+            subscriber. Every real signup creates a trial Subscription in the GROWERP
+            tenant (externalSubscriptionId = the new tenant's ownerPartyId) with a
+            customer party carrying the admin email — so this job only scans
+            GROWERP-owned data. Idempotent via SubstackSubscriberSync; per-row errors
+            never abort the batch.</description>
+        <out-parameters>
+            <parameter name="syncedCount" type="Integer"/>
+            <parameter name="skippedCount" type="Integer"/>
+            <parameter name="failedCount" type="Integer"/>
+        </out-parameters>
+        <actions>
+            <entity-find entity-name="mantle.product.subscription.Subscription" list="trialSubscriptions">
+                <econdition field-name="ownerPartyId" value="GROWERP"/>
+                <econdition field-name="externalSubscriptionId" operator="is-not-null"/>
+                <order-by field-name="fromDate"/>
+            </entity-find>
+
+            <set field="syncedCount" value="0" type="Integer"/>
+            <set field="skippedCount" value="0" type="Integer"/>
+            <set field="failedCount" value="0" type="Integer"/>
+            <set field="seenEmails" from="new HashSet()"/>
+
+            <iterate list="trialSubscriptions" entry="subscription">
+                <if condition="!subscription.subscriberPartyId"><continue/></if>
+
+                <!-- resolve the subscriber's email address -->
+                <entity-find entity-name="mantle.party.contact.PartyContactMechInfo" list="emailInfoList">
+                    <econdition field-name="partyId" from="subscription.subscriberPartyId"/>
+                    <econdition field-name="contactMechTypeEnumId" value="CmtEmailAddress"/>
+                    <date-filter/>
+                </entity-find>
+                <if condition="!emailInfoList">
+                    <set field="skippedCount" from="skippedCount + 1" type="Integer"/>
+                    <continue/>
+                </if>
+                <set field="emailAddress" from="emailInfoList[0].infoString?.trim()?.toLowerCase()"/>
+                <if condition="!emailAddress || seenEmails.contains(emailAddress)"><continue/></if>
+                <script>seenEmails.add(emailAddress)</script>
+
+                <service-call name="growerp.100.SubstackServices100.add#SubstackSubscriber"
+                    in-map="[emailAddress: emailAddress, ownerPartyId: 'GROWERP',
+                             tenantPartyId: subscription.externalSubscriptionId]"
+                    out-map="addResult" ignore-error="true"/>
+
+                <if condition="addResult.resultStatus == 'SYNCED'">
+                    <set field="syncedCount" from="syncedCount + 1" type="Integer"/>
+                    <else-if condition="addResult.resultStatus == 'FAILED'">
+                        <set field="failedCount" from="failedCount + 1" type="Integer"/>
+                    </else-if>
+                    <else>
+                        <set field="skippedCount" from="skippedCount + 1" type="Integer"/>
+                    </else>
+                </if>
+            </iterate>
+            <log message="Substack subscriber sync: ${syncedCount} synced, ${skippedCount} skipped, ${failedCount} failed"/>
+        </actions>
+    </service>
+
+    <service verb="get" noun="SubstackPostComments">
+        <description>Fetch comments (incl. restacks) for one published Substack post via
+            GET {publicationUrl}/api/v1/post/{externalPostId}/comments and flatten the
+            nested reply tree.</description>
+        <in-parameters>
+            <parameter name="externalPostId" required="true"/>
+            <parameter name="platformConfig" type="org.moqui.entity.EntityValue" required="true"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="comments" type="List"/>
+            <parameter name="errorMessage"/>
+        </out-parameters>
+        <actions>
+            <script><![CDATA[
+                import groovy.json.JsonSlurper
+                import java.net.http.HttpClient
+                import java.net.http.HttpRequest
+                import java.net.http.HttpResponse
+                import java.time.Duration
+
+                comments = []
+                errorMessage = null
+
+                try {
+                    def publicationUrl = platformConfig.username?.replaceAll('/+$', '')
+                    if (!publicationUrl) {
+                        errorMessage = "Substack publication URL (username) not configured"
+                        return
+                    }
+                    def sessionToken = platformConfig.apiKey
+
+                    def httpClient = HttpClient.newBuilder()
+                        .connectTimeout(Duration.ofSeconds(15))
+                        .build()
+
+                    def builder = HttpRequest.newBuilder()
+                        .uri(URI.create("${publicationUrl}/api/v1/post/${externalPostId}/comments?all_comments=true"))
+                        .header("Referer", publicationUrl)
+                        .GET()
+                        .timeout(Duration.ofSeconds(30))
+                    if (sessionToken) {
+                        builder.header("Cookie", "substack.sid=${sessionToken}; connect.sid=${sessionToken}")
+                    }
+
+                    def response = httpClient.send(builder.build(), HttpResponse.BodyHandlers.ofString())
+                    if (!(response.statusCode() in [200, 201])) {
+                        errorMessage = "Substack comments API error ${response.statusCode()}: " +
+                            "${response.body()?.take(300)}"
+                        return
+                    }
+
+                    def parsed = new JsonSlurper().parseText(response.body())
+                    def flatten
+                    flatten = { List nodes ->
+                        for (node in nodes) {
+                            if (node == null) continue
+                            comments.add([
+                                externalId:     node.id as String,
+                                userName:       node.name ?: node.user_name ?: 'Anonymous',
+                                userProfileUrl: node.handle ? "https://substack.com/@${node.handle}" : null,
+                                body:           node.body,
+                                date:           node.date ?: node.created_at,
+                                type:           node.type ?: 'comment'
+                            ])
+                            if (node.children) flatten(node.children)
+                        }
+                    }
+                    flatten(parsed?.comments ?: [])
+                } catch (Exception e) {
+                    errorMessage = "Substack comments fetch failed: ${e.message}"
+                    ec.logger.error("Substack comments fetch error", e)
+                }
+            ]]></script>
+        </actions>
+    </service>
+
+    <service verb="collect" noun="SubstackEngagements" authenticate="false" allow-remote="false">
+        <description>Backend job: pull comments and restacks for recently published
+            Substack posts (all tenants) into SocialEngagement, deduped on
+            externalEngagementId. Likes are not collected — Substack only exposes
+            aggregate reaction counts, not reactor identities.</description>
+        <out-parameters>
+            <parameter name="newEngagementCount" type="Integer"/>
+            <parameter name="checkedPostCount" type="Integer"/>
+            <parameter name="failedCount" type="Integer"/>
+        </out-parameters>
+        <actions>
+            <set field="cutoffDate" from="new java.sql.Timestamp(ec.user.nowTimestamp.time - 90L*24*60*60*1000)"/>
+            <entity-find entity-name="growerp.marketing.SocialPost" list="publishedPosts">
+                <econdition field-name="platform" value="SUBSTACK"/>
+                <econdition field-name="status" value="PUBLISHED"/>
+                <econdition field-name="externalPostId" operator="is-not-null"/>
+                <econdition field-name="publishedDate" operator="greater-equals" from="cutoffDate"/>
+            </entity-find>
+
+            <set field="newEngagementCount" value="0" type="Integer"/>
+            <set field="checkedPostCount" value="0" type="Integer"/>
+            <set field="failedCount" value="0" type="Integer"/>
+
+            <iterate list="publishedPosts" entry="post">
+                <entity-find-one entity-name="growerp.marketing.PlatformConfiguration"
+                    value-field="platformConfig">
+                    <field-map field-name="ownerPartyId" from="post.ownerPartyId"/>
+                    <field-map field-name="platform" value="SUBSTACK"/>
+                </entity-find-one>
+                <if condition="!platformConfig || platformConfig.isEnabled != 'Y'"><continue/></if>
+
+                <service-call name="growerp.100.SubstackServices100.get#SubstackPostComments"
+                    in-map="[externalPostId: post.externalPostId, platformConfig: platformConfig]"
+                    out-map="commentsResult" ignore-error="true"/>
+                <set field="checkedPostCount" from="checkedPostCount + 1" type="Integer"/>
+                <if condition="commentsResult.errorMessage">
+                    <set field="failedCount" from="failedCount + 1" type="Integer"/>
+                    <log level="warn" message="Substack engagement fetch failed for post ${post.postId}: ${commentsResult.errorMessage}"/>
+                    <continue/>
+                </if>
+
+                <iterate list="commentsResult.comments" entry="comment">
+                    <if condition="!comment.externalId"><continue/></if>
+                    <entity-find entity-name="growerp.marketing.SocialEngagement" list="existingEngagements">
+                        <econdition field-name="postId" from="post.postId"/>
+                        <econdition field-name="externalEngagementId" from="comment.externalId"/>
+                    </entity-find>
+                    <if condition="existingEngagements"><continue/></if>
+
+                    <service-call name="create#growerp.marketing.SocialEngagement"
+                        in-map="[ownerPartyId: post.ownerPartyId, postId: post.postId,
+                                 platform: 'SUBSTACK',
+                                 engagementType: comment.type == 'restack' ? 'SHARE' : 'COMMENT',
+                                 userName: comment.userName, userProfileUrl: comment.userProfileUrl,
+                                 externalEngagementId: comment.externalId,
+                                 note: comment.body, status: 'NEW',
+                                 createdDate: ec.user.nowTimestamp]"/>
+                    <set field="newEngagementCount" from="newEngagementCount + 1" type="Integer"/>
+                </iterate>
+            </iterate>
+            <log message="Substack engagement collect: ${newEngagementCount} new, ${checkedPostCount} posts checked, ${failedCount} failed"/>
+        </actions>
+    </service>
+</services>

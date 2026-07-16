@@ -58,7 +58,7 @@
         <field name="ownerPartyId" type="id" />
         <field name="planId" type="id" />
         <field name="type" type="text-short" /> <!-- PAIN, NEWS, PRIZE, OTHER -->
-        <field name="platform" type="text-short" /> <!-- LINKEDIN, TWITTER, FACEBOOK, MEDIUM, SUBSTACK, EMAIL -->
+        <field name="platform" type="text-short" /> <!-- LINKEDIN, TWITTER, FACEBOOK, MEDIUM, SUBSTACK, SUBSTACK_NOTE, EMAIL -->
         <field name="masterContentId" type="id" /> <!-- source MasterContent this was adapted from -->
         <field name="headline" type="text-medium" />
         <field name="draftContent" type="text-very-long" />
@@ -67,6 +67,7 @@
         <field name="scheduledDate" type="date-time" />
         <field name="publishedDate" type="date-time" />
         <field name="publishedUrl" type="text-medium" />
+        <field name="externalPostId" type="text-short" /> <!-- platform-native post id (e.g. Substack numeric id) -->
         <field name="publishError" type="text-long" />
 
         <field name="createdDate" type="date-time" />
@@ -123,6 +124,7 @@
         <field name="engagementType" type="text-short" />
         <field name="userName" type="text-medium" />
         <field name="userProfileUrl" type="text-medium" />
+        <field name="externalEngagementId" type="text-medium" /> <!-- platform-native comment/engagement id, dedupe key -->
         <field name="note" type="text-long" />
         <!-- NEW, CONTACTED, CONVERTED -->
         <field name="status" type="text-short" />
@@ -130,5 +132,20 @@
         <relationship type="one" related="growerp.marketing.SocialPost">
             <key-map field-name="postId" />
         </relationship>
+    </entity>
+
+    <!-- ========================================================= -->
+    <!--  Substack subscriber sync tracking                        -->
+    <!-- ========================================================= -->
+    <entity entity-name="SubstackSubscriberSync" package="growerp.marketing">
+        <description>Tracks which email addresses were pushed to Substack as free
+            subscribers; the PK is the dedupe key. FAILED rows are retried on the
+            next sync run.</description>
+        <field name="ownerPartyId" type="id" is-pk="true" />
+        <field name="emailAddress" type="text-medium" is-pk="true" /> <!-- lowercased -->
+        <field name="tenantPartyId" type="id" /> <!-- the signup tenant's ownerPartyId -->
+        <field name="status" type="text-short" /> <!-- SYNCED, FAILED -->
+        <field name="errorMessage" type="text-long" />
+        <field name="syncedDate" type="date-time" />
     </entity>
 </entities>
