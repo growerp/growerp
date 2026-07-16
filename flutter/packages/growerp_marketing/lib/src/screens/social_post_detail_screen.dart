@@ -14,9 +14,11 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:responsive_framework/responsive_framework.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../growerp_marketing.dart';
 
@@ -66,6 +68,7 @@ class SocialPostDetailScreenState extends State<SocialPostDetailScreen> {
     'FACEBOOK',
     'INSTAGRAM',
     'SUBSTACK',
+    'SUBSTACK_NOTE',
   ];
 
   @override
@@ -143,6 +146,24 @@ class SocialPostDetailScreenState extends State<SocialPostDetailScreen> {
       setState(() {
         _selectedScheduledDate = picked;
       });
+    }
+  }
+
+  /// No official write API for X/Twitter — copy the drafted text and open
+  /// X's compose intent (pre-fills the tweet) for the user to post manually.
+  Future<void> _copyAndOpenTwitter() async {
+    final text = _finalContentController.text;
+    await Clipboard.setData(ClipboardData(text: text));
+    final uri = Uri.https('twitter.com', '/intent/tweet', {'text': text});
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
+    if (mounted) {
+      HelperFunctions.showMessage(
+        context,
+        'Tweet copied — after posting, set status to PUBLISHED and Save',
+        Colors.green,
+      );
     }
   }
 
@@ -409,6 +430,7 @@ class SocialPostDetailScreenState extends State<SocialPostDetailScreen> {
             ),
             if (widget.socialPost?.postId != null &&
                 (_selectedPlatform == 'SUBSTACK' ||
+                    _selectedPlatform == 'SUBSTACK_NOTE' ||
                     _selectedPlatform == 'LINKEDIN')) ...[
               const SizedBox(height: 10),
               SizedBox(
@@ -416,7 +438,8 @@ class SocialPostDetailScreenState extends State<SocialPostDetailScreen> {
                 child: ElevatedButton.icon(
                   key: const Key('publishButton'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: _selectedPlatform == 'SUBSTACK'
+                    backgroundColor: _selectedPlatform == 'SUBSTACK' ||
+                            _selectedPlatform == 'SUBSTACK_NOTE'
                         ? const Color(0xFFFF6719)
                         : const Color(0xFF0A66C2),
                     foregroundColor: Colors.white,
@@ -456,6 +479,32 @@ class SocialPostDetailScreenState extends State<SocialPostDetailScreen> {
                   textAlign: TextAlign.center,
                 ),
               ],
+            ],
+            if (widget.socialPost?.postId != null &&
+                _selectedPlatform == 'TWITTER') ...[
+              const SizedBox(height: 10),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  key: const Key('copyAndOpenTwitter'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.black,
+                    foregroundColor: Colors.white,
+                  ),
+                  icon: const Icon(Icons.open_in_new),
+                  label: const Text('Copy & Open X'),
+                  onPressed: _finalContentController.text.isEmpty
+                      ? null
+                      : () => _copyAndOpenTwitter(),
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                'No automated posting for X/Twitter — copy the text, post it '
+                'yourself, then set status to PUBLISHED and Save.',
+                style: Theme.of(context).textTheme.bodySmall,
+                textAlign: TextAlign.center,
+              ),
             ],
             const SizedBox(height: 20),
           ],

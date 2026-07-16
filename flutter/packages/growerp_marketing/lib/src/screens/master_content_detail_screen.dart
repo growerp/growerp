@@ -46,16 +46,20 @@ class MasterContentDetailScreenState
 
   late MasterContentBloc _bloc;
 
-  // The 6 supported platforms; user picks a subset to adapt to.
+  // The supported platforms; user picks a subset to adapt to.
   static const List<String> allPlatforms = [
     'LINKEDIN',
     'TWITTER',
     'FACEBOOK',
     'MEDIUM',
     'SUBSTACK',
+    'SUBSTACK_NOTE',
     'EMAIL',
   ];
   final Set<String> _selectedPlatforms = {...allPlatforms};
+
+  static String _platformLabel(String p) =>
+      p == 'SUBSTACK_NOTE' ? 'Substack Note' : p;
 
   static const List<String> contentTypes = ['POSTING', 'ARTICLE', 'MESSAGE'];
   static const List<String> pnpTypes = ['PAIN', 'NEWS', 'PRIZE', 'OTHER'];
@@ -384,7 +388,7 @@ class MasterContentDetailScreenState
               final selected = _selectedPlatforms.contains(p);
               return FilterChip(
                 key: Key('platformChip$p'),
-                label: Text(p),
+                label: Text(_platformLabel(p)),
                 selected: selected,
                 onSelected: (v) => setState(() {
                   if (v) {

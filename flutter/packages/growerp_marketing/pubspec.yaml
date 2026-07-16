@@ -32,6 +32,9 @@ dependencies:
   # Web support
   web: ^1.0.0
 
+  # Open external URLs (assisted Twitter/X compose)
+  url_launcher: ^6.1.4
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
