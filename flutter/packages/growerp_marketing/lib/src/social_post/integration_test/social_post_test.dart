@@ -212,4 +212,22 @@ class SocialPostTest {
     }
     await clearSearch(tester);
   }
+
+  /// X (Twitter) posts get a real publish button (X API publisher exists),
+  /// same as Substack/LinkedIn — verify it renders; does not tap it, since
+  /// CI has no live X credentials configured.
+  static Future<void> checkTwitterPublishButton(WidgetTester tester) async {
+    SaveTest test = await PersistFunctions.getTest(backup: false);
+    SocialPost twitterPost =
+        test.socialPosts.firstWhere((p) => p.platform == 'TWITTER');
+    await doSocialPostSearch(tester, searchString: twitterPost.pseudoId!);
+    expect(
+      find.byKey(Key('SocialPostDetail${twitterPost.pseudoId}')),
+      findsOneWidget,
+    );
+    expect(find.byKey(const Key('publishButton')), findsOneWidget);
+    expect(find.byKey(const Key('copyAndOpenTwitter')), findsOneWidget);
+    await CommonTest.tapByKey(tester, 'cancel');
+    await clearSearch(tester);
+  }
 }

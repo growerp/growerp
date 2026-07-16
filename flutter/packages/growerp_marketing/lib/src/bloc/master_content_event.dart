@@ -103,6 +103,22 @@ class MasterContentAdaptForPlatform extends MasterContentEvent {
       [masterContentId, platforms, campaignId, scheduledDate];
 }
 
+/// Event to approve (or revoke approval of) a master content piece.
+/// Approving lets the scheduler auto-publish every SocialPost adapted
+/// from this piece; revoking stops future auto-publishes.
+class MasterContentApprove extends MasterContentEvent {
+  final String masterContentId;
+  final bool approve;
+
+  const MasterContentApprove({
+    required this.masterContentId,
+    this.approve = true,
+  });
+
+  @override
+  List<Object?> get props => [masterContentId, approve];
+}
+
 class MasterContentSearchRequested extends MasterContentEvent {
   final String searchString;
 

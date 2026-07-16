@@ -431,7 +431,8 @@ class SocialPostDetailScreenState extends State<SocialPostDetailScreen> {
             if (widget.socialPost?.postId != null &&
                 (_selectedPlatform == 'SUBSTACK' ||
                     _selectedPlatform == 'SUBSTACK_NOTE' ||
-                    _selectedPlatform == 'LINKEDIN')) ...[
+                    _selectedPlatform == 'LINKEDIN' ||
+                    _selectedPlatform == 'TWITTER')) ...[
               const SizedBox(height: 10),
               SizedBox(
                 width: double.infinity,
@@ -441,7 +442,9 @@ class SocialPostDetailScreenState extends State<SocialPostDetailScreen> {
                     backgroundColor: _selectedPlatform == 'SUBSTACK' ||
                             _selectedPlatform == 'SUBSTACK_NOTE'
                         ? const Color(0xFFFF6719)
-                        : const Color(0xFF0A66C2),
+                        : _selectedPlatform == 'TWITTER'
+                            ? Colors.black
+                            : const Color(0xFF0A66C2),
                     foregroundColor: Colors.white,
                   ),
                   icon: const Icon(Icons.send),

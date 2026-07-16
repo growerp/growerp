@@ -78,7 +78,10 @@ messages and new opportunities, score them by fit (SMB on spreadsheets) and buyi
 concise tailored follow-up for the hottest few. Post your ranked summary + drafts to the team chat. You do
 not send anything to prospects yourself."/>
 
-    <!-- 4 ── Content/Social: weekly PNP content to keep the sending profile warm; publish is approval-gated -->
+    <!-- 4 ── Content/Social: weekly PNP content to keep the sending profile warm.
+         Approval gate moved from per-action ADK approvals to a single per-piece
+         MasterContent approval (approve#MasterContent); the scheduler then auto-publishes
+         every platform variant of an approved piece, so this agent never publishes itself. -->
     <moqui.adk.AdkAgentConfig
         ownerPartyId="GROWERP"
         adkAgentConfigId="GROWERP_CONTENT_SOCIAL"
@@ -88,19 +91,28 @@ not send anything to prospects yourself."/>
         enabled="Y"
         agentRole="specialist"
         toolMode="scoped"
-        serviceAllowlist="*MarketingPersona,*ContentPlan,*SocialPost,*MasterContent,*adapt#ContentForPlatform,*publish#SocialPost"
-        writePolicy="approve"
+        serviceAllowlist="*MarketingPersona,*ContentPlan,*list#SocialPosts,*list#MasterContents,*create#MasterContent,*update#MasterContent,*generate#MasterContent,*adapt#ContentForPlatform"
+        writePolicy="allow"
         scheduleEnabled="Y"
         scheduleChatRoomId="GROWERP_CONTENT_ROOM"
         scheduleExpression="0 0 8 ? * MON"
-        schedulePrompt="Ensure a persona for SMB owners on spreadsheets (generate if missing). Generate the Pain-News-Prize ContentPlan. For each slot generate#MasterContent then adapt#ContentForPlatform to all enabled platforms as READY SocialPosts; publish is approval-gated."
+        schedulePrompt="Ensure a persona for SMB owners on spreadsheets (generate if missing). Generate the Pain-News-Prize
+ContentPlan for this week. For each of the three slots (PAIN, NEWS, PRIZE) call generate#MasterContent, then
+adapt#ContentForPlatform to all enabled platforms — pass scheduledDate (epoch milliseconds) so the three pieces land
+on Monday, Wednesday and Friday of THIS week at 10:00 UTC respectively, spreading posts instead of bursting them all
+at once. Finish with one chat message listing each master piece's pseudoId and title with: 'awaiting your approval —
+open Marketing > Master Content to approve; once approved every platform variant auto-publishes at its scheduled time
+within each platform's daily limit.'"
         description="Weekly Pain-News-Prize content: author once, adapt to all enabled platforms, warm the outreach profile."
         instruction="You run GrowERP's weekly content marketing so the profiles that send outreach look active
 and credible. Aim at SMB owners stuck on spreadsheets. Each week: ensure a persona, generate the Pain-News-Prize
 ContentPlan, author each piece ONCE as platform-neutral MasterContent (generate#MasterContent), then call
 adapt#ContentForPlatform to produce per-platform variants (LinkedIn/X/Facebook/Medium/Substack/Email) as READY
-SocialPosts. Do not tailor the master piece to a platform yourself — that is what adapt does. Publishing is
-external, so every publish is queued for human approval — never assume it is sent."/>
+SocialPosts, staggering their scheduledDate across the week. Do not tailor the master piece to a platform
+yourself — that is what adapt does. You never publish anything: a human approves each MasterContent piece once
+(approve#MasterContent, outside your allowed tools) and the platform scheduler then auto-publishes every variant
+of an approved piece at its scheduled time, within each platform's daily limit. Always end the run by telling the
+team chat which pieces are awaiting approval."/>
 
     <!-- 5 ── Ops Digest: daily 9am summary of campaign progress + pipeline against the 1-customer goal -->
     <moqui.adk.AdkAgentConfig

@@ -81,6 +81,7 @@
             <parameter name="callToAction" />
             <parameter name="targetUrl" />
             <parameter name="status" />
+            <parameter name="approvedDate" type="Timestamp" />
             <parameter name="createdDate" type="Timestamp" />
             <parameter name="lastModifiedDate" type="Timestamp" />
         </out-parameters>
@@ -125,6 +126,7 @@
             <set field="callToAction" from="mc.callToAction" />
             <set field="targetUrl" from="mc.targetUrl" />
             <set field="status" from="mc.status" />
+            <set field="approvedDate" from="mc.approvedDate" />
             <set field="createdDate" from="mc.createdDate" />
             <set field="lastModifiedDate" from="mc.lastModifiedDate" />
         </actions>
@@ -154,6 +156,7 @@
             <parameter name="callToAction" />
             <parameter name="targetUrl" />
             <parameter name="status" />
+            <parameter name="approvedDate" type="Timestamp" />
             <parameter name="createdDate" type="Timestamp" />
             <parameter name="lastModifiedDate" type="Timestamp" />
         </out-parameters>
@@ -198,8 +201,52 @@
             <set field="callToAction" from="updated.callToAction" />
             <set field="targetUrl" from="updated.targetUrl" />
             <set field="status" from="updated.status" />
+            <set field="approvedDate" from="updated.approvedDate" />
             <set field="createdDate" from="updated.createdDate" />
             <set field="lastModifiedDate" from="updated.lastModifiedDate" />
+        </actions>
+    </service>
+
+    <service verb="approve" noun="MasterContent" authenticate="true">
+        <description>Human approval gate for auto-publishing. Setting approvedDate lets the
+            publish#ScheduledSocialPosts scheduler auto-publish every SocialPost adapted from
+            this master piece. approve=N clears approvedDate (revokes future auto-publishes;
+            already-PUBLISHED posts are unaffected).</description>
+        <in-parameters>
+            <parameter name="masterContentId" required="true" />
+            <parameter name="approve" default-value="Y" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="masterContentId" />
+            <parameter name="status" />
+            <parameter name="approvedDate" type="Timestamp" />
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="context" />
+
+            <entity-find-one entity-name="growerp.marketing.MasterContent" value-field="mc">
+                <field-map field-name="masterContentId" />
+            </entity-find-one>
+            <if condition="!mc">
+                <return error="true" message="Master content not found" />
+            </if>
+            <if condition="mc.ownerPartyId != ownerPartyId">
+                <return error="true" message="Access denied to this master content" />
+            </if>
+
+            <service-call name="update#growerp.marketing.MasterContent"
+                in-map="[
+                    masterContentId: masterContentId,
+                    approvedDate: approve == 'Y' ? ec.user.nowTimestamp : null,
+                    lastModifiedDate: ec.user.nowTimestamp
+                ]" />
+
+            <entity-find-one entity-name="growerp.marketing.MasterContent" value-field="updated">
+                <field-map field-name="masterContentId" />
+            </entity-find-one>
+            <set field="status" from="updated.status" />
+            <set field="approvedDate" from="updated.approvedDate" />
         </actions>
     </service>
 

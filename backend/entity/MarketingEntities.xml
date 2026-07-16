@@ -98,6 +98,7 @@
         <field name="callToAction" type="text-long" />
         <field name="targetUrl" type="text-medium" />
         <field name="status" type="text-short" /> <!-- DRAFT, APPROVED, ADAPTED -->
+        <field name="approvedDate" type="date-time" /> <!-- human approval gate: set = scheduler may auto-publish this piece's SocialPost variants -->
 
         <field name="createdDate" type="date-time" />
         <field name="lastModifiedDate" type="date-time" />

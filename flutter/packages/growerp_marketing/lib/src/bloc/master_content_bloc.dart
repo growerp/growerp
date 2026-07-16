@@ -33,6 +33,7 @@ class MasterContentBloc
     on<MasterContentDelete>(_onDelete);
     on<MasterContentGenerateWithAI>(_onGenerateWithAI);
     on<MasterContentAdaptForPlatform>(_onAdaptForPlatform);
+    on<MasterContentApprove>(_onApprove);
     on<MasterContentSearchRequested>(
       _onSearchRequested,
       transformer: masterContentSearchDebounce(),
@@ -227,6 +228,35 @@ class MasterContentBloc
       ));
       // refresh so the ADAPTED status shows
       add(const MasterContentFetch(refresh: true));
+    } on DioException catch (e) {
+      emit(state.copyWith(
+          status: MasterContentStatus.failure, message: await getDioError(e)));
+    } catch (e) {
+      emit(state.copyWith(
+          status: MasterContentStatus.failure, message: e.toString()));
+    }
+  }
+
+  Future<void> _onApprove(
+    MasterContentApprove event,
+    Emitter<MasterContentState> emit,
+  ) async {
+    try {
+      emit(state.copyWith(status: MasterContentStatus.loading));
+      final updated = await restClient.approveMasterContent(
+        masterContentId: event.masterContentId,
+        approve: event.approve ? 'Y' : 'N',
+      );
+      emit(state.copyWith(
+        status: MasterContentStatus.success,
+        masterContents: state.masterContents
+            .map((m) =>
+                m.masterContentId == updated.masterContentId ? updated : m)
+            .toList(),
+        message: event.approve
+            ? 'Master content approved — variants will auto-publish at their scheduled time'
+            : 'Master content approval revoked',
+      ));
     } on DioException catch (e) {
       emit(state.copyWith(
           status: MasterContentStatus.failure, message: await getDioError(e)));

@@ -52,6 +52,7 @@ void main() {
       marketing_data.masterContents.sublist(0, 3),
     );
     await MasterContentTest.checkMasterContent(tester);
+    await MasterContentTest.approveMasterContent(tester);
     await MasterContentTest.updateMasterContent(
       tester,
       marketing_data.updatedMasterContents.sublist(0, 3),

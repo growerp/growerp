@@ -5,9 +5,9 @@
     <!-- ========================================================= -->
     <!--  Social Post Publishing Services                          -->
     <!--  API publish: SUBSTACK, SUBSTACK_NOTE, LINKEDIN,          -->
-    <!--  FACEBOOK, MEDIUM.                                        -->
-    <!--  TWITTER and EMAIL have no safe write API here and are    -->
-    <!--  left READY for the assisted content send-queue.          -->
+    <!--  FACEBOOK, MEDIUM, TWITTER.                                -->
+    <!--  EMAIL has no safe write API here and is left READY for   -->
+    <!--  the assisted content send-queue.                          -->
     <!-- ========================================================= -->
 
     <service verb="publish" noun="ScheduledSocialPosts" authenticate="false" allow-remote="false">
@@ -16,6 +16,17 @@
             is in the past (or unset). Designed to run as a Moqui ServiceJob — no user context
             required. Credentials are looked up per post using the post's own ownerPartyId.
             Errors per post are recorded but do not abort the batch.
+
+            Approval gate: a post adapted from a MasterContent (post.masterContentId set) only
+            publishes once that MasterContent.approvedDate is set — a human approves the master
+            piece once and every platform variant auto-publishes from then on. Posts with no
+            masterContentId (created directly, not via adapt#ContentForPlatform) are treated as
+            already approved.
+
+            Daily limit: at most PlatformConfiguration.dailyLimit posts are published per
+            ownerPartyId+platform per UTC day, counting posts already PUBLISHED today.
+            SUBSTACK_NOTE is counted in its own bucket but shares the SUBSTACK configuration's
+            dailyLimit (it shares the SUBSTACK credentials too).
         </description>
         <out-parameters>
             <parameter name="publishedCount" type="Integer"/>
@@ -24,13 +35,19 @@
         <actions>
             <entity-find entity-name="growerp.marketing.SocialPost" list="readyPosts">
                 <econdition field-name="status" value="READY"/>
-                <econdition field-name="platform" operator="in" value="SUBSTACK,SUBSTACK_NOTE,LINKEDIN,FACEBOOK,MEDIUM"/>
+                <econdition field-name="platform" operator="in" value="SUBSTACK,SUBSTACK_NOTE,LINKEDIN,FACEBOOK,MEDIUM,TWITTER"/>
                 <order-by field-name="scheduledDate"/>
             </entity-find>
 
             <set field="publishedCount" value="0" type="Integer"/>
             <set field="failedCount" value="0" type="Integer"/>
             <set field="nowMs" from="ec.user.nowTimestamp.time" type="Long"/>
+            <set field="masterApproval" from="[:]"/>
+            <set field="publishedToday" from="[:]"/>
+            <script>
+                dayStart = new java.sql.Timestamp(java.time.LocalDate.now(java.time.ZoneOffset.UTC)
+                    .atStartOfDay(java.time.ZoneOffset.UTC).toInstant().toEpochMilli())
+            </script>
 
             <iterate list="readyPosts" entry="post">
                 <if condition="post.scheduledDate != null &amp;&amp; post.scheduledDate.time > nowMs">
@@ -38,6 +55,19 @@
                 </if>
                 <if condition="!post.finalContent">
                     <continue/>
+                </if>
+
+                <!-- Approval gate: posts adapted from a MasterContent need that master approved -->
+                <if condition="post.masterContentId">
+                    <if condition="!masterApproval.containsKey(post.masterContentId)">
+                        <entity-find-one entity-name="growerp.marketing.MasterContent" value-field="gateMc">
+                            <field-map field-name="masterContentId" from="post.masterContentId"/>
+                        </entity-find-one>
+                        <script>masterApproval[post.masterContentId] = (gateMc?.approvedDate != null)</script>
+                    </if>
+                    <if condition="!masterApproval[post.masterContentId]">
+                        <continue/>
+                    </if>
                 </if>
 
                 <!-- Load credentials using the post's own ownerPartyId;
@@ -50,6 +80,21 @@
                     <field-map field-name="platform" from="configPlatform"/>
                 </entity-find-one>
                 <if condition="!platformConfig || platformConfig.isEnabled != 'Y'">
+                    <continue/>
+                </if>
+
+                <!-- Daily limit: count posts already PUBLISHED today for this owner+platform -->
+                <set field="limitKey" from="post.ownerPartyId + '|' + post.platform"/>
+                <if condition="publishedToday[limitKey] == null">
+                    <entity-find-count entity-name="growerp.marketing.SocialPost" count-field="todayCount">
+                        <econdition field-name="ownerPartyId" from="post.ownerPartyId"/>
+                        <econdition field-name="platform" from="post.platform"/>
+                        <econdition field-name="status" value="PUBLISHED"/>
+                        <econdition field-name="publishedDate" operator="greater-equals" from="dayStart"/>
+                    </entity-find-count>
+                    <script>publishedToday[limitKey] = todayCount</script>
+                </if>
+                <if condition="publishedToday[limitKey] >= (platformConfig.dailyLimit ?: 50)">
                     <continue/>
                 </if>
 
@@ -85,6 +130,12 @@
                             in-map="[post: post, platformConfig: platformConfig]"
                             out-map="publishResult" ignore-error="true"/>
                     </else-if>
+                    <else-if condition="post.platform == 'TWITTER'">
+                        <service-call
+                            name="growerp.100.SocialPostPublishingServices100.publish#SocialPostToX"
+                            in-map="[post: post, platformConfig: platformConfig]"
+                            out-map="publishResult" ignore-error="true"/>
+                    </else-if>
                 </if>
 
                 <if condition="publishResult.success">
@@ -96,6 +147,7 @@
                                  publishError: null,
                                  lastModifiedDate: ec.user.nowTimestamp]"/>
                     <set field="publishedCount" from="publishedCount + 1" type="Integer"/>
+                    <script>publishedToday[limitKey] = publishedToday[limitKey] + 1</script>
                 <else/>
                     <service-call name="update#growerp.marketing.SocialPost"
                         in-map="[postId: post.postId,
@@ -186,6 +238,12 @@
                 <else-if condition="post.platform == 'MEDIUM'">
                     <service-call
                         name="growerp.100.SocialPostPublishingServices100.publish#SocialPostToMedium"
+                        in-map="[post: post, platformConfig: platformConfig]"
+                        out-map="publishResult"/>
+                </else-if>
+                <else-if condition="post.platform == 'TWITTER'">
+                    <service-call
+                        name="growerp.100.SocialPostPublishingServices100.publish#SocialPostToX"
                         in-map="[post: post, platformConfig: platformConfig]"
                         out-map="publishResult"/>
                 </else-if>
@@ -617,6 +675,125 @@
                 } catch (Exception e) {
                     errorMessage = "Medium publishing failed: ${e.message}"
                     ec.logger.error("Medium publish error", e)
+                }
+            ]]></script>
+        </actions>
+    </service>
+
+    <!-- ========================================================= -->
+    <!--  X (Twitter): POST https://api.x.com/2/tweets             -->
+    <!--  Auth: OAuth 1.0a user-context (HMAC-SHA1)                 -->
+    <!--  PlatformConfiguration fields used:                       -->
+    <!--    apiKey    = consumer key (API key)                     -->
+    <!--    apiSecret = consumer secret (API key secret)           -->
+    <!--    username  = access token                                -->
+    <!--    password  = access token secret                        -->
+    <!-- ========================================================= -->
+    <service verb="publish" noun="SocialPostToX">
+        <description>Publish a post to X (Twitter) via API v2, signed with OAuth 1.0a
+            user-context (HMAC-SHA1). The JSON body is not part of the OAuth signature —
+            only the URL and OAuth parameters are signed.</description>
+        <in-parameters>
+            <parameter name="post" type="org.moqui.entity.EntityValue" required="true"/>
+            <parameter name="platformConfig" type="org.moqui.entity.EntityValue" required="true"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="success" type="Boolean"/>
+            <parameter name="publishedUrl"/>
+            <parameter name="externalPostId"/>
+            <parameter name="errorMessage"/>
+        </out-parameters>
+        <actions>
+            <script><![CDATA[
+                import groovy.json.JsonOutput
+                import groovy.json.JsonSlurper
+                import java.net.http.HttpClient
+                import java.net.http.HttpRequest
+                import java.net.http.HttpResponse
+                import java.time.Duration
+                import java.net.URLEncoder
+                import javax.crypto.Mac
+                import javax.crypto.spec.SecretKeySpec
+                import java.util.Base64
+                import java.util.UUID
+
+                success = false
+                publishedUrl = null
+                externalPostId = null
+                errorMessage = null
+
+                def rfc3986Encode = { String s ->
+                    URLEncoder.encode(s, "UTF-8")
+                        .replace("+", "%20")
+                        .replace("*", "%2A")
+                        .replace("%7E", "~")
+                }
+
+                try {
+                    def consumerKey    = platformConfig.apiKey
+                    def consumerSecret = platformConfig.apiSecret
+                    def accessToken    = platformConfig.username
+                    def tokenSecret    = platformConfig.password
+
+                    if (!consumerKey)    { errorMessage = "X consumer key (apiKey) not configured"; return }
+                    if (!consumerSecret) { errorMessage = "X consumer secret (apiSecret) not configured"; return }
+                    if (!accessToken)    { errorMessage = "X access token (username) not configured"; return }
+                    if (!tokenSecret)    { errorMessage = "X access token secret (password) not configured"; return }
+
+                    def text = new StringBuilder()
+                    if (post.headline) text.append(post.headline).append("\n\n")
+                    text.append(post.finalContent ?: "")
+                    def tweetText = text.toString()
+                    if (tweetText.length() > 280) tweetText = tweetText.take(277) + "…"
+
+                    def apiUrl = "https://api.x.com/2/tweets"
+                    def oauthParams = [
+                        oauth_consumer_key    : consumerKey as String,
+                        oauth_nonce           : UUID.randomUUID().toString().replace("-", ""),
+                        oauth_signature_method: "HMAC-SHA1",
+                        oauth_timestamp       : (System.currentTimeMillis() / 1000L) as String,
+                        oauth_token           : accessToken as String,
+                        oauth_version         : "1.0"
+                    ]
+
+                    def paramString = oauthParams.sort().collect { k, v ->
+                        "${rfc3986Encode(k)}=${rfc3986Encode(v)}"
+                    }.join("&")
+                    def baseString = "POST&${rfc3986Encode(apiUrl)}&${rfc3986Encode(paramString)}"
+                    def signingKey = "${rfc3986Encode(consumerSecret as String)}&${rfc3986Encode(tokenSecret as String)}"
+
+                    def mac = Mac.getInstance("HmacSHA1")
+                    mac.init(new SecretKeySpec(signingKey.getBytes("UTF-8"), "HmacSHA1"))
+                    def signature = Base64.encoder.encodeToString(mac.doFinal(baseString.getBytes("UTF-8")))
+
+                    def authHeader = "OAuth " + (oauthParams + [oauth_signature: signature]).sort().collect { k, v ->
+                        "${rfc3986Encode(k)}=\"${rfc3986Encode(v)}\""
+                    }.join(", ")
+
+                    def httpClient = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(15)).build()
+                    def request = HttpRequest.newBuilder()
+                        .uri(URI.create(apiUrl))
+                        .header("Authorization", authHeader)
+                        .header("Content-Type", "application/json")
+                        .POST(HttpRequest.BodyPublishers.ofString(JsonOutput.toJson([text: tweetText])))
+                        .timeout(Duration.ofSeconds(30))
+                        .build()
+
+                    def response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
+                    def responseBody = response.body()
+                    ec.logger.info("X API response [${response.statusCode()}]: ${responseBody?.take(500)}")
+
+                    if (response.statusCode() == 201) {
+                        def parsed = new JsonSlurper().parseText(responseBody)
+                        externalPostId = parsed?.data?.id as String
+                        publishedUrl = externalPostId ? "https://x.com/i/web/status/${externalPostId}" : "https://x.com/"
+                        success = true
+                    } else {
+                        errorMessage = "X API error ${response.statusCode()}: ${responseBody?.take(300)}"
+                    }
+                } catch (Exception e) {
+                    errorMessage = "X publishing failed: ${e.message}"
+                    ec.logger.error("X publish error", e)
                 }
             ]]></script>
         </actions>

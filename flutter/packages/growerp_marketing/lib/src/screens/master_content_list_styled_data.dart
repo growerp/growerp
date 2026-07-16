@@ -107,20 +107,36 @@ List<Widget> getMasterContentListRow({
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-            decoration: BoxDecoration(
-              color: _getStatusColor(content.status).withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Text(
-              content.status,
-              style: TextStyle(
-                fontSize: 10,
-                color: _getStatusColor(content.status),
-                fontWeight: FontWeight.w500,
+          Row(
+            children: [
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color:
+                      _getStatusColor(content.status).withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  content.status,
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: _getStatusColor(content.status),
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
               ),
-            ),
+              const SizedBox(width: 4),
+              Icon(
+                content.approvedDate != null
+                    ? Icons.check_circle
+                    : Icons.hourglass_empty,
+                key: Key('approvalIcon$index'),
+                size: 14,
+                color:
+                    content.approvedDate != null ? Colors.green : Colors.grey,
+              ),
+            ],
           ),
         ],
       ),
@@ -141,20 +157,34 @@ List<Widget> getMasterContentListRow({
       ),
     );
     cells.add(
-      Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        decoration: BoxDecoration(
-          color: _getStatusColor(content.status).withValues(alpha: 0.15),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Text(
-          content.status,
-          style: TextStyle(
-            fontSize: 12,
-            color: _getStatusColor(content.status),
-            fontWeight: FontWeight.w500,
+      Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: _getStatusColor(content.status).withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Text(
+              content.status,
+              style: TextStyle(
+                fontSize: 12,
+                color: _getStatusColor(content.status),
+                fontWeight: FontWeight.w500,
+              ),
+            ),
           ),
-        ),
+          const SizedBox(width: 4),
+          Icon(
+            content.approvedDate != null
+                ? Icons.check_circle
+                : Icons.hourglass_empty,
+            key: Key('approvalIcon$index'),
+            size: 16,
+            color: content.approvedDate != null ? Colors.green : Colors.grey,
+          ),
+        ],
       ),
     );
   }

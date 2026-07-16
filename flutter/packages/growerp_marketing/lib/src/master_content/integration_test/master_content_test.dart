@@ -159,6 +159,42 @@ class MasterContentTest {
     );
   }
 
+  /// Approves the first master content piece, verifies the approval chip,
+  /// then revokes it and verifies the chip reverts.
+  static Future<void> approveMasterContent(WidgetTester tester) async {
+    SaveTest test = await PersistFunctions.getTest(backup: false);
+    MasterContent mc = test.masterContents[0];
+    await doMasterContentSearch(tester, searchString: mc.pseudoId!);
+    expect(find.byKey(Key('MasterContentDetail${mc.pseudoId}')), findsOneWidget);
+
+    expect(
+      find.text('Awaiting approval', skipOffstage: false),
+      findsOneWidget,
+    );
+    await CommonTest.tapByKey(
+      tester,
+      'approveMasterContent',
+      seconds: CommonTest.waitTime,
+    );
+    expect(
+      find.textContaining('Approved', skipOffstage: false),
+      findsOneWidget,
+    );
+
+    await CommonTest.tapByKey(
+      tester,
+      'approveMasterContent',
+      seconds: CommonTest.waitTime,
+    );
+    expect(
+      find.text('Awaiting approval', skipOffstage: false),
+      findsOneWidget,
+    );
+
+    await CommonTest.tapByKey(tester, 'cancel');
+    await clearSearch(tester);
+  }
+
   static Future<void> checkMasterContent(WidgetTester tester) async {
     SaveTest test = await PersistFunctions.getTest(backup: false);
 

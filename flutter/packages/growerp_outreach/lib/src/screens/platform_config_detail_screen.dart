@@ -201,9 +201,9 @@ class _PlatformConfigDetailScreenState
                   TextFormField(
                     key: const Key('API Secret'),
                     controller: _apiSecretController,
-                    decoration: const InputDecoration(
-                      labelText: 'API Secret',
-                      hintText: 'Platform API secret',
+                    decoration: InputDecoration(
+                      labelText: _apiSecretLabel,
+                      hintText: _apiSecretHint,
                     ),
                     obscureText: true,
                   ),
@@ -220,9 +220,9 @@ class _PlatformConfigDetailScreenState
                   TextFormField(
                     key: const Key('Password'),
                     controller: _passwordController,
-                    decoration: const InputDecoration(
-                      labelText: 'Password',
-                      hintText: 'Platform password',
+                    decoration: InputDecoration(
+                      labelText: _passwordLabel,
+                      hintText: _passwordHint,
                     ),
                     obscureText: true,
                   ),
@@ -246,6 +246,7 @@ class _PlatformConfigDetailScreenState
   String get _apiKeyLabel => switch (widget.platform) {
         OutreachPlatform.substack => 'Session Cookie (substack.sid)',
         OutreachPlatform.linkedIn => 'OAuth 2.0 Access Token',
+        OutreachPlatform.twitter => 'Consumer Key (API Key)',
         _ => 'API Key',
       };
 
@@ -253,19 +254,42 @@ class _PlatformConfigDetailScreenState
         OutreachPlatform.substack => 'Paste value of substack.sid cookie',
         OutreachPlatform.linkedIn =>
           'Bearer token from LinkedIn developer portal',
+        OutreachPlatform.twitter => 'From your X developer app "Keys and tokens"',
         _ => 'Platform API key',
+      };
+
+  String get _apiSecretLabel => switch (widget.platform) {
+        OutreachPlatform.twitter => 'Consumer Secret',
+        _ => 'API Secret',
+      };
+
+  String get _apiSecretHint => switch (widget.platform) {
+        OutreachPlatform.twitter => 'API Key Secret from your X developer app',
+        _ => 'Platform API secret',
       };
 
   String get _usernameLabel => switch (widget.platform) {
         OutreachPlatform.substack => 'Publication URL',
         OutreachPlatform.linkedIn => 'Person URN',
+        OutreachPlatform.twitter => 'Access Token',
         _ => 'Username',
       };
 
   String get _usernameHint => switch (widget.platform) {
         OutreachPlatform.substack => 'https://yourname.substack.com',
         OutreachPlatform.linkedIn => 'urn:li:person:AbCdEfGhIj',
+        OutreachPlatform.twitter => 'User-context access token (Read and Write)',
         _ => 'Platform username',
+      };
+
+  String get _passwordLabel => switch (widget.platform) {
+        OutreachPlatform.twitter => 'Access Token Secret',
+        _ => 'Password',
+      };
+
+  String get _passwordHint => switch (widget.platform) {
+        OutreachPlatform.twitter => 'Paired with the access token above',
+        _ => 'Platform password',
       };
 
   // ── Help steps (null = no help card shown) ──────────────────────────────
@@ -329,6 +353,26 @@ class _PlatformConfigDetailScreenState
                   'Call https://api.linkedin.com/v2/me with your token (use the OAuth tools page or curl -H "Authorization: Bearer {token}" https://api.linkedin.com/v2/me). The "id" value gives the last segment — your URN is urn:li:person:{id}.',
             ),
           ],
+        OutreachPlatform.twitter => const [
+            _HelpStep(
+              icon: Icons.app_registration,
+              title: 'Create an X developer app',
+              body:
+                  'Go to developer.x.com → Projects & Apps → Create App. Set the app permissions to "Read and Write" (required to post).',
+            ),
+            _HelpStep(
+              icon: Icons.vpn_key,
+              title: 'Copy the Consumer Key and Secret',
+              body:
+                  'On the app\'s "Keys and tokens" tab, copy the API Key into Consumer Key above and the API Key Secret into Consumer Secret above.',
+            ),
+            _HelpStep(
+              icon: Icons.key,
+              title: 'Generate an Access Token and Secret',
+              body:
+                  'On the same tab, generate an Access Token and Secret under "Access Token and Secret" (make sure app permissions are Read and Write first, then regenerate if needed). Paste them into Access Token / Access Token Secret above.',
+            ),
+          ],
         _ => null,
       };
 
@@ -336,7 +380,9 @@ class _PlatformConfigDetailScreenState
     final steps = _helpSteps!;
     final color = widget.platform == OutreachPlatform.substack
         ? const Color(0xFFFF6719)
-        : const Color(0xFF0A66C2);
+        : widget.platform == OutreachPlatform.twitter
+            ? Colors.black
+            : const Color(0xFF0A66C2);
 
     return Card(
       elevation: 0,

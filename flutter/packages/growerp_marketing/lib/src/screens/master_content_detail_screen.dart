@@ -169,7 +169,7 @@ class MasterContentDetailScreenState
                     if (state.status == MasterContentStatus.loading) {
                       return const LoadingIndicator();
                     }
-                    return _buildContent(state);
+                    return _buildContent(state, _currentMasterContent(state));
                   },
                 ),
               ],
@@ -180,7 +180,19 @@ class MasterContentDetailScreenState
     );
   }
 
-  Widget _buildContent(MasterContentState state) {
+  /// The live copy of this master content from bloc state (reflects approve
+  /// toggles without needing the dialog to reopen), falling back to the
+  /// widget's original for a not-yet-saved (new) piece.
+  MasterContent? _currentMasterContent(MasterContentState state) {
+    final id = widget.masterContent?.masterContentId;
+    if (id == null) return widget.masterContent;
+    for (final m in state.masterContents) {
+      if (m.masterContentId == id) return m;
+    }
+    return widget.masterContent;
+  }
+
+  Widget _buildContent(MasterContentState state, MasterContent? masterContent) {
     return Form(
       key: _formKey,
       child: SingleChildScrollView(
@@ -367,11 +379,48 @@ class MasterContentDetailScreenState
             ),
             if (widget.masterContent?.masterContentId != null) ...[
               const SizedBox(height: 20),
+              _buildApprovalSection(masterContent),
+              const SizedBox(height: 20),
               _buildAdaptSection(state),
             ],
             const SizedBox(height: 20),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildApprovalSection(MasterContent? masterContent) {
+    final approvedDate = masterContent?.approvedDate;
+    final isApproved = approvedDate != null;
+    return GroupingDecorator(
+      labelText: 'Auto-publish approval',
+      child: Row(
+        children: [
+          Icon(
+            isApproved ? Icons.check_circle : Icons.hourglass_empty,
+            color: isApproved ? Colors.green : Colors.orange,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              key: const Key('approvalStatus'),
+              isApproved
+                  ? 'Approved ${approvedDate.toLocal()}'
+                  : 'Awaiting approval',
+            ),
+          ),
+          OutlinedButton(
+            key: const Key('approveMasterContent'),
+            onPressed: () => _bloc.add(
+              MasterContentApprove(
+                masterContentId: widget.masterContent!.masterContentId!,
+                approve: !isApproved,
+              ),
+            ),
+            child: Text(isApproved ? 'Revoke' : 'Approve'),
+          ),
+        ],
       ),
     );
   }

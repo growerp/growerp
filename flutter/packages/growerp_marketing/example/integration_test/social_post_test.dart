@@ -61,6 +61,7 @@ void main() {
       marketing_data.socialPosts.sublist(0, 3),
     );
     await SocialPostTest.checkSocialPosts(tester);
+    await SocialPostTest.checkTwitterPublishButton(tester);
     await SocialPostTest.updateSocialPosts(
       tester,
       marketing_data.updatedSocialPosts.sublist(0, 3),

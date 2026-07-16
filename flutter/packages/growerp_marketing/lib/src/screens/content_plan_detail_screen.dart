@@ -445,6 +445,34 @@ class ContentPlanDetailScreenState extends State<ContentPlanDetailScreen> {
                               ),
                             ),
                           ),
+                          const SizedBox(width: 4),
+                          // Approve/revoke toggle — the auto-publish gate
+                          IconButton(
+                            key: Key('approveContent${content.pseudoId}'),
+                            tooltip: content.approvedDate != null
+                                ? 'Revoke approval'
+                                : 'Approve — variants will auto-publish',
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(),
+                            icon: Icon(
+                              content.approvedDate != null
+                                  ? Icons.check_circle
+                                  : Icons.hourglass_empty,
+                              size: 18,
+                              color: content.approvedDate != null
+                                  ? Colors.green
+                                  : Colors.grey,
+                            ),
+                            onPressed: content.masterContentId == null
+                                ? null
+                                : () => context.read<MasterContentBloc>().add(
+                                      MasterContentApprove(
+                                        masterContentId:
+                                            content.masterContentId!,
+                                        approve: content.approvedDate == null,
+                                      ),
+                                    ),
+                          ),
                         ],
                       ),
                     ),

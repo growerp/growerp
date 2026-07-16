@@ -1256,6 +1256,12 @@ abstract class RestClient {
     @Field() int? scheduledDate,
   });
 
+  @POST("rest/s1/growerp/100/MasterContent/approve")
+  Future<MasterContent> approveMasterContent({
+    @Field() required String masterContentId,
+    @Field() String? approve,
+  });
+
   // Assessment Result endpoints
   @GET("rest/s1/growerp/100/Assessment/Results")
   Future<AssessmentResults> getAssessmentResults({

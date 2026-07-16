@@ -44,6 +44,11 @@ class MasterContent {
   @JsonKey(defaultValue: 'DRAFT')
   final String status;
 
+  /// Human approval gate: when set, the scheduler auto-publishes every
+  /// SocialPost adapted from this piece at its scheduledDate.
+  @NullableTimestampConverter()
+  final DateTime? approvedDate;
+
   /// Timestamp when created
   @NullableTimestampConverter()
   final DateTime? createdDate;
@@ -63,6 +68,7 @@ class MasterContent {
     this.callToAction,
     this.targetUrl,
     required this.status,
+    this.approvedDate,
     this.createdDate,
     this.lastModifiedDate,
   });
@@ -78,6 +84,7 @@ class MasterContent {
     String? callToAction,
     String? targetUrl,
     String? status,
+    DateTime? approvedDate,
     DateTime? createdDate,
     DateTime? lastModifiedDate,
   }) {
@@ -92,6 +99,7 @@ class MasterContent {
       callToAction: callToAction ?? this.callToAction,
       targetUrl: targetUrl ?? this.targetUrl,
       status: status ?? this.status,
+      approvedDate: approvedDate ?? this.approvedDate,
       createdDate: createdDate ?? this.createdDate,
       lastModifiedDate: lastModifiedDate ?? this.lastModifiedDate,
     );
