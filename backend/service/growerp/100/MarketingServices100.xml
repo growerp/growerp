@@ -386,8 +386,11 @@
         <out-parameters>
             <parameter name="planId" />
             <parameter name="pseudoId" />
+            <parameter name="personaId" />
             <parameter name="theme" />
-            <parameter name="weekStartDate" />
+            <parameter name="weekStartDate" type="Timestamp" />
+            <parameter name="createdDate" type="Timestamp" />
+            <parameter name="lastModifiedDate" type="Timestamp" />
             <parameter name="masterContents" type="List" />
         </out-parameters>
         <actions>

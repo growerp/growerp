@@ -242,10 +242,14 @@ Generate the content plan now.
         ec.logger.info("Created MasterContent (${post.type}) with ID: ${createContentResult.masterContentId}")
     }
 
-    // Return the created plan
+    // Return the created plan with the same field shapes as list#ContentPlans
+    // (dates as epoch millis, personaId included) so the frontend can insert
+    // the response straight into its list without a refetch
     pseudoId = pseudoIdResult.seqNum
     theme = planData.theme
-    weekStartDate = weekStart.format(formatter)
+    weekStartDate = java.sql.Date.valueOf(weekStart)
+    createdDate = ec.user.nowTimestamp
+    lastModifiedDate = ec.user.nowTimestamp
     masterContents = createdContents
 
     ec.message.addMessage("Content plan for week of ${weekStart.format(formatter)} generated successfully with ${createdContents.size()} content pieces!")
