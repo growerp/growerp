@@ -348,7 +348,7 @@ class ContentPlanDetailScreenState extends State<ContentPlanDetailScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              if (postState.status == SocialPostStatus.loading && posts.isEmpty)
+              if (postState.status == SocialPostStatus.loading)
                 const Padding(
                   padding: EdgeInsets.all(16),
                   child: Center(child: CircularProgressIndicator()),

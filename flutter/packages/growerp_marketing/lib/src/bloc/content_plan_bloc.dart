@@ -225,7 +225,15 @@ class ContentPlanBloc extends Bloc<ContentPlanEvent, ContentPlanState> {
 
       final generatedContentPlan = await restClient.generateContentPlanWithAI(
         personaId: event.personaId,
-        weekStartDate: event.weekStartDate?.millisecondsSinceEpoch,
+        // send UTC-midnight millis: backend converts epoch at UTC zone,
+        // local-midnight millis would shift the date for UTC+ timezones
+        weekStartDate: event.weekStartDate != null
+            ? DateTime.utc(
+                event.weekStartDate!.year,
+                event.weekStartDate!.month,
+                event.weekStartDate!.day,
+              ).millisecondsSinceEpoch
+            : null,
       );
 
       final updatedContentPlans = List<ContentPlan>.from(state.contentPlans)
