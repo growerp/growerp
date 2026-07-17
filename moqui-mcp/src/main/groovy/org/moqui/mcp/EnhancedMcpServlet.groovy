@@ -976,6 +976,14 @@ class EnhancedMcpServlet extends HttpServlet {
 
         try {
             ec.artifactExecution.disableAuthz()
+            // Stale errors on a reused ExecutionContext (e.g. left by an earlier failed
+            // call on this jetty thread) make ServiceCallSync refuse to run the service
+            // at all ("Found error(s) before service"). They belong to a previous
+            // request — clear them so this call proceeds.
+            if (ec.message.hasError()) {
+                logger.warn("Clearing stale message errors before MCP service ${serviceName}: ${ec.message.errorsString}")
+                ec.message.clearErrors()
+            }
             def result = ec.service.sync().name("McpServices.${serviceName}")
                 .parameters(params ?: [:])
                 .call()

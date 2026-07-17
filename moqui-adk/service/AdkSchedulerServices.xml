@@ -7,7 +7,7 @@
          the source of truth for the schedule. Called from create#/update#AdkAgentConfig and
          from run#AllScheduledAgents (to backfill seed/legacy configs that never went through
          the save path). -->
-    <service verb="sync" noun="AgentJob" authenticate="anonymous">
+    <service verb="sync" noun="AgentJob" authenticate="anonymous-all">
         <description>Create/update/pause the per-agent ServiceJob for an ADK agent config.</description>
         <in-parameters>
             <parameter name="adkAgentConfigId" required="true"/>
@@ -56,7 +56,7 @@
     <!-- Called by ServiceJob every minute. Configs WITH a scheduleExpression are owned by their
          own per-agent ServiceJob (created/backfilled via sync#AgentJob) and must NOT be run
          here. Only legacy configs with no scheduleExpression are run inline every minute. -->
-    <service verb="run" noun="AllScheduledAgents" authenticate="anonymous">
+    <service verb="run" noun="AllScheduledAgents" authenticate="anonymous-all">
         <description>Backfill per-agent jobs for scheduled configs; run only legacy (expression-less) configs inline.</description>
         <actions>
             <entity-find entity-name="moqui.adk.AdkAgentConfig" list="cfgList">
@@ -88,7 +88,7 @@
          nested MCP tool calls that can take many seconds. With the default (~60s) timeout the
          service transaction would be reaped mid-run, so the post-run chat write + notification
          sends would execute against a dead transaction and never reach clients. -->
-    <service verb="run" noun="ScheduledAgent" authenticate="anonymous" transaction-timeout="600">
+    <service verb="run" noun="ScheduledAgent" authenticate="anonymous-all" transaction-timeout="600">
         <description>Run one scheduled ADK agent turn and deliver the result to the configured chat room.</description>
         <in-parameters>
             <parameter name="adkAgentConfigId" required="true"/>

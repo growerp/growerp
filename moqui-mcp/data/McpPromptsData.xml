@@ -21,19 +21,23 @@
         restrictUpdate="Y"
         rootPageLocation="dbresource://WikiSpace/MCP_PROMPTS.md"/>
 
-    <!-- Parent DbResource for WikiSpace -->
+    <!-- Root page file under the shared "WikiSpace" folder (WIKI_SPACE_ROOT),
+         same pattern as McpServiceDocsData.xml — required so
+         rootPageLocation dbresource://WikiSpace/MCP_PROMPTS.md resolves -->
     <moqui.resource.DbResource
         resourceId="WIKI_MCP_PROMPTS"
-        parentResourceId=""
+        parentResourceId="WIKI_SPACE_ROOT"
         filename="MCP_PROMPTS.md"
         isFile="Y"/>
     <moqui.resource.DbResourceFile
         resourceId="WIKI_MCP_PROMPTS"
         mimeType="text/markdown"
-        versionName="v1">This server provides access to Moqui ERP through MCP.
+        versionName="v1">
+        <fileData><![CDATA[This server provides access to Moqui ERP through MCP.]]></fileData>
     </moqui.resource.DbResourceFile>
 
-    <!-- DbResource for root page -->
+    <!-- Page file as child of the root page file (dbresource resolves path
+         WikiSpace/MCP_PROMPTS.md/get-started.md), same as MCP_SERVICE_DOCS pages -->
     <moqui.resource.DbResource
         resourceId="WIKI_MCP_PROMPTS_ROOT"
         parentResourceId="WIKI_MCP_PROMPTS"
@@ -62,6 +66,7 @@
         resourceId="WIKI_MCP_PROMPTS_ROOT"
         mimeType="text/markdown"
         versionName="v1">
+        <fileData><![CDATA[
 This server provides access to GrowERP (Moqui backend) through MCP.
 For ${focus?.capitalize() ?: 'General'} operations:
 
@@ -93,6 +98,7 @@ Use following discovery tools to explore available functionality:
 - `moqui_search_services`: Find growerp.* services by keyword
 - `moqui_get_service_details`: Get input/output parameters for a service
 - `moqui_execute_service`: Run a growerp.* service
+]]></fileData>
     </moqui.resource.DbResourceFile>
 
     <!-- Argument Schema Attachment -->
@@ -104,7 +110,8 @@ Use following discovery tools to explore available functionality:
     <moqui.resource.DbResourceFile
         resourceId="WIKI_MCP_GET_STARTED_ARGS"
         mimeType="application/json"
-        versionName="v1">[
+        versionName="v1">
+        <fileData><![CDATA[[
   {
     "name": "focus",
     "title": "Focus Area",
@@ -121,6 +128,6 @@ Use following discovery tools to explore available functionality:
     "enum": ["basic", "advanced"],
     "required": false
   }
-]
+]]]></fileData>
     </moqui.resource.DbResourceFile>
 </entity-facade-xml>

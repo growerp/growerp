@@ -25,12 +25,13 @@
         scheduleEnabled="Y"
         scheduleChatRoomId="GROWERP_OUTREACH_ROOM"
         scheduleExpression="0 0 9-17 * * ?"
-        schedulePrompt="Personalise up to 50 PENDING outreach messages with an empty body: for each call generate#PlatformMessage from the campaign template + recipient name/title/company, then save with update#OutreachMessageContent. Skip SENT messages."
+        schedulePrompt="Personalise up to 50 PENDING outreach messages with an empty body: fetch them with list#OutreachMessages (status=PENDING), for each call generate#PlatformMessage from the campaign template + recipient name/title/company, then save with update#OutreachMessageContent. Skip SENT messages."
         description="Personalises pending outreach message bodies for the active campaign."
-        instruction="You prepare outbound messages for GrowERP's own marketing campaign. Personalise each
+        instruction="You prepare outbound messages for GrowERP's own marketing campaign. Fetch pending
+messages with list#OutreachMessages (status=PENDING). Personalise each
 PENDING message using the recipient's name, title and company and the campaign template, keeping it short,
 human and specific to their likely pain (running an SMB on spreadsheets). Write the body back with
-update#OutreachMessageContent. You never send messages and you never edit a message that is already SENT.
+update#OutreachMessageContent — these are the only message services; do not invent others. You never send messages and you never edit a message that is already SENT.
 Channel rules: for LINKEDIN, end on a question and include NO URL (we share the link only after they
 reply); keep it under ~400 characters. For EMAIL, include the assessment link
 https://growerp.com/landing/erp-landing-page and a one-line sign-off (Hans, GrowERP); keep it under ~120
@@ -91,7 +92,7 @@ not send anything to prospects yourself."/>
         enabled="Y"
         agentRole="specialist"
         toolMode="scoped"
-        serviceAllowlist="*MarketingPersona,*ContentPlan,*list#SocialPosts,*list#MasterContents,*create#MasterContent,*update#MasterContent,*generate#MasterContent,*adapt#ContentForPlatform"
+        serviceAllowlist="*MarketingPersona*,*ContentPlan*,*list#SocialPosts,*list#MasterContents,*create#MasterContent,*update#MasterContent,*generate#MasterContent,*adapt#ContentForPlatform"
         writePolicy="allow"
         scheduleEnabled="Y"
         scheduleChatRoomId="GROWERP_CONTENT_ROOM"
@@ -108,7 +109,9 @@ within each platform's daily limit.'"
 and credible. Aim at SMB owners stuck on spreadsheets. Each week: ensure a persona, generate the Pain-News-Prize
 ContentPlan, author each piece ONCE as platform-neutral MasterContent (generate#MasterContent), then call
 adapt#ContentForPlatform to produce per-platform variants (LinkedIn/X/Facebook/Medium/Substack/Email) as READY
-SocialPosts, staggering their scheduledDate across the week. Do not tailor the master piece to a platform
+SocialPosts, staggering their scheduledDate across the week. Omit the platforms parameter of
+adapt#ContentForPlatform to target all enabled platforms automatically — there is no service to list them.
+Personas are managed with list#MarketingPersonas / generate#MarketingPersona. Do not tailor the master piece to a platform
 yourself — that is what adapt does. You never publish anything: a human approves each MasterContent piece once
 (approve#MasterContent, outside your allowed tools) and the platform scheduler then auto-publishes every variant
 of an approved piece at its scheduled time, within each platform's daily limit. Always end the run by telling the

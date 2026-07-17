@@ -259,6 +259,74 @@
                     // Surface domain-alias services (e.g. get#FinDoc for 'order') first.
                     (aliases + scored.findAll { !aliases.contains(it) }).take(max)
                 }
+                // Fix up common LLM service-name mistakes; returns the resolved name or the
+                // original (still-undefined) name so the caller's error path can suggest.
+                // Unique growerp.* service whose name ends with ".verb#Noun", or null.
+                def uniqueByTail = { String tail ->
+                    def suffix = ('.' + tail).toLowerCase()
+                    def matches = org.moqui.mcp.adapter.McpToolAdapter.getCachedGroWerpServiceNames(ec)
+                        .findAll { it.toLowerCase().endsWith(suffix) }
+                    matches.size() == 1 ? matches[0] : null
+                }
+                def resolveSvcName = { String svcName ->
+                    if (!svcName) return svcName
+                    // Short "verb#Noun" without package path: resolve to the unique growerp.*
+                    // service if there is one. Checked BEFORE isServiceDefined because Moqui
+                    // reports create/update/delete/store#<Entity> as defined (implicit
+                    // entity-auto), which would bypass the real growerp service.
+                    if (svcName.contains('#') && svcName.indexOf('.') < 0) {
+                        def resolved = uniqueByTail(svcName)
+                        if (resolved) {
+                            ec.logger.info("MCP: resolved short service name '${svcName}' → '${resolved}'")
+                            return resolved
+                        }
+                        return svcName
+                    }
+                    if (ec.service.isServiceDefined(svcName)) return svcName
+                    // Full-looking name with the WRONG package path (LLMs guess the service
+                    // file): resolve by the verb#Noun tail if it names exactly one service.
+                    if (svcName.contains('#')) {
+                        def tail = svcName.substring(svcName.lastIndexOf('.') + 1)
+                        if (tail.contains('#')) {
+                            def resolved = uniqueByTail(tail)
+                            if (resolved) {
+                                ec.logger.info("MCP: resolved wrong-package service name '${svcName}' → '${resolved}'")
+                                return resolved
+                            }
+                        }
+                        return svcName
+                    }
+                    // Missing '#' separator: "OrderServices.getSalesOrders" → "OrderServices.get#SalesOrders"
+                    if (!svcName.contains('#')) {
+                        def lastDot = svcName.lastIndexOf('.')
+                        if (lastDot > 0) {
+                            def tail = svcName.substring(lastDot + 1)
+                            for (v in suggestVerbs) {
+                                if (tail.startsWith(v) && tail.length() > v.length() &&
+                                        Character.isUpperCase(tail.charAt(v.length()))) {
+                                    def corrected = svcName.substring(0, lastDot + 1) +
+                                        v + '#' + tail.substring(v.length())
+                                    if (ec.service.isServiceDefined(corrected)) {
+                                        ec.logger.info("MCP: auto-corrected service name '${svcName}' → '${corrected}'")
+                                        return corrected
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    return svcName
+                }
+                // A failed nested sync service call does NOT throw into this script: Moqui
+                // puts the error on the message facade and call() returns null. Left alone,
+                // the facade error marks ToolsCall itself failed and the client gets {}.
+                // Call this right after a nested call to surface the error as an MCP result.
+                def errorResultIfFailed = { ->
+                    if (!ec.message.hasError()) return null
+                    def errText = ec.message.getErrorsString()?.trim()
+                    ec.message.clearErrors()
+                    isError = true
+                    return [content: [[type: "text", text: "Error executing tool ${name}: ${errText}"]], isError: true]
+                }
 
                 try {
                     // Consolidated Tool Dispatching
@@ -284,7 +352,10 @@
                     
                     def targetServiceName = internalToolMappings[name]
                     if (targetServiceName) {
-                        def serviceResult = ec.service.sync().name(targetServiceName).parameters(arguments ?: [:]).call()
+                        def serviceResult = ec.service.sync().name(targetServiceName).parameters(arguments ?: [:])
+                            .requireNewTransaction(true).call()
+                        def callErr = errorResultIfFailed()
+                        if (callErr != null) { result = callErr; return }
                         def actualRes = serviceResult?.result ?: serviceResult
                         // Ensure standard MCP response format with content array
                         if (actualRes instanceof Map && actualRes.content && actualRes.content instanceof List) {
@@ -296,38 +367,23 @@
                      }
 
                     if (name == "moqui_execute_service") {
-                        def svcName = arguments?.serviceName
+                        def svcName = resolveSvcName(arguments?.serviceName)
                         def svcArgs = arguments?.parameters ?: [:]
-                        // Auto-correct missing # separator (same as moqui_get_service_details)
-                        if (svcName && !svcName.contains('#') && !ec.service.isServiceDefined(svcName)) {
-                            def verbs = ['get','create','update','delete','find','store','check',
-                                'send','run','register','login','logout','search','submit',
-                                'receive','reset','close','recalculate','list','add','remove',
-                                'ingest','push','ensure','escalate','reply','process','set',
-                                'calculate','validate','approve','cancel','complete','draft',
-                                'generate','publish','mark','test','start','pause']
-                            def lastDot = svcName.lastIndexOf('.')
-                            if (lastDot > 0) {
-                                def tail = svcName.substring(lastDot + 1)
-                                for (v in verbs) {
-                                    if (tail.startsWith(v) && tail.length() > v.length() &&
-                                            Character.isUpperCase(tail.charAt(v.length()))) {
-                                        def corrected = svcName.substring(0, lastDot + 1) +
-                                            v + '#' + tail.substring(v.length())
-                                        if (ec.service.isServiceDefined(corrected)) {
-                                            ec.logger.info("MCP: auto-corrected service name '${svcName}' → '${corrected}'")
-                                            svcName = corrected
-                                            break
-                                        }
-                                    }
-                                }
-                            }
-                        }
                         if (!svcName || !ec.service.isServiceDefined(svcName)) {
                             def sugg = suggestServices(svcName, 5)
                             def hint = sugg ? " Did you mean: ${sugg.join(', ')}?"
                                 : " Use moqui_search_services to find valid names."
                             throw new Exception("Unknown service name: ${svcName}. Only growerp.* services are callable.${hint}")
+                        }
+                        // isServiceDefined is also true for implicit entity-auto CRUD
+                        // (create/update/delete/store#<Entity>) — all writes, no defined
+                        // service. Entity writes must go through a growerp.* service; reads
+                        // are available via the read-only moqui_rest_call e1/ API.
+                        if (ec.service.getServiceDefinition(svcName) == null) {
+                            def sugg = suggestServices(svcName, 5)
+                            def hint = sugg ? " Did you mean: ${sugg.join(', ')}?"
+                                : " Use moqui_search_services to find valid names."
+                            throw new Exception("Direct entity write '${svcName}' is not allowed. Use a growerp.* service for writes, or moqui_rest_call (e1/) for reads.${hint}")
                         }
                         def gate = applyGate(svcName, svcArgs)
                         if (!gate.allowed) {
@@ -336,7 +392,10 @@
                                       isError: (gate.decision == 'blocked')]
                             return
                         }
-                        def serviceResult = ec.service.sync().name(svcName).parameters(gate.args).call()
+                        def serviceResult = ec.service.sync().name(svcName).parameters(gate.args)
+                            .requireNewTransaction(true).call()
+                        def callErr = errorResultIfFailed()
+                        if (callErr != null) { result = callErr; return }
                         recordResult(gate.logId, serviceResult)
                         result = [content: [[type: "text", text: new groovy.json.JsonBuilder(serviceResult).toString()]], isError: false]
                         return
@@ -497,32 +556,7 @@
                     if (name == "moqui_get_service_details") {
                         def svcName = arguments?.serviceName
                         if (!svcName) throw new Exception("Missing serviceName")
-                        // Auto-correct missing # separator: LLMs often write
-                        // "OrderServices.getSalesOrders" instead of "OrderServices.get#SalesOrders"
-                        if (!svcName.contains('#') && !ec.service.isServiceDefined(svcName)) {
-                            def verbs = ['get','create','update','delete','find','store','check',
-                                'send','run','register','login','logout','search','submit',
-                                'receive','reset','close','recalculate','list','add','remove',
-                                'ingest','push','ensure','escalate','reply','process','set',
-                                'calculate','validate','approve','cancel','complete','draft',
-                                'generate','publish','mark','test','start','pause']
-                            def lastDot = svcName.lastIndexOf('.')
-                            if (lastDot > 0) {
-                                def tail = svcName.substring(lastDot + 1)
-                                for (v in verbs) {
-                                    if (tail.startsWith(v) && tail.length() > v.length() &&
-                                            Character.isUpperCase(tail.charAt(v.length()))) {
-                                        def corrected = svcName.substring(0, lastDot + 1) +
-                                            v + '#' + tail.substring(v.length())
-                                        if (ec.service.isServiceDefined(corrected)) {
-                                            ec.logger.info("MCP: auto-corrected service name '${svcName}' → '${corrected}'")
-                                            svcName = corrected
-                                            break
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                        svcName = resolveSvcName(svcName)
                         def sd = ec.service.getServiceDefinition(svcName)
                         if (!sd) {
                             def sugg = suggestServices(svcName, 5)
@@ -572,7 +606,10 @@
                             return
                         }
                         // Execute service with current user context
-                        def serviceResult = ec.service.sync().name(name).parameters(gate.args).call()
+                        def serviceResult = ec.service.sync().name(name).parameters(gate.args)
+                            .requireNewTransaction(true).call()
+                        def callErr = errorResultIfFailed()
+                        if (callErr != null) { result = callErr; return }
                         recordResult(gate.logId, serviceResult)
                         // Convert result to MCP format for general services
                         result = [content: [[type: "text", text: new JsonBuilder(serviceResult).toString()]], isError: false]
@@ -582,7 +619,11 @@
                     throw new Exception("Unknown tool name: ${name}")
                 } catch (Exception e) {
                     isError = true
-                    
+                    // A failed nested service call leaves errors on the message facade,
+                    // which would mark THIS service as failed and drop the result map —
+                    // the client would get {} instead of the error text. Clear them so
+                    // the MCP error response below actually reaches the agent.
+                    ec.message.clearErrors()
                     result = [
                         content: [
                             [
@@ -592,7 +633,7 @@
                         ],
                         isError: true
                     ]
-                    
+
                     ec.logger.error("MCP tool execution error", e)
                 } finally {
                     // Send a simple notification about tool execution
@@ -1068,6 +1109,9 @@
             <parameter name="name" required="true">
                 <description>Prompt name to retrieve</description>
             </parameter>
+            <parameter name="arguments" type="Map">
+                <description>Values for the prompt template placeholders</description>
+            </parameter>
         </in-parameters>
         <out-parameters>
             <parameter name="result" type="Map"/>
@@ -1099,7 +1143,11 @@
                 ec.logger.info("MCP PromptsGet: Looking for pagePath='${name}', found: ${wikiPage?.wikiPageId}")
                 
                 if (!wikiPage) {
-                    throw new Exception("Prompt not found: ${name}")
+                    def available = allPages.collect { it.pagePath }.join(', ') ?: 'none'
+                    def svcHint = name?.contains('#')
+                        ? " '${name}' looks like a service name — prompts are documentation templates, not services; use moqui_search_services / moqui_execute_service instead."
+                        : ""
+                    throw new Exception("Prompt not found: ${name}. Available prompts: ${available}.${svcHint}")
                 }
                 
                 // Get the wiki space to build the page location
@@ -1112,17 +1160,13 @@
                     throw new Exception("MCP Prompts wiki space not found")
                 }
                 
-                // Build resource location using framework's findChildFile pattern
-                // Note: pagePath is "get-started" but file is "get-started.md"
-                ec.logger.info("MCP PromptsGet: rootPageLocation=${wikiSpace.rootPageLocation}, pagePath=${wikiPage.pagePath}")
-                def rootPageRef = ec.resource.getLocationReference(wikiSpace.rootPageLocation)
-                ec.logger.info("MCP PromptsGet: rootPageRef.location=${rootPageRef?.location}")
-
-                // Try with .md extension first, then without
-                def pageRef = rootPageRef.findChildFile(wikiPage.pagePath + '.md')
-                if (!pageRef) {
-                    pageRef = rootPageRef.findChildFile(wikiPage.pagePath)
-                }
+                // Direct child-of-root-page location, same proven pattern as
+                // mcp#Initialize root instructions (findChildFile strips the root
+                // page's .md and looks in a sibling folder that does not exist)
+                def pageLocation = wikiSpace.rootPageLocation
+                if (!pageLocation.endsWith('/')) pageLocation += '/'
+                pageLocation += wikiPage.pagePath + '.md'
+                def pageRef = ec.resource.getLocationReference(pageLocation)
                 ec.logger.info("MCP PromptsGet: pageRef.location=${pageRef?.location}")
 
                 def templateText = pageRef?.getText()
@@ -1146,7 +1190,10 @@
                             .useCache(true)
                             .one()
                         if (dbResourceFile) {
-                            def jsonText = dbResourceFile.fileData?.getText()
+                            def fd = dbResourceFile.fileData
+                            def jsonText = fd instanceof java.sql.Blob
+                                ? new String(fd.getBytes(1L, (int) fd.length()), "UTF-8")
+                                : (fd instanceof byte[] ? new String(fd, "UTF-8") : fd?.toString())
                             if (jsonText) {
                                 promptArguments = new JsonSlurper().parseText(jsonText) ?: []
                             }
@@ -1159,7 +1206,9 @@
                 // Render template using Groovy GString engine
                 def templateEngine = new GStringTemplateEngine()
                 def template = templateEngine.createTemplate(templateText)
-                def binding = arguments ?: [:]
+                // withDefault: template placeholders the caller didn't supply render as
+                // null instead of throwing MissingPropertyException
+                def binding = new HashMap(arguments ?: [:]).withDefault { null }
                 def rendered = template.make(binding).toString()
 
                 ec.logger.info("MCP PromptsGet: Rendered prompt '${name}' with ${binding.size()} arguments")
@@ -1384,11 +1433,11 @@
                     [
                         name: "moqui_prompts_get",
                         title: "Get Prompt",
-                        description: "Retrieve and render a specific MCP prompt template.",
+                        description: "Retrieve and render a specific MCP prompt template (documentation/guidance text, NOT a service). Call moqui_prompts_list first to see valid names. To find or run business logic use moqui_search_services / moqui_execute_service.",
                         inputSchema: [
                             type: "object",
                             properties: [
-                                "name": [type: "string", description: "Prompt name"],
+                                "name": [type: "string", description: "Prompt name exactly as returned by moqui_prompts_list. Not a service name — never pass verb#Noun here."],
                                 "arguments": [type: "object", description: "Arguments for prompt template"]
                             ],
                             required: ["name"]
@@ -1413,7 +1462,7 @@
                         inputSchema: [
                             type: "object",
                             properties: [
-                                "serviceName": [type: "string", description: "Full service name (e.g. 'update#growerp.product.Product')"]
+                                "serviceName": [type: "string", description: "Fully-qualified service name in the form package.path.ServiceFile.verb#Noun (e.g. 'growerp.100.CatalogServices100.get#Products'). Get the exact name from moqui_search_services — do not guess."]
                             ],
                             required: ["serviceName"]
                         ]
@@ -1425,7 +1474,7 @@
                         inputSchema: [
                             type: "object",
                             properties: [
-                                "serviceName": [type: "string", description: "Full service name (e.g. 'update#growerp.product.Product')"],
+                                "serviceName": [type: "string", description: "Fully-qualified service name in the form package.path.ServiceFile.verb#Noun (e.g. 'growerp.100.CatalogServices100.get#Products'). Get the exact name from moqui_search_services — do not guess."],
                                 "parameters": [type: "object", description: "Input parameters for the service (required params must be provided)"]
                             ],
                             required: ["serviceName"]

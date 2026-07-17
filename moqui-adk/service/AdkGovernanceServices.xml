@@ -101,7 +101,12 @@
                     } else if (toolMode == 'scoped') {
                         def globs = ((cfg.serviceAllowlist ?: '') as String).split(/[,\s]+/).findAll { it }
                         def ok = globs.any { g ->
-                            def rx = '^' + java.util.regex.Pattern.quote(g).replace('\\*', '\\E.*\\Q') + '$'
+                            // glob → regex: quote the literal parts, '*' → '.*'
+                            // (do NOT Pattern.quote the whole glob first — quote() wraps in
+                            // \Q..\E so the '*' is never found as '\*' and stays literal)
+                            def rx = '^' + g.split(/\*/, -1).collect {
+                                it ? java.util.regex.Pattern.quote(it) : ''
+                            }.join('.*') + '$'
                             serviceName ==~ rx
                         }
                         if (!ok) {
