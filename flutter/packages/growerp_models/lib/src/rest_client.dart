@@ -1306,6 +1306,8 @@ abstract class RestClient {
     @Field() String? ctaActionType,
     @Field() String? ctaAssessmentId,
     @Field() String? ctaButtonLink,
+    @Field() String? ctaFormId,
+    @Field() String? theme,
     @Field() String status = 'DRAFT',
   });
 
@@ -1320,6 +1322,8 @@ abstract class RestClient {
     @Field() String? ctaActionType,
     @Field() String? ctaAssessmentId,
     @Field() String? ctaButtonLink,
+    @Field() String? ctaFormId,
+    @Field() String? theme,
     @Field() String? privacyPolicyUrl,
     @Field() String? status,
   });
@@ -1363,6 +1367,8 @@ abstract class RestClient {
     @Field() required String sectionTitle,
     @Field() String? sectionDescription,
     @Field() String? sectionImageUrl,
+    @Field() String? sectionType,
+    @Field() String? contentJson,
     @Field() int? sectionSequence,
   });
 
@@ -1373,6 +1379,8 @@ abstract class RestClient {
     @Field() String? sectionTitle,
     @Field() String? sectionDescription,
     @Field() String? sectionImageUrl,
+    @Field() String? sectionType,
+    @Field() String? contentJson,
     @Field() int? sectionSequence,
   });
 

@@ -283,22 +283,28 @@ RETURN FORMAT: Return ONLY valid JSON (no markdown, no code blocks) with this ex
             }
         }
         
-        // Features section
+        // Features section - stored as a typed 'cards' section (one card per
+        // value proposition) instead of flattening propositions into one text
+        // blob, so the public renderer can show them as the outline-card grid
         if (contentData.features) {
             def featuresPseudoId = ec.service.sync().name("growerp.100.GeneralServices100.getNext#PseudoId")
                 .parameters([ownerPartyId: ownerPartyId, seqName: 'pageSection'])
                 .call().seqNum
-            
-            def featuresContent = contentData.features.propositions?.collect { prop ->
-                "${prop.title}: ${prop.description}"
-            }?.join(" | ") ?: contentData.features.title
-            
+
+            def cardsJson = contentData.features.propositions instanceof List
+                ? JsonOutput.toJson(contentData.features.propositions.collect { prop ->
+                    [title: prop.title ?: '', description: prop.description ?: '']
+                  })
+                : null
+
             ec.service.sync().name("create#growerp.landing.PageSection")
                 .parameters([
                     landingPageId: landingPageId,
                     pseudoId: featuresPseudoId,
                     sectionTitle: contentData.features.title ?: 'Features',
-                    sectionDescription: featuresContent ?: '',
+                    sectionDescription: '',
+                    sectionType: cardsJson ? 'cards' : null,
+                    contentJson: cardsJson,
                     sectionSequence: sectionSequence++
                 ])
                 .call()

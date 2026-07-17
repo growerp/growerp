@@ -32,16 +32,22 @@ Service definitions for landing page, sections, credibility, and CTA management
     </in-parameters>
     <out-parameters>
       <parameter name="landingPage" type="Map">
-        <description>Landing page object with all fields, sections, credibility</description>
+        <description>Landing page object with all fields, sections, credibility.
+          Note: this map is built from the full LandingPage/PageSection/CredibilityInfo
+          entity fields (via getMap()), so it also carries subheading, hookType,
+          privacyPolicyUrl, ctaFormId, theme, and section sectionType/contentJson —
+          not just the fields listed below.</description>
         <parameter name="landingPageId" />
         <parameter name="pseudoId" />
         <parameter name="title" />
         <parameter name="headline" />
-        <parameter name="description" />
+        <parameter name="subheading" />
         <parameter name="status" />
         <parameter name="ctaActionType" />
         <parameter name="ctaAssessmentId" />
         <parameter name="ctaButtonLink" />
+        <parameter name="ctaFormId" />
+        <parameter name="theme" />
         <parameter name="createdDate" type="Timestamp" />
         <parameter name="lastModifiedDate" type="Timestamp" />
         <parameter name="sections" type="List">
@@ -49,7 +55,9 @@ Service definitions for landing page, sections, credibility, and CTA management
           <parameter name="pageSectionId" />
           <parameter name="sectionTitle" />
           <parameter name="sectionSequence" type="Integer" />
-          <parameter name="sectionText" />
+          <parameter name="sectionDescription" />
+          <parameter name="sectionType" />
+          <parameter name="contentJson" />
         </parameter>
         <parameter name="credibility" type="Map">
           <description>Credibility/bio section</description>
@@ -57,6 +65,11 @@ Service definitions for landing page, sections, credibility, and CTA management
           <parameter name="creatorBio" />
           <parameter name="backgroundText" />
           <parameter name="creatorImageUrl" />
+          <parameter name="statistics" type="List">
+            <parameter name="credibilityStatisticId" />
+            <parameter name="statistic" />
+            <parameter name="sequence" type="Integer" />
+          </parameter>
         </parameter>
       </parameter>
     </out-parameters>
@@ -97,13 +110,23 @@ Service definitions for landing page, sections, credibility, and CTA management
       <entity-find entity-name="growerp.landing.CredibilityInfo" list="credibilityList">
         <econdition field-name="landingPageId" from="page.landingPageId" />
       </entity-find>
-      <set field="credibility" from="credibilityList ? credibilityList[0] : [:]" />
+
+      <!-- Get credibility statistics, ordered by sequence (mirrors get#CredibilityInfo) -->
+      <set field="statistics" from="[]" />
+      <if condition="credibilityList">
+        <entity-find entity-name="growerp.landing.CredibilityStatistic" list="statistics">
+          <econdition field-name="credibilityInfoId" from="credibilityList[0].credibilityInfoId" />
+          <order-by field-name="sequence" />
+        </entity-find>
+      </if>
 
       <!-- Build unified landingPage response with page data + nested dependents -->
       <script>
         Map pageMap = page.getMap()
         pageMap.put('sections', sections ?: [])
-        pageMap.put('credibility', credibility ?: [:])
+        Map credibilityMap = credibilityList ? credibilityList[0].getMap() : [:]
+        if (credibilityList) credibilityMap.put('statistics', statistics ?: [])
+        pageMap.put('credibility', credibilityMap)
         context.landingPage = pageMap
       </script>
     </actions>
@@ -141,6 +164,8 @@ Service definitions for landing page, sections, credibility, and CTA management
         <parameter name="ctaActionType" />
         <parameter name="ctaAssessmentId" />
         <parameter name="ctaButtonLink" />
+        <parameter name="ctaFormId" />
+        <parameter name="theme" />
         <parameter name="status" />
         <parameter name="createdDate" type="Timestamp" />
         <parameter name="lastUpdated" type="Timestamp" />
@@ -203,6 +228,8 @@ Service definitions for landing page, sections, credibility, and CTA management
           ctaActionType: page.ctaActionType,
           ctaAssessmentId: page.ctaAssessmentId,
           ctaButtonLink: page.ctaButtonLink,
+          ctaFormId: page.ctaFormId,
+          theme: page.theme,
           status: page.status,
           createdDate: page.createdDate,
           lastUpdated: page.lastModifiedDate
@@ -235,13 +262,19 @@ Service definitions for landing page, sections, credibility, and CTA management
         <description>Optional privacy policy link</description>
       </parameter>
       <parameter name="ctaActionType">
-        <description>CTA action type: assessment or url</description>
+        <description>CTA action type: assessment, url, or form</description>
       </parameter>
       <parameter name="ctaAssessmentId">
         <description>Assessment ID for CTA (when actionType is assessment)</description>
       </parameter>
       <parameter name="ctaButtonLink">
         <description>Button URL for CTA (when actionType is url)</description>
+      </parameter>
+      <parameter name="ctaFormId">
+        <description>WebsiteForm ID for CTA (when actionType is form)</description>
+      </parameter>
+      <parameter name="theme">
+        <description>Visual theme: light (default) or dark</description>
       </parameter>
       <parameter name="status" default-value="DRAFT">
         <description>Status: ACTIVE, INACTIVE, DRAFT</description>
@@ -278,6 +311,12 @@ Service definitions for landing page, sections, credibility, and CTA management
       <parameter name="ctaButtonLink">
         <description>CTA button link</description>
       </parameter>
+      <parameter name="ctaFormId">
+        <description>CTA form ID</description>
+      </parameter>
+      <parameter name="theme">
+        <description>Visual theme</description>
+      </parameter>
       <parameter name="status">
         <description>Landing page status</description>
       </parameter>
@@ -313,6 +352,8 @@ Service definitions for landing page, sections, credibility, and CTA management
         ctaActionType: ctaActionType,
         ctaAssessmentId: ctaAssessmentId,
         ctaButtonLink: ctaButtonLink,
+        ctaFormId: ctaFormId,
+        theme: theme ?: 'light',
         status: status,
         createdDate: ec.user.nowTimestamp,
         lastModifiedDate: ec.user.nowTimestamp
@@ -359,13 +400,19 @@ Service definitions for landing page, sections, credibility, and CTA management
         <description>New privacy policy URL</description>
       </parameter>
       <parameter name="ctaActionType">
-        <description>CTA action type: assessment or url</description>
+        <description>CTA action type: assessment, url, or form</description>
       </parameter>
       <parameter name="ctaAssessmentId">
         <description>Assessment ID for CTA (when actionType is assessment)</description>
       </parameter>
       <parameter name="ctaButtonLink">
         <description>Button URL for CTA (when actionType is url)</description>
+      </parameter>
+      <parameter name="ctaFormId">
+        <description>WebsiteForm ID for CTA (when actionType is form)</description>
+      </parameter>
+      <parameter name="theme">
+        <description>Visual theme: light or dark</description>
       </parameter>
       <parameter name="status">
         <description>New status: ACTIVE, INACTIVE, DRAFT</description>
@@ -401,6 +448,12 @@ Service definitions for landing page, sections, credibility, and CTA management
       </parameter>
       <parameter name="ctaButtonLink">
         <description>CTA button link</description>
+      </parameter>
+      <parameter name="ctaFormId">
+        <description>CTA form ID</description>
+      </parameter>
+      <parameter name="theme">
+        <description>Visual theme</description>
       </parameter>
       <parameter name="status">
         <description>Landing page status</description>
@@ -447,6 +500,8 @@ Service definitions for landing page, sections, credibility, and CTA management
         ctaActionType: ctaActionType,
         ctaAssessmentId: ctaAssessmentId,
         ctaButtonLink: ctaButtonLink,
+        ctaFormId: ctaFormId,
+        theme: theme ?: existingPage.theme,
         status: status ?: existingPage.status,
         lastModifiedDate: ec.user.nowTimestamp
       ]" />
@@ -581,7 +636,13 @@ Service definitions for landing page, sections, credibility, and CTA management
 
       <!-- Set output parameters -->
       <set field="pseudoId" from="landingPage.pseudoId" />
-      <set field="publicUrl" from="'https://app.growerp.com/landing/' + pseudoId" />
+      <!-- Use the host the admin is currently on (their tenant's own host, e.g.
+           100000.localhost or a custom domain) when available; fall back to the
+           generic app host outside a web request (e.g. called from a test) -->
+      <set field="hostName" from="ec.web ? ec.web.getHostName(false) : null" />
+      <set field="publicUrl"
+        from="hostName ? ('https://' + hostName + '/landing/' + pseudoId)
+            : ('https://app.growerp.com/landing/' + pseudoId)" />
     </actions>
   </service>
 
@@ -604,6 +665,12 @@ Service definitions for landing page, sections, credibility, and CTA management
       </parameter>
       <parameter name="sectionImageUrl">
         <description>Optional section image URL</description>
+      </parameter>
+      <parameter name="sectionType">
+        <description>Section type: text (default), stats, cards, timeline, or benefits</description>
+      </parameter>
+      <parameter name="contentJson">
+        <description>Structured content for non-text sectionTypes (JSON array of row objects)</description>
       </parameter>
       <parameter name="sectionSequence" type="Integer">
         <description>Display order (auto-incremented if not provided)</description>
@@ -630,6 +697,12 @@ Service definitions for landing page, sections, credibility, and CTA management
       </parameter>
       <parameter name="sectionImageUrl">
         <description>Section image URL</description>
+      </parameter>
+      <parameter name="sectionType">
+        <description>Section type</description>
+      </parameter>
+      <parameter name="contentJson">
+        <description>Structured content JSON</description>
       </parameter>
       <parameter name="sectionSequence" type="Integer">
         <description>Section sequence</description>
@@ -684,6 +757,8 @@ Service definitions for landing page, sections, credibility, and CTA management
         sectionTitle: sectionTitle,
         sectionDescription: sectionDescription,
         sectionImageUrl: sectionImageUrl,
+        sectionType: sectionType,
+        contentJson: contentJson,
         sectionSequence: sectionSequence,
         createdDate: ec.user.nowTimestamp
       ]" />
@@ -718,6 +793,12 @@ Service definitions for landing page, sections, credibility, and CTA management
       <parameter name="sectionImageUrl">
         <description>New section image URL</description>
       </parameter>
+      <parameter name="sectionType">
+        <description>New section type: text, stats, cards, timeline, or benefits</description>
+      </parameter>
+      <parameter name="contentJson">
+        <description>New structured content (JSON array of row objects)</description>
+      </parameter>
       <parameter name="sectionSequence" type="Integer">
         <description>New display order</description>
       </parameter>
@@ -743,6 +824,12 @@ Service definitions for landing page, sections, credibility, and CTA management
       </parameter>
       <parameter name="sectionImageUrl">
         <description>Section image URL</description>
+      </parameter>
+      <parameter name="sectionType">
+        <description>Section type</description>
+      </parameter>
+      <parameter name="contentJson">
+        <description>Structured content JSON</description>
       </parameter>
       <parameter name="sectionSequence" type="Integer">
         <description>Section sequence</description>
@@ -779,6 +866,8 @@ Service definitions for landing page, sections, credibility, and CTA management
         sectionTitle: sectionTitle ?: existingSection.sectionTitle,
         sectionDescription: sectionDescription,
         sectionImageUrl: sectionImageUrl,
+        sectionType: sectionType ?: existingSection.sectionType,
+        contentJson: contentJson,
         sectionSequence: sectionSequence ?: existingSection.sectionSequence
       ]" />
 
@@ -859,6 +948,8 @@ Service definitions for landing page, sections, credibility, and CTA management
         <parameter name="sectionTitle" />
         <parameter name="sectionDescription" />
         <parameter name="sectionImageUrl" />
+        <parameter name="sectionType" />
+        <parameter name="contentJson" />
         <parameter name="createdDate" type="Timestamp" />
       </parameter>
     </out-parameters>

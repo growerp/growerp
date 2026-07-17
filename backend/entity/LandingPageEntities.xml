@@ -20,9 +20,14 @@ Dual-ID strategy: entityNameId (system-wide) + pseudoId (tenant-unique)
     <field name="subheading" type="text-long" />
     <field name="status" type="text-short" />
     <field name="privacyPolicyUrl" type="text-long" />
+    <!-- ctaActionType: assessment | url | form (free-text convention, no enum) -->
     <field name="ctaActionType" type="text-short" />
     <field name="ctaAssessmentId" type="id" />
     <field name="ctaButtonLink" type="text-long" />
+    <!-- WebsiteForm to render/submit when ctaActionType == 'form' -->
+    <field name="ctaFormId" type="id" />
+    <!-- visual theme for the public renderer: light (default, purple gradient) | dark -->
+    <field name="theme" type="text-short" />
     <field name="createdDate" type="date-time" />
     <field name="createdByUserLogin" type="text-short" />
     <field name="lastModifiedDate" type="date-time" />
@@ -37,6 +42,10 @@ Dual-ID strategy: entityNameId (system-wide) + pseudoId (tenant-unique)
     <relationship type="one" title="Assessment" related="growerp.assessment.Assessment"
       short-alias="assessment">
       <key-map field-name="ctaAssessmentId" related="assessmentId" />
+    </relationship>
+    <relationship type="one" title="CtaForm" related="growerp.website.WebsiteForm"
+      short-alias="ctaForm">
+      <key-map field-name="ctaFormId" related="formId" />
     </relationship>
     <!-- Indices -->
     <index name="landing_pseudoId_idx">
@@ -56,6 +65,12 @@ Dual-ID strategy: entityNameId (system-wide) + pseudoId (tenant-unique)
     <field name="sectionTitle" type="text-medium" />
     <field name="sectionDescription" type="text-long" />
     <field name="sectionImageUrl" type="text-long" />
+    <!-- sectionType: text (default) | stats | cards | timeline | benefits -->
+    <field name="sectionType" type="text-short" />
+    <!-- structured content for non-text sectionTypes, JSON array of row objects:
+         stats: {value,label} | cards: {tag,title,description,points[],footer}
+         timeline: {title,description} | benefits: {icon,text} -->
+    <field name="contentJson" type="text-very-long" />
     <field name="createdDate" type="date-time" />
 
     <relationship type="one" title="LandingPage" related="growerp.landing.LandingPage"

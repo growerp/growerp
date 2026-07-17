@@ -17,6 +17,8 @@
         <field name="successMessage" type="text-medium" />
         <!-- optional nurture sequence to enroll leads into on submit -->
         <field name="emailSequenceId" type="id" />
+        <!-- optional EmailTemplate sent to the submitter on submit (e.g. document delivery) -->
+        <field name="emailTemplateId" type="id" />
         <field name="createdDate" type="date-time" />
 
         <relationship type="one" related="mantle.party.Party">

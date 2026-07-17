@@ -23,9 +23,20 @@ work. -->
         <screen location="component://webroot/screen/webroot.xml">
             <subscreens-item name="assessment" location="component://PopRestStore/screen/assessmentApp.xml" no-sub-path="true"/>
         </screen>
-        <!-- single page for the url /assessmentLanding -->
+        <!-- Generic, tenant-scoped, data-driven landing page renderer: /landing/{pseudoId}
+             (pseudoId resolved per-tenant from the request hostname) -->
         <screen location="component://webroot/screen/webroot.xml">
-            <subscreens-item name="assessmentLanding" location="component://PopRestStore/screen/assessmentLandingPage.xml" />
+            <subscreens-item name="landing" location="component://PopRestStore/screen/landingPage.xml" />
+        </screen>
+        <!-- /assessmentLanding kept as an alias of /landing for backward compatibility with
+             already-published URLs; same screen, same default pseudoId (erp-landing-page) -->
+        <screen location="component://webroot/screen/webroot.xml">
+            <subscreens-item name="assessmentLanding" location="component://PopRestStore/screen/landingPage.xml" />
+        </screen>
+        <!-- /spreadsheetFreedom kept as a redirect to /landing/spreadsheet-freedom for
+             already-circulated marketing links -->
+        <screen location="component://webroot/screen/webroot.xml">
+            <subscreens-item name="spreadsheetFreedom" location="component://PopRestStore/screen/spreadsheetFreedomGuide.xml" />
         </screen>
     </screen-facade>
 </moqui-conf>

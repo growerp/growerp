@@ -48,7 +48,10 @@ class WebsiteFormDialogState extends State<WebsiteFormDialog> {
   final _titleController = TextEditingController();
   final _submitLabelController = TextEditingController();
   final _successMessageController = TextEditingController();
+  final _emailTemplateIdController = TextEditingController();
   final List<_FieldRow> _fieldRows = [];
+  String? _selectedEmailSequenceId;
+  List<EmailSequence> _emailSequences = [];
   late WebsiteFormBloc _websiteFormBloc;
 
   @override
@@ -59,6 +62,15 @@ class WebsiteFormDialogState extends State<WebsiteFormDialog> {
     _titleController.text = widget.webForm.title;
     _submitLabelController.text = widget.webForm.submitLabel;
     _successMessageController.text = widget.webForm.successMessage;
+    _emailTemplateIdController.text = widget.webForm.emailTemplateId;
+    _selectedEmailSequenceId = widget.webForm.emailSequenceId.isEmpty
+        ? null
+        : widget.webForm.emailSequenceId;
+
+    // Load email sequences for the nurture-enrollment picker
+    _websiteFormBloc.restClient.getEmailSequence().then((result) {
+      if (mounted) setState(() => _emailSequences = result.emailSequences);
+    }).catchError((_) {});
     for (final field in widget.webForm.fields) {
       final row = _FieldRow()
         ..fieldId = field.fieldId
@@ -136,6 +148,35 @@ class WebsiteFormDialogState extends State<WebsiteFormDialog> {
               key: const Key('successMessage'),
               controller: _successMessageController,
               decoration: const InputDecoration(labelText: 'Message after submit'),
+            ),
+            TextFormField(
+              key: const Key('emailTemplateId'),
+              controller: _emailTemplateIdController,
+              decoration: const InputDecoration(
+                labelText: 'Email template ID (optional)',
+                hintText: 'Sends this EmailTemplate to the submitter, e.g. a document delivery',
+              ),
+            ),
+            DropdownButtonFormField<String?>(
+              key: const Key('emailSequenceId'),
+              decoration: const InputDecoration(
+                labelText: 'Enroll into nurture sequence (optional)',
+              ),
+              initialValue: _selectedEmailSequenceId,
+              items: [
+                const DropdownMenuItem<String?>(
+                  value: null,
+                  child: Text('None'),
+                ),
+                ..._emailSequences.map(
+                  (seq) => DropdownMenuItem<String?>(
+                    value: seq.emailSequenceId,
+                    child: Text('${seq.pseudoId} - ${seq.sequenceName}'),
+                  ),
+                ),
+              ],
+              onChanged: (value) =>
+                  setState(() => _selectedEmailSequenceId = value),
             ),
             const SizedBox(height: 15),
             Align(
@@ -226,6 +267,8 @@ class WebsiteFormDialogState extends State<WebsiteFormDialog> {
                               title: _titleController.text,
                               submitLabel: _submitLabelController.text,
                               successMessage: _successMessageController.text,
+                              emailTemplateId: _emailTemplateIdController.text,
+                              emailSequenceId: _selectedEmailSequenceId ?? '',
                               fields: _fieldRows
                                   .map(
                                     (row) => WebsiteFormField(

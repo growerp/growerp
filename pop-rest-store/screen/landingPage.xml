@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<!-- Generic, tenant-scoped, data-driven landing page renderer. Mounted at
+     /landing (and aliased at /assessmentLanding for backward compatibility)
+     in MoquiConf.xml. Tenant is resolved from the request hostname (e.g.
+     100000.localhost or a custom domain), same as checkoutOnePage/website;
+     the page itself is selected by pseudoId, taken from the extra URL path
+     segment (/landing/{pseudoId}) or the pseudoId query parameter, so each
+     tenant authors pages at their own path. -->
+<screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-2.1.xsd"
+    standalone="true" require-authentication="anonymous-view" allow-extra-path="true">
+
+    <always-actions>
+        <!-- Get company/owner from hostname (multi-tenant host format:
+             companyId.localhost, e.g. 100000.localhost) -->
+        <set field="hostName" from="ec.web.getHostName(false) == '10.0.2.2' ? 'localhost' : ec.web.getHostName(false)"/>
+
+        <service-call name="popstore.StoreServices.get#ProductStoreIdFromHostName" in-map="[
+            requestHostName: hostName]" out-map="productStoreIdContext"/>
+        <set field="productStoreId" value="${productStoreIdContext.productStoreId ?: 'POPC_DEFAULT'}"/>
+        <entity-find-one entity-name="mantle.product.store.ProductStore" value-field="productStore"/>
+        <set field="companyPartyId" from="productStore?.organizationPartyId ?: '100001'"/>
+        <entity-find-one entity-name="mantle.party.Party" value-field="party">
+            <field-map field-name="partyId" from="companyPartyId"/></entity-find-one>
+
+        <!-- pseudoId: extra path segment (/landing/{pseudoId}) takes priority,
+             then the query parameter, then the ERP demo default -->
+        <set field="extraPathNameList" from="sri.screenUrlInfo.extraPathNameList"/>
+        <set field="landingPageId" from="ec.web.parameters.landingPageId"/>
+        <set field="pseudoId" from="(extraPathNameList ? extraPathNameList[0] : null)
+            ?: ec.web.parameters.pseudoId ?: (landingPageId ? null : 'erp-landing-page')"/>
+
+        <log message="===== Landing Page: pseudoId=$pseudoId, landingPageId=$landingPageId, ownerPartyId=${party.ownerPartyId} companyPartyId: $companyPartyId"/>
+
+        <!-- Fetch landing page data from backend -->
+        <service-call name="growerp.100.LandingPageServices100.get#LandingPage"
+            in-map="[pseudoId: pseudoId, landingPageId: landingPageId,
+                    ownerPartyId: party.ownerPartyId, companyPartyId: companyPartyId]"
+            out-map="landingPageResult"/>
+
+        <set field="landingPage" from="landingPageResult.landingPage"/>
+        <set field="sections" from="landingPage?.sections ?: []"/>
+        <set field="credibility" from="landingPage?.credibility ?: [:]"/>
+
+        <!-- Determine CTA behavior -->
+        <set field="ctaActionType" from="landingPage?.ctaActionType"/>
+        <set field="ctaAssessmentId" from="landingPage?.ctaAssessmentId"/>
+        <set field="ctaButtonLink" from="landingPage?.ctaButtonLink"/>
+        <set field="ctaFormId" from="landingPage?.ctaFormId"/>
+        <set field="theme" from="landingPage?.theme ?: 'light'"/>
+
+        <!-- Parse each section's contentJson into a 'rows' list here (not in the
+             FTL) so the template only ever deals with plain data. Missing or
+             invalid JSON silently falls back to an empty list so hand-edited or
+             legacy (untyped) rows never blank the page. -->
+        <script><![CDATA[
+            sections = (sections ?: []).collect { s ->
+                Map m = new LinkedHashMap(s)
+                m.sectionType = m.sectionType ?: 'text'
+                m.rows = []
+                if (m.sectionType != 'text' && m.contentJson) {
+                    try {
+                        m.rows = new groovy.json.JsonSlurper().parseText(m.contentJson as String)
+                    } catch (Exception e) {
+                        m.sectionType = 'text'
+                    }
+                }
+                return m
+            }
+        ]]></script>
+    </always-actions>
+
+    <widgets>
+        <section name="landingPage" condition="productStoreId != null &amp;&amp; landingPage != null">
+            <widgets>
+                <render-mode>
+                    <text type="html" location="component://PopRestStore/screen/landingPage.ftl"/>
+                </render-mode>
+            </widgets>
+            <fail-widgets>
+                <label text="Landing page not found or invalid product store" />
+                <label text="Product Store: $productStoreId" />
+                <label text="Pseudo ID: $pseudoId" />
+                <label text="Landing Page ID: $landingPageId" />
+            </fail-widgets>
+        </section>
+        <!-- lead-capture form widget: only when this page's CTA is a form; separate
+             section so it renders after the page (same pattern as store.xml chat-button) -->
+        <section name="landing-form" condition="landingPage != null &amp;&amp; ctaActionType == 'form' &amp;&amp; ctaFormId != null">
+            <widgets>
+                <render-mode>
+                    <text type="html" location="component://PopRestStore/template/formWidget.html.ftl"/>
+                </render-mode>
+            </widgets>
+        </section>
+    </widgets>
+</screen>

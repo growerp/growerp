@@ -242,6 +242,9 @@ along with this software (see the LICENSE.md file). If not, see
                     // self-marketing sprint content: MarketingCampaign references
                     // landingPageId=ERP_LANDING_PAGE just loaded above
                     ec.entity.makeDataLoader().location("component://growerp/data/GrowerpMarketingContentData.xml").load()
+                    // spreadsheet-freedom guide download form + playbook email template
+                    // for the /spreadsheetFreedom landing page
+                    ec.entity.makeDataLoader().location("component://growerp/data/SpreadsheetFreedomLandingPageData.xml").load()
                 ]]></script>
                 <service-call name="update#growerp.Application" in-map="[applicationId: 'AppAdmin', assessmentId: 'ERP_ONBOARD']"/>
 

@@ -1481,10 +1481,21 @@ along with this software (see the LICENSE.md file). If not, see
                         emailAddress: email, firstName: visitorName,
                         partyId: visitorPartyId]" />
             </if>
-            <!-- notify the company admin when email is configured -->
             <entity-find-one entity-name="moqui.basic.email.EmailServer" value-field="emailServer">
                 <field-map field-name="emailServerId" value="SYSTEM" />
             </entity-find-one>
+            <!-- send the form's delivery email (e.g. a playbook/guide attachment) to the
+                 submitter when configured and email is set up -->
+            <if condition="form.emailTemplateId &amp;&amp; emailServer &amp;&amp;
+                    emailServer.mailPassword != 'SMTP_PASSWORD' &amp;&amp;
+                    !email.contains('example.com')">
+                <service-call name="org.moqui.impl.EmailServices.send#EmailTemplate"
+                    async="true" ignore-error="true"
+                    in-map="[emailTemplateId: form.emailTemplateId,
+                        toAddresses: email,
+                        bodyParameters: [firstName: visitorName, email: email]]" />
+            </if>
+            <!-- notify the company admin when email is configured -->
             <entity-find entity-name="growerp.party.OwnerPersonDetailAndCompany"
                 list="admins" limit="1">
                 <econdition field-name="ownerPartyId" from="ownerPartyId" />
@@ -1492,7 +1503,8 @@ along with this software (see the LICENSE.md file). If not, see
                 <econdition field-name="emailAddress" operator="is-not-null" />
             </entity-find>
             <if condition="emailServer &amp;&amp; emailServer.mailPassword != 'SMTP_PASSWORD'
-                    &amp;&amp; admins">
+                    &amp;&amp; admins &amp;&amp;
+                    !admins[0].emailAddress.contains('example.com')">
                 <service-call name="org.moqui.impl.EmailServices.send#EmailTemplate"
                     async="true" ignore-error="true"
                     in-map="[emailTemplateId: 'NOTIFICATION',

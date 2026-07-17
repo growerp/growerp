@@ -79,8 +79,11 @@ class LandingPageDetailScreenState extends State<LandingPageDetailScreen> {
 
   late String _selectedStatus;
   late String? _selectedHookType;
-  late String _selectedCtaActionType; // 'assessment' or 'url'
+  late String _selectedCtaActionType; // 'Assessment', 'Url', or 'Form'
   late String? _selectedCtaAssessmentId;
+  late String? _selectedCtaFormId;
+  late String _selectedTheme;
+  List<WebsiteForm> _websiteForms = [];
   late LandingPage updatedLandingPage;
   late LandingPageBloc _landingPageBloc;
   late AssessmentBloc _assessmentBloc;
@@ -111,6 +114,8 @@ class LandingPageDetailScreenState extends State<LandingPageDetailScreen> {
     _selectedCtaActionType =
         _capitalizeFirst(widget.landingPage.ctaActionType ?? 'Assessment');
     _selectedCtaAssessmentId = widget.landingPage.ctaAssessmentId;
+    _selectedCtaFormId = widget.landingPage.ctaFormId;
+    _selectedTheme = _capitalizeFirst(widget.landingPage.theme ?? 'Light');
     updatedLandingPage = widget.landingPage;
     _landingPageBloc = context.read<LandingPageBloc>();
     _assessmentBloc = context.read<AssessmentBloc>();
@@ -119,6 +124,11 @@ class LandingPageDetailScreenState extends State<LandingPageDetailScreen> {
     if (_assessmentBloc.state.assessments.isEmpty) {
       _assessmentBloc.add(const AssessmentFetch());
     }
+
+    // Load website forms for the CTA form picker
+    _landingPageBloc.restClient.getWebsiteForm().then((result) {
+      if (mounted) setState(() => _websiteForms = result.webForms);
+    }).catchError((_) {});
 
     _scrollController.addListener(() {
       if (isVisible &&
@@ -385,6 +395,30 @@ class LandingPageDetailScreenState extends State<LandingPageDetailScreen> {
                   Row(
                     children: [
                       Expanded(
+                        child: DropdownButtonFormField<String>(
+                          key: const Key('theme'),
+                          decoration: const InputDecoration(labelText: 'Theme'),
+                          initialValue: _selectedTheme,
+                          items: ['Light', 'Dark'].map((item) {
+                            return DropdownMenuItem<String>(
+                              value: item,
+                              child: Text(item),
+                            );
+                          }).toList(),
+                          onChanged: (String? newValue) {
+                            setState(() {
+                              _selectedTheme = newValue ?? 'Light';
+                            });
+                          },
+                          isExpanded: true,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Expanded(
                         child: TextFormField(
                           key: const Key('headline'),
                           decoration:
@@ -438,6 +472,10 @@ class LandingPageDetailScreenState extends State<LandingPageDetailScreen> {
                               value: 'Url',
                               child: Text('Url'),
                             ),
+                            DropdownMenuItem<String>(
+                              value: 'Form',
+                              child: Text('Form'),
+                            ),
                           ],
                           onChanged: (String? newValue) {
                             setState(() {
@@ -452,7 +490,9 @@ class LandingPageDetailScreenState extends State<LandingPageDetailScreen> {
                       if (!ResponsiveBreakpoints.of(context).isMobile)
                         Expanded(
                           flex: 3,
-                          child: _selectedCtaActionType == 'Assessment'
+                          child: _selectedCtaActionType == 'Form'
+                              ? _buildCtaFormPicker(const Key('ctaFormDropdown'))
+                              : _selectedCtaActionType == 'Assessment'
                               ? BlocBuilder<AssessmentBloc, AssessmentState>(
                                   builder: (context, state) {
                                     // Find the selected CTA assessment from the list
@@ -749,7 +789,14 @@ class LandingPageDetailScreenState extends State<LandingPageDetailScreen> {
                       ],
                     ),
                   if (ResponsiveBreakpoints.of(context).isMobile &&
-                      _selectedCtaActionType == 'url')
+                      _selectedCtaActionType == 'Form')
+                    Padding(
+                      padding: const EdgeInsets.only(top: 10),
+                      child: _buildCtaFormPicker(
+                          const Key('ctaFormDropdownMobile')),
+                    ),
+                  if (ResponsiveBreakpoints.of(context).isMobile &&
+                      _selectedCtaActionType == 'Url')
                     Row(
                       children: [
                         Expanded(
@@ -836,6 +883,10 @@ class LandingPageDetailScreenState extends State<LandingPageDetailScreen> {
                   return;
                 }
 
+                // backend/FTL compare ctaActionType against lowercase
+                // ('assessment'/'url'/'form'); the dropdown displays it
+                // capitalized, so normalize here before sending.
+                final ctaType = _selectedCtaActionType.toLowerCase();
                 updatedLandingPage = widget.landingPage.copyWith(
                   pseudoId: _pseudoIdController.text,
                   title: _titleController.text,
@@ -844,13 +895,13 @@ class LandingPageDetailScreenState extends State<LandingPageDetailScreen> {
                   hookType: _selectedHookType,
                   status: _selectedStatus,
                   privacyPolicyUrl: _privacyPolicyUrlController.text,
-                  ctaActionType: _selectedCtaActionType,
-                  ctaAssessmentId: _selectedCtaActionType == 'assessment'
-                      ? _selectedCtaAssessmentId
-                      : null,
-                  ctaButtonLink: _selectedCtaActionType == 'url'
-                      ? _ctaLinkController.text
-                      : null,
+                  ctaActionType: ctaType,
+                  ctaAssessmentId:
+                      ctaType == 'assessment' ? _selectedCtaAssessmentId : null,
+                  ctaButtonLink:
+                      ctaType == 'url' ? _ctaLinkController.text : null,
+                  ctaFormId: ctaType == 'form' ? _selectedCtaFormId : null,
+                  theme: _selectedTheme.toLowerCase(),
                 );
 
                 if (widget.landingPage.landingPageId == null) {
@@ -922,6 +973,34 @@ class LandingPageDetailScreenState extends State<LandingPageDetailScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildCtaFormPicker(Key key) {
+    return DropdownButtonFormField<String>(
+      key: key,
+      decoration: const InputDecoration(
+        labelText: 'CTA Form',
+        hintText: 'Select a lead-capture form',
+        prefixIcon: Icon(Icons.dynamic_form),
+        isDense: true,
+        contentPadding:
+            EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      ),
+      initialValue: _selectedCtaFormId,
+      items: _websiteForms.map((form) {
+        return DropdownMenuItem<String>(
+          value: form.formId,
+          child: Text('${form.pseudoId} - ${form.title}',
+              overflow: TextOverflow.ellipsis),
+        );
+      }).toList(),
+      onChanged: (String? newValue) {
+        setState(() {
+          _selectedCtaFormId = newValue;
+        });
+      },
+      isExpanded: true,
     );
   }
 

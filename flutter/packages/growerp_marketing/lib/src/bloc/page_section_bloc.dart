@@ -62,6 +62,8 @@ class PageSectionBloc extends Bloc<PageSectionEvent, PageSectionState> {
         sectionTitle: event.sectionTitle,
         sectionDescription: event.sectionDescription,
         sectionImageUrl: event.sectionImageUrl,
+        sectionType: event.sectionType,
+        contentJson: event.contentJson,
         sectionSequence: event.sectionSequence,
       );
 
@@ -102,6 +104,8 @@ class PageSectionBloc extends Bloc<PageSectionEvent, PageSectionState> {
         sectionTitle: event.sectionTitle,
         sectionDescription: event.sectionDescription,
         sectionImageUrl: event.sectionImageUrl,
+        sectionType: event.sectionType,
+        contentJson: event.contentJson,
         sectionSequence: event.sectionSequence,
       );
 

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Email body for the Spreadsheet Freedom Playbook download (form SF_GUIDE_FORM);
+the playbook PDF is attached via EmailTemplate SPREADSHEET_FREEDOM_GUIDE
+-->
+<screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-3.xsd"
+        require-authentication="false">
+    <widgets>
+        <render-mode>
+            <text type="html"><![CDATA[
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #2D3748; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header {background: linear-gradient(135deg, #667EEA 0%, #764BA2 100%);
+                 padding: 40px 20px; text-align: center; border-radius: 8px 8px 0 0; }
+        .header h1 { color: white; margin: 0; font-size: 24px; }
+        .content { background: #fff; padding: 30px; border: 1px solid #E2E8F0; }
+        .btn { display: inline-block; padding: 12px 30px; background: #667EEA;
+               color: white; text-decoration: none; border-radius: 6px; margin: 20px 0; }
+        .footer { text-align: center; padding: 20px; color: #718096; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Your Spreadsheet Freedom Playbook</h1>
+        </div>
+        <div class="content">
+            <p>Hello ${firstName!""},</p>
+
+            <p>Thank you for downloading <strong>The Complete Spreadsheet Freedom Playbook</strong> —
+            it is attached to this email as a PDF.</p>
+
+            <p>Inside you'll find:</p>
+            <ul>
+                <li>The self-assessment: are you ready to ditch spreadsheets?</li>
+                <li>The 30-day migration plan that keeps your business running</li>
+                <li>Questions to ask any ERP vendor before you sign</li>
+                <li>How to calculate your ROI before you commit to anything</li>
+            </ul>
+
+            <p>Start with the self-assessment in Part 2 — it takes five minutes and tells you
+            exactly how urgent your situation is.</p>
+
+            <p style="text-align:center;">
+                <a class="btn" href="https://growerp.com">Explore GrowERP</a>
+            </p>
+
+            <p>Questions about your migration? Just reply to this email — a real person reads it.</p>
+
+            <p>Best regards,<br>
+            The GrowERP Team</p>
+        </div>
+        <div class="footer">
+            <p>You received this email because you requested the free guide on our website.</p>
+            <p>&copy; ${ec.l10n.format(ec.user.nowTimestamp, 'yyyy')} GrowERP. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>
+]]></text>
+        </render-mode>
+    </widgets>
+</screen>

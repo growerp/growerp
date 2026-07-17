@@ -33,7 +33,7 @@ class LandingPage {
   /// Privacy policy URL
   final String? privacyPolicyUrl;
 
-  /// CTA action type: 'assessment' or 'url'
+  /// CTA action type: 'assessment', 'url', or 'form'
   final String? ctaActionType;
 
   /// CTA assessment ID (when ctaActionType is 'assessment')
@@ -41,6 +41,12 @@ class LandingPage {
 
   /// CTA button link/URL (when ctaActionType is 'url')
   final String? ctaButtonLink;
+
+  /// CTA WebsiteForm ID (when ctaActionType is 'form')
+  final String? ctaFormId;
+
+  /// Visual theme for the public renderer: 'light' (default) or 'dark'
+  final String? theme;
 
   /// Landing page status: ACTIVE, INACTIVE, DRAFT
   @JsonKey(defaultValue: 'DRAFT')
@@ -77,6 +83,8 @@ class LandingPage {
     this.ctaActionType,
     this.ctaAssessmentId,
     this.ctaButtonLink,
+    this.ctaFormId,
+    this.theme,
     required this.status,
     this.createdDate,
     this.createdByUserLogin,
@@ -98,6 +106,8 @@ class LandingPage {
     String? ctaActionType,
     String? ctaAssessmentId,
     String? ctaButtonLink,
+    String? ctaFormId,
+    String? theme,
     String? status,
     DateTime? createdDate,
     String? createdByUserLogin,
@@ -117,6 +127,8 @@ class LandingPage {
       ctaActionType: ctaActionType ?? this.ctaActionType,
       ctaAssessmentId: ctaAssessmentId ?? this.ctaAssessmentId,
       ctaButtonLink: ctaButtonLink ?? this.ctaButtonLink,
+      ctaFormId: ctaFormId ?? this.ctaFormId,
+      theme: theme ?? this.theme,
       status: status ?? this.status,
       createdDate: createdDate ?? this.createdDate,
       createdByUserLogin: createdByUserLogin ?? this.createdByUserLogin,
@@ -202,6 +214,12 @@ class LandingPageSection {
   /// Section image URL
   final String? sectionImageUrl;
 
+  /// Section type: 'text' (default), 'stats', 'cards', 'timeline', 'benefits'
+  final String? sectionType;
+
+  /// Structured content for non-text sectionTypes (JSON array of row objects)
+  final String? contentJson;
+
   /// Display order/sequence
   final int? sectionSequence;
 
@@ -211,6 +229,8 @@ class LandingPageSection {
     this.sectionTitle,
     this.sectionDescription,
     this.sectionImageUrl,
+    this.sectionType,
+    this.contentJson,
     this.sectionSequence,
   });
 

@@ -16,6 +16,8 @@ class PageSectionCreate extends PageSectionEvent {
   final String sectionTitle;
   final String? sectionDescription;
   final String? sectionImageUrl;
+  final String? sectionType;
+  final String? contentJson;
   final int? sectionSequence;
 
   const PageSectionCreate({
@@ -23,6 +25,8 @@ class PageSectionCreate extends PageSectionEvent {
     required this.sectionTitle,
     this.sectionDescription,
     this.sectionImageUrl,
+    this.sectionType,
+    this.contentJson,
     this.sectionSequence,
   });
 
@@ -36,6 +40,8 @@ class PageSectionUpdate extends PageSectionEvent {
   final String? sectionTitle;
   final String? sectionDescription;
   final String? sectionImageUrl;
+  final String? sectionType;
+  final String? contentJson;
   final int? sectionSequence;
 
   const PageSectionUpdate({
@@ -43,6 +49,8 @@ class PageSectionUpdate extends PageSectionEvent {
     this.sectionTitle,
     this.sectionDescription,
     this.sectionImageUrl,
+    this.sectionType,
+    this.contentJson,
     this.sectionSequence,
   });
 

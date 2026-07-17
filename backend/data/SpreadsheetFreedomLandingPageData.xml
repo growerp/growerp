@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-facade-xml type="demo">
+  <!-- Spreadsheet Freedom guide landing page data (GROWERP owner only):
+       a data-driven LandingPage (pseudoId spreadsheet-freedom, served generically
+       by pop-rest-store/screen/landingPage.xml at /landing/spreadsheet-freedom)
+       with a form CTA that renders the SF_GUIDE_FORM lead-capture form and
+       delivers the Spreadsheet Freedom Playbook PDF by email on submit.
+       Loaded from TenantServices100.xml in the ownerPartyId=='GROWERP' block. -->
+
+  <!-- Email template: playbook PDF attached, sent to the form submitter -->
+  <moqui.basic.email.EmailTemplate emailTemplateId="SPREADSHEET_FREEDOM_GUIDE"
+      description="Spreadsheet Freedom Playbook download delivery"
+      emailServerId="SYSTEM" emailTypeEnumId="EMT_SYSTEM"
+      bodyScreenLocation="component://growerp/screen/email/SpreadsheetFreedomGuideEmail.xml"
+      fromAddress="support@growerp.com" fromName="GrowERP"
+      subject="Your Spreadsheet Freedom Playbook" sendPartial="Y">
+      <attachments fileName="spreadsheet-freedom-playbook.pdf"
+          attachmentLocation="component://growerp/screen/email/SpreadsheetFreedomPlaybookPdf.xml"
+          screenRenderMode="xsl-fo" />
+  </moqui.basic.email.EmailTemplate>
+
+  <!-- Lead-capture form; fieldIds match the JS payload in spreadsheetFreedomGuide.html.
+       Note: WebsiteForm.ownerPartyId holds the COMPANY partyId (100001 = GROWERP company,
+       same assumption as ErpLandingPageData.xml); submit#WebsiteForm resolves the tenant
+       owner from that company's Party.ownerPartyId -->
+  <growerp.website.WebsiteForm formId="SF_GUIDE_FORM" pseudoId="sf-guide-form"
+      ownerPartyId="100001"
+      formName="Spreadsheet Freedom Guide Download"
+      title="Download the Free Guide"
+      submitLabel="Send Me the Free Guide"
+      successMessage="Your Spreadsheet Freedom Playbook is on its way to your inbox."
+      emailTemplateId="SPREADSHEET_FREEDOM_GUIDE" />
+
+  <growerp.website.WebsiteFormField formId="SF_GUIDE_FORM" fieldId="SF_FIRST_NAME"
+      sequenceNum="10" label="First Name" fieldType="text" isRequired="Y" />
+  <growerp.website.WebsiteFormField formId="SF_GUIDE_FORM" fieldId="SF_LAST_NAME"
+      sequenceNum="20" label="Last Name" fieldType="text" isRequired="N" />
+  <growerp.website.WebsiteFormField formId="SF_GUIDE_FORM" fieldId="SF_EMAIL"
+      sequenceNum="30" label="Work Email" fieldType="email" isRequired="Y" />
+  <growerp.website.WebsiteFormField formId="SF_GUIDE_FORM" fieldId="SF_COMPANY"
+      sequenceNum="40" label="Company Name" fieldType="text" isRequired="N" />
+  <growerp.website.WebsiteFormField formId="SF_GUIDE_FORM" fieldId="SF_TEAM_SIZE"
+      sequenceNum="50" label="Team Size" fieldType="text" isRequired="N" />
+  <growerp.website.WebsiteFormField formId="SF_GUIDE_FORM" fieldId="SF_BIGGEST_PAIN"
+      sequenceNum="60" label="Biggest Spreadsheet Pain Right Now" fieldType="text" isRequired="N" />
+
+  <!-- Landing page: form CTA renders SF_GUIDE_FORM at the bottom of the page -->
+  <growerp.landing.LandingPage landingPageId="SPREADSHEET_FREEDOM" pseudoId="spreadsheet-freedom"
+      ownerPartyId="GROWERP" companyPartyId="100001"
+      title="Stop Letting Spreadsheets Run Your Business"
+      hookType="frustration" theme="dark" status="ACTIVE"
+      headline="Stop Letting Spreadsheets Dictate Your Workday"
+      subheading="You've felt the pain of double-entry. You've seen the trend toward smarter, integrated systems. Now it's time to claim your prize — a clear, low-risk path to a unified business."
+      ctaActionType="form" ctaFormId="SF_GUIDE_FORM" />
+
+  <!-- Stats bar -->
+  <growerp.landing.PageSection pageSectionId="SF_STATS_SECTION" pseudoId="sf-stats"
+      landingPageId="SPREADSHEET_FREEDOM" sectionSequence="10" sectionType="stats"
+      contentJson="[{&quot;value&quot;:&quot;5+&quot;,&quot;label&quot;:&quot;Hours saved every week&quot;},{&quot;value&quot;:&quot;0&quot;,&quot;label&quot;:&quot;Extra staff needed&quot;},{&quot;value&quot;:&quot;Real-time&quot;,&quot;label&quot;:&quot;Stock &amp; cash visibility&quot;}]" />
+
+  <!-- Content-series outline cards -->
+  <growerp.landing.PageSection pageSectionId="SF_CARDS_SECTION" pseudoId="sf-cards"
+      landingPageId="SPREADSHEET_FREEDOM" sectionSequence="20" sectionType="cards"
+      sectionTitle="The Spreadsheet Freedom Roadmap"
+      sectionDescription="Three posts. One transformation. Here's what we covered — and what's waiting in your free guide."
+      contentJson="[
+        {&quot;tag&quot;:&quot;Day 1 — The Pain&quot;,&quot;title&quot;:&quot;Why Double-Entry Is Silently Killing Your Business Growth&quot;,&quot;description&quot;:&quot;Every time you copy a number from your invoice to your spreadsheet, you're not just wasting time — you're creating a crack in your data foundation that compounds every single month.&quot;,&quot;points&quot;:[&quot;The hidden cost of manual re-entry (it's not just time)&quot;,&quot;Why \&quot;good enough\&quot; spreadsheets become dangerous at scale&quot;,&quot;Real stories: month-end chaos that didn't have to happen&quot;,&quot;The tipping point — when does spreadsheet pain become a business risk?&quot;],&quot;footer&quot;:&quot;Awareness Content&quot;},
+        {&quot;tag&quot;:&quot;Day 2 — The Trend&quot;,&quot;title&quot;:&quot;Smarter, Integrated Systems Are No Longer Just for Enterprise&quot;,&quot;description&quot;:&quot;The shift is already happening. Modern SMBs are discovering that unified business systems — once reserved for large corporations — are now accessible, affordable, and built for teams of any size.&quot;,&quot;points&quot;:[&quot;How integrated ERP has democratised in the last 5 years&quot;,&quot;What \&quot;unified system\&quot; actually means in practice for a 5-50 person team&quot;,&quot;The three data flows every business must connect: inventory, sales, cash&quot;,&quot;Why open-source changes the cost and risk equation entirely&quot;],&quot;footer&quot;:&quot;Education Content&quot;},
+        {&quot;tag&quot;:&quot;Day 3 — The Prize&quot;,&quot;title&quot;:&quot;Your Clear Path to a Unified Business — Starting This Month&quot;,&quot;description&quot;:&quot;Stop waiting for the \&quot;right time.\&quot; This post outlines the exact low-risk migration strategy that lets you move to a single source of truth — without disrupting daily operations or hiring a single extra person.&quot;,&quot;points&quot;:[&quot;The 3-phase migration that keeps your business running while you upgrade&quot;,&quot;Real-time stock and cash visibility — what it looks like on day one&quot;,&quot;How to eliminate month-end chaos for good&quot;,&quot;Reclaiming 5+ hours per week: what could you build with that time?&quot;],&quot;footer&quot;:&quot;Conversion Content&quot;},
+        {&quot;tag&quot;:&quot;Free Guide — All Three Combined&quot;,&quot;title&quot;:&quot;The Complete Spreadsheet Freedom Playbook&quot;,&quot;description&quot;:&quot;Everything above, plus a practical step-by-step workbook to assess your current setup, plan your migration, and measure success — tailored for business owners, not IT departments.&quot;,&quot;points&quot;:[&quot;Self-assessment: Are you ready to ditch spreadsheets?&quot;,&quot;Migration checklist — 30 day action plan&quot;,&quot;Questions to ask any ERP vendor before you sign&quot;,&quot;How to calculate your ROI before you commit to anything&quot;],&quot;footer&quot;:&quot;Get It Free Below&quot;}
+      ]" />
+
+  <!-- 30-day transformation timeline -->
+  <growerp.landing.PageSection pageSectionId="SF_TIMELINE_SECTION" pseudoId="sf-timeline"
+      landingPageId="SPREADSHEET_FREEDOM" sectionSequence="30" sectionType="timeline"
+      sectionTitle="Your 30-Day Transformation"
+      sectionDescription="A practical roadmap — no IT department required."
+      contentJson="[
+        {&quot;title&quot;:&quot;Week 1 — Assess &amp; Map&quot;,&quot;description&quot;:&quot;Identify every place data lives and every manual re-entry touchpoint. Use our self-assessment worksheet to score your current setup and spot the highest-impact fixes.&quot;},
+        {&quot;title&quot;:&quot;Week 2 — Connect the Core Three&quot;,&quot;description&quot;:&quot;Link your inventory, sales, and cash flows into a single system. Real-time stock visibility and auto-reconciled financials become the new normal — while your business keeps running.&quot;},
+        {&quot;title&quot;:&quot;Week 3 — Eliminate the Chaos&quot;,&quot;description&quot;:&quot;Retire your last spreadsheet. Set up automated month-end reports. Watch data errors drop to zero. This is the week you get 5+ hours back.&quot;},
+        {&quot;title&quot;:&quot;Week 4 — Scale With Confidence&quot;,&quot;description&quot;:&quot;Your business can now grow without back-office headcount growing with it. Use the time and data clarity to make decisions faster — and with confidence in your numbers.&quot;}
+      ]" />
+
+  <!-- Benefits checklist, paired two-column with the form by the renderer -->
+  <growerp.landing.PageSection pageSectionId="SF_BENEFITS_SECTION" pseudoId="sf-benefits"
+      landingPageId="SPREADSHEET_FREEDOM" sectionSequence="40" sectionType="benefits"
+      sectionTitle="Get Your Free Playbook — Instantly"
+      sectionDescription="No fluff, no vendor pitch disguised as a guide. Just a practical, plain-English playbook written for SMB owners who are ready to stop firefighting data and start making decisions with confidence."
+      contentJson="[
+        {&quot;icon&quot;:&quot;📊&quot;,&quot;text&quot;:&quot;Real-time stock &amp; cash visibility from day one&quot;},
+        {&quot;icon&quot;:&quot;✅&quot;,&quot;text&quot;:&quot;Eliminate data entry errors permanently&quot;},
+        {&quot;icon&quot;:&quot;⏱️&quot;,&quot;text&quot;:&quot;Reclaim 5+ hours per week — immediately&quot;},
+        {&quot;icon&quot;:&quot;📅&quot;,&quot;text&quot;:&quot;End month-end chaos with automated reporting&quot;},
+        {&quot;icon&quot;:&quot;🚀&quot;,&quot;text&quot;:&quot;Scale without hiring extra back-office staff&quot;}
+      ]" />
+</entity-facade-xml>

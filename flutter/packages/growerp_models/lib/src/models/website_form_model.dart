@@ -43,6 +43,7 @@ abstract class WebsiteForm with _$WebsiteForm {
     @Default("") String submitLabel,
     @Default("") String successMessage,
     @Default("") String emailSequenceId,
+    @Default("") String emailTemplateId,
     @Default(0) int submissionCount,
     @Default([]) List<WebsiteFormField> fields,
   }) = _WebsiteForm;

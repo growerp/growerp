@@ -138,6 +138,8 @@ class LandingPageBloc extends Bloc<LandingPageEvent, LandingPageState> {
         ctaActionType: event.landingPage.ctaActionType,
         ctaAssessmentId: event.landingPage.ctaAssessmentId,
         ctaButtonLink: event.landingPage.ctaButtonLink,
+        ctaFormId: event.landingPage.ctaFormId,
+        theme: event.landingPage.theme,
       );
 
       final updatedLandingPages = List<LandingPage>.from(state.landingPages)
@@ -180,6 +182,8 @@ class LandingPageBloc extends Bloc<LandingPageEvent, LandingPageState> {
         ctaActionType: event.landingPage.ctaActionType,
         ctaAssessmentId: event.landingPage.ctaAssessmentId,
         ctaButtonLink: event.landingPage.ctaButtonLink,
+        ctaFormId: event.landingPage.ctaFormId,
+        theme: event.landingPage.theme,
       );
 
       final updatedLandingPages = state.landingPages
