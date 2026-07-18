@@ -43,6 +43,13 @@ along with this software (see the LICENSE.md file). If not, see
         </field>
     </extend-entity>
 
+    <extend-entity entity-name="TimeEntry" package="mantle.work.time">
+        <!-- approval workflow: TesInProcess (default, also when null) -> TesApproved.
+             Named approvalStatusId (not statusId) to avoid an alias collision with
+             WorkEffort.statusId in the TimeEntryAndWorkEffort view entities. -->
+        <field name="approvalStatusId" type="id" />
+    </extend-entity>
+
     <extend-entity entity-name="Request" package="mantle.request"
         sequence-primary-prefix="req">
         <field name="requestPseudoId" type="id" /><!-- if pseudoId get conflicts with existing views -->

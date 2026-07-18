@@ -149,6 +149,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <parameter name="estimatedStartDate" />
                     <parameter name="estimatedEndDate" />
                     <parameter name="unInvoicedHours" />
+                    <parameter name="rate" />
                     <parameter name="employee" type="Map">
                         <parameter name="partyId" />
                         <parameter name="pseudoId" />
@@ -356,6 +357,17 @@ along with this software (see the LICENSE.md file). If not, see
                                 </entity-find>
                                 <set field="teOutList" from="[]" />
                                 <set field="unInvoicedHours" value="0" type="Integer" />
+                                <!-- client hourly rate for this task -->
+                                <entity-find entity-name="mantle.humanres.rate.RateAmount"
+                                    list="rateAmounts" limit="1">
+                                    <econdition field-name="workEffortId"
+                                        from="entry.workEffortId" />
+                                    <econdition field-name="ratePurposeEnumId" value="RaprClient" />
+                                    <date-filter />
+                                    <order-by field-name="-fromDate" />
+                                </entity-find>
+                                <set field="rate"
+                                    from="rateAmounts ? rateAmounts[0].rateAmount?.toString() : null" />
                                 <iterate list="timeEntries" entry="te">
                                     <set field="teOut"
                                         from="[
@@ -364,7 +376,10 @@ along with this software (see the LICENSE.md file). If not, see
                                 partyId: te.partyId,
                                 hours: te.hours?.toString(),
                                 date: te.fromDate ? ec.l10n.format(te.fromDate,'yyyy-MM-dd') : null,
-                                comments: te.comments
+                                comments: te.comments,
+                                status: te.approvalStatusId == 'TesApproved' ? 'approved' : 'inProcess',
+                                invoiceId: te.invoiceId,
+                                vendorInvoiceId: te.vendorInvoiceId
                             ]" />
                                     <set
                                         field="unInvoicedHours" from="unInvoicedHours + te.hours" />
@@ -440,6 +455,7 @@ along with this software (see the LICENSE.md file). If not, see
                                         actualEndDate: entry.actualCompletionDate?
                                             ec.l10n.format(entry.actualCompletionDate,'yyyy-MM-dd')  : null,
                                         unInvoicedHours: unInvoicedHours.toString(),
+                                        rate: rate,
                                         originator: originator,
                                         assignee: assignee,
                                         thirdParty: thirdParty,
@@ -478,6 +494,8 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="estimatedStartDate" />
                 <parameter name="estimatedEndDate" />
                 <parameter name="unInvoicedHours" />
+                <!-- client hourly rate used when invoicing time entries -->
+                <parameter name="rate" />
                 <!-- optional link to a sales opportunity -->
                 <parameter name="opportunityId" />
                 <parameter name="originator" type="Map">
@@ -624,6 +642,16 @@ along with this software (see the LICENSE.md file). If not, see
                     in-map="[salesOpportunityId: activity.opportunityId,
                             workEffortId: workEffortId]" />
             </if>
+            <!-- client hourly rate used when invoicing time entries -->
+            <if condition="activity.rate">
+                <service-call name="create#mantle.humanres.rate.RateAmount"
+                    in-map="[workEffortId: workEffortId,
+                            rateTypeEnumId: 'RatpStandard',
+                            ratePurposeEnumId: 'RaprClient',
+                            timePeriodUomId: 'TF_hr',
+                            fromDate: ec.user.nowTimestamp,
+                            rateAmount: activity.rate]" />
+            </if>
             <service-call name="growerp.100.ActivityServices100.get#Activity"
                 in-map="[activityId: workEffortId, activityType: activity.activityType]"
                 out-map="context" />
@@ -645,6 +673,8 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="estimatedStartDate" />
                 <parameter name="estimatedEndDate" />
                 <parameter name="unInvoicedHours" />
+                <!-- client hourly rate used when invoicing time entries -->
+                <parameter name="rate" />
                 <parameter name="flowElementId" />
             </parameter>
         </in-parameters>
@@ -792,6 +822,30 @@ along with this software (see the LICENSE.md file). If not, see
                         ]" />
                 </if>
             </if>
+            <!-- client hourly rate: expire the old rate and create a new one when changed -->
+            <if condition="activity.rate">
+                <entity-find entity-name="mantle.humanres.rate.RateAmount"
+                    list="rateAmounts" limit="1">
+                    <econdition field-name="workEffortId" from="activity.activityId" />
+                    <econdition field-name="ratePurposeEnumId" value="RaprClient" />
+                    <date-filter />
+                    <order-by field-name="-fromDate" />
+                </entity-find>
+                <if
+                    condition="!rateAmounts || rateAmounts[0].rateAmount != (activity.rate as BigDecimal)">
+                    <if condition="rateAmounts">
+                        <set field="rateAmounts[0].thruDate" from="ec.user.nowTimestamp" />
+                        <entity-update value-field="rateAmounts[0]" />
+                    </if>
+                    <service-call name="create#mantle.humanres.rate.RateAmount"
+                        in-map="[workEffortId: activity.activityId,
+                                rateTypeEnumId: 'RatpStandard',
+                                ratePurposeEnumId: 'RaprClient',
+                                timePeriodUomId: 'TF_hr',
+                                fromDate: ec.user.nowTimestamp,
+                                rateAmount: activity.rate]" />
+                </if>
+            </if>
             <service-call name="growerp.100.ActivityServices100.get#Activity"
                 in-map="[activityId: activity.activityId, activityType: activity.activityType]"
                 out-map="context" />
@@ -812,10 +866,16 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="hours" />
                 <parameter name="comments" />
                 <parameter name="date" />
+                <parameter name="status" />
+                <parameter name="invoiceId" />
+                <parameter name="vendorInvoiceId" />
             </parameter>
         </out-parameters>
         <actions>
             <entity-find-one entity-name="mantle.work.time.TimeEntry" value-field="te" />
+            <service-call name="growerp.100.FinDocServices100.convert#StatusId"
+                in-map="[docType: 'timeEntry', statusId: te.approvalStatusId ?: 'TesInProcess']"
+                out-map="context" />
             <set field="timeEntry"
                 from="[
                 timeEntryId: te.timeEntryId,
@@ -823,7 +883,10 @@ along with this software (see the LICENSE.md file). If not, see
                 partyId: te.partyId,
                 hours: te.hours?.toString(),
                 comments: te.comments,
-                date: te.fromDate ? ec.l10n.format(te.fromDate,'yyyy-MM-dd') : null
+                date: te.fromDate ? ec.l10n.format(te.fromDate,'yyyy-MM-dd') : null,
+                status: convertedStatusId,
+                invoiceId: te.invoiceId,
+                vendorInvoiceId: te.vendorInvoiceId
             ]" />
         </actions>
     </service>
@@ -860,14 +923,21 @@ along with this software (see the LICENSE.md file). If not, see
             <if condition="!workEffort">
                 <return error="true" message="Activity not found: ${timeEntry.activityId}" />
             </if>
+            <!-- admins may enter hours on behalf of someone else -->
+            <set field="isAdmin"
+                from="ec.user.isInGroup('GROWERP_M_ADMIN') || ec.user.isInGroup('GROWERP_M_SYSTEM')" />
+            <set field="entryPartyId"
+                from="isAdmin &amp;&amp; timeEntry.partyId ?
+                    timeEntry.partyId : ec.user.userAccount.partyId" />
             <service-call name="create#mantle.work.time.TimeEntry"
                 in-map="[
                 timeEntryId: timeEntry.timeEntryId,
                 workEffortId: timeEntry.activityId,
-                partyId: ec.user.userAccount.partyId,
+                partyId: entryPartyId,
                 hours: timeEntry.hours,
                 comments: timeEntry.comments,
-                fromDate: timeEntry.date ? timeEntry.date?.substring(0,18) : ec.user.nowTimestamp
+                approvalStatusId: 'TesInProcess',
+                fromDate: timeEntry.date ? timeEntry.date?.substring(0,10) : ec.user.nowTimestamp
             ]"
                 out-map="context" />
             <!-- set to inprogress -->
@@ -884,15 +954,17 @@ along with this software (see the LICENSE.md file). If not, see
     </service>
 
     <service verb="update" noun="TimeEntry">
-        <description>enter hours worked</description>
+        <description>update hours worked; admins can also approve (status: approved)
+            or send back (status: inProcess). Invoiced entries cannot be changed.</description>
         <in-parameters>
             <parameter name="timeEntry" type="Map" required="true">
-                <parameter name="timeEntryId" />
+                <parameter name="timeEntryId" required="true" />
                 <parameter name="activityId" />
                 <parameter name="partyId" />
                 <parameter name="hours" />
                 <parameter name="comments" />
                 <parameter name="date" />
+                <parameter name="status" />
             </parameter>
         </in-parameters>
         <out-parameters>
@@ -903,9 +975,68 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="hours" />
                 <parameter name="comments" />
                 <parameter name="date" />
+                <parameter name="status" />
+                <parameter name="invoiceId" />
+                <parameter name="vendorInvoiceId" />
             </parameter>
         </out-parameters>
-        <actions />
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <entity-find-one entity-name="mantle.work.time.TimeEntry" value-field="teOld">
+                <field-map field-name="timeEntryId" from="timeEntry.timeEntryId" />
+            </entity-find-one>
+            <if condition="!teOld">
+                <return error="true"
+                    message="Time entry ${timeEntry.timeEntryId} not found" />
+            </if>
+            <!-- owner check via the related activity -->
+            <entity-find entity-name="mantle.work.effort.WorkEffort" list="workEfforts" limit="1">
+                <econdition field-name="workEffortId" from="teOld.workEffortId" />
+                <econdition field-name="ownerPartyId" ignore-if-empty="true" />
+            </entity-find>
+            <if condition="!workEfforts">
+                <return error="true" message="Activity not found: ${teOld.workEffortId}" />
+            </if>
+            <if condition="teOld.invoiceId || teOld.vendorInvoiceId">
+                <return error="true"
+                    message="Cannot update time entry: already invoiced" />
+            </if>
+            <set field="isAdmin"
+                from="ec.user.isInGroup('GROWERP_M_ADMIN') || ec.user.isInGroup('GROWERP_M_SYSTEM')" />
+            <!-- non-admins can only change their own entries and cannot approve -->
+            <if
+                condition="!isAdmin &amp;&amp; teOld.partyId != ec.user.userAccount.partyId">
+                <return error="true"
+                    message="Only admins can update time entries of others" />
+            </if>
+            <if condition="timeEntry.status">
+                <if condition="!isAdmin">
+                    <return error="true"
+                        message="Only admins can change the time entry approval status" />
+                </if>
+                <service-call name="growerp.100.FinDocServices100.convert#StatusId"
+                    in-map="[docType: 'timeEntry', statusId: timeEntry.status]"
+                    out-map="context" />
+                <if condition="!convertedStatusId">
+                    <return error="true"
+                        message="Time entry status ${timeEntry.status} not valid" />
+                </if>
+                <set field="teOld.approvalStatusId" from="convertedStatusId" />
+            </if>
+            <if condition="timeEntry.hours != null">
+                <set field="teOld.hours" from="timeEntry.hours" type="BigDecimal" />
+            </if>
+            <if condition="timeEntry.comments != null">
+                <set field="teOld.comments" from="timeEntry.comments" />
+            </if>
+            <if condition="timeEntry.date">
+                <set field="teOld.fromDate" from="timeEntry.date.substring(0,10)" />
+            </if>
+            <entity-update value-field="teOld" />
+            <service-call name="growerp.100.ActivityServices100.get#TimeEntry"
+                in-map="[timeEntryId: timeEntry.timeEntryId]" out-map="context" />
+        </actions>
     </service>
 
     <service verb="delete" noun="TimeEntry">
@@ -945,6 +1076,218 @@ along with this software (see the LICENSE.md file). If not, see
             <service-call name="growerp.100.ActivityServices100.get#TimeEntry"
                 in-map="[timeEntryId: timeEntry.timeEntryId]" out-map="context" />
             <entity-delete value-field="teOld" />
+        </actions>
+    </service>
+
+    <service verb="create" noun="InvoiceFromTimeEntries">
+        <description>Create an invoice from approved, not yet invoiced time entries.
+            sales=true: a sales invoice to a client (partyId) covering the approved
+            hours on all tasks where the client is the third party; the hourly rate
+            comes from the rate defined on each task.
+            sales=false: a purchase (self-billing) invoice for an assistant (partyId)
+            covering their approved hours; the hourly rate is the hourlyRate
+            parameter. Admin only.</description>
+        <in-parameters>
+            <parameter name="sales" type="Boolean" default="true" />
+            <!-- client party (sales) or assistant party (purchase) -->
+            <parameter name="partyId" required="true" />
+            <!-- purchase only: the hourly rate to pay the assistant -->
+            <parameter name="hourlyRate" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="finDoc" type="Map" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <if
+                condition="!ec.user.isInGroup('GROWERP_M_ADMIN') &amp;&amp; !ec.user.isInGroup('GROWERP_M_SYSTEM')">
+                <return error="true"
+                    message="Only admins can create invoices from time entries" />
+            </if>
+            <set field="items" from="[]" />
+            <set field="markTimeEntryIds" from="[]" />
+            <if condition="sales">
+                <then>
+                    <!-- all owner tasks where this client is the third party -->
+                    <entity-find entity-name="mantle.work.effort.WorkEffortParty"
+                        list="weParties">
+                        <econdition field-name="partyId" />
+                        <econdition field-name="roleTypeId" value="ThirdParty" />
+                        <econdition field-name="thruDate" operator="is-null" />
+                    </entity-find>
+                    <if condition="!weParties">
+                        <return error="true"
+                            message="No tasks found for client ${partyId}" />
+                    </if>
+                    <entity-find entity-name="mantle.work.effort.WorkEffort" list="tasks">
+                        <econdition field-name="workEffortId" operator="in"
+                            from="weParties.workEffortId" />
+                        <econdition field-name="workEffortTypeEnumId" value="WetTask" />
+                        <econdition field-name="ownerPartyId" />
+                        <order-by field-name="workEffortId" />
+                    </entity-find>
+                    <iterate list="tasks" entry="task">
+                        <entity-find entity-name="mantle.work.time.TimeEntry"
+                            list="timeEntries">
+                            <econdition field-name="workEffortId" from="task.workEffortId" />
+                            <econdition field-name="approvalStatusId" value="TesApproved" />
+                            <econdition field-name="invoiceId" operator="is-null" />
+                            <order-by field-name="fromDate" />
+                        </entity-find>
+                        <if condition="!timeEntries"><continue /></if>
+                        <!-- client hourly rate defined on the task -->
+                        <entity-find entity-name="mantle.humanres.rate.RateAmount"
+                            list="rateAmounts" limit="1">
+                            <econdition field-name="workEffortId" from="task.workEffortId" />
+                            <econdition field-name="ratePurposeEnumId" value="RaprClient" />
+                            <date-filter />
+                            <order-by field-name="-fromDate" />
+                        </entity-find>
+                        <if condition="!rateAmounts">
+                            <return error="true"
+                                message="No hourly rate defined on task ${task.workEffortName} [${task.workEffortPseudoId}]" />
+                        </if>
+                        <set field="taskHours" value="0" type="BigDecimal" />
+                        <iterate list="timeEntries" entry="te">
+                            <set field="taskHours" from="taskHours + (te.hours ?: 0)" />
+                            <script>markTimeEntryIds.add(te.timeEntryId)</script>
+                        </iterate>
+                        <script>items.add([
+                            itemType: [itemTypeId: 'ItemTimeEntry'],
+                            description: "${task.workEffortName} (${taskHours} hours)".toString(),
+                            quantity: taskHours,
+                            price: rateAmounts[0].rateAmount])</script>
+                    </iterate>
+                    <if condition="!items">
+                        <return error="true"
+                            message="No approved un-invoiced hours found for client ${partyId}" />
+                    </if>
+                    <service-call name="growerp.100.FinDocServices100.create#FinDoc"
+                        in-map="[finDoc: [
+                            docType: 'invoice',
+                            sales: true,
+                            otherCompany: [partyId: partyId],
+                            description: 'Invoice for hours worked',
+                            items: items]]"
+                        out-map="context" />
+                    <iterate list="markTimeEntryIds" entry="markId">
+                        <service-call name="update#mantle.work.time.TimeEntry"
+                            in-map="[timeEntryId: markId, invoiceId: finDoc.invoiceId]" />
+                    </iterate>
+                </then>
+                <else>
+                    <if condition="!hourlyRate">
+                        <return error="true"
+                            message="hourlyRate is required for an assistant (purchase) invoice" />
+                    </if>
+                    <!-- approved hours of this assistant on owner tasks, grouped by task -->
+                    <entity-find entity-name="mantle.work.time.TimeEntryAndWorkEffort"
+                        list="teList">
+                        <econdition field-name="partyId" />
+                        <econdition field-name="approvalStatusId" value="TesApproved" />
+                        <econdition field-name="vendorInvoiceId" operator="is-null" />
+                        <econdition field-name="workEffortTypeEnumId" value="WetTask" />
+                        <econdition field-name="ownerPartyId" />
+                        <order-by field-name="workEffortId" />
+                    </entity-find>
+                    <if condition="!teList">
+                        <return error="true"
+                            message="No approved un-invoiced hours found for assistant ${partyId}" />
+                    </if>
+                    <set field="taskHours" from="[:]" type="NewMap" />
+                    <set field="taskNames" from="[:]" type="NewMap" />
+                    <iterate list="teList" entry="te">
+                        <set field="taskHours[te.workEffortId]"
+                            from="(taskHours[te.workEffortId] ?: 0) + (te.hours ?: 0)" />
+                        <set field="taskNames[te.workEffortId]" from="te.workEffortName" />
+                        <script>markTimeEntryIds.add(te.timeEntryId)</script>
+                    </iterate>
+                    <iterate list="taskHours" entry="hours" key="taskId">
+                        <script>items.add([
+                            itemType: [itemTypeId: 'ItemTimeEntry'],
+                            description: "${taskNames[taskId]} (${hours} hours)".toString(),
+                            quantity: hours,
+                            price: hourlyRate])</script>
+                    </iterate>
+                    <service-call name="growerp.100.FinDocServices100.create#FinDoc"
+                        in-map="[finDoc: [
+                            docType: 'invoice',
+                            sales: false,
+                            otherUser: [partyId: partyId],
+                            description: 'Assistant hours self-billing invoice',
+                            items: items]]"
+                        out-map="context" />
+                    <iterate list="markTimeEntryIds" entry="markId">
+                        <service-call name="update#mantle.work.time.TimeEntry"
+                            in-map="[timeEntryId: markId, vendorInvoiceId: finDoc.invoiceId]" />
+                    </iterate>
+                </else>
+            </if>
+        </actions>
+    </service>
+
+    <service verb="get" noun="TimeEntryReport">
+        <description>Hours per assistant: in process (not yet approved), approved
+            (billable) and invoiced. Admins see all assistants; other users only
+            see their own hours.</description>
+        <out-parameters>
+            <parameter name="reportItems" type="List">
+                <parameter name="reportItem" type="Map">
+                    <parameter name="partyId" />
+                    <parameter name="pseudoId" />
+                    <parameter name="firstName" />
+                    <parameter name="lastName" />
+                    <parameter name="inProcessHours" />
+                    <parameter name="approvedHours" />
+                    <parameter name="invoicedHours" />
+                </parameter>
+            </parameter>
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <set field="isAdmin"
+                from="ec.user.isInGroup('GROWERP_M_ADMIN') || ec.user.isInGroup('GROWERP_M_SYSTEM')" />
+            <set field="filterPartyId"
+                from="isAdmin ? null : ec.user.userAccount.partyId" />
+            <entity-find entity-name="mantle.work.time.TimeEntryAndWorkEffort" list="teList">
+                <econdition field-name="workEffortTypeEnumId" value="WetTask" />
+                <econdition field-name="ownerPartyId" />
+                <econdition field-name="partyId" from="filterPartyId" ignore-if-empty="true" />
+            </entity-find>
+            <set field="totals" from="[:]" type="NewMap" />
+            <iterate list="teList" entry="te">
+                <if condition="!totals[te.partyId]">
+                    <set field="totals[te.partyId]"
+                        from="[inProcessHours: 0, approvedHours: 0, invoicedHours: 0]" />
+                </if>
+                <script>
+                    def bucket
+                    if (te.invoiceId || te.vendorInvoiceId) bucket = 'invoicedHours'
+                    else if (te.approvalStatusId == 'TesApproved') bucket = 'approvedHours'
+                    else bucket = 'inProcessHours'
+                    totals[te.partyId][bucket] = totals[te.partyId][bucket] + (te.hours ?: 0)
+                </script>
+            </iterate>
+            <set field="reportItems" from="[]" />
+            <iterate list="totals" entry="hoursMap" key="entryPartyId">
+                <entity-find-one entity-name="mantle.party.Party" value-field="party">
+                    <field-map field-name="partyId" from="entryPartyId" />
+                </entity-find-one>
+                <entity-find-one entity-name="mantle.party.Person" value-field="person">
+                    <field-map field-name="partyId" from="entryPartyId" />
+                </entity-find-one>
+                <script>reportItems.add([
+                    partyId: entryPartyId,
+                    pseudoId: party?.pseudoId,
+                    firstName: person?.firstName,
+                    lastName: person?.lastName,
+                    inProcessHours: hoursMap.inProcessHours.toString(),
+                    approvedHours: hoursMap.approvedHours.toString(),
+                    invoicedHours: hoursMap.invoicedHours.toString()])</script>
+            </iterate>
+            <script>reportItems = reportItems.sort { it.lastName ?: '' }</script>
         </actions>
     </service>
 </services>

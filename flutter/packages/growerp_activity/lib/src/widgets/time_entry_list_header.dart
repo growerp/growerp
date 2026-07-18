@@ -30,6 +30,9 @@ class TimeEntryListHeader extends StatelessWidget {
             children: <Widget>[
               const Expanded(child: Text("Date")),
               const Text("Hours"),
+              const Expanded(
+                child: Text("Status", textAlign: TextAlign.center),
+              ),
               if (isPhone(context))
                 const Expanded(
                   child: Text("From/To Party", textAlign: TextAlign.center),

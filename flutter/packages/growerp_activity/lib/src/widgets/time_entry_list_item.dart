@@ -33,16 +33,31 @@ class TimeEntryListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isAdmin =
+        context.read<AuthBloc>().state.authenticate?.user?.userGroup ==
+        UserGroup.admin;
+    final isInvoiced =
+        timeEntry.invoiceId != null || timeEntry.vendorInvoiceId != null;
+    final status = isInvoiced ? 'invoiced' : (timeEntry.status ?? 'inProcess');
     return ListTile(
       title: Row(
         children: <Widget>[
           Expanded(
             child: Text(
-              "${timeEntry.date!.toLocal()}".split(' ')[0],
+              timeEntry.date != null
+                  ? "${timeEntry.date!.toLocal()}".split(' ')[0]
+                  : '',
               key: Key('date$index'),
             ),
           ),
           Text("${timeEntry.hours}", key: Key('hours$index')),
+          Expanded(
+            child: Text(
+              status,
+              key: Key('status$index'),
+              textAlign: TextAlign.center,
+            ),
+          ),
           if (!isPhone(context))
             Expanded(
               child: Text(
@@ -61,25 +76,49 @@ class TimeEntryListItem extends StatelessWidget {
             ),
         ],
       ),
-      onTap: () async {
-        await showDialog(
-          barrierDismissible: true,
-          context: context,
-          builder: (BuildContext context) {
-            return BlocProvider.value(
-              value: context.read<ActivityBloc>(),
-              child: TimeEntryDialog(timeEntry),
-            );
-          },
-        );
-      },
-      trailing: IconButton(
-        key: Key('delete$index'),
-        icon: const Icon(Icons.delete_forever),
-        padding: EdgeInsets.zero,
-        onPressed: () {
-          context.read<ActivityBloc>().add(ActivityTimeEntryDelete(timeEntry));
-        },
+      onTap: isInvoiced
+          ? null
+          : () async {
+              await showDialog(
+                barrierDismissible: true,
+                context: context,
+                builder: (BuildContext context) {
+                  return BlocProvider.value(
+                    value: context.read<ActivityBloc>(),
+                    child: TimeEntryDialog(timeEntry),
+                  );
+                },
+              );
+            },
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (isAdmin && !isInvoiced && status == 'inProcess')
+            IconButton(
+              key: Key('approve$index'),
+              icon: const Icon(Icons.check_circle_outline),
+              tooltip: 'Approve',
+              padding: EdgeInsets.zero,
+              onPressed: () {
+                context.read<ActivityBloc>().add(
+                  ActivityTimeEntryUpdate(
+                    timeEntry.copyWith(status: 'approved'),
+                  ),
+                );
+              },
+            ),
+          if (!isInvoiced)
+            IconButton(
+              key: Key('delete$index'),
+              icon: const Icon(Icons.delete_forever),
+              padding: EdgeInsets.zero,
+              onPressed: () {
+                context.read<ActivityBloc>().add(
+                  ActivityTimeEntryDelete(timeEntry),
+                );
+              },
+            ),
+        ],
       ),
     );
   }

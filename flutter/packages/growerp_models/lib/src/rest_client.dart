@@ -787,6 +787,20 @@ abstract class RestClient {
   @DELETE("rest/s1/growerp/100/TimeEntry")
   Future<TimeEntry> deleteTimeEntry({@Field() required TimeEntry timeEntry});
 
+  /// Create an invoice from approved time entries. sales=true: sales invoice
+  /// to a client; sales=false: purchase (self-billing) invoice for an
+  /// assistant, [hourlyRate] required.
+  @POST("rest/s1/growerp/100/TimeEntryInvoice")
+  Future<FinDoc> createInvoiceFromTimeEntries({
+    @Field() required bool sales,
+    @Field() required String partyId,
+    @Field() String? hourlyRate,
+  });
+
+  /// Hours per assistant: in process, approved and invoiced.
+  @GET("rest/s1/growerp/100/TimeEntryReport")
+  Future<TimeEntryReport> getTimeEntryReport();
+
   // import / export ========
   @POST("rest/s1/growerp/100/ImportExport")
   Future<void> uploadEntities({

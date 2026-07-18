@@ -192,15 +192,19 @@ class TimeEntryDialogState extends State<TimeEntryDialog> {
                 activityBloc.add(
                   ActivityTimeEntryUpdate(
                     TimeEntry(
+                      timeEntryId: widget.timeEntry.timeEntryId,
                       date: _selectedDate,
                       hours: Decimal.parse(_hoursController.text),
+                      comments: _commentsController.text,
                       activityId: widget.timeEntry.activityId,
-                      partyId: context
-                          .read<AuthBloc>()
-                          .state
-                          .authenticate!
-                          .user!
-                          .partyId!,
+                      partyId:
+                          widget.timeEntry.partyId ??
+                          context
+                              .read<AuthBloc>()
+                              .state
+                              .authenticate!
+                              .user!
+                              .partyId!,
                     ),
                   ),
                 );

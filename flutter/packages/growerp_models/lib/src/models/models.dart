@@ -37,6 +37,7 @@ export 'email_template_model.dart';
 export 'llm_config_model.dart';
 export 'system_settings_model.dart';
 export 'time_entry_model.dart';
+export 'time_entry_report_model.dart';
 export 'chat_message_model.dart';
 export 'chat_room_model.dart';
 export 'chat_room_member_model.dart';

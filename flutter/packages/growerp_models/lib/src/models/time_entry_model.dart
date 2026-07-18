@@ -40,6 +40,11 @@ abstract class TimeEntry with _$TimeEntry {
     Decimal? hours,
     String? comments,
     @DateTimeConverter() DateTime? date,
+    // approval workflow: 'inProcess' (default) -> 'approved'
+    String? status,
+    // set when billed to the client / self-billed to the assistant
+    String? invoiceId,
+    String? vendorInvoiceId,
   }) = _TimeEntry;
 
   factory TimeEntry.fromJson(Map<String, dynamic> json) =>

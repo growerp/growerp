@@ -46,6 +46,17 @@ along with this software (see the LICENSE.md file). If not, see
                 ]" />
                 <set field="convertedStatusId" from="activityStatusValues[statusId]" />
             </if>
+            <!-- time entry approval status -->
+            <if condition="docType == 'timeEntry'">
+                <set field="timeEntryStatusValues"
+                    from="[
+                'TesInProcess': 'inProcess',
+                'TesApproved': 'approved',
+                'inProcess': 'TesInProcess',
+                'approved': 'TesApproved'
+                ]" />
+                <set field="convertedStatusId" from="timeEntryStatusValues[statusId]" />
+            </if>
             <!-- Product status and classEnumId translation -->
             <if condition="docType == 'product'">
                 <set field="productTypeValues"

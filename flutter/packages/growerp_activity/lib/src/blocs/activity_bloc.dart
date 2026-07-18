@@ -41,6 +41,7 @@ class ActivityBloc extends Bloc<ActivityEvent, ActivityState> {
     on<ActivityUpdate>(_onActivityUpdate);
     on<ActivityTimeEntryUpdate>(_onTimeEntryUpdate); //add,delete
     on<ActivityTimeEntryDelete>(_onTimeEntryDelete);
+    on<ActivityInvoiceFromTimeEntries>(_onInvoiceFromTimeEntries);
   }
 
   final RestClient restClient;
@@ -166,13 +167,23 @@ class ActivityBloc extends Bloc<ActivityEvent, ActivityState> {
       int index = activities.indexWhere(
         (element) => element.activityId == compResult.activityId,
       );
-      if (event.timeEntry.timeEntryId == null) {
-        activities[index].timeEntries.add(compResult);
-      } else {
-        int indexTe = activities[index].timeEntries.indexWhere(
-          (element) => element.timeEntryId == compResult.timeEntryId,
-        );
-        activities[index].timeEntries[indexTe] = compResult;
+      if (index != -1) {
+        // timeEntries can be a const (unmodifiable) list when the activity has
+        // no entries yet, so rebuild it immutably instead of mutating in place.
+        final entries = List<TimeEntry>.from(activities[index].timeEntries);
+        if (event.timeEntry.timeEntryId == null) {
+          entries.add(compResult);
+        } else {
+          final indexTe = entries.indexWhere(
+            (element) => element.timeEntryId == compResult.timeEntryId,
+          );
+          if (indexTe != -1) {
+            entries[indexTe] = compResult;
+          } else {
+            entries.add(compResult);
+          }
+        }
+        activities[index] = activities[index].copyWith(timeEntries: entries);
       }
 
       emit(state.copyWith(activities: activities));
@@ -181,6 +192,37 @@ class ActivityBloc extends Bloc<ActivityEvent, ActivityState> {
         state.copyWith(
           status: ActivityBlocStatus.failure,
           activities: [],
+          message: await getDioError(e),
+        ),
+      );
+    }
+  }
+
+  Future<void> _onInvoiceFromTimeEntries(
+    ActivityInvoiceFromTimeEntries event,
+    Emitter<ActivityState> emit,
+  ) async {
+    try {
+      emit(state.copyWith(status: ActivityBlocStatus.loading));
+      FinDoc invoice = await restClient.createInvoiceFromTimeEntries(
+        sales: event.sales,
+        partyId: event.partyId,
+        hourlyRate: event.hourlyRate,
+      );
+      emit(
+        state.copyWith(
+          status: ActivityBlocStatus.success,
+          message:
+              "${event.sales ? 'Sales' : 'Purchase'} invoice "
+              "${invoice.pseudoId ?? ''} created",
+        ),
+      );
+      // invoiced entries dropped out of the un-invoiced totals: refresh
+      add(const ActivityFetch(refresh: true, activityType: ActivityType.todo));
+    } on DioException catch (e) {
+      emit(
+        state.copyWith(
+          status: ActivityBlocStatus.failure,
           message: await getDioError(e),
         ),
       );
@@ -199,9 +241,14 @@ class ActivityBloc extends Bloc<ActivityEvent, ActivityState> {
       int index = activities.indexWhere(
         (element) => element.activityId == teApiResult.activityId,
       );
-      activities[index].timeEntries.removeWhere(
-        (element) => element.timeEntryId == teApiResult.timeEntryId,
-      );
+      if (index != -1) {
+        // timeEntries may be a const (unmodifiable) list; rebuild it immutably.
+        final entries = List<TimeEntry>.from(activities[index].timeEntries)
+          ..removeWhere(
+            (element) => element.timeEntryId == teApiResult.timeEntryId,
+          );
+        activities[index] = activities[index].copyWith(timeEntries: entries);
+      }
 
       emit(
         state.copyWith(

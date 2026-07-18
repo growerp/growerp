@@ -358,6 +358,16 @@ along with this software (see the LICENSE.md file). If not, see
                 <service name="growerp.100.ActivityServices100.delete#TimeEntry" />
             </method>
         </resource>
+        <resource name="TimeEntryInvoice"><!-- invoice approved time entries -->
+            <method type="post">
+                <service name="growerp.100.ActivityServices100.create#InvoiceFromTimeEntries" />
+            </method>
+        </resource>
+        <resource name="TimeEntryReport"><!-- hours per assistant -->
+            <method type="get">
+                <service name="growerp.100.ActivityServices100.get#TimeEntryReport" />
+            </method>
+        </resource>
         <!-- rental -->
         <resource name="DailyRentalOccupancy">
             <method type="get">

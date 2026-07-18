@@ -15,6 +15,8 @@ Map<String, GrowerpWidgetBuilder> getActivityWidgets() {
       _parseActivityType(args?['activityType']),
       key: getKeyFromArgs(args),
     ),
+    'TimeEntryReportList': (args) =>
+        TimeEntryReportList(key: getKeyFromArgs(args)),
   };
 }
 
@@ -30,6 +32,13 @@ List<WidgetMetadata> getActivityWidgetsWithMetadata() {
         _parseActivityType(args?['activityType']),
         key: getKeyFromArgs(args),
       ),
+    ),
+    WidgetMetadata(
+      widgetName: 'TimeEntryReportList',
+      description: 'Hours per assistant: in process, approved and invoiced',
+      iconName: 'schedule',
+      keywords: ['hours', 'time', 'report', 'assistant', 'timesheet'],
+      builder: (args) => TimeEntryReportList(key: getKeyFromArgs(args)),
     ),
     WidgetMetadata(
       widgetName: 'ActivityDialog',

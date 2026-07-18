@@ -12,6 +12,7 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+import 'package:decimal/decimal.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:flutter/material.dart';
@@ -33,6 +34,7 @@ class ActivityDialogState extends State<ActivityDialog> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _pseudoIdController = TextEditingController();
+  final TextEditingController _rateController = TextEditingController();
 
   late ActivityBloc _activityBloc;
   late AuthBloc _authBloc;
@@ -52,6 +54,7 @@ class ActivityDialogState extends State<ActivityDialog> {
     _pseudoIdController.text = widget.activity.pseudoId;
     _nameController.text = widget.activity.activityName;
     _descriptionController.text = widget.activity.description;
+    _rateController.text = widget.activity.rate?.toString() ?? '';
     _activityBloc = context.read<ActivityBloc>();
     _authBloc = context.read<AuthBloc>();
     _updatedStatus = widget.activity.statusId ?? ActivityStatus.planning;
@@ -254,6 +257,21 @@ class ActivityDialogState extends State<ActivityDialog> {
               ),
               controller: _descriptionController,
             ),
+            if (widget.activity.activityType == ActivityType.todo &&
+                _authBloc.state.authenticate?.user?.userGroup ==
+                    UserGroup.admin)
+              const SizedBox(height: 10),
+            if (widget.activity.activityType == ActivityType.todo &&
+                _authBloc.state.authenticate?.user?.userGroup ==
+                    UserGroup.admin)
+              TextFormField(
+                key: const Key('rate'),
+                decoration: const InputDecoration(
+                  labelText: 'Hourly rate (client billing)',
+                ),
+                controller: _rateController,
+                keyboardType: TextInputType.number,
+              ),
             if (widget.activity.activityType == ActivityType.todo)
               const SizedBox(height: 10),
             if (widget.activity.activityType == ActivityType.todo)
@@ -437,6 +455,9 @@ class ActivityDialogState extends State<ActivityDialog> {
                               statusId: _updatedStatus,
                               assignee: _selectedAssignee,
                               thirdParty: _selectedThirdParty,
+                              rate: _rateController.text.isNotEmpty
+                                  ? Decimal.tryParse(_rateController.text)
+                                  : null,
                             ),
                           ),
                         );

@@ -57,3 +57,17 @@ class ActivityTimeEntryDelete extends ActivityEvent {
   const ActivityTimeEntryDelete(this.timeEntry);
   final TimeEntry timeEntry;
 }
+
+/// Create an invoice from approved time entries: a sales invoice for a
+/// client (sales=true) or a purchase (self-billing) invoice for an
+/// assistant (sales=false, hourlyRate required).
+class ActivityInvoiceFromTimeEntries extends ActivityEvent {
+  const ActivityInvoiceFromTimeEntries({
+    required this.sales,
+    required this.partyId,
+    this.hourlyRate,
+  });
+  final bool sales;
+  final String partyId;
+  final String? hourlyRate;
+}

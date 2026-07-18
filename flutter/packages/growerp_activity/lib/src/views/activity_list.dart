@@ -148,6 +148,36 @@ class ActivityListState extends State<ActivityList> {
                   : Stack(
                       children: [
                         tableView(),
+                        if (widget.activityType == ActivityType.todo &&
+                            context
+                                    .read<AuthBloc>()
+                                    .state
+                                    .authenticate
+                                    ?.user
+                                    ?.userGroup ==
+                                UserGroup.admin)
+                          Positioned(
+                            right: right! + 70,
+                            bottom: bottom,
+                            child: FloatingActionButton(
+                              heroTag: 'invoiceHours',
+                              key: const Key('invoiceHours'),
+                              onPressed: () async {
+                                await showDialog(
+                                  barrierDismissible: true,
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return BlocProvider.value(
+                                      value: _activityBloc,
+                                      child: const TimeEntryInvoiceDialog(),
+                                    );
+                                  },
+                                );
+                              },
+                              tooltip: 'Invoice approved hours',
+                              child: const Icon(Icons.receipt_long),
+                            ),
+                          ),
                         Positioned(
                           right: right,
                           bottom: bottom,

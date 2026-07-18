@@ -263,31 +263,35 @@ along with this software (see the LICENSE.md file). If not, see
     <growerp.menu.MenuItem menuItemId="FREELANCE_TASKS" menuConfigurationId="FREELANCE_DEFAULT" itemKey="allTasks"
         title="Tasks" route="/tasks" iconName="task" widgetName="ActivityList" sequenceNum="20"/>
     <growerp.menu.MenuItem menuItemId="FREELANCE_CRM" menuConfigurationId="FREELANCE_DEFAULT" itemKey="myOpportunities"
-        title="CRM" route="/crm" iconName="people" widgetName="ActivityList" sequenceNum="30"/>
+        title="CRM" route="/crm" iconName="people" widgetName="ActivityList" userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="30"/>
     <growerp.menu.MenuItem menuItemId="FREELANCE_MARKETING" menuConfigurationId="FREELANCE_DEFAULT" 
-        title="Marketing" route="/marketing" iconName="campaign" widgetName="ContentPlanList" sequenceNum="35"/>
+        title="Marketing" route="/marketing" iconName="campaign" widgetName="ContentPlanList" userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="35"/>
     <growerp.menu.MenuItem menuItemId="FREELANCE_OUTREACH" menuConfigurationId="FREELANCE_DEFAULT" 
-        title="Outreach" route="/outreach" iconName="send" widgetName="CampaignListScreen" sequenceNum="38"/>
+        title="Outreach" route="/outreach" iconName="send" widgetName="CampaignListScreen" userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="38"/>
     <growerp.menu.MenuItem menuItemId="FREELANCE_CATALOG" menuConfigurationId="FREELANCE_DEFAULT" itemKey="products"
-        title="Catalog" route="/catalog" iconName="category" widgetName="ProductList" sequenceNum="40"/>
+        title="Catalog" route="/catalog" iconName="category" widgetName="ProductList" userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="40"/>
     <growerp.menu.MenuItem menuItemId="FREELANCE_ORDERS" menuConfigurationId="FREELANCE_DEFAULT" itemKey="openSlsOrders"
-        title="Orders" route="/orders" iconName="shopping_cart" widgetName="SalesOrderList" sequenceNum="50"/>
+        title="Orders" route="/orders" iconName="shopping_cart" widgetName="SalesOrderList" userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="50"/>
     <growerp.menu.MenuItem menuItemId="FREELANCE_WEBSITE" menuConfigurationId="FREELANCE_DEFAULT" 
-        title="Website" route="/website" iconName="web" widgetName="WebsiteDialog" sequenceNum="60"/>
+        title="Website" route="/website" iconName="web" widgetName="WebsiteDialog" userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="60"/>
     <growerp.menu.MenuItem menuItemId="FREELANCE_ACC_SALES" menuConfigurationId="FREELANCE_DEFAULT" itemKey="salesInvoicesNotPaidCount"
-        title="Acct Sales" route="/acct-sales" iconName="receipt_long" widgetName="SalesInvoiceList" sequenceNum="70"/>
+        title="Acct Sales" route="/acct-sales" iconName="receipt_long" widgetName="SalesInvoiceList" userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="70"/>
     <growerp.menu.MenuItem menuItemId="FREELANCE_ACC_PURCHASE" menuConfigurationId="FREELANCE_DEFAULT" itemKey="purchInvoicesNotPaidCount"
-        title="Acct Purchase" route="/acct-purchase" iconName="receipt" widgetName="PurchaseInvoiceList" sequenceNum="71"/>
+        title="Acct Purchase" route="/acct-purchase" iconName="receipt" widgetName="PurchaseInvoiceList" userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="71"/>
     <growerp.menu.MenuItem menuItemId="FREELANCE_ACC_LEDGER" menuConfigurationId="FREELANCE_DEFAULT" 
-        title="Acct Ledger" route="/acct-ledger" iconName="account_balance" widgetName="LedgerTreeForm" sequenceNum="72"/>
+        title="Acct Ledger" route="/acct-ledger" iconName="account_balance" widgetName="LedgerTreeForm" userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="72"/>
     <growerp.menu.MenuItem menuItemId="FREELANCE_ACC_REPORTS" menuConfigurationId="FREELANCE_DEFAULT" 
-        title="Acct Reports" route="/acct-reports" iconName="assessment" widgetName="RevenueExpenseChart" sequenceNum="73"/>
+        title="Acct Reports" route="/acct-reports" iconName="assessment" widgetName="RevenueExpenseChart" userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="73"/>
     <growerp.menu.MenuItem menuItemId="FREELANCE_ACC_SETUP" menuConfigurationId="FREELANCE_DEFAULT" 
-        title="Acct Setup" route="/acct-setup" iconName="settings" widgetName="TimePeriodListForm" sequenceNum="74"/>
+        title="Acct Setup" route="/acct-setup" iconName="settings" widgetName="TimePeriodListForm" userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="74"/>
     <growerp.menu.MenuItem menuItemId="FREELANCE_ABOUT" menuConfigurationId="FREELANCE_DEFAULT" 
         title="About" route="/about" iconName="info" widgetName="AboutForm" sequenceNum="80"/>
 
     <!-- FREELANCE children -->
+    <growerp.menu.MenuItem menuItemId="FREELANCE_TASKS_ALL" menuConfigurationId="FREELANCE_DEFAULT" parentMenuItemId="FREELANCE_TASKS"
+        title="Tasks" iconName="task" widgetName="ActivityList" sequenceNum="10"/>
+    <growerp.menu.MenuItem menuItemId="FREELANCE_TASKS_HOURS" menuConfigurationId="FREELANCE_DEFAULT" parentMenuItemId="FREELANCE_TASKS"
+        title="Assistant Hours" iconName="schedule" widgetName="TimeEntryReportList" sequenceNum="20"/>
     <growerp.menu.MenuItem menuItemId="FREELANCE_CRM_OPP" menuConfigurationId="FREELANCE_DEFAULT" parentMenuItemId="FREELANCE_CRM"
         title="Opportunities" iconName="home" widgetName="OpportunityList" sequenceNum="10"/>
     <growerp.menu.MenuItem menuItemId="FREELANCE_CRM_LEADS" menuConfigurationId="FREELANCE_DEFAULT" parentMenuItemId="FREELANCE_CRM"
