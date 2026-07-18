@@ -49,8 +49,13 @@ class ReservationDialogState extends State<ReservationDialog> {
   final TextEditingController _priceController = TextEditingController();
   final TextEditingController _quantityController = TextEditingController();
   final TextEditingController _daysController = TextEditingController();
+  final TextEditingController _depositController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   late OrderAccountingLocalizations _localizations;
+
+  /// price breakdown of the current stay: date-banded nightly rates,
+  /// tourist tax and totals. Null while not (yet) quoted.
+  RentalQuote? _quote;
 
   @override
   void initState() {
@@ -92,6 +97,36 @@ class ReservationDialogState extends State<ReservationDialog> {
     }
     _finDocBloc = context.read<FinDocBloc>();
     _salesOrderBloc = context.read<SalesOrderBloc>();
+  }
+
+  /// Ask the backend for the price of the currently selected stay. The
+  /// nightly rates come from the date-banded room rates, the tax from the
+  /// tenant tourist-tax setting.
+  Future<void> _refreshQuote() async {
+    final product = _selectedProduct;
+    final nights = int.tryParse(_daysController.text) ?? 0;
+    if (product == null || product.productId.isEmpty || nights < 1) {
+      if (mounted) setState(() => _quote = null);
+      return;
+    }
+    try {
+      final quote = await context.read<RestClient>().getRentalQuote(
+        productId: product.productId,
+        fromDate: DateFormat('yyyy-MM-dd').format(_selectedDate),
+        nights: nights,
+        quantity: int.tryParse(_quantityController.text) ?? 1,
+      );
+      if (!mounted) return;
+      setState(() {
+        _quote = quote;
+        if (quote.averageNightlyRate != null) {
+          _priceController.text = quote.averageNightlyRate.toString();
+        }
+      });
+    } catch (_) {
+      // pricing is informational: keep the manually entered price on failure
+      if (mounted) setState(() => _quote = null);
+    }
   }
 
   String _displayName(CompanyUser cu) {
@@ -164,6 +199,52 @@ class ReservationDialogState extends State<ReservationDialog> {
     return nowDate;
   }
 
+  /// Read-only summary of what the stay costs: room charge (date-banded
+  /// nightly rates), tourist tax and the resulting total.
+  Widget _priceBreakdown() {
+    final quote = _quote;
+    if (quote == null) return const SizedBox.shrink();
+    final deposit = Decimal.tryParse(_depositController.text);
+    Widget line(String label, String value, {Key? key}) => Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label),
+          Text(value, key: key),
+        ],
+      ),
+    );
+    return Padding(
+      padding: const EdgeInsets.only(top: 10),
+      child: Column(
+        key: const Key('priceBreakdown'),
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          line(
+            'Room charge (${quote.nightlyRates.length} nights)',
+            '${quote.roomTotal ?? 0}',
+            key: const Key('roomTotal'),
+          ),
+          if ((quote.touristTax ?? Decimal.zero) > Decimal.zero)
+            line(
+              'Tourist tax',
+              '${quote.touristTax}',
+              key: const Key('touristTax'),
+            ),
+          if (deposit != null && deposit > Decimal.zero)
+            line('Deposit', '$deposit', key: const Key('depositAmount')),
+          const Divider(height: 8),
+          line(
+            'Total',
+            '${(quote.grandTotal ?? Decimal.zero) + (deposit ?? Decimal.zero)}',
+            key: const Key('grandTotal'),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _addRentalItemDialog() {
     Future<void> selectDate(BuildContext context) async {
       final localeState = context.read<LocaleBloc>().state;
@@ -209,6 +290,7 @@ class ReservationDialogState extends State<ReservationDialog> {
         setState(() {
           _selectedDate = picked;
         });
+        await _refreshQuote();
       }
     }
 
@@ -413,6 +495,7 @@ class ReservationDialogState extends State<ReservationDialog> {
                         : [];
                     _selectedDate = firstFreeDate();
                   });
+                  await _refreshQuote();
                 },
               ),
               TextFormField(
@@ -461,10 +544,20 @@ class ReservationDialogState extends State<ReservationDialog> {
                         labelText: _localizations.numberOfDays,
                       ),
                       controller: _daysController,
+                      onChanged: (_) => _refreshQuote(),
                     ),
                   ),
                 ],
               ),
+              const SizedBox(height: 20),
+              TextFormField(
+                key: const Key('deposit'),
+                decoration: const InputDecoration(
+                  labelText: 'Deposit (optional)',
+                ),
+                controller: _depositController,
+              ),
+              _priceBreakdown(),
               const SizedBox(height: 20),
               Row(
                 children: [
@@ -508,8 +601,39 @@ class ReservationDialogState extends State<ReservationDialog> {
                                 ? Decimal.parse('1')
                                 : Decimal.parse(_quantityController.text),
                           );
+                          // tourist tax and deposit ride along as their own
+                          // order lines so they stay out of the room revenue
+                          final extraItems = <FinDocItem>[];
+                          final tax = _quote?.touristTax;
+                          if (tax != null && tax > Decimal.zero) {
+                            extraItems.add(
+                              FinDocItem(
+                                itemType: ItemType(itemTypeId: 'ItemSalesTax'),
+                                description: 'Tourist tax',
+                                price: tax,
+                                quantity: Decimal.one,
+                              ),
+                            );
+                          }
+                          final deposit = Decimal.tryParse(
+                            _depositController.text,
+                          );
+                          if (deposit != null && deposit > Decimal.zero) {
+                            extraItems.add(
+                              FinDocItem(
+                                itemType: ItemType(
+                                  itemTypeId: 'ItemRentalDeposit',
+                                ),
+                                description: 'Deposit',
+                                price: deposit,
+                                quantity: Decimal.one,
+                              ),
+                            );
+                          }
                           if (widget.original?.orderId == null) {
-                            newFinDoc = newFinDoc.copyWith(items: [newItem]);
+                            newFinDoc = newFinDoc.copyWith(
+                              items: [newItem, ...extraItems],
+                            );
                           } else {
                             List<FinDocItem> newItemList = List.of(
                               widget.original!.items,

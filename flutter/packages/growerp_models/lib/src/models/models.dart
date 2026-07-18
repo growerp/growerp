@@ -25,6 +25,7 @@ export 'country_model.dart';
 export 'stats_model.dart';
 export 'save_test_model.dart';
 export 'asset_model.dart';
+export 'hotel_model.dart';
 export 'bom_item_model.dart';
 export 'routing_model.dart';
 export 'liner_type_model.dart';

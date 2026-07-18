@@ -371,8 +371,11 @@ along with this software (see the LICENSE.md file). If not, see
         title="Rooms" route="/rooms" iconName="king_bed" widgetName="AssetList" sequenceNum="30"/>
     <growerp.menu.MenuItem menuItemId="HOTEL_RESERVATIONS" menuConfigurationId="HOTEL_DEFAULT" 
         title="Reservations" route="/reservations" iconName="book_online" widgetName="SalesOrderRentalList" sequenceNum="40"/>
-    <growerp.menu.MenuItem menuItemId="HOTEL_CHECKINOUT" menuConfigurationId="HOTEL_DEFAULT" 
+    <growerp.menu.MenuItem menuItemId="HOTEL_CHECKINOUT" menuConfigurationId="HOTEL_DEFAULT"
         title="In/Out" route="/checkInOut" iconName="luggage" widgetName="CheckInList" sequenceNum="50"/>
+    <growerp.menu.MenuItem menuItemId="HOTEL_HOUSEKEEPING" menuConfigurationId="HOTEL_DEFAULT"
+        title="Housekeeping" route="/housekeeping" iconName="cleaning_services"
+        widgetName="HousekeepingForm" sequenceNum="55"/>
     <growerp.menu.MenuItem menuItemId="HOTEL_ACC_SALES" menuConfigurationId="HOTEL_DEFAULT" itemKey="salesInvoicesNotPaidCount"
         title="Acct Sales" route="/acct-sales" iconName="receipt_long" widgetName="SalesInvoiceList" sequenceNum="60"/>
     <growerp.menu.MenuItem menuItemId="HOTEL_ACC_PURCHASE" menuConfigurationId="HOTEL_DEFAULT" itemKey="purchInvoicesNotPaidCount"
@@ -395,6 +398,8 @@ along with this software (see the LICENSE.md file). If not, see
         title="Rooms" iconName="king_bed" widgetName="AssetList" sequenceNum="10"/>
     <growerp.menu.MenuItem menuItemId="HOTEL_ROOMS_PROD" menuConfigurationId="HOTEL_DEFAULT" parentMenuItemId="HOTEL_ROOMS"
         title="Room Types" iconName="category" widgetName="ProductList" sequenceNum="20"/>
+    <growerp.menu.MenuItem menuItemId="HOTEL_ROOMS_RATES" menuConfigurationId="HOTEL_DEFAULT" parentMenuItemId="HOTEL_ROOMS"
+        title="Rates" iconName="price_change" widgetName="RoomRateForm" sequenceNum="30"/>
     <growerp.menu.MenuItem menuItemId="HOTEL_RES_ORDERS" menuConfigurationId="HOTEL_DEFAULT" parentMenuItemId="HOTEL_RESERVATIONS"
         title="reservations" iconName="home" widgetName="SalesOrderRentalList" sequenceNum="10"/>
     <growerp.menu.MenuItem menuItemId="HOTEL_RES_CUST" menuConfigurationId="HOTEL_DEFAULT" parentMenuItemId="HOTEL_RESERVATIONS"
@@ -435,6 +440,8 @@ along with this software (see the LICENSE.md file). If not, see
         title="Balance Sheet" iconName="list" widgetName="BalanceSheetForm" sequenceNum="20"/>
     <growerp.menu.MenuItem menuItemId="HOTEL_ACCR_SUM" menuConfigurationId="HOTEL_DEFAULT" parentMenuItemId="HOTEL_ACC_REPORTS"
         title="Balance Summary" iconName="list" widgetName="BalanceSummaryList" sequenceNum="30"/>
+    <growerp.menu.MenuItem menuItemId="HOTEL_ACCR_HOTEL" menuConfigurationId="HOTEL_DEFAULT" parentMenuItemId="HOTEL_ACC_REPORTS"
+        title="Occupancy/ADR" iconName="hotel" widgetName="StatisticsForm" sequenceNum="40"/>
     <growerp.menu.MenuItem menuItemId="HOTEL_ACCU_PER" menuConfigurationId="HOTEL_DEFAULT" parentMenuItemId="HOTEL_ACC_SETUP"
         title="setUp" iconName="settings" widgetName="TimePeriodListForm" sequenceNum="10"/>
     <growerp.menu.MenuItem menuItemId="HOTEL_ACCU_ITEM" menuConfigurationId="HOTEL_DEFAULT" parentMenuItemId="HOTEL_ACC_SETUP"

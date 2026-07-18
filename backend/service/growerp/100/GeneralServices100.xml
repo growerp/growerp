@@ -1789,6 +1789,7 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="googleClientSecret"/>
             <parameter name="googleRefreshToken"/>
             <parameter name="googleCalendarId"/>
+            <parameter name="touristTaxPerNight" type="BigDecimal"/>
         </in-parameters>
         <out-parameters>
             <parameter name="systemSettings" type="Map"/>
@@ -1846,6 +1847,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <set field="ss.googleRefreshToken" from="googleRefreshToken"/>
             </if>
             <if condition="googleCalendarId != null"><set field="ss.googleCalendarId" from="googleCalendarId"/></if>
+            <if condition="touristTaxPerNight != null"><set field="ss.touristTaxPerNight" from="touristTaxPerNight"/></if>
 
             <if condition="isNew"><then><script>ss.create()</script></then>
                 <else><script>ss.update()</script></else>

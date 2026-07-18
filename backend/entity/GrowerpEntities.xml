@@ -135,6 +135,9 @@ along with this software (see the LICENSE.md file). If not, see
     <extend-entity entity-name="Asset" package="mantle.product.asset"
         sequence-primary-prefix="ast">
         <field name="assetPseudoId" type="id" /><!-- pseudoId give conflict in many views -->
+        <field name="hkStatusId" type="text-short">
+            <description>Housekeeping status for hotel rooms: Clean / Dirty</description>
+        </field>
         <index name="ASSET_PSEUDOID" unique="false">
             <index-field name="assetPseudoId" />
         </index>
@@ -177,6 +180,18 @@ along with this software (see the LICENSE.md file). If not, see
         <relationship type="one" related="mantle.product.Product" short-alias="product" />
         <relationship type="one-nofk" related="mantle.order.OrderHeader" short-alias="orderHeader" />
         <relationship type="one" related="mantle.order.OrderItem" short-alias="orderItem" />
+    </entity>
+
+    <entity entity-name="RentalPrice" package="growerp.product" sequence-primary-prefix="rrp">
+        <description>Date-banded rental (room) rate for a rental product; when no band
+            matches a date the product current price applies</description>
+        <field name="rentalPriceId" type="id" is-pk="true" />
+        <field name="ownerPartyId" type="id" />
+        <field name="productId" type="id" />
+        <field name="fromDate" type="date" />
+        <field name="thruDate" type="date" />
+        <field name="price" type="currency-amount" />
+        <relationship type="one" related="mantle.product.Product" short-alias="product" />
     </entity>
 
     <entity entity-name="Statistics" package="growerp.general">
@@ -423,6 +438,9 @@ along with this software (see the LICENSE.md file). If not, see
         <field name="googleRefreshToken" type="text-medium" encrypt="true" enable-audit-log="true"/>
         <field name="googleCalendarId"   type="text-medium">
             <description>Google Calendar id to sync bookings from; 'primary' when empty</description>
+        </field>
+        <field name="touristTaxPerNight" type="currency-amount">
+            <description>Hotel: lodging/tourist tax charged per room per night; 0/empty = none</description>
         </field>
     </entity>
 

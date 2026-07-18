@@ -12,6 +12,7 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+import 'package:decimal/decimal.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'llm_config_model.dart';
 
@@ -51,6 +52,8 @@ abstract class SystemSettings with _$SystemSettings {
     // write-only: backend returns '****' when set
     String? googleRefreshToken,
     String? googleCalendarId,
+    // Hotel: lodging/tourist tax charged per room per night
+    Decimal? touristTaxPerNight,
     // Quota
     int? llmSystemTokenLimit,
     // Tenant-wide default Gemini model for AI content generation; empty uses the system default.

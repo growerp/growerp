@@ -33,6 +33,9 @@ import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 
 import 'views/gantt_form.dart';
 import 'views/accounting_form.dart';
+import 'views/housekeeping_form.dart';
+import 'views/room_rate_form.dart';
+import 'views/statistics_form.dart';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -229,6 +232,9 @@ List<Map<String, GrowerpWidgetBuilder>> hotelWidgetRegistrations = [
   {
     'GanttForm': (args) => const GanttForm(),
     'AccountingForm': (args) => const AccountingForm(),
+    'HousekeepingForm': (args) => const HousekeepingForm(),
+    'RoomRateForm': (args) => const RoomRateForm(),
+    'StatisticsForm': (args) => const StatisticsForm(),
   },
 ];
 

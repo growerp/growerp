@@ -1,0 +1,642 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-2.1.xsd">
+
+    <!-- ============================================================
+         Hotel rate management: date-banded rental (room) rates.
+         When no band matches a night the product current price applies.
+         ============================================================ -->
+
+    <service verb="get" noun="RentalPrices">
+        <description>List the date-banded rate rows for a rental product</description>
+        <in-parameters>
+            <parameter name="productId" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="rentalPrices" type="List">
+                <parameter name="rentalPrice" type="Map">
+                    <parameter name="rentalPriceId" />
+                    <parameter name="productId" />
+                    <parameter name="fromDate" />
+                    <parameter name="thruDate" />
+                    <parameter name="price" />
+                </parameter>
+            </parameter>
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <entity-find entity-name="growerp.product.RentalPrice" list="rows">
+                <econdition field-name="ownerPartyId" />
+                <econdition field-name="productId" />
+                <order-by field-name="fromDate" />
+            </entity-find>
+            <set field="rentalPrices" from="[]" />
+            <iterate list="rows" entry="row">
+                <!-- anchored at noon UTC so client-side timezone conversion
+                     cannot move a rate band to the neighbouring day -->
+                <script>rentalPrices.add([
+                    rentalPriceId: row.rentalPriceId,
+                    productId: row.productId,
+                    fromDate: row.fromDate
+                        ? ec.l10n.format(row.fromDate,'yyyy-MM-dd') + 'T12:00:00Z' : null,
+                    thruDate: row.thruDate
+                        ? ec.l10n.format(row.thruDate,'yyyy-MM-dd') + 'T12:00:00Z' : null,
+                    price: row.price?.toString()])</script>
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="create" noun="RentalPrice">
+        <description>Create a date-banded rate for a rental product</description>
+        <in-parameters>
+            <parameter name="productId" required="true" />
+            <parameter name="fromDate" type="Date" required="true" />
+            <parameter name="thruDate" type="Date" required="true" />
+            <parameter name="price" type="BigDecimal" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="rentalPriceId" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <service-call name="create#growerp.product.RentalPrice" out-map="context"
+                in-map="[ownerPartyId: ownerPartyId, productId: productId,
+                    fromDate: fromDate, thruDate: thruDate, price: price]" />
+        </actions>
+    </service>
+
+    <service verb="update" noun="RentalPrice">
+        <description>Update a date-banded rate</description>
+        <in-parameters>
+            <parameter name="rentalPriceId" required="true" />
+            <parameter name="fromDate" type="Date" />
+            <parameter name="thruDate" type="Date" />
+            <parameter name="price" type="BigDecimal" />
+        </in-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <entity-find-one entity-name="growerp.product.RentalPrice" value-field="row"
+                for-update="true" />
+            <if condition="!row || row.ownerPartyId != ownerPartyId">
+                <return error="true" message="Rate ${rentalPriceId} not found" />
+            </if>
+            <if condition="fromDate != null"><set field="row.fromDate" from="fromDate" /></if>
+            <if condition="thruDate != null"><set field="row.thruDate" from="thruDate" /></if>
+            <if condition="price != null"><set field="row.price" from="price" /></if>
+            <entity-update value-field="row" />
+        </actions>
+    </service>
+
+    <service verb="delete" noun="RentalPrice">
+        <description>Delete a date-banded rate</description>
+        <in-parameters>
+            <parameter name="rentalPriceId" required="true" />
+        </in-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <entity-delete-by-condition entity-name="growerp.product.RentalPrice">
+                <econdition field-name="rentalPriceId" />
+                <econdition field-name="ownerPartyId" />
+            </entity-delete-by-condition>
+        </actions>
+    </service>
+
+    <!-- ============================================================
+         Rate quote: nightly breakdown + tourist tax for a stay.
+         Shared by the reservation dialog and public booking.
+         ============================================================ -->
+
+    <service verb="get" noun="RentalQuote">
+        <description>Compute nightly rates, room total and tourist tax for a stay.
+            ownerPartyId may be provided for anonymous (public) use, otherwise the
+            logged-in user's owner is used.</description>
+        <in-parameters>
+            <parameter name="productId" required="true" />
+            <parameter name="fromDate" type="Date" required="true" />
+            <parameter name="nights" type="Integer" required="true" />
+            <parameter name="quantity" type="Integer" default-value="1" />
+            <parameter name="ownerPartyId" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="nightlyRates" type="List">
+                <parameter name="night" type="Map">
+                    <parameter name="date" />
+                    <parameter name="price" />
+                </parameter>
+            </parameter>
+            <parameter name="roomTotal" />
+            <parameter name="touristTax" />
+            <parameter name="grandTotal" />
+            <parameter name="averageNightlyRate" />
+        </out-parameters>
+        <actions>
+            <if condition="!ownerPartyId">
+                <service-call out-map="context"
+                    name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            </if>
+            <!-- product current price as fallback -->
+            <entity-find entity-name="mantle.product.ProductPrice" list="curPrices" limit="1">
+                <econdition field-name="productId" />
+                <econdition field-name="priceTypeEnumId" value="PptCurrent" />
+                <date-filter />
+                <order-by field-name="-fromDate" />
+            </entity-find>
+            <set field="basePrice"
+                from="curPrices ? curPrices[0].price : (0 as BigDecimal)" />
+            <entity-find entity-name="growerp.product.RentalPrice" list="bands">
+                <econdition field-name="ownerPartyId" />
+                <econdition field-name="productId" />
+                <order-by field-name="fromDate" />
+            </entity-find>
+            <set field="qty" from="quantity ?: 1" type="BigDecimal" />
+            <set field="nightlyRates" from="[]" />
+            <set field="roomTotal" value="0" type="BigDecimal" />
+            <script><![CDATA[
+                import java.time.LocalDate
+                LocalDate start = fromDate instanceof java.sql.Date
+                    ? fromDate.toLocalDate()
+                    : LocalDate.parse(fromDate.toString().substring(0,10))
+                for (int i = 0; i < nights; i++) {
+                    LocalDate d = start.plusDays(i)
+                    BigDecimal price = basePrice
+                    for (def b in bands) {
+                        LocalDate bf = b.fromDate.toLocalDate()
+                        LocalDate bt = b.thruDate.toLocalDate()
+                        // band inclusive of fromDate, exclusive of thruDate
+                        if (!d.isBefore(bf) && d.isBefore(bt)) { price = b.price; break }
+                    }
+                    nightlyRates.add([date: d.toString(), price: price.toString()])
+                    roomTotal = roomTotal + (price * qty)
+                }
+                context.nightlyRates = nightlyRates
+                context.roomTotal = roomTotal
+            ]]></script>
+            <!-- tourist tax per room per night -->
+            <entity-find-one entity-name="growerp.general.SystemSettings" value-field="ss">
+                <field-map field-name="ownerPartyId" />
+            </entity-find-one>
+            <set field="taxPerNight"
+                from="ss?.touristTaxPerNight ?: (0 as BigDecimal)" />
+            <set field="touristTax"
+                from="taxPerNight * (nights as BigDecimal) * qty" />
+            <set field="grandTotal" from="roomTotal + touristTax" />
+            <set field="averageNightlyRate"
+                from="nights > 0 ? (roomTotal / (nights as BigDecimal)) : (0 as BigDecimal)" />
+            <script>
+                context.roomTotal = roomTotal.toString()
+                context.touristTax = touristTax.toString()
+                context.grandTotal = grandTotal.toString()
+                context.averageNightlyRate = averageNightlyRate.toString()
+            </script>
+        </actions>
+    </service>
+
+    <!-- ============================================================
+         Housekeeping: room clean/dirty board.
+         ============================================================ -->
+
+    <service verb="get" noun="Housekeeping">
+        <description>List hotel rooms with occupancy (today) and housekeeping status</description>
+        <in-parameters>
+            <parameter name="start" default-value="0" type="Integer" />
+            <parameter name="limit" default-value="100" type="Integer" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="rooms" type="List">
+                <parameter name="room" type="Map">
+                    <parameter name="assetId" />
+                    <parameter name="pseudoId" />
+                    <parameter name="assetName" />
+                    <parameter name="productName" />
+                    <parameter name="hkStatusId" /><!-- Clean / Dirty -->
+                    <parameter name="occupied" type="Boolean" /><!-- has a rental over today -->
+                </parameter>
+            </parameter>
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <set field="today"
+                from="Timestamp.from(ec.user.nowTimestamp.toInstant()
+                    .truncatedTo(java.time.temporal.ChronoUnit.DAYS))" />
+            <entity-find entity-name="growerp.product.asset.AssetProductAndLocation"
+                list="assetList" offset="start" limit="limit">
+                <econdition field-name="ownerPartyId" from="companyPartyId" />
+                <econdition field-name="classEnumId" value="AsClsRoom" />
+                <econdition field-name="statusId" operator="not-equals" value="AstDeactivated"
+                    or-null="true" />
+                <order-by field-name="assetName" />
+            </entity-find>
+            <set field="rooms" from="[]" />
+            <iterate list="assetList" entry="item">
+                <entity-find-count entity-name="growerp.product.AssetRental" count-field="nbr">
+                    <econdition field-name="assetId" from="item.assetId" />
+                    <econdition field-name="rentalFromDate" operator="less-equals" from="today" />
+                    <econdition field-name="rentalThruDate" operator="greater-than" from="today" />
+                </entity-find-count>
+                <script>rooms.add([
+                    assetId: item.assetId,
+                    pseudoId: item.pseudoId,
+                    assetName: item.assetName,
+                    productName: item.productName,
+                    hkStatusId: item.hkStatusId ?: 'Clean',
+                    occupied: nbr > 0])</script>
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="update" noun="Housekeeping">
+        <description>Set the housekeeping status of a room</description>
+        <in-parameters>
+            <parameter name="assetId" required="true" />
+            <parameter name="hkStatusId" required="true" /><!-- Clean / Dirty -->
+        </in-parameters>
+        <out-parameters>
+            <parameter name="assetId" />
+            <parameter name="hkStatusId" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <entity-find-one entity-name="mantle.product.asset.Asset" value-field="asset"
+                for-update="true" />
+            <if condition="!asset || asset.ownerPartyId != companyPartyId">
+                <return error="true" message="Room ${assetId} not found" />
+            </if>
+            <set field="asset.hkStatusId" from="hkStatusId" />
+            <entity-update value-field="asset" />
+        </actions>
+    </service>
+
+    <!-- ============================================================
+         Reporting: occupancy %, ADR, RevPAR over a date range.
+         ============================================================ -->
+
+    <service verb="get" noun="HotelStatistics">
+        <description>Occupancy %, ADR and RevPAR for a date range (default: last 30 days)</description>
+        <in-parameters>
+            <parameter name="fromDate" type="Date" />
+            <parameter name="thruDate" type="Date" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="fromDate" />
+            <parameter name="thruDate" />
+            <parameter name="totalRooms" type="Integer" />
+            <parameter name="availableRoomNights" type="Integer" />
+            <parameter name="occupiedRoomNights" type="Integer" />
+            <parameter name="occupancyPercent" />
+            <parameter name="roomRevenue" />
+            <parameter name="adr" /><!-- average daily rate = revenue / occupied room-nights -->
+            <parameter name="revPar" /><!-- revenue / available room-nights -->
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <script><![CDATA[
+                import java.time.LocalDate
+                import java.time.temporal.ChronoUnit
+                LocalDate end = thruDate
+                    ? (thruDate instanceof java.sql.Date ? thruDate.toLocalDate()
+                        : LocalDate.parse(thruDate.toString().substring(0,10)))
+                    : LocalDate.now()
+                LocalDate begin = fromDate
+                    ? (fromDate instanceof java.sql.Date ? fromDate.toLocalDate()
+                        : LocalDate.parse(fromDate.toString().substring(0,10)))
+                    : end.minusDays(30)
+                context.beginDate = begin
+                context.endDate = end
+                context.rangeDays = (int) ChronoUnit.DAYS.between(begin, end)
+            ]]></script>
+            <if condition="rangeDays &lt;= 0">
+                <return error="true" message="thruDate must be after fromDate" />
+            </if>
+            <!-- total rooms -->
+            <entity-find-count entity-name="mantle.product.asset.Asset" count-field="totalRooms">
+                <econdition field-name="ownerPartyId" from="companyPartyId" />
+                <econdition field-name="classEnumId" value="AsClsRoom" />
+                <econdition field-name="statusId" operator="not-equals" value="AstDeactivated"
+                    or-null="true" />
+            </entity-find-count>
+            <set field="availableRoomNights" from="totalRooms * rangeDays" type="Integer" />
+            <!-- rentals overlapping the range -->
+            <set field="rangeBegin" from="java.sql.Timestamp.valueOf(beginDate.atStartOfDay())" />
+            <set field="rangeEnd" from="java.sql.Timestamp.valueOf(endDate.atStartOfDay())" />
+            <entity-find entity-name="growerp.product.ProductAndAssetRental" list="rentals">
+                <econdition field-name="ownerPartyId" from="ownerPartyId" />
+                <econdition field-name="rentalFromDate" operator="less-than" from="rangeEnd" />
+                <econdition field-name="rentalThruDate" operator="greater-than" from="rangeBegin" />
+            </entity-find>
+            <set field="occupiedRoomNights" value="0" type="Integer" />
+            <set field="roomRevenue" value="0" type="BigDecimal" />
+            <iterate list="rentals" entry="rental">
+                <!-- nightly rate from the related order item unitAmount -->
+                <entity-find-one entity-name="mantle.order.OrderItem" value-field="oItem">
+                    <field-map field-name="orderId" from="rental.orderId" />
+                    <field-map field-name="orderItemSeqId" from="rental.orderItemSeqId" />
+                </entity-find-one>
+                <set field="nightly"
+                    from="oItem?.unitAmount ?: (0 as BigDecimal)" />
+                <script><![CDATA[
+                    java.time.LocalDate rf = rental.rentalFromDate.toLocalDate()
+                    java.time.LocalDate rt = rental.rentalThruDate.toLocalDate()
+                    java.time.LocalDate s = rf.isBefore(beginDate) ? beginDate : rf
+                    java.time.LocalDate e = rt.isAfter(endDate) ? endDate : rt
+                    int nights = (int) java.time.temporal.ChronoUnit.DAYS.between(s, e)
+                    if (nights > 0) {
+                        occupiedRoomNights = occupiedRoomNights + nights
+                        roomRevenue = roomRevenue + (nightly * (nights as BigDecimal))
+                    }
+                    context.occupiedRoomNights = occupiedRoomNights
+                    context.roomRevenue = roomRevenue
+                ]]></script>
+            </iterate>
+            <script><![CDATA[
+                BigDecimal occNights = occupiedRoomNights as BigDecimal
+                BigDecimal availNights = availableRoomNights as BigDecimal
+                BigDecimal occPct = availNights > 0
+                    ? (occNights / availNights * 100).setScale(1, java.math.RoundingMode.HALF_UP)
+                    : (0 as BigDecimal)
+                BigDecimal adr = occNights > 0
+                    ? (roomRevenue / occNights).setScale(2, java.math.RoundingMode.HALF_UP)
+                    : (0 as BigDecimal)
+                BigDecimal revPar = availNights > 0
+                    ? (roomRevenue / availNights).setScale(2, java.math.RoundingMode.HALF_UP)
+                    : (0 as BigDecimal)
+                context.occupancyPercent = occPct.toString()
+                context.adr = adr.toString()
+                context.revPar = revPar.toString()
+                context.roomRevenue = roomRevenue.setScale(2, java.math.RoundingMode.HALF_UP).toString()
+                context.fromDate = beginDate.toString()
+                context.thruDate = endDate.toString()
+            ]]></script>
+        </actions>
+    </service>
+
+    <!-- ============================================================
+         Public (anonymous) booking from the hotel website.
+         ============================================================ -->
+
+    <service verb="get" noun="PublicRooms" authenticate="anonymous-all">
+        <description>Public room-type list with availability for a stay, for the website
+            booking widget. Resolve ownerPartyId from the hostName.</description>
+        <in-parameters>
+            <parameter name="hostName" required="true" />
+            <parameter name="fromDate" type="Date" required="true" />
+            <parameter name="nights" type="Integer" default-value="1" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="ownerPartyId" />
+            <parameter name="currencyUomId" />
+            <parameter name="rooms" type="List">
+                <parameter name="room" type="Map">
+                    <parameter name="productId" />
+                    <parameter name="productName" />
+                    <parameter name="description" />
+                    <parameter name="available" type="Integer" />
+                    <parameter name="roomTotal" />
+                    <parameter name="grandTotal" />
+                    <parameter name="averageNightlyRate" />
+                </parameter>
+            </parameter>
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.PartyServices100.get#CompanyFromHost"
+                in-map="[hostName: hostName]" out-map="hostOut" disable-authz="true" />
+            <set field="companyPartyId" from="hostOut.company?.partyId" />
+            <set field="ownerPartyId" from="hostOut.company?.ownerPartyId" />
+            <if condition="!companyPartyId">
+                <return error="true" message="No hotel found for host ${hostName}" />
+            </if>
+            <!-- availability lookups run as the hotel administrator: the shared
+                 asset services resolve their tenant from the logged-in user -->
+            <if condition="!ec.user.userId">
+                <entity-find entity-name="growerp.party.OwnerPersonDetailAndCompany"
+                    list="adminList" limit="1" disable-authz="true">
+                    <econdition field-name="ownerPartyId" />
+                    <econdition field-name="companyRole" value="OrgInternal" />
+                    <econdition field-name="userGroupId" value="GROWERP_M_ADMIN" />
+                    <econdition field-name="userDisabled" value="N" or-null="true" />
+                    <order-by field-name="userId" />
+                </entity-find>
+                <if condition="!adminList">
+                    <return error="true" message="Hotel not configured for online booking" />
+                </if>
+                <script>ec.user.internalLoginUser(adminList[0].loginName)</script>
+            </if>
+            <entity-find-one entity-name="mantle.ledger.config.PartyAcctgPreference"
+                value-field="aPref" disable-authz="true">
+                <field-map field-name="organizationPartyId" from="companyPartyId" />
+            </entity-find-one>
+            <set field="currencyUomId" from="aPref?.baseCurrencyUomId ?: 'USD'" />
+            <!-- rental products are owned by the tenant owner, not the company -->
+            <entity-find entity-name="mantle.product.Product" list="products"
+                disable-authz="true">
+                <econdition field-name="ownerPartyId" from="ownerPartyId" />
+                <econdition field-name="productTypeEnumId" value="PtFixedAssetUse" />
+                <order-by field-name="productName" />
+            </entity-find>
+            <set field="fromTs"
+                from="java.sql.Timestamp.valueOf((fromDate instanceof java.sql.Date
+                    ? fromDate.toLocalDate()
+                    : java.time.LocalDate.parse(fromDate.toString().substring(0,10)))
+                    .atStartOfDay())" />
+            <set field="thruTs"
+                from="java.sql.Timestamp.valueOf((fromDate instanceof java.sql.Date
+                    ? fromDate.toLocalDate()
+                    : java.time.LocalDate.parse(fromDate.toString().substring(0,10)))
+                    .plusDays(nights).atStartOfDay())" />
+            <set field="rooms" from="[]" />
+            <iterate list="products" entry="product">
+                <service-call name="growerp.100.FinDocServices100.get#AssetsAvailableForProduct"
+                    in-map="[productId: product.productId, fromDate: fromTs, thruDate: thruTs]"
+                    out-map="availOut" disable-authz="true" />
+                <service-call name="growerp.100.HotelServices100.get#RentalQuote"
+                    in-map="[productId: product.productId, fromDate: fromDate, nights: nights,
+                        ownerPartyId: ownerPartyId]" out-map="quoteOut" disable-authz="true" />
+                <script>rooms.add([
+                    productId: product.productId,
+                    productName: product.productName,
+                    description: product.description,
+                    available: availOut.availableAssetIds ? availOut.availableAssetIds.size() : 0,
+                    roomTotal: quoteOut.roomTotal,
+                    grandTotal: quoteOut.grandTotal,
+                    averageNightlyRate: quoteOut.averageNightlyRate])</script>
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="create" noun="PublicBooking" authenticate="anonymous-all">
+        <description>Anonymous booking from the hotel website. Creates (or reuses) a customer
+            for the email and a rental sales order in the reserved (created) state; the
+            front-desk approves it later.</description>
+        <in-parameters>
+            <parameter name="hostName" required="true" />
+            <parameter name="productId" required="true" />
+            <parameter name="fromDate" type="Date" required="true" />
+            <parameter name="nights" type="Integer" required="true" />
+            <parameter name="firstName" required="true" />
+            <parameter name="lastName" required="true" />
+            <parameter name="email" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="orderId" />
+            <parameter name="pseudoId" />
+            <parameter name="grandTotal" />
+            <parameter name="message" />
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.PartyServices100.get#CompanyFromHost"
+                in-map="[hostName: hostName]" out-map="hostOut" disable-authz="true" />
+            <set field="companyPartyId" from="hostOut.company?.partyId" />
+            <set field="ownerPartyId" from="hostOut.company?.ownerPartyId" />
+            <if condition="!companyPartyId">
+                <return error="true" message="No hotel found for host ${hostName}" />
+            </if>
+            <!-- run as the hotel administrator so downstream services see the tenant -->
+            <entity-find entity-name="growerp.party.OwnerPersonDetailAndCompany"
+                list="adminList" limit="1" disable-authz="true">
+                <econdition field-name="ownerPartyId" />
+                <econdition field-name="companyRole" value="OrgInternal" />
+                <econdition field-name="userGroupId" value="GROWERP_M_ADMIN" />
+                <econdition field-name="userDisabled" value="N" or-null="true" />
+                <order-by field-name="userId" />
+            </entity-find>
+            <if condition="!adminList">
+                <return error="true" message="Hotel not configured for online booking" />
+            </if>
+            <script>ec.user.internalLoginUser(adminList[0].loginName)</script>
+            <!-- availability check; rental days are anchored at noon, the same
+                 convention the Flutter reservation dialog uses, so a timezone
+                 shift can never move a stay to the neighbouring day -->
+            <set field="stayStart"
+                from="fromDate instanceof java.sql.Date
+                    ? fromDate.toLocalDate()
+                    : java.time.LocalDate.parse(fromDate.toString().substring(0,10))" />
+            <set field="fromTs"
+                from="java.sql.Timestamp.valueOf(stayStart.atTime(12, 0))" />
+            <set field="thruTs"
+                from="java.sql.Timestamp.valueOf(stayStart.plusDays(nights).atTime(12, 0))" />
+            <service-call name="growerp.100.FinDocServices100.get#AssetsAvailableForProduct"
+                in-map="[productId: productId, fromDate: fromTs, thruDate: thruTs]"
+                out-map="availOut" />
+            <if condition="!availOut.availableAssetIds">
+                <return error="true"
+                    message="Sorry, no room of that type is available for those dates" />
+            </if>
+            <!-- resolve (or create) the guest as a customer -->
+            <entity-find entity-name="mantle.party.contact.ContactMech" list="emailContacts">
+                <econdition field-name="infoString" from="email" />
+                <econdition field-name="contactMechTypeEnumId" value="CmtEmailAddress" />
+            </entity-find>
+            <set field="guestPartyId" from="null" />
+            <if condition="emailContacts">
+                <entity-find entity-name="mantle.party.contact.PartyContactMech"
+                    list="pcms" limit="1">
+                    <econdition field-name="contactMechId" from="emailContacts[0].contactMechId" />
+                    <date-filter />
+                </entity-find>
+                <if condition="pcms"><set field="guestPartyId" from="pcms[0].partyId" /></if>
+            </if>
+            <if condition="!guestPartyId">
+                <service-call name="growerp.100.PartyServices100.create#User" out-map="userOut">
+                    <field-map field-name="ownerPartyId" from="ownerPartyId" />
+                    <field-map field-name="user"
+                        from="[firstName: firstName, lastName: lastName, email: email,
+                            role: 'Customer']" />
+                </service-call>
+                <set field="guestPartyId" from="userOut.user?.partyId" />
+            </if>
+            <!-- quote -->
+            <service-call name="growerp.100.HotelServices100.get#RentalQuote"
+                in-map="[productId: productId, fromDate: fromDate, nights: nights]"
+                out-map="quoteOut" />
+            <entity-find-one entity-name="mantle.product.Product" value-field="product" />
+            <set field="nightlyRate"
+                from="new BigDecimal(quoteOut.averageNightlyRate)" />
+            <!-- create the reservation order -->
+            <service-call name="growerp.100.FinDocServices100.create#FinDoc" out-map="fdOut"
+                in-map="[finDoc: [
+                    docType: 'order', sales: true, statusId: 'created',
+                    otherUser: [partyId: guestPartyId],
+                    description: 'Website booking: ' + product.productName,
+                    items: [[
+                        itemType: [itemTypeId: 'ItemRental'],
+                        product: [productId: productId],
+                        description: product.productName,
+                        price: nightlyRate,
+                        quantity: nights,
+                        rentalFromDate: fromTs,
+                        rentalThruDate: thruTs]]]]" />
+            <set field="orderId" from="fdOut.finDoc?.orderId" />
+            <set field="pseudoId" from="fdOut.finDoc?.pseudoId" />
+            <set field="grandTotal" from="quoteOut.grandTotal" />
+            <set field="message"
+                from="'Thank you ' + firstName + ', your reservation ' + pseudoId +
+                    ' is confirmed.'" />
+            <!-- confirmation email to the guest -->
+            <service-call name="growerp.100.HotelServices100.send#BookingConfirmation"
+                async="true" ignore-error="true"
+                in-map="[orderId: orderId, ownerPartyId: ownerPartyId]" />
+        </actions>
+    </service>
+
+    <!-- ============================================================
+         Booking confirmation email (best-effort, no-op without SMTP).
+         ============================================================ -->
+
+    <service verb="send" noun="BookingConfirmation">
+        <description>Email a booking confirmation to the guest. Silently does nothing when no
+            SMTP server is configured or the guest has no usable email.</description>
+        <in-parameters>
+            <parameter name="orderId" required="true" />
+            <parameter name="ownerPartyId" />
+        </in-parameters>
+        <actions>
+            <entity-find entity-name="OrderHeaderPartItemPartiesAndReservation" list="items">
+                <econdition field-name="orderId" />
+                <order-by field-name="orderItemSeqId" />
+            </entity-find>
+            <if condition="!items"><return /></if>
+            <set field="guestPartyId" from="items[0].customerPartyId" />
+            <service-call name="mantle.party.ContactServices.get#PartyContactInfoList"
+                out-map="ci" disable-authz="true"
+                in-map="[partyId: guestPartyId, contactMechPurposeId: 'EmailPrimary']" />
+            <set field="toEmail"
+                from="ci.emailList ? ci.emailList[0].infoString : null" />
+            <if condition="!toEmail || toEmail.contains('example.com')"><return /></if>
+            <entity-find-one entity-name="moqui.basic.email.EmailServer" value-field="emailServer"
+                disable-authz="true">
+                <field-map field-name="emailServerId" value="SYSTEM" />
+            </entity-find-one>
+            <if condition="!emailServer || emailServer.mailPassword == 'SMTP_PASSWORD'">
+                <return />
+            </if>
+            <service-call name="org.moqui.impl.EmailServices.send#EmailTemplate"
+                async="true" ignore-error="true"
+                in-map="[emailTemplateId: 'NOTIFICATION', toAddresses: toEmail,
+                    bodyParameters: [
+                        title: 'Your reservation ' + (items[0].pseudoId ?: orderId) +
+                            ' is confirmed',
+                        topic: 'Booking', type: 'info',
+                        sentDate: ec.user.nowTimestamp]]" />
+        </actions>
+    </service>
+
+</services>

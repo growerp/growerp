@@ -2782,22 +2782,23 @@ along with this software (see the LICENSE.md file). If not, see
                     <then>
                         <service-call in-map="context" out-map="context"
                             name="mantle.order.OrderServices.place#Order" />
-                        <!-- assign asset when rental order (one item per order only)-->
-                        <if
-                            condition="items[0].rentalFromDate &amp;&amp;
-                                        items[0].rentalThruDate">
+                        <!-- assign an asset to each rental item; non-rental lines
+                             (tourist tax, deposit) are left untouched -->
+                        <set field="rentalItems"
+                            from="items.findAll { it.rentalFromDate &amp;&amp; it.rentalThruDate }" />
+                        <if condition="rentalItems">
                             <service-call
                                 name="growerp.100.FinDocServices100.get#AssetsAvailableForProduct"
-                                in-map="productId: items[0].productId,
-                                    fromDate: items[0].rentalFromDate,
-                                    thruDate: items[0].rentalThruDate"
+                                in-map="productId: rentalItems[0].productId,
+                                    fromDate: rentalItems[0].rentalFromDate,
+                                    thruDate: rentalItems[0].rentalThruDate"
                                 out-map="context" />
-                            <if condition="availableAssetIds.size() &lt; items.size()">
+                            <if condition="availableAssetIds.size() &lt; rentalItems.size()">
                                 <return error="true"
-                                    message="not enough assets available for this date: required ${items.size()} available: ${availableAssetIds.size()}" />
+                                    message="not enough assets available for this date: required ${rentalItems.size()} available: ${availableAssetIds.size()}" />
                             </if>
                             <set field="index" value="0" type="Integer" />
-                            <iterate list="items" entry="item">
+                            <iterate list="rentalItems" entry="item">
                                 <!-- when items replaced assetRentalId not available -->
                                 <entity-find-one entity-name="growerp.product.AssetRental"
                                     value-field="assetRental">
@@ -2808,6 +2809,11 @@ along with this software (see the LICENSE.md file). If not, see
                                 <set field="assetRental.assetId" from="availableAssetIds[index++]" />
                                 <entity-update value-field="assetRental" />
                             </iterate>
+                            <!-- confirm the stay to the guest (no-op without SMTP) -->
+                            <service-call
+                                name="growerp.100.HotelServices100.send#BookingConfirmation"
+                                async="true" ignore-error="true"
+                                in-map="[orderId: order.orderId, ownerPartyId: ownerPartyId]" />
                         </if>
                     </then>
                     <else-if condition="order.statusId == 'OrderApproved'">
