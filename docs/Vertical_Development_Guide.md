@@ -85,7 +85,7 @@ default (`catalog,order_accounting,activity,adk`). Then follow the printed steps
 
 ```bash
 cd flutter && melos bootstrap
-cd moqui && java -jar moqui.war load location=runtime/component/growerp/data/GrowerpBakeryAppSeedData.xml
+cd moqui && java -jar moqui.war load location=component://growerp/data/GrowerpBakeryAppSeedData.xml
 # restart backend, then:
 cd flutter/packages/bakery && flutter run
 ```

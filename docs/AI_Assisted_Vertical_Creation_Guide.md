@@ -69,7 +69,7 @@ numbered next-steps list. The command creates:
 ```bash
 cd flutter && melos bootstrap              # expect: "Got dependencies!"
 cd flutter && dart analyze packages/<name> # expect: "No issues found!"
-cd moqui && java -jar moqui.war load location=runtime/component/growerp/data/Growerp<Name>AppSeedData.xml
+cd moqui && java -jar moqui.war load location=component://growerp/data/Growerp<Name>AppSeedData.xml
 # restart backend, then:
 cd flutter/packages/<name> && flutter run  # expect: dashboard renders after login
 ```
