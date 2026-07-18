@@ -97,6 +97,12 @@ packages:
 
 ## Creating a New Building Block {#creating-building-block}
 
+> **Tip:** To scaffold a building block automatically (Flutter package + Moqui
+> component + workspace registration), use `growerp createPackage <name>` instead of
+> the manual steps below. To build or extend an *end-user vertical app* from building
+> blocks, see [Vertical_Development_Guide.md](Vertical_Development_Guide.md). The manual
+> steps below remain valid for understanding the package structure.
+
 ### Step 1: Initialize Package
 
 ```bash

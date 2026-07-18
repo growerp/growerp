@@ -17,6 +17,8 @@ import 'dart:io';
 import 'package:dcli/dcli.dart';
 import 'package:logger/logger.dart';
 
+import 'workspace_registry.dart';
+
 final _logger = Logger(filter: ProductionFilter());
 
 /// Creates a new GrowERP package with both Flutter frontend and Moqui backend component.
@@ -74,8 +76,13 @@ void createPackage(String packageName, String growerpPath) {
     upperCaseName,
   );
 
-  // Add package to melos.yaml
-  _addToMelosYaml(growerpPath, flutterPackageName);
+  // Register package in the pub workspace (flutter/pubspec.yaml)
+  addPackageToWorkspace(growerpPath, 'packages/$flutterPackageName', _logger);
+  addPackageToWorkspace(
+    growerpPath,
+    'packages/$flutterPackageName/example',
+    _logger,
+  );
 
   _logger.i('\n✅ Package created successfully!');
   Zone.root.run(() {
@@ -101,92 +108,6 @@ String _toPascalCase(String input) {
     if (word.isEmpty) return '';
     return word[0].toUpperCase() + word.substring(1);
   }).join();
-}
-
-/// Adds the new package to flutter/melos.yaml
-void _addToMelosYaml(String growerpPath, String flutterPackageName) {
-  final melosPath = '$growerpPath/flutter/melos.yaml';
-
-  if (!exists(melosPath)) {
-    _logger.w('Warning: melos.yaml not found at $melosPath');
-    return;
-  }
-
-  final content = read(melosPath).toList().join('\n');
-  final lines = content.split('\n');
-
-  // Find the packages section
-  int packagesStartIndex = -1;
-  int packagesEndIndex = -1;
-
-  for (int i = 0; i < lines.length; i++) {
-    final trimmed = lines[i].trim();
-    if (trimmed == 'packages:') {
-      packagesStartIndex = i;
-    } else if (packagesStartIndex != -1 && packagesEndIndex == -1) {
-      // Check if this line is still part of packages section (starts with - and indentation)
-      if (trimmed.startsWith('-') && lines[i].startsWith('  ')) {
-        continue;
-      } else if (trimmed.isEmpty) {
-        // Empty line might be within or after the section
-        continue;
-      } else if (!lines[i].startsWith('  ')) {
-        // New section starts - packages section ended at previous line
-        packagesEndIndex = i;
-        break;
-      }
-    }
-  }
-
-  if (packagesStartIndex == -1) {
-    _logger.w('Warning: packages section not found in melos.yaml');
-    return;
-  }
-
-  // If we didn't find an end, it means packages go to end of file
-  if (packagesEndIndex == -1) {
-    packagesEndIndex = lines.length;
-  }
-
-  // Find where to insert the new package entries
-  // growerp_* packages should be grouped together followed by example apps
-  // Non-growerp packages come after
-
-  final packageEntry = '  - packages/$flutterPackageName';
-  final exampleEntry = '  - packages/$flutterPackageName/example';
-
-  // Check if already exists
-  if (content.contains(packageEntry)) {
-    _logger.i('  ✓ Package already in melos.yaml');
-    return;
-  }
-
-  // Find the insertion point - after the last growerp_* package/example, before non-growerp packages
-  int insertIndex = packagesEndIndex;
-
-  for (int i = packagesStartIndex + 1; i < packagesEndIndex; i++) {
-    final trimmed = lines[i].trim();
-    if (trimmed.isEmpty) continue;
-
-    // Extract package name from line like "  - packages/packagename"
-    if (trimmed.startsWith('- packages/')) {
-      final pkgName = trimmed.substring('- packages/'.length);
-      // If this is NOT a growerp_ package and NOT an example, we should insert before it
-      if (!pkgName.startsWith('growerp_') && !pkgName.contains('/example')) {
-        insertIndex = i;
-        break;
-      }
-    }
-  }
-
-  // Insert the new entries
-  lines.insert(insertIndex, exampleEntry);
-  lines.insert(insertIndex, packageEntry);
-
-  // Write back to file
-  melosPath.write(lines.join('\n'));
-
-  _logger.i('  ✓ Added to melos.yaml: $flutterPackageName');
 }
 
 void _createFlutterPackage(

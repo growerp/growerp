@@ -24,8 +24,10 @@ import 'package:growerp/src/src.dart';
 Future<void> main(List<String> args) async {
   String growerpPath = '$HOME/growerp';
   String validCommands =
-      "valid commands are:'help | install | import | export | finalize | createPackage | exportPackage | importPackage'";
+      "valid commands are:'help | install | import | export | finalize | createPackage | createApp | exportPackage | importPackage'";
   String? backendUrl;
+  String blocks = '';
+  String describe = '';
   String outputDirectory = 'growerpCsv';
   String branch = 'master';
   String inputFile = '';
@@ -99,6 +101,11 @@ Future<void> main(List<String> args) async {
           fiscalYear = args[++i];
         case '-d':
           growerpPath = args[++i];
+        case '-b':
+        case '--blocks':
+          blocks = args[++i];
+        case '--describe':
+          describe = args[++i];
         default:
           modifiedArgs.add(args[i]);
       }
@@ -157,6 +164,16 @@ Future<void> main(List<String> args) async {
           "             Creates flutter/packages/growerp_<name> and\n"
           "             moqui/runtime/component/growerp-<name>\n"
           "     -d      Target directory (default: ~/growerp)\n"
+          " -- createApp <name>:\n "
+          "     Creates a new GrowERP vertical application from building blocks.\n"
+          "     <name>       The app name (lowercase), e.g. bakery.\n"
+          "     -b/--blocks  Comma-separated block keys to wire in,\n"
+          "                  e.g. catalog,order_accounting,inventory\n"
+          "                  (default: catalog,order_accounting,activity,adk)\n"
+          "     --describe   AI-assisted: a business description instead of\n"
+          "                  <name>/-b; needs GOOGLE_API_KEY. Example:\n"
+          '                  createApp --describe "small bakery with a webshop"\n'
+          "     -d           Target directory (default: ~/growerp)\n"
           " -- exportPackage <packageName>:\n "
           "     Exports a GrowERP package as a zip archive.\n"
           "     <packageName>  Full package name (e.g., growerp_testpkg)\n"
@@ -234,6 +251,26 @@ Future<void> main(List<String> args) async {
           exit(1);
         }
         createPackage(modifiedArgs[1], growerpPath);
+      case 'createapp':
+        if (describe.isNotEmpty) {
+          if (blocks.isNotEmpty) {
+            logger.e('Use either --blocks or --describe, not both.');
+            exit(1);
+          }
+          await createAppFromDescription(describe, growerpPath);
+        } else {
+          if (modifiedArgs.length < 2) {
+            logger.e(
+              'Usage: growerp createApp <name> [-b block1,block2] '
+              '| createApp --describe "<business description>"',
+            );
+            exit(1);
+          }
+          final blockList = blocks.isEmpty
+              ? <String>[]
+              : blocks.split(',').map((s) => s.trim()).toList();
+          await createApp(modifiedArgs[1], blockList, growerpPath);
+        }
       case 'exportpackage':
         if (modifiedArgs.length < 2) {
           logger.e('Usage: growerp exportPackage <packageName> [-o outputDir]');

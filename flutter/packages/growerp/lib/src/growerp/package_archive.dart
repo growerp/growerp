@@ -20,10 +20,10 @@ Future<void> exportPackage(String packageName, String outputPath) async {
 
   final baseName = packageName.replaceFirst('growerp_', '');
 
-  // Find the root directory (look for melos.yaml)
+  // Find the root directory (look for flutter/pubspec.yaml)
   String? rootDir = _findProjectRoot();
   if (rootDir == null) {
-    logger.e('Could not find project root (melos.yaml not found)');
+    logger.e('Could not find project root (flutter/pubspec.yaml not found)');
     exit(1);
   }
 
@@ -112,7 +112,7 @@ Future<void> importPackage(String archivePath) async {
   // Find the root directory
   String? rootDir = _findProjectRoot();
   if (rootDir == null) {
-    logger.e('Could not find project root (melos.yaml not found)');
+    logger.e('Could not find project root (flutter/pubspec.yaml not found)');
     exit(1);
   }
 
@@ -201,8 +201,11 @@ Future<void> importPackage(String archivePath) async {
     logger.i('  ✓ Extracted Moqui component to: $moquiComponentPath');
   }
 
-  // Add to melos.yaml
-  await _addToMelosYaml(rootDir, packageName, logger);
+  // Register in the pub workspace (flutter/pubspec.yaml)
+  addPackageToWorkspace(rootDir, 'packages/$packageName', logger);
+  if (Directory(p.join(flutterPackagePath, 'example')).existsSync()) {
+    addPackageToWorkspace(rootDir, 'packages/$packageName/example', logger);
+  }
 
   logger.i('✓ Package imported successfully!');
   logger.i('Run "melos bootstrap" to include the package in the workspace.');
@@ -263,86 +266,21 @@ bool _shouldSkipFile(String relativePath) {
   return false;
 }
 
-/// Adds the package to melos.yaml.
-Future<void> _addToMelosYaml(
-  String rootDir,
-  String packageName,
-  Logger logger,
-) async {
-  final melosPath = p.join(rootDir, 'flutter', 'melos.yaml');
-  final melosFile = File(melosPath);
-
-  if (!melosFile.existsSync()) {
-    logger.e('melos.yaml not found: $melosPath');
-    return;
-  }
-
-  final content = melosFile.readAsStringSync();
-  final lines = content.split('\n');
-
-  // Check if package is already in melos.yaml
-  final packageEntry = '  - packages/$packageName';
-  final exampleEntry = '  - packages/$packageName/example';
-
-  if (content.contains(packageEntry)) {
-    logger.i('  Package already in melos.yaml');
-    return;
-  }
-
-  // Find the packages section and add the new package before "packages/growerp"
-  final newLines = <String>[];
-  bool added = false;
-
-  for (int i = 0; i < lines.length; i++) {
-    final line = lines[i];
-
-    // Insert before "  - packages/growerp" (the CLI package)
-    if (!added && line.trim() == '- packages/growerp') {
-      newLines.add(packageEntry);
-      newLines.add(exampleEntry);
-      added = true;
-    }
-
-    newLines.add(line);
-  }
-
-  if (!added) {
-    // Fallback: add at the end of packages section
-    for (int i = 0; i < lines.length; i++) {
-      if (lines[i].trim().startsWith('- packages/') &&
-          (i + 1 >= lines.length ||
-              !lines[i + 1].trim().startsWith('- packages/'))) {
-        newLines.insert(i + 1, exampleEntry);
-        newLines.insert(i + 1, packageEntry);
-        added = true;
-        break;
-      }
-    }
-  }
-
-  if (added) {
-    melosFile.writeAsStringSync(newLines.join('\n'));
-    logger.i('  ✓ Added package to melos.yaml');
-  } else {
-    logger.e('  Could not add package to melos.yaml - please add manually');
-  }
-}
-
-/// Finds the project root directory by looking for melos.yaml.
+/// Finds the project root directory by looking for flutter/pubspec.yaml
+/// (the pub workspace root).
 String? _findProjectRoot() {
   var current = Directory.current;
 
   // Walk up to find the root
   for (int i = 0; i < 10; i++) {
-    // Check for melos.yaml in flutter subdirectory
-    final melosPath = p.join(current.path, 'flutter', 'melos.yaml');
-    if (File(melosPath).existsSync()) {
+    // Check for flutter/pubspec.yaml in a subdirectory (root case)
+    if (File(p.join(current.path, 'flutter', 'pubspec.yaml')).existsSync()) {
       return current.path;
     }
 
-    // Check if current directory has melos.yaml (we might be in flutter/)
-    final melosPathHere = p.join(current.path, 'melos.yaml');
-    if (File(melosPathHere).existsSync()) {
+    // We might already be inside flutter/ - check for the workspace marker
+    final pubspec = File(p.join(current.path, 'pubspec.yaml'));
+    if (p.basename(current.path) == 'flutter' && pubspec.existsSync()) {
       return current.parent.path;
     }
 

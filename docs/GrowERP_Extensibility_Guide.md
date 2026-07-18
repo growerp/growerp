@@ -306,6 +306,13 @@ export 'src/views/custom_list.dart';
 
 ### Menu System Configuration {#menu-system}
 
+> **Superseded.** Menus are no longer static Dart (`menu_options.dart` no longer
+> exists). They are backend-driven: an app fetches its `MenuConfiguration` by `appId`
+> at runtime and resolves each item's `widgetName` through `WidgetRegistry`. For the
+> current model and how to create/extend a vertical, see
+> [Vertical_Development_Guide.md](Vertical_Development_Guide.md). The section below is
+> retained for historical context only.
+
 The menu system is the primary way users navigate through GrowERP applications. It's highly configurable and supports role-based access control.
 
 #### Menu Structure
