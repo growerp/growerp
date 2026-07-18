@@ -27,7 +27,7 @@ flutter/packages/growerp_core/lib/src/domains/common/functions/get_backend_url.d
 **Purpose**: Determines the appropriate backend URL based on environment (debug vs production) and application configuration.
 
 **Parameters**:
-- `classificationId` (String): Application identifier used to lookup backend URL
+- `applicationId` (String): Application identifier used to lookup backend URL
 - `version` (String): Application version for backend compatibility checking
 
 **Logic Flow**:
@@ -52,7 +52,7 @@ flutter/packages/growerp_core/lib/src/domains/common/functions/get_backend_url.d
 
 2. **Backend URL Discovery Call**:
    ```dart
-   backendUrl = '$backendBaseUrl/rest/s1/growerp/100/BackendUrl?version=$version&applicationId=$classificationId';
+   backendUrl = '$backendBaseUrl/rest/s1/growerp/100/BackendUrl?version=$version&applicationId=$applicationId';
    response = await http.get(Uri.parse(backendUrl));
    ```
 
@@ -104,7 +104,7 @@ flutter/packages/growerp_core/lib/src/domains/common/functions/get_backend_url.d
 
 The backend service performs the following operations:
 
-1. **Application Lookup**: Uses `applicationId` (classificationId) to find the corresponding backend URL configuration
+1. **Application Lookup**: Uses `applicationId` (applicationId) to find the corresponding backend URL configuration
 2. **Version Validation**: Checks if the requested version is compatible with the backend
 3. **URL Resolution**: Returns the appropriate backend hostname/port for the application
 4. **Multi-tenancy Support**: Supports different backend URLs for different applications/tenants
@@ -133,7 +133,7 @@ The `PartyClassification` entity links applications to their backend configurati
 
 The `standardCode` field serves as the key connection between applications and their backend configurations:
 
-- **partyClassificationId**: Unique identifier for the classification (matches the application's classificationId)
+- **partyClassificationId**: Unique identifier for the classification (matches the application's applicationId)
 - **classificationTypeEnumId**: Type of classification (can be used to categorize different types of backend mappings)
 - **parentClassificationId**: Supports hierarchical classifications for organization
 - **description**: Human-readable description of the application or configuration
@@ -144,9 +144,9 @@ The `standardCode` field serves as the key connection between applications and t
 The backend URL selection system uses the following data flow:
 
 ```
-Application (classificationId)
+Application (applicationId)
     ↓
-PartyClassification.partyClassificationId (matches classificationId)
+PartyClassification.partyClassificationId (matches applicationId)
     ↓
 PartyClassification.standardCode (contains backend URL and version logic)
     ↓
@@ -241,8 +241,8 @@ _applicationBloc.add(ApplicationUpdate(Application(
 ### Complete Backend URL Selection Process
 
 1. **Application Startup**:
-   - Application determines its `classificationId` and `version`
-   - Calls `getBackendUrlOverride(classificationId, version)`
+   - Application determines its `applicationId` and `version`
+   - Calls `getBackendUrlOverride(applicationId, version)`
 
 2. **Environment Check**:
    - Debug mode: Uses local/development backend URLs
@@ -250,7 +250,7 @@ _applicationBloc.add(ApplicationUpdate(Application(
 
 3. **Backend URL Discovery**:
    - Makes HTTP GET request to `/rest/s1/growerp/100/BackendUrl`
-   - Passes `applicationId` (classificationId) and `version` parameters
+   - Passes `applicationId` (applicationId) and `version` parameters
 
 4. **Backend Service Processing**:
    - Looks up `PartyClassification` record where `partyClassificationId = applicationId`

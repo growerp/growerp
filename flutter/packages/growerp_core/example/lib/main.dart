@@ -34,7 +34,7 @@ Future main() async {
   runApp(
     CoreApp(
       restClient: restClient,
-      classificationId: 'AppAdmin',
+      applicationId: 'AppAdmin',
       chatClient: chatClient,
       notificationClient: notificationClient,
     ),
@@ -45,13 +45,13 @@ class CoreApp extends StatefulWidget {
   const CoreApp({
     super.key,
     required this.restClient,
-    required this.classificationId,
+    required this.applicationId,
     required this.chatClient,
     required this.notificationClient,
   });
 
   final RestClient restClient;
-  final String classificationId;
+  final String applicationId;
   final WsClient chatClient;
   final WsClient notificationClient;
 
@@ -150,7 +150,7 @@ class _CoreAppState extends State<CoreApp> {
               '${state.menuConfiguration?.menuItems.length ?? 0}',
             ),
             restClient: widget.restClient,
-            classificationId: widget.classificationId,
+            applicationId: widget.applicationId,
             chatClient: widget.chatClient,
             notificationClient: widget.notificationClient,
             title: 'Core Example',
@@ -159,7 +159,7 @@ class _CoreAppState extends State<CoreApp> {
             extraBlocProviders: [
               ...getUserCompanyBlocProviders(
                 widget.restClient,
-                widget.classificationId,
+                widget.applicationId,
               ),
             ],
             widgetRegistrations: coreWidgetRegistrations,

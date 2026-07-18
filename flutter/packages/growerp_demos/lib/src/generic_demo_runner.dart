@@ -63,14 +63,14 @@ class _GenericDemoRunnerState extends State<GenericDemoRunner> {
   String? _errorMessage;
 
   late RestClient _restClient;
-  late String _classificationId;
+  late String _applicationId;
   late String _ownerPartyId;
 
   @override
   void initState() {
     super.initState();
     _restClient = context.read<ProductBloc>().restClient;
-    _classificationId = context.read<String>();
+    _applicationId = context.read<String>();
     _ownerPartyId =
         context.read<AuthBloc>().state.authenticate?.ownerPartyId ?? 'default';
     _loadSavedStep();
@@ -102,7 +102,7 @@ class _GenericDemoRunnerState extends State<GenericDemoRunner> {
 
     try {
       final message =
-          await phase.action(_restClient, _classificationId, _ownerPartyId);
+          await phase.action(_restClient, _applicationId, _ownerPartyId);
       final nextStep = _currentStep + 1;
       await widget.progress.saveStep(nextStep, _ownerPartyId);
 

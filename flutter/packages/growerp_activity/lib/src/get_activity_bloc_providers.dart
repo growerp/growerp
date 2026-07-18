@@ -5,7 +5,7 @@ import '../growerp_activity.dart';
 
 List<BlocProvider> getActivityBlocProviders(
   RestClient restClient,
-  String classificationId,
+  String applicationId,
 ) {
   List<BlocProvider> blocProviders = [
     BlocProvider<ActivityBloc>(create: (context) => ActivityBloc(restClient)),

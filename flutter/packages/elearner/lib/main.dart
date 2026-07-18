@@ -44,9 +44,9 @@ Future<void> main() async {
   GlobalConfiguration().updateValue('version', packageInfo.version);
   GlobalConfiguration().updateValue('build', packageInfo.buildNumber);
 
-  final classificationId = GlobalConfiguration().get('classificationId') as String;
+  final applicationId = GlobalConfiguration().get('applicationId') as String;
   final forceUpdateInfo = await getBackendUrlOverride(
-    classificationId,
+    applicationId,
     packageInfo.version,
   );
 
@@ -73,7 +73,7 @@ Future<void> main() async {
   runApp(
     ElearnerApp(
       restClient: restClient,
-      classificationId: classificationId,
+      applicationId: applicationId,
       chatClient: chatClient,
       notificationClient: notificationClient,
       company: company,
@@ -86,7 +86,7 @@ class ElearnerApp extends StatefulWidget {
   const ElearnerApp({
     super.key,
     required this.restClient,
-    required this.classificationId,
+    required this.applicationId,
     required this.chatClient,
     required this.notificationClient,
     this.company,
@@ -94,7 +94,7 @@ class ElearnerApp extends StatefulWidget {
   });
 
   final RestClient restClient;
-  final String classificationId;
+  final String applicationId;
   final WsClient chatClient;
   final WsClient notificationClient;
   final Company? company;
@@ -155,7 +155,7 @@ class _ElearnerAppState extends State<ElearnerApp> {
 
           return TopApp(
             restClient: widget.restClient,
-            classificationId: widget.classificationId,
+            applicationId: widget.applicationId,
             chatClient: widget.chatClient,
             notificationClient: widget.notificationClient,
             title: 'GrowERP eLearner',
@@ -163,7 +163,7 @@ class _ElearnerAppState extends State<ElearnerApp> {
             extraDelegates: _delegates,
             extraBlocProviders: getElearnerBlocProviders(
               widget.restClient,
-              widget.classificationId,
+              widget.applicationId,
             ),
             company: widget.company,
             widgetRegistrations: elearnerWidgetRegistrations,
@@ -196,12 +196,12 @@ List<Map<String, GrowerpWidgetBuilder>> elearnerWidgetRegistrations = [
 
 List<BlocProvider> getElearnerBlocProviders(
   RestClient restClient,
-  String classificationId,
+  String applicationId,
 ) {
   return [
-    ...getUserCompanyBlocProviders(restClient, classificationId),
+    ...getUserCompanyBlocProviders(restClient, applicationId),
     ...getCoursesBlocProviders(restClient),
-    ...getCatalogBlocProviders(restClient, classificationId),
+    ...getCatalogBlocProviders(restClient, applicationId),
     ...getWebsiteBlocProviders(restClient),
   ];
 }

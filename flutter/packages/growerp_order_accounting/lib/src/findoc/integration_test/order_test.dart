@@ -182,7 +182,7 @@ class OrderTest {
 
   static Future<void> checkOrderCompleted(
     WidgetTester tester, {
-    String classificationId = 'AppAdmin',
+    String applicationId = 'AppAdmin',
   }) async {
     SaveTest test = await PersistFunctions.getTest();
     List<FinDoc> orders = test.orders;
@@ -191,7 +191,7 @@ class OrderTest {
       expect(
         CommonTest.getDropdown(
           'statusDropDown',
-          classificationId: classificationId,
+          applicationId: applicationId,
         ),
         equals(FinDocStatusVal.completed.hotel),
       );
@@ -201,24 +201,24 @@ class OrderTest {
   /// approve orders
   static Future<void> approveOrders(
     WidgetTester tester, {
-    String classificationId = 'AppAdmin',
+    String applicationId = 'AppAdmin',
   }) async {
     await FinDocTest.changeStatusFinDocs(
       tester,
       FinDocType.order,
-      classificationId: classificationId,
+      applicationId: applicationId,
     );
   }
 
   /// complete orders
   static Future<void> completeOrders(
     WidgetTester tester, {
-    String classificationId = 'AppAdmin',
+    String applicationId = 'AppAdmin',
   }) async {
     await FinDocTest.changeStatusFinDocs(
       tester,
       FinDocType.order,
-      classificationId: classificationId,
+      applicationId: applicationId,
       status: FinDocStatusVal.completed,
     );
   }

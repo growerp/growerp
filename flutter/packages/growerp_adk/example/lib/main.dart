@@ -32,12 +32,12 @@ Future main() async {
   RestClient restClient = RestClient(await buildDioClient());
   WsClient chatClient = WsClient('chat');
   WsClient notificationClient = WsClient('notws');
-  String classificationId = GlobalConfiguration().get("classificationId");
+  String applicationId = GlobalConfiguration().get("applicationId");
 
   runApp(
     TopApp(
       restClient: restClient,
-      classificationId: classificationId,
+      applicationId: applicationId,
       chatClient: chatClient,
       notificationClient: notificationClient,
       title: 'GrowERP ADK',
@@ -45,7 +45,7 @@ Future main() async {
       extraDelegates: const [UserCompanyLocalizations.delegate],
       extraBlocProviders: getUserCompanyBlocProviders(
         restClient,
-        classificationId,
+        applicationId,
       ),
     ),
   );

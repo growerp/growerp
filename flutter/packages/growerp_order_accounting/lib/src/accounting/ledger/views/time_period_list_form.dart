@@ -39,7 +39,7 @@ class TimePeriodListState extends State<TimePeriodList> {
   final _scrollController = ScrollController();
   final _searchController = TextEditingController();
   late LedgerBloc _ledgerBloc;
-  String classificationId = GlobalConfiguration().getValue("classificationId");
+  String applicationId = GlobalConfiguration().getValue("applicationId");
   late String entityName;
   late String periodType;
   String searchString = '';
@@ -48,7 +48,7 @@ class TimePeriodListState extends State<TimePeriodList> {
   void initState() {
     super.initState();
     periodType = 'Y';
-    entityName = classificationId == 'AppHotel' ? 'Room' : 'TimePeriod';
+    entityName = applicationId == 'AppHotel' ? 'Room' : 'TimePeriod';
     _ledgerBloc = context.read<LedgerBloc>()
       ..add(LedgerTimePeriods(periodType: periodType));
   }

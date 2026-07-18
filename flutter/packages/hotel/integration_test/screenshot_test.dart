@@ -168,7 +168,7 @@ Future<void> _closeDialogIfPresent(WidgetTester tester) async {
 // ---------------------------------------------------------------------------
 void main() {
   final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
-  const classificationId = 'AppHotel';
+  const applicationId = 'AppHotel';
 
   setUp(() async {
     await GlobalConfiguration().loadFromAsset('app_settings');
@@ -185,8 +185,8 @@ void main() {
       _hotelMenuConfig,
       delegates,
       restClient: restClient,
-      blocProviders: getHotelBlocProviders(restClient, classificationId),
-      classificationId: classificationId,
+      blocProviders: getHotelBlocProviders(restClient, applicationId),
+      applicationId: applicationId,
       clear: true,
       title: 'Hotel Screenshots',
     );

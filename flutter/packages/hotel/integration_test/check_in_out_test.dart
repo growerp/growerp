@@ -38,7 +38,7 @@ void main() {
   DateTime today = CustomizableDateTime.current;
   var intlFormat = DateFormat('yyyy-MM-dd');
   String todayStringIntl = intlFormat.format(today);
-  String classificationId = 'AppHotel';
+  String applicationId = 'AppHotel';
 
   setUp(() async {
     await GlobalConfiguration().loadFromAsset("app_settings");
@@ -52,8 +52,8 @@ void main() {
       hotelTestMenuConfig,
       delegates,
       restClient: restClient,
-      blocProviders: getHotelBlocProviders(restClient, classificationId),
-      classificationId: classificationId,
+      blocProviders: getHotelBlocProviders(restClient, applicationId),
+      applicationId: applicationId,
       clear: true,
       title: 'Hotel check in Test',
     );
@@ -92,7 +92,7 @@ void main() {
       delegates,
       restClient: restClient,
       blocProviders: getHotelBlocProviders(restClient, 'AppHotel'),
-      classificationId: classificationId,
+      applicationId: applicationId,
       clear: false,
       title: 'Hotel Checkout Test',
     );
@@ -104,7 +104,7 @@ void main() {
     expect(
       CommonTest.getDropdown(
         'statusDropDown',
-        classificationId: classificationId,
+        applicationId: applicationId,
       ),
       equals(FinDocStatusVal.approved.hotel),
     );
@@ -127,8 +127,8 @@ void main() {
       hotelTestMenuConfig,
       delegates,
       restClient: restClient,
-      blocProviders: getHotelBlocProviders(restClient, classificationId),
-      classificationId: classificationId,
+      blocProviders: getHotelBlocProviders(restClient, applicationId),
+      applicationId: applicationId,
       clear: false,
       title: 'Hotel reservation empty checkin/out Test',
     );
@@ -139,7 +139,7 @@ void main() {
     await selectReservations(tester);
     await OrderTest.checkOrderCompleted(
       tester,
-      classificationId: classificationId,
+      applicationId: applicationId,
     );
     await CommonTest.logout(tester);
   }, skip: false);

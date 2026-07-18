@@ -40,7 +40,7 @@ void main() {
       restClient: restClient,
       blocProviders: getExampleBlocProviders(
         restClient,
-        GlobalConfiguration().get("classificationId"),
+        GlobalConfiguration().get("applicationId"),
       ),
       title: 'GrowERP master content test',
       clear: true,

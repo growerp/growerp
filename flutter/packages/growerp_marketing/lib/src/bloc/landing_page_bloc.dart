@@ -18,9 +18,9 @@ EventTransformer<LandingPageSearchRequested> landingPageSearchDebounce() {
 
 class LandingPageBloc extends Bloc<LandingPageEvent, LandingPageState> {
   final RestClient restClient;
-  final String classificationId;
+  final String applicationId;
 
-  LandingPageBloc({required this.restClient, required this.classificationId})
+  LandingPageBloc({required this.restClient, required this.applicationId})
     : super(const LandingPageState()) {
     on<LandingPageLoad>(_onLandingPageLoad);
     on<LandingPageFetch>(_onLandingPageFetch);

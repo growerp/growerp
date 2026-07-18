@@ -45,7 +45,7 @@ EventTransformer<CategorySearchChanged> categorySearchDebounce() {
 }
 
 class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
-  CategoryBloc(this.restClient, this.classificationId)
+  CategoryBloc(this.restClient, this.applicationId)
     : super(const CategoryState()) {
     on<CategoryFetch>(
       _onCategoryFetch,
@@ -62,7 +62,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
   }
 
   final RestClient restClient;
-  final String classificationId;
+  final String applicationId;
   int start = 0;
 
   Future<void> _onCategoryFetch(
@@ -131,7 +131,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
       if (event.category.categoryId.isNotEmpty) {
         Category compResult = await restClient.updateCategory(
           category: event.category,
-          classificationId: classificationId,
+          applicationId: applicationId,
         );
 
         int index = categories.indexWhere(
@@ -150,7 +150,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
         // add
         Category compResult = await restClient.createCategory(
           category: event.category,
-          classificationId: classificationId,
+          applicationId: applicationId,
         );
 
         categories.insert(0, compResult);
@@ -252,7 +252,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
       emit(state.copyWith(status: CategoryStatus.loading));
 
       await restClient.exportScreenCategories(
-        classificationId: classificationId,
+        applicationId: applicationId,
       );
 
       emit(

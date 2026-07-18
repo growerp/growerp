@@ -29,20 +29,20 @@ Future main() async {
   RestClient restClient = RestClient(await buildDioClient());
   WsClient chatClient = WsClient('chat');
   WsClient notificationClient = WsClient('notws');
-  String classificationId = GlobalConfiguration().get("classificationId");
+  String applicationId = GlobalConfiguration().get("applicationId");
 
   runApp(
     TopApp(
       restClient: restClient,
-      classificationId: classificationId,
+      applicationId: applicationId,
       chatClient: chatClient,
       notificationClient: notificationClient,
       title: 'GrowERP Marketing Demo',
       router: createMarketingDemoRouter(),
       extraDelegates: const [OrderAccountingLocalizations.delegate],
       extraBlocProviders: [
-        ...getCatalogBlocProviders(restClient, classificationId),
-        ...getOrderAccountingBlocProviders(restClient, classificationId),
+        ...getCatalogBlocProviders(restClient, applicationId),
+        ...getOrderAccountingBlocProviders(restClient, applicationId),
       ],
     ),
   );

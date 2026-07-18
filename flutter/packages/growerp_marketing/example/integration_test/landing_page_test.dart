@@ -40,7 +40,7 @@ void main() {
       restClient: restClient,
       blocProviders: getExampleBlocProviders(
         restClient,
-        GlobalConfiguration().get("classificationId"),
+        GlobalConfiguration().get("applicationId"),
       ),
       title: 'GrowERP landing page test',
       clear: true,
@@ -69,7 +69,7 @@ void main() {
       restClient: restClient,
       blocProviders: getExampleBlocProviders(
         restClient,
-        GlobalConfiguration().get("classificationId"),
+        GlobalConfiguration().get("applicationId"),
       ),
       title: 'GrowERP landing page section test',
       clear: false,
@@ -98,7 +98,7 @@ void main() {
       restClient: restClient,
       blocProviders: getExampleBlocProviders(
         restClient,
-        GlobalConfiguration().get("classificationId"),
+        GlobalConfiguration().get("applicationId"),
       ),
       title: 'GrowERP landing page credibility test',
       clear: false,

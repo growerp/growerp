@@ -34,7 +34,7 @@ class AssetListState extends State<AssetList> {
   final _searchFocusNode = FocusNode();
   late AssetBloc _assetBloc;
   List<Asset> assets = const <Asset>[];
-  late String classificationId;
+  late String applicationId;
   late String entityName;
   late double bottom;
   double? right;
@@ -46,8 +46,8 @@ class AssetListState extends State<AssetList> {
   @override
   void initState() {
     super.initState();
-    classificationId = context.read<String>();
-    entityName = classificationId == 'AppHotel' ? 'Room' : 'Asset';
+    applicationId = context.read<String>();
+    entityName = applicationId == 'AppHotel' ? 'Room' : 'Asset';
     _scrollController.addListener(_onScroll);
     _assetBloc = context.read<AssetBloc>()
       ..add(const AssetFetch(refresh: true));
@@ -72,14 +72,14 @@ class AssetListState extends State<AssetList> {
           asset: asset,
           index: index,
           bloc: _assetBloc,
-          classificationId: classificationId,
+          applicationId: applicationId,
         );
       }).toList();
 
       return StyledDataTable(
         columns: getAssetListColumns(
           context,
-          classificationId: classificationId,
+          applicationId: applicationId,
         ),
         rows: rows,
         isLoading: _isLoading && assets.isEmpty,

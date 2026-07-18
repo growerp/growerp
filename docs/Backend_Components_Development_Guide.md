@@ -167,7 +167,7 @@ Each Flutter application includes an `app_settings.json` file in `assets/cfg/` t
 
 ```json
 {
-  "classificationId": "AppAdmin",
+  "applicationId": "AppAdmin",
   "databaseUrl": "https://backend.growerp.com",
   "chatUrl": "wss://backend.growerp.com",
   "databaseUrlDebug": "",
@@ -180,7 +180,7 @@ Each Flutter application includes an `app_settings.json` file in `assets/cfg/` t
 
 #### Key Configuration Fields
 
-- **classificationId**: Unique identifier linking the application to backend configurations (e.g., "AppAdmin", "AppSupport", "AppHealth")
+- **applicationId**: Unique identifier linking the application to backend configurations (e.g., "AppAdmin", "AppSupport", "AppHealth")
 - **databaseUrl**: Production backend URL for REST API calls
 - **chatUrl**: Production WebSocket URL for chat functionality
 - **databaseUrlDebug**: Development/debug backend URL (empty by default)
@@ -195,11 +195,11 @@ The configuration is loaded during application startup using GlobalConfiguration
 ```dart
 await GlobalConfiguration().loadFromAsset('app_settings');
 
-String classificationId = GlobalConfiguration().get("classificationId");
+String applicationId = GlobalConfiguration().get("applicationId");
 PackageInfo packageInfo = await PackageInfo.fromPlatform();
 ```
 
-This provides the initial `classificationId` and default URLs that are then used by the backend URL discovery process.
+This provides the initial `applicationId` and default URLs that are then used by the backend URL discovery process.
 
 #### Critical Role in Final Backend URL Settings
 
@@ -207,7 +207,7 @@ This provides the initial `classificationId` and default URLs that are then used
 
 ##### 1. Foundation Configuration Layer
 - **Default URLs**: `databaseUrl` and `chatUrl` serve as fallback values if dynamic discovery fails
-- **Classification Identity**: `classificationId` is essential for backend discovery service calls
+- **Classification Identity**: `applicationId` is essential for backend discovery service calls
 - **Environment-Specific URLs**: `databaseUrlDebug` and `chatUrlDebug` provide debug environment overrides
 
 ##### 2. Three-Level Override Hierarchy
@@ -232,9 +232,9 @@ if (kDebugMode) {
 ```
 
 ##### 4. Discovery Process Dependencies
-The `classificationId` from app_settings.json is **mandatory** for the backend discovery service:
+The `applicationId` from app_settings.json is **mandatory** for the backend discovery service:
 ```dart
-backendUrl = '$backendBaseUrl/rest/s1/growerp/100/BackendUrl?version=$version&applicationId=$classificationId';
+backendUrl = '$backendBaseUrl/rest/s1/growerp/100/BackendUrl?version=$version&applicationId=$applicationId';
 ```
 
 ##### 5. Final URL Resolution Logic
@@ -251,7 +251,7 @@ The core backend URL selection logic is implemented in `flutter/packages/growerp
 #### Environment-Based URL Selection
 
 ```dart
-Future<void> getBackendUrlOverride(String classificationId, String version) async {
+Future<void> getBackendUrlOverride(String applicationId, String version) async {
   late String backendBaseUrl, backendUrl, databaseUrl, chatUrl, secure;
   
   if (kDebugMode) {
@@ -276,7 +276,7 @@ Future<void> getBackendUrlOverride(String classificationId, String version) asyn
 The function calls the backend discovery REST service:
 
 ```dart
-backendUrl = '$backendBaseUrl/rest/s1/growerp/100/BackendUrl?version=$version&applicationId=$classificationId';
+backendUrl = '$backendBaseUrl/rest/s1/growerp/100/BackendUrl?version=$version&applicationId=$applicationId';
 response = await http.get(Uri.parse(backendUrl));
 
 String? appBackendUrl = jsonDecode(response.body)['backendUrl'];
@@ -289,7 +289,7 @@ if (response.statusCode == 200 && appBackendUrl != null) {
 
 This call queries the `growerp.100.GeneralServices100.get#BackendUrl` service with:
 - **version**: Application version from `package_info_plus`
-- **applicationId**: The `classificationId` from app_settings.json
+- **applicationId**: The `applicationId` from app_settings.json
 
 ### Database Storage: PartyClassification Entity
 
@@ -326,7 +326,7 @@ The format allows for:
 
 The `growerp.100.GeneralServices100.get#BackendUrl` service:
 
-1. Queries `PartyClassification` using the provided `applicationId` (classificationId)
+1. Queries `PartyClassification` using the provided `applicationId` (applicationId)
 2. Evaluates version constraints in the `standardCode` field
 3. Returns the appropriate backend URL based on application version
 4. Enables dynamic routing between test and production environments
@@ -366,8 +366,8 @@ This script configures debug URLs for Docker-based testing environments.
 ### Configuration Flow Summary
 
 1. **Startup**: `app_settings.json` loaded via `GlobalConfiguration().loadFromAsset()`
-2. **Bootstrap**: Initial `classificationId`, `databaseUrl`, and `chatUrl` values set
-3. **Discovery**: `getBackendUrlOverride()` calls backend service with `classificationId` and version
+2. **Bootstrap**: Initial `applicationId`, `databaseUrl`, and `chatUrl` values set
+3. **Discovery**: `getBackendUrlOverride()` calls backend service with `applicationId` and version
 4. **Backend Query**: Service queries `PartyClassification` entity using `standardCode` field
 5. **URL Resolution**: Backend returns appropriate URL based on version and environment
 6. **Configuration Update**: `GlobalConfiguration` values updated with discovered URLs

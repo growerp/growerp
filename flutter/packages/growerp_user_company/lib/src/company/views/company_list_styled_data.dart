@@ -53,7 +53,7 @@ List<Widget> getCompanyListRow({
   required Bloc bloc,
 }) {
   bool isPhone = isAPhone(context);
-  var classificationId = context.read<String>();
+  var applicationId = context.read<String>();
   List<Widget> cells = [];
 
   if (isPhone) {
@@ -63,7 +63,7 @@ List<Widget> getCompanyListRow({
         child: company.image != null
             ? Image.memory(company.image!)
             : Text(
-                classificationId == 'AppSupport'
+                applicationId == 'AppSupport'
                     ? company.partyId!.lastChar(3)
                     : company.pseudoId == null
                     ? ''
@@ -75,7 +75,7 @@ List<Widget> getCompanyListRow({
     // ID
     cells.add(
       Text(
-        classificationId == 'AppSupport'
+        applicationId == 'AppSupport'
             ? (company.partyId ?? '')
             : (company.pseudoId ?? ''),
         key: Key('id$index'),
@@ -99,7 +99,7 @@ List<Widget> getCompanyListRow({
     cells.add(SizedBox(
       key: Key('item$index'),
       child: Text(
-        classificationId == 'AppSupport'
+        applicationId == 'AppSupport'
             ? (company.partyId ?? '')
             : (company.pseudoId ?? ''),
         key: Key('id$index'),

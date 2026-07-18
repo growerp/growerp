@@ -33,7 +33,7 @@ class ProductListState extends State<ProductList> {
   final _searchFocusNode = FocusNode();
   late ProductBloc _productBloc;
   List<Product> products = const <Product>[];
-  late String classificationId;
+  late String applicationId;
   late String entityName;
   late int limit;
   late double bottom;
@@ -48,8 +48,8 @@ class ProductListState extends State<ProductList> {
     _scrollController.addListener(_onScroll);
     _productBloc = context.read<ProductBloc>()
       ..add(const ProductFetch(refresh: true));
-    classificationId = context.read<String>();
-    entityName = classificationId == 'AppHotel' ? 'Room Type' : 'Product';
+    applicationId = context.read<String>();
+    entityName = applicationId == 'AppHotel' ? 'Room Type' : 'Product';
     bottom = 50;
     WidgetsBinding.instance.addPostFrameCallback(
       (_) => _searchFocusNode.requestFocus(),
@@ -72,14 +72,14 @@ class ProductListState extends State<ProductList> {
           product: product,
           index: index,
           bloc: _productBloc,
-          classificationId: classificationId,
+          applicationId: applicationId,
         );
       }).toList();
 
       return StyledDataTable(
         columns: getProductListColumns(
           context,
-          classificationId: classificationId,
+          applicationId: applicationId,
         ),
         rows: rows,
         isLoading: _isLoading && products.isEmpty,

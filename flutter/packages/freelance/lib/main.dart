@@ -48,11 +48,11 @@ Future main() async {
   GlobalConfiguration().updateValue('version', packageInfo.version);
   GlobalConfiguration().updateValue('build', packageInfo.buildNumber);
 
-  String classificationId = GlobalConfiguration().get("classificationId");
+  String applicationId = GlobalConfiguration().get("applicationId");
   // check if there is override for the production(now test) backend url
   // Also checks if force update is required
   final forceUpdateInfo = await getBackendUrlOverride(
-    classificationId,
+    applicationId,
     packageInfo.version,
   );
 
@@ -79,7 +79,7 @@ Future main() async {
   runApp(
     FreelanceApp(
       restClient: restClient,
-      classificationId: classificationId,
+      applicationId: applicationId,
       chatClient: chatClient,
       notificationClient: notificationClient,
       company: company,
@@ -92,7 +92,7 @@ class FreelanceApp extends StatefulWidget {
   const FreelanceApp({
     super.key,
     required this.restClient,
-    required this.classificationId,
+    required this.applicationId,
     required this.chatClient,
     required this.notificationClient,
     this.company,
@@ -100,7 +100,7 @@ class FreelanceApp extends StatefulWidget {
   });
 
   final RestClient restClient;
-  final String classificationId;
+  final String applicationId;
   final WsClient chatClient;
   final WsClient notificationClient;
   final Company? company;
@@ -184,7 +184,7 @@ class _FreelanceAppState extends State<FreelanceApp> {
 
           return TopApp(
             restClient: widget.restClient,
-            classificationId: widget.classificationId,
+            applicationId: widget.applicationId,
             chatClient: widget.chatClient,
             notificationClient: widget.notificationClient,
             title: 'GrowERP Freelance.',
@@ -202,15 +202,15 @@ class _FreelanceAppState extends State<FreelanceApp> {
             extraBlocProviders: [
               ...getUserCompanyBlocProviders(
                 widget.restClient,
-                widget.classificationId,
+                widget.applicationId,
               ),
               ...getCatalogBlocProviders(
                 widget.restClient,
-                widget.classificationId,
+                widget.applicationId,
               ),
               ...getOrderAccountingBlocProviders(
                 widget.restClient,
-                widget.classificationId,
+                widget.applicationId,
               ),
               ...getSalesBlocProviders(widget.restClient),
               ...getWebsiteBlocProviders(widget.restClient),

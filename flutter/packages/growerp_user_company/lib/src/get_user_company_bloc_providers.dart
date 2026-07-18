@@ -5,7 +5,7 @@ import '../growerp_user_company.dart';
 
 List<BlocProvider> getUserCompanyBlocProviders(
   RestClient restClient,
-  String classificationId,
+  String applicationId,
 ) {
   List<BlocProvider> blocProviders = [
     BlocProvider<CompanyUserBloc>(

@@ -13,7 +13,7 @@ Flutter                          Moqui (Groovy)                Gemini
 ──────                           ──────────────                ──────
 OnboardingDialog
   │ POST /rest/s1/growerp/100/OnboardingChat
-  │  { classificationId,    ──► onboardingChat.groovy
+  │  { applicationId,    ──► onboardingChat.groovy
   │    systemPrompt,             │ flattens history → prompt
   │    messages (history) }      │ POST generateContent    ──► gemini-3.5-flash
   │                              │                         ◄── A2UI JSONL text
@@ -46,7 +46,7 @@ OnboardingDialog
 | `domains/onboarding/widgets/options_card.dart` | Single/multi-select chip questions |
 | `domains/onboarding/widgets/menu_preview_card.dart` | Shows AI-proposed menu, confirm or adjust |
 | `domains/onboarding/widgets/finalize_menu_widget.dart` | Terminal widget — triggers menu save |
-| `domains/onboarding/bloc/onboarding_bloc.dart` | Minimal cubit — holds `classificationId` only; conversation state owned by genui |
+| `domains/onboarding/bloc/onboarding_bloc.dart` | Minimal cubit — holds `applicationId` only; conversation state owned by genui |
 
 ### Models (`growerp_models`)
 `OnboardingMenuConfig`, `OnboardingMenuItem` — carry the finalised menu from Gemini back to Flutter.

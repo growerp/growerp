@@ -32,19 +32,19 @@ Future main() async {
   GlobalConfiguration().updateValue('build', packageInfo.buildNumber);
 
   RestClient restClient = RestClient(await buildDioClient());
-  String classificationId = GlobalConfiguration().get("classificationId");
+  String applicationId = GlobalConfiguration().get("applicationId");
   Bloc.observer = AppBlocObserver();
 
   runApp(
     TopApp(
       restClient: restClient,
-      classificationId: classificationId,
+      applicationId: applicationId,
       chatClient: WsClient('chat'),
       notificationClient: WsClient('notws'),
       title: 'GrowERP Activity Example',
       router: createActivityExampleRouter(),
       extraDelegates: extraDelegates,
-      extraBlocProviders: getExampleBlocProviders(restClient, classificationId),
+      extraBlocProviders: getExampleBlocProviders(restClient, applicationId),
     ),
   );
 }

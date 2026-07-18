@@ -33,7 +33,7 @@ Future addRentalItemDialog(
   Product? selectedProduct;
   DateTime startDate = CustomizableDateTime.current;
   List<DateTime> rentalDays = [];
-  String classificationId = context.read<String>();
+  String applicationId = context.read<String>();
   quantityController.text = quantityController.text == ''
       ? '1'
       : quantityController.text; // Default quantity for rental items is 1 day
@@ -182,7 +182,7 @@ Future addRentalItemDialog(
                                             focusNode: focusNode,
                                             decoration: InputDecoration(
                                               labelText:
-                                                  classificationId == 'AppHotel'
+                                                  applicationId == 'AppHotel'
                                                   ? 'Room Type'
                                                   : 'Product',
                                             ),

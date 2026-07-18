@@ -18,7 +18,10 @@ along with this software (see the LICENSE.md file). If not, see
     <service verb="get" noun="Product" authenticate="false">
         <description> get a single, or all products</description>
         <in-parameters>
-            <parameter name="classificationId" default="AppAdmin" /><!-- AppHotel AppXXXXX-->
+            <parameter name="applicationId" /><!-- AppHotel AppXXXXX-->
+            <parameter name="classificationId">
+                <description>Deprecated alias for applicationId, kept for old clients</description>
+            </parameter>
             <parameter name="ownerPartyId" />
             <parameter name="pseudoId" />
             <parameter name="categoryId" />
@@ -65,6 +68,7 @@ along with this software (see the LICENSE.md file). If not, see
             </parameter>
         </out-parameters>
         <actions>
+            <set field="applicationId" from="applicationId ?: classificationId ?: 'AppAdmin'" />
             <!-- if requested always show products of GROWERP -->
             <if condition="ownerPartyId != 'GROWERP'">
                 <set field="ownerPartyId" from="ec.user.userAccount.partyId" />
@@ -157,7 +161,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <set field="categories" from="[]" />
                 </if>
                 <if condition="!lastItem || lastItem.productId != product.productId">
-                    <if condition="classificationId == 'AppHotel'">
+                    <if condition="applicationId == 'AppHotel'">
                         <entity-find-count entity-name="mantle.product.asset.Asset"
                             count-field="assetCount">
                             <econdition field-name="productId" from="product.productId" />
@@ -261,7 +265,10 @@ along with this software (see the LICENSE.md file). If not, see
     <service verb="create" noun="Product">
         <description> Create a Product with a price in a category</description>
         <in-parameters>
-            <parameter name="classificationId" required="true" />
+            <parameter name="applicationId" />
+            <parameter name="classificationId">
+                <description>Deprecated alias for applicationId, kept for old clients</description>
+            </parameter>
             <parameter name="product" required="true" type="Map">
                 <parameter name="pseudoId" />
                 <parameter name="productTypeId" />
@@ -319,6 +326,7 @@ along with this software (see the LICENSE.md file). If not, see
             </parameter>
         </out-parameters>
         <actions>
+            <set field="applicationId" from="applicationId ?: classificationId" />
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <!-- convert AssetClassId and product type-->
@@ -405,7 +413,7 @@ along with this software (see the LICENSE.md file). If not, see
                         product: newProduct,
                         statusId: 'Available']" />
                 <service-call name="growerp.100.InventoryServices100.create#Asset"
-                    in-map="[asset: inMap, classificationId: classificationId]" />
+                    in-map="[asset: inMap, applicationId: applicationId]" />
             </if>
             <!-- product Image -->
             <if condition="product.image != null &amp;&amp; product.image != ''">

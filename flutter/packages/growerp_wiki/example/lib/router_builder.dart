@@ -63,9 +63,9 @@ GoRouter createWikiExampleRouter() {
 /// BLoC providers for the wiki example app.
 List<BlocProvider> getExampleBlocProviders(
   RestClient restClient,
-  String classificationId,
+  String applicationId,
 ) {
-  return [...getUserCompanyBlocProviders(restClient, classificationId)];
+  return [...getUserCompanyBlocProviders(restClient, applicationId)];
 }
 
 /// Localizations delegates for the wiki example app.

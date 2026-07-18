@@ -48,7 +48,7 @@ class LoginDialogState extends State<LoginDialog> {
   late bool _obscureText3;
   late bool _obscureText4;
   late AuthBloc _authBloc;
-  late String _classification;
+  late String _application;
   late User? user;
   late String? moquiSessionToken; // in login process used for password
   String? furtherAction;
@@ -62,7 +62,7 @@ class LoginDialogState extends State<LoginDialog> {
   void initState() {
     super.initState();
     _authBloc = context.read<AuthBloc>();
-    _classification = context.read<String>();
+    _application = context.read<String>();
     authenticate = _authBloc.state.authenticate!;
     _obscureText = true;
     _obscureText3 = true;
@@ -118,11 +118,11 @@ class LoginDialogState extends State<LoginDialog> {
                   // classification makes user.appsUsed non-empty next time.
                   if (context.mounted) {
                     try {
-                      final classificationId =
-                          context.read<AuthBloc>().classificationId;
+                      final applicationId =
+                          context.read<AuthBloc>().applicationId;
                       await context
                           .read<RestClient>()
-                          .registerAppUsed(classificationId: classificationId);
+                          .registerAppUsed(applicationId: applicationId);
                     } catch (_) {
                       // Non-fatal: if registration fails the dialog may show
                       // again next login, but login itself must not break.
@@ -294,12 +294,12 @@ class LoginDialogState extends State<LoginDialog> {
         authenticate.user?.loginName ??
         (kReleaseMode
             ? ''
-            : _classification == 'AppSupport'
+            : _application == 'AppSupport'
             ? 'SystemSupport'
             : 'test@example.com');
     String defaultPassword = kReleaseMode
         ? ''
-        : _classification == 'AppSupport'
+        : _application == 'AppSupport'
         ? 'moqui'
         : 'qqqqqq9!';
 

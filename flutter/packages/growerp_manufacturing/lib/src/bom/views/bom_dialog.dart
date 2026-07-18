@@ -31,7 +31,7 @@ class BomDialog extends StatefulWidget {
 class BomDialogState extends State<BomDialog> {
   late BomBloc _bomBloc;
   late RestClient _restClient;
-  late String _classificationId;
+  late String _applicationId;
 
   // New BOM creation fields (used when widget.bom == null)
   final _pseudoIdController = TextEditingController();
@@ -69,7 +69,7 @@ class BomDialogState extends State<BomDialog> {
     super.initState();
     _bomBloc = context.read<BomBloc>();
     _restClient = _bomBloc.restClient;
-    _classificationId = context.read<String>();
+    _applicationId = context.read<String>();
     if (widget.bom != null) {
       _bomBloc.add(BomFetch(productId: widget.bom!.productId, refresh: true));
     }
@@ -317,7 +317,7 @@ class BomDialogState extends State<BomDialog> {
           useWarehouse: true,
           assetClassId: 'AsClsInventoryFin',
         ),
-        classificationId: _classificationId,
+        applicationId: _applicationId,
       );
       if (!mounted) return;
       setState(() {

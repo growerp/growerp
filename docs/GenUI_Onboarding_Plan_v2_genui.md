@@ -31,14 +31,14 @@ Phase 3 = global command bar inline (future).
 **Architecture:**
 ```
 Flutter (genui Conversation + Surface)
-  → POST /rest/s1/growerp/100/OnboardingChat  {messages, systemPrompt, classificationId}
+  → POST /rest/s1/growerp/100/OnboardingChat  {messages, systemPrompt, applicationId}
       → Moqui (onboardingChat.groovy)
           → GeminiAiUtil.callGeminiApi (text generation, A2UI JSONL output)
           ← raw A2UI JSONL string
       ← {jsonl: "...A2UI JSONL..."}
   ← A2uiTransportAdapter yields JSONL → SurfaceController parses → Surface rebuilds
   → user confirms FinalizeMenu widget
-  → POST /rest/s1/growerp/100/OnboardingSave  {classificationId, menuConfig, conversation}
+  → POST /rest/s1/growerp/100/OnboardingSave  {applicationId, menuConfig, conversation}
       → saves MenuConfig + ChatRoom conversation record
 ```
 
@@ -85,9 +85,9 @@ part 'onboarding_models.g.dart';
 @JsonSerializable(explicitToJson: true)
 class OnboardingMenuConfig {
   final String name;
-  final String classificationId;  // AppAdmin | AppHotel | AppFreelance | ...
+  final String applicationId;  // AppAdmin | AppHotel | AppFreelance | ...
   final List<OnboardingMenuItem> menuItems;
-  const OnboardingMenuConfig({required this.name, required this.classificationId, required this.menuItems});
+  const OnboardingMenuConfig({required this.name, required this.applicationId, required this.menuItems});
   factory OnboardingMenuConfig.fromJson(Map<String, dynamic> j) => _$OnboardingMenuConfigFromJson(j);
   Map<String, dynamic> toJson() => _$OnboardingMenuConfigToJson(this);
 }
@@ -122,12 +122,12 @@ Two endpoints — chat (returns A2UI JSONL) and save (persists result):
 
 ```dart
 /// Returns A2UI JSONL text for genui's A2uiTransportAdapter to parse.
-/// Body: {messages: [...], systemPrompt: "...", classificationId: "..."}
+/// Body: {messages: [...], systemPrompt: "...", applicationId: "..."}
 @POST("rest/s1/growerp/100/OnboardingChat")
 Future<Map<String, dynamic>> chatOnboarding(@Body() Map<String, dynamic> body);
 
 /// Persists confirmed menu config + conversation to backend.
-/// Body: {classificationId: "...", menuConfig: {...}, conversation: [...]}
+/// Body: {applicationId: "...", menuConfig: {...}, conversation: [...]}
 @POST("rest/s1/growerp/100/OnboardingSave")
 Future<void> saveOnboarding(@Body() Map<String, dynamic> body);
 ```
@@ -166,7 +166,7 @@ After the `ChatRoom` block (line ~781), inside `<resource name="100">`:
     <in-parameters>
       <parameter name="messages"      type="List"   required="true" />
       <parameter name="systemPrompt"  type="String" required="true" />
-      <parameter name="classificationId" required="true" />
+      <parameter name="applicationId" required="true" />
     </in-parameters>
     <out-parameters>
       <parameter name="jsonl" />  <!-- raw A2UI JSONL string -->
@@ -179,7 +179,7 @@ After the `ChatRoom` block (line ~781), inside `<resource name="100">`:
   <!-- Called once when user confirms the menu. Saves config + chat log. -->
   <service verb="save" noun="Onboarding" authenticate="true">
     <in-parameters>
-      <parameter name="classificationId" required="true" />
+      <parameter name="applicationId" required="true" />
       <parameter name="menuConfig"   type="Map"  required="true" />
       <parameter name="conversation" type="List" required="true" />
     </in-parameters>
@@ -235,7 +235,7 @@ ExecutionContext ec = context.ec ?: context
 
 // 1. Save MenuConfiguration via existing service
 ec.service.sync().name("growerp.100.GeneralServices100.save#MenuConfiguration")
-    .parameters([classificationId: classificationId, menuConfig: menuConfig])
+    .parameters([applicationId: applicationId, menuConfig: menuConfig])
     .call()
 
 // 2. Persist conversation to ChatRoom (support app can read it)
@@ -244,8 +244,8 @@ def ownerResult = ec.service.sync()
 
 // Room name: first 60 chars of user's first message + app + date
 def firstUserText = conversation.find { it.role == "user" }
-    ?.parts?.find { it.text }?.text?.take(60) ?: classificationId
-def roomName = "Onboarding: ${firstUserText} [${classificationId}] ${new Date().format('yyyy-MM-dd')}"
+    ?.parts?.find { it.text }?.text?.take(60) ?: applicationId
+def roomName = "Onboarding: ${firstUserText} [${applicationId}] ${new Date().format('yyyy-MM-dd')}"
 
 def roomResult = ec.service.sync()
     .name("growerp.100.ChatServices100.create#ChatRoom")
@@ -338,7 +338,7 @@ class WelcomeCardItem extends StatelessWidget {
 ### 5e. `widgets/finalize_menu_widget.dart`
 
 ```dart
-// CatalogItem schema: {name, classificationId, menuItems: [...]}
+// CatalogItem schema: {name, applicationId, menuItems: [...]}
 // This widget is never shown to user — it triggers onFinalize callback when rendered
 // onFinalize called with parsed OnboardingMenuConfig
 // Then Flutter calls saveOnboarding + MenuConfigSave
@@ -370,21 +370,21 @@ class _OnboardingDialogState extends State<OnboardingDialog> {
   void initState() {
     super.initState();
     final restClient = context.read<RestClient>();
-    final classificationId = context.read<OnboardingBloc>().classificationId;
+    final applicationId = context.read<OnboardingBloc>().applicationId;
 
     _catalog = buildOnboardingCatalog(
       onFinalize: (menuConfig) => _handleCompletion(menuConfig),
     );
     _surfaceCtrl = SurfaceController(catalogs: [_catalog]);
 
-    final systemPrompt = OnboardingPrompts.forApp(classificationId, _catalog);
+    final systemPrompt = OnboardingPrompts.forApp(applicationId, _catalog);
 
     _conversation = Conversation(
       controller: _surfaceCtrl,
       transport: A2uiTransportAdapter(
         onSend: (messages) async* {
           final result = await restClient.chatOnboarding({
-            'classificationId': classificationId,
+            'applicationId': applicationId,
             'systemPrompt': systemPrompt,
             'messages': messages.map((m) => m.toJson()).toList(),
           });
@@ -399,12 +399,12 @@ class _OnboardingDialogState extends State<OnboardingDialog> {
 
   void _handleCompletion(OnboardingMenuConfig menuConfig) async {
     await context.read<RestClient>().saveOnboarding({
-      'classificationId': menuConfig.classificationId,
+      'applicationId': menuConfig.applicationId,
       'menuConfig': menuConfig.toJson(),
       'conversation': _conversation.messages.map((m) => m.toJson()).toList(),
     });
     context.read<MenuConfigBloc>().add(MenuConfigSave(MenuConfiguration(
-      appId: menuConfig.classificationId,
+      appId: menuConfig.applicationId,
       name: menuConfig.name,
       menuItems: menuConfig.menuItems.map((item) => MenuItem(
         title: item.title, iconName: item.iconName, route: item.route ?? '',
@@ -481,10 +481,10 @@ class _OnboardingDialogState extends State<OnboardingDialog> {
 import 'package:genui/genui.dart';
 
 class OnboardingPrompts {
-  static String forApp(String classificationId, Catalog catalog) {
+  static String forApp(String applicationId, Catalog catalog) {
     final catalogSpec = PromptBuilder.chat(
       catalog: catalog,
-      systemPromptFragments: [_appInstructions[classificationId] ?? _appInstructions['AppAdmin']!],
+      systemPromptFragments: [_appInstructions[applicationId] ?? _appInstructions['AppAdmin']!],
     ).systemPromptJoined();
     return catalogSpec;
   }
@@ -507,7 +507,7 @@ Flow:
    LedgerTreeForm (route:/acct-ledger), RevenueExpenseChart (route:/acct-reports),
    UserListEmployee (route:/companies), ContentPlanList (route:/marketing),
    CourseList (route:/courses), WebsiteDialog (route:/website)
-4. FinalizeMenu — classificationId = 'AppAdmin'
+4. FinalizeMenu — applicationId = 'AppAdmin'
 Rules: ONE widget per response. Generate every label from context. No GrowERP jargon.''',
 
     'AppHotel': '''
@@ -524,7 +524,7 @@ Flow:
    SalesInvoiceList (route:/acct-sales), PurchaseInvoiceList (route:/acct-purchase),
    LedgerTreeForm (route:/acct-ledger), RevenueExpenseChart (route:/acct-reports),
    UserListCompany (route:/myHotel), WebsiteDialog (route:/myHotel)
-4. FinalizeMenu — classificationId = 'AppHotel'
+4. FinalizeMenu — applicationId = 'AppHotel'
 Rules: ONE widget per response. Hotel language: "Front Desk" not "CheckInList".''',
 
     'AppFreelance': '''
@@ -540,7 +540,7 @@ Flow:
    PurchaseInvoiceList (route:/acct-purchase), RevenueExpenseChart (route:/acct-reports),
    ContentPlanList (route:/marketing), WebsiteDialog (route:/website),
    ProductList (route:/catalog)
-4. FinalizeMenu — classificationId = 'AppFreelance'
+4. FinalizeMenu — applicationId = 'AppFreelance'
 Rules: ONE widget per response. Use: "Clients" not "Customers", "Projects" not "Orders".''',
   };
 }
@@ -554,19 +554,19 @@ Rules: ONE widget per response. Use: "Clients" not "Customers", "Projects" not "
 
 **File:** `flutter/packages/growerp_core/lib/src/get_core_bloc_providers.dart`
 
-`OnboardingBloc` is now minimal — it only holds `classificationId` for the dialog to read. The conversation state is owned by genui's `Conversation` inside the dialog's `State`.
+`OnboardingBloc` is now minimal — it only holds `applicationId` for the dialog to read. The conversation state is owned by genui's `Conversation` inside the dialog's `State`.
 
 ```dart
 BlocProvider<OnboardingBloc>(
-  create: (context) => OnboardingBloc(classificationId),
+  create: (context) => OnboardingBloc(applicationId),
 ),
 ```
 
-`OnboardingBloc` has no events — just a cubit holding `classificationId`:
+`OnboardingBloc` has no events — just a cubit holding `applicationId`:
 ```dart
 class OnboardingBloc extends Cubit<void> {
-  OnboardingBloc(this.classificationId) : super(null);
-  final String classificationId;
+  OnboardingBloc(this.applicationId) : super(null);
+  final String applicationId;
 }
 ```
 
@@ -726,7 +726,7 @@ Reuses `ChatRoomBloc` (fetch with `namePrefix: 'Onboarding:'`), `ChatDialog`, `C
    ```bash
    curl -X POST http://localhost:8080/rest/s1/growerp/100/OnboardingChat \
      -H "api_key: <session_token>" -H "Content-Type: application/json" \
-     -d '{"classificationId":"AppAdmin","systemPrompt":"...","messages":[{"role":"user","parts":[{"text":"Start."}]}]}'
+     -d '{"applicationId":"AppAdmin","systemPrompt":"...","messages":[{"role":"user","parts":[{"text":"Start."}]}]}'
    # Expect: {"jsonl": "{\"v\":\"0.9\",\"op\":\"set\",...\"type\":\"WelcomeCard\"...}"}
    ```
 

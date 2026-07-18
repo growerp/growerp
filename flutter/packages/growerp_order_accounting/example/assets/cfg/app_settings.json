@@ -3,7 +3,7 @@
     "packageName": "",
     "version": "",
     "build": "",
-    "classificationId": "AppAdmin",
+    "applicationId": "AppAdmin",
     "_________________comment__backend": "moqui / ofbiz",
     "backend": "moqui",
     "_________________comment__production url NOT _end forwardslash!": "https://rest.example.com",

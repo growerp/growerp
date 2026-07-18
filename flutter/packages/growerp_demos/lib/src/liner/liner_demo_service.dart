@@ -83,12 +83,12 @@ Future<Product?> _findProduct(RestClient rc, String pseudoId) async {
 
 Future<Product> _ensureProduct(
   RestClient rc,
-  String classificationId,
+  String applicationId,
   Product product,
 ) async {
   final existing = await _findProduct(rc, product.pseudoId);
   if (existing != null) return existing;
-  return rc.createProduct(product: product, classificationId: classificationId);
+  return rc.createProduct(product: product, applicationId: applicationId);
 }
 
 Future<Company> _ensureCompany(RestClient rc, Company company) async {
@@ -113,11 +113,11 @@ Future<LinerType?> _findLinerType(RestClient rc, String name) async {
 /// Phase 0 – Create products, BOM, liner types, and companies.
 Future<String> linerSetupData(
   RestClient rc,
-  String classificationId,
+  String applicationId,
   String ownerPartyId,
 ) async {
   for (final p in _products) {
-    await _ensureProduct(rc, classificationId, p);
+    await _ensureProduct(rc, applicationId, p);
   }
 
   final system = await _findProduct(rc, _systemId);
@@ -164,7 +164,7 @@ Future<String> linerSetupData(
 /// Phase 1 – Create production routing with four tasks.
 Future<String> linerCreateRouting(
   RestClient rc,
-  String classificationId,
+  String applicationId,
   String ownerPartyId,
 ) async {
   final existing = await rc.getRoutings(search: _routingName, limit: 5);
@@ -204,7 +204,7 @@ Future<String> linerCreateRouting(
 /// Phase 2 – Create a sales order for 1× Pond Liner System.
 Future<String> linerCreateSalesOrder(
   RestClient rc,
-  String classificationId,
+  String applicationId,
   String ownerPartyId,
 ) async {
   final system = await _findProduct(rc, _systemId);
@@ -244,7 +244,7 @@ Future<String> linerCreateSalesOrder(
 /// Phase 3 – Approve sales order → backend auto-creates a Work Order.
 Future<String> linerApproveSalesOrder(
   RestClient rc,
-  String classificationId,
+  String applicationId,
   String ownerPartyId,
 ) async {
   final soId = await linerDemoProgress.getSalesOrderId(ownerPartyId);
@@ -269,7 +269,7 @@ Future<String> linerApproveSalesOrder(
 /// Phase 4 – Assign routing and add liner panels to the Work Order.
 Future<String> linerAddPanelsToWorkOrder(
   RestClient rc,
-  String classificationId,
+  String applicationId,
   String ownerPartyId,
 ) async {
   final wos = await rc.getWorkOrder(search: _systemId, limit: 5);
@@ -318,7 +318,7 @@ Future<String> linerAddPanelsToWorkOrder(
 /// Phase 5 – Purchase 5 rolls of roll stock and complete payment.
 Future<String> linerPurchaseRollStock(
   RestClient rc,
-  String classificationId,
+  String applicationId,
   String ownerPartyId,
 ) async {
   final suppliers = await rc.getCompany(
@@ -378,7 +378,7 @@ Future<String> linerPurchaseRollStock(
 /// Phase 6 – Approve and receive the incoming shipment.
 Future<String> linerReceiveRollStock(
   RestClient rc,
-  String classificationId,
+  String applicationId,
   String ownerPartyId,
 ) async {
   final shipments = await rc.getFinDoc(
@@ -414,7 +414,7 @@ Future<String> linerReceiveRollStock(
 /// Phase 7 – Release, start, and complete the Work Order.
 Future<String> linerCompleteProduction(
   RestClient rc,
-  String classificationId,
+  String applicationId,
   String ownerPartyId,
 ) async {
   WorkOrders wos = await rc.getWorkOrder(search: _systemId, limit: 5);
@@ -454,7 +454,7 @@ Future<String> linerCompleteProduction(
 /// Phase 8 – Ship to customer and collect payment.
 Future<String> linerShipAndCollect(
   RestClient rc,
-  String classificationId,
+  String applicationId,
   String ownerPartyId,
 ) async {
   final shipments = await rc.getFinDoc(
@@ -497,7 +497,7 @@ Future<String> linerShipAndCollect(
 /// Phase 9 – Recalculate ledger and statistics.
 Future<String> linerUpdateStats(
   RestClient rc,
-  String classificationId,
+  String applicationId,
   String ownerPartyId,
 ) async {
   await rc.calculateLedger();

@@ -42,10 +42,10 @@ Future main() async {
   GlobalConfiguration().updateValue('version', packageInfo.version);
   GlobalConfiguration().updateValue('build', packageInfo.buildNumber);
 
-  String classificationId = GlobalConfiguration().get("classificationId");
+  String applicationId = GlobalConfiguration().get("applicationId");
   // Also checks if force update is required
   final forceUpdateInfo = await getBackendUrlOverride(
-    classificationId,
+    applicationId,
     packageInfo.version,
   );
 
@@ -73,7 +73,7 @@ Future main() async {
   runApp(
     SupportApp(
       restClient: restClient,
-      classificationId: classificationId,
+      applicationId: applicationId,
       chatClient: chatClient,
       notificationClient: notificationClient,
       company: company,
@@ -86,7 +86,7 @@ class SupportApp extends StatefulWidget {
   const SupportApp({
     super.key,
     required this.restClient,
-    required this.classificationId,
+    required this.applicationId,
     required this.chatClient,
     required this.notificationClient,
     this.company,
@@ -94,7 +94,7 @@ class SupportApp extends StatefulWidget {
   });
 
   final RestClient restClient;
-  final String classificationId;
+  final String applicationId;
   final WsClient chatClient;
   final WsClient notificationClient;
   final Company? company;
@@ -170,7 +170,7 @@ class _SupportAppState extends State<SupportApp> {
 
           return TopApp(
             restClient: widget.restClient,
-            classificationId: widget.classificationId,
+            applicationId: widget.applicationId,
             chatClient: widget.chatClient,
             notificationClient: widget.notificationClient,
             title: 'GrowERP System Support.',
@@ -178,7 +178,7 @@ class _SupportAppState extends State<SupportApp> {
             extraDelegates: delegates,
             extraBlocProviders: getSupportBlocProviders(
               widget.restClient,
-              widget.classificationId,
+              widget.applicationId,
             ),
             company: widget.company,
             widgetRegistrations: supportWidgetRegistrations,
@@ -208,10 +208,10 @@ List<Map<String, GrowerpWidgetBuilder>> supportWidgetRegistrations = [
 
 List<BlocProvider> getSupportBlocProviders(
   RestClient restClient,
-  String classificationId,
+  String applicationId,
 ) {
   return [
-    ...getUserCompanyBlocProviders(restClient, classificationId),
+    ...getUserCompanyBlocProviders(restClient, applicationId),
     BlocProvider<ApplicationBloc>(
       create: (context) => ApplicationBloc(restClient),
     ),

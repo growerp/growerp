@@ -3,7 +3,7 @@
     "packageName": "",
     "version": "",
     "build": "",
-    "classificationId": "AppFreelance",
+    "applicationId": "AppFreelance",
     "_________________comment__backend(only moqui is active)": "moqui / ofbiz",
     "backend": "moqui",
     "_________________example:": "https://rest.example.com",

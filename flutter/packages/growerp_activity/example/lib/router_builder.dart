@@ -76,11 +76,11 @@ GoRouter createActivityExampleRouter() {
 /// Used by both the production app (main.dart) and all integration tests.
 List<BlocProvider> getExampleBlocProviders(
   RestClient restClient,
-  String classificationId,
+  String applicationId,
 ) {
   return [
-    ...getActivityBlocProviders(restClient, classificationId),
-    ...getUserCompanyBlocProviders(restClient, classificationId),
+    ...getActivityBlocProviders(restClient, applicationId),
+    ...getUserCompanyBlocProviders(restClient, applicationId),
   ];
 }
 

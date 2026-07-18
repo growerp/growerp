@@ -274,7 +274,7 @@ Future<void> selectSalesInvoices(WidgetTester tester) async {
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
-  String classificationId = 'AppHotel';
+  String applicationId = 'AppHotel';
 
   setUp(() async {
     await GlobalConfiguration().loadFromAsset("app_settings");
@@ -290,8 +290,8 @@ void main() {
       hotelTestMenuConfig,
       delegates,
       restClient: restClient,
-      blocProviders: getHotelBlocProviders(restClient, classificationId),
-      classificationId: classificationId,
+      blocProviders: getHotelBlocProviders(restClient, applicationId),
+      applicationId: applicationId,
       clear: true,
       title: 'Hotel reservation Test',
     );
@@ -307,19 +307,19 @@ void main() {
       tester,
       FinDocType.order,
       rental: true,
-      classificationId: 'AppHotel',
+      applicationId: 'AppHotel',
     );
     await OrderTest.checkRentalSalesOrderBlocDates(tester);
-    await OrderTest.approveOrders(tester, classificationId: classificationId);
+    await OrderTest.approveOrders(tester, applicationId: applicationId);
     await selectSalesInvoices(tester);
     await InvoiceTest.checkInvoices(tester);
     await InvoiceTest.sendOrApproveInvoices(tester);
     await CommonTest.gotoMainMenu(tester);
     await selectReservations(tester);
-    await OrderTest.completeOrders(tester, classificationId: classificationId);
+    await OrderTest.completeOrders(tester, applicationId: applicationId);
     await OrderTest.checkOrderCompleted(
       tester,
-      classificationId: classificationId,
+      applicationId: applicationId,
     );
     await CommonTest.logout(tester);
   }, skip: false);

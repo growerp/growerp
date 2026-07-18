@@ -5,12 +5,12 @@ import '../growerp_inventory.dart';
 
 List<BlocProvider> getInventoryBlocProviders(
   RestClient restClient,
-  String classificationId,
+  String applicationId,
 ) {
   List<BlocProvider> blocProviders = [
     BlocProvider<LocationBloc>(create: (context) => LocationBloc(restClient)),
     BlocProvider<AssetBloc>(
-      create: (context) => AssetBloc(restClient, classificationId),
+      create: (context) => AssetBloc(restClient, applicationId),
     ),
   ];
   return blocProviders;

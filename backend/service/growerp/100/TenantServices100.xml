@@ -25,7 +25,7 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="adminFirstName" required="true"/>
             <parameter name="adminLastName" required="true"/>
             <parameter name="password" default="org.moqui.util.StringUtilities.getRandomString(6) + '9!'"/>
-            <parameter name="classificationId" required="true"/>
+            <parameter name="applicationId" required="true"/>
             <parameter name="timeZoneOffset"/>
             <parameter name="locale"/>
         </in-parameters>
@@ -94,7 +94,7 @@ along with this software (see the LICENSE.md file). If not, see
 
             <!-- Create admin user with company -->
             <service-call name="growerp.100.PartyServices100.create#User"
-                in-map="[user: user, password: password, ownerPartyId: ownerPartyId, classificationId: classificationId]"
+                in-map="[user: user, password: password, ownerPartyId: ownerPartyId, applicationId: applicationId]"
                 out-map="userResult"/>
 
             <set field="adminPartyId" from="userResult.user.partyId"/>
@@ -103,7 +103,7 @@ along with this software (see the LICENSE.md file). If not, see
 
             <!-- Create TenantSetup record (not complete yet) -->
             <service-call name="create#growerp.general.TenantSetup"
-                in-map="[ownerPartyId: ownerPartyId, setupComplete: 'N', classificationId: classificationId]"/>
+                in-map="[ownerPartyId: ownerPartyId, setupComplete: 'N', applicationId: applicationId]"/>
 
             <!-- Create event for system tracking -->
             <service-call name="growerp.100.ActivityServices100.create#Event"
@@ -122,7 +122,7 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="companyName" required="true"/>
             <parameter name="currencyId" required="true"/>
             <parameter name="demoData" type="Boolean" default="false"/>
-            <parameter name="classificationId" required="true"/>
+            <parameter name="applicationId" required="true"/>
             <parameter name="userPartyId" required="true"/>
             <parameter name="hostName"/>
             <parameter name="timeZoneOffset"/>
@@ -152,12 +152,12 @@ along with this software (see the LICENSE.md file). If not, see
             <!-- Setup main organization (product store, warehouse, wiki, etc.) -->
             <service-call name="growerp.100.PartyServices100.setup#MainOrganization"
                 in-map="[ownerPartyId: ownerPartyId, userPartyId: userPartyId, companyPartyId: companyPartyId, 
-                         classificationId: classificationId, hostName: hostName]"/>
+                         applicationId: applicationId, hostName: hostName]"/>
 
             <!-- App-specific setup -->
             <service-call name="growerp.100.PartyServices100.setup#SpecificApp"
                 in-map="[ownerPartyId: ownerPartyId, companyPartyId: companyPartyId,
-                         userPartyId: userPartyId, classificationId: classificationId,
+                         userPartyId: userPartyId, applicationId: applicationId,
                          demoData: demoData,
                          currencyId: currencyId, timeZoneOffset: timeZoneOffset]"/>
 
@@ -706,7 +706,7 @@ along with this software (see the LICENSE.md file). If not, see
         <out-parameters>
             <parameter name="setupComplete" type="Boolean"/>
             <parameter name="setupCompletedDate" type="Timestamp"/>
-            <parameter name="classificationId"/>
+            <parameter name="applicationId"/>
         </out-parameters>
         <actions>
             <entity-find-one entity-name="growerp.general.TenantSetup" value-field="tenantSetup">
@@ -716,7 +716,7 @@ along with this software (see the LICENSE.md file). If not, see
             <if condition="tenantSetup">
                 <set field="setupComplete" from="tenantSetup.setupComplete == 'Y'" type="Boolean"/>
                 <set field="setupCompletedDate" from="tenantSetup.setupCompletedDate"/>
-                <set field="classificationId" from="tenantSetup.classificationId"/>
+                <set field="applicationId" from="tenantSetup.applicationId"/>
             <else>
                 <set field="setupComplete" value="false" type="Boolean"/>
             </else>

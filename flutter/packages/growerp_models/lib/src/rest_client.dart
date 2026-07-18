@@ -43,7 +43,7 @@ abstract class RestClient {
   @Extra({'noApiKey': true})
   @FormUrlEncoded()
   Future<Authenticate> register({
-    @Field() required String classificationId,
+    @Field() required String applicationId,
     @Field() required String firstName,
     @Field() required String lastName,
     @Field() required String email,
@@ -70,7 +70,7 @@ abstract class RestClient {
     @Field() String? companyName,
     @Field() String? currencyId,
     @Field() bool? demoData,
-    @Field() required String classificationId,
+    @Field() required String applicationId,
     @Field() String? timeZoneOffset,
     @Field() int? testDaysOffset,
   });
@@ -93,7 +93,7 @@ abstract class RestClient {
     @Field() required String username,
     @Field() required String oldPassword,
     @Field() required String newPassword,
-    @Field() required String classificationId,
+    @Field() required String applicationId,
   });
 
   @GET("rest/s1/growerp/100/Companies")
@@ -119,7 +119,7 @@ abstract class RestClient {
 
   @GET("rest/s1/growerp/100/Authenticate")
   Future<Authenticate> getAuthenticate({
-    @Query('classificationId') required String classificationId,
+    @Query('applicationId') required String applicationId,
   });
 
   // backend application url override
@@ -241,7 +241,7 @@ abstract class RestClient {
   /// Marks the current app as used by the logged-in user so one-time
   /// post-login flows (welcome/assessment) appear only on the first login.
   @POST("rest/s1/growerp/100/AppUsed")
-  Future<void> registerAppUsed({@Field() required String classificationId});
+  Future<void> registerAppUsed({@Field() required String applicationId});
 
   // payment gateway actions
   @POST("rest/s1/growerp/100/GatewayPayment")
@@ -293,13 +293,13 @@ abstract class RestClient {
   @POST("rest/s1/growerp/100/Asset")
   Future<Asset> createAsset({
     @Field() required Asset asset,
-    @Field() required String classificationId,
+    @Field() required String applicationId,
   });
 
   @PATCH("rest/s1/growerp/100/Asset")
   Future<Asset> updateAsset({
     @Field() required Asset asset,
-    @Field() required String classificationId,
+    @Field() required String applicationId,
   });
 
   // categories
@@ -310,19 +310,19 @@ abstract class RestClient {
     @Query('companyPartyId') String? companyPartyId,
     @Query('isForDropDown') bool? isForDropDown,
     @Query('search') String? searchString,
-    @Query('classificationId') String? classificationId,
+    @Query('applicationId') String? applicationId,
   });
 
   @POST("rest/s1/growerp/100/Category")
   Future<Category> createCategory({
     @Field() required Category category,
-    @Field() required String classificationId,
+    @Field() required String applicationId,
   });
 
   @PATCH("rest/s1/growerp/100/Category")
   Future<Category> updateCategory({
     @Field() required Category category,
-    @Field() required String classificationId,
+    @Field() required String applicationId,
   });
 
   @DELETE("rest/s1/growerp/100/Category")
@@ -331,13 +331,13 @@ abstract class RestClient {
   @POST("rest/s1/growerp/100/ImportExport")
   Future<String> importScreenCategories({
     @Field() required List categories,
-    @Field() required String classificationId,
+    @Field() required String applicationId,
   });
 
   @GET("rest/s1/growerp/100/ImportExport")
   Future<String> exportScreenCategories({
     @Query('entityName') String entityName = 'Category',
-    @Query('classificationId') String? classificationId,
+    @Query('applicationId') String? applicationId,
   });
 
   // products
@@ -349,7 +349,7 @@ abstract class RestClient {
     @Query('ownerPartyId') String? ownerPartyId,
     @Query('isForDropDown') bool? isForDropDown,
     @Query('search') String? searchString,
-    @Query('classificationId') String? classificationId,
+    @Query('applicationId') String? applicationId,
     @Query('categoryId') String? categoryId,
     @Query('productId') String? productId,
     @Query('productTypeId') String? productTypeId,
@@ -359,13 +359,13 @@ abstract class RestClient {
   @POST("rest/s1/growerp/100/Product")
   Future<Product> createProduct({
     @Field() required Product product,
-    @Field() required String classificationId,
+    @Field() required String applicationId,
   });
 
   @PATCH("rest/s1/growerp/100/Product")
   Future<Product> updateProduct({
     @Field() required Product product,
-    @Field() required String classificationId,
+    @Field() required String applicationId,
   });
 
   @DELETE("rest/s1/growerp/100/Product")
@@ -374,13 +374,13 @@ abstract class RestClient {
   @POST("rest/s1/growerp/100/ImportExport")
   Future<String> importScreenProducts({
     @Field() required List<Product> products,
-    @Field() required String classificationId,
+    @Field() required String applicationId,
   });
 
   @GET("rest/s1/growerp/100/ImportExport")
   Future<String> exportScreenProducts({
     @Query('entityName') String entityName = 'Product',
-    @Query('classificationId') required String classificationId,
+    @Query('applicationId') required String applicationId,
   });
 
   // dayly rental
@@ -440,7 +440,7 @@ abstract class RestClient {
   @POST("rest/s1/growerp/100/ImportExport/finDocItems")
   Future<void> importFinDocItem(
     @Field() List<FinDocItem> finDocItems,
-    @Field() String classificationId,
+    @Field() String applicationId,
   );
 
   // finalize import
@@ -745,7 +745,7 @@ abstract class RestClient {
   @POST("rest/s1/growerp/100/ImportExport")
   Future<void> uploadEntities({
     @Field() required dynamic entities,
-    @Field() required String classificationId,
+    @Field() required String applicationId,
   });
 
   @POST("rest/s1/growerp/100/ImportExport/itemTypes")
@@ -771,7 +771,7 @@ abstract class RestClient {
   @POST("rest/s1/growerp/100/ImportExport/products")
   Future<void> importProducts(
     @Field() List<Product> products,
-    @Field() String classificationId,
+    @Field() String applicationId,
   );
 
   @POST("rest/s1/growerp/100/ImportExport/categories")
@@ -780,7 +780,7 @@ abstract class RestClient {
   @POST("rest/s1/growerp/100/ImportExport/assets")
   Future<void> importAssets(
     @Field() List<Asset> assets,
-    @Field() String classificationId,
+    @Field() String applicationId,
   );
 
   @GET("rest/s1/growerp/100/Categories")
@@ -789,7 +789,7 @@ abstract class RestClient {
   @GET("rest/s1/growerp/100/Products")
   Future<Products> getProducts({
     @Query('limit') int? limit,
-    @Query('classificationId') String? classificationId,
+    @Query('applicationId') String? applicationId,
   });
 
   @GET("rest/s1/growerp/100/User")

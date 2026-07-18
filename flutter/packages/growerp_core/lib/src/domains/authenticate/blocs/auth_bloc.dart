@@ -48,7 +48,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     this.chat,
     this.notification,
     this.restClient,
-    this.classificationId,
+    this.applicationId,
     this.company,
   ) : super(const AuthState()) {
     on<AuthUpdateLocal>(_onAuthUpdateLocal);
@@ -72,7 +72,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final RestClient restClient;
   final WsClient chat;
   final WsClient notification;
-  final String classificationId;
+  final String applicationId;
   final Company? company;
 
   void _onAuthUpdateLocal(AuthUpdateLocal event, Emitter<AuthState> emit) {
@@ -82,7 +82,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   Future<void> _onAuthLoad(AuthLoad event, Emitter<AuthState> emit) async {
     emit(state.copyWith(status: AuthStatus.loading));
     Authenticate defaultAuthenticate = Authenticate(
-      classificationId: classificationId,
+      applicationId: applicationId,
     );
     // get session data from last time
     Authenticate? localAuthenticate = await PersistFunctions.getAuthenticate();
@@ -123,7 +123,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         }
         // test apiKey and get Authenticate
         Authenticate authResult = await restClient.getAuthenticate(
-          classificationId: classificationId,
+          applicationId: applicationId,
         );
         // Api key invalid or not present: UnAuthenticated
         if (authResult.apiKey == null) {
@@ -242,7 +242,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     try {
       emit(state.copyWith(status: AuthStatus.loading));
       final result = await restClient.register(
-        classificationId: classificationId,
+        applicationId: applicationId,
         email: event.user.email!,
         companyPartyId: event.user.company?.partyId,
         firstName: event.user.firstName!,
@@ -269,7 +269,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       emit(
         state.copyWith(
           status: AuthStatus.failure,
-          authenticate: Authenticate(classificationId: classificationId),
+          authenticate: Authenticate(applicationId: applicationId),
           message: await getDioError(e),
         ),
       );
@@ -340,7 +340,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         expireYear: event.expireYear,
         cVC: event.cVC,
         plan: event.plan,
-        classificationId: classificationId,
+        applicationId: applicationId,
         timeZoneOffset: DateTime.now().timeZoneOffset.toString(),
         testDaysOffset: event.testDaysOffset,
       );
@@ -433,7 +433,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         username: event.username,
         oldPassword: event.oldPassword,
         newPassword: event.newPassword,
-        classificationId: classificationId,
+        applicationId: applicationId,
       );
       if (state.authenticate!.user!.userId != null) {
         await chat.connect(

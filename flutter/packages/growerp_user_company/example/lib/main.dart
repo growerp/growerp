@@ -28,25 +28,25 @@ Future main() async {
   RestClient restClient = RestClient(await buildDioClient());
   WsClient chatClient = WsClient('chat');
   WsClient notificationClient = WsClient('notws');
-  String classificationId = GlobalConfiguration().get("classificationId");
+  String applicationId = GlobalConfiguration().get("applicationId");
 
   runApp(
     TopApp(
       restClient: restClient,
-      classificationId: classificationId,
+      applicationId: applicationId,
       chatClient: chatClient,
       notificationClient: notificationClient,
       title: 'GrowERP User & Company Example',
       router: createUserCompanyExampleRouter(),
       extraDelegates: const [UserCompanyLocalizations.delegate],
-      extraBlocProviders: getExampleBlocProviders(restClient, classificationId),
+      extraBlocProviders: getExampleBlocProviders(restClient, applicationId),
     ),
   );
 }
 
 List<BlocProvider> getExampleBlocProviders(
   RestClient restClient,
-  String classificationId,
+  String applicationId,
 ) {
-  return [...getUserCompanyBlocProviders(restClient, classificationId)];
+  return [...getUserCompanyBlocProviders(restClient, applicationId)];
 }

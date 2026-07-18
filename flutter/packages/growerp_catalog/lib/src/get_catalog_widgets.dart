@@ -61,7 +61,7 @@ List<WidgetMetadata> getCatalogWidgetsWithMetadata() {
         return AsyncRecordDialog<Product>(
           fetch: (ctx) async {
             final r = await ctx.read<RestClient>().getProduct(
-                productId: id, limit: 1, classificationId: ctx.read<String>());
+                productId: id, limit: 1, applicationId: ctx.read<String>());
             return r.products.isNotEmpty ? r.products.first : null;
           },
           onLoaded: (p) => ProductDialog(p),
@@ -87,7 +87,7 @@ List<WidgetMetadata> getCatalogWidgetsWithMetadata() {
         return AsyncRecordDialog<Category>(
           fetch: (ctx) async {
             final r = await ctx.read<RestClient>().getCategory(
-                searchString: id, limit: 1, classificationId: ctx.read<String>());
+                searchString: id, limit: 1, applicationId: ctx.read<String>());
             return r.categories.isNotEmpty ? r.categories.first : null;
           },
           onLoaded: (c) => CategoryDialog(c),

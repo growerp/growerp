@@ -206,7 +206,7 @@ class FinDocTest {
     WidgetTester tester,
     FinDocType docType, {
     bool rental = false,
-    String classificationId = 'AppAdmin',
+    String applicationId = 'AppAdmin',
   }) async {
     List<FinDoc> finDocs = await FinDocTest.getFinDocs(docType);
     for (final finDoc in finDocs) {
@@ -215,7 +215,7 @@ class FinDocTest {
         CommonTest.getTextField('topHeader').split('#')[1],
         finDoc.pseudoId,
       );
-      if (classificationId != 'AppHotel') {
+      if (applicationId != 'AppHotel') {
         // reservation for hotel is called from ganntChart
         await CommonTest.checkWidgetKey(
           tester,
@@ -436,7 +436,7 @@ class FinDocTest {
     WidgetTester tester,
     FinDocType type, {
     FinDocType? subType,
-    String classificationId = 'AppAdmin',
+    String applicationId = 'AppAdmin',
     FinDocStatusVal status = FinDocStatusVal.approved,
   }) async {
     List<FinDoc> oldFinDocs = await getFinDocs(type);
@@ -483,7 +483,7 @@ class FinDocTest {
         await CommonTest.tapByKey(tester, 'statusDropDown');
         await CommonTest.tapByText(
           tester,
-          classificationId == 'AppHotel' ? status.hotel : status.name,
+          applicationId == 'AppHotel' ? status.hotel : status.name,
         );
         await CommonTest.drag(tester);
         await CommonTest.tapByKey(

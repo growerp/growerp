@@ -1598,7 +1598,7 @@ along with this software (see the LICENSE.md file). If not, see
                 default="org.moqui.util.StringUtilities.getRandomString(6) + '9!'" />
             <parameter name="ownerPartyId" /><!-- only required when no user logged in after
                                                 creating owner company -->
-            <parameter name="classificationId" />
+            <parameter name="applicationId" />
         </in-parameters>
         <out-parameters>
             <parameter name="user" type="Map">
@@ -1859,7 +1859,7 @@ along with this software (see the LICENSE.md file). If not, see
                         <field-map field-name="fromAddress" value="WELCOME" />
                         <field-map field-name="toAddresses" from="user.email" />
                         <field-map field-name="bodyParameters"
-                            from="[classification: classificationId? classificationId.substring(3) : '',
+                            from="[application: applicationId? applicationId.substring(3) : '',
                                 newPassword:password, firstName: user.firstName,
                                 lastName: user.lastName]" />
                     </service-call>
@@ -2354,11 +2354,15 @@ along with this software (see the LICENSE.md file). If not, see
             one-time post-login flow (welcome/assessment) is shown only once.
             Adds a PartyApplication which surfaces in user.appsUsed.</description>
         <in-parameters>
-            <parameter name="classificationId" required="true">
+            <parameter name="applicationId">
                 <description>ApplicationId, e.g. AppAdmin</description>
+            </parameter>
+            <parameter name="classificationId">
+                <description>Deprecated alias for applicationId, kept for old clients</description>
             </parameter>
         </in-parameters>
         <actions>
+            <set field="applicationId" from="applicationId ?: classificationId" />
             <set field="partyId" from="ec.user.userAccount?.partyId" />
             <if condition="!partyId">
                 <return />
@@ -2366,11 +2370,11 @@ along with this software (see the LICENSE.md file). If not, see
             <entity-find-count entity-name="growerp.PartyApplication"
                 count-field="existingCount">
                 <econdition field-name="partyId" from="partyId" />
-                <econdition field-name="applicationId" from="classificationId" />
+                <econdition field-name="applicationId" from="applicationId" />
             </entity-find-count>
             <if condition="existingCount == 0">
                 <service-call name="create#growerp.PartyApplication"
-                    in-map="[partyId: partyId, applicationId: classificationId, fromDate: ec.user.nowTimestamp]" />
+                    in-map="[partyId: partyId, applicationId: applicationId, fromDate: ec.user.nowTimestamp]" />
             </if>
         </actions>
     </service>
@@ -2682,8 +2686,11 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="ownerPartyId" required="true"><!-- owner company not top owner -->
                 <description>Party Id of the organization</description>
             </parameter>
-            <parameter name="classificationId">
+            <parameter name="applicationId">
                 <description>The App id the user want to register for, valid entries: AppAdmin, AppHotel etc </description>
+            </parameter>
+            <parameter name="classificationId">
+                <description>Deprecated alias for applicationId, kept for old clients</description>
             </parameter>
             <parameter name="user" type="Map" required="true">
                 <parameter name="partyId" />
@@ -2739,6 +2746,7 @@ along with this software (see the LICENSE.md file). If not, see
             </parameter>
         </out-parameters>
         <actions>
+            <set field="applicationId" from="applicationId ?: classificationId" />
             <!-- get main company party id with ownerPartyId-->
             <entity-find-one entity-name="growerp.party.CompanyPreferenceAndRole"
                 value-field="companyParty">
@@ -2750,10 +2758,10 @@ along with this software (see the LICENSE.md file). If not, see
             </if>
             <entity-find-one entity-name="growerp.Application"
                 value-field="application">
-                <field-map field-name="applicationId" from="classificationId" />
+                <field-map field-name="applicationId" from="applicationId" />
             </entity-find-one>
             <if condition="!application">
-                <return message="Not a valid classificationId: ${classificationId}" />
+                <return message="Not a valid applicationId: ${applicationId}" />
             </if>
             <!-- create account, not active when no login provided -->
             <set field="disabled" value="N" />
@@ -2810,7 +2818,7 @@ along with this software (see the LICENSE.md file). If not, see
                         <field-map field-name="emailTemplateId" value="WELCOME" />
                         <field-map field-name="toAddresses" from="user.email" />
                         <field-map field-name="bodyParameters"
-                            from="[classification: classificationId.substring(3),
+                            from="[application: applicationId.substring(3),
                                     newPassword:newPassword, firstName: user.firstName,
                                     lastName: user.lastName]" />
                     </service-call>
@@ -2837,7 +2845,10 @@ along with this software (see the LICENSE.md file). If not, see
             - If no companyPartyId and admin: Create new tenant using create#Tenant service
         </description>
         <in-parameters>
-            <parameter name="classificationId" required="true" />
+            <parameter name="applicationId" />
+            <parameter name="classificationId">
+                <description>Deprecated alias for applicationId, kept for old clients</description>
+            </parameter>
             <parameter name="firstName" required="true" />
             <parameter name="lastName" required="true" />
             <parameter name="email" required="true" />
@@ -2854,6 +2865,7 @@ along with this software (see the LICENSE.md file). If not, see
         <out-parameters>
             <parameter name="authenticate" type="Map">
                 <parameter name="ownerPartyId" />
+                <parameter name="applicationId" />
                 <parameter name="classificationId" />
                 <parameter name="apiKey" /><!-- 'registered', 'trialWelcome' -->
                 <parameter name="user" type="Map">
@@ -2872,6 +2884,7 @@ along with this software (see the LICENSE.md file). If not, see
             </parameter>
         </out-parameters>
         <actions>
+            <set field="applicationId" from="applicationId ?: classificationId" />
             <!-- Set locale for error messages -->
             <if condition="locale">
                 <script>ec.user.setLocale(new Locale(locale))</script>
@@ -2880,10 +2893,10 @@ along with this software (see the LICENSE.md file). If not, see
             <!-- Validate application -->
             <entity-find-one entity-name="growerp.Application"
                 value-field="application">
-                <field-map field-name="applicationId" from="classificationId" />
+                <field-map field-name="applicationId" from="applicationId" />
             </entity-find-one>
             <if condition="!application">
-                <return error="true" message="Not a valid classificationId: ${classificationId}" />
+                <return error="true" message="Not a valid applicationId: ${applicationId}" />
             </if>
 
             <if condition="companyPartyId">
@@ -2924,7 +2937,7 @@ along with this software (see the LICENSE.md file). If not, see
                             ],
                             password: newPassword,
                             ownerPartyId: ownerPartyId,
-                            classificationId: classificationId
+                            applicationId: applicationId
                         ]"
                         out-map="context" />
 
@@ -2933,7 +2946,8 @@ along with this software (see the LICENSE.md file). If not, see
                         from="[
                         ownerPartyId: ownerPartyId,
                         user: user,
-                        classificationId: classificationId,
+                        applicationId: applicationId,
+                        classificationId: applicationId,
                         loginStatus: 'registered',
                         apiKey: 'registered'
                     ]" />
@@ -2949,7 +2963,7 @@ along with this software (see the LICENSE.md file). If not, see
                             adminFirstName: firstName,
                             adminLastName: lastName,
                             password: newPassword,
-                            classificationId: classificationId,
+                            applicationId: applicationId,
                             timeZoneOffset: timeZoneOffset,
                             locale: locale
                         ]"
@@ -2969,7 +2983,8 @@ along with this software (see the LICENSE.md file). If not, see
                         from="[
                         ownerPartyId: tenantResult.ownerPartyId,
                         user: userInfo.users[0],
-                        classificationId: classificationId,
+                        applicationId: applicationId,
+                        classificationId: applicationId,
                         loginStatus: 'registered',
                         apiKey: 'registered'
                     ]" />
@@ -2988,7 +3003,7 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="ownerPartyId" required="true" />
             <parameter name="userPartyId" required="true" />
             <parameter name="companyPartyId" />
-            <parameter name="classificationId" required="true" />
+            <parameter name="applicationId" required="true" />
             <parameter name="hostName" />
         </in-parameters>
         <out-parameters>
@@ -3059,14 +3074,14 @@ along with this software (see the LICENSE.md file). If not, see
                     defaultCurrencyUomId: aPref.baseCurrencyUomId,
                     wikiSpaceId: wikiSpaceId,
                     ]" />
-            <if condition="classificationId == 'AppAdmin'">
+            <if condition="applicationId == 'AppAdmin'">
                 <set field="inMap"
                     from="inMap + [
                     requireInventory: 'N',
                     reservationOrderEnumId:'AsResOrdNoRes',
                     ]" />
             </if>
-            <if condition="classificationId == 'AppHotel'">
+            <if condition="applicationId == 'AppHotel'">
                 <set field="inMap"
                     from="inMap + [
                     requireInventory: 'N',
@@ -3316,7 +3331,7 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="ownerPartyId" required="true" />
             <parameter name="userPartyId" required="true" />
             <parameter name="companyPartyId" />
-            <parameter name="classificationId" required="true" />
+            <parameter name="applicationId" required="true" />
             <parameter name="demoData" type="Boolean" default="false" />
             <parameter name="currencyId" />
             <parameter name="timeZoneOffset" />
@@ -3325,16 +3340,16 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="partyClassification" />
         </out-parameters>
         <actions>
-            <!-- check for specific classification application-->
+            <!-- check for specific application -->
             <entity-find-one entity-name="growerp.PartyApplication"
                 value-field="partyApplication">
                 <field-map field-name="partyId" from="userPartyId" />
-                <field-map field-name="applicationId" from="classificationId" />
+                <field-map field-name="applicationId" from="applicationId" />
             </entity-find-one>
 
             <!-- hotel app not using categories but need one for products -->
             <if condition="!partyApplication">
-                <if condition="classificationId == 'AppHotel'">
+                <if condition="applicationId == 'AppHotel'">
                     <entity-find entity-name="mantle.product.category.ProductCategory"
                         list="rootList">
                         <econdition field-name="productCategoryTypeEnumId" value="PctRoot" />
@@ -3365,7 +3380,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <log message="Loading demo data for ownerPartyId: ${ownerPartyId}" />
                     <service-call name="growerp.100.PartyServices100.load#DemoData"
                         in-map="[ownerPartyId: ownerPartyId, companyPartyId: companyPartyId,
-                                 userPartyId: userPartyId, classificationId: classificationId,
+                                 userPartyId: userPartyId, applicationId: applicationId,
                                  currencyId: currencyId, timeZoneOffset: timeZoneOffset]" />
                 </if>
 
@@ -3387,7 +3402,7 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="companyPartyId" required="true" />
             <parameter name="userPartyId" required="true" />
             <parameter name="currencyId" />
-            <parameter name="classificationId" />
+            <parameter name="applicationId" />
             <parameter name="counterMax" default="1" type="Integer" />
             <parameter name="timeZoneOffset" />
         </in-parameters>
@@ -3534,7 +3549,7 @@ along with this software (see the LICENSE.md file). If not, see
                         from="localProductCategories[0].productCategoryId" />
                 </iterate>
                 <!-- create product -->
-                <if condition="classificationId == 'AppHotel'">
+                <if condition="applicationId == 'AppHotel'">
                     <set field="productType" value="PtFixedAssetUse" />
                 </if>
                 <entity-find entity-name="mantle.product.Product" list="products">
@@ -3634,7 +3649,7 @@ along with this software (see the LICENSE.md file). If not, see
                         ]" />
                     <service-call name="growerp.100.PartyServices100.create#User"
                         in-map="[user: userIn, ownerPartyId: ownerPartyId,
-                                classificationId: classificationId]"
+                                applicationId: applicationId]"
                         out-map="outMap" />
                     <script>
                             if(us.role == 'OrgInternal') dbEmployees.add(outMap)
@@ -3725,10 +3740,10 @@ along with this software (see the LICENSE.md file). If not, see
                             orderName: 'fifth generated Hotel order'],
                     ]" />
 
-                <if condition="classificationId == 'AppAdmin'">
+                <if condition="applicationId == 'AppAdmin'">
                     <set field="ordersIn" from="ordersAdmin" />
                 </if>
-                <if condition="classificationId == 'AppHotel'">
+                <if condition="applicationId == 'AppHotel'">
                     <set field="ordersIn" from="ordersHotel" />
                 </if>
                 <entity-find entity-name="growerp.party.OwnerCompanyDetailAndEmployee"
@@ -3754,7 +3769,7 @@ along with this software (see the LICENSE.md file). If not, see
                     </entity-find>
 
                     <set field="items" from="[]" />
-                    <if condition="classificationId == 'AppHotel'">
+                    <if condition="applicationId == 'AppHotel'">
                         <then>
                             <while condition="order.quantity--">
                                 <set field="item"
@@ -3793,7 +3808,7 @@ along with this software (see the LICENSE.md file). If not, see
                             items: items]" />
                     <service-call
                         name="growerp.100.FinDocServices100.create#FinDoc"
-                        in-map="[finDoc: finDoc, classificationId: classificationId]"
+                        in-map="[finDoc: finDoc, applicationId: applicationId]"
                         out-map="context" />
                     <set field="index" from="index + 1" />
                 </iterate>

@@ -33,7 +33,7 @@ class ChatRoomListDialogsState extends State<ChatRoomListDialog> {
   int limit = 20;
   late bool search;
   String searchString = '';
-  String classificationId = GlobalConfiguration().getValue("classificationId");
+  String applicationId = GlobalConfiguration().getValue("applicationId");
   late String entityName;
   late double top, left;
   CoreLocalizations? _localizations;
@@ -41,7 +41,7 @@ class ChatRoomListDialogsState extends State<ChatRoomListDialog> {
   @override
   void initState() {
     super.initState();
-    entityName = classificationId == 'AppHotel' ? 'Room' : 'ChatRoom';
+    entityName = applicationId == 'AppHotel' ? 'Room' : 'ChatRoom';
     _scrollController.addListener(_onScroll);
     _chatRoomBloc = context.read<ChatRoomBloc>()
       ..add(const ChatRoomFetch(refresh: true));
@@ -88,7 +88,7 @@ class ChatRoomListDialogsState extends State<ChatRoomListDialog> {
               context: context,
               title:
                   _localizations?.chatUsersAndGroups ?? 'Chat Users and Groups',
-              height: classificationId == 'AppAdmin' ? 550 : 600,
+              height: applicationId == 'AppAdmin' ? 550 : 600,
               width: isPhone ? 450 : 800,
               child: Stack(
                 children: [

@@ -100,7 +100,7 @@ class CommonTest {
     required RestClient restClient,
     bool clear = false,
     String title = "Growerp testing...",
-    String classificationId = 'AppAdmin',
+    String applicationId = 'AppAdmin',
     List<Map<String, GrowerpWidgetBuilder>> widgetRegistrations = const [],
   }) async {
     // Override the logical screen size when SCREEN_WIDTH / SCREEN_HEIGHT are
@@ -150,7 +150,7 @@ class CommonTest {
     runApp(
       TopApp(
         restClient: restClient,
-        classificationId: classificationId,
+        applicationId: applicationId,
         chatClient: WsClient('chat'),
         notificationClient: WsClient('notws'),
         router: router,
@@ -481,7 +481,7 @@ class CommonTest {
       });
       await restClient.uploadEntities(
         entities: parsed,
-        classificationId: 'AppAdmin',
+        applicationId: 'AppAdmin',
       );
     }
     await PersistFunctions.persistTest(
@@ -1326,7 +1326,7 @@ class CommonTest {
 
   static String getDropdown(
     String key, {
-    String classificationId = 'AppAdmin',
+    String applicationId = 'AppAdmin',
   }) {
     DropdownButtonFormField tff =
         find.byKey(Key(key)).last.evaluate().single.widget
@@ -1339,7 +1339,7 @@ class CommonTest {
     if (val is RequestType) return val.toString();
     if (val is Role) return val.value;
     if (val is FinDocStatusVal) {
-      return classificationId == 'AppHotel' ? val.hotel : val.name;
+      return applicationId == 'AppHotel' ? val.hotel : val.name;
     }
     return val.toString();
   }

@@ -78,12 +78,12 @@ Future<Product?> _findProduct(RestClient rc, String pseudoId) async {
 
 Future<Product> _ensureProduct(
   RestClient rc,
-  String classificationId,
+  String applicationId,
   Product product,
 ) async {
   final existing = await _findProduct(rc, product.pseudoId);
   if (existing != null) return existing;
-  return rc.createProduct(product: product, classificationId: classificationId);
+  return rc.createProduct(product: product, applicationId: applicationId);
 }
 
 Future<Company> _ensureCompany(RestClient rc, Company company) async {
@@ -102,13 +102,13 @@ Future<Company> _ensureCompany(RestClient rc, Company company) async {
 
 Future<String> setupDemoData(
   RestClient rc,
-  String classificationId,
+  String applicationId,
   String ownerPartyId,
 ) async {
   for (final p in _swagProducts) {
-    await _ensureProduct(rc, classificationId, p);
+    await _ensureProduct(rc, applicationId, p);
   }
-  final pkg = await _ensureProduct(rc, classificationId, _swagPackage);
+  final pkg = await _ensureProduct(rc, applicationId, _swagPackage);
 
   final boms = await rc.getBoms(search: _swagPackage.pseudoId, limit: 5);
   final bomExists =
@@ -151,7 +151,7 @@ Future<String> setupDemoData(
 
 Future<String> createSalesOrder(
   RestClient rc,
-  String classificationId,
+  String applicationId,
   String ownerPartyId,
 ) async {
   final pkg = await _findProduct(rc, _swagPackage.pseudoId);
@@ -196,7 +196,7 @@ Future<String> createSalesOrder(
 
 Future<String> approveSalesOrder(
   RestClient rc,
-  String classificationId,
+  String applicationId,
   String ownerPartyId,
 ) async {
   final soId = await catalogSwagProgress.getSalesOrderId(ownerPartyId);
@@ -222,7 +222,7 @@ Future<String> approveSalesOrder(
 
 Future<String> viewWorkOrder(
   RestClient rc,
-  String classificationId,
+  String applicationId,
   String ownerPartyId,
 ) async {
   final wos = await rc.getWorkOrder(search: _swagPackage.pseudoId, limit: 5);
@@ -233,7 +233,7 @@ Future<String> viewWorkOrder(
 
 Future<String> createAndApprovePurchaseOrder(
   RestClient rc,
-  String classificationId,
+  String applicationId,
   String ownerPartyId,
 ) async {
   final suppliers = await rc.getCompany(
@@ -312,7 +312,7 @@ Future<String> createAndApprovePurchaseOrder(
 
 Future<String> receiveIncomingShipment(
   RestClient rc,
-  String classificationId,
+  String applicationId,
   String ownerPartyId,
 ) async {
   final shipments = await rc.getFinDoc(
@@ -349,7 +349,7 @@ Future<String> receiveIncomingShipment(
 
 Future<String> completeWorkOrder(
   RestClient rc,
-  String classificationId,
+  String applicationId,
   String ownerPartyId,
 ) async {
   WorkOrders wos =
@@ -393,7 +393,7 @@ Future<String> completeWorkOrder(
 
 Future<String> shipToCustomerAndCollectPayment(
   RestClient rc,
-  String classificationId,
+  String applicationId,
   String ownerPartyId,
 ) async {
   final shipments = await rc.getFinDoc(
@@ -437,7 +437,7 @@ Future<String> shipToCustomerAndCollectPayment(
 
 Future<String> updateStatsAndLedger(
   RestClient rc,
-  String classificationId,
+  String applicationId,
   String ownerPartyId,
 ) async {
   await rc.calculateLedger();

@@ -25,7 +25,7 @@ class TimePeriodListHeader extends StatefulWidget {
 }
 
 class _TimePeriodListHeaderState extends State<TimePeriodListHeader> {
-  String classificationId = GlobalConfiguration().getValue("classificationId");
+  String applicationId = GlobalConfiguration().getValue("applicationId");
   String searchString = '';
   bool search = false;
   @override

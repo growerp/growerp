@@ -22,10 +22,10 @@ import '../blocs/asset_bloc.dart';
 /// Returns column definitions for asset list based on device type
 List<StyledColumn> getAssetListColumns(
   BuildContext context, {
-  String? classificationId,
+  String? applicationId,
 }) {
   bool isPhone = isAPhone(context);
-  final isHotel = classificationId == 'AppHotel';
+  final isHotel = applicationId == 'AppHotel';
 
   if (isPhone) {
     return [
@@ -65,10 +65,10 @@ List<Widget> getAssetListRow({
   required Asset asset,
   required int index,
   required Bloc bloc,
-  String? classificationId,
+  String? applicationId,
 }) {
   bool isPhone = isAPhone(context);
-  final isHotel = classificationId == 'AppHotel';
+  final isHotel = applicationId == 'AppHotel';
   String currencyId = context
       .read<AuthBloc>()
       .state

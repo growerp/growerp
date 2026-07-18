@@ -162,7 +162,7 @@ Future<void> _closeDialogIfPresent(WidgetTester tester) async {
 
 void main() {
   final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
-  const classificationId = 'AppAdmin';
+  const applicationId = 'AppAdmin';
 
   setUp(() async {
     await GlobalConfiguration().loadFromAsset('app_settings');
@@ -179,8 +179,8 @@ void main() {
       _adminMenuConfig,
       delegates,
       restClient: restClient,
-      blocProviders: getAdminBlocProviders(restClient, classificationId),
-      classificationId: classificationId,
+      blocProviders: getAdminBlocProviders(restClient, applicationId),
+      applicationId: applicationId,
       clear: true,
       title: 'Admin Screenshots',
     );

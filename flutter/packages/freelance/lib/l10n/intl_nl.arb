@@ -20,11 +20,11 @@
             }
         }
     },
-    "classificationNotDefined": "Geen {classificationId} bedrijf gevonden in systeem\n Ga naar de admin app om er een aan te maken!",
-    "@classificationNotDefined": {
+    "applicationNotDefined": "Geen {applicationId} bedrijf gevonden in systeem\n Ga naar de admin app om er een aan te maken!",
+    "@applicationNotDefined": {
         "description": "Error message when no company is found for a classification",
         "placeholders": {
-            "classificationId": {
+            "applicationId": {
                 "type": "String",
                 "description": "Classification ID that was not found"
             }

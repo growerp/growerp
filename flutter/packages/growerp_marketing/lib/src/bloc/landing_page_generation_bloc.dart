@@ -24,11 +24,11 @@ part 'landing_page_generation_state.dart';
 class LandingPageGenerationBloc
     extends Bloc<LandingPageGenerationEvent, LandingPageGenerationState> {
   final RestClient restClient;
-  final String classificationId;
+  final String applicationId;
 
   LandingPageGenerationBloc({
     required this.restClient,
-    required this.classificationId,
+    required this.applicationId,
   }) : super(const LandingPageGenerationState()) {
     on<GenerateLandingPageRequested>(_onGenerateLandingPage);
     on<GenerationCancelled>(_onGenerationCancelled);

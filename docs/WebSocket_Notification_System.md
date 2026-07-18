@@ -148,7 +148,7 @@ ws://hostname:8080/notws?apiKey={apiKey}&userId={userId}
 
 The backend validates the API key by making a REST call to:
 ```
-/rest/s1/growerp/100/Authenticate?classificationId=token
+/rest/s1/growerp/100/Authenticate?applicationId=token
 ```
 
 ## Message Formats
@@ -501,7 +501,7 @@ class ConnectionBloc extends Bloc<ConnectionEvent, ConnectionState> {
 
 ### Authentication
 - API key validation on every connection via query parameters
-- Backend validates API key by calling `/rest/s1/growerp/100/Authenticate?classificationId=token`
+- Backend validates API key by calling `/rest/s1/growerp/100/Authenticate?applicationId=token`
 - User ID verification against authenticated session
 - Automatic disconnection on invalid credentials
 

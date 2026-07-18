@@ -42,7 +42,7 @@ void main() {
       restClient: restClient,
       blocProviders: getExampleBlocProviders(
         restClient,
-        GlobalConfiguration().get("classificationId"),
+        GlobalConfiguration().get("applicationId"),
       ),
       title: 'GrowERP take assessment test',
       clear: true,
@@ -93,7 +93,7 @@ void main() {
       restClient: restClient,
       blocProviders: getExampleBlocProviders(
         restClient,
-        GlobalConfiguration().get("classificationId"),
+        GlobalConfiguration().get("applicationId"),
       ),
       title: 'GrowERP take assessment - empty test',
       clear: true,

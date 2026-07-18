@@ -24,10 +24,10 @@ import '../blocs/fin_doc_bloc.dart';
 List<StyledColumn> getFinDocListColumns(
   BuildContext context, {
   required FinDocType docType,
-  String? classificationId,
+  String? applicationId,
 }) {
   bool isPhone = isAPhone(context);
-  final isHotel = classificationId == 'AppHotel';
+  final isHotel = applicationId == 'AppHotel';
   final isTransaction = docType == FinDocType.transaction;
   final isShipment = docType == FinDocType.shipment;
 
@@ -69,10 +69,10 @@ List<Widget> getFinDocListRow({
   required FinDoc finDoc,
   required int index,
   required Bloc bloc,
-  String? classificationId,
+  String? applicationId,
 }) {
   bool isPhone = isAPhone(context);
-  final isHotel = classificationId == 'AppHotel';
+  final isHotel = applicationId == 'AppHotel';
   String currencyId = context
       .read<AuthBloc>()
       .state

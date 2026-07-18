@@ -57,13 +57,13 @@ Future main() async {
   GlobalConfiguration().updateValue('version', packageInfo.version);
   GlobalConfiguration().updateValue('build', packageInfo.buildNumber);
 
-  String classificationId = GlobalConfiguration().get("classificationId");
+  String applicationId = GlobalConfiguration().get("applicationId");
 
   // check if there is override for the production backend url
   // if there is a overide we are in test mode: see the banner in the app
   // Also checks if force update is required
   final forceUpdateInfo = await getBackendUrlOverride(
-    classificationId,
+    applicationId,
     packageInfo.version,
   );
 
@@ -90,7 +90,7 @@ Future main() async {
   runApp(
     AdminApp(
       restClient: restClient,
-      classificationId: classificationId,
+      applicationId: applicationId,
       chatClient: chatClient,
       notificationClient: notificationClient,
       extraDelegates: delegates,
@@ -104,7 +104,7 @@ class AdminApp extends StatefulWidget {
   const AdminApp({
     super.key,
     required this.restClient,
-    required this.classificationId,
+    required this.applicationId,
     required this.chatClient,
     required this.notificationClient,
     required this.extraDelegates,
@@ -113,7 +113,7 @@ class AdminApp extends StatefulWidget {
   });
 
   final RestClient restClient;
-  final String classificationId;
+  final String applicationId;
   final WsClient chatClient;
   final WsClient notificationClient;
   final List<LocalizationsDelegate> extraDelegates;
@@ -207,7 +207,7 @@ class _AdminAppState extends State<AdminApp> {
               '${state.menuConfiguration?.menuItems.length ?? 0}',
             ),
             restClient: widget.restClient,
-            classificationId: widget.classificationId,
+            applicationId: widget.applicationId,
             chatClient: widget.chatClient,
             notificationClient: widget.notificationClient,
             title: 'GrowERP Administrator',
@@ -215,7 +215,7 @@ class _AdminAppState extends State<AdminApp> {
             extraDelegates: widget.extraDelegates,
             extraBlocProviders: getAdminBlocProviders(
               widget.restClient,
-              widget.classificationId,
+              widget.applicationId,
             ),
             company: widget.company,
             widgetRegistrations: adminWidgetRegistrations,
@@ -290,15 +290,15 @@ List<WidgetMetadata> adminWidgetMetadata = [
 
 List<BlocProvider> getAdminBlocProviders(
   RestClient restClient,
-  String classificationId,
+  String applicationId,
 ) {
   return [
-    ...getInventoryBlocProviders(restClient, classificationId),
-    ...getUserCompanyBlocProviders(restClient, classificationId),
-    ...getCatalogBlocProviders(restClient, classificationId),
+    ...getInventoryBlocProviders(restClient, applicationId),
+    ...getUserCompanyBlocProviders(restClient, applicationId),
+    ...getCatalogBlocProviders(restClient, applicationId),
     ...getManufacturingBlocProviders(restClient),
     ...getLinerBlocProviders(restClient),
-    ...getOrderAccountingBlocProviders(restClient, classificationId),
+    ...getOrderAccountingBlocProviders(restClient, applicationId),
     ...getSalesBlocProviders(restClient),
     ...getMarketingBlocProviders(restClient),
     ...getOutreachBlocProviders(restClient),

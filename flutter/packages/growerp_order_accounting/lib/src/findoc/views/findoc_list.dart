@@ -70,7 +70,7 @@ class FinDocListState extends State<FinDocList> {
   late bool isPhone;
   bool hasReachedMax = false;
   late FinDocBloc _finDocBloc;
-  late String classificationId;
+  late String applicationId;
   String searchString = '';
   late FocusNode myFocusNode;
   List<FinDoc> searchFinDocs = [];
@@ -89,7 +89,7 @@ class FinDocListState extends State<FinDocList> {
     super.initState();
     _authBloc = context.read<AuthBloc>();
     my = _authBloc.state.authenticate?.user?.userGroup == UserGroup.other;
-    classificationId = context.read<String>();
+    applicationId = context.read<String>();
     myFocusNode = FocusNode();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       myFocusNode.requestFocus();
@@ -209,7 +209,7 @@ class FinDocListState extends State<FinDocList> {
           finDoc: finDoc,
           index: index,
           bloc: _finDocBloc,
-          classificationId: classificationId,
+          applicationId: applicationId,
         );
       }).toList();
 
@@ -217,7 +217,7 @@ class FinDocListState extends State<FinDocList> {
         columns: getFinDocListColumns(
           context,
           docType: widget.docType,
-          classificationId: classificationId,
+          applicationId: applicationId,
         ),
         rows: rows,
         isLoading: _isLoading && finDocs.isEmpty,

@@ -18,8 +18,8 @@ along with this software (see the LICENSE.md file). If not, see
         <render-mode>
             <text type="html"><![CDATA[
                 <html><body>
-                Welcome to the GrowERP ${classification} system, ${firstName!} ${lastName!}<br/><br/>
-                <#if  classification == 'Admin'>    
+                Welcome to the GrowERP ${application} system, ${firstName!} ${lastName!}<br/><br/>
+                <#if  application == 'Admin'>    
                 You can now start a website, sell products, manage your inventory and your accounting is done automatically.<br/><br/>
 
                 If you sell products on your website, you can enter your Stripe secret key on the website admin screen and incoming payments will be handled by your own stripe account.
@@ -28,7 +28,7 @@ along with this software (see the LICENSE.md file). If not, see
                 </#if>
                 
                 When you need any support, please let us know at
-                <a href="mailto:support@growerp.com?subject=Question%20about%20Growerp-${classification}">support@growerp.com</a><br/><br/>
+                <a href="mailto:support@growerp.com?subject=Question%20about%20Growerp-${application}">support@growerp.com</a><br/><br/>
                 <b>Your password to login is ${newPassword}</b> <br/><br/>
 
                 If you just want to test, we also have a test system with limited availability and is cleared regularly: <br/>
@@ -37,7 +37,7 @@ along with this software (see the LICENSE.md file). If not, see
                 We will send you weekly an email with tips about the system.
                 But for now, look around and let us know your comments!
                 <br/><br/>
-                Regards, <br/> The Growerp-${classification} Team!
+                Regards, <br/> The Growerp-${application} Team!
                 </body></html>
             ]]></text></render-mode>
     </widgets>

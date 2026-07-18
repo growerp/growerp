@@ -29,16 +29,16 @@ class ProductTest {
     WidgetTester tester,
     List<Product> products, {
     bool check = true,
-    String classificationId = "AppAdmin",
+    String applicationId = "AppAdmin",
   }) async {
     await PersistFunctions.persistTest(SaveTest(products: products));
-    await enterProductData(tester, classificationId: classificationId);
-    await checkProduct(tester, classificationId: classificationId);
+    await enterProductData(tester, applicationId: applicationId);
+    await checkProduct(tester, applicationId: applicationId);
   }
 
   static Future<void> enterProductData(
     WidgetTester tester, {
-    String classificationId = "AppAdmin",
+    String applicationId = "AppAdmin",
   }) async {
     SaveTest test = await PersistFunctions.getTest();
     List<Product> products = test.products;
@@ -74,7 +74,7 @@ class ProductTest {
         'listPrice',
         product.listPrice.toString(),
       );
-      if (classificationId == 'AppAdmin') {
+      if (applicationId == 'AppAdmin') {
         await CommonTest.dragUntil(tester, key: 'addCategories');
         // remove existing categories
         while (tester.any(find.byKey(const Key("deleteChip")))) {
@@ -128,7 +128,7 @@ class ProductTest {
 
   static Future<void> checkProduct(
     WidgetTester tester, {
-    String classificationId = 'AppAdmin',
+    String applicationId = 'AppAdmin',
   }) async {
     SaveTest test = await PersistFunctions.getTest();
     List<Product> products = test.products;
@@ -148,7 +148,7 @@ class ProductTest {
       });
       expect(errors.isEmpty, isTrue, reason: errors.toString());
       expect(find.byKey(const Key('ProductDialog')), findsOneWidget);
-      if (classificationId == 'AppAdmin') {
+      if (applicationId == 'AppAdmin') {
         for (Category category in product.categories) {
           expect(find.byKey(Key(category.categoryName)), findsOneWidget);
         }
@@ -203,7 +203,7 @@ class ProductTest {
     WidgetTester tester,
     List<Product> products, {
     bool check = true,
-    String classificationId = "AppAdmin",
+    String applicationId = "AppAdmin",
   }) async {
     SaveTest test = await PersistFunctions.getTest();
     List<Product> oldProducts = test.products;
@@ -215,7 +215,7 @@ class ProductTest {
       );
     }
     await PersistFunctions.persistTest(test.copyWith(products: newProducts));
-    await enterProductData(tester, classificationId: classificationId);
-    await checkProduct(tester, classificationId: classificationId);
+    await enterProductData(tester, applicationId: applicationId);
+    await checkProduct(tester, applicationId: applicationId);
   }
 }

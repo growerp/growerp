@@ -45,7 +45,7 @@ class ReservationDialogState extends State<ReservationDialog> {
   Product? _selectedProduct;
   late DateTime _selectedDate;
   List<DateTime> rentalDays = [];
-  late String classificationId;
+  late String applicationId;
   final TextEditingController _priceController = TextEditingController();
   final TextEditingController _quantityController = TextEditingController();
   final TextEditingController _daysController = TextEditingController();
@@ -62,14 +62,14 @@ class ReservationDialogState extends State<ReservationDialog> {
         ? context.read<CompanyUserCustomerBloc>() as CompanyUserBloc
         : context.read<CompanyUserSupplierBloc>() as CompanyUserBloc;
     _companyUserBloc.add(const CompanyUserFetch(refresh: true, limit: 20));
-    classificationId = GlobalConfiguration().get("classificationId");
+    applicationId = GlobalConfiguration().get("applicationId");
     _productBloc = context.read<DataFetchBloc<Products>>()
       ..add(
         GetDataEvent(
           () => context.read<RestClient>().getProduct(
             limit: 100,
             isForDropDown: true,
-            classificationId: classificationId,
+            applicationId: applicationId,
           ),
         ),
       );
@@ -221,10 +221,10 @@ class ReservationDialogState extends State<ReservationDialog> {
         height: 550,
         width: 400,
         title: widget.finDoc.orderId == null
-            ? (classificationId == 'AppHotel'
+            ? (applicationId == 'AppHotel'
                   ? _localizations.newRental
                   : _localizations.newOrder)
-            : (classificationId == 'AppHotel'
+            : (applicationId == 'AppHotel'
                       ? _localizations.reservationId
                       : _localizations.orderId) +
                   widget.finDoc.pseudoId!,
@@ -361,7 +361,7 @@ class ReservationDialogState extends State<ReservationDialog> {
                         controller: textController,
                         focusNode: focusNode,
                         decoration: InputDecoration(
-                          labelText: classificationId == 'AppHotel'
+                          labelText: applicationId == 'AppHotel'
                               ? 'Room Type'
                               : _localizations.product,
                         ),

@@ -2848,7 +2848,7 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="productStoreId" entity-alias="PS" />
         <alias name="organizationPartyId" entity-alias="PS" />
         <alias name="storeName" entity-alias="PS" />
-        <alias name="classificationId" field="storeDomain" entity-alias="PS" />
+        <alias name="applicationId" field="storeDomain" entity-alias="PS" />
         <alias name="wikiSpaceId" entity-alias="WS" />
         <alias name="rootPageLocation" entity-alias="WS" />
         <alias name="wikiPageId" entity-alias="WP" />
@@ -2880,7 +2880,7 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="productStoreId" entity-alias="PS" />
         <alias name="organizationPartyId" entity-alias="PS" />
         <alias name="storeName" entity-alias="PS" />
-        <alias name="classificationId" field="storeDomain" entity-alias="PS" />
+        <alias name="applicationId" field="storeDomain" entity-alias="PS" />
         <alias name="storeCategoryTypeEnumId" entity-alias="CMEMBER" />
         <alias name="productCategoryId" entity-alias="CATG" />
         <alias name="categoryName" entity-alias="CATG" />

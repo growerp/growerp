@@ -117,7 +117,7 @@ if (localeStr != null && localeStr.length() > 0) {
 ```dart
 // During registration
 final result = await restClient.register(
-  classificationId: classificationId,
+  applicationId: applicationId,
   email: event.user.email!,
   firstName: event.user.firstName!,
   lastName: event.user.lastName!,
@@ -287,7 +287,7 @@ await userBloc.add(UserUpdate(updatedUser));
 Request body:
 ```json
 {
-  "classificationId": "AppAdmin",
+  "applicationId": "AppAdmin",
   "firstName": "John",
   "lastName": "Doe",
   "email": "john@example.com",

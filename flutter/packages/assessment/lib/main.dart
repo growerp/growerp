@@ -34,9 +34,9 @@ Future main() async {
   GlobalConfiguration().updateValue('version', packageInfo.version);
   GlobalConfiguration().updateValue('build', packageInfo.buildNumber);
 
-  String classificationId = GlobalConfiguration().get("classificationId");
+  String applicationId = GlobalConfiguration().get("applicationId");
   // check if there is override for the production(now test) backend url
-  await getBackendUrlOverride(classificationId, packageInfo.version);
+  await getBackendUrlOverride(applicationId, packageInfo.version);
 
   Bloc.observer = AppBlocObserver();
   RestClient restClient = RestClient(await buildDioClient());
@@ -67,7 +67,7 @@ Future main() async {
       restClient: restClient,
       chatClient: chatClient,
       notificationClient: notificationClient,
-      classificationId: classificationId,
+      applicationId: applicationId,
       landingPageId: landingPageId,
       pseudoId: pseudoId,
       ownerPartyId: ownerPartyId,
@@ -102,7 +102,7 @@ List<BlocProvider> getAssessmentAppBlocProviders(
   RestClient restClient,
   WsClient chatClient,
   WsClient notificationClient,
-  String classificationId,
+  String applicationId,
   Company? company,
 ) {
   // Combine core BLoCs with assessment-specific BLoCs
@@ -111,10 +111,10 @@ List<BlocProvider> getAssessmentAppBlocProviders(
       restClient,
       chatClient,
       notificationClient,
-      classificationId,
+      applicationId,
       company,
     ),
-    ...getMarketingBlocProviders(restClient, classificationId),
+    ...getMarketingBlocProviders(restClient, applicationId),
   ];
 }
 
@@ -124,7 +124,7 @@ class AssessmentApp extends StatelessWidget {
     required this.restClient,
     required this.chatClient,
     required this.notificationClient,
-    required this.classificationId,
+    required this.applicationId,
     this.pseudoId,
     this.landingPageId,
     this.ownerPartyId,
@@ -134,7 +134,7 @@ class AssessmentApp extends StatelessWidget {
   final RestClient restClient;
   final WsClient chatClient;
   final WsClient notificationClient;
-  final String classificationId;
+  final String applicationId;
   final String? pseudoId;
   final String? landingPageId;
   final String? ownerPartyId;
@@ -147,7 +147,7 @@ class AssessmentApp extends StatelessWidget {
         restClient,
         chatClient,
         notificationClient,
-        classificationId,
+        applicationId,
         company,
       ),
       child: MaterialApp(

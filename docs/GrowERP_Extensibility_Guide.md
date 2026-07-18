@@ -617,7 +617,7 @@ class MyCustomApp extends StatelessWidget {
     return GrowerpApp(
       title: 'My Custom App',
       menuOptions: menuOptions,
-      classificationId: 'AppAdmin',
+      applicationId: 'AppAdmin',
       chatEnabled: true,
       router: generateRoute,
     );

@@ -23,11 +23,11 @@ import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 
 List<BlocProvider> getOrderAccountingBlocProvidersExample(
   RestClient restClient,
-  String classificationId,
+  String applicationId,
 ) {
   return [
-    ...getInventoryBlocProviders(restClient, classificationId),
-    ...getOrderAccountingBlocProviders(restClient, classificationId),
+    ...getInventoryBlocProviders(restClient, applicationId),
+    ...getOrderAccountingBlocProviders(restClient, applicationId),
   ];
 }
 

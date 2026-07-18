@@ -44,7 +44,7 @@ class TransactionTest {
 
     // Fetch fresh auth state with updated stats and push it into the BLoC
     final freshAuth = await authBloc.restClient.getAuthenticate(
-      classificationId: authBloc.classificationId,
+      applicationId: authBloc.applicationId,
     );
     authBloc.add(AuthUpdateLocal(freshAuth));
     await tester.pumpAndSettle(

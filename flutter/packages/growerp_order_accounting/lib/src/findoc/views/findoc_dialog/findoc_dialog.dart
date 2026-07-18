@@ -118,7 +118,7 @@ class MyFinDocState extends State<FinDocPage> {
   late DataFetchBloc<Products> _productBloc;
   late GlAccountBloc _glAccountBloc;
   late FinDocBloc _finDocBloc;
-  late String classificationId;
+  late String applicationId;
   late FinDoc finDocUpdated;
   late FinDoc finDoc; // incoming finDoc
   bool? _isPosted = false;
@@ -155,7 +155,7 @@ class MyFinDocState extends State<FinDocPage> {
     super.initState();
     finDoc = widget.finDoc;
     finDocUpdated = finDoc;
-    classificationId = context.read<String>();
+    applicationId = context.read<String>();
     currencyId = context
         .read<AuthBloc>()
         .state
@@ -192,7 +192,7 @@ class MyFinDocState extends State<FinDocPage> {
           () => context.read<RestClient>().getProduct(
             limit: 100,
             isForDropDown: true,
-            classificationId: classificationId,
+            applicationId: applicationId,
           ),
         ),
       );
@@ -508,7 +508,7 @@ class MyFinDocState extends State<FinDocPage> {
                       (label) => DropdownMenuItem<FinDocStatusVal>(
                         value: label,
                         child: Text(
-                          classificationId == 'AppHotel'
+                          applicationId == 'AppHotel'
                               ? label.hotel
                               : label.name,
                         ),

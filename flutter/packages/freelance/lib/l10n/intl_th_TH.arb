@@ -2,5 +2,5 @@
     "@@locale": "th_TH",
     "pageHomeWelcome": "ยินดีต้อนรับ {name}",
     "screenNotFound": "ไม่พบหน้าจอ {screen}",
-    "classificationNotDefined": "ไม่พบบริษัท {classificationId} ในระบบ\n ไปที่แอปผู้ดูแลระบบเพื่อสร้าง!"
+    "applicationNotDefined": "ไม่พบบริษัท {applicationId} ในระบบ\n ไปที่แอปผู้ดูแลระบบเพื่อสร้าง!"
 }

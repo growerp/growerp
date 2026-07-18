@@ -904,7 +904,7 @@ flutter:
 String _flutterExampleAppSettings() => '''
 {
     "appName": "", "packageName":"", "version": "", "build": "",
-    "classificationId": "AppAdmin",
+    "applicationId": "AppAdmin",
     "_________________comment__backend": "moqui / ofbiz",
     "backend": "moqui",
     "_________________comment__production url NOT _end forwardslash!": "https://rest.example.com",
@@ -959,7 +959,7 @@ Future main() async {
   runApp(
     TopApp(
       restClient: restClient,
-      classificationId: 'AppAdmin',
+      applicationId: 'AppAdmin',
       chatClient: chatClient,
       notificationClient: notificationClient,
       title: 'GrowERP $pascalCaseName Example',

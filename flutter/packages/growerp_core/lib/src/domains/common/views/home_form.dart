@@ -42,7 +42,7 @@ class HomeForm extends StatefulWidget {
 class HomeFormState extends State<HomeForm> with TickerProviderStateMixin {
   late AuthBloc _authBloc;
   Company? company;
-  late String classificationId;
+  late String applicationId;
   CoreLocalizations? _localizations;
 
   // Animation controllers
@@ -56,7 +56,7 @@ class HomeFormState extends State<HomeForm> with TickerProviderStateMixin {
     super.initState();
     _authBloc = context.read<AuthBloc>();
     company = context.read<Company?>();
-    classificationId = context.read<String>();
+    applicationId = context.read<String>();
 
     // Setup entrance animations
     _fadeController = AnimationController(
@@ -330,8 +330,8 @@ class HomeFormState extends State<HomeForm> with TickerProviderStateMixin {
                                     },
                                   ),
                                   const SizedBox(height: 50),
-                                  if (classificationId != 'AppSupport' &&
-                                      !(classificationId == 'AppHotel' &&
+                                  if (applicationId != 'AppSupport' &&
+                                      !(applicationId == 'AppHotel' &&
                                           GlobalConfiguration().get("test") ==
                                               true &&
                                           Platform.isMacOS))

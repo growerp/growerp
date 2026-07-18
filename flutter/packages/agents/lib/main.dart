@@ -31,12 +31,12 @@ Future main() async {
   RestClient restClient = RestClient(await buildDioClient());
   WsClient chatClient = WsClient('chat');
   WsClient notificationClient = WsClient('notws');
-  String classificationId = GlobalConfiguration().get("classificationId");
+  String applicationId = GlobalConfiguration().get("applicationId");
 
   runApp(
     AgentsApp(
       restClient: restClient,
-      classificationId: classificationId,
+      applicationId: applicationId,
       chatClient: chatClient,
       notificationClient: notificationClient,
     ),
@@ -50,13 +50,13 @@ class AgentsApp extends StatefulWidget {
   const AgentsApp({
     super.key,
     required this.restClient,
-    required this.classificationId,
+    required this.applicationId,
     required this.chatClient,
     required this.notificationClient,
   });
 
   final RestClient restClient;
-  final String classificationId;
+  final String applicationId;
   final WsClient chatClient;
   final WsClient notificationClient;
 
@@ -141,7 +141,7 @@ class _AgentsAppState extends State<AgentsApp> {
               '${state.menuConfiguration?.menuItems.length ?? 0}',
             ),
             restClient: widget.restClient,
-            classificationId: widget.classificationId,
+            applicationId: widget.applicationId,
             chatClient: widget.chatClient,
             notificationClient: widget.notificationClient,
             title: 'GrowERP Agents',
@@ -153,7 +153,7 @@ class _AgentsAppState extends State<AgentsApp> {
             extraBlocProviders: [
               ...getUserCompanyBlocProviders(
                 widget.restClient,
-                widget.classificationId,
+                widget.applicationId,
               ),
               ...getWebsiteBlocProviders(widget.restClient),
             ],

@@ -62,7 +62,7 @@ class RequestDialogState extends State<RequestDialog> {
   // ignore: unused_field
   late GlAccountBloc _accountBloc; // needed for accountlist
   late FinDocStatusVal _updatedStatus;
-  late String classificationId;
+  late String applicationId;
   late AuthBloc _authBloc;
 
   late bool isPhone;
@@ -105,7 +105,7 @@ class RequestDialogState extends State<RequestDialog> {
       ),
     );
     _finDocBloc = context.read<FinDocBloc>();
-    classificationId = context.read<String>();
+    applicationId = context.read<String>();
     _authBloc = context.read<AuthBloc>();
     user = _authBloc.state.authenticate?.user as User;
     if (finDoc.description != null) {
@@ -159,7 +159,7 @@ class RequestDialogState extends State<RequestDialog> {
               }
             },
             builder: (context, state) {
-              return classificationId == 'AppHealth'
+              return applicationId == 'AppHealth'
                   ? healthRequestForm(
                       state,
                       requestDialogFormKey,

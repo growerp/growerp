@@ -58,10 +58,10 @@ String _getCurrentPlatform() {
 /// Updates the GlobalConfiguration with the new backend URL if available
 /// Returns ForceUpdateInfo if a force update is required
 ///
-/// [classificationId] - The application classification ID
+/// [applicationId] - The application classification ID
 /// [version] - The application version
 Future<ForceUpdateInfo> getBackendUrlOverride(
-  String classificationId,
+  String applicationId,
   String version,
 ) async {
   late http.Response response;
@@ -91,7 +91,7 @@ Future<ForceUpdateInfo> getBackendUrlOverride(
     }
     backendUrl =
         '$backendBaseUrl/rest/s1/growerp/100/BackendUrl?version='
-        '$version&applicationId=$classificationId&platform=$platform';
+        '$version&applicationId=$applicationId&platform=$platform';
     response = await http.get(Uri.parse(backendUrl));
 
     if (response.statusCode == 200) {

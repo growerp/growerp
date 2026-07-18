@@ -22,10 +22,10 @@ import '../blocs/product_bloc.dart';
 /// Returns column definitions for product list based on device type
 List<StyledColumn> getProductListColumns(
   BuildContext context, {
-  String? classificationId,
+  String? applicationId,
 }) {
   bool isPhone = isAPhone(context);
-  final isHotel = classificationId == 'AppHotel';
+  final isHotel = applicationId == 'AppHotel';
 
   if (isPhone) {
     return [
@@ -53,10 +53,10 @@ List<Widget> getProductListRow({
   required Product product,
   required int index,
   required Bloc bloc,
-  String? classificationId,
+  String? applicationId,
 }) {
   bool isPhone = isAPhone(context);
-  final isHotel = classificationId == 'AppHotel';
+  final isHotel = applicationId == 'AppHotel';
   String currencyId = context
       .read<AuthBloc>()
       .state

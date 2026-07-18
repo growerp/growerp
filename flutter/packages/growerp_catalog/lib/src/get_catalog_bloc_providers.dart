@@ -5,14 +5,14 @@ import '../growerp_catalog.dart';
 
 List<BlocProvider> getCatalogBlocProviders(
   RestClient restClient,
-  String classificationId,
+  String applicationId,
 ) {
   List<BlocProvider<StateStreamableSource<Object?>>> blocProviders = [
     BlocProvider<ProductBloc>(
-      create: (context) => ProductBloc(restClient, classificationId),
+      create: (context) => ProductBloc(restClient, applicationId),
     ),
     BlocProvider<CategoryBloc>(
-      create: (context) => CategoryBloc(restClient, classificationId),
+      create: (context) => CategoryBloc(restClient, applicationId),
     ),
     BlocProvider<SubscriptionBloc>(
       create: (context) => SubscriptionBloc(restClient),

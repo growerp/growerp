@@ -215,12 +215,12 @@ class LandingPageGenerationBloc
   extends Bloc<LandingPageGenerationEvent, LandingPageGenerationState> {
   
   final RestClient restClient;
-  final String classificationId;
+  final String applicationId;
   final String ownerPartyId; // Current user's owner party ID
 
   LandingPageGenerationBloc({
     required this.restClient,
-    required this.classificationId,
+    required this.applicationId,
     required this.ownerPartyId,
   }) : super(const LandingPageGenerationState()) {
     on<GenerateLandingPageRequested>(_onGenerateLandingPage);
@@ -738,7 +738,7 @@ class _GenerateLandingPageDialogState extends State<GenerateLandingPageDialog> {
         child: BlocProvider<LandingPageGenerationBloc>(
           create: (context) => LandingPageGenerationBloc(
             restClient: context.read<RestClient>(),
-            classificationId: 'AppAdmin', // From context
+            applicationId: 'AppAdmin', // From context
             ownerPartyId: widget.ownerPartyId,
           ),
           child: BlocConsumer<LandingPageGenerationBloc, 

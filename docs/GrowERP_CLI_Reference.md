@@ -380,7 +380,7 @@ Used by the import/export commands to configure backend connection:
 ```json
 {
   "backendUrl": "http://localhost:8080",
-  "classificationId": "AppAdmin",
+  "applicationId": "AppAdmin",
   "chatUrl": "ws://localhost:3000"
 }
 ```

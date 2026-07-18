@@ -47,7 +47,7 @@ EventTransformer<ProductSearchChanged> productSearchDebounce() {
 
 /// Bloc to access [Product] information
 class ProductBloc extends Bloc<ProductEvent, ProductState> {
-  ProductBloc(this.restClient, this.classificationId)
+  ProductBloc(this.restClient, this.applicationId)
     : super(const ProductState()) {
     on<ProductFetch>(
       _onProductFetch,
@@ -65,7 +65,7 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
   }
 
   final RestClient restClient;
-  final String classificationId;
+  final String applicationId;
   int start = 0;
 
   Future<void> _onProductFetch(
@@ -99,7 +99,7 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
         assetClassId: event.assetClassId,
         start: start,
         limit: event.limit,
-        classificationId: classificationId,
+        applicationId: applicationId,
       );
       emit(
         state.copyWith(
@@ -148,7 +148,7 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
         // update
         Product compResult = await restClient.updateProduct(
           product: event.product,
-          classificationId: classificationId,
+          applicationId: applicationId,
         );
         int index = products.indexWhere(
           (element) => element.productId == event.product.productId,
@@ -165,7 +165,7 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
         // add
         Product compResult = await restClient.createProduct(
           product: event.product,
-          classificationId: classificationId,
+          applicationId: applicationId,
         );
         products.insert(0, compResult);
         emit(
@@ -250,7 +250,7 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
         );
       }
 
-      await restClient.importProducts(products, classificationId);
+      await restClient.importProducts(products, applicationId);
       emit(
         state.copyWith(
           status: ProductStatus.success,
@@ -274,7 +274,7 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
   ) async {
     try {
       emit(state.copyWith(status: ProductStatus.loading));
-      await restClient.exportScreenProducts(classificationId: classificationId);
+      await restClient.exportScreenProducts(applicationId: applicationId);
       emit(
         state.copyWith(
           status: ProductStatus.success,

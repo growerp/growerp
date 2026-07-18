@@ -5,7 +5,7 @@ import '../growerp_marketing.dart';
 
 /// Provides BLoC instances for the marketing module with landing page support
 List<BlocProvider> getMarketingBlocProviders(RestClient restClient,
-    [String classificationId = 'AppAdmin']) {
+    [String applicationId = 'AppAdmin']) {
   List<BlocProvider> blocProviders = [
     BlocProvider<AssessmentBloc>(
       create: (context) => AssessmentBloc(restClient),
@@ -13,7 +13,7 @@ List<BlocProvider> getMarketingBlocProviders(RestClient restClient,
     BlocProvider<LandingPageBloc>(
       create: (context) => LandingPageBloc(
         restClient: restClient,
-        classificationId: classificationId,
+        applicationId: applicationId,
       ),
     ),
     BlocProvider<PageSectionBloc>(

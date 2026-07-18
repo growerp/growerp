@@ -49,7 +49,7 @@ class ProductDialogState extends State<ProductDialog> {
   dynamic _pickImageError;
   String? _retrieveDataError;
   String? _selectedProductTypeId;
-  late String classificationId;
+  late String applicationId;
   final ImagePicker _picker = ImagePicker();
   late List<Category> _selectedCategories;
   late List<Category> _categories;
@@ -82,7 +82,7 @@ class ProductDialogState extends State<ProductDialog> {
     context.read<CategoryBloc>().add(
       const CategoryFetch(isForDropDown: true, limit: 3),
     );
-    classificationId = context.read<String>();
+    applicationId = context.read<String>();
     _selectedCategories = List.of(widget.product.categories);
     useWarehouse = widget.product.useWarehouse;
     _currencySelected = widget.product.currency != null
@@ -120,7 +120,7 @@ class ProductDialogState extends State<ProductDialog> {
   Widget build(BuildContext context) {
     bool isPhone = ResponsiveBreakpoints.of(context).isMobile;
     var catalogLocalizations = CatalogLocalizations.of(context)!;
-    if (classificationId == 'AppHotel') {
+    if (applicationId == 'AppHotel') {
       _selectedProductTypeId = catalogLocalizations.rental;
     }
     return BlocConsumer<ProductBloc, ProductState>(
@@ -190,7 +190,7 @@ class ProductDialogState extends State<ProductDialog> {
                 ),
                 child: popUp(
                   context: context,
-                  title: (classificationId == 'AppAdmin'
+                  title: (applicationId == 'AppAdmin'
                       ? catalogLocalizations.productNumber(
                           widget.product.productId.isEmpty
                               ? catalogLocalizations.newItem
@@ -202,10 +202,10 @@ class ProductDialogState extends State<ProductDialog> {
                               : widget.product.pseudoId,
                         )),
                   height: isPhone
-                      ? (classificationId == 'AppAdmin' ? 850 : 700)
-                      : (classificationId == 'AppAdmin' ? 700 : 600),
+                      ? (applicationId == 'AppAdmin' ? 850 : 700)
+                      : (applicationId == 'AppAdmin' ? 700 : 600),
                   width: isPhone ? 450 : 800,
-                  child: listChild(classificationId, isPhone),
+                  child: listChild(applicationId, isPhone),
                 ),
               );
             },
@@ -215,7 +215,7 @@ class ProductDialogState extends State<ProductDialog> {
     );
   }
 
-  Widget listChild(String classificationId, bool isPhone) {
+  Widget listChild(String applicationId, bool isPhone) {
     return Builder(
       builder: (BuildContext context) {
         return !foundation.kIsWeb &&
@@ -231,10 +231,10 @@ class ProductDialogState extends State<ProductDialog> {
                       textAlign: TextAlign.center,
                     );
                   }
-                  return _showForm(classificationId, isPhone);
+                  return _showForm(applicationId, isPhone);
                 },
               )
-            : _showForm(classificationId, isPhone);
+            : _showForm(applicationId, isPhone);
       },
     );
   }
@@ -248,7 +248,7 @@ class ProductDialogState extends State<ProductDialog> {
     return null;
   }
 
-  Widget _showForm(String classificationId, bool isPhone) {
+  Widget _showForm(String applicationId, bool isPhone) {
     var catalogLocalizations = CatalogLocalizations.of(context)!;
     final Text? retrieveError = _getRetrieveErrorWidget();
     if (retrieveError != null) {
@@ -263,7 +263,7 @@ class ProductDialogState extends State<ProductDialog> {
 
     List<Widget> relCategories = _buildRelatedCategories();
 
-    List<Widget> widgets = _buildFormFields(classificationId, relCategories);
+    List<Widget> widgets = _buildFormFields(applicationId, relCategories);
 
     List<Widget> rows = [];
     if (!ResponsiveBreakpoints.of(context).isMobile) {
@@ -386,7 +386,7 @@ class ProductDialogState extends State<ProductDialog> {
   }
 
   List<Widget> _buildFormFields(
-    String classificationId,
+    String applicationId,
     List<Widget> relCategories,
   ) {
     var catalogLocalizations = CatalogLocalizations.of(context)!;
@@ -400,13 +400,13 @@ class ProductDialogState extends State<ProductDialog> {
               key: const Key('id'),
               initialValue: widget.product.pseudoId,
               decoration: InputDecoration(
-                labelText: classificationId == 'AppHotel'
+                labelText: applicationId == 'AppHotel'
                     ? catalogLocalizations.roomTypeId
                     : catalogLocalizations.productId,
               ),
             ),
           ),
-          if (classificationId != 'AppHotel')
+          if (applicationId != 'AppHotel')
             Expanded(
               flex: 2,
               child: Padding(
@@ -445,7 +445,7 @@ class ProductDialogState extends State<ProductDialog> {
         key: const Key('name'),
         initialValue: widget.product.productName ?? '',
         decoration: InputDecoration(
-          labelText: classificationId == 'AppHotel'
+          labelText: applicationId == 'AppHotel'
               ? catalogLocalizations.roomTypeName
               : catalogLocalizations.productName,
         ),
@@ -536,7 +536,7 @@ class ProductDialogState extends State<ProductDialog> {
           ],
         ),
       ),
-      if (classificationId != 'AppHotel')
+      if (applicationId != 'AppHotel')
         Padding(
           padding: const EdgeInsets.fromLTRB(0, 5, 0, 5),
           child: GroupingDecorator(
@@ -544,7 +544,7 @@ class ProductDialogState extends State<ProductDialog> {
             child: Wrap(spacing: 10.0, children: relCategories),
           ),
         ),
-      if (classificationId != 'AppHotel' && _selectedProductTypeId != 'Service')
+      if (applicationId != 'AppHotel' && _selectedProductTypeId != 'Service')
         GroupingDecorator(
           labelText: catalogLocalizations.warehouseInventory,
           child: Row(
@@ -720,7 +720,7 @@ class ProductDialogState extends State<ProductDialog> {
                     productId: widget.product.productId,
                     pseudoId: formData['id'] ?? '',
                     productName: formData['name'] ?? '',
-                    assetClassId: classificationId == 'AppHotel'
+                    assetClassId: applicationId == 'AppHotel'
                         ? catalogLocalizations.hotelRoom
                         : catalogLocalizations.inventoryFin, // finished good
                     description: formData['description'] ?? '',

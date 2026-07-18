@@ -1,6 +1,7 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+
 import 'intl/messages_all.dart';
 
 // **************************************************************************
@@ -55,32 +56,32 @@ class S {
   }
 
   /// `Welcome {name}`
-  String pageHomeWelcome(Object name) {
+  String pageHomeWelcome(String name) {
     return Intl.message(
       'Welcome $name',
       name: 'pageHomeWelcome',
-      desc: '',
+      desc: 'Welcome message on home page with user name',
       args: [name],
     );
   }
 
   /// `Screen {screen} not found`
-  String screenNotFound(Object screen) {
+  String screenNotFound(String screen) {
     return Intl.message(
       'Screen $screen not found',
       name: 'screenNotFound',
-      desc: '',
+      desc: 'Error message when a screen is not found',
       args: [screen],
     );
   }
 
-  /// `No {classificationId} company found in system\n Go to the admin app to create one!`
-  String classificationNotDefined(Object classificationId) {
+  /// `No {applicationId} company found in system\n Go to the admin app to create one!`
+  String applicationNotDefined(String applicationId) {
     return Intl.message(
-      'No $classificationId company found in system\n Go to the admin app to create one!',
-      name: 'classificationNotDefined',
-      desc: '',
-      args: [classificationId],
+      'No $applicationId company found in system\n Go to the admin app to create one!',
+      name: 'applicationNotDefined',
+      desc: 'Error message when no company is found for a classification',
+      args: [applicationId],
     );
   }
 }
@@ -91,6 +92,8 @@ class AppLocalizationDelegate extends LocalizationsDelegate<S> {
   List<Locale> get supportedLocales {
     return const <Locale>[
       Locale.fromSubtags(languageCode: 'en'),
+      Locale.fromSubtags(languageCode: 'fr'),
+      Locale.fromSubtags(languageCode: 'nl'),
       Locale.fromSubtags(languageCode: 'th', countryCode: 'TH'),
     ];
   }

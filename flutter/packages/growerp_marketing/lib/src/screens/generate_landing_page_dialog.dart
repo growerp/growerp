@@ -55,7 +55,7 @@ class _GenerateLandingPageDialogState extends State<GenerateLandingPageDialog> {
         child: BlocProvider<LandingPageGenerationBloc>(
           create: (_) => LandingPageGenerationBloc(
             restClient: restClient,
-            classificationId: 'AppAdmin',
+            applicationId: 'AppAdmin',
           ),
           child: BlocConsumer<LandingPageGenerationBloc,
               LandingPageGenerationState>(

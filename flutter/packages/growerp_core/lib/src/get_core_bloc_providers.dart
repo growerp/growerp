@@ -8,14 +8,14 @@ List<BlocProvider> getCoreBlocProviders(
   RestClient restClient,
   WsClient chatClient,
   WsClient notificationClient,
-  String classificationId,
+  String applicationId,
   Company? company,
 ) {
   AuthBloc authBloc = AuthBloc(
     chatClient,
     notificationClient,
     restClient,
-    classificationId,
+    applicationId,
     company,
   );
   ChatRoomBloc chatRoomBloc = ChatRoomBloc(restClient, chatClient, authBloc);

@@ -141,7 +141,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <parameter name="postedBalance" />
                 </parameter>
             </parameter>
-            <parameter name="classificationId" />
+            <parameter name="applicationId" />
         </in-parameters>
         <actions>
             <script>System.out.println(">>>>importing ${glAccounts?.size()} GL Accounts")</script>
@@ -272,7 +272,7 @@ along with this software (see the LICENSE.md file). If not, see
                     </parameter>
                 </parameter>
             </parameter>
-            <parameter name="classificationId" />
+            <parameter name="applicationId" />
         </in-parameters>
         <actions>
             <script>System.out.println(">>>===== importing ${companies?.size()} companies")</script>
@@ -472,7 +472,7 @@ along with this software (see the LICENSE.md file). If not, see
                 ec.service.async()
                     .name('growerp.100.ImportExportServices100.process#CompanyUserImport')
                     .parameters([companyUsers: companyUsers, ownerPartyId: ownerPartyId,
-                                 classificationId: classificationId,
+                                 applicationId: applicationId,
                                  notifyUserId: ec.user.userId, username: ec.user.username])
                     .call()
             </script>
@@ -487,7 +487,7 @@ along with this software (see the LICENSE.md file). If not, see
         <in-parameters>
             <parameter name="companyUsers" type="List" required="true" />
             <parameter name="ownerPartyId" required="true" />
-            <parameter name="classificationId" />
+            <parameter name="applicationId" />
             <parameter name="notifyUserId" />
             <parameter name="username" />
         </in-parameters>
@@ -508,7 +508,7 @@ along with this software (see the LICENSE.md file). If not, see
                 </if>
                 <service-call name="growerp.100.ImportExportServices100.import#CompanyUser"
                     in-map="[companyUser: companyUser, ownerPartyId: ownerPartyId,
-                             classificationId: classificationId]" />
+                             applicationId: applicationId]" />
                 <if condition="ec.message.hasError()">
                     <set field="failed" from="failed + 1" />
                     <script>ec.message.clearErrors()</script>
@@ -533,7 +533,7 @@ along with this software (see the LICENSE.md file). If not, see
         <in-parameters>
             <parameter name="companyUser" type="Map" required="true" />
             <parameter name="ownerPartyId" required="true" />
-            <parameter name="classificationId" />
+            <parameter name="applicationId" />
         </in-parameters>
         <actions>
             <!-- validate -->
@@ -638,7 +638,7 @@ along with this software (see the LICENSE.md file). If not, see
                                 ]" />
                     <service-call name="growerp.100.PartyServices100.create#User"
                         out-map="result"
-                        in-map="[user: user, classificationId: classificationId]" />
+                        in-map="[user: user, applicationId: applicationId]" />
                 </then>
 
                 <else-if condition="companyUser.type == 'Company'">
@@ -646,12 +646,12 @@ along with this software (see the LICENSE.md file). If not, see
                         <service-call
                             name="growerp.100.PartyServices100.create#Company"
                             out-map="result"
-                            in-map="[company: companyUser, classificationId: classificationId]" />
+                            in-map="[company: companyUser, applicationId: applicationId]" />
                         <else>
                             <service-call
                                 name="growerp.100.PartyServices100.update#Company"
                                 out-map="result"
-                                in-map="[company: companyUser, classificationId: classificationId]" />
+                                in-map="[company: companyUser, applicationId: applicationId]" />
                         </else>
                     </if>
                 </else-if>
@@ -682,9 +682,13 @@ along with this software (see the LICENSE.md file). If not, see
                     <parameter name="image" />
                 </parameter>
             </parameter>
-            <parameter name="classificationId" required="true" />
+            <parameter name="applicationId" />
+            <parameter name="classificationId">
+                <description>Deprecated alias for applicationId, kept for old clients</description>
+            </parameter>
         </in-parameters>
         <actions>
+            <set field="applicationId" from="applicationId ?: classificationId" />
             <script>System.out.println(">>>>importing ${products?.size()} products")</script>
             <set field="productsImported" type="Integer" value="0" />
             <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
@@ -710,7 +714,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <if condition="!products">
                     <service-call name="growerp.100.CatalogServices100.create#Product"
                         out-map="result"
-                        in-map="[product: product, classificationId: classificationId]" />
+                        in-map="[product: product, applicationId: applicationId]" />
                     <script>productsImported++</script>
                 </if>
             </iterate>
@@ -730,14 +734,14 @@ along with this software (see the LICENSE.md file). If not, see
                     <parameter name="image" />
                 </parameter>
             </parameter>
-            <parameter name="classificationId" />
+            <parameter name="applicationId" />
         </in-parameters>
         <actions>
             <script>System.out.println(">>>>importing ${categories?.size()} categories")</script>
             <script>ec.user.setEffectiveTime(Timestamp.valueOf("1999-01-01 00:00:00"))</script>
             <iterate list="categories" entry="category">
                 <service-call name="growerp.100.CatalogServices100.create#ProductCategory"
-                    in-map="[category: category, classificationId: classificationId]" />
+                    in-map="[category: category, applicationId: applicationId]" />
             </iterate>
             <if condition="!ec.message.hasError()">
                 <script>System.out.println(">>>${categories?.size()} categories imported")</script>
@@ -748,7 +752,7 @@ along with this software (see the LICENSE.md file). If not, see
     <service verb="import" noun="Assets">
         <in-parameters>
             <parameter name="assets" required="true" type="List">
-                <parameter name="classificationId" required="true" />
+                <parameter name="applicationId" required="true" />
                 <parameter name="asset" type="Map" required="true">
                     <parameter name="pseudoId" />
                     <parameter name="statusId" />
@@ -785,14 +789,18 @@ along with this software (see the LICENSE.md file). If not, see
                     </parameter>
                 </parameter>
             </parameter>
-            <parameter name="classificationId" />
+            <parameter name="applicationId" />
+            <parameter name="classificationId">
+                <description>Deprecated alias for applicationId, kept for old clients</description>
+            </parameter>
         </in-parameters>
         <actions>
+            <set field="applicationId" from="applicationId ?: classificationId" />
             <script>System.out.println(">>>>importing ${assets?.size()} assets")</script>
             <iterate list="assets" entry="asset">
                 <service-call name="growerp.100.InventoryServices100.create#Asset"
                     out-map="result"
-                    in-map="[asset: asset, classificationId: classificationId]" />
+                    in-map="[asset: asset, applicationId: applicationId]" />
             </iterate>
             <if condition="!ec.message.hasError()">
                 <script>System.out.println(">>>${assets?.size()} assets imported")</script>
@@ -821,7 +829,7 @@ along with this software (see the LICENSE.md file). If not, see
                         </parameter>
                     </parameter>
                     <parameter name="grandTotal" />
-                    <parameter name="classificationId" />
+                    <parameter name="applicationId" />
                     <parameter name="isPosted" type="Boolean" />
                     <parameter name="journal">
                         <parameter name="journalId" />
@@ -829,7 +837,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <parameter name="requestType" />
                 </parameter>
             </parameter>
-            <parameter name="classificationId" />
+            <parameter name="applicationId" />
         </in-parameters>
         <actions>
             <script>System.out.println(">>>>importing ${finDocs[0].sales == true ? 'Sales' : 'Purchase'} ${finDocs[0].docType} ${finDocs?.size()} finDocs")</script>
@@ -936,7 +944,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <!-- create findoc-->
                 <set field="finDoc.statusId" value="FinDocCreated" />
                 <service-call name="growerp.100.FinDocServices100.create#FinDoc"
-                    in-map="[finDoc: finDoc, classificationId: classificationId]"
+                    in-map="[finDoc: finDoc, applicationId: applicationId]"
                     out-map="resultCreateFindoc" />
                 <script>finDocsImported++</script>
                 <!-- create references-->
@@ -1020,7 +1028,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <if condition="finDoc.sales == true">
                         <set field="fromPartyId" from="companyPartyId" />
                         <set field="toPartyId" from="null" />
-                        <set field="pseudoIds" from="[finDoc.classificationId]" />
+                        <set field="pseudoIds" from="[finDoc.applicationId]" />
                         <else>
                             <set field="toPartyId" from="companyPartyId" />
                             <set field="fromPartyId" from="null" />
@@ -1055,8 +1063,8 @@ along with this software (see the LICENSE.md file). If not, see
                     </iterate>
                 </if>
                 <!-- link invoices to order, so order should be created first -->
-                <if condition="finDoc.docType == 'invoice' &amp;&amp; finDoc.classificationId">
-                    <set field="pseudoId" from="finDoc.classificationId" />
+                <if condition="finDoc.docType == 'invoice' &amp;&amp; finDoc.applicationId">
+                    <set field="pseudoId" from="finDoc.applicationId" />
                     <if condition="finDoc.sales == true">
                         <set field="vendorPartyId" from="companyPartyId" />
                         <set field="customerPartyId" from="null" />
@@ -1145,9 +1153,13 @@ along with this software (see the LICENSE.md file). If not, see
                     <parameter name="rentalThruDate" />
                 </parameter>
             </parameter>
-            <parameter name="classificationId" required="true" />
+            <parameter name="applicationId" />
+            <parameter name="classificationId">
+                <description>Deprecated alias for applicationId, kept for old clients</description>
+            </parameter>
         </in-parameters>
         <actions>
+            <set field="applicationId" from="applicationId ?: classificationId" />
             <script>System.out.println(">>>>importing ${finDocItems?.size()} ${!finDocItems.isEmpty() ? finDocItems[0].docType : ''} items")</script>
             <set field="itemsImported" type="Integer" value="0" />
             <service-call out-map="context"
@@ -1162,7 +1174,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <!-- get last document id-->
                     <service-call name="growerp.100.FinDocServices100.get#FinDoc" out-map="context"
                         in-map="[pseudoId: lastItem.pseudoId, docType: lastItem.docType,
-                                classificationId: classificationId]" />
+                                applicationId: applicationId]" />
                     <if condition="finDocs.isEmpty()">
                         <!-- cannot find, so not try to add items -->
                         <script>System.out.println(">>>>importing ${lastItem.docType} items could not find company: $companyPartyId and pseudo: ${lastItem.pseudoId}")</script>
@@ -1189,7 +1201,7 @@ along with this software (see the LICENSE.md file). If not, see
                                 <else>
                                     <!-- other doctypes -->
                                     <service-call name="growerp.100.FinDocServices100.update#FinDoc"
-                                        in-map="[finDoc: finDoc, classificationId: classificationId]" />
+                                        in-map="[finDoc: finDoc, applicationId: applicationId]" />
                                 </else>
                             </if>
                             <script>itemsImported += finDoc.items?.size()</script>
@@ -1268,7 +1280,7 @@ along with this software (see the LICENSE.md file). If not, see
                                     ]" />
                                 <service-call name="growerp.100.CatalogServices100.create#Product"
                                     out-map="context"
-                                    in-map="[product: product, classificationId: classificationId]" />
+                                    in-map="[product: product, applicationId: applicationId]" />
                                 <set field="item.productId" from="product.productId" />
                             </if>
                         </else>
@@ -1288,7 +1300,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <!-- get current document id-->
                 <service-call name="growerp.100.FinDocServices100.get#FinDoc" out-map="context"
                     in-map="[pseudoId: lastItem.pseudoId, docType: lastItem.docType,
-                            classificationId: classificationId]" />
+                            applicationId: applicationId]" />
                 <if condition="finDocs.isEmpty()">
                     <!-- cannot find, so not try to add items -->
                     <script>System.out.println(">>>>importing items ${lastItem.docType} could not find header ${lastItem.pseudoId}")</script>
@@ -1314,7 +1326,7 @@ along with this software (see the LICENSE.md file). If not, see
                             <else>
                                 <!-- other doctypes -->
                                 <service-call name="growerp.100.FinDocServices100.update#FinDoc"
-                                    in-map="[finDoc: finDoc, classificationId: classificationId]" />
+                                    in-map="[finDoc: finDoc, applicationId: applicationId]" />
                             </else>
                         </if>
                     </else>
@@ -1830,9 +1842,13 @@ along with this software (see the LICENSE.md file). If not, see
         <description> Import general entities</description>
         <in-parameters>
             <parameter name="entities" required="true" type="Map" />
-            <parameter name="classificationId" />
+            <parameter name="applicationId" />
+            <parameter name="classificationId">
+                <description>Deprecated alias for applicationId, kept for old clients</description>
+            </parameter>
         </in-parameters>
         <actions>
+            <set field="applicationId" from="applicationId ?: classificationId" />
             <!-- Validate entity types - check for unrecognized keys -->
             <set field="supportedEntities"
                 from="['companies', 'users', 'categories', 'personas', 'products', 'assets', 'bomItems', 'locations', 'glAccounts', 'socialPosts']" />
@@ -1881,7 +1897,7 @@ along with this software (see the LICENSE.md file). If not, see
             <if condition="entities.categories">
                 <iterate list="entities.categories" entry="category">
                     <service-call name="growerp.100.CatalogServices100.create#ProductCategory"
-                        in-map="[category: category, classificationId: classificationId]" />
+                        in-map="[category: category, applicationId: applicationId]" />
                 </iterate>
             </if>
             <if condition="entities.personas">
@@ -1927,14 +1943,14 @@ along with this software (see the LICENSE.md file). If not, see
                     </iterate>
                     <service-call name="growerp.100.CatalogServices100.create#Product"
                         out-map="result"
-                        in-map="[product: product, classificationId: classificationId]" />
+                        in-map="[product: product, applicationId: applicationId]" />
                 </iterate>
                 <message public="true" type="success">Products Upload completed</message>
             </if>
             <if condition="entities.assets">
                 <iterate list="entities.assets" entry="asset">
                     <service-call name="growerp.100.InventoryServices100.create#Asset"
-                        in-map="[asset: asset, classificationId: classificationId]" />
+                        in-map="[asset: asset, applicationId: applicationId]" />
                 </iterate>
                 <message public="true" type="success">Assets Upload completed</message>
             </if>
@@ -2017,14 +2033,14 @@ along with this software (see the LICENSE.md file). If not, see
             Get Categories information into a CSV file attachement
         </description>
         <in-parameters>
-            <parameter name="classificationId" />
+            <parameter name="applicationId" />
         </in-parameters>
         <out-parameters>
             <parameter name="fileText" />
         </out-parameters>
         <actions>
             <service-call name="growerp.100.CatalogServices100.get#ProductCategory"
-                in-map="[classificationId: classificationId]" out-map="context" />
+                in-map="[applicationId: applicationId]" out-map="context" />
             <set field="fileText" value="" />
             <script><![CDATA[
                 import org.apache.commons.csv.CSVPrinter
@@ -2163,12 +2179,16 @@ along with this software (see the LICENSE.md file). If not, see
         <description> Export general entities</description>
         <in-parameters>
             <parameter name="entityName" required="true" />
-            <parameter name="classificationId" /><!-- not needed for gl accounts-->
+            <parameter name="applicationId" /><!-- not needed for gl accounts-->
+            <parameter name="classificationId">
+                <description>Deprecated alias for applicationId, kept for old clients</description>
+            </parameter>
         </in-parameters>
         <actions>
+            <set field="applicationId" from="applicationId ?: classificationId" />
             <set field="emailAddress" from="ec.user.userAccount.emailAddress" />
             <set field="userAccount" from="ec.user.userAccount" />
-            <set field="bodyParameters" from="[classificationId: classificationId]" />
+            <set field="bodyParameters" from="[applicationId: applicationId]" />
             <if condition="entityName == 'Category'">
                 <service-call name="org.moqui.impl.EmailServices.send#EmailTemplate" async="true"
                     in-map="[emailTemplateId: 'GrowerpExportCategories',

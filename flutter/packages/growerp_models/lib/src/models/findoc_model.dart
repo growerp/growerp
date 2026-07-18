@@ -56,7 +56,7 @@ abstract class FinDoc with _$FinDoc {
     Decimal? grandTotal,
     Decimal? originalGrandTotal,
     Currency? originalCurrency, // currency, like EUR, USD
-    String? classificationId, // is productStore
+    String? applicationId, // is productStore
     String? salesChannel,
     String? shipmentMethod,
     Address? address,
@@ -152,7 +152,7 @@ List<FinDoc> csvToFinDocs(String csvFile, Logger logger) {
           grandTotal: row[10] != 'null' && row[10].isNotEmpty
               ? Decimal.parse(row[10].replaceAll(',', ''))
               : null,
-          classificationId: row[11], // for invoice/payment/order matching
+          applicationId: row[11], // for invoice/payment/order matching
         ),
       );
     } catch (e) {

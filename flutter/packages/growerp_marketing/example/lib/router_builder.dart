@@ -133,9 +133,9 @@ GoRouter createMarketingExampleRouter() {
 /// Used by both the production app (main.dart) and all integration tests.
 List<BlocProvider> getExampleBlocProviders(
   RestClient restClient,
-  String classificationId,
+  String applicationId,
 ) {
-  return [...getMarketingBlocProviders(restClient, classificationId)];
+  return [...getMarketingBlocProviders(restClient, applicationId)];
 }
 
 /// Simple dashboard for marketing example

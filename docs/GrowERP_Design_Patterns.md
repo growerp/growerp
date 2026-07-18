@@ -180,13 +180,13 @@ class [Entity]List extends StatefulWidget {
 
 class [Entity]ListState extends State<[Entity]List> {
   late [Entity]Bloc _[entity]Bloc;
-  late String classificationId;
+  late String applicationId;
 
   @override
   void initState() {
     super.initState();
     _[entity]Bloc = context.read<[Entity]Bloc>();
-    classificationId = context.read<String>();
+    applicationId = context.read<String>();
     _[entity]Bloc.add(const [Entity]Fetch());
   }
 

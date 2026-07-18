@@ -102,7 +102,7 @@ class UserDialogState extends State<UserDialog> {
   final ScrollController _scrollController = ScrollController();
   late User currentUser;
   late bool isAdmin;
-  late String _classificationId;
+  late String _applicationId;
 
   @override
   void initState() {
@@ -126,7 +126,7 @@ class UserDialogState extends State<UserDialog> {
     localUserGroups = UserGroup.values;
     updatedUser = widget.user;
     _authBloc = context.read<AuthBloc>();
-    _classificationId = context.read<String>();
+    _applicationId = context.read<String>();
     _companyBloc = context.read<CompanyBloc>()
       ..add(
         CompanyFetch(
@@ -806,7 +806,7 @@ class UserDialogState extends State<UserDialog> {
                   loginDisabled: _isLoginDisabled,
                   userGroup: _selectedUserGroup,
                   role: _selectedRole,
-                  appsUsed: [_classificationId],
+                  appsUsed: [_applicationId],
                   //                      language: Localizations.localeOf(context)
                   //                          .languageCode
                   //                          .toString(),

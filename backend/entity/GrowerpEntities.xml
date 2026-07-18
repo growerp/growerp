@@ -383,14 +383,14 @@ along with this software (see the LICENSE.md file). If not, see
             <description>Y if tenant setup is complete, N otherwise</description>
         </field>
         <field name="setupCompletedDate" type="date-time" />
-        <field name="classificationId" type="id">
+        <field name="applicationId" type="id">
             <description>The app classification (e.g., AppAdmin, AppHotel) used during registration</description>
         </field>
         <relationship type="one" title="Owner" related="mantle.party.Party" short-alias="owner">
             <key-map field-name="ownerPartyId" />
         </relationship>
         <relationship type="one" title="Application" related="growerp.Application" short-alias="application">
-            <key-map field-name="classificationId" related="applicationId" />
+            <key-map field-name="applicationId" related="applicationId" />
         </relationship>
     </entity>
 

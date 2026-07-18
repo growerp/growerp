@@ -77,7 +77,7 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
     this.restClient,
     this.sales,
     this.docType,
-    this.classificationId, {
+    this.applicationId, {
     this.journalId = '',
   }) : super(const FinDocState()) {
     on<FinDocFetch>(
@@ -101,7 +101,7 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
   }
 
   final RestClient restClient;
-  final String classificationId;
+  final String applicationId;
   final bool sales;
   final FinDocType docType;
   final String journalId;
@@ -199,7 +199,7 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
         // create
         FinDoc compResult = await restClient.createFinDoc(
           finDoc: event.finDoc.copyWith(
-            classificationId: classificationId,
+            applicationId: applicationId,
             items: items,
           ),
         );
@@ -216,7 +216,7 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
         // update
         FinDoc compResult = await restClient.updateFinDoc(
           finDoc: event.finDoc.copyWith(
-            classificationId: classificationId,
+            applicationId: applicationId,
             items: items,
           ),
         );

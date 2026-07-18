@@ -20,18 +20,16 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'en';
 
-  static String m0(String classificationId) =>
-      "No ${classificationId} company found in system\n Go to the admin app to create one!";
+  static String m0(applicationId) =>
+      "No ${applicationId} company found in system\n Go to the admin app to create one!";
 
-  static String m1(String name) => "Welcome ${name}";
+  static String m1(name) => "Welcome ${name}";
 
-  static String m2(String screen) => "Screen ${screen} not found";
+  static String m2(screen) => "Screen ${screen} not found";
 
-  final Map<String, Function> messages = _notInlinedMessages(
-    _notInlinedMessages,
-  );
+  final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
-    "classificationNotDefined": m0,
+    "applicationNotDefined": m0,
     "pageHomeWelcome": m1,
     "screenNotFound": m2,
   };

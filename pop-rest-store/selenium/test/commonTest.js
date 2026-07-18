@@ -22,10 +22,10 @@ async function getFreeEmail(email) { // template email with XXX to be replaced b
     if (count != 5) return newEmail;
     return;
 }
-async function newCompany(firstName, lastName, email, companyName, currencyId, classificationId) {
+async function newCompany(firstName, lastName, email, companyName, currencyId, applicationId) {
     let response = await axios.post(baseUrl + 'Register',
         {
-            classificationId: classificationId,
+            applicationId: applicationId,
             email: email,
             firstName: firstName,
             lastName: lastName,
@@ -38,7 +38,7 @@ async function newCompany(firstName, lastName, email, companyName, currencyId, c
 
     await axios.post(baseUrl + 'Login',
         {
-            classificationId: classificationId,
+            applicationId: applicationId,
             username: email,
             password: 'qqqqqq9!'
         },
@@ -49,7 +49,7 @@ async function newCompany(firstName, lastName, email, companyName, currencyId, c
 
     response = await axios.post(baseUrl + 'Login',
         {
-            classificationId: classificationId,
+            applicationId: applicationId,
             username: email,
             password: 'qqqqqq9!',
             companyName: companyName,

@@ -35,7 +35,7 @@ class TopApp extends StatefulWidget {
   const TopApp({
     super.key,
     required this.restClient,
-    required this.classificationId,
+    required this.applicationId,
     required this.chatClient,
     required this.notificationClient,
     this.title = '',
@@ -50,7 +50,7 @@ class TopApp extends StatefulWidget {
   });
 
   final RestClient restClient;
-  final String classificationId;
+  final String applicationId;
   final Company? company;
 
   final WsClient chatClient;
@@ -199,7 +199,7 @@ class _TopAppState extends State<TopApp> {
         RepositoryProvider(create: (context) => widget.restClient),
         RepositoryProvider(create: (context) => widget.chatClient),
         RepositoryProvider(create: (context) => widget.notificationClient),
-        RepositoryProvider(create: (context) => widget.classificationId),
+        RepositoryProvider(create: (context) => widget.applicationId),
         RepositoryProvider(create: (context) => widget.company),
       ],
       child: MultiBlocProvider(
@@ -208,7 +208,7 @@ class _TopAppState extends State<TopApp> {
             widget.restClient,
             widget.chatClient,
             widget.notificationClient,
-            widget.classificationId,
+            widget.applicationId,
             widget.company,
           ),
           if (_menuConfigBloc != null)

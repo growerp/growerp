@@ -44,7 +44,7 @@ class CategoryDialogState extends State<CategoryDialog> {
   dynamic _pickImageError;
   String? _retrieveDataError;
   List<Product> _selectedProducts = [];
-  late String classificationId;
+  late String applicationId;
   late CategoryBloc _categoryBloc;
   final ImagePicker _picker = ImagePicker();
   final ScrollController _scrollController = ScrollController();
@@ -53,7 +53,7 @@ class CategoryDialogState extends State<CategoryDialog> {
   @override
   void initState() {
     super.initState();
-    classificationId = GlobalConfiguration().get("classificationId");
+    applicationId = GlobalConfiguration().get("applicationId");
     _idController.text = widget.category.pseudoId;
     _nameController.text = widget.category.categoryName;
     _descrController.text = widget.category.description;

@@ -19,11 +19,11 @@ along with this software (see the LICENSE.md file). If not, see
   <!-- ============================================ -->
 
   <moqui.basic.LocalizedMessage locale="default" original="GrowerpEmailWelcomeGreeting"
-    localized="Welcome to the GrowERP ${classification} system, ${firstName!} ${lastName!}" />
+    localized="Welcome to the GrowERP ${application} system, ${firstName!} ${lastName!}" />
   <moqui.basic.LocalizedMessage locale="th" original="GrowerpEmailWelcomeGreeting"
-    localized="ยินดีต้อนรับสู่ระบบ GrowERP ${classification}, ${firstName!} ${lastName!}" />
+    localized="ยินดีต้อนรับสู่ระบบ GrowERP ${application}, ${firstName!} ${lastName!}" />
   <moqui.basic.LocalizedMessage locale="nl" original="GrowerpEmailWelcomeGreeting"
-    localized="Welkom bij het GrowERP ${classification} systeem, ${firstName!} ${lastName!}" />
+    localized="Welkom bij het GrowERP ${application} systeem, ${firstName!} ${lastName!}" />
 
   <moqui.basic.LocalizedMessage locale="default" original="GrowerpEmailWelcomeAdminIntro"
     localized="You can now start a website, sell products, manage your inventory and your accounting is done automatically." />
@@ -82,11 +82,11 @@ along with this software (see the LICENSE.md file). If not, see
     localized="Met vriendelijke groet," />
 
   <moqui.basic.LocalizedMessage locale="default" original="GrowerpEmailWelcomeTeam"
-    localized="The Growerp-${classification} Team!" />
+    localized="The Growerp-${application} Team!" />
   <moqui.basic.LocalizedMessage locale="th" original="GrowerpEmailWelcomeTeam"
-    localized="ทีม Growerp-${classification}!" />
+    localized="ทีม Growerp-${application}!" />
   <moqui.basic.LocalizedMessage locale="nl" original="GrowerpEmailWelcomeTeam"
-    localized="Het Growerp-${classification} Team!" />
+    localized="Het Growerp-${application} Team!" />
 
   <!-- Welcome Test Email -->
   <moqui.basic.LocalizedMessage locale="default" original="GrowerpEmailWelcomeTestNote"
@@ -385,12 +385,12 @@ along with this software (see the LICENSE.md file). If not, see
   <moqui.basic.LocalizedMessage locale="nl" original="GrowerpInvalidCompanyPartyId"
     localized="Geen geldig companyPartyId: $companyPartyId" />
 
-  <moqui.basic.LocalizedMessage locale="default" original="GrowerpInvalidClassificationId"
-    localized="Not a valid classificationId: ${classificationId}" />
-  <moqui.basic.LocalizedMessage locale="th" original="GrowerpInvalidClassificationId"
-    localized="classificationId ไม่ถูกต้อง: ${classificationId}" />
-  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpInvalidClassificationId"
-    localized="Geen geldig classificationId: ${classificationId}" />
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpInvalidApplicationId"
+    localized="Not a valid applicationId: ${applicationId}" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpInvalidApplicationId"
+    localized="applicationId ไม่ถูกต้อง: ${applicationId}" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpInvalidApplicationId"
+    localized="Geen geldig applicationId: ${applicationId}" />
 
   <moqui.basic.LocalizedMessage locale="default" original="GrowerpInvalidUserGroupId"
     localized="Not a valid userGroupId: ${user.userGroupId}" />

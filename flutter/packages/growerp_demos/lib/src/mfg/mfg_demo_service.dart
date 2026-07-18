@@ -72,12 +72,12 @@ Future<Product?> _findProduct(RestClient rc, String pseudoId) async {
 
 Future<Product> _ensureProduct(
   RestClient rc,
-  String classificationId,
+  String applicationId,
   Product product,
 ) async {
   final existing = await _findProduct(rc, product.pseudoId);
   if (existing != null) return existing;
-  return rc.createProduct(product: product, classificationId: classificationId);
+  return rc.createProduct(product: product, applicationId: applicationId);
 }
 
 Future<Company> _ensureCompany(RestClient rc, Company company) async {
@@ -97,11 +97,11 @@ Future<Company> _ensureCompany(RestClient rc, Company company) async {
 /// Phase 0 – Create products, BOM, and trading-partner companies.
 Future<String> mfgSetupData(
   RestClient rc,
-  String classificationId,
+  String applicationId,
   String ownerPartyId,
 ) async {
   for (final p in _products) {
-    await _ensureProduct(rc, classificationId, p);
+    await _ensureProduct(rc, applicationId, p);
   }
 
   final assy = await _findProduct(rc, _assyId);
@@ -150,7 +150,7 @@ Future<String> mfgSetupData(
 /// Phase 1 – Create production routing with three tasks.
 Future<String> mfgCreateRouting(
   RestClient rc,
-  String classificationId,
+  String applicationId,
   String ownerPartyId,
 ) async {
   final existing = await rc.getRoutings(search: _routingName, limit: 5);
@@ -185,7 +185,7 @@ Future<String> mfgCreateRouting(
 /// Phase 2 – Create a sales order for 1× Widget Assembly.
 Future<String> mfgCreateSalesOrder(
   RestClient rc,
-  String classificationId,
+  String applicationId,
   String ownerPartyId,
 ) async {
   final assy = await _findProduct(rc, _assyId);
@@ -225,7 +225,7 @@ Future<String> mfgCreateSalesOrder(
 /// Phase 3 – Approve the sales order → backend auto-creates a Work Order.
 Future<String> mfgApproveSalesOrder(
   RestClient rc,
-  String classificationId,
+  String applicationId,
   String ownerPartyId,
 ) async {
   final soId = await mfgDemoProgress.getSalesOrderId(ownerPartyId);
@@ -250,7 +250,7 @@ Future<String> mfgApproveSalesOrder(
 /// Phase 4 – Assign the production routing to the auto-created Work Order.
 Future<String> mfgAssignRouting(
   RestClient rc,
-  String classificationId,
+  String applicationId,
   String ownerPartyId,
 ) async {
   final wos = await rc.getWorkOrder(search: _assyId, limit: 5);
@@ -283,7 +283,7 @@ Future<String> mfgAssignRouting(
 /// Phase 5 – Purchase components (5×Bolt, 3×Bearing) and complete payment.
 Future<String> mfgPurchaseComponents(
   RestClient rc,
-  String classificationId,
+  String applicationId,
   String ownerPartyId,
 ) async {
   final suppliers = await rc.getCompany(
@@ -352,7 +352,7 @@ Future<String> mfgPurchaseComponents(
 /// Phase 6 – Approve and receive the incoming shipment.
 Future<String> mfgReceiveComponents(
   RestClient rc,
-  String classificationId,
+  String applicationId,
   String ownerPartyId,
 ) async {
   final shipments = await rc.getFinDoc(
@@ -389,7 +389,7 @@ Future<String> mfgReceiveComponents(
 /// Phase 7 – Release, start, and complete the Work Order.
 Future<String> mfgCompleteProduction(
   RestClient rc,
-  String classificationId,
+  String applicationId,
   String ownerPartyId,
 ) async {
   WorkOrders wos = await rc.getWorkOrder(search: _assyId, limit: 5);
@@ -429,7 +429,7 @@ Future<String> mfgCompleteProduction(
 /// Phase 8 – Ship to customer and collect payment.
 Future<String> mfgShipAndCollect(
   RestClient rc,
-  String classificationId,
+  String applicationId,
   String ownerPartyId,
 ) async {
   final shipments = await rc.getFinDoc(
@@ -472,7 +472,7 @@ Future<String> mfgShipAndCollect(
 /// Phase 9 – Recalculate ledger and statistics.
 Future<String> mfgUpdateStats(
   RestClient rc,
-  String classificationId,
+  String applicationId,
   String ownerPartyId,
 ) async {
   await rc.calculateLedger();

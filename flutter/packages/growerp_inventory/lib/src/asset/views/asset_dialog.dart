@@ -44,7 +44,7 @@ class AssetDialogState extends State<AssetDialog> {
   final TextEditingController _atpController = TextEditingController();
   final TextEditingController _acquireCostController = TextEditingController();
 
-  late String classificationId;
+  late String applicationId;
   late AssetBloc _assetBloc;
   late DataFetchBloc<Products> _productBloc;
   late DataFetchBloc<Locations> _locationBloc;
@@ -97,7 +97,7 @@ class AssetDialogState extends State<AssetDialog> {
         : widget.asset.acquireCost.currency(currencyId: ''); // no symbol
     _selectedProduct = widget.asset.product;
     _selectedLocation = widget.asset.location;
-    classificationId = context.read<String>();
+    applicationId = context.read<String>();
     _locationBloc = context.read<DataFetchBloc<Locations>>()
       ..add(
         GetDataEvent(() => context.read<RestClient>().getLocation(limit: 3)),
@@ -136,7 +136,7 @@ class AssetDialogState extends State<AssetDialog> {
         child: popUp(
           context: context,
           title:
-              '${classificationId == 'AppHotel' ? _localizations.roomNumber : _localizations.assetNumber} #${widget.asset.pseudoId.isEmpty ? _localizations.newLabel : widget.asset.pseudoId}',
+              '${applicationId == 'AppHotel' ? _localizations.roomNumber : _localizations.assetNumber} #${widget.asset.pseudoId.isEmpty ? _localizations.newLabel : widget.asset.pseudoId}',
           height: 480,
           width: 350,
           child: _showForm(isPhone),
@@ -162,7 +162,7 @@ class AssetDialogState extends State<AssetDialog> {
             TextFormField(
               key: const Key('name'),
               decoration: InputDecoration(
-                labelText: classificationId == 'AppHotel'
+                labelText: applicationId == 'AppHotel'
                     ? _localizations.roomNameLabel
                     : _localizations.assetNameLabel,
               ),
@@ -173,7 +173,7 @@ class AssetDialogState extends State<AssetDialog> {
               },
             ),
             const SizedBox(height: 10),
-            if (classificationId != 'AppHotel')
+            if (applicationId != 'AppHotel')
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
@@ -250,7 +250,7 @@ class AssetDialogState extends State<AssetDialog> {
                     return AutocompleteLabel<Product>(
                       key: const Key('productDropDown'),
                       initialValue: _selectedProduct,
-                      label: classificationId == 'AppHotel'
+                      label: applicationId == 'AppHotel'
                           ? _localizations.roomTypeId
                           : _localizations.productId,
                       optionsBuilder: (TextEditingValue textEditingValue) {
@@ -316,7 +316,7 @@ class AssetDialogState extends State<AssetDialog> {
                     isExpanded: true,
                   ),
                 ),
-                if (classificationId != 'AppHotel')
+                if (applicationId != 'AppHotel')
                   Expanded(
                     child:
                         BlocBuilder<
@@ -390,7 +390,7 @@ class AssetDialogState extends State<AssetDialog> {
                       Asset(
                         assetId: widget.asset.assetId,
                         pseudoId: _pseudoIdController.text,
-                        assetClassId: classificationId == 'AppHotel'
+                        assetClassId: applicationId == 'AppHotel'
                             ? 'Hotel Room'
                             : null,
                         assetName: _nameController.text,

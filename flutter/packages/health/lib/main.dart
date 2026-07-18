@@ -42,11 +42,11 @@ Future main() async {
   GlobalConfiguration().updateValue('version', packageInfo.version);
   GlobalConfiguration().updateValue('build', packageInfo.buildNumber);
 
-  String classificationId = GlobalConfiguration().get("classificationId");
+  String applicationId = GlobalConfiguration().get("applicationId");
 
   // Also checks if force update is required
   final forceUpdateInfo = await getBackendUrlOverride(
-    classificationId,
+    applicationId,
     packageInfo.version,
   );
 
@@ -74,7 +74,7 @@ Future main() async {
   runApp(
     HealthApp(
       restClient: restClient,
-      classificationId: classificationId,
+      applicationId: applicationId,
       chatClient: chatClient,
       notificationClient: notificationClient,
       extraDelegates: delegates,
@@ -88,7 +88,7 @@ class HealthApp extends StatefulWidget {
   const HealthApp({
     super.key,
     required this.restClient,
-    required this.classificationId,
+    required this.applicationId,
     required this.chatClient,
     required this.notificationClient,
     required this.extraDelegates,
@@ -97,7 +97,7 @@ class HealthApp extends StatefulWidget {
   });
 
   final RestClient restClient;
-  final String classificationId;
+  final String applicationId;
   final WsClient chatClient;
   final WsClient notificationClient;
   final List<LocalizationsDelegate> extraDelegates;
@@ -171,7 +171,7 @@ class _HealthAppState extends State<HealthApp> {
 
           return TopApp(
             restClient: widget.restClient,
-            classificationId: widget.classificationId,
+            applicationId: widget.applicationId,
             chatClient: widget.chatClient,
             notificationClient: widget.notificationClient,
             title: 'GrowERP Health',
@@ -179,7 +179,7 @@ class _HealthAppState extends State<HealthApp> {
             extraDelegates: widget.extraDelegates,
             extraBlocProviders: getHealthBlocProviders(
               widget.restClient,
-              widget.classificationId,
+              widget.applicationId,
             ),
             company: widget.company,
             widgetRegistrations: healthWidgetRegistrations,
@@ -214,12 +214,12 @@ List<Map<String, GrowerpWidgetBuilder>> healthWidgetRegistrations = [
 
 List<BlocProvider> getHealthBlocProviders(
   RestClient restClient,
-  String classificationId,
+  String applicationId,
 ) {
   return [
-    ...getUserCompanyBlocProviders(restClient, classificationId),
+    ...getUserCompanyBlocProviders(restClient, applicationId),
     ...getSalesBlocProviders(restClient),
-    ...getOrderAccountingBlocProviders(restClient, classificationId),
+    ...getOrderAccountingBlocProviders(restClient, applicationId),
     ...getWebsiteBlocProviders(restClient),
   ];
 }

@@ -404,7 +404,10 @@ along with this software (see the LICENSE.md file). If not, see
     <service verb="create" noun="Asset">
         <description> Create a Asset </description>
         <in-parameters>
-            <parameter name="classificationId" required="true" />
+            <parameter name="applicationId" />
+            <parameter name="classificationId">
+                <description>Deprecated alias for applicationId, kept for old clients</description>
+            </parameter>
             <parameter name="asset" type="Map" required="true">
                 <parameter name="pseudoId" />
                 <parameter name="statusId" />
@@ -466,6 +469,7 @@ along with this software (see the LICENSE.md file). If not, see
             </parameter>
         </out-parameters>
         <actions>
+            <set field="applicationId" from="applicationId ?: classificationId" />
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <if condition="!asset.pseudoId || asset.pseudoId == ''">
@@ -505,7 +509,7 @@ along with this software (see the LICENSE.md file). If not, see
                     </then>
                     <else>
                         <service-call name="growerp.100.CatalogServices100.create#Product"
-                            in-map="[product: asset.product,classificationId: classificationId]"
+                            in-map="[product: asset.product,applicationId: applicationId]"
                             out-map="productResult" />
                         <set field="asset.product.productId" from="productResult.product.productId" />
                     </else>
@@ -542,7 +546,7 @@ along with this software (see the LICENSE.md file). If not, see
                     acquireCost: asset.acquireCost ? new BigDecimal(asset.acquireCost): BigDecimal.ZERO,
                     facilityId: stores[0].inventoryFacilityId,
                     locationSeqId: asset.location?.locationId,
-                    assetTypeEnumId: classificationId == 'AppHotel' ? 'AstTpFixed' : 'AstTpInventory']"
+                    assetTypeEnumId: applicationId == 'AppHotel' ? 'AstTpFixed' : 'AstTpInventory']"
                 out-map="context" />
             <service-call name="create#mantle.product.asset.AssetDetail"
                 in-map="[assetId: assetId, quantityOnHandDiff: asset.quantityOnHand,

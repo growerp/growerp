@@ -581,11 +581,15 @@ along with this software (see the LICENSE.md file). If not, see
     <service verb="get" noun="Authenticate">
         <description>Get userlogin information when a proper Apikey is provided in the header</description>
         <in-parameters>
-            <parameter name="classificationId" required="true"/>
+            <parameter name="applicationId"/>
+            <parameter name="classificationId">
+                <description>Deprecated alias for applicationId, kept for old clients</description>
+            </parameter>
         </in-parameters>
         <out-parameters>
             <parameter name="authenticate" type="Map">
                 <parameter name="ownerPartyId"/>
+                <parameter name="applicationId"/>
                 <parameter name="classificationId"/>
                 <parameter name="user" type="Map">
                     <parameter name="partyId"/>
@@ -683,7 +687,8 @@ along with this software (see the LICENSE.md file). If not, see
             </parameter>
         </out-parameters>
         <actions>
-            <if condition="classificationId == 'token'">
+            <set field="applicationId" from="applicationId ?: classificationId"/>
+            <if condition="applicationId == 'token'">
                 <set field="authenticate" from="[moquiSessionToken: ec.web.sessionToken]"/>
                 <!-- used by chat to see if apiKey is valid -->
                 <return/>
@@ -692,7 +697,7 @@ along with this software (see the LICENSE.md file). If not, see
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"/>
             <!-- get owner -->
             <set field="authenticate"
-                from="[ownerPartyId: ownerPartyId,classificationId: classificationId]"/>
+                from="[ownerPartyId: ownerPartyId,applicationId: applicationId,classificationId: applicationId]"/>
             <!-- get user-->
             <service-call name="growerp.100.PartyServices100.get#User"
                 in-map="[userPartyId: userPartyId, ownerPartyId: ownerPartyId]"
@@ -701,7 +706,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <set field="authenticate.user" from="userInfo.users[0]"/>
             </if>
             <!-- get company (skip for AppSupport - support users are cross-company) -->
-            <if condition="classificationId != 'AppSupport'">
+            <if condition="applicationId != 'AppSupport'">
                 <service-call name="growerp.100.PartyServices100.get#Company"
                     in-map="[companyPartyId: companyPartyId, ownerPartyId: ownerPartyId]"
                     out-map="companyInfo"/>
@@ -927,7 +932,10 @@ along with this software (see the LICENSE.md file). If not, see
                 <description>Username or email address</description>
             </parameter>
             <parameter name="password" required="true"/>
-            <parameter name="classificationId" required="true"/>
+            <parameter name="applicationId"/>
+            <parameter name="classificationId">
+                <description>Deprecated alias for applicationId, kept for old clients</description>
+            </parameter>
             <!-- Parameters for completing tenant setup -->
             <parameter name="companyName"/>
             <parameter name="currencyId"/>
@@ -949,6 +957,7 @@ along with this software (see the LICENSE.md file). If not, see
         <out-parameters>
             <parameter name="authenticate" type="Map">
                 <parameter name="ownerPartyId"/>
+                <parameter name="applicationId"/>
                 <parameter name="classificationId"/>
                 <parameter name="loginStatus"/>
                 <parameter name="apiKey"/><!-- 'authenticated', 'setupRequired',
@@ -960,6 +969,7 @@ along with this software (see the LICENSE.md file). If not, see
             </parameter>
         </out-parameters>
         <actions>
+            <set field="applicationId" from="applicationId ?: classificationId"/>
             <!-- For testing: set effective time if testDaysOffset provided -->
             <if
                 condition="testDaysOffset != null &amp;&amp; ('dev'.equals(System.getProperty('instance_purpose')) || 'test'.equals(System.getProperty('instance_purpose')))">
@@ -1008,7 +1018,8 @@ along with this software (see the LICENSE.md file). If not, see
                         <set field="authenticate"
                             from="[
                             user: [loginName: username],
-                            classificationId: classificationId,
+                            applicationId: applicationId,
+                            classificationId: applicationId,
                             loginStatus: 'passwordChange',
                             apiKey: 'passwordChange'
                         ]"/>
@@ -1033,10 +1044,10 @@ along with this software (see the LICENSE.md file). If not, see
             <set field="ownerPartyId" from="userParty.ownerPartyId"/>
 
             <!-- Special handling for AppSupport classification - handle early -->
-            <if condition="classificationId == 'AppSupport'">
+            <if condition="applicationId == 'AppSupport'">
                 <script>ec.user.loginUser(username, password)</script>
                 <service-call name="growerp.100.GeneralServices100.get#Authenticate"
-                    in-map="[classificationId: classificationId]"
+                    in-map="[applicationId: applicationId]"
                     out-map="context"/>
                 <return/>
             </if>
@@ -1074,7 +1085,7 @@ along with this software (see the LICENSE.md file). If not, see
                                 companyName: companyName,
                                 currencyId: currencyId,
                                 demoData: demoData,
-                                classificationId: classificationId,
+                                applicationId: applicationId,
                                 userPartyId: userAccount.partyId,
                                 hostName: ec.web?.getHostName(false),
                                 timeZoneOffset: timeZoneOffset
@@ -1085,7 +1096,8 @@ along with this software (see the LICENSE.md file). If not, see
                             <set field="authenticate"
                                 from="[
                             ownerPartyId: ownerPartyId,
-                            classificationId: classificationId,
+                            applicationId: applicationId,
+                            classificationId: applicationId,
                             loginStatus: 'setupRequired',
                             apiKey: 'setupRequired',
                             user: [
@@ -1135,7 +1147,8 @@ along with this software (see the LICENSE.md file). If not, see
                     <set field="authenticate"
                         from="[
                         ownerPartyId: ownerPartyId,
-                        classificationId: classificationId,
+                        applicationId: applicationId,
+                        classificationId: applicationId,
                         loginStatus: 'subscriptionExpired',
                         apiKey: 'subscriptionExpired',
                         evaluationDays: evaluationDays,
@@ -1172,7 +1185,7 @@ along with this software (see the LICENSE.md file). If not, see
                 </else>
             </if>
             <service-call name="growerp.100.GeneralServices100.get#Authenticate"
-                in-map="[classificationId: classificationId]"
+                in-map="[applicationId: applicationId]"
                 out-map="context"/>
         </actions>
     </service>
@@ -1230,7 +1243,10 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="username" required="true"/>
             <parameter name="newPassword" required="true"/>
             <parameter name="oldPassword"/>
-            <parameter name="classificationId" required="true"/>
+            <parameter name="applicationId"/>
+            <parameter name="classificationId">
+                <description>Deprecated alias for applicationId, kept for old clients</description>
+            </parameter>
         </in-parameters>
         <out-parameters>
             <parameter name="authenticate" type="Map">
@@ -1326,6 +1342,7 @@ along with this software (see the LICENSE.md file). If not, see
             </parameter>
         </out-parameters>
         <actions>
+            <set field="applicationId" from="applicationId ?: classificationId"/>
             <if condition="ec.user.userAccount"><!-- only possible with a loggedin user -->
                 <service-call out-map="context"
                     name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"/>
@@ -1348,7 +1365,7 @@ along with this software (see the LICENSE.md file). If not, see
                     successiveFailedLogins:0, tempResetPassword:null]"/>
             <script>ec.user.loginUser(username, newPassword)</script>
             <service-call name="growerp.100.GeneralServices100.get#Authenticate"
-                in-map="classificationId: classificationId"
+                in-map="applicationId: applicationId"
                 out-map="context"/>
         </actions>
     </service>

@@ -9,7 +9,7 @@ var LoginService = {
   login: function (user, headers) { return axios.post("/rest/s1/pop/login", user, headers).then(function (response) { return response.data; }); },
   loginFB: function (user, headers) { return axios.post("/rest/s1/pop/loginFB", user, headers).then(function (response) { return response.data; }); },
   createAccount: function (account, headers) {
-    account.classificationId = 'AppEcommerceShop';
+    account.applicationId = 'AppEcommerceShop';
     account.user = {
       email: account.emailAddress, firstName: account.firstName, lastName: account.lastName,
       userGroupId: 'GROWERP_M_CUSTOMER', companyName: account.companyName,

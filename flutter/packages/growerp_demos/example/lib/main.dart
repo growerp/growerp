@@ -112,7 +112,7 @@ Future<void> main() async {
   runApp(
     TopApp(
       restClient: restClient,
-      classificationId: 'AppAdmin',
+      applicationId: 'AppAdmin',
       chatClient: chatClient,
       notificationClient: notificationClient,
       title: 'GrowERP Demos',

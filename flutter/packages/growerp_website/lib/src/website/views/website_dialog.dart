@@ -59,7 +59,7 @@ class WebsiteDialogState extends State<WebsiteDialog> {
   final _substackController = TextEditingController();
   final _websiteFormKey1 = GlobalKey<FormState>();
   ScrollController myScrollController = ScrollController();
-  late String classificationId;
+  late String applicationId;
   late RestClient restClient;
   late WebsiteLocalizations _localizations;
   List<LandingPage> _landingPages = [];
@@ -69,7 +69,7 @@ class WebsiteDialogState extends State<WebsiteDialog> {
   @override
   void initState() {
     super.initState();
-    classificationId = context.read<String>();
+    applicationId = context.read<String>();
     restClient = context.read<RestClient>();
     _websiteBloc = context.read<WebsiteBloc>()..add(WebsiteFetch());
     _categoryBloc = context.read<DataFetchBloc<Categories>>()

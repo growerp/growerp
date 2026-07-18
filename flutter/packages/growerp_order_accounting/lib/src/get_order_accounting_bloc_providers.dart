@@ -6,7 +6,7 @@ import '../growerp_order_accounting.dart';
 
 List<BlocProvider> getOrderAccountingBlocProviders(
   RestClient restClient,
-  String classificationId,
+  String applicationId,
 ) {
   List<BlocProvider> blocProviders = [
     BlocProvider<LedgerBloc>(create: (context) => LedgerBloc(restClient)),
@@ -17,51 +17,51 @@ List<BlocProvider> getOrderAccountingBlocProviders(
     // sales order used in hotel
     BlocProvider<FinDocBloc>(
       create: (context) =>
-          FinDocBloc(restClient, true, FinDocType.order, classificationId),
+          FinDocBloc(restClient, true, FinDocType.order, applicationId),
     ),
     BlocProvider<PurchaseOrderBloc>(
       create: (context) =>
-          FinDocBloc(restClient, false, FinDocType.order, classificationId),
+          FinDocBloc(restClient, false, FinDocType.order, applicationId),
     ),
     BlocProvider<PurchaseInvoiceBloc>(
       create: (context) =>
-          FinDocBloc(restClient, false, FinDocType.invoice, classificationId),
+          FinDocBloc(restClient, false, FinDocType.invoice, applicationId),
     ),
     BlocProvider<PurchasePaymentBloc>(
       create: (context) =>
-          FinDocBloc(restClient, false, FinDocType.payment, classificationId),
+          FinDocBloc(restClient, false, FinDocType.payment, applicationId),
     ),
     BlocProvider<IncomingShipmentBloc>(
       create: (context) =>
-          FinDocBloc(restClient, false, FinDocType.shipment, classificationId),
+          FinDocBloc(restClient, false, FinDocType.shipment, applicationId),
     ),
     BlocProvider<SalesOrderBloc>(
       create: (context) =>
-          FinDocBloc(restClient, true, FinDocType.order, classificationId),
+          FinDocBloc(restClient, true, FinDocType.order, applicationId),
     ),
     BlocProvider<SalesInvoiceBloc>(
       create: (context) =>
-          FinDocBloc(restClient, true, FinDocType.invoice, classificationId),
+          FinDocBloc(restClient, true, FinDocType.invoice, applicationId),
     ),
     BlocProvider<SalesPaymentBloc>(
       create: (context) =>
-          FinDocBloc(restClient, true, FinDocType.payment, classificationId),
+          FinDocBloc(restClient, true, FinDocType.payment, applicationId),
     ),
     BlocProvider<OutgoingShipmentBloc>(
       create: (context) =>
-          FinDocBloc(restClient, true, FinDocType.shipment, classificationId),
+          FinDocBloc(restClient, true, FinDocType.shipment, applicationId),
     ),
     BlocProvider<TransactionBloc>(
       create: (context) => FinDocBloc(
         restClient,
         true,
         FinDocType.transaction,
-        classificationId,
+        applicationId,
       ),
     ),
     BlocProvider<RequestBloc>(
       create: (context) =>
-          FinDocBloc(restClient, true, FinDocType.request, classificationId),
+          FinDocBloc(restClient, true, FinDocType.request, applicationId),
     ),
     BlocProvider<LedgerJournalBloc>(
       create: (context) => LedgerJournalBloc(restClient),

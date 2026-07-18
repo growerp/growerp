@@ -1,8 +1,8 @@
 #!/bin/sh
 # This is a generated file; do not edit or check into version control.
-export "FLUTTER_ROOT=/home/hans/development/flutter"
-export "FLUTTER_APPLICATION_PATH=/data/growerp/flutter/packages/growerp_catalog/example"
-export "FLUTTER_FRAMEWORK_SWIFT_PACKAGE_PATH=/data/growerp/flutter/packages/growerp_catalog/example/macos/Flutter/ephemeral/Packages/.packages/FlutterFramework"
+export "FLUTTER_ROOT=/sdks/flutter"
+export "FLUTTER_APPLICATION_PATH=/home/mobiledevops/growerp/packages/growerp_catalog/example"
+export "FLUTTER_FRAMEWORK_SWIFT_PACKAGE_PATH=/home/mobiledevops/growerp/packages/growerp_catalog/example/macos/Flutter/ephemeral/Packages/.packages/FlutterFramework"
 export "COCOAPODS_PARALLEL_CODE_SIGN=true"
 export "FLUTTER_BUILD_DIR=build"
 export "FLUTTER_BUILD_NAME=1.0.0"

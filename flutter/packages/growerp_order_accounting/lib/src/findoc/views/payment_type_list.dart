@@ -32,7 +32,7 @@ class PaymentTypeListState extends State<PaymentTypeList> {
   final _searchFocusNode = FocusNode();
   late FinDocBloc finDocBloc;
   late GlAccountBloc glAccountBloc;
-  String classificationId = GlobalConfiguration().getValue("classificationId");
+  String applicationId = GlobalConfiguration().getValue("applicationId");
   late String entityName;
   late bool showAll;
   String searchString = '';
@@ -42,7 +42,7 @@ class PaymentTypeListState extends State<PaymentTypeList> {
   void initState() {
     super.initState();
     showAll = false;
-    entityName = classificationId == 'AppHotel' ? 'Room' : 'PaymentType';
+    entityName = applicationId == 'AppHotel' ? 'Room' : 'PaymentType';
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _searchFocusNode.requestFocus();
     });

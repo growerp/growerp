@@ -47,11 +47,11 @@ Future main() async {
   GlobalConfiguration().updateValue('version', packageInfo.version);
   GlobalConfiguration().updateValue('build', packageInfo.buildNumber);
 
-  String classificationId = GlobalConfiguration().get("classificationId");
+  String applicationId = GlobalConfiguration().get("applicationId");
   // check if there is override for the production(now test) backend url
   // Also checks if force update is required
   final forceUpdateInfo = await getBackendUrlOverride(
-    classificationId,
+    applicationId,
     packageInfo.version,
   );
 
@@ -90,7 +90,7 @@ Future main() async {
   runApp(
     HotelApp(
       restClient: restClient,
-      classificationId: classificationId,
+      applicationId: applicationId,
       chatClient: chatClient,
       notificationClient: notificationClient,
       forceUpdateInfo: forceUpdateInfo,
@@ -102,14 +102,14 @@ class HotelApp extends StatefulWidget {
   const HotelApp({
     super.key,
     required this.restClient,
-    required this.classificationId,
+    required this.applicationId,
     required this.chatClient,
     required this.notificationClient,
     this.forceUpdateInfo,
   });
 
   final RestClient restClient;
-  final String classificationId;
+  final String applicationId;
   final WsClient chatClient;
   final WsClient notificationClient;
   final ForceUpdateInfo? forceUpdateInfo;
@@ -187,7 +187,7 @@ class _HotelAppState extends State<HotelApp> {
 
           return TopApp(
             restClient: widget.restClient,
-            classificationId: widget.classificationId,
+            applicationId: widget.applicationId,
             chatClient: widget.chatClient,
             notificationClient: widget.notificationClient,
             title: 'GrowERP Hotel.',
@@ -195,7 +195,7 @@ class _HotelAppState extends State<HotelApp> {
             extraDelegates: delegates,
             extraBlocProviders: getHotelBlocProviders(
               widget.restClient,
-              widget.classificationId,
+              widget.applicationId,
             ),
             widgetRegistrations: hotelWidgetRegistrations,
             forceUpdateInfo: widget.forceUpdateInfo,
@@ -234,13 +234,13 @@ List<Map<String, GrowerpWidgetBuilder>> hotelWidgetRegistrations = [
 
 List<BlocProvider> getHotelBlocProviders(
   RestClient restClient,
-  String classificationId,
+  String applicationId,
 ) {
   return [
-    ...getInventoryBlocProviders(restClient, classificationId),
-    ...getUserCompanyBlocProviders(restClient, classificationId),
-    ...getCatalogBlocProviders(restClient, classificationId),
-    ...getOrderAccountingBlocProviders(restClient, classificationId),
+    ...getInventoryBlocProviders(restClient, applicationId),
+    ...getUserCompanyBlocProviders(restClient, applicationId),
+    ...getCatalogBlocProviders(restClient, applicationId),
+    ...getOrderAccountingBlocProviders(restClient, applicationId),
     ...getSalesBlocProviders(restClient),
     ...getWebsiteBlocProviders(restClient),
   ];

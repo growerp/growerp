@@ -33,7 +33,7 @@ Future<bool> login(
           currencyId.isNotEmpty) {
         // no so register new
         await client.register(
-          classificationId: 'AppAdmin',
+          applicationId: 'AppAdmin',
           email: username,
           newPassword: password,
           firstName: 'admin',
@@ -58,13 +58,13 @@ Future<bool> login(
   await client.login(
     username: username,
     password: password,
-    classificationId: 'AppAdmin',
+    applicationId: 'AppAdmin',
   );
   // login again to provide more info and get apikey
   authenticate = await client.login(
     username: username,
     password: password,
-    classificationId: 'AppAdmin',
+    applicationId: 'AppAdmin',
     companyName: companyName,
     currencyId: currencyId,
     demoData: false,

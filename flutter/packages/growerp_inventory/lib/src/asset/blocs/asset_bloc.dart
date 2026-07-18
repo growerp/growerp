@@ -44,7 +44,7 @@ EventTransformer<AssetSearchChanged> assetSearchDebounce() {
 }
 
 class AssetBloc extends Bloc<AssetEvent, AssetState> {
-  AssetBloc(this.restClient, this.classificationId)
+  AssetBloc(this.restClient, this.applicationId)
     : super(const AssetState()) {
     on<AssetFetch>(
       _onAssetFetch,
@@ -58,7 +58,7 @@ class AssetBloc extends Bloc<AssetEvent, AssetState> {
   }
 
   final RestClient restClient;
-  final String classificationId;
+  final String applicationId;
 
   Future<void> _onAssetFetch(AssetFetch event, Emitter<AssetState> emit) async {
     try {
@@ -123,7 +123,7 @@ class AssetBloc extends Bloc<AssetEvent, AssetState> {
         // update
         Asset compResult = await restClient.updateAsset(
           asset: event.asset,
-          classificationId: classificationId,
+          applicationId: applicationId,
         );
         int index = assets.indexWhere(
           (element) => element.assetId == event.asset.assetId,
@@ -140,7 +140,7 @@ class AssetBloc extends Bloc<AssetEvent, AssetState> {
         // add
         Asset compResult = await restClient.createAsset(
           asset: event.asset,
-          classificationId: classificationId,
+          applicationId: applicationId,
         );
         assets.insert(0, compResult);
         emit(

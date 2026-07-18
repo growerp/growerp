@@ -32,7 +32,7 @@ class SubscriptionListState extends State<SubscriptionList> {
   final _searchFocusNode = FocusNode();
   late SubscriptionBloc _subscriptionBloc;
   late List<Subscription> subscriptions;
-  late String classificationId;
+  late String applicationId;
   late String entityName;
   late bool started;
   late int limit;
@@ -47,7 +47,7 @@ class SubscriptionListState extends State<SubscriptionList> {
     _scrollController.addListener(_onScroll);
     _subscriptionBloc = context.read<SubscriptionBloc>()
       ..add(const SubscriptionFetch(refresh: true));
-    classificationId = context.read<String>();
+    applicationId = context.read<String>();
     entityName = 'Subscription';
     bottom = 50;
     WidgetsBinding.instance.addPostFrameCallback(

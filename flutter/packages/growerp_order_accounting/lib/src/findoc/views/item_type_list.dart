@@ -32,7 +32,7 @@ class ItemTypeListState extends State<ItemTypeList> {
   final _searchFocusNode = FocusNode();
   late FinDocBloc finDocBloc;
   late GlAccountBloc glAccountBloc;
-  String classificationId = GlobalConfiguration().getValue("classificationId");
+  String applicationId = GlobalConfiguration().getValue("applicationId");
   late String entityName;
   late bool showAll;
   String searchString = '';
@@ -42,7 +42,7 @@ class ItemTypeListState extends State<ItemTypeList> {
   void initState() {
     super.initState();
     showAll = false;
-    entityName = classificationId == 'AppHotel' ? 'Room' : 'ItemType';
+    entityName = applicationId == 'AppHotel' ? 'Room' : 'ItemType';
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _searchFocusNode.requestFocus();
     });

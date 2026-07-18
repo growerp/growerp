@@ -24,7 +24,7 @@ abstract class Authenticate with _$Authenticate {
   factory Authenticate({
     final String? apiKey, // api or actions as changePassword, moreinfo
     final String? loginStatus, // e.g. passwordChange, setupRequired, registered, etc.
-    String? classificationId, // appname
+    String? applicationId, // appname
     String? moquiSessionToken,
     String? ownerPartyId,
     CompanyUser? companyUser,
