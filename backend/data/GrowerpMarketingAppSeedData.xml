@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License. See the LICENSE.md file for details.
+-->
+<entity-facade-xml type="seed">
+    <!-- Application record -->
+    <growerp.Application applicationId="AppMarketing"
+        description="GrowERP Marketing vertical app" />
+
+    <!-- Menu configuration -->
+    <growerp.menu.MenuConfiguration menuConfigurationId="MARKETING_DEFAULT" appId="marketing"
+        name="Marketing Menu" description="Default marketing application menu structure"/>
+
+    <!-- ====================== Top-level Menu Items ====================== -->
+    <growerp.menu.MenuItem menuItemId="MKTAPP_MAIN" menuConfigurationId="MARKETING_DEFAULT"
+        title="Main" route="/" iconName="dashboard" widgetName="MarketingDbForm" sequenceNum="10"/>
+    <growerp.menu.MenuItem menuItemId="MKTAPP_CRM" menuConfigurationId="MARKETING_DEFAULT" itemKey="myOpportunities"
+        title="CRM" route="/crm" iconName="people" widgetName="ActivityList" sequenceNum="20"/>
+    <growerp.menu.MenuItem menuItemId="MKTAPP_MARKETING" menuConfigurationId="MARKETING_DEFAULT"
+        title="Marketing" route="/marketing" iconName="campaign" widgetName="ContentPlanList" sequenceNum="30"/>
+    <growerp.menu.MenuItem menuItemId="MKTAPP_OUTREACH" menuConfigurationId="MARKETING_DEFAULT"
+        title="Outreach" route="/outreach" iconName="send" widgetName="CampaignListScreen" sequenceNum="40"/>
+    <growerp.menu.MenuItem menuItemId="MKTAPP_AGENT_CONTROL" menuConfigurationId="MARKETING_DEFAULT"
+        title="Agent Control" route="/agent-control" iconName="smart_toy" widgetName="AdkAgentListView" sequenceNum="50"/>
+    <growerp.menu.MenuItem menuItemId="MKTAPP_ORG" menuConfigurationId="MARKETING_DEFAULT"
+        title="Organization" route="/companies" iconName="business" widgetName="ShowCompanyDialog" sequenceNum="60"/>
+    <growerp.menu.MenuItem menuItemId="MKTAPP_SYSTEM_SETUP" menuConfigurationId="MARKETING_DEFAULT"
+        title="System Setup" route="/systemSetup" iconName="settings" widgetName="SystemSetupDialog"
+        userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="70"/>
+    <growerp.menu.MenuItem menuItemId="MKTAPP_ABOUT" menuConfigurationId="MARKETING_DEFAULT"
+        title="About" route="/about" iconName="info" widgetName="AboutForm" sequenceNum="80"/>
+
+    <!-- ====================== CRM children ====================== -->
+    <growerp.menu.MenuItem menuItemId="MKTAPP_CRM_ACTIVITIES" menuConfigurationId="MARKETING_DEFAULT" parentMenuItemId="MKTAPP_CRM"
+        title="My To Do, tasks" iconName="task" widgetName="ActivityList" sequenceNum="10"/>
+    <growerp.menu.MenuItem menuItemId="MKTAPP_CRM_OPPORTUNITIES" menuConfigurationId="MARKETING_DEFAULT" parentMenuItemId="MKTAPP_CRM"
+        title="Opportunities" iconName="home" widgetName="OpportunityList" sequenceNum="20"/>
+    <growerp.menu.MenuItem menuItemId="MKTAPP_CRM_PIPELINE" menuConfigurationId="MARKETING_DEFAULT" parentMenuItemId="MKTAPP_CRM"
+        title="Pipeline" iconName="view_kanban" widgetName="OpportunityPipeline" sequenceNum="25"/>
+    <growerp.menu.MenuItem menuItemId="MKTAPP_CRM_LEADS" menuConfigurationId="MARKETING_DEFAULT" parentMenuItemId="MKTAPP_CRM"
+        title="Leads" iconName="business" widgetName="UserListLead" sequenceNum="30"/>
+    <growerp.menu.MenuItem menuItemId="MKTAPP_CRM_CUSTOMERS" menuConfigurationId="MARKETING_DEFAULT" parentMenuItemId="MKTAPP_CRM"
+        title="Customers" iconName="school" widgetName="UserListCustomer" sequenceNum="40"/>
+
+    <!-- ====================== Marketing children ====================== -->
+    <growerp.menu.MenuItem menuItemId="MKTAPP_MKTG_CONTENT" menuConfigurationId="MARKETING_DEFAULT" parentMenuItemId="MKTAPP_MARKETING"
+        title="Content Plans" iconName="list" widgetName="ContentPlanList" sequenceNum="10"/>
+    <growerp.menu.MenuItem menuItemId="MKTAPP_MKTG_SOCIAL" menuConfigurationId="MARKETING_DEFAULT" parentMenuItemId="MKTAPP_MARKETING"
+        title="Content" iconName="auto_awesome" widgetName="MasterContentList" sequenceNum="20"/>
+    <growerp.menu.MenuItem menuItemId="MKTAPP_MKTG_PERSONA" menuConfigurationId="MARKETING_DEFAULT" parentMenuItemId="MKTAPP_MARKETING"
+        title="Personas" iconName="people" widgetName="PersonaList" sequenceNum="30"/>
+    <growerp.menu.MenuItem menuItemId="MKTAPP_MKTG_SEQUENCES" menuConfigurationId="MARKETING_DEFAULT" parentMenuItemId="MKTAPP_MARKETING"
+        title="Email Sequences" iconName="schedule_send" widgetName="EmailSequenceList" sequenceNum="35"/>
+    <growerp.menu.MenuItem menuItemId="MKTAPP_MKTG_ENGAGEMENT" menuConfigurationId="MARKETING_DEFAULT" parentMenuItemId="MKTAPP_MARKETING"
+        title="Engagements" iconName="thumb_up" widgetName="SocialEngagementList" sequenceNum="38"/>
+    <growerp.menu.MenuItem menuItemId="MKTAPP_MKTG_LANDING" menuConfigurationId="MARKETING_DEFAULT" parentMenuItemId="MKTAPP_MARKETING"
+        title="Landing Pages" iconName="web" widgetName="LandingPageList" sequenceNum="40"/>
+    <growerp.menu.MenuItem menuItemId="MKTAPP_MKTG_ASSESS" menuConfigurationId="MARKETING_DEFAULT" parentMenuItemId="MKTAPP_MARKETING"
+        title="Assessments" iconName="quiz" widgetName="AssessmentList" sequenceNum="50"/>
+
+    <!-- ====================== Outreach children ====================== -->
+    <growerp.menu.MenuItem menuItemId="MKTAPP_OUT_CAMPAIGNS" menuConfigurationId="MARKETING_DEFAULT" parentMenuItemId="MKTAPP_OUTREACH"
+        title="Campaigns" iconName="list" widgetName="CampaignListScreen" sequenceNum="10"/>
+    <growerp.menu.MenuItem menuItemId="MKTAPP_OUT_AUTO" menuConfigurationId="MARKETING_DEFAULT" parentMenuItemId="MKTAPP_OUTREACH"
+        title="Automation" iconName="settings_input_component" widgetName="AutomationScreen" sequenceNum="20"/>
+    <growerp.menu.MenuItem menuItemId="MKTAPP_OUT_PLATFORMS" menuConfigurationId="MARKETING_DEFAULT" parentMenuItemId="MKTAPP_OUTREACH"
+        title="Platforms" iconName="public" widgetName="PlatformConfigListScreen" sequenceNum="30"/>
+    <growerp.menu.MenuItem menuItemId="MKTAPP_OUT_MESSAGES" menuConfigurationId="MARKETING_DEFAULT" parentMenuItemId="MKTAPP_OUTREACH"
+        title="Messages" iconName="message" widgetName="OutreachMessageList" sequenceNum="40"/>
+    <growerp.menu.MenuItem menuItemId="MKTAPP_OUT_SEND_QUEUE" menuConfigurationId="MARKETING_DEFAULT" parentMenuItemId="MKTAPP_OUTREACH"
+        title="Send Queue" iconName="send" widgetName="LinkedInSendQueueScreen" sequenceNum="50"/>
+
+    <!-- ====================== Orders children ====================== -->
+    <growerp.menu.MenuItem menuItemId="MKTAPP_ORDERS" menuConfigurationId="MARKETING_DEFAULT"
+        title="Orders" route="/orders" iconName="shopping_cart" widgetName="SalesOrderList" sequenceNum="45"/>
+    <growerp.menu.MenuItem menuItemId="MKTAPP_ORD_SALES" menuConfigurationId="MARKETING_DEFAULT" parentMenuItemId="MKTAPP_ORDERS"
+        title="salesOrders" iconName="home" widgetName="SalesOrderList" sequenceNum="10"/>
+    <growerp.menu.MenuItem menuItemId="MKTAPP_ORD_CUST" menuConfigurationId="MARKETING_DEFAULT" parentMenuItemId="MKTAPP_ORDERS"
+        title="customers" iconName="school" widgetName="UserListCustomer" sequenceNum="20"/>
+
+    <!-- ====================== Agent Control children ====================== -->
+    <growerp.menu.MenuItem menuItemId="MKTAPP_ADK_AGENTS" menuConfigurationId="MARKETING_DEFAULT" parentMenuItemId="MKTAPP_AGENT_CONTROL"
+        title="AI Agents" iconName="smart_toy" widgetName="AdkAgentListView" sequenceNum="10"/>
+    <growerp.menu.MenuItem menuItemId="MKTAPP_ADK_MCPSERVERS" menuConfigurationId="MARKETING_DEFAULT" parentMenuItemId="MKTAPP_AGENT_CONTROL"
+        title="MCP Servers" iconName="dns" widgetName="AdkMcpServerListView" sequenceNum="15"/>
+    <growerp.menu.MenuItem menuItemId="MKTAPP_ADK_JOBS" menuConfigurationId="MARKETING_DEFAULT" parentMenuItemId="MKTAPP_AGENT_CONTROL"
+        title="Agent Jobs" iconName="schedule" widgetName="AdkJobListView" sequenceNum="20"/>
+    <growerp.menu.MenuItem menuItemId="MKTAPP_ADK_APPROVALS" menuConfigurationId="MARKETING_DEFAULT" parentMenuItemId="MKTAPP_AGENT_CONTROL"
+        title="Approvals" iconName="fact_check" widgetName="AdkApprovalsListView" sequenceNum="30"/>
+    <growerp.menu.MenuItem menuItemId="MKTAPP_ADK_ACTIONS" menuConfigurationId="MARKETING_DEFAULT" parentMenuItemId="MKTAPP_AGENT_CONTROL"
+        title="Agent Actions" iconName="history" widgetName="AdkActionsListView" sequenceNum="40"/>
+    <growerp.menu.MenuItem menuItemId="MKTAPP_ADK_KNOWLEDGE" menuConfigurationId="MARKETING_DEFAULT" parentMenuItemId="MKTAPP_AGENT_CONTROL"
+        title="Knowledge" iconName="menu_book" widgetName="AdkKnowledgeView" sequenceNum="50"/>
+    <growerp.menu.MenuItem menuItemId="MKTAPP_ADK_WIKI" menuConfigurationId="MARKETING_DEFAULT" parentMenuItemId="MKTAPP_AGENT_CONTROL"
+        title="Wiki" iconName="menu_book" widgetName="WikiList" sequenceNum="55"/>
+
+    <!-- ====================== Organization children ====================== -->
+    <growerp.menu.MenuItem menuItemId="MKTAPP_ORG_COMPANY" menuConfigurationId="MARKETING_DEFAULT" parentMenuItemId="MKTAPP_ORG"
+        title="Company" iconName="home" widgetName="ShowCompanyDialog" sequenceNum="10"/>
+    <growerp.menu.MenuItem menuItemId="MKTAPP_ORG_USERS" menuConfigurationId="MARKETING_DEFAULT" parentMenuItemId="MKTAPP_ORG"
+        title="Employees" iconName="school" widgetName="UserListEmployee" sequenceNum="20"/>
+    <growerp.menu.MenuItem menuItemId="MKTAPP_ORG_WEBSITE" menuConfigurationId="MARKETING_DEFAULT" parentMenuItemId="MKTAPP_ORG"
+        title="Website" iconName="webhook" widgetName="WebsiteDialog" sequenceNum="30"/>
+
+</entity-facade-xml>

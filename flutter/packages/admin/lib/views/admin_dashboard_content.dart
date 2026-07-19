@@ -16,18 +16,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
+import 'package:growerp_sales/growerp_sales.dart';
+import 'package:growerp_marketing/growerp_marketing.dart';
+import 'package:growerp_outreach/growerp_outreach.dart';
+import 'package:growerp_adk/growerp_adk.dart';
 
 import 'acct_purchase_dashboard_chart_mini.dart';
 import 'acct_sales_dashboard_chart_mini.dart';
-import 'agent_control_dashboard_chart_mini.dart';
 import 'catalog_dashboard_chart_mini.dart';
-import 'crm_dashboard_chart_mini.dart';
 import 'inventory_dashboard_chart_mini.dart';
 import 'ledger_dashboard_chart_mini.dart';
 import 'manufacturing_dashboard_chart_mini.dart';
-import 'marketing_dashboard_chart_mini.dart';
-import 'order_dashboard_chart_mini.dart';
-import 'outreach_dashboard_chart_mini.dart';
 
 /// Admin dashboard content - displays dashboard panels with statistics.
 /// This is the content-only version for use with ShellRoute.

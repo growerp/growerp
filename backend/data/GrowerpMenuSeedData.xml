@@ -47,6 +47,7 @@ along with this software (see the LICENSE.md file). If not, see
         name="Core Example Menu" description="Default menu for core example app"/>
     <growerp.menu.MenuConfiguration menuConfigurationId="COURSES_EXAMPLE_DEFAULT" appId="courses_example"
         name="Courses Example Menu" description="Default menu for courses example app"/>
+
     <growerp.menu.MenuConfiguration menuConfigurationId="AGENTS_DEFAULT" appId="agents"
         name="Agents Menu" description="Default menu for the GrowERP Agents app"/>
 
@@ -483,33 +484,6 @@ along with this software (see the LICENSE.md file). If not, see
         title="System Setup" route="/systemSetup" iconName="settings" widgetName="SystemSetupDialog"
         userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="999"/>
 
-    <!-- ====================== ELEARNER_DEFAULT (Customer/Student menu) ====================== -->
-    <growerp.menu.MenuItem menuItemId="ELEARNER_MY_COURSES" menuConfigurationId="ELEARNER_DEFAULT"
-        title="Take a Course" route="/" iconName="play_circle_outline" widgetName="ElearnerDashboard" sequenceNum="10"/>
-    <growerp.menu.MenuItem menuItemId="ELEARNER_ALL_COURSES" menuConfigurationId="ELEARNER_DEFAULT"
-        title="All Courses" route="/catalog" iconName="explore" widgetName="CourseCatalogView" sequenceNum="20"/>
-    <growerp.menu.MenuItem menuItemId="ELEARNER_PROFILE" menuConfigurationId="ELEARNER_DEFAULT"
-        title="Profile" route="/profile" iconName="person" widgetName="UserDialog" sequenceNum="30"/>
-    <growerp.menu.MenuItem menuItemId="ELEARNER_SYSTEM_SETUP" menuConfigurationId="ELEARNER_DEFAULT"
-        title="System Setup" route="/systemSetup" iconName="settings" widgetName="SystemSetupDialog"
-        userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="999"/>
-
-    <!-- ====================== ELEARNER_ADMIN_DEFAULT (Admin/Employee menu) ====================== -->
-    <growerp.menu.MenuItem menuItemId="ELEARNER_ADM_SUBSCRIPTIONS" menuConfigurationId="ELEARNER_ADMIN_DEFAULT"
-        title="Participants" route="/participants" iconName="group" widgetName="ElearnerParticipantList" sequenceNum="10"/>
-    <growerp.menu.MenuItem menuItemId="ELEARNER_ADM_COURSES" menuConfigurationId="ELEARNER_ADMIN_DEFAULT"
-        title="Courses" route="/courses" iconName="school" widgetName="CourseList" sequenceNum="20"/>
-    <growerp.menu.MenuItem menuItemId="ELEARNER_ADM_VIEWER" menuConfigurationId="ELEARNER_ADMIN_DEFAULT"
-        title="Take a Course" route="/viewer" iconName="play_circle_outline" widgetName="CourseViewer" sequenceNum="30"/>
-    <growerp.menu.MenuItem menuItemId="ELEARNER_ADM_WEBSITE" menuConfigurationId="ELEARNER_ADMIN_DEFAULT"
-        title="Website" route="/website" iconName="webhook" widgetName="WebsiteDialog" sequenceNum="40"/>
-    <growerp.menu.MenuItem menuItemId="ELEARNER_ADM_COMPANY" menuConfigurationId="ELEARNER_ADMIN_DEFAULT"
-        title="Company" route="/company" iconName="home" widgetName="ShowCompanyDialog" sequenceNum="50"/>
-    <growerp.menu.MenuItem menuItemId="ELEARNER_ADM_ABOUT" menuConfigurationId="ELEARNER_ADMIN_DEFAULT"
-        title="About" route="/about" iconName="info" widgetName="AboutForm" sequenceNum="60"/>
-    <growerp.menu.MenuItem menuItemId="ELEARNER_ADM_SYSTEM_SETUP" menuConfigurationId="ELEARNER_ADMIN_DEFAULT"
-        title="System Setup" route="/systemSetup" iconName="settings" widgetName="SystemSetupDialog"
-        userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="999"/>
 
     <!-- ====================== EXAMPLE APP MENUS ====================== -->
     <!-- Catalog Example -->

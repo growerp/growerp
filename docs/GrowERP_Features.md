@@ -18,7 +18,7 @@
 	- **Admin Application:** A comprehensive ERP system for managing all aspects of a business.
 	- **Hotel Application:** A specialized application tailored for the hospitality industry.
 	- **Freelance Application:** A project-based work management application for freelancers and service professionals.
-	- **eLearner Application:** A student-facing platform for course enrollment and learning.
+
 	- **Health Application:** A healthcare management application.
 	- **Support Application:** A support and ticketing system.
 	- **Assessment Application:** A lead-capture and AI-scored assessment platform.
@@ -144,16 +144,4 @@
 
 - **Accounting:** Full accounting cycle including payments and ledger management.
 
----
 
-## eLearner Application Modules
-
-- **Dashboard:** A student-facing overview of enrolled courses and progress.
-
-- **Course Catalog:** Browse and enroll in available courses.
-
-- **Curriculum Management:** Structured course content with lessons and media delivery.
-
-- **Enrollment Management:** Manage student enrollments and access.
-
-- **AI Content Generation:** AI-assisted course content creation for instructors.

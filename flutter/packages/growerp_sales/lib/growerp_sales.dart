@@ -5,3 +5,4 @@ export 'package:growerp_sales/l10n/generated/sales_localizations.dart';
 export 'src/get_sales_bloc_providers.dart';
 export 'src/common/translate_bloc_messages.dart';
 export 'src/get_sales_widgets.dart';
+export 'src/common/crm_dashboard_chart_mini.dart';

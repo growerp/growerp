@@ -5,3 +5,4 @@ export 'src/get_order_accounting_bloc_providers.dart';
 export 'src/common/translate_bloc_messages.dart';
 export 'src/route.dart';
 export 'src/get_order_accounting_widgets.dart';
+export 'src/common/order_dashboard_chart_mini.dart';

@@ -4,7 +4,7 @@ GrowERP includes a built-in, real-time chat system designed to facilitate seamle
 
 ## Overview
 
-The chat system is a core component of the GrowERP ecosystem, accessible across all specialized applications (Admin, Hotel, Freelance, eLearner, etc.). It enables users to communicate in real-time, share information, and stay updated on business activities without leaving the ERP environment.
+The chat system is a core component of the GrowERP ecosystem, accessible across all specialized applications (Admin, Hotel, Freelance, etc.). It enables users to communicate in real-time, share information, and stay updated on business activities without leaving the ERP environment.
 
 ## Key Features
 

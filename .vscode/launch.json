@@ -242,6 +242,17 @@
                 "-d",
                 "macos"
             ]
+        },
+        {
+            "name": "Marketing linux (lib/main.dart)",
+            "type": "dart",
+            "request": "launch",
+            "cwd": "flutter/packages/marketing",
+            "program": "lib/main.dart",
+            "toolArgs": [
+                "-d",
+                "linux"
+            ]
         }
     ]
 }

@@ -22,7 +22,9 @@ import 'package:growerp_models/growerp_models.dart';
 /// purchase counters in a row at the bottom. The tile route must be listed
 /// in DashboardGrid.compactGraphicRoutes so the icon+title render beside it.
 class OrderDashboardChartMini extends StatefulWidget {
-  const OrderDashboardChartMini({super.key});
+  const OrderDashboardChartMini({super.key, this.showPurchase = true});
+
+  final bool showPurchase;
 
   @override
   State<OrderDashboardChartMini> createState() =>
@@ -148,9 +150,9 @@ class _OrderDashboardChartMiniState extends State<OrderDashboardChartMini> {
     );
     final counters = [
       counter('sales', dashboard!.salesOrders),
-      counter('purchase', dashboard!.purchaseOrders),
+      if (widget.showPurchase) counter('purchase', dashboard!.purchaseOrders),
       counter('sls unpaid', dashboard!.salesInvoicesNotPaidCount),
-      counter('pur unpaid', dashboard!.purchInvoicesNotPaidCount),
+      if (widget.showPurchase) counter('pur unpaid', dashboard!.purchInvoicesNotPaidCount),
     ];
     // Phones show the logo as a horizontal top-left strip, desktop as a
     // vertical badge on the left: inset the funnel accordingly.

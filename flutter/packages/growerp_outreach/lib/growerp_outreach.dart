@@ -49,3 +49,4 @@ export 'src/get_outreach_widgets.dart';
 
 // Integration test exports
 export 'src/integration_test/outreach_campaign_test.dart';
+export 'src/screens/outreach_dashboard_chart_mini.dart';

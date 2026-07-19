@@ -78,8 +78,7 @@ along with this software (see the LICENSE.md file). If not, see
         description="App for Hotel, Bed &amp; Breakfeast" />
     <growerp.Application applicationId="AppFreelance"
         description="App for a freelancer" />
-    <growerp.Application applicationId="AppElearner"
-        description="eLearner app for students to read subscribed courses" />
+
     <growerp.Application applicationId="AppAgents"
         description="App for agents" />
 

@@ -43,6 +43,7 @@ workspace:
   - packages/growerp_wiki
   - packages/growerp_wiki/example
   - packages/hotel
+  - packages/marketing
   - packages/rental
   - packages/support
   - packages/website
@@ -98,6 +99,7 @@ melos:
     - packages/assessment
     - packages/support
     - packages/rental
+    - packages/marketing
 
   command:
     bootstrap:

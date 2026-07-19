@@ -260,12 +260,7 @@ Project management focused:
 - Invoicing
 - Activity monitoring
 
-### 🎓 eLearner Application
-Student-facing learning platform:
-- Course enrollment and management
-- Learning progress tracking
-- Content delivery
-- Instructor and student management
+
 
 ### 🏥 Health Application
 Healthcare management:
