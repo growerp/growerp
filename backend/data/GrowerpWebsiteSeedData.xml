@@ -12,12 +12,12 @@
          HOME PAGE
          ================================================================ -->
     <moqui.resource.wiki.WikiPage wikiPageId="growerp_home" wikiSpaceId="GROWERP_WS" pagePath="home"
-        publishedVersionName="01" sequenceNum="1">
-        <histories historySeqId="01" versionName="01" changeDateTime="1485028800000" />
+        publishedVersionName="02" sequenceNum="1">
+        <histories historySeqId="01" versionName="02" changeDateTime="1485028800001" />
     </moqui.resource.wiki.WikiPage>
     <moqui.resource.DbResource filename="home.html.ftl" isFile="Y" resourceId="growerp_home"
         parentResourceId="growerp_content_dir">
-        <file mimeType="text/html" versionName="01" rootVersionName="01">
+        <file mimeType="text/html" versionName="02" rootVersionName="01">
             <fileData><![CDATA[<#-- title: Home -->
 <!-- ==================== Marketing landing (GrowERP) ==================== -->
 <main class="pt-24 pb-16 relative">
@@ -114,7 +114,6 @@
             </div>
         </div>
     </section>
-
     <!-- Platform Downloads -->
     <section class="max-w-container mx-auto px-4 md:px-12 pb-8 relative">
         <div class="l-glass rounded-2xl p-8 text-center">
@@ -141,7 +140,131 @@
     </section>
 </main>
 ]]></fileData>
-            <histories versionName="01" versionDate="1485028800000" isDiff="N" />
+            <histories versionName="02" versionDate="1485028800001" isDiff="N" />
+        </file>
+    </moqui.resource.DbResource>
+
+    <!-- ================================================================
+         VERTICALS PAGE
+         ================================================================ -->
+    <moqui.resource.wiki.WikiPage wikiPageId="growerp_verticals" wikiSpaceId="GROWERP_WS" pagePath="verticals"
+        publishedVersionName="02" sequenceNum="4">
+        <histories historySeqId="01" versionName="02" changeDateTime="1485028800001" />
+    </moqui.resource.wiki.WikiPage>
+    <moqui.resource.DbResource filename="verticals.html.ftl" isFile="Y" resourceId="growerp_verticals"
+        parentResourceId="growerp_content_dir">
+        <file mimeType="text/html" versionName="02" rootVersionName="01">
+            <fileData><![CDATA[<#-- title: Verticals -->
+<!-- Background Ambient Glow -->
+<div class="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
+    <div class="absolute top-[15%] left-[-10%] w-[45%] h-[45%] rounded-full bg-primary/5 blur-[120px]"></div>
+    <div class="absolute top-[40%] right-[-10%] w-[40%] h-[40%] rounded-full bg-tertiary/5 blur-[100px]"></div>
+</div>
+
+<main class="pt-28 pb-16 overflow-x-hidden">
+    <section class="max-w-container mx-auto px-4 md:px-12 text-center mb-16 relative">
+        <h1 class="font-display text-4xl md:text-5xl font-bold tracking-tight text-on-surface mb-6">Tailored Verticals</h1>
+        <p class="text-lg text-on-surface-variant max-w-2xl mx-auto leading-relaxed">
+            Specialized applications designed for specific industries. Choose the one that perfectly fits your business model.
+        </p>
+    </section>
+
+    <section class="max-w-container mx-auto px-4 md:px-12 pb-24 relative">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Admin -->
+            <a href="https://admin.growerp.com" target="_blank" rel="noopener" class="l-glass p-8 rounded-2xl flex flex-col gap-4 hover:bg-surface-container-low/60 transition-colors group relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-[40px] group-hover:bg-primary/10 transition-all"></div>
+                <div class="w-12 h-12 rounded-lg bg-surface-container flex items-center justify-center border border-outline-variant/30 text-primary mb-2">
+                    <span class="material-symbols-outlined icon-fill text-[24px]">admin_panel_settings</span>
+                </div>
+                <h3 class="font-display text-xl font-semibold text-on-surface">Admin</h3>
+                <p class="text-on-surface-variant leading-relaxed">The core comprehensive ERP for medium to large enterprises. Full control over all modules, accounting, and organization settings.</p>
+                <div class="mt-auto pt-4 flex items-center text-primary font-label text-sm font-medium">
+                    admin.growerp.com <span class="material-symbols-outlined text-[16px] ml-1">arrow_forward</span>
+                </div>
+            </a>
+            
+            <!-- Hotel -->
+            <a href="https://hotel.growerp.com" target="_blank" rel="noopener" class="l-glass p-8 rounded-2xl flex flex-col gap-4 hover:bg-surface-container-low/60 transition-colors group relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-secondary/5 rounded-full blur-[40px] group-hover:bg-secondary/10 transition-all"></div>
+                <div class="w-12 h-12 rounded-lg bg-surface-container flex items-center justify-center border border-outline-variant/30 text-secondary mb-2">
+                    <span class="material-symbols-outlined icon-fill text-[24px]">hotel</span>
+                </div>
+                <h3 class="font-display text-xl font-semibold text-on-surface">Hotel</h3>
+                <p class="text-on-surface-variant leading-relaxed">Designed for hotels, bed &amp; breakfasts, and resorts. Manage reservations, room inventory, and guest experiences seamlessly.</p>
+                <div class="mt-auto pt-4 flex items-center text-secondary font-label text-sm font-medium">
+                    hotel.growerp.com <span class="material-symbols-outlined text-[16px] ml-1">arrow_forward</span>
+                </div>
+            </a>
+            
+            <!-- Rental -->
+            <a href="https://rental.growerp.com" target="_blank" rel="noopener" class="l-glass p-8 rounded-2xl flex flex-col gap-4 hover:bg-surface-container-low/60 transition-colors group relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-tertiary/5 rounded-full blur-[40px] group-hover:bg-tertiary/10 transition-all"></div>
+                <div class="w-12 h-12 rounded-lg bg-surface-container flex items-center justify-center border border-outline-variant/30 text-tertiary mb-2">
+                    <span class="material-symbols-outlined icon-fill text-[24px]">car_rental</span>
+                </div>
+                <h3 class="font-display text-xl font-semibold text-on-surface">Rental</h3>
+                <p class="text-on-surface-variant leading-relaxed">Perfect for equipment, vehicle, or property rental businesses. Track asset availability, maintenance, and recurring billing.</p>
+                <div class="mt-auto pt-4 flex items-center text-tertiary font-label text-sm font-medium">
+                    rental.growerp.com <span class="material-symbols-outlined text-[16px] ml-1">arrow_forward</span>
+                </div>
+            </a>
+            
+            <!-- Freelance -->
+            <a href="https://freelance.growerp.com" target="_blank" rel="noopener" class="l-glass p-8 rounded-2xl flex flex-col gap-4 hover:bg-surface-container-low/60 transition-colors group relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-[40px] group-hover:bg-primary/10 transition-all"></div>
+                <div class="w-12 h-12 rounded-lg bg-surface-container flex items-center justify-center border border-outline-variant/30 text-primary mb-2">
+                    <span class="material-symbols-outlined icon-fill text-[24px]">person</span>
+                </div>
+                <h3 class="font-display text-xl font-semibold text-on-surface">Freelance</h3>
+                <p class="text-on-surface-variant leading-relaxed">Tailored for independent professionals and solopreneurs. Simplified invoicing, task tracking, and client management.</p>
+                <div class="mt-auto pt-4 flex items-center text-primary font-label text-sm font-medium">
+                    freelance.growerp.com <span class="material-symbols-outlined text-[16px] ml-1">arrow_forward</span>
+                </div>
+            </a>
+            
+            <!-- Marketing -->
+            <a href="https://marketing.growerp.com" target="_blank" rel="noopener" class="l-glass p-8 rounded-2xl flex flex-col gap-4 hover:bg-surface-container-low/60 transition-colors group relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-secondary/5 rounded-full blur-[40px] group-hover:bg-secondary/10 transition-all"></div>
+                <div class="w-12 h-12 rounded-lg bg-surface-container flex items-center justify-center border border-outline-variant/30 text-secondary mb-2">
+                    <span class="material-symbols-outlined icon-fill text-[24px]">campaign</span>
+                </div>
+                <h3 class="font-display text-xl font-semibold text-on-surface">Marketing</h3>
+                <p class="text-on-surface-variant leading-relaxed">Built for marketing agencies and outreach teams. Coordinate campaigns, manage leads, and analyze conversion metrics.</p>
+                <div class="mt-auto pt-4 flex items-center text-secondary font-label text-sm font-medium">
+                    marketing.growerp.com <span class="material-symbols-outlined text-[16px] ml-1">arrow_forward</span>
+                </div>
+            </a>
+            
+            <!-- Agents -->
+            <a href="https://agents.growerp.com" target="_blank" rel="noopener" class="l-glass p-8 rounded-2xl flex flex-col gap-4 hover:bg-surface-container-low/60 transition-colors group relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-tertiary/5 rounded-full blur-[40px] group-hover:bg-tertiary/10 transition-all"></div>
+                <div class="w-12 h-12 rounded-lg bg-surface-container flex items-center justify-center border border-outline-variant/30 text-tertiary mb-2">
+                    <span class="material-symbols-outlined icon-fill text-[24px]">support_agent</span>
+                </div>
+                <h3 class="font-display text-xl font-semibold text-on-surface">Agents</h3>
+                <p class="text-on-surface-variant leading-relaxed">Empower your AI agents and customer support teams. Manage knowledge bases, automate responses, and oversee agent actions.</p>
+                <div class="mt-auto pt-4 flex items-center text-tertiary font-label text-sm font-medium">
+                    agents.growerp.com <span class="material-symbols-outlined text-[16px] ml-1">arrow_forward</span>
+                </div>
+            </a>
+        </div>
+
+        <!-- CTA: your own vertical -->
+        <div class="l-glass rounded-2xl p-10 md:p-14 text-center relative overflow-hidden">
+            <div class="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-primary/10 rounded-full blur-[80px] pointer-events-none"></div>
+            <h2 class="font-display text-3xl md:text-4xl font-bold tracking-tight text-on-surface mb-4 relative">How about your vertical?</h2>
+            <p class="text-lg text-on-surface-variant max-w-2xl mx-auto leading-relaxed mb-8 relative">
+                Tell us what you need &mdash; we can deliver your app within one week.
+            </p>
+            <a href="https://calendar.app.google/KQBVyUZEGyPPM4HK9" target="_blank" rel="noopener" class="inline-flex items-center gap-2 bg-primary text-on-primary font-label text-sm font-semibold px-6 py-3 rounded-full hover:bg-primary/90 transition-colors relative">
+                Book a call <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+            </a>
+        </div>
+    </section>
+</main>
+]]></fileData>
+            <histories versionName="02" versionDate="1485028800001" isDiff="N" />
         </file>
     </moqui.resource.DbResource>
 
@@ -149,7 +272,7 @@
          GETTING STARTED PAGE
          ================================================================ -->
     <moqui.resource.wiki.WikiPage wikiPageId="growerp_getting_started" wikiSpaceId="GROWERP_WS" pagePath="getting-started"
-        publishedVersionName="01" sequenceNum="4">
+        publishedVersionName="01" sequenceNum="5">
         <histories historySeqId="01" versionName="01" changeDateTime="1485028800000" />
     </moqui.resource.wiki.WikiPage>
     <moqui.resource.DbResource filename="getting-started.md.ftl" isFile="Y" resourceId="growerp_getting_started"
@@ -525,7 +648,7 @@ If you decide GrowERP isn't for you:
          PRICING PAGE
          ================================================================ -->
     <moqui.resource.wiki.WikiPage wikiPageId="growerp_pricing" wikiSpaceId="GROWERP_WS" pagePath="pricing"
-        publishedVersionName="01" sequenceNum="5">
+        publishedVersionName="01" sequenceNum="6">
         <histories historySeqId="01" versionName="01" changeDateTime="1485028800000" />
     </moqui.resource.wiki.WikiPage>
     <moqui.resource.DbResource filename="pricing.html.ftl" isFile="Y" resourceId="growerp_pricing"
@@ -756,7 +879,7 @@ If you decide GrowERP isn't for you:
          ABOUT PAGE (NEW)
          ================================================================ -->
     <moqui.resource.wiki.WikiPage wikiPageId="growerp_about" wikiSpaceId="GROWERP_WS" pagePath="about"
-        publishedVersionName="01" sequenceNum="6">
+        publishedVersionName="01" sequenceNum="7">
         <histories historySeqId="01" versionName="01" changeDateTime="1485028800000" />
     </moqui.resource.wiki.WikiPage>
     <moqui.resource.DbResource filename="about.md.ftl" isFile="Y" resourceId="growerp_about"
@@ -810,7 +933,7 @@ Whether you need requirements gathering, implementation, custom interfacing, or 
          PRIVACY POLICY PAGE
          ================================================================ -->
     <moqui.resource.wiki.WikiPage wikiPageId="growerp_privacy" wikiSpaceId="GROWERP_WS" pagePath="privacy"
-        publishedVersionName="01" sequenceNum="7">
+        publishedVersionName="01" sequenceNum="8">
         <histories historySeqId="01" versionName="01" changeDateTime="1485028800000" />
     </moqui.resource.wiki.WikiPage>
     <moqui.resource.DbResource filename="privacy.md.ftl" isFile="Y" resourceId="growerp_privacy"
