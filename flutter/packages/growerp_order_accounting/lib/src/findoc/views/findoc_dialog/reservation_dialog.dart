@@ -303,10 +303,10 @@ class ReservationDialogState extends State<ReservationDialog> {
         height: 550,
         width: 400,
         title: widget.finDoc.orderId == null
-            ? (applicationId == 'AppHotel'
+            ? (applicationId == 'AppHotel' || applicationId == 'AppRental'
                   ? _localizations.newRental
                   : _localizations.newOrder)
-            : (applicationId == 'AppHotel'
+            : (applicationId == 'AppHotel' || applicationId == 'AppRental'
                       ? _localizations.reservationId
                       : _localizations.orderId) +
                   widget.finDoc.pseudoId!,
@@ -443,7 +443,7 @@ class ReservationDialogState extends State<ReservationDialog> {
                         controller: textController,
                         focusNode: focusNode,
                         decoration: InputDecoration(
-                          labelText: applicationId == 'AppHotel'
+                          labelText: applicationId == 'AppHotel' || applicationId == 'AppRental'
                               ? 'Room Type'
                               : _localizations.product,
                         ),

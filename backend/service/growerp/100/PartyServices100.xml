@@ -3548,13 +3548,19 @@ along with this software (see the LICENSE.md file). If not, see
                     <set field="catgTrans[category.productCategoryId]"
                         from="localProductCategories[0].productCategoryId" />
                 </iterate>
-                <!-- create product -->
+                <!-- create product: hotel gets the rooms, rental the cars &amp;
+                     equipment, other apps get all demo products -->
                 <if condition="applicationId == 'AppHotel'">
-                    <set field="productType" value="PtFixedAssetUse" />
+                    <set field="productIdList"
+                        from="['SINGLE_ROOM', 'STANDARD_ROOM', 'DELUXE_ROOM']" />
+                </if>
+                <if condition="applicationId == 'AppRental'">
+                    <set field="productIdList"
+                        from="['COMPACT_CAR', 'SUV_4X4', 'MINI_EXCAVATOR', 'SCISSOR_LIFT']" />
                 </if>
                 <entity-find entity-name="mantle.product.Product" list="products">
                     <econdition field-name="ownerPartyId" value="_NA_" />
-                    <econdition field-name="productTypeEnumId" from="productType"
+                    <econdition field-name="productId" operator="in" from="productIdList"
                         ignore-if-empty="true" />
                 </entity-find>
                 <!-- get currency -->
@@ -3740,11 +3746,30 @@ along with this software (see the LICENSE.md file). If not, see
                             orderName: 'fifth generated Hotel order'],
                     ]" />
 
+                <set field="ordersRental"
+                    from="[
+                    [ productName: 'Compact car', quantity: 1,
+                        rentalFromDate: nowDate.plus(1),
+                        rentalThruDate: nowDate.plus(4),
+                        price: 40, orderName: 'first generated Rental order'],
+                    [ productName: 'SUV 4x4', quantity: 1,
+                        rentalFromDate: nowDate.plus(5),
+                        rentalThruDate: nowDate.plus(8),
+                        price: 75, orderName: 'second generated Rental order'],
+                    [ productName: 'Mini excavator', quantity: 1,
+                        rentalFromDate: nowDate.plus(10),
+                        rentalThruDate: nowDate.plus(12),
+                        price: 250, orderName: 'third generated Rental order'],
+                    ]" />
+
                 <if condition="applicationId == 'AppAdmin'">
                     <set field="ordersIn" from="ordersAdmin" />
                 </if>
                 <if condition="applicationId == 'AppHotel'">
                     <set field="ordersIn" from="ordersHotel" />
+                </if>
+                <if condition="applicationId == 'AppRental'">
+                    <set field="ordersIn" from="ordersRental" />
                 </if>
                 <entity-find entity-name="growerp.party.OwnerCompanyDetailAndEmployee"
                     list="customers">
@@ -3769,7 +3794,8 @@ along with this software (see the LICENSE.md file). If not, see
                     </entity-find>
 
                     <set field="items" from="[]" />
-                    <if condition="applicationId == 'AppHotel'">
+                    <if
+                        condition="applicationId == 'AppHotel' || applicationId == 'AppRental'">
                         <then>
                             <while condition="order.quantity--">
                                 <set field="item"

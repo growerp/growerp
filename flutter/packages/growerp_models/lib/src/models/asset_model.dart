@@ -58,6 +58,7 @@ List<String> assetClassIds = [
   'Hotel Room',
   'Restaurant Table',
   'Restaurant Table Area',
+  'Equipment',
 ];
 
 List<String> assetStatusValues = ['Available', 'Deactivated', 'In Use'];

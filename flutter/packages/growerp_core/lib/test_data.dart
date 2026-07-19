@@ -1387,6 +1387,81 @@ List<Asset> roomsHotel = [
   ),
 ];
 
+// Rental (equipment hire) demo data — rentable product types and the
+// individual pieces of equipment (assets) that belong to each type.
+List<Product> productsRental = [
+  Product(
+    productName: 'Mini Excavator',
+    description: '1.5 ton mini excavator',
+    productTypeId: productTypes[2], //rental
+    assetClassId: 'Equipment',
+    listPrice: Decimal.parse('150'),
+    price: Decimal.parse('120'),
+    categories: [Category(categoryName: "equipment")],
+  ),
+  Product(
+    productName: 'Scaffold Tower',
+    description: 'Mobile aluminium scaffold tower',
+    productTypeId: productTypes[2], //rental
+    assetClassId: 'Equipment',
+    listPrice: Decimal.parse('45'),
+    price: Decimal.parse('35'),
+    categories: [Category(categoryName: "equipment")],
+  ),
+  Product(
+    productName: 'Concrete Mixer',
+    description: 'Petrol concrete mixer',
+    productTypeId: productTypes[2], //rental
+    assetClassId: 'Equipment',
+    listPrice: Decimal.parse('30'),
+    price: Decimal.parse('25'),
+    categories: [Category(categoryName: "equipment")],
+  ),
+];
+
+List<Asset> equipmentRental = [
+  Asset(
+    statusId: "Available",
+    assetName: "Excavator 1",
+    assetClassId: 'Equipment',
+    quantityOnHand: Decimal.parse("1"),
+    availableToPromise: Decimal.parse("1"),
+    product: productsRental[0],
+  ),
+  Asset(
+    statusId: "Available",
+    assetName: "Excavator 2",
+    assetClassId: 'Equipment',
+    quantityOnHand: Decimal.parse("1"),
+    availableToPromise: Decimal.parse("1"),
+    product: productsRental[0],
+  ),
+  Asset(
+    statusId: "Available",
+    assetName: "Scaffold 1",
+    assetClassId: 'Equipment',
+    quantityOnHand: Decimal.parse("1"),
+    availableToPromise: Decimal.parse("1"),
+    product: productsRental[1],
+  ),
+  Asset(
+    statusId: "Available",
+    assetName: "Scaffold 2",
+    assetClassId: 'Equipment',
+    quantityOnHand: Decimal.parse("1"),
+    availableToPromise: Decimal.parse("1"),
+    product: productsRental[1],
+  ),
+  Asset(
+    statusId: "Available",
+    assetName: "Mixer 1",
+    assetClassId: 'Equipment',
+    quantityOnHand: Decimal.parse("1"),
+    availableToPromise: Decimal.parse("1"),
+    product: productsRental[2],
+  ),
+];
+
 List<FinDoc> roomReservations = [
   FinDoc(
     docType: FinDocType.order,
@@ -1395,6 +1470,21 @@ List<FinDoc> roomReservations = [
     items: [
       FinDocItem(
         description: productsHotel[0].productName,
+        rentalFromDate: nowNoon,
+        quantity: Decimal.parse('1'),
+      ), // nbr of days
+    ],
+  ),
+];
+
+List<FinDoc> equipmentReservations = [
+  FinDoc(
+    docType: FinDocType.order,
+    sales: true,
+    otherUser: customers[0],
+    items: [
+      FinDocItem(
+        description: productsRental[0].productName,
         rentalFromDate: nowNoon,
         quantity: Decimal.parse('1'),
       ), // nbr of days

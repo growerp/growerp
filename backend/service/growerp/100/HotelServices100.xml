@@ -294,6 +294,7 @@ along with this software (see the LICENSE.md file). If not, see
         <in-parameters>
             <parameter name="fromDate" type="Date" />
             <parameter name="thruDate" type="Date" />
+            <parameter name="assetClassId" default-value="AsClsRoom" /><!-- AsClsEquipment for rental -->
         </in-parameters>
         <out-parameters>
             <parameter name="fromDate" />
@@ -330,7 +331,7 @@ along with this software (see the LICENSE.md file). If not, see
             <!-- total rooms -->
             <entity-find-count entity-name="mantle.product.asset.Asset" count-field="totalRooms">
                 <econdition field-name="ownerPartyId" from="companyPartyId" />
-                <econdition field-name="classEnumId" value="AsClsRoom" />
+                <econdition field-name="classEnumId" from="assetClassId" />
                 <econdition field-name="statusId" operator="not-equals" value="AstDeactivated"
                     or-null="true" />
             </entity-find-count>

@@ -403,7 +403,7 @@ along with this software (see the LICENSE.md file). If not, see
     <growerp.menu.MenuItem menuItemId="HOTEL_ROOMS_PROD" menuConfigurationId="HOTEL_DEFAULT" parentMenuItemId="HOTEL_ROOMS"
         title="Room Types" iconName="category" widgetName="ProductList" sequenceNum="20"/>
     <growerp.menu.MenuItem menuItemId="HOTEL_ROOMS_RATES" menuConfigurationId="HOTEL_DEFAULT" parentMenuItemId="HOTEL_ROOMS"
-        title="Rates" iconName="price_change" widgetName="RoomRateForm" sequenceNum="30"/>
+        title="Rates" iconName="price_change" widgetName="RentalRateForm" sequenceNum="30"/>
     <growerp.menu.MenuItem menuItemId="HOTEL_RES_ORDERS" menuConfigurationId="HOTEL_DEFAULT" parentMenuItemId="HOTEL_RESERVATIONS"
         title="reservations" iconName="home" widgetName="SalesOrderRentalList" sequenceNum="10"/>
     <growerp.menu.MenuItem menuItemId="HOTEL_RES_CUST" menuConfigurationId="HOTEL_DEFAULT" parentMenuItemId="HOTEL_RESERVATIONS"

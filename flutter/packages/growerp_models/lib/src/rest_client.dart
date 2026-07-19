@@ -433,6 +433,7 @@ abstract class RestClient {
   Future<HotelStatistics> getHotelStatistics({
     @Query('fromDate') String? fromDate,
     @Query('thruDate') String? thruDate,
+    @Query('assetClassId') String? assetClassId,
   });
 
   // FINDOC

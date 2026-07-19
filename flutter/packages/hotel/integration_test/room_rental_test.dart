@@ -28,7 +28,7 @@ import 'package:growerp_inventory/growerp_inventory.dart';
 import 'package:growerp_website/growerp_website.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:hotel/main.dart';
-import 'package:hotel/views/gantt_form.dart';
+import 'package:growerp_rental/growerp_rental.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

@@ -28,10 +28,8 @@ import 'package:growerp_models/growerp_models.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:intl/intl.dart';
 import 'package:hotel/main.dart';
-import 'package:hotel/views/gantt_form.dart';
 import 'package:hotel/views/housekeeping_form.dart';
-import 'package:hotel/views/room_rate_form.dart';
-import 'package:hotel/views/statistics_form.dart';
+import 'package:growerp_rental/growerp_rental.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 const hotelFeatureMenuConfig = MenuConfiguration(
@@ -66,7 +64,7 @@ const hotelFeatureMenuConfig = MenuConfiguration(
         ),
         MenuItem(
           title: 'Rates',
-          widgetName: 'RoomRateForm',
+          widgetName: 'RentalRateForm',
           iconName: 'price_change',
           sequenceNum: 30,
         ),
@@ -102,7 +100,7 @@ GoRouter createHotelFeatureRouter() {
     tabWidgetLoader: (widgetName, args) => switch (widgetName) {
       'AssetList' => const AssetList(key: Key('AssetList')),
       'ProductList' => const ProductList(key: Key('ProductList')),
-      'RoomRateForm' => const RoomRateForm(key: Key('RoomRateForm')),
+      'RentalRateForm' => const RentalRateForm(key: Key('RentalRateForm')),
       'HousekeepingForm' => const HousekeepingForm(key: Key('HousekeepingForm')),
       'StatisticsForm' => const StatisticsForm(key: Key('StatisticsForm')),
       _ => const SizedBox.shrink(),
@@ -126,7 +124,7 @@ Future<void> waitForKey(WidgetTester tester, String key) async {
 
 Future<void> selectRates(WidgetTester tester) async {
   await CommonTest.gotoMainMenu(tester);
-  await CommonTest.selectOption(tester, '/rooms', 'RoomRateForm', 'Rates');
+  await CommonTest.selectOption(tester, '/rooms', 'RentalRateForm', 'Rates');
   await waitForKey(tester, 'rateSummary');
 }
 
@@ -186,7 +184,7 @@ void main() {
 /// can be removed again.
 Future<void> checkSeasonalRate(WidgetTester tester) async {
   await selectRates(tester);
-  await CommonTest.checkWidgetKey(tester, 'RoomRateForm');
+  await CommonTest.checkWidgetKey(tester, 'RentalRateForm');
   expect(CommonTest.getTextField('rateSummary'), 'Seasonal rates: 0');
 
   final from = CustomizableDateTime.current.add(const Duration(days: 40));
@@ -194,7 +192,7 @@ Future<void> checkSeasonalRate(WidgetTester tester) async {
   final rate = Decimal.parse('275');
 
   await CommonTest.tapByKey(tester, 'addNew');
-  await CommonTest.checkWidgetKey(tester, 'RoomRateDialog');
+  await CommonTest.checkWidgetKey(tester, 'RentalRateDialog');
   await CommonTest.enterDate(tester, 'rateFromDate', from, usDate: true);
   await CommonTest.enterDate(tester, 'rateThruDate', thru, usDate: true);
   await CommonTest.enterText(tester, 'rate', rate.toString());

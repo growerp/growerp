@@ -1,12 +1,12 @@
 /*
- * This software is in the public domain under CC0 1.0 Universal plus a
+ * This GrowERP software is in the public domain under CC0 1.0 Universal plus a
  * Grant of Patent License.
- * 
+ *
  * To the extent possible under law, the author(s) have dedicated all
  * copyright and related and neighboring rights to this software to the
  * public domain worldwide. This software is distributed without any
  * warranty.
- * 
+ *
  * You should have received a copy of the CC0 Public Domain Dedication
  * along with this software (see the LICENSE.md file). If not, see
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
@@ -24,6 +24,10 @@ import 'package:intl/intl.dart';
 
 enum Period { day, week, month }
 
+/// Date-range rental timeline: one row per rentable asset (hotel room, rental
+/// equipment, ...) with a bar for every reservation over the period. Shared by
+/// the hotel and rental verticals; the noun ("Room" vs "Equipment") follows the
+/// hosting app's applicationId.
 class GanttForm extends StatefulWidget {
   const GanttForm({super.key});
 
@@ -37,6 +41,7 @@ class _GanttFormState extends State<GanttForm> {
   late SalesOrderBloc _salesOrderBloc;
   late AssetBloc _assetBloc;
   late FinDocBloc _finDocBloc;
+  late String _assetNoun; // 'Room' for hotel, 'Equipment' otherwise
   List<Asset> assets = [];
   List<FinDoc> finDocs = [];
   List<FinDoc> reservations = [];
@@ -70,6 +75,7 @@ class _GanttFormState extends State<GanttForm> {
       ..add(const AssetFetch(refresh: true));
     _finDocBloc = context.read<FinDocBloc>()
       ..add(const FinDocProductRentalDates(null));
+    _assetNoun = context.read<String>() == 'AppHotel' ? 'Room' : 'Equipment';
 
     bottom = 50;
   }
@@ -112,7 +118,7 @@ class _GanttFormState extends State<GanttForm> {
                   productRentalDates = finDocState.productRentalDates;
                   finDocs = salesOrderState.finDocs;
 
-                  // group all open reservations by Room number as a single item
+                  // group all open reservations by asset as a single item
                   assets = List.of(assets);
                   final Set<String> matchingOrderIds = {};
                   if (_searchString.isNotEmpty) {
@@ -259,7 +265,7 @@ class _GanttFormState extends State<GanttForm> {
                                   },
                                   decoration: InputDecoration(
                                     hintText:
-                                        'Search reservation ID, guest name, date...',
+                                        'Search reservation ID, customer name, date...',
                                     prefixIcon: const Icon(
                                       Icons.search_rounded,
                                       size: 20,
@@ -293,7 +299,7 @@ class _GanttFormState extends State<GanttForm> {
                           if (isAPhone(context))
                             ListFilterBar(
                               searchHint:
-                                  'Search reservation ID, guest name, date...',
+                                  'Search reservation ID, customer name, date...',
                               searchController: _searchController,
                               focusNode: _searchFocusNode,
                               onSearchChanged: (value) {
@@ -435,16 +441,18 @@ class _GanttFormState extends State<GanttForm> {
                         ),
                       ),
                       if (assetState.assets.isEmpty)
-                        const Column(
+                        Column(
                           children: [
-                            SizedBox(height: 10),
-                            SizedBox(height: 200),
+                            const SizedBox(height: 10),
+                            const SizedBox(height: 200),
                             Center(
                               child: Text(
-                                "No Rooms found,\n goto to the room section to add:\n"
-                                "1. room types\n"
-                                "2. actual rooms related to room types",
-                                style: TextStyle(fontSize: 20.0),
+                                "No ${_assetNoun}s found,\n goto the "
+                                "${_assetNoun.toLowerCase()} section to add:\n"
+                                "1. ${_assetNoun.toLowerCase()} types\n"
+                                "2. actual ${_assetNoun.toLowerCase()}s related "
+                                "to ${_assetNoun.toLowerCase()} types",
+                                style: const TextStyle(fontSize: 20.0),
                               ),
                             ),
                           ],
@@ -518,7 +526,7 @@ class _GanttFormState extends State<GanttForm> {
         padding: const EdgeInsets.symmetric(horizontal: 8),
         decoration: headerDecoration,
         alignment: Alignment.centerLeft,
-        child: Text('Room Type\nnbr/name', style: headerTextStyle),
+        child: Text('$_assetNoun Type\nnbr/name', style: headerTextStyle),
       ),
     ];
     DateTime? tempDate = ganttFromDate;
@@ -561,12 +569,12 @@ class _GanttFormState extends State<GanttForm> {
       columnText = productRentalDates[index].productName ?? '';
     } else if (index == productRentalDates.length) {
     } else {
-      var roomReservation = reservations.firstWhere(
+      var assetReservation = reservations.firstWhere(
         (element) =>
             int.parse(element.shipmentId ?? '') ==
             index - productRentalDates.length,
       );
-      columnText = roomReservation.items[0].asset?.assetName ?? '';
+      columnText = assetReservation.items[0].asset?.assetName ?? '';
     }
     final isEven = index.isEven;
     return Container(
@@ -599,7 +607,7 @@ class _GanttFormState extends State<GanttForm> {
   }
 
   /// print single bar depending on the start and end rental dates for
-  /// either by product (room type) or asset(room)
+  /// either by product (asset type) or asset
   Widget buildAssetReservation(BuildContext context, int index) {
     chartContent = [];
     List<Widget> chartLine = [];
@@ -659,21 +667,13 @@ class _GanttFormState extends State<GanttForm> {
     // show reservations
     else if (index > productRentalDates.length) {
       FinDoc reservation = reservations[index - productRentalDates.length - 1];
-      /*debugPrint(
-        "==${reservation.shipmentId}==room: ${reservation.items[0].asset?.assetName} "
-        "orderId: ${reservation.orderId} "
-        "fr:${reservation.items[0].rentalFromDate.dateOnly()} "
-        "to: ${reservation.items[0].rentalThruDate.dateOnly()}",
-      );*/
       // occupation by product
       if (reservation.items[0].rentalFromDate != null &&
           reservation.items[0].rentalThruDate!
                   .difference(ganttFromDate)
                   .inDays >=
               0) {
-        // show occupation by room(asset) ==================================
-        //roomReservations.sort((b, a) => (a.items[0].rentalFromDate.dateOnly())
-        //    .compareTo(b.items[0].rentalFromDate.dateOnly()));
+        // show occupation by asset ========================================
         DateTime from = reservation.items[0].rentalFromDate!;
         DateTime thru = reservation.items[0].rentalThruDate!;
         // started before today only borderradius on the right

@@ -25,7 +25,11 @@ List<StyledColumn> getAssetListColumns(
   String? applicationId,
 }) {
   bool isPhone = isAPhone(context);
-  final isHotel = applicationId == 'AppHotel';
+  // Hotel and rental both show the rentable-asset layout (unit nr/name/type/
+  // price) instead of the generic stock-inventory columns.
+  final isRentalLayout =
+      applicationId == 'AppHotel' || applicationId == 'AppRental';
+  final noun = applicationId == 'AppRental' ? 'Equipment' : 'Room';
 
   if (isPhone) {
     return [
@@ -36,11 +40,11 @@ List<StyledColumn> getAssetListColumns(
     ];
   }
 
-  if (isHotel) {
+  if (isRentalLayout) {
     return [
-      const StyledColumn(header: 'Room Nr', flex: 1),
-      const StyledColumn(header: 'Room Name', flex: 2),
-      const StyledColumn(header: 'Room Type', flex: 2),
+      StyledColumn(header: '$noun Nr', flex: 1),
+      StyledColumn(header: '$noun Name', flex: 2),
+      StyledColumn(header: '$noun Type', flex: 2),
       const StyledColumn(header: 'List Price', flex: 1),
       const StyledColumn(header: 'Price', flex: 1),
       const StyledColumn(header: 'Active', flex: 1),
@@ -68,7 +72,8 @@ List<Widget> getAssetListRow({
   String? applicationId,
 }) {
   bool isPhone = isAPhone(context);
-  final isHotel = applicationId == 'AppHotel';
+  final isHotel =
+      applicationId == 'AppHotel' || applicationId == 'AppRental';
   String currencyId = context
       .read<AuthBloc>()
       .state

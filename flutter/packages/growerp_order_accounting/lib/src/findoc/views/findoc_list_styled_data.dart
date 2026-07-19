@@ -27,7 +27,7 @@ List<StyledColumn> getFinDocListColumns(
   String? applicationId,
 }) {
   bool isPhone = isAPhone(context);
-  final isHotel = applicationId == 'AppHotel';
+  final isHotel = applicationId == 'AppHotel' || applicationId == 'AppRental';
   final isTransaction = docType == FinDocType.transaction;
   final isShipment = docType == FinDocType.shipment;
 
@@ -72,7 +72,7 @@ List<Widget> getFinDocListRow({
   String? applicationId,
 }) {
   bool isPhone = isAPhone(context);
-  final isHotel = applicationId == 'AppHotel';
+  final isHotel = applicationId == 'AppHotel' || applicationId == 'AppRental';
   String currencyId = context
       .read<AuthBloc>()
       .state

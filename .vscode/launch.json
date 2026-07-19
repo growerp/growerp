@@ -109,17 +109,17 @@
             "program": "lib/main.dart"
         },
         {
-            "name": "Health mobile (lib/main.dart)",
+            "name": "rental mobile (lib/main.dart)",
             "type": "dart",
             "request": "launch",
-            "cwd": "flutter/packages/health",
+            "cwd": "flutter/packages/rental",
             "program": "lib/main.dart"
         },
         {
-            "name": "Health Web (lib/main.dart)",
+            "name": "rental Web (lib/main.dart)",
             "type": "dart",
             "request": "launch",
-            "cwd": "flutter/packages/health",
+            "cwd": "flutter/packages/rental",
             "program": "lib/main.dart",
             "toolArgs": [
                 "-d",
@@ -129,10 +129,10 @@
             ]
         },
         {
-            "name": "Health linux (lib/main.dart)",
+            "name": "rental linux (lib/main.dart)",
             "type": "dart",
             "request": "launch",
-            "cwd": "flutter/packages/health",
+            "cwd": "flutter/packages/rental",
             "program": "lib/main.dart",
             "toolArgs": [
                 "-d",

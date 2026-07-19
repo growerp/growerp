@@ -302,6 +302,17 @@ const Map<String, AppBlock> appBlocks = {
       widgetName: 'CourseList',
     ),
   ),
+  'rental': AppBlock(
+    key: 'rental',
+    package: 'growerp_rental',
+    version: '^1.0.0',
+    importUri: 'package:growerp_rental/growerp_rental.dart',
+    description:
+        'Date-range rental timeline, seasonal rates and utilisation statistics '
+        'for equipment/asset hire. Reuses inventory + order_accounting; the '
+        'GanttForm dashboard is its main screen so it adds no top-level menu.',
+    widgetsFn: 'getRentalWidgets',
+  ),
   'adk': AppBlock(
     key: 'adk',
     package: 'growerp_adk',

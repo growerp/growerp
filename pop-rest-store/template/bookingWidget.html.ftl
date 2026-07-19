@@ -1,7 +1,10 @@
-<#-- Hotel room-booking widget, included by website.xml.
+<#-- Date-range rental booking widget, included by website.xml.
      Page authors embed <div data-growerp-booking></div> in any content page;
-     this script renders an availability search and books the stay directly
-     against the anonymous PublicRooms / PublicBooking endpoints. -->
+     this script renders an availability search and books directly against the
+     anonymous PublicRooms / PublicBooking endpoints. Wording defaults to hotel
+     rooms; a rental site overrides it per marker, e.g.
+     <div data-growerp-booking data-noun="equipment" data-unit="day"
+          data-title="Book equipment"></div>. -->
 <style>
 .growerp-booking{max-width:560px;margin:16px 0;padding:18px;border:1px solid #ddd;
   border-radius:12px;font-family:inherit;background:rgba(255,255,255,.9);color:#222}
@@ -42,8 +45,14 @@
   function isoDate(d){ return d.toISOString().substring(0,10); }
 
   function render(holder){
+    // Wording is configurable per marker; defaults keep hotel pages unchanged.
+    var noun  = holder.getAttribute('data-noun')  || 'room';
+    var unit  = holder.getAttribute('data-unit')  || 'night';
+    var title = holder.getAttribute('data-title') || ('Book a ' + noun);
+    var unitCap = unit.charAt(0).toUpperCase() + unit.substring(1);
+
     var box = el('div', {'class':'growerp-booking'});
-    box.appendChild(el('h3', {}, 'Book a room'));
+    box.appendChild(el('h3', {}, title));
 
     var tomorrow = new Date(Date.now() + 86400000);
     var row = el('div', {'class':'growerp-bk-row'});
@@ -53,7 +62,7 @@
     fromInput.value = isoDate(tomorrow);
     fromWrap.appendChild(fromInput);
     var nightsWrap = el('div');
-    nightsWrap.appendChild(el('label', {'for':'growerp-bk-nights'}, 'Nights'));
+    nightsWrap.appendChild(el('label', {'for':'growerp-bk-nights'}, unitCap + 's'));
     var nightsInput = el('input', {id:'growerp-bk-nights', type:'number', min:'1'});
     nightsInput.value = '1';
     nightsWrap.appendChild(nightsInput);
@@ -77,7 +86,7 @@
       var form = el('form');
       form.appendChild(el('h3', {}, room.productName));
       form.appendChild(el('div', {'class':'growerp-bk-desc'},
-        nightsInput.value + ' night(s) from ' + fromInput.value +
+        nightsInput.value + ' ' + unit + '(s) from ' + fromInput.value +
         ' — total ' + room.grandTotal));
       var fields = [
         {id:'growerp-bk-first', label:'First name', type:'text'},
@@ -146,7 +155,7 @@
           var rooms = (res.j && res.j.rooms) || [];
           var free = rooms.filter(function(r){ return r.available > 0; });
           if (!free.length) {
-            setStatus('No rooms available for those dates', 'err');
+            setStatus('No ' + noun + 's available for those dates', 'err');
             return;
           }
           setStatus('', null);

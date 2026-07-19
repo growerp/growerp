@@ -30,12 +30,10 @@ import 'package:growerp_sales/growerp_sales.dart';
 import 'package:growerp_user_company/growerp_user_company.dart';
 import 'package:growerp_website/growerp_website.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
+import 'package:growerp_rental/growerp_rental.dart';
 
-import 'views/gantt_form.dart';
 import 'views/accounting_form.dart';
 import 'views/housekeeping_form.dart';
-import 'views/room_rate_form.dart';
-import 'views/statistics_form.dart';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -228,13 +226,11 @@ List<Map<String, GrowerpWidgetBuilder>> hotelWidgetRegistrations = [
   getInventoryWidgets(),
   getOrderAccountingWidgets(),
   getWebsiteWidgets(),
+  getRentalWidgets(),
   // App-specific widgets
   {
-    'GanttForm': (args) => const GanttForm(),
     'AccountingForm': (args) => const AccountingForm(),
     'HousekeepingForm': (args) => const HousekeepingForm(),
-    'RoomRateForm': (args) => const RoomRateForm(),
-    'StatisticsForm': (args) => const StatisticsForm(),
   },
 ];
 

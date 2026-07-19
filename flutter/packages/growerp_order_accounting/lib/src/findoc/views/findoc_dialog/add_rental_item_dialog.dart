@@ -182,7 +182,7 @@ Future addRentalItemDialog(
                                             focusNode: focusNode,
                                             decoration: InputDecoration(
                                               labelText:
-                                                  applicationId == 'AppHotel'
+                                                  applicationId == 'AppHotel' || applicationId == 'AppRental'
                                                   ? 'Room Type'
                                                   : 'Product',
                                             ),

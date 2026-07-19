@@ -18,8 +18,10 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:intl/intl.dart';
 
-/// The three numbers a hotel is run on: occupancy, ADR (average daily rate)
-/// and RevPAR (revenue per available room) over a chosen period.
+/// The three numbers a date-range rental business is run on: occupancy, ADR
+/// (average daily rate) and RevPAR (revenue per available unit) over a chosen
+/// period. Shared by hotel (rooms) and rental (equipment); the asset class the
+/// numbers are computed over follows the hosting app's applicationId.
 class StatisticsForm extends StatefulWidget {
   const StatisticsForm({super.key});
 
@@ -29,6 +31,8 @@ class StatisticsForm extends StatefulWidget {
 
 class _StatisticsFormState extends State<StatisticsForm> {
   late RestClient _restClient;
+  late bool _isHotel;
+  late String _unitNoun; // 'Room' for hotel, 'Equipment' otherwise
   final _dateFormat = DateFormat('yyyy-MM-dd');
   HotelStatistics? _stats;
   bool _loading = true;
@@ -40,6 +44,8 @@ class _StatisticsFormState extends State<StatisticsForm> {
   void initState() {
     super.initState();
     _restClient = context.read<RestClient>();
+    _isHotel = context.read<String>() == 'AppHotel';
+    _unitNoun = _isHotel ? 'Room' : 'Equipment';
     _thruDate = CustomizableDateTime.current;
     _fromDate = _thruDate.subtract(const Duration(days: 30));
     _fetch();
@@ -51,6 +57,7 @@ class _StatisticsFormState extends State<StatisticsForm> {
       final stats = await _restClient.getHotelStatistics(
         fromDate: _dateFormat.format(_fromDate),
         thruDate: _dateFormat.format(_thruDate),
+        assetClassId: _isHotel ? 'AsClsRoom' : 'AsClsEquipment',
       );
       if (!mounted) return;
       setState(() {
@@ -109,6 +116,7 @@ class _StatisticsFormState extends State<StatisticsForm> {
   @override
   Widget build(BuildContext context) {
     final stats = _stats;
+    final unit = _unitNoun.toLowerCase();
     return Scaffold(
       floatingActionButton: FloatingActionButton(
         key: const Key('refresh'),
@@ -158,16 +166,17 @@ class _StatisticsFormState extends State<StatisticsForm> {
             ),
             _tile('ADR (average daily rate)', '${stats.adr ?? 0}',
                 const Key('adr')),
-            _tile('RevPAR (revenue per available room)',
+            _tile('RevPAR (revenue per available $unit)',
                 '${stats.revPar ?? 0}', const Key('revPar')),
-            _tile('Room revenue', '${stats.roomRevenue ?? 0}',
+            _tile('$_unitNoun revenue', '${stats.roomRevenue ?? 0}',
                 const Key('roomRevenue')),
             _tile(
-              'Room nights sold / available',
+              '$_unitNoun days sold / available',
               '${stats.occupiedRoomNights} / ${stats.availableRoomNights}',
               const Key('roomNights'),
             ),
-            _tile('Rooms', '${stats.totalRooms}', const Key('totalRooms')),
+            _tile('${_unitNoun}s', '${stats.totalRooms}',
+                const Key('totalRooms')),
           ],
         ],
       ),

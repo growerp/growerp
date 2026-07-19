@@ -1,0 +1,21 @@
+{
+    "appName": "",
+    "packageName": "",
+    "version": "",
+    "build": "",
+    "applicationId": "AppRental",
+    "backend": "moqui",
+    "databaseUrl": "https://backend.growerp.com",
+    "chatUrl": "wss://backend.growerp.com",
+    "databaseUrlDebug": "",
+    "chatUrlDebug": "",
+    "test": false,
+    "singleCompany": "",
+    "connectTimeoutProd": 30,
+    "receiveTimeoutProd": 300,
+    "connectTimeoutTest": 30,
+    "receiveTimeoutTest": 600,
+    "restRequestLogs": false,
+    "restResponseLogs": false,
+    "cacheMaxStaleMinutes": 10
+}

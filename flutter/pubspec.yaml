@@ -33,6 +33,7 @@ workspace:
   - packages/growerp_order_accounting/example
   - packages/growerp_outreach
   - packages/growerp_outreach/example
+  - packages/growerp_rental
   - packages/growerp_sales
   - packages/growerp_sales/example
   - packages/growerp_user_company
@@ -43,6 +44,7 @@ workspace:
   - packages/growerp_wiki/example
   - packages/health
   - packages/hotel
+  - packages/rental
   - packages/support
   - packages/elearner
   - packages/website
@@ -74,6 +76,7 @@ melos:
     - packages/growerp_sales/example
     - packages/growerp_order_accounting
     - packages/growerp_order_accounting/example
+    - packages/growerp_rental
     - packages/growerp_website
     - packages/growerp_website/example
     - packages/growerp_wiki
@@ -98,6 +101,7 @@ melos:
     - packages/health
     - packages/support
     - packages/elearner
+    - packages/rental
 
   command:
     bootstrap:

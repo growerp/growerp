@@ -48,6 +48,9 @@ bool _skipDonorPath(String rel) {
   for (final pre in skipPrefixes) {
     if (normalized.startsWith(pre)) return true;
   }
+  // Platform build artifacts (e.g. linux/flutter/ephemeral, ios/Flutter/
+  // ephemeral) are regenerated per build and can be non-UTF-8 binaries.
+  if (normalized.split('/').contains('ephemeral')) return true;
   const skipExact = [
     'pubspec.yaml',
     'pubspec.lock',

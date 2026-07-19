@@ -19,18 +19,23 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:intl/intl.dart';
 
-/// Seasonal room rates: date bands that override the room type's standard
-/// price for the nights they cover (weekends, high season, events).
-class RoomRateForm extends StatefulWidget {
-  const RoomRateForm({super.key});
+/// Seasonal rental rates: date bands that override the rental product's
+/// standard daily price for the days they cover (weekends, high season,
+/// events). Shared by hotel (rooms) and rental (equipment); the noun and the
+/// per-night surcharge label follow the hosting app's applicationId.
+class RentalRateForm extends StatefulWidget {
+  const RentalRateForm({super.key});
 
   @override
-  State<RoomRateForm> createState() => _RoomRateFormState();
+  State<RentalRateForm> createState() => _RentalRateFormState();
 }
 
-class _RoomRateFormState extends State<RoomRateForm> {
+class _RentalRateFormState extends State<RentalRateForm> {
   late RestClient _restClient;
-  List<Product> _roomTypes = [];
+  late String _applicationId;
+  late bool _isHotel;
+  late String _productNoun; // 'Room Type' for hotel, 'Equipment Type' otherwise
+  List<Product> _productTypes = [];
   final Map<String, List<RentalPrice>> _ratesByProduct = {};
   final _touristTaxController = TextEditingController();
   bool _loading = true;
@@ -41,6 +46,9 @@ class _RoomRateFormState extends State<RoomRateForm> {
   void initState() {
     super.initState();
     _restClient = context.read<RestClient>();
+    _applicationId = context.read<String>();
+    _isHotel = _applicationId == 'AppHotel';
+    _productNoun = _isHotel ? 'Room Type' : 'Equipment Type';
     _fetch();
   }
 
@@ -50,7 +58,7 @@ class _RoomRateFormState extends State<RoomRateForm> {
       final products = await _restClient.getProduct(
         limit: 100,
         isForDropDown: true,
-        applicationId: 'AppHotel',
+        applicationId: _applicationId,
       );
       final rateLists = await Future.wait(
         products.products.map(
@@ -67,7 +75,7 @@ class _RoomRateFormState extends State<RoomRateForm> {
       final settings = await _restClient.getSystemSettings();
       if (!mounted) return;
       setState(() {
-        _roomTypes = products.products;
+        _productTypes = products.products;
         _touristTaxController.text =
             settings.touristTaxPerNight?.toString() ?? '';
         _loading = false;
@@ -82,11 +90,11 @@ class _RoomRateFormState extends State<RoomRateForm> {
     }
   }
 
-  /// Flattened view: one row per rate band, room types without any band
-  /// are not listed (their standard price applies to every night).
+  /// Flattened view: one row per rate band, product types without any band
+  /// are not listed (their standard price applies to every day).
   List<(Product, RentalPrice)> get _rows {
     final rows = <(Product, RentalPrice)>[];
-    for (final product in _roomTypes) {
+    for (final product in _productTypes) {
       for (final rate in _ratesByProduct[product.productId] ?? []) {
         rows.add((product, rate));
       }
@@ -94,8 +102,8 @@ class _RoomRateFormState extends State<RoomRateForm> {
     return rows;
   }
 
-  /// The lodging tax the hotel must charge per room per night; it is added
-  /// to every quote and reservation as its own line.
+  /// The lodging tax the hotel must charge per room per night; added to every
+  /// quote and reservation as its own line. Hotel-only.
   Future<void> _saveTouristTax() async {
     setState(() => _savingTax = true);
     try {
@@ -133,9 +141,10 @@ class _RoomRateFormState extends State<RoomRateForm> {
   Future<void> _showDialog({Product? product, RentalPrice? rate}) async {
     final saved = await showDialog<bool>(
       context: context,
-      builder: (_) => _RoomRateDialog(
+      builder: (_) => _RentalRateDialog(
         restClient: _restClient,
-        roomTypes: _roomTypes,
+        productTypes: _productTypes,
+        productNoun: _productNoun,
         product: product,
         rate: rate,
       ),
@@ -160,28 +169,29 @@ class _RoomRateFormState extends State<RoomRateForm> {
       ),
       body: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextFormField(
-                    key: const Key('touristTaxPerNight'),
-                    controller: _touristTaxController,
-                    decoration: const InputDecoration(
-                      labelText: 'Tourist tax per room per night',
+          if (_isHotel)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      key: const Key('touristTaxPerNight'),
+                      controller: _touristTaxController,
+                      decoration: const InputDecoration(
+                        labelText: 'Tourist tax per room per night',
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(width: 10),
-                OutlinedButton(
-                  key: const Key('saveTouristTax'),
-                  onPressed: _savingTax ? null : _saveTouristTax,
-                  child: const Text('Save'),
-                ),
-              ],
+                  const SizedBox(width: 10),
+                  OutlinedButton(
+                    key: const Key('saveTouristTax'),
+                    onPressed: _savingTax ? null : _saveTouristTax,
+                    child: const Text('Save'),
+                  ),
+                ],
+              ),
             ),
-          ),
           Padding(
             padding: const EdgeInsets.all(10),
             child: Text(
@@ -192,12 +202,12 @@ class _RoomRateFormState extends State<RoomRateForm> {
           ),
           Expanded(
             child: StyledDataTable(
-              columns: const [
-                StyledColumn(header: 'Room Type', flex: 3),
-                StyledColumn(header: 'From', flex: 2),
-                StyledColumn(header: 'Thru', flex: 2),
-                StyledColumn(header: 'Rate', flex: 2),
-                StyledColumn(header: '', flex: 1),
+              columns: [
+                StyledColumn(header: _productNoun, flex: 3),
+                const StyledColumn(header: 'From', flex: 2),
+                const StyledColumn(header: 'Thru', flex: 2),
+                const StyledColumn(header: 'Rate', flex: 2),
+                const StyledColumn(header: '', flex: 1),
               ],
               rows: rows.indexed.map((entry) {
                 final index = entry.$1;
@@ -239,24 +249,26 @@ class _RoomRateFormState extends State<RoomRateForm> {
 }
 
 /// Create or edit one seasonal rate band.
-class _RoomRateDialog extends StatefulWidget {
+class _RentalRateDialog extends StatefulWidget {
   final RestClient restClient;
-  final List<Product> roomTypes;
+  final List<Product> productTypes;
+  final String productNoun;
   final Product? product;
   final RentalPrice? rate;
 
-  const _RoomRateDialog({
+  const _RentalRateDialog({
     required this.restClient,
-    required this.roomTypes,
+    required this.productTypes,
+    required this.productNoun,
     this.product,
     this.rate,
   });
 
   @override
-  State<_RoomRateDialog> createState() => _RoomRateDialogState();
+  State<_RentalRateDialog> createState() => _RentalRateDialogState();
 }
 
-class _RoomRateDialogState extends State<_RoomRateDialog> {
+class _RentalRateDialogState extends State<_RentalRateDialog> {
   final _formKey = GlobalKey<FormState>();
   final _priceController = TextEditingController();
   final _dateFormat = DateFormat('yyyy-MM-dd');
@@ -268,7 +280,7 @@ class _RoomRateDialogState extends State<_RoomRateDialog> {
   @override
   void initState() {
     super.initState();
-    _product = widget.product ?? widget.roomTypes.firstOrNull;
+    _product = widget.product ?? widget.productTypes.firstOrNull;
     _fromDate = widget.rate?.fromDate ?? CustomizableDateTime.current;
     _thruDate =
         widget.rate?.thruDate ??
@@ -334,7 +346,7 @@ class _RoomRateDialogState extends State<_RoomRateDialog> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      key: const Key('RoomRateDialog'),
+      key: const Key('RentalRateDialog'),
       insetPadding: const EdgeInsets.all(10),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: popUp(
@@ -348,10 +360,11 @@ class _RoomRateDialogState extends State<_RoomRateDialog> {
             key: const Key('listView'),
             children: [
               DropdownButtonFormField<Product>(
-                key: const Key('roomType'),
+                key: const Key('rentalProductType'),
                 initialValue: _product,
-                decoration: const InputDecoration(labelText: 'Room Type'),
-                items: widget.roomTypes
+                decoration:
+                    InputDecoration(labelText: widget.productNoun),
+                items: widget.productTypes
                     .map(
                       (p) => DropdownMenuItem(
                         value: p,
@@ -360,7 +373,9 @@ class _RoomRateDialogState extends State<_RoomRateDialog> {
                     )
                     .toList(),
                 onChanged: (value) => setState(() => _product = value),
-                validator: (value) => value == null ? 'Select a room type' : null,
+                validator: (value) => value == null
+                    ? 'Select a ${widget.productNoun.toLowerCase()}'
+                    : null,
               ),
               const SizedBox(height: 20),
               InkWell(
@@ -390,7 +405,7 @@ class _RoomRateDialogState extends State<_RoomRateDialog> {
               TextFormField(
                 key: const Key('rate'),
                 controller: _priceController,
-                decoration: const InputDecoration(labelText: 'Rate per night'),
+                decoration: const InputDecoration(labelText: 'Rate per day'),
                 validator: (value) {
                   if (value == null || value.isEmpty) return 'Enter a rate';
                   if (Decimal.tryParse(value) == null) return 'Invalid amount';

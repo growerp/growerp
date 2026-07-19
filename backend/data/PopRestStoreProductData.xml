@@ -201,6 +201,109 @@ along with this software (see the LICENSE.md file). If not, see
         <fileData><![CDATA[PHA+NTAlIGNvdHRvbiAvIDUwJSBQb2x5ZXN0ZXI8L3A+DQo8cD5JbXBvcnRlZDwvcD4NCjxwPlppcHBlciBjbG9zdXJlPC9wPg0KPHA+TWFjaGluZSB3YXNoPC9wPg0KPHA+WmlwLXVwIGhvb2RlZCBzd2VhdHNoaXJ0IGluIDcuOC1vdW5jZSBmbGVlY2UgbWFkZSB3aXRoIHVwIHRvIDUlIHBvbHllc3RlciBjcmVhdGVkIGZyb20gcmVjeWNsZWQgcGxhc3RpYy48L3A+DQo8cD5QaWxsLXJlc2lzdGFudCBmYWJyaWMgd2l0aCBoaWdoLXN0aXRjaCBkZW5zaXR5IGZvciBkdXJhYmlsaXR5LiA8L3A+DQo8cD5SaWJiZWQgd2Fpc3RiYW5kIGFuZCBjdWZmcywgc3BsaXQga2FuZ2Fyb28gcG9ja2V0LjwvcD4=]]></fileData>
     </moqui.resource.DbResourceFile>
 
+    <!-- Rental cars & equipment (used as demo products by the rental app) -->
+    <mantle.product.category.ProductCategory productCategoryId="RENTAL"
+        ownerPartyId="_NA_"
+        productCategoryTypeEnumId="PctCatalog" categoryName="Cars &amp; Equipment" description="" />
+    <mantle.product.category.ProductCategoryRollup productCategoryId="RENTAL"
+        parentProductCategoryId="PopcBrowseRoot" fromDate="1265184000000" sequenceNum="5" />
+
+    <mantle.product.Product productId="COMPACT_CAR" productTypeEnumId="PtFixedAssetUse"
+        chargeShipping="N" returnable="N" productName="Compact car" description=""
+        ownerPartyId="_NA_" requireInventory="Y">
+        <prices productPriceId="COMPACT_CAR_L" pricePurposeEnumId="PppPurchase"
+            priceTypeEnumId="PptList" fromDate="1265184000000"
+            minQuantity="1" price="45" priceUomId="USD" />
+        <prices productPriceId="COMPACT_CAR_C" pricePurposeEnumId="PppPurchase"
+            priceTypeEnumId="PptCurrent" fromDate="1265184000000"
+            minQuantity="1" price="40" priceUomId="USD" />
+        <categories productCategoryId="PopcAllProducts" fromDate="1265184000000" />
+        <categories productCategoryId="RENTAL" fromDate="1265184000000" sequenceNum="1" />
+        <assets assetId="COMPACT_CAR_1" facilityId="DEFAULT_WH" locationSeqId="FA001"
+            assetTypeEnumId="AstTpFixed" assetName="01-Compact car"
+            hasQuantity="Y" quantityOnHandTotal="1" availableToPromiseTotal="1"
+            ownerPartyId="_NA_" statusId="AstAvailable">
+            <mantle.product.asset.AssetDetail assetId="COMPACT_CAR_1" effectiveDate="1265184000000"
+                quantityOnHandDiff="1" availableToPromiseDiff="1" />
+        </assets>
+        <assets assetId="COMPACT_CAR_2" facilityId="DEFAULT_WH" locationSeqId="FA002"
+            assetTypeEnumId="AstTpFixed" assetName="02-Compact car"
+            hasQuantity="Y" quantityOnHandTotal="1" availableToPromiseTotal="1"
+            ownerPartyId="_NA_" statusId="AstAvailable">
+            <mantle.product.asset.AssetDetail assetId="COMPACT_CAR_2" effectiveDate="1265184000000"
+                quantityOnHandDiff="1" availableToPromiseDiff="1" />
+        </assets>
+    </mantle.product.Product>
+
+    <mantle.product.Product productId="SUV_4X4" productTypeEnumId="PtFixedAssetUse"
+        chargeShipping="N" returnable="N" productName="SUV 4x4" description=""
+        ownerPartyId="_NA_" requireInventory="Y">
+        <prices productPriceId="SUV_4X4_L" pricePurposeEnumId="PppPurchase"
+            priceTypeEnumId="PptList" fromDate="1265184000000"
+            minQuantity="1" price="80" priceUomId="USD" />
+        <prices productPriceId="SUV_4X4_C" pricePurposeEnumId="PppPurchase"
+            priceTypeEnumId="PptCurrent" fromDate="1265184000000"
+            minQuantity="1" price="75" priceUomId="USD" />
+        <categories productCategoryId="PopcAllProducts" fromDate="1265184000000" />
+        <categories productCategoryId="RENTAL" fromDate="1265184000000" sequenceNum="2" />
+        <assets assetId="SUV_4X4_1" facilityId="DEFAULT_WH" locationSeqId="FA001"
+            assetTypeEnumId="AstTpFixed" assetName="01-SUV 4x4"
+            hasQuantity="Y" quantityOnHandTotal="1" availableToPromiseTotal="1"
+            ownerPartyId="_NA_" statusId="AstAvailable">
+            <mantle.product.asset.AssetDetail assetId="SUV_4X4_1" effectiveDate="1265184000000"
+                quantityOnHandDiff="1" availableToPromiseDiff="1" />
+        </assets>
+        <assets assetId="SUV_4X4_2" facilityId="DEFAULT_WH" locationSeqId="FA002"
+            assetTypeEnumId="AstTpFixed" assetName="02-SUV 4x4"
+            hasQuantity="Y" quantityOnHandTotal="1" availableToPromiseTotal="1"
+            ownerPartyId="_NA_" statusId="AstAvailable">
+            <mantle.product.asset.AssetDetail assetId="SUV_4X4_2" effectiveDate="1265184000000"
+                quantityOnHandDiff="1" availableToPromiseDiff="1" />
+        </assets>
+    </mantle.product.Product>
+
+    <mantle.product.Product productId="MINI_EXCAVATOR" productTypeEnumId="PtFixedAssetUse"
+        chargeShipping="N" returnable="N" productName="Mini excavator" description=""
+        ownerPartyId="_NA_" requireInventory="Y">
+        <prices productPriceId="MINI_EXCAVATOR_L" pricePurposeEnumId="PppPurchase"
+            priceTypeEnumId="PptList" fromDate="1265184000000"
+            minQuantity="1" price="260" priceUomId="USD" />
+        <prices productPriceId="MINI_EXCAVATOR_C" pricePurposeEnumId="PppPurchase"
+            priceTypeEnumId="PptCurrent" fromDate="1265184000000"
+            minQuantity="1" price="250" priceUomId="USD" />
+        <categories productCategoryId="PopcAllProducts" fromDate="1265184000000" />
+        <categories productCategoryId="RENTAL" fromDate="1265184000000" sequenceNum="3" />
+        <assets assetId="MINI_EXCAVATOR_1" facilityId="DEFAULT_WH" locationSeqId="FA001"
+            assetTypeEnumId="AstTpFixed" assetName="01-Mini excavator"
+            hasQuantity="Y" quantityOnHandTotal="1" availableToPromiseTotal="1"
+            ownerPartyId="_NA_" statusId="AstAvailable">
+            <mantle.product.asset.AssetDetail assetId="MINI_EXCAVATOR_1"
+                effectiveDate="1265184000000"
+                quantityOnHandDiff="1" availableToPromiseDiff="1" />
+        </assets>
+    </mantle.product.Product>
+
+    <mantle.product.Product productId="SCISSOR_LIFT" productTypeEnumId="PtFixedAssetUse"
+        chargeShipping="N" returnable="N" productName="Scissor lift" description=""
+        ownerPartyId="_NA_" requireInventory="Y">
+        <prices productPriceId="SCISSOR_LIFT_L" pricePurposeEnumId="PppPurchase"
+            priceTypeEnumId="PptList" fromDate="1265184000000"
+            minQuantity="1" price="130" priceUomId="USD" />
+        <prices productPriceId="SCISSOR_LIFT_C" pricePurposeEnumId="PppPurchase"
+            priceTypeEnumId="PptCurrent" fromDate="1265184000000"
+            minQuantity="1" price="120" priceUomId="USD" />
+        <categories productCategoryId="PopcAllProducts" fromDate="1265184000000" />
+        <categories productCategoryId="RENTAL" fromDate="1265184000000" sequenceNum="4" />
+        <assets assetId="SCISSOR_LIFT_1" facilityId="DEFAULT_WH" locationSeqId="FA001"
+            assetTypeEnumId="AstTpFixed" assetName="01-Scissor lift"
+            hasQuantity="Y" quantityOnHandTotal="1" availableToPromiseTotal="1"
+            ownerPartyId="_NA_" statusId="AstAvailable">
+            <mantle.product.asset.AssetDetail assetId="SCISSOR_LIFT_1"
+                effectiveDate="1265184000000"
+                quantityOnHandDiff="1" availableToPromiseDiff="1" />
+        </assets>
+    </mantle.product.Product>
+
     <!-- GrowERP introduction movie -->
     <mantle.product.Product productId="GROWERP_DEMO" productTypeEnumId="PtService"
         chargeShipping="N" returnable="N" productName="GrowERP demo movie" description=""

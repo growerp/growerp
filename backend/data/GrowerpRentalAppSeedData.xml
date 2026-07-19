@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License. See the LICENSE.md file for details.
+-->
+<entity-facade-xml type="seed">
+    <!-- Application record -->
+    <growerp.Application applicationId="AppRental"
+        description="GrowERP Rental vertical app" />
+
+    <!-- Menu configuration -->
+    <growerp.menu.MenuConfiguration menuConfigurationId="RENTAL_DEFAULT" appId="rental"
+        name="Rental Menu" description="Default rental application menu structure"/>
+
+    <!-- ====================== RENTAL_DEFAULT Menu Items ====================== -->
+    <growerp.menu.MenuItem menuItemId="RENTAL_MAIN" menuConfigurationId="RENTAL_DEFAULT"
+        title="Main" route="/" iconName="dashboard" widgetName="GanttForm" sequenceNum="10"/>
+    <growerp.menu.MenuItem menuItemId="RENTAL_MYCOMPANY" menuConfigurationId="RENTAL_DEFAULT"
+        title="My Company" route="/myCompany" iconName="business" widgetName="ShowCompanyDialog" sequenceNum="20"/>
+    <growerp.menu.MenuItem menuItemId="RENTAL_EQUIPMENT" menuConfigurationId="RENTAL_DEFAULT"
+        title="Equipment" route="/equipment" iconName="construction" widgetName="AssetList" sequenceNum="30"/>
+    <growerp.menu.MenuItem menuItemId="RENTAL_RENTALS" menuConfigurationId="RENTAL_DEFAULT"
+        title="Rentals" route="/rentals" iconName="book_online" widgetName="SalesOrderRentalList" sequenceNum="40"/>
+    <growerp.menu.MenuItem menuItemId="RENTAL_PICKUP" menuConfigurationId="RENTAL_DEFAULT"
+        title="Pickup/Return" route="/pickupReturn" iconName="local_shipping" widgetName="CheckInList" sequenceNum="50"/>
+    <growerp.menu.MenuItem menuItemId="RENTAL_TASKS" menuConfigurationId="RENTAL_DEFAULT"
+        title="Tasks" route="/tasks" iconName="task" widgetName="ActivityList" sequenceNum="55"/>
+    <growerp.menu.MenuItem menuItemId="RENTAL_CRM" menuConfigurationId="RENTAL_DEFAULT"
+        title="CRM" route="/crm" iconName="people" widgetName="OpportunityList" sequenceNum="58"/>
+    <growerp.menu.MenuItem menuItemId="RENTAL_ACC_SALES" menuConfigurationId="RENTAL_DEFAULT" itemKey="salesInvoicesNotPaidCount"
+        title="Acct Sales" route="/acct-sales" iconName="receipt_long" widgetName="SalesInvoiceList" sequenceNum="60"/>
+    <growerp.menu.MenuItem menuItemId="RENTAL_ACC_PURCHASE" menuConfigurationId="RENTAL_DEFAULT" itemKey="purchInvoicesNotPaidCount"
+        title="Acct Purchase" route="/acct-purchase" iconName="receipt" widgetName="PurchaseInvoiceList" sequenceNum="61"/>
+    <growerp.menu.MenuItem menuItemId="RENTAL_ACC_LEDGER" menuConfigurationId="RENTAL_DEFAULT"
+        title="Acct Ledger" route="/acct-ledger" iconName="account_balance" widgetName="LedgerTreeForm" sequenceNum="62"/>
+    <growerp.menu.MenuItem menuItemId="RENTAL_STATISTICS" menuConfigurationId="RENTAL_DEFAULT"
+        title="Utilisation" route="/statistics" iconName="assessment" widgetName="StatisticsForm" sequenceNum="63"/>
+    <growerp.menu.MenuItem menuItemId="RENTAL_ACC_SETUP" menuConfigurationId="RENTAL_DEFAULT"
+        title="Acct Setup" route="/acct-setup" iconName="settings" widgetName="TimePeriodListForm" sequenceNum="64"/>
+    <growerp.menu.MenuItem menuItemId="RENTAL_MARKETING" menuConfigurationId="RENTAL_DEFAULT"
+        title="Marketing" route="/marketing" iconName="campaign" widgetName="ContentPlanList" sequenceNum="70"/>
+    <growerp.menu.MenuItem menuItemId="RENTAL_ABOUT" menuConfigurationId="RENTAL_DEFAULT"
+        title="About" route="/about" iconName="info" widgetName="AboutForm" sequenceNum="100"/>
+
+    <!-- My Company children -->
+    <growerp.menu.MenuItem menuItemId="RENTAL_MC_COMPANY" menuConfigurationId="RENTAL_DEFAULT" parentMenuItemId="RENTAL_MYCOMPANY"
+        title="company" iconName="home" widgetName="ShowCompanyDialog" sequenceNum="10"/>
+    <growerp.menu.MenuItem menuItemId="RENTAL_MC_USERS" menuConfigurationId="RENTAL_DEFAULT" parentMenuItemId="RENTAL_MYCOMPANY"
+        title="employees" iconName="school" widgetName="UserListCompany" sequenceNum="20"/>
+    <growerp.menu.MenuItem menuItemId="RENTAL_MC_WEBSITE" menuConfigurationId="RENTAL_DEFAULT" parentMenuItemId="RENTAL_MYCOMPANY"
+        title="Website" iconName="webhook" widgetName="WebsiteDialog" sequenceNum="30"/>
+
+    <!-- Equipment children -->
+    <growerp.menu.MenuItem menuItemId="RENTAL_EQ_ASSETS" menuConfigurationId="RENTAL_DEFAULT" parentMenuItemId="RENTAL_EQUIPMENT"
+        title="Equipment" iconName="construction" widgetName="AssetList" sequenceNum="10"/>
+    <growerp.menu.MenuItem menuItemId="RENTAL_EQ_PROD" menuConfigurationId="RENTAL_DEFAULT" parentMenuItemId="RENTAL_EQUIPMENT"
+        title="Equipment Types" iconName="category" widgetName="ProductList" sequenceNum="20"/>
+    <growerp.menu.MenuItem menuItemId="RENTAL_EQ_RATES" menuConfigurationId="RENTAL_DEFAULT" parentMenuItemId="RENTAL_EQUIPMENT"
+        title="Rates" iconName="price_change" widgetName="RentalRateForm" sequenceNum="30"/>
+
+    <!-- Rentals children -->
+    <growerp.menu.MenuItem menuItemId="RENTAL_RE_ORDERS" menuConfigurationId="RENTAL_DEFAULT" parentMenuItemId="RENTAL_RENTALS"
+        title="rentals" iconName="home" widgetName="SalesOrderRentalList" sequenceNum="10"/>
+    <growerp.menu.MenuItem menuItemId="RENTAL_RE_CUST" menuConfigurationId="RENTAL_DEFAULT" parentMenuItemId="RENTAL_RENTALS"
+        title="Customers" iconName="school" widgetName="CompanyUserListCustomer" sequenceNum="20"/>
+    <growerp.menu.MenuItem menuItemId="RENTAL_RE_PURCH" menuConfigurationId="RENTAL_DEFAULT" parentMenuItemId="RENTAL_RENTALS"
+        title="Purchase orders" iconName="home" widgetName="PurchaseOrderList" sequenceNum="30"/>
+    <growerp.menu.MenuItem menuItemId="RENTAL_RE_SUPP" menuConfigurationId="RENTAL_DEFAULT" parentMenuItemId="RENTAL_RENTALS"
+        title="Suppliers" iconName="business" widgetName="CompanyUserListSupplier" sequenceNum="40"/>
+
+    <!-- Pickup/Return children -->
+    <growerp.menu.MenuItem menuItemId="RENTAL_PR_OUT" menuConfigurationId="RENTAL_DEFAULT" parentMenuItemId="RENTAL_PICKUP"
+        title="Pickup" iconName="home" widgetName="CheckInList" sequenceNum="10"/>
+    <growerp.menu.MenuItem menuItemId="RENTAL_PR_IN" menuConfigurationId="RENTAL_DEFAULT" parentMenuItemId="RENTAL_PICKUP"
+        title="Return" iconName="home" widgetName="CheckOutList" sequenceNum="20"/>
+
+    <!-- Accounting sales children -->
+    <growerp.menu.MenuItem menuItemId="RENTAL_ACCS_INV" menuConfigurationId="RENTAL_DEFAULT" parentMenuItemId="RENTAL_ACC_SALES"
+        title="Sales Invoices" iconName="shopping_cart" widgetName="SalesInvoiceList" sequenceNum="10"/>
+    <growerp.menu.MenuItem menuItemId="RENTAL_ACCS_PAY" menuConfigurationId="RENTAL_DEFAULT" parentMenuItemId="RENTAL_ACC_SALES"
+        title="Incoming Payments" iconName="input" widgetName="SalesPaymentList" sequenceNum="20"/>
+    <growerp.menu.MenuItem menuItemId="RENTAL_ACCS_CUST" menuConfigurationId="RENTAL_DEFAULT" parentMenuItemId="RENTAL_ACC_SALES"
+        title="Customers" iconName="school" widgetName="CompanyUserListCustomer" sequenceNum="30"/>
+
+    <!-- Accounting purchase children -->
+    <growerp.menu.MenuItem menuItemId="RENTAL_ACCP_INV" menuConfigurationId="RENTAL_DEFAULT" parentMenuItemId="RENTAL_ACC_PURCHASE"
+        title="Purchase Invoices" iconName="shopping_bag" widgetName="PurchaseInvoiceList" sequenceNum="10"/>
+    <growerp.menu.MenuItem menuItemId="RENTAL_ACCP_PAY" menuConfigurationId="RENTAL_DEFAULT" parentMenuItemId="RENTAL_ACC_PURCHASE"
+        title="Outgoing Payments" iconName="output" widgetName="PurchasePaymentList" sequenceNum="20"/>
+    <growerp.menu.MenuItem menuItemId="RENTAL_ACCP_SUPP" menuConfigurationId="RENTAL_DEFAULT" parentMenuItemId="RENTAL_ACC_PURCHASE"
+        title="Suppliers" iconName="business" widgetName="CompanyUserListSupplier" sequenceNum="30"/>
+
+    <!-- Accounting ledger children -->
+    <growerp.menu.MenuItem menuItemId="RENTAL_ACCL_TREE" menuConfigurationId="RENTAL_DEFAULT" parentMenuItemId="RENTAL_ACC_LEDGER"
+        title="Ledger" iconName="account_balance" widgetName="LedgerTreeForm" sequenceNum="10"/>
+    <growerp.menu.MenuItem menuItemId="RENTAL_ACCL_ACCT" menuConfigurationId="RENTAL_DEFAULT" parentMenuItemId="RENTAL_ACC_LEDGER"
+        title="Ledger Accounts" iconName="format_list_bulleted" widgetName="GlAccountList" sequenceNum="20"/>
+    <growerp.menu.MenuItem menuItemId="RENTAL_ACCL_TRANS" menuConfigurationId="RENTAL_DEFAULT" parentMenuItemId="RENTAL_ACC_LEDGER"
+        title="transactions" iconName="view_list" widgetName="TransactionList" sequenceNum="30"/>
+    <growerp.menu.MenuItem menuItemId="RENTAL_ACCL_JOUR" menuConfigurationId="RENTAL_DEFAULT" parentMenuItemId="RENTAL_ACC_LEDGER"
+        title="Ledger Journals" iconName="checklist" widgetName="LedgerJournalList" sequenceNum="40"/>
+</entity-facade-xml>

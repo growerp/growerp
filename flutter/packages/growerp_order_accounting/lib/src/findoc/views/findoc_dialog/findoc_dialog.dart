@@ -508,7 +508,7 @@ class MyFinDocState extends State<FinDocPage> {
                       (label) => DropdownMenuItem<FinDocStatusVal>(
                         value: label,
                         child: Text(
-                          applicationId == 'AppHotel'
+                          applicationId == 'AppHotel' || applicationId == 'AppRental'
                               ? label.hotel
                               : label.name,
                         ),
