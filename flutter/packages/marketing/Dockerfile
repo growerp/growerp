@@ -13,7 +13,7 @@
 #
 #
 # to be build from the flutter directory
-# with: docker build --build-arg DOCKER_TAG=1.3.0 -f packages/marketing_app/Dockerfile -t growerp/marketing_app . --progress=plain
+# with: docker build --build-arg DOCKER_TAG=1.3.0 -f packages/marketing/Dockerfile -t growerp/marketing . --progress=plain
 #
 #Stage 1 - Install dependencies and build the app
 FROM ghcr.io/cirruslabs/flutter:stable AS build-env
@@ -42,7 +42,7 @@ ENV PATH="$PATH:/root/.pub-cache/bin"
 COPY . /root/flutter
 WORKDIR /root/flutter
 RUN echo "pwd: $PWD"
-RUN sed -i 's\//webactivate \\' packages/marketing_app/lib/main.dart
+RUN sed -i 's\//webactivate \\' packages/marketing/lib/main.dart
 RUN flutter --version
 # Clean any existing dart tool caches
 RUN find . -name ".dart_tool" -type d -exec rm -rf {} + 2>/dev/null || true
@@ -53,11 +53,11 @@ RUN melos l10n --no-select
 # build
 RUN melos build --no-select
 # build flutter app
-WORKDIR /root/flutter/packages/marketing_app
+WORKDIR /root/flutter/packages/marketing
 RUN sed -i 's/version: .*/version: '"${DOCKER_TAG}"'/' pubspec.yaml
 RUN flutter build web --release
 
 # Stage 2 - Create the run-time image
 FROM nginx
-COPY --from=build-env /root/flutter/packages/marketing_app/build/web /usr/share/nginx/html
+COPY --from=build-env /root/flutter/packages/marketing/build/web /usr/share/nginx/html
 EXPOSE 80
