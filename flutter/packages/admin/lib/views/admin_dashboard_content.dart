@@ -20,13 +20,10 @@ import 'package:growerp_sales/growerp_sales.dart';
 import 'package:growerp_marketing/growerp_marketing.dart';
 import 'package:growerp_outreach/growerp_outreach.dart';
 import 'package:growerp_adk/growerp_adk.dart';
-
-import 'acct_purchase_dashboard_chart_mini.dart';
-import 'acct_sales_dashboard_chart_mini.dart';
-import 'catalog_dashboard_chart_mini.dart';
-import 'inventory_dashboard_chart_mini.dart';
-import 'ledger_dashboard_chart_mini.dart';
-import 'manufacturing_dashboard_chart_mini.dart';
+import 'package:growerp_activity/growerp_activity.dart';
+import 'package:growerp_catalog/growerp_catalog.dart';
+import 'package:growerp_inventory/growerp_inventory.dart';
+import 'package:growerp_manufacturing/growerp_manufacturing.dart';
 
 /// Admin dashboard content - displays dashboard panels with statistics.
 /// This is the content-only version for use with ShellRoute.
@@ -84,6 +81,7 @@ class AdminDashboardContent extends StatelessWidget {
                   context.read<AuthBloc>().add(AuthLoad());
                 },
                 compactGraphicRoutes: const {
+                  '/tasks',
                   '/marketing',
                   '/outreach',
                   '/crm',
@@ -103,6 +101,9 @@ class AdminDashboardContent extends StatelessWidget {
                       route == '/accounting' ||
                       route == '/accounting/reports') {
                     return const RevenueExpenseChartMini();
+                  }
+                  if (route == '/tasks') {
+                    return const TaskDashboardChartMini();
                   }
                   if (route == '/marketing') {
                     return const MarketingDashboardChartMini();

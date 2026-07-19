@@ -5,3 +5,4 @@ export 'l10n/generated/manufacturing_localizations.dart';
 export 'src/get_manufacturing_bloc_providers.dart';
 export 'src/get_manufacturing_widgets.dart';
 export 'src/common/translate_bloc_messages.dart';
+export 'src/manufacturing_dashboard_chart_mini.dart';

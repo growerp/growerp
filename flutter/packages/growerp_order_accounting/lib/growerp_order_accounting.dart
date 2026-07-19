@@ -6,3 +6,6 @@ export 'src/common/translate_bloc_messages.dart';
 export 'src/route.dart';
 export 'src/get_order_accounting_widgets.dart';
 export 'src/common/order_dashboard_chart_mini.dart';
+export 'src/accounting/acct_purchase_dashboard_chart_mini.dart';
+export 'src/accounting/acct_sales_dashboard_chart_mini.dart';
+export 'src/accounting/ledger_dashboard_chart_mini.dart';

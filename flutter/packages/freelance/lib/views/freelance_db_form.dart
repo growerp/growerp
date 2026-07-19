@@ -16,6 +16,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
+import 'package:growerp_sales/growerp_sales.dart';
+import 'package:growerp_marketing/growerp_marketing.dart';
+import 'package:growerp_outreach/growerp_outreach.dart';
+import 'package:growerp_catalog/growerp_catalog.dart';
+import 'package:growerp_activity/growerp_activity.dart';
 
 class FreelanceDbForm extends StatelessWidget {
   const FreelanceDbForm({super.key});
@@ -58,7 +63,45 @@ class FreelanceDbForm extends StatelessWidget {
                 onToggleMinimize: (id) => context
                     .read<MenuConfigBloc>()
                     .add(MenuItemToggleMinimize(id)),
+                compactGraphicRoutes: const {
+                  '/tasks',
+                  '/crm',
+                  '/marketing',
+                  '/outreach',
+                  '/catalog',
+                  '/orders',
+                  '/acct-sales',
+                  '/acct-purchase',
+                  '/acct-ledger',
+                },
                 chartBuilder: (route) {
+                  if (route == '/tasks') {
+                    return const TaskDashboardChartMini();
+                  }
+                  if (route == '/crm') {
+                    return const CrmDashboardChartMini();
+                  }
+                  if (route == '/marketing') {
+                    return const MarketingDashboardChartMini();
+                  }
+                  if (route == '/outreach') {
+                    return const OutreachDashboardChartMini();
+                  }
+                  if (route == '/catalog') {
+                    return const CatalogDashboardChartMini();
+                  }
+                  if (route == '/orders') {
+                    return const OrderDashboardChartMini();
+                  }
+                  if (route == '/acct-sales') {
+                    return const AcctSalesDashboardChartMini();
+                  }
+                  if (route == '/acct-purchase') {
+                    return const AcctPurchaseDashboardChartMini();
+                  }
+                  if (route == '/acct-ledger') {
+                    return const LedgerDashboardChartMini();
+                  }
                   if (route == '/acct-reports' ||
                       route == '/accounting' ||
                       route == '/accounting/reports') {

@@ -1,6 +1,7 @@
 export 'src/views/views.dart';
 export 'src/widgets/widgets.dart';
 export 'src/blocs/activity_bloc.dart';
+export 'src/common/task_dashboard_chart_mini.dart';
 export 'src/get_activity_bloc_providers.dart';
 export 'l10n/generated/activity_localizations.dart';
 export 'src/common/translate_bloc_messages.dart';
