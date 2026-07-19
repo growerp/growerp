@@ -15,10 +15,6 @@ on:
         description: "Freelance App"
         type: boolean
         default: false
-      app_elearner:
-        description: "eLearner App"
-        type: boolean
-        default: false
       app_support:
         description: "Support App"
         type: boolean
@@ -88,7 +84,6 @@ jobs:
           APP_ADMIN: ${{ inputs.app_admin }}
           APP_HOTEL: ${{ inputs.app_hotel }}
           APP_FREELANCE: ${{ inputs.app_freelance }}
-          APP_ELEARNER: ${{ inputs.app_elearner }}
           APP_SUPPORT: ${{ inputs.app_support }}
           APP_AGENTS: ${{ inputs.app_agents }}
           STORE_IOS: ${{ inputs.store_ios }}
@@ -101,7 +96,6 @@ jobs:
           [[ "$APP_ADMIN" == "true" ]] && APPS="${APPS}admin,"
           [[ "$APP_HOTEL" == "true" ]] && APPS="${APPS}hotel,"
           [[ "$APP_FREELANCE" == "true" ]] && APPS="${APPS}freelance,"
-          [[ "$APP_ELEARNER" == "true" ]] && APPS="${APPS}elearner,"
           [[ "$APP_SUPPORT" == "true" ]] && APPS="${APPS}support,"
           [[ "$APP_AGENTS" == "true" ]] && APPS="${APPS}agents,"
           APPS="${APPS%,}"
@@ -196,7 +190,6 @@ jobs:
           [[ "${{ inputs.app_admin }}" == "true" ]] && APPS="${APPS}admin,"
           [[ "${{ inputs.app_hotel }}" == "true" ]] && APPS="${APPS}hotel,"
           [[ "${{ inputs.app_freelance }}" == "true" ]] && APPS="${APPS}freelance,"
-          [[ "${{ inputs.app_elearner }}" == "true" ]] && APPS="${APPS}elearner,"
           [[ "${{ inputs.app_support }}" == "true" ]] && APPS="${APPS}support,"
           [[ "${{ inputs.app_agents }}" == "true" ]] && APPS="${APPS}agents,"
           echo "APPS=${APPS%,}" >> "$GITHUB_ENV"
@@ -799,7 +792,7 @@ jobs:
           MATRIX_APP: ${{ matrix.app }}
         run: |
           case "$MATRIX_APP" in
-            admin|hotel|freelance|elearner|support|agents)
+            admin|hotel|freelance|support|agents)
               ;;
             *)
               echo "Unsupported Android app: $MATRIX_APP" >&2
@@ -878,7 +871,6 @@ jobs:
           [[ "${{ inputs.app_admin }}" == "true" ]] && APPS="${APPS}admin,"
           [[ "${{ inputs.app_hotel }}" == "true" ]] && APPS="${APPS}hotel,"
           [[ "${{ inputs.app_freelance }}" == "true" ]] && APPS="${APPS}freelance,"
-          [[ "${{ inputs.app_elearner }}" == "true" ]] && APPS="${APPS}elearner,"
           [[ "${{ inputs.app_support }}" == "true" ]] && APPS="${APPS}support,"
           [[ "${{ inputs.app_agents }}" == "true" ]] && APPS="${APPS}agents,"
           APPS="${APPS%,}"
@@ -1240,7 +1232,7 @@ jobs:
           MATRIX_APP: ${{ matrix.app }}
         run: |
           case "$MATRIX_APP" in
-            admin|hotel|freelance|elearner|support|agents)
+            admin|hotel|freelance|support|agents)
               ;;
             *)
               echo "Unsupported Snap app: $MATRIX_APP" >&2

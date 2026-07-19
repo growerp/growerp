@@ -756,7 +756,7 @@ Grant of Patent License.
     </service>
 
     <service verb="get" noun="MyCourseSubscriptions">
-        <description>Returns courses the current user has active subscriptions for (elearner app)</description>
+        <description>Returns courses the current user has active subscriptions for</description>
         <out-parameters>
             <parameter name="courses" type="List" />
         </out-parameters>

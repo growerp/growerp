@@ -72,7 +72,7 @@ GrowERP: multi-platform ERP (Android, iOS, Web, Linux, Windows). Flutter fronten
 
 **Two Flutter package categories** (all under `flutter/packages/`):
 1. **Building blocks** (`growerp_*`) — domain-specific reusable packages (e.g., `growerp_core`, `growerp_models`, `growerp_catalog`). Lower-level packages are deps of higher-level ones; `growerp_models` is base.
-2. **Applications** — end-user apps composed from building blocks (e.g., `admin`, `hotel`, `freelance`, `elearner`).
+2. **Applications** — end-user apps composed from building blocks (e.g., `admin`, `hotel`, `freelance`).
 
 **State management**: BLoC (`flutter_bloc`) throughout. Each domain entity follows:
 ```

@@ -45,7 +45,6 @@ workspace:
   - packages/hotel
   - packages/rental
   - packages/support
-  - packages/elearner
   - packages/website
 dev_dependencies:
   melos: ^7.4.0
@@ -98,7 +97,6 @@ melos:
     - packages/freelance
     - packages/assessment
     - packages/support
-    - packages/elearner
     - packages/rental
 
   command:

@@ -27,10 +27,6 @@ on:
         description: "Freelance App"
         type: boolean
         default: false
-      app_elearner:
-        description: "eLearner App"
-        type: boolean
-        default: false
       app_support:
         description: "Support App"
         type: boolean
@@ -84,7 +80,6 @@ jobs:
           [[ "${{ inputs.app_admin }}" == "true" ]] && APPS="${APPS}admin,"
           [[ "${{ inputs.app_hotel }}" == "true" ]] && APPS="${APPS}hotel,"
           [[ "${{ inputs.app_freelance }}" == "true" ]] && APPS="${APPS}freelance,"
-          [[ "${{ inputs.app_elearner }}" == "true" ]] && APPS="${APPS}elearner,"
           [[ "${{ inputs.app_support }}" == "true" ]] && APPS="${APPS}support,"
           [[ "${{ inputs.app_agents }}" == "true" ]] && APPS="${APPS}agents,"
           
@@ -122,7 +117,7 @@ jobs:
           APPS: ${{ needs.set-params.outputs.apps }}
           STORES: ${{ needs.set-params.outputs.stores }}
         run: |
-          VALID_APPS="admin hotel freelance elearner support agents"
+          VALID_APPS="admin hotel freelance support agents"
           IFS=',' read -ra app_list <<< "$APPS"
           for app in "${app_list[@]}"; do
             app=$(echo "$app" | tr -d ' ')

@@ -24,10 +24,7 @@ along with this software (see the LICENSE.md file). If not, see
         name="Hotel Menu" description="Default hotel application menu structure"/>
     <growerp.menu.MenuConfiguration menuConfigurationId="SUPPORT_DEFAULT" appId="support"
         name="Support Menu" description="Default support application menu structure"/>
-    <growerp.menu.MenuConfiguration menuConfigurationId="ELEARNER_DEFAULT" appId="elearner"
-        name="eLearner Customer Menu" description="eLearner menu for students/customers"/>
-    <growerp.menu.MenuConfiguration menuConfigurationId="ELEARNER_ADMIN_DEFAULT" appId="elearner_admin"
-        name="eLearner Admin Menu" description="eLearner menu for admin and employee users"/>
+
     <growerp.menu.MenuConfiguration menuConfigurationId="CATALOG_EXAMPLE_DEFAULT" appId="catalog_example" 
         name="Catalog Example Menu" description="Default menu for catalog example app"/>
     <growerp.menu.MenuConfiguration menuConfigurationId="INVENTORY_EXAMPLE_DEFAULT" appId="inventory_example" 

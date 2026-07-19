@@ -2,7 +2,7 @@
 
 The fastest way to extend an existing GrowERP vertical or build a new one.
 
-A **vertical** is an end-user app (admin, hotel, freelance, elearner, …) composed
+A **vertical** is an end-user app (admin, hotel, freelance, …) composed
 from `growerp_*` building blocks. This guide is the source of truth for creating
 and extending them. For creating a *building block* (a new domain library) instead,
 see [Building_Blocks_Development_Guide.md](Building_Blocks_Development_Guide.md) and

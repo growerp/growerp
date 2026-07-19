@@ -41,7 +41,7 @@ GrowERP is an open-source (CC0), AI-native, multi-platform ERP for small and med
 | Segment | Primary message | Proof points |
 |---|---|---|
 | SMB horizontal | "The all-in-one ERP for ambitious SMBs" | Free trial in 2 minutes; demo data; 6 platforms; Stripe payments; auto-generated business website |
-| Verticals | "Built for your industry, backed by a full ERP" | hotel, freelance, elearner, health, support apps; shared accounting core |
+| Verticals | "Built for your industry, backed by a full ERP" | hotel, freelance, support apps; shared accounting core |
 | Developers / open-source | "The extensible ERP platform: Flutter building blocks + Moqui backend, CC0" | 41+ docs, building-block architecture, 50% faster app development, no CLA friction |
 | AI-agent-first buyers | "The ERP that works for you: governed AI agents inside your business system" | Agent Control Center, scheduled agents, approval/governance workflow, invoice scan, AI landing pages |
 
@@ -59,8 +59,7 @@ Owner/GM of a 5–50 person product or service business. Runs the company on spr
 ### 3.2 Vertical operators — one flagship per quarter
 - **Hotel Henri** — independent hotel/guesthouse manager (5–80 rooms). Pain: OTA-only visibility, paper housekeeping, separate books. **App:** hotel.
 - **Freelance Fiona** — consultant/agency of 1–10. Pain: time tracking, project invoicing. **App:** freelance.
-- **Educator Elena** — course creator/training company. Pain: enrollment + content + billing in three tools. **App:** elearner + courses.
-- (health, support follow the same playbook later.)
+- (support follows the same playbook later.)
 
 ### 3.3 Developer / integrator — "Builder Ben"
 Flutter or Java/Groovy developer, freelancer or small software house, wants to ship business apps fast without writing an ERP backend. Motivations: CC0 license (resell without restriction), building blocks, documented patterns. Converts to: contributor, integrator/partner, hosted-tenant referrer.
