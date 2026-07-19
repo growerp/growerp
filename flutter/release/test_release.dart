@@ -132,7 +132,7 @@ void main() async {
   // Test 7: Application detection
   print("\n✅ Test 7: Application detection");
   try {
-    var expectedApps = ['admin', 'freelance', 'health', 'hotel', 'support'];
+    var expectedApps = ['admin', 'freelance', 'hotel', 'support'];
     var foundApps = <String>[];
 
     if (exists('packages') || exists('../flutter/packages')) {

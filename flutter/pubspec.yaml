@@ -42,7 +42,6 @@ workspace:
   - packages/growerp_website/example
   - packages/growerp_wiki
   - packages/growerp_wiki/example
-  - packages/health
   - packages/hotel
   - packages/rental
   - packages/support
@@ -98,7 +97,6 @@ melos:
     - packages/hotel
     - packages/freelance
     - packages/assessment
-    - packages/health
     - packages/support
     - packages/elearner
     - packages/rental

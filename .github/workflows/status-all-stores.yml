@@ -14,11 +14,11 @@ name: Status all stores
 # Snap     | Snap Store public API      (curl + Python, no auth)
 #
 # Per-store app availability:
-# iOS     : admin, hotel, freelance, health
+# iOS     : admin, hotel, freelance
 # macOS   : admin, hotel
-# Android : admin, hotel, freelance, health, elearner, support, agents
+# Android : admin, hotel, freelance, elearner, support, agents
 # Windows : admin, hotel
-# Snap    : admin, hotel, freelance, health, elearner, support, agents
+# Snap    : admin, hotel, freelance, elearner, support, agents
 
 on:
     workflow_dispatch:
@@ -33,10 +33,6 @@ on:
                 default: true
             app_freelance:
                 description: "Freelance App"
-                type: boolean
-                default: false
-            app_health:
-                description: "Health App"
                 type: boolean
                 default: false
             app_elearner:
@@ -103,7 +99,6 @@ jobs:
                   APP_ADMIN: ${{ inputs.app_admin }}
                   APP_HOTEL: ${{ inputs.app_hotel }}
                   APP_FREELANCE: ${{ inputs.app_freelance }}
-                  APP_HEALTH: ${{ inputs.app_health }}
                   APP_ELEARNER: ${{ inputs.app_elearner }}
                   APP_SUPPORT: ${{ inputs.app_support }}
                   APP_AGENTS: ${{ inputs.app_agents }}
@@ -117,7 +112,6 @@ jobs:
                   [[ "$APP_ADMIN" == "true" ]] && APPS="${APPS}admin,"
                   [[ "$APP_HOTEL" == "true" ]] && APPS="${APPS}hotel,"
                   [[ "$APP_FREELANCE" == "true" ]] && APPS="${APPS}freelance,"
-                  [[ "$APP_HEALTH" == "true" ]] && APPS="${APPS}health,"
                   [[ "$APP_ELEARNER" == "true" ]] && APPS="${APPS}elearner,"
                   [[ "$APP_SUPPORT" == "true" ]] && APPS="${APPS}support,"
                   [[ "$APP_AGENTS" == "true" ]] && APPS="${APPS}agents,"
@@ -154,11 +148,11 @@ jobs:
                   contains_store() { echo "$STORES" | grep -qw "$1"; }
 
                   declare -A STORE_APPS
-                  STORE_APPS[ios]="admin hotel freelance health"
+                  STORE_APPS[ios]="admin hotel freelance"
                   STORE_APPS[macos]="admin hotel"
-                  STORE_APPS[android]="admin hotel freelance health elearner support agents"
+                  STORE_APPS[android]="admin hotel freelance elearner support agents"
                   STORE_APPS[windows]="admin hotel"
-                  STORE_APPS[snap]="admin hotel freelance health elearner support agents"
+                  STORE_APPS[snap]="admin hotel freelance elearner support agents"
 
                   for store in ios macos android windows snap; do
                     if contains_store "$store"; then
@@ -760,7 +754,6 @@ jobs:
                   APP_ADMIN: ${{ inputs.app_admin }}
                   APP_HOTEL: ${{ inputs.app_hotel }}
                   APP_FREELANCE: ${{ inputs.app_freelance }}
-                  APP_HEALTH: ${{ inputs.app_health }}
                   APP_ELEARNER: ${{ inputs.app_elearner }}
                   APP_SUPPORT: ${{ inputs.app_support }}
                   APP_AGENTS: ${{ inputs.app_agents }}
@@ -777,13 +770,12 @@ jobs:
                   from datetime import datetime, timezone
 
                   STORE_ORDER = ['ios', 'macos', 'android', 'windows', 'snap']
-                  APP_ORDER   = ['admin', 'hotel', 'freelance', 'health', 'elearner', 'support', 'agents']
+                  APP_ORDER   = ['admin', 'hotel', 'freelance', 'elearner', 'support', 'agents']
 
                   selected_apps = []
                   if os.environ.get('APP_ADMIN') == 'true': selected_apps.append('admin')
                   if os.environ.get('APP_HOTEL') == 'true': selected_apps.append('hotel')
                   if os.environ.get('APP_FREELANCE') == 'true': selected_apps.append('freelance')
-                  if os.environ.get('APP_HEALTH') == 'true': selected_apps.append('health')
                   if os.environ.get('APP_ELEARNER') == 'true': selected_apps.append('elearner')
                   if os.environ.get('APP_SUPPORT') == 'true': selected_apps.append('support')
                   if os.environ.get('APP_AGENTS') == 'true': selected_apps.append('agents')

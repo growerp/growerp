@@ -21,7 +21,6 @@ void main() async {
   List<String> apps = [
     'admin',
     'freelance',
-    'health',
     'hotel',
     'support',
     'growerp-moqui',

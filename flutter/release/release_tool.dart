@@ -229,7 +229,6 @@ Future<void> loadConfiguration() async {
       'defaultApps': [
         'admin',
         'freelance',
-        'health',
         'hotel',
         'support',
         'growerp-moqui',

@@ -1,9 +1,0 @@
-# title.strings
-"dashboard" = "Application Dashboard.";
-"website" = "Website Information";
-"catalog" = "Products & Assets & Categories";
-"orders" = "Orders & Customers/Suppliers";
-"warehouse" = "Warehouse locations & shipments";
-"account" = "Accounting Dashboard";
-"ledgers" = "Ledger tree & transactions";
-"chat" = "Internal Chat window";

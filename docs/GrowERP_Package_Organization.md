@@ -38,7 +38,6 @@ graph TB
         hotel[hotel]
         freelance[freelance]
         support[support]
-        health[health]
     end
     
     models --> chat
@@ -131,7 +130,6 @@ Applications are **compositions** of building blocks tailored for specific use c
 | **hotel** | Hotel management | core, user_company, catalog, order_accounting, inventory, sales, website, activity |
 | **freelance** | Freelancer/consultant | core, user_company, catalog, order_accounting, inventory, sales, website, marketing, outreach, activity |
 | **support** | System support | core, user_company, activity |
-| **health** | Healthcare management | core, user_company, + healthcare-specific |
 
 ---
 
@@ -187,7 +185,6 @@ The redesign follows the dependency graph from foundation to top-level packages:
 | 14 | hotel | Validate hotel-specific workflows |
 | 15 | freelance | Validate freelancer workflows |
 | 16 | support | Minimal UI, quick update |
-| 17 | health | Healthcare-specific validation |
 
 ---
 
