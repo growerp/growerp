@@ -355,10 +355,11 @@ jobs:
     needs: [integration-tests, backend-tests]
     if: always() && needs.integration-tests.result != 'skipped'
     runs-on: ubuntu-latest
-    # A stuck/cancelled summarize run (e.g. a GitHub runner-allocation hiccup)
-    # is just a reporting step — it must not flip an otherwise-green run to
-    # failure when every real test job already passed.
-    continue-on-error: true
+    # No continue-on-error here: this job enforces the failure threshold
+    # ("CI FAILED: more than 1 individual test failure"), so its result must
+    # reach the workflow status. A stuck run (runner-allocation hiccup) is
+    # bounded by the timeout instead — re-run the job if that happens.
+    timeout-minutes: 15
     steps:
       - name: Download all test logs
         uses: actions/download-artifact@v4

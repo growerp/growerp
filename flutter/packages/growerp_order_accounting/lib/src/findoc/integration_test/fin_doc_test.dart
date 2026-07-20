@@ -483,7 +483,9 @@ class FinDocTest {
         await CommonTest.tapByKey(tester, 'statusDropDown');
         await CommonTest.tapByText(
           tester,
-          applicationId == 'AppHotel' ? status.hotel : status.name,
+          applicationId == 'AppHotel' || applicationId == 'AppRental'
+              ? status.hotel
+              : status.name,
         );
         await CommonTest.drag(tester);
         await CommonTest.tapByKey(

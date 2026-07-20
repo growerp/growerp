@@ -1420,17 +1420,12 @@ List<Product> productsRental = [
 ];
 
 List<Asset> equipmentRental = [
+  // Only one asset per rented product: checkRentalSalesOrderBlocDates expects
+  // a single reservation to fully block the date ("Out of range." in the
+  // date picker), which only happens when all assets of the product are booked.
   Asset(
     statusId: "Available",
     assetName: "Excavator 1",
-    assetClassId: 'Equipment',
-    quantityOnHand: Decimal.parse("1"),
-    availableToPromise: Decimal.parse("1"),
-    product: productsRental[0],
-  ),
-  Asset(
-    statusId: "Available",
-    assetName: "Excavator 2",
     assetClassId: 'Equipment',
     quantityOnHand: Decimal.parse("1"),
     availableToPromise: Decimal.parse("1"),

@@ -156,6 +156,15 @@ class SocialPostTest {
       );
       await CommonTest.selectDropDown(tester, 'status', socialPost.status);
 
+      // Select platform from dropdown (publish buttons depend on it)
+      if (socialPost.platform != null) {
+        await CommonTest.selectDropDown(
+          tester,
+          'platform',
+          socialPost.platform!,
+        );
+      }
+
       // Save the social post
       await CommonTest.dragUntil(
         tester,

@@ -137,7 +137,11 @@ class CommonTest {
       // Silently ignore overflow and network-image errors in tests
     };
 
-    int seq = Random.secure().nextInt(1024);
+    // Wide range: many packages run against the same backend in one CI slice,
+    // each consuming ~10 sequence numbers for generated emails/loginNames
+    // (emailNNN@example.org, adminNNN). With only 1024 start values those
+    // collide ("Username [adminNNN] is already in use" 400 on data upload).
+    int seq = Random.secure().nextInt(1000000);
     if (clear == true) {
       await PersistFunctions.persistTest(SaveTest(sequence: seq));
       // Also clear any stored authentication
@@ -1339,7 +1343,10 @@ class CommonTest {
     if (val is RequestType) return val.toString();
     if (val is Role) return val.value;
     if (val is FinDocStatusVal) {
-      return applicationId == 'AppHotel' ? val.hotel : val.name;
+      // AppHotel and AppRental render hotel-style status labels (Checked In/Out)
+      return applicationId == 'AppHotel' || applicationId == 'AppRental'
+          ? val.hotel
+          : val.name;
     }
     return val.toString();
   }
