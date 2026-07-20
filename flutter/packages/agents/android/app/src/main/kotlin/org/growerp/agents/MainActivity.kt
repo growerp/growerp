@@ -1,4 +1,4 @@
-package com.growerp.agents
+package org.growerp.agents
 
 import io.flutter.embedding.android.FlutterActivity
 

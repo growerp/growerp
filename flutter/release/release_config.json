@@ -19,9 +19,7 @@
     "marketing": ["ios", "macos", "android", "windows", "snap"]
   },
   "bundleIds": {},
-  "androidIds": {
-    "agents": "com.growerp.agents"
-  },
+  "androidIds": {},
   "dockerRegistry": "ghcr.io/growerp",
   "repositoryUrl": "git@github.com:growerp/growerp.git",
   "tempWorkspaceDir": "/tmp/growerpRelease",
