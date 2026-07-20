@@ -1,4 +1,4 @@
-app_identifier("org.growerp.marketing_app") # The bundle identifier of your app
+app_identifier("org.growerp.marketing") # The bundle identifier of your app
 apple_id("apple@hansbakker.com") # Your Apple email address
 
 itc_team_id("120263859") # App Store Connect Team ID

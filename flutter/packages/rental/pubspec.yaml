@@ -44,6 +44,7 @@ dev_dependencies:
     sdk: flutter
   flutter_lints: ^6.0.0
   flutter_launcher_icons: ^0.14.4
+  msix: ^3.16.12
 
 flutter_launcher_icons:
   image_path: "assets/icon/icon.png"
@@ -73,3 +74,13 @@ flutter:
     - packages/growerp_core/images/growerpDark100.png
 flutter_intl:
   enabled: true
+
+msix_config:
+  display_name: GrowERP-Rental
+  publisher: CN=68EEF479-7015-49FC-9C60-33E5A2EB731C
+  publisher_display_name: "AntWebsystems Co.,Ltd"
+  identity_name: AntWebsystemsCo.LTD.GrowERP-Rental
+  msix_version: 1.16.29.0
+  logo_path: "assets/icon/icon.png"
+  capabilities: internetClient
+  store: true

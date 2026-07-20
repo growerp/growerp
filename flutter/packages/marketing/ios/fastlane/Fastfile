@@ -33,7 +33,7 @@ end
 platform :ios do
   lane :build do
     increment_build_number
-    build_app(scheme: "GrowERPmarketing_app")
+    build_app(scheme: "GrowERPmarketing")
   end
   lane :ci_build do
     build_app(

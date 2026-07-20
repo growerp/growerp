@@ -1,4 +1,4 @@
-package org.growerp.marketing_app
+package org.growerp.marketing
 
 import io.flutter.embedding.android.FlutterActivity
 
