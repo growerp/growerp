@@ -1,9 +1,12 @@
 {
   "defaultApps": [
     "admin",
+    "rental",
     "freelance",
     "hotel",
     "support",
+    "agents",
+    "marketing",
     "growerp-moqui"
   ],
   "dockerRegistry": "ghcr.io/growerp",
