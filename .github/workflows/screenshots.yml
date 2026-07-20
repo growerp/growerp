@@ -11,7 +11,7 @@ on:
   workflow_dispatch:
     inputs:
       apps:
-        description: "Apps to screenshot (comma-separated: admin, hotel, freelance, support, agents)"
+        description: "Apps to screenshot (comma-separated; valid = storeApps in flutter/release/release_config.json)"
         required: true
         default: "admin,hotel"
         type: string
@@ -80,20 +80,6 @@ jobs:
             height: 1080
 
     steps:
-      - name: Validate app names
-        run: |
-          # When triggered by workflow_run there is no inputs context; fall back to default.
-          APPS_INPUT="${{ github.event.inputs.apps || 'admin,hotel' }}"
-          VALID_APPS="admin hotel freelance support agents"
-          IFS=',' read -ra app_list <<< "$APPS_INPUT"
-          for app in "${app_list[@]}"; do
-            app=$(echo "$app" | tr -d ' ')
-            if ! echo "$VALID_APPS" | grep -qw "$app"; then
-              echo "Invalid app: '$app'. Valid values: $VALID_APPS" >&2
-              exit 1
-            fi
-          done
-
       - name: Free disk space
         run: |
           sudo rm -rf /usr/local/lib/android
@@ -106,6 +92,21 @@ jobs:
 
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Validate app names
+        run: |
+          # When triggered by workflow_run there is no inputs context; fall back to default.
+          APPS_INPUT="${{ github.event.inputs.apps || 'admin,hotel' }}"
+          # Central app list: storeApps in flutter/release/release_config.json
+          VALID_APPS=$(jq -r '.storeApps | keys_unsorted | join(" ")' flutter/release/release_config.json)
+          IFS=',' read -ra app_list <<< "$APPS_INPUT"
+          for app in "${app_list[@]}"; do
+            app=$(echo "$app" | tr -d ' ')
+            if ! echo "$VALID_APPS" | grep -qw "$app"; then
+              echo "Invalid app: '$app'. Valid values: $VALID_APPS" >&2
+              exit 1
+            fi
+          done
 
       - name: Init submodules (SSH → HTTPS rewrite)
         run: |

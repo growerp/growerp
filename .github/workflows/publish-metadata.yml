@@ -35,6 +35,14 @@ on:
         description: "Agents App"
         type: boolean
         default: false
+      app_rental:
+        description: "Rental App"
+        type: boolean
+        default: false
+      app_marketing:
+        description: "Marketing App"
+        type: boolean
+        default: false
       store_ios:
         description: "iOS App Store"
         type: boolean
@@ -82,6 +90,8 @@ jobs:
           [[ "${{ inputs.app_freelance }}" == "true" ]] && APPS="${APPS}freelance,"
           [[ "${{ inputs.app_support }}" == "true" ]] && APPS="${APPS}support,"
           [[ "${{ inputs.app_agents }}" == "true" ]] && APPS="${APPS}agents,"
+          [[ "${{ inputs.app_rental }}" == "true" ]] && APPS="${APPS}rental,"
+          [[ "${{ inputs.app_marketing }}" == "true" ]] && APPS="${APPS}marketing,"
           
           STORES=""
           [[ "${{ inputs.store_ios }}" == "true" ]] && STORES="${STORES}ios,"
@@ -112,12 +122,17 @@ jobs:
       windows_matrix: ${{ steps.matrix.outputs.windows_matrix }}
       snap_matrix: ${{ steps.matrix.outputs.snap_matrix }}
     steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: flutter/release/release_config.json
+          sparse-checkout-cone-mode: false
       - id: matrix
         env:
           APPS: ${{ needs.set-params.outputs.apps }}
           STORES: ${{ needs.set-params.outputs.stores }}
         run: |
-          VALID_APPS="admin hotel freelance support agents"
+          # Central app list: storeApps in flutter/release/release_config.json
+          VALID_APPS=$(jq -r '.storeApps | keys_unsorted | join(" ")' flutter/release/release_config.json)
           IFS=',' read -ra app_list <<< "$APPS"
           for app in "${app_list[@]}"; do
             app=$(echo "$app" | tr -d ' ')
@@ -127,15 +142,19 @@ jobs:
             fi
           done
 
+          # Only include apps published on the given store
           build_matrix() {
+            local store_apps="$1"
             local json="["
             local first=true
             IFS=',' read -ra app_list <<< "$APPS"
             for app in "${app_list[@]}"; do
               app=$(echo "$app" | tr -d ' ')
-              if [[ "$first" == "false" ]]; then json="$json,"; fi
-              json="${json}{\"app\":\"${app}\"}"
-              first=false
+              if echo "$store_apps" | grep -qw "$app"; then
+                if [[ "$first" == "false" ]]; then json="$json,"; fi
+                json="${json}{\"app\":\"${app}\"}"
+                first=false
+              fi
             done
             json="${json}]"
             echo "$json"
@@ -144,12 +163,16 @@ jobs:
           contains() { echo "$STORES" | grep -qw "$1"; }
 
           for store in ios macos android windows snap; do
-            if contains "$store"; then
-              echo "run_${store}=true"               >> "$GITHUB_OUTPUT"
-              echo "${store}_matrix=$(build_matrix)" >> "$GITHUB_OUTPUT"
+            store_apps=$(jq -r --arg s "$store" \
+              '[.storeApps | to_entries[] | select(.value | index($s)) | .key] | join(" ")' \
+              flutter/release/release_config.json)
+            matrix=$(build_matrix "$store_apps")
+            if contains "$store" && [[ "$matrix" != "[]" ]]; then
+              echo "run_${store}=true"          >> "$GITHUB_OUTPUT"
+              echo "${store}_matrix=${matrix}"  >> "$GITHUB_OUTPUT"
             else
-              echo "run_${store}=false"              >> "$GITHUB_OUTPUT"
-              echo "${store}_matrix=[]"              >> "$GITHUB_OUTPUT"
+              echo "run_${store}=false"         >> "$GITHUB_OUTPUT"
+              echo "${store}_matrix=[]"         >> "$GITHUB_OUTPUT"
             fi
           done
 
@@ -250,11 +273,15 @@ jobs:
 
       - name: Resolve BUNDLE_ID
         run: |
-          case "${{ matrix.app }}" in
-            admin) echo "BUNDLE_ID=org.growerp.admin" >> "$GITHUB_ENV" ;;
-            hotel) echo "BUNDLE_ID=org.growerp.hotel" >> "$GITHUB_ENV" ;;
-            *) echo "Unsupported macOS app: ${{ matrix.app }}" >&2; exit 1 ;;
-          esac
+          # Central app/bundle list: storeApps + bundleIds in release_config.json
+          APP="${{ matrix.app }}"
+          if ! jq -e --arg app "$APP" '.storeApps[$app] // [] | index("macos")' \
+              flutter/release/release_config.json >/dev/null; then
+            echo "Unsupported macOS app: $APP" >&2
+            exit 1
+          fi
+          echo "BUNDLE_ID=$(jq -r --arg app "$APP" \
+            '.bundleIds[$app] // ("org.growerp." + $app)' flutter/release/release_config.json)" >> "$GITHUB_ENV"
 
       - name: Download framed screenshots artifact
         uses: dawidd6/action-download-artifact@v6

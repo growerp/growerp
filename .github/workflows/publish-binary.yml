@@ -23,6 +23,14 @@ on:
         description: "Agents App"
         type: boolean
         default: false
+      app_rental:
+        description: "Rental App"
+        type: boolean
+        default: false
+      app_marketing:
+        description: "Marketing App"
+        type: boolean
+        default: false
       store_ios:
         description: "iOS App Store"
         type: boolean
@@ -79,6 +87,10 @@ jobs:
       windows_matrix: ${{ steps.matrix.outputs.windows_matrix }}
       snap_matrix: ${{ steps.matrix.outputs.snap_matrix }}
     steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: flutter/release/release_config.json
+          sparse-checkout-cone-mode: false
       - id: matrix
         env:
           APP_ADMIN: ${{ inputs.app_admin }}
@@ -86,6 +98,8 @@ jobs:
           APP_FREELANCE: ${{ inputs.app_freelance }}
           APP_SUPPORT: ${{ inputs.app_support }}
           APP_AGENTS: ${{ inputs.app_agents }}
+          APP_RENTAL: ${{ inputs.app_rental }}
+          APP_MARKETING: ${{ inputs.app_marketing }}
           STORE_IOS: ${{ inputs.store_ios }}
           STORE_MACOS: ${{ inputs.store_macos }}
           STORE_ANDROID: ${{ inputs.store_android }}
@@ -98,6 +112,8 @@ jobs:
           [[ "$APP_FREELANCE" == "true" ]] && APPS="${APPS}freelance,"
           [[ "$APP_SUPPORT" == "true" ]] && APPS="${APPS}support,"
           [[ "$APP_AGENTS" == "true" ]] && APPS="${APPS}agents,"
+          [[ "$APP_RENTAL" == "true" ]] && APPS="${APPS}rental,"
+          [[ "$APP_MARKETING" == "true" ]] && APPS="${APPS}marketing,"
           APPS="${APPS%,}"
 
           STORES=""
@@ -111,14 +127,19 @@ jobs:
           if [[ -z "$APPS" ]]; then echo "No apps selected" >&2; exit 1; fi
           if [[ -z "$STORES" ]]; then echo "No stores selected" >&2; exit 1; fi
 
+          # Only include apps published on the given store
+          # (central list: storeApps in flutter/release/release_config.json)
           build_matrix() {
+            local store_apps="$1"
             local json="["
             local first=true
             IFS=',' read -ra app_list <<< "$APPS"
             for app in "${app_list[@]}"; do
-              if [[ "$first" == "false" ]]; then json="$json,"; fi
-              json="${json}{\"app\":\"${app}\"}"
-              first=false
+              if echo "$store_apps" | grep -qw "$app"; then
+                if [[ "$first" == "false" ]]; then json="$json,"; fi
+                json="${json}{\"app\":\"${app}\"}"
+                first=false
+              fi
             done
             json="${json}]"
             echo "$json"
@@ -127,12 +148,16 @@ jobs:
           contains() { echo "$STORES" | grep -qw "$1"; }
 
           for store in ios macos android windows snap; do
-            if contains "$store"; then
-              echo "run_${store}=true"               >> "$GITHUB_OUTPUT"
-              echo "${store}_matrix=$(build_matrix)" >> "$GITHUB_OUTPUT"
+            store_apps=$(jq -r --arg s "$store" \
+              '[.storeApps | to_entries[] | select(.value | index($s)) | .key] | join(" ")' \
+              flutter/release/release_config.json)
+            matrix=$(build_matrix "$store_apps")
+            if contains "$store" && [[ "$matrix" != "[]" ]]; then
+              echo "run_${store}=true"          >> "$GITHUB_OUTPUT"
+              echo "${store}_matrix=${matrix}"  >> "$GITHUB_OUTPUT"
             else
-              echo "run_${store}=false"              >> "$GITHUB_OUTPUT"
-              echo "${store}_matrix=[]"              >> "$GITHUB_OUTPUT"
+              echo "run_${store}=false"         >> "$GITHUB_OUTPUT"
+              echo "${store}_matrix=[]"         >> "$GITHUB_OUTPUT"
             fi
           done
 
@@ -353,14 +378,11 @@ jobs:
         run: |
           set -euo pipefail
 
-          case "$MATRIX_APP" in
-            admin|hotel|freelance)
-              ;;
-            *)
-              echo "Unsupported iOS app: $MATRIX_APP" >&2
-              exit 1
-              ;;
-          esac
+          if ! jq -e --arg app "$MATRIX_APP" '.storeApps[$app] // [] | index("ios")' \
+              flutter/release/release_config.json >/dev/null; then
+            echo "Unsupported iOS app: $MATRIX_APP" >&2
+            exit 1
+          fi
 
           case "$SUBMIT_FOR_REVIEW" in
             true|false)
@@ -584,18 +606,14 @@ jobs:
             fi
           done
 
-          case "$MATRIX_APP" in
-            admin)
-              BUNDLE_ID='org.growerp.admin'
-              ;;
-            hotel)
-              BUNDLE_ID='org.growerp.hotel'
-              ;;
-            *)
-              echo "Unsupported macOS app: $MATRIX_APP" >&2
-              exit 1
-              ;;
-          esac
+          # Central app/bundle list: storeApps + bundleIds in release_config.json
+          if ! jq -e --arg app "$MATRIX_APP" '.storeApps[$app] // [] | index("macos")' \
+              flutter/release/release_config.json >/dev/null; then
+            echo "Unsupported macOS app: $MATRIX_APP" >&2
+            exit 1
+          fi
+          BUNDLE_ID=$(jq -r --arg app "$MATRIX_APP" \
+            '.bundleIds[$app] // ("org.growerp." + $app)' flutter/release/release_config.json)
 
           {
             echo "MATRIX_APP=$MATRIX_APP"
@@ -791,14 +809,11 @@ jobs:
         env:
           MATRIX_APP: ${{ matrix.app }}
         run: |
-          case "$MATRIX_APP" in
-            admin|hotel|freelance|support|agents)
-              ;;
-            *)
+          if ! jq -e --arg app "$MATRIX_APP" '.storeApps[$app] // [] | index("android")' \
+              flutter/release/release_config.json >/dev/null; then
               echo "Unsupported Android app: $MATRIX_APP" >&2
               exit 1
-              ;;
-          esac
+          fi
 
       - name: Write keystore and key.properties
         env:
@@ -1231,14 +1246,11 @@ jobs:
         env:
           MATRIX_APP: ${{ matrix.app }}
         run: |
-          case "$MATRIX_APP" in
-            admin|hotel|freelance|support|agents)
-              ;;
-            *)
-              echo "Unsupported Snap app: $MATRIX_APP" >&2
-              exit 1
-              ;;
-          esac
+          if ! jq -e --arg app "$MATRIX_APP" '.storeApps[$app] // [] | index("snap")' \
+              flutter/release/release_config.json >/dev/null; then
+            echo "Unsupported Snap app: $MATRIX_APP" >&2
+            exit 1
+          fi
 
       - name: Flutter pub get
         run: flutter pub get

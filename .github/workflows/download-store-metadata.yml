@@ -10,8 +10,8 @@ on:
   workflow_dispatch:
     inputs:
       apps:
-        description: "Apps to download metadata for (comma-separated: admin, hotel,
-          freelance, support, agents)"
+        description: "Apps to download metadata for (comma-separated; valid = storeApps
+          in flutter/release/release_config.json)"
         required: true
         default: "admin,hotel"
         type: string
@@ -46,12 +46,17 @@ jobs:
       macos_matrix: ${{ steps.matrix.outputs.macos_matrix }}
       windows_matrix: ${{ steps.matrix.outputs.windows_matrix }}
     steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: flutter/release/release_config.json
+          sparse-checkout-cone-mode: false
       - id: matrix
         env:
           APPS: ${{ inputs.apps }}
           STORES: ${{ inputs.stores }}
         run: |
-          VALID_APPS="admin hotel freelance support agents"
+          # Central app list: storeApps in flutter/release/release_config.json
+          VALID_APPS=$(jq -r '.storeApps | keys_unsorted | join(" ")' flutter/release/release_config.json)
           IFS=',' read -ra app_list <<< "$APPS"
           for app in "${app_list[@]}"; do
             app=$(echo "$app" | tr -d ' ')
@@ -61,15 +66,19 @@ jobs:
             fi
           done
 
+          # Only include apps published on the given store
           build_matrix() {
+            local store_apps="$1"
             local json="["
             local first=true
             IFS=',' read -ra app_list <<< "$APPS"
             for app in "${app_list[@]}"; do
               app=$(echo "$app" | tr -d ' ')
-              if [[ "$first" == "false" ]]; then json="$json,"; fi
-              json="${json}{\"app\":\"${app}\"}"
-              first=false
+              if echo "$store_apps" | grep -qw "$app"; then
+                if [[ "$first" == "false" ]]; then json="$json,"; fi
+                json="${json}{\"app\":\"${app}\"}"
+                first=false
+              fi
             done
             json="${json}]"
             echo "$json"
@@ -78,12 +87,16 @@ jobs:
           contains() { echo "$STORES" | grep -qw "$1"; }
 
           for store in ios macos android windows; do
-            if contains "$store"; then
-              echo "run_${store}=true"               >> "$GITHUB_OUTPUT"
-              echo "${store}_matrix=$(build_matrix)" >> "$GITHUB_OUTPUT"
+            store_apps=$(jq -r --arg s "$store" \
+              '[.storeApps | to_entries[] | select(.value | index($s)) | .key] | join(" ")' \
+              flutter/release/release_config.json)
+            matrix=$(build_matrix "$store_apps")
+            if contains "$store" && [[ "$matrix" != "[]" ]]; then
+              echo "run_${store}=true"          >> "$GITHUB_OUTPUT"
+              echo "${store}_matrix=${matrix}"  >> "$GITHUB_OUTPUT"
             else
-              echo "run_${store}=false"              >> "$GITHUB_OUTPUT"
-              echo "${store}_matrix=[]"              >> "$GITHUB_OUTPUT"
+              echo "run_${store}=false"         >> "$GITHUB_OUTPUT"
+              echo "${store}_matrix=[]"         >> "$GITHUB_OUTPUT"
             fi
           done
 
@@ -209,14 +222,14 @@ jobs:
         env:
           MATRIX_APP: ${{ matrix.app }}
         run: |
-          case "$MATRIX_APP" in
-            admin) echo "BUNDLE_ID=org.growerp.admin" >> "$GITHUB_ENV" ;;
-            hotel) echo "BUNDLE_ID=org.growerp.hotel" >> "$GITHUB_ENV" ;;
-            *)
-              echo "Unsupported macOS app: $MATRIX_APP" >&2
-              exit 1
-              ;;
-          esac
+          # Central app/bundle list: storeApps + bundleIds in release_config.json
+          if ! jq -e --arg app "$MATRIX_APP" '.storeApps[$app] // [] | index("macos")' \
+              flutter/release/release_config.json >/dev/null; then
+            echo "Unsupported macOS app: $MATRIX_APP" >&2
+            exit 1
+          fi
+          echo "BUNDLE_ID=$(jq -r --arg app "$MATRIX_APP" \
+            '.bundleIds[$app] // ("org.growerp." + $app)' flutter/release/release_config.json)" >> "$GITHUB_ENV"
 
       - uses: ruby/setup-ruby@v1
         with:

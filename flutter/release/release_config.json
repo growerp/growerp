@@ -9,6 +9,19 @@
     "marketing",
     "growerp-moqui"
   ],
+  "storeApps": {
+    "admin": ["ios", "macos", "android", "windows", "snap"],
+    "rental": ["ios", "macos", "android", "windows", "snap"],
+    "freelance": ["ios", "macos", "android", "windows", "snap"],
+    "hotel": ["ios", "macos", "android", "windows", "snap"],
+    "support": ["android", "snap"],
+    "agents": ["ios", "macos", "android", "windows", "snap"],
+    "marketing": ["ios", "macos", "android", "windows", "snap"]
+  },
+  "bundleIds": {},
+  "androidIds": {
+    "agents": "com.growerp.agents"
+  },
   "dockerRegistry": "ghcr.io/growerp",
   "repositoryUrl": "git@github.com:growerp/growerp.git",
   "tempWorkspaceDir": "/tmp/growerpRelease",

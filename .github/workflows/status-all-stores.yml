@@ -13,12 +13,7 @@ name: Status all stores
 # Windows  | Partner Center REST API    (Python, Azure AD)
 # Snap     | Snap Store public API      (curl + Python, no auth)
 #
-# Per-store app availability:
-# iOS     : admin, hotel, freelance
-# macOS   : admin, hotel
-# Android : admin, hotel, freelance, support, agents
-# Windows : admin, hotel
-# Snap    : admin, hotel, freelance, support, agents
+# Per-store app availability: storeApps in flutter/release/release_config.json
 
 on:
     workflow_dispatch:
@@ -41,6 +36,14 @@ on:
                 default: false
             app_agents:
                 description: "Agents App"
+                type: boolean
+                default: false
+            app_rental:
+                description: "Rental App"
+                type: boolean
+                default: false
+            app_marketing:
+                description: "Marketing App"
                 type: boolean
                 default: false
             store_ios:
@@ -90,6 +93,10 @@ jobs:
             windows_matrix: ${{ steps.matrix.outputs.windows_matrix }}
             snap_matrix: ${{ steps.matrix.outputs.snap_matrix }}
         steps:
+            - uses: actions/checkout@v4
+              with:
+                  sparse-checkout: flutter/release/release_config.json
+                  sparse-checkout-cone-mode: false
             - id: matrix
               env:
                   APP_ADMIN: ${{ inputs.app_admin }}
@@ -97,6 +104,8 @@ jobs:
                   APP_FREELANCE: ${{ inputs.app_freelance }}
                   APP_SUPPORT: ${{ inputs.app_support }}
                   APP_AGENTS: ${{ inputs.app_agents }}
+                  APP_RENTAL: ${{ inputs.app_rental }}
+                  APP_MARKETING: ${{ inputs.app_marketing }}
                   STORE_IOS: ${{ inputs.store_ios }}
                   STORE_MACOS: ${{ inputs.store_macos }}
                   STORE_ANDROID: ${{ inputs.store_android }}
@@ -109,6 +118,8 @@ jobs:
                   [[ "$APP_FREELANCE" == "true" ]] && APPS="${APPS}freelance,"
                   [[ "$APP_SUPPORT" == "true" ]] && APPS="${APPS}support,"
                   [[ "$APP_AGENTS" == "true" ]] && APPS="${APPS}agents,"
+                  [[ "$APP_RENTAL" == "true" ]] && APPS="${APPS}rental,"
+                  [[ "$APP_MARKETING" == "true" ]] && APPS="${APPS}marketing,"
                   APPS="${APPS%,}"
                   
                   STORES=""
@@ -130,8 +141,12 @@ jobs:
                     for app in "${app_list[@]}"; do
                       app=$(echo "$app" | tr -d ' ')
                       if echo "$store_apps" | grep -qw "$app"; then
+                        local bundle_id=$(jq -r --arg app "$app" \
+                          '.bundleIds[$app] // ("org.growerp." + $app)' flutter/release/release_config.json)
+                        local android_id=$(jq -r --arg app "$app" \
+                          '.androidIds[$app] // ("org.growerp." + $app)' flutter/release/release_config.json)
                         if [[ "$first" == "false" ]]; then json="$json,"; fi
-                        json="${json}{\"app\":\"${app}\"}"
+                        json="${json}{\"app\":\"${app}\",\"bundle_id\":\"${bundle_id}\",\"android_id\":\"${android_id}\"}"
                         first=false
                       fi
                     done
@@ -141,12 +156,13 @@ jobs:
 
                   contains_store() { echo "$STORES" | grep -qw "$1"; }
 
+                  # Central per-app store availability: storeApps in release_config.json
                   declare -A STORE_APPS
-                  STORE_APPS[ios]="admin hotel freelance"
-                  STORE_APPS[macos]="admin hotel"
-                  STORE_APPS[android]="admin hotel freelance support agents"
-                  STORE_APPS[windows]="admin hotel"
-                  STORE_APPS[snap]="admin hotel freelance support agents"
+                  for store in ios macos android windows snap; do
+                    STORE_APPS[$store]=$(jq -r --arg s "$store" \
+                      '[.storeApps | to_entries[] | select(.value | index($s)) | .key] | join(" ")' \
+                      flutter/release/release_config.json)
+                  done
 
                   for store in ios macos android windows snap; do
                     if contains_store "$store"; then
@@ -187,6 +203,7 @@ jobs:
                   APP_STORE_CONNECT_API_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
                   APP_STORE_CONNECT_API_KEY_CONTENT: ${{ secrets.APP_STORE_CONNECT_API_KEY_CONTENT }}
                   APP_NAME: ${{ matrix.app }}
+                  BUNDLE_ID: ${{ matrix.bundle_id }}
               run: |
                   python3 << 'PYEOF'
                   import jwt, time, base64, json, os, sys
@@ -197,7 +214,7 @@ jobs:
                   issuer_id   = os.environ['APP_STORE_CONNECT_API_ISSUER_ID']
                   private_key = base64.b64decode(os.environ['APP_STORE_CONNECT_API_KEY_CONTENT']).decode()
                   app_name    = os.environ['APP_NAME']
-                  bundle_id   = f'org.growerp.{app_name}'
+                  bundle_id   = os.environ['BUNDLE_ID']
 
                   now = int(time.time())
                   token = jwt.encode(
@@ -306,6 +323,7 @@ jobs:
                   APP_STORE_CONNECT_API_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
                   APP_STORE_CONNECT_API_KEY_CONTENT: ${{ secrets.APP_STORE_CONNECT_API_KEY_CONTENT }}
                   APP_NAME: ${{ matrix.app }}
+                  BUNDLE_ID: ${{ matrix.bundle_id }}
               run: |
                   python3 << 'PYEOF'
                   import jwt, time, base64, json, os, sys
@@ -316,7 +334,7 @@ jobs:
                   issuer_id   = os.environ['APP_STORE_CONNECT_API_ISSUER_ID']
                   private_key = base64.b64decode(os.environ['APP_STORE_CONNECT_API_KEY_CONTENT']).decode()
                   app_name    = os.environ['APP_NAME']
-                  bundle_id   = f'org.growerp.{app_name}'
+                  bundle_id   = os.environ['BUNDLE_ID']
 
                   now = int(time.time())
                   token = jwt.encode(
@@ -416,6 +434,7 @@ jobs:
               env:
                   GOOGLE_PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
                   APP_NAME: ${{ matrix.app }}
+                  PACKAGE_NAME: ${{ matrix.android_id }}
               run: |
                   python3 << 'PYEOF'
                   import base64, json, os, sys
@@ -424,7 +443,7 @@ jobs:
                   from googleapiclient.discovery import build
 
                   app_name     = os.environ['APP_NAME']
-                  package_name = f'org.growerp.{app_name}'
+                  package_name = os.environ['PACKAGE_NAME']
 
                   creds_raw = os.environ.get('GOOGLE_PLAY_SERVICE_ACCOUNT_JSON', '')
                   if not creds_raw:
@@ -750,6 +769,8 @@ jobs:
                   APP_FREELANCE: ${{ inputs.app_freelance }}
                   APP_SUPPORT: ${{ inputs.app_support }}
                   APP_AGENTS: ${{ inputs.app_agents }}
+                  APP_RENTAL: ${{ inputs.app_rental }}
+                  APP_MARKETING: ${{ inputs.app_marketing }}
                   STORE_IOS: ${{ inputs.store_ios }}
                   STORE_MACOS: ${{ inputs.store_macos }}
                   STORE_ANDROID: ${{ inputs.store_android }}
@@ -763,7 +784,7 @@ jobs:
                   from datetime import datetime, timezone
 
                   STORE_ORDER = ['ios', 'macos', 'android', 'windows', 'snap']
-                  APP_ORDER   = ['admin', 'hotel', 'freelance', 'support', 'agents']
+                  APP_ORDER   = ['admin', 'hotel', 'freelance', 'support', 'agents', 'rental', 'marketing']
 
                   selected_apps = []
                   if os.environ.get('APP_ADMIN') == 'true': selected_apps.append('admin')
@@ -771,6 +792,8 @@ jobs:
                   if os.environ.get('APP_FREELANCE') == 'true': selected_apps.append('freelance')
                   if os.environ.get('APP_SUPPORT') == 'true': selected_apps.append('support')
                   if os.environ.get('APP_AGENTS') == 'true': selected_apps.append('agents')
+                  if os.environ.get('APP_RENTAL') == 'true': selected_apps.append('rental')
+                  if os.environ.get('APP_MARKETING') == 'true': selected_apps.append('marketing')
 
                   selected_stores = []
                   if os.environ.get('STORE_IOS') == 'true': selected_stores.append('ios')
