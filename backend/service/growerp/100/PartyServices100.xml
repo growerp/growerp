@@ -196,10 +196,12 @@ along with this software (see the LICENSE.md file). If not, see
         <out-parameters>
             <parameter name="companies" type="List">
                 <parameter name="company" type="Map">
+                    <parameter name="ownerPartyId" />
                     <parameter name="partyId" />
                     <parameter name="pseudoId" />
                     <parameter name="name" />
                     <parameter name="email" />
+                    <parameter name="telephoneNr" />
                     <parameter name="role" />
                     <parameter name="currency" type="Map">
                         <parameter name="currencyId" />
@@ -243,6 +245,39 @@ along with this software (see the LICENSE.md file). If not, see
                 </econditions>
                 <order-by field-name="organizationName" />
             </entity-find>
+            <!-- primary email/phone for all companies found, in two finds -->
+            <set field="companyPartyIds" from="parties.collect { it.partyId }" />
+            <set field="emailByParty" from="[:]" />
+            <set field="telByParty" from="[:]" />
+            <if condition="companyPartyIds">
+                <entity-find entity-name="mantle.party.contact.PartyContactMech"
+                    list="partyContactMechs">
+                    <econdition field-name="partyId" operator="in" from="companyPartyIds" />
+                    <econdition field-name="contactMechPurposeId" operator="in"
+                        from="['EmailPrimary', 'PhonePrimary']" />
+                    <date-filter />
+                </entity-find>
+                <if condition="partyContactMechs">
+                    <entity-find entity-name="mantle.party.contact.ContactMech"
+                        list="contactMechs">
+                        <econdition field-name="contactMechId" operator="in"
+                            from="partyContactMechs.collect { it.contactMechId }" />
+                    </entity-find>
+                    <script><![CDATA[
+                        def cmById = contactMechs.collectEntries { [(it.contactMechId): it] }
+                        for (pcm in partyContactMechs) {
+                            def cm = cmById[pcm.contactMechId]
+                            if (cm == null) continue
+                            if (pcm.contactMechPurposeId == 'EmailPrimary') {
+                                emailByParty[pcm.partyId] = cm.infoString
+                            } else {
+                                telByParty[pcm.partyId] =
+                                    "${cm.countryCode ?: ''}${cm.areaCode ?: ''}${cm.contactNumber ?: ''}"
+                            }
+                        }
+                    ]]></script>
+                </if>
+            </if>
             <set field="companies" from="[]" />
             <iterate list="parties" entry="party">
                 <set field="currency"
@@ -250,10 +285,13 @@ along with this software (see the LICENSE.md file). If not, see
                     currencyId: party.baseCurrencyUomId,
                     description: party.uomDescription]" />
                 <set field="company"
-                    from="[partyId: party.partyId,
+                    from="[ownerPartyId: party.ownerPartyId,
+                                partyId: party.partyId,
                                 pseudoId: party.pseudoId ?:'',
                                 name: party.organizationName,
                                 role: party.roleTypeId,
+                                email: emailByParty[party.partyId],
+                                telephoneNr: telByParty[party.partyId],
                                 currency: party.baseCurrencyUomId == null ? null : currency,
                                 vatPerc: party.vatPerc ? party.vatPerc.toString() : null,
                                 salesPerc: party.salesPerc ? party.salesPerc.toString() : null]" />

@@ -125,15 +125,11 @@ List<Widget> getCompanyListRow({
     // Phone
     cells.add(Text(company.telephoneNr ?? '', key: Key('telephone$index')));
 
-    // VAT/SLS
-    cells.add(
-      Text(
-        company.vatPerc != Decimal.parse("0")
-            ? company.vatPerc.toString()
-            : company.salesPerc.toString(),
-        key: Key('perc$index'),
-      ),
-    );
+    // VAT/SLS: both are optional, show nothing rather than 'null'
+    final perc = (company.vatPerc != null && company.vatPerc != Decimal.zero)
+        ? company.vatPerc
+        : company.salesPerc;
+    cells.add(Text(perc?.toString() ?? '', key: Key('perc$index')));
   }
 
   // Actions (both phone and desktop)

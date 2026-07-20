@@ -36,7 +36,9 @@ class RestRequestStatsDialogState extends State<RestRequestStatsDialog> {
     try {
       final restClient = context.read<RestClient>();
       final compResult = await restClient.getRestRequest(
-        ownerPartyId: widget.company.partyId,
+        // hits are recorded against the owner party, not the company party:
+        // for an owner company those differ (company 100001 → owner GROWERP)
+        ownerPartyId: widget.company.ownerPartyId ?? widget.company.partyId,
         startDateTime: _startDate?.toIso8601String(),
         endDateTime: _endDate?.toIso8601String(),
         limit: 10000,

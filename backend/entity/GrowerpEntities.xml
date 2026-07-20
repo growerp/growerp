@@ -507,7 +507,9 @@ along with this software (see the LICENSE.md file). If not, see
         <alias-all entity-alias="PA"/>
         <alias-all entity-alias="APP"/>
         <entity-condition>
-            <date-filter entity-alias="PA" valid-date="ec.user.nowTimestamp"/>
+            <!-- no valid-date: it is string-expanded, not a Groovy expression;
+                 omitted it defaults to ec.user.nowTimestamp -->
+            <date-filter entity-alias="PA"/>
         </entity-condition>
     </view-entity>
 
