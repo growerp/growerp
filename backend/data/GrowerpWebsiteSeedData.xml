@@ -686,6 +686,10 @@ If you decide GrowERP isn't for you:
             <ul class="space-y-4 mb-8 flex-grow">
                 <li class="flex items-start gap-3">
                     <span class="material-symbols-outlined text-primary text-xl mt-0.5">check_circle</span>
+                    <span class="text-sm text-on-surface">50 Users Included</span>
+                </li>
+                <li class="flex items-start gap-3">
+                    <span class="material-symbols-outlined text-primary text-xl mt-0.5">check_circle</span>
                     <span class="text-sm text-on-surface">Full Platform Access</span>
                 </li>
                 <li class="flex items-start gap-3">
