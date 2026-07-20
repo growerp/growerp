@@ -1510,6 +1510,266 @@ along with this software (see the LICENSE.md file). If not, see
         </actions>
     </service>
 
+    <service verb="get" noun="RestUsageStatistics">
+        <description>Per-user REST activity aggregated per day (dot plot data):
+            one entry per user with a hit count for every day the user made at
+            least one external REST call in the period.</description>
+        <in-parameters>
+            <parameter name="startDateTime" type="Timestamp"/><!-- default: endDateTime - 30 days -->
+            <parameter name="endDateTime" type="Timestamp"/><!-- default: now -->
+            <parameter name="ownerPartyId"/><!-- optional filter by owner -->
+            <parameter name="maxUsers" type="Integer" default-value="100"/><!-- top users by total hits -->
+        </in-parameters>
+        <out-parameters>
+            <parameter name="fromDate"/><!-- yyyy-MM-dd -->
+            <parameter name="thruDate"/><!-- yyyy-MM-dd -->
+            <parameter name="users" type="List">
+                <parameter name="user" type="Map">
+                    <parameter name="userId"/>
+                    <parameter name="userPartyId"/>
+                    <parameter name="firstName"/>
+                    <parameter name="lastName"/>
+                    <parameter name="loginName"/>
+                    <parameter name="companyName"/>
+                    <parameter name="totalHits" type="Integer"/>
+                    <parameter name="days" type="List">
+                        <parameter name="dayEntry" type="Map">
+                            <parameter name="day"/><!-- yyyy-MM-dd -->
+                            <parameter name="hitCount" type="Integer"/>
+                        </parameter>
+                    </parameter>
+                </parameter>
+            </parameter>
+        </out-parameters>
+        <actions>
+            <set field="thruDateTime" from="endDateTime ?: ec.user.nowTimestamp"/>
+            <set field="fromDateTime"
+                from="startDateTime ?: new java.sql.Timestamp(thruDateTime.time - 30L*24*60*60*1000)"/>
+
+            <!-- Restrict to services exposed via growerp.rest.xml, excludes internal hits -->
+            <script><![CDATA[
+                def restXml = new groovy.xml.XmlSlurper().parse(
+                    ec.resource.getLocationReference('component://growerp/service/growerp.rest.xml').openStream())
+                externalServiceNames = restXml.'**'.findAll { it.name() == 'service' }
+                    .collect { it.@name.text() } as Set
+            ]]></script>
+
+            <entity-find entity-name="growerp.party.OwnerPersonRestRequest" list="hitData">
+                <econdition field-name="ownerPartyId" from="ownerPartyId" ignore-if-empty="true"/>
+                <econdition field-name="artifactName" operator="in" from="externalServiceNames"/>
+                <econdition field-name="startDateTime" operator="greater-equals" from="fromDateTime"/>
+                <econdition field-name="startDateTime" operator="less-equals" from="thruDateTime"/>
+                <select-field field-name="hitId"/>
+                <select-field field-name="userId"/>
+                <select-field field-name="userPartyId"/>
+                <select-field field-name="firstName"/>
+                <select-field field-name="lastName"/>
+                <select-field field-name="loginName"/>
+                <select-field field-name="companyName"/>
+                <select-field field-name="startDateTime"/>
+            </entity-find>
+
+            <!-- Bucket hits per user per day; the PERSONTOCOMPANY join can duplicate
+                 a hit for users related to multiple companies, so dedup on hitId -->
+            <script><![CDATA[
+                def userMap = [:]
+                def seenHits = new HashSet()
+                for (restData in hitData) {
+                    if (restData.hitId == null || !seenHits.add(restData.hitId)) continue
+                    def u = userMap[restData.userId]
+                    if (u == null) {
+                        u = [userId: restData.userId, userPartyId: restData.userPartyId,
+                             firstName: restData.firstName, lastName: restData.lastName,
+                             loginName: restData.loginName, companyName: restData.companyName,
+                             totalHits: 0, dayCounts: [:]]
+                        userMap[restData.userId] = u
+                    }
+                    def day = ec.l10n.format(restData.startDateTime, 'yyyy-MM-dd')
+                    u.dayCounts[day] = (u.dayCounts[day] ?: 0) + 1
+                    u.totalHits++
+                }
+                def sorted = userMap.values().sort { -it.totalHits }
+                if (sorted.size() > maxUsers) sorted = sorted.subList(0, maxUsers)
+                users = sorted.collect { u ->
+                    [userId: u.userId, userPartyId: u.userPartyId,
+                     firstName: u.firstName, lastName: u.lastName,
+                     loginName: u.loginName, companyName: u.companyName,
+                     totalHits: u.totalHits,
+                     days: u.dayCounts.collect { d, c -> [day: d, hitCount: c] }.sort { a, b -> a.day <=> b.day }]
+                }
+                fromDate = ec.l10n.format(fromDateTime, 'yyyy-MM-dd')
+                thruDate = ec.l10n.format(thruDateTime, 'yyyy-MM-dd')
+            ]]></script>
+        </actions>
+    </service>
+
+    <service verb="get" noun="SupportDashboard">
+        <description>Aggregated counters for the support app dashboard tiles:
+            applications, owners, system LLM usage and REST usage. One call feeds
+            all four dashboard chart minis.</description>
+        <in-parameters>
+            <parameter name="periodDays" type="Integer" default-value="30"/>
+        </in-parameters>
+        <out-parameters>
+            <!-- every section: bars = [{label, count}], plus four counters -->
+            <parameter name="applications" type="Map">
+                <parameter name="bars" type="List"/>
+                <parameter name="applications" type="Integer"/>
+                <parameter name="installs" type="Integer"/>
+                <parameter name="withAssessment" type="Integer"/>
+                <parameter name="withoutAssessment" type="Integer"/>
+            </parameter>
+            <parameter name="owners" type="Map">
+                <parameter name="bars" type="List"/>
+                <parameter name="owners" type="Integer"/>
+                <parameter name="active" type="Integer"/>
+                <parameter name="users" type="Integer"/>
+                <parameter name="companies" type="Integer"/>
+            </parameter>
+            <parameter name="llmUsage" type="Map">
+                <parameter name="bars" type="List"/>
+                <parameter name="tenants" type="Integer"/>
+                <parameter name="actions" type="Integer"/>
+                <parameter name="tokensIn" type="Integer"/>
+                <parameter name="tokensOut" type="Integer"/>
+            </parameter>
+            <parameter name="restUsage" type="Map">
+                <parameter name="bars" type="List"/>
+                <parameter name="users" type="Integer"/>
+                <parameter name="calls" type="Integer"/>
+                <parameter name="avgPerDay" type="Integer"/>
+                <parameter name="peakDay" type="Integer"/>
+            </parameter>
+        </out-parameters>
+        <actions>
+            <set field="thruDateTime" from="ec.user.nowTimestamp"/>
+            <set field="fromDateTime"
+                from="new java.sql.Timestamp(thruDateTime.time - (periodDays as long)*24*60*60*1000)"/>
+
+            <!-- ===== applications: owner installs per application ===== -->
+            <entity-find entity-name="growerp.Application" list="apps"/>
+            <entity-find entity-name="growerp.PartyApplication" list="installs">
+                <date-filter/>
+                <select-field field-name="partyId"/>
+                <select-field field-name="applicationId"/>
+            </entity-find>
+            <script><![CDATA[
+                def installsPerApp = installs.countBy { it.applicationId }
+                applications = [
+                    bars: apps.collect {
+                            [label: it.applicationId, count: installsPerApp[it.applicationId] ?: 0] }
+                        .sort { -it.count },
+                    applications: apps.size(),
+                    installs: installs.size(),
+                    withAssessment: apps.count { it.assessmentId } as int,
+                    withoutAssessment: apps.count { !it.assessmentId } as int]
+            ]]></script>
+
+            <!-- ===== rest hits: shared by the owners and restUsage sections ===== -->
+            <!-- Restrict to services exposed via growerp.rest.xml, excludes internal hits -->
+            <script><![CDATA[
+                def restXml = new groovy.xml.XmlSlurper().parse(
+                    ec.resource.getLocationReference('component://growerp/service/growerp.rest.xml').openStream())
+                externalServiceNames = restXml.'**'.findAll { it.name() == 'service' }
+                    .collect { it.@name.text() } as Set
+            ]]></script>
+            <entity-find entity-name="growerp.party.OwnerPersonRestRequest" list="hitData">
+                <econdition field-name="artifactName" operator="in" from="externalServiceNames"/>
+                <econdition field-name="startDateTime" operator="greater-equals" from="fromDateTime"/>
+                <econdition field-name="startDateTime" operator="less-equals" from="thruDateTime"/>
+                <select-field field-name="hitId"/>
+                <select-field field-name="userId"/>
+                <select-field field-name="ownerPartyId"/>
+                <select-field field-name="startDateTime"/>
+            </entity-find>
+
+            <!-- ===== owners: all owners, top ones by rest activity ===== -->
+            <entity-find entity-name="growerp.party.OwnerCompany" list="ownerCompanies">
+                <econdition field-name="role" value="OrgInternal"/>
+                <select-field field-name="ownerPartyId"/>
+                <select-field field-name="name"/>
+            </entity-find>
+            <!-- one row per person/role: distinct partyId gives the user count -->
+            <entity-find entity-name="growerp.party.OwnerUser" list="ownerPersons">
+                <select-field field-name="ownerPartyId"/>
+                <select-field field-name="partyId"/>
+            </entity-find>
+
+            <!-- The PERSONTOCOMPANY join can duplicate a hit for users related to
+                 multiple companies, so dedup on hitId before counting anything. -->
+            <script><![CDATA[
+                def seenHits = new HashSet()
+                def hits = []
+                for (hit in hitData) {
+                    if (hit.hitId == null || !seenHits.add(hit.hitId)) continue
+                    hits.add(hit)
+                }
+
+                def ownerNames = [:]
+                for (oc in ownerCompanies) ownerNames[oc.ownerPartyId] = oc.name ?: oc.ownerPartyId
+                // _NA_ is the placeholder owner on unscoped hits, not a tenant
+                def hitsPerOwner = hits.findAll { it.ownerPartyId != '_NA_' }
+                    .countBy { it.ownerPartyId }
+                owners = [
+                    // every owner is listed, busiest first: an owner without REST
+                    // access in the period still shows, with a zero bar
+                    bars: ownerNames.collect { ownerId, name ->
+                            [label: name, count: hitsPerOwner[ownerId] ?: 0] }
+                        .sort { -it.count }.take(6),
+                    owners: ownerNames.size(),
+                    active: hitsPerOwner.size(),
+                    users: ownerPersons.collect { it.partyId }.toSet().size(),
+                    companies: ownerCompanies.size()]
+
+                // restUsage: hits bucketed per week over the period
+                def dayMillis = 24L*60*60*1000
+                def weekCount = Math.max(1, (int)Math.ceil(periodDays / 7.0d))
+                // oldest week first, so the last bar is the current week
+                def weekBars = (0..<weekCount).collect { index ->
+                    def weeksAgo = weekCount - 1 - index
+                    [label: weeksAgo == 0 ? 'this week' : "${weeksAgo}w ago", count: 0] }
+                def perDay = [:]
+                for (hit in hits) {
+                    def daysAgo = (int)((thruDateTime.time - hit.startDateTime.time) / dayMillis)
+                    def weekIndex = weekCount - 1 - Math.min(weekCount - 1, (int)(daysAgo / 7))
+                    weekBars[weekIndex].count = weekBars[weekIndex].count + 1
+                    def day = ec.l10n.format(hit.startDateTime, 'yyyy-MM-dd')
+                    perDay[day] = (perDay[day] ?: 0) + 1
+                }
+                restUsage = [
+                    bars: weekBars,
+                    users: hits.collect { it.userId }.toSet().size(),
+                    calls: hits.size(),
+                    avgPerDay: (int)(hits.size() / periodDays),
+                    peakDay: perDay ? perDay.values().max() : 0]
+            ]]></script>
+
+            <!-- ===== llmUsage: system LLM actions by decision =====
+                 Guarded: a no-op when the moqui-adk component is absent. -->
+            <script><![CDATA[
+                llmUsage = [bars: [], tenants: 0, actions: 0, tokensIn: 0, tokensOut: 0]
+                try {
+                    def logs = ec.entity.find('moqui.adk.AdkActionLog')
+                            .condition('actionTime', 'greater-equals', fromDateTime)
+                            .condition('actionTime', 'less-equals', thruDateTime)
+                            .selectField('ownerPartyId').selectField('decision')
+                            .selectField('tokensIn').selectField('tokensOut').list()
+                    llmUsage = [
+                        bars: logs.countBy { it.decision ?: 'unknown' }
+                            .collect { decision, count -> [label: decision, count: count] }
+                            .sort { -it.count }.take(6),
+                        tenants: logs.collect { it.ownerPartyId }.toSet().size(),
+                        actions: logs.size(),
+                        // sum{} on an empty list returns null, so seed with inject
+                        tokensIn: logs.inject(0) { t, l -> t + ((l.tokensIn ?: 0) as int) },
+                        tokensOut: logs.inject(0) { t, l -> t + ((l.tokensOut ?: 0) as int) }]
+                } catch (Throwable t) {
+                    ec.logger.warn("ADK usage skipped: ${t.message}")
+                }
+            ]]></script>
+        </actions>
+    </service>
+
     <!-- Unified Gemini AI Service -->
     <service verb="call" noun="GeminiApi">
         <description>Call Gemini AI API with a prompt and optional configuration</description>

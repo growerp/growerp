@@ -117,6 +117,19 @@ abstract class RestClient {
     @Query('limit') int? limit,
   });
 
+  @GET("rest/s1/growerp/100/RestUsageStatistics")
+  Future<RestUsageStatistics> getRestUsageStatistics({
+    @Query('startDateTime') String? startDateTime,
+    @Query('endDateTime') String? endDateTime,
+    @Query('ownerPartyId') String? ownerPartyId,
+    @Query('maxUsers') int? maxUsers,
+  });
+
+  @GET("rest/s1/growerp/100/SupportDashboard")
+  Future<SupportDashboard> getSupportDashboard({
+    @Query('periodDays') int? periodDays,
+  });
+
   @GET("rest/s1/growerp/100/Authenticate")
   Future<Authenticate> getAuthenticate({
     @Query('applicationId') required String applicationId,

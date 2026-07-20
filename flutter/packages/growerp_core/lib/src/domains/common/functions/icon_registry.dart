@@ -85,6 +85,7 @@ final Map<String, Icon> iconRegistry = {
   // Support app icons
   'apps': const Icon(Icons.apps),
   'http': const Icon(Icons.http),
+  'scatter_plot': const Icon(Icons.scatter_plot),
   // Hotel app icons
   'king_bed': const Icon(Icons.king_bed),
   'book_online': const Icon(Icons.book_online),

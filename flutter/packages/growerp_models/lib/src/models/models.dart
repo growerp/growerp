@@ -54,6 +54,8 @@ export 'website_form_model.dart';
 export 'email_sequence_model.dart';
 export 'marketing_dashboard_model.dart';
 export 'crm_dashboard_model.dart';
+export 'rest_usage_statistics_model.dart';
+export 'support_dashboard_model.dart';
 export 'catalog_dashboard_model.dart';
 export 'order_dashboard_model.dart';
 export 'inventory_dashboard_model.dart';
