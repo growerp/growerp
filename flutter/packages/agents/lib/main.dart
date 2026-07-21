@@ -131,6 +131,13 @@ class _AgentsAppState extends State<AgentsApp> {
                     appId: 'agents',
                   ),
                 ),
+                GoRoute(
+                  path: '/:path',
+                  builder: (context, routeState) => AppSplashScreen.simple(
+                    appTitle: 'GrowERP Agents',
+                    appId: 'agents',
+                  ),
+                ),
               ],
             );
           }
