@@ -14,30 +14,75 @@ along with this software (see the LICENSE.md file). If not, see
 -->
 <screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-2.1.xsd">
+    <!-- Body parameters: application, firstName, lastName, newPassword, userLocale.
+         All wording lives in moqui.basic.LocalizedMessage (see GrowerpL10nData.xml);
+         per-application copy is keyed GrowerpEmailWelcomeIntro<App> /
+         GrowerpEmailWelcomeFirstStep<App>, so a new vertical needs seed rows only. -->
+    <parameter name="application"/>
+    <parameter name="firstName"/>
+    <parameter name="lastName"/>
+    <parameter name="newPassword"/>
+    <parameter name="userLocale"/>
+    <actions>
+        <script><![CDATA[
+            // Java API calls (Locale, l10n, resource) so this is Groovy rather than mini-language.
+            // ec.l10n.localize() does NOT expand ${} - it returns the stored string as-is - so
+            // every localized message must be run through ec.resource.expand() afterwards.
+            def loc = ec.context.userLocale ? new Locale(ec.context.userLocale) : ec.user.locale
+            String app = ec.context.application ?: 'Admin'
+
+            def msg = { String key -> ec.resource.expand(ec.l10n.localize(key, loc), '') }
+            // localize() returns the key itself when no row matches: fall back to ...Default
+            // so an unseeded application never mails out a raw message key.
+            def appMsg = { String base ->
+                String key = base + app
+                String raw = ec.l10n.localize(key, loc)
+                if (raw == key) raw = ec.l10n.localize(base + 'Default', loc)
+                return ec.resource.expand(raw, '')
+            }
+
+            // drop name parts without a single letter, so '1 1' greets without a name
+            def named = { String s -> s && s ==~ /(?s).*\p{L}.*/ }
+            String fn = named(ec.context.firstName) ? ec.context.firstName.trim() : ''
+            String ln = named(ec.context.lastName) ? ec.context.lastName.trim() : ''
+
+            ec.context.application = app
+            ec.context.userName = [fn, ln].findAll({ it }).join(' ')
+
+            greeting = ec.context.userName ? msg('GrowerpEmailWelcomeGreeting')
+                    : msg('GrowerpEmailWelcomeGreetingNoName')
+            intro = appMsg('GrowerpEmailWelcomeIntro')
+            firstStep = appMsg('GrowerpEmailWelcomeFirstStep')
+            stripeInfo = app in ['Admin', 'Hotel', 'Rental'] ? msg('GrowerpEmailWelcomeStripeInfo') : ''
+            supportInfo = msg('GrowerpEmailWelcomeSupportInfo')
+            passwordInfo = msg('GrowerpEmailWelcomePasswordInfo')
+            tipsInfo = msg('GrowerpEmailWelcomeTipsInfo')
+            regards = msg('GrowerpEmailWelcomeRegards')
+            team = msg('GrowerpEmailWelcomeTeam')
+        ]]></script>
+    </actions>
     <widgets>
         <render-mode>
             <text type="html"><![CDATA[
                 <html><body>
-                Welcome to the GrowERP ${application} system, ${firstName!} ${lastName!}<br/><br/>
-                <#if  application == 'Admin'>    
-                You can now start a website, sell products, manage your inventory and your accounting is done automatically.<br/><br/>
+                ${greeting}<br/><br/>
 
-                If you sell products on your website, you can enter your Stripe secret key on the website admin screen and incoming payments will be handled by your own stripe account.
-                Your secret key is safe with us: it is encrypted in our database<br/><br/>
-                
+                ${intro}<br/><br/>
+
+                ${firstStep}<br/><br/>
+
+                <#if stripeInfo?has_content>
+                ${stripeInfo}<br/><br/>
                 </#if>
-                
-                When you need any support, please let us know at
+
+                <b>${passwordInfo}</b><br/><br/>
+
+                ${supportInfo}
                 <a href="mailto:support@growerp.com?subject=Question%20about%20Growerp-${application}">support@growerp.com</a><br/><br/>
-                <b>Your password to login is ${newPassword}</b> <br/><br/>
 
-                If you just want to test, we also have a test system with limited availability and is cleared regularly: <br/>
-                Please register again at <a href="https://admin.growerp.org">https://admin.growerp.org</a><br/><br/>
+                ${tipsInfo}<br/><br/>
 
-                We will send you weekly an email with tips about the system.
-                But for now, look around and let us know your comments!
-                <br/><br/>
-                Regards, <br/> The Growerp-${application} Team!
+                ${regards} <br/> ${team}
                 </body></html>
             ]]></text></render-mode>
     </widgets>

@@ -12,19 +12,34 @@ You should have received a copy of the CC0 Public Domain Dedication
 along with this software (see the LICENSE.md file). If not, see
 <http://creativecommons.org/publicdomain/zero/1.0/>.
 -->
-<entity-facade-xml type="seed-initial">
+<!-- type=seed, not seed-initial: these strings are app-owned product copy that must stay
+     in lockstep with the templates/services referencing the keys. seed-initial is only
+     loaded when the DB is created, so an upgrade would leave stale rows behind and any
+     template referencing a changed key would fail to render. -->
+<entity-facade-xml type="seed">
 
   <!-- ============================================ -->
   <!-- EMAIL MESSAGES - Welcome Email -->
   <!-- ============================================ -->
 
+  <!-- userName is assembled by the template: name parts without a single letter
+       (a registrant typing '1 1') are dropped, and the NoName variant used instead -->
   <moqui.basic.LocalizedMessage locale="default" original="GrowerpEmailWelcomeGreeting"
-    localized="Welcome to the GrowERP ${application} system, ${firstName!} ${lastName!}" />
+    localized="Welcome to GrowERP ${application}, ${userName}" />
   <moqui.basic.LocalizedMessage locale="th" original="GrowerpEmailWelcomeGreeting"
-    localized="ยินดีต้อนรับสู่ระบบ GrowERP ${application}, ${firstName!} ${lastName!}" />
+    localized="ยินดีต้อนรับสู่ GrowERP ${application}, ${userName}" />
   <moqui.basic.LocalizedMessage locale="nl" original="GrowerpEmailWelcomeGreeting"
-    localized="Welkom bij het GrowERP ${application} systeem, ${firstName!} ${lastName!}" />
+    localized="Welkom bij GrowERP ${application}, ${userName}" />
 
+  <!-- used when the registrant supplied no usable first/last name -->
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpEmailWelcomeGreetingNoName"
+    localized="Welcome to GrowERP ${application}" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpEmailWelcomeGreetingNoName"
+    localized="ยินดีต้อนรับสู่ GrowERP ${application}" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpEmailWelcomeGreetingNoName"
+    localized="Welkom bij GrowERP ${application}" />
+
+  <!-- DEPRECATED: superseded by GrowerpEmailWelcomeIntroAdmin below, kept until removed in a later pass -->
   <moqui.basic.LocalizedMessage locale="default" original="GrowerpEmailWelcomeAdminIntro"
     localized="You can now start a website, sell products, manage your inventory and your accounting is done automatically." />
   <moqui.basic.LocalizedMessage locale="th" original="GrowerpEmailWelcomeAdminIntro"
@@ -32,27 +47,142 @@ along with this software (see the LICENSE.md file). If not, see
   <moqui.basic.LocalizedMessage locale="nl" original="GrowerpEmailWelcomeAdminIntro"
     localized="U kunt nu een website starten, producten verkopen, uw voorraad beheren en uw boekhouding wordt automatisch gedaan." />
 
+  <!-- ============================================ -->
+  <!-- Per-application welcome intro + first step.
+       Key = GrowerpEmailWelcomeIntro<App> / GrowerpEmailWelcomeFirstStep<App>, where
+       <App> is applicationId minus its 'App' prefix (AppHotel -> Hotel). Welcome.xml
+       falls back to the ...Default rows when an app has no rows of its own, so a new
+       vertical only needs rows added here - no template change. -->
+  <!-- ============================================ -->
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpEmailWelcomeIntroAdmin"
+    localized="Your back office is ready. Sell products, track inventory, invoice customers - and your accounting is posted automatically as you go, no bookkeeping needed." />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpEmailWelcomeIntroAdmin"
+    localized="ระบบหลังบ้านของคุณพร้อมใช้งานแล้ว ขายสินค้า ติดตามสินค้าคงคลัง ออกใบแจ้งหนี้ให้ลูกค้า และระบบบัญชีจะบันทึกรายการให้โดยอัตโนมัติ ไม่ต้องทำบัญชีเอง" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpEmailWelcomeIntroAdmin"
+    localized="Uw backoffice is klaar. Verkoop producten, houd uw voorraad bij, factureer klanten - en uw boekhouding wordt onderweg automatisch geboekt, zonder handmatig boekhouden." />
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpEmailWelcomeFirstStepAdmin"
+    localized="Add a product under Catalog, then create your first sales order." />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpEmailWelcomeFirstStepAdmin"
+    localized="เพิ่มสินค้าในเมนูแคตตาล็อก แล้วสร้างใบสั่งขายแรกของคุณ" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpEmailWelcomeFirstStepAdmin"
+    localized="Voeg een product toe onder Catalogus en maak daarna uw eerste verkooporder aan." />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpEmailWelcomeIntroHotel"
+    localized="Your property is ready to take bookings. Set up rooms, manage reservations on the occupancy calendar, and check guests in and out." />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpEmailWelcomeIntroHotel"
+    localized="ที่พักของคุณพร้อมรับการจองแล้ว ตั้งค่าห้องพัก จัดการการจองบนปฏิทินการเข้าพัก และเช็คอินเช็คเอาต์ผู้เข้าพัก" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpEmailWelcomeIntroHotel"
+    localized="Uw accommodatie kan boekingen ontvangen. Richt kamers in, beheer reserveringen op de bezettingskalender en check gasten in en uit." />
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpEmailWelcomeFirstStepHotel"
+    localized="Define your room types, then make a test reservation to see the calendar fill up." />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpEmailWelcomeFirstStepHotel"
+    localized="กำหนดประเภทห้องพักของคุณ แล้วลองสร้างการจองทดสอบเพื่อดูปฏิทินการเข้าพัก" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpEmailWelcomeFirstStepHotel"
+    localized="Definieer uw kamertypes en maak daarna een testreservering om de kalender gevuld te zien." />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpEmailWelcomeIntroFreelance"
+    localized="Everything to run solo: log your hours against clients, set your rates, and turn approved time into an invoice in one click." />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpEmailWelcomeIntroFreelance"
+    localized="ทุกอย่างสำหรับการทำงานอิสระ บันทึกชั่วโมงทำงานตามลูกค้า กำหนดอัตราค่าบริการ และแปลงเวลาที่อนุมัติแล้วเป็นใบแจ้งหนี้ได้ในคลิกเดียว" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpEmailWelcomeIntroFreelance"
+    localized="Alles om zelfstandig te werken: registreer uw uren per klant, stel uw tarieven in en zet goedgekeurde tijd met een klik om in een factuur." />
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpEmailWelcomeFirstStepFreelance"
+    localized="Add a client company, then log your first time entry." />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpEmailWelcomeFirstStepFreelance"
+    localized="เพิ่มบริษัทลูกค้า แล้วบันทึกรายการเวลาทำงานรายการแรกของคุณ" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpEmailWelcomeFirstStepFreelance"
+    localized="Voeg een klantbedrijf toe en registreer daarna uw eerste urenregel." />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpEmailWelcomeIntroRental"
+    localized="Your hire business is ready. Track equipment availability day by day, take reservations, and invoice on return." />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpEmailWelcomeIntroRental"
+    localized="ธุรกิจให้เช่าของคุณพร้อมแล้ว ติดตามความพร้อมของอุปกรณ์แบบรายวัน รับการจอง และออกใบแจ้งหนี้เมื่อคืนของ" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpEmailWelcomeIntroRental"
+    localized="Uw verhuurbedrijf is klaar. Volg de beschikbaarheid van materieel per dag, neem reserveringen aan en factureer bij retour." />
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpEmailWelcomeFirstStepRental"
+    localized="Add an item to your rental catalog, then check its availability calendar." />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpEmailWelcomeFirstStepRental"
+    localized="เพิ่มรายการลงในแคตตาล็อกสินค้าให้เช่า แล้วตรวจสอบปฏิทินความพร้อมของรายการนั้น" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpEmailWelcomeFirstStepRental"
+    localized="Voeg een item toe aan uw verhuurcatalogus en bekijk daarna de beschikbaarheidskalender." />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpEmailWelcomeIntroSupport"
+    localized="Your helpdesk is ready. Take in customer requests, assign them, and follow each one through to resolution." />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpEmailWelcomeIntroSupport"
+    localized="ระบบช่วยเหลือของคุณพร้อมแล้ว รับคำขอจากลูกค้า มอบหมายงาน และติดตามแต่ละเรื่องจนแก้ไขเสร็จสิ้น" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpEmailWelcomeIntroSupport"
+    localized="Uw helpdesk is klaar. Neem klantverzoeken aan, wijs ze toe en volg elk verzoek tot het is opgelost." />
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpEmailWelcomeFirstStepSupport"
+    localized="Open your first support request and assign it to yourself." />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpEmailWelcomeFirstStepSupport"
+    localized="เปิดคำขอรับการช่วยเหลือรายการแรก แล้วมอบหมายให้ตัวคุณเอง" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpEmailWelcomeFirstStepSupport"
+    localized="Open uw eerste supportverzoek en wijs het aan uzelf toe." />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpEmailWelcomeIntroMarketing"
+    localized="Your outreach hub is ready. Publish to your website, schedule social posts across platforms, and see what each campaign brought in." />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpEmailWelcomeIntroMarketing"
+    localized="ศูนย์กลางการตลาดของคุณพร้อมแล้ว เผยแพร่เนื้อหาบนเว็บไซต์ ตั้งเวลาโพสต์โซเชียลบนหลายแพลตฟอร์ม และดูผลลัพธ์ที่แต่ละแคมเปญสร้างได้" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpEmailWelcomeIntroMarketing"
+    localized="Uw marketinghub is klaar. Publiceer op uw website, plan social posts over meerdere platforms en zie wat elke campagne heeft opgeleverd." />
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpEmailWelcomeFirstStepMarketing"
+    localized="Connect a social platform, then schedule your first post." />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpEmailWelcomeFirstStepMarketing"
+    localized="เชื่อมต่อแพลตฟอร์มโซเชียล แล้วตั้งเวลาโพสต์แรกของคุณ" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpEmailWelcomeFirstStepMarketing"
+    localized="Koppel een social platform en plan daarna uw eerste post." />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpEmailWelcomeIntroAgents"
+    localized="Your AI workforce is ready. Configure agents, give them tools and access to your own data, and let them handle recurring work." />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpEmailWelcomeIntroAgents"
+    localized="ผู้ช่วย AI ของคุณพร้อมแล้ว ตั้งค่าเอเจนต์ ให้เครื่องมือและสิทธิ์เข้าถึงข้อมูลของคุณ แล้วให้เอเจนต์จัดการงานประจำแทนคุณ" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpEmailWelcomeIntroAgents"
+    localized="Uw AI-medewerkers staan klaar. Configureer agents, geef ze tools en toegang tot uw eigen gegevens, en laat ze terugkerend werk afhandelen." />
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpEmailWelcomeFirstStepAgents"
+    localized="Open the agent list and try a chat with the built-in assistant." />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpEmailWelcomeFirstStepAgents"
+    localized="เปิดรายการเอเจนต์ แล้วลองสนทนากับผู้ช่วยที่มีมาให้ในระบบ" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpEmailWelcomeFirstStepAgents"
+    localized="Open de agentlijst en probeer een gesprek met de ingebouwde assistent." />
+
+  <!-- fallback for an application with no rows of its own -->
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpEmailWelcomeIntroDefault"
+    localized="Your GrowERP system is ready to use." />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpEmailWelcomeIntroDefault"
+    localized="ระบบ GrowERP ของคุณพร้อมใช้งานแล้ว" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpEmailWelcomeIntroDefault"
+    localized="Uw GrowERP systeem is klaar voor gebruik." />
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpEmailWelcomeFirstStepDefault"
+    localized="Log in and take a look around - the menu on the left is your starting point." />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpEmailWelcomeFirstStepDefault"
+    localized="เข้าสู่ระบบและลองสำรวจดู เมนูทางด้านซ้ายคือจุดเริ่มต้นของคุณ" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpEmailWelcomeFirstStepDefault"
+    localized="Log in en kijk rond - het menu aan de linkerkant is uw startpunt." />
+
   <moqui.basic.LocalizedMessage locale="default" original="GrowerpEmailWelcomeStripeInfo"
-    localized="If you sell products on your website, you can enter your Stripe secret key on the website admin screen and incoming payments will be handled by your own stripe account. Your secret key is safe with us: it is encrypted in our database" />
+    localized="Selling online? Enter your Stripe secret key on the website admin screen and payments go straight into your own Stripe account. Your key is encrypted in our database." />
   <moqui.basic.LocalizedMessage locale="th" original="GrowerpEmailWelcomeStripeInfo"
-    localized="หากคุณขายสินค้าบนเว็บไซต์ คุณสามารถป้อน Stripe secret key ในหน้าจัดการเว็บไซต์ และการชำระเงินที่เข้ามาจะถูกจัดการโดยบัญชี Stripe ของคุณเอง คีย์ของคุณปลอดภัยกับเรา: มันถูกเข้ารหัสในฐานข้อมูลของเรา" />
+    localized="ขายออนไลน์อยู่ใช่ไหม ป้อน Stripe secret key ของคุณในหน้าจัดการเว็บไซต์ แล้วเงินที่ชำระเข้ามาจะเข้าบัญชี Stripe ของคุณเองโดยตรง คีย์ของคุณถูกเข้ารหัสไว้ในฐานข้อมูลของเรา" />
   <moqui.basic.LocalizedMessage locale="nl" original="GrowerpEmailWelcomeStripeInfo"
-    localized="Als u producten op uw website verkoopt, kunt u uw Stripe geheime sleutel invoeren op het website beheerscherm en inkomende betalingen worden afgehandeld door uw eigen Stripe-account. Uw geheime sleutel is veilig bij ons: deze is versleuteld in onze database" />
+    localized="Verkoopt u online? Voer uw Stripe geheime sleutel in op het website beheerscherm en betalingen komen rechtstreeks op uw eigen Stripe-account binnen. Uw sleutel wordt versleuteld opgeslagen in onze database." />
 
   <moqui.basic.LocalizedMessage locale="default" original="GrowerpEmailWelcomeSupportInfo"
-    localized="When you need any support, please let us know at" />
+    localized="Questions? Write to us - we answer personally:" />
   <moqui.basic.LocalizedMessage locale="th" original="GrowerpEmailWelcomeSupportInfo"
-    localized="เมื่อคุณต้องการความช่วยเหลือ โปรดแจ้งให้เราทราบที่" />
+    localized="มีคำถามไหม เขียนมาหาเราได้เลย เราตอบด้วยตัวเองทุกฉบับ:" />
   <moqui.basic.LocalizedMessage locale="nl" original="GrowerpEmailWelcomeSupportInfo"
-    localized="Wanneer u ondersteuning nodig heeft, laat het ons weten op" />
+    localized="Vragen? Schrijf ons - we antwoorden persoonlijk:" />
 
   <moqui.basic.LocalizedMessage locale="default" original="GrowerpEmailWelcomePasswordInfo"
-    localized="Your password to login is ${newPassword} Please Note you need a credit card to register in our production system" />
+    localized="Your password to login is ${newPassword}" />
   <moqui.basic.LocalizedMessage locale="th" original="GrowerpEmailWelcomePasswordInfo"
-    localized="รหัสผ่านสำหรับเข้าสู่ระบบของคุณคือ ${newPassword} โปรดทราบว่าคุณต้องใช้บัตรเครดิตในการลงทะเบียนในระบบจริงของเรา" />
+    localized="รหัสผ่านสำหรับเข้าสู่ระบบของคุณคือ ${newPassword}" />
   <moqui.basic.LocalizedMessage locale="nl" original="GrowerpEmailWelcomePasswordInfo"
-    localized="Uw wachtwoord om in te loggen is ${newPassword} Let op: u heeft een creditcard nodig om te registreren in ons productiesysteem" />
+    localized="Uw wachtwoord om in te loggen is ${newPassword}" />
 
+  <!-- DEPRECATED: the "register again on the test system" pitch was dropped from the
+       production welcome mail - it pointed every vertical at the admin app. Unused. -->
   <moqui.basic.LocalizedMessage locale="default" original="GrowerpEmailWelcomeTestSystemInfo"
     localized="If you just want to test, we also have a test system with limited availability and is cleared regularly:" />
   <moqui.basic.LocalizedMessage locale="th" original="GrowerpEmailWelcomeTestSystemInfo"
@@ -68,11 +198,11 @@ along with this software (see the LICENSE.md file). If not, see
     localized="Registreer opnieuw bij" />
 
   <moqui.basic.LocalizedMessage locale="default" original="GrowerpEmailWelcomeTipsInfo"
-    localized="We will send you weekly an email with tips about the system. But for now, look around and let us know your comments!" />
+    localized="Each week we send one short email with a tip about the system. For now: look around, and tell us what you think." />
   <moqui.basic.LocalizedMessage locale="th" original="GrowerpEmailWelcomeTipsInfo"
-    localized="เราจะส่งอีเมลให้คุณทุกสัปดาห์พร้อมคำแนะนำเกี่ยวกับระบบ แต่สำหรับตอนนี้ ลองดูรอบๆ และแจ้งความคิดเห็นของคุณให้เราทราบ!" />
+    localized="ทุกสัปดาห์เราจะส่งอีเมลสั้นๆ หนึ่งฉบับพร้อมเคล็ดลับการใช้งานระบบ สำหรับตอนนี้ ลองสำรวจดูรอบๆ แล้วบอกความคิดเห็นของคุณกับเรา" />
   <moqui.basic.LocalizedMessage locale="nl" original="GrowerpEmailWelcomeTipsInfo"
-    localized="We sturen u wekelijks een e-mail met tips over het systeem. Maar voor nu, kijk rond en laat ons uw opmerkingen weten!" />
+    localized="Elke week sturen we een korte e-mail met een tip over het systeem. Kijk voor nu vooral rond en laat ons weten wat u ervan vindt." />
 
   <moqui.basic.LocalizedMessage locale="default" original="GrowerpEmailWelcomeRegards"
     localized="Regards," />
@@ -82,19 +212,19 @@ along with this software (see the LICENSE.md file). If not, see
     localized="Met vriendelijke groet," />
 
   <moqui.basic.LocalizedMessage locale="default" original="GrowerpEmailWelcomeTeam"
-    localized="The Growerp-${application} Team!" />
+    localized="The GrowERP ${application} Team" />
   <moqui.basic.LocalizedMessage locale="th" original="GrowerpEmailWelcomeTeam"
-    localized="ทีม Growerp-${application}!" />
+    localized="ทีมงาน GrowERP ${application}" />
   <moqui.basic.LocalizedMessage locale="nl" original="GrowerpEmailWelcomeTeam"
-    localized="Het Growerp-${application} Team!" />
+    localized="Het GrowERP ${application} Team" />
 
   <!-- Welcome Test Email -->
   <moqui.basic.LocalizedMessage locale="default" original="GrowerpEmailWelcomeTestNote"
-    localized="Please note that you are now going to use our test system with limited availability and is cleared regularly?" />
+    localized="A heads-up: this is our test system. Availability is limited and all data is wiped regularly, so please do not use it for real business data." />
   <moqui.basic.LocalizedMessage locale="th" original="GrowerpEmailWelcomeTestNote"
-    localized="โปรดทราบว่าคุณกำลังจะใช้ระบบทดสอบของเราที่มีความพร้อมใช้งานจำกัดและจะถูกล้างข้อมูลเป็นประจำ" />
+    localized="โปรดทราบ นี่คือระบบทดสอบของเรา มีความพร้อมใช้งานจำกัดและข้อมูลทั้งหมดจะถูกล้างเป็นประจำ จึงไม่ควรใช้เก็บข้อมูลธุรกิจจริง" />
   <moqui.basic.LocalizedMessage locale="nl" original="GrowerpEmailWelcomeTestNote"
-    localized="Houd er rekening mee dat u nu ons testsysteem gaat gebruiken met beperkte beschikbaarheid en dat deze regelmatig wordt gewist?" />
+    localized="Let op: dit is ons testsysteem. De beschikbaarheid is beperkt en alle gegevens worden regelmatig gewist, gebruik het dus niet voor echte bedrijfsgegevens." />
 
   <!-- ============================================ -->
   <!-- EMAIL MESSAGES - Password Reset -->

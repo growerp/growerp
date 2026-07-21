@@ -14,23 +14,67 @@ along with this software (see the LICENSE.md file). If not, see
 -->
 <screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-2.1.xsd">
+    <!-- Test-system twin of Welcome.xml: same per-application copy, plus the
+         cleared-regularly note, minus the Stripe paragraph. See Welcome.xml for
+         how the localized keys resolve. -->
+    <parameter name="application"/>
+    <parameter name="firstName"/>
+    <parameter name="lastName"/>
+    <parameter name="newPassword"/>
+    <parameter name="userLocale"/>
+    <actions>
+        <script><![CDATA[
+            // ec.l10n.localize() does NOT expand ${} - always run the result through expand().
+            def loc = ec.context.userLocale ? new Locale(ec.context.userLocale) : ec.user.locale
+            String app = ec.context.application ?: 'Admin'
+
+            def msg = { String key -> ec.resource.expand(ec.l10n.localize(key, loc), '') }
+            def appMsg = { String base ->
+                String key = base + app
+                String raw = ec.l10n.localize(key, loc)
+                if (raw == key) raw = ec.l10n.localize(base + 'Default', loc)
+                return ec.resource.expand(raw, '')
+            }
+
+            def named = { String s -> s && s ==~ /(?s).*\p{L}.*/ }
+            String fn = named(ec.context.firstName) ? ec.context.firstName.trim() : ''
+            String ln = named(ec.context.lastName) ? ec.context.lastName.trim() : ''
+
+            ec.context.application = app
+            ec.context.userName = [fn, ln].findAll({ it }).join(' ')
+
+            greeting = ec.context.userName ? msg('GrowerpEmailWelcomeGreeting')
+                    : msg('GrowerpEmailWelcomeGreetingNoName')
+            testNote = msg('GrowerpEmailWelcomeTestNote')
+            intro = appMsg('GrowerpEmailWelcomeIntro')
+            firstStep = appMsg('GrowerpEmailWelcomeFirstStep')
+            supportInfo = msg('GrowerpEmailWelcomeSupportInfo')
+            passwordInfo = msg('GrowerpEmailWelcomePasswordInfo')
+            tipsInfo = msg('GrowerpEmailWelcomeTipsInfo')
+            regards = msg('GrowerpEmailWelcomeRegards')
+            team = msg('GrowerpEmailWelcomeTeam')
+        ]]></script>
+    </actions>
     <widgets>
         <render-mode>
             <text type="html"><![CDATA[
                 <html><body>
-                Welcome to the GrowERP ${application} system, ${firstName!} ${lastName!}<br/><br/>
+                ${greeting}<br/><br/>
 
-                Please note that you are now going to use our test system with limited availability and is cleared regularly?<br/><br/>
-                
-                <b>Your password to login is ${newPassword}</b><br/><br/>
-                
-                When you need any support, please let us know at
+                ${testNote}<br/><br/>
+
+                ${intro}<br/><br/>
+
+                ${firstStep}<br/><br/>
+
+                <b>${passwordInfo}</b><br/><br/>
+
+                ${supportInfo}
                 <a href="mailto:support@growerp.com?subject=Question%20about%20Growerp-${application}%20on%20the%20test%20system">support@growerp.com</a><br/><br/>
 
-                We will send you weekly an email with tips about the system.
-                But for now, look around and let us know your comments!
-                <br/><br/>
-                Regards, <br/> The Growerp-${application} Team!
+                ${tipsInfo}<br/><br/>
+
+                ${regards} <br/> ${team}
                 </body></html>
             ]]></text></render-mode>
     </widgets>
