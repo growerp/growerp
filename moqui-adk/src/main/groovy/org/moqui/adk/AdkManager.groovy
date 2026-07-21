@@ -444,36 +444,35 @@ CRITICAL tool-use rules — follow exactly:
     }
 
     /// Register the shared DEFAULT_CONFIG runner used for interactive chat, deriving
-    /// its key from (in order) [seedKey], env vars, then the gemini growerp.general.LlmConfig.
+    /// its key from (in order) the gemini growerp.general.LlmConfig, env vars, then [seedKey].
     /// No-op when the runner already exists. Called by lazyInit and reloadInteractive.
     private static void ensureInteractiveDefault(ExecutionContextFactory ecf, String seedKey = null,
                                                  String model = 'gemini-2.5-flash-lite') {
         if (registry.containsKey(DEFAULT_CONFIG)) return
-        // Precedence for the shared interactive runner: explicit env var → key saved via
-        // System Setup (growerp.general.LlmConfig) → key borrowed from a specialised agent
-        // (seedKey). The System Setup key must win over a specialised agent's key (e.g. the
-        // CI Monitor) so general chat uses the tenant's own key, not the monitor's.
-        String defaultKey = System.getenv('GOOGLE_API_KEY') ?:
+        // Precedence for the shared interactive runner: key saved via System Setup
+        // (growerp.general.LlmConfig) → explicit env var → key borrowed from a specialised
+        // agent (seedKey). The System Setup key must win over the env var so an admin/tenant
+        // can always override a stale or server-wide key without a restart.
+        String defaultKey = ''
+        try {
+            def ec = ecf.getExecutionContext()
+            boolean wasDisabled = ec.artifactExecution.disableAuthz()
+            try {
+                def lcList = ec.entity.find('growerp.general.LlmConfig')
+                        .condition('llmProvider', 'gemini').list()
+                for (def lc in lcList) {
+                    String k = lc.getString('apiKey')
+                    if (k) { defaultKey = k; break }
+                }
+                logger.info("ensureInteractiveDefault: LlmConfig gemini rows={}, keyFound={}",
+                        lcList?.size() ?: 0, (defaultKey ? true : false))
+            } finally { if (!wasDisabled) ec.artifactExecution.enableAuthz() }
+        } catch (Exception e) {
+            logger.error("ensureInteractiveDefault: LlmConfig lookup failed: ${e.message}", e)
+        }
+        if (!defaultKey) defaultKey = System.getenv('GOOGLE_API_KEY') ?:
                             System.getenv('GOOGLE_GENAI_API_KEY') ?:
                             System.getenv('GEMINI_API_KEY') ?: ''
-        if (!defaultKey) {
-            try {
-                def ec = ecf.getExecutionContext()
-                boolean wasDisabled = ec.artifactExecution.disableAuthz()
-                try {
-                    def lcList = ec.entity.find('growerp.general.LlmConfig')
-                            .condition('llmProvider', 'gemini').list()
-                    for (def lc in lcList) {
-                        String k = lc.getString('apiKey')
-                        if (k) { defaultKey = k; break }
-                    }
-                    logger.info("ensureInteractiveDefault: LlmConfig gemini rows={}, keyFound={}",
-                            lcList?.size() ?: 0, (defaultKey ? true : false))
-                } finally { if (!wasDisabled) ec.artifactExecution.enableAuthz() }
-            } catch (Exception e) {
-                logger.error("ensureInteractiveDefault: LlmConfig lookup failed: ${e.message}", e)
-            }
-        }
         if (!defaultKey) defaultKey = seedKey ?: ''
         logger.info("ensureInteractiveDefault: registering __default__ hasKey={} (seedKeyPresent={})",
                 (defaultKey ? true : false), (seedKey ? true : false))
@@ -503,13 +502,10 @@ CRITICAL tool-use rules — follow exactly:
         logger.info("Registered per-tenant interactive agent configId='${cid}' (owner=${ownerPartyId})")
     }
 
-    /// Resolve a gemini API key for [ownerPartyId]: env vars → this owner's LlmConfig →
-    /// any gemini LlmConfig. Returns '' when none found.
+    /// Resolve a gemini API key for [ownerPartyId]: this owner's LlmConfig → any gemini
+    /// LlmConfig → a key borrowed from an AdkAgentConfig → env vars. Returns '' when none found.
     private static String resolveTenantKey(String ownerPartyId) {
-        String key = System.getenv('GOOGLE_API_KEY') ?:
-                     System.getenv('GOOGLE_GENAI_API_KEY') ?:
-                     System.getenv('GEMINI_API_KEY') ?: ''
-        if (key) return key
+        String key = ''
         try {
             def ec = sharedSessionService.ecf.getExecutionContext()
             boolean wasDisabled = ec.artifactExecution.disableAuthz()
@@ -545,6 +541,9 @@ CRITICAL tool-use rules — follow exactly:
         } catch (Exception e) {
             logger.warn("resolveTenantKey(${ownerPartyId}) failed: ${e.message}")
         }
+        if (!key) key = System.getenv('GOOGLE_API_KEY') ?:
+                         System.getenv('GOOGLE_GENAI_API_KEY') ?:
+                         System.getenv('GEMINI_API_KEY') ?: ''
         return key
     }
 
