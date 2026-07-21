@@ -81,7 +81,7 @@ This directory contains comprehensive documentation for extending and developing
 - **[🤖 Agent Control Center & Moqui MCP Guide](./AGENT_CONTROL_CENTER_AND_MCP_GUIDE.md)** - Consolidated guide to multi-agent orchestration and MCP integration ⭐ **NEW!**
 - **[🧠 Agent Control Center (ADK) User Guide](./Agent_Control_Center_User_Guide.md)** - Original UI user guide
 - **[🎮 Agent Demo Walkthrough](./Agent_Control_Center_Demo.md)** - Test the operations assistant and specialist agent team
-- **[Model Context Protocol (MCP) Server](../moqui/runtime/component/growerp/docs/README.md)** - AI integration system
+- **[Moqui MCP User Guide](./Moqui_MCP_User_Guide.md)** - Connecting a client and using the MCP tools ⭐ **NEW!**
 - **[Invoice Scan Documentation](./Invoice_Scan_Documentation.md)** - AI-powered invoice processing ⭐ **NEW FEATURE!**
 
 ### 📊 Business Processes & Party Model
@@ -257,7 +257,7 @@ BlocListener<UserBloc, UserState>(
 ### 🤖 AI/ML Developers
 1. [GrowERP AI Development Instructions](./GrowERP_AI_Instructions.md)
 2. [Invoice Scan Documentation](./Invoice_Scan_Documentation.md) ⭐ **NEW!**
-3. [Model Context Protocol (MCP) Server](../moqui/runtime/component/growerp/docs/README.md)
+3. [Moqui MCP User Guide](./Moqui_MCP_User_Guide.md)
 
 ### 🌐 Localization/Translation Teams
 1. [BLoC Message Translation Quick Reference](./QUICK_REFERENCE_BLOC_MESSAGES.md) ⭐ **Complete guide**
@@ -311,6 +311,7 @@ BlocListener<UserBloc, UserState>(
 | **Agent Control Center (ADK)** | [Agent Control Center User Guide](./Agent_Control_Center_User_Guide.md) | All sections |
 | **Agent Demo Walkthrough** | [Agent Demo Walkthrough](./Agent_Control_Center_Demo.md) | All sections |
 | **MCP Servers & Integration** | [Agent Control Center User Guide](./Agent_Control_Center_User_Guide.md) | MCP Servers |
+| **Connecting a client to Moqui MCP / MCP tools** | [Moqui MCP User Guide](./Moqui_MCP_User_Guide.md) | All sections |
 | **Dynamic menu system** | [Dynamic Menu System and Widget Repository](./Dynamic_Menu_System_And_Widget_Repository.md) | Complete guide |
 | **Widget registry pattern** | [Dynamic Menu System and Widget Repository](./Dynamic_Menu_System_And_Widget_Repository.md) | Widget Registry |
 | **Static vs dynamic router** | [Dynamic Menu System and Widget Repository](./Dynamic_Menu_System_And_Widget_Repository.md) | When to Use Each Pattern |
