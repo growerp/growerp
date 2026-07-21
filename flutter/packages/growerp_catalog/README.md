@@ -5,6 +5,7 @@ It contains the following file maintenance screens:
 - Product
 - Category
 - Assets
+- Subscription
 
 ## integrated test
 An integrated test is available in the example component.  

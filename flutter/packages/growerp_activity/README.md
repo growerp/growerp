@@ -1,9 +1,11 @@
-This is the Task/Event part of the GrowERP system.
+This is the Activity/Task/Time-tracking part of the GrowERP system.
 
 It contains the following file maintenance screens:
 
-- Event
-- ToDo
+- Activity (task/event)
+- Time Entry (time sheet entry against an activity)
+- Time Entry Report (list of logged time)
+- Time Entry Invoice (generate an invoice from unbilled time entries)
 
 ## integrated test
 An integrated test is available in the example component.  
@@ -24,4 +26,3 @@ flutter test integration_test
 ## use the example component
 As with the integration test you can use a local backend or our test backend.
 Before you can use the Core component you have to create a company which sends an email with a password. Use this password to login and the Core components appear in the main menu.
-

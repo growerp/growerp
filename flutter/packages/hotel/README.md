@@ -1,15 +1,23 @@
 # GrowERP Hotel App
 
-GrowERP Flutter frontend component for Android, IOS and Web using Flutter.
+GrowERP vertical for Android, iOS, Web, Linux and Windows (Flutter) covering hotel
+operations: room catalog/rates, reservations, housekeeping and accounting.
 
-Under development.
-several branches with different products, all using Flutter:
+Built from these building blocks (`flutter/packages/growerp_*`):
 
-This Hotel branch will contain an app withe the following functions:
+- `growerp_user_company` — companies, users, employees
+- `growerp_catalog` — room/product catalog
+- `growerp_inventory` — room/asset inventory
+- `growerp_order_accounting` — reservations (orders), invoices, payments, ledger
+- `growerp_website` — public website/booking pages
+- `growerp_rental` — Gantt-style availability/rate scheduling shared with the Rental app
+- `growerp_activity` — tasks/activities
+- `growerp_adk` — AI chat assistant
 
-1. Customer reservation
-2. Room management
-3. checkin/out
-4. Accounting
+App-specific: `HousekeepingForm` (room status/cleaning) and `AccountingForm`.
 
-For the backend you need the Moqui or OFBiz ERP system (moqui.org) 
+The dashboard, menu and navigation are server-driven (`MenuConfigBloc`, applicationId
+`hotel`) and can be reordered/customized per user.
+
+Backend: Moqui ERP (moqui.org) — see `docs/Flutter_Moqui_REST_Backend_Interface.md` in the
+repo root for the REST API, and the root `CLAUDE.md` / `README.md` for setup.

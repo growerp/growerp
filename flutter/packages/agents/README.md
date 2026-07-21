@@ -1,17 +1,22 @@
-# agents
+# GrowERP Agents App
 
-A new Flutter project.
+GrowERP vertical for Android, iOS, Web, Linux and Windows (Flutter) for AI agent
+governance: chat with ADK agents, review/approve agent jobs and actions, plus light
+organization (company, employees, website) and system setup.
 
-## Getting Started
+Built from these building blocks (`flutter/packages/growerp_*`):
 
-This project is a starting point for a Flutter application.
+- `growerp_user_company` — companies, users, employees
+- `growerp_website` — public website
+- `growerp_adk` — AI chat (`AdkChatView`), agents, MCP servers, jobs, approvals,
+  action audit (`AdkAgentListView`, `AdkMcpServerListView`, `AdkJobListView`,
+  `AdkApprovalsListView`, `AdkActionsListView`, `AdkKnowledgeView`)
 
-A few resources to get you started if this is your first Flutter project:
+App-specific: `AgentsDashboard` (reorderable, menu-driven dashboard) and
+`SystemSetupDialog`.
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+The dashboard, menu and navigation are server-driven (`MenuConfigBloc`, applicationId
+`agents`) and can be reordered/customized per user.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Backend: Moqui ERP (moqui.org) — see `docs/Flutter_Moqui_REST_Backend_Interface.md` in the
+repo root for the REST API, and the root `CLAUDE.md` / `README.md` for setup.
