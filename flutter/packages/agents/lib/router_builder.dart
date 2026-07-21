@@ -39,15 +39,6 @@ const agentsMenuConfig = MenuConfiguration(
       isActive: true,
     ),
     MenuItem(
-      menuItemId: 'AGENTS_AICHAT',
-      title: 'AI Chat',
-      route: '/chat',
-      iconName: 'smart_toy',
-      sequenceNum: 20,
-      widgetName: 'AdkChatView',
-      isActive: true,
-    ),
-    MenuItem(
       menuItemId: 'AGENTS_AIAGENTS',
       title: 'AI Agents',
       route: '/adk-agents',
@@ -234,6 +225,35 @@ class AgentsDashboard extends StatelessWidget {
                     .add(MenuItemToggleMinimize(id)),
                 onRefresh: () async {
                   context.read<AuthBloc>().add(AuthLoad());
+                },
+                // Render each ADK tile as a rich graphic card (breakdown bars
+                // + headline counters), same style as the admin app's Agent
+                // Control tile.
+                compactGraphicRoutes: const {
+                  '/adk-agents',
+                  '/adk-mcp-servers',
+                  '/adk-jobs',
+                  '/adk-approvals',
+                  '/adk-actions',
+                  '/adk-knowledge',
+                },
+                chartBuilder: (route) {
+                  switch (route) {
+                    case '/adk-agents':
+                      return const AgentControlDashboardChartMini();
+                    case '/adk-mcp-servers':
+                      return const AdkMcpServersDashboardChartMini();
+                    case '/adk-jobs':
+                      return const AdkJobsDashboardChartMini();
+                    case '/adk-approvals':
+                      return const AdkApprovalsDashboardChartMini();
+                    case '/adk-actions':
+                      return const AdkActionsDashboardChartMini();
+                    case '/adk-knowledge':
+                      return const AdkKnowledgeDashboardChartMini();
+                    default:
+                      return null;
+                  }
                 },
               ),
             );

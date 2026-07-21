@@ -34,11 +34,16 @@ Future main() async {
   GlobalConfiguration().updateValue('version', packageInfo.version);
   GlobalConfiguration().updateValue('build', packageInfo.buildNumber);
 
+  String applicationId = GlobalConfiguration().get("applicationId");
+
+  // Check for a production/test backend url override. Side effect: sets the
+  // "test" flag so the top-left test banner shows (same as the admin app).
+  await getBackendUrlOverride(applicationId, packageInfo.version);
+
   Bloc.observer = AppBlocObserver();
   RestClient restClient = RestClient(await buildDioClient());
   WsClient chatClient = WsClient('chat');
   WsClient notificationClient = WsClient('notws');
-  String applicationId = GlobalConfiguration().get("applicationId");
 
   runApp(
     AgentsApp(

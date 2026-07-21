@@ -601,8 +601,6 @@ along with this software (see the LICENSE.md file). If not, see
     <!-- ====================== AGENTS_DEFAULT Menu Items ====================== -->
     <growerp.menu.MenuItem menuItemId="AGENTS_MAIN" menuConfigurationId="AGENTS_DEFAULT"
         title="Main" route="/" iconName="dashboard" widgetName="AgentsDashboard" sequenceNum="10"/>
-    <growerp.menu.MenuItem menuItemId="AGENTS_AICHAT" menuConfigurationId="AGENTS_DEFAULT"
-        title="AI Chat" route="/chat" iconName="smart_toy" widgetName="AdkChatView" sequenceNum="20"/>
     <growerp.menu.MenuItem menuItemId="AGENTS_AIAGENTS" menuConfigurationId="AGENTS_DEFAULT"
         title="AI Agents" route="/adk-agents" iconName="smart_toy" widgetName="AdkAgentListView" sequenceNum="30"/>
     <growerp.menu.MenuItem menuItemId="AGENTS_MCPSERVERS" menuConfigurationId="AGENTS_DEFAULT"

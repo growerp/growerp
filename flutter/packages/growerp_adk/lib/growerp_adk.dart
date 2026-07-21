@@ -25,3 +25,4 @@ export 'src/adk_approvals_list_view.dart';
 export 'src/adk_knowledge_service.dart';
 export 'src/adk_knowledge_view.dart';
 export 'src/agent_control_dashboard_chart_mini.dart';
+export 'src/adk_dashboard_minis.dart';
