@@ -17,3 +17,4 @@ library;
 export 'src/views/wiki_list.dart';
 export 'src/views/wiki_page_dialog.dart';
 export 'src/get_wiki_widgets.dart';
+export 'src/wiki_dashboard_chart_mini.dart';

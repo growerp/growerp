@@ -20,6 +20,7 @@ import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_adk/growerp_adk.dart';
 import 'package:growerp_user_company/growerp_user_company.dart';
 import 'package:growerp_website/growerp_website.dart';
+import 'package:growerp_wiki/growerp_wiki.dart';
 
 /// Local fallback menu for the Agents app (mirrors the AGENTS_DEFAULT backend
 /// seed). The dynamic router normally renders the backend menu so options can
@@ -90,6 +91,15 @@ const agentsMenuConfig = MenuConfiguration(
       iconName: 'menu_book',
       sequenceNum: 65,
       widgetName: 'AdkKnowledgeView',
+      isActive: true,
+    ),
+    MenuItem(
+      menuItemId: 'AGENTS_WIKI',
+      title: 'Wiki',
+      route: '/wiki',
+      iconName: 'menu_book',
+      sequenceNum: 67,
+      widgetName: 'WikiList',
       isActive: true,
     ),
     MenuItem(
@@ -169,6 +179,7 @@ GoRouter createDynamicAgentsRouter(
 List<Map<String, GrowerpWidgetBuilder>> agentsWidgetRegistrations = [
   getUserCompanyWidgets(),
   getWebsiteWidgets(),
+  getWikiWidgets(),
   {
     'AgentsDashboard': (args) => const AgentsDashboard(),
     'AboutForm': (args) => const AboutForm(),
@@ -236,6 +247,7 @@ class AgentsDashboard extends StatelessWidget {
                   '/adk-approvals',
                   '/adk-actions',
                   '/adk-knowledge',
+                  '/wiki',
                 },
                 chartBuilder: (route) {
                   switch (route) {
@@ -251,6 +263,8 @@ class AgentsDashboard extends StatelessWidget {
                       return const AdkActionsDashboardChartMini();
                     case '/adk-knowledge':
                       return const AdkKnowledgeDashboardChartMini();
+                    case '/wiki':
+                      return const WikiDashboardChartMini();
                     default:
                       return null;
                   }
