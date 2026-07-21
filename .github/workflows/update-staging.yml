@@ -317,3 +317,23 @@ jobs:
               echo "- ❌ $app" >> $GITHUB_STEP_SUMMARY
             fi
           done
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # 6. Pull the new :latest images onto the staging swarm right away.
+  #    Without this the redeploy only happens on the host's cron (up to 15 min
+  #    later) and the workflow gives no feedback on whether staging picked it up.
+  #    Runs for bump=none too — that is the case that has no commit job at all.
+  # ───────────────────────────────────────────────────────────────────────────
+  deploy-staging:
+    needs: [prepare, build-image, build-moqui]
+    if: always() && needs.prepare.result == 'success' && (needs.build-image.result == 'success' || needs.build-image.result == 'skipped') && (needs.build-moqui.result == 'success' || needs.build-moqui.result == 'skipped')
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Apply image updates on staging swarm
+        uses: appleboy/ssh-action@v1
+        with:
+          host: growerp.com
+          username: ${{ secrets.PROD_SSH_USER }}
+          key: ${{ secrets.PROD_SSH_KEY }}
+          script: server/swarm/check-updates.sh --apply
