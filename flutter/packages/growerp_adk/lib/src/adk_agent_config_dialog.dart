@@ -210,7 +210,17 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
     try {
       final svc = await AdkConfigService.create();
       await svc.detachServer(adkAgentMcpServerId);
-      await _loadMcpServers();
+      // Drop the row locally instead of re-reading: the delete either succeeded
+      // (so the tile must go) or threw. A re-read has been seen on CI to still
+      // return the detached row, which put the tile back.
+      if (mounted) {
+        setState(() {
+          _attachedServers = _attachedServers
+              .where((s) => s.adkAgentMcpServerId != adkAgentMcpServerId)
+              .toList();
+          _mcpLoading = false;
+        });
+      }
     } catch (e) {
       if (mounted) {
         setState(() => _mcpLoading = false);

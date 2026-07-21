@@ -452,6 +452,11 @@
                 <set field="cfgId" from="lnk.configId"/>
                 <entity-delete value-field="lnk"/>
                 <script>org.moqui.adk.AdkManager.reloadConfig(cfgId as String)</script>
+                <!-- else: never report success for a delete that did not happen -->
+                <else>
+                    <return error="true"
+                        message="MCP server attachment ${adkAgentMcpServerId} not found for your company."/>
+                </else>
             </if>
         </actions>
     </service>
