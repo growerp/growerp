@@ -21,11 +21,18 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_user_company/growerp_user_company.dart';
 import 'package:growerp_website/growerp_website.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'router_builder.dart';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await GlobalConfiguration().loadFromAsset('app_settings');
+
+  PackageInfo packageInfo = await PackageInfo.fromPlatform();
+  GlobalConfiguration().updateValue('appName', packageInfo.appName);
+  GlobalConfiguration().updateValue('packageName', packageInfo.packageName);
+  GlobalConfiguration().updateValue('version', packageInfo.version);
+  GlobalConfiguration().updateValue('build', packageInfo.buildNumber);
 
   Bloc.observer = AppBlocObserver();
   RestClient restClient = RestClient(await buildDioClient());
