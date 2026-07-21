@@ -2,6 +2,22 @@ name: Copy Staging to Production
 
 on:
   workflow_dispatch:
+    inputs:
+      app:
+        description: "App to sync (all = every changed service)"
+        required: true
+        default: "all"
+        type: choice
+        options:
+          - all
+          - moqui
+          - admin
+          - support
+          - hotel
+          - freelance
+          - marketing
+          - rental
+          - agents
 
 concurrency:
   group: stage-to-production
@@ -19,4 +35,4 @@ jobs:
           host: growerp.com
           username: ${{ secrets.PROD_SSH_USER }}
           key: ${{ secrets.PROD_SSH_KEY }}
-          script: server/swarm/sync-to-prod.sh --apply
+          script: server/swarm/sync-to-prod.sh ${{ inputs.app }} --apply

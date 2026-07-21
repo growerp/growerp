@@ -2,6 +2,22 @@ name: Revert Production Update
 
 on:
   workflow_dispatch:
+    inputs:
+      app:
+        description: "App to revert (all = every service)"
+        required: true
+        default: "all"
+        type: choice
+        options:
+          - all
+          - moqui
+          - admin
+          - support
+          - hotel
+          - freelance
+          - marketing
+          - rental
+          - agents
 
 concurrency:
   group: revert-last-sync
@@ -19,4 +35,4 @@ jobs:
           host: growerp.com
           username: ${{ secrets.PROD_SSH_USER }}
           key: ${{ secrets.PROD_SSH_KEY }}
-          script: server/swarm/revert-prod.sh --apply
+          script: server/swarm/revert-prod.sh ${{ inputs.app }} --apply
