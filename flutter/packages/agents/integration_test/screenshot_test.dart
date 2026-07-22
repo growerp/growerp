@@ -50,10 +50,21 @@ const _agentsMenuConfig = MenuConfiguration(
 
 GoRouter createAgentsScreenshotRouter() {
   WidgetRegistry.clear();
-  // The agents app has no dashboardBuilder — its dashboard is the
-  // AgentsDashboard widget served from the backend menu — so reuse the app's
-  // own router factory, which registers the widgets and wires the same config.
-  return createDynamicAgentsRouter([_agentsMenuConfig]);
+  for (final reg in agentsWidgetRegistrations) {
+    WidgetRegistry.register(reg);
+  }
+  // The app itself serves AgentsDashboard for '/' via the backend menu, but
+  // this config starts with no menu items, so pass it as dashboardBuilder —
+  // otherwise '/' renders empty and no dashboard tile keys ever appear.
+  return createDynamicAppRouter(
+    [_agentsMenuConfig],
+    config: DynamicRouterConfig(
+      mainConfigId: 'AGENTS_DEFAULT',
+      dashboardBuilder: () => const AgentsDashboard(),
+      widgetLoader: WidgetRegistry.getWidget,
+      appTitle: 'GrowERP Agents',
+    ),
+  );
 }
 
 // ---------------------------------------------------------------------------
