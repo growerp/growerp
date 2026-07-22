@@ -71,7 +71,9 @@ jobs:
                         local android_id=$(jq -r --arg app "$app" \
                           '.androidIds[$app] // ("org.growerp." + $app)' flutter/release/release_config.json)
                         if [[ "$first" == "false" ]]; then json="$json,"; fi
-                        json="${json}{\"app\":\"${app}\",\"bundle_id\":\"${bundle_id}\",\"android_id\":\"${android_id}\"}"
+                        # secretSuffix backs dynamic per-app secret lookup, e.g.
+                        # WINDOWS_<SUFFIX>_PRODUCT_ID in status-windows.
+                        json="${json}{\"app\":\"${app}\",\"bundle_id\":\"${bundle_id}\",\"android_id\":\"${android_id}\",\"secretSuffix\":\"${app^^}\"}"
                         first=false
                       fi
                     done
@@ -462,7 +464,7 @@ jobs:
     # Windows — Partner Center REST API, Azure AD client-credentials auth
     # Fragment rows: [{label, version, status}, ...]
     # Secrets: WINDOWS_TENANT_ID, WINDOWS_CLIENT_ID, WINDOWS_CLIENT_SECRET,
-    #          WINDOWS_ADMIN_PRODUCT_ID, WINDOWS_HOTEL_PRODUCT_ID
+    #          WINDOWS_<APP>_PRODUCT_ID per app
     # ─────────────────────────────────────────────────────────────────────────────
     status-windows:
         needs: [ resolve-matrix ]
@@ -481,19 +483,14 @@ jobs:
                   WINDOWS_TENANT_ID: ${{ secrets.WINDOWS_TENANT_ID }}
                   WINDOWS_CLIENT_ID: ${{ secrets.WINDOWS_CLIENT_ID }}
                   WINDOWS_CLIENT_SECRET: ${{ secrets.WINDOWS_CLIENT_SECRET }}
-                  WINDOWS_ADMIN_PRODUCT_ID: ${{ secrets.WINDOWS_ADMIN_PRODUCT_ID }}
-                  WINDOWS_HOTEL_PRODUCT_ID: ${{ secrets.WINDOWS_HOTEL_PRODUCT_ID }}
+                  WINDOWS_PRODUCT_ID: ${{ secrets[format('WINDOWS_{0}_PRODUCT_ID', matrix.secretSuffix)] }}
                   APP_NAME: ${{ matrix.app }}
               run: |
                   python3 << 'PYEOF'
                   import json, os, sys, requests
 
                   app_name = os.environ['APP_NAME']
-                  product_ids = {
-                      'admin': os.environ.get('WINDOWS_ADMIN_PRODUCT_ID', ''),
-                      'hotel': os.environ.get('WINDOWS_HOTEL_PRODUCT_ID', ''),
-                  }
-                  app_id = product_ids.get(app_name, '')
+                  app_id = os.environ.get('WINDOWS_PRODUCT_ID', '')
                   if not app_id:
                       print(f'No product ID for {app_name}. Skipping.')
                       sys.exit(0)
