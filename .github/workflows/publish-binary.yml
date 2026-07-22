@@ -1036,6 +1036,17 @@ jobs:
             --certificate-password "$env:WINDOWS_CERTIFICATE_PASSWORD"
         working-directory: flutter/packages/${{ matrix.app }}
 
+      # Temporary: keep the signed MSIX downloadable from the run so a first
+      # submission can be uploaded to Partner Center by hand (the Store
+      # submission API cannot create an app's very first submission).
+      - name: Upload MSIX artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: msix-${{ matrix.app }}
+          retention-days: 7
+          if-no-files-found: error
+          path: flutter/packages/${{ matrix.app }}/build/windows/x64/runner/Release/*.msix
+
       - name: Submit to Partner Center
         shell: pwsh
         env:
