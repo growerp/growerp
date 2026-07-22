@@ -80,7 +80,7 @@ msix_config:
   display_name: GrowERP-Freelance
   publisher: CN=68EEF479-7015-49FC-9C60-33E5A2EB731C
   publisher_display_name: "AntWebsystems Co.,Ltd"
-  identity_name: AntWebsystemsCo.LTD.GrowERP-Freelance
+  identity_name: AntWebsystemsCo.LTD.growerp-freelance
   msix_version: 1.16.29.0
   logo_path: "assets/icon/icon.png"
   capabilities: internetClient
