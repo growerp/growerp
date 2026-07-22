@@ -715,6 +715,10 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Full history: the commit step rebases onto the branch tip, which a
+          # shallow clone cannot do.
+          fetch-depth: 0
 
       - name: Download framed screenshots
         uses: actions/download-artifact@v4
@@ -774,4 +778,23 @@ jobs:
           git status --short
           git diff --cached --quiet && { echo "Nothing to commit — screenshots already current"; exit 0; }
           git commit -m "chore: refresh README + website screenshots from screenshots.yml [skip ci]"
-          git push origin HEAD:${{ github.ref_name }}
+          # The capture jobs take well over an hour, so the branch has usually
+          # moved on by now and a plain push is rejected. Rebase onto whatever
+          # landed meanwhile and retry. This commit only touches PNGs the run
+          # generated, so it rebases cleanly unless another screenshots run is
+          # writing the same files — hence the retry rather than a force push.
+          for attempt in 1 2 3; do
+            if git push origin HEAD:${{ github.ref_name }}; then
+              echo "Pushed refreshed screenshots"
+              exit 0
+            fi
+            echo "Push rejected (attempt $attempt) — rebasing onto ${{ github.ref_name }}"
+            git fetch origin ${{ github.ref_name }}
+            if ! git rebase origin/${{ github.ref_name }}; then
+              git rebase --abort || true
+              echo "::error::Could not rebase refreshed screenshots onto ${{ github.ref_name }}"
+              exit 1
+            fi
+          done
+          echo "::error::Failed to push refreshed screenshots after 3 attempts"
+          exit 1
