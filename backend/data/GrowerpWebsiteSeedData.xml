@@ -172,31 +172,65 @@
     <section class="max-w-container mx-auto px-4 md:px-12 pb-24 relative">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <!-- Admin -->
-            <a href="https://admin.growerp.com" target="_blank" rel="noopener" class="l-glass p-8 rounded-2xl flex flex-col gap-4 hover:bg-surface-container-low/60 transition-colors group relative overflow-hidden">
+            <div class="l-glass p-8 rounded-2xl flex flex-col gap-4 hover:bg-surface-container-low/60 transition-colors group relative overflow-hidden">
                 <div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-[40px] group-hover:bg-primary/10 transition-all"></div>
                 <div class="w-12 h-12 rounded-lg bg-surface-container flex items-center justify-center border border-outline-variant/30 text-primary mb-2">
                     <span class="material-symbols-outlined icon-fill text-[24px]">admin_panel_settings</span>
                 </div>
                 <h3 class="font-display text-xl font-semibold text-on-surface">Admin</h3>
                 <p class="text-on-surface-variant leading-relaxed">The core comprehensive ERP for medium to large enterprises. Full control over all modules, accounting, and organization settings.</p>
-                <div class="mt-auto pt-4 flex items-center text-primary font-label text-sm font-medium">
+                <a href="https://admin.growerp.com" target="_blank" rel="noopener" class="flex items-center text-primary font-label text-sm font-medium hover:underline">
                     admin.growerp.com <span class="material-symbols-outlined text-[16px] ml-1">arrow_forward</span>
+                </a>
+                <div class="mt-auto pt-4 flex flex-wrap gap-2 border-t border-outline-variant/20">
+                    <a href="https://admin.growerp.com" target="_blank" rel="noopener" title="Web Browser" class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-white/15 hover:border-primary/50 hover:text-primary text-on-surface-variant transition-colors">
+                        <span class="material-symbols-outlined text-[18px]">language</span>
+                    </a>
+                    <a href="https://play.google.com/store/apps/details?id=org.growerp.admin" target="_blank" rel="noopener" title="Android" class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-white/15 hover:border-primary/50 hover:text-primary text-on-surface-variant transition-colors">
+                        <span class="material-symbols-outlined text-[18px]">android</span>
+                    </a>
+                    <a href="https://apps.apple.com/us/app/growerp-admin-open-source/id1545521755" target="_blank" rel="noopener" title="iOS &amp; macOS" class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-white/15 hover:border-primary/50 hover:text-primary text-on-surface-variant transition-colors">
+                        <span class="material-symbols-outlined text-[18px]">phone_iphone</span>
+                    </a>
+                    <a href="https://snapcraft.io/growerp-admin" target="_blank" rel="noopener" title="Linux" class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-white/15 hover:border-primary/50 hover:text-primary text-on-surface-variant transition-colors">
+                        <span class="material-symbols-outlined text-[18px]">terminal</span>
+                    </a>
+                    <a href="https://apps.microsoft.com/detail/9nwx6kftjnql" target="_blank" rel="noopener" title="Windows" class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-white/15 hover:border-primary/50 hover:text-primary text-on-surface-variant transition-colors">
+                        <span class="material-symbols-outlined text-[18px]">grid_view</span>
+                    </a>
                 </div>
-            </a>
-            
+            </div>
+
             <!-- Hotel -->
-            <a href="https://hotel.growerp.com" target="_blank" rel="noopener" class="l-glass p-8 rounded-2xl flex flex-col gap-4 hover:bg-surface-container-low/60 transition-colors group relative overflow-hidden">
+            <div class="l-glass p-8 rounded-2xl flex flex-col gap-4 hover:bg-surface-container-low/60 transition-colors group relative overflow-hidden">
                 <div class="absolute top-0 right-0 w-32 h-32 bg-secondary/5 rounded-full blur-[40px] group-hover:bg-secondary/10 transition-all"></div>
                 <div class="w-12 h-12 rounded-lg bg-surface-container flex items-center justify-center border border-outline-variant/30 text-secondary mb-2">
                     <span class="material-symbols-outlined icon-fill text-[24px]">hotel</span>
                 </div>
                 <h3 class="font-display text-xl font-semibold text-on-surface">Hotel</h3>
                 <p class="text-on-surface-variant leading-relaxed">Designed for hotels, bed &amp; breakfasts, and resorts. Manage reservations, room inventory, and guest experiences seamlessly.</p>
-                <div class="mt-auto pt-4 flex items-center text-secondary font-label text-sm font-medium">
+                <a href="https://hotel.growerp.com" target="_blank" rel="noopener" class="flex items-center text-secondary font-label text-sm font-medium hover:underline">
                     hotel.growerp.com <span class="material-symbols-outlined text-[16px] ml-1">arrow_forward</span>
+                </a>
+                <div class="mt-auto pt-4 flex flex-wrap gap-2 border-t border-outline-variant/20">
+                    <a href="https://hotel.growerp.com" target="_blank" rel="noopener" title="Web Browser" class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-white/15 hover:border-secondary/50 hover:text-secondary text-on-surface-variant transition-colors">
+                        <span class="material-symbols-outlined text-[18px]">language</span>
+                    </a>
+                    <a href="https://play.google.com/store/apps/details?id=org.growerp.hotel" target="_blank" rel="noopener" title="Android" class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-white/15 hover:border-secondary/50 hover:text-secondary text-on-surface-variant transition-colors">
+                        <span class="material-symbols-outlined text-[18px]">android</span>
+                    </a>
+                    <a href="https://apps.apple.com/app/growerp-hotel-open-source/id1531267095" target="_blank" rel="noopener" title="iOS &amp; macOS" class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-white/15 hover:border-secondary/50 hover:text-secondary text-on-surface-variant transition-colors">
+                        <span class="material-symbols-outlined text-[18px]">phone_iphone</span>
+                    </a>
+                    <a href="https://snapcraft.io/growerp-hotel" target="_blank" rel="noopener" title="Linux" class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-white/15 hover:border-secondary/50 hover:text-secondary text-on-surface-variant transition-colors">
+                        <span class="material-symbols-outlined text-[18px]">terminal</span>
+                    </a>
+                    <a href="https://apps.microsoft.com/detail/9ngphmvmwfj1" target="_blank" rel="noopener" title="Windows" class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-white/15 hover:border-secondary/50 hover:text-secondary text-on-surface-variant transition-colors">
+                        <span class="material-symbols-outlined text-[18px]">grid_view</span>
+                    </a>
                 </div>
-            </a>
-            
+            </div>
+
             <!-- Rental -->
             <a href="https://rental.growerp.com" target="_blank" rel="noopener" class="l-glass p-8 rounded-2xl flex flex-col gap-4 hover:bg-surface-container-low/60 transition-colors group relative overflow-hidden">
                 <div class="absolute top-0 right-0 w-32 h-32 bg-tertiary/5 rounded-full blur-[40px] group-hover:bg-tertiary/10 transition-all"></div>
