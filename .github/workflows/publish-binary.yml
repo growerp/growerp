@@ -139,7 +139,11 @@ jobs:
             for app in "${app_list[@]}"; do
               if echo "$store_apps" | grep -qw "$app"; then
                 if [[ "$first" == "false" ]]; then json="$json,"; fi
-                json="${json}{\"app\":\"${app}\"}"
+                # secretSuffix backs dynamic per-app secret lookup, e.g.
+                # WINDOWS_<SUFFIX>_PRODUCT_ID in deploy-windows — add a new
+                # app here (and to release_config.json) and its secret is
+                # picked up automatically, no further workflow edits needed.
+                json="${json}{\"app\":\"${app}\",\"secretSuffix\":\"${app^^}\"}"
                 first=false
               fi
             done
@@ -907,12 +911,12 @@ jobs:
   # Windows — flutter build windows + MSIX + Partner Center
   # Secrets: WINDOWS_CERTIFICATE_BASE64, WINDOWS_CERTIFICATE_PASSWORD,
   #          WINDOWS_TENANT_ID, WINDOWS_CLIENT_ID, WINDOWS_CLIENT_SECRET,
-  #          WINDOWS_ADMIN_PRODUCT_ID, WINDOWS_HOTEL_PRODUCT_ID,
-  #          WINDOWS_FREELANCE_PRODUCT_ID, WINDOWS_AGENTS_PRODUCT_ID,
-  #          WINDOWS_MARKETING_PRODUCT_ID, WINDOWS_RENTAL_PRODUCT_ID
-  #          (apps without a Partner Center listing yet: leave their secret
-  #          unset — the job fails loudly instead of falling back to another
-  #          app's product ID)
+  #          WINDOWS_<APP>_PRODUCT_ID per app (e.g. WINDOWS_ADMIN_PRODUCT_ID,
+  #          WINDOWS_FREELANCE_PRODUCT_ID) — looked up dynamically from
+  #          matrix.secretSuffix, so a new app needs only its secret added,
+  #          no workflow edit. Apps without a Partner Center listing yet:
+  #          leave the secret unset — the job fails loudly instead of
+  #          falling back to another app's product ID.
   # ───────────────────────────────────────────────────────────────────────────
   deploy-windows:
     needs: [ resolve-matrix, bootstrap ]
@@ -962,12 +966,7 @@ jobs:
           WINDOWS_TENANT_ID: ${{ secrets.WINDOWS_TENANT_ID }}
           WINDOWS_CLIENT_ID: ${{ secrets.WINDOWS_CLIENT_ID }}
           WINDOWS_CLIENT_SECRET: ${{ secrets.WINDOWS_CLIENT_SECRET }}
-          WINDOWS_ADMIN_PRODUCT_ID: ${{ secrets.WINDOWS_ADMIN_PRODUCT_ID }}
-          WINDOWS_HOTEL_PRODUCT_ID: ${{ secrets.WINDOWS_HOTEL_PRODUCT_ID }}
-          WINDOWS_FREELANCE_PRODUCT_ID: ${{ secrets.WINDOWS_FREELANCE_PRODUCT_ID }}
-          WINDOWS_AGENTS_PRODUCT_ID: ${{ secrets.WINDOWS_AGENTS_PRODUCT_ID }}
-          WINDOWS_MARKETING_PRODUCT_ID: ${{ secrets.WINDOWS_MARKETING_PRODUCT_ID }}
-          WINDOWS_RENTAL_PRODUCT_ID: ${{ secrets.WINDOWS_RENTAL_PRODUCT_ID }}
+          WINDOWS_PRODUCT_ID: ${{ secrets[format('WINDOWS_{0}_PRODUCT_ID', matrix.secretSuffix)] }}
         run: |
           $ErrorActionPreference = "Stop"
 
@@ -979,20 +978,12 @@ jobs:
           [version]$floor = "$($Matches[1]).0"
 
           # Query the published store version via Partner Center.
-          # Each app maps to its own Partner Center product ID — never fall
-          # back to another app's ID, or a build for one app can get
+          # WINDOWS_PRODUCT_ID is resolved per-app above (WINDOWS_<APP>_PRODUCT_ID) —
+          # never fall back to another app's ID, or a build for one app can get
           # committed into another app's store listing.
-          $productIds = @{
-            admin     = $env:WINDOWS_ADMIN_PRODUCT_ID
-            hotel     = $env:WINDOWS_HOTEL_PRODUCT_ID
-            freelance = $env:WINDOWS_FREELANCE_PRODUCT_ID
-            agents    = $env:WINDOWS_AGENTS_PRODUCT_ID
-            marketing = $env:WINDOWS_MARKETING_PRODUCT_ID
-            rental    = $env:WINDOWS_RENTAL_PRODUCT_ID
-          }
-          $appId = $productIds["${{ matrix.app }}"]
+          $appId = $env:WINDOWS_PRODUCT_ID
           if ([string]::IsNullOrWhiteSpace($appId)) {
-            throw "No Windows Partner Center product ID configured for app '${{ matrix.app }}'. Add secret WINDOWS_$("${{ matrix.app }}".ToUpper())_PRODUCT_ID."
+            throw "No Windows Partner Center product ID configured for app '${{ matrix.app }}'. Add secret WINDOWS_${{ matrix.secretSuffix }}_PRODUCT_ID."
           }
           $authBody = "grant_type=client_credentials" +
             "&client_id=$([Uri]::EscapeDataString($env:WINDOWS_CLIENT_ID))" +
@@ -1051,29 +1042,16 @@ jobs:
           WINDOWS_TENANT_ID: ${{ secrets.WINDOWS_TENANT_ID }}
           WINDOWS_CLIENT_ID: ${{ secrets.WINDOWS_CLIENT_ID }}
           WINDOWS_CLIENT_SECRET: ${{ secrets.WINDOWS_CLIENT_SECRET }}
-          WINDOWS_ADMIN_PRODUCT_ID: ${{ secrets.WINDOWS_ADMIN_PRODUCT_ID }}
-          WINDOWS_HOTEL_PRODUCT_ID: ${{ secrets.WINDOWS_HOTEL_PRODUCT_ID }}
-          WINDOWS_FREELANCE_PRODUCT_ID: ${{ secrets.WINDOWS_FREELANCE_PRODUCT_ID }}
-          WINDOWS_AGENTS_PRODUCT_ID: ${{ secrets.WINDOWS_AGENTS_PRODUCT_ID }}
-          WINDOWS_MARKETING_PRODUCT_ID: ${{ secrets.WINDOWS_MARKETING_PRODUCT_ID }}
-          WINDOWS_RENTAL_PRODUCT_ID: ${{ secrets.WINDOWS_RENTAL_PRODUCT_ID }}
+          WINDOWS_PRODUCT_ID: ${{ secrets[format('WINDOWS_{0}_PRODUCT_ID', matrix.secretSuffix)] }}
         run: |
           $ErrorActionPreference = "Stop"
 
-          # Each app maps to its own Partner Center product ID — never fall
-          # back to another app's ID, or a build for one app can get
+          # WINDOWS_PRODUCT_ID is resolved per-app above (WINDOWS_<APP>_PRODUCT_ID) —
+          # never fall back to another app's ID, or a build for one app can get
           # committed into another app's store listing.
-          $productIds = @{
-            admin     = $env:WINDOWS_ADMIN_PRODUCT_ID
-            hotel     = $env:WINDOWS_HOTEL_PRODUCT_ID
-            freelance = $env:WINDOWS_FREELANCE_PRODUCT_ID
-            agents    = $env:WINDOWS_AGENTS_PRODUCT_ID
-            marketing = $env:WINDOWS_MARKETING_PRODUCT_ID
-            rental    = $env:WINDOWS_RENTAL_PRODUCT_ID
-          }
-          $appId = $productIds["${{ matrix.app }}"]
+          $appId = $env:WINDOWS_PRODUCT_ID
           if ([string]::IsNullOrWhiteSpace($appId)) {
-            throw "No Windows Partner Center product ID configured for app '${{ matrix.app }}'. Add secret WINDOWS_$("${{ matrix.app }}".ToUpper())_PRODUCT_ID."
+            throw "No Windows Partner Center product ID configured for app '${{ matrix.app }}'. Add secret WINDOWS_${{ matrix.secretSuffix }}_PRODUCT_ID."
           }
 
           # Find MSIX
