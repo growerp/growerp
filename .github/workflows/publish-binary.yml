@@ -76,6 +76,7 @@ jobs:
   resolve-matrix:
     runs-on: ubuntu-latest
     outputs:
+      apps: ${{ steps.matrix.outputs.apps }}
       run_ios: ${{ steps.matrix.outputs.run_ios }}
       run_macos: ${{ steps.matrix.outputs.run_macos }}
       run_android: ${{ steps.matrix.outputs.run_android }}
@@ -115,6 +116,7 @@ jobs:
           [[ "$APP_RENTAL" == "true" ]] && APPS="${APPS}rental,"
           [[ "$APP_MARKETING" == "true" ]] && APPS="${APPS}marketing,"
           APPS="${APPS%,}"
+          echo "apps=${APPS}" >> "$GITHUB_OUTPUT"
 
           STORES=""
           [[ "$STORE_IOS" == "true" ]] && STORES="${STORES}ios,"
@@ -210,14 +212,7 @@ jobs:
         run: pip install PyJWT cryptography google-auth requests --quiet
 
       - name: Resolve selected apps
-        run: |
-          APPS=""
-          [[ "${{ inputs.app_admin }}" == "true" ]] && APPS="${APPS}admin,"
-          [[ "${{ inputs.app_hotel }}" == "true" ]] && APPS="${APPS}hotel,"
-          [[ "${{ inputs.app_freelance }}" == "true" ]] && APPS="${APPS}freelance,"
-          [[ "${{ inputs.app_support }}" == "true" ]] && APPS="${APPS}support,"
-          [[ "${{ inputs.app_agents }}" == "true" ]] && APPS="${APPS}agents,"
-          echo "APPS=${APPS%,}" >> "$GITHUB_ENV"
+        run: echo "APPS=${{ needs.resolve-matrix.outputs.apps }}" >> "$GITHUB_ENV"
 
       - name: Bump version based on store latest versions
         env:
