@@ -189,34 +189,11 @@ class _FreelanceAppState extends State<FreelanceApp> {
             notificationClient: widget.notificationClient,
             title: 'GrowERP Freelance.',
             router: router,
-            extraDelegates: const [
-              UserCompanyLocalizations.delegate,
-              CatalogLocalizations.delegate,
-              InventoryLocalizations.delegate,
-              OrderAccountingLocalizations.delegate,
-              WebsiteLocalizations.delegate,
-              SalesLocalizations.delegate,
-              InventoryLocalizations.delegate,
-              ActivityLocalizations.delegate,
-            ],
-            extraBlocProviders: [
-              ...getUserCompanyBlocProviders(
-                widget.restClient,
-                widget.applicationId,
-              ),
-              ...getCatalogBlocProviders(
-                widget.restClient,
-                widget.applicationId,
-              ),
-              ...getOrderAccountingBlocProviders(
-                widget.restClient,
-                widget.applicationId,
-              ),
-              ...getSalesBlocProviders(widget.restClient),
-              ...getWebsiteBlocProviders(widget.restClient),
-              ...getMarketingBlocProviders(widget.restClient),
-              ...getOutreachBlocProviders(widget.restClient),
-            ],
+            extraDelegates: delegates,
+            extraBlocProviders: getFreelanceBlocProviders(
+              widget.restClient,
+              widget.applicationId,
+            ),
             widgetRegistrations: freelanceWidgetRegistrations,
             forceUpdateInfo: widget.forceUpdateInfo,
           );
@@ -224,6 +201,31 @@ class _FreelanceAppState extends State<FreelanceApp> {
       ),
     );
   }
+}
+
+List<LocalizationsDelegate> delegates = const [
+  UserCompanyLocalizations.delegate,
+  CatalogLocalizations.delegate,
+  InventoryLocalizations.delegate,
+  OrderAccountingLocalizations.delegate,
+  WebsiteLocalizations.delegate,
+  SalesLocalizations.delegate,
+  ActivityLocalizations.delegate,
+];
+
+List<BlocProvider> getFreelanceBlocProviders(
+  RestClient restClient,
+  String applicationId,
+) {
+  return [
+    ...getUserCompanyBlocProviders(restClient, applicationId),
+    ...getCatalogBlocProviders(restClient, applicationId),
+    ...getOrderAccountingBlocProviders(restClient, applicationId),
+    ...getSalesBlocProviders(restClient),
+    ...getWebsiteBlocProviders(restClient),
+    ...getMarketingBlocProviders(restClient),
+    ...getOutreachBlocProviders(restClient),
+  ];
 }
 
 /// Widget registrations for all packages used by Freelance app

@@ -185,25 +185,11 @@ class _MarketingAppState extends State<MarketingApp> {
             notificationClient: widget.notificationClient,
             title: 'GrowERP Marketing',
             router: router,
-            extraDelegates: const [
-              UserCompanyLocalizations.delegate,
-              SalesLocalizations.delegate,
-              OrderAccountingLocalizations.delegate,
-              WebsiteLocalizations.delegate,
-              ActivityLocalizations.delegate,
-            ],
-            extraBlocProviders: [
-              ...getUserCompanyBlocProviders(
-                  widget.restClient, widget.applicationId),
-              ...getSalesBlocProviders(widget.restClient),
-              ...getOrderAccountingBlocProviders(
-                  widget.restClient, widget.applicationId),
-              ...getMarketingBlocProviders(widget.restClient),
-              ...getOutreachBlocProviders(widget.restClient),
-              ...getWebsiteBlocProviders(widget.restClient),
-              ...getActivityBlocProviders(
-                  widget.restClient, widget.applicationId),
-            ],
+            extraDelegates: delegates,
+            extraBlocProviders: getMarketingAppBlocProviders(
+              widget.restClient,
+              widget.applicationId,
+            ),
             company: widget.company,
             widgetRegistrations: marketingWidgetRegistrations,
             widgetMetadata: marketingWidgetMetadata,
@@ -216,6 +202,31 @@ class _MarketingAppState extends State<MarketingApp> {
 }
 
 /// Widget registrations for all packages used by the Marketing app.
+List<LocalizationsDelegate> delegates = const [
+  UserCompanyLocalizations.delegate,
+  SalesLocalizations.delegate,
+  OrderAccountingLocalizations.delegate,
+  WebsiteLocalizations.delegate,
+  ActivityLocalizations.delegate,
+];
+
+/// Named ...AppBlocProviders to avoid clashing with getMarketingBlocProviders
+/// exported by the growerp_marketing building block.
+List<BlocProvider> getMarketingAppBlocProviders(
+  RestClient restClient,
+  String applicationId,
+) {
+  return [
+    ...getUserCompanyBlocProviders(restClient, applicationId),
+    ...getSalesBlocProviders(restClient),
+    ...getOrderAccountingBlocProviders(restClient, applicationId),
+    ...getMarketingBlocProviders(restClient),
+    ...getOutreachBlocProviders(restClient),
+    ...getWebsiteBlocProviders(restClient),
+    ...getActivityBlocProviders(restClient, applicationId),
+  ];
+}
+
 List<Map<String, GrowerpWidgetBuilder>> marketingWidgetRegistrations = [
   getUserCompanyWidgets(),
   getSalesWidgets(),

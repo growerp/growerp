@@ -165,21 +165,30 @@ class _AgentsAppState extends State<AgentsApp> {
             notificationClient: widget.notificationClient,
             title: 'GrowERP Agents',
             router: router,
-            extraDelegates: const [
-              UserCompanyLocalizations.delegate,
-              WebsiteLocalizations.delegate,
-            ],
-            extraBlocProviders: [
-              ...getUserCompanyBlocProviders(
-                widget.restClient,
-                widget.applicationId,
-              ),
-              ...getWebsiteBlocProviders(widget.restClient),
-            ],
+            extraDelegates: delegates,
+            extraBlocProviders: getAgentsBlocProviders(
+              widget.restClient,
+              widget.applicationId,
+            ),
             widgetRegistrations: agentsWidgetRegistrations,
           );
         },
       ),
     );
   }
+}
+
+List<LocalizationsDelegate> delegates = const [
+  UserCompanyLocalizations.delegate,
+  WebsiteLocalizations.delegate,
+];
+
+List<BlocProvider> getAgentsBlocProviders(
+  RestClient restClient,
+  String applicationId,
+) {
+  return [
+    ...getUserCompanyBlocProviders(restClient, applicationId),
+    ...getWebsiteBlocProviders(restClient),
+  ];
 }

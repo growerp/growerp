@@ -11,7 +11,7 @@ on:
   workflow_dispatch:
     inputs:
       apps:
-        description: "Apps to screenshot ('all', or comma-separated names from storeApps in flutter/release/release_config.json)"
+        description: "'all' (every storeApps app that has integration_test/screenshot_test.dart), or comma-separated app names"
         required: true
         default: "all"
         type: string
