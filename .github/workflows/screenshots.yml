@@ -545,7 +545,9 @@ jobs:
           #   2. Append title strip below.
           process() {
             local f=$1 store_w=$2 store_h=$3
-            [ -f "$f" ] || return
+            # `return 0`, not bare `return`: a bare return propagates the failed
+            # test's status, which under `bash -e` aborts the whole step.
+            [ -f "$f" ] || return 0
 
             local base="${f%_framed.png}"
 
@@ -573,7 +575,9 @@ jobs:
               -resize "${store_w}x${content_h}"\! -type TrueColor "$f"
             echo "Resized $f -> ${store_w}x${content_h}"
 
-            [ -n "$title" ] || return
+            # Untitled shots (apps without a Fastlane title.strings) stop here at
+            # full store size. `return 0` for the same reason as above.
+            [ -n "$title" ] || return 0
 
             # Step 2 — append title strip below so final size = store_w x store_h.
             local pointsize=$((store_w / 40))
