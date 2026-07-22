@@ -181,7 +181,15 @@ void main() {
       title: 'Support Screenshots',
     );
 
-    await CommonTest.createCompanyAndAdmin(tester, demoData: true);
+    // The support app hides newUserButton (see home_form.dart), so there is no
+    // self-registration flow and createCompanyAndAdmin cannot be used. Log in
+    // as the seeded SystemSupport account instead — the same credentials the
+    // support login dialog defaults to outside release mode.
+    await CommonTest.login(
+      tester,
+      username: 'SystemSupport',
+      password: 'moqui',
+    );
 
     await _waitForAnyKey(tester, ['refresh', 'tap/applications']);
     await _screenshot(binding, tester, 'dashboard');

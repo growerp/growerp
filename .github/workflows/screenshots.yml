@@ -224,17 +224,30 @@ jobs:
         run: |
           APPS="$APPS_INPUT"
           IFS=',' read -ra app_list <<< "$APPS"
+          # Keep going after a failing app so one broken test still leaves the
+          # other apps' screenshots captured, and every failure shows up in a
+          # single run instead of one per run. Failures are re-reported below.
+          failed=""
           for app in "${app_list[@]}"; do
             app=$(echo "$app" | tr -d ' ')
             [ -n "$app" ] || continue
             echo "--- Taking screenshots for app: $app ---"
             docker compose -f ci/docker-compose-screenshot.yml rm -sf sut 2>/dev/null || true
-            HOST_UID=$(id -u) HOST_GID=$(id -g) \
-            APP=$app \
-            SCREEN_WIDTH=$SCREEN_WIDTH SCREEN_HEIGHT=$SCREEN_HEIGHT DEVICE_PREFIX=${{ matrix.device }} \
-              docker compose -f ci/docker-compose-screenshot.yml up \
-                --exit-code-from sut sut
+            if HOST_UID=$(id -u) HOST_GID=$(id -g) \
+               APP=$app \
+               SCREEN_WIDTH=$SCREEN_WIDTH SCREEN_HEIGHT=$SCREEN_HEIGHT DEVICE_PREFIX=${{ matrix.device }} \
+                 docker compose -f ci/docker-compose-screenshot.yml up \
+                   --exit-code-from sut sut; then
+              echo "--- $app: OK ---"
+            else
+              echo "::error::Screenshots failed for $app on ${{ matrix.device }}"
+              failed="${failed:+$failed }$app"
+            fi
           done
+          if [ -n "$failed" ]; then
+            echo "Failed apps on ${{ matrix.device }}: $failed"
+            exit 1
+          fi
 
       # iOS only: scale captured PNGs from logical → physical resolution so
       # frameit can auto-detect the device by pixel dimensions.
