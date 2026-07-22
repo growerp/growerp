@@ -16,56 +16,8 @@ name: Status all stores
 # Per-store app availability: storeApps in flutter/release/release_config.json
 
 on:
+    # Always queries every app against every store — no selection needed.
     workflow_dispatch:
-        inputs:
-            app_admin:
-                description: "Admin App"
-                type: boolean
-                default: true
-            app_hotel:
-                description: "Hotel App"
-                type: boolean
-                default: true
-            app_freelance:
-                description: "Freelance App"
-                type: boolean
-                default: false
-            app_support:
-                description: "Support App"
-                type: boolean
-                default: false
-            app_agents:
-                description: "Agents App"
-                type: boolean
-                default: false
-            app_rental:
-                description: "Rental App"
-                type: boolean
-                default: false
-            app_marketing:
-                description: "Marketing App"
-                type: boolean
-                default: false
-            store_ios:
-                description: "iOS App Store"
-                type: boolean
-                default: true
-            store_macos:
-                description: "Mac App Store"
-                type: boolean
-                default: true
-            store_android:
-                description: "Google Play"
-                type: boolean
-                default: true
-            store_windows:
-                description: "Windows Store"
-                type: boolean
-                default: true
-            store_snap:
-                description: "Snap Store"
-                type: boolean
-                default: true
 
 concurrency:
     group: store-status
@@ -76,12 +28,13 @@ permissions:
 
 jobs:
     # ─────────────────────────────────────────────────────────────────────────────
-    # Build per-store matrix arrays from the intersection of the user's app list
-    # and each store's set of supported apps.
+    # Build per-store matrix arrays from all apps in the central app map
+    # (storeApps in release_config.json) × all stores.
     # ─────────────────────────────────────────────────────────────────────────────
     resolve-matrix:
         runs-on: ubuntu-latest
         outputs:
+            apps: ${{ steps.matrix.outputs.apps }}
             run_ios: ${{ steps.matrix.outputs.run_ios }}
             run_macos: ${{ steps.matrix.outputs.run_macos }}
             run_android: ${{ steps.matrix.outputs.run_android }}
@@ -98,40 +51,12 @@ jobs:
                   sparse-checkout: flutter/release/release_config.json
                   sparse-checkout-cone-mode: false
             - id: matrix
-              env:
-                  APP_ADMIN: ${{ inputs.app_admin }}
-                  APP_HOTEL: ${{ inputs.app_hotel }}
-                  APP_FREELANCE: ${{ inputs.app_freelance }}
-                  APP_SUPPORT: ${{ inputs.app_support }}
-                  APP_AGENTS: ${{ inputs.app_agents }}
-                  APP_RENTAL: ${{ inputs.app_rental }}
-                  APP_MARKETING: ${{ inputs.app_marketing }}
-                  STORE_IOS: ${{ inputs.store_ios }}
-                  STORE_MACOS: ${{ inputs.store_macos }}
-                  STORE_ANDROID: ${{ inputs.store_android }}
-                  STORE_WINDOWS: ${{ inputs.store_windows }}
-                  STORE_SNAP: ${{ inputs.store_snap }}
               run: |
-                  APPS=""
-                  [[ "$APP_ADMIN" == "true" ]] && APPS="${APPS}admin,"
-                  [[ "$APP_HOTEL" == "true" ]] && APPS="${APPS}hotel,"
-                  [[ "$APP_FREELANCE" == "true" ]] && APPS="${APPS}freelance,"
-                  [[ "$APP_SUPPORT" == "true" ]] && APPS="${APPS}support,"
-                  [[ "$APP_AGENTS" == "true" ]] && APPS="${APPS}agents,"
-                  [[ "$APP_RENTAL" == "true" ]] && APPS="${APPS}rental,"
-                  [[ "$APP_MARKETING" == "true" ]] && APPS="${APPS}marketing,"
-                  APPS="${APPS%,}"
-                  
-                  STORES=""
-                  [[ "$STORE_IOS" == "true" ]] && STORES="${STORES}ios,"
-                  [[ "$STORE_MACOS" == "true" ]] && STORES="${STORES}macos,"
-                  [[ "$STORE_ANDROID" == "true" ]] && STORES="${STORES}android,"
-                  [[ "$STORE_WINDOWS" == "true" ]] && STORES="${STORES}windows,"
-                  [[ "$STORE_SNAP" == "true" ]] && STORES="${STORES}snap,"
-                  STORES="${STORES%,}"
-                  
-                  if [[ -z "$APPS" ]]; then echo "No apps selected" >&2; exit 1; fi
-                  if [[ -z "$STORES" ]]; then echo "No stores selected" >&2; exit 1; fi
+                  # Always all apps (storeApps keys) and all stores — no selection input.
+                  APPS=$(jq -r '.storeApps | keys_unsorted | join(",")' flutter/release/release_config.json)
+
+                  if [[ -z "$APPS" ]]; then echo "No apps in release_config.json" >&2; exit 1; fi
+                  echo "apps=${APPS}" >> "$GITHUB_OUTPUT"
 
                   build_matrix() {
                     local store_apps="$1"
@@ -154,8 +79,6 @@ jobs:
                     echo "$json"
                   }
 
-                  contains_store() { echo "$STORES" | grep -qw "$1"; }
-
                   # Central per-app store availability: storeApps in release_config.json
                   declare -A STORE_APPS
                   for store in ios macos android windows snap; do
@@ -165,18 +88,13 @@ jobs:
                   done
 
                   for store in ios macos android windows snap; do
-                    if contains_store "$store"; then
-                      matrix=$(build_matrix "${STORE_APPS[$store]}")
-                      if [[ "$matrix" == "[]" ]]; then
-                        echo "run_${store}=false"       >> "$GITHUB_OUTPUT"
-                      else
-                        echo "run_${store}=true"        >> "$GITHUB_OUTPUT"
-                      fi
-                      echo "${store}_matrix=${matrix}"  >> "$GITHUB_OUTPUT"
+                    matrix=$(build_matrix "${STORE_APPS[$store]}")
+                    if [[ "$matrix" == "[]" ]]; then
+                      echo "run_${store}=false"       >> "$GITHUB_OUTPUT"
                     else
-                      echo "run_${store}=false"         >> "$GITHUB_OUTPUT"
-                      echo "${store}_matrix=[]"         >> "$GITHUB_OUTPUT"
+                      echo "run_${store}=true"        >> "$GITHUB_OUTPUT"
                     fi
+                    echo "${store}_matrix=${matrix}"  >> "$GITHUB_OUTPUT"
                   done
 
     # ─────────────────────────────────────────────────────────────────────────────
@@ -748,7 +666,7 @@ jobs:
     #   Snap        : latest/stable revision + version
     # ─────────────────────────────────────────────────────────────────────────────
     report:
-        needs: [ status-ios, status-macos, status-android, status-windows, status-snap ]
+        needs: [ resolve-matrix, status-ios, status-macos, status-android, status-windows, status-snap ]
         if: always()
         runs-on: ubuntu-latest
         steps:
@@ -764,18 +682,7 @@ jobs:
 
             - name: Build consolidated report and PDF
               env:
-                  APP_ADMIN: ${{ inputs.app_admin }}
-                  APP_HOTEL: ${{ inputs.app_hotel }}
-                  APP_FREELANCE: ${{ inputs.app_freelance }}
-                  APP_SUPPORT: ${{ inputs.app_support }}
-                  APP_AGENTS: ${{ inputs.app_agents }}
-                  APP_RENTAL: ${{ inputs.app_rental }}
-                  APP_MARKETING: ${{ inputs.app_marketing }}
-                  STORE_IOS: ${{ inputs.store_ios }}
-                  STORE_MACOS: ${{ inputs.store_macos }}
-                  STORE_ANDROID: ${{ inputs.store_android }}
-                  STORE_WINDOWS: ${{ inputs.store_windows }}
-                  STORE_SNAP: ${{ inputs.store_snap }}
+                  APPS: ${{ needs.resolve-matrix.outputs.apps }}
               run: |
                   python3 << 'PYEOF'
                   import json, os
@@ -784,24 +691,12 @@ jobs:
                   from datetime import datetime, timezone
 
                   STORE_ORDER = ['ios', 'macos', 'android', 'windows', 'snap']
-                  APP_ORDER   = ['admin', 'hotel', 'freelance', 'support', 'agents', 'rental', 'marketing']
+                  APP_ORDER   = os.environ['APPS'].split(',')
 
-                  selected_apps = []
-                  if os.environ.get('APP_ADMIN') == 'true': selected_apps.append('admin')
-                  if os.environ.get('APP_HOTEL') == 'true': selected_apps.append('hotel')
-                  if os.environ.get('APP_FREELANCE') == 'true': selected_apps.append('freelance')
-                  if os.environ.get('APP_SUPPORT') == 'true': selected_apps.append('support')
-                  if os.environ.get('APP_AGENTS') == 'true': selected_apps.append('agents')
-                  if os.environ.get('APP_RENTAL') == 'true': selected_apps.append('rental')
-                  if os.environ.get('APP_MARKETING') == 'true': selected_apps.append('marketing')
+                  # Always all apps (central app map) and all stores — no selection input.
+                  selected_apps = list(APP_ORDER)
+                  selected_stores = list(STORE_ORDER)
 
-                  selected_stores = []
-                  if os.environ.get('STORE_IOS') == 'true': selected_stores.append('ios')
-                  if os.environ.get('STORE_MACOS') == 'true': selected_stores.append('macos')
-                  if os.environ.get('STORE_ANDROID') == 'true': selected_stores.append('android')
-                  if os.environ.get('STORE_WINDOWS') == 'true': selected_stores.append('windows')
-                  if os.environ.get('STORE_SNAP') == 'true': selected_stores.append('snap')
-                  
                   apps_input = ','.join(selected_apps)
                   stores_input = ','.join(selected_stores)
 
