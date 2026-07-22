@@ -11,9 +11,9 @@ on:
   workflow_dispatch:
     inputs:
       apps:
-        description: "Apps to screenshot (comma-separated; valid = storeApps in flutter/release/release_config.json)"
+        description: "Apps to screenshot ('all', or comma-separated names from storeApps in flutter/release/release_config.json)"
         required: true
-        default: "admin,hotel"
+        default: "all"
         type: string
       commit_screenshots:
         description: "Commit refreshed screenshots to README assets + website hero"
@@ -32,6 +32,65 @@ permissions:
 
 jobs:
   # ──────────────────────────────────────────────────────────────────────────
+  # 0. Resolve + validate the app list once, so every downstream job shares it.
+  # "all" expands to every storeApps key in flutter/release/release_config.json.
+  # ──────────────────────────────────────────────────────────────────────────
+  resolve-apps:
+    runs-on: ubuntu-latest
+    outputs:
+      apps: ${{ steps.resolve.outputs.apps }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Resolve and validate app names
+        id: resolve
+        env:
+          # When triggered by workflow_run there is no inputs context; fall back to default.
+          APPS_INPUT: ${{ github.event.inputs.apps || 'all' }}
+        run: |
+          # Central app list: storeApps in flutter/release/release_config.json
+          VALID_APPS=$(jq -r '.storeApps | keys_unsorted | join(" ")' flutter/release/release_config.json)
+          # ci/run_screenshots.sh runs integration_test/screenshot_test.dart, so an
+          # app can only be screenshotted if it ships that test.
+          has_test() { [ -f "flutter/packages/$1/integration_test/screenshot_test.dart" ]; }
+
+          APPS=""
+          if [ "$APPS_INPUT" = "all" ]; then
+            # "all" = every storeApps entry that has a screenshot test; others are skipped.
+            for app in $VALID_APPS; do
+              if has_test "$app"; then
+                APPS="${APPS:+$APPS,}$app"
+              else
+                echo "Skipping '$app': no integration_test/screenshot_test.dart"
+              fi
+            done
+          else
+            IFS=',' read -ra app_list <<< "$APPS_INPUT"
+            for app in "${app_list[@]}"; do
+              app=$(echo "$app" | tr -d ' ')
+              [ -n "$app" ] || continue
+              if ! echo "$VALID_APPS" | grep -qw "$app"; then
+                echo "Invalid app: '$app'. Valid values: $VALID_APPS all" >&2
+                exit 1
+              fi
+              # Named explicitly, so a missing test is an error rather than a skip.
+              if ! has_test "$app"; then
+                echo "App '$app' has no flutter/packages/$app/integration_test/screenshot_test.dart" >&2
+                exit 1
+              fi
+              APPS="${APPS:+$APPS,}$app"
+            done
+          fi
+
+          if [ -z "$APPS" ]; then
+            echo "No screenshot-capable apps resolved from '$APPS_INPUT'" >&2
+            exit 1
+          fi
+          echo "Apps to screenshot: $APPS"
+          echo "apps=$APPS" >> "$GITHUB_OUTPUT"
+
+  # ──────────────────────────────────────────────────────────────────────────
   # 1. Take raw screenshots — all device sizes run in parallel
   #
   # width/height are LOGICAL pixels (what Flutter's layout engine sees).
@@ -43,6 +102,7 @@ jobs:
   # renders correctly, then are scaled 3× (iPhone) / 2× (iPad) to physical.
   # ──────────────────────────────────────────────────────────────────────────
   take-screenshots:
+    needs: resolve-apps
     runs-on: ubuntu-latest
     timeout-minutes: 90
     strategy:
@@ -92,21 +152,6 @@ jobs:
 
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Validate app names
-        run: |
-          # When triggered by workflow_run there is no inputs context; fall back to default.
-          APPS_INPUT="${{ github.event.inputs.apps || 'admin,hotel' }}"
-          # Central app list: storeApps in flutter/release/release_config.json
-          VALID_APPS=$(jq -r '.storeApps | keys_unsorted | join(" ")' flutter/release/release_config.json)
-          IFS=',' read -ra app_list <<< "$APPS_INPUT"
-          for app in "${app_list[@]}"; do
-            app=$(echo "$app" | tr -d ' ')
-            if ! echo "$VALID_APPS" | grep -qw "$app"; then
-              echo "Invalid app: '$app'. Valid values: $VALID_APPS" >&2
-              exit 1
-            fi
-          done
 
       - name: Init submodules (SSH → HTTPS rewrite)
         run: |
@@ -175,9 +220,9 @@ jobs:
         env:
           SCREEN_WIDTH: ${{ matrix.width }}
           SCREEN_HEIGHT: ${{ matrix.height }}
-          APPS_INPUT: ${{ github.event.inputs.apps }}
+          APPS_INPUT: ${{ needs.resolve-apps.outputs.apps }}
         run: |
-          APPS="${APPS_INPUT:-admin,hotel}"
+          APPS="$APPS_INPUT"
           IFS=',' read -ra app_list <<< "$APPS"
           for app in "${app_list[@]}"; do
             app=$(echo "$app" | tr -d ' ')
@@ -196,10 +241,10 @@ jobs:
       - name: Scale iOS screenshots to physical resolution
         if: ${{ matrix.phys_w != '' }}
         env:
-          APPS_INPUT: ${{ github.event.inputs.apps }}
+          APPS_INPUT: ${{ needs.resolve-apps.outputs.apps }}
         run: |
           sudo apt-get install -y imagemagick -qq
-          APPS="${APPS_INPUT:-admin,hotel}"
+          APPS="$APPS_INPUT"
           IFS=',' read -ra app_list <<< "$APPS"
           for app in "${app_list[@]}"; do
             app=$(echo "$app" | tr -d ' ')
@@ -234,7 +279,7 @@ jobs:
   #    upload as artifact. publish-metadata downloads this artifact.
   # ──────────────────────────────────────────────────────────────────────────
   frame-screenshots:
-    needs: take-screenshots
+    needs: [resolve-apps, take-screenshots]
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
@@ -281,7 +326,7 @@ jobs:
       - name: Generate titles from app Fastlane files
         working-directory: screenshots
         env:
-          APPS_INPUT: ${{ github.event.inputs.apps }}
+          APPS_INPUT: ${{ needs.resolve-apps.outputs.apps }}
         run: |
           python3 - << 'PYEOF'
           import glob
@@ -289,7 +334,7 @@ jobs:
           import os
           import re
 
-          apps = [a.strip() for a in (os.environ.get('APPS_INPUT') or 'admin,hotel').split(',') if a.strip()]
+          apps = [a.strip() for a in os.environ['APPS_INPUT'].split(',') if a.strip()]
           screenshots = sorted(
             os.path.basename(path)
             for path in glob.glob('*.png')
