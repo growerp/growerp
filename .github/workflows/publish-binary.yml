@@ -300,6 +300,47 @@ jobs:
                   print(f'  Play Store query failed for {package_name}: {e}')
                   return None
 
+          # Highest Android versionCode Play has ever seen for this package.
+          # A bundle's versionCode is consumed permanently once uploaded, even
+          # if the edit is later abandoned (which is what a failed deploy does),
+          # so the next code must exceed every code Play already knows.
+          def latest_play_version_code(package_name):
+              try:
+                  sa_json = os.environ.get('GOOGLE_PLAY_SERVICE_ACCOUNT_JSON', '')
+                  if not sa_json:
+                      return 0
+                  creds = google.oauth2.service_account.Credentials.from_service_account_info(
+                      json.loads(sa_json),
+                      scopes=['https://www.googleapis.com/auth/androidpublisher']
+                  )
+                  creds.refresh(google.auth.transport.requests.Request())
+                  hdrs = {'Authorization': f'Bearer {creds.token}'}
+                  base = f'https://androidpublisher.googleapis.com/androidpublisher/v3/applications/{package_name}'
+                  edit = requests.post(f'{base}/edits', headers=hdrs)
+                  edit.raise_for_status()
+                  edit_id = edit.json()['id']
+                  codes = []
+                  try:
+                      for kind in ('bundles', 'apks'):
+                          r = requests.get(f'{base}/edits/{edit_id}/{kind}', headers=hdrs)
+                          if r.ok:
+                              for item in r.json().get(kind, []):
+                                  vc = item.get('versionCode')
+                                  if vc:
+                                      codes.append(int(vc))
+                      r = requests.get(f'{base}/edits/{edit_id}/tracks', headers=hdrs)
+                      if r.ok:
+                          for track in r.json().get('tracks', []):
+                              for rel in track.get('releases', []):
+                                  for vc in rel.get('versionCodes', []) or []:
+                                      codes.append(int(vc))
+                  finally:
+                      requests.delete(f'{base}/edits/{edit_id}', headers=hdrs)
+                  return max(codes) if codes else 0
+              except Exception as e:
+                  print(f'  Play versionCode query failed for {package_name}: {e}')
+                  return 0
+
           def max_version(a, b):
               if not a:
                   return b
@@ -323,13 +364,17 @@ jobs:
               bundle_id = f'org.growerp.{app}'
               asc_ver  = latest_asc_version(bundle_id)
               play_ver = latest_play_version(bundle_id)
+              play_code = latest_play_version_code(bundle_id)
               best_ver = max_version(max_version(asc_ver, play_ver), pub_ver)
 
-              print(f'{app}: ASC={asc_ver or "n/a"}  Play={play_ver or "n/a"}  pubspec={pub_ver}  → base={best_ver}')
+              print(f'{app}: ASC={asc_ver or "n/a"}  Play={play_ver or "n/a"}  '
+                    f'PlayCode={play_code}  pubspec={pub_ver}  → base={best_ver}')
 
               major, minor, patch = best_ver.split('.')
               new_patch = int(patch) + 1
-              new_build = int(pub_build) + 1
+              # versionCode must strictly exceed every code Play already knows,
+              # otherwise "Version code N has already been used" on upload.
+              new_build = max(int(pub_build), play_code) + 1
               new_ver = f'{major}.{minor}.{new_patch}+{new_build}'
               content = re.sub(r'^version:\s*[\d.+]+', f'version: {new_ver}', content, flags=re.MULTILINE)
               with open(pubspec, 'w') as f:
