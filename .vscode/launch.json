@@ -12,7 +12,8 @@
                 "-d",
                 "chrome",
                 "--web-port",
-                "55555"
+                "55555",
+                "--dart-define=BACKEND_PORT=8080"
             ]
         },
         {
@@ -23,7 +24,8 @@
             "program": "lib/main.dart",
             "toolArgs": [
                 "-d",
-                "linux"
+                "linux",
+                "--dart-define=BACKEND_PORT=8080"
             ]
         },
         {
@@ -31,7 +33,10 @@
             "type": "dart",
             "request": "launch",
             "cwd": "flutter/packages/agents",
-            "program": "lib/main.dart"
+            "program": "lib/main.dart",
+            "toolArgs": [
+                "--dart-define=BACKEND_PORT=8080"
+            ]
         },
         {
             "name": "Support Web (lib/main.dart)",
@@ -43,7 +48,8 @@
                 "-d",
                 "chrome",
                 "--web-port",
-                "55555"
+                "55555",
+                "--dart-define=BACKEND_PORT=8080"
             ]
         },
         {
@@ -63,7 +69,10 @@
             "type": "dart",
             "request": "launch",
             "cwd": "flutter/packages/support",
-            "program": "lib/main.dart"
+            "program": "lib/main.dart",
+            "toolArgs": [
+                "--dart-define=BACKEND_PORT=8080"
+            ]
         },
         {
             "name": "Admin Web (lib/main.dart)",
@@ -75,7 +84,8 @@
                 "-d",
                 "chrome",
                 "--web-port",
-                "55555"
+                "55555",
+                "--dart-define=BACKEND_PORT=8080"
             ]
         },
         {
@@ -98,7 +108,8 @@
             "program": "lib/main.dart",
             "toolArgs": [
                 "-d",
-                "macos"
+                "macos",
+                "--dart-define=BACKEND_PORT=8080"
             ]
         },
         {
@@ -106,14 +117,20 @@
             "type": "dart",
             "request": "launch",
             "cwd": "flutter/packages/admin",
-            "program": "lib/main.dart"
+            "program": "lib/main.dart",
+            "toolArgs": [
+                "--dart-define=BACKEND_PORT=8080"
+            ]
         },
         {
             "name": "rental mobile (lib/main.dart)",
             "type": "dart",
             "request": "launch",
             "cwd": "flutter/packages/rental",
-            "program": "lib/main.dart"
+            "program": "lib/main.dart",
+            "toolArgs": [
+                "--dart-define=BACKEND_PORT=8080"
+            ]
         },
         {
             "name": "rental Web (lib/main.dart)",
@@ -125,7 +142,8 @@
                 "-d",
                 "chrome",
                 "--web-port",
-                "55555"
+                "55555",
+                "--dart-define=BACKEND_PORT=8080"
             ]
         },
         {
@@ -136,7 +154,8 @@
             "program": "lib/main.dart",
             "toolArgs": [
                 "-d",
-                "linux"
+                "linux",
+                "--dart-define=BACKEND_PORT=8080"
             ]
         },
         {
@@ -144,7 +163,10 @@
             "type": "dart",
             "request": "launch",
             "cwd": "flutter/packages/freelance",
-            "program": "lib/main.dart"
+            "program": "lib/main.dart",
+            "toolArgs": [
+                "--dart-define=BACKEND_PORT=8080"
+            ]
         },
         {
             "name": "Freelance linux(lib/main.dart)",
@@ -154,7 +176,8 @@
             "program": "lib/main.dart",
             "toolArgs": [
                 "-d",
-                "linux"
+                "linux",
+                "--dart-define=BACKEND_PORT=8080"
             ]
         },
         {
@@ -167,7 +190,8 @@
                 "-d",
                 "chrome",
                 "--web-port",
-                "55555"
+                "55555",
+                "--dart-define=BACKEND_PORT=8080"
             ]
         },
         {
@@ -175,7 +199,10 @@
             "type": "dart",
             "request": "launch",
             "cwd": "flutter/packages/hotel",
-            "program": "lib/main.dart"
+            "program": "lib/main.dart",
+            "toolArgs": [
+                "--dart-define=BACKEND_PORT=8080"
+            ]
         },
         {
             "name": "Hotel chrome (lib/main.dart)",
@@ -187,7 +214,8 @@
                 "-d",
                 "chrome",
                 "--web-port",
-                "55555"
+                "55555",
+                "--dart-define=BACKEND_PORT=8080"
             ]
         },
         {
@@ -198,7 +226,8 @@
             "program": "lib/main.dart",
             "toolArgs": [
                 "-d",
-                "linux"
+                "linux",
+                "--dart-define=BACKEND_PORT=8080"
             ]
         },
         {
@@ -209,7 +238,8 @@
             "program": "lib/main.dart",
             "toolArgs": [
                 "-d",
-                "macos"
+                "macos",
+                "--dart-define=BACKEND_PORT=8080"
             ]
         },
         {
@@ -220,7 +250,8 @@
             "program": "lib/main.dart",
             "toolArgs": [
                 "-d",
-                "linux"
+                "linux",
+                "--dart-define=BACKEND_PORT=8080"
             ]
         }
     ]
