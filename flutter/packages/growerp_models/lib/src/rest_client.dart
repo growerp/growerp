@@ -441,6 +441,10 @@ abstract class RestClient {
     @Query('hkStatusId') required String hkStatusId,
   });
 
+  /// mark all rooms clean at the end of a housekeeping round
+  @POST("rest/s1/growerp/100/Housekeeping")
+  Future<void> resetHousekeeping();
+
   // HOTEL: occupancy / ADR / RevPAR statistics
   @GET("rest/s1/growerp/100/HotelStatistics")
   Future<HotelStatistics> getHotelStatistics({

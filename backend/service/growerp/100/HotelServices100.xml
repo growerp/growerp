@@ -233,9 +233,12 @@ along with this software (see the LICENSE.md file). If not, see
         <actions>
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <!-- stays run from noon to noon, so the night of today is the one
+                 covering today noon: at midnight no stay has started yet -->
             <set field="today"
                 from="Timestamp.from(ec.user.nowTimestamp.toInstant()
-                    .truncatedTo(java.time.temporal.ChronoUnit.DAYS))" />
+                    .truncatedTo(java.time.temporal.ChronoUnit.DAYS)
+                    .plus(12, java.time.temporal.ChronoUnit.HOURS))" />
             <entity-find entity-name="growerp.product.asset.AssetProductAndLocation"
                 list="assetList" offset="start" limit="limit">
                 <econdition field-name="ownerPartyId" from="companyPartyId" />
@@ -282,6 +285,30 @@ along with this software (see the LICENSE.md file). If not, see
             </if>
             <set field="asset.hkStatusId" from="hkStatusId" />
             <entity-update value-field="asset" />
+        </actions>
+    </service>
+
+    <service verb="reset" noun="Housekeeping">
+        <description>Mark every room of the hotel as cleaned, for the end of a
+            housekeeping round</description>
+        <out-parameters>
+            <parameter name="roomsCleaned" type="Integer" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <entity-find entity-name="mantle.product.asset.Asset" list="assetList"
+                for-update="true">
+                <econdition field-name="ownerPartyId" from="companyPartyId" />
+                <econdition field-name="classEnumId" value="AsClsRoom" />
+                <!-- rooms never touched are null and already count as clean -->
+                <econdition field-name="hkStatusId" operator="not-equals" value="Clean" />
+            </entity-find>
+            <iterate list="assetList" entry="asset">
+                <set field="asset.hkStatusId" value="Clean" />
+                <entity-update value-field="asset" />
+            </iterate>
+            <set field="roomsCleaned" from="assetList.size()" />
         </actions>
     </service>
 

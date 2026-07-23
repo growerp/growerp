@@ -2994,6 +2994,17 @@ along with this software (see the LICENSE.md file). If not, see
                     <else-if condition="order.statusId == 'OrderCompleted'">
                         <service-call name="mantle.order.OrderServices.complete#Order"
                             in-map="context" />
+                        <!-- checkout: the rented rooms need housekeeping -->
+                        <entity-find entity-name="growerp.product.AssetRental" list="rentals">
+                            <econdition field-name="orderId" from="order.orderId" />
+                            <!-- the asset is only assigned when the stay is confirmed -->
+                            <econdition field-name="assetId" operator="is-not-null" />
+                        </entity-find>
+                        <iterate list="rentals" entry="rental">
+                            <service-call
+                                name="growerp.100.HotelServices100.update#Housekeeping"
+                                in-map="[assetId: rental.assetId, hkStatusId: 'Dirty']" />
+                        </iterate>
                         <!-- invoice only be updated is required? it can make the order completed-->
                         <!--entity-find-one
                     entity-name="mantle.account.invoice.Invoice" value-field="invoice">

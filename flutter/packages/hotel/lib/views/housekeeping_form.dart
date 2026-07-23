@@ -81,6 +81,17 @@ class _HousekeepingFormState extends State<HousekeepingForm> {
     }
   }
 
+  /// end of a housekeeping round: every room clean again
+  Future<void> _allClean() async {
+    try {
+      await _restClient.resetHousekeeping();
+      await _fetch();
+    } catch (e) {
+      if (!mounted) return;
+      HelperFunctions.showMessage(context, '$e', Colors.red);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_loading) return const LoadingIndicator();
@@ -89,11 +100,25 @@ class _HousekeepingFormState extends State<HousekeepingForm> {
     }
     final dirtyCount = _rooms.where((r) => r.hkStatusId != 'Clean').length;
     return Scaffold(
-      floatingActionButton: FloatingActionButton(
-        key: const Key('refresh'),
-        onPressed: _fetch,
-        tooltip: 'Refresh',
-        child: const Icon(Icons.refresh),
+      floatingActionButton: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          FloatingActionButton(
+            key: const Key('allClean'),
+            heroTag: 'allClean',
+            onPressed: dirtyCount == 0 ? null : _allClean,
+            tooltip: 'All rooms clean',
+            child: const Icon(Icons.done_all),
+          ),
+          const SizedBox(height: 10),
+          FloatingActionButton(
+            key: const Key('refresh'),
+            heroTag: 'refresh',
+            onPressed: _fetch,
+            tooltip: 'Refresh',
+            child: const Icon(Icons.refresh),
+          ),
+        ],
       ),
       body: Column(
         children: [
