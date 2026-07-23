@@ -26,23 +26,23 @@ on:
       app_freelance:
         description: "Freelance App"
         type: boolean
-        default: false
+        default: true
       app_support:
         description: "Support App"
         type: boolean
-        default: false
+        default: true
       app_agents:
         description: "Agents App"
         type: boolean
-        default: false
+        default: true
       app_rental:
         description: "Rental App"
         type: boolean
-        default: false
+        default: true
       app_marketing:
         description: "Marketing App"
         type: boolean
-        default: false
+        default: true
       store_ios:
         description: "iOS App Store"
         type: boolean
