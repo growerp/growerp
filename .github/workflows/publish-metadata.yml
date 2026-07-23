@@ -589,7 +589,17 @@ jobs:
               if pending_sub and pending_sub.get('id'):
                   old_sub_id = pending_sub['id']
                   print(f'Deleting existing pending submission {old_sub_id}...')
-                  call('DELETE', f'{base_url}/submissions/{old_sub_id}', headers=headers).raise_for_status()
+                  del_resp = call('DELETE', f'{base_url}/submissions/{old_sub_id}', headers=headers)
+                  if not del_resp.ok:
+                      # A pending submission that can't be deleted means the app has an
+                      # in-flight submission (e.g. first-time onboarding still in
+                      # certification). Metadata can't be replaced until it goes live —
+                      # skip this app rather than fail the job.
+                      print(f'Cannot delete pending submission {old_sub_id} '
+                            f'(status {del_resp.status_code}): {del_resp.text}')
+                      print(f'Skipping {app_name}: an in-flight submission is pending; '
+                            'metadata will publish once it goes live.')
+                      exit(0)
 
           # Create new submission (clones last published).
           # Do NOT send json={} — an empty body tells the API to clone from
