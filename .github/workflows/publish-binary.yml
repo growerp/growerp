@@ -60,11 +60,16 @@ on:
         options:
           - beta
           - stable
-      android_draft:
-        description: "Android: create the Play release as a draft (required for a
-          brand-new app's first release — promote it by hand in Play Console)"
-        type: boolean
-        default: false
+      android_release_status:
+        description: "Android release status (auto = draft for a never-published app,
+          completed otherwise)"
+        required: true
+        default: "auto"
+        type: choice
+        options:
+          - auto
+          - draft
+          - completed
 
 concurrency:
   group: store-deploy
@@ -899,6 +904,60 @@ jobs:
           if-no-files-found: error
           path: flutter/packages/${{ matrix.app }}/build/app/outputs/bundle/release/app-release.aab
 
+      # A draft app (one that has never been published) only accepts a draft
+      # release — "Only releases with status draft may be created on draft app".
+      # Published apps must keep getting completed releases, so the status is
+      # resolved per app rather than by one global flag.
+      - name: Resolve Play release status
+        env:
+          GOOGLE_PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+          RELEASE_STATUS: ${{ inputs.android_release_status }}
+          PACKAGE_NAME: org.growerp.${{ matrix.app }}
+        run: |
+          if [[ "$RELEASE_STATUS" != "auto" ]]; then
+            echo "PLAY_STATUS=$RELEASE_STATUS" >> "$GITHUB_ENV"
+            echo "Status forced to '$RELEASE_STATUS'"
+            exit 0
+          fi
+          pip install google-auth requests --quiet
+          python3 << 'PYEOF'
+          import json, os
+          import requests
+          import google.oauth2.service_account
+          import google.auth.transport.requests
+
+          package = os.environ['PACKAGE_NAME']
+          status = 'draft'
+          try:
+              creds = google.oauth2.service_account.Credentials.from_service_account_info(
+                  json.loads(os.environ['GOOGLE_PLAY_SERVICE_ACCOUNT_JSON']),
+                  scopes=['https://www.googleapis.com/auth/androidpublisher']
+              )
+              creds.refresh(google.auth.transport.requests.Request())
+              hdrs = {'Authorization': f'Bearer {creds.token}'}
+              base = f'https://androidpublisher.googleapis.com/androidpublisher/v3/applications/{package}'
+              edit = requests.post(f'{base}/edits', headers=hdrs)
+              edit.raise_for_status()
+              edit_id = edit.json()['id']
+              try:
+                  r = requests.get(f'{base}/edits/{edit_id}/tracks', headers=hdrs)
+                  r.raise_for_status()
+                  for track in r.json().get('tracks', []):
+                      for rel in track.get('releases', []):
+                          if rel.get('status') == 'completed':
+                              status = 'completed'
+              finally:
+                  requests.delete(f'{base}/edits/{edit_id}', headers=hdrs)
+          except Exception as e:
+              # An app with no releases at all cannot take a completed release,
+              # so draft is the safe fallback.
+              print(f'Play status query failed for {package}: {e}')
+
+          print(f'{package}: release status → {status}')
+          with open(os.environ['GITHUB_ENV'], 'a') as f:
+              f.write(f'PLAY_STATUS={status}\n')
+          PYEOF
+
       - name: Upload to Play Store
         uses: r0adkll/upload-google-play@v1
         with:
@@ -907,9 +966,7 @@ jobs:
           releaseFiles: flutter/packages/${{ matrix.app
             }}/build/app/outputs/bundle/release/app-release.aab
           track: ${{ inputs.track == 'stable' && 'production' || inputs.track }}
-          # A draft app (never published) only accepts a draft release; existing
-          # apps get a completed release as before.
-          status: ${{ inputs.android_draft == true && 'draft' || 'completed' }}
+          status: ${{ env.PLAY_STATUS }}
 
   # ───────────────────────────────────────────────────────────────────────────
   # Commit the bumped pubspecs after all platform deploys complete.

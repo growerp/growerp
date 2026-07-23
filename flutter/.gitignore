@@ -1,8 +1,10 @@
 # Ignoring generated files, as they pollute pull requests and can create merge conflicts
-*.xcconfig
+# Only the Flutter-generated xcconfigs are ignored — Debug/Release xcconfig and the
+# Podfile are normal project files and must be committed, or the store builds fail.
+**/Flutter/Generated.xcconfig
+**/Flutter/Flutter-Generated.xcconfig
 *.g.dart
 *.freezed.dart
-Podfile
 
 pubspec.lock
 generated
@@ -68,9 +70,9 @@ lib/generated_plugin_registrant.dart
 **/GeneratedPluginRegistrant.m
 **/GeneratedPluginRegistrant.h
 
-# iOS Flutter generated files
+# iOS/macOS Flutter generated files
 **/ios/Flutter/flutter_export_environment.sh
-**/ios/Flutter/ephemeral/
+**/Flutter/ephemeral/
 
 # Example-app generated desktop runner + local tests (regeneratable / local-only)
 packages/*/example/linux/

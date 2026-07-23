@@ -4,7 +4,15 @@ storage_mode("git")
 
 type("appstore") # The default type, can be: appstore, adhoc, enterprise or development
 
-app_identifier(["org.growerp.admin", "org.growerp.hotel"])
+# Apps published to the Apple stores; support ships to android/snap only.
+app_identifier([
+  "org.growerp.admin",
+  "org.growerp.hotel",
+  "org.growerp.freelance",
+  "org.growerp.agents",
+  "org.growerp.rental",
+  "org.growerp.marketing"
+])
 username("apple@hansbakker.com") # Your Apple Developer Portal username
 team_id("P64T65C668")
 platform("macos") # The platform you want to use (ios or android)

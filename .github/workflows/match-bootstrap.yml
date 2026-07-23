@@ -1,0 +1,137 @@
+name: Bootstrap Apple Signing (match)
+
+# One-time signing setup for a new vertical. The publish workflow runs match in
+# readonly mode, so it can never create the first certificate/provisioning
+# profile for a new bundle ID — that job fails with
+# "No matching provisioning profiles found for 'AppStore_org.growerp.<app>.provisionprofile'".
+#
+# This workflow runs match in WRITE mode and pushes the new assets to the
+# certificates repo. It is manual-only by design.
+#
+# Prerequisites per app (cannot be automated here):
+#   - the bundle ID org.growerp.<app> exists in the Apple Developer portal
+#   - the app record exists in App Store Connect
+#
+# Secrets: MATCH_PASSWORD, MATCH_GIT_URL, MATCH_GIT_BASIC_AUTHORIZATION,
+#          APP_STORE_CONNECT_API_KEY_ID / _ISSUER_ID / _KEY_CONTENT
+
+on:
+  workflow_dispatch:
+    inputs:
+      app_admin:
+        description: "Admin App"
+        type: boolean
+        default: false
+      app_hotel:
+        description: "Hotel App"
+        type: boolean
+        default: false
+      app_freelance:
+        description: "Freelance App"
+        type: boolean
+        default: true
+      app_support:
+        description: "Support App (android/snap only — no Apple signing needed)"
+        type: boolean
+        default: false
+      app_agents:
+        description: "Agents App"
+        type: boolean
+        default: true
+      app_rental:
+        description: "Rental App"
+        type: boolean
+        default: true
+      app_marketing:
+        description: "Marketing App"
+        type: boolean
+        default: true
+      platform:
+        description: "Which platform's signing assets to create"
+        required: true
+        default: "both"
+        type: choice
+        options:
+          - both
+          - ios
+          - macos
+
+concurrency:
+  group: match-bootstrap
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  resolve-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set.outputs.matrix }}
+    steps:
+      - id: set
+        run: |
+          apps=()
+          [[ "${{ inputs.app_admin }}"     == "true" ]] && apps+=(admin)
+          [[ "${{ inputs.app_hotel }}"     == "true" ]] && apps+=(hotel)
+          [[ "${{ inputs.app_freelance }}" == "true" ]] && apps+=(freelance)
+          [[ "${{ inputs.app_support }}"   == "true" ]] && apps+=(support)
+          [[ "${{ inputs.app_agents }}"    == "true" ]] && apps+=(agents)
+          [[ "${{ inputs.app_rental }}"    == "true" ]] && apps+=(rental)
+          [[ "${{ inputs.app_marketing }}" == "true" ]] && apps+=(marketing)
+
+          if [[ ${#apps[@]} -eq 0 ]]; then
+            echo "No app selected" >&2
+            exit 1
+          fi
+
+          case "${{ inputs.platform }}" in
+            both)  platforms=(ios macos) ;;
+            *)     platforms=("${{ inputs.platform }}") ;;
+          esac
+
+          json="["
+          first=true
+          for app in "${apps[@]}"; do
+            for p in "${platforms[@]}"; do
+              [[ "$first" == false ]] && json="${json},"
+              json="${json}{\"app\":\"${app}\",\"platform\":\"${p}\"}"
+              first=false
+            done
+          done
+          json="${json}]"
+          echo "matrix=$json" >> "$GITHUB_OUTPUT"
+          echo "$json"
+
+  bootstrap:
+    needs: [ resolve-matrix ]
+    runs-on: macos-latest
+    strategy:
+      # Serial: every job pushes to the same certificates repo.
+      max-parallel: 1
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.resolve-matrix.outputs.matrix) }}
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.2"
+          bundler-cache: true
+          working-directory: flutter/fastlane
+
+      - name: Fastlane match bootstrap (${{ matrix.app }} / ${{ matrix.platform }})
+        env:
+          BUNDLE_GEMFILE: ${{ github.workspace }}/flutter/fastlane/Gemfile
+          APP_NAME: ${{ matrix.app }}
+          MATCH_PLATFORM: ${{ matrix.platform }}
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
+          MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
+          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          APP_STORE_CONNECT_API_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY_CONTENT: ${{ secrets.APP_STORE_CONNECT_API_KEY_CONTENT }}
+        run: bundle exec fastlane bootstrap_signing
+        working-directory: flutter

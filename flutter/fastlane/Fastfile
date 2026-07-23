@@ -28,25 +28,79 @@ def release_pending_versions(app, platform_filter)
   released
 end
 
-# Make sure App Store Connect will accept a new version submission.
+# States in which Apple already has the previous submission and will not accept
+# a new one. deliver fails with "reject_if_possible doesn't work when using
+# submit_build. The app store version is in Waiting For Review".
+REVIEW_BLOCKING_STATES = %w[WAITING_FOR_REVIEW IN_REVIEW].freeze
+
+# Is App Store Connect able to accept a new version submission right now?
 # A version in PENDING_DEVELOPER_RELEASE blocks creating a new version, so
-# release it first and wait until it leaves that state.
-def ensure_submit_slot!(api_key, bundle_id, platform_filter)
+# release it first and wait until it leaves that state. A version already
+# queued for review cannot be displaced — report that so the caller can upload
+# the build without submitting it.
+def submit_slot_available?(api_key, bundle_id, platform_filter)
   require "spaceship"
   Spaceship::ConnectAPI.token = Spaceship::ConnectAPI::Token.from(hash: api_key)
   app = Spaceship::ConnectAPI::App.find(bundle_id)
   UI.user_error!("App not found: #{bundle_id}") unless app
 
-  return unless release_pending_versions(app, platform_filter)
-
-  30.times do
-    pending = app.get_app_store_versions(
-      filter: { "appStoreState" => "PENDING_DEVELOPER_RELEASE", "platform" => platform_filter }
-    )
-    break if pending.empty?
-    UI.message("Waiting for previous version to leave PENDING_DEVELOPER_RELEASE...")
-    sleep(10)
+  if release_pending_versions(app, platform_filter)
+    30.times do
+      pending = app.get_app_store_versions(
+        filter: { "appStoreState" => "PENDING_DEVELOPER_RELEASE", "platform" => platform_filter }
+      )
+      break if pending.empty?
+      UI.message("Waiting for previous version to leave PENDING_DEVELOPER_RELEASE...")
+      sleep(10)
+    end
   end
+
+  blocking = REVIEW_BLOCKING_STATES.flat_map do |state|
+    app.get_app_store_versions(
+      filter: { "appStoreState" => state, "platform" => platform_filter }
+    )
+  end
+  return true if blocking.empty?
+
+  UI.important(
+    "#{bundle_id} (#{platform_filter}) has v#{blocking.first.version_string} in " \
+    "#{blocking.first.app_store_state}; uploading the build without submitting for review."
+  )
+  false
+end
+
+# One-time signing bootstrap for a bundle ID that has no match profile yet.
+# The regular codesign lanes run readonly, so they can never create the first
+# certificate/profile for a new vertical. Run this manually (it WRITES to the
+# certificates repo) via the match-bootstrap workflow.
+# Requires the bundle ID to already exist in the Apple Developer portal and the
+# app record to exist in App Store Connect.
+lane :bootstrap_signing do
+  setup_ci if ENV["CI"]
+  app_name  = required_env!("APP_NAME")
+  platform  = required_env!("MATCH_PLATFORM")   # "ios" or "macos"
+  bundle_id = "org.growerp.#{app_name}"
+
+  api_key = app_store_connect_api_key(
+    key_id:                required_env!("APP_STORE_CONNECT_API_KEY_ID"),
+    issuer_id:             required_env!("APP_STORE_CONNECT_API_ISSUER_ID"),
+    key_content:           required_env!("APP_STORE_CONNECT_API_KEY_CONTENT"),
+    is_key_content_base64: true,
+    in_house:              false
+  )
+  options = {
+    type: "appstore",
+    platform: platform,
+    app_identifier: [bundle_id],
+    git_url: required_env!("MATCH_GIT_URL"),
+    readonly: false,
+    api_key: api_key
+  }
+  options[:additional_cert_types] = ["mac_installer_distribution"] if platform == "macos"
+  auth = optional_env("MATCH_GIT_BASIC_AUTHORIZATION")
+  options[:git_basic_authorization] = auth if auth
+  sync_code_signing(**options)
+  UI.success("Signing assets ready for #{bundle_id} (#{platform})")
 end
 
 lane :codesign do
@@ -117,11 +171,18 @@ lane :upload do
     is_key_content_base64: true,
     in_house:              false
   )
-  if ENV.fetch("SUBMIT_FOR_REVIEW", "false") == "true"
+  submit_for_review = ENV.fetch("SUBMIT_FOR_REVIEW", "false") == "true"
+  if submit_for_review
+    app_name = required_env!("APP_NAME")
+    # A version already queued at Apple cannot be replaced — fall back to a
+    # TestFlight-only upload so the build still ships.
+    submit_for_review = submit_slot_available?(api_key, "org.growerp.#{app_name}", "IOS")
+  end
+
+  if submit_for_review
     # stable: create App Store version if missing, upload release notes, submit for review
     app_name      = required_env!("APP_NAME")
     metadata_path = File.expand_path("../packages/#{app_name}/ios/fastlane/metadata", __dir__)
-    ensure_submit_slot!(api_key, "org.growerp.#{app_name}", "IOS")
     upload_to_app_store(
       api_key:                    api_key,
       app_identifier:             "org.growerp.#{app_name}",
@@ -266,10 +327,14 @@ lane :upload_macos do
   UI.user_error!("No .pkg found in #{export_dir}") if pkg.nil?
 
   submit_for_review = ENV.fetch("SUBMIT_FOR_REVIEW", "false") == "true"
+  # A version already queued at Apple cannot be replaced — fall back to a
+  # TestFlight-only upload so the build still ships.
+  if submit_for_review
+    submit_for_review = submit_slot_available?(api_key, "org.growerp.#{app_name}", "MAC_OS")
+  end
 
   if submit_for_review
     metadata_path = File.expand_path("../packages/#{app_name}/ios/fastlane/metadata", __dir__)
-    ensure_submit_slot!(api_key, "org.growerp.#{app_name}", "MAC_OS")
     upload_to_app_store(
       api_key:                    api_key,
       app_identifier:             "org.growerp.#{app_name}",
