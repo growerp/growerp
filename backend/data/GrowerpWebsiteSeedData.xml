@@ -49,9 +49,9 @@
                     <a href="https://admin.growerp.com" class="bg-primary hover:bg-primary/90 text-on-primary font-label text-sm font-medium px-8 py-4 rounded-lg l-glow transition-all active:scale-95 text-center">
                         Start Free Trial
                     </a>
-                    <a href="/assessmentLanding?landingPageId=ERP_LANDING_PAGE" class="l-glass hover:bg-surface-container text-on-surface font-label text-sm font-medium px-8 py-4 rounded-lg transition-all active:scale-95 text-center flex items-center justify-center gap-2">
-                        <span class="material-symbols-outlined text-[20px]">quiz</span>
-                        Start the ERP Assessment
+                    <a href="https://calendar.app.google/KQBVyUZEGyPPM4HK9" target="_blank" rel="noopener" class="l-glass hover:bg-surface-container text-on-surface font-label text-sm font-medium px-8 py-4 rounded-lg transition-all active:scale-95 text-center flex items-center justify-center gap-2">
+                        <span class="material-symbols-outlined text-[20px]">calendar_month</span>
+                        Ask for a Demo
                     </a>
                 </div>
                 <p class="text-sm text-on-surface-variant/70 mt-4">No credit card required &bull; 2 weeks free</p>
