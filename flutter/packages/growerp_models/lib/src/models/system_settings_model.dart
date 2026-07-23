@@ -53,7 +53,7 @@ abstract class SystemSettings with _$SystemSettings {
     String? googleRefreshToken,
     String? googleCalendarId,
     // Hotel: lodging/tourist tax charged per room per night
-    Decimal? touristTaxPerNight,
+    @JsonKey(fromJson: _decimalFromJson) Decimal? touristTaxPerNight,
     // Quota
     int? llmSystemTokenLimit,
     // Tenant-wide default Gemini model for AI content generation; empty uses the system default.
@@ -71,4 +71,9 @@ abstract class SystemSettings with _$SystemSettings {
       'githubToken: ${githubToken != null ? "set" : "unset"} '
       'githubRepository: ${githubRepository ?? "unset"} '
       'llmSystemTokenLimit: $llmSystemTokenLimit';
+}
+
+Decimal? _decimalFromJson(dynamic value) {
+  if (value == null) return null;
+  return Decimal.parse(value.toString());
 }

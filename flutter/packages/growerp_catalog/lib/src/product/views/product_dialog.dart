@@ -583,13 +583,14 @@ class ProductDialogState extends State<ProductDialog> {
             ],
           ),
         ),
-      GroupingDecorator(
-        labelText: catalogLocalizations.typeAmount,
-        child: Column(
-          children: [
-            Row(
-              children: [
-                // UOM Type dropdown (first level)
+      if (applicationId != 'AppHotel')
+        GroupingDecorator(
+          labelText: catalogLocalizations.typeAmount,
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  // UOM Type dropdown (first level)
                 Expanded(
                   child: FormBuilderDropdown<Uom>(
                     key: const Key('uomTypeDropDown'),
@@ -729,9 +730,11 @@ class ProductDialogState extends State<ProductDialog> {
                       formData['price'].isEmpty ? '0.00' : formData['price'],
                     ),
                     currency: formData['currency'] ?? _currencySelected,
-                    amount: Decimal.parse(
-                      formData['amount'].isEmpty ? '0.00' : formData['amount'],
-                    ),
+                    amount: formData['amount'] != null
+                        ? Decimal.parse(
+                            formData['amount'].isEmpty ? '0.00' : formData['amount'],
+                          )
+                        : (widget.product.amount ?? Decimal.parse('1')),
                     amountUom: formData['amountUom'] ?? _selectedUom,
                     assetCount:
                         formData['assets'] == null || formData['assets'].isEmpty
