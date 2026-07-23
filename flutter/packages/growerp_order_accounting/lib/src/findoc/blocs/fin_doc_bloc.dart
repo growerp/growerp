@@ -193,7 +193,8 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
       // need sort because were loaded at the top of the list:better seen by the user
       List<FinDocItem> items = List.from(event.finDoc.items);
       if (docType != FinDocType.shipment && docType != FinDocType.payment) {
-        items.sort((a, b) => a.itemSeqId!.compareTo(b.itemSeqId!));
+        // new items have no sequence yet: keep them in the order supplied
+        items.sort((a, b) => (a.itemSeqId ?? '').compareTo(b.itemSeqId ?? ''));
       }
       if (event.finDoc.idIsNull()) {
         // create
