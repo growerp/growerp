@@ -60,6 +60,11 @@ on:
         options:
           - beta
           - stable
+      android_draft:
+        description: "Android: create the Play release as a draft (required for a
+          brand-new app's first release — promote it by hand in Play Console)"
+        type: boolean
+        default: false
 
 concurrency:
   group: store-deploy
@@ -857,7 +862,9 @@ jobs:
           releaseFiles: flutter/packages/${{ matrix.app
             }}/build/app/outputs/bundle/release/app-release.aab
           track: ${{ inputs.track == 'stable' && 'production' || inputs.track }}
-          status: completed
+          # A draft app (never published) only accepts a draft release; existing
+          # apps get a completed release as before.
+          status: ${{ inputs.android_draft == true && 'draft' || 'completed' }}
 
   # ───────────────────────────────────────────────────────────────────────────
   # Commit the bumped pubspecs after all platform deploys complete.
