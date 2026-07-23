@@ -119,20 +119,33 @@ along with this software (see the LICENSE.md file). If not, see
                     <if condition="incomingVersionIsLess">
                         <set field="forceUpdate" from="true"/>
                         <set field="minVersion" from="versionDb"/>
+                        <!-- Store ids per app, mirrors storeIds in flutter/release/release_config.json.
+                             Apps without an entry (e.g. AppSupport) fall back to the admin listing. -->
+                        <set field="appName" from="applicationId.substring(3).toLowerCase()"/>
+                        <set field="appleStoreIds"
+                            from="[admin: '1545521755', hotel: '1531267095', rental: '6793362791',
+                                freelance: '6793362997', marketing: '6793362708', agents: '6793362262']"/>
+                        <set field="windowsStoreIds"
+                            from="[admin: '9nwx6kftjnql', hotel: '9ngphmvmwfj1', rental: '9N4H3Z77CBNW',
+                                freelance: '9MZBTP3WV3CP', marketing: '9NJH32VW90KX', agents: '9PHK5D4MHV0Q']"/>
                         <!-- Set update URLs based on platform -->
                         <if condition="platform == 'android'">
                             <set field="updateUrl"
-                                from="'https://play.google.com/store/apps/details?id=org.growerp.' + applicationId.substring(3).toLowerCase()"/>
+                                from="'https://play.google.com/store/apps/details?id=org.growerp.' + appName"/>
                             <else-if condition="platform == 'ios' || platform == 'macos'">
+                                <set field="appleStoreId"
+                                    from="appleStoreIds.get(appName) ?: appleStoreIds.admin"/>
                                 <set field="updateUrl"
-                                    value="https://apps.apple.com/us/app/growerp-admin-open-source/id1545521755"/>
+                                    from="'https://apps.apple.com/us/app/id' + appleStoreId"/>
                             </else-if>
                             <else-if condition="platform == 'linux'">
-                                <set field="updateUrl" value="https://snapcraft.io/growerp-admin"/>
+                                <set field="updateUrl" from="'https://snapcraft.io/growerp-' + appName"/>
                             </else-if>
                             <else-if condition="platform == 'windows'">
+                                <set field="windowsStoreId"
+                                    from="windowsStoreIds.get(appName) ?: windowsStoreIds.admin"/>
                                 <set field="updateUrl"
-                                    value="https://apps.microsoft.com/detail/9nwx6kftjnql"/>
+                                    from="'https://apps.microsoft.com/detail/' + windowsStoreId"/>
                             </else-if>
                             <else>
                                 <!-- Web platform: instruct user to refresh browser -->

@@ -232,56 +232,124 @@
             </div>
 
             <!-- Rental -->
-            <a href="https://rental.growerp.com" target="_blank" rel="noopener" class="l-glass p-8 rounded-2xl flex flex-col gap-4 hover:bg-surface-container-low/60 transition-colors group relative overflow-hidden">
+            <div class="l-glass p-8 rounded-2xl flex flex-col gap-4 hover:bg-surface-container-low/60 transition-colors group relative overflow-hidden">
                 <div class="absolute top-0 right-0 w-32 h-32 bg-tertiary/5 rounded-full blur-[40px] group-hover:bg-tertiary/10 transition-all"></div>
                 <div class="w-12 h-12 rounded-lg bg-surface-container flex items-center justify-center border border-outline-variant/30 text-tertiary mb-2">
                     <span class="material-symbols-outlined icon-fill text-[24px]">car_rental</span>
                 </div>
                 <h3 class="font-display text-xl font-semibold text-on-surface">Rental</h3>
                 <p class="text-on-surface-variant leading-relaxed">Perfect for equipment, vehicle, or property rental businesses. Track asset availability, maintenance, and recurring billing.</p>
-                <div class="mt-auto pt-4 flex items-center text-tertiary font-label text-sm font-medium">
+                <a href="https://rental.growerp.com" target="_blank" rel="noopener" class="flex items-center text-tertiary font-label text-sm font-medium hover:underline">
                     rental.growerp.com <span class="material-symbols-outlined text-[16px] ml-1">arrow_forward</span>
+                </a>
+                <div class="mt-auto pt-4 flex flex-wrap gap-2 border-t border-outline-variant/20">
+                    <a href="https://rental.growerp.com" target="_blank" rel="noopener" title="Web Browser" class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-white/15 hover:border-tertiary/50 hover:text-tertiary text-on-surface-variant transition-colors">
+                        <span class="material-symbols-outlined text-[18px]">language</span>
+                    </a>
+                    <a href="https://play.google.com/store/apps/details?id=org.growerp.rental" target="_blank" rel="noopener" title="Android" class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-white/15 hover:border-tertiary/50 hover:text-tertiary text-on-surface-variant transition-colors">
+                        <span class="material-symbols-outlined text-[18px]">android</span>
+                    </a>
+                    <a href="https://apps.apple.com/us/app/id6793362791" target="_blank" rel="noopener" title="iOS &amp; macOS" class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-white/15 hover:border-tertiary/50 hover:text-tertiary text-on-surface-variant transition-colors">
+                        <span class="material-symbols-outlined text-[18px]">phone_iphone</span>
+                    </a>
+                    <a href="https://snapcraft.io/growerp-rental" target="_blank" rel="noopener" title="Linux" class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-white/15 hover:border-tertiary/50 hover:text-tertiary text-on-surface-variant transition-colors">
+                        <span class="material-symbols-outlined text-[18px]">terminal</span>
+                    </a>
+                    <a href="https://apps.microsoft.com/detail/9N4H3Z77CBNW" target="_blank" rel="noopener" title="Windows" class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-white/15 hover:border-tertiary/50 hover:text-tertiary text-on-surface-variant transition-colors">
+                        <span class="material-symbols-outlined text-[18px]">grid_view</span>
+                    </a>
                 </div>
-            </a>
-            
+            </div>
+
             <!-- Freelance -->
-            <a href="https://freelance.growerp.com" target="_blank" rel="noopener" class="l-glass p-8 rounded-2xl flex flex-col gap-4 hover:bg-surface-container-low/60 transition-colors group relative overflow-hidden">
+            <div class="l-glass p-8 rounded-2xl flex flex-col gap-4 hover:bg-surface-container-low/60 transition-colors group relative overflow-hidden">
                 <div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-[40px] group-hover:bg-primary/10 transition-all"></div>
                 <div class="w-12 h-12 rounded-lg bg-surface-container flex items-center justify-center border border-outline-variant/30 text-primary mb-2">
                     <span class="material-symbols-outlined icon-fill text-[24px]">person</span>
                 </div>
                 <h3 class="font-display text-xl font-semibold text-on-surface">Freelance</h3>
                 <p class="text-on-surface-variant leading-relaxed">Tailored for independent professionals and solopreneurs. Simplified invoicing, task tracking, and client management.</p>
-                <div class="mt-auto pt-4 flex items-center text-primary font-label text-sm font-medium">
+                <a href="https://freelance.growerp.com" target="_blank" rel="noopener" class="flex items-center text-primary font-label text-sm font-medium hover:underline">
                     freelance.growerp.com <span class="material-symbols-outlined text-[16px] ml-1">arrow_forward</span>
+                </a>
+                <div class="mt-auto pt-4 flex flex-wrap gap-2 border-t border-outline-variant/20">
+                    <a href="https://freelance.growerp.com" target="_blank" rel="noopener" title="Web Browser" class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-white/15 hover:border-primary/50 hover:text-primary text-on-surface-variant transition-colors">
+                        <span class="material-symbols-outlined text-[18px]">language</span>
+                    </a>
+                    <a href="https://play.google.com/store/apps/details?id=org.growerp.freelance" target="_blank" rel="noopener" title="Android" class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-white/15 hover:border-primary/50 hover:text-primary text-on-surface-variant transition-colors">
+                        <span class="material-symbols-outlined text-[18px]">android</span>
+                    </a>
+                    <a href="https://apps.apple.com/us/app/id6793362997" target="_blank" rel="noopener" title="iOS &amp; macOS" class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-white/15 hover:border-primary/50 hover:text-primary text-on-surface-variant transition-colors">
+                        <span class="material-symbols-outlined text-[18px]">phone_iphone</span>
+                    </a>
+                    <a href="https://snapcraft.io/growerp-freelance" target="_blank" rel="noopener" title="Linux" class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-white/15 hover:border-primary/50 hover:text-primary text-on-surface-variant transition-colors">
+                        <span class="material-symbols-outlined text-[18px]">terminal</span>
+                    </a>
+                    <a href="https://apps.microsoft.com/detail/9MZBTP3WV3CP" target="_blank" rel="noopener" title="Windows" class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-white/15 hover:border-primary/50 hover:text-primary text-on-surface-variant transition-colors">
+                        <span class="material-symbols-outlined text-[18px]">grid_view</span>
+                    </a>
                 </div>
-            </a>
-            
+            </div>
+
             <!-- Marketing -->
-            <a href="https://marketing.growerp.com" target="_blank" rel="noopener" class="l-glass p-8 rounded-2xl flex flex-col gap-4 hover:bg-surface-container-low/60 transition-colors group relative overflow-hidden">
+            <div class="l-glass p-8 rounded-2xl flex flex-col gap-4 hover:bg-surface-container-low/60 transition-colors group relative overflow-hidden">
                 <div class="absolute top-0 right-0 w-32 h-32 bg-secondary/5 rounded-full blur-[40px] group-hover:bg-secondary/10 transition-all"></div>
                 <div class="w-12 h-12 rounded-lg bg-surface-container flex items-center justify-center border border-outline-variant/30 text-secondary mb-2">
                     <span class="material-symbols-outlined icon-fill text-[24px]">campaign</span>
                 </div>
                 <h3 class="font-display text-xl font-semibold text-on-surface">Marketing</h3>
                 <p class="text-on-surface-variant leading-relaxed">Built for any company to improve marketing and sales: create campaigns, conduct outreach, nurture leads, and automate content marketing.</p>
-                <div class="mt-auto pt-4 flex items-center text-secondary font-label text-sm font-medium">
+                <a href="https://marketing.growerp.com" target="_blank" rel="noopener" class="flex items-center text-secondary font-label text-sm font-medium hover:underline">
                     marketing.growerp.com <span class="material-symbols-outlined text-[16px] ml-1">arrow_forward</span>
+                </a>
+                <div class="mt-auto pt-4 flex flex-wrap gap-2 border-t border-outline-variant/20">
+                    <a href="https://marketing.growerp.com" target="_blank" rel="noopener" title="Web Browser" class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-white/15 hover:border-secondary/50 hover:text-secondary text-on-surface-variant transition-colors">
+                        <span class="material-symbols-outlined text-[18px]">language</span>
+                    </a>
+                    <a href="https://play.google.com/store/apps/details?id=org.growerp.marketing" target="_blank" rel="noopener" title="Android" class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-white/15 hover:border-secondary/50 hover:text-secondary text-on-surface-variant transition-colors">
+                        <span class="material-symbols-outlined text-[18px]">android</span>
+                    </a>
+                    <a href="https://apps.apple.com/us/app/id6793362708" target="_blank" rel="noopener" title="iOS &amp; macOS" class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-white/15 hover:border-secondary/50 hover:text-secondary text-on-surface-variant transition-colors">
+                        <span class="material-symbols-outlined text-[18px]">phone_iphone</span>
+                    </a>
+                    <a href="https://snapcraft.io/growerp-marketing" target="_blank" rel="noopener" title="Linux" class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-white/15 hover:border-secondary/50 hover:text-secondary text-on-surface-variant transition-colors">
+                        <span class="material-symbols-outlined text-[18px]">terminal</span>
+                    </a>
+                    <a href="https://apps.microsoft.com/detail/9NJH32VW90KX" target="_blank" rel="noopener" title="Windows" class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-white/15 hover:border-secondary/50 hover:text-secondary text-on-surface-variant transition-colors">
+                        <span class="material-symbols-outlined text-[18px]">grid_view</span>
+                    </a>
                 </div>
-            </a>
-            
+            </div>
+
             <!-- Agents -->
-            <a href="https://agents.growerp.com" target="_blank" rel="noopener" class="l-glass p-8 rounded-2xl flex flex-col gap-4 hover:bg-surface-container-low/60 transition-colors group relative overflow-hidden">
+            <div class="l-glass p-8 rounded-2xl flex flex-col gap-4 hover:bg-surface-container-low/60 transition-colors group relative overflow-hidden">
                 <div class="absolute top-0 right-0 w-32 h-32 bg-tertiary/5 rounded-full blur-[40px] group-hover:bg-tertiary/10 transition-all"></div>
                 <div class="w-12 h-12 rounded-lg bg-surface-container flex items-center justify-center border border-outline-variant/30 text-tertiary mb-2">
                     <span class="material-symbols-outlined icon-fill text-[24px]">support_agent</span>
                 </div>
                 <h3 class="font-display text-xl font-semibold text-on-surface">Agents</h3>
                 <p class="text-on-surface-variant leading-relaxed">Empower your AI agents and customer support teams. Manage knowledge bases, automate responses, and oversee agent actions.</p>
-                <div class="mt-auto pt-4 flex items-center text-tertiary font-label text-sm font-medium">
+                <a href="https://agents.growerp.com" target="_blank" rel="noopener" class="flex items-center text-tertiary font-label text-sm font-medium hover:underline">
                     agents.growerp.com <span class="material-symbols-outlined text-[16px] ml-1">arrow_forward</span>
+                </a>
+                <div class="mt-auto pt-4 flex flex-wrap gap-2 border-t border-outline-variant/20">
+                    <a href="https://agents.growerp.com" target="_blank" rel="noopener" title="Web Browser" class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-white/15 hover:border-tertiary/50 hover:text-tertiary text-on-surface-variant transition-colors">
+                        <span class="material-symbols-outlined text-[18px]">language</span>
+                    </a>
+                    <a href="https://play.google.com/store/apps/details?id=org.growerp.agents" target="_blank" rel="noopener" title="Android" class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-white/15 hover:border-tertiary/50 hover:text-tertiary text-on-surface-variant transition-colors">
+                        <span class="material-symbols-outlined text-[18px]">android</span>
+                    </a>
+                    <a href="https://apps.apple.com/us/app/id6793362262" target="_blank" rel="noopener" title="iOS &amp; macOS" class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-white/15 hover:border-tertiary/50 hover:text-tertiary text-on-surface-variant transition-colors">
+                        <span class="material-symbols-outlined text-[18px]">phone_iphone</span>
+                    </a>
+                    <a href="https://snapcraft.io/growerp-agents" target="_blank" rel="noopener" title="Linux" class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-white/15 hover:border-tertiary/50 hover:text-tertiary text-on-surface-variant transition-colors">
+                        <span class="material-symbols-outlined text-[18px]">terminal</span>
+                    </a>
+                    <a href="https://apps.microsoft.com/detail/9PHK5D4MHV0Q" target="_blank" rel="noopener" title="Windows" class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-white/15 hover:border-tertiary/50 hover:text-tertiary text-on-surface-variant transition-colors">
+                        <span class="material-symbols-outlined text-[18px]">grid_view</span>
+                    </a>
                 </div>
-            </a>
+            </div>
         </div>
 
         <!-- CTA: your own vertical -->

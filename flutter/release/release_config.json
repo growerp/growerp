@@ -18,6 +18,14 @@
     "agents": ["ios", "macos", "android", "windows", "snap"],
     "marketing": ["ios", "macos", "android", "windows", "snap"]
   },
+  "storeIds": {
+    "admin": { "apple": "1545521755", "windows": "9nwx6kftjnql" },
+    "rental": { "apple": "6793362791", "windows": "9N4H3Z77CBNW" },
+    "freelance": { "apple": "6793362997", "windows": "9MZBTP3WV3CP" },
+    "hotel": { "apple": "1531267095", "windows": "9ngphmvmwfj1" },
+    "agents": { "apple": "6793362262", "windows": "9PHK5D4MHV0Q" },
+    "marketing": { "apple": "6793362708", "windows": "9NJH32VW90KX" }
+  },
   "bundleIds": {},
   "androidIds": {},
   "dockerRegistry": "ghcr.io/growerp",
