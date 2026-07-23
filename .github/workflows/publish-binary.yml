@@ -838,6 +838,17 @@ jobs:
         run: flutter build appbundle --release
         working-directory: flutter/packages/${{ matrix.app }}
 
+      # Keep the .aab downloadable from every run so any future new app can get
+      # its first Play Console release uploaded by hand (the Play publishing API
+      # cannot create an app's very first release).
+      - name: Upload AAB artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: aab-${{ matrix.app }}
+          retention-days: 7
+          if-no-files-found: error
+          path: flutter/packages/${{ matrix.app }}/build/app/outputs/bundle/release/app-release.aab
+
       - name: Upload to Play Store
         uses: r0adkll/upload-google-play@v1
         with:
@@ -1036,8 +1047,8 @@ jobs:
             --certificate-password "$env:WINDOWS_CERTIFICATE_PASSWORD"
         working-directory: flutter/packages/${{ matrix.app }}
 
-      # Temporary: keep the signed MSIX downloadable from the run so a first
-      # submission can be uploaded to Partner Center by hand (the Store
+      # Keep the signed MSIX downloadable from every run so any future new app
+      # can get its first Partner Center submission uploaded by hand (the Store
       # submission API cannot create an app's very first submission).
       - name: Upload MSIX artifact
         uses: actions/upload-artifact@v4
