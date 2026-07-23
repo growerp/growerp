@@ -14,23 +14,23 @@ on:
       app_freelance:
         description: "Freelance App"
         type: boolean
-        default: false
+        default: true
       app_support:
         description: "Support App"
         type: boolean
-        default: false
+        default: true
       app_agents:
         description: "Agents App"
         type: boolean
-        default: false
+        default: true
       app_rental:
         description: "Rental App"
         type: boolean
-        default: false
+        default: true
       app_marketing:
         description: "Marketing App"
         type: boolean
-        default: false
+        default: true
       store_ios:
         description: "iOS App Store"
         type: boolean
@@ -967,6 +967,10 @@ jobs:
 
           git diff --cached --quiet && { echo "Nothing to commit"; exit 0; }
           git commit -m "chore: bump build number for apps=[$APPS] stores=[$STORES] [skip ci]"
+          # The bumped-pubspecs artifact restores every app's pubspec, but only
+          # the selected ones are committed above; discard the rest so the
+          # rebase has a clean tree.
+          git checkout -- .
           git pull --rebase origin ${{ github.ref_name }}
           git push origin HEAD:${{ github.ref_name }}
 
