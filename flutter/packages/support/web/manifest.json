@@ -1,11 +1,11 @@
 {
-    "name": "support",
-    "short_name": "support",
+    "name": "GrowERP-Support",
+    "short_name": "Support",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#hexcode",
-    "theme_color": "#hexcode",
-    "description": "GrowERP support",
+    "background_color": "#030303",
+    "theme_color": "#006B5A",
+    "description": "GrowERP Support.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

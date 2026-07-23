@@ -53,12 +53,13 @@ dev_dependencies:
 
   bloc_test: ^10.0.0
   msix: ^3.16.12
-  # flutter_launcher_icons: ^0.9.2
-# to run icons: flutter pub run flutter_launcher_icons:main
-flutter_icons:
+  flutter_launcher_icons: ^0.14.4
+
+# to run icons: dart run flutter_launcher_icons
+flutter_launcher_icons:
   android: "launcher_icon"
   ios: true
-  image_path: "packages/growerp_core/images/freelanceStore.jpg"
+  image_path: "assets/icon/icon.png"
 
 flutter:
   uses-material-design: true
