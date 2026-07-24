@@ -33,16 +33,39 @@ end
 # submit_build. The app store version is in Waiting For Review".
 REVIEW_BLOCKING_STATES = %w[WAITING_FOR_REVIEW IN_REVIEW].freeze
 
+# States that only ever occur once an app has been through review at least once.
+# If a platform has no version in any of these, it has never been published and
+# its first App Store version cannot be submitted for review from CI (the auto-
+# created PREPARE_FOR_SUBMISSION version has no listing/metadata yet, so deliver
+# fails with "appStoreVersions ... is not in valid state. This resource cannot
+# be reviewed"). Such apps get a TestFlight upload instead.
+PUBLISHED_STATES = %w[
+  READY_FOR_SALE PENDING_DEVELOPER_RELEASE PENDING_APPLE_RELEASE
+  PROCESSING_FOR_APP_STORE IN_REVIEW WAITING_FOR_REVIEW
+  REPLACED_WITH_NEW_VERSION DEVELOPER_REMOVED_FROM_SALE REMOVED_FROM_SALE
+].freeze
+
 # Is App Store Connect able to accept a new version submission right now?
 # A version in PENDING_DEVELOPER_RELEASE blocks creating a new version, so
 # release it first and wait until it leaves that state. A version already
 # queued for review cannot be displaced — report that so the caller can upload
-# the build without submitting it.
+# the build without submitting it. A never-published app likewise can't be
+# submitted, so it also falls back to a TestFlight-only upload.
 def submit_slot_available?(api_key, bundle_id, platform_filter)
   require "spaceship"
   Spaceship::ConnectAPI.token = Spaceship::ConnectAPI::Token.from(hash: api_key)
   app = Spaceship::ConnectAPI::App.find(bundle_id)
   UI.user_error!("App not found: #{bundle_id}") unless app
+
+  versions = app.get_app_store_versions(filter: { "platform" => platform_filter })
+  unless versions.any? { |v| PUBLISHED_STATES.include?(v.app_store_state) }
+    UI.important(
+      "#{bundle_id} (#{platform_filter}) has never been published; uploading to " \
+      "TestFlight and skipping review submission. Complete the store listing and " \
+      "submit the first version by hand, then stable-track runs will submit."
+    )
+    return false
+  end
 
   if release_pending_versions(app, platform_filter)
     30.times do
