@@ -97,6 +97,10 @@ lane :bootstrap_signing do
     api_key: api_key
   }
   options[:additional_cert_types] = ["mac_installer_distribution"] if platform == "macos"
+  # Regenerate the provisioning profile even if one exists — needed when a
+  # freshly-minted profile doesn't reconcile with the current certificates and
+  # the export fails with "profile doesn't include signing certificate ...".
+  options[:force] = true if optional_env("MATCH_FORCE") == "true"
   auth = optional_env("MATCH_GIT_BASIC_AUTHORIZATION")
   options[:git_basic_authorization] = auth if auth
   sync_code_signing(**options)

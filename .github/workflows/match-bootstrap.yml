@@ -55,6 +55,11 @@ on:
           - both
           - ios
           - macos
+      force:
+        description: "Regenerate the provisioning profile even if one already
+          exists (fixes an existing profile that won't sign/export)"
+        type: boolean
+        default: false
 
 concurrency:
   group: match-bootstrap
@@ -127,6 +132,7 @@ jobs:
           BUNDLE_GEMFILE: ${{ github.workspace }}/flutter/fastlane/Gemfile
           APP_NAME: ${{ matrix.app }}
           MATCH_PLATFORM: ${{ matrix.platform }}
+          MATCH_FORCE: ${{ inputs.force }}
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
           MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
           MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
