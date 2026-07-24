@@ -145,10 +145,6 @@ lane :ci_build do
     workspace: workspace_path,
     scheme: "Runner",
     export_method: "app-store",
-    # Force the distribution identity so apps whose project.pbxproj still carries
-    # the Flutter default "iPhone Developer" don't fail the archive with
-    # "No signing certificate iOS Development found".
-    codesigning_identity: "Apple Distribution",
     export_options: {
       method: "app-store",
       provisioningProfiles: {
