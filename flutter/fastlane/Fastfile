@@ -480,6 +480,13 @@ lane :build_macos do
     configuration:        "Release",
     export_method:        "app-store",
     codesigning_identity: "Apple Distribution",
+    # Pin the .pkg installer identity so it always lands in the exportOptionsPlist.
+    # gym's auto-detection is unreliable (works for some apps, silently omits it
+    # for others); when the key is absent Xcode auto-picks and then fails with
+    # "provisioning profile doesn't include signing certificate 3rd Party Mac
+    # Developer Installer". Setting it explicitly makes every app behave like the
+    # already-working ones.
+    installer_cert_name:  "3rd Party Mac Developer Installer: Johannes Bakker (P64T65C668)",
     xcargs: [
       "CURRENT_PROJECT_VERSION=#{build_num}",
       "DEVELOPMENT_TEAM=P64T65C668",
