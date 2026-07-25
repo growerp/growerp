@@ -1045,11 +1045,11 @@ Whether you need requirements gathering, implementation, custom interfacing, or 
     <moqui.resource.DbResource filename="privacy.md.ftl" isFile="Y" resourceId="growerp_privacy"
         parentResourceId="growerp_content_dir">
         <file mimeType="text/markdown" versionName="01" rootVersionName="01">
-            <fileData><![CDATA[# Privacy Policy
+            <fileData><![CDATA[# GrowERP Privacy Policy
 
 **Effective Date:** October 2024
 
-This Privacy Policy explains how The system GrowERP collects, uses, discloses, and safeguards your information when you use our application (App). By using our App, you agree to the collection and use of information in accordance with this policy.
+This Privacy Policy explains how GrowERP, developed by AntWebsystems Co., Ltd, collects, uses, discloses, and safeguards your information when you use any GrowERP application (App) — including GrowERP Admin, GrowERP Hotel, GrowERP Freelance, GrowERP Support, GrowERP Marketing, GrowERP Agents, and GrowERP Rental. By using our App, you agree to the collection and use of information in accordance with this policy.
 
 ## 1. Information We Collect
 ### a. Personal Information
