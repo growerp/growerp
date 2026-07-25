@@ -25,6 +25,8 @@ concurrency:
 
 permissions:
     contents: read
+    pages: write
+    id-token: write
 
 jobs:
     # ─────────────────────────────────────────────────────────────────────────────
@@ -831,6 +833,9 @@ jobs:
                       + html_body
                       + '</body></html>'
                   )
+                  os.makedirs('/tmp/pages', exist_ok=True)
+                  with open('/tmp/pages/index.html', 'w') as f:
+                      f.write(full_html)
                   HTML(string=full_html).write_pdf('/tmp/store-status-report.pdf')
                   print('PDF written.')
                   PYEOF
@@ -841,3 +846,29 @@ jobs:
                   name: store-status-report
                   path: /tmp/store-status-report.pdf
                   retention-days: 30
+
+            - name: Upload Pages artifact
+              uses: actions/upload-pages-artifact@v3
+              with:
+                  path: /tmp/pages
+
+    # ─────────────────────────────────────────────────────────────────────────────
+    # Publish the report to GitHub Pages for a stable, no-download view.
+    # ─────────────────────────────────────────────────────────────────────────────
+    deploy-pages:
+        needs: report
+        if: always() && needs.report.result == 'success'
+        runs-on: ubuntu-latest
+        concurrency:
+            group: pages
+            cancel-in-progress: false
+        permissions:
+            pages: write
+            id-token: write
+        environment:
+            name: github-pages
+            url: ${{ steps.deployment.outputs.page_url }}
+        steps:
+            - name: Deploy to GitHub Pages
+              id: deployment
+              uses: actions/deploy-pages@v4
