@@ -597,8 +597,10 @@ jobs:
                       # skip this app rather than fail the job.
                       print(f'Cannot delete pending submission {old_sub_id} '
                             f'(status {del_resp.status_code}): {del_resp.text}')
-                      print(f'Skipping {app_name}: an in-flight submission is pending; '
-                            'metadata will publish once it goes live.')
+                      print(f'::warning::Windows {app_name}: skipped — an in-progress '
+                            'submission exists that was NOT created via the API (likely '
+                            'started in the Partner Center dashboard). Delete that draft '
+                            'submission in Partner Center, then re-run this workflow.')
                       exit(0)
 
           # Create new submission (clones last published).
@@ -708,6 +710,35 @@ jobs:
               else:
                   raise RuntimeError(f'Error committing submission (status={status}): {commit_resp.text}')
           print(f'Committed submission')
+
+          # A committed submission is NOT live until it passes certification.
+          # Poll the status for a couple of minutes so validation errors (e.g.
+          # rejected screenshots) surface here instead of silently leaving the
+          # listing unchanged. Long-running states (CommitStarted / PreProcessing
+          # / Certification) are normal and just mean "still working".
+          for _ in range(6):
+              st_resp = call('GET', f'{base_url}/submissions/{sub_id}/status', headers=headers)
+              if not st_resp.ok:
+                  break
+              st = st_resp.json()
+              status = st.get('status', '')
+              details = st.get('statusDetails', {}) or {}
+              errors = details.get('errors') or []
+              warnings = details.get('warnings') or []
+              print(f'Submission status: {status}')
+              for w in warnings:
+                  print(f'::warning::Windows {app_name}: {w.get("code")}: {w.get("details")}')
+              if errors:
+                  for e in errors:
+                      print(f'::error::Windows {app_name}: {e.get("code")}: {e.get("details")}')
+                  raise RuntimeError(f'Submission has certification errors: {errors}')
+              if status in ('CommitFailed', 'PublishFailed'):
+                  raise RuntimeError(f'Submission ended in {status}: {details}')
+              # Once past the early processing stages the metadata is accepted;
+              # remaining Certification/Publishing is async and can take hours.
+              if status in ('PendingCommit', 'Certification', 'Release', 'Published'):
+                  break
+              time.sleep(20)
 
           print('Windows metadata + screenshots uploaded successfully')
           PYEOF
