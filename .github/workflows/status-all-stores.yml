@@ -830,6 +830,7 @@ jobs:
                   full_html = (
                       '<!DOCTYPE html><html><head><meta charset="utf-8">'
                       f'<style>\n{css}\n</style></head><body>'
+                      '<p><a href="tests.html">Integration Test Results &rarr;</a></p>'
                       + html_body
                       + '</body></html>'
                   )
@@ -846,6 +847,9 @@ jobs:
                   name: store-status-report
                   path: /tmp/store-status-report.pdf
                   retention-days: 30
+
+            - name: Preserve integration test report page
+              run: curl -sf https://growerp.github.io/growerp/tests.html -o /tmp/pages/tests.html || echo "no tests.html yet"
 
             - name: Upload Pages artifact
               uses: actions/upload-pages-artifact@v3

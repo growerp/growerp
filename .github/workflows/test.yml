@@ -31,6 +31,8 @@ env:
 
 permissions:
   contents: read
+  pages: write
+  id-token: write
 
 jobs:
   # ------------------------------------------------------------------
@@ -374,6 +376,102 @@ jobs:
           path: backend-test-logs/
         continue-on-error: true
 
+      - name: Build Pages totals
+        if: always()
+        run: |
+          python3 << 'PYEOF'
+          import glob, os, re
+          import xml.etree.ElementTree as ET
+          from datetime import datetime, timezone
+
+          # ── Backend Spock totals ────────────────────────────────────────
+          backend_tests = backend_skipped = backend_failures = backend_errors = 0
+          for xf in glob.glob('backend-test-logs/TEST-*.xml'):
+              try:
+                  root = ET.parse(xf).getroot()
+              except ET.ParseError:
+                  continue
+              backend_tests    += int(root.get('tests', 0))
+              backend_skipped  += int(root.get('skipped', 0))
+              backend_failures += int(root.get('failures', 0))
+              backend_errors   += int(root.get('errors', 0))
+          backend_passed = backend_tests - backend_skipped - backend_failures - backend_errors
+          backend_failed = backend_failures + backend_errors
+
+          # ── Flutter totals per format (mirrors the Combined summary step) ─
+          def last_trailing_number(text, keyword):
+              val = None
+              for line in text.splitlines():
+                  if keyword in line:
+                      after = line.split('|', 1)[-1] if '|' in line else line
+                      m = re.search(r'(\d+)\s*$', after)
+                      if m:
+                          val = int(m.group(1))
+              return val or 0
+
+          def format_totals(fmt):
+              passed_pkgs = failed_pkgs = ind_passed = ind_failed = 0
+              for slice_dir in sorted(glob.glob(f'test-logs/test-output-*-{fmt}')):
+                  log = os.path.join(slice_dir, 'test_output.log')
+                  if not os.path.exists(log):
+                      continue
+                  text = open(log, errors='replace').read()
+                  lines = '\n'.join(l for l in text.splitlines() if '+ echo' not in l)
+                  failed_pkgs += len(re.findall(r'>>> RESULT:.*FAILED', lines))
+                  passed_pkgs += len(re.findall(r'>>> RESULT:.*PASSED', lines))
+                  ind_passed  += last_trailing_number(text, 'Tests passed')
+                  ind_failed  += last_trailing_number(text, 'Tests failed')
+              return passed_pkgs, failed_pkgs, ind_passed, ind_failed
+
+          mobile  = format_totals('mobile')
+          desktop = format_totals('desktop')
+
+          rows = [
+              ('Backend (Spock) tests',      backend_passed, backend_failed),
+              ('Flutter Mobile packages',    mobile[0],      mobile[1]),
+              ('Flutter Mobile tests',       mobile[2],      mobile[3]),
+              ('Flutter Desktop packages',   desktop[0],     desktop[1]),
+              ('Flutter Desktop tests',      desktop[2],     desktop[3]),
+          ]
+          table_rows = ''.join(
+              f'<tr><td>{name}</td><td>{p}</td><td>{f}</td></tr>' for name, p, f in rows
+          )
+          css = '\n'.join([
+              '  body  { font-family: Arial, sans-serif; font-size: 12pt; margin: 2cm; color: #222; }',
+              '  h1    { color: #1a5276; border-bottom: 2px solid #1a5276; padding-bottom: 6px; }',
+              '  table { border-collapse: collapse; margin-top: 1em; }',
+              '  th    { background: #1a5276; color: #fff; padding: 7px 12px; text-align: center; }',
+              '  td    { border: 1px solid #ccc; padding: 6px 10px; }',
+              '  tr:nth-child(even) td { background: #f4f6f9; }',
+              '  td:first-child { font-weight: bold; }',
+          ])
+          now_str = datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')
+          full_html = (
+              '<!DOCTYPE html><html><head><meta charset="utf-8">'
+              f'<style>\n{css}\n</style></head><body>'
+              '<h1>Integration Test Results</h1>'
+              '<p><a href="index.html">&larr; Store Status</a></p>'
+              f'<p>Generated: {now_str}</p>'
+              '<table><tr><th>Suite</th><th>Passed</th><th>Failed</th></tr>'
+              f'{table_rows}</table>'
+              '</body></html>'
+          )
+          os.makedirs('/tmp/pages', exist_ok=True)
+          with open('/tmp/pages/tests.html', 'w') as f:
+              f.write(full_html)
+          print('tests.html written.')
+          PYEOF
+
+      - name: Preserve store status report page
+        if: always()
+        run: curl -sf https://growerp.github.io/growerp/ -o /tmp/pages/index.html || echo "no index.html yet"
+
+      - name: Upload Pages artifact
+        if: always()
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: /tmp/pages
+
       - name: Combined summary
         env:
           BACKEND_RESULT: ${{ needs.backend-tests.result }}
@@ -497,4 +595,27 @@ jobs:
               | tee -a "$GITHUB_STEP_SUMMARY"
             exit 1
           fi
+
+  # ------------------------------------------------------------------
+  # Publish integration test totals to GitHub Pages (deploys even when
+  # `summarize` fails its threshold check — that's exactly when people
+  # want to see the totals).
+  # ------------------------------------------------------------------
+  deploy-pages:
+    needs: summarize
+    if: always() && needs.summarize.result != 'skipped'
+    runs-on: ubuntu-latest
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
 
