@@ -501,30 +501,59 @@ jobs:
             echo "Framed: $f → ${base}_framed.png"
           done
 
-          # Frame macOS with simple bezel
+          # Frame macOS with a title bar (traffic-light close / min / max on the left)
           for f in macos-*.png; do
             [ -f "$f" ] || continue
             [[ "$f" == *_framed.png ]] && continue
             base="${f%.png}"
-            convert "$f" \
+            W=$(identify -format '%w' "$f")
+            BAR_H=48
+            cy=$((BAR_H / 2))
+            r=7
+            # Traffic-light x-centres from the left edge (20px apart, macOS layout)
+            close_cx=24; min_cx=48; max_cx=72
+            # Title bar strip with three filled traffic-light dots
+            convert -size "${W}x${BAR_H}" xc:"#ECECEC" -stroke none \
+              -fill "#FF5F57" -draw "circle $close_cx,$cy $((close_cx + r)),$cy" \
+              -fill "#FEBC2E" -draw "circle $min_cx,$cy $((min_cx + r)),$cy" \
+              -fill "#28C840" -draw "circle $max_cx,$cy $((max_cx + r)),$cy" \
+              "${base}_titlebar.png"
+            # Stack title bar above the screenshot, then add a dark bezel + shadow
+            convert "${base}_titlebar.png" "$f" -append +repage \
               -bordercolor "#1C1C1E" -border 12 \
               \( +clone -background black -shadow 80x10+0+8 \) \
               +swap -background "#F2F2F7" -layers merge +repage \
               "${base}_framed.png"
-            echo "Framed: $f → ${base}_framed.png (macOS bezel)"
+            rm -f "${base}_titlebar.png"
+            echo "Framed: $f → ${base}_framed.png (macOS title bar)"
           done
 
-          # Frame Windows with simple bezel
+          # Frame Windows with a title bar (minimize / maximize / close on the right)
           for f in windows-*.png; do
             [ -f "$f" ] || continue
             [[ "$f" == *_framed.png ]] && continue
             base="${f%.png}"
-            convert "$f" \
+            W=$(identify -format '%w' "$f")
+            BAR_H=48
+            cy=$((BAR_H / 2))
+            # Glyph x-centres, measured from the right edge (46px per button, Win11 layout)
+            close_cx=$((W - 23)); max_cx=$((W - 69)); min_cx=$((W - 115))
+            # Title bar strip with three Windows-style control glyphs
+            convert -size "${W}x${BAR_H}" xc:"#F3F3F3" \
+              -stroke "#333333" -strokewidth 2 -fill none \
+              -draw "line $((min_cx - 5)),$cy $((min_cx + 5)),$cy" \
+              -draw "rectangle $((max_cx - 5)),$((cy - 5)) $((max_cx + 5)),$((cy + 5))" \
+              -draw "line $((close_cx - 5)),$((cy - 5)) $((close_cx + 5)),$((cy + 5))" \
+              -draw "line $((close_cx - 5)),$((cy + 5)) $((close_cx + 5)),$((cy - 5))" \
+              "${base}_titlebar.png"
+            # Stack title bar above the screenshot, then add a light bezel + shadow
+            convert "${base}_titlebar.png" "$f" -append +repage \
               -bordercolor "#CCCCCC" -border 12 \
               \( +clone -background black -shadow 80x10+0+8 \) \
               +swap -background "#F2F2F7" -layers merge +repage \
               "${base}_framed.png"
-            echo "Framed: $f → ${base}_framed.png (Windows bezel)"
+            rm -f "${base}_titlebar.png"
+            echo "Framed: $f → ${base}_framed.png (Windows title bar)"
           done
 
       - name: Flatten, resize, and add titles to framed screenshots
