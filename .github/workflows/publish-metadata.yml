@@ -646,6 +646,14 @@ jobs:
               
           sub['listings'] = listings
 
+          # A cloned submission from an app whose baseline never set this returns
+          # 400 InvalidParameterValue on update. GrowERP ships a Desktop MSIX, so
+          # default Desktop=True and leave the other families as-is/False.
+          aff = sub.get('allowTargetFutureDeviceFamilies') or {}
+          for fam in ('Desktop', 'Mobile', 'Xbox', 'Holographic'):
+              aff.setdefault(fam, fam == 'Desktop')
+          sub['allowTargetFutureDeviceFamilies'] = aff
+
           # Update submission
           update_resp = call(
               'PUT',
@@ -658,40 +666,31 @@ jobs:
               update_resp.raise_for_status()
           print(f'Updated submission metadata + screenshots')
 
-          # Upload screenshot files to Partner Center
+          # Upload screenshot files to Partner Center.
+          # The Store Ingestion API expects ALL images in one ZIP uploaded to the
+          # submission's fileUploadUrl (an Azure Blob SAS URL). The old per-file
+          # POST /submissions/{id}/files endpoint does not exist, so images were
+          # referenced in the listing but never uploaded and never showed in the
+          # store. Each zip entry name must match the fileName in images[].
           if screenshots:
-              for screenshot in screenshots:
-                  file_name = screenshot['fileName']
-                  file_path = screenshots_dir / file_name
-                  if not file_path.exists():
-                      print(f'Warning: {file_path} not found')
-                      continue
-
-                  # Get file upload URL
-                  file_resp = call(
-                      'POST',
-                      f'{base_url}/submissions/{sub_id}/files',
-                      headers=headers,
-                      json={'fileName': file_name, 'fileStatus': 'PendingUpload'}
-                  )
-                  if file_resp.status_code not in [200, 201]:
-                      print(f'Warning: Could not get upload URL for {file_name}')
-                      continue
-
-                  upload_url = file_resp.json().get('uploadUrl', '')
-                  if not upload_url:
-                      print(f'Warning: No upload URL for {file_name}')
-                      continue
-
-                  # Upload file (read bytes so call() can safely retry)
-                  upload_resp = call(
-                      'PUT',
-                      upload_url,
-                      data=file_path.read_bytes(),
-                      headers={'x-ms-blob-type': 'BlockBlob'}
-                  )
-                  upload_resp.raise_for_status()
-                  print(f'Uploaded {file_name}')
+              import io, zipfile
+              buf = io.BytesIO()
+              with zipfile.ZipFile(buf, 'w', zipfile.ZIP_DEFLATED) as zf:
+                  for s in screenshots:
+                      p = screenshots_dir / s['fileName']
+                      if p.exists():
+                          zf.write(p, arcname=s['fileName'])
+                      else:
+                          print(f'Warning: {p} not found')
+              # SAS URL must be passed unmodified (requests must not re-encode it).
+              up = call(
+                  'PUT',
+                  sub['fileUploadUrl'],
+                  data=buf.getvalue(),
+                  headers={'x-ms-blob-type': 'BlockBlob'}
+              )
+              up.raise_for_status()
+              print(f'Uploaded screenshot ZIP ({len(screenshots)} images)')
 
           # Commit submission. A retried commit can fail because the first
           # attempt landed despite a 5xx response — check status before failing.
