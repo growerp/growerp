@@ -275,6 +275,31 @@ jobs:
                   print(f'  ASC query failed for {bundle_id}: {e}')
                   return None
 
+          # Highest build number (CFBundleVersion) already uploaded to TestFlight /
+          # App Store for this app. A build number is consumed permanently once
+          # uploaded, so the next one must exceed it, else altool rejects with
+          # "The bundle version must be higher than the previously uploaded version".
+          def latest_asc_build_number(bundle_id):
+              try:
+                  data = asc_get(f'https://api.appstoreconnect.apple.com/v1/apps?filter[bundleId]={bundle_id}')
+                  if not data['data']:
+                      return 0
+                  app_id = data['data'][0]['id']
+                  data = asc_get(
+                      f'https://api.appstoreconnect.apple.com/v1/builds'
+                      f'?filter[app]={app_id}&sort=-version&limit=200'
+                  )
+                  nums = []
+                  for b in data.get('data', []):
+                      v = b['attributes'].get('version', '')
+                      m = re.match(r'^(\d+)', str(v))
+                      if m:
+                          nums.append(int(m.group(1)))
+                  return max(nums) if nums else 0
+              except Exception as e:
+                  print(f'  ASC build query failed for {bundle_id}: {e}')
+                  return 0
+
           # ── Google Play ──────────────────────────────────────────────────────
           def latest_play_version(package_name):
               try:
@@ -370,16 +395,18 @@ jobs:
               asc_ver  = latest_asc_version(bundle_id)
               play_ver = latest_play_version(bundle_id)
               play_code = latest_play_version_code(bundle_id)
+              asc_build = latest_asc_build_number(bundle_id)
               best_ver = max_version(max_version(asc_ver, play_ver), pub_ver)
 
               print(f'{app}: ASC={asc_ver or "n/a"}  Play={play_ver or "n/a"}  '
-                    f'PlayCode={play_code}  pubspec={pub_ver}  → base={best_ver}')
+                    f'PlayCode={play_code}  ASCBuild={asc_build}  pubspec={pub_ver}  → base={best_ver}')
 
               major, minor, patch = best_ver.split('.')
               new_patch = int(patch) + 1
-              # versionCode must strictly exceed every code Play already knows,
-              # otherwise "Version code N has already been used" on upload.
-              new_build = max(int(pub_build), play_code) + 1
+              # The build number must strictly exceed every build already consumed
+              # by Play (versionCode) AND App Store Connect (CFBundleVersion), else
+              # upload is rejected as "already been used" / "must be higher".
+              new_build = max(int(pub_build), play_code, asc_build) + 1
               new_ver = f'{major}.{minor}.{new_patch}+{new_build}'
               content = re.sub(r'^version:\s*[\d.+]+', f'version: {new_ver}', content, flags=re.MULTILINE)
               with open(pubspec, 'w') as f:
