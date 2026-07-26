@@ -1,3 +1,7 @@
+## 1.12.2
+
+ - **FIX**: lengthen pubspec description for pub.dev; drop a redundant `invalid_annotation_target` ignore comment on FinDoc.status.
+
 ## 1.12.1
 
  - **FIX**: relicense under Apache License 2.0 (LICENSE and file headers); add example/main.dart for pub.dev.

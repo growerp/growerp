@@ -44,7 +44,6 @@ abstract class FinDoc with _$FinDoc {
     String?
     reference, //transaction id field saved in AcctgTrans/theirAcctgTransId in backend
     @PaymentInstrumentConverter() PaymentInstrument? paymentInstrument,
-    // ignore: invalid_annotation_target
     @JsonKey(name: 'statusId')
     @FinDocStatusValConverter()
     FinDocStatusVal? status,

@@ -1,7 +1,7 @@
 name: growerp_models
 resolution: workspace
-version: 1.12.1
-description: GrowERP models and Moqui backend REST interface
+version: 1.12.2
+description: Freezed data models and a Retrofit REST client for the GrowERP Moqui backend, shared across all GrowERP Flutter packages.
 homepage: https://www.growerp.com
 repository: https://github.com/growerp/growerp
 platforms:
