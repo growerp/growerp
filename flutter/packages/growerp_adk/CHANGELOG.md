@@ -1,3 +1,7 @@
+## 1.1.1
+
+ - **FIX**: relicense under Apache License 2.0 (LICENSE and file headers).
+
 ## 1.1.0
 
  - **REFACTOR**: standardize dialog components by integrating popUp widget and updating navigation and layout across packages. ([f13a4e06](https://github.com/growerp/growerp/commit/f13a4e0636b62d459dc78aa4081f8584540a7ea4))

@@ -1,3 +1,7 @@
+## 1.11.1
+
+ - **FIX**: relicense under Apache License 2.0 (LICENSE and file headers); lengthen pubspec description.
+
 ## 1.11.0
 
  - **REFACTOR**: remove redundant ScaffoldMessenger from HomeForm and RegisterUserDialog: registration message was not showing. ([8dface8f](https://github.com/growerp/growerp/commit/8dface8f4bb8a5baa2c3f61cf2feb11a8a2870c0))

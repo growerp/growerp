@@ -1,3 +1,7 @@
+## 1.11.1
+
+ - **FIX**: relicense under Apache License 2.0 (LICENSE and file headers); lengthen pubspec description.
+
 ## 1.11.0
 
  - **REFACTOR**: now chat server can also be used for notification: renaming to WsServer. ([a07efb53](https://github.com/growerp/growerp/commit/a07efb537bab9e6eefb106bdf8bd4b389de8e5e1))

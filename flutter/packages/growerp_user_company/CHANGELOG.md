@@ -1,3 +1,7 @@
+## 1.11.1
+
+ - **FIX**: relicense under Apache License 2.0 (LICENSE and file headers); lengthen pubspec description.
+
 ## 1.11.0
 
  - **REFACTOR**: Remove localization dependency from CompanyUserBloc and update messages. ([f4883b6f](https://github.com/growerp/growerp/commit/f4883b6fe45c2bc86ff60cf01f0270037f00b917))

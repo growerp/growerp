@@ -1,7 +1,7 @@
 name: growerp_adk
 resolution: workspace
 description: "GrowERP ADK domain: AI agents, agent config, scheduled jobs, agent chat and governance (action audit + write approvals)."
-version: 1.1.0
+version: 1.1.1
 repository: https://github.com/growerp/growerp
 homepage: https://www.growerp.com
 environment:

@@ -1,3 +1,7 @@
+## 1.11.1
+
+ - **FIX**: relicense under Apache License 2.0 (LICENSE and file headers); fix pubspec description (was describing a different package) and lengthen it.
+
 ## 1.11.0
 
  - **REFACTOR**: rename classificationId to applicationId everywhere. ([9c23feae](https://github.com/growerp/growerp/commit/9c23feae113511b6dfdafbbe095bdb391bf828bf))

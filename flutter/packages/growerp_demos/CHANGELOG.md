@@ -1,3 +1,7 @@
+## 1.1.1
+
+ - **FIX**: relicense under Apache License 2.0 (LICENSE and file headers).
+
 ## 1.1.0
 
  - **REFACTOR**: rename classificationId to applicationId everywhere. ([9c23feae](https://github.com/growerp/growerp/commit/9c23feae113511b6dfdafbbe095bdb391bf828bf))

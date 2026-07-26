@@ -1,3 +1,7 @@
+## 1.11.1
+
+ - **FIX**: relicense under Apache License 2.0 (LICENSE and file headers).
+
 ## 1.11.0
 
  - **REFACTOR**: replace `dropdown_search` package with a new custom `AutocompleteLabel` widget. ([48413477](https://github.com/growerp/growerp/commit/48413477e676a04f1de52bab208f77965f3a1cc9))

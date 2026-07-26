@@ -1,7 +1,7 @@
 name: growerp_user_company
 resolution: workspace
-description: A package providing user and company functions.
-version: 1.11.0
+description: User, employee, and company/organization management building block for the GrowERP system, including roles and registration.
+version: 1.11.1
 homepage: https://www.growerp.com
 repository: https://github.com/growerp/growerp
 platforms:

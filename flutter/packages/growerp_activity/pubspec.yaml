@@ -1,7 +1,7 @@
 name: growerp_activity
 resolution: workspace
 description: "Activity, task and event management for the GrowERP project."
-version: 1.11.0
+version: 1.11.1
 repository: https://github.com/growerp/growerp
 homepage: https://www.growerp.com
 environment:

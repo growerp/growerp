@@ -1,7 +1,7 @@
 name: growerp_sales
 resolution: workspace
-description: A marketing package for the GrowERP system
-version: 1.11.0
+description: Sales and CRM building block for the GrowERP system, providing leads, opportunities, and the sales pipeline.
+version: 1.11.1
 homepage: https://www.growerp.com
 repository: https://github.com/growerp/growerp
 platforms:
