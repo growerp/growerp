@@ -39,6 +39,7 @@ dependencies:
   collection: ^1.16.0
   dio: ^5.4.3
   credit_card_validator: ^2.0.1
+  credit_card_type_detector: ^3.0.0
   markdown_widget: ^2.3.1
   url_launcher: ^6.1.4
   flutter_colorpicker: ^1.1.0
@@ -70,6 +71,7 @@ dependencies:
   form_builder_validators: ^11.2.0
   google_fonts: ^8.0.2
   animations: ^2.1.1
+  web: ^1.0.0
 
 dev_dependencies:
   flutter_driver:
