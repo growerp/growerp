@@ -8,7 +8,7 @@
 
 ## 1. Executive Summary
 
-GrowERP is an open-source (CC0), AI-native, multi-platform ERP for small and medium businesses, distributed as a hosted multi-tenant SaaS with a free 2-week trial (no credit card) and as free self-hosted software.
+GrowERP is an open-source (Apache 2.0), AI-native, multi-platform ERP for small and medium businesses, distributed as a hosted multi-tenant SaaS with a free 2-week trial (no credit card) and as free self-hosted software.
 
 **Objective (12 months):**
 - Grow trial signups to a predictable weekly flow and convert trials to paying hosted tenants.
@@ -32,8 +32,8 @@ GrowERP is an open-source (CC0), AI-native, multi-platform ERP for small and med
 | Alternative | Their weakness | GrowERP counter-message |
 |---|---|---|
 | Spreadsheets / patchwork tools | Errors, no real-time visibility, doesn't scale | "One system, one truth. Orders, stock, invoices, accounting — connected." |
-| Legacy ERP (SAP B1, NetSuite, Dynamics) | Multi-year, over-budget implementations; per-seat license fees | "Live in a day, not a year. Zero license fees — CC0 public domain." |
-| Odoo / ERPNext (open-source ERP) | Odoo's open core is limited, enterprise features paid; web-first UIs | "Truly free (CC0, even patent-granted). Native apps on Web, Android, iOS, Windows, macOS, Linux from one codebase." |
+| Legacy ERP (SAP B1, NetSuite, Dynamics) | Multi-year, over-budget implementations; per-seat license fees | "Live in a day, not a year. Zero license fees — Apache 2.0 open source." |
+| Odoo / ERPNext (open-source ERP) | Odoo's open core is limited, enterprise features paid; web-first UIs | "Truly free (Apache 2.0, patent-granted). Native apps on Web, Android, iOS, Windows, macOS, Linux from one codebase." |
 | Closed vertical SaaS (hotel PMS, clinic software, LMS) | Point solutions; data silos; no accounting integration | "A vertical app *plus* full ERP underneath — reservations and the general ledger in the same system." |
 
 ### Message house per segment
@@ -42,7 +42,7 @@ GrowERP is an open-source (CC0), AI-native, multi-platform ERP for small and med
 |---|---|---|
 | SMB horizontal | "The all-in-one ERP for ambitious SMBs" | Free trial in 2 minutes; demo data; 6 platforms; Stripe payments; auto-generated business website |
 | Verticals | "Built for your industry, backed by a full ERP" | hotel, freelance, support apps; shared accounting core |
-| Developers / open-source | "The extensible ERP platform: Flutter building blocks + Moqui backend, CC0" | 41+ docs, building-block architecture, 50% faster app development, no CLA friction |
+| Developers / open-source | "The extensible ERP platform: Flutter building blocks + Moqui backend, Apache 2.0" | 41+ docs, building-block architecture, 50% faster app development, no CLA friction |
 | AI-agent-first buyers | "The ERP that works for you: governed AI agents inside your business system" | Agent Control Center, scheduled agents, approval/governance workflow, invoice scan, AI landing pages |
 
 **Tagline candidates:** "Grow your business, not your admin." / "The AI-native open-source ERP."
@@ -62,7 +62,7 @@ Owner/GM of a 5–50 person product or service business. Runs the company on spr
 - (support follows the same playbook later.)
 
 ### 3.3 Developer / integrator — "Builder Ben"
-Flutter or Java/Groovy developer, freelancer or small software house, wants to ship business apps fast without writing an ERP backend. Motivations: CC0 license (resell without restriction), building blocks, documented patterns. Converts to: contributor, integrator/partner, hosted-tenant referrer.
+Flutter or Java/Groovy developer, freelancer or small software house, wants to ship business apps fast without writing an ERP backend. Motivations: Apache 2.0 license (resell without restriction), building blocks, documented patterns. Converts to: contributor, integrator/partner, hosted-tenant referrer.
 
 ### 3.4 AI-forward operator — "Automation Aaron"
 Tech-savvy founder/ops lead who evaluates software by "what can the AI do for me." Wants agents that draft content, chase invoices, summarize the business — with governance. **App:** agents (Agent Control Center) + admin.
@@ -151,7 +151,7 @@ Every funnel stage runs on a GrowERP capability. Gaps are marked **[Gap #n]** an
 
 | Tier | Offer | Revenue role |
 |---|---|---|
-| **Self-host** | Free forever, CC0. Docs + community support. | Adoption, community, credibility. Funnel into hosting/support. |
+| **Self-host** | Free forever, Apache 2.0. Docs + community support. | Adoption, community, credibility. Funnel into hosting/support. |
 | **Hosted Starter** | Single company, one app, standard support. | Convert trials; low-friction entry price. |
 | **Hosted Business** | All apps, multi-user, AI agents included with token quota, priority support. | Core MRR. AI quota (LLM usage tracking already exists) is the natural upgrade meter. |
 | **Vertical editions** | Hotel/Health/eLearning packaging of Business tier with vertical onboarding. | Higher willingness-to-pay in niches. |

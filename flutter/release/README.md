@@ -469,7 +469,7 @@ jobs:
 
 ## 📄 License
 
-This tool is part of the GrowERP project and follows the same CC0 1.0 Universal license.
+This tool is part of the GrowERP project and follows the same Apache License 2.0.
 
 ---
 

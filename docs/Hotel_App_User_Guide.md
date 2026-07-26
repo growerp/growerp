@@ -274,6 +274,6 @@ A front-desk day typically looks like:
 
 ---
 
-*GrowERP is public-domain software (CC0 1.0 Universal). For backend setup, developer
+*GrowERP is open-source software (Apache License 2.0). For backend setup, developer
 documentation and the REST API reference, see the `docs/` folder in the GrowERP
 repository.*

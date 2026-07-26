@@ -13,7 +13,7 @@ GrowERP represents a paradigm shift in enterprise resource planning (ERP) system
 - **Template-driven UI** ensuring consistent user experience across applications
 
 ### Cost Efficiency
-- **Zero licensing fees** with CC0 1.0 Universal license
+- **Zero licensing fees** with Apache License 2.0
 - **Reduced development costs** through component reusability
 - **Lower maintenance overhead** with standardized architecture
 - **Community-driven support** reducing dependency on vendor support
@@ -155,7 +155,7 @@ The opportunity for meaningful contribution extends beyond code development to i
 - **GitHub Repository**: [github.com/growerp/growerp](https://github.com/growerp/growerp)
 - **Documentation**: Available in the `/docs` directory
 - **Community**: GitHub Discussions and Issues
-- **License**: CC0 1.0 Universal (Public Domain)
+- **License**: Apache License 2.0
 
 ### About This Document
 This management summary is designed to communicate the strategic value and contribution opportunities of GrowERP's extensibility system to business leaders, technology decision-makers, and potential open source contributors. It emphasizes the business benefits, technical innovation, and community impact of participating in the GrowERP ecosystem.

@@ -440,7 +440,7 @@ Contributions are welcome! Please:
 
 ## 📄 License
 
-GrowERP is released under the CC0 1.0 Universal license.
+GrowERP is released under the Apache License 2.0.
 
 ---
 

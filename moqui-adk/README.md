@@ -554,4 +554,4 @@ git push origin growerp
 
 ## License
 
-Public domain under CC0 1.0 Universal plus Grant of Patent License, consistent with Moqui Framework.
+Licensed under the Apache License, Version 2.0.

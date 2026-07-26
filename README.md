@@ -1,6 +1,6 @@
 # GrowERP - Open Source Modular ERP Platform
 
-[![License: CC0-1.0](https://img.shields.io/badge/License-CC0%201.0-lightgrey.svg)](http://creativecommons.org/publicdomain/zero/1.0/)
+[![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0)
 [![Flutter](https://img.shields.io/badge/Flutter-3.33.0-blue.svg)](https://flutter.dev/)
 [![Moqui](https://img.shields.io/badge/Moqui-Framework-green.svg)](https://www.moqui.org/)
 
@@ -73,7 +73,7 @@ GrowERP is an open-source, multi-platform ERP application built with a modular a
 
 - **[🔧 Contributing Guide](./CONTRIBUTING.md)** - How to contribute to GrowERP
 - **[📜 Code of Conduct](./CODE_OF_CONDUCT.md)** - Community guidelines and expectations
-- **[📄 License](./LICENSE)** - CC0 1.0 Universal (Public Domain)
+- **[📄 License](./LICENSE)** - Apache License 2.0
 - **[🎯 AI Development Guide](./docs/GrowERP_AI_Instructions.md)** - AI-assisted development best practices and prompts
 
 ### 📖 Additional Resources
@@ -417,7 +417,7 @@ We welcome contributions from developers of all skill levels! Here's how you can
 
 ### 📈 Project Status
 - **Latest Release**: 1.15.0
-- **License**: CC0 1.0 Universal (Public Domain)
+- **License**: Apache License 2.0
 - **Status**: Active development
 - **Stability**: Production ready
 - **Community**: Growing open source ecosystem

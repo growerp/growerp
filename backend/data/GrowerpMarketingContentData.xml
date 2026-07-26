@@ -35,7 +35,7 @@
         ownerPartyId="GROWERP" name="Builder Ben — developer / integrator"
         demographics="Flutter or Java/Groovy developer, freelancer or small software house, wants to ship business apps fast without writing an ERP backend."
         painPoints="Writing a business backend from scratch for every app; license and CLA friction that limits resale; long time-to-first-demo for clients."
-        goals="Ship vertical business apps in days from proven building blocks; resell without restriction (CC0); become a contributor, integrator or partner."
+        goals="Ship vertical business apps in days from proven building blocks; resell without restriction (Apache 2.0); become a contributor, integrator or partner."
         toneOfVoice="Technical and direct, zero marketing fluff. Architecture, code and links to the repo and docs. Respect their time." />
 
     <growerp.marketing.MarketingPersona personaId="GROWERP_AARON" pseudoId="aaron-ai"
@@ -81,9 +81,9 @@
         campaignSummary="Outbound to Flutter / Java-Groovy developers and small software houses. Persona: Builder Ben (GROWERP_BEN). Email CTA deviates to the GitHub repo — the right offer for this persona."
         targetAudience="Flutter or Java/Groovy developers, freelancers and small software houses building business apps for clients."
         landingPageId="ERP_LANDING_PAGE" dailyLimitPerPlatform="25"
-        emailSubject="CC0 Flutter + Moqui building blocks — ship a business app in a day">
-        <messageTemplate><![CDATA[GrowERP is a CC0 (public-domain, patent-granted) stack: Flutter ERP building blocks — accounting, catalog, orders, users — on a Moqui REST backend. Compose vertical apps in days, resell without restriction, 6 platforms from one codebase. CTA: github.com/growerp/growerp.]]></messageTemplate>
-        <platformSettings><![CDATA[{"linkedin":{"actionType":"send_dms","messageTemplate":"Hi {firstName} — you build business apps in Flutter? We open-sourced a full set of ERP building blocks (CC0, no CLA): drop in accounting, catalog, orders and user management, and ship a vertical app in days instead of months. Resell without restriction. What are you building right now?"},"email":{"actionType":"send_email","messageTemplate":"Hi {firstName},\n\nWriting an ERP backend to ship one business app is the worst part of the job. GrowERP is a CC0 (public-domain, patent-granted) stack: Flutter building blocks — accounting, catalog, orders, users — on a Moqui REST backend. Compose them into your own vertical app and resell without restriction. Web, Android, iOS, Windows, macOS, Linux from one codebase.\n\nStart here: https://github.com/growerp/growerp — the \"build an app in a day\" tutorial is in the docs.\n\nHans, GrowERP"}}]]></platformSettings>
+        emailSubject="Apache 2.0 Flutter + Moqui building blocks — ship a business app in a day">
+        <messageTemplate><![CDATA[GrowERP is an Apache 2.0 (open-source, patent-granted) stack: Flutter ERP building blocks — accounting, catalog, orders, users — on a Moqui REST backend. Compose vertical apps in days, resell without restriction, 6 platforms from one codebase. CTA: github.com/growerp/growerp.]]></messageTemplate>
+        <platformSettings><![CDATA[{"linkedin":{"actionType":"send_dms","messageTemplate":"Hi {firstName} — you build business apps in Flutter? We open-sourced a full set of ERP building blocks (Apache 2.0, no CLA): drop in accounting, catalog, orders and user management, and ship a vertical app in days instead of months. Resell without restriction. What are you building right now?"},"email":{"actionType":"send_email","messageTemplate":"Hi {firstName},\n\nWriting an ERP backend to ship one business app is the worst part of the job. GrowERP is an Apache 2.0 (open-source, patent-granted) stack: Flutter building blocks — accounting, catalog, orders, users — on a Moqui REST backend. Compose them into your own vertical app and resell without restriction. Web, Android, iOS, Windows, macOS, Linux from one codebase.\n\nStart here: https://github.com/growerp/growerp — the \"build an app in a day\" tutorial is in the docs.\n\nHans, GrowERP"}}]]></platformSettings>
         <platforms><![CDATA[["LINKEDIN","EMAIL"]]]></platforms>
     </mantle.marketing.campaign.MarketingCampaign>
 
