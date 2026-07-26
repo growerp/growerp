@@ -241,7 +241,7 @@ Creates a `growerpOutput` directory with the converted files.
 ### Pre-Import Checklist
 
 Before running `import`:
-1. [Pause](http://localhost:8080/vapps/system/ServiceJob/Jobs/ServiceJobDetail?jobName=recalculate_GlAccountOrgSummaries) the 'recalculate account summaries' job
+1. Pause the 'recalculate account summaries' job at `vapps/system/ServiceJob/Jobs/ServiceJobDetail?jobName=recalculate_GlAccountOrgSummaries` on your local Moqui instance
 
 Before running `finalize`:
 1. Disable accounting SECA by modifying files as listed in [initstart.sh](moqui/runtime/component/growerp/deploy/initstart.sh) under 'DISABLE_SECA'
