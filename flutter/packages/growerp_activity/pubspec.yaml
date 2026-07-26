@@ -6,7 +6,7 @@ repository: https://github.com/growerp/growerp
 homepage: https://www.growerp.com
 environment:
   sdk: ^3.10.0
-  flutter: ^3.33.0
+  flutter: '>=3.33.0'
 platforms:
   android:
   ios:
