@@ -21,8 +21,8 @@ screens:
   - route: /equipment     title: "Equipment"
   - route: /rentals       title: "Rentals"
   - route: /pickupReturn  title: "Pickup and return"
-  - route: /statistics    title: "Utilisation"
   - route: /acct-ledger   title: "Ledger"
+  - route: /statistics    title: "Utilisation"
 */
 
 import 'dart:io';
@@ -201,10 +201,10 @@ void main() {
     );
     await _screenshot(binding, tester, 'pickup_return');
 
-    await _selectOption(tester, route: '/statistics', formKey: '/statistics');
-    await _screenshot(binding, tester, 'utilisation');
-
     await _selectOption(tester, route: '/acct-ledger', formKey: '/acct-ledger');
     await _screenshot(binding, tester, 'ledger');
+
+    await _selectOption(tester, route: '/statistics', formKey: '/statistics');
+    await _screenshot(binding, tester, 'utilisation');
   });
 }
