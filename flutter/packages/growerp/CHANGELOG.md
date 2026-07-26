@@ -1,3 +1,7 @@
+## 1.12.2
+
+ - **FIX**: replace CC0 file-license headers with Apache-2.0 to match the package LICENSE; add example/README.md for pub.dev.
+
 ## 1.12.1
 
  - **FIX**: relicense under Apache License 2.0, remove insecure link from README, refresh dependencies to address pub.dev score.
