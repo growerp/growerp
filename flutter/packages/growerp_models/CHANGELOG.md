@@ -1,3 +1,7 @@
+## 1.12.1
+
+ - **FIX**: relicense under Apache License 2.0 (LICENSE and file headers); add example/main.dart for pub.dev.
+
 ## 1.12.0
 
  - **REFACTOR**: update subscription dialog to dynamically fetch and display product plans from DataFetchBloc. ([fd01461e](https://github.com/growerp/growerp/commit/fd01461e3d2ff0d4247c2fe3f8b765636816f165))

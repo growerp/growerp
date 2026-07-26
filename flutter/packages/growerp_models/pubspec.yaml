@@ -1,6 +1,6 @@
 name: growerp_models
 resolution: workspace
-version: 1.12.0
+version: 1.12.1
 description: GrowERP models and Moqui backend REST interface
 homepage: https://www.growerp.com
 repository: https://github.com/growerp/growerp
