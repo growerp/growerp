@@ -56,6 +56,7 @@ dependencies:
   flutter_test:
     sdk: flutter
   flutter_expandable_fab: ^2.3.0
+  go_router: ^17.1.0
 
 dev_dependencies:
   flutter_driver:
