@@ -69,6 +69,9 @@ android {
     buildTypes {
         release {
             signingConfig signingConfigs.release
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
 }
@@ -78,7 +81,7 @@ android {
 configurations.all {
     resolutionStrategy.eachDependency { DependencyResolveDetails details ->
         if (details.requested.group == 'androidx.glance') {
-            details.useVersion '1.1.0'
+            details.useVersion '1.1.1'
         }
         if (details.requested.group == 'androidx.compose.remote') {
             details.useVersion '1.0.0-alpha05'

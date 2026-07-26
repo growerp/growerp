@@ -43,7 +43,7 @@ android {
 configurations.all {
     resolutionStrategy.eachDependency {
         if (requested.group == "androidx.glance") {
-            useVersion("1.1.0")
+            useVersion("1.1.1")
         }
         if (requested.group == "androidx.compose.remote") {
             useVersion("1.0.0-alpha05")
