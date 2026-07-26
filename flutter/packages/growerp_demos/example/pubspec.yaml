@@ -11,15 +11,15 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  growerp_demos: ^1.0.0
-  growerp_core: ^1.9.0
-  growerp_models: ^1.11.6
-  growerp_catalog: ^1.10.5
-  growerp_manufacturing: ^1.0.0
-  growerp_manuf_liner: ^1.0.0
-  growerp_order_accounting: ^1.0.0
-  growerp_inventory: ^1.0.0
-  growerp_user_company: ^1.0.0
+  growerp_demos: ^1.1.0
+  growerp_core: ^1.11.0
+  growerp_models: ^1.12.0
+  growerp_catalog: ^1.11.0
+  growerp_manufacturing: ^1.1.0
+  growerp_manuf_liner: ^1.1.0
+  growerp_order_accounting: ^1.11.0
+  growerp_inventory: ^1.11.0
+  growerp_user_company: ^1.11.0
 
 dev_dependencies:
   flutter_test:

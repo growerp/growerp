@@ -1,7 +1,7 @@
 name: growerp_activity
 resolution: workspace
 description: "Activity, task and event management for the GrowERP project."
-version: 1.10.5
+version: 1.11.0
 repository: https://github.com/growerp/growerp
 homepage: https://www.growerp.com
 environment:
@@ -18,8 +18,8 @@ platforms:
 dependencies:
   flutter:
     sdk: flutter
-  growerp_core: ^1.9.0
-  growerp_models: ^1.11.6
+  growerp_core: ^1.11.0
+  growerp_models: ^1.12.0
   flutter_localizations:
     sdk: flutter
   intl: ^0.20.2

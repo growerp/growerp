@@ -9,7 +9,7 @@ environment:
 dependencies: 
   flutter: 
     sdk: flutter
-  growerp_catalog: ^1.9.0
+  growerp_catalog: ^1.11.0
 
 dev_dependencies:
   flutter_test:

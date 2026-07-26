@@ -1,7 +1,7 @@
 name: growerp_core
 resolution: workspace
 description: The Core of the GrowERP frontend
-version: 1.10.9
+version: 1.11.0
 homepage: https://www.growerp.com
 repository: https://github.com/growerp/growerp
 platforms:
@@ -15,7 +15,7 @@ environment:
   sdk: ^3.10.0
   flutter: ^3.33.0
 dependencies:
-  growerp_models: ^1.11.6
+  growerp_models: ^1.12.0
   flutter:
     sdk: flutter
   flutter_localizations:
@@ -65,7 +65,7 @@ dependencies:
     sdk: flutter
   integration_test:
     sdk: flutter
-  growerp_activity: ^1.8.1
+  growerp_activity: ^1.11.0
   flutter_form_builder: ^10.1.0
   form_builder_validators: ^11.2.0
   google_fonts: ^8.0.2

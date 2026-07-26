@@ -12,10 +12,10 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  growerp_user_company: ^1.9.0
-  growerp_activity: ^1.8.1
-  growerp_core: ^1.9.0
-  growerp_models: ^1.11.6
+  growerp_user_company: ^1.11.0
+  growerp_activity: ^1.11.0
+  growerp_core: ^1.11.0
+  growerp_models: ^1.12.0
   flutter_localizations:
     sdk: flutter
   global_configuration: ^2.0.0

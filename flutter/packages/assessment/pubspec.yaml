@@ -13,8 +13,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  growerp_core: ^1.9.0
-  growerp_models: ^1.11.6
+  growerp_core: ^1.11.0
+  growerp_models: ^1.12.0
   growerp_marketing: ^1.9.0
   package_info_plus: ^9.0.0
   flutter_localizations:

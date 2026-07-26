@@ -13,10 +13,10 @@ dependencies:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
-  growerp_courses: ^1.9.0
-  growerp_core: ^1.9.0
-  growerp_models: ^1.11.6
-  growerp_user_company: ^1.9.0
+  growerp_courses: ^1.10.0
+  growerp_core: ^1.11.0
+  growerp_models: ^1.12.0
+  growerp_user_company: ^1.11.0
   global_configuration: ^2.0.0-nullsafety.1
   flutter_test:
     sdk: flutter

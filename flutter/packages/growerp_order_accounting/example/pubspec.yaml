@@ -8,8 +8,8 @@ environment:
   flutter: ^3.33.0
 
 dependencies:
-  growerp_order_accounting: ^1.9.0
-  growerp_inventory: ^1.9.0
+  growerp_order_accounting: ^1.11.0
+  growerp_inventory: ^1.11.0
   fl_chart: ^1.1.0
 
 dev_dependencies:

@@ -1,3 +1,30 @@
+## 1.12.0
+
+ - **REFACTOR**: rename classificationId to applicationId everywhere. ([9c23feae](https://github.com/growerp/growerp/commit/9c23feae113511b6dfdafbbe095bdb391bf828bf))
+ - **REFACTOR**: move growerp_chat package to core and update core dependencies accordingly. ([ee81f96b](https://github.com/growerp/growerp/commit/ee81f96bbb5be43ef337da616ec1fe8754603a2f))
+ - **FIX**: remove border of input fields and reformatting. ([468a1715](https://github.com/growerp/growerp/commit/468a17154f816e37efcc4bcc86a0f34fe1774ebd))
+ - **FIX**: growerp command pure dart including models package, growerp createPackage improvements and fixes. ([42b57b51](https://github.com/growerp/growerp/commit/42b57b519bd403343cacf19607742b6cf09a667d))
+ - **FIX**: growerp install error when already installed is modified. ([e389d61f](https://github.com/growerp/growerp/commit/e389d61f6100d1ff28b29174326168e9d9d41246))
+ - **FIX**: conversion adjustments. ([55016ea0](https://github.com/growerp/growerp/commit/55016ea002630525189f589c32052adfccbb7661))
+ - **FIX**: conversion changes: close and update period totals by year. ([3bc65040](https://github.com/growerp/growerp/commit/3bc650402a20941c1d16ae0f8791c22c2ce545aa))
+ - **FIX**: change conversion quantities and lint error. ([f6f2cf08](https://github.com/growerp/growerp/commit/f6f2cf08948d1a5877d954ccad8597ff078a9f92))
+ - **FIX**: dart lint and log warnings. ([4221d8b7](https://github.com/growerp/growerp/commit/4221d8b7e1a7508bf46bfead40f46dff2845d7a7))
+ - **FIX**: conversion split closing of documents in parts. ([80a97d7f](https://github.com/growerp/growerp/commit/80a97d7f9a9aa0c7140cf719f0144c8abdb24484))
+ - **FIX**: data conversion adjustments. ([204330c5](https://github.com/growerp/growerp/commit/204330c5e9562a285194c04059e3e09d1048c165))
+ - **FIX**: the growerp finalize conversion command closing a first period. ([9b2729d2](https://github.com/growerp/growerp/commit/9b2729d2ceb50ddec097988006ab033289b03ea2))
+ - **FIX**: remove flutter_hive blocking executing in native dart(conversion). ([43bd4eff](https://github.com/growerp/growerp/commit/43bd4eff104570a5b27d84d99a846e9b2d5152a1))
+ - **FEAT**(rental): rental vertical app with cars/equipment demo data. ([90425783](https://github.com/growerp/growerp/commit/9042578306b1de6dbd2c53655c4ea911bc204930))
+ - **FEAT**(cli): growerp createApp to scaffold new vertical apps. ([28fca91c](https://github.com/growerp/growerp/commit/28fca91c74c5df6ccc6d2427eabe7ec69172778e))
+ - **FEAT**: added dragable and minimizable dashboard tile features. ([ed4e9430](https://github.com/growerp/growerp/commit/ed4e943042e336c0b2d6bd5a28a35751763892cf))
+ - **FEAT**: Adopt Flutter workspaces and update package dependencies across various packages. ([08103d59](https://github.com/growerp/growerp/commit/08103d59a23fc7d02cbc636ce244b800ccc53bdc))
+ - **FEAT**: make space at the main menu for additional modules. ([99682438](https://github.com/growerp/growerp/commit/99682438c024e9db5ffd96e4a6923c9de9eda58c))
+ - **FEAT**: upgrade model and growerp packages to version 1.11.6. ([a58d5ad9](https://github.com/growerp/growerp/commit/a58d5ad960d82b2b741e4674e528893b01910714))
+ - **FEAT**: extended the growerp command for create/import/export package, check docs for detail.(PLEASE note Locale, changed to String otherwise could not use in CLI). ([3462be78](https://github.com/growerp/growerp/commit/3462be783d4e2b7553a43a2bf702b451189bd521))
+ - **FEAT**: refact: login sequence & added a payment screen at login when not subscribed: first working version with Stripe with debug messages and need for Sripe key in first company creation which is The GrowERP company, receiving subscription payments from tenants. ([0ef0a42f](https://github.com/growerp/growerp/commit/0ef0a42f890a8d3276e1f7e84badc9572909729c))
+ - **FEAT**: added year parameter to recalculate#GlAccountOrgSummaries. ([4b748f86](https://github.com/growerp/growerp/commit/4b748f86ecf21879f688b3efae39e66ab7825562))
+ - **FEAT**: added conversion selection parameters. ([a0a2436f](https://github.com/growerp/growerp/commit/a0a2436fa826cb8d9c1dcfcb642fcc723e25a61c))
+ - **DOCS**: added overal convert procedure, roadmap for next year. ([8d3359af](https://github.com/growerp/growerp/commit/8d3359afdc5815030783b91058c8d3c268801536))
+
 ## 1.11.6
 
  - **FIX**: growerp command pure dart including models package, growerp createPackage improvements and fixes. ([a8b70e1c](https://github.com/growerp/growerp/commit/a8b70e1cfa40a0564e283357e8e703570afd36a3))

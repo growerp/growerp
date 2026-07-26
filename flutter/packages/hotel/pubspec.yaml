@@ -12,16 +12,16 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  growerp_adk: ^1.0.0
-  growerp_core: ^1.9.0
-  growerp_sales: ^1.9.0
-  growerp_website: ^1.9.0
-  growerp_inventory: ^1.9.0
-  growerp_catalog: ^1.9.0
-  growerp_order_accounting: ^1.9.0
-  growerp_rental: ^1.0.0
-  growerp_user_company: ^1.9.0
-  growerp_activity: ^1.8.1
+  growerp_adk: ^1.1.0
+  growerp_core: ^1.11.0
+  growerp_sales: ^1.11.0
+  growerp_website: ^1.11.0
+  growerp_inventory: ^1.11.0
+  growerp_catalog: ^1.11.0
+  growerp_order_accounting: ^1.11.0
+  growerp_rental: ^1.1.0
+  growerp_user_company: ^1.11.0
+  growerp_activity: ^1.11.0
   package_info_plus: ^9.0.0
   horizontal_data_table: ^4.3.1
   flutter_localizations:
@@ -34,7 +34,7 @@ dependencies:
   dio: ^5.4.3
   web: ^1.0.0
   flutter_bloc: ^9.1.1
-  growerp_models: ^1.11.6
+  growerp_models: ^1.12.0
   shared_preferences: ^2.0.0
   global_configuration: ^2.0.0
 

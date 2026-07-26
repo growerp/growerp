@@ -13,16 +13,16 @@ dependencies:
   flutter_bloc: ^9.1.1
   flutter_localizations:
     sdk: flutter
-  growerp_core: ^1.9.0
-  growerp_models: ^1.11.6
-  growerp_user_company: ^1.9.0
-  growerp_sales: ^1.9.0
+  growerp_core: ^1.11.0
+  growerp_models: ^1.12.0
+  growerp_user_company: ^1.11.0
+  growerp_sales: ^1.11.0
   growerp_marketing: ^1.9.0
   growerp_outreach: ^1.9.0
-  growerp_website: ^1.9.0
-  growerp_order_accounting: ^1.9.0
-  growerp_activity: ^1.8.1
-  growerp_adk: ^1.0.0
+  growerp_website: ^1.11.0
+  growerp_order_accounting: ^1.11.0
+  growerp_activity: ^1.11.0
+  growerp_adk: ^1.1.0
   growerp_wiki: ^1.9.0
   universal_io: ^2.2.2
   global_configuration: ^2.0.0

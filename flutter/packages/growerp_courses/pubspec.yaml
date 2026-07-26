@@ -1,7 +1,7 @@
 name: growerp_courses
 resolution: workspace
 description: Course management package with AI-powered content generation for GrowERP
-version: 1.9.0
+version: 1.10.0
 homepage: https://github.com/growerp/growerp
 
 environment:
@@ -13,8 +13,8 @@ dependencies:
     sdk: flutter
   flutter_bloc: ^9.1.1
   equatable: ^2.0.5
-  growerp_core: ^1.9.0
-  growerp_models: ^1.11.6
+  growerp_core: ^1.11.0
+  growerp_models: ^1.12.0
   decimal: ^3.0.2
   flutter_markdown_plus: ^1.0.7
   url_launcher: ^6.2.1

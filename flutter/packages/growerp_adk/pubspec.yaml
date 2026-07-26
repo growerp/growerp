@@ -1,7 +1,7 @@
 name: growerp_adk
 resolution: workspace
 description: "GrowERP ADK domain: AI agents, agent config, scheduled jobs, agent chat and governance (action audit + write approvals)."
-version: 1.0.0
+version: 1.1.0
 repository: https://github.com/growerp/growerp
 homepage: https://www.growerp.com
 environment:
@@ -11,8 +11,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  growerp_core: ^1.9.0
-  growerp_models: ^1.11.6
+  growerp_core: ^1.11.0
+  growerp_models: ^1.12.0
   flutter_localizations:
     sdk: flutter
   intl: ^0.20.2
