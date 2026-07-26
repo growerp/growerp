@@ -1,6 +1,6 @@
 name: growerp_core
 resolution: workspace
-description: Core building block for the GrowERP frontend: authentication, theming, navigation, and shared widgets used by every GrowERP Flutter package and app.
+description: "Core building block for the GrowERP frontend: authentication, theming, navigation, and shared widgets used by every GrowERP Flutter package and app."
 version: 1.11.1
 homepage: https://www.growerp.com
 repository: https://github.com/growerp/growerp
