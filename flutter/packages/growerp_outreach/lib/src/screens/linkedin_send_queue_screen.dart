@@ -106,6 +106,19 @@ class _LinkedInSendQueueScreenState extends State<LinkedInSendQueueScreen> {
     return match?.group(1);
   }
 
+  /// Fill any template placeholders still present in a stored message body
+  /// (older imports only substituted {name}/{company}/{title}).
+  String _substitute(OutreachMessage m, String text) {
+    final name = (m.recipientName ?? '').trim();
+    final firstName = name.isEmpty ? '' : name.split(RegExp(r'\s+')).first;
+    return text
+        .replaceAll('{name}', name)
+        .replaceAll('{firstName}', firstName)
+        .replaceAll('{company}', m.recipientCompany ?? '')
+        .replaceAll('{companyName}', m.recipientCompany ?? '')
+        .replaceAll('{title}', m.recipientTitle ?? '');
+  }
+
   Future<void> _copyAndOpen(OutreachMessage m) async {
     await Clipboard.setData(ClipboardData(text: _bodyController.text));
     final uri = _linkedInUri(m);
@@ -170,7 +183,9 @@ class _LinkedInSendQueueScreenState extends State<LinkedInSendQueueScreen> {
         // Sync the editable body when the current message changes.
         if (current?.messageId != _loadedMessageId) {
           _loadedMessageId = current?.messageId;
-          _bodyController.text = current?.messageContent ?? '';
+          _bodyController.text = current == null
+              ? ''
+              : _substitute(current, current.messageContent);
         }
 
         return Column(

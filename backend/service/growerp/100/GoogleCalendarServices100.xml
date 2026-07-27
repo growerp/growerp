@@ -368,9 +368,8 @@ limitations under the License.
             </entity-find>
             <set field="leadPartyId" from="thirdParties ? thirdParties[0].partyId : null" />
 
-            <script location="component://growerp/service/GeminiAiUtil.groovy"/>
             <script><![CDATA[
-                def GeminiAiUtil = _scriptResult
+                def GeminiAiUtil = ec.resource.script("component://growerp/service/GeminiAiUtil.groovy", null)
                 def prompt = """Extract the concrete action items from the meeting notes below.
 Return ONLY a JSON array (no markdown) of at most 10 objects with fields:
   "title": short imperative task title (max 80 chars)
