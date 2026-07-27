@@ -63,6 +63,9 @@
             <description>PENDING, SENT, RESPONDED, FAILED</description>
         </field>
         <field name="errorMessage" type="text-long" />
+        <field name="convertedPartyId" type="id">
+            <description>Set when status == CONVERTED; partyId of the lead created from this message</description>
+        </field>
 
         <field name="createdDate" type="date-time" />
 

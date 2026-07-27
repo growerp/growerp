@@ -813,6 +813,7 @@
             <parameter name="responseDate" />
             <parameter name="sentDate" />
             <parameter name="errorMessage" />
+            <parameter name="convertedPartyId" />
         </in-parameters>
         <out-parameters>
             <parameter name="messageId" />
@@ -829,6 +830,7 @@
             <parameter name="sentDate" />
             <parameter name="responseDate" />
             <parameter name="errorMessage" />
+            <parameter name="convertedPartyId" />
             <parameter name="createdDate" />
         </out-parameters>
         <actions>
@@ -846,7 +848,8 @@
                          status: status,
                          sentDate: sentDate ?: (status == 'SENT' ? ec.user.nowTimestamp : null),
                          responseDate: responseDate ?: (status == 'RESPONDED' ? ec.user.nowTimestamp : null),
-                         errorMessage: errorMessage]" />
+                         errorMessage: errorMessage,
+                         convertedPartyId: convertedPartyId]" />
 
             <!-- Update metrics if responded and has marketingCampaignId -->
             <if condition="status == 'RESPONDED' &amp;&amp; message.marketingCampaignId">
@@ -883,6 +886,7 @@
             <set field="responseDate"
                 from="updatedMessage.responseDate ? ec.l10n.format(updatedMessage.responseDate, 'yyyy-MM-dd HH:mm:ssZ') : null" />
             <set field="errorMessage" from="updatedMessage.errorMessage" />
+            <set field="convertedPartyId" from="updatedMessage.convertedPartyId" />
             <set field="createdDate"
                 from="updatedMessage.createdDate ? ec.l10n.format(updatedMessage.createdDate, 'yyyy-MM-dd HH:mm:ssZ') : null" />
         </actions>
