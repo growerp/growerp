@@ -467,18 +467,14 @@ limitations under the License.
             ]]></script>
 
             <!-- send only when an email server is configured; state advances anyway -->
-            <entity-find-one entity-name="moqui.basic.email.EmailServer"
-                value-field="emailServer">
-                <field-map field-name="emailServerId" value="SYSTEM" />
-            </entity-find-one>
-            <set field="emailConfigured" from="emailServer != null &amp;&amp;
-                emailServer.mailPassword != 'SMTP_PASSWORD'" />
+            <service-call name="growerp.100.GeneralServices100.get#ActiveEmailServer"
+                in-map="[ownerPartyId: enrollment.ownerPartyId]" out-map="context" />
             <if condition="emailConfigured">
-                <service-call name="org.moqui.impl.EmailServices.send#EmailTemplate"
+                <service-call name="growerp.100.GeneralServices100.send#DirectEmail"
                     ignore-error="true"
-                    in-map="[toAddresses: enrollment.emailAddress,
-                        subject: emailSubject, bodyHtml: emailBody,
-                        fromAddress: 'noreply@growerp.com']" />
+                    in-map="[ownerPartyId: enrollment.ownerPartyId,
+                        toAddresses: enrollment.emailAddress,
+                        subject: emailSubject, bodyHtml: emailBody]" />
             </if>
             <!-- record on the linked campaign when there is one -->
             <if condition="sequence.marketingCampaignId">

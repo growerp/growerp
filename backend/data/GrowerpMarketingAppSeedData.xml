@@ -92,7 +92,7 @@ limitations under the License.
     <growerp.menu.MenuItem menuItemId="MKTAPP_ADK_AGENTS" menuConfigurationId="MARKETING_DEFAULT" parentMenuItemId="MKTAPP_AGENT_CONTROL"
         title="AI Agents" iconName="smart_toy" widgetName="AdkAgentListView" sequenceNum="10"/>
     <growerp.menu.MenuItem menuItemId="MKTAPP_ADK_MCPSERVERS" menuConfigurationId="MARKETING_DEFAULT" parentMenuItemId="MKTAPP_AGENT_CONTROL"
-        title="MCP Servers" iconName="dns" widgetName="AdkMcpServerListView" sequenceNum="15"/>
+        title="Tools &amp; Integrations" iconName="dns" widgetName="AdkMcpServerListView" sequenceNum="15"/>
     <growerp.menu.MenuItem menuItemId="MKTAPP_ADK_JOBS" menuConfigurationId="MARKETING_DEFAULT" parentMenuItemId="MKTAPP_AGENT_CONTROL"
         title="Agent Jobs" iconName="schedule" widgetName="AdkJobListView" sequenceNum="20"/>
     <growerp.menu.MenuItem menuItemId="MKTAPP_ADK_APPROVALS" menuConfigurationId="MARKETING_DEFAULT" parentMenuItemId="MKTAPP_AGENT_CONTROL"

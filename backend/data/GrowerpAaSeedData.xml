@@ -52,7 +52,11 @@ limitations under the License.
             storeHost="imap.gmail.com" storePort="993" storeProtocol="imaps" storeFolder=""
             storeDelete="N" storeMarkSeen="Y" storeSkipSeen="Y" mailUsername="${SMTP_USER}"
     mailPassword="${SMTP_PASSWORD}"/-->
-    <!-- email opensrs -->
+    <!-- email opensrs.
+        mailUsername/mailPassword are placeholders: data load does NOT expand ${};
+        growerp.100.GeneralServices100.get#ActiveEmailServer replaces them at first
+        send from the SMTP_USER/SMTP_PASSWORD (optional SMTP_HOST/SMTP_PORT)
+        environment variables. -->
     <moqui.basic.email.EmailServer emailServerId="SYSTEM"
         smtpHost="smtp.hostedemail.com" smtpPort="465" smtpStartTls="N" smtpSsl="Y"
         storeHost="mail.hostedemail.com" storePort="993" storeProtocol="imaps"

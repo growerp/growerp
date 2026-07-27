@@ -2239,5 +2239,108 @@ limitations under the License.
         </actions>
     </service>
 
+    <service verb="get" noun="ActiveEmailServer">
+        <description>Resolve the email server to send with. With ownerPartyId: only the
+            owner company's own EmailServer record (synced from its SMTP settings in
+            update#Owner) — the SYSTEM server is never a fallback for tenant sends.
+            Without ownerPartyId (system-level sends): the SYSTEM server, whose
+            placeholder seed credentials are replaced from the SMTP_USER/SMTP_PASSWORD
+            (and optional SMTP_HOST/SMTP_PORT) environment variables when present.</description>
+        <in-parameters>
+            <parameter name="ownerPartyId"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="emailServerId"/>
+            <parameter name="emailConfigured" type="Boolean"/>
+        </out-parameters>
+        <actions>
+            <set field="emailConfigured" from="false"/>
+            <if condition="ownerPartyId">
+                <then>
+                    <!-- cache=false: cached EmailServer values are read-only -->
+                    <entity-find-one entity-name="moqui.basic.email.EmailServer"
+                            value-field="ownServer" cache="false">
+                        <field-map field-name="emailServerId" from="ownerPartyId"/>
+                    </entity-find-one>
+                    <if condition="ownServer != null &amp;&amp; ownServer.smtpHost &amp;&amp;
+                            ownServer.mailPassword">
+                        <set field="emailServerId" from="ownServer.emailServerId"/>
+                        <set field="emailConfigured" from="true"/>
+                    </if>
+                </then>
+                <else>
+                    <entity-find-one entity-name="moqui.basic.email.EmailServer"
+                            value-field="sysServer" cache="false">
+                        <field-map field-name="emailServerId" value="SYSTEM"/>
+                    </entity-find-one>
+                    <if condition="sysServer == null"><return/></if>
+                    <if condition="sysServer.mailUsername == 'SMTP_USER' ||
+                            sysServer.mailPassword == 'SMTP_PASSWORD'">
+                        <script><![CDATA[
+                            // seed ships placeholder credentials; take real ones from the environment
+                            String envUser = System.getenv('SMTP_USER')
+                            String envPassword = System.getenv('SMTP_PASSWORD')
+                            if (envUser && envPassword) {
+                                sysServer.mailUsername = envUser
+                                sysServer.mailPassword = envPassword
+                                String envHost = System.getenv('SMTP_HOST')
+                                if (envHost) sysServer.smtpHost = envHost
+                                String envPort = System.getenv('SMTP_PORT')
+                                if (envPort) sysServer.smtpPort = envPort
+                                sysServer.update()
+                            }
+                        ]]></script>
+                    </if>
+                    <if condition="sysServer.smtpHost &amp;&amp; sysServer.mailPassword &amp;&amp;
+                            sysServer.mailPassword != 'SMTP_PASSWORD' &amp;&amp;
+                            sysServer.mailPassword != 'EMAIL_CHANGEME'">
+                        <set field="emailServerId" value="SYSTEM"/>
+                        <set field="emailConfigured" from="true"/>
+                    </if>
+                </else>
+            </if>
+        </actions>
+    </service>
+
+    <service verb="send" noun="DirectEmail">
+        <description>Send a single email through the active email server (the owner
+            company's own SMTP settings when configured, otherwise SYSTEM).
+            Errors when no email server is configured.</description>
+        <in-parameters>
+            <parameter name="ownerPartyId"/>
+            <parameter name="toAddresses" required="true"/>
+            <parameter name="subject" required="true"/>
+            <parameter name="bodyHtml" allow-html="any"/>
+            <parameter name="bodyText" allow-html="any"/>
+            <parameter name="fromAddress" default-value="noreply@growerp.com"/>
+            <parameter name="fromName"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="emailMessageId"/>
+            <parameter name="messageId"/>
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.GeneralServices100.get#ActiveEmailServer"
+                in-map="[ownerPartyId: ownerPartyId]" out-map="context"/>
+            <if condition="!emailConfigured">
+                <return error="true"
+                    message="No SMTP email server configured for this company, please enter the SMTP settings in the company settings"/>
+            </if>
+            <service-call name="create#moqui.basic.email.EmailMessage" out-map="context"
+                in-map="[statusId: 'ES_READY', emailServerId: emailServerId,
+                    fromAddress: fromAddress, fromName: fromName,
+                    toAddresses: toAddresses, subject: subject,
+                    body: bodyHtml, bodyText: bodyText,
+                    contentType: bodyHtml ? 'text/html' : 'text/plain']"/>
+            <service-call name="org.moqui.impl.EmailServices.send#EmailMessage"
+                in-map="[emailMessageId: emailMessageId]"/>
+            <entity-find-one entity-name="moqui.basic.email.EmailMessage"
+                    value-field="sentMessage" cache="false">
+                <field-map field-name="emailMessageId"/>
+            </entity-find-one>
+            <set field="messageId" from="sentMessage?.messageId"/>
+        </actions>
+    </service>
+
 </services>
  

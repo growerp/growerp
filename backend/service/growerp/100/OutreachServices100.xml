@@ -1331,16 +1331,16 @@
             <set field="emailBody"
                 from="body + '\n\n---\n\n&lt;p style=&quot;font-size: 12px; color: #666;&quot;&gt;&lt;a href=&quot;' + unsubscribeUrl + '&quot;&gt;Unsubscribe&lt;/a&gt;&lt;/p&gt;'" />
 
-            <!-- Send email using Moqui EmailServices -->
-            <service-call name="org.moqui.impl.EmailServices.send#EmailTemplate"
+            <!-- Send through the active email server (owner SMTP settings, else SYSTEM) -->
+            <service-call name="growerp.100.GeneralServices100.send#DirectEmail"
                 out-map="emailResult">
-                <field-map field-name="toAddresses" value="${toEmail}" />
+                <field-map field-name="ownerPartyId" />
+                <field-map field-name="toAddresses" from="toEmail" />
                 <field-map field-name="subject" from="subject" />
                 <field-map field-name="bodyText"
                     from="bodyContentType == 'text/plain' ? emailBody : null" />
                 <field-map field-name="bodyHtml"
                     from="bodyContentType == 'text/html' ? emailBody : null" />
-                <field-map field-name="fromAddress" value="noreply@growerp.com" />
             </service-call>
 
             <!-- Record message in OutreachMessage -->
@@ -1359,7 +1359,8 @@
             <service-call name="growerp.100.OutreachServices100.update#CampaignMetrics"
                 in-map="[marketingCampaignId: marketingCampaignId, incrementMessagesSent: true]" />
 
-            <set field="emailMessageId" from="emailResult.messageId" />
+            <set field="emailMessageId" from="emailResult.emailMessageId" />
+            <set field="messageId" from="emailResult.messageId" />
         </actions>
     </service>
 

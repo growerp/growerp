@@ -185,7 +185,31 @@ class _PlatformConfigDetailScreenState
               ),
             ),
             const SizedBox(height: 16),
-            GroupingDecorator(
+            if (widget.platform == OutreachPlatform.email)
+              GroupingDecorator(
+                labelText: 'Email Server',
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Outreach emails are sent through your company\'s own '
+                      'SMTP email server; no credentials are needed here. '
+                      'The server is configured under Agent Control → '
+                      'Tools & Integrations → Email.',
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                    const SizedBox(height: 12),
+                    OutlinedButton.icon(
+                      key: const Key('emailServerSettings'),
+                      icon: const Icon(Icons.mail_outline),
+                      label: const Text('Change email server settings'),
+                      onPressed: () => EmailSettingsDialog.show(context),
+                    ),
+                  ],
+                ),
+              )
+            else
+              GroupingDecorator(
               labelText: 'Authentication Credentials',
               child: Column(
                 children: [
@@ -481,21 +505,23 @@ class _PlatformConfigDetailScreenState
             key: Key(widget.config == null ? 'Create' : 'Update'),
             onPressed: () {
               if (_formKey.currentState!.validate()) {
+                // email sends via the company SMTP server, no credentials here
+                final isEmail = widget.platform == OutreachPlatform.email;
                 final config = PlatformConfiguration(
                   configId: widget.config?.configId,
                   platform: widget.platform.name,
                   isEnabled: _isEnabled,
                   dailyLimit: int.parse(_dailyLimitController.text),
-                  apiKey: _apiKeyController.text.isEmpty
+                  apiKey: isEmail || _apiKeyController.text.isEmpty
                       ? null
                       : _apiKeyController.text,
-                  apiSecret: _apiSecretController.text.isEmpty
+                  apiSecret: isEmail || _apiSecretController.text.isEmpty
                       ? null
                       : _apiSecretController.text,
-                  username: _usernameController.text.isEmpty
+                  username: isEmail || _usernameController.text.isEmpty
                       ? null
                       : _usernameController.text,
-                  password: _passwordController.text.isEmpty
+                  password: isEmail || _passwordController.text.isEmpty
                       ? null
                       : _passwordController.text,
                 );
