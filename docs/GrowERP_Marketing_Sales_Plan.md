@@ -228,6 +228,7 @@ Engineering detail per item: [GrowERP_Marketing_Enhancements_Implementation_Plan
 
 ## 11. Relationship to Existing Documents
 
+- [Marketing_Weekly_Operational_Guide.md](./Marketing_Weekly_Operational_Guide.md) — the day-by-day runbook that executes this plan for one work week in the Marketing app.
 - [marketing_plan.md](./marketing_plan.md) — its outreach scripts and 7-email sequence copy are adopted verbatim into §4 Nurture / §5.1; this document supersedes it as the plan of record.
 - [MarketingProposal.md](./MarketingProposal.md) / [SocialMediaLeadSystem.md](./SocialMediaLeadSystem.md) — the social system is the Awareness/Capture engine of §4; its Phase 2 and Phase 4 gaps appear here as enhancements #6 and #5.
 - [marketing_implementation_guide.md](./marketing_implementation_guide.md) — current BirdSend wiring; retired when enhancement #1 ships.
