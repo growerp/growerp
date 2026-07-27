@@ -99,6 +99,29 @@ class _AdkJobListViewState extends State<AdkJobListView> {
     }
   }
 
+  void _showError(AdkJob job) {
+    if (job.latestErrors == null || job.latestErrors!.isEmpty) return;
+    showDialog<void>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text('Error — ${job.agentName}'),
+        content: SingleChildScrollView(
+          child: SelectableText(
+            job.latestErrors!,
+            key: const Key('jobErrorText'),
+          ),
+        ),
+        actions: [
+          TextButton(
+            key: const Key('closeJobError'),
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _togglePause(AdkJob job) async {
     try {
       final svc = await AdkJobService.create();
@@ -333,6 +356,10 @@ class _AdkJobListViewState extends State<AdkJobListView> {
               job.latestStatus,
               style: TextStyle(fontSize: 12, color: statusColor),
             ),
+            if (job.latestErrors != null && job.latestErrors!.isNotEmpty) ...[
+              const SizedBox(width: 4),
+              Icon(Icons.info_outline, size: 14, color: statusColor),
+            ],
           ],
         ),
         lockCell,
@@ -347,6 +374,7 @@ class _AdkJobListViewState extends State<AdkJobListView> {
       columns: columns,
       rows: rows,
       rowHeight: 56,
+      onRowTap: (index) => _showError(_jobs[index]),
     );
   }
 }
