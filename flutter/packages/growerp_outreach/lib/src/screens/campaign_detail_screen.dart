@@ -170,13 +170,15 @@ class CampaignDetailScreenState extends State<CampaignDetailScreen> {
     }
   }
 
-  /// Import a LinkedIn connections CSV as leads (company created if new + linked).
-  Future<void> _importLinkedInLeads() async {
+  /// Import a LinkedIn connections or Apollo people CSV as leads
+  /// (company created if new + linked).
+  Future<void> _importLeads(LeadImportSource source) async {
     await showDialog(
       context: context,
       builder: (_) => LinkedInLeadImportDialog(
         restClient: RepositoryProvider.of<RestClient>(context, listen: false),
         campaignId: widget.campaign.campaignId,
+        source: source,
       ),
     );
   }
@@ -325,13 +327,23 @@ class CampaignDetailScreenState extends State<CampaignDetailScreen> {
                       ),
                       const SizedBox(height: 20),
                       if (widget.campaign.campaignId != null) ...[
-                        Row(
+                        Wrap(
+                          spacing: 8.0,
+                          runSpacing: 8.0,
                           children: [
                             OutlinedButton.icon(
                               key: const Key('importLeads'),
                               icon: const Icon(Icons.upload_file, size: 18),
                               label: const Text('Import LinkedIn leads'),
-                              onPressed: _importLinkedInLeads,
+                              onPressed: () =>
+                                  _importLeads(LeadImportSource.linkedin),
+                            ),
+                            OutlinedButton.icon(
+                              key: const Key('importApolloLeads'),
+                              icon: const Icon(Icons.upload_file, size: 18),
+                              label: const Text('Import Apollo leads'),
+                              onPressed: () =>
+                                  _importLeads(LeadImportSource.apollo),
                             ),
                           ],
                         ),

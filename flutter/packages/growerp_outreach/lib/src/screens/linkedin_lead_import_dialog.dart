@@ -20,7 +20,12 @@ import 'package:flutter/material.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
-/// Import a LinkedIn "Connections" export (CSV) as GrowERP leads.
+/// Where the uploaded CSV came from; selects parser, labels and the
+/// outreach platform queued recipients get.
+enum LeadImportSource { linkedin, apollo }
+
+/// Import a LinkedIn "Connections" or Apollo people export (CSV) as GrowERP
+/// leads.
 ///
 /// Each row becomes a lead User (role: Lead -> CUSTOMER_ASSIGNED / unqualified).
 /// When the row has a Company, the backend import#CompanyUsers creates that
@@ -30,6 +35,7 @@ class LinkedInLeadImportDialog extends StatefulWidget {
     super.key,
     required this.restClient,
     this.campaignId,
+    this.source = LeadImportSource.linkedin,
   });
 
   final RestClient restClient;
@@ -37,6 +43,8 @@ class LinkedInLeadImportDialog extends StatefulWidget {
   /// When set, imported rows are also queued as PENDING [OutreachMessage]s
   /// for this campaign, personalized from its messageTemplate.
   final String? campaignId;
+
+  final LeadImportSource source;
 
   @override
   State<LinkedInLeadImportDialog> createState() =>
@@ -50,6 +58,8 @@ class _LinkedInLeadImportDialogState extends State<LinkedInLeadImportDialog> {
 
   bool _busy = false;
   String? _status;
+
+  bool get _isApollo => widget.source == LeadImportSource.apollo;
 
   Future<void> _pickAndImport() async {
     final result = await FilePicker.platform.pickFiles(
@@ -72,7 +82,9 @@ class _LinkedInLeadImportDialogState extends State<LinkedInLeadImportDialog> {
         fileString = await File(result.files.single.path!).readAsString();
       }
 
-      var leads = parseLinkedInConnectionsCsv(fileString);
+      var leads = _isApollo
+          ? parseApolloCsv(fileString)
+          : parseLinkedInConnectionsCsv(fileString);
       if (leads.isEmpty) {
         setState(() {
           _busy = false;
@@ -107,7 +119,7 @@ class _LinkedInLeadImportDialogState extends State<LinkedInLeadImportDialog> {
                     'recipientEmail': l.email,
                     'recipientCompany': l.company?.name,
                     'recipientTitle': l.personalTitle,
-                    'platform': 'LINKEDIN',
+                    'platform': _isApollo ? 'EMAIL' : 'LINKEDIN',
                   })
               .toList();
           await widget.restClient.importOutreachRecipients(
@@ -137,17 +149,21 @@ class _LinkedInLeadImportDialogState extends State<LinkedInLeadImportDialog> {
   Widget build(BuildContext context) {
     return popUpDialog(
       context: context,
-      title: 'Import LinkedIn leads',
+      title: _isApollo ? 'Import Apollo leads' : 'Import LinkedIn leads',
       children: [
         const SizedBox(height: 20),
-        const Text(
-          'Upload a LinkedIn "Connections" CSV export. Each contact becomes a '
-          'lead; its company is created if new and linked to the person.',
+        Text(
+          _isApollo
+              ? 'Upload an Apollo people CSV export. Each contact becomes a '
+                  'lead; its company is created if new and linked to the person.'
+              : 'Upload a LinkedIn "Connections" CSV export. Each contact '
+                  'becomes a lead; its company is created if new and linked '
+                  'to the person.',
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 20),
         OutlinedButton.icon(
-          key: const Key('uploadLinkedIn'),
+          key: Key(_isApollo ? 'uploadApollo' : 'uploadLinkedIn'),
           icon: const Icon(Icons.upload_file),
           label: const Text('Choose CSV file'),
           onPressed: _busy ? null : _pickAndImport,
@@ -214,6 +230,59 @@ List<CompanyUser> parseLinkedInConnectionsCsv(String fileString) {
       personalTitle: cell(iPosition),
       email: cell(iEmail),
       url: _normalizeUrl(cell(iUrl)),
+      company:
+          company.isNotEmpty ? Company(name: company, role: Role.lead) : null,
+    ));
+  }
+  return leads;
+}
+
+/// Parse an Apollo people CSV export into lead [CompanyUser]s.
+///
+/// Maps columns by header name (First Name, Last Name, Title, Company, Email,
+/// Person Linkedin Url and the first available phone column). Each result is
+/// a Lead; the company is attached only when the row has one.
+List<CompanyUser> parseApolloCsv(String fileString) {
+  final rows = fast_csv.parse(fileString);
+  final headerIdx = rows
+      .indexWhere((r) => r.any((c) => c.trim().toLowerCase() == 'first name'));
+  if (headerIdx == -1) {
+    throw 'No "First Name" header row found — is this an Apollo people export?';
+  }
+  final header = rows[headerIdx].map((c) => c.trim().toLowerCase()).toList();
+  int col(String name) => header.indexOf(name);
+  final iFirst = col('first name'),
+      iLast = col('last name'),
+      iTitle = col('title'),
+      iEmail = col('email'),
+      iCompany = col('company'),
+      iUrl = col('person linkedin url');
+  final phoneCols = [
+    col('work direct phone'),
+    col('mobile phone'),
+    col('corporate phone'),
+    col('other phone'),
+  ];
+
+  final leads = <CompanyUser>[];
+  for (var i = headerIdx + 1; i < rows.length; i++) {
+    final r = rows[i];
+    String cell(int idx) => (idx >= 0 && idx < r.length) ? r[idx].trim() : '';
+    final first = cell(iFirst), last = cell(iLast);
+    if (first.isEmpty && last.isEmpty) continue;
+    final company = cell(iCompany);
+    final phone = phoneCols.map(cell).firstWhere(
+          (p) => p.isNotEmpty,
+          orElse: () => '',
+        );
+    leads.add(CompanyUser(
+      type: PartyType.user,
+      role: Role.lead,
+      name: '$first $last'.trim(),
+      personalTitle: cell(iTitle),
+      email: cell(iEmail),
+      url: _normalizeUrl(cell(iUrl)),
+      telephoneNr: phone.isNotEmpty ? phone : null,
       company:
           company.isNotEmpty ? Company(name: company, role: Role.lead) : null,
     ));
