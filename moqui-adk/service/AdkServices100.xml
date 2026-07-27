@@ -467,6 +467,7 @@
             <parameter name="adkJobs" type="List"/>
         </out-parameters>
         <actions>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" out-map="context"/>
             <set field="adkJobs" from="[]"/>
             <entity-find entity-name="moqui.service.job.ServiceJob" list="jobList">
                 <econdition field-name="jobName" operator="like" value="adk_scheduled_%"/>
@@ -488,35 +489,38 @@
                 </entity-find>
                 <set field="configId" from="paramList ? paramList[0]?.parameterValue : null"/>
                 <set field="agentName" from="configId ?: jn"/>
+                <set field="cfg" from="null"/>
                 <if condition="configId">
                     <entity-find-one entity-name="moqui.adk.AdkAgentConfig" value-field="cfg"
                         auto-field-map="[adkAgentConfigId: configId]"/>
                     <if condition="cfg?.agentName"><set field="agentName" from="cfg.agentName"/></if>
                 </if>
-                <set field="isLocked" from="(lock != null &amp;&amp; lock.jobRunId != null) as boolean"/>
-                <set field="lockAgeMin" from="0"/>
-                <if condition="isLocked &amp;&amp; lock.lastRunTime">
-                    <set field="lockAgeMin"
-                        from="(System.currentTimeMillis() - lock.lastRunTime.time) / 60000 as int"/>
-                </if>
-                <set field="latestStatus" from="latestRun ? (latestRun.hasError == 'Y' ? 'error' : (latestRun.endTime ? 'complete' : 'running')) : 'never'"/>
-                <set field="jobOut" from="[
-                    jobName       : jn,
-                    agentName     : agentName,
-                    configId      : configId,
-                    cronExpression: job.cronExpression,
-                    paused        : job.paused == 'Y',
-                    isLocked      : isLocked,
-                    lockRunId     : lock?.jobRunId,
-                    lastRunTime   : lock?.lastRunTime?.toString(),
-                    lockAgeMin    : lockAgeMin,
-                    latestStatus  : latestStatus,
-                    latestStart   : latestRun?.startTime?.toString(),
-                    latestEnd     : latestRun?.endTime?.toString(),
-                    latestErrors  : latestRun?.errors,
-                ]"/>
-                <if condition="!search || (agentName ?: '').toLowerCase().contains(search.toLowerCase())">
-                    <script>adkJobs.add(jobOut)</script>
+                <if condition="cfg?.ownerPartyId == ownerPartyId">
+                    <set field="isLocked" from="(lock != null &amp;&amp; lock.jobRunId != null) as boolean"/>
+                    <set field="lockAgeMin" from="0"/>
+                    <if condition="isLocked &amp;&amp; lock.lastRunTime">
+                        <set field="lockAgeMin"
+                            from="(System.currentTimeMillis() - lock.lastRunTime.time) / 60000 as int"/>
+                    </if>
+                    <set field="latestStatus" from="latestRun ? (latestRun.hasError == 'Y' ? 'error' : (latestRun.endTime ? 'complete' : 'running')) : 'never'"/>
+                    <set field="jobOut" from="[
+                        jobName       : jn,
+                        agentName     : agentName,
+                        configId      : configId,
+                        cronExpression: job.cronExpression,
+                        paused        : job.paused == 'Y',
+                        isLocked      : isLocked,
+                        lockRunId     : lock?.jobRunId,
+                        lastRunTime   : lock?.lastRunTime?.toString(),
+                        lockAgeMin    : lockAgeMin,
+                        latestStatus  : latestStatus,
+                        latestStart   : latestRun?.startTime?.toString(),
+                        latestEnd     : latestRun?.endTime?.toString(),
+                        latestErrors  : latestRun?.errors,
+                    ]"/>
+                    <if condition="!search || (agentName ?: '').toLowerCase().contains(search.toLowerCase())">
+                        <script>adkJobs.add(jobOut)</script>
+                    </if>
                 </if>
             </iterate>
         </actions>
@@ -529,6 +533,19 @@
         </in-parameters>
         <actions>
             <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" out-map="context"/>
+            <entity-find entity-name="moqui.service.job.ServiceJobParameter" list="paramList">
+                <econdition field-name="jobName" from="jobName"/>
+                <econdition field-name="parameterName" value="adkAgentConfigId"/>
+            </entity-find>
+            <set field="configId" from="paramList ? paramList[0]?.parameterValue : null"/>
+            <set field="cfg" from="null"/>
+            <if condition="configId">
+                <entity-find-one entity-name="moqui.adk.AdkAgentConfig" value-field="cfg"
+                    auto-field-map="[adkAgentConfigId: configId]"/>
+            </if>
+            <if condition="cfg?.ownerPartyId != ownerPartyId">
+                <return message="Job not found" type="error"/>
+            </if>
             <entity-find-one entity-name="moqui.service.job.ServiceJobRunLock"
                 value-field="lock" for-update="true" auto-field-map="[jobName: jobName]"/>
             <if condition="lock &amp;&amp; lock.jobRunId">
@@ -567,6 +584,19 @@
         </in-parameters>
         <actions>
             <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" out-map="context"/>
+            <entity-find entity-name="moqui.service.job.ServiceJobParameter" list="paramList">
+                <econdition field-name="jobName" from="jobName"/>
+                <econdition field-name="parameterName" value="adkAgentConfigId"/>
+            </entity-find>
+            <set field="configId" from="paramList ? paramList[0]?.parameterValue : null"/>
+            <set field="cfg" from="null"/>
+            <if condition="configId">
+                <entity-find-one entity-name="moqui.adk.AdkAgentConfig" value-field="cfg"
+                    auto-field-map="[adkAgentConfigId: configId]"/>
+            </if>
+            <if condition="cfg?.ownerPartyId != ownerPartyId">
+                <return message="Job not found" type="error"/>
+            </if>
             <entity-find-one entity-name="moqui.service.job.ServiceJob"
                 value-field="job" for-update="true" auto-field-map="[jobName: jobName]"/>
             <if condition="job">
