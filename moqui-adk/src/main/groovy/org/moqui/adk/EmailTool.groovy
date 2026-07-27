@@ -52,6 +52,9 @@ class EmailTool {
             def ec = ecf.getExecutionContext()
             try {
                 ec.user.internalLoginUser('SystemSupport')
+                // SystemSupport only has REST-path authz (GROWERP_API); direct entity access
+                // from this background thread has no REST parent so needs authz disabled.
+                ec.artifactExecution.disableAuthz()
 
                 // Guard: email not configured for this tenant
                 def es = ec.entity.find('moqui.basic.email.EmailServer')
@@ -109,6 +112,9 @@ class EmailTool {
             def ec = ecf.getExecutionContext()
             try {
                 ec.user.internalLoginUser('SystemSupport')
+                // SystemSupport only has REST-path authz (GROWERP_API); direct entity access
+                // from this background thread has no REST parent so needs authz disabled.
+                ec.artifactExecution.disableAuthz()
 
                 // Guard: email not configured for this tenant
                 def es = ec.entity.find('moqui.basic.email.EmailServer')

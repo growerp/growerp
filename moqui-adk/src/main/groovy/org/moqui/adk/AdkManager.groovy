@@ -402,10 +402,12 @@ CRITICAL tool-use rules — follow exactly:
         String defaultModel = 'gemini-2.5-flash-lite'
 
         if (cfgList) {
-            def ec2 = null
+            // getExecutionContext() returns the CALLER's thread-local EC when one exists
+            // (e.g. the scheduled-job EC that triggered lazyInit), so never destroy it here —
+            // that logs out the job user and later entity ops fail with "[No User]".
+            def ec2 = ecf.getExecutionContext()
+            boolean wasDisabled2 = ec2.artifactExecution.disableAuthz()
             try {
-                ec2 = ecf.getExecutionContext()
-                ec2.artifactExecution.disableAuthz()
                 for (def cfg in cfgList) {
                     String resolvedApiKey = cfg.getString('apiKey') ?: ''
                     String provider = cfg.getString('llmProvider') ?: 'gemini'
@@ -433,7 +435,7 @@ CRITICAL tool-use rules — follow exactly:
                             cfg.getString('llmProvider') ?: 'gemini', cfg.getString('description'))
                 }
             } finally {
-                ec2?.destroy()
+                if (!wasDisabled2) ec2.artifactExecution.enableAuthz()
             }
         }
 
