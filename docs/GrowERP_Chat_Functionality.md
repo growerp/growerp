@@ -49,7 +49,7 @@ The backend implementation leverages the Moqui Framework's WebSocket capabilitie
 - **Services:** REST services handle chat room creation, membership management, and message persistence.
 
 ### Frontend (Flutter)
-The frontend is modularized into the `growerp_chat` package:
+The frontend is modularized into the `growerp_adk` package (previously `growerp_chat`):
 - **BLoCs:** `ChatRoomBloc` manages the list of rooms, while `ChatMessageBloc` handles individual message streams and history.
 - **WebSocket Client:** A shared `WsClient` manages the persistent connection to the Moqui backend.
 

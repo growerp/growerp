@@ -36,8 +36,10 @@ graph TD
         I[growerp_user_company]
         J[growerp_marketing]
         K[growerp_website]
-        L[growerp_activity]
-        M[growerp_chat]
+        L[growerp_adk]
+        M[growerp_wiki]
+        N[growerp_rental]
+        O[growerp_manufacturing]
     end
     
     B --> F
@@ -48,6 +50,8 @@ graph TD
     B --> K
     B --> L
     B --> M
+    B --> N
+    B --> O
 ```
 
 ### Core Dependencies
@@ -61,7 +65,7 @@ Every building block must depend on:
 ### Optional Dependencies
 
 Based on functionality needs:
-- `growerp_chat` - If real-time communication is needed
+- `growerp_adk` - If AI agents, scheduled jobs, and agent chat are needed
 - Other domain packages - Only if there's a legitimate business relationship
 
 ## Development Setup {#development-setup}

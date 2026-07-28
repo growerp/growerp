@@ -69,7 +69,7 @@ GrowERP uses a modular package system where functionality is organized into reus
 **Core Packages:**
 - `growerp_core` - Foundation package with templates, UI components, and shared functionality
 - `growerp_models` - Data models, entities, and API clients
-- `growerp_chat` - Real-time chat functionality
+- `growerp_activity` - Task and activity management
 
 **Domain Packages:**
 - `growerp_catalog` - Product catalog management
@@ -78,7 +78,10 @@ GrowERP uses a modular package system where functionality is organized into reus
 - `growerp_user_company` - User and company management
 - `growerp_marketing` - Marketing campaigns and analytics
 - `growerp_website` - Website content management
-- `growerp_activity` - Task and activity management
+- `growerp_adk` - AI agents, scheduled jobs, and agent chat
+- `growerp_wiki` - Wiki and knowledge management
+- `growerp_manufacturing` - Manufacturing (BOM and Work Orders)
+- `growerp_rental` - Date-range rental (Gantt, seasonal rates)
 
 #### Package Structure
 

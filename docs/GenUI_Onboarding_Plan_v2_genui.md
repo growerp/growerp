@@ -664,7 +664,7 @@ Add optional `namePrefix` in-parameter; append LIKE condition to existing query.
 
 ### 11b. Add `namePrefix` to `ChatRoomFetch` event
 
-**File:** `growerp_chat/lib/src/chat_room/bloc/chat_room_event.dart`
+**File:** `growerp_adk/lib/src/chat_room/bloc/chat_room_event.dart`
 
 Add optional `namePrefix` field to `ChatRoomFetch`. BLoC passes it to REST call. One field addition.
 
@@ -712,7 +712,7 @@ Reuses `ChatRoomBloc` (fetch with `namePrefix: 'Onboarding:'`), `ChatDialog`, `C
 | `growerp_core/src/get_core_bloc_providers.dart` | add `OnboardingBloc` cubit |
 | `growerp_core/src/domains/authenticate/views/login_dialog.dart` | add trigger (Step 10) |
 | `backend/service/growerp/100/ChatServices100.xml` | add `namePrefix` filter (Step 11a) |
-| `growerp_chat/lib/src/chat_room/bloc/chat_room_event.dart` | add `namePrefix` (Step 11b) |
+| `growerp_adk/lib/src/chat_room/bloc/chat_room_event.dart` | add `namePrefix` (Step 11b) |
 | `support/lib/src/onboarding/views/onboarding_conversation_list.dart` | **CREATE** (Step 11c) |
 | `backend/data/GrowerpMenuSeedData.xml` | add SUPPORT_ONBOARDING item (Step 11d) |
 
