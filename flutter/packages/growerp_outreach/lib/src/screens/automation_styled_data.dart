@@ -15,7 +15,6 @@
 import 'package:flutter/material.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
-import 'package:intl/intl.dart';
 import '../bloc/outreach_campaign_bloc.dart';
 
 String _formatStatus(String status) {
@@ -182,9 +181,10 @@ List<Widget> getMessageRow({
   required int index,
 }) {
   bool isPhone = isAPhone(context);
-  final timeStr = message.sentDate != null
-      ? DateFormat('MMM d, HH:mm').format(message.sentDate!)
-      : '';
+  final timeStr = message.sentDate.toLocalizedString(
+    context,
+    format: 'MMM d, HH:mm',
+  );
 
   if (isPhone) {
     return [

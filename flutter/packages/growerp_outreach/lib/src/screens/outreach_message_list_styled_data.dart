@@ -15,7 +15,6 @@
 import 'package:flutter/material.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
-import 'package:intl/intl.dart';
 
 import '../bloc/outreach_message_bloc.dart';
 import '../bloc/outreach_message_event.dart';
@@ -56,9 +55,9 @@ Color _getStatusColor(String status) {
   }
 }
 
-String _formatDate(DateTime? date) {
+String _formatDate(BuildContext context, DateTime? date) {
   if (date == null) return 'N/A';
-  return DateFormat('MMM dd, yyyy').format(date);
+  return date.toLocalizedString(context, format: 'MMM dd, yyyy');
 }
 
 /// Returns row data for outreach message list
@@ -178,7 +177,9 @@ List<Widget> getOutreachMessageListRow({
     );
 
     // Sent Date
-    cells.add(Text(_formatDate(message.sentDate), key: Key('sentDate$index')));
+    cells.add(
+      Text(_formatDate(context, message.sentDate), key: Key('sentDate$index')),
+    );
 
     // Status with color
     cells.add(

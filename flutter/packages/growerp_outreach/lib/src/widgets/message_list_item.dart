@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
-import 'package:intl/intl.dart';
 
 class MessageListItem extends StatelessWidget {
   const MessageListItem({super.key, required this.message});
@@ -27,7 +27,7 @@ class MessageListItem extends StatelessWidget {
             Text('Platform: ${message.platform}'),
             if (message.sentDate != null)
               Text(
-                'Sent: ${DateFormat('MMM d, y HH:mm').format(message.sentDate!)}',
+                'Sent: ${message.sentDate.toLocalizedString(context, format: 'MMM d, y HH:mm')}',
                 style: Theme.of(context).textTheme.bodySmall,
               ),
           ],

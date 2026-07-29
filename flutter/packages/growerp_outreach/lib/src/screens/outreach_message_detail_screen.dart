@@ -17,7 +17,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:responsive_framework/responsive_framework.dart';
-import 'package:intl/intl.dart';
 
 import '../bloc/outreach_message_bloc.dart';
 import '../bloc/outreach_message_event.dart';
@@ -50,10 +49,6 @@ class OutreachMessageDetailScreenState
   final List<String> _availablePlatforms = [
     'EMAIL',
     'LINKEDIN',
-    'TWITTER',
-    'MEDIUM',
-    'SUBSTACK',
-    'FACEBOOK',
   ];
 
   final List<String> _statusOptions = [
@@ -86,8 +81,9 @@ class OutreachMessageDetailScreenState
         TextEditingController(text: widget.message.campaignId ?? '');
     _selectedCampaignId = widget.message.campaignId;
 
-    _selectedPlatform =
-        widget.message.platform.isNotEmpty ? widget.message.platform : 'EMAIL';
+    _selectedPlatform = _availablePlatforms.contains(widget.message.platform)
+        ? widget.message.platform
+        : 'EMAIL';
     _selectedStatus =
         widget.message.status.isNotEmpty ? widget.message.status : 'PENDING';
 
@@ -528,13 +524,13 @@ class OutreachMessageDetailScreenState
                   if (!isNewMessage) ...[
                     if (widget.message.sentDate != null)
                       Text(
-                        'Sent: ${DateFormat('MMM dd, yyyy HH:mm').format(widget.message.sentDate!)}',
+                        'Sent: ${widget.message.sentDate.toLocalizedString(context, format: 'MMM dd, yyyy HH:mm')}',
                         style: Theme.of(context).textTheme.bodyMedium,
                       ),
                     if (widget.message.responseDate != null) ...[
                       const SizedBox(height: 10),
                       Text(
-                        'Response: ${DateFormat('MMM dd, yyyy HH:mm').format(widget.message.responseDate!)}',
+                        'Response: ${widget.message.responseDate.toLocalizedString(context, format: 'MMM dd, yyyy HH:mm')}',
                         style: Theme.of(context).textTheme.bodyMedium,
                       ),
                     ],

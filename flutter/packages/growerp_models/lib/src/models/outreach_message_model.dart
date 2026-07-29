@@ -1,4 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
+import '../json_converters.dart';
 
 part 'outreach_message_model.g.dart';
 
@@ -39,9 +40,11 @@ class OutreachMessage {
   final String messageContent;
 
   /// When message was sent
+  @DateTimeConverter()
   final DateTime? sentDate;
 
   /// When response was received
+  @DateTimeConverter()
   final DateTime? responseDate;
 
   /// Message status: PENDING, SENT, RESPONDED, FAILED
