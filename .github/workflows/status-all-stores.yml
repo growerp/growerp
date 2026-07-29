@@ -37,6 +37,7 @@ jobs:
         runs-on: ubuntu-latest
         outputs:
             apps: ${{ steps.matrix.outputs.apps }}
+            store_ids: ${{ steps.matrix.outputs.store_ids }}
             run_ios: ${{ steps.matrix.outputs.run_ios }}
             run_macos: ${{ steps.matrix.outputs.run_macos }}
             run_android: ${{ steps.matrix.outputs.run_android }}
@@ -59,6 +60,9 @@ jobs:
 
                   if [[ -z "$APPS" ]]; then echo "No apps in release_config.json" >&2; exit 1; fi
                   echo "apps=${APPS}" >> "$GITHUB_OUTPUT"
+
+                  # Per-app store IDs for console deep links in the report
+                  echo "store_ids=$(jq -c '.storeIds // {}' flutter/release/release_config.json)" >> "$GITHUB_OUTPUT"
 
                   build_matrix() {
                     local store_apps="$1"
@@ -682,6 +686,7 @@ jobs:
             - name: Build consolidated report and PDF
               env:
                   APPS: ${{ needs.resolve-matrix.outputs.apps }}
+                  STORE_IDS: ${{ needs.resolve-matrix.outputs.store_ids }}
               run: |
                   python3 << 'PYEOF'
                   import json, os
@@ -691,6 +696,7 @@ jobs:
 
                   STORE_ORDER = ['ios', 'macos', 'android', 'windows', 'snap']
                   APP_ORDER   = os.environ['APPS'].split(',')
+                  STORE_IDS   = json.loads(os.environ.get('STORE_IDS') or '{}')
 
                   # Always all apps (central app map) and all stores — no selection input.
                   selected_apps = list(APP_ORDER)
@@ -710,37 +716,56 @@ jobs:
                                   frag = json.load(f)
                               data[(store, app)] = frag.get('rows', [])
 
+                  # ── Store console deep links ─────────────────────────────────────
+                  def console_url(store, app):
+                      ids = STORE_IDS.get(app, {})
+                      if store in ('ios', 'macos'):
+                          apple = ids.get('apple')
+                          return f'https://appstoreconnect.apple.com/apps/{apple}/distribution' if apple else None
+                      if store == 'android':
+                          # Play Console deep links need opaque numeric IDs not in the repo
+                          return 'https://play.google.com/console'
+                      if store == 'windows':
+                          win = ids.get('windows')
+                          return f'https://partner.microsoft.com/en-us/dashboard/products/{win}/overview' if win else None
+                      if store == 'snap':
+                          return f'https://dashboard.snapcraft.io/snaps/growerp-{app}/'
+                      return None
+
+                  def link(text, url):
+                      return f'<a href="{url}">{text}</a>' if url else text
+
                   # ── Cell formatters ──────────────────────────────────────────────
-                  def cell_asc(rows):
+                  def cell_asc(rows, url):
                       if not rows:
                           return '—'
                       r = rows[0]
-                      return f"{r.get('version','—')}<br>{r.get('state','?')}"
+                      return f"{link(r.get('version','—'), url)}<br>{r.get('state','?')}"
 
-                  def cell_android(rows):
+                  def cell_android(rows, url):
                       if not rows:
                           return '—'
                       prod = [r for r in rows if r.get('track') == 'production']
                       src  = prod[0] if prod else rows[0]
-                      return f"{src.get('version','?')}<br>{src.get('status','?')}"
+                      return f"{link(src.get('version','?'), url)}<br>{src.get('status','?')}"
 
-                  def cell_windows(rows):
+                  def cell_windows(rows, url):
                       if not rows:
                           return '—'
                       parts = []
                       for r in rows:
                           ver, st = r.get('version','?'), r.get('status','?')
-                          parts.append(f"✓ {ver}" if r.get('label') == 'published' else f"⏳ {ver} {st}")
+                          parts.append(f"✓ {link(ver, url)}" if r.get('label') == 'published' else f"⏳ {link(ver, url)} {st}")
                       return '<br>'.join(parts)
 
-                  def cell_snap(rows):
+                  def cell_snap(rows, url):
                       if not rows:
                           return '—'
                       stable = [r for r in rows if '/stable' in r.get('channel', '')]
                       r = stable[0] if stable else rows[0]
                       if r.get('version') == '—':
                           return '—'
-                      return f"r{r.get('revision','?')} {r.get('version','?')}"
+                      return f"r{r.get('revision','?')} {link(r.get('version','?'), url)}"
 
                   cell_fn = {
                       'ios': cell_asc, 'macos': cell_asc,
@@ -756,7 +781,7 @@ jobs:
 
                   table_rows = [header, sep]
                   for app in visible_apps:
-                      cells = [cell_fn[s](data.get((s, app))) if (s, app) in data else '—'
+                      cells = [cell_fn[s](data.get((s, app)), console_url(s, app)) if (s, app) in data else '—'
                                for s in visible_stores]
                       table_rows.append('| ' + app + ' | ' + ' | '.join(cells) + ' |')
 
