@@ -81,6 +81,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   Future<void> _onAuthLoad(AuthLoad event, Emitter<AuthState> emit) async {
     emit(state.copyWith(status: AuthStatus.loading));
+    // AuthLoad doubles as pull-to-refresh: drop cached GET responses
+    // (dashboard charts use CachePolicy.forceCache) so the reload is real.
+    await clearRestCache();
     Authenticate defaultAuthenticate = Authenticate(
       applicationId: applicationId,
     );
@@ -106,12 +109,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
       if (localAuthenticate != null && localAuthenticate.apiKey != null) {
         // check if company still valid; skip if no company (support users) or DefaultSettings
+        // the getCompanies call above already searched for this same partyId
+        // (defaultAuthenticate is localAuthenticate here), so reuse its result
         if (localAuthenticate.company?.partyId != null &&
             localAuthenticate.company!.partyId != 'DefaultSettings') {
-          Companies? companies = await restClient.getCompanies(
-            limit: 1,
-            searchString: localAuthenticate.company!.partyId!,
-          );
           if (companies.companies.isEmpty) {
             return emit(
               state.copyWith(

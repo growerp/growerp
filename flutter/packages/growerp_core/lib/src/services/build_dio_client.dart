@@ -150,6 +150,30 @@ Future<Dio> buildDioClient({
       allowPostMethod: false,
     );
 
+    // Dashboard GETs are served straight from cache: Moqui sends no cache
+    // headers, so the default CachePolicy.request always revalidates over
+    // the network. Staleness is bounded by maxStale and by
+    // CacheInvalidationInterceptor clearing the store on mutations.
+    const forceCachePaths = [
+      'Dashboard', // the XxxDashboard chart mini endpoints
+      'OperatingRevenueExpenseChart', // revenue/expense mini chart
+      'TimePeriod', // serial prefetch in LedgerBloc
+    ];
+
+    dio.interceptors.add(
+      InterceptorsWrapper(
+        onRequest: (options, handler) {
+          if (options.method == 'GET' &&
+              forceCachePaths.any(options.path.contains)) {
+            options.extra.addAll(
+              cacheOptions.copyWith(policy: CachePolicy.forceCache).toExtra(),
+            );
+          }
+          handler.next(options);
+        },
+      ),
+    );
+
     dio.interceptors.add(DioCacheInterceptor(options: cacheOptions));
 
     // 3. Cache invalidation — clear cache after successful mutations

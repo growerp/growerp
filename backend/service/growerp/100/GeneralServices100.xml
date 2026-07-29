@@ -279,26 +279,31 @@ limitations under the License.
                 <set field="userPartyId" from="ec.user?.userAccount?.partyId"/>
             </if>
             <!-- get ownerpartyId  and check if exist-->
-            <entity-find-one entity-name="mantle.party.Party" value-field="userParty">
+            <!-- cache="true" on the finds below: this service is called by every
+                 dashboard service, party data changes rarely and the entity cache
+                 is auto-invalidated on writes -->
+            <entity-find-one entity-name="mantle.party.Party" value-field="userParty" cache="true">
                 <field-map field-name="partyId" from="userPartyId"/>
-                <select-field field-name="ownerPartyId"/>
             </entity-find-one>
             <if condition="!userParty">
                 <return error="true"
                     message="Not logged in and provided userPartyId: $userPartyId not found"/>
             </if>
             <set field="ownerPartyId" from="userParty.ownerPartyId"/>
-            <!-- get user related company -->
-            <entity-find entity-name="mantle.party.PartyRelationship" list="relCompanies">
+            <!-- get user related company; date-filter applied after the find so
+                 the cached query has no 'now' timestamp in its key -->
+            <entity-find entity-name="mantle.party.PartyRelationship" list="relCompanies" cache="true">
                 <econdition field-name="fromPartyId" from="userPartyId"/>
                 <econdition field-name="relationshipTypeEnumId" value="PrtEmployee"/>
-                <date-filter/>
             </entity-find>
+            <filter-map-list list="relCompanies">
+                <date-filter/>
+            </filter-map-list>
             <if condition="relCompanies">
                 <set field="userCompanyPartyId" from="relCompanies[0].toPartyId"/>
             </if>
             <!-- find main company with the Role OrgInternal -->
-            <entity-find entity-name="mantle.party.PartyDetailAndRole" limit="1" list="companyList">
+            <entity-find entity-name="mantle.party.PartyDetailAndRole" list="companyList" cache="true">
                 <econdition field-name="ownerPartyId" from="ownerPartyId"/>
                 <econdition field-name="partyTypeEnumId" value="PtyOrganization"/>
                 <econdition field-name="roleTypeId" value="OrgInternal"/>

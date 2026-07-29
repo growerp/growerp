@@ -160,29 +160,43 @@ limitations under the License.
                     value="Deleted" />
                 <order-by field-name="sequenceNum" />
             </entity-find>
+            <!-- single find over all owner opportunities, accumulated per stage
+                 below (was one full-row find per stage) -->
+            <entity-find list="opps"
+                entity-name="mantle.sales.opportunity.SalesOpportunity">
+                <econdition field-name="ownerPartyId" from="companyPartyId" />
+                <econdition field-name="opportunityStageId" operator="not-equals"
+                    value="Deleted" />
+                <select-field field-name="opportunityStageId" />
+                <select-field field-name="estimatedAmount" />
+                <select-field field-name="estimatedProbability" />
+            </entity-find>
+            <set field="byStage" from="[:]" />
+            <iterate list="opps" entry="opp">
+                <set field="acc"
+                    from="byStage[opp.opportunityStageId] ?:
+                        [count: 0, total: new BigDecimal(0),
+                            weighted: new BigDecimal(0)]" />
+                <set field="acc.count" from="acc.count + 1" />
+                <set field="acc.total"
+                    from="acc.total + (opp.estimatedAmount ?: 0)" />
+                <set field="acc.weighted"
+                    from="acc.weighted + ((opp.estimatedAmount ?: 0) *
+                        (opp.estimatedProbability ?: 0) / 100)" />
+                <script>byStage[opp.opportunityStageId] = acc</script>
+            </iterate>
             <set field="stageSummary" from="[]" />
             <iterate list="stages" entry="stage">
-                <entity-find list="opps"
-                    entity-name="mantle.sales.opportunity.SalesOpportunity">
-                    <econdition field-name="ownerPartyId" from="companyPartyId" />
-                    <econdition field-name="opportunityStageId"
-                        from="stage.opportunityStageId" />
-                </entity-find>
-                <set field="totalAmount" from="new BigDecimal(0)" />
-                <set field="weightedAmount" from="new BigDecimal(0)" />
-                <iterate list="opps" entry="opp">
-                    <set field="totalAmount"
-                        from="totalAmount + (opp.estimatedAmount ?: 0)" />
-                    <set field="weightedAmount"
-                        from="weightedAmount + ((opp.estimatedAmount ?: 0) *
-                            (opp.estimatedProbability ?: 0) / 100)" />
-                </iterate>
+                <set field="acc"
+                    from="byStage[stage.opportunityStageId] ?:
+                        [count: 0, total: new BigDecimal(0),
+                            weighted: new BigDecimal(0)]" />
                 <set field="stageOut"
                     from="[stageId: stage.opportunityStageId,
                         sequenceNum: stage.sequenceNum,
-                        opportunityCount: opps.size(),
-                        totalAmount: totalAmount.toString(),
-                        weightedAmount: weightedAmount.setScale(2,
+                        opportunityCount: acc.count,
+                        totalAmount: acc.total.toString(),
+                        weightedAmount: acc.weighted.setScale(2,
                             java.math.RoundingMode.HALF_UP).toString()]" />
                 <script>stageSummary.add(stageOut)</script>
             </iterate>
