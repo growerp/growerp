@@ -263,16 +263,22 @@ limitations under the License.
                         <econdition field-name="contactMechId" operator="in"
                             from="partyContactMechs.collect { it.contactMechId }" />
                     </entity-find>
+                    <entity-find entity-name="mantle.party.contact.TelecomNumber"
+                        list="telecomNumbers">
+                        <econdition field-name="contactMechId" operator="in"
+                            from="partyContactMechs.collect { it.contactMechId }" />
+                    </entity-find>
                     <script><![CDATA[
                         def cmById = contactMechs.collectEntries { [(it.contactMechId): it] }
+                        def telById = telecomNumbers.collectEntries { [(it.contactMechId): it] }
                         for (pcm in partyContactMechs) {
-                            def cm = cmById[pcm.contactMechId]
-                            if (cm == null) continue
                             if (pcm.contactMechPurposeId == 'EmailPrimary') {
-                                emailByParty[pcm.partyId] = cm.infoString
+                                def cm = cmById[pcm.contactMechId]
+                                if (cm != null) emailByParty[pcm.partyId] = cm.infoString
                             } else {
-                                telByParty[pcm.partyId] =
-                                    "${cm.countryCode ?: ''}${cm.areaCode ?: ''}${cm.contactNumber ?: ''}"
+                                def tel = telById[pcm.contactMechId]
+                                if (tel != null) telByParty[pcm.partyId] =
+                                    "${tel.countryCode ?: ''}${tel.areaCode ?: ''}${tel.contactNumber ?: ''}"
                             }
                         }
                     ]]></script>
