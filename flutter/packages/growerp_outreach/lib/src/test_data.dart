@@ -18,6 +18,7 @@ List<OutreachCampaign> campaigns = [
   const OutreachCampaign(
     pseudoId: '1',
     name: 'Campaign 1',
+    description: 'Description 1',
     status: 'MKTG_CAMP_PLANNED',
     platforms: '[EMAIL]',
     targetAudience: 'Audience 1',
@@ -28,6 +29,7 @@ List<OutreachCampaign> campaigns = [
   const OutreachCampaign(
     pseudoId: '2',
     name: 'Campaign 2',
+    description: 'Description 2',
     status: 'MKTG_CAMP_PLANNED',
     platforms: '[LINKEDIN]',
     targetAudience: 'Audience 2',
@@ -38,6 +40,7 @@ List<OutreachCampaign> campaigns = [
   const OutreachCampaign(
     pseudoId: '3',
     name: 'Campaign 3',
+    description: 'Description 3',
     status: 'MKTG_CAMP_PLANNED',
     platforms: '[EMAIL, LINKEDIN]',
     targetAudience: 'Audience 3',
@@ -51,6 +54,7 @@ List<OutreachCampaign> updatedCampaigns = [
   const OutreachCampaign(
     pseudoId: '1',
     name: 'Campaign 1 Updated',
+    description: 'Description 1 Updated',
     status: 'MKTG_CAMP_PLANNED',
     platforms: '[EMAIL, LINKEDIN]',
     targetAudience: 'Audience 1 Updated',
@@ -61,6 +65,7 @@ List<OutreachCampaign> updatedCampaigns = [
   const OutreachCampaign(
     pseudoId: '2',
     name: 'Campaign 2 Updated',
+    description: 'Description 2 Updated',
     status: 'MKTG_CAMP_PLANNED',
     platforms: '[LINKEDIN, EMAIL]',
     targetAudience: 'Audience 2 Updated',
@@ -71,6 +76,7 @@ List<OutreachCampaign> updatedCampaigns = [
   const OutreachCampaign(
     pseudoId: '3',
     name: 'Campaign 3 Updated',
+    description: 'Description 3 Updated',
     status: 'MKTG_CAMP_CANCELLED',
     platforms: '[LINKEDIN]',
     targetAudience: 'Audience 3 Updated',

@@ -27,6 +27,7 @@ class OutreachCampaignCreate extends OutreachCampaignEvent {
   const OutreachCampaignCreate({
     required this.name,
     required this.platforms,
+    this.description,
     this.targetAudience,
     this.landingPageId,
     this.messageTemplate,
@@ -37,6 +38,7 @@ class OutreachCampaignCreate extends OutreachCampaignEvent {
 
   final String name;
   final String platforms;
+  final String? description;
   final String? targetAudience;
   final String? landingPageId;
   final String? messageTemplate;
@@ -48,6 +50,7 @@ class OutreachCampaignCreate extends OutreachCampaignEvent {
   List<Object?> get props => [
         name,
         platforms,
+        description,
         targetAudience,
         landingPageId,
         messageTemplate,
@@ -62,6 +65,7 @@ class OutreachCampaignUpdate extends OutreachCampaignEvent {
     required this.campaignId,
     this.pseudoId,
     this.name,
+    this.description,
     this.platforms,
     this.targetAudience,
     this.landingPageId,
@@ -75,6 +79,7 @@ class OutreachCampaignUpdate extends OutreachCampaignEvent {
   final String campaignId;
   final String? pseudoId;
   final String? name;
+  final String? description;
   final String? platforms;
   final String? targetAudience;
   final String? landingPageId;
@@ -89,6 +94,7 @@ class OutreachCampaignUpdate extends OutreachCampaignEvent {
         campaignId,
         pseudoId,
         name,
+        description,
         platforms,
         targetAudience,
         landingPageId,

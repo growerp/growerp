@@ -46,6 +46,7 @@ class CampaignDetailScreenState extends State<CampaignDetailScreen> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _pseudoIdController;
   late TextEditingController _nameController;
+  late TextEditingController _descriptionController;
   late TextEditingController _targetAudienceController;
   late TextEditingController _messageTemplateController;
   late TextEditingController _emailSubjectController;
@@ -91,6 +92,8 @@ class CampaignDetailScreenState extends State<CampaignDetailScreen> {
     _pseudoIdController =
         TextEditingController(text: widget.campaign.pseudoId ?? '');
     _nameController = TextEditingController(text: widget.campaign.name);
+    _descriptionController =
+        TextEditingController(text: widget.campaign.description);
     _selectedStatus = widget.campaign.status.isNotEmpty
         ? widget.campaign.status
         : 'MKTG_CAMP_PLANNED';
@@ -130,6 +133,7 @@ class CampaignDetailScreenState extends State<CampaignDetailScreen> {
   void dispose() {
     _pseudoIdController.dispose();
     _nameController.dispose();
+    _descriptionController.dispose();
     _targetAudienceController.dispose();
     _messageTemplateController.dispose();
     _emailSubjectController.dispose();
@@ -313,6 +317,14 @@ class CampaignDetailScreenState extends State<CampaignDetailScreen> {
                           ),
                         ],
                       ),
+                      const SizedBox(height: 10),
+                      TextFormField(
+                        key: const Key('description'),
+                        controller: _descriptionController,
+                        decoration:
+                            const InputDecoration(labelText: 'Description'),
+                        maxLines: 2,
+                      ),
                       const SizedBox(height: 20),
                       if (widget.campaign.campaignId != null) ...[
                         Wrap(
@@ -465,6 +477,7 @@ class CampaignDetailScreenState extends State<CampaignDetailScreen> {
                                   if (widget.campaign.campaignId == null) {
                                     _campaignBloc.add(OutreachCampaignCreate(
                                       name: _nameController.text,
+                                      description: _descriptionController.text,
                                       platforms: platforms,
                                       targetAudience:
                                           _targetAudienceController.text,
@@ -483,6 +496,7 @@ class CampaignDetailScreenState extends State<CampaignDetailScreen> {
                                       campaignId: widget.campaign.campaignId!,
                                       pseudoId: _pseudoIdController.text,
                                       name: _nameController.text,
+                                      description: _descriptionController.text,
                                       status: _selectedStatus,
                                       platforms: platforms,
                                       targetAudience:

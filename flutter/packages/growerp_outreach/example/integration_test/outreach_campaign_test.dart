@@ -56,6 +56,7 @@ void main() {
       test_data.campaigns.sublist(0, 3),
     );
     await OutreachCampaignTest.checkCampaigns(tester);
+    await OutreachCampaignTest.approveCampaign(tester, 0);
     await OutreachCampaignTest.updateCampaigns(
       tester,
       test_data.updatedCampaigns.sublist(0, 3),

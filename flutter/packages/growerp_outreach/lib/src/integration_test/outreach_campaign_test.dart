@@ -142,6 +142,11 @@ class OutreachCampaignTest {
       // Enter campaign name
       await CommonTest.enterText(tester, 'name', campaign.name);
 
+      // Enter description
+      if (campaign.description != null) {
+        await CommonTest.enterText(tester, 'description', campaign.description!);
+      }
+
       // Select status (tap on formatted display text)
       await CommonTest.tapByKey(tester, 'status');
       await CommonTest.tapByText(tester, _formatStatus(campaign.status));
@@ -237,6 +242,74 @@ class OutreachCampaignTest {
     );
   }
 
+  /// Approves the campaign at [index] and verifies nothing else changed:
+  /// approving sends a partial update, which used to null out every field
+  /// the update did not carry (and regenerate the pseudoId).
+  static Future<void> approveCampaign(WidgetTester tester, int index) async {
+    SaveTest test = await PersistFunctions.getTest();
+    OutreachCampaign campaign = test.outreachCampaigns[index];
+
+    await searchAndOpenCampaign(tester, campaign.pseudoId!);
+    await CommonTest.tapByKey(tester, 'status');
+    await CommonTest.tapByText(tester, _formatStatus('MKTG_CAMP_APPROVED'));
+    await tester.ensureVisible(find.byKey(const Key('update')));
+    await CommonTest.tapByKey(tester, 'update', seconds: CommonTest.waitTime);
+    await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
+    await clearSearch(tester);
+
+    // Re-open by the same pseudoId: a regenerated id would not be found
+    await searchAndOpenCampaign(tester, campaign.pseudoId!);
+    expect(
+      find.byKey(Key('CampaignDetail${campaign.pseudoId}')),
+      findsOneWidget,
+      reason: 'campaign ${campaign.pseudoId} lost its id when approved',
+    );
+
+    expect(CommonTest.getTextFormField('name'), equals(campaign.name),
+        reason: 'name lost when approved');
+    expect(CommonTest.getTextFormField('description'),
+        equals(campaign.description),
+        reason: 'description lost when approved');
+    expect(CommonTest.getTextFormField('targetAudience'),
+        equals(campaign.targetAudience),
+        reason: 'targetAudience lost when approved');
+    expect(CommonTest.getTextFormField('messageTemplate'),
+        equals(campaign.messageTemplate),
+        reason: 'messageTemplate lost when approved');
+    expect(
+        CommonTest.getTextFormField('emailSubject'), equals(campaign.emailSubject),
+        reason: 'emailSubject lost when approved');
+    expect(CommonTest.getTextFormField('dailyLimit'),
+        equals(campaign.dailyLimitPerPlatform.toString()),
+        reason: 'dailyLimit lost when approved');
+
+    // Platform chips must still be selected
+    final platforms = campaign.platforms
+        .replaceAll('[', '')
+        .replaceAll(']', '')
+        .replaceAll('"', '')
+        .split(',')
+        .map((e) => e.trim())
+        .where((e) => e.isNotEmpty);
+    for (final platform in platforms) {
+      final chipFinder = find.widgetWithText(FilterChip, platform);
+      expect(tester.any(chipFinder), isTrue,
+          reason: 'platform $platform not shown after approval');
+      expect(tester.widget<FilterChip>(chipFinder.first).selected, isTrue,
+          reason: 'platform $platform lost when approved');
+    }
+
+    // The automation moves the status on asynchronously (in progress/completed
+    // /failed), so only check it is no longer the original one.
+    expect(_formatStatus(CommonTest.getDropdown('status')),
+        isNot(equals(_formatStatus(campaign.status))),
+        reason: 'status not changed by approval');
+
+    await CommonTest.tapByKey(tester, 'cancel');
+    await tester.pumpAndSettle();
+    await clearSearch(tester);
+  }
+
   /// Verifies all campaigns in the persisted list.
   static Future<void> checkCampaigns(WidgetTester tester) async {
     SaveTest test = await PersistFunctions.getTest(backup: false);
@@ -256,6 +329,14 @@ class OutreachCampaignTest {
 
       // Verify campaign name
       expect(CommonTest.getTextFormField('name'), equals(campaign.name));
+
+      // Verify description
+      if (campaign.description != null) {
+        expect(
+          CommonTest.getTextFormField('description'),
+          equals(campaign.description),
+        );
+      }
 
       // Verify target audience
       if (campaign.targetAudience != null) {

@@ -205,10 +205,19 @@ class OutreachCampaign {
       identical(this, other) ||
       other is OutreachCampaign &&
           runtimeType == other.runtimeType &&
-          campaignId == other.campaignId;
+          campaignId == other.campaignId &&
+          pseudoId == other.pseudoId &&
+          name == other.name &&
+          description == other.description &&
+          status == other.status &&
+          platforms == other.platforms &&
+          numSent == other.numSent &&
+          messagesSent == other.messagesSent &&
+          responsesReceived == other.responsesReceived;
 
   @override
-  int get hashCode => campaignId.hashCode;
+  int get hashCode => Object.hash(campaignId, pseudoId, name, description,
+      status, platforms, numSent, messagesSent, responsesReceived);
 
   @override
   String toString() => 'OutreachCampaign($campaignId, $name)';

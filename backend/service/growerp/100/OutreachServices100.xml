@@ -477,11 +477,8 @@
             <set field="isActive" from="campaign.isActive" />
 
             <!-- Find campaign by ID or pseudoId -->
-            <if condition="pseudoId == ''">
-                <set field="pseudoid" from="null" />
-            </if>
             <entity-find entity-name="mantle.marketing.campaign.MarketingCampaign"
-                list="campaignList">
+                list="campaignList" for-update="true" limit="1">
                 <econdition field-name="pseudoId" ignore-if-empty="true" />
                 <econdition field-name="marketingCampaignId" ignore-if-empty="true" />
                 <econdition field-name="ownerPartyId" />
@@ -505,36 +502,48 @@
             </if>
 
             <set field="ownerPartyId" from="existingCampaign.ownerPartyId" />
-            <if condition="!pseudoId">
-                <!-- Generate unique pseudoId within the tenant only if not provided -->
+            <if condition="!pseudoId &amp;&amp; !existingCampaign.pseudoId">
+                <!-- Generate unique pseudoId within the tenant only if not present yet -->
                 <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
                     in-map="[ownerPartyId: ownerPartyId, seqName: 'marketingCampaign']"
                     out-map="context" />
                 <set field="pseudoId" from="seqNum" />
             </if>
 
-
-            <!-- Update campaign -->
-            <service-call name="update#mantle.marketing.campaign.MarketingCampaign"
-                in-map="[marketingCampaignId: marketingCampaignId,
-                         campaignName: campaignName,
-                         campaignSummary: campaignSummary,
-                         pseudoId: pseudoId,
-                         platforms: platforms,
-                         targetAudience: targetAudience,
-                         landingPageId: landingPageId,
-                         messageTemplate: messageTemplate,
-                         emailSubject: emailSubject,
-                         platformSettings: platformSettings,
-                         statusId: statusId,
-                         dailyLimitPerPlatform: dailyLimitPerPlatform,
-                         budgetedCost: budgetedCost,
-                         actualCost: actualCost,
-                         estimatedCost: estimatedCost,
-                         expectedRevenue: expectedRevenue,
-                         expectedResponsePercent: expectedResponsePercent,
-                         isActive: isActive,
-                         lastModifiedByUserLogin: ec.user.userId]" />
+            <!-- Update campaign: only fields actually provided, a missing/null field
+                 keeps its stored value (an update can be partial) -->
+            <set field="existingCampaign.pseudoId" from="pseudoId ?: existingCampaign.pseudoId" />
+            <set field="existingCampaign.campaignName"
+                from="campaignName ?: existingCampaign.campaignName" />
+            <set field="existingCampaign.campaignSummary"
+                from="campaignSummary ?: existingCampaign.campaignSummary" />
+            <set field="existingCampaign.platforms" from="platforms ?: existingCampaign.platforms" />
+            <set field="existingCampaign.targetAudience"
+                from="targetAudience ?: existingCampaign.targetAudience" />
+            <set field="existingCampaign.landingPageId"
+                from="landingPageId ?: existingCampaign.landingPageId" />
+            <set field="existingCampaign.messageTemplate"
+                from="messageTemplate ?: existingCampaign.messageTemplate" />
+            <set field="existingCampaign.emailSubject"
+                from="emailSubject ?: existingCampaign.emailSubject" />
+            <set field="existingCampaign.platformSettings"
+                from="platformSettings ?: existingCampaign.platformSettings" />
+            <set field="existingCampaign.statusId" from="statusId ?: existingCampaign.statusId" />
+            <set field="existingCampaign.dailyLimitPerPlatform"
+                from="dailyLimitPerPlatform ?: existingCampaign.dailyLimitPerPlatform" />
+            <set field="existingCampaign.budgetedCost"
+                from="budgetedCost ?: existingCampaign.budgetedCost" />
+            <set field="existingCampaign.actualCost"
+                from="actualCost ?: existingCampaign.actualCost" />
+            <set field="existingCampaign.estimatedCost"
+                from="estimatedCost ?: existingCampaign.estimatedCost" />
+            <set field="existingCampaign.expectedRevenue"
+                from="expectedRevenue ?: existingCampaign.expectedRevenue" />
+            <set field="existingCampaign.expectedResponsePercent"
+                from="expectedResponsePercent ?: existingCampaign.expectedResponsePercent" />
+            <set field="existingCampaign.isActive" from="isActive ?: existingCampaign.isActive" />
+            <set field="existingCampaign.lastModifiedByUserLogin" from="ec.user.userId" />
+            <entity-update value-field="existingCampaign" />
 
             <!-- Build output campaign map matching frontend model -->
             <set field="campaign"
@@ -1190,20 +1199,23 @@
             <parameter name="lastModifiedDate" />
         </out-parameters>
         <actions>
-            <service-call name="update#growerp.marketing.PlatformConfiguration"
-                in-map="[configId: configId,
-                         isEnabled: isEnabled,
-                         dailyLimit: dailyLimit,
-                         apiKey: apiKey,
-                         apiSecret: apiSecret,
-                         username: username,
-                         password: password,
-                         lastModifiedDate: ec.user.nowTimestamp]" />
-            <!-- Fetch updated record to return full object -->
             <entity-find-one entity-name="growerp.marketing.PlatformConfiguration"
-                value-field="conf">
+                value-field="conf" for-update="true">
                 <field-map field-name="configId" />
             </entity-find-one>
+            <if condition="!conf">
+                <return error="true" message="Platform configuration not found: ${configId}" />
+            </if>
+            <!-- Only fields actually provided, a missing/null field keeps its
+                 stored value (an update can be partial) -->
+            <set field="conf.isEnabled" from="isEnabled ?: conf.isEnabled" />
+            <set field="conf.dailyLimit" from="dailyLimit ?: conf.dailyLimit" />
+            <set field="conf.apiKey" from="apiKey ?: conf.apiKey" />
+            <set field="conf.apiSecret" from="apiSecret ?: conf.apiSecret" />
+            <set field="conf.username" from="username ?: conf.username" />
+            <set field="conf.password" from="password ?: conf.password" />
+            <set field="conf.lastModifiedDate" from="ec.user.nowTimestamp" />
+            <entity-update value-field="conf" />
             <set field="ownerPartyId" from="conf.ownerPartyId" />
             <set field="platform" from="conf.platform" />
             <set field="isEnabled" from="conf.isEnabled == 'Y'" />

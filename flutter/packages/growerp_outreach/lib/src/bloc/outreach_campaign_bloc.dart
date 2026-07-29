@@ -79,6 +79,7 @@ class OutreachCampaignBloc
       await restClient.createOutreachCampaign(
         campaign: {
           'campaignName': event.name,
+          'campaignSummary': event.description,
           'platforms': event.platforms,
           'targetAudience': event.targetAudience,
           'landingPageId': event.landingPageId,
@@ -120,6 +121,7 @@ class OutreachCampaignBloc
           'marketingCampaignId': event.campaignId,
           'pseudoId': event.pseudoId,
           'campaignName': event.name,
+          'campaignSummary': event.description,
           'platforms': event.platforms,
           'targetAudience': event.targetAudience,
           'landingPageId': event.landingPageId,
@@ -138,15 +140,8 @@ class OutreachCampaignBloc
           marketingCampaignId: event.campaignId,
         );
 
-        // Update status to IN_PROGRESS
-        await restClient.updateOutreachCampaign(
-          campaign: {
-            'marketingCampaignId': event.campaignId,
-            'statusId': 'MKTG_CAMP_INPROGRESS',
-          },
-        );
-
-        // Start automation in background
+        // Start automation in background: startCampaign notifies the backend
+        // (start#CampaignAutomation) which sets the status to IN_PROGRESS.
         _startAutomationWithErrorHandling(detail.campaign, event.campaignId);
       }
 
