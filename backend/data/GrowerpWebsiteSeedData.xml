@@ -179,10 +179,10 @@
                 </div>
                 <h3 class="font-display text-xl font-semibold text-on-surface">Admin</h3>
                 <p class="text-on-surface-variant leading-relaxed">The core comprehensive ERP for medium to large enterprises. Full control over all modules, accounting, and organization settings.</p>
-                <a href="https://admin.growerp.com" target="_blank" rel="noopener" class="flex items-center text-primary font-label text-sm font-medium hover:underline">
+                <a href="https://admin.growerp.com" target="_blank" rel="noopener" class="mt-auto pt-4 flex items-center text-primary font-label text-sm font-medium">
                     admin.growerp.com <span class="material-symbols-outlined text-[16px] ml-1">arrow_forward</span>
                 </a>
-                <div class="mt-auto pt-4 flex flex-wrap gap-2 border-t border-outline-variant/20">
+                <div class="pt-4 flex flex-wrap gap-2 border-t border-outline-variant/20">
                     <a href="https://admin.growerp.com" target="_blank" rel="noopener" title="Web Browser" class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-white/15 hover:border-primary/50 hover:text-primary text-on-surface-variant transition-colors">
                         <span class="material-symbols-outlined text-[18px]">language</span>
                     </a>
@@ -209,10 +209,10 @@
                 </div>
                 <h3 class="font-display text-xl font-semibold text-on-surface">Hotel</h3>
                 <p class="text-on-surface-variant leading-relaxed">Designed for hotels, bed &amp; breakfasts, and resorts. Manage reservations, room inventory, and guest experiences seamlessly.</p>
-                <a href="https://hotel.growerp.com" target="_blank" rel="noopener" class="flex items-center text-secondary font-label text-sm font-medium hover:underline">
+                <a href="https://hotel.growerp.com" target="_blank" rel="noopener" class="mt-auto pt-4 flex items-center text-secondary font-label text-sm font-medium">
                     hotel.growerp.com <span class="material-symbols-outlined text-[16px] ml-1">arrow_forward</span>
                 </a>
-                <div class="mt-auto pt-4 flex flex-wrap gap-2 border-t border-outline-variant/20">
+                <div class="pt-4 flex flex-wrap gap-2 border-t border-outline-variant/20">
                     <a href="https://hotel.growerp.com" target="_blank" rel="noopener" title="Web Browser" class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-white/15 hover:border-secondary/50 hover:text-secondary text-on-surface-variant transition-colors">
                         <span class="material-symbols-outlined text-[18px]">language</span>
                     </a>
@@ -239,10 +239,10 @@
                 </div>
                 <h3 class="font-display text-xl font-semibold text-on-surface">Rental</h3>
                 <p class="text-on-surface-variant leading-relaxed">Perfect for equipment, vehicle, or property rental businesses. Track asset availability, maintenance, and recurring billing.</p>
-                <a href="https://rental.growerp.com" target="_blank" rel="noopener" class="flex items-center text-tertiary font-label text-sm font-medium hover:underline">
+                <a href="https://rental.growerp.com" target="_blank" rel="noopener" class="mt-auto pt-4 flex items-center text-tertiary font-label text-sm font-medium">
                     rental.growerp.com <span class="material-symbols-outlined text-[16px] ml-1">arrow_forward</span>
                 </a>
-                <div class="mt-auto pt-4 flex flex-wrap gap-2 border-t border-outline-variant/20">
+                <div class="pt-4 flex flex-wrap gap-2 border-t border-outline-variant/20">
                     <a href="https://rental.growerp.com" target="_blank" rel="noopener" title="Web Browser" class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-white/15 hover:border-tertiary/50 hover:text-tertiary text-on-surface-variant transition-colors">
                         <span class="material-symbols-outlined text-[18px]">language</span>
                     </a>
@@ -269,10 +269,10 @@
                 </div>
                 <h3 class="font-display text-xl font-semibold text-on-surface">Freelance</h3>
                 <p class="text-on-surface-variant leading-relaxed">Tailored for independent professionals and solopreneurs. Simplified invoicing, task tracking, and client management.</p>
-                <a href="https://freelance.growerp.com" target="_blank" rel="noopener" class="flex items-center text-primary font-label text-sm font-medium hover:underline">
+                <a href="https://freelance.growerp.com" target="_blank" rel="noopener" class="mt-auto pt-4 flex items-center text-primary font-label text-sm font-medium">
                     freelance.growerp.com <span class="material-symbols-outlined text-[16px] ml-1">arrow_forward</span>
                 </a>
-                <div class="mt-auto pt-4 flex flex-wrap gap-2 border-t border-outline-variant/20">
+                <div class="pt-4 flex flex-wrap gap-2 border-t border-outline-variant/20">
                     <a href="https://freelance.growerp.com" target="_blank" rel="noopener" title="Web Browser" class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-white/15 hover:border-primary/50 hover:text-primary text-on-surface-variant transition-colors">
                         <span class="material-symbols-outlined text-[18px]">language</span>
                     </a>
@@ -299,10 +299,10 @@
                 </div>
                 <h3 class="font-display text-xl font-semibold text-on-surface">Marketing</h3>
                 <p class="text-on-surface-variant leading-relaxed">Built for any company to improve marketing and sales: create campaigns, conduct outreach, nurture leads, and automate content marketing.</p>
-                <a href="https://marketing.growerp.com" target="_blank" rel="noopener" class="flex items-center text-secondary font-label text-sm font-medium hover:underline">
+                <a href="https://marketing.growerp.com" target="_blank" rel="noopener" class="mt-auto pt-4 flex items-center text-secondary font-label text-sm font-medium">
                     marketing.growerp.com <span class="material-symbols-outlined text-[16px] ml-1">arrow_forward</span>
                 </a>
-                <div class="mt-auto pt-4 flex flex-wrap gap-2 border-t border-outline-variant/20">
+                <div class="pt-4 flex flex-wrap gap-2 border-t border-outline-variant/20">
                     <a href="https://marketing.growerp.com" target="_blank" rel="noopener" title="Web Browser" class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-white/15 hover:border-secondary/50 hover:text-secondary text-on-surface-variant transition-colors">
                         <span class="material-symbols-outlined text-[18px]">language</span>
                     </a>
@@ -329,10 +329,10 @@
                 </div>
                 <h3 class="font-display text-xl font-semibold text-on-surface">Agents</h3>
                 <p class="text-on-surface-variant leading-relaxed">Empower your AI agents and customer support teams. Manage knowledge bases, automate responses, and oversee agent actions.</p>
-                <a href="https://agents.growerp.com" target="_blank" rel="noopener" class="flex items-center text-tertiary font-label text-sm font-medium hover:underline">
+                <a href="https://agents.growerp.com" target="_blank" rel="noopener" class="mt-auto pt-4 flex items-center text-tertiary font-label text-sm font-medium">
                     agents.growerp.com <span class="material-symbols-outlined text-[16px] ml-1">arrow_forward</span>
                 </a>
-                <div class="mt-auto pt-4 flex flex-wrap gap-2 border-t border-outline-variant/20">
+                <div class="pt-4 flex flex-wrap gap-2 border-t border-outline-variant/20">
                     <a href="https://agents.growerp.com" target="_blank" rel="noopener" title="Web Browser" class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-white/15 hover:border-tertiary/50 hover:text-tertiary text-on-surface-variant transition-colors">
                         <span class="material-symbols-outlined text-[18px]">language</span>
                     </a>
