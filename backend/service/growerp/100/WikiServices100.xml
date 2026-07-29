@@ -106,9 +106,11 @@ limitations under the License.
             <service-call name="org.moqui.impl.WikiServices.update#WikiPage" out-map="updOut"
                 in-map="[wikiSpaceId: wikiSpaceId, pagePath: pagePath, pageName: pageName,
                          parentPath: parentPath, pageText: pageText]"/>
-            <!-- publish: versioned resources give a versionName, plain files do not - use '1' -->
-            <service-call name="org.moqui.impl.WikiServices.set#PublishedVersion"
-                in-map="[wikiPageId: updOut.wikiPageId, publishedVersionName: (updOut.versionName ?: '1')]"/>
+            <!-- publish the new version; versionName is null when the text was unchanged - leave published as is -->
+            <if condition="updOut.versionName">
+                <service-call name="org.moqui.impl.WikiServices.set#PublishedVersion"
+                    in-map="[wikiPageId: updOut.wikiPageId, publishedVersionName: updOut.versionName]"/>
+            </if>
             <service-call name="growerp.100.WikiServices100.get#WikiPage" out-map="context"
                 in-map="[wikiSpaceId: wikiSpaceId, pagePath: updOut.pagePath ?: pagePath]"/>
         </actions>
