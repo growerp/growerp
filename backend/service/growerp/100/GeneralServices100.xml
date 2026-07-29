@@ -2308,8 +2308,8 @@ limitations under the License.
     </service>
 
     <service verb="send" noun="DirectEmail">
-        <description>Send a single email through the active email server (the owner
-            company's own SMTP settings when configured, otherwise SYSTEM).
+        <description>Send a single email through the active email server. With ownerPartyId
+            only the owner company's own SMTP settings are used — never the SYSTEM server.
             Errors when no email server is configured.</description>
         <in-parameters>
             <parameter name="ownerPartyId"/>

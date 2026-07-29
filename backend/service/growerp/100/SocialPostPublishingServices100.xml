@@ -268,18 +268,18 @@
                 <set field="status" value="PUBLISHED"/>
                 <set field="publishedUrl" from="publishResult.publishedUrl"/>
                 <set field="publishError" value=""/>
+                <else>
+                    <service-call name="update#growerp.marketing.SocialPost"
+                        in-map="[
+                            postId: postId,
+                            publishError: publishResult.errorMessage,
+                            lastModifiedDate: ec.user.nowTimestamp
+                        ]"/>
+                    <set field="status" from="post.status"/>
+                    <set field="publishError" from="publishResult.errorMessage"/>
+                    <return error="true" message="${publishResult.errorMessage}"/>
+                </else>
             </if>
-            <else>
-                <service-call name="update#growerp.marketing.SocialPost"
-                    in-map="[
-                        postId: postId,
-                        publishError: publishResult.errorMessage,
-                        lastModifiedDate: ec.user.nowTimestamp
-                    ]"/>
-                <set field="status" from="post.status"/>
-                <set field="publishError" from="publishResult.errorMessage"/>
-                <return error="true" message="${publishResult.errorMessage}"/>
-            </else>
         </actions>
     </service>
 

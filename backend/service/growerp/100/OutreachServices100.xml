@@ -1565,10 +1565,10 @@
         <in-parameters>
             <parameter name="campaignTemplate" required="true" type="String" />
             <parameter name="platform" required="true" type="String">
-                <description>TWITTER, LINKEDIN, EMAIL, SUBSTACK</description>
+                <description>LINKEDIN or EMAIL</description>
             </parameter>
             <parameter name="actionType" required="true" type="String">
-                <description>post_tweet, send_dms, message_connections, send_email, etc.</description>
+                <description>message_connections, search_and_connect, send_email</description>
             </parameter>
         </in-parameters>
         <out-parameters>

@@ -55,10 +55,6 @@ class CampaignDetailScreenState extends State<CampaignDetailScreen> {
   final List<String> _availablePlatforms = [
     'EMAIL',
     'LINKEDIN',
-    'TWITTER',
-    'MEDIUM',
-    'SUBSTACK',
-    'FACEBOOK',
   ];
   final List<String> _statusOptions = [
     'MKTG_CAMP_PLANNED',
@@ -80,14 +76,6 @@ class CampaignDetailScreenState extends State<CampaignDetailScreen> {
         return 'send_email';
       case 'LINKEDIN':
         return 'message_connections';
-      case 'TWITTER':
-        return 'post_tweet';
-      case 'SUBSTACK':
-        return 'post_note';
-      case 'MEDIUM':
-        return 'post_article';
-      case 'FACEBOOK':
-        return 'post_update';
       default:
         return 'send_message';
     }
@@ -127,7 +115,7 @@ class CampaignDetailScreenState extends State<CampaignDetailScreen> {
           .replaceAll('"', '')
           .split(',')
           .map((e) => e.trim())
-          .where((e) => e.isNotEmpty);
+          .where((e) => _availablePlatforms.contains(e));
       _selectedPlatforms.addAll(platforms);
     } catch (e) {
       // Ignore parsing errors
@@ -563,12 +551,8 @@ class _PlatformConfigDialogState extends State<_PlatformConfigDialog>
   final Map<String, bool> _isCheckingLogin = {};
 
   static const Map<String, String> _platformLoginUrls = {
-    'TWITTER': 'https://twitter.com/login',
     'LINKEDIN': 'https://www.linkedin.com/login',
     'EMAIL': '', // Email uses SMTP, no browser login needed
-    'SUBSTACK': 'https://substack.com/sign-in',
-    'MEDIUM': 'https://medium.com/m/signin',
-    'FACEBOOK': 'https://www.facebook.com/login',
   };
 
   static const Map<String, List<Map<String, String>>> _platformActions = {
@@ -578,22 +562,6 @@ class _PlatformConfigDialogState extends State<_PlatformConfigDialog>
     'LINKEDIN': [
       {'value': 'message_connections', 'label': 'Message Connections'},
       {'value': 'search_and_connect', 'label': 'Search & Connect'},
-    ],
-    'TWITTER': [
-      {'value': 'post_tweet', 'label': 'Post Tweet'},
-      {'value': 'follow_profiles', 'label': 'Follow Profiles'},
-      {'value': 'send_dms', 'label': 'Send DMs'},
-    ],
-    'SUBSTACK': [
-      {'value': 'post_note', 'label': 'Post Note'},
-      {'value': 'subscribe', 'label': 'Subscribe'},
-      {'value': 'comment', 'label': 'Comment'},
-    ],
-    'MEDIUM': [
-      {'value': 'post_article', 'label': 'Post Article'},
-    ],
-    'FACEBOOK': [
-      {'value': 'post_update', 'label': 'Post Update'},
     ],
   };
 

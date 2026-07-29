@@ -159,10 +159,10 @@
                         <set field="messagesSent" from="messagesSent + 1"/>
                         <service-call name="growerp.100.OutreachServices100.update#CampaignMetrics"
                             in-map="[marketingCampaignId: marketingCampaignId, incrementMessagesSent: true]"/>
+                        <else>
+                            <set field="messagesFailed" from="messagesFailed + 1"/>
+                        </else>
                     </if>
-                    <else>
-                        <set field="messagesFailed" from="messagesFailed + 1"/>
-                    </else>
                 </iterate>
             </iterate>
         </actions>
@@ -238,7 +238,7 @@
         <in-parameters>
             <parameter name="messageId" required="true"/>
             <parameter name="platform" required="true">
-                <description>TWITTER, LINKEDIN, EMAIL, etc.</description>
+                <description>LINKEDIN or EMAIL</description>
             </parameter>
             <parameter name="ownerPartyId">
                 <description>Pass explicitly from the headless scheduler; derived from the
@@ -266,46 +266,58 @@
             </if>
 
             <!-- Route to platform-specific automation -->
-            <if condition="platform == 'TWITTER'">
-                <service-call name="growerp.100.TwitterAutomationServices100.send#TwitterMessage" 
-                    in-map="[message: message, ownerPartyId: ownerPartyId]" out-map="sendResult"/>
-            </if>
-            <else-if condition="platform == 'LINKEDIN'">
+            <if condition="platform == 'LINKEDIN'">
                 <service-call name="growerp.100.LinkedInAutomationServices100.send#LinkedInMessage"
                     in-map="[message: message, ownerPartyId: ownerPartyId]" out-map="sendResult"/>
-            </else-if>
-            <else-if condition="platform == 'EMAIL'">
-                <!-- Send via Moqui email using the campaign subject + this message body.
-                     Operates on the existing PENDING message; status update happens below. -->
-                <if condition="!message.recipientEmail">
-                    <set field="sendResult"
-                        from="[success: false, errorMessage: 'Recipient has no email address']"/>
-                </if>
+                <else-if condition="platform == 'EMAIL'">
+                    <!-- Send via the tenant's active email server using the campaign subject +
+                         this message body. Operates on the existing PENDING message; status
+                         update happens below. -->
+                    <if condition="!message.recipientEmail">
+                        <set field="sendResult"
+                            from="[success: false, errorMessage: 'Recipient has no email address']"/>
+                        <else>
+                            <!-- tenant-only email server, no SYSTEM fallback; check first so an
+                                 unconfigured tenant becomes a FAILED message, not a service error -->
+                            <service-call name="growerp.100.GeneralServices100.get#ActiveEmailServer"
+                                in-map="[ownerPartyId: ownerPartyId]" out-map="emailServerOut"/>
+                            <if condition="!emailServerOut.emailConfigured">
+                                <set field="sendResult"
+                                    from="[success: false, errorMessage: 'No SMTP email server configured for this company, please enter the SMTP settings in the company settings']"/>
+                                <else>
+                                    <entity-find-one entity-name="mantle.marketing.campaign.MarketingCampaign"
+                                        value-field="campaign">
+                                        <field-map field-name="marketingCampaignId" from="message.marketingCampaignId"/>
+                                    </entity-find-one>
+                                    <!-- unsubscribe served by pop-rest-store /nurture screen -->
+                                    <service-call name="growerp.100.NurtureServices100.get#TenantBaseUrl"
+                                        in-map="[ownerPartyId: ownerPartyId]" out-map="context"/>
+                                    <set field="unsubscribeUrl"
+                                        value="${baseUrl}/nurture/unsubscribe?email=${message.recipientEmail}&amp;campaign=${message.marketingCampaignId}"/>
+                                    <set field="emailBody"
+                                        from="message.messageContent + '\n\n---\n\n&lt;p style=&quot;font-size: 12px; color: #666;&quot;&gt;&lt;a href=&quot;' + unsubscribeUrl + '&quot;&gt;Unsubscribe&lt;/a&gt;&lt;/p&gt;'"/>
+                                    <!-- ignore-error + force-new: a send failure must not abort or
+                                         poison this service's transaction; failure is detected by
+                                         the missing emailMessageId and recorded on the message -->
+                                    <service-call name="growerp.100.GeneralServices100.send#DirectEmail"
+                                        ignore-error="true" transaction="force-new" out-map="emailResult">
+                                        <field-map field-name="ownerPartyId"/>
+                                        <field-map field-name="toAddresses" from="message.recipientEmail"/>
+                                        <field-map field-name="subject" from="campaign?.emailSubject ?: 'Hello from GrowERP'"/>
+                                        <field-map field-name="bodyHtml" from="emailBody"/>
+                                    </service-call>
+                                    <set field="sendResult"
+                                        from="emailResult?.emailMessageId ? [success: true] :
+                                            [success: false, errorMessage: 'Email send failed, see server log']"/>
+                                </else>
+                            </if>
+                        </else>
+                    </if>
+                </else-if>
                 <else>
-                    <entity-find-one entity-name="mantle.marketing.campaign.MarketingCampaign"
-                        value-field="campaign">
-                        <field-map field-name="marketingCampaignId" from="message.marketingCampaignId"/>
-                    </entity-find-one>
-                    <!-- unsubscribe served by pop-rest-store /nurture screen -->
-                    <service-call name="growerp.100.NurtureServices100.get#TenantBaseUrl"
-                        in-map="[ownerPartyId: ownerPartyId]" out-map="context"/>
-                    <set field="unsubscribeUrl"
-                        value="${baseUrl}/nurture/unsubscribe?email=${message.recipientEmail}&amp;campaign=${message.marketingCampaignId}"/>
-                    <set field="emailBody"
-                        from="message.messageContent + '\n\n---\n\n&lt;p style=&quot;font-size: 12px; color: #666;&quot;&gt;&lt;a href=&quot;' + unsubscribeUrl + '&quot;&gt;Unsubscribe&lt;/a&gt;&lt;/p&gt;'"/>
-                    <service-call name="org.moqui.impl.EmailServices.send#EmailTemplate"
-                        out-map="emailResult">
-                        <field-map field-name="toAddresses" from="message.recipientEmail"/>
-                        <field-map field-name="subject" from="campaign?.emailSubject ?: 'Hello from GrowERP'"/>
-                        <field-map field-name="bodyHtml" from="emailBody"/>
-                        <field-map field-name="fromAddress" value="noreply@growerp.com"/>
-                    </service-call>
-                    <set field="sendResult" from="[success: true]"/>
+                    <return error="true" message="Unsupported platform: ${platform}"/>
                 </else>
-            </else-if>
-            <else>
-                <return error="true" message="Unsupported platform: ${platform}"/>
-            </else>
+            </if>
 
             <set field="success" from="sendResult.success"/>
             <set field="errorMessage" from="sendResult.errorMessage"/>
