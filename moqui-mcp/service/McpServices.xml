@@ -222,6 +222,27 @@
                     'recalculate','list','add','remove','ingest','push','ensure','escalate','reply',
                     'process','set','calculate','validate','approve','cancel','complete','draft',
                     'generate','publish','mark','test','start','pause'] as Set
+                // Verbs that only read: a guessed read verb may be resolved to another read
+                // verb (get#SocialPosts → list#SocialPosts); writes never auto-resolve.
+                def readVerbs = ['get','list','find','search','check','calculate'] as Set
+                // Singularize so a plural guess matches the real noun:
+                // Opportunities → opportunity, SocialPosts → socialpost.
+                def normalizeNoun = { String n ->
+                    if (!n) return n
+                    def low = n.toLowerCase()
+                    if (low.endsWith('ies') && low.length() > 4) return low[0..-4] + 'y'
+                    if (low.length() > 4 && (low.endsWith('ches') || low.endsWith('shes') ||
+                            low.endsWith('xes') || low.endsWith('ses') || low.endsWith('zes')))
+                        return low[0..-3]
+                    if (low.endsWith('s') && low.length() > 3) return low[0..-2]
+                    return low
+                }
+                // Split a "verb#Noun" tail into [verb, normalized noun]; null when malformed.
+                def splitTail = { String tail ->
+                    if (!tail || !tail.contains('#')) return null
+                    def i = tail.indexOf('#')
+                    [tail.substring(0, i).toLowerCase(), normalizeNoun(tail.substring(i + 1))]
+                }
                 // Domain aliases: some list/read operations live on a generic service whose
                 // NAME lacks the domain noun — orders, invoices, shipments, payments and
                 // transactions are all "FinDoc", listed via FinDocServices100.get#FinDoc. A
@@ -246,12 +267,15 @@
                     // prefer noun tokens; verbs like get/create match too many services and add noise
                     def nouns = raw.findAll { !suggestVerbs.contains(it) }
                     def base = (nouns ?: raw) as List
-                    // add singular forms so 'orders' matches 'Order'
-                    def toks = (base + base.findAll { it.endsWith('s') && it.length() > 3 }.collect { it[0..-2] }) as Set
+                    // add singular forms so 'orders' matches 'Order' and
+                    // 'opportunities' matches 'Opportunity'
+                    def toks = (base + base.collect { normalizeNoun(it) }) as Set
                     if (!toks) return []
                     def scored = names.collect { n ->
                             def low = n.toLowerCase()
-                            [name: n, score: toks.count { low.contains(it) }]
+                            // also score against the singularized noun of the service itself
+                            def nounPart = n.contains('#') ? normalizeNoun(n.substring(n.indexOf('#') + 1)) : ''
+                            [name: n, score: toks.count { low.contains(it) || (it && nounPart.contains(it)) }]
                         }
                         .findAll { it.score > 0 }
                         .sort { -it.score }
@@ -261,12 +285,38 @@
                 }
                 // Fix up common LLM service-name mistakes; returns the resolved name or the
                 // original (still-undefined) name so the caller's error path can suggest.
-                // Unique growerp.* service whose name ends with ".verb#Noun", or null.
+                // Unique growerp.* service for a "verb#Noun" tail, or null.
+                // 1) exact tail match; 2) same noun (singularized) with a different verb —
+                //    only read verb → read verb, so a guessed get# can never run a delete#.
                 def uniqueByTail = { String tail ->
+                    def all = org.moqui.mcp.adapter.McpToolAdapter.getCachedGroWerpServiceNames(ec)
                     def suffix = ('.' + tail).toLowerCase()
-                    def matches = org.moqui.mcp.adapter.McpToolAdapter.getCachedGroWerpServiceNames(ec)
-                        .findAll { it.toLowerCase().endsWith(suffix) }
-                    matches.size() == 1 ? matches[0] : null
+                    def matches = all.findAll { it.toLowerCase().endsWith(suffix) }
+                    if (matches.size() == 1) return matches[0]
+                    if (matches.size() > 1) return null
+                    def want = splitTail(tail)
+                    if (!want) return null
+                    def byNoun = all.collect { n ->
+                            def t = n.contains('.') ? n.substring(n.lastIndexOf('.') + 1) : n
+                            [name: n, parts: splitTail(t)]
+                        }
+                        .findAll { it.parts && it.parts[1] == want[1] }
+                    if (!byNoun) return null
+                    // same verb, plural/singular noun difference only (get#Opportunities → get#Opportunity)
+                    def sameVerb = byNoun.findAll { it.parts[0] == want[0] }
+                    if (sameVerb.size() == 1) return sameVerb[0].name
+                    if (sameVerb.size() > 1) return null
+                    if (!readVerbs.contains(want[0])) return null
+                    def reads = byNoun.findAll { readVerbs.contains(it.parts[0]) }
+                    reads.size() == 1 ? reads[0].name : null
+                }
+                // Is this an existing growerp.* service? Checked against the cached name list
+                // instead of ec.service.isServiceDefined(), which logs a framework WARN
+                // ("not found; used relative location") for every guessed name. The cache is
+                // built once per JVM, so a newly ADDED service file needs a Moqui restart
+                // before it is callable/searchable through MCP.
+                def knownGrowerp = { String n ->
+                    n && org.moqui.mcp.adapter.McpToolAdapter.getCachedGroWerpServiceNames(ec).contains(n)
                 }
                 def resolveSvcName = { String svcName ->
                     if (!svcName) return svcName
@@ -282,7 +332,7 @@
                         }
                         return svcName
                     }
-                    if (ec.service.isServiceDefined(svcName)) return svcName
+                    if (knownGrowerp(svcName)) return svcName
                     // Full-looking name with the WRONG package path (LLMs guess the service
                     // file): resolve by the verb#Noun tail if it names exactly one service.
                     if (svcName.contains('#')) {
@@ -306,9 +356,11 @@
                                         Character.isUpperCase(tail.charAt(v.length()))) {
                                     def corrected = svcName.substring(0, lastDot + 1) +
                                         v + '#' + tail.substring(v.length())
-                                    if (ec.service.isServiceDefined(corrected)) {
-                                        ec.logger.info("MCP: auto-corrected service name '${svcName}' → '${corrected}'")
-                                        return corrected
+                                    def resolved = knownGrowerp(corrected) ? corrected :
+                                        uniqueByTail(v + '#' + tail.substring(v.length()))
+                                    if (resolved) {
+                                        ec.logger.info("MCP: auto-corrected service name '${svcName}' → '${resolved}'")
+                                        return resolved
                                     }
                                 }
                             }
@@ -332,7 +384,6 @@
                     // Consolidated Tool Dispatching
 
                     ec.logger.info("MCP ToolsCall: Dispatching tool name=${name}, arguments=${arguments}")
-                    ec.logger.info("MCP ToolsCall: CODE VERSION: 2025-01-09 - FIXED NULL CHECK")
 
                     // Moqui screens are not used in GrowERP (Flutter frontend); screen
                     // browsing/rendering tools were removed. Point agents at the service tools.
@@ -369,21 +420,21 @@
                     if (name == "moqui_execute_service") {
                         def svcName = resolveSvcName(arguments?.serviceName)
                         def svcArgs = arguments?.parameters ?: [:]
-                        if (!svcName || !ec.service.isServiceDefined(svcName)) {
+                        // A guessed name is an ordinary LLM mistake: report it as a tool error
+                        // with recovery hints, not as an exception + stack trace in the log.
+                        // The cached-name check also rules out implicit entity-auto CRUD
+                        // (create/update/delete/store#<Entity>), which isServiceDefined()
+                        // reports as defined: entity writes must go through a growerp.*
+                        // service, entity reads through the read-only moqui_rest_call e1/ API.
+                        if (!knownGrowerp(svcName)) {
                             def sugg = suggestServices(svcName, 5)
                             def hint = sugg ? " Did you mean: ${sugg.join(', ')}?"
                                 : " Use moqui_search_services to find valid names."
-                            throw new Exception("Unknown service name: ${svcName}. Only growerp.* services are callable.${hint}")
-                        }
-                        // isServiceDefined is also true for implicit entity-auto CRUD
-                        // (create/update/delete/store#<Entity>) — all writes, no defined
-                        // service. Entity writes must go through a growerp.* service; reads
-                        // are available via the read-only moqui_rest_call e1/ API.
-                        if (ec.service.getServiceDefinition(svcName) == null) {
-                            def sugg = suggestServices(svcName, 5)
-                            def hint = sugg ? " Did you mean: ${sugg.join(', ')}?"
-                                : " Use moqui_search_services to find valid names."
-                            throw new Exception("Direct entity write '${svcName}' is not allowed. Use a growerp.* service for writes, or moqui_rest_call (e1/) for reads.${hint}")
+                            def msg = "Unknown service name: ${svcName}. Only growerp.* services are callable.${hint}"
+                            ec.logger.warn("MCP: ${msg}")
+                            isError = true
+                            result = [content: [[type: "text", text: msg]], isError: true]
+                            return
                         }
                         def gate = applyGate(svcName, svcArgs)
                         if (!gate.allowed) {
@@ -536,14 +587,22 @@
                         // Prepend domain-alias services whose name lacks the noun (orders/invoices/
                         // shipments/payments/transactions are all listed via get#FinDoc).
                         def aliasNames = domainAliasFor(query).findAll { !nameMatches.contains(it) }
-                        def matchedNames = (aliasNames + nameMatches).take(30)
+                        // Plain substring never matches a CamelCase query like 'SalesOrder' or
+                        // 'CustomerGoal'; fall back to the token/noun scorer so the agent still
+                        // gets candidates instead of an empty list it will guess around.
+                        // pass the ORIGINAL case: the scorer splits CamelCase into tokens
+                        def fuzzy = (aliasNames || nameMatches) ? [] : suggestServices(arguments?.query, 10)
+                        def matchedNames = (aliasNames + nameMatches + fuzzy).take(30)
                         def findocHint = aliasNames
                             ? "Orders, invoices, shipments, payments and transactions are 'financial documents' — list them with growerp.100.FinDocServices100.get#FinDoc (set docType e.g. 'order' and sales=true/false)."
+                            : null
+                        def fuzzyHint = fuzzy
+                            ? "No exact name match; these are the closest services by keyword. Use one of these exact names or search again with a single noun."
                             : null
                         def txt = new groovy.json.JsonBuilder([
                             total: matchedNames.size(),
                             services: matchedNames.collect { [name: it] },
-                            hint: findocHint ?: (matchedNames.size() == 30
+                            hint: findocHint ?: fuzzyHint ?: (matchedNames.size() == 30
                                 ? "Showing first 30 matches. Narrow your query or use moqui_get_service_details for parameter info."
                                 : (matchedNames.isEmpty()
                                     ? "No matches. Search by a single noun keyword (e.g. 'order', 'invoice', 'product') rather than a full or guessed service path. Only growerp.* services are callable."
@@ -557,12 +616,16 @@
                         def svcName = arguments?.serviceName
                         if (!svcName) throw new Exception("Missing serviceName")
                         svcName = resolveSvcName(svcName)
-                        def sd = ec.service.getServiceDefinition(svcName)
+                        def sd = knownGrowerp(svcName) ? ec.service.getServiceDefinition(svcName) : null
                         if (!sd) {
                             def sugg = suggestServices(svcName, 5)
                             def hint = sugg ? " Did you mean: ${sugg.join(', ')}?"
                                 : " Use moqui_search_services to find valid names."
-                            throw new Exception("Unknown service: ${svcName}. Only growerp.* services are callable.${hint}")
+                            def msg = "Unknown service: ${svcName}. Only growerp.* services are callable.${hint}"
+                            ec.logger.warn("MCP: ${msg}")
+                            isError = true
+                            result = [content: [[type: "text", text: msg]], isError: true]
+                            return
                         }
                         def descNode = sd.serviceNode.first("description")
                         def inParams = [:]

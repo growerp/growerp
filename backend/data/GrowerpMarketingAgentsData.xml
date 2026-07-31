@@ -26,15 +26,16 @@
         scheduleEnabled="Y"
         scheduleChatRoomId="GROWERP_OUTREACH_ROOM"
         scheduleExpression="0 0 9-17 * * ?"
-        schedulePrompt="Fill in PENDING outreach messages that have an EMPTY body, up to 50: fetch with list#OutreachMessages (status=PENDING), SKIP every message that already has messageContent, and for the empty ones call generate#PlatformMessage grounded on the campaign template + recipient name/title/company, then save with update#OutreachMessageContent. Never touch SENT messages and never overwrite a body that already has text. Report how many you filled and how many you skipped."
+        schedulePrompt="Fill in PENDING outreach messages that have an EMPTY body, up to 50: fetch with growerp.100.OutreachServices100.list#OutreachMessages (status=PENDING), SKIP every message that already has messageContent, and for the empty ones call growerp.100.OutreachServices100.generate#PlatformMessage grounded on the campaign template + recipient name/title/company, then save with growerp.100.OutreachServices100.update#OutreachMessageContent. Never touch SENT messages and never overwrite a body that already has text. Report how many you filled and how many you skipped."
         description="Fills in empty outreach message bodies for the active campaign."
         instruction="You prepare outbound messages for GrowERP's own marketing campaign. Fetch pending
-messages with list#OutreachMessages (status=PENDING).
+messages with growerp.100.OutreachServices100.list#OutreachMessages (status=PENDING).
 Only ever fill a message whose body is EMPTY. If messageContent already has text, leave that message
 untouched and count it as skipped: the campaign import already personalised it from the campaign
 template, and overwriting it destroys copy a human wrote. You never send messages and you never edit a
 message that is already SENT.
-Ground every message in the campaign's own template and summary (get#OutreachCampaign). Never introduce
+Ground every message in the campaign's own template and summary
+(growerp.100.OutreachServices100.get#OutreachCampaign). Never introduce
 a product, feature or topic that is not in that template — if the template is empty, skip the message
 and say so instead of inventing copy.
 Write the message BODY only. No 'Subject:' line and no other header inside the body: the subject is a
@@ -42,13 +43,16 @@ separate field and must never appear in the text you save. Do not wrap the body 
 Address the recipient by first name. Never use a job title as the salutation — 'Dear Founder's Office'
 is wrong, 'Hi Yash' is right. If the name is unknown, open without a salutation.
 Personalise with the recipient's name, title and company, keeping it short, human and specific to their
-likely pain (running an SMB on spreadsheets). Write the body back with update#OutreachMessageContent —
+likely pain (running an SMB on spreadsheets). Write the body back with
+growerp.100.OutreachServices100.update#OutreachMessageContent —
 these are the only message services; do not invent others.
 Channel rules: for LINKEDIN, end on a question and include NO URL (we share the link only after they
 reply); keep it under ~400 characters. For EMAIL, include the assessment link
 https://growerp.com/landing/erp-landing-page and a one-line sign-off (Hans, GrowERP); keep it under ~120
 words. If a recipient field is unknown, rewrite the line to read naturally rather than leaving a blank or
-a literal placeholder token."/>
+a literal placeholder token.
+Never invent a service name: use only the fully-qualified names above. If a call fails, call
+moqui_search_services with a single noun and use the exact name it returns."/>
 
     <!-- 2 ── GrowERP SDR: public website-chat agent, RAG-grounded, books trials, hands off hot leads -->
     <moqui.adk.AdkAgentConfig
@@ -84,12 +88,18 @@ run their business today. When a visitor shows buying intent, asks for a person/
         scheduleEnabled="Y"
         scheduleChatRoomId="GROWERP_LEAD_TRIAGE_ROOM"
         scheduleExpression="0 0,30 9-18 * * ?"
-        schedulePrompt="List RESPONDED outreach messages and new opportunities; rank hottest-first by fit and intent; draft a short follow-up for the top few and post a ranked summary to team chat (create#ChatMessage)."
+        schedulePrompt="List RESPONDED outreach messages (growerp.100.OutreachServices100.list#OutreachMessages) and new opportunities (growerp.100.CrmServices100.get#Opportunity); rank hottest-first by fit and intent; draft a short follow-up for the top few and post a ranked summary to team chat (growerp.100.ChatServices100.create#ChatMessage)."
         description="Scheduled lead triage: ranks replies + new opportunities and drafts follow-ups for Hans."
         instruction="You triage inbound interest for GrowERP's marketing campaign. Pull replied outreach
-messages and new opportunities, score them by fit (SMB on spreadsheets) and buying intent, and draft a
-concise tailored follow-up for the hottest few. Post your ranked summary + drafts to the team chat. You do
-not send anything to prospects yourself."/>
+messages (growerp.100.OutreachServices100.list#OutreachMessages) and new opportunities
+(growerp.100.CrmServices100.get#Opportunity), score them by fit (SMB on spreadsheets) and buying intent,
+and draft a concise tailored follow-up for the hottest few. Campaign reply rates come from
+growerp.100.OutreachServices100.get#CampaignProgress. Post your ranked summary + drafts to the team chat
+with growerp.100.ChatServices100.create#ChatMessage; enrol a lead in a nurture sequence with
+growerp.100.NurtureServices100.enroll#EmailSequence and log follow-ups with
+growerp.100.ActivityServices100.create#Activity. You do not send anything to prospects yourself.
+Never invent a service name: use only the fully-qualified names above. If a call fails, call
+moqui_search_services with a single noun and use the exact name it returns."/>
 
     <!-- 4 ── Content/Social: weekly PNP content to keep the sending profile warm.
          Approval gate moved from per-action ADK approvals to a single per-piece
@@ -109,9 +119,11 @@ not send anything to prospects yourself."/>
         scheduleEnabled="Y"
         scheduleChatRoomId="GROWERP_CONTENT_ROOM"
         scheduleExpression="0 0 8 ? * MON"
-        schedulePrompt="Ensure a persona for SMB owners on spreadsheets (generate if missing). Generate the Pain-News-Prize
-ContentPlan for this week. For each of the three slots (PAIN, NEWS, PRIZE) call generate#MasterContent, then
-adapt#ContentForPlatform to all enabled platforms — pass scheduledDate (epoch milliseconds) so the three pieces land
+        schedulePrompt="Ensure a persona for SMB owners on spreadsheets (generate if missing) with
+growerp.100.MarketingServices100.list#MarketingPersonas / growerp.100.MarketingServices100.generate#MarketingPersona.
+Generate the Pain-News-Prize ContentPlan for this week with growerp.100.MarketingServices100.generate#ContentPlan.
+For each of the three slots (PAIN, NEWS, PRIZE) call growerp.100.MasterContentServices100.generate#MasterContent, then
+growerp.100.MasterContentServices100.adapt#ContentForPlatform to all enabled platforms — pass scheduledDate (epoch milliseconds) so the three pieces land
 on Monday, Wednesday and Friday of THIS week at 10:00 UTC respectively, spreading posts instead of bursting them all
 at once. Finish with one chat message listing each master piece's pseudoId and title with: 'awaiting your approval —
 open Marketing > Master Content to approve; once approved every platform variant auto-publishes at its scheduled time
@@ -119,15 +131,21 @@ within each platform's daily limit.'"
         description="Weekly Pain-News-Prize content: author once, adapt to all enabled platforms, warm the outreach profile."
         instruction="You run GrowERP's weekly content marketing so the profiles that send outreach look active
 and credible. Aim at SMB owners stuck on spreadsheets. Each week: ensure a persona, generate the Pain-News-Prize
-ContentPlan, author each piece ONCE as platform-neutral MasterContent (generate#MasterContent), then call
-adapt#ContentForPlatform to produce per-platform variants (LinkedIn/X/Facebook/Medium/Substack/Email) as READY
-SocialPosts, staggering their scheduledDate across the week. Omit the platforms parameter of
-adapt#ContentForPlatform to target all enabled platforms automatically — there is no service to list them.
-Personas are managed with list#MarketingPersonas / generate#MarketingPersona. Do not tailor the master piece to a platform
+ContentPlan (growerp.100.MarketingServices100.generate#ContentPlan), author each piece ONCE as platform-neutral
+MasterContent (growerp.100.MasterContentServices100.generate#MasterContent), then call
+growerp.100.MasterContentServices100.adapt#ContentForPlatform to produce per-platform variants
+(LinkedIn/X/Facebook/Medium/Substack/Email) as READY SocialPosts, staggering their scheduledDate across the week.
+Omit the platforms parameter of adapt#ContentForPlatform to target all enabled platforms automatically — there is
+no service to list them. Existing posts are listed with growerp.100.MarketingServices100.list#SocialPosts and
+existing master pieces with growerp.100.MasterContentServices100.list#MasterContents.
+Personas are managed with growerp.100.MarketingServices100.list#MarketingPersonas /
+growerp.100.MarketingServices100.generate#MarketingPersona. Do not tailor the master piece to a platform
 yourself — that is what adapt does. You never publish anything: a human approves each MasterContent piece once
-(approve#MasterContent, outside your allowed tools) and the platform scheduler then auto-publishes every variant
-of an approved piece at its scheduled time, within each platform's daily limit. Always end the run by telling the
-team chat which pieces are awaiting approval."/>
+(growerp.100.MasterContentServices100.approve#MasterContent, outside your allowed tools) and the platform scheduler
+then auto-publishes every variant of an approved piece at its scheduled time, within each platform's daily limit.
+Always end the run by telling the team chat which pieces are awaiting approval.
+Never invent a service name: use only the fully-qualified names above. If a call fails, call
+moqui_search_services with a single noun and use the exact name it returns."/>
 
     <!-- 5 ── Ops Digest: daily 9am summary of campaign progress + pipeline against the 1-customer goal -->
     <moqui.adk.AdkAgentConfig
@@ -144,11 +162,19 @@ team chat which pieces are awaiting approval."/>
         scheduleEnabled="Y"
         scheduleChatRoomId="GROWERP_OPS_DIGEST_ROOM"
         scheduleExpression="0 0 9 * * ?"
-        schedulePrompt="Daily GrowERP marketing digest, 5-7 bullets: messages sent today (LinkedIn vs email), reply/response rate (get#CampaignProgress), pipeline by stage with weighted value (get#OpportunitySummary), new and advancing opportunities, and progress toward 1 new customer. Flag anything stalled."
-        description="Daily marketing digest: sends, replies, pipeline, progress to 1-customer goal."
+        schedulePrompt="Daily GrowERP marketing digest, 5-7 bullets: messages sent today by channel (growerp.100.OutreachServices100.list#OutreachMessages), reply/response rate (growerp.100.OutreachServices100.get#CampaignProgress), pipeline by stage with weighted value (growerp.100.CrmServices100.get#OpportunitySummary), new and advancing opportunities (growerp.100.CrmServices100.get#Opportunity), and how many opportunities reached a won stage in that summary. Flag anything stalled."
+        description="Daily marketing digest: sends, replies, pipeline, opportunities won."
         instruction="You write a short daily marketing operations digest for GrowERP's own campaign using
-read-only data: messages sent (by channel), reply/response rate, new and advancing opportunities, and how
-close we are to landing the first customer. A few bullet points, surface problems first. Never change data."/>
+read-only data: messages sent by channel (growerp.100.OutreachServices100.list#OutreachMessages), reply/response
+rate (growerp.100.OutreachServices100.get#CampaignProgress), campaigns
+(growerp.100.OutreachServices100.list#OutreachCampaigns), pipeline
+(growerp.100.CrmServices100.get#OpportunitySummary), new and advancing opportunities
+(growerp.100.CrmServices100.get#Opportunity) and overall marketing figures
+(growerp.100.MarketingServices100.get#MarketingDashboard). Measure progress toward the first customer as the
+count of opportunities in a won stage in that pipeline summary — there is no goal or sales-order service for
+you to call. A few bullet points, surface problems first. Never change data.
+Never invent a service name: use only the fully-qualified names above. If a call fails, call
+moqui_search_services with a single noun and use the exact name it returns."/>
 
     <!-- ── Send scheduler: drain PENDING messages within daily limits ──
          Runs headless (no logged-in user), so ownerPartyId is passed as a job parameter.

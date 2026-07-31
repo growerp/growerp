@@ -1813,30 +1813,6 @@ limitations under the License.
         </actions>
     </service>
 
-    <!-- Generate platform-specific message from campaign template -->
-    <service verb="generate" noun="PlatformMessage">
-        <description>Generate a platform-optimized message from a campaign template using AI</description>
-        <in-parameters>
-            <parameter name="campaignTemplate" required="true" type="String"/>
-            <parameter name="platform" required="true" type="String">
-                <description>TWITTER, LINKEDIN, EMAIL, SUBSTACK</description>
-            </parameter>
-            <parameter name="actionType" required="true" type="String">
-                <description>post_tweet, send_dms, message_connections, send_email, etc.</description>
-            </parameter>
-        </in-parameters>
-        <out-parameters>
-            <parameter name="platformMessage" type="String"/>
-        </out-parameters>
-        <actions>
-            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" out-map="relInfo"/>
-            <script>
-                def GeminiAiUtil = ec.resource.script("component://growerp/service/GeminiAiUtil.groovy", null)
-                platformMessage = GeminiAiUtil.generatePlatformMessage(ec, campaignTemplate, platform, actionType, relInfo.ownerPartyId)
-            </script>
-        </actions>
-    </service>
-
     <service verb="get" noun="EmailTemplates">
         <description>Get a list of email templates, optionally filtered by search string</description>
         <in-parameters>
