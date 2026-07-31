@@ -193,7 +193,15 @@ ACTION TYPE: ${actionType}
 PLATFORM REQUIREMENTS:
 ${getPlatformRequirements(platform, actionType)}
 
-Return ONLY the adapted message text, no explanations or formatting.
+PERSONALISATION TOKENS:
+Refer to the recipient with these tokens, which are substituted per recipient when the
+message is sent: {firstName}, {name}, {company}, {title}.
+Write "Hi {firstName}," — never invent a bracketed placeholder such as [Name] or [Company],
+never address the recipient by their job title, and never put a real person's name in the text.
+
+Return ONLY the message body: no subject line, no "Subject:" header, no explanations, no
+markdown and no surrounding quotes. The subject is a separate field and must not appear in
+the body.
 Keep the core message but optimize for the platform's style and constraints.
 """
         
@@ -226,7 +234,8 @@ RECIPIENT: ${recipientName ?: '(unknown)'}${recipientTitle ? ' - ' + recipientTi
 DRAFT MESSAGE:
 ${draftMessage}
 
-Return ONLY the revised message text, no explanations or markdown.
+Return ONLY the revised message body, no explanations, no markdown and no "Subject:" line:
+the subject is a separate field and must not appear in the body.
 """
 
         return callGeminiApi(ec, prompt, [temperature: 0.5, maxOutputTokens: 1024, ownerPartyId: ownerPartyId])
@@ -246,7 +255,7 @@ Return ONLY the revised message text, no explanations or markdown.
             case 'LINKEDIN':
                 return "- Professional tone\n- Can be longer (up to 3000 chars for connection notes, more for messages)\n- Include value proposition\n- Reference mutual connections or interests if mentioned"
             case 'EMAIL':
-                return "- Professional tone\n- Clear call-to-action\n- Include greeting and sign-off\n- Keep concise but complete"
+                return "- Professional tone\n- Clear call-to-action\n- Open with \"Hi {firstName},\" and close with a one-line sign-off\n- Body text only, the subject is set separately\n- Keep concise but complete"
             case 'SUBSTACK':
                 return "- Thoughtful, writer-style tone\n- Can be conversational\n- For notes: keep under 500 chars\n- For comments: be engaging and add value"
             default:

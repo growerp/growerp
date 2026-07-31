@@ -1563,6 +1563,14 @@ abstract class RestClient {
     @Field() required String marketingCampaignId,
   });
 
+  /// Drain the campaign's PENDING OutreachMessages server-side, per platform,
+  /// up to dailyLimitPerPlatform. EMAIL is sent through the company's own SMTP
+  /// server, so no browser automation is involved.
+  @POST("rest/s1/growerp/100/OutreachCampaign/process")
+  Future<dynamic> processCampaignAutomation({
+    @Field() required String marketingCampaignId,
+  });
+
   @GET("rest/s1/growerp/100/OutreachMessage")
   Future<OutreachMessages> listOutreachMessages({
     @Query("marketingCampaignId") String? marketingCampaignId,
@@ -1575,6 +1583,15 @@ abstract class RestClient {
   @DELETE("rest/s1/growerp/100/OutreachMessage")
   Future<void> deleteOutreachMessage({@Field() required String messageId});
 
+  /// Requeue failed messages: status back to PENDING with the attempt counter
+  /// reset. Pass messageId for one message, marketingCampaignId for all failed
+  /// messages of a campaign. Returns retriedCount.
+  @POST("rest/s1/growerp/100/OutreachMessage/retry")
+  Future<dynamic> retryOutreachMessages({
+    @Field() String? messageId,
+    @Field() String? marketingCampaignId,
+  });
+
   @GET("rest/s1/growerp/100/OutreachCampaign/progress")
   Future<CampaignProgress> getCampaignProgress({
     @Query('marketingCampaignId') required String marketingCampaignId,
@@ -1583,7 +1600,7 @@ abstract class RestClient {
   // Outreach Message endpoints
   @POST("rest/s1/growerp/100/OutreachMessage")
   Future<OutreachMessage> createOutreachMessage({
-    @Field() String? marketingCampaignId,
+    @Field() required String marketingCampaignId,
     @Field() required String platform,
     @Field() String? recipientName,
     @Field() String? recipientProfileUrl,
@@ -1592,6 +1609,9 @@ abstract class RestClient {
     @Field() String? recipientCompany,
     @Field() String? recipientTitle,
     @Field() required String messageContent,
+
+    /// Subject override for EMAIL; the campaign subject is used when empty
+    @Field() String? emailSubject,
     @Field() String? status,
   });
 
@@ -1623,6 +1643,9 @@ abstract class RestClient {
   Future<dynamic> updateOutreachMessageContent({
     @Field() required String messageId,
     @Field() required String messageContent,
+
+    /// Subject override for EMAIL; '' falls back to the campaign subject
+    @Field() String? emailSubject,
   });
 
   /// AI-polish the tone of an already-personalized message draft (does not persist).

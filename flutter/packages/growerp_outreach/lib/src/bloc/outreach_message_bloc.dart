@@ -13,6 +13,7 @@
  */
 
 import 'dart:async';
+import 'dart:convert';
 import 'package:bloc/bloc.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:growerp_models/growerp_models.dart';
@@ -52,6 +53,7 @@ class OutreachMessageBloc
     on<OutreachMessageCreate>(_onCreate);
     on<OutreachMessageUpdateStatus>(_onUpdateStatus);
     on<OutreachMessageDelete>(_onDelete);
+    on<OutreachMessageRetry>(_onRetry);
     on<OutreachMessageSearchRequested>(
       _onSearchRequested,
       transformer: outreachMessageSearchDebounce(),
@@ -124,6 +126,7 @@ class OutreachMessageBloc
         recipientHandle: event.recipientHandle,
         recipientEmail: event.recipientEmail,
         messageContent: event.messageContent,
+        emailSubject: event.emailSubject,
       );
 
       final updatedMessages = List<OutreachMessage>.from(state.messages)
@@ -152,6 +155,16 @@ class OutreachMessageBloc
   ) async {
     try {
       emit(state.copyWith(status: OutreachMessageStatus.loading));
+
+      // body/subject live on a separate endpoint which only accepts PENDING
+      // messages, so the caller only passes them while still editable
+      if (event.messageContent != null) {
+        await restClient.updateOutreachMessageContent(
+          messageId: event.messageId,
+          messageContent: event.messageContent!,
+          emailSubject: event.emailSubject,
+        );
+      }
 
       final updatedMessage = await restClient.updateOutreachMessageStatus(
         messageId: event.messageId,
@@ -200,6 +213,46 @@ class OutreachMessageBloc
           message: 'Message deleted successfully',
         ),
       );
+    } catch (error) {
+      emit(
+        state.copyWith(
+          status: OutreachMessageStatus.failure,
+          message: await getDioError(error),
+        ),
+      );
+    }
+  }
+
+  Future<void> _onRetry(
+    OutreachMessageRetry event,
+    Emitter<OutreachMessageState> emit,
+  ) async {
+    try {
+      emit(state.copyWith(status: OutreachMessageStatus.loading));
+
+      final result = await restClient.retryOutreachMessages(
+        messageId: event.messageId,
+        marketingCampaignId: event.campaignId,
+      );
+      // dio can hand the body back as a raw JSON String
+      final decoded = result is String ? jsonDecode(result) : result;
+      final count = decoded['retriedCount'] ?? 0;
+
+      final refreshed = await restClient.listOutreachMessages(
+        start: 0,
+        limit: 20,
+        marketingCampaignId: event.campaignId,
+      );
+
+      emit(
+        state.copyWith(
+          status: OutreachMessageStatus.success,
+          messages: refreshed.messages,
+          hasReachedMax: refreshed.messages.length < 20,
+          message: '$count message(s) requeued',
+        ),
+      );
+      start = refreshed.messages.length;
     } catch (error) {
       emit(
         state.copyWith(

@@ -39,6 +39,9 @@ class OutreachMessage {
   @JsonKey(defaultValue: '')
   final String messageContent;
 
+  /// Subject override for EMAIL; the campaign's emailSubject is used when empty
+  final String? emailSubject;
+
   /// When message was sent
   @DateTimeConverter()
   final DateTime? sentDate;
@@ -46,6 +49,19 @@ class OutreachMessage {
   /// When response was received
   @DateTimeConverter()
   final DateTime? responseDate;
+
+  /// When the message was created: the send attempt time for messages which
+  /// never got a sentDate (FAILED, still PENDING)
+  @DateTimeConverter()
+  final DateTime? createdDate;
+
+  /// When the last send attempt ran, successful or not
+  @DateTimeConverter()
+  final DateTime? lastAttemptDate;
+
+  /// Send attempts so far; the status only becomes FAILED when these run out
+  @JsonKey(defaultValue: 0)
+  final int attemptCount;
 
   /// Message status: PENDING, SENT, RESPONDED, FAILED
   @JsonKey(defaultValue: 'PENDING')
@@ -76,8 +92,12 @@ class OutreachMessage {
     this.recipientCompany,
     this.recipientTitle,
     required this.messageContent,
+    this.emailSubject,
     this.sentDate,
     this.responseDate,
+    this.createdDate,
+    this.lastAttemptDate,
+    this.attemptCount = 0,
     required this.status,
     this.errorMessage,
     this.convertedPartyId,

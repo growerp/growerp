@@ -21,7 +21,6 @@ import 'package:responsive_framework/responsive_framework.dart';
 import '../bloc/outreach_message_bloc.dart';
 import '../bloc/outreach_message_event.dart';
 import '../bloc/outreach_message_state.dart';
-import '../bloc/outreach_campaign_bloc.dart';
 
 class OutreachMessageDetailScreen extends StatefulWidget {
   final OutreachMessage message;
@@ -44,7 +43,12 @@ class OutreachMessageDetailScreenState
   late TextEditingController _recipientProfileUrlController;
   late TextEditingController _recipientHandleController;
   late TextEditingController _messageContentController;
-  late TextEditingController _campaignIdController;
+  late TextEditingController _emailSubjectController;
+
+  /// Body and subject can only be changed while the message has not been sent:
+  /// update#OutreachMessageContent refuses anything but PENDING
+  bool get _isEditable =>
+      widget.message.messageId == null || widget.message.status == 'PENDING';
 
   final List<String> _availablePlatforms = [
     'EMAIL',
@@ -61,8 +65,9 @@ class OutreachMessageDetailScreenState
   late String _selectedPlatform;
   late String _selectedStatus;
   String? _selectedCampaignId;
-  List<OutreachCampaign> _availableCampaigns = [];
-  bool _loadingCampaigns = false;
+
+  /// Name of the campaign an existing message belongs to, id until loaded
+  String? _campaignLabel;
 
   @override
   void initState() {
@@ -77,8 +82,8 @@ class OutreachMessageDetailScreenState
         TextEditingController(text: widget.message.recipientHandle ?? '');
     _messageContentController =
         TextEditingController(text: widget.message.messageContent);
-    _campaignIdController =
-        TextEditingController(text: widget.message.campaignId ?? '');
+    _emailSubjectController =
+        TextEditingController(text: widget.message.emailSubject ?? '');
     _selectedCampaignId = widget.message.campaignId;
 
     _selectedPlatform = _availablePlatforms.contains(widget.message.platform)
@@ -87,42 +92,51 @@ class OutreachMessageDetailScreenState
     _selectedStatus =
         widget.message.status.isNotEmpty ? widget.message.status : 'PENDING';
 
-    // Load available campaigns for dropdown
-    _loadCampaigns();
+    _loadCampaignLabel();
   }
 
-  Future<void> _loadCampaigns() async {
-    setState(() => _loadingCampaigns = true);
+  /// Resolve the campaign name of an existing message for the read-only display
+  Future<void> _loadCampaignLabel() async {
+    final id = widget.message.campaignId;
+    if (id == null || id.isEmpty) return;
     try {
-      final bloc = context.read<OutreachCampaignBloc>();
-      // Trigger fetch if not already loaded
-      if (bloc.state.campaigns.isEmpty) {
-        bloc.add(const OutreachCampaignFetch(start: 0));
-      }
-      // Wait a bit for the campaigns to load
-      await Future.delayed(const Duration(milliseconds: 500));
+      final result = await RepositoryProvider.of<RestClient>(context)
+          .getOutreachCampaigns(marketingCampaignId: id, limit: 1);
+      if (!mounted || result.campaigns.isEmpty) return;
+      final campaign = result.campaigns.first;
       setState(() {
-        _availableCampaigns = bloc.state.campaigns;
-        _loadingCampaigns = false;
+        _campaignLabel = '${campaign.name} (${campaign.pseudoId ?? id})';
       });
     } catch (e) {
-      setState(() => _loadingCampaigns = false);
+      // keep showing the raw id
     }
   }
 
-  /// Human-readable campaign label for an existing message. Falls back to the
-  /// raw id until [_availableCampaigns] has loaded.
-  String _campaignLabel() {
-    final id = widget.message.campaignId;
-    if (id == null || id.isEmpty) return '(none)';
-    final campaign = _availableCampaigns.firstWhere(
-      (c) => c.campaignId == id,
-      orElse: () =>
-          const OutreachCampaign(name: '', platforms: '', status: ''),
+  /// Campaign selection for a new message: a message without a campaign is
+  /// never sent (the automation queries per campaign) and has no owner, so the
+  /// campaign is required. Searches server-side on name/id, there can be many.
+  Widget _campaignSelector() {
+    return AutocompleteLabel<OutreachCampaign>(
+      key: const Key('campaignId'),
+      label: 'Campaign *',
+      hintText: 'Type to search campaigns',
+      optionsBuilder: (TextEditingValue textEditingValue) =>
+          RepositoryProvider.of<RestClient>(context)
+              .listOutreachCampaigns(
+                searchString: textEditingValue.text,
+                limit: 10,
+              )
+              .then((result) => result.campaigns),
+      displayStringForOption: (OutreachCampaign campaign) =>
+          '${campaign.name} (${campaign.pseudoId})',
+      onSelected: (OutreachCampaign? campaign) {
+        setState(() => _selectedCampaignId = campaign?.campaignId);
+      },
+      validator: (OutreachCampaign? campaign) =>
+          _selectedCampaignId == null || _selectedCampaignId!.isEmpty
+              ? 'Please select a campaign'
+              : null,
     );
-    return campaign.name.isNotEmpty
-        ? '${campaign.name} (${campaign.pseudoId ?? id})'
-        : id;
   }
 
   @override
@@ -132,7 +146,7 @@ class OutreachMessageDetailScreenState
     _recipientProfileUrlController.dispose();
     _recipientHandleController.dispose();
     _messageContentController.dispose();
-    _campaignIdController.dispose();
+    _emailSubjectController.dispose();
     super.dispose();
   }
 
@@ -180,78 +194,7 @@ class OutreachMessageDetailScreenState
                   if (!isPhone && isNewMessage)
                     Row(
                       children: [
-                        Expanded(
-                          child: Autocomplete<OutreachCampaign>(
-                            key: const Key('campaignId'),
-                            initialValue: _selectedCampaignId != null
-                                ? TextEditingValue(
-                                    text: _availableCampaigns
-                                        .firstWhere(
-                                          (c) =>
-                                              c.campaignId ==
-                                              _selectedCampaignId,
-                                          orElse: () => const OutreachCampaign(
-                                            name: '',
-                                            platforms: '',
-                                            status: '',
-                                          ),
-                                        )
-                                        .name)
-                                : TextEditingValue.empty,
-                            optionsBuilder:
-                                (TextEditingValue textEditingValue) {
-                              if (textEditingValue.text.isEmpty) {
-                                return _availableCampaigns;
-                              }
-                              return _availableCampaigns.where((campaign) {
-                                return campaign.name.toLowerCase().contains(
-                                        textEditingValue.text.toLowerCase()) ||
-                                    (campaign.pseudoId ?? '')
-                                        .toLowerCase()
-                                        .contains(textEditingValue.text
-                                            .toLowerCase());
-                              });
-                            },
-                            displayStringForOption:
-                                (OutreachCampaign campaign) =>
-                                    '${campaign.name} (${campaign.pseudoId})',
-                            fieldViewBuilder: (context, controller, focusNode,
-                                onEditingComplete) {
-                              return TextFormField(
-                                controller: controller,
-                                focusNode: focusNode,
-                                decoration: InputDecoration(
-                                  labelText: 'Campaign *',
-                                  helperText: 'Type to search campaigns',
-                                  suffixIcon: _loadingCampaigns
-                                      ? const SizedBox(
-                                          width: 20,
-                                          height: 20,
-                                          child: Center(
-                                            child: CircularProgressIndicator(
-                                                strokeWidth: 2),
-                                          ),
-                                        )
-                                      : const Icon(Icons.search),
-                                ),
-                                validator: (value) {
-                                  if (_selectedCampaignId == null ||
-                                      _selectedCampaignId!.isEmpty) {
-                                    return 'Please select a campaign';
-                                  }
-                                  return null;
-                                },
-                              );
-                            },
-                            onSelected: (OutreachCampaign campaign) {
-                              setState(() {
-                                _selectedCampaignId = campaign.campaignId;
-                                _campaignIdController.text =
-                                    campaign.campaignId ?? '';
-                              });
-                            },
-                          ),
-                        ),
+                        Expanded(child: _campaignSelector()),
                         const SizedBox(width: 10),
                         Expanded(
                           child: DropdownButtonFormField<String>(
@@ -297,72 +240,8 @@ class OutreachMessageDetailScreenState
                       ],
                     ),
 
-                  // For mobile: Campaign ID separate
-                  if (isPhone && isNewMessage)
-                    Autocomplete<OutreachCampaign>(
-                      key: const Key('campaignId'),
-                      initialValue: _selectedCampaignId != null
-                          ? TextEditingValue(
-                              text: _availableCampaigns
-                                  .firstWhere(
-                                    (c) => c.campaignId == _selectedCampaignId,
-                                    orElse: () => const OutreachCampaign(
-                                      name: '',
-                                      platforms: '',
-                                      status: '',
-                                    ),
-                                  )
-                                  .name)
-                          : TextEditingValue.empty,
-                      optionsBuilder: (TextEditingValue textEditingValue) {
-                        if (textEditingValue.text.isEmpty) {
-                          return _availableCampaigns;
-                        }
-                        return _availableCampaigns.where((campaign) {
-                          return campaign.name.toLowerCase().contains(
-                                  textEditingValue.text.toLowerCase()) ||
-                              (campaign.pseudoId ?? '').toLowerCase().contains(
-                                  textEditingValue.text.toLowerCase());
-                        });
-                      },
-                      displayStringForOption: (OutreachCampaign campaign) =>
-                          '${campaign.name} (${campaign.pseudoId})',
-                      fieldViewBuilder:
-                          (context, controller, focusNode, onEditingComplete) {
-                        return TextFormField(
-                          controller: controller,
-                          focusNode: focusNode,
-                          decoration: InputDecoration(
-                            labelText: 'Campaign *',
-                            helperText: 'Type to search campaigns',
-                            suffixIcon: _loadingCampaigns
-                                ? const SizedBox(
-                                    width: 20,
-                                    height: 20,
-                                    child: Center(
-                                      child: CircularProgressIndicator(
-                                          strokeWidth: 2),
-                                    ),
-                                  )
-                                : const Icon(Icons.search),
-                          ),
-                          validator: (value) {
-                            if (_selectedCampaignId == null ||
-                                _selectedCampaignId!.isEmpty) {
-                              return 'Please select a campaign';
-                            }
-                            return null;
-                          },
-                        );
-                      },
-                      onSelected: (OutreachCampaign campaign) {
-                        setState(() {
-                          _selectedCampaignId = campaign.campaignId;
-                          _campaignIdController.text =
-                              campaign.campaignId ?? '';
-                        });
-                      },
-                    ),
+                  // For mobile: Campaign on its own line
+                  if (isPhone && isNewMessage) _campaignSelector(),
                   if (isNewMessage) const SizedBox(height: 20),
 
                   // For existing messages: show the (read-only) campaign it belongs to
@@ -373,7 +252,9 @@ class OutreachMessageDetailScreenState
                         decoration:
                             const InputDecoration(labelText: 'Campaign'),
                         child: Text(
-                          _campaignLabel(),
+                          _campaignLabel ??
+                              widget.message.campaignId ??
+                              '(none)',
                           key: const Key('campaignDisplay'),
                         ),
                       ),
@@ -504,10 +385,26 @@ class OutreachMessageDetailScreenState
                   ),
                   const SizedBox(height: 20),
 
+                  // Subject: EMAIL only, empty falls back to the campaign's
+                  if (_selectedPlatform == 'EMAIL') ...[
+                    TextFormField(
+                      key: const Key('emailSubject'),
+                      controller: _emailSubjectController,
+                      readOnly: !_isEditable,
+                      decoration: const InputDecoration(
+                        labelText: 'Email Subject',
+                        helperText: 'Empty uses the campaign subject; '
+                            '{name} etc. are substituted when sent',
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                  ],
+
                   // Message Content
                   TextFormField(
                     key: const Key('messageContent'),
                     controller: _messageContentController,
+                    readOnly: !_isEditable,
                     decoration:
                         const InputDecoration(labelText: 'Message Content *'),
                     maxLines: 5,
@@ -534,6 +431,16 @@ class OutreachMessageDetailScreenState
                         style: Theme.of(context).textTheme.bodyMedium,
                       ),
                     ],
+                    if (widget.message.attemptCount > 0) ...[
+                      const SizedBox(height: 10),
+                      Text(
+                        'Attempts: ${widget.message.attemptCount}'
+                        '${widget.message.lastAttemptDate != null ? ', last '
+                            '${widget.message.lastAttemptDate.toLocalizedString(context, format: 'MMM dd, yyyy HH:mm')}' : ''}',
+                        key: const Key('attemptCount'),
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                    ],
                     if (widget.message.errorMessage != null) ...[
                       const SizedBox(height: 10),
                       Text(
@@ -550,6 +457,23 @@ class OutreachMessageDetailScreenState
                   // Action Buttons
                   Row(
                     children: [
+                      // exhausted its send attempts: requeue it with the
+                      // counter reset so the automation sends it again
+                      if (widget.message.status == 'FAILED') ...[
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            key: const Key('retryMessage'),
+                            onPressed: () => messageBloc.add(
+                              OutreachMessageRetry(
+                                messageId: widget.message.messageId,
+                              ),
+                            ),
+                            icon: const Icon(Icons.refresh, size: 18),
+                            label: const Text('Retry'),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                      ],
                       Expanded(
                         child: ElevatedButton(
                           key: const Key('saveMessage'),
@@ -558,9 +482,7 @@ class OutreachMessageDetailScreenState
                               if (isNewMessage) {
                                 // Create new message
                                 messageBloc.add(OutreachMessageCreate(
-                                  campaignId: _campaignIdController.text.isEmpty
-                                      ? null
-                                      : _campaignIdController.text,
+                                  campaignId: _selectedCampaignId!,
                                   platform: _selectedPlatform,
                                   recipientName:
                                       _recipientNameController.text.isEmpty
@@ -581,18 +503,27 @@ class OutreachMessageDetailScreenState
                                           : _recipientProfileUrlController.text,
                                   messageContent:
                                       _messageContentController.text,
+                                  emailSubject:
+                                      _emailSubjectController.text.isEmpty
+                                          ? null
+                                          : _emailSubjectController.text,
                                 ));
                               } else {
-                                // Update status
+                                // body and subject only while still PENDING
                                 messageBloc.add(OutreachMessageUpdateStatus(
                                   messageId: widget.message.messageId!,
                                   status: _selectedStatus,
+                                  messageContent: _isEditable
+                                      ? _messageContentController.text
+                                      : null,
+                                  emailSubject: _isEditable
+                                      ? _emailSubjectController.text
+                                      : null,
                                 ));
                               }
                             }
                           },
-                          child:
-                              Text(isNewMessage ? 'Create' : 'Update Status'),
+                          child: Text(isNewMessage ? 'Create' : 'Update'),
                         ),
                       ),
                     ],

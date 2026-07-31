@@ -21,6 +21,14 @@
             <description>Email subject line (for EMAIL platform)</description>
         </field>
         <field name="dailyLimitPerPlatform" type="number-integer" default="50" />
+        <field name="sendFromHour" type="number-integer">
+            <description>First hour (0-23, UTC) the automation may send for this campaign;
+                empty means no restriction. The scheduler runs in UTC.</description>
+        </field>
+        <field name="sendToHour" type="number-integer">
+            <description>Last hour (0-23, UTC) the automation may send, inclusive; empty means
+                no restriction. A sendFromHour greater than sendToHour wraps over midnight.</description>
+        </field>
         <field name="platformSettings" type="text-very-long">
             <description>JSON object storing per-platform settings: actionType, searchKeywords, messageTemplate</description>
         </field>
@@ -57,8 +65,19 @@
         <field name="recipientCompany" type="text-medium" />
         <field name="recipientTitle" type="text-medium" />
         <field name="messageContent" type="text-very-long" />
+        <field name="emailSubject" type="text-medium">
+            <description>Per-message subject override (EMAIL); the campaign's emailSubject
+                is used when empty</description>
+        </field>
         <field name="sentDate" type="date-time" />
         <field name="responseDate" type="date-time" />
+        <field name="attemptCount" type="number-integer" default="0">
+            <description>Send attempts so far; the status only goes FAILED once it reaches the
+                maxAttempts of send#OutreachMessage, before that a failed send stays PENDING</description>
+        </field>
+        <field name="lastAttemptDate" type="date-time">
+            <description>When the last send attempt ran, successful or not</description>
+        </field>
         <field name="status" type="text-short" default="PENDING">
             <description>PENDING, SENT, RESPONDED, FAILED</description>
         </field>

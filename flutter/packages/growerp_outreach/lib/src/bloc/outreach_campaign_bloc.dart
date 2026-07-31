@@ -87,6 +87,8 @@ class OutreachCampaignBloc
           'emailSubject': event.emailSubject,
           'platformSettings': event.platformSettings,
           'dailyLimitPerPlatform': event.dailyLimitPerPlatform,
+          'sendFromHour': event.sendFromHour,
+          'sendToHour': event.sendToHour,
         },
       );
 
@@ -130,6 +132,8 @@ class OutreachCampaignBloc
           'platformSettings': event.platformSettings,
           'statusId': event.status,
           'dailyLimitPerPlatform': event.dailyLimitPerPlatform,
+          'sendFromHour': event.sendFromHour,
+          'sendToHour': event.sendToHour,
         },
       );
 
@@ -167,17 +171,15 @@ class OutreachCampaignBloc
   }
 
   /// Start automation with error handling - updates status to FAILED on error
+  ///
+  /// The campaign is left In Progress on success: the backend scheduler
+  /// (run#AllCampaignAutomation) only drains campaigns with statusId
+  /// MKTG_CAMP_INPROGRESS and isActive Y, so completing it here would stop the
+  /// remaining pending messages from ever being sent.
   void _startAutomationWithErrorHandling(
       OutreachCampaign campaign, String campaignId) async {
     try {
       await _automationService.startCampaign(campaign);
-      // Update to COMPLETED when done
-      await restClient.updateOutreachCampaign(
-        campaign: {
-          'marketingCampaignId': campaignId,
-          'statusId': 'MKTG_CAMP_COMPLETED',
-        },
-      );
     } catch (e) {
       // Update to FAILED on error
       try {

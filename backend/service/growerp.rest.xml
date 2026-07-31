@@ -714,6 +714,11 @@ limitations under the License.
             <method type="delete">
                 <service name="growerp.100.OutreachServices100.delete#OutreachMessage" />
             </method>
+            <resource name="retry">
+                <method type="post">
+                    <service name="growerp.100.OutreachServices100.retry#OutreachMessages" />
+                </method>
+            </resource>
         </resource>
         <resource name="OutreachRecipients">
             <method type="post">
@@ -765,7 +770,7 @@ limitations under the License.
         </resource>
         <resource name="SendOutreachMessage">
             <method type="post">
-                <service name="growerp.100.MCPAutomationServices100.send#OutreachMessageViaBrowser" />
+                <service name="growerp.100.MCPAutomationServices100.send#OutreachMessage" />
             </method>
         </resource>
 

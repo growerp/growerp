@@ -181,10 +181,10 @@ List<Widget> getMessageRow({
   required int index,
 }) {
   bool isPhone = isAPhone(context);
-  final timeStr = message.sentDate.toLocalizedString(
-    context,
-    format: 'MMM d, HH:mm',
-  );
+  // FAILED/PENDING messages have no sentDate, show the attempt time instead
+  final timeStr =
+      (message.sentDate ?? message.lastAttemptDate ?? message.createdDate)
+          .toLocalizedString(context, format: 'MMM d, HH:mm');
 
   if (isPhone) {
     return [

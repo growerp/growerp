@@ -28,6 +28,49 @@ String _formatStatus(String status) {
 /// Integration test class for OutreachCampaign following the LandingPageTest pattern.
 /// Uses external test data and PersistFunctions to manage test state.
 class OutreachCampaignTest {
+  /// The send-window dropdowns show local hours while the backend stores UTC,
+  /// mirror the screen's conversion. Empty means 'no restriction'.
+  static String _hourValue(int? utcHour) => utcHour == null
+      ? ''
+      : ((utcHour + DateTime.now().timeZoneOffset.inHours + 24) % 24)
+          .toString();
+
+  static String _hourLabel(int? utcHour) {
+    final value = _hourValue(utcHour);
+    return value.isEmpty ? 'Any time' : '${value.padLeft(2, '0')}:00';
+  }
+
+  /// Only touch the dropdown when the wanted hour is not already selected:
+  /// re-picking the shown value makes the option text ambiguous, the closed
+  /// field and the open menu then both carry it.
+  static Future<void> _selectHour(
+    WidgetTester tester,
+    String key,
+    int? utcHour,
+  ) async {
+    if (CommonTest.getDropdown(key) == _hourValue(utcHour)) return;
+    await CommonTest.selectDropDown(tester, key, _hourLabel(utcHour));
+  }
+
+  /// Campaign platform chips can only be selected when the platform has an
+  /// enabled configuration, so create the ones used by the test data.
+  static Future<void> enablePlatforms(
+    RestClient restClient, [
+    List<String> platforms = const ['EMAIL', 'LINKEDIN'],
+  ]) async {
+    final existing = (await restClient.listPlatformConfigurations())
+        .configs
+        .map((config) => config.platform.toUpperCase())
+        .toSet();
+    for (final platform in platforms) {
+      if (existing.contains(platform)) continue;
+      await restClient.createPlatformConfiguration(
+        platform: platform,
+        isEnabled: 'Y',
+      );
+    }
+  }
+
   /// Navigates to the campaigns list screen.
   static Future<void> selectCampaigns(WidgetTester tester) async {
     await CommonTest.selectOption(
@@ -188,6 +231,11 @@ class OutreachCampaignTest {
         'dailyLimit',
         campaign.dailyLimitPerPlatform.toString(),
       );
+
+      // Send window, entered in local hours and stored as UTC
+      await tester.ensureVisible(find.byKey(const Key('sendFromHour')));
+      await _selectHour(tester, 'sendFromHour', campaign.sendFromHour);
+      await _selectHour(tester, 'sendToHour', campaign.sendToHour);
 
       // Handle platforms (FilterChips)
       if (campaign.platforms.isNotEmpty && campaign.platforms != '[]') {
@@ -366,6 +414,18 @@ class OutreachCampaignTest {
       expect(
         CommonTest.getTextFormField('dailyLimit'),
         equals(campaign.dailyLimitPerPlatform.toString()),
+      );
+
+      // Verify send window (shown in local hours, stored as UTC)
+      expect(
+        CommonTest.getDropdown('sendFromHour'),
+        equals(_hourValue(campaign.sendFromHour)),
+        reason: 'sendFromHour lost or not converted back to local time',
+      );
+      expect(
+        CommonTest.getDropdown('sendToHour'),
+        equals(_hourValue(campaign.sendToHour)),
+        reason: 'sendToHour lost or not converted back to local time',
       );
 
       // Verify status (compare formatted values for consistency with UI)

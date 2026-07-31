@@ -34,6 +34,8 @@ class OutreachCampaignCreate extends OutreachCampaignEvent {
     this.emailSubject,
     this.platformSettings,
     this.dailyLimitPerPlatform = 50,
+    this.sendFromHour,
+    this.sendToHour,
   });
 
   final String name;
@@ -46,6 +48,10 @@ class OutreachCampaignCreate extends OutreachCampaignEvent {
   final String? platformSettings;
   final int dailyLimitPerPlatform;
 
+  /// send window in UTC hours, null = no restriction
+  final int? sendFromHour;
+  final int? sendToHour;
+
   @override
   List<Object?> get props => [
         name,
@@ -57,6 +63,8 @@ class OutreachCampaignCreate extends OutreachCampaignEvent {
         emailSubject,
         platformSettings,
         dailyLimitPerPlatform,
+        sendFromHour,
+        sendToHour,
       ];
 }
 
@@ -74,6 +82,8 @@ class OutreachCampaignUpdate extends OutreachCampaignEvent {
     this.platformSettings,
     this.status,
     this.dailyLimitPerPlatform,
+    this.sendFromHour,
+    this.sendToHour,
   });
 
   final String campaignId;
@@ -89,6 +99,10 @@ class OutreachCampaignUpdate extends OutreachCampaignEvent {
   final String? status;
   final int? dailyLimitPerPlatform;
 
+  /// send window in UTC hours, null leaves the stored value untouched
+  final int? sendFromHour;
+  final int? sendToHour;
+
   @override
   List<Object?> get props => [
         campaignId,
@@ -103,6 +117,8 @@ class OutreachCampaignUpdate extends OutreachCampaignEvent {
         platformSettings,
         status,
         dailyLimitPerPlatform,
+        sendFromHour,
+        sendToHour,
       ];
 }
 

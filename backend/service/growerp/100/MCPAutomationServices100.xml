@@ -80,11 +80,23 @@
                 <description>Pass explicitly from the headless scheduler; derived from the
                     logged-in user when omitted.</description>
             </parameter>
+            <parameter name="maxAttempts" type="Integer" default-value="3">
+                <description>Passed to send#OutreachMessage: attempts before a message is FAILED</description>
+            </parameter>
+            <parameter name="retryDelayMinutes" type="Integer" default-value="30">
+                <description>A message attempted less than this many minutes ago is skipped, so a
+                    manually triggered run cannot burn all its attempts at once.</description>
+            </parameter>
         </in-parameters>
         <out-parameters>
             <parameter name="messagesProcessed" type="Integer"/>
             <parameter name="messagesSent" type="Integer"/>
-            <parameter name="messagesFailed" type="Integer"/>
+            <parameter name="messagesFailed" type="Integer">
+                <description>Attempts that did not send; those with attempts left stay PENDING</description>
+            </parameter>
+            <parameter name="campaignCompleted" type="Boolean">
+                <description>Set when this run left no PENDING message and closed the campaign</description>
+            </parameter>
         </out-parameters>
         <actions>
             <if condition="!ownerPartyId">
@@ -110,6 +122,24 @@
                 <return/>
             </if>
 
+            <!-- Outside this campaign's send window: the job ticks hourly, each campaign
+                 decides which of those hours it uses. Hours are UTC, the zone the scheduler
+                 runs in; a from greater than a to wraps over midnight. -->
+            <if condition="campaign.sendFromHour != null &amp;&amp; campaign.sendToHour != null">
+                <!-- explicit UTC: ec.user.nowCalendar would use the logged-in user's zone -->
+                <set field="currentHour"
+                    from="java.time.ZonedDateTime.now(java.time.ZoneOffset.UTC).getHour()"
+                    type="Integer"/>
+                <set field="fromHour" from="campaign.sendFromHour as int" type="Integer"/>
+                <set field="toHour" from="campaign.sendToHour as int" type="Integer"/>
+                <set field="inWindow" from="fromHour &lt;= toHour
+                        ? (currentHour &gt;= fromHour &amp;&amp; currentHour &lt;= toHour)
+                        : (currentHour &gt;= fromHour || currentHour &lt;= toHour)"/>
+                <if condition="!inWindow">
+                    <return/>
+                </if>
+            </if>
+
             <!-- Parse the JSON platforms array and compute start-of-day for the daily limit -->
             <script><![CDATA[
                 import groovy.json.JsonSlurper
@@ -126,6 +156,8 @@
                 cal.set(Calendar.HOUR_OF_DAY, 0); cal.set(Calendar.MINUTE, 0)
                 cal.set(Calendar.SECOND, 0); cal.set(Calendar.MILLISECOND, 0)
                 todayStart = new java.sql.Timestamp(cal.timeInMillis)
+                retryCutoff = new java.sql.Timestamp(
+                    ec.user.nowTimestamp.time - (retryDelayMinutes as long) * 60000L)
             ]]></script>
 
             <set field="dailyLimit" from="campaign.dailyLimitPerPlatform ?: 50" type="Integer"/>
@@ -147,17 +179,29 @@
                     <econdition field-name="marketingCampaignId"/>
                     <econdition field-name="platform" from="plat"/>
                     <econdition field-name="status" value="PENDING"/>
+                    <!-- leave a retried message alone until the retry delay has passed -->
+                    <econditions combine="or">
+                        <econdition field-name="lastAttemptDate" operator="is-null"/>
+                        <econdition field-name="lastAttemptDate" operator="less-than"
+                            from="retryCutoff"/>
+                    </econditions>
                     <order-by field-name="createdDate"/>
                 </entity-find>
 
                 <iterate list="pendingMessages" entry="pmsg">
                     <set field="messagesProcessed" from="messagesProcessed + 1"/>
-                    <service-call name="growerp.100.MCPAutomationServices100.send#OutreachMessageViaBrowser"
-                        in-map="[messageId: pmsg.messageId, platform: plat, ownerPartyId: ownerPartyId]"
+                    <!-- Each message is its own unit of work: a hung SMTP connection can run
+                         past the transaction timeout, and without force-new the remaining
+                         messages would be refused with "transaction marked for rollback". -->
+                    <service-call name="growerp.100.MCPAutomationServices100.send#OutreachMessage"
+                        transaction="force-new" ignore-error="true"
+                        in-map="[messageId: pmsg.messageId, platform: plat, ownerPartyId: ownerPartyId,
+                                 maxAttempts: maxAttempts]"
                         out-map="sendOut"/>
-                    <if condition="sendOut.success">
+                    <if condition="sendOut?.success">
                         <set field="messagesSent" from="messagesSent + 1"/>
                         <service-call name="growerp.100.OutreachServices100.update#CampaignMetrics"
+                            transaction="force-new"
                             in-map="[marketingCampaignId: marketingCampaignId, incrementMessagesSent: true]"/>
                         <else>
                             <set field="messagesFailed" from="messagesFailed + 1"/>
@@ -165,6 +209,28 @@
                     </if>
                 </iterate>
             </iterate>
+
+            <!-- Nothing left to send: the campaign is done. Nothing used to write this status,
+                 so campaigns stayed INPROGRESS forever even after every message had gone out.
+                 FAILED messages do not hold it open, they are terminal: retry#OutreachMessages
+                 puts them back to PENDING when a human wants another go. -->
+            <entity-find-count entity-name="growerp.marketing.OutreachMessage"
+                count-field="messagesLeft">
+                <econdition field-name="marketingCampaignId"/>
+                <econdition field-name="status" value="PENDING"/>
+            </entity-find-count>
+            <entity-find-count entity-name="growerp.marketing.OutreachMessage"
+                count-field="messagesTotal">
+                <econdition field-name="marketingCampaignId"/>
+            </entity-find-count>
+            <set field="campaignCompleted" from="false"/>
+            <if condition="messagesLeft == 0 &amp;&amp; messagesTotal &gt; 0
+                    &amp;&amp; campaign.statusId == 'MKTG_CAMP_INPROGRESS'">
+                <service-call name="update#mantle.marketing.campaign.MarketingCampaign"
+                    in-map="[marketingCampaignId: marketingCampaignId,
+                             statusId: 'MKTG_CAMP_COMPLETED', isActive: 'N']"/>
+                <set field="campaignCompleted" from="true"/>
+            </if>
         </actions>
     </service>
 
@@ -230,10 +296,49 @@
         </actions>
     </service>
 
-    <service verb="send" noun="OutreachMessageViaBrowser">
+    <service verb="sync" noun="CampaignAutomationJob" authenticate="anonymous">
         <description>
-            Send a single outreach message via browser automation
-            Uses browsermcp MCP server
+            Make sure this owner has a send job. Without one its campaigns can go active and
+            collect PENDING messages that are never sent: the scheduler only knows the jobs that
+            exist. Called whenever a campaign is created, activated or started. The job ticks
+            hourly all day; each campaign limits itself with sendFromHour/sendToHour.
+        </description>
+        <in-parameters>
+            <parameter name="ownerPartyId" required="true"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="jobName"/>
+            <parameter name="created" type="Boolean"/>
+        </out-parameters>
+        <actions>
+            <set field="jobName" from="'CampaignAutomation_' + ownerPartyId"/>
+            <!-- cache=false: ServiceJob is cacheable and a cached value is not mutable -->
+            <entity-find-one entity-name="moqui.service.job.ServiceJob" value-field="job"
+                cache="false">
+                <field-map field-name="jobName"/>
+            </entity-find-one>
+            <if condition="job">
+                <set field="created" from="false"/>
+                <else>
+                    <service-call name="create#moqui.service.job.ServiceJob"
+                        in-map="[jobName: jobName,
+                                 description: 'Send PENDING outreach messages for ' + ownerPartyId,
+                                 serviceName: 'growerp.100.MCPAutomationServices100.run#AllCampaignAutomation',
+                                 cronExpression: '0 0 * * * ?',
+                                 paused: 'N']"/>
+                    <service-call name="create#moqui.service.job.ServiceJobParameter"
+                        in-map="[jobName: jobName, parameterName: 'ownerPartyId',
+                                 parameterValue: ownerPartyId]"/>
+                    <set field="created" from="true"/>
+                </else>
+            </if>
+        </actions>
+    </service>
+
+    <service verb="send" noun="OutreachMessage">
+        <description>
+            Send a single outreach message on its platform: LINKEDIN goes through browser
+            automation (browsermcp MCP server), EMAIL through the company's own SMTP server.
         </description>
         <in-parameters>
             <parameter name="messageId" required="true"/>
@@ -244,11 +349,22 @@
                 <description>Pass explicitly from the headless scheduler; derived from the
                     logged-in user when omitted.</description>
             </parameter>
+            <parameter name="maxAttempts" type="Integer" default-value="3">
+                <description>A failed send stays PENDING (and is retried by the next automation
+                    run) until this many attempts have been made, then becomes FAILED.</description>
+            </parameter>
         </in-parameters>
         <out-parameters>
             <parameter name="success" type="Boolean"/>
             <parameter name="errorMessage"/>
             <parameter name="screenshotPath"/>
+            <parameter name="attemptCount" type="Integer">
+                <description>Attempts made including this one</description>
+            </parameter>
+            <parameter name="messageStatus">
+                <description>Status written: SENT, PENDING (retry pending) or FAILED (attempts
+                    exhausted, or a permanent failure that retrying cannot fix)</description>
+            </parameter>
         </out-parameters>
         <actions>
             <if condition="!ownerPartyId">
@@ -274,16 +390,21 @@
                          this message body. Operates on the existing PENDING message; status
                          update happens below. -->
                     <if condition="!message.recipientEmail">
+                        <!-- permanent: retrying cannot invent an address -->
                         <set field="sendResult"
-                            from="[success: false, errorMessage: 'Recipient has no email address']"/>
+                            from="[success: false, permanent: true,
+                                   errorMessage: 'Recipient has no email address']"/>
                         <else>
                             <!-- tenant-only email server, no SYSTEM fallback; check first so an
                                  unconfigured tenant becomes a FAILED message, not a service error -->
                             <service-call name="growerp.100.GeneralServices100.get#ActiveEmailServer"
                                 in-map="[ownerPartyId: ownerPartyId]" out-map="emailServerOut"/>
                             <if condition="!emailServerOut.emailConfigured">
+                                <!-- permanent: a missing configuration is not a transient
+                                     glitch, retrying it hourly only hides the real problem -->
                                 <set field="sendResult"
-                                    from="[success: false, errorMessage: 'No SMTP email server configured for this company, please enter the SMTP settings in the company settings']"/>
+                                    from="[success: false, permanent: true,
+                                           errorMessage: 'No SMTP email server configured for this company, please enter the SMTP settings in the company settings']"/>
                                 <else>
                                     <entity-find-one entity-name="mantle.marketing.campaign.MarketingCampaign"
                                         value-field="campaign">
@@ -294,20 +415,46 @@
                                         in-map="[ownerPartyId: ownerPartyId]" out-map="context"/>
                                     <set field="unsubscribeUrl"
                                         value="${baseUrl}/nurture/unsubscribe?email=${message.recipientEmail}&amp;campaign=${message.marketingCampaignId}"/>
-                                    <set field="emailBody"
-                                        from="message.messageContent + '\n\n---\n\n&lt;p style=&quot;font-size: 12px; color: #666;&quot;&gt;&lt;a href=&quot;' + unsubscribeUrl + '&quot;&gt;Unsubscribe&lt;/a&gt;&lt;/p&gt;'"/>
+                                    <!-- Substitute placeholders here, not only when the message
+                                         was imported: a hand-written subject, an edited body or
+                                         one rewritten by the personalizer agent never passed
+                                         through the import-time substitution. -->
+                                    <service-call name="growerp.100.OutreachServices100.personalize#OutreachText"
+                                        out-map="subjectOut"
+                                        in-map="[text: message.emailSubject ?: campaign?.emailSubject
+                                                     ?: 'Hello from GrowERP',
+                                                 recipientName: message.recipientName,
+                                                 recipientCompany: message.recipientCompany,
+                                                 recipientTitle: message.recipientTitle]"/>
+                                    <service-call name="growerp.100.OutreachServices100.personalize#OutreachText"
+                                        out-map="bodyOut"
+                                        in-map="[text: message.messageContent,
+                                                 recipientName: message.recipientName,
+                                                 recipientCompany: message.recipientCompany,
+                                                 recipientTitle: message.recipientTitle]"/>
+                                    <service-call name="growerp.100.OutreachServices100.render#OutreachEmailBody"
+                                        out-map="renderOut"
+                                        in-map="[bodyText: bodyOut.text,
+                                                 unsubscribeUrl: unsubscribeUrl]"/>
+                                    <set field="emailBody" from="renderOut.bodyHtml"/>
                                     <!-- ignore-error + force-new: a send failure must not abort or
-                                         poison this service's transaction; failure is detected by
-                                         the missing emailMessageId and recorded on the message -->
+                                         poison this service's transaction; failure is recorded on
+                                         the message -->
                                     <service-call name="growerp.100.GeneralServices100.send#DirectEmail"
                                         ignore-error="true" transaction="force-new" out-map="emailResult">
                                         <field-map field-name="ownerPartyId"/>
                                         <field-map field-name="toAddresses" from="message.recipientEmail"/>
-                                        <field-map field-name="subject" from="campaign?.emailSubject ?: 'Hello from GrowERP'"/>
+                                        <!-- per-message override wins over the campaign subject,
+                                             placeholders already substituted above -->
+                                        <field-map field-name="subject" from="subjectOut.text"/>
                                         <field-map field-name="bodyHtml" from="emailBody"/>
                                     </service-call>
+                                    <!-- Success is the SMTP message id, NOT emailMessageId:
+                                         emailMessageId only means the EmailMessage row was
+                                         created, and Moqui's sendEmailMessage swallows SMTP
+                                         errors, so an unreachable server would look sent. -->
                                     <set field="sendResult"
-                                        from="emailResult?.emailMessageId ? [success: true] :
+                                        from="emailResult?.messageId ? [success: true] :
                                             [success: false, errorMessage: 'Email send failed, see server log']"/>
                                 </else>
                             </if>
@@ -323,12 +470,26 @@
             <set field="errorMessage" from="sendResult.errorMessage"/>
             <set field="screenshotPath" from="sendResult.screenshotPath"/>
 
-            <!-- Update message status -->
-            <service-call name="update#growerp.marketing.OutreachMessage">
+            <!-- A failed send is only terminal once the attempts run out: until then it stays
+                 PENDING so the next automation run picks it up again. -->
+            <set field="attemptCount" from="(message.attemptCount ?: 0) + 1" type="Integer"/>
+            <set field="messageStatus"
+                from="success ? 'SENT'
+                      : ((sendResult.permanent || attemptCount &gt;= maxAttempts)
+                         ? 'FAILED' : 'PENDING')"/>
+
+            <!-- Update message status. force-new: an unreachable SMTP host blocks for its
+                 full socket timeout, which can exceed the transaction timeout and leave the
+                 calling transaction rollback-only. Without its own transaction the outcome
+                 would be lost and the message would silently stay PENDING. -->
+            <service-call name="update#growerp.marketing.OutreachMessage" transaction="force-new">
                 <field-map field-name="messageId"/>
-                <field-map field-name="status" from="success ? 'SENT' : 'FAILED'"/>
+                <field-map field-name="status" from="messageStatus"/>
                 <field-map field-name="sentDate" from="success ? ec.user.nowTimestamp : null"/>
-                <field-map field-name="errorMessage" from="errorMessage"/>
+                <field-map field-name="attemptCount" from="attemptCount"/>
+                <field-map field-name="lastAttemptDate" from="ec.user.nowTimestamp"/>
+                <!-- '' not null: entity-auto skips null fields, a stale error would survive -->
+                <field-map field-name="errorMessage" from="success ? '' : errorMessage"/>
             </service-call>
         </actions>
     </service>

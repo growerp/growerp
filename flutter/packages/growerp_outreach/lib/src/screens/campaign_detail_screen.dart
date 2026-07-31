@@ -12,6 +12,8 @@
  * limitations under the License.
  */
 
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
@@ -19,6 +21,7 @@ import 'package:growerp_models/growerp_models.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
 import '../bloc/outreach_campaign_bloc.dart';
+import '../bloc/platform_config_bloc.dart';
 import '../models/platform_settings.dart';
 import 'linkedin_lead_import_dialog.dart';
 
@@ -67,6 +70,21 @@ class CampaignDetailScreenState extends State<CampaignDetailScreen> {
   ];
   late String _selectedStatus;
 
+  /// Send window, held in local hours for display; the backend stores UTC
+  /// because the send scheduler runs in UTC.
+  int? _sendFromHour;
+  int? _sendToHour;
+
+  int get _utcOffsetHours => DateTime.now().timeZoneOffset.inHours;
+
+  int? _toLocalHour(int? utcHour) =>
+      utcHour == null ? null : (utcHour + _utcOffsetHours + 24) % 24;
+
+  /// -1 tells the backend to clear the hour: a null there means 'not supplied'
+  /// and would keep the stored value on a partial update.
+  int _toUtcHour(int? localHour) =>
+      localHour == null ? -1 : (localHour - _utcOffsetHours + 24) % 24;
+
   // Platform settings for storing action types
   late PlatformSettings _platformSettings;
 
@@ -88,6 +106,8 @@ class CampaignDetailScreenState extends State<CampaignDetailScreen> {
   void initState() {
     super.initState();
     _campaignBloc = context.read<OutreachCampaignBloc>();
+    // platform chips are only selectable when the platform is configured
+    context.read<PlatformConfigBloc>().add(const PlatformConfigFetch());
 
     _pseudoIdController =
         TextEditingController(text: widget.campaign.pseudoId ?? '');
@@ -109,6 +129,8 @@ class CampaignDetailScreenState extends State<CampaignDetailScreen> {
     _dailyLimitController = TextEditingController(
       text: widget.campaign.dailyLimitPerPlatform.toString(),
     );
+    _sendFromHour = _toLocalHour(widget.campaign.sendFromHour);
+    _sendToHour = _toLocalHour(widget.campaign.sendToHour);
 
     // Parse existing platforms
     try {
@@ -159,6 +181,80 @@ class CampaignDetailScreenState extends State<CampaignDetailScreen> {
       setState(() {
         _platformSettings = result;
       });
+    }
+  }
+
+  /// One end of the send window, in the user's own hours. 'Any time' clears it,
+  /// which lets the campaign send on every hourly tick.
+  Widget _hourDropdown(String label, bool isFrom) {
+    return DropdownButtonFormField<int?>(
+      key: Key(isFrom ? 'sendFromHour' : 'sendToHour'),
+      decoration: InputDecoration(labelText: label),
+      initialValue: isFrom ? _sendFromHour : _sendToHour,
+      isExpanded: true,
+      items: [
+        const DropdownMenuItem<int?>(value: null, child: Text('Any time')),
+        for (int hour = 0; hour < 24; hour++)
+          DropdownMenuItem<int?>(
+            value: hour,
+            child: Text('${hour.toString().padLeft(2, '0')}:00'),
+          ),
+      ],
+      onChanged: (int? newValue) {
+        setState(() {
+          if (isFrom) {
+            _sendFromHour = newValue;
+          } else {
+            _sendToHour = newValue;
+          }
+        });
+      },
+    );
+  }
+
+  /// Requeue this campaign's failed messages: back to PENDING with the attempt
+  /// counter reset, so the automation sends them again on its next run.
+  Future<void> _retryFailed() async {
+    final restClient =
+        RepositoryProvider.of<RestClient>(context, listen: false);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Retry failed sends'),
+        content: const Text(
+          'Put all failed messages of this campaign back in the send queue?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            key: const Key('retryFailedConfirm'),
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('Retry'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    try {
+      final result = await restClient.retryOutreachMessages(
+        marketingCampaignId: widget.campaign.campaignId,
+      );
+      // dio can hand the body back as a raw JSON String
+      final decoded = result is String ? jsonDecode(result) : result;
+      if (mounted) {
+        HelperFunctions.showMessage(
+          context,
+          '${decoded['retriedCount'] ?? 0} message(s) requeued',
+          Colors.green,
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        HelperFunctions.showMessage(context, e.toString(), Colors.red);
+      }
     }
   }
 
@@ -345,6 +441,12 @@ class CampaignDetailScreenState extends State<CampaignDetailScreen> {
                               onPressed: () =>
                                   _importLeads(LeadImportSource.apollo),
                             ),
+                            OutlinedButton.icon(
+                              key: const Key('retryFailed'),
+                              icon: const Icon(Icons.refresh, size: 18),
+                              label: const Text('Retry failed sends'),
+                              onPressed: _retryFailed,
+                            ),
                           ],
                         ),
                         const SizedBox(height: 20),
@@ -371,35 +473,84 @@ class CampaignDetailScreenState extends State<CampaignDetailScreen> {
                         ],
                       ),
                       const SizedBox(height: 8),
-                      Wrap(
-                        spacing: 8.0,
-                        children: _availablePlatforms.map((platform) {
-                          return FilterChip(
-                            label: Text(platform),
-                            selected: _selectedPlatforms.contains(platform),
-                            onSelected: (bool selected) {
-                              setState(() {
-                                if (selected) {
-                                  _selectedPlatforms.add(platform);
-                                  // Initialize default action for this platform
-                                  if (_platformSettings
-                                          .getForPlatform(platform) ==
-                                      null) {
-                                    _platformSettings =
-                                        _platformSettings.updatePlatform(
-                                      platform.toLowerCase(),
-                                      PlatformConfig(
-                                        actionType: _getDefaultAction(platform),
-                                      ),
-                                    );
-                                  }
-                                } else {
-                                  _selectedPlatforms.remove(platform);
-                                }
-                              });
-                            },
+                      BlocBuilder<PlatformConfigBloc, PlatformConfigState>(
+                        builder: (context, configState) {
+                          final configured = configState.configs
+                              .where((c) => c.isEnabled)
+                              .map((c) => c.platform.toUpperCase())
+                              .toSet();
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Wrap(
+                                spacing: 8.0,
+                                children: _availablePlatforms.map((platform) {
+                                  final isSelected =
+                                      _selectedPlatforms.contains(platform);
+                                  final isConfigured =
+                                      configured.contains(platform);
+                                  return FilterChip(
+                                    key: Key('platform$platform'),
+                                    label: Text(platform),
+                                    selected: isSelected,
+                                    // unconfigured platforms cannot be
+                                    // selected, only deselected when stale
+                                    tooltip: isConfigured
+                                        ? null
+                                        : '$platform not configured: enable it '
+                                            'in Platform Configurations',
+                                    onSelected: isConfigured || isSelected
+                                        ? (bool selected) {
+                                            if (selected && !isConfigured) {
+                                              return;
+                                            }
+                                            setState(() {
+                                              if (selected) {
+                                                _selectedPlatforms.add(platform);
+                                                // Initialize default action
+                                                // for this platform
+                                                if (_platformSettings
+                                                        .getForPlatform(
+                                                            platform) ==
+                                                    null) {
+                                                  _platformSettings =
+                                                      _platformSettings
+                                                          .updatePlatform(
+                                                    platform.toLowerCase(),
+                                                    PlatformConfig(
+                                                      actionType:
+                                                          _getDefaultAction(
+                                                              platform),
+                                                    ),
+                                                  );
+                                                }
+                                              } else {
+                                                _selectedPlatforms
+                                                    .remove(platform);
+                                              }
+                                            });
+                                          }
+                                        : null,
+                                  );
+                                }).toList(),
+                              ),
+                              if (configured.isEmpty &&
+                                  configState.status !=
+                                      PlatformConfigStatus.loading)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 8),
+                                  child: Text(
+                                    'No platform configured yet: enable a '
+                                    'platform in Platform Configurations.',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodySmall
+                                        ?.copyWith(color: Colors.red),
+                                  ),
+                                ),
+                            ],
                           );
-                        }).toList(),
+                        },
                       ),
                       const SizedBox(height: 20),
                       TextFormField(
@@ -419,7 +570,8 @@ class CampaignDetailScreenState extends State<CampaignDetailScreen> {
                               ? "Hi {name} — noticed you're {title} at "
                                   '{company} and wanted to connect...'
                               : null,
-                          helperText: 'Placeholders: {name}, {company}, {title}',
+                          helperText: 'Placeholders: {name}, {firstName}, '
+                              '{company}, {title}',
                         ),
                         maxLines: 5,
                       ),
@@ -427,8 +579,10 @@ class CampaignDetailScreenState extends State<CampaignDetailScreen> {
                       TextFormField(
                         key: const Key('emailSubject'),
                         controller: _emailSubjectController,
-                        decoration:
-                            const InputDecoration(labelText: 'Email Subject'),
+                        decoration: const InputDecoration(
+                          labelText: 'Email Subject',
+                          helperText: 'Placeholders work here too',
+                        ),
                       ),
                       const SizedBox(height: 20),
                       TextFormField(
@@ -445,6 +599,17 @@ class CampaignDetailScreenState extends State<CampaignDetailScreen> {
                           }
                           return null;
                         },
+                      ),
+                      const SizedBox(height: 20),
+                      // Send window: the job ticks every hour, these say which
+                      // of those hours this campaign may use. Shown in local
+                      // time, stored as UTC.
+                      Row(
+                        children: [
+                          Expanded(child: _hourDropdown('Send from', true)),
+                          const SizedBox(width: 10),
+                          Expanded(child: _hourDropdown('Send until', false)),
+                        ],
                       ),
                       const SizedBox(height: 30),
                       Row(
@@ -488,6 +653,8 @@ class CampaignDetailScreenState extends State<CampaignDetailScreen> {
                                       dailyLimitPerPlatform: int.tryParse(
                                               _dailyLimitController.text) ??
                                           50,
+                                      sendFromHour: _toUtcHour(_sendFromHour),
+                                      sendToHour: _toUtcHour(_sendToHour),
                                       platformSettings:
                                           _platformSettings.toJson(),
                                     ));
@@ -508,6 +675,8 @@ class CampaignDetailScreenState extends State<CampaignDetailScreen> {
                                       dailyLimitPerPlatform: int.tryParse(
                                               _dailyLimitController.text) ??
                                           50,
+                                      sendFromHour: _toUtcHour(_sendFromHour),
+                                      sendToHour: _toUtcHour(_sendToHour),
                                       platformSettings:
                                           _platformSettings.toJson(),
                                     ));

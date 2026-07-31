@@ -77,8 +77,11 @@ class AutomationOrchestrator {
     });
   }
 
-  /// Initialize adapters for the specified platforms and the prospect
-  /// aggregator (scrapers are initialised lazily when first used).
+  /// Initialize adapters for the specified platforms.
+  ///
+  /// Prospect scrapers are not touched here: they are initialised lazily by the
+  /// aggregator when a scrape actually routes to them, so a campaign never
+  /// starts browser sessions for platforms it does not use.
   Future<void> initialize(List<String> platforms) async {
     for (final platform in platforms) {
       final adapter = _createAdapter(platform);
@@ -87,8 +90,6 @@ class AutomationOrchestrator {
         _adapters[platform] = adapter;
       }
     }
-    // Initialise scrapers (each one no-ops if already initialised)
-    await _prospectAggregator.initialize();
   }
 
   /// Run automation for a specific platform
@@ -567,7 +568,6 @@ class AutomationOrchestrator {
   Future<List<ProspectScrapeResult>> discoverProspects(
     ProspectQuery query,
   ) async {
-    await _prospectAggregator.initialize();
     return _prospectAggregator.scrape(query);
   }
 

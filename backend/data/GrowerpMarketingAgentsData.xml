@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<entity-facade-xml type="install">
+<entity-facade-xml type="seed">
 
     <!-- ════════════════════════════════════════════════════════════════════════
          GrowERP self-marketing sprint — control-center (ADK) agents + send scheduler.
-         Owner: GROWERP. Load after the GROWERP company exists:
-           java -jar moqui.war load types=install file=.../GrowerpMarketingAgentsData.xml
+         Owner: GROWERP. Must load after the GROWERP company exists; reloaded by the
+         ordinary `java -jar moqui.war load types=seed` (create-or-update, safe to
+         re-run on an existing database).
          Agents need an LLM key (config/AdkAgentConfig.apiKey or GOOGLE_API_KEY env).
          Each scheduled agent ships with a default scheduleChatRoomId; change it per agent in /adk if needed.
          See plans/marketing-sales-plan.md.
@@ -25,13 +26,24 @@
         scheduleEnabled="Y"
         scheduleChatRoomId="GROWERP_OUTREACH_ROOM"
         scheduleExpression="0 0 9-17 * * ?"
-        schedulePrompt="Personalise up to 50 PENDING outreach messages with an empty body: fetch them with list#OutreachMessages (status=PENDING), for each call generate#PlatformMessage from the campaign template + recipient name/title/company, then save with update#OutreachMessageContent. Skip SENT messages."
-        description="Personalises pending outreach message bodies for the active campaign."
+        schedulePrompt="Fill in PENDING outreach messages that have an EMPTY body, up to 50: fetch with list#OutreachMessages (status=PENDING), SKIP every message that already has messageContent, and for the empty ones call generate#PlatformMessage grounded on the campaign template + recipient name/title/company, then save with update#OutreachMessageContent. Never touch SENT messages and never overwrite a body that already has text. Report how many you filled and how many you skipped."
+        description="Fills in empty outreach message bodies for the active campaign."
         instruction="You prepare outbound messages for GrowERP's own marketing campaign. Fetch pending
-messages with list#OutreachMessages (status=PENDING). Personalise each
-PENDING message using the recipient's name, title and company and the campaign template, keeping it short,
-human and specific to their likely pain (running an SMB on spreadsheets). Write the body back with
-update#OutreachMessageContent — these are the only message services; do not invent others. You never send messages and you never edit a message that is already SENT.
+messages with list#OutreachMessages (status=PENDING).
+Only ever fill a message whose body is EMPTY. If messageContent already has text, leave that message
+untouched and count it as skipped: the campaign import already personalised it from the campaign
+template, and overwriting it destroys copy a human wrote. You never send messages and you never edit a
+message that is already SENT.
+Ground every message in the campaign's own template and summary (get#OutreachCampaign). Never introduce
+a product, feature or topic that is not in that template — if the template is empty, skip the message
+and say so instead of inventing copy.
+Write the message BODY only. No 'Subject:' line and no other header inside the body: the subject is a
+separate field and must never appear in the text you save. Do not wrap the body in quotes or markdown.
+Address the recipient by first name. Never use a job title as the salutation — 'Dear Founder's Office'
+is wrong, 'Hi Yash' is right. If the name is unknown, open without a salutation.
+Personalise with the recipient's name, title and company, keeping it short, human and specific to their
+likely pain (running an SMB on spreadsheets). Write the body back with update#OutreachMessageContent —
+these are the only message services; do not invent others.
 Channel rules: for LINKEDIN, end on a question and include NO URL (we share the link only after they
 reply); keep it under ~400 characters. For EMAIL, include the assessment link
 https://growerp.com/landing/erp-landing-page and a one-line sign-off (Hans, GrowERP); keep it under ~120
@@ -138,17 +150,28 @@ team chat which pieces are awaiting approval."/>
 read-only data: messages sent (by channel), reply/response rate, new and advancing opportunities, and how
 close we are to landing the first customer. A few bullet points, surface problems first. Never change data."/>
 
-    <!-- ── Send scheduler: drain PENDING messages within daily limits, hourly in work hours ──
-         Runs headless (no logged-in user), so ownerPartyId is passed as a job parameter. -->
+    <!-- ── Send scheduler: drain PENDING messages within daily limits ──
+         Runs headless (no logged-in user), so ownerPartyId is passed as a job parameter.
+         Ticks every hour of the day: the send window is per campaign (sendFromHour /
+         sendToHour), because one cron cannot serve campaigns in different time zones.
+         jobName matches sync#CampaignAutomationJob so other owners get the same job
+         created automatically when they start a campaign.
+         NOTE the scheduler evaluates cron in UTC, not in the server's local zone. -->
     <moqui.service.job.ServiceJob
-        jobName="GrowerpCampaignAutomation"
-        description="Drain PENDING outreach messages for GROWERP active campaigns within daily limits"
+        jobName="CampaignAutomation_GROWERP"
+        description="Send PENDING outreach messages for GROWERP"
         serviceName="growerp.100.MCPAutomationServices100.run#AllCampaignAutomation"
-        cronExpression="0 0 9-17 * * ?"
+        cronExpression="0 0 * * * ?"
         paused="N"/>
     <moqui.service.job.ServiceJobParameter
-        jobName="GrowerpCampaignAutomation"
+        jobName="CampaignAutomation_GROWERP"
         parameterName="ownerPartyId"
         parameterValue="GROWERP"/>
+
+    <!-- superseded by CampaignAutomation_GROWERP above; paused so an existing database does
+         not run both and send everything twice per hour -->
+    <moqui.service.job.ServiceJob
+        jobName="GrowerpCampaignAutomation"
+        paused="Y"/>
 
 </entity-facade-xml>

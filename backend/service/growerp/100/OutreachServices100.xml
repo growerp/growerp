@@ -28,6 +28,8 @@
                 <parameter name="emailSubject" />
                 <parameter name="statusId" />
                 <parameter name="dailyLimitPerPlatform" type="Integer" />
+                <parameter name="sendFromHour" type="Integer" />
+                <parameter name="sendToHour" type="Integer" />
                 <parameter name="budgetedCost" type="BigDecimal" />
                 <parameter name="actualCost" type="BigDecimal" />
                 <parameter name="estimatedCost" type="BigDecimal" />
@@ -85,6 +87,8 @@
                     platformSettings: camp.platformSettings,
                     statusId: camp.statusId ?: 'MKTG_CAMP_PLANNED',
                     dailyLimitPerPlatform: camp.dailyLimitPerPlatform ?: 50,
+                    sendFromHour: camp.sendFromHour,
+                    sendToHour: camp.sendToHour,
                     budgetedCost: camp.budgetedCost?.toString(),
                     actualCost: camp.actualCost?.toString(),
                     estimatedCost: camp.estimatedCost?.toString(),
@@ -126,6 +130,8 @@
                 <parameter name="platformSettings" />
                 <parameter name="statusId" />
                 <parameter name="dailyLimitPerPlatform" type="Integer" />
+                <parameter name="sendFromHour" type="Integer" />
+                <parameter name="sendToHour" type="Integer" />
                 <parameter name="budgetedCost" type="BigDecimal" />
                 <parameter name="actualCost" type="BigDecimal" />
                 <parameter name="estimatedCost" type="BigDecimal" />
@@ -175,6 +181,8 @@
                 platformSettings: campaignValue.platformSettings,
                 statusId: campaignValue.statusId ?: 'MKTG_CAMP_PLANNED',
                 dailyLimitPerPlatform: campaignValue.dailyLimitPerPlatform ?: 50,
+                sendFromHour: campaignValue.sendFromHour,
+                sendToHour: campaignValue.sendToHour,
                 budgetedCost: campaignValue.budgetedCost?.toString(),
                 actualCost: campaignValue.actualCost?.toString(),
                 estimatedCost: campaignValue.estimatedCost?.toString(),
@@ -208,6 +216,7 @@
                     recipientCompany: msg.recipientCompany,
                     recipientTitle: msg.recipientTitle,
                     messageContent: msg.messageContent,
+                    emailSubject: msg.emailSubject,
                     sentDate: msg.sentDate?.toString(),
                     responseDate: msg.responseDate?.toString(),
                     status: msg.status,
@@ -263,6 +272,8 @@
                 <parameter name="emailSubject" />
                 <parameter name="platformSettings" />
                 <parameter name="dailyLimitPerPlatform" type="Integer" default="50" />
+                <parameter name="sendFromHour" type="Integer" />
+                <parameter name="sendToHour" type="Integer" />
                 <parameter name="budgetedCost" type="BigDecimal" />
                 <parameter name="estimatedCost" type="BigDecimal" />
                 <parameter name="expectedRevenue" type="BigDecimal" />
@@ -284,6 +295,8 @@
                 <parameter name="platformSettings" />
                 <parameter name="statusId" />
                 <parameter name="dailyLimitPerPlatform" type="Integer" />
+                <parameter name="sendFromHour" type="Integer" />
+                <parameter name="sendToHour" type="Integer" />
                 <parameter name="budgetedCost" type="BigDecimal" />
                 <parameter name="estimatedCost" type="BigDecimal" />
                 <parameter name="expectedRevenue" type="BigDecimal" />
@@ -308,6 +321,17 @@
             <set field="emailSubject" from="campaign.emailSubject" />
             <set field="platformSettings" from="campaign.platformSettings" />
             <set field="dailyLimitPerPlatform" from="campaign.dailyLimitPerPlatform ?: 50"
+                type="Integer" />
+            <!-- -1 is the 'any time' marker from the client, store it as no restriction.
+                 Elvis (?:) is wrong here: Groovy treats integer 0 as falsy, which would
+                 turn midnight UTC into -1 and wrongly clear it; use explicit null checks. -->
+            <set field="sendFromHour"
+                from="campaign.sendFromHour == null ? null
+                      : ((campaign.sendFromHour as Integer) &lt; 0 ? null : campaign.sendFromHour)"
+                type="Integer" />
+            <set field="sendToHour"
+                from="campaign.sendToHour == null ? null
+                      : ((campaign.sendToHour as Integer) &lt; 0 ? null : campaign.sendToHour)"
                 type="Integer" />
             <set field="budgetedCost" from="campaign.budgetedCost" />
             <set field="estimatedCost" from="campaign.estimatedCost" />
@@ -357,6 +381,8 @@
                          platformSettings: platformSettings,
                          statusId: 'MKTG_CAMP_PLANNED',
                          dailyLimitPerPlatform: dailyLimitPerPlatform,
+                         sendFromHour: sendFromHour,
+                         sendToHour: sendToHour,
                          budgetedCost: budgetedCost,
                          estimatedCost: estimatedCost,
                          expectedRevenue: expectedRevenue,
@@ -365,6 +391,10 @@
                          isActive: 'N',
                          createdByUserLogin: ec.user.userId,
                          lastModifiedByUserLogin: ec.user.userId]" />
+
+            <!-- an owner without a send job collects PENDING messages that never go out -->
+            <service-call name="growerp.100.MCPAutomationServices100.sync#CampaignAutomationJob"
+                in-map="[ownerPartyId: ownerPartyId]" />
 
             <!-- Initialize metrics -->
             <service-call name="create#growerp.marketing.CampaignMetrics"
@@ -390,6 +420,8 @@
                 platformSettings: platformSettings,
                 statusId: 'MKTG_CAMP_PLANNED',
                 dailyLimitPerPlatform: dailyLimitPerPlatform,
+                sendFromHour: sendFromHour,
+                sendToHour: sendToHour,
                 budgetedCost: budgetedCost?.toString(),
                 estimatedCost: estimatedCost?.toString(),
                 expectedRevenue: expectedRevenue?.toString(),
@@ -417,6 +449,8 @@
                 <parameter name="platformSettings" />
                 <parameter name="statusId" />
                 <parameter name="dailyLimitPerPlatform" type="Integer" />
+                <parameter name="sendFromHour" type="Integer" />
+                <parameter name="sendToHour" type="Integer" />
                 <parameter name="budgetedCost" type="BigDecimal" />
                 <parameter name="actualCost" type="BigDecimal" />
                 <parameter name="estimatedCost" type="BigDecimal" />
@@ -440,6 +474,8 @@
                 <parameter name="platformSettings" />
                 <parameter name="statusId" />
                 <parameter name="dailyLimitPerPlatform" type="Integer" />
+                <parameter name="sendFromHour" type="Integer" />
+                <parameter name="sendToHour" type="Integer" />
                 <parameter name="budgetedCost" type="BigDecimal" />
                 <parameter name="actualCost" type="BigDecimal" />
                 <parameter name="estimatedCost" type="BigDecimal" />
@@ -469,6 +505,8 @@
             <set field="platformSettings" from="campaign.platformSettings" />
             <set field="statusId" from="campaign.statusId" />
             <set field="dailyLimitPerPlatform" from="campaign.dailyLimitPerPlatform" type="Integer" />
+            <set field="sendFromHour" from="campaign.sendFromHour" type="Integer" />
+            <set field="sendToHour" from="campaign.sendToHour" type="Integer" />
             <set field="budgetedCost" from="campaign.budgetedCost" />
             <set field="actualCost" from="campaign.actualCost" />
             <set field="estimatedCost" from="campaign.estimatedCost" />
@@ -531,6 +569,14 @@
             <set field="existingCampaign.statusId" from="statusId ?: existingCampaign.statusId" />
             <set field="existingCampaign.dailyLimitPerPlatform"
                 from="dailyLimitPerPlatform ?: existingCampaign.dailyLimitPerPlatform" />
+            <!-- null keeps the stored hour (partial update), -1 clears it back to
+                 'any time': a plain null cannot express the difference -->
+            <set field="existingCampaign.sendFromHour"
+                from="sendFromHour == null ? existingCampaign.sendFromHour
+                      : (sendFromHour &lt; 0 ? null : sendFromHour)" />
+            <set field="existingCampaign.sendToHour"
+                from="sendToHour == null ? existingCampaign.sendToHour
+                      : (sendToHour &lt; 0 ? null : sendToHour)" />
             <set field="existingCampaign.budgetedCost"
                 from="budgetedCost ?: existingCampaign.budgetedCost" />
             <set field="existingCampaign.actualCost"
@@ -560,6 +606,8 @@
                 platformSettings: platformSettings ?: existingCampaign.platformSettings,
                 statusId: statusId ?: existingCampaign.statusId ?: 'MKTG_CAMP_PLANNED',
                 dailyLimitPerPlatform: dailyLimitPerPlatform ?: existingCampaign.dailyLimitPerPlatform ?: 50,
+                sendFromHour: existingCampaign.sendFromHour,
+                sendToHour: existingCampaign.sendToHour,
                 budgetedCost: (budgetedCost ?: existingCampaign.budgetedCost)?.toString(),
                 actualCost: (actualCost ?: existingCampaign.actualCost)?.toString(),
                 estimatedCost: (estimatedCost ?: existingCampaign.estimatedCost)?.toString(),
@@ -737,7 +785,9 @@
     <service verb="create" noun="OutreachMessage">
         <description>Record a sent outreach message</description>
         <in-parameters>
-            <parameter name="marketingCampaignId" />
+            <!-- required: the automation only ever sends per campaign, and the message takes
+                 its owner and unsubscribe link from the campaign -->
+            <parameter name="marketingCampaignId" required="true" />
             <parameter name="platform" required="true" />
             <parameter name="recipientName" />
             <parameter name="recipientProfileUrl" />
@@ -746,6 +796,9 @@
             <parameter name="recipientCompany" />
             <parameter name="recipientTitle" />
             <parameter name="messageContent" required="true" />
+            <parameter name="emailSubject">
+                <description>Subject override; the campaign's emailSubject is used when empty</description>
+            </parameter>
             <parameter name="status" default-value="PENDING" />
         </in-parameters>
         <out-parameters>
@@ -759,6 +812,7 @@
             <parameter name="recipientCompany" />
             <parameter name="recipientTitle" />
             <parameter name="messageContent" />
+            <parameter name="emailSubject" />
             <parameter name="status" />
             <parameter name="sentDate" />
             <parameter name="responseDate" />
@@ -777,15 +831,13 @@
                          recipientCompany: recipientCompany,
                          recipientTitle: recipientTitle,
                          messageContent: messageContent,
+                         emailSubject: emailSubject,
                          sentDate: status == 'SENT' ? ec.user.nowTimestamp : null,
                          status: status,
                          createdDate: ec.user.nowTimestamp]" />
 
-            <!-- Update campaign metrics only if marketingCampaignId is provided -->
-            <if condition="marketingCampaignId">
-                <service-call name="growerp.100.OutreachServices100.update#CampaignMetrics"
-                    in-map="[marketingCampaignId: marketingCampaignId, incrementMessagesSent: status == 'SENT']" />
-            </if>
+            <service-call name="growerp.100.OutreachServices100.update#CampaignMetrics"
+                in-map="[marketingCampaignId: marketingCampaignId, incrementMessagesSent: status == 'SENT']" />
 
             <!-- Fetch created message to return full object -->
             <entity-find-one entity-name="growerp.marketing.OutreachMessage" value-field="message">
@@ -803,6 +855,7 @@
             <set field="recipientCompany" from="message.recipientCompany" />
             <set field="recipientTitle" from="message.recipientTitle" />
             <set field="messageContent" from="message.messageContent" />
+            <set field="emailSubject" from="message.emailSubject" />
             <set field="status" from="message.status" />
             <set field="sentDate"
                 from="message.sentDate ? ec.l10n.format(message.sentDate, 'yyyy-MM-dd HH:mm:ssZ') : null" />
@@ -903,12 +956,16 @@
 
     <service verb="update" noun="OutreachMessageContent">
         <description>
-            Set the (AI-personalised) body of a PENDING outreach message. Used by the Outreach
-            Personalizer agent after generate#PlatformMessage. Refuses messages already sent.
+            Set the (AI-personalised) body and optional subject override of a PENDING outreach
+            message. Used by the Outreach Personalizer agent after generate#PlatformMessage.
+            Refuses messages already sent.
         </description>
         <in-parameters>
             <parameter name="messageId" required="true" />
             <parameter name="messageContent" required="true" />
+            <parameter name="emailSubject">
+                <description>Subject override; pass '' to fall back to the campaign subject</description>
+            </parameter>
         </in-parameters>
         <out-parameters>
             <parameter name="messageId" />
@@ -925,8 +982,10 @@
                 <return error="true"
                     message="Can only edit PENDING messages; ${messageId} is ${message.status}" />
             </if>
+            <!-- emailSubject null leaves the current one (entity-auto skips nulls), '' clears it -->
             <service-call name="update#growerp.marketing.OutreachMessage"
-                in-map="[messageId: messageId, messageContent: messageContent]" />
+                in-map="[messageId: messageId, messageContent: messageContent,
+                         emailSubject: emailSubject]" />
             <set field="status" from="message.status" />
         </actions>
     </service>
@@ -1021,18 +1080,19 @@
                     <set field="skippedCount" from="skippedCount + 1" />
                     <continue />
                 </if>
-                <!-- Personalise messageContent from the template unless explicitly supplied -->
-                <script><![CDATA[
-                    def tmpl = platformTemplates[rcptPlatform.toLowerCase()] ?: (campaign.messageTemplate ?: '')
-                    def rcptName = recipient.recipientName ?: ''
-                    def rcptFirstName = rcptName.trim() ? rcptName.trim().split(/\s+/)[0] : ''
-                    def autoContent = tmpl.replace('{name}', rcptName)
-                            .replace('{firstName}', rcptFirstName)
-                            .replace('{company}', recipient.recipientCompany ?: '')
-                            .replace('{companyName}', recipient.recipientCompany ?: '')
-                            .replace('{title}', recipient.recipientTitle ?: '')
-                    computedMessageContent = recipient.messageContent ? recipient.messageContent : autoContent
-                ]]></script>
+                <!-- Personalise messageContent from the template unless explicitly supplied.
+                     One placeholder list, shared with the send-time substitution. -->
+                <set field="rcptTemplate"
+                    from="platformTemplates[rcptPlatform.toLowerCase()]
+                          ?: (campaign.messageTemplate ?: '')" />
+                <service-call name="growerp.100.OutreachServices100.personalize#OutreachText"
+                    out-map="contentOut"
+                    in-map="[text: rcptTemplate,
+                             recipientName: recipient.recipientName,
+                             recipientCompany: recipient.recipientCompany,
+                             recipientTitle: recipient.recipientTitle]" />
+                <set field="computedMessageContent"
+                    from="recipient.messageContent ?: contentOut.text" />
                 <service-call name="create#growerp.marketing.OutreachMessage"
                     in-map="[marketingCampaignId: marketingCampaignId,
                              platform: rcptPlatform,
@@ -1293,6 +1353,103 @@
     <!--  Email Sending Service                                    -->
     <!-- ========================================================= -->
 
+    <service verb="personalize" noun="OutreachText">
+        <description>Substitute the recipient placeholders of a subject or body:
+            {name}, {firstName}, {company}, {companyName}, {title}. Used when a message is
+            created from a template AND again at send time, so a hand-written subject or an
+            AI-rewritten body gets the same treatment. Idempotent: substituted text holds no
+            placeholders left to replace.</description>
+        <in-parameters>
+            <!-- allow-html: copy legitimately holds &lt; &gt; &amp; (an address in plain text,
+                 a "<" in a sentence). Nothing here interprets the text as markup. -->
+            <parameter name="text" allow-html="any" />
+            <parameter name="recipientName" allow-html="any" />
+            <parameter name="recipientCompany" allow-html="any" />
+            <parameter name="recipientTitle" allow-html="any" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="text" allow-html="any" />
+        </out-parameters>
+        <actions>
+            <if condition="!text">
+                <return />
+            </if>
+            <script><![CDATA[
+                def fullName = recipientName ?: ''
+                def firstName = fullName.trim() ? fullName.trim().split(/\s+/)[0] : ''
+                text = text.replace('{name}', fullName)
+                        .replace('{firstName}', firstName)
+                        .replace('{company}', recipientCompany ?: '')
+                        .replace('{companyName}', recipientCompany ?: '')
+                        .replace('{title}', recipientTitle ?: '')
+            ]]></script>
+        </actions>
+    </service>
+
+    <service verb="render" noun="OutreachEmailBody">
+        <description>Wrap a plain-text outreach message in the HTML email layout: readable
+            column, paragraphs and line breaks kept, muted footer with the unsubscribe link.
+            Styles are inline because mail clients drop stylesheets. The text is escaped
+            first, so an angle bracket in the copy cannot break the layout.</description>
+        <in-parameters>
+            <!-- allow-html: the copy may contain &lt; &gt; &amp;, they are escaped below -->
+            <parameter name="bodyText" required="true" allow-html="any" />
+            <parameter name="unsubscribeUrl" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="bodyHtml" allow-html="any" />
+        </out-parameters>
+        <actions>
+            <script><![CDATA[
+                // escape first: this is human/AI copy, never markup
+                def escaped = bodyText.replace('&', '&amp;')
+                        .replace('<', '&lt;').replace('>', '&gt;')
+                // A bare URL is the call to action of most outreach mails, so make it
+                // clickable. Runs on escaped text and stops at '<', which keeps the <br />
+                // inserted below out of the href. Trailing sentence punctuation is not
+                // part of the link.
+                def autoLink = { String block ->
+                    block.replaceAll(/https?:\/\/[^\s<]+/) { String url ->
+                        def trail = ''
+                        while (url && url[-1] in ['.', ',', ';', ':', ')']) {
+                            trail = url[-1] + trail
+                            url = url[0..-2]
+                        }
+                        '<a href="' + url + '" style="color:#0b6bcb;">' + url + '</a>' + trail
+                    }
+                }
+
+                // blank line starts a paragraph, a single newline is a line break
+                def paragraphs = escaped.split(/\r?\n\s*\r?\n/)
+                        .findAll { it.trim() }
+                        .collect { block ->
+                            '<p style="margin:0 0 16px 0;">' +
+                                autoLink(block.trim().replace('\n', '<br />')) + '</p>'
+                        }.join('\n        ')
+
+                def footer = ''
+                if (unsubscribeUrl) {
+                    // & is a character reference start in HTML: an unescaped query
+                    // separator makes the href invalid and some clients mangle it
+                    def safeUrl = unsubscribeUrl.replace('&', '&amp;')
+                    footer = '''
+        <div style="margin-top:28px;padding-top:16px;border-top:1px solid #e4e7eb;
+             font-size:12px;line-height:1.5;color:#7b8794;">
+          <a href="''' + safeUrl + '''" style="color:#7b8794;">Unsubscribe</a>
+        </div>'''
+                }
+
+                bodyHtml = '''<div style="background:#f4f5f7;padding:24px 12px;">
+      <div style="max-width:600px;margin:0 auto;padding:32px;background:#ffffff;
+           border-radius:8px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',
+           Roboto,Helvetica,Arial,sans-serif;font-size:15px;line-height:1.6;color:#1f2933;">
+        ''' + paragraphs + footer + '''
+      </div>
+    </div>'''
+            ]]></script>
+        </actions>
+    </service>
+
     <service verb="send" noun="OutreachEmail">
         <description>Send an outreach email for a campaign</description>
         <in-parameters>
@@ -1340,8 +1497,15 @@
                 in-map="[ownerPartyId: companyPartyId]" out-map="context" />
             <set field="unsubscribeUrl"
                 value="${baseUrl}/nurture/unsubscribe?email=${toEmail}&amp;campaign=${marketingCampaignId}" />
-            <set field="emailBody"
-                from="body + '\n\n---\n\n&lt;p style=&quot;font-size: 12px; color: #666;&quot;&gt;&lt;a href=&quot;' + unsubscribeUrl + '&quot;&gt;Unsubscribe&lt;/a&gt;&lt;/p&gt;'" />
+            <service-call name="growerp.100.OutreachServices100.personalize#OutreachText"
+                out-map="subjectOut" in-map="[text: subject, recipientName: toName]" />
+            <set field="subject" from="subjectOut.text" />
+            <service-call name="growerp.100.OutreachServices100.personalize#OutreachText"
+                out-map="bodyOut" in-map="[text: body, recipientName: toName]" />
+            <service-call name="growerp.100.OutreachServices100.render#OutreachEmailBody"
+                out-map="renderOut"
+                in-map="[bodyText: bodyOut.text, unsubscribeUrl: unsubscribeUrl]" />
+            <set field="emailBody" from="renderOut.bodyHtml" />
 
             <!-- Send through the active email server (owner SMTP settings, else SYSTEM) -->
             <service-call name="growerp.100.GeneralServices100.send#DirectEmail"
@@ -1362,6 +1526,8 @@
                 <field-map field-name="recipientName" from="toName" />
                 <field-map field-name="recipientEmail" from="toEmail" />
                 <field-map field-name="messageContent" from="body" />
+                <!-- keep the subject actually sent, it can differ from the campaign's -->
+                <field-map field-name="emailSubject" from="subject" />
                 <field-map field-name="sentDate" from="ec.user.nowTimestamp" />
                 <field-map field-name="status" value="SENT" />
                 <field-map field-name="createdDate" from="ec.user.nowTimestamp" />
@@ -1411,6 +1577,10 @@
                 <field-map field-name="startDate" from="ec.user.nowTimestamp" />
                 <field-map field-name="lastModifiedByUserLogin" from="ec.user.userId" />
             </service-call>
+
+            <!-- an owner without a send job collects PENDING messages that never go out -->
+            <service-call name="growerp.100.MCPAutomationServices100.sync#CampaignAutomationJob"
+                in-map="[ownerPartyId: ownerPartyId]" />
 
             <set field="statusId" value="MKTG_CAMP_INPROGRESS" />
             <set field="message" value="Campaign automation started" />
@@ -1512,11 +1682,61 @@
         </actions>
     </service>
 
+    <service verb="retry" noun="OutreachMessages">
+        <description>Requeue failed outreach messages: status back to PENDING with the attempt
+            counter reset, so the campaign automation sends them again on its next run. Pass
+            messageId for a single message, marketingCampaignId for all failed ones of a
+            campaign.</description>
+        <in-parameters>
+            <parameter name="messageId" />
+            <parameter name="marketingCampaignId" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="retriedCount" type="Integer" />
+        </out-parameters>
+        <actions>
+            <if condition="!messageId &amp;&amp; !marketingCampaignId">
+                <return error="true"
+                    message="messageId or marketingCampaignId is required" />
+            </if>
+            <service-call
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="context" />
+
+            <!-- read through the view to keep this owner-scoped, the campaign holds the owner -->
+            <entity-find entity-name="growerp.marketing.OutreachMessageAndCampaign"
+                list="failedList">
+                <econdition field-name="ownerPartyId" />
+                <econdition field-name="messageId" ignore-if-empty="true" />
+                <econdition field-name="marketingCampaignId" ignore-if-empty="true" />
+                <econdition field-name="status" value="FAILED" />
+                <select-field field-name="messageId" />
+            </entity-find>
+
+            <set field="retriedCount" from="0" type="Integer" />
+            <iterate list="failedList" entry="failed">
+                <entity-find-one entity-name="growerp.marketing.OutreachMessage" value-field="msg"
+                    for-update="true">
+                    <field-map field-name="messageId" from="failed.messageId" />
+                </entity-find-one>
+                <set field="msg.status" value="PENDING" />
+                <set field="msg.attemptCount" from="0" />
+                <set field="msg.errorMessage" from="null" />
+                <set field="msg.lastAttemptDate" from="null" />
+                <entity-update value-field="msg" />
+                <set field="retriedCount" from="retriedCount + 1" />
+            </iterate>
+        </actions>
+    </service>
+
     <service verb="list" noun="OutreachMessages">
-        <description>List outreach messages for owner with optional filters</description>
+        <description>List outreach messages of the calling user's company, newest first.</description>
         <in-parameters>
             <parameter name="marketingCampaignId" />
             <parameter name="status" />
+            <parameter name="search">
+                <description>Matches recipient name, email or company</description>
+            </parameter>
             <parameter name="start" type="Integer" default="0" />
             <parameter name="limit" type="Integer" default="20" />
         </in-parameters>
@@ -1533,8 +1753,12 @@
                 <parameter name="recipientCompany" />
                 <parameter name="recipientTitle" />
                 <parameter name="messageContent" />
+                <parameter name="emailSubject" />
                 <parameter name="status" />
                 <parameter name="sentDate" />
+                <parameter name="createdDate" />
+                <parameter name="lastAttemptDate" />
+                <parameter name="attemptCount" type="Integer" />
                 <parameter name="errorMessage" />
             </parameter>
         </out-parameters>
@@ -1543,10 +1767,26 @@
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
                 out-map="context" />
 
-            <entity-find entity-name="growerp.marketing.OutreachMessage" list="messageList"
-                offset="start" limit="limit">
+            <if condition="search">
+                <set field="searchPattern" value="%${search}%" />
+            </if>
+
+            <!-- Through the view entity so the owner condition can be applied: a message has
+                 no ownerPartyId of its own, it belongs to whoever owns the campaign. Without
+                 this every company saw every other company's recipients and message bodies. -->
+            <entity-find entity-name="growerp.marketing.OutreachMessageAndCampaign"
+                list="messageList" offset="start" limit="limit">
+                <econdition field-name="ownerPartyId" />
                 <econdition field-name="marketingCampaignId" ignore-if-empty="true" />
                 <econdition field-name="status" ignore-if-empty="true" />
+                <econditions combine="or">
+                    <econdition field-name="recipientName" operator="like"
+                        from="searchPattern" ignore-case="true" ignore-if-empty="true" />
+                    <econdition field-name="recipientEmail" operator="like"
+                        from="searchPattern" ignore-case="true" ignore-if-empty="true" />
+                    <econdition field-name="recipientCompany" operator="like"
+                        from="searchPattern" ignore-case="true" ignore-if-empty="true" />
+                </econditions>
                 <order-by field-name="-createdDate" />
             </entity-find>
 
@@ -1563,8 +1803,14 @@
                     recipientCompany: msg.recipientCompany,
                     recipientTitle: msg.recipientTitle,
                     messageContent: msg.messageContent,
+                    emailSubject: msg.emailSubject,
                     status: msg.status,
                     sentDate: msg.sentDate ? ec.l10n.format(msg.sentDate, 'yyyy-MM-dd HH:mm:ssZ') : null,
+                    createdDate: msg.createdDate
+                        ? ec.l10n.format(msg.createdDate, 'yyyy-MM-dd HH:mm:ssZ') : null,
+                    lastAttemptDate: msg.lastAttemptDate
+                        ? ec.l10n.format(msg.lastAttemptDate, 'yyyy-MM-dd HH:mm:ssZ') : null,
+                    attemptCount: msg.attemptCount ?: 0,
                     errorMessage: msg.errorMessage
                 ])</script>
             </iterate>

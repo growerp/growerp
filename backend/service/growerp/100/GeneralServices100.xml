@@ -2331,7 +2331,13 @@ limitations under the License.
                 <return error="true"
                     message="No SMTP email server configured for this company, please enter the SMTP settings in the company settings"/>
             </if>
+            <!-- force-new: the row must be COMMITTED before send#EmailMessage runs. Moqui's
+                 sendEmailMessage marks it ES_SENT through requireNewTransaction(true), and that
+                 separate transaction cannot see a row still uncommitted here: the update then
+                 fails with "value not found", which poisons this transaction and rolls the row
+                 back — while the mail itself has already gone out over SMTP. -->
             <service-call name="create#moqui.basic.email.EmailMessage" out-map="context"
+                transaction="force-new"
                 in-map="[statusId: 'ES_READY', emailServerId: emailServerId,
                     fromAddress: fromAddress, fromName: fromName,
                     toAddresses: toAddresses, subject: subject,

@@ -10,6 +10,9 @@ import 'prospecting/prospect_query.dart';
 import 'prospecting/prospect_scrape_result.dart';
 
 class CampaignAutomationService {
+  /// Platforms sent by the backend (SMTP) instead of browser automation
+  static const _backendPlatforms = {'EMAIL'};
+
   final RestClient restClient;
   final AutomationOrchestrator _orchestrator;
 
@@ -205,7 +208,27 @@ class CampaignAutomationService {
       return;
     }
 
-    await _orchestrator.initialize(platforms);
+    // Platforms without browser automation (EMAIL) are sent by the backend:
+    // process#CampaignAutomation drains the campaign's PENDING messages through
+    // the company's own SMTP server. Only the browser platforms need an
+    // orchestrator, so an email-only campaign never starts a browser.
+    final browserPlatforms = platforms
+        .where((p) => !_backendPlatforms.contains(p.toUpperCase()))
+        .toList();
+
+    if (browserPlatforms.length != platforms.length) {
+      try {
+        await restClient.processCampaignAutomation(
+          marketingCampaignId: campaignId,
+        );
+      } catch (e) {
+        debugPrint('Error processing backend automation for $campaignId: $e');
+      }
+    }
+
+    if (browserPlatforms.isEmpty) return;
+
+    await _orchestrator.initialize(browserPlatforms);
 
     // 3. Parse platform-specific settings
     final platformSettings = PlatformSettings.fromJson(
@@ -217,7 +240,7 @@ class CampaignAutomationService {
 
     // 5. Run automation in background
     // Note: This runs for each platform sequentially for now
-    for (final platform in platforms) {
+    for (final platform in browserPlatforms) {
       if (_activeCampaigns[campaignId] != true) break;
 
       // Get platform-specific settings with fallbacks to campaign defaults

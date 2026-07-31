@@ -54,22 +54,6 @@ class ProspectAggregatorService {
     _scrapers.insert(0, scraper);
   }
 
-  /// Initialise all registered scrapers.
-  ///
-  /// Call once before the first [scrape].  Individual failures are logged
-  /// but do not throw.
-  Future<void> initialize() async {
-    for (final scraper in _scrapers) {
-      try {
-        await scraper.initialize();
-      } catch (e) {
-        debugPrint(
-          '[ProspectAggregator] Init failed for ${scraper.sourceName}: $e',
-        );
-      }
-    }
-  }
-
   /// Scrape [query] across all eligible scrapers and return a unified,
   /// deduplicated list of up to [ProspectQuery.maxResults] prospects.
   Future<List<ProspectScrapeResult>> scrape(ProspectQuery query) async {
@@ -145,11 +129,17 @@ class ProspectAggregatorService {
   // ── Private helpers ──────────────────────────────────────────────────────────
 
   /// Wrap a scraper call so errors don't abort the whole run.
+  ///
+  /// Scrapers are initialised here rather than up front: initialisation starts
+  /// a browser session, so it must only happen for a scraper this query
+  /// actually uses. Each scraper's [ProspectScraper.initialize] is a no-op when
+  /// already initialised.
   Future<List<ProspectScrapeResult>> _safeScrape(
     ProspectScraper scraper,
     ProspectQuery query,
   ) async {
     try {
+      await scraper.initialize();
       final available = await scraper.isAvailable();
       if (!available) {
         debugPrint(

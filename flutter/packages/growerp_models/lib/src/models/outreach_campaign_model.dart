@@ -51,6 +51,14 @@ class OutreachCampaign {
   @JsonKey(defaultValue: 50)
   final int dailyLimitPerPlatform;
 
+  /// First hour (0-23, UTC) the automation may send; null = no restriction.
+  /// The send job ticks hourly, these bound which ticks this campaign uses.
+  final int? sendFromHour;
+
+  /// Last hour (0-23, UTC) the automation may send, inclusive; null = no
+  /// restriction. A from greater than a to wraps over midnight.
+  final int? sendToHour;
+
   /// Budgeted cost for the campaign (stored as String to handle BigDecimal)
   final String? budgetedCost;
 
@@ -116,6 +124,8 @@ class OutreachCampaign {
     this.platformSettings,
     required this.status,
     this.dailyLimitPerPlatform = 50,
+    this.sendFromHour,
+    this.sendToHour,
     this.budgetedCost,
     this.actualCost,
     this.estimatedCost,
@@ -147,6 +157,8 @@ class OutreachCampaign {
     String? platformSettings,
     String? status,
     int? dailyLimitPerPlatform,
+    int? sendFromHour,
+    int? sendToHour,
     String? budgetedCost,
     String? actualCost,
     String? estimatedCost,
@@ -177,6 +189,8 @@ class OutreachCampaign {
       status: status ?? this.status,
       dailyLimitPerPlatform:
           dailyLimitPerPlatform ?? this.dailyLimitPerPlatform,
+      sendFromHour: sendFromHour ?? this.sendFromHour,
+      sendToHour: sendToHour ?? this.sendToHour,
       budgetedCost: budgetedCost ?? this.budgetedCost,
       actualCost: actualCost ?? this.actualCost,
       estimatedCost: estimatedCost ?? this.estimatedCost,

@@ -197,6 +197,20 @@ class _EmailSettingsDialogState extends State<EmailSettingsDialog> {
                                   keyboardType: TextInputType.number,
                                   decoration:
                                       const InputDecoration(labelText: 'Port'),
+                                  // port and security must match: sending
+                                  // plaintext into 465 just times out
+                                  validator: (value) {
+                                    final port = value?.trim() ?? '';
+                                    if (port == '465' &&
+                                        _smtpSecurity != 'ssl') {
+                                      return 'Port 465 needs SSL/TLS';
+                                    }
+                                    if (port == '587' &&
+                                        _smtpSecurity == 'ssl') {
+                                      return 'Port 587 needs STARTTLS';
+                                    }
+                                    return null;
+                                  },
                                 ),
                               ),
                             ]),
@@ -204,8 +218,10 @@ class _EmailSettingsDialogState extends State<EmailSettingsDialog> {
                             DropdownButtonFormField<String>(
                               key: const Key('smtpSecurity'),
                               initialValue: _smtpSecurity,
-                              decoration:
-                                  const InputDecoration(labelText: 'Security'),
+                              decoration: const InputDecoration(
+                                labelText: 'Security',
+                                helperText: '465: SSL/TLS, 587: STARTTLS',
+                              ),
                               items: const [
                                 DropdownMenuItem(
                                     value: 'none', child: Text('None')),
@@ -214,8 +230,10 @@ class _EmailSettingsDialogState extends State<EmailSettingsDialog> {
                                 DropdownMenuItem(
                                     value: 'ssl', child: Text('SSL/TLS')),
                               ],
-                              onChanged: (v) =>
-                                  setState(() => _smtpSecurity = v ?? 'none'),
+                              onChanged: (v) {
+                                setState(() => _smtpSecurity = v ?? 'none');
+                                _formKey.currentState?.validate();
+                              },
                             ),
                             const SizedBox(height: 20),
                             Text('Credentials',

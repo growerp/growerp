@@ -25,6 +25,9 @@ List<OutreachCampaign> campaigns = [
     messageTemplate: 'Template 1',
     emailSubject: 'Subject 1',
     dailyLimitPerPlatform: 50,
+    // send window in UTC hours, the UI shows/enters them in local time
+    sendFromHour: 6,
+    sendToHour: 14,
   ),
   const OutreachCampaign(
     pseudoId: '2',
@@ -47,6 +50,9 @@ List<OutreachCampaign> campaigns = [
     messageTemplate: 'Template 3',
     emailSubject: 'Subject 3',
     dailyLimitPerPlatform: 20,
+    // wraps over midnight UTC
+    sendFromHour: 22,
+    sendToHour: 3,
   ),
 ];
 
@@ -61,6 +67,8 @@ List<OutreachCampaign> updatedCampaigns = [
     messageTemplate: 'Template 1 Updated',
     emailSubject: 'Subject 1 Updated',
     dailyLimitPerPlatform: 60,
+    sendFromHour: 8,
+    sendToHour: 16,
   ),
   const OutreachCampaign(
     pseudoId: '2',
@@ -72,6 +80,8 @@ List<OutreachCampaign> updatedCampaigns = [
     messageTemplate: 'Template 2 Updated',
     emailSubject: 'Subject 2 Updated',
     dailyLimitPerPlatform: 110,
+    sendFromHour: 5,
+    sendToHour: 9,
   ),
   const OutreachCampaign(
     pseudoId: '3',

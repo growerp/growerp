@@ -40,7 +40,8 @@ class OutreachMessageLoad extends OutreachMessageEvent {
 
 /// Create a new outreach message
 class OutreachMessageCreate extends OutreachMessageEvent {
-  final String? campaignId;
+  /// A message is only sent as part of a campaign, so this is required
+  final String campaignId;
   final String platform;
   final String? recipientName;
   final String? recipientProfileUrl;
@@ -48,14 +49,18 @@ class OutreachMessageCreate extends OutreachMessageEvent {
   final String? recipientEmail;
   final String messageContent;
 
+  /// Subject override for EMAIL; the campaign subject is used when empty
+  final String? emailSubject;
+
   const OutreachMessageCreate({
-    this.campaignId,
+    required this.campaignId,
     required this.platform,
     this.recipientName,
     this.recipientProfileUrl,
     this.recipientHandle,
     this.recipientEmail,
     required this.messageContent,
+    this.emailSubject,
   });
 
   @override
@@ -67,23 +72,30 @@ class OutreachMessageCreate extends OutreachMessageEvent {
     recipientHandle,
     recipientEmail,
     messageContent,
+    emailSubject,
   ];
 }
 
-/// Update outreach message status
+/// Update outreach message status, and its body/subject when supplied
+/// (only accepted by the backend while the message is still PENDING)
 class OutreachMessageUpdateStatus extends OutreachMessageEvent {
   final String messageId;
   final String status;
   final String? errorMessage;
+  final String? messageContent;
+  final String? emailSubject;
 
   const OutreachMessageUpdateStatus({
     required this.messageId,
     required this.status,
     this.errorMessage,
+    this.messageContent,
+    this.emailSubject,
   });
 
   @override
-  List<Object?> get props => [messageId, status, errorMessage];
+  List<Object?> get props =>
+      [messageId, status, errorMessage, messageContent, emailSubject];
 }
 
 /// Delete an outreach message
@@ -94,6 +106,19 @@ class OutreachMessageDelete extends OutreachMessageEvent {
 
   @override
   List<Object?> get props => [messageId];
+}
+
+/// Requeue failed messages: status back to PENDING with the attempt counter
+/// reset, so the campaign automation sends them again on its next run.
+/// Pass [messageId] for one message or [campaignId] for all failed ones.
+class OutreachMessageRetry extends OutreachMessageEvent {
+  final String? messageId;
+  final String? campaignId;
+
+  const OutreachMessageRetry({this.messageId, this.campaignId});
+
+  @override
+  List<Object?> get props => [messageId, campaignId];
 }
 
 /// Search outreach messages

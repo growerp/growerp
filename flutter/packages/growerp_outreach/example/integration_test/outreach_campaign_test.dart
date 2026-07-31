@@ -43,6 +43,9 @@ void main() {
         BlocProvider<OutreachCampaignBloc>(
           create: (context) => OutreachCampaignBloc(restClient),
         ),
+        BlocProvider<PlatformConfigBloc>(
+          create: (context) => PlatformConfigBloc(restClient),
+        ),
         ...getUserCompanyBlocProviders(restClient, 'AppAdmin'),
         ...getMarketingBlocProviders(restClient, 'AppAdmin'),
       ],
@@ -50,6 +53,7 @@ void main() {
       clear: true,
     );
     await CommonTest.createCompanyAndAdmin(tester);
+    await OutreachCampaignTest.enablePlatforms(restClient);
     await OutreachCampaignTest.selectCampaigns(tester);
     await OutreachCampaignTest.addCampaigns(
       tester,
