@@ -478,6 +478,16 @@ class EnhancedMcpServlet extends HttpServlet {
             return
         }
 
+        // The legacy HTTP+SSE transport delivers responses back over the session's SSE stream, so
+        // without a live writer there is nowhere to answer: the request would be processed and its
+        // response queued forever while the client blocks until its own timeout (google-adk
+        // McpToolset: 300s). Fail fast so the client drops this session and reconnects.
+        if (!session.hasActiveWriter()) {
+            logger.warn("Rejecting /mcp/message for session ${sessionId}: SSE stream is gone")
+            response.sendError(HttpServletResponse.SC_NOT_FOUND, "SSE stream closed for session: " + sessionId)
+            return
+        }
+
         // Verify user has access
         if (session.userId != ec.user.userId?.toString()) {
             response.setStatus(HttpServletResponse.SC_FORBIDDEN)

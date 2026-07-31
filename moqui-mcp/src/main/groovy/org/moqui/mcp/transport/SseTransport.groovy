@@ -69,8 +69,13 @@ class SseTransport implements MoquiMcpTransport {
 
     @Override
     boolean isSessionActive(String sessionId) {
+        // Transport liveness only — deliberately NOT session.isActive(), which also demands
+        // state == STATE_INITIALIZED. The sole caller is the SSE keep-alive loop, and `initialize`
+        // moves the session through STATE_INITIALIZING before setting INITIALIZED; a state-based
+        // check makes the loop see its own session as dead during that window and tear the stream
+        // down mid-handshake, so the client never receives its initialize response.
         def session = sessionAdapter.getSession(sessionId)
-        return session?.isActive() ?: false
+        return session != null && session.hasActiveWriter()
     }
 
     @Override
@@ -82,6 +87,14 @@ class SseTransport implements MoquiMcpTransport {
         }
 
         if (!session.hasActiveWriter()) {
+            // A JSON-RPC response (has an id) is only meaningful on the connection that asked for
+            // it — queuing one delivers it to whatever client next attaches to this session, out of
+            // context, while the original caller blocks until its own timeout. Drop it; only
+            // notifications (no id) are worth replaying.
+            if (message.containsKey('id')) {
+                logger.warn("Dropping response ${message.id} for session ${sessionId}: no active SSE writer")
+                return
+            }
             // Queue message for later delivery
             session.notificationQueue.add(message)
             logger.debug("Queued message for session ${sessionId} (no active writer)")
@@ -95,6 +108,11 @@ class SseTransport implements MoquiMcpTransport {
             logger.debug("Sent message to session ${sessionId}")
         } catch (Exception e) {
             logger.warn("Failed to send message to session ${sessionId}: ${e.message}")
+            // The stream is broken — drop the writer so the session is recognised as dead and the
+            // next POST to /mcp/message gets a fast 404 instead of another blocked-until-timeout
+            // request. PrintWriter.checkError() alone does not reliably report this.
+            session.sseWriter = null
+            if (message.containsKey('id')) return
             // Queue for later if send fails
             session.notificationQueue.add(message)
         }
