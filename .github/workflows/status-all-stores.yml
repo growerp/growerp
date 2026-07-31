@@ -341,7 +341,7 @@ jobs:
 
     # ─────────────────────────────────────────────────────────────────────────────
     # Android — Google Play Developer API, service account auth
-    # Fragment rows: [{track, version, status, rollout}, ...]
+    # Fragment rows: [{track, version, status, rollout, live}, ...]
     # Secrets: GOOGLE_PLAY_SERVICE_ACCOUNT_JSON
     # ─────────────────────────────────────────────────────────────────────────────
     status-android:
@@ -443,6 +443,28 @@ jobs:
 
                   if not rows:
                       rows = [{'track': '—', 'version': '—', 'status': 'NO TRACKS', 'rollout': '—'}]
+
+                  # The Play Developer API exposes per-track release status only — never
+                  # the Console's app-level "Draft / In review / Production" state. A
+                  # first release still under review keeps its track status 'completed'
+                  # while the app is not on the store. Probe the public listing instead:
+                  # 404 = not published yet. None = probe failed, stay silent.
+                  import urllib.request, urllib.error
+                  def probe_live(pkg):
+                      req = urllib.request.Request(
+                          f'https://play.google.com/store/apps/details?id={pkg}',
+                          headers={'User-Agent': 'Mozilla/5.0'})
+                      try:
+                          with urllib.request.urlopen(req, timeout=20) as resp:
+                              return resp.status == 200
+                      except urllib.error.HTTPError as e:
+                          return False if e.code == 404 else None
+                      except Exception:
+                          return None
+
+                  live = probe_live(package_name)
+                  for r in rows:
+                      r['live'] = live
 
                   fragment = {'store': 'android', 'app': app_name, 'rows': rows}
                   with open('/tmp/fragment.json', 'w') as f:
@@ -746,8 +768,16 @@ jobs:
                       if not rows:
                           return '—'
                       prod = [r for r in rows if r.get('track') == 'production']
-                      src  = prod[0] if prod else rows[0]
-                      return f"{link(src.get('version','?'), url)}<br>{src.get('status','?')}"
+                      # A track can hold a draft release next to the rolled-out one;
+                      # the completed release is the one that reflects production.
+                      done = [r for r in prod if r.get('status') == 'completed']
+                      src  = (done or prod or rows)[0]
+                      status = src.get('status', '?')
+                      if src.get('live') is False:
+                          # Track says completed, but the app is not on the store:
+                          # first publication is still awaiting Play review.
+                          status = 'in review' if status == 'completed' else f'{status} · in review'
+                      return f"{link(src.get('version','?'), url)}<br>{status}"
 
                   def cell_windows(rows, url):
                       if not rows:
@@ -800,7 +830,7 @@ jobs:
                                   'PENDING_APPLE_RELEASE'},
                       'macos':   {'IN_REVIEW', 'WAITING_FOR_REVIEW', 'PENDING_DEVELOPER_RELEASE',
                                   'PENDING_APPLE_RELEASE'},
-                      'android': {'inProgress', 'draft'},
+                      'android': {'inProgress', 'draft', 'in review'},
                       'windows': {'Certification', 'PreProcessing', 'CommitStarted',
                                   'PendingCommit', 'PendingPublication', 'ReadyToPublish'},
                       'snap':    set(),
@@ -817,6 +847,10 @@ jobs:
                               status_val = r.get('state') or r.get('status', '')
                               track_info = f" [{r['track']}]" if 'track' in r else ''
                               label_info = f" [{r['label']}]" if 'label' in r else ''
+                              if store == 'android' and r.get('live') is False \
+                                      and r.get('track') == 'production' \
+                                      and status_val == 'completed':
+                                  status_val = 'in review'
                               if status_val in PENDING_STATES.get(store, set()):
                                   ver = r.get('version', '?')
                                   waiting.append(
