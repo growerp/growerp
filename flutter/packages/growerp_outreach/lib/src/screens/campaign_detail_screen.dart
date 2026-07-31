@@ -571,7 +571,9 @@ class CampaignDetailScreenState extends State<CampaignDetailScreen> {
                                   '{company} and wanted to connect...'
                               : null,
                           helperText: 'Placeholders: {name}, {firstName}, '
-                              '{company}, {title}',
+                              '{company}, {title}. Use {company|your team} '
+                              'for a fallback when the field is empty',
+                          helperMaxLines: 2,
                         ),
                         maxLines: 5,
                       ),

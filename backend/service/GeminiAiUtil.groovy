@@ -198,6 +198,8 @@ Refer to the recipient with these tokens, which are substituted per recipient wh
 message is sent: {firstName}, {name}, {company}, {title}.
 Write "Hi {firstName}," — never invent a bracketed placeholder such as [Name] or [Company],
 never address the recipient by their job title, and never put a real person's name in the text.
+A token whose field may be missing needs a fallback after a pipe, e.g. {company|your team},
+otherwise the sentence loses a word for recipients without that field.
 
 Return ONLY the message body: no subject line, no "Subject:" header, no explanations, no
 markdown and no surrounding quotes. The subject is a separate field and must not appear in

@@ -820,6 +820,20 @@
             <parameter name="createdDate" />
         </out-parameters>
         <actions>
+            <!-- The campaign decides who owns the message, so it has to be the caller's own:
+                 otherwise a message can be hung off another company's campaign. -->
+            <service-call
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="context" />
+            <entity-find-count entity-name="mantle.marketing.campaign.MarketingCampaign"
+                count-field="ownedCampaigns">
+                <econdition field-name="marketingCampaignId" />
+                <econdition field-name="ownerPartyId" />
+            </entity-find-count>
+            <if condition="ownedCampaigns == 0">
+                <return error="true" message="Campaign not found: ${marketingCampaignId}" />
+            </if>
+
             <!-- Create message -->
             <service-call name="create#growerp.marketing.OutreachMessage" out-map="createOut"
                 in-map="[marketingCampaignId: marketingCampaignId,
@@ -896,6 +910,9 @@
             <parameter name="createdDate" />
         </out-parameters>
         <actions>
+            <service-call name="growerp.100.OutreachServices100.check#OutreachMessageOwner"
+                in-map="[messageId: messageId]" />
+
             <!-- Get message -->
             <entity-find-one entity-name="growerp.marketing.OutreachMessage" value-field="message">
                 <field-map field-name="messageId" />
@@ -972,6 +989,9 @@
             <parameter name="status" />
         </out-parameters>
         <actions>
+            <service-call name="growerp.100.OutreachServices100.check#OutreachMessageOwner"
+                in-map="[messageId: messageId]" />
+
             <entity-find-one entity-name="growerp.marketing.OutreachMessage" value-field="message">
                 <field-map field-name="messageId" />
             </entity-find-one>
@@ -996,6 +1016,9 @@
             <parameter name="messageId" required="true" />
         </in-parameters>
         <actions>
+            <service-call name="growerp.100.OutreachServices100.check#OutreachMessageOwner"
+                in-map="[messageId: messageId]" />
+
             <!-- Delete message -->
             <entity-delete-by-condition entity-name="growerp.marketing.OutreachMessage">
                 <econdition field-name="messageId" />
@@ -1353,12 +1376,37 @@
     <!--  Email Sending Service                                    -->
     <!-- ========================================================= -->
 
+    <service verb="check" noun="OutreachMessageOwner">
+        <description>Refuse a message that belongs to another company. A message carries no
+            ownerPartyId of its own, the campaign it hangs off does, so the check goes through
+            the view entity. Called by every service that writes a message by id: without it
+            a guessed messageId edits or deletes another tenant's data. The error says "not
+            found" rather than "not yours", which keeps ids from being probed.</description>
+        <in-parameters>
+            <parameter name="messageId" required="true" />
+        </in-parameters>
+        <actions>
+            <service-call
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="context" />
+            <entity-find-count entity-name="growerp.marketing.OutreachMessageAndCampaign"
+                count-field="ownedCount">
+                <econdition field-name="messageId" />
+                <econdition field-name="ownerPartyId" />
+            </entity-find-count>
+            <if condition="ownedCount == 0">
+                <return error="true" message="Message not found: ${messageId}" />
+            </if>
+        </actions>
+    </service>
+
     <service verb="personalize" noun="OutreachText">
         <description>Substitute the recipient placeholders of a subject or body:
-            {name}, {firstName}, {company}, {companyName}, {title}. Used when a message is
-            created from a template AND again at send time, so a hand-written subject or an
-            AI-rewritten body gets the same treatment. Idempotent: substituted text holds no
-            placeholders left to replace.</description>
+            {name}, {firstName}, {company}, {companyName}, {title}. Each accepts a fallback
+            after a pipe, {company|your team}, used when the recipient field is empty.
+            Used when a message is created from a template AND again at send time, so a
+            hand-written subject or an AI-rewritten body gets the same treatment. Idempotent:
+            substituted text holds no placeholders left to replace.</description>
         <in-parameters>
             <!-- allow-html: copy legitimately holds &lt; &gt; &amp; (an address in plain text,
                  a "<" in a sentence). Nothing here interprets the text as markup. -->
@@ -1377,11 +1425,19 @@
             <script><![CDATA[
                 def fullName = recipientName ?: ''
                 def firstName = fullName.trim() ? fullName.trim().split(/\s+/)[0] : ''
-                text = text.replace('{name}', fullName)
-                        .replace('{firstName}', firstName)
-                        .replace('{company}', recipientCompany ?: '')
-                        .replace('{companyName}', recipientCompany ?: '')
-                        .replace('{title}', recipientTitle ?: '')
+                def values = [name: fullName, firstName: firstName,
+                              company: recipientCompany ?: '',
+                              companyName: recipientCompany ?: '',
+                              title: recipientTitle ?: '']
+                // {company} substitutes the field, {company|your team} falls back to the text
+                // after the pipe when the field is empty. Without a fallback an unknown field
+                // leaves a hole: "does {company} re-key" went out as "does  re-key".
+                text = text.replaceAll(/\{(name|firstName|company|companyName|title)(?:\|([^}]*))?\}/)
+                        { full, token, fallback -> values[token] ?: (fallback ?: '') }
+                // tidy the seam a blanked token leaves behind, without touching newlines:
+                // the body layout depends on them
+                text = text.replaceAll(/[ \t]{2,}/, ' ')
+                        .replaceAll(/ +([,.!?;:])/, '$1')
             ]]></script>
         </actions>
     </service>
