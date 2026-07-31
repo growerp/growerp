@@ -164,12 +164,14 @@ jobs:
                           # appStoreVersions returns HTTP 400 (not empty list) when the app
                           # has never completed an App Store submission — catch it and fall
                           # back to preReleaseVersions (TestFlight builds).
-                          # sort is not a valid parameter for appStoreVersions — omit it
+                          # sort is not a valid parameter for appStoreVersions — omit it.
+                          # filter[platform] is required: an app record holds the iOS and
+                          # macOS versions in one list.
                           vs = []
                           try:
                               vs = asc_get(
                                   f'https://api.appstoreconnect.apple.com/v1/apps/{app_id}/appStoreVersions'
-                                  f'?limit=10'
+                                  f'?filter[platform]=IOS&limit=10'
                               )['data']
                           except HTTPError as e:
                               print(f'appStoreVersions HTTP {e.code}: {e.read().decode("utf-8","replace")[:300]}')
@@ -189,7 +191,7 @@ jobs:
                               try:
                                   pv = asc_get(
                                       f'https://api.appstoreconnect.apple.com/v1/apps/{app_id}/preReleaseVersions'
-                                      f'?limit=5'
+                                      f'?filter[platform]=IOS&limit=5'
                                   )['data']
                               except HTTPError as e:
                                   print(f'preReleaseVersions HTTP {e.code}: {e.read().decode("utf-8","replace")[:300]}')
@@ -281,11 +283,13 @@ jobs:
                           rows = [{'version': '—', 'state': '—', 'date': '—'}]
                       else:
                           app_id = data['data'][0]['id']
+                          # filter[platform] is required: without it this returns the same
+                          # iOS versions as the iOS job.
                           vs = []
                           try:
                               vs = asc_get(
                                   f'https://api.appstoreconnect.apple.com/v1/apps/{app_id}/appStoreVersions'
-                                  f'?limit=10'
+                                  f'?filter[platform]=MAC_OS&limit=10'
                               )['data']
                           except HTTPError as e:
                               print(f'appStoreVersions HTTP {e.code}: {e.read().decode("utf-8","replace")[:300]}')
@@ -304,7 +308,7 @@ jobs:
                               try:
                                   pv = asc_get(
                                       f'https://api.appstoreconnect.apple.com/v1/apps/{app_id}/preReleaseVersions'
-                                      f'?limit=5'
+                                      f'?filter[platform]=MAC_OS&limit=5'
                                   )['data']
                               except HTTPError as e:
                                   print(f'preReleaseVersions HTTP {e.code}: {e.read().decode("utf-8","replace")[:300]}')
