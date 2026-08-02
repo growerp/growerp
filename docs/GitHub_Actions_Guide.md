@@ -9,7 +9,7 @@ This document describes all GitHub Actions workflows used in the GrowERP reposit
 1. [Overview](#overview)
 2. [Workflow Summary](#workflow-summary)
 3. [Workflows](#workflows)
-   - [Integration Tests (`test.yml`)](#1-integration-tests-testyml)
+   - [Status (`status.yml`)](#1-status-statusyml)
    - [Update Staging (`release.yml`)](#2-update-staging-releaseyml)
    - [Publish to Stores (`publish-to-stores.yml`)](#3-publish-to-stores-publish-to-storesyml)
    - [Release Approved Submissions (`release-approved-submissions.yml`)](#4-release-approved-submissions-release-approved-submissionsyml)
@@ -36,7 +36,7 @@ GrowERP uses six GitHub Actions workflows to automate testing, releasing Docker 
 
 ```
 .github/workflows/
-├── test.yml                              # Integration tests (scheduled + manual)
+├── status.yml                            # Integration tests + store status (scheduled + manual)
 ├── release.yml                           # Docker image build + version bump (manual)
 ├── publish-to-stores.yml                 # Build & submit to stores (manual)
 ├── release-approved-submissions.yml      # Release store-approved versions to public (manual)
@@ -50,7 +50,7 @@ GrowERP uses six GitHub Actions workflows to automate testing, releasing Docker 
 
 | Workflow | Trigger | Runner | Secrets needed |
 |----------|---------|--------|----------------|
-| Integration Tests | Schedule (daily) + manual | `ubuntu-latest` | None (uses `GITHUB_TOKEN`) |
+| status | Schedule (daily) + manual | `ubuntu-latest` | Store API secrets (see [Secrets Reference](#secrets-reference)) for the store-status jobs; tests need none |
 | Update Staging | Manual | `ubuntu-latest` | `GITHUB_TOKEN` |
 | Publish to Stores | Manual | macOS / Ubuntu / Windows | See [Secrets Reference](#secrets-reference) |
 | Release Approved Submissions | Manual | macOS / Ubuntu / Windows | See [Secrets Reference](#secrets-reference) |
@@ -61,42 +61,59 @@ GrowERP uses six GitHub Actions workflows to automate testing, releasing Docker 
 
 ## Workflows
 
-### 1. Integration Tests (`test.yml`)
+### 1. Status (`status.yml`)
 
-**Purpose:** Runs the full Flutter integration test suite against a locally-built Moqui backend.
+**Purpose:** One nightly status run — the full Flutter integration test suite plus the backend Spock tests against a locally-built Moqui backend, *and* the publish state of every app in every store. Both results are published as a single GitHub Pages page: <https://growerp.github.io/growerp/>.
 
 **Triggers:**
-- **Schedule:** Daily at 12:00 PM Bangkok time (05:00 UTC). Only runs if there were commits in the last 24 hours affecting `flutter/**` or `moqui/runtime/component/**`.
+- **Schedule:** Daily at 1 AM Bangkok time (18:00 UTC previous day). The store-status jobs run every time; the test jobs only run when there were commits in the last 24 hours affecting `flutter/**` or `moqui/runtime/component/**`.
 - **Manual (`workflow_dispatch`):** Run at any time from the Actions tab.
 
-**Concurrency:** Only one test run per branch at a time; new runs cancel in-progress runs.
+**Concurrency:** Only one status run per branch at a time; new runs cancel in-progress runs. Pages deployment uses its own `pages` concurrency group and is never cancelled.
 
 **Manual Input Variables:**
 
 | Input | Type | Required | Default | Description |
 |-------|------|----------|---------|-------------|
 | `package_filter` | string | No | *(empty)* | Filter to a single package name (e.g. `catalog`). When empty, all 4 parallel slices run. |
+| `skip_integration_tests` | boolean | No | `false` | Only refresh the store status — skips the test runners. |
 
 **Job Flow:**
 
 ```
-check-changes
-    └── integration-tests (matrix: 4 slices, or 1 if package_filter set)
-            └── summarize
+check-changes                       resolve-matrix
+    ├── backend-tests                   ├── status-ios
+    └── integration-tests               ├── status-macos
+        (matrix: 4 slices × mobile/     ├── status-android
+         desktop, or 1 slice when       ├── status-windows
+         package_filter is set)         └── status-snap
+                       ↓                       ↓
+                            report
+                              ↓
+                         deploy-pages
 ```
 
-**What it does:**
-1. Checks if there are any relevant recent commits (skips if none on a scheduled run).
-2. Frees disk space on the runner (removes Android SDK, .NET, Haskell etc.).
-3. Checks out the repo and initialises all git submodules.
+**What it does — tests:**
+1. Checks if there are any relevant recent commits (skips the test jobs if none on a scheduled run).
+2. Runs the backend Spock tests of the `growerp` component against an embedded Moqui + H2.
+3. Frees disk space on the runner, checks out the repo and initialises all git submodules.
 4. Builds the Moqui backend Docker image from local source using Gradle + Java 21.
 5. Builds a Flutter test runner Docker image (cached via GitHub Actions cache).
 6. Starts the Moqui backend + PostgreSQL via Docker Compose.
-7. Runs the integration tests, splitting across 4 parallel matrix slices (or filtering to one package).
+7. Runs the integration tests, splitting across 4 parallel matrix slices × mobile/desktop layouts (or filtering to one package).
 8. Uploads test logs as artifacts (retained 7 days).
-9. Produces a combined summary of all slices.
 
-**Secrets required:** None beyond the automatic `GITHUB_TOKEN`.
+**What it does — stores:**
+1. `resolve-matrix` builds the app × store matrix from `storeApps` in `flutter/release/release_config.json`.
+2. Each store job queries its API (App Store Connect, Google Play, Partner Center, Snap Store) and uploads a JSON fragment.
+
+**What it does — report:**
+1. Merges the store fragments into one matrix table (app rows × store columns) and lists apps waiting for approval.
+2. Sums the test totals (backend Spock, Flutter mobile/desktop packages and tests). When the tests were skipped, the last published totals are carried over from `tests-data.json` on the Pages site and labelled with their original date.
+3. Writes `index.html` + `tests-data.json` for GitHub Pages, a PDF artifact (`status-report`, retained 30 days) and the run's step summary.
+4. Fails the run when more than one individual test failed on a layout, or when the backend tests failed — the page is still published in that case.
+
+**Secrets required:** none for the test jobs; the store jobs use the App Store Connect, Google Play, Partner Center and Snap Store secrets listed in the [Secrets Reference](#secrets-reference).
 
 ---
 
