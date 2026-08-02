@@ -289,6 +289,11 @@ jobs:
             | xargs -I{} basename {} .txt | sort | tr '\n' ', ' | sed 's/, $//')
           NEW_VERSION=$(grep -o 'name="growerp" version="[^"]*"' backend/component.xml 2>/dev/null \
             | head -1 | sed 's/.*version="//; s/".*//; s/+.*//')
+          if [ -z "$NEW_VERSION" ]; then
+            # component.xml download is best-effort; app pubspecs carry the same version
+            NEW_VERSION=$(grep -m1 '^version:' flutter/packages/admin/pubspec.yaml 2>/dev/null \
+              | sed 's/^version:[[:space:]]*//; s/+.*//')
+          fi
           MSG="chore: update staging — ${{ inputs.bump }} bump"
           if [ -n "$NEW_VERSION" ]; then
             MSG="$MSG — new version: $NEW_VERSION"
@@ -304,6 +309,19 @@ jobs:
           git diff --cached --quiet && echo "Nothing to commit" || git commit -m "$MSG"
           git pull --rebase --autostash origin ${{ github.ref_name }}
           git push origin HEAD
+
+          # Tag the released version — after the rebase/push so the tag points at
+          # the commit that actually landed on the branch.
+          if [ -z "$NEW_VERSION" ]; then
+            echo "::notice::No version resolved — skipping tag"
+          elif git rev-parse -q --verify "refs/tags/$NEW_VERSION" >/dev/null \
+            || git ls-remote --exit-code --tags origin "refs/tags/$NEW_VERSION" >/dev/null 2>&1; then
+            echo "::notice::Tag $NEW_VERSION already exists — not moving it"
+          else
+            git tag -a "$NEW_VERSION" -m "$MSG"
+            git push origin "refs/tags/$NEW_VERSION" \
+              || echo "::warning::Failed to push tag $NEW_VERSION"
+          fi
 
       - name: Summary
         if: always()
