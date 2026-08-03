@@ -386,11 +386,9 @@ along with this software (see the LICENSE.md file). If not, see
 
             <set field="filteredProductList" from="[]" />
             <iterate list="productList" entry="product">
-                <script>
-                    if(viewAllowProductListIds.contains(product.productId)){
-                        filteredProductList.add(product)
-                    }
-                </script>
+                <if condition="product &amp;&amp; viewAllowProductListIds.contains(product.productId)">
+                    <script>filteredProductList.add(product)</script>
+                </if>
             </iterate>
             <set field="productList" from="filteredProductList" />
         </actions>
