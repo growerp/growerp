@@ -132,6 +132,8 @@ along with this software (see the LICENSE.md file). If not, see
                 <script>
                     storeInfo.menu1 = []
                     if (pageText) {
+                        // same heading id rule as the markdown renderer, so the anchors match
+                        def anchorOf = { String s -> s.toLowerCase().replaceAll('[^a-z0-9 -]','').trim().replaceAll(' +','-') };
                         List items = [];
                         String title;
                         boolean first = true;
@@ -140,7 +142,7 @@ along with this software (see the LICENSE.md file). If not, see
                                 if (first == false) {
                                     storeInfo.menu1.add([path: ec.web.getPathInfo().split('/')[2],
                                                         title: title, items: items,
-                                                        anchor: title.replace(' ','-').replace('.','').toLowerCase()]);
+                                                        anchor: anchorOf(title)]);
                                     items = [];
                                 }
                                 title = it.substring(it.indexOf(' ') + 1);
@@ -148,13 +150,12 @@ along with this software (see the LICENSE.md file). If not, see
                             }
                             if (it.startsWith('## ')) {
                                 Map item = [text: it.substring(it.indexOf(' ') + 1),
-                                            anchor: it.substring(it.indexOf(' ') + 1)
-                                                .replace(' ','-').replace('.','').toLowerCase()];
+                                            anchor: anchorOf(it.substring(it.indexOf(' ') + 1))];
                                 items.add(item);
                             }
                         }
                         if (first == false) storeInfo.menu1.add([path: ec.web.getPathInfo().split('/')[2],
-                            title: title, items: items, anchor: title.replace(' ','-').replace('.','').toLowerCase()]);
+                            title: title, items: items, anchor: anchorOf(title)]);
                     }
                 </script>
             </else>

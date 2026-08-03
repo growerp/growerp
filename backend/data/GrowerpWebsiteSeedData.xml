@@ -384,6 +384,8 @@
 
 Get up and running with GrowERP in minutes. No credit card required.
 
+Stuck or have questions? Jump to [Need Help?](#need-help)
+
 ---
 
 ## Quick Setup (5 Minutes)
@@ -420,12 +422,7 @@ Want to run GrowERP locally or contribute to the project?
 - Git
 
 ### Local Installation
-```
-git clone https://github.com/growerp/growerp
-cd growerp
-git submodule update --init --recursive
-./setup-backend.sh
-```
+See [Manual Installation](https://github.com/growerp/growerp#manual-installation) in the README.
 
 See the full [Developer Documentation](https://github.com/growerp/growerp/blob/master/docs/README.md) for detailed guides on building blocks, backend components, and AI integrations.
 
@@ -433,6 +430,7 @@ See the full [Developer Documentation](https://github.com/growerp/growerp/blob/m
 
 ## Need Help?
 
+- **Free 30 Minute Support Call:** [Book a time slot](https://calendar.app.google/pz3kcsmty7ArrYWX8)
 - **Email Support:** support@growerp.com
 - **GitHub Issues:** [Report bugs or request features](https://github.com/growerp/growerp/issues)
 - **GitHub Discussions:** [Ask questions and share ideas](https://github.com/growerp/growerp/discussions)
