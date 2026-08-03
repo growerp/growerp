@@ -66,5 +66,8 @@ if [ ! -z "$DB_DATA" ] && [ "$DB_DATA" != "NONE" ] ; then
 fi
 
 # start moqui
-java -cp . MoquiStart port=80 conf=$CONF_FILE no-run-es
+# exec so java replaces this shell as PID 1 and receives SIGTERM from docker directly:
+# without it bash holds PID 1, never forwards the signal, and Moqui is SIGKILLed after the
+# stop grace period, leaving ServiceJobRunLock rows locked
+exec java -cp . MoquiStart port=80 conf=$CONF_FILE no-run-es
 

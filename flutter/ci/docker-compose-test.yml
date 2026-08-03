@@ -40,7 +40,9 @@ services:
     depends_on:
       - moqui-database
     healthcheck:
-      test: ["CMD-SHELL", "curl -sf http://localhost/status || exit 1"]
+      # forwarded headers so Moqui sees a secure request (no redirect to https),
+      # --max-redirs 0 so a redirect can never pass as healthy
+      test: ["CMD-SHELL", "curl -sf --max-redirs 0 -H \"X-Forwarded-Proto: https\" -H \"X-Forwarded-Ssl: on\" http://localhost/status || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 30
