@@ -446,7 +446,7 @@ deliberate admin steps, **not** part of seed loading.
 
 | Piece | Location |
 |---|---|
-| The bundle itself | `moqui/runtime/growerp-okf/growerp/` — `index.md`, `tables/` (446 entity concepts), `datasets/`, `notes/`, plus `log.md` and `viz.html` |
+| The bundle itself | `backend/okf/growerp/` — `index.md`, `tables/` (446 entity concepts), `datasets/`, `notes/`, plus `log.md` and `viz.html` (in the growerp component, so it is version controlled and ships in the docker image) |
 | Hosted as (after export) | Moqui `WikiSpace` **`GROWERP_OKF`**, whose `rootPageLocation` points at `growerp.md`; the sibling `growerp/` directory is the bundle root |
 | Exporter | `export#OkfBundle` — [OkfServices100.xml](../backend/service/growerp/100/OkfServices100.xml) + [OkfExport.groovy](../backend/service/OkfExport.groovy) |
 | Agent-facing tools | `okf_index` / `okf_load_concept` / `okf_follow` in [McpServices.xml](../moqui-mcp/service/McpServices.xml) |
@@ -475,8 +475,8 @@ the Moqui service runner. All parameters are optional and default sensibly:
 
 | Parameter | Default | Notes |
 |---|---|---|
-| `wikiSpaceId` | `GROWERP_OKF` | An existing space keeps its own `rootPageLocation` |
-| `rootPageLocation` | `growerp-okf` under the runtime dir | Only used when creating the space |
+| `wikiSpaceId` | `GROWERP_OKF` | Seeded by [GrowerpOkfSeedData.xml](../backend/data/GrowerpOkfSeedData.xml); an existing space keeps its own `rootPageLocation` |
+| `rootPageLocation` | `component://growerp/okf/growerp.md` | Only used when creating the space |
 | `packagePrefixes` | `mantle.,growerp.` | Keeps the export away from thousands of framework entities |
 | `includeViewEntities` | `false` | |
 | `baseUrl` | webapp root | Used for the frontmatter `resource:` link |

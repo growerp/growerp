@@ -24,10 +24,12 @@ limitations under the License.
             is served by the standard wiki services.</description>
         <in-parameters>
             <parameter name="wikiSpaceId" default-value="GROWERP_OKF" />
-            <parameter name="rootPageLocation" default-value="growerp-okf/growerp.md">
+            <parameter name="rootPageLocation" default-value="component://growerp/okf/growerp.md">
                 <description>Only used when the WikiSpace does not exist yet; an existing
-                    space keeps its own rootPageLocation. No scheme = relative to the moqui
-                    runtime directory.</description>
+                    space keeps its own rootPageLocation (see GrowerpOkfSeedData.xml). The
+                    bundle lives in the growerp component so it is version controlled and
+                    ships in the docker image; a scheme-less value would be relative to the
+                    moqui runtime directory instead.</description>
             </parameter>
             <parameter name="packagePrefixes" default-value="mantle.,growerp.">
                 <description>Comma-separated package prefixes to include; keeps the export

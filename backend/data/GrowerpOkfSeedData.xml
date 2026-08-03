@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<entity-facade-xml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/entity-facade-3.xsd" type="seed">
+
+    <!-- OKF (Open Knowledge Format) knowledge bundle: the markdown files live in the
+         growerp component under okf/ (root page okf/growerp.md, concepts under
+         okf/growerp/). Seeding the space here makes the okf_index / okf_load_concept /
+         okf_follow MCP tools work on a fresh install without first running
+         growerp.100.OkfServices100.export#OkfBundle; that export refreshes the files from
+         the live entity definitions and adds the WikiPage rows needed for wiki serving. -->
+    <moqui.resource.wiki.WikiSpace wikiSpaceId="GROWERP_OKF"
+        description="GrowERP OKF knowledge bundle"
+        restrictView="N"
+        restrictUpdate="Y"
+        rootPageLocation="component://growerp/okf/growerp.md"/>
+
+</entity-facade-xml>
