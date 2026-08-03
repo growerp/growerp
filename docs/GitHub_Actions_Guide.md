@@ -50,7 +50,7 @@ GrowERP uses six GitHub Actions workflows to automate testing, releasing Docker 
 
 | Workflow | Trigger | Runner | Secrets needed |
 |----------|---------|--------|----------------|
-| status | Schedule (daily) + manual | `ubuntu-latest` | Store API secrets (see [Secrets Reference](#secrets-reference)) for the store-status jobs; tests need none |
+| status | Schedule (daily) + manual | `ubuntu-latest` | Store API secrets (see [Secrets Reference](#secrets-reference)) for the store-status jobs; `PROD_SSH_USER`, `PROD_SSH_KEY` for the swarm status; tests need none |
 | Update Staging | Manual | `ubuntu-latest` | `GITHUB_TOKEN` |
 | Publish to Stores | Manual | macOS / Ubuntu / Windows | See [Secrets Reference](#secrets-reference) |
 | Release Approved Submissions | Manual | macOS / Ubuntu / Windows | See [Secrets Reference](#secrets-reference) |
@@ -63,7 +63,7 @@ GrowERP uses six GitHub Actions workflows to automate testing, releasing Docker 
 
 ### 1. Status (`status.yml`)
 
-**Purpose:** One nightly status run — the full Flutter integration test suite plus the backend Spock tests against a locally-built Moqui backend, *and* the publish state of every app in every store. Both results are published as a single GitHub Pages page: <https://growerp.github.io/growerp/>.
+**Purpose:** One nightly status run — the full Flutter integration test suite plus the backend Spock tests against a locally-built Moqui backend, the publish state of every app in every store, *and* the state of the production Docker swarm. All results are published as a single GitHub Pages page: <https://growerp.github.io/growerp/>.
 
 **Triggers:**
 - **Schedule:** Daily at 1 AM Bangkok time (18:00 UTC previous day). The store-status jobs run every time; the test jobs only run when there were commits in the last 24 hours affecting `flutter/**` or `moqui/runtime/component/**`.
@@ -81,16 +81,16 @@ GrowERP uses six GitHub Actions workflows to automate testing, releasing Docker 
 **Job Flow:**
 
 ```
-check-changes                       resolve-matrix
-    ├── backend-tests                   ├── status-ios
-    └── integration-tests               ├── status-macos
+check-changes                       resolve-matrix              swarm-status
+    ├── backend-tests                   ├── status-ios          (ssh growerp.com
+    └── integration-tests               ├── status-macos         ./deploy.sh status)
         (matrix: 4 slices × mobile/     ├── status-android
          desktop, or 1 slice when       ├── status-windows
          package_filter is set)         └── status-snap
-                       ↓                       ↓
-                            report
-                              ↓
-                         deploy-pages
+                       ↓                       ↓                       ↓
+                                     report
+                                       ↓
+                                  deploy-pages
 ```
 
 **What it does — tests:**
@@ -110,10 +110,15 @@ check-changes                       resolve-matrix
 **What it does — report:**
 1. Merges the store fragments into one matrix table (app rows × store columns) and lists apps waiting for approval.
 2. Sums the test totals (backend Spock, Flutter mobile/desktop packages and tests). When the tests were skipped, the last published totals are carried over from `tests-data.json` on the Pages site and labelled with their original date.
-3. Writes `index.html` + `tests-data.json` for GitHub Pages, a PDF artifact (`status-report`, retained 30 days) and the run's step summary.
-4. Fails the run when more than one individual test failed on a layout, or when the backend tests failed — the page is still published in that case.
+3. Renders the production swarm section from the `status-swarm` fragment: the `docker stack ps` tasks and the `docker service ls` services, with non-running tasks and incomplete replica counts (`0/1`) highlighted in red.
+4. Writes `index.html`, `failures.html`, `tests-data.json` for GitHub Pages, a PDF artifact (`status-report`, retained 30 days) and the run's step summary.
+5. Fails the run when more than one individual test failed on a layout, or when the backend tests failed — the page is still published in that case.
 
-**Secrets required:** none for the test jobs; the store jobs use the App Store Connect, Google Play, Partner Center and Snap Store secrets listed in the [Secrets Reference](#secrets-reference).
+**What it does — swarm:** `swarm-status` SSHes into `growerp.com` and runs `cd ~/server/swarm && ./deploy.sh status` (read-only: `docker stack ps` + `docker service ls`). The raw output is uploaded as the `status-swarm` fragment. The job never blocks the run — when the SSH credentials are missing or the host is unreachable, the page shows "Swarm status unavailable".
+
+**Failure drill-down:** every non-zero `Failed` count on the page links to `failures.html` on the same site, listing the failed packages, the failed test lines and the exceptions caught by the Flutter test framework, plus a link back to the workflow run for the raw logs. That detail is stored inside `tests-data.json`, so a run that skipped the tests rebuilds the same failures page from the carried-over data.
+
+**Secrets required:** none for the test jobs; the store jobs use the App Store Connect, Google Play, Partner Center and Snap Store secrets listed in the [Secrets Reference](#secrets-reference); the swarm job uses `PROD_SSH_USER` / `PROD_SSH_KEY`.
 
 ---
 
@@ -486,5 +491,5 @@ For organisation-wide secrets (shared across repos):
 | Google Play Console | Service account with **Release Manager** role | Android deploy |
 | Microsoft Partner Center | Azure AD app with **Manager** role | Windows deploy |
 | Snap Store | `package_upload` ACL for the relevant snaps | Snap deploy + Snap metadata upload |
-| Production server | SSH access for `PROD_SSH_USER` | Stage-to-production + Revert |
+| Production server | SSH access for `PROD_SSH_USER` | Stage-to-production + Revert + swarm status |
 | Match certs repository | GitHub PAT with `repo` scope | iOS deploy |
