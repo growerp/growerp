@@ -1,0 +1,828 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- AntWebsystems Co.,Ltd website owner-import file.
+
+     www.antwebsystems.com is a Vue single page app, so scraping it yields almost nothing:
+     the generated export held one invented home page. This file is that export enriched with
+     the real content of the previous site, taken from the Moqui seed data of the Vue website
+     (vueWebsite/AWSSetupAaaWebSiteData.xml): about, services, products, partner, jobs and
+     contact, rewritten for the GrowERP 'modern' (Lumina) template per
+     docs/Website_Template_Definition.md.
+
+     Install with:
+        growerp.100.ImportExportServices100.import#WebsiteOwner
+            location=component://growerp/data/AntWebsystemsCoLtdOwnerImportData.xml
+            siteId=ANTWEBSYSTEM
+     or through the support app: Website Generator, the upload button. -->
+<entity-facade-xml type="demo">
+
+    <moqui.resource.DbResource filename="ANTWEBSYSTEM_ROOT" isFile="N" resourceId="ANTWEBSYSTEM_ROOT" parentResourceId=""/>
+    <moqui.resource.DbResource filename="content" isFile="N" resourceId="antwebsystem_content_dir" parentResourceId="ANTWEBSYSTEM_ROOT"/>
+    <moqui.resource.DbResource filename="images" isFile="N" resourceId="ANTWEBSYSTEM_IMAGES" parentResourceId="ANTWEBSYSTEM_ROOT"/>
+
+    <moqui.resource.wiki.WikiSpace wikiSpaceId="ANTWEBSYSTEM_WS" description="AntWebsystems Co.,Ltd Website Content"
+        allowAnyHtml="Y" rootPageLocation="dbresource://ANTWEBSYSTEM_ROOT"/>
+
+    <!-- ================================================================
+         HOME
+         ================================================================ -->
+    <moqui.resource.wiki.WikiPage wikiPageId="antwebsystem_0_home" wikiSpaceId="ANTWEBSYSTEM_WS" pagePath="home"
+        publishedVersionName="01" sequenceNum="1">
+        <histories historySeqId="01" versionName="01" changeDateTime="1785818725769"/>
+    </moqui.resource.wiki.WikiPage>
+    <moqui.resource.DbResource filename="home.html.ftl" isFile="Y" resourceId="antwebsystem_0_home"
+        parentResourceId="antwebsystem_content_dir">
+        <file mimeType="text/html" versionName="01" rootVersionName="01">
+            <fileData><![CDATA[<#-- title: Home -->
+<main class="pt-24 pb-16">
+    <!-- Hero -->
+    <section class="max-w-container mx-auto px-4 md:px-12 min-h-[60vh] flex flex-col justify-center py-16">
+        <div class="max-w-3xl">
+            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-container border border-outline-variant/50 w-fit mb-6">
+                <span class="w-2 h-2 rounded-full bg-primary"></span>
+                <span class="font-label text-xs text-on-surface-variant">Apache OFBiz and Moqui specialists</span>
+            </div>
+            <h1 class="font-display text-4xl md:text-6xl font-bold tracking-tight leading-tight text-on-surface">
+                Looking for quality support on<br>
+                <span class="l-gradient-text">open source ERP?</span>
+            </h1>
+            <p class="text-lg text-on-surface-variant mt-6 max-w-xl leading-relaxed">
+                We are one of the largest contributors and committers to Apache OFBiz, and a PMC
+                member. AntWebsystems is a registered software development company in Thailand
+                under European management, supporting installations in North America, Europe
+                and Asia.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 mt-10">
+                <a href="/content/services" class="bg-primary hover:bg-primary/90 text-on-primary font-label text-sm font-medium px-8 py-4 rounded-lg l-glow transition-all active:scale-95 inline-flex items-center justify-center gap-2">
+                    Our services
+                    <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+                </a>
+                <a href="/content/contact" class="l-glass hover:bg-surface-container-high/60 text-on-surface font-label text-sm font-medium px-8 py-4 rounded-lg transition-all active:scale-95 inline-flex items-center justify-center gap-2">
+                    Get in touch
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- What we do -->
+    <section class="max-w-container mx-auto px-4 md:px-12 py-16">
+        <h2 class="font-display text-3xl font-bold text-on-surface mb-3">The full lifecycle, not just the install</h2>
+        <p class="text-on-surface-variant max-w-2xl mb-10">
+            Our services cover the whole life of the product in your company: documenting your
+            business processes, gathering requirements, implementation and customization,
+            end-user training, and monitoring and support of the production system.
+        </p>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="l-glass rounded-2xl p-8">
+                <span class="material-symbols-outlined text-primary text-[36px] mb-4">insights</span>
+                <h3 class="font-display text-xl font-semibold text-on-surface mb-2">Business systems consulting</h3>
+                <p class="text-sm text-on-surface-variant leading-relaxed">
+                    We document your processes in BPMN and improve them before the implementation
+                    starts, so the savings begin early.
+                </p>
+            </div>
+            <div class="l-glass rounded-2xl p-8">
+                <span class="material-symbols-outlined text-primary text-[36px] mb-4">deployed_code</span>
+                <h3 class="font-display text-xl font-semibold text-on-surface mb-2">Implementation and customization</h3>
+                <p class="text-sm text-on-surface-variant leading-relaxed">
+                    Project management and an implementation team working in Scrum: data
+                    conversion, a user interface to your requirements, staging and version
+                    management.
+                </p>
+            </div>
+            <div class="l-glass rounded-2xl p-8">
+                <span class="material-symbols-outlined text-primary text-[36px] mb-4">support_agent</span>
+                <h3 class="font-display text-xl font-semibold text-on-surface mb-2">24/7 support and system management</h3>
+                <p class="text-sm text-on-surface-variant leading-relaxed">
+                    Worldwide system support, production installs on Linux, backups, upgrades and
+                    uninterrupted availability through round the clock monitoring.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Products -->
+    <section class="max-w-container mx-auto px-4 md:px-12 py-8">
+        <div class="l-glass rounded-2xl p-8 md:p-12">
+            <h2 class="font-display text-3xl font-bold text-on-surface mb-4">Built on open source, all the way down</h2>
+            <p class="text-on-surface-variant max-w-3xl leading-relaxed mb-6">
+                Apache OFBiz is the base product. GrowERP adds what we found small and mid-size
+                companies need most, so you can start small and add functions as you grow. Every
+                product we make carries the same Apache licence as the core system.
+            </p>
+            <a href="/content/products" class="text-primary font-label text-sm hover:underline inline-flex items-center gap-1">
+                See the products we support
+                <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+            </a>
+        </div>
+    </section>
+</main>]]></fileData>
+            <histories versionName="01" versionDate="1785818725769" isDiff="N"/>
+        </file>
+    </moqui.resource.DbResource>
+
+    <!-- ================================================================
+         ABOUT US
+         ================================================================ -->
+    <moqui.resource.wiki.WikiPage wikiPageId="antwebsystem_1_about" wikiSpaceId="ANTWEBSYSTEM_WS" pagePath="about"
+        publishedVersionName="01" sequenceNum="2">
+        <histories historySeqId="01" versionName="01" changeDateTime="1785818725769"/>
+    </moqui.resource.wiki.WikiPage>
+    <moqui.resource.DbResource filename="about.html.ftl" isFile="Y" resourceId="antwebsystem_1_about"
+        parentResourceId="antwebsystem_content_dir">
+        <file mimeType="text/html" versionName="01" rootVersionName="01">
+            <fileData><![CDATA[<#-- title: About Us -->
+<main class="pt-28 pb-16">
+    <section class="max-w-container mx-auto px-4 md:px-12 py-8">
+        <h1 class="font-display text-4xl font-bold text-on-surface mb-6">About Us</h1>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div class="lg:col-span-2 space-y-5 text-on-surface-variant leading-relaxed">
+                <h2 class="font-display text-2xl font-semibold text-on-surface">Who we are</h2>
+                <p>
+                    We love to develop and extend business applications using Apache OFBiz, for its
+                    extensive framework, data model and ERP/CRM application. We are one of the top
+                    Apache OFBiz committers and a PMC member helping to determine the future of
+                    OFBiz.
+                </p>
+                <p>
+                    AntWebsystems Co., Ltd is an officially registered software development company
+                    in Thailand under European management, and growing fast. We currently support
+                    OFBiz installations in North America, Europe and Asia, and co-operate with
+                    partner companies worldwide to provide local support. We are always looking for
+                    new partners to help make the Apache OFBiz open source ERP system successful in
+                    their area.
+                </p>
+
+                <h2 class="font-display text-2xl font-semibold text-on-surface pt-4">Let us know how we can help</h2>
+                <p>
+                    If you are looking for quality support around the open source ERP product
+                    Apache OFBiz at competitive rates, you have found what you are looking for. We
+                    are one of the largest contributors and committers to Apache OFBiz and are ready
+                    to help you now. Tell us what kind of support you need and we will let you know
+                    within 24 hours how we can help.
+                </p>
+
+                <h2 class="font-display text-2xl font-semibold text-on-surface pt-4">How do we work?</h2>
+                <p>
+                    We work to an internal development process based on the Scrum agile methodology.
+                    Scrum lets you see the progress being made every day, in agreed periods of one
+                    to four weeks, at the end of which usable system functions are delivered.
+                </p>
+                <p>
+                    Requirements do not have to be detailed up front, and you can change them
+                    between those periods without a large impact on the implementation. We built and
+                    use a Scrum component to support this process: as a customer or partner you can
+                    log in and follow the whole process day by day.
+                </p>
+
+                <h2 class="font-display text-2xl font-semibold text-on-surface pt-4">What we can do</h2>
+                <p>
+                    Anything related to Apache OFBiz: requirements gathering, implementation,
+                    interfacing, customization, and managing your production system. The
+                    <a href="/content/services" class="text-primary hover:underline">services page</a>
+                    describes each of these in detail.
+                </p>
+            </div>
+
+            <aside class="space-y-6">
+                <div class="l-glass rounded-2xl p-8">
+                    <h3 class="font-display text-lg font-semibold text-on-surface mb-3">What is Apache OFBiz?</h3>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="https://ofbiz.apache.org" target="_blank" rel="noopener" class="text-primary hover:underline">The Apache OFBiz project</a></li>
+                        <li><a href="https://cwiki.apache.org/confluence/display/OFBIZ/Is+OFBiz+for+Me" target="_blank" rel="noopener" class="text-primary hover:underline">Is OFBiz for you?</a></li>
+                        <li><a href="https://cwiki.apache.org/confluence/display/OFBIZ/Feature+summary" target="_blank" rel="noopener" class="text-primary hover:underline">Feature list</a></li>
+                        <li><a href="https://cwiki.apache.org/confluence/display/OFBIZ/Apache+OFBiz+User+List" target="_blank" rel="noopener" class="text-primary hover:underline">Who is using OFBiz</a></li>
+                    </ul>
+                </div>
+                <div class="l-glass rounded-2xl p-8">
+                    <h3 class="font-display text-lg font-semibold text-on-surface mb-3">GrowERP</h3>
+                    <p class="text-sm text-on-surface-variant leading-relaxed mb-3">
+                        The open source ERP that grows with your business.
+                    </p>
+                    <a href="https://www.growerp.com" target="_blank" rel="noopener" class="text-primary text-sm hover:underline">www.growerp.com</a>
+                </div>
+            </aside>
+        </div>
+    </section>
+</main>]]></fileData>
+            <histories versionName="01" versionDate="1785818725769" isDiff="N"/>
+        </file>
+    </moqui.resource.DbResource>
+
+    <!-- ================================================================
+         SERVICES
+         ================================================================ -->
+    <moqui.resource.wiki.WikiPage wikiPageId="antwebsystem_2_services" wikiSpaceId="ANTWEBSYSTEM_WS" pagePath="services"
+        publishedVersionName="01" sequenceNum="3">
+        <histories historySeqId="01" versionName="01" changeDateTime="1785818725769"/>
+    </moqui.resource.wiki.WikiPage>
+    <moqui.resource.DbResource filename="services.html.ftl" isFile="Y" resourceId="antwebsystem_2_services"
+        parentResourceId="antwebsystem_content_dir">
+        <file mimeType="text/html" versionName="01" rootVersionName="01">
+            <fileData><![CDATA[<#-- title: Services -->
+<main class="pt-28 pb-16">
+    <section class="max-w-container mx-auto px-4 md:px-12 py-8">
+        <h1 class="font-display text-4xl font-bold text-on-surface mb-6">Our Services</h1>
+        <p class="text-on-surface-variant max-w-3xl leading-relaxed mb-4">
+            Our vision is to make the professional ERP system Apache OFBiz and GrowERP available to
+            small and mid-size companies at a cost effective investment, using open source software
+            only. We help you not just with the implementation, but with maintaining and customizing
+            the system afterwards.
+        </p>
+        <p class="text-on-surface-variant max-w-3xl leading-relaxed mb-12">
+            These services cover the full lifecycle of the product within your company: documenting
+            your business processes, gathering requirements, implementation and customization,
+            introduction and end-user training, and monitoring and support of the production system.
+            We can also train your own IT department to maintain the system, using Scrum, peer
+            review, continuous testing and release management.
+        </p>
+
+        <div class="space-y-6">
+            <div class="l-glass rounded-2xl p-8">
+                <span class="material-symbols-outlined text-primary text-[32px] mb-3">insights</span>
+                <h2 class="font-display text-2xl font-semibold text-on-surface mb-3">Business systems consulting</h2>
+                <div class="space-y-4 text-on-surface-variant leading-relaxed">
+                    <p>
+                        Once you have decided on Apache OFBiz, we advise documenting your business
+                        processes with BPMN. After that first step the workflow is improved to obtain
+                        cost savings as early as possible, before the ERP implementation even starts.
+                    </p>
+                    <p>
+                        Next we design a new menu shell around the ERP system, using as much of the
+                        standard system as possible and showing only the functions you really want,
+                        to keep it simple and friendly to use. That shell sits outside the core
+                        system, so future upgrades remain possible. The screens and functional
+                        requirements are documented in our Scrum system, and an implementation plan
+                        follows, including any integration with existing systems.
+                    </p>
+                    <p>
+                        Because software development with the OFBiz framework is our core business,
+                        we have a complete product lifecycle built on open source support systems
+                        only, and we can help introduce it to your own development department.
+                    </p>
+                </div>
+            </div>
+
+            <div class="l-glass rounded-2xl p-8">
+                <span class="material-symbols-outlined text-primary text-[32px] mb-3">deployed_code</span>
+                <h2 class="font-display text-2xl font-semibold text-on-surface mb-3">Apache OFBiz implementation</h2>
+                <div class="space-y-4 text-on-surface-variant leading-relaxed">
+                    <p>
+                        With the implementation plan in place and the requirements defined as Scrum
+                        stories, we provide project management and an implementation team. We convert
+                        your existing data, create a new user interface to your requirements and carry
+                        out any further customization.
+                    </p>
+                    <p>
+                        As soon as a usable part of the system is ready we set up the production
+                        environment and help you train your end-users and IT staff. We also provide
+                        the infrastructure for staging, testing and version management, and are happy
+                        to work alongside your local IT department.
+                    </p>
+                </div>
+            </div>
+
+            <div class="l-glass rounded-2xl p-8">
+                <span class="material-symbols-outlined text-primary text-[32px] mb-3">hub</span>
+                <h2 class="font-display text-2xl font-semibold text-on-surface mb-3">Moqui ecosystem implementation</h2>
+                <p class="text-on-surface-variant leading-relaxed">
+                    We have people highly skilled in the Moqui ecosystem and in interfacing it with
+                    other systems. Our development environment runs from project management and
+                    accounting through to a proper distributed version control system with branch
+                    level security and peer review, automated testing, and a demo system updated
+                    daily so you can follow the work of the customization team as it happens.
+                </p>
+            </div>
+
+            <div class="l-glass rounded-2xl p-8">
+                <span class="material-symbols-outlined text-primary text-[32px] mb-3">smartphone</span>
+                <h2 class="font-display text-2xl font-semibold text-on-surface mb-3">Android and iOS apps on a Moqui backend</h2>
+                <p class="text-on-surface-variant leading-relaxed">
+                    We build mobile applications on a Moqui backend to your needs, whether you are
+                    implementing a new system or extending an existing one, in the same transparent
+                    way of working.
+                </p>
+            </div>
+
+            <div class="l-glass rounded-2xl p-8">
+                <span class="material-symbols-outlined text-primary text-[32px] mb-3">support_agent</span>
+                <h2 class="font-display text-2xl font-semibold text-on-surface mb-3">24/7 support and system management</h2>
+                <div class="space-y-4 text-on-surface-variant leading-relaxed">
+                    <p>
+                        We provide system support worldwide, as long as your system is reachable over
+                        the internet. We install production systems on Linux including database setup,
+                        from a single server up to a load balancer with multiple application and
+                        database servers, set up backup procedures and upgrade services, and keep your
+                        system available uninterrupted with round the clock monitoring.
+                    </p>
+                    <p>
+                        A second level help desk is available to support the technical people and the
+                        end-users in your organization, by chat or by email. Standard support
+                        contracts are available on request and can be adapted to your situation.
+                    </p>
+                    <p>
+                        If you want to get started quickly, we provide a knowledge transfer service
+                        for organizations new to Apache OFBiz, as an on-site training course or
+                        remotely by chat and email.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-12 l-glass rounded-2xl p-8 text-center">
+            <p class="text-on-surface-variant mb-4">Want to know more about any of these services?</p>
+            <a href="/content/contact" class="bg-primary hover:bg-primary/90 text-on-primary font-label text-sm font-medium px-8 py-4 rounded-lg l-glow transition-all active:scale-95 inline-flex items-center gap-2">
+                Contact us
+                <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+            </a>
+        </div>
+    </section>
+</main>]]></fileData>
+            <histories versionName="01" versionDate="1785818725769" isDiff="N"/>
+        </file>
+    </moqui.resource.DbResource>
+
+    <!-- ================================================================
+         PRODUCTS
+         ================================================================ -->
+    <moqui.resource.wiki.WikiPage wikiPageId="antwebsystem_3_products" wikiSpaceId="ANTWEBSYSTEM_WS" pagePath="products"
+        publishedVersionName="01" sequenceNum="4">
+        <histories historySeqId="01" versionName="01" changeDateTime="1785818725769"/>
+    </moqui.resource.wiki.WikiPage>
+    <moqui.resource.DbResource filename="products.html.ftl" isFile="Y" resourceId="antwebsystem_3_products"
+        parentResourceId="antwebsystem_content_dir">
+        <file mimeType="text/html" versionName="01" rootVersionName="01">
+            <fileData><![CDATA[<#-- title: Products -->
+<main class="pt-28 pb-16">
+    <section class="max-w-container mx-auto px-4 md:px-12 py-8">
+        <h1 class="font-display text-4xl font-bold text-on-surface mb-6">Supported Open Source Products</h1>
+        <p class="text-on-surface-variant max-w-3xl leading-relaxed mb-4">
+            AntWebsystems is primarily a services company, helping you use the open source system
+            Apache OFBiz as efficiently as possible. Alongside those services we maintain a number
+            of products, which we either use ourselves or which grew out of customizations we built
+            for customers and have improved ever since.
+        </p>
+        <p class="text-on-surface-variant max-w-3xl leading-relaxed mb-12">
+            All of them are open source under the same licence as the Apache OFBiz core system.
+            Every product has a README in its root explaining how to install it.
+        </p>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="l-glass rounded-2xl p-8">
+                <h2 class="font-display text-2xl font-semibold text-on-surface mb-3">Apache OFBiz</h2>
+                <div class="space-y-4 text-on-surface-variant leading-relaxed text-sm">
+                    <p>
+                        The Apache Open For Business Project is an open source enterprise automation
+                        project under the Apache License 2.0: ERP, CRM, e-business and e-commerce,
+                        supply chain management, manufacturing resource planning, maintenance
+                        management and point of sale.
+                    </p>
+                    <p>
+                        It is a foundation and starting point for reliable, secure and scalable
+                        enterprise solutions. Use it out of the box or customize it to the most
+                        demanding needs, and grow your operations as your business grows without the
+                        deployment and maintenance costs of traditional enterprise systems.
+                    </p>
+                    <p>
+                        Being open source and driven by a community, it offers flexibility by design,
+                        access to the code, and a solution where you can work with many others to get
+                        things done.
+                    </p>
+                </div>
+            </div>
+
+            <div class="l-glass rounded-2xl p-8">
+                <h2 class="font-display text-2xl font-semibold text-on-surface mb-3">GrowERP</h2>
+                <div class="space-y-4 text-on-surface-variant leading-relaxed text-sm">
+                    <p>
+                        When implementing OFBiz we used to scale down from the full version, which is
+                        a lot of work to repeat for every smaller customer. GrowERP lets you start
+                        small and add functions as the customer needs them.
+                    </p>
+                    <p>
+                        We found smaller customers are better served in a multi-tenant environment,
+                        so we normally add a component on top of GrowERP for customer specific
+                        functions that also works multi-tenant.
+                    </p>
+                    <p>
+                        More information is at
+                        <a href="https://www.growerp.com" target="_blank" rel="noopener" class="text-primary hover:underline">www.growerp.com</a>.
+                    </p>
+                </div>
+            </div>
+
+            <div class="l-glass rounded-2xl p-8">
+                <h2 class="font-display text-2xl font-semibold text-on-surface mb-3">Scrum component</h2>
+                <p class="text-on-surface-variant leading-relaxed text-sm">
+                    A component we use ourselves, administering the major data of a Scrum
+                    environment: products, projects and backlogs. It accepts time registration from
+                    its members and can generate invoices from it.
+                </p>
+            </div>
+
+            <div class="l-glass rounded-2xl p-8">
+                <h2 class="font-display text-2xl font-semibold text-on-surface mb-3">Import / Export component</h2>
+                <p class="text-on-surface-variant leading-relaxed text-sm">
+                    Makes data conversion easier, whether from another ERP system or from an older
+                    OFBiz installation.
+                </p>
+            </div>
+
+            <div class="l-glass rounded-2xl p-8">
+                <h2 class="font-display text-2xl font-semibold text-on-surface mb-3">Sitemap component</h2>
+                <p class="text-on-surface-variant leading-relaxed text-sm">
+                    Creates a sitemap of every page in the website, so all pages are registered with
+                    the search engines.
+                </p>
+            </div>
+
+            <div class="l-glass rounded-2xl p-8">
+                <h2 class="font-display text-2xl font-semibold text-on-surface mb-3">Twitter component</h2>
+                <p class="text-on-surface-variant leading-relaxed text-sm">
+                    A Twitter interface, letting you post by calling a service.
+                </p>
+            </div>
+        </div>
+    </section>
+</main>]]></fileData>
+            <histories versionName="01" versionDate="1785818725769" isDiff="N"/>
+        </file>
+    </moqui.resource.DbResource>
+
+    <!-- ================================================================
+         PARTNER
+         ================================================================ -->
+    <moqui.resource.wiki.WikiPage wikiPageId="antwebsystem_4_partner" wikiSpaceId="ANTWEBSYSTEM_WS" pagePath="partner"
+        publishedVersionName="01" sequenceNum="5">
+        <histories historySeqId="01" versionName="01" changeDateTime="1785818725769"/>
+    </moqui.resource.wiki.WikiPage>
+    <moqui.resource.DbResource filename="partner.html.ftl" isFile="Y" resourceId="antwebsystem_4_partner"
+        parentResourceId="antwebsystem_content_dir">
+        <file mimeType="text/html" versionName="01" rootVersionName="01">
+            <fileData><![CDATA[<#-- title: Become a Partner -->
+<main class="pt-28 pb-16">
+    <section class="max-w-container mx-auto px-4 md:px-12 py-8">
+        <h1 class="font-display text-4xl font-bold text-on-surface mb-6">Become a Partner and get more customers</h1>
+
+        <div class="max-w-3xl space-y-5 text-on-surface-variant leading-relaxed">
+            <p>
+                Selling an ERP system, even services around an open source product, is not easy.
+                Going out and talking to people directly, by mail or phone or whatever channel you
+                use, does not work on its own any more.
+            </p>
+            <p>
+                Buyers now scan the internet for information themselves long before they contact an
+                ERP vendor, which changes how the product has to be promoted. The number of
+                competitors in the ERP market makes it harder still.
+            </p>
+
+            <h2 class="font-display text-2xl font-semibold text-on-surface pt-4">So how do you solve that?</h2>
+            <p>
+                Start with a marketing plan: define the product or service you want to sell, define
+                the ideal customer, and work out how to find and approach them. Set up campaigns
+                with actions, enter the prospects, and have sales people execute the plan.
+            </p>
+            <p>
+                All of this can be done by hand in spreadsheets, but in our experience it only works
+                with a software system behind it. So we built that function into GrowERP. It is
+                available as a hosted version or can be downloaded from
+                <a href="https://www.growerp.com" target="_blank" rel="noopener" class="text-primary hover:underline">growerp.com</a>.
+            </p>
+            <p>
+                The plan is built on connecting to prospects over LinkedIn and, once connected,
+                sending regular personalized messages automatically to stay in contact until they
+                are ready to make the jump to open source ERP.
+            </p>
+            <p>
+                We also believe that selling ERP alone is no longer enough: the system needs
+                functions your competitors do not have. That is why these extended CRM functions are
+                the first thing a new user touches, increasing their sales before they use any other
+                part of the ERP.
+            </p>
+
+            <h2 class="font-display text-2xl font-semibold text-on-surface pt-4">Working together</h2>
+            <p>
+                We have developed such a marketing plan ourselves using this GrowERP function, and
+                are looking for partners we can help to increase their sales and who want to work
+                together on local OFBiz and GrowERP projects. The partnership fee is very low to
+                begin with. It will rise as the plans, the support and the system mature, and it can
+                be reduced again when we work together on joint projects in your area.
+            </p>
+        </div>
+
+        <div class="mt-10 l-glass rounded-2xl p-8">
+            <h3 class="font-display text-lg font-semibold text-on-surface mb-2">Interested?</h3>
+            <p class="text-on-surface-variant mb-4">
+                Let us know, so we can work together on making Apache OFBiz and GrowERP a success
+                worldwide.
+            </p>
+            <a href="mailto:partner@antwebsystems.com" class="bg-primary hover:bg-primary/90 text-on-primary font-label text-sm font-medium px-8 py-4 rounded-lg l-glow transition-all active:scale-95 inline-flex items-center gap-2">
+                <span class="material-symbols-outlined text-[18px]">mail</span>
+                partner@antwebsystems.com
+            </a>
+        </div>
+    </section>
+</main>]]></fileData>
+            <histories versionName="01" versionDate="1785818725769" isDiff="N"/>
+        </file>
+    </moqui.resource.DbResource>
+
+    <!-- ================================================================
+         JOBS
+         ================================================================ -->
+    <moqui.resource.wiki.WikiPage wikiPageId="antwebsystem_5_jobs" wikiSpaceId="ANTWEBSYSTEM_WS" pagePath="jobs"
+        publishedVersionName="01" sequenceNum="6">
+        <histories historySeqId="01" versionName="01" changeDateTime="1785818725769"/>
+    </moqui.resource.wiki.WikiPage>
+    <moqui.resource.DbResource filename="jobs.html.ftl" isFile="Y" resourceId="antwebsystem_5_jobs"
+        parentResourceId="antwebsystem_content_dir">
+        <file mimeType="text/html" versionName="01" rootVersionName="01">
+            <fileData><![CDATA[<#-- title: Jobs -->
+<main class="pt-28 pb-16">
+    <section class="max-w-container mx-auto px-4 md:px-12 py-8">
+        <h1 class="font-display text-4xl font-bold text-on-surface mb-6">Available Job Positions</h1>
+
+        <div class="max-w-3xl space-y-5 text-on-surface-variant leading-relaxed mb-12">
+            <p>
+                We are always interested in hiring people with a passion for open source software
+                and a good attitude. If you feel you can contribute to the success of our company,
+                either in one of the positions below or in a position we have not thought of yet,
+                let us know so we can arrange a meeting.
+            </p>
+            <p>
+                What do we offer? A good environment in a building just outside Chiang Mai, built
+                specially for us, creating business software for customers all over the world. The
+                ERP work is not easy: expect about two years to understand the ground we cover, not
+                only programming but also the business disciplines, from product and order
+                management to warehousing and accounting.
+            </p>
+            <p>
+                You can start as a junior tester or programmer and grow into a technical specialist,
+                project manager or business systems consultant. In marketing and sales we are also
+                looking for someone who can find new customers and, as an account manager, keep the
+                relationship with our current ones.
+            </p>
+            <p>
+                Most important is that we can offer you work you enjoy, because then you have fun
+                and we have someone who performs well. We are open source people: we share what we
+                know and work together to give the customer licence free software. A bachelor degree
+                or equivalent working experience is usually required, and learning quickly is very
+                much appreciated.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="l-glass rounded-2xl p-8">
+                <h2 class="font-display text-xl font-semibold text-on-surface mb-2">Application tester</h2>
+                <p class="text-sm text-on-surface-variant leading-relaxed">
+                    Creating automated and manual tests that run every day to keep the software as
+                    error free as possible. Basic Java knowledge is required; knowledge of business
+                    practices and applications is an advantage.
+                </p>
+            </div>
+            <div class="l-glass rounded-2xl p-8">
+                <h2 class="font-display text-xl font-semibold text-on-surface mb-2">Software developer</h2>
+                <p class="text-sm text-on-surface-variant leading-relaxed">
+                    You need the basics of a structured programming language such as Java and an
+                    understanding of relational databases. Linux and business knowledge help but are
+                    not required. Technology changes quickly, so learning fast and solving the
+                    problems you meet matters more than what you already know.
+                </p>
+            </div>
+            <div class="l-glass rounded-2xl p-8">
+                <h2 class="font-display text-xl font-semibold text-on-surface mb-2">System administrator</h2>
+                <p class="text-sm text-on-surface-variant leading-relaxed">
+                    We often run the production servers of our customers, where availability around
+                    the clock is required. You would also maintain the development machines and the
+                    network in our own company, all running Ubuntu Linux. Knowledge of development
+                    and testing tools is an advantage.
+                </p>
+            </div>
+            <div class="l-glass rounded-2xl p-8">
+                <h2 class="font-display text-xl font-semibold text-on-surface mb-2">Project leader</h2>
+                <p class="text-sm text-on-surface-variant leading-relaxed">
+                    Above all this asks for responsibility and the ability to work with people and
+                    customers. We use the Scrum framework, and basic technical knowledge of software
+                    development and production environments is required.
+                </p>
+            </div>
+            <div class="l-glass rounded-2xl p-8">
+                <h2 class="font-display text-xl font-semibold text-on-surface mb-2">Business systems consultant</h2>
+                <p class="text-sm text-on-surface-variant leading-relaxed">
+                    An advanced position asking for general knowledge of software development, open
+                    source ERP systems and business. You will meet leaders in the industry as well as
+                    operational people on the shop floor, and should be able to discuss business at
+                    any level.
+                </p>
+            </div>
+            <div class="l-glass rounded-2xl p-8">
+                <h2 class="font-display text-xl font-semibold text-on-surface mb-2">Marketing manager</h2>
+                <p class="text-sm text-on-surface-variant leading-relaxed">
+                    Developing a repeatable sales plan that helps sales people show potential
+                    customers how an open source ERP system can help them run their business.
+                    General knowledge of business and ERP systems, and above all of marketing, is
+                    required.
+                </p>
+            </div>
+            <div class="l-glass rounded-2xl p-8 md:col-span-2">
+                <h2 class="font-display text-xl font-semibold text-on-surface mb-2">Sales people</h2>
+                <p class="text-sm text-on-surface-variant leading-relaxed">
+                    Contacting potential customers over the internet using the sales plans already
+                    developed, coming back with suggestions to improve them, and presenting our open
+                    source ERP system.
+                </p>
+            </div>
+        </div>
+
+        <div class="mt-10 text-center">
+            <a href="/content/contact" class="bg-primary hover:bg-primary/90 text-on-primary font-label text-sm font-medium px-8 py-4 rounded-lg l-glow transition-all active:scale-95 inline-flex items-center gap-2">
+                Get in touch
+                <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+            </a>
+        </div>
+    </section>
+</main>]]></fileData>
+            <histories versionName="01" versionDate="1785818725769" isDiff="N"/>
+        </file>
+    </moqui.resource.DbResource>
+
+    <!-- ================================================================
+         CONTACT
+         ================================================================ -->
+    <moqui.resource.wiki.WikiPage wikiPageId="antwebsystem_6_contact" wikiSpaceId="ANTWEBSYSTEM_WS" pagePath="contact"
+        publishedVersionName="01" sequenceNum="7">
+        <histories historySeqId="01" versionName="01" changeDateTime="1785818725769"/>
+    </moqui.resource.wiki.WikiPage>
+    <moqui.resource.DbResource filename="contact.html.ftl" isFile="Y" resourceId="antwebsystem_6_contact"
+        parentResourceId="antwebsystem_content_dir">
+        <file mimeType="text/html" versionName="01" rootVersionName="01">
+            <fileData><![CDATA[<#-- title: Contact -->
+<main class="pt-28 pb-16">
+    <section class="max-w-container mx-auto px-4 md:px-12 py-8">
+        <h1 class="font-display text-4xl font-bold text-on-surface mb-6">Contact us</h1>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="l-glass rounded-2xl p-8">
+                <span class="material-symbols-outlined text-primary text-[32px] mb-3">location_on</span>
+                <h2 class="font-display text-xl font-semibold text-on-surface mb-3">Headquarters</h2>
+                <address class="not-italic text-on-surface-variant leading-relaxed">
+                    AntWebsystems Co., Ltd<br>
+                    73/1 M.8, Soi AntWebsystems<br>
+                    Tambon Sanklang, Amphur Sanpatong<br>
+                    Chiang Mai 50120<br>
+                    Thailand
+                </address>
+            </div>
+
+            <div class="l-glass rounded-2xl p-8">
+                <span class="material-symbols-outlined text-primary text-[32px] mb-3">mail</span>
+                <h2 class="font-display text-xl font-semibold text-on-surface mb-3">Email</h2>
+                <dl class="space-y-3 text-sm">
+                    <div>
+                        <dt class="text-on-surface-variant">Support questions</dt>
+                        <dd><a href="mailto:support@antwebsystems.com" class="text-primary hover:underline">support@antwebsystems.com</a></dd>
+                    </div>
+                    <div>
+                        <dt class="text-on-surface-variant">Administration</dt>
+                        <dd><a href="mailto:admin@antwebsystems.com" class="text-primary hover:underline">admin@antwebsystems.com</a></dd>
+                    </div>
+                    <div>
+                        <dt class="text-on-surface-variant">General information</dt>
+                        <dd><a href="mailto:info@antwebsystems.com" class="text-primary hover:underline">info@antwebsystems.com</a></dd>
+                    </div>
+                    <div>
+                        <dt class="text-on-surface-variant">Partnership</dt>
+                        <dd><a href="mailto:partner@antwebsystems.com" class="text-primary hover:underline">partner@antwebsystems.com</a></dd>
+                    </div>
+                </dl>
+            </div>
+
+            <div class="l-glass rounded-2xl p-8">
+                <span class="material-symbols-outlined text-primary text-[32px] mb-3">call</span>
+                <h2 class="font-display text-xl font-semibold text-on-surface mb-3">Telephone</h2>
+                <dl class="space-y-3 text-sm">
+                    <div>
+                        <dt class="text-on-surface-variant">Landline</dt>
+                        <dd class="text-on-surface">+66 (0)53 355753</dd>
+                    </div>
+                    <div>
+                        <dt class="text-on-surface-variant">Mobile</dt>
+                        <dd class="text-on-surface">+66 (0)98 7964553</dd>
+                    </div>
+                </dl>
+            </div>
+
+            <div class="l-glass rounded-2xl p-8">
+                <span class="material-symbols-outlined text-primary text-[32px] mb-3">account_balance</span>
+                <h2 class="font-display text-xl font-semibold text-on-surface mb-3">Payment information</h2>
+                <dl class="space-y-3 text-sm">
+                    <div>
+                        <dt class="text-on-surface-variant">Bank</dt>
+                        <dd class="text-on-surface">Bangkok Bank Public Co., Ltd</dd>
+                    </div>
+                    <div>
+                        <dt class="text-on-surface-variant">SWIFT code</dt>
+                        <dd class="text-on-surface">BKKBTHBK</dd>
+                    </div>
+                    <div>
+                        <dt class="text-on-surface-variant">Account</dt>
+                        <dd class="text-on-surface">4593018114, AntWebsystems Co.,Ltd.</dd>
+                    </div>
+                    <div>
+                        <dt class="text-on-surface-variant">PayPal</dt>
+                        <dd class="text-on-surface">admin@antwebsystems.com</dd>
+                    </div>
+                </dl>
+            </div>
+        </div>
+
+        <p class="text-on-surface-variant mt-8 max-w-2xl">
+            Tell us what kind of support you need and we will let you know within 24 hours how we
+            can help.
+        </p>
+    </section>
+</main>]]></fileData>
+            <histories versionName="01" versionDate="1785818725769" isDiff="N"/>
+        </file>
+    </moqui.resource.DbResource>
+
+    <!-- ================================================================
+         THEME
+         ================================================================ -->
+    <moqui.resource.DbResource filename="websiteColor.json" isFile="Y" resourceId="antwebsystem_website_color"
+        parentResourceId="antwebsystem_content_dir">
+        <file mimeType="application/json" versionName="01" rootVersionName="01">
+            <fileData><![CDATA[{
+    "luminaBrightness": "light",
+    "primary": "#007bff",
+    "onPrimary": "#ffffff",
+    "secondary": "#6c757d",
+    "onSecondary": "#ffffff",
+    "tertiary": "#17a2b8",
+    "onTertiary": "#ffffff",
+    "error": "#dc3545",
+    "onError": "#ffffff",
+    "surface": "#ffffff",
+    "surfaceContainerLowest": "#f8f9fa",
+    "surfaceContainerLow": "#e9ecef",
+    "surfaceContainer": "#dee2e6",
+    "surfaceContainerHigh": "#ced4da",
+    "surfaceContainerHighest": "#adb5bd",
+    "onSurface": "#212529",
+    "onSurfaceVariant": "#495057",
+    "outlineVariant": "#ced4da"
+}]]></fileData>
+            <histories versionName="01" versionDate="1785818725769" isDiff="N"/>
+        </file>
+    </moqui.resource.DbResource>
+
+    <!-- ================================================================
+         LOGO (the site favicon, the only image the single page app exposes)
+         ================================================================ -->
+    <moqui.resource.DbResource filename="logo.ico" isFile="Y" resourceId="ANTWEBSYSTEM_IMG_0"
+        parentResourceId="ANTWEBSYSTEM_IMAGES"/>
+    <moqui.resource.DbResourceFile resourceId="ANTWEBSYSTEM_IMG_0" rootVersionName="01"
+        versionName="01" mimeType="image/x-icon">
+        <fileData><![CDATA[AAABAAEAICAAAAEAIACoEAAAFgAAACgAAAAgAAAAQAAAAAEAIAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAD////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////6/Pz/nL7C/+719f///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////+PMzP/jycn/4srL//z6+v/////////////////m7vH/jLi+/9HNzv/jycn/5crK/+LJyv/iysr/48nK/+LJyv/jycr/4srJ/+LJyv/kycr/48nJ/+PJy//kycr/4srK/+TJyv/iycr/4crK/+TJyv/hysr/7uPj////////////rkRH/5kBB/+XAQf/2rOz///////////////////////Dxsr/dFNa/6hAQf+qQkL/rUpM/7pbWP+pTE//tGdo/6tKS/+lP0D/rUtN/6tGRv+lPED/rkVG/50jJf+qRUj/qkhJ/6pGSv+qRUj/rEpN/6tLTv/Llpb////////////UpKX/mAEE/5wBCP+wVln//v7+/////////////f/+/6lZW/+DdX3/1Kem/7uChP+xaWz/y5SS/62Hiv+vXmH/u2hn/7Zwb/+7amv/s2tt/6xfYP+zVVX/rlRT/6pNTf+wWVr/mQMG/7JXV/+3YmP/smVm/9m4uP////////////ny8v+ZFBf/mQEJ/5kHDv+eKzP/mW5z/5Kaov+NlZv/lAwQ/3ZdZP9/Ojz/a1Zd/01RXf+LfYL/fZ+k/5MaH/+VAQT/uHBw/9iwsv/aq6z/nRsf/5wBBf+VAQj/xn+B/9qwsf/Zr7L/1rCz/6AdJP+VAQf/xHp6/////////////////7plaP+aAQX/lwAL/5UBB/+YAQT/kQEF/35GTP98Ulf/jQoN/29lb/8sdYf/KHuN/0+Wo/+ZucD/jiEm/5YBB//No6T//////921tv+TAgj/mgEF/5YACv/guLf/////////////////pCwy/5cACv/FeXj////////////////hxsf/lAIE/5sBBv+nMjP/068w/9Str/+hMDP/glhf/4U2PP91anL/JXKC/zmJmP+Nw87/mb3C/4McI/+ZAAr/z6Wm//79/f+jNjj/lwEH/5gBB/+WAAr/4Li3/////////////////6MrM/+XAAr/xXl4//////////////////79/f+gKSz/mAAJ/5cOFP/38fH/+/b2/5cRFP+GJyr/WYKM/5a4v/+zyc7/XZah/x5jcv+wyM7/hjg9/5cBB//Sqar/2bGx/5oBB/+dGiH/pyEl/5cACP/euLf/////////////////oysz/5cACv/FeXj//////////////////////8iJi/+ZAQn/lgEE/9irrf/bt7n/mgEH/5gBBv+UX2H/oL/E/6fEyv+Xt73/OH2O/0OKmP+DJSr/nAEG/9Wrq/+jMjb/mgEG/8iQkf+iKSr/kgEF/+C3uP////////////////+jKzP/lwAK/8V5eP//////////////////////8OHh/5cHDf+YAQX/tVld/7psbf+YAQj/lQIF/+HAwP///////////+/09f9mpbH/Wpup/5YlKv+WAgT/tV9f/5QBBv+eGh7/+fLy/6MlKv+ZAQn/3bi5/////////////////6MrM/+XAAr/xXl4///////////////////+/v7/rktN/5sBBf+aDxP/nhse/5wBB/+dJyr//vz8/////////////////8zd4f91p7P/mC4x/5gBCP+XBQ3/mgIE/8qNjf//////oiUq/5cAB//fuLf//v7+//z39//89vb/pSot/5oACf/Adnf//Pb2//z5+f////////////////+3rKz/lAEE/5kBB/+aAQj/mAEH/8WHh/////////////////rv8P9MgIv/RGN5/1JiZ/+GEBX/mwEH/5sZG//48/P//////6AjKP+XAQf/4be3//719v+WGh3/lBAW/5oEBv+XAQf/nAgM/5oRFP++Z2v/////////////////+/b2/5UdIf+XCw7/lAsN/5MQFP/w4uL/////////////////wM7R/4Krt/9ZlJ//X4CK/2srMv+TCAr/yIuN////////////mSUn/5AICv/fubn//vX1/5MKDv+ZAQX/lQEI/5gBBf+WAQn/lgEJ/7xeYv///////////////////////ff3//719f/+9fX//fX1///+/v/////////////////u8fP/kKuz/0WHk/+ltrz/7efo//fr6//9+/r////////////47e3/+Ozs//z5+f/+/f3/7ODg/+3f3v/t397/7d/e/+7f3//u39//9Orq////////////////////////////////////////////////////////////////////////8vT1/6O+wv/k6uz//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////Pv7/7zR0/+60NL//f39/8XW2P/D19r//v7+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=]]></fileData>
+    </moqui.resource.DbResourceFile>
+
+    <!-- ================================================================
+         OWNER SPEC — read by import#WebsiteOwner
+         ================================================================ -->
+    <moqui.resource.DbResource filename="ownerSpec.json" isFile="Y"
+        resourceId="ANTWEBSYSTEM_OWNER_SPEC" parentResourceId="ANTWEBSYSTEM_ROOT">
+        <file mimeType="application/json" versionName="01" rootVersionName="01">
+            <fileData><![CDATA[{
+    "adminEmail": "admin@antwebsystems.com",
+    "adminFirstName": "Hans",
+    "adminLastName": "Bakker",
+    "companyName": "AntWebsystems Co.,Ltd",
+    "currencyId": "THB",
+    "applicationId": "AppAdmin",
+    "hostNames": [
+        "www.antwebsystems.com",
+        "antwebsystems.com",
+        "antwebsystems.localhost:8080"
+    ],
+    "logoPath": "images/logo.ico",
+    "contact": {
+        "email": "info@antwebsystems.com",
+        "telephone": {
+            "countryCode": "66",
+            "areaCode": "53",
+            "contactNumber": "355753"
+        },
+        "address": {
+            "address1": "73/1 M.8, Soi AntWebsystems",
+            "address2": "Tambon Sanklang, Amphur Sanpatong",
+            "city": "Chiang Mai",
+            "postalCode": "50120",
+            "countryGeoId": "THA"
+        }
+    }
+}]]></fileData>
+            <histories versionName="01" versionDate="1785818725769" isDiff="N"/>
+        </file>
+    </moqui.resource.DbResource>
+
+</entity-facade-xml>
