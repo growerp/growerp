@@ -577,12 +577,15 @@ limitations under the License.
         mimeType="text/html" versionName="01">
         <fileData><![CDATA[PHA+RHJpbmsgaW4gc3R5bGUgd2l0aCB0aGlzIGN1c3RvbSBwcmludGVkIGNlcmFtaWMgbXVnITwvcD4NCjxwPk11Z3MgcHJpbnRlZCBmcm9tIGhpZ2ggcmVzb2x1dGlvbiBpbWFnZXMgZm9yIHNoYXJwIHJlc3VsdHMuPC9wPg0KPHA+RGlzaHdhc2hlciBhbmQgbWljcm93YXZlIHNhZmUsIGltYWdlcyB3aWxsIG5vdCBmYWRlIG92ZXIgdGltZS48L3A+DQo8cD48L3A+]]></fileData>
     </moqui.resource.DbResourceFile>
-    <!-- website setting -->
+    <!-- website setting; fromDate is part of the primary key, so it has to be given here:
+         without it every seed load creates another row instead of updating this one, and every
+         store created afterwards clones all of them (setup#MainOrganization copies each
+         POPC_DEFAULT setting verbatim) -->
     <mantle.product.store.ProductStoreSetting productStoreId="POPC_DEFAULT"
-        settingValue="localhost"
+        settingValue="localhost" fromDate="2024-01-01 00:00:00"
         settingTypeEnumId="PsstHostname" />
     <mantle.product.store.ProductStoreSetting productStoreId="POPC_DEFAULT"
-        settingValue="dbresource://DEFAULT_ROOT"
+        settingValue="dbresource://DEFAULT_ROOT" fromDate="2024-01-01 00:00:00"
         settingTypeEnumId="PsstContentLocation" />
 
     <!-- product store image example -->

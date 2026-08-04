@@ -33,7 +33,7 @@ limitations under the License.
         <moqui.security.UserLoginHistory userId="SYSTEM_SUPPORT" fromDate="1265184000000"
                 successfulLogin="Y" />
         <growerp.PartyApplication partyId="SYSTEM_SUPPORT"
-                applicationId="AppSupport" />
+                applicationId="AppSupport" fromDate="1265184000000" />
 
         <!-- ========== Artifact Tarpit Example ========== -->
         <moqui.security.ArtifactGroup artifactGroupId="ALL_SCREENS" description="All Screens" />
