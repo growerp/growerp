@@ -580,12 +580,17 @@ limitations under the License.
     <!-- website setting; fromDate is part of the primary key, so it has to be given here:
          without it every seed load creates another row instead of updating this one, and every
          store created afterwards clones all of them (setup#MainOrganization copies each
-         POPC_DEFAULT setting verbatim) -->
+         POPC_DEFAULT setting verbatim).
+
+         Keep this date well before 2024-01-01: setup#MainOrganization clones these rows into
+         every new store keeping their fromDate, and complete#TenantSetup then adds the GROWERP
+         marketing hostnames on 2024-01-01..04. Sharing a date there means a duplicate primary
+         key (productStoreId, settingTypeEnumId, fromDate) and the whole tenant setup rolls back. -->
     <mantle.product.store.ProductStoreSetting productStoreId="POPC_DEFAULT"
-        settingValue="localhost" fromDate="2024-01-01 00:00:00"
+        settingValue="localhost" fromDate="2020-01-01 00:00:00"
         settingTypeEnumId="PsstHostname" />
     <mantle.product.store.ProductStoreSetting productStoreId="POPC_DEFAULT"
-        settingValue="dbresource://DEFAULT_ROOT" fromDate="2024-01-01 00:00:00"
+        settingValue="dbresource://DEFAULT_ROOT" fromDate="2020-01-01 00:00:00"
         settingTypeEnumId="PsstContentLocation" />
 
     <!-- product store image example -->
