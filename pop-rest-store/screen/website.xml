@@ -20,6 +20,10 @@ along with this software (see the LICENSE.md file). If not, see
         <service-call name="popstore.StoreServices.get#ProductStoreIdFromHostName" in-map="[
             requestHostName: (ec.web.getHostName(false) == '10.0.2.2' ? 'localhost' : ec.web.getHostName(false))]" out-map="productStoreIdContext"/>
         <set field="productStoreId" value="${productStoreIdContext.productStoreId ?: 'POPC_DEFAULT'}"/>
+        <!-- no store for this hostname: return 404, the website section below renders the not found page -->
+        <if condition="productStoreId == 'POPC_DEFAULT'">
+            <script>ec.web.response.setStatus(404)</script>
+        </if>
 
         <service-call name="popstore.StoreServices.get#StoreInfo" in-map="[productStoreId:productStoreId]" out-map="storeInfo"/>
         <set field="productStore" from="storeInfo.productStore"/>
@@ -68,8 +72,11 @@ along with this software (see the LICENSE.md file). If not, see
                 </render-mode>
             </widgets>
             <fail-widgets>
-                <label text="$productStoreId"/>
-                <label text="${ec.web.sendError(404, 'Not a valid Growerp website url', null)}"/>
+                <render-mode><text type="html"><![CDATA[
+                    <html><head><title>Site not found</title></head>
+                    <body><h2>Site not found</h2>
+                    <p>No website is configured for this address.</p></body></html>
+                ]]></text></render-mode>
             </fail-widgets>
         </section>
         <!-- floating chat-inquiry button: separate section so it renders independently
