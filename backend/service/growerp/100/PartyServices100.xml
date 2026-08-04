@@ -1888,7 +1888,9 @@ limitations under the License.
                     value-field="emailExist">
                     <field-map field-name="emailServerId" value="SYSTEM" />
                 </entity-find-one>
-                <if condition="ec.web.getHostName(false).endsWith('.com')">
+                <!-- ec.web is null when this runs outside a web request, eg from the website
+                     generator's background worker: fall back to the test template then -->
+                <if condition="ec.web?.getHostName(false)?.endsWith('.com') == true">
                     <set field="templateId" value="WELCOME" />
                     <else>
                         <set field="templateId" value="WELCOME_TEST" />
