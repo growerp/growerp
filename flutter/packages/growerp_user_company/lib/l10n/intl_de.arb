@@ -68,6 +68,7 @@
   "location": "Standort",
   "login": "Anmeldung",
   "loginDisabled": "Anmeldung deaktiviert",
+  "loginEnabled": "Anmeldung aktiv",
   "name": "Name",
   "needPostalAddress": "Zum Hinzufügen Postanschrift erforderlich",
   "noAddress": "Noch keine Adresse",

@@ -316,6 +316,10 @@
   "@loginDisabled": {
     "description": "Status message indicating that login is disabled"
   },
+  "loginEnabled": "Login enabled",
+  "@loginEnabled": {
+    "description": "Label of the switch that allows the user to log in"
+  },
   "name": "Name",
   "@name": {
     "description": "A person's or thing's name"

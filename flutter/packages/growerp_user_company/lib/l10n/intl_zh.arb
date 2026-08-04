@@ -68,6 +68,7 @@
   "location": "位置",
   "login": "登录",
   "loginDisabled": "登录已禁用",
+  "loginEnabled": "登录已启用",
   "name": "名称",
   "needPostalAddress": "需要邮政地址才能添加",
   "noAddress": "尚无地址",

@@ -266,8 +266,8 @@ class UserTest {
           user.userGroup!.name,
         );
         if (user.loginDisabled != null &&
-            CommonTest.getCheckbox('loginDisabled') != user.loginDisabled) {
-          await CommonTest.tapByKey(tester, 'loginDisabled');
+            CommonTest.getSwitch('loginEnabled') == user.loginDisabled) {
+          await CommonTest.tapByKey(tester, 'loginEnabled');
         }
       }
       await CommonTest.dragUntil(
@@ -490,8 +490,8 @@ class UserTest {
         );
         if (user.loginDisabled != null) {
           expect(
-            CommonTest.getCheckbox('loginDisabled'),
-            equals(user.loginDisabled),
+            CommonTest.getSwitch('loginEnabled'),
+            equals(!user.loginDisabled!),
           );
         }
       }

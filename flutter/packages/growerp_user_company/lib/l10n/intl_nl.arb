@@ -68,6 +68,7 @@
   "location": "Locatie",
   "login": "Inloggen",
   "loginDisabled": "Inloggen uitgeschakeld",
+  "loginEnabled": "Inloggen actief",
   "name": "Naam",
   "needPostalAddress": "Postadres nodig om toe te voegen",
   "noAddress": "Nog geen adres",

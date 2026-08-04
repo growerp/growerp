@@ -1453,6 +1453,11 @@ class CommonTest {
     return tff.value ?? false;
   }
 
+  static bool getSwitch(String key) {
+    Switch sw = find.byKey(Key(key)).evaluate().single.widget as Switch;
+    return sw.value;
+  }
+
   static bool getRadio(String key) {
     Radio tff = find.byKey(Key(key)).evaluate().single.widget as Radio;
     return tff.value;

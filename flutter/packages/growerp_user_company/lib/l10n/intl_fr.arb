@@ -68,6 +68,7 @@
   "location": "Emplacement",
   "login": "Connexion",
   "loginDisabled": "Connexion désactivée",
+  "loginEnabled": "Connexion activée",
   "name": "Nom",
   "needPostalAddress": "Besoin d'une adresse postale pour ajouter",
   "noAddress": "Pas encore d'adresse",

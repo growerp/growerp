@@ -699,6 +699,7 @@ class UserDialogState extends State<UserDialog> {
                 children: [
                   const SizedBox(height: 10),
                   Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Expanded(
                         child: DropdownButtonFormField<UserGroup>(
@@ -725,21 +726,40 @@ class UserDialogState extends State<UserDialog> {
                           isExpanded: true,
                         ),
                       ),
-                      const SizedBox(width: 10),
+                      const SizedBox(width: 12),
                       SizedBox(
-                        width: 100,
-                        height: 60,
-                        child: GroupingDecorator(
-                          labelText: _localizations.disabled,
-                          child: Checkbox(
-                            key: const Key('loginDisabled'),
-                            value: _isLoginDisabled,
-                            onChanged: (bool? value) {
-                              setState(() {
-                                _isLoginDisabled = value!;
-                              });
-                            },
-                          ),
+                        width: 110,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              _localizations.loginEnabled,
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                            Switch(
+                              key: const Key('loginEnabled'),
+                              value: !_isLoginDisabled,
+                              onChanged: (bool value) {
+                                setState(() {
+                                  _isLoginDisabled = !value;
+                                });
+                              },
+                              activeTrackColor: Theme.of(
+                                context,
+                              ).colorScheme.primary.withValues(alpha: 0.5),
+                              thumbColor: WidgetStatePropertyAll(
+                                !_isLoginDisabled
+                                    ? Theme.of(context).colorScheme.primary
+                                    : Theme.of(context).colorScheme.outline,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],

@@ -1733,7 +1733,8 @@ limitations under the License.
                     emailAddress: user.email,
                     username: user.loginName, newPassword: password,
                     newPasswordVerify: password, ownerPartyId: ownerPartyId,
-                    timeZone: user.timeZoneOffset, locale: user.locale
+                    timeZone: user.timeZoneOffset, locale: user.locale,
+                    disabled: user.loginDisabled == true ? 'Y' : 'N'
                 ]" />
             <if condition="user.loginName">
                 <service-call name="mantle.party.PartyServices.create#Account"
@@ -1757,11 +1758,6 @@ limitations under the License.
             <if condition="user.personalTitle">
                 <service-call name="update#mantle.party.Person"
                     in-map="[partyId: userPartyId, personalTitle: user.personalTitle]" />
-            </if>
-            <if condition="user.loginDisabled">
-                <service-call name="update#moqui.security.UserAccount"
-                    in-map="[userId: userPartyId,
-                                disabled: user.loginDisabled == true ? 'Y' : 'N']" />
             </if>
             <if condition="user.loginName">
                 <!-- user security access -->
@@ -2083,6 +2079,13 @@ limitations under the License.
                                 username: user.loginName ?: oldValue.user.loginName,
                                 locale: language
                             ]" />
+                <!-- PersonAndUserAccount joins UserAccount optionally: userId is null
+                     when the person has no login, so check it before updating -->
+                <if condition="user.loginDisabled != null &amp;&amp; userAccount.userId">
+                    <service-call name="update#moqui.security.UserAccount"
+                        in-map="[userId: userAccount.userId,
+                            disabled: user.loginDisabled == true ? 'Y' : 'N']" />
+                </if>
                 <else-if
                     condition="user.loginName &amp;&amp; user.email &amp;&amp; user.userGroupId">
                     <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
@@ -2097,7 +2100,7 @@ limitations under the License.
                                 newPasswordVerify: password,
                                 ownerPartyId: ownerPartyId]"
                         out-map="userAccount" />
-                    <if condition="user.loginDisabled">
+                    <if condition="user.loginDisabled != null">
                         <service-call name="update#moqui.security.UserAccount"
                             in-map="[userId: userAccount.userId,
                                 disabled: user.loginDisabled == true ? 'Y' : 'N']" />
