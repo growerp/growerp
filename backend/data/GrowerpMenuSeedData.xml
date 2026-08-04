@@ -474,6 +474,9 @@ limitations under the License.
         title="Applications" route="/applications" iconName="apps" widgetName="ApplicationList" sequenceNum="20"/>
     <growerp.menu.MenuItem menuItemId="SUPPORT_OWNERS" menuConfigurationId="SUPPORT_DEFAULT"
         title="Owners" route="/owners" iconName="business" widgetName="CompanyListMainOnly" sequenceNum="25"/>
+    <growerp.menu.MenuItem menuItemId="SUPPORT_WEBSITE_GEN" menuConfigurationId="SUPPORT_DEFAULT"
+        title="Website Generator" route="/websiteGenerator" iconName="travel_explore"
+        widgetName="WebsiteConversionList" userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="30"/>
     <growerp.menu.MenuItem menuItemId="SUPPORT_ABOUT" menuConfigurationId="SUPPORT_DEFAULT"
         title="About" route="/about" iconName="info" widgetName="AboutForm" sequenceNum="40"/>
     <growerp.menu.MenuItem menuItemId="SUPPORT_LLM_USAGE" menuConfigurationId="SUPPORT_DEFAULT"

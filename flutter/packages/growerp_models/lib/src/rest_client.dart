@@ -146,6 +146,50 @@ abstract class RestClient {
   @DELETE("rest/s1/growerp/100/Application")
   Future<Application> deleteApplication(@Field() Application application);
 
+  // website generator: convert an existing website into a new owner
+  @GET("rest/s1/growerp/100/WebsiteConversion")
+  Future<WebsiteConversions> getWebsiteConversion({
+    @Query('conversionId') String? conversionId,
+    @Query('start') int? start,
+    @Query('limit') int? limit,
+    @Query('search') String? search,
+  });
+
+  @POST("rest/s1/growerp/100/WebsiteConversion")
+  Future<WebsiteConversion> createWebsiteConversion({
+    @Field() required String sourceUrl,
+    @Field() required String companyName,
+    @Field() required String adminEmail,
+    @Field() String? adminFirstName,
+    @Field() String? adminLastName,
+    @Field() required String currencyId,
+    @Field() String? applicationId,
+    @Field() String? hostNames,
+    @Field() int? maxPages,
+  });
+
+  @DELETE("rest/s1/growerp/100/WebsiteConversion")
+  Future<void> deleteWebsiteConversion({
+    @Field() required String conversionId,
+  });
+
+  /// rebuild the owner-import XML of a live website so it can be installed elsewhere
+  @GET("rest/s1/growerp/100/WebsiteConversion/export")
+  Future<WebsiteExport> exportWebsiteOwner({
+    @Query('conversionId') String? conversionId,
+    @Query('productStoreId') String? productStoreId,
+    @Query('siteId') String? siteId,
+    @Query('adminEmail') String? adminEmail,
+  });
+
+  /// install an owner-import XML file produced by an export or by /convert-website.
+  /// Sent as a JSON body, not form fields: a site with images is megabytes and
+  /// Jetty rejects form posts over 200kB.
+  @POST("rest/s1/growerp/100/WebsiteConversion/file")
+  Future<WebsiteConversion> importWebsiteFile({
+    @Body() required Map<String, dynamic> data,
+  });
+
   // email templates
   @GET("rest/s1/growerp/100/EmailTemplate")
   Future<EmailTemplates> getEmailTemplates({

@@ -59,4 +59,48 @@
             <key-map field-name="partyId" />
         </relationship>
     </entity>
+
+    <!-- ========================================================= -->
+    <!--  Website generator: convert an external site to an owner  -->
+    <!-- ========================================================= -->
+    <entity entity-name="WebsiteConversion" package="growerp.website">
+        <description>One attempt to convert an existing website into a new GrowERP owner: scrape the
+            source site, generate the pages and theme with AI, and install them with
+            import#WebsiteOwner. Runs as a background job; this row carries the progress.</description>
+        <field name="conversionId" type="id" is-pk="true" />
+        <field name="ownerPartyId" type="id" /><!-- who started the conversion -->
+        <field name="sourceUrl" type="text-medium" />
+        <field name="siteId" type="text-short" /><!-- id prefix of the generated content -->
+        <field name="companyName" type="text-medium" />
+        <field name="adminEmail" type="text-medium" />
+        <field name="adminFirstName" type="text-medium" />
+        <field name="adminLastName" type="text-medium" />
+        <field name="currencyId" type="id" />
+        <field name="applicationId" type="id" />
+        <field name="hostNames" type="text-medium" /><!-- comma separated -->
+        <field name="maxPages" type="number-integer" />
+        <!-- QUEUED, SCRAPING, GENERATING, IMPORTING, COMPLETED, FAILED -->
+        <field name="status" type="text-short" />
+        <field name="statusMessage" type="text-medium" />
+        <field name="pageCount" type="number-integer" />
+        <field name="imageCount" type="number-integer" />
+        <!-- filled in when the import succeeded -->
+        <field name="createdOwnerPartyId" type="id" />
+        <field name="createdCompanyPartyId" type="id" />
+        <field name="productStoreId" type="id" />
+        <field name="generatedPassword" type="text-medium" encrypt="true" />
+        <field name="errorMessage" type="text-long" />
+        <field name="createdDate" type="date-time" />
+        <field name="completedDate" type="date-time" />
+
+        <relationship type="one" related="mantle.party.Party">
+            <key-map field-name="ownerPartyId" related="partyId" />
+        </relationship>
+        <relationship type="one" title="Created" related="mantle.party.Party">
+            <key-map field-name="createdCompanyPartyId" related="partyId" />
+        </relationship>
+        <relationship type="one" related="mantle.product.store.ProductStore">
+            <key-map field-name="productStoreId" />
+        </relationship>
+    </entity>
 </entities>

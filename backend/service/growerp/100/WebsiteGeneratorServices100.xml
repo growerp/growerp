@@ -1,0 +1,580 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<!--
+Website generator: convert an existing company website into a new GrowERP owner.
+
+    create#WebsiteConversion   validate + queue, returns immediately
+    process#WebsiteConversion  background worker: scrape -> generate -> import
+    get#WebsiteConversions     list/single row for the support app page
+    delete#WebsiteConversion   remove a row (never the created owner)
+
+The generated content has the same shape as the files the /convert-website Claude skill
+produces, and is installed by the same growerp.100.ImportExportServices100.import#WebsiteOwner.
+-->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
+
+    <service verb="get" noun="WebsiteConversions">
+        <description>List website conversions of this owner, or a single one by conversionId.
+            The generated password is only returned for a single row, never in the list.</description>
+        <in-parameters>
+            <parameter name="conversionId" />
+            <parameter name="start" type="Integer" default-value="0" />
+            <parameter name="limit" type="Integer" default-value="20" />
+            <parameter name="search" default="null" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="websiteConversions" type="List">
+                <parameter name="websiteConversion" type="Map" />
+            </parameter>
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <if condition="search != null">
+                <set field="search" value="%${search}%" />
+            </if>
+            <entity-find entity-name="growerp.website.WebsiteConversion" list="conversions"
+                offset="start" limit="limit">
+                <econdition field-name="ownerPartyId" from="ownerPartyId" />
+                <econdition field-name="conversionId" ignore-if-empty="true" />
+                <econditions combine="or">
+                    <econdition field-name="sourceUrl" ignore-case="true"
+                        operator="like" from="search" ignore-if-empty="true" />
+                    <econdition field-name="companyName" ignore-case="true"
+                        operator="like" from="search" ignore-if-empty="true" />
+                    <econdition field-name="status" ignore-case="true"
+                        operator="like" from="search" ignore-if-empty="true" />
+                </econditions>
+                <order-by field-name="-createdDate" />
+            </entity-find>
+            <set field="websiteConversions" from="[]" />
+            <!-- dates go out as ISO strings: the Flutter DateTimeConverter reads a String, a
+                 raw Timestamp would serialize as epoch millis and blow up the client parse -->
+            <script>def isoFormat = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")</script>
+            <iterate list="conversions" entry="conversion">
+                <set field="row" from="[
+                    conversionId: conversion.conversionId, sourceUrl: conversion.sourceUrl,
+                    siteId: conversion.siteId, companyName: conversion.companyName,
+                    adminEmail: conversion.adminEmail,
+                    adminFirstName: conversion.adminFirstName,
+                    adminLastName: conversion.adminLastName,
+                    currencyId: conversion.currencyId, applicationId: conversion.applicationId,
+                    hostNames: conversion.hostNames, maxPages: conversion.maxPages,
+                    status: conversion.status, statusMessage: conversion.statusMessage,
+                    pageCount: conversion.pageCount, imageCount: conversion.imageCount,
+                    createdOwnerPartyId: conversion.createdOwnerPartyId,
+                    createdCompanyPartyId: conversion.createdCompanyPartyId,
+                    productStoreId: conversion.productStoreId,
+                    errorMessage: conversion.errorMessage,
+                    createdDate: (conversion.createdDate != null ?
+                        isoFormat.format(conversion.createdDate) : null),
+                    completedDate: (conversion.completedDate != null ?
+                        isoFormat.format(conversion.completedDate) : null)]" />
+                <!-- the password is only handed out on an explicit single row request -->
+                <if condition="conversionId">
+                    <set field="row.generatedPassword" from="conversion.generatedPassword" />
+                </if>
+                <script>websiteConversions.add(row)</script>
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="create" noun="WebsiteConversion">
+        <description>Validate the request and queue the conversion. All the checks that
+            import#WebsiteOwner does at the end are done here first, so a conversion that cannot
+            be installed never spends any LLM tokens.</description>
+        <in-parameters>
+            <parameter name="sourceUrl" required="true" />
+            <parameter name="companyName" required="true" />
+            <parameter name="adminEmail" required="true" />
+            <parameter name="adminFirstName" default-value="Site" />
+            <parameter name="adminLastName" default-value="Administrator" />
+            <parameter name="currencyId" required="true" />
+            <parameter name="applicationId" default-value="AppAdmin" />
+            <parameter name="hostNames">
+                <description>comma separated; when empty they are derived from the source url</description>
+            </parameter>
+            <parameter name="maxPages" type="Integer" default-value="12" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="conversionId" />
+            <parameter name="websiteConversion" type="Map" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+
+            <!-- normalize the url -->
+            <set field="sourceUrl" from="sourceUrl.trim()" />
+            <if condition="!sourceUrl.startsWith('http')">
+                <set field="sourceUrl" value="https://${sourceUrl}" />
+            </if>
+
+            <!-- the admin email becomes a login, it may not exist yet -->
+            <entity-find entity-name="moqui.security.UserAccount" list="existingUsers">
+                <econdition field-name="username" from="adminEmail" />
+            </entity-find>
+            <if condition="existingUsers">
+                <return error="true"
+                    message="Email ${adminEmail} is already registered, use another address" />
+            </if>
+
+            <!-- hostnames: derived from the source url when not given, always plus a name on
+                 the host this backend is reached at so the result can be opened right away -->
+            <script><![CDATA[
+                def names = []
+                String sourceHost = null
+                try {
+                    sourceHost = new URL(sourceUrl).host
+                } catch (Exception e) {
+                    ec.message.addError("Cannot read the host name from ${sourceUrl}: ${e.message}")
+                }
+                if (hostNames) {
+                    names = hostNames.split(',').collect { it.trim() }.findAll { it }
+                } else if (sourceHost) {
+                    names.add(sourceHost)
+                    names.add(sourceHost.startsWith('www.') ? sourceHost.substring(4) : "www.${sourceHost}")
+                }
+                if (sourceHost) {
+                    // mysidekick.com.au -> mysidekick, served as mysidekick.<this backend host>
+                    String bare = sourceHost.startsWith('www.') ? sourceHost.substring(4) : sourceHost
+                    String label = bare.contains('.') ? bare.substring(0, bare.indexOf('.')) : bare
+                    String currentHost = ec.web?.getHostName(true)
+                    if (!currentHost) currentHost = 'localhost:8080'
+                    if (label) names.add("${label}.${currentHost}")
+                }
+                context.hostNameList = names.unique()
+            ]]></script>
+            <check-errors />
+            <iterate list="hostNameList" entry="specHostName">
+                <entity-find entity-name="mantle.product.store.ProductStoreSetting"
+                    list="hostSettings">
+                    <econdition field-name="settingTypeEnumId" value="PsstHostname" />
+                    <econdition field-name="settingValue" from="specHostName" />
+                </entity-find>
+                <if condition="hostSettings">
+                    <return error="true"
+                        message="Hostname ${specHostName} is already used by store ${hostSettings[0].productStoreId}" />
+                </if>
+            </iterate>
+
+            <!-- an AI key has to be available or the worker would die silently -->
+            <entity-find-one entity-name="growerp.general.SystemSettings" value-field="settings">
+                <field-map field-name="ownerPartyId" from="ownerPartyId" />
+            </entity-find-one>
+            <script><![CDATA[
+                context.apiKey = settings?.geminiApiKey ?: ec.user.getPreference("GEMINI_API_KEY") ?:
+                    System.getenv("GEMINI_API_KEY") ?: System.getenv("GOOGLE_API_KEY")
+            ]]></script>
+            <if condition="!apiKey">
+                <return error="true"
+                    message="No Gemini API key configured: set it in System Setup or in the GEMINI_API_KEY environment variable" />
+            </if>
+
+            <!-- NOTE the source site is deliberately NOT fetched here: reading someone
+                 else's site can take many seconds and this service must return at once so
+                 the screen does not sit and wait. The worker reports an unreachable site as
+                 a FAILED row instead. -->
+
+            <!-- a free site id, derived from the company name -->
+            <script><![CDATA[
+                String base = (companyName as String).toUpperCase().replaceAll(/[^A-Z0-9]/, '')
+                if (base.length() > 12) base = base.substring(0, 12)
+                if (!base) base = 'SITE'
+                String candidate = base
+                int suffix = 2
+                while (true) {
+                    def wikiSpace = ec.entity.find("moqui.resource.wiki.WikiSpace")
+                        .condition("wikiSpaceId", "${candidate}_WS").disableAuthz().one()
+                    def root = ec.entity.find("moqui.resource.DbResource")
+                        .condition("resourceId", "${candidate}_ROOT").disableAuthz().one()
+                    def used = ec.entity.find("growerp.website.WebsiteConversion")
+                        .condition("siteId", candidate).disableAuthz().one()
+                    if (!wikiSpace && !root && !used) break
+                    candidate = "${base}${suffix++}"
+                    if (suffix > 50) break
+                }
+                context.siteId = candidate
+            ]]></script>
+
+            <!-- Write the row in its own transaction and fire the worker only afterwards: the
+                 async worker runs on another thread and looks the row up by id, so it would not
+                 see it yet if it were still in this uncommitted transaction. -->
+            <script><![CDATA[
+                def created = ec.service.sync().name('create#growerp.website.WebsiteConversion')
+                    .parameters([ownerPartyId: ownerPartyId, sourceUrl: sourceUrl, siteId: siteId,
+                                 companyName: companyName, adminEmail: adminEmail,
+                                 adminFirstName: adminFirstName, adminLastName: adminLastName,
+                                 currencyId: currencyId, applicationId: applicationId,
+                                 hostNames: hostNameList.join(','), maxPages: maxPages,
+                                 status: 'QUEUED', statusMessage: 'Waiting to start',
+                                 createdDate: ec.user.nowTimestamp])
+                    .requireNewTransaction(true).call()
+                context.conversionId = created.conversionId
+            ]]></script>
+            <check-errors />
+
+            <!-- run the conversion in the background, it takes minutes -->
+            <script>
+                ec.service.async()
+                    .name('growerp.100.WebsiteGeneratorServices100.process#WebsiteConversion')
+                    .parameters([conversionId: conversionId, notifyUserId: ec.user.userId,
+                                 username: ec.user.username])
+                    .call()
+            </script>
+
+            <service-call name="growerp.100.WebsiteGeneratorServices100.get#WebsiteConversions"
+                in-map="[conversionId: conversionId]" out-map="fetched" />
+            <set field="websiteConversion" from="fetched.websiteConversions[0]" />
+        </actions>
+    </service>
+
+    <service verb="update" noun="WebsiteConversionStatus" transaction="force-new">
+        <description>Write the progress of a conversion in its own transaction, so the page sees
+            it immediately and a later failure cannot roll the progress back.</description>
+        <in-parameters>
+            <parameter name="conversionId" required="true" />
+            <parameter name="status" />
+            <parameter name="statusMessage" />
+            <parameter name="errorMessage" />
+            <parameter name="pageCount" type="Integer" />
+            <parameter name="imageCount" type="Integer" />
+            <parameter name="createdOwnerPartyId" />
+            <parameter name="createdCompanyPartyId" />
+            <parameter name="productStoreId" />
+            <parameter name="generatedPassword" />
+            <parameter name="completedDate" type="Timestamp" />
+        </in-parameters>
+        <actions>
+            <entity-find-one entity-name="growerp.website.WebsiteConversion" value-field="conversion"
+                for-update="true" />
+            <if condition="!conversion">
+                <return error="true" message="Conversion ${conversionId} not found" />
+            </if>
+            <set field="conversion.status" from="status" set-if-empty="false" />
+            <set field="conversion.statusMessage" from="statusMessage" set-if-empty="false" />
+            <set field="conversion.errorMessage" from="errorMessage" set-if-empty="false" />
+            <set field="conversion.pageCount" from="pageCount" set-if-empty="false" />
+            <set field="conversion.imageCount" from="imageCount" set-if-empty="false" />
+            <set field="conversion.createdOwnerPartyId" from="createdOwnerPartyId"
+                set-if-empty="false" />
+            <set field="conversion.createdCompanyPartyId" from="createdCompanyPartyId"
+                set-if-empty="false" />
+            <set field="conversion.productStoreId" from="productStoreId" set-if-empty="false" />
+            <set field="conversion.generatedPassword" from="generatedPassword"
+                set-if-empty="false" />
+            <set field="conversion.completedDate" from="completedDate" set-if-empty="false" />
+            <entity-update value-field="conversion" />
+        </actions>
+    </service>
+
+    <service verb="process" noun="WebsiteConversion" authenticate="anonymous"
+        transaction="ignore">
+        <description>Background worker: scrape the source site, generate the pages and theme with
+            AI, then install everything as a new owner. Every step commits its progress through
+            update#WebsiteConversionStatus so the support app can follow along.</description>
+        <in-parameters>
+            <parameter name="conversionId" required="true" />
+            <parameter name="notifyUserId" />
+            <parameter name="username" />
+        </in-parameters>
+        <actions>
+            <!-- the async worker has no web session: log in as the submitting user for authz -->
+            <if condition="!ec.user.userId &amp;&amp; username">
+                <script>ec.user.internalLoginUser(username)</script>
+            </if>
+            <!-- the caller commits the row just before firing this worker; allow for the commit
+                 not being visible on this thread the very first moment -->
+            <script><![CDATA[
+                def conversion = null
+                for (int attempt = 0; attempt < 10 && conversion == null; attempt++) {
+                    conversion = ec.entity.find("growerp.website.WebsiteConversion")
+                        .condition("conversionId", conversionId).useCache(false).disableAuthz().one()
+                    if (conversion == null) Thread.sleep(500)
+                }
+                context.conversion = conversion
+            ]]></script>
+            <if condition="!conversion">
+                <return error="true" message="Conversion ${conversionId} not found" />
+            </if>
+
+            <script><![CDATA[
+                def failed = { String message ->
+                    ec.logger.error("process#WebsiteConversion ${conversionId} failed: ${message}")
+                    ec.message.clearErrors()
+                    ec.service.sync()
+                        .name('growerp.100.WebsiteGeneratorServices100.update#WebsiteConversionStatus')
+                        .parameters([conversionId: conversionId, status: 'FAILED',
+                                     statusMessage: 'Failed',
+                                     errorMessage: message.take(4000),
+                                     completedDate: ec.user.nowTimestamp])
+                        .call()
+                }
+                def progress = { String status, String message ->
+                    ec.service.sync()
+                        .name('growerp.100.WebsiteGeneratorServices100.update#WebsiteConversionStatus')
+                        .parameters([conversionId: conversionId, status: status,
+                                     statusMessage: message])
+                        .call()
+                }
+
+                // the api key of the owner that started the conversion
+                def settings = ec.entity.find("growerp.general.SystemSettings")
+                    .condition("ownerPartyId", conversion.ownerPartyId).disableAuthz().one()
+                String apiKey = settings?.geminiApiKey ?: ec.user.getPreference("GEMINI_API_KEY") ?:
+                    System.getenv("GEMINI_API_KEY") ?: System.getenv("GOOGLE_API_KEY")
+
+                try {
+                    // ---- scrape -------------------------------------------------------------
+                    progress('SCRAPING', "Reading ${conversion.sourceUrl}")
+                    def scraped = ec.service.sync().name('growerp.100.WebsiteGeneratorServices100.scrape#WebsiteContent')
+                        .parameters([sourceUrl: conversion.sourceUrl, maxPages: conversion.maxPages])
+                        .call()
+                    if (ec.message.hasError()) throw new Exception(ec.message.getErrorsString())
+                    def siteData = scraped?.siteData
+                    if (!siteData || !siteData.pages) throw new Exception("No readable pages found on ${conversion.sourceUrl}")
+
+                    // ---- generate -----------------------------------------------------------
+                    progress('GENERATING', "Writing ${siteData.pages.size()} pages with AI")
+                    def generated = ec.service.sync().name('growerp.100.WebsiteGeneratorServices100.generate#WebsiteContent')
+                        .parameters([siteData: siteData, siteId: conversion.siteId,
+                                     companyName: conversion.companyName,
+                                     adminEmail: conversion.adminEmail,
+                                     adminFirstName: conversion.adminFirstName,
+                                     adminLastName: conversion.adminLastName,
+                                     currencyId: conversion.currencyId,
+                                     applicationId: conversion.applicationId,
+                                     hostNames: (conversion.hostNames ?: '').split(',').collect { it.trim() }.findAll { it },
+                                     apiKey: apiKey, ownerPartyId: conversion.ownerPartyId])
+                        .call()
+                    if (ec.message.hasError()) throw new Exception(ec.message.getErrorsString())
+                    if (!generated?.xmlText) throw new Exception("The AI returned no website content")
+                    ec.service.sync()
+                        .name('growerp.100.WebsiteGeneratorServices100.update#WebsiteConversionStatus')
+                        .parameters([conversionId: conversionId,
+                                     pageCount: generated.pageCount, imageCount: generated.imageCount])
+                        .call()
+
+                    // ---- install ------------------------------------------------------------
+                    progress('IMPORTING', "Creating the owner and installing ${generated.pageCount} pages")
+                    def imported = ec.service.sync().name('growerp.100.ImportExportServices100.import#WebsiteOwner')
+                        .parameters([xmlText: generated.xmlText, siteId: conversion.siteId])
+                        .call()
+                    if (ec.message.hasError()) throw new Exception(ec.message.getErrorsString())
+
+                    ec.service.sync()
+                        .name('growerp.100.WebsiteGeneratorServices100.update#WebsiteConversionStatus')
+                        .parameters([conversionId: conversionId, status: 'COMPLETED',
+                                     statusMessage: "Website ready on ${conversion.hostNames}",
+                                     createdOwnerPartyId: imported.ownerPartyId,
+                                     createdCompanyPartyId: imported.companyPartyId,
+                                     productStoreId: imported.productStoreId,
+                                     generatedPassword: imported.password,
+                                     completedDate: ec.user.nowTimestamp])
+                        .call()
+                    ec.logger.info("process#WebsiteConversion ${conversionId} completed, store ${imported.productStoreId}")
+
+                    if (notifyUserId) {
+                        ec.makeNotificationMessage().topic('websiteConversion')
+                            .userId(notifyUserId as String).title('Website ready')
+                            .message([conversionId: conversionId, status: 'COMPLETED',
+                                message: "Website for ${conversion.companyName} is ready"]).send()
+                    }
+                } catch (Exception e) {
+                    failed(e.message ?: e.toString())
+                    if (notifyUserId) {
+                        ec.makeNotificationMessage().topic('websiteConversion')
+                            .userId(notifyUserId as String).title('Website conversion failed')
+                            .message([conversionId: conversionId, status: 'FAILED',
+                                message: "Conversion of ${conversion.sourceUrl} failed"]).send()
+                    }
+                }
+            ]]></script>
+        </actions>
+    </service>
+
+    <service verb="scrape" noun="WebsiteContent">
+        <description>Read a public website with Jsoup; input for generate#WebsiteContent.</description>
+        <in-parameters>
+            <parameter name="sourceUrl" required="true" />
+            <parameter name="maxPages" type="Integer" default-value="12" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="siteData" type="Map" />
+        </out-parameters>
+        <actions>
+            <script location="component://growerp/service/scrapeWebsite.groovy" />
+        </actions>
+    </service>
+
+    <service verb="generate" noun="WebsiteContent" transaction-timeout="1800">
+        <description>Turn scraped website data into an owner-import XML document with Gemini.</description>
+        <in-parameters>
+            <parameter name="siteData" type="Map" required="true" allow-html="any" />
+            <parameter name="siteId" required="true" />
+            <parameter name="companyName" required="true" />
+            <parameter name="adminEmail" required="true" />
+            <parameter name="adminFirstName" />
+            <parameter name="adminLastName" />
+            <parameter name="currencyId" required="true" />
+            <parameter name="applicationId" />
+            <parameter name="hostNames" type="List" />
+            <parameter name="apiKey" />
+            <parameter name="ownerPartyId" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="xmlText" allow-html="any" />
+            <parameter name="pageCount" type="Integer" />
+            <parameter name="imageCount" type="Integer" />
+        </out-parameters>
+        <actions>
+            <script location="component://growerp/service/generateWebsiteWithAI.groovy" />
+        </actions>
+    </service>
+
+    <service verb="import" noun="WebsiteFile" transaction-timeout="600">
+        <description>Install an owner-import XML that was exported here or produced by the
+            /convert-website skill, and record it in the conversion list. The file carries its own
+            ownerSpec.json, so only the file itself is needed.
+
+            Runs inline rather than in the background: an import is database work only, it takes
+            seconds, unlike a conversion which reads a website and calls an AI.</description>
+        <in-parameters>
+            <parameter name="xmlText" required="true" allow-html="any" />
+            <parameter name="fileName" />
+            <parameter name="password">
+                <description>login password for the new owner, generated when left empty</description>
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="conversionId" />
+            <parameter name="websiteConversion" type="Map" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+
+            <!-- the site id prefix is in the file: the root resource is named <ID>_ROOT -->
+            <script><![CDATA[
+                def matcher = (xmlText =~ /filename="([A-Za-z0-9]+)_ROOT"/)
+                context.siteId = matcher.find() ? matcher.group(1) : null
+                def specMatcher = (xmlText =~ /"companyName"\s*:\s*"([^"]*)"/)
+                context.fileCompanyName = specMatcher.find() ? specMatcher.group(1) : null
+                def emailMatcher = (xmlText =~ /"adminEmail"\s*:\s*"([^"]*)"/)
+                context.fileAdminEmail = emailMatcher.find() ? emailMatcher.group(1) : null
+            ]]></script>
+            <if condition="!siteId">
+                <return error="true"
+                    message="This is not a GrowERP website export: no &lt;ID&gt;_ROOT resource found in the file" />
+            </if>
+
+            <service-call name="growerp.100.ImportExportServices100.import#WebsiteOwner"
+                in-map="[xmlText: xmlText, siteId: siteId, password: password]"
+                out-map="imported" />
+
+            <service-call name="create#growerp.website.WebsiteConversion" out-map="created"
+                in-map="[ownerPartyId: ownerPartyId,
+                        sourceUrl: fileName ?: 'imported file',
+                        siteId: siteId,
+                        companyName: fileCompanyName ?: siteId,
+                        adminEmail: fileAdminEmail,
+                        currencyId: '', applicationId: 'AppAdmin',
+                        status: 'COMPLETED',
+                        statusMessage: 'Imported from a website export file',
+                        createdOwnerPartyId: imported.ownerPartyId,
+                        createdCompanyPartyId: imported.companyPartyId,
+                        productStoreId: imported.productStoreId,
+                        generatedPassword: imported.password,
+                        createdDate: ec.user.nowTimestamp,
+                        completedDate: ec.user.nowTimestamp]" />
+            <set field="conversionId" from="created.conversionId" />
+            <service-call name="growerp.100.WebsiteGeneratorServices100.get#WebsiteConversions"
+                in-map="[conversionId: conversionId]" out-map="fetched" />
+            <set field="websiteConversion" from="fetched.websiteConversions[0]" />
+        </actions>
+    </service>
+
+    <service verb="export" noun="WebsiteOwner" transaction-timeout="600">
+        <description>Rebuild the owner-import XML of a website that is live here, so it can be
+            installed on another GrowERP with import#WebsiteOwner. Reads the current content, so
+            later edits made in the admin app's Website dialog are included. Works for any
+            website, whether the generator, the /convert-website skill or a person made it.</description>
+        <in-parameters>
+            <parameter name="productStoreId">
+                <description>the store to export; either this or conversionId</description>
+            </parameter>
+            <parameter name="conversionId">
+                <description>export the website a conversion created</description>
+            </parameter>
+            <parameter name="siteId">
+                <description>id prefix for the generated file, default from the company name</description>
+            </parameter>
+            <parameter name="adminEmail">
+                <description>login for the target installation; left empty it has to be filled
+                    in before the file can be imported</description>
+            </parameter>
+            <parameter name="adminFirstName" />
+            <parameter name="adminLastName" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="xmlText" allow-html="any" />
+            <parameter name="fileName" />
+            <parameter name="pageCount" type="Integer" />
+            <parameter name="imageCount" type="Integer" />
+        </out-parameters>
+        <actions>
+            <if condition="!productStoreId &amp;&amp; conversionId">
+                <entity-find-one entity-name="growerp.website.WebsiteConversion"
+                    value-field="conversion" />
+                <if condition="!conversion?.productStoreId">
+                    <return error="true"
+                        message="Conversion ${conversionId} has no finished website to export" />
+                </if>
+                <set field="productStoreId" from="conversion.productStoreId" />
+                <set field="siteId" from="siteId ?: conversion.siteId" />
+                <set field="adminEmail" from="adminEmail ?: conversion.adminEmail" />
+                <set field="adminFirstName" from="adminFirstName ?: conversion.adminFirstName" />
+                <set field="adminLastName" from="adminLastName ?: conversion.adminLastName" />
+            </if>
+            <if condition="!productStoreId">
+                <return error="true" message="Either productStoreId or conversionId is required" />
+            </if>
+            <script location="component://growerp/service/exportWebsiteOwner.groovy" />
+        </actions>
+    </service>
+
+    <service verb="delete" noun="WebsiteConversion">
+        <description>Remove a conversion row. The owner and website an earlier run created are
+            never touched: deleting a tenant has to stay a deliberate separate action.</description>
+        <in-parameters>
+            <parameter name="conversionId" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="conversionId" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <entity-find-one entity-name="growerp.website.WebsiteConversion"
+                value-field="conversion" />
+            <if condition="!conversion || conversion.ownerPartyId != ownerPartyId">
+                <return error="true" message="Conversion ${conversionId} not found" />
+            </if>
+            <entity-delete value-field="conversion" />
+        </actions>
+    </service>
+
+</services>
