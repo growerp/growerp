@@ -2306,4 +2306,211 @@ limitations under the License.
         </actions>
     </service>
 
+    <service verb="import" noun="WebsiteOwner" transaction-timeout="600">
+        <description>
+            Create a complete new owner (tenant) from a website owner-import data file, as
+            produced by the /convert-website skill. The file contains the whole website
+            (WikiSpace, page and image DbResources, theme) plus an ownerSpec.json describing
+            the admin user, the company and the hostnames to serve.
+
+            After loading the file this creates the tenant with create#Tenant /
+            complete#TenantSetup and repoints the store created for it at the loaded content,
+            the same way complete#TenantSetup repoints the GROWERP store at its marketing site.
+
+            Can only be run once per owner: when the admin email is already registered the
+            import stops with an error and nothing is changed.
+        </description>
+        <in-parameters>
+            <parameter name="location">
+                <description>data file, eg component://growerp/data/AccuGeoOwnerImportData.xml;
+                    either this or xmlText is required</description>
+            </parameter>
+            <parameter name="xmlText" allow-html="any">
+                <description>the same content as a string, used by the website generator which
+                    builds it in memory instead of writing a file; allow-html because this is
+                    a whole XML document</description>
+            </parameter>
+            <parameter name="siteId" required="true">
+                <description>id prefix used in the data file, eg ACCUGEO</description>
+            </parameter>
+            <parameter name="password"
+                default="org.moqui.util.StringUtilities.getRandomString(6) + '9!'" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="ownerPartyId" />
+            <parameter name="companyPartyId" />
+            <parameter name="adminPartyId" />
+            <parameter name="productStoreId" />
+            <parameter name="password" />
+        </out-parameters>
+        <actions>
+            <!-- load the website content, images and owner spec -->
+            <if condition="!location &amp;&amp; !xmlText">
+                <return error="true" message="Either location or xmlText is required" />
+            </if>
+            <if condition="xmlText">
+                <script>ec.entity.makeDataLoader().xmlText(xmlText).load()</script>
+                <else>
+                    <script>ec.entity.makeDataLoader().location(location).load()</script>
+                </else>
+            </if>
+
+            <set field="rootLocation" value="dbresource://${siteId}_ROOT" />
+            <script><![CDATA[
+                def specRef = ec.resource.getLocationReference("${rootLocation}/ownerSpec.json")
+                context.spec = specRef?.exists ?
+                    new groovy.json.JsonSlurper().parseText(specRef.getText()) : null
+            ]]></script>
+            <if condition="!spec?.adminEmail || !spec?.companyName || !spec?.currencyId">
+                <return error="true"
+                    message="ownerSpec.json missing or incomplete in ${rootLocation}, need adminEmail, companyName and currencyId" />
+            </if>
+            <set field="applicationId" from="spec.applicationId ?: 'AppAdmin'" />
+
+            <!-- an existing admin login means this file was already imported -->
+            <entity-find entity-name="moqui.security.UserAccount" list="existingUsers">
+                <econdition field-name="username" from="spec.adminEmail" />
+            </entity-find>
+            <if condition="existingUsers">
+                <return error="true"
+                    message="Email ${spec.adminEmail} is already registered, this website was already imported" />
+            </if>
+
+            <!-- hostnames have to be free, they are matched over all stores -->
+            <iterate list="spec.hostNames" entry="specHostName">
+                <entity-find entity-name="mantle.product.store.ProductStoreSetting"
+                    list="hostSettings">
+                    <econdition field-name="settingTypeEnumId" value="PsstHostname" />
+                    <econdition field-name="settingValue" from="specHostName" />
+                </entity-find>
+                <if condition="hostSettings">
+                    <return error="true"
+                        message="Hostname ${specHostName} is already used by store ${hostSettings[0].productStoreId}" />
+                </if>
+            </iterate>
+
+            <!-- create the owner with its admin user and main company -->
+            <service-call name="growerp.100.TenantServices100.create#Tenant" out-map="tenant"
+                in-map="[adminEmail: spec.adminEmail,
+                        adminFirstName: spec.adminFirstName ?: 'Admin',
+                        adminLastName: spec.adminLastName ?: 'Admin',
+                        password: password,
+                        applicationId: applicationId]" />
+            <set field="ownerPartyId" from="tenant.ownerPartyId" />
+            <set field="companyPartyId" from="tenant.companyPartyId" />
+            <set field="adminPartyId" from="tenant.adminPartyId" />
+
+            <!-- creates the accounting config, the product store, warehouse and wiki space -->
+            <service-call name="growerp.100.TenantServices100.complete#TenantSetup"
+                in-map="[ownerPartyId: ownerPartyId, companyPartyId: companyPartyId,
+                        companyName: spec.companyName, currencyId: spec.currencyId,
+                        applicationId: applicationId, userPartyId: adminPartyId,
+                        hostName: 'localhost']" />
+
+            <entity-find entity-name="mantle.product.store.ProductStore" list="stores">
+                <econdition field-name="organizationPartyId" from="companyPartyId" />
+            </entity-find>
+            <if condition="!stores">
+                <return error="true"
+                    message="No store created for company ${companyPartyId}, cannot install the website" />
+            </if>
+            <set field="productStoreId" from="stores[0].productStoreId" />
+
+            <!-- repoint the new store at the imported website -->
+            <service-call name="update#mantle.product.store.ProductStore"
+                in-map="[productStoreId: productStoreId, storeName: spec.companyName,
+                        wikiSpaceId: siteId + '_WS']" />
+
+            <entity-find entity-name="mantle.product.store.ProductStoreSetting"
+                list="templateSettings">
+                <econdition field-name="productStoreId" from="productStoreId" />
+                <econdition field-name="settingTypeEnumId" value="PsstTemplateId" />
+            </entity-find>
+            <if condition="templateSettings">
+                <service-call name="update#mantle.product.store.ProductStoreSetting"
+                    in-map="templateSettings[0] + [settingValue: 'modern']" />
+                <else>
+                    <service-call name="create#mantle.product.store.ProductStoreSetting"
+                        in-map="[productStoreId: productStoreId,
+                                settingTypeEnumId: 'PsstTemplateId', settingValue: 'modern']" />
+                </else>
+            </if>
+
+            <entity-find entity-name="mantle.product.store.ProductStoreSetting"
+                list="contentSettings">
+                <econdition field-name="productStoreId" from="productStoreId" />
+                <econdition field-name="settingTypeEnumId" value="PsstContentLocation" />
+            </entity-find>
+            <iterate list="contentSettings" entry="contentSetting">
+                <service-call name="update#mantle.product.store.ProductStoreSetting"
+                    in-map="contentSetting + [settingValue: rootLocation]" />
+            </iterate>
+
+            <!-- serve the site on the original domains, distinct fromDate for every row -->
+            <set field="hostSeq" value="0" type="Integer" />
+            <iterate list="spec.hostNames" entry="specHostName">
+                <service-call name="create#mantle.product.store.ProductStoreSetting"
+                    in-map="[productStoreId: productStoreId, settingTypeEnumId: 'PsstHostname',
+                            fromDate: new java.sql.Timestamp(ec.user.nowTimestamp.time + hostSeq * 1000),
+                            settingValue: specHostName]" />
+                <set field="hostSeq" from="hostSeq + 1" />
+            </iterate>
+
+            <!-- company logo, served by the /getLogo transition of the store -->
+            <if condition="spec.logoPath">
+                <service-call name="create#mantle.party.PartyContent"
+                    in-map="[partyId: companyPartyId, partyContentTypeEnumId: 'PcntLogoImage',
+                            contentLocation: rootLocation + '/' + spec.logoPath]" />
+            </if>
+
+            <!-- page images, served by /getImage/images/{filename} -->
+            <entity-find entity-name="moqui.resource.DbResource" list="imageResources">
+                <econdition field-name="parentResourceId" value="${siteId}_IMAGES" />
+                <econdition field-name="isFile" value="Y" />
+            </entity-find>
+            <iterate list="imageResources" entry="imageResource">
+                <service-call name="create#growerp.store.ProductStoreContent"
+                    in-map="[productStoreId: productStoreId, contentTypeEnumId: 'PrstImageLarge',
+                            description: 'images/' + imageResource.filename,
+                            contentLocation: rootLocation + '/images/' + imageResource.filename]" />
+            </iterate>
+
+            <!-- company contact details found on the original website, shown in the footer -->
+            <if condition="spec.contact?.email">
+                <entity-find entity-name="mantle.party.contact.PartyContactMech"
+                    for-update="true" list="emailContactMechs">
+                    <econdition field-name="partyId" from="companyPartyId" />
+                    <econdition field-name="contactMechPurposeId" value="EmailPrimary" />
+                    <date-filter />
+                </entity-find>
+                <iterate list="emailContactMechs" entry="emailContactMech">
+                    <set field="emailContactMech.thruDate" from="ec.user.nowTimestamp" />
+                    <entity-update value-field="emailContactMech" />
+                </iterate>
+                <service-call name="mantle.party.ContactServices.create#EmailAddress"
+                    in-map="[partyId: companyPartyId, contactMechPurposeId: 'EmailPrimary',
+                            emailAddress: spec.contact.email]" />
+            </if>
+            <if condition="spec.contact?.telephone">
+                <service-call name="mantle.party.ContactServices.create#TelecomNumber"
+                    in-map="[partyId: companyPartyId, contactMechPurposeId: 'PhonePrimary',
+                            countryCode: spec.contact.telephone.countryCode,
+                            areaCode: spec.contact.telephone.areaCode,
+                            contactNumber: spec.contact.telephone.contactNumber]" />
+            </if>
+            <if condition="spec.contact?.address">
+                <service-call name="mantle.party.ContactServices.create#PostalAddress"
+                    in-map="[partyId: companyPartyId, contactMechPurposeId: 'PostalPrimary',
+                            address1: spec.contact.address.address1,
+                            address2: spec.contact.address.address2,
+                            city: spec.contact.address.city,
+                            postalCode: spec.contact.address.postalCode,
+                            stateProvinceGeoId: spec.contact.address.stateProvinceGeoId,
+                            countryGeoId: spec.contact.address.countryGeoId]" />
+            </if>
+
+            <log message="Imported website ${siteId} for owner ${ownerPartyId}, company ${companyPartyId}, store ${productStoreId}" />
+        </actions>
+    </service>
+
 </services>
