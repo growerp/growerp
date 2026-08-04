@@ -92,6 +92,44 @@ produces, and is installed by the same growerp.100.ImportExportServices100.impor
         </actions>
     </service>
 
+    <service verb="get" noun="WebsiteHostName">
+        <description>The host name this website gets on THIS installation:
+        the first label of its own domain, on the domain this backend is reached at.
+        www.antwebsystems.com on admin.growerp.org becomes antwebsystems.growerp.org.
+
+        Follows the same rule as setup#MainOrganization: a host with two or more dots loses
+        its first label, so admin/staging prefixes do not end up in the name. Returns empty
+        when there is no web request (a background job), the caller then keeps what it has.</description>
+        <in-parameters>
+            <parameter name="sourceHostName" required="true">
+                <description>domain of the website, eg www.antwebsystems.com</description>
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="hostName" />
+        </out-parameters>
+        <actions>
+            <script><![CDATA[
+                String bare = sourceHostName.startsWith('www.') ?
+                    sourceHostName.substring(4) : sourceHostName
+                String label = bare.contains('.') ? bare.substring(0, bare.indexOf('.')) : bare
+                String raw = ec.web?.getHostName(true)
+                if (!label || !raw) { context.hostName = ''; return }
+
+                String port = raw.contains(':') ? raw.substring(raw.indexOf(':')) : ''
+                String host = raw.contains(':') ? raw.substring(0, raw.indexOf(':')) : raw
+                // the default http/https ports are never part of a host name
+                if (port == ':80' || port == ':443') port = ''
+                if (host == '10.0.2.2' || host == '127.0.0.1') host = 'localhost'
+                // two or more dots: drop the first label, admin.growerp.org -> growerp.org
+                if (host.indexOf('.', host.indexOf('.') + 1) != -1) {
+                    host = host.substring(host.indexOf('.') + 1)
+                }
+                context.hostName = "${label}.${host}${port}"
+            ]]></script>
+        </actions>
+    </service>
+
     <service verb="create" noun="WebsiteConversion">
         <description>Validate the request and queue the conversion. All the checks that
             import#WebsiteOwner does at the end are done here first, so a conversion that cannot
@@ -148,16 +186,18 @@ produces, and is installed by the same growerp.100.ImportExportServices100.impor
                     names.add(sourceHost)
                     names.add(sourceHost.startsWith('www.') ? sourceHost.substring(4) : "www.${sourceHost}")
                 }
-                if (sourceHost) {
-                    // mysidekick.com.au -> mysidekick, served as mysidekick.<this backend host>
-                    String bare = sourceHost.startsWith('www.') ? sourceHost.substring(4) : sourceHost
-                    String label = bare.contains('.') ? bare.substring(0, bare.indexOf('.')) : bare
-                    String currentHost = ec.web?.getHostName(true)
-                    if (!currentHost) currentHost = 'localhost:8080'
-                    if (label) names.add("${label}.${currentHost}")
-                }
+                context.sourceHost = sourceHost
                 context.hostNameList = names.unique()
             ]]></script>
+            <!-- plus a name on the host this backend is reached at, so the result can be
+                 opened right away on this installation -->
+            <if condition="sourceHost">
+                <service-call name="growerp.100.WebsiteGeneratorServices100.get#WebsiteHostName"
+                    in-map="[sourceHostName: sourceHost]" out-map="derived" />
+                <if condition="derived.hostName &amp;&amp; !hostNameList.contains(derived.hostName)">
+                    <script>hostNameList.add(derived.hostName)</script>
+                </if>
+            </if>
             <check-errors />
             <iterate list="hostNameList" entry="specHostName">
                 <entity-find entity-name="mantle.product.store.ProductStoreSetting"
