@@ -20,7 +20,9 @@ limitations under the License.
          versioning stay in the framework. -->
 
     <service verb="get" noun="WikiSpaces">
-        <description>List wiki spaces, optional search on id/description.</description>
+        <description>List the wiki spaces this owner may browse: its own space first,
+            then the shared read-only GROWERP_OKF bundle. Optional search on
+            id/description.</description>
         <in-parameters>
             <parameter name="searchString"/>
             <parameter name="start" type="Integer" default-value="0"/>
@@ -28,18 +30,28 @@ limitations under the License.
         </in-parameters>
         <out-parameters><parameter name="wikiSpaces" type="List"/></out-parameters>
         <actions>
-            <entity-find entity-name="moqui.resource.wiki.WikiSpace" list="spaceList"
-                    offset="start" limit="limit">
-                <econditions combine="or">
-                    <econdition field-name="wikiSpaceId" operator="like"
-                        value="%${searchString ?: ''}%" ignore-case="true"/>
-                    <econdition field-name="description" operator="like"
-                        value="%${searchString ?: ''}%" ignore-case="true"/>
-                </econditions>
-                <order-by field-name="wikiSpaceId"/>
+            <!-- the owner's own space is created by setup#MainOrganization and linked
+                 from the company ProductStore -->
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="context"/>
+            <entity-find entity-name="mantle.product.store.ProductStore" list="stores">
+                <econdition field-name="organizationPartyId" from="companyPartyId"/>
             </entity-find>
+            <set field="spaceIds" from="[]"/>
+            <if condition="stores &amp;&amp; stores[0].wikiSpaceId">
+                <script>spaceIds.add(stores[0].wikiSpaceId)</script>
+            </if>
+            <script>spaceIds.add('GROWERP_OKF')</script>
             <set field="wikiSpaces" from="[]"/>
-            <iterate list="spaceList" entry="sp">
+            <iterate list="spaceIds" entry="spaceId">
+                <entity-find-one entity-name="moqui.resource.wiki.WikiSpace" value-field="sp">
+                    <field-map field-name="wikiSpaceId" from="spaceId"/>
+                </entity-find-one>
+                <if condition="sp == null"><continue/></if>
+                <if condition="searchString &amp;&amp; !(sp.wikiSpaceId + ' ' +
+                        (sp.description ?: '')).toLowerCase().contains(searchString.toLowerCase())">
+                    <continue/>
+                </if>
                 <script>wikiSpaces.add([wikiSpaceId: sp.wikiSpaceId, description: sp.description,
                     rootPageLocation: sp.rootPageLocation, publicPageUrl: sp.publicPageUrl])</script>
             </iterate>

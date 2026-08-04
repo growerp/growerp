@@ -1335,8 +1335,7 @@ class CommonTest {
     DropdownButtonFormField tff =
         find.byKey(Key(key)).last.evaluate().single.widget
             as DropdownButtonFormField;
-    // Support both initialValue and value properties
-    final val = tff.initialValue ?? (tff as dynamic).value;
+    final val = tff.initialValue;
     if (val == null) return '';
     if (val is Currency) return val.description ?? '';
     if (val is UserGroup) return val.toString();
@@ -1618,6 +1617,19 @@ class CommonTest {
     seconds = 1,
   }) async {
     await tapByKey(tester, key, seconds: seconds);
+    // a long option list (e.g. the 24 hours of a send window) only renders the
+    // part of the menu that fits the screen: scroll the overlay to the option.
+    final option = find.textContaining(RegExp(value, caseSensitive: false));
+    if (!tester.any(option)) {
+      try {
+        await tester.scrollUntilVisible(
+          option,
+          100.0,
+          scrollable: find.byType(Scrollable).last,
+          maxScrolls: 30,
+        );
+      } catch (_) {}
+    }
     await tapByText(tester, value);
   }
 

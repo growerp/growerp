@@ -19,9 +19,10 @@ import 'package:growerp_models/growerp_models.dart';
 
 import 'wiki_page_dialog.dart';
 
-/// Browse and edit the pages of a wiki space (default: the GROWERP_OKF
-/// knowledge bundle produced by the OKF exporter). Generated pages live under
-/// tables/ and datasets/; hand-authored pages (e.g. notes/) survive re-export.
+/// Browse and edit the pages of a wiki space: the owner's own space (default)
+/// and the read-only GROWERP_OKF knowledge bundle produced by the OKF exporter.
+/// In the bundle generated pages live under tables/ and datasets/;
+/// hand-authored pages (e.g. notes/) survive re-export.
 class WikiList extends StatefulWidget {
   const WikiList({super.key});
 
@@ -32,7 +33,7 @@ class WikiList extends StatefulWidget {
 class WikiListState extends State<WikiList> {
   List<WikiSpace> spaces = const [];
   List<WikiPage> pages = const [];
-  String wikiSpaceId = 'GROWERP_OKF';
+  String wikiSpaceId = '';
   final TextEditingController _searchController = TextEditingController();
   bool _loading = true;
   String? _error;
