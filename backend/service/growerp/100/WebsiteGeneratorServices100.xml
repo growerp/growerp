@@ -288,8 +288,11 @@ produces, and is installed by the same growerp.100.ImportExportServices100.impor
         <in-parameters>
             <parameter name="conversionId" required="true" />
             <parameter name="status" />
-            <parameter name="statusMessage" />
-            <parameter name="errorMessage" />
+            <parameter name="statusMessage" allow-html="any" />
+            <!-- an error from the AI or the import quotes html or xml often enough that the
+                 default check would reject the write and leave the row stuck in its last
+                 status with no message at all -->
+            <parameter name="errorMessage" allow-html="any" />
             <parameter name="pageCount" type="Integer" />
             <parameter name="imageCount" type="Integer" />
             <parameter name="createdOwnerPartyId" />
@@ -525,6 +528,7 @@ produces, and is installed by the same growerp.100.ImportExportServices100.impor
                 in-map="[xmlText: xmlText, siteId: siteId, password: password]"
                 out-map="imported" />
 
+            <set field="nowStamp" from="ec.user.nowTimestamp" />
             <service-call name="create#growerp.website.WebsiteConversion" out-map="created"
                 in-map="[ownerPartyId: ownerPartyId,
                         sourceUrl: fileName ?: 'imported file',
@@ -538,12 +542,32 @@ produces, and is installed by the same growerp.100.ImportExportServices100.impor
                         createdCompanyPartyId: imported.companyPartyId,
                         productStoreId: imported.productStoreId,
                         generatedPassword: imported.password,
-                        createdDate: ec.user.nowTimestamp,
-                        completedDate: ec.user.nowTimestamp]" />
+                        createdDate: nowStamp,
+                        completedDate: nowStamp]" />
             <set field="conversionId" from="created.conversionId" />
-            <service-call name="growerp.100.WebsiteGeneratorServices100.get#WebsiteConversions"
-                in-map="[conversionId: conversionId]" out-map="fetched" />
-            <set field="websiteConversion" from="fetched.websiteConversions[0]" />
+            <!-- Answer from what was just created rather than reading it back: the row is still
+                 uncommitted here, and the caller adds this to its list straight away. Reading it
+                 back returned nothing, so the new website only showed up after a reload.
+                 Dates go out as ISO strings, the Flutter DateTimeConverter reads a String. -->
+            <script><![CDATA[
+                def isoFormat = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+                context.nowIso = isoFormat.format(nowStamp)
+            ]]></script>
+            <set field="websiteConversion"
+                from="[conversionId: conversionId, ownerPartyId: ownerPartyId,
+                        sourceUrl: fileName ?: 'imported file',
+                        siteId: siteId,
+                        companyName: fileCompanyName ?: siteId,
+                        adminEmail: fileAdminEmail,
+                        currencyId: '', applicationId: 'AppAdmin',
+                        hostNames: '',
+                        status: 'COMPLETED',
+                        statusMessage: 'Imported from a website export file',
+                        createdOwnerPartyId: imported.ownerPartyId,
+                        createdCompanyPartyId: imported.companyPartyId,
+                        productStoreId: imported.productStoreId,
+                        generatedPassword: imported.password,
+                        createdDate: nowIso, completedDate: nowIso]" />
         </actions>
     </service>
 
