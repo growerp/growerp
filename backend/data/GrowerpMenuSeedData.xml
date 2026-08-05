@@ -474,18 +474,23 @@ limitations under the License.
         title="Applications" route="/applications" iconName="apps" widgetName="ApplicationList" sequenceNum="20"/>
     <growerp.menu.MenuItem menuItemId="SUPPORT_OWNERS" menuConfigurationId="SUPPORT_DEFAULT"
         title="Owners" route="/owners" iconName="business" widgetName="CompanyListMainOnly" sequenceNum="25"/>
+    <!-- the support app signs in as a system support user (GROWERP_M_SYSTEM); listing only
+         GROWERP_M_ADMIN here hides the item from the left menu, which filters on the user's
+         group, while the dashboard tiles do not -->
     <growerp.menu.MenuItem menuItemId="SUPPORT_WEBSITE_GEN" menuConfigurationId="SUPPORT_DEFAULT"
         title="Website Generator" route="/websiteGenerator" iconName="travel_explore"
-        widgetName="WebsiteConversionList" userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="30"/>
-    <growerp.menu.MenuItem menuItemId="SUPPORT_ABOUT" menuConfigurationId="SUPPORT_DEFAULT"
-        title="About" route="/about" iconName="info" widgetName="AboutForm" sequenceNum="40"/>
+        widgetName="WebsiteConversionList"
+        userGroupsJson='["GROWERP_M_SYSTEM","GROWERP_M_ADMIN"]' sequenceNum="30"/>
     <growerp.menu.MenuItem menuItemId="SUPPORT_LLM_USAGE" menuConfigurationId="SUPPORT_DEFAULT"
         title="LLM Usage" route="/llm-usage" iconName="assessment" widgetName="AdkSystemUsageView" sequenceNum="50"/>
     <growerp.menu.MenuItem menuItemId="SUPPORT_STATISTICS" menuConfigurationId="SUPPORT_DEFAULT"
         title="Statistics" route="/restStatistics" iconName="scatter_plot" widgetName="RestStatisticsView" sequenceNum="55"/>
     <growerp.menu.MenuItem menuItemId="SUPPORT_SYSTEM_SETUP" menuConfigurationId="SUPPORT_DEFAULT"
         title="System Setup" route="/systemSetup" iconName="settings" widgetName="SystemSetupDialog"
-        userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="999"/>
+        userGroupsJson='["GROWERP_M_SYSTEM","GROWERP_M_ADMIN"]' sequenceNum="900"/>
+    <!-- About stays last in the menu -->
+    <growerp.menu.MenuItem menuItemId="SUPPORT_ABOUT" menuConfigurationId="SUPPORT_DEFAULT"
+        title="About" route="/about" iconName="info" widgetName="AboutForm" sequenceNum="999"/>
 
 
     <!-- ====================== EXAMPLE APP MENUS ====================== -->
