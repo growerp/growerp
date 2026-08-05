@@ -35,8 +35,11 @@ final String USER_AGENT = 'Mozilla/5.0 (compatible; GrowERP-WebsiteGenerator/1.0
 final long MAX_IMAGE_BYTES = 2 * 1024 * 1024
 
 def GeminiAiUtil = ec.resource.script("component://growerp/service/GeminiAiUtil.groovy", null)
+// the structure call returns real structured data, so JSON mode fits there
 Map aiOptions = [apiKey: apiKey, ownerPartyId: ownerPartyId, jsonMode: true,
                  temperature: 0.4, maxOutputTokens: 8192]
+// page bodies come back as plain text, see extractBody below
+Map pageOptions = aiOptions + [jsonMode: false]
 
 // --------------------------------------------------------------------------------------
 // helpers
@@ -51,6 +54,29 @@ def safeFileName = { String name, String fallback ->
 }
 
 def cdata = { String text -> "<![CDATA[${(text ?: '').replace(']]>', ']]]]><![CDATA[>')}]]>" }
+
+/** models like to wrap their answer in a ``` fence even when told not to */
+def stripFences = { String text ->
+    String t = (text ?: '').trim()
+    t = t.replaceAll(/(?s)^```[a-zA-Z]*\s*/, '').replaceAll(/(?s)\s*```$/, '')
+    return t.trim()
+}
+
+/**
+ * The page body comes back as raw text, not wrapped in JSON: a 4kB HTML fragment full of
+ * class="..." attributes is exactly what a model fails to escape, and one unescaped quote
+ * ends the JSON string early and breaks the whole parse. Keep only the fragment itself in
+ * case the model adds a sentence around it.
+ */
+def extractBody = { String text, boolean isMd ->
+    String t = stripFences(text)
+    if (!isMd) {
+        int start = t.indexOf('<main')
+        int end = t.lastIndexOf('</main>')
+        if (start >= 0 && end > start) t = t.substring(start, end + '</main>'.length())
+    }
+    return t.trim()
+}
 
 /** entity id columns are 40 chars; longer generated ids abort the whole import */
 def shortId = { String value -> value.length() > 40 ? value.substring(0, 40) : value }
@@ -124,8 +150,14 @@ LOGO CANDIDATES: ${JsonOutput.toJson(site.logoCandidates)}
 IMAGES FOUND: ${JsonOutput.toJson((site.images as List)?.take(30))}
 """
     ec.logger.info("generateWebsiteWithAI: asking for the structure of ${site.homeUrl}")
-    def structure = GeminiAiUtil.parseJsonResponse(
-        GeminiAiUtil.callGeminiApi(ec, structurePrompt, aiOptions))
+    String structureText = GeminiAiUtil.callGeminiApi(ec, structurePrompt, aiOptions)
+    def structure
+    try {
+        structure = GeminiAiUtil.parseJsonResponse(structureText)
+    } catch (Exception e) {
+        ec.logger.warn("generateWebsiteWithAI: unparsable structure answer:\n${structureText?.take(2000)}")
+        throw new Exception("the model did not return usable JSON for the site structure: ${e.message}")
+    }
     List aiPages = (structure.pages ?: []) as List
     if (!aiPages) throw new Exception("the model returned no pages for ${site.homeUrl}")
     // the model sometimes ignores the limit and invents pages with no source behind them
@@ -202,7 +234,7 @@ RULES
 - First line exactly: # ${pageTitle}
 - Plain Markdown only: headings, paragraphs, lists, links. No HTML, no front matter.
 - Keep the facts of the source text. Never invent prices, certifications or claims.
-Return ONLY JSON: {"body": "<the markdown>"}
+Return ONLY the Markdown itself: no JSON, no ``` fence, no explanation before or after.
 """ : """
 Write the body of the "${pageTitle}" page of ${companyName}'s website for the GrowERP 'modern'
 Lumina template.
@@ -232,11 +264,12 @@ MANDATORY RULES
   the footer automatically.
 - Keep the facts of the source text. Never invent prices, certifications or claims.
 ${idx == 0 ? '- This is the home page: open with a hero (headline, one sentence subtitle, a primary and a secondary call to action), then the key selling points as a card grid.' : ''}
-Return ONLY JSON: {"body": "<the html>"}
+Return ONLY the HTML itself, starting with <main and ending with </main>: no JSON, no ```
+fence, no explanation before or after.
 """
         ec.logger.info("generateWebsiteWithAI: writing page ${pagePath}")
-        def result = GeminiAiUtil.parseJsonResponse(GeminiAiUtil.callGeminiApi(ec, pagePrompt, aiOptions))
-        String body = (result?.body as String) ?: ''
+        String raw = GeminiAiUtil.callGeminiApi(ec, pagePrompt, pageOptions)
+        String body = extractBody(raw, isMd)
         if (!body) throw new Exception("the model returned no content for page ${pagePath}")
         pageBodies.add([pagePath: pagePath, title: pageTitle, isMd: isMd,
                         sequenceNum: (p.sequenceNum ?: (idx + 1)) as int, body: body])
