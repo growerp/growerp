@@ -103,7 +103,10 @@ class ChatRoomBloc extends Bloc<ChatRoomEvent, ChatRoomState> {
     } else {
       start = state.chatRooms.length;
     }
-    if (!_subscribed && chatClient.isConnected) {
+    // the ws stream survives reconnects, so subscribe even when the socket is not
+    // up yet: waiting for isConnected here meant never subscribing at all when the
+    // first fetch won the race with the login connect
+    if (!_subscribed) {
       _subscribed = true;
       await _wsSubscription?.cancel();
       _wsSubscription = chatClient.stream().listen(

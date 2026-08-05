@@ -268,6 +268,14 @@ limitations under the License.
         <field name="userId" type="id" is-pk="true" />
         <field name="isActive" type="text-indicator" />
         <field name="hasRead" type="text-indicator" />
+        <field name="lastSeenDate" type="date-time">
+            <description>when this member last read the room, used as presence for the
+                website visitor who polls instead of holding a chat WebSocket</description>
+        </field>
+        <field name="lastEmailDate" type="date-time">
+            <description>when a chat notification email was last sent to this member for
+                this room, throttles repeat notifications</description>
+        </field>
         <relationship type="one" title="User" related="moqui.security.UserAccount">
             <key-map field-name="userId" />
         </relationship>

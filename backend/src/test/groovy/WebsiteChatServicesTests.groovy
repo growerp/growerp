@@ -155,6 +155,52 @@ class WebsiteChatServicesTests extends Specification {
                 .condition('infoString', mixedCaseEmail).list().size() == 0
     }
 
+    def "polling the message thread records the visitor's lastSeenDate as presence"() {
+        setup:
+        String email = 'leadtest5@example.com'
+        Map out = ec.service.sync().name('growerp.100.ChatServices100.submit#WebsiteChat')
+                .parameters([productStoreId: productStoreId, email: email, question: 'Still there?'])
+                .disableAuthz().call()
+
+        when: 'the widget polls the thread'
+        ec.service.sync().name('growerp.100.ChatServices100.get#WebsiteChatMessages')
+                .parameters([productStoreId: productStoreId, chatRoomId: out.chatRoomId,
+                        visitorToken: out.visitorToken]).disableAuthz().call()
+        EntityValue member = ec.entity.find('growerp.general.ChatRoomMember')
+                .condition([chatRoomId: out.chatRoomId, userId: out.visitorUserId] as Map)
+                .useCache(false).one()
+
+        then: 'the visitor counts as present and has read the room'
+        member.lastSeenDate != null
+        member.hasRead == 'Y'
+    }
+
+    def "a tenant without its own email server gets no chat notification, and never SYSTEM"() {
+        setup:
+        String email = 'leadtest6@example.com'
+        Map out = ec.service.sync().name('growerp.100.ChatServices100.submit#WebsiteChat')
+                .parameters([productStoreId: productStoreId, email: email, question: 'Anyone home?'])
+                .disableAuthz().call()
+        EntityValue staffMember = ec.entity.find('growerp.general.ChatRoomMember')
+                .condition('chatRoomId', out.chatRoomId)
+                .condition('userId', 'not-equals', out.visitorUserId).list().first
+        assert staffMember != null
+
+        when:
+        Map notifyOut = ec.service.sync().name('growerp.100.ChatServices100.send#ChatNotificationEmail')
+                .parameters([chatRoomId: out.chatRoomId, toUserId: staffMember.userId,
+                        reason: 'offline']).disableAuthz().call()
+        EntityValue after = ec.entity.find('growerp.general.ChatRoomMember')
+                .condition([chatRoomId: out.chatRoomId, userId: staffMember.userId] as Map)
+                .useCache(false).one()
+
+        then: 'nothing was sent and no send is recorded, so a later configured send still happens'
+        notifyOut.emailSent == false
+        after.lastEmailDate == null
+        // send#UnansweredChatEmails is deliberately not called here: it sweeps every unread
+        // room in the database and would send real mail when the run-time backend has SMTP
+    }
+
     def "the visitor's chat message is tagged with the room's visitorUserId for origin display"() {
         setup:
         String email = 'leadtest4@example.com'

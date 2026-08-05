@@ -131,6 +131,10 @@ limitations under the License.
                         <econdition field-name="myHasRead" value="N" />
                     </econditions>
                     <econdition field-name="myUserId" value="SYSTEM_SUPPORT" />
+                    <!-- without this a single-room lookup returned every support room, so
+                         ChatEndpoint fanned the message out to the first room's members -->
+                    <econdition field-name="chatRoomId" from="chatRoomId"
+                        ignore-if-empty="true" />
                     <econdition field-name="chatRoomName" operator="like" from="namePrefixLike" ignore-if-empty="true" />
                 </entity-find>
                 <else>
@@ -518,7 +522,8 @@ limitations under the License.
                 <service-call name="update#growerp.general.ChatRoomMember"
                     in-map="[chatRoomId: chatRoomId,
                             userId: ec.user.userAccount.userId,
-                            hasRead: 'Y']" />
+                            hasRead: 'Y',
+                            lastSeenDate: ec.user.nowTimestamp]" />
             </if>
         </actions>
     </service>
@@ -554,15 +559,7 @@ limitations under the License.
                 list="roomMembers">
                 <econdition field-name="chatRoomId" from="chatMessage.chatRoom.chatRoomId" />
             </entity-find>
-            <!-- email config + sender name, resolved once for offline notifications -->
-            <entity-find-one entity-name="moqui.basic.email.EmailServer" value-field="emailServer">
-                <field-map field-name="emailServerId" value="SYSTEM" />
-            </entity-find-one>
-            <set field="emailConfigured"
-                from="emailServer &amp;&amp; emailServer.mailPassword != 'SMTP_PASSWORD'" />
-            <entity-find-one entity-name="moqui.security.UserAccount" value-field="senderUa">
-                <field-map field-name="userId" from="ec.user.userAccount.userId" />
-            </entity-find-one>
+            <!-- unread members are emailed the thread by send#UnansweredChatEmails -->
             <iterate
                 list="roomMembers" entry="member">
                 <if condition="ec.user.userAccount.userId != member.userId">
@@ -573,29 +570,18 @@ limitations under the License.
                                             hasRead: 'N',
                                             isActive: 'Y']" />
                     </if>
-                    <!-- email the message to members who are not connected (offline) -->
-                    <if condition="emailConfigured &amp;&amp; !org.moqui.impl.webapp.ChatEndpoint.isUserOnline(member.userId)">
-                        <entity-find-one entity-name="moqui.security.UserAccount" value-field="toUa">
-                            <field-map field-name="userId" from="member.userId" />
-                        </entity-find-one>
-                        <entity-find entity-name="mantle.party.contact.PartyContactMech" list="emailPcms">
-                            <econdition field-name="partyId" from="toUa.partyId" />
-                            <econdition field-name="contactMechPurposeId" value="EmailPrimary" />
-                            <date-filter />
-                        </entity-find>
-                        <set field="toEmail" from="emailPcms ? emailPcms[0].contactMech.infoString : null" />
-                        <if condition="toEmail &amp;&amp; !toEmail.contains('example.com')">
-                            <service-call name="org.moqui.impl.EmailServices.send#EmailTemplate" async="true">
-                                <field-map field-name="emailTemplateId" value="CHAT_NOTIFICATION" />
-                                <field-map field-name="toAddresses" from="toEmail" />
-                                <field-map field-name="bodyParameters"
-                                    from="[senderName: (senderUa?.userFullName ?: 'GrowERP'),
-                                           messageContent: chatMessage.content]" />
-                            </service-call>
-                        </if>
-                    </if>
                 </if>
             </iterate>
+            <!-- push over the chat WebSocket from here instead of relying on the sender's
+                 own socket relaying it (ChatEndpoint.onMessage): this REST call always
+                 happens, so the receiver's unread indicator updates even when the sender's
+                 socket is stale -->
+            <service-call name="growerp.100.ChatServices100.push#WebsiteChatWs"
+                in-map="[chatRoomId: chatMessage.chatRoom.chatRoomId,
+                        fromUserId: ec.user.userAccount.userId,
+                        fromUserFullName: ec.user.username,
+                        content: chatMessage.content,
+                        chatMessageId: chatMessageId]" />
             <service-call name="growerp.100.ChatServices100.get#ChatMessage"
                 in-map="[chatMessageId: chatMessageId]" out-map="context" />
             <set field="chatMessageId" from="chatMessageId" />
@@ -1002,10 +988,12 @@ limitations under the License.
                     ]" />
                 <script>chatMessages.add(chatMessage)</script>
             </iterate>
-            <!-- the visitor has now seen the thread -->
+            <!-- the visitor has now seen the thread; lastSeenDate doubles as presence
+                 because the widget polls instead of holding a chat WebSocket -->
             <if condition="visitorUserId">
                 <service-call name="update#growerp.general.ChatRoomMember"
-                    in-map="[chatRoomId: chatRoomId, userId: visitorUserId, hasRead: 'Y']" />
+                    in-map="[chatRoomId: chatRoomId, userId: visitorUserId, hasRead: 'Y',
+                            lastSeenDate: ec.user.nowTimestamp]" />
             </if>
         </actions>
     </service>
@@ -1014,8 +1002,8 @@ limitations under the License.
         <description>
             Public endpoint: an anonymous website visitor posts a follow-up message to
             their chat room (validated by the per-room token). Marks the other members
-            (the company admin) unread and emails them if offline, mirroring
-            create#ChatMessage.
+            (the company admin) unread, mirroring create#ChatMessage; the notification
+            email is sent by send#UnansweredChatEmails.
         </description>
         <in-parameters>
             <parameter name="productStoreId" required="true" />
@@ -1047,41 +1035,16 @@ limitations under the License.
             </if>
             <service-call name="create#growerp.general.ChatMessage" out-map="context"
                 in-map="[chatRoomId: chatRoomId, fromUserId: visitorUserId, content: content]" />
-            <!-- mark the other (admin) members unread + email them when offline -->
+            <!-- mark the other (admin) members unread -->
             <entity-find entity-name="growerp.general.ChatRoomMember" list="roomMembers">
                 <econdition field-name="chatRoomId" from="chatRoomId" />
             </entity-find>
-            <entity-find-one entity-name="moqui.basic.email.EmailServer" value-field="emailServer">
-                <field-map field-name="emailServerId" value="SYSTEM" />
-            </entity-find-one>
-            <set field="emailConfigured"
-                from="emailServer &amp;&amp; emailServer.mailPassword != 'SMTP_PASSWORD'" />
             <iterate list="roomMembers" entry="member">
                 <if condition="member.userId != visitorUserId">
                     <if condition="member.hasRead != 'N'">
                         <service-call name="update#growerp.general.ChatRoomMember"
                             in-map="[chatRoomId: member.chatRoomId, userId: member.userId,
                                     hasRead: 'N', isActive: 'Y']" />
-                    </if>
-                    <if condition="emailConfigured &amp;&amp; !org.moqui.impl.webapp.ChatEndpoint.isUserOnline(member.userId)">
-                        <entity-find-one entity-name="moqui.security.UserAccount" value-field="toUa">
-                            <field-map field-name="userId" from="member.userId" />
-                        </entity-find-one>
-                        <entity-find entity-name="mantle.party.contact.PartyContactMech" list="emailPcms">
-                            <econdition field-name="partyId" from="toUa.partyId" />
-                            <econdition field-name="contactMechPurposeId" value="EmailPrimary" />
-                            <date-filter />
-                        </entity-find>
-                        <set field="toEmail" from="emailPcms ? emailPcms[0].contactMech.infoString : null" />
-                        <if condition="toEmail &amp;&amp; !toEmail.contains('example.com')">
-                            <service-call name="org.moqui.impl.EmailServices.send#EmailTemplate" async="true">
-                                <field-map field-name="emailTemplateId" value="CHAT_NOTIFICATION" />
-                                <field-map field-name="toAddresses" from="toEmail" />
-                                <field-map field-name="bodyParameters"
-                                    from="[senderName: (room?.chatRoomName ?: 'website visitor'),
-                                           messageContent: content]" />
-                            </service-call>
-                        </if>
                     </if>
                 </if>
             </iterate>
@@ -1100,6 +1063,250 @@ limitations under the License.
             <if condition="cr?.chatAgentConfigId &amp;&amp; cr.agentActive == 'Y'">
                 <service-call name="AdkChatServices.reply#WebsiteChatAgent" async="true"
                     in-map="[chatRoomId: chatRoomId, ownerPartyId: ownerPartyId]" />
+            </if>
+        </actions>
+    </service>
+
+    <!-- ===== email notification of chat messages ================================ -->
+
+    <service verb="get" noun="ChatMailOwner" authenticate="false" allow-remote="false">
+        <description>
+            Which company's email server sends the notification for a chat message: the
+            sender's. A message from SystemSupport (or in a GROWERP-owned room) goes out
+            over the SYSTEM server, returned as an empty mailOwnerPartyId; a message from
+            a tenant goes out over that tenant's own server.
+        </description>
+        <in-parameters>
+            <parameter name="fromUserId" />
+            <parameter name="roomOwnerPartyId" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="mailOwnerPartyId">
+                <description>null for the SYSTEM server, otherwise the owner company</description>
+            </parameter>
+        </out-parameters>
+        <actions>
+            <set field="mailOwnerPartyId"
+                from="roomOwnerPartyId == 'GROWERP' ? null : roomOwnerPartyId" />
+            <if condition="fromUserId == 'SYSTEM_SUPPORT'">
+                <set field="mailOwnerPartyId" from="null" />
+            </if>
+        </actions>
+    </service>
+
+    <service verb="send" noun="ChatNotificationEmail" authenticate="false" allow-remote="false">
+        <description>
+            Email the conversation of one chat room to one of its members, with explanatory
+            text: either they were not there when the message came in, or the conversation
+            has been waiting for their answer for more than 10 minutes.
+            The owner company's own email server is used; only rooms owned by GROWERP
+            (SystemSupport) use the SYSTEM server. At most one email per member per room per
+            10 minutes. Never returns an error: a chat must not fail because email does not.
+        </description>
+        <in-parameters>
+            <parameter name="chatRoomId" required="true" />
+            <parameter name="toUserId" required="true" />
+            <parameter name="reason" default-value="offline">
+                <description>offline: the member was not connected when the message came in.
+                    noresponse: the member has not answered for more than 10 minutes.</description>
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="emailSent" type="Boolean" />
+        </out-parameters>
+        <actions>
+            <set field="emailSent" from="false" />
+            <entity-find-one entity-name="growerp.general.ChatRoom" value-field="room">
+                <field-map field-name="chatRoomId" />
+            </entity-find-one>
+            <entity-find-one entity-name="growerp.general.ChatRoomMember" value-field="member"
+                cache="false">
+                <field-map field-name="chatRoomId" />
+                <field-map field-name="userId" from="toUserId" />
+            </entity-find-one>
+            <if condition="room == null || member == null"><return /></if>
+            <!-- at most one notification per member per room per 10 minutes -->
+            <set field="throttleTime"
+                from="new java.sql.Timestamp(ec.user.nowTimestamp.time - 600000L)" />
+            <if condition="member.lastEmailDate != null &amp;&amp;
+                    member.lastEmailDate &gt; throttleTime">
+                <return />
+            </if>
+            <!-- the last 50 messages of the room, oldest first in the mail -->
+            <entity-find entity-name="growerp.general.ChatRoomAndMessages" list="latestFirst"
+                limit="50">
+                <econdition field-name="chatRoomId" />
+                <order-by field-name="-lastUpdatedStamp" />
+                <order-by field-name="-chatMessageId" />
+            </entity-find>
+            <if condition="!latestFirst"><return /></if>
+            <!-- the sender decides the server: SystemSupport (and GROWERP-owned rooms) send
+                 with the SYSTEM server, a tenant sends with its own -->
+            <service-call name="growerp.100.ChatServices100.get#ChatMailOwner" out-map="context"
+                in-map="[fromUserId: latestFirst[0].fromUserId,
+                        roomOwnerPartyId: room.ownerPartyId]" />
+            <service-call name="growerp.100.GeneralServices100.get#ActiveEmailServer"
+                in-map="[ownerPartyId: mailOwnerPartyId]" out-map="context" />
+            <if condition="!emailConfigured">
+                <!-- info: the sweep logs one warning per owner, this would repeat per room -->
+                <log level="info"
+                    message="No email server configured for ${mailOwnerPartyId ?: 'SYSTEM'}, no chat notification sent for room ${chatRoomId}" />
+                <return />
+            </if>
+            <!-- recipient email address -->
+            <entity-find-one entity-name="moqui.security.UserAccount" value-field="toUa">
+                <field-map field-name="userId" from="toUserId" />
+            </entity-find-one>
+            <if condition="toUa?.partyId == null"><return /></if>
+            <entity-find entity-name="mantle.party.contact.PartyContactMech" list="emailPcms">
+                <econdition field-name="partyId" from="toUa.partyId" />
+                <econdition field-name="contactMechPurposeId" value="EmailPrimary" />
+                <date-filter />
+            </entity-find>
+            <set field="toEmail" from="emailPcms ? emailPcms[0].contactMech.infoString : null" />
+            <if condition="!toEmail || toEmail.contains('example.com')"><return /></if>
+            <service-call name="growerp.100.NurtureServices100.get#TenantBaseUrl"
+                in-map="[ownerPartyId: room.ownerPartyId ?: 'GROWERP']" out-map="context" />
+            <!-- send from the mail server's own account when it is an address, so a tenant
+                 SMTP server does not reject a foreign sender domain -->
+            <entity-find-one entity-name="moqui.basic.email.EmailServer" value-field="mailServer">
+                <field-map field-name="emailServerId" />
+            </entity-find-one>
+            <set field="fromAddress"
+                from="mailServer?.mailUsername?.contains('@') ? mailServer.mailUsername
+                        : 'noreply@growerp.com'" />
+            <script><![CDATA[
+                boolean isVisitor = toUserId == room.visitorUserId
+                String roomName = room.chatRoomName ?: 'chat'
+                context.subject = reason == 'noresponse'
+                    ? 'Chat waiting for your answer: ' + roomName
+                    : 'New chat message: ' + roomName
+                String intro = reason == 'noresponse'
+                    ? 'This chat conversation has been waiting for an answer for more than 10 minutes.'
+                    : 'A chat message came in while you were not connected.'
+                String closing = isVisitor
+                    ? 'You can continue the conversation in the chat window on ' + baseUrl + '.'
+                    : 'Log in to GrowERP on ' + baseUrl + ' to reply.'
+                StringBuilder sb = new StringBuilder()
+                sb.append('<p>').append(intro).append('</p>')
+                sb.append('<p>The conversation so far:</p>')
+                for (msg in latestFirst.reverse()) {
+                    String when = msg.lastUpdatedStamp
+                        ? ec.l10n.format(msg.lastUpdatedStamp, 'yyyy-MM-dd HH:mm') : ''
+                    String who = msg.fromUserFullName ?: 'unknown'
+                    String text = (msg.content ?: '').replace('&', '&amp;')
+                        .replace('<', '&lt;').replace('>', '&gt;').replace('\n', '<br/>')
+                    sb.append('<p style="margin:0 0 8px 0;"><b>').append(who).append('</b> ')
+                        .append('<span style="color:#888;font-size:12px;">').append(when)
+                        .append('</span><br/>').append(text).append('</p>')
+                }
+                sb.append('<p>').append(closing).append('</p>')
+                context.bodyHtml = sb.toString()
+            ]]></script>
+            <service-call name="growerp.100.GeneralServices100.send#DirectEmail"
+                ignore-error="true" out-map="sendOut"
+                in-map="[ownerPartyId: mailOwnerPartyId, toAddresses: toEmail,
+                        subject: subject, bodyHtml: bodyHtml,
+                        fromAddress: fromAddress, fromName: 'GrowERP chat']" />
+            <if condition="sendOut?.emailMessageId">
+                <then>
+                    <set field="emailSent" from="true" />
+                    <service-call name="update#growerp.general.ChatRoomMember"
+                        in-map="[chatRoomId: chatRoomId, userId: toUserId,
+                                lastEmailDate: ec.user.nowTimestamp]" />
+                </then>
+                <else>
+                    <log level="warn"
+                        message="Chat notification email to ${toEmail} for room ${chatRoomId} was not sent" />
+                </else>
+            </if>
+        </actions>
+    </service>
+
+    <service verb="send" noun="UnansweredChatEmails" authenticate="false" allow-remote="false"
+        transaction-timeout="600">
+        <description>
+            Scheduled every minute: email the conversation to every room member with unread
+            messages who is either not present (no chat WebSocket and not polling the website
+            widget), or who is present but has left the conversation unanswered for more than
+            10 minutes. Repeats are throttled by send#ChatNotificationEmail.
+        </description>
+        <out-parameters>
+            <parameter name="emailsSent" type="Integer" />
+        </out-parameters>
+        <actions>
+            <!-- headless run: get#ActiveEmailServer and send#DirectEmail need a user -->
+            <if condition="!ec.user.userId">
+                <script>ec.user.internalLoginUser('SystemSupport')</script>
+            </if>
+            <set field="emailsSent" from="0" />
+            <set field="presentTime"
+                from="new java.sql.Timestamp(ec.user.nowTimestamp.time - 120000L)" />
+            <set field="unansweredTime"
+                from="new java.sql.Timestamp(ec.user.nowTimestamp.time - 600000L)" />
+            <!-- one email-server lookup per owner, and one summary warning per sweep
+                 instead of a warning per room every minute -->
+            <set field="ownerHasServer" from="[:]" />
+            <set field="ownersWithoutServer" from="new HashSet()" />
+            <entity-find entity-name="growerp.general.ChatRoomMember" list="unreadMembers"
+                limit="500">
+                <econdition field-name="hasRead" value="N" />
+            </entity-find>
+            <iterate list="unreadMembers" entry="member">
+                <if condition="member.isActive == 'N'"><continue /></if>
+                <entity-find entity-name="growerp.general.ChatRoomAndMessages" list="lastMsgs"
+                    limit="1">
+                    <econdition field-name="chatRoomId" from="member.chatRoomId" />
+                    <order-by field-name="-lastUpdatedStamp" />
+                    <order-by field-name="-chatMessageId" />
+                </entity-find>
+                <if condition="!lastMsgs"><continue /></if>
+                <set field="lastMsg" from="lastMsgs[0]" />
+                <!-- nothing to notify about when the last message is their own, or when
+                     they were already emailed after it arrived -->
+                <if condition="lastMsg.fromUserId == member.userId"><continue /></if>
+                <if condition="member.lastEmailDate != null &amp;&amp;
+                        member.lastEmailDate &gt; lastMsg.lastUpdatedStamp">
+                    <continue />
+                </if>
+                <set field="isPresent"
+                    from="org.moqui.impl.webapp.ChatEndpoint.isUserOnline(member.userId) ||
+                        (member.lastSeenDate != null &amp;&amp; member.lastSeenDate &gt; presentTime)" />
+                <!-- present members only get a mail once the answer is overdue -->
+                <if condition="isPresent &amp;&amp; lastMsg.lastUpdatedStamp &gt; unansweredTime">
+                    <continue />
+                </if>
+                <!-- skip owners that cannot send at all, reported once below -->
+                <entity-find-one entity-name="growerp.general.ChatRoom" value-field="room">
+                    <field-map field-name="chatRoomId" from="member.chatRoomId" />
+                </entity-find-one>
+                <service-call name="growerp.100.ChatServices100.get#ChatMailOwner"
+                    out-map="mailOwnerOut"
+                    in-map="[fromUserId: lastMsg.fromUserId,
+                            roomOwnerPartyId: room?.ownerPartyId]" />
+                <set field="ownerKey" from="mailOwnerOut.mailOwnerPartyId ?: 'SYSTEM'" />
+                <if condition="!ownerHasServer.containsKey(ownerKey)">
+                    <service-call name="growerp.100.GeneralServices100.get#ActiveEmailServer"
+                        out-map="serverOut"
+                        in-map="[ownerPartyId: mailOwnerOut.mailOwnerPartyId]" />
+                    <script>ownerHasServer[ownerKey] = serverOut.emailConfigured ?: false</script>
+                </if>
+                <if condition="!ownerHasServer[ownerKey]">
+                    <script>ownersWithoutServer.add(ownerKey)</script>
+                    <continue />
+                </if>
+                <!-- force-new: a failure for one member must not roll back the sweep -->
+                <service-call name="growerp.100.ChatServices100.send#ChatNotificationEmail"
+                    ignore-error="true" out-map="notifyOut" transaction="force-new"
+                    in-map="[chatRoomId: member.chatRoomId, toUserId: member.userId,
+                            reason: isPresent ? 'noresponse' : 'offline']" />
+                <if condition="notifyOut?.emailSent">
+                    <set field="emailsSent" from="emailsSent + 1" />
+                </if>
+            </iterate>
+            <if condition="ownersWithoutServer">
+                <log level="warn"
+                    message="No email server configured for ${ownersWithoutServer}: unread chat conversations were not emailed" />
             </if>
         </actions>
     </service>

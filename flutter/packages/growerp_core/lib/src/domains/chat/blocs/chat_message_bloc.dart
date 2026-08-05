@@ -147,7 +147,8 @@ class ChatMessageBloc extends Bloc<ChatMessageEvent, ChatMessageState> {
     Emitter<ChatMessageState> emit,
   ) async {
     try {
-      chatClient.send(event.chatMessage);
+      // no chatClient.send: createChatMessage pushes the message to the other
+      // members server side, which also works when this socket went stale
       await restClient.createChatMessage(chatMessage: event.chatMessage);
       List<ChatMessage> chatMessages = List.from(state.chatMessages);
       chatMessages.add(event.chatMessage);

@@ -52,7 +52,10 @@ class ChatEndpoint extends MoquiAbstractEndpoint {
     void onMessage(String messageJson) {
         ExecutionContextImpl eci = super.ecfi.getEci()
         try {
-            if (userId) ((UserFacadeImpl) eci.user).internalLoginUser(userId)
+            // internalLoginUser takes the username, not the userId: passing the userId
+            // added a 'No account found' error to the message facade, which made every
+            // following service call refuse to run, so no message was ever fanned out
+            if (username) ((UserFacadeImpl) eci.user).internalLoginUser(username)
 
             Object parsed = new JsonSlurper().parseText(messageJson)
             if (!(parsed instanceof Map)) {
@@ -72,10 +75,18 @@ class ChatEndpoint extends MoquiAbstractEndpoint {
             }
 
             // get member using direct service call instead of HTTP (avoids localhost issues in Docker)
-            Map result = eci.service.sync().name("growerp.100.ChatServices100.get#ChatRoom")
-                .parameter("chatRoomId", chatRoomId)
-                .parameter("apiKey", apiKey)
-                .call()
+            // authz is disabled because this call has no parent REST artifact to inherit
+            // authorization from; the service itself still scopes the rooms to the logged in user
+            boolean alreadyDisabled = eci.artifactExecution.disableAuthz()
+            Map result
+            try {
+                result = eci.service.sync().name("growerp.100.ChatServices100.get#ChatRoom")
+                    .parameter("chatRoomId", chatRoomId)
+                    .parameter("apiKey", apiKey)
+                    .call()
+            } finally {
+                if (!alreadyDisabled) eci.artifactExecution.enableAuthz()
+            }
 
             if (result == null || result.get("chatRooms") == null || ((List)result.get("chatRooms")).isEmpty()) {
                 logger.warn("Websocket ChatRoom lookup error for room ${chatRoomId}: ${result}")

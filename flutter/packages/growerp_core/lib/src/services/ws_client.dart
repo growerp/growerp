@@ -38,7 +38,13 @@ const String _chatUrlDefine = String.fromEnvironment('CHAT_URL');
 class WsClient {
   WebSocketChannel? _channel;
   late String wsUrl;
-  StreamController? _streamController;
+  // one controller for the life of the client: subscribers keep working over a
+  // reconnect, so a backend restart does not silently kill chat notifications
+  final StreamController _streamController = StreamController.broadcast();
+  String? _apiKey;
+  String? _userId;
+  bool _closedByUser = false;
+  Timer? _reconnectTimer;
 
   bool get isConnected => _channel != null;
 
@@ -86,11 +92,13 @@ class WsClient {
   }
 
   Future<void> connect(String apiKey, String userId) async {
+    _apiKey = apiKey;
+    _userId = userId;
+    _closedByUser = false;
+    _reconnectTimer?.cancel();
     // Close previous connection gracefully; ignore errors (connection may already be dead).
     try { _channel?.sink.close(status.normalClosure); } catch (_) {}
-    try { _streamController?.close(); } catch (_) {}
     _channel = null;
-    _streamController = null;
 
     try {
       logger.i("WS connect $wsUrl");
@@ -109,10 +117,32 @@ class WsClient {
         logger.e('Websocket connect error: $error');
       }
       _channel = null;
+      _scheduleReconnect();
       return;
     }
-    _streamController = StreamController.broadcast()
-      ..addStream(_channel!.stream);
+    _channel!.stream.listen(
+      (data) => _streamController.add(data),
+      onError: (e) {
+        logger.w('Websocket stream error: $e');
+        _scheduleReconnect();
+      },
+      onDone: () {
+        logger.i('Websocket closed, reconnecting');
+        _scheduleReconnect();
+      },
+      cancelOnError: true,
+    );
+  }
+
+  /// Reconnect after a backend restart or a dropped connection; without this the
+  /// app keeps a dead socket and never receives chat messages again.
+  void _scheduleReconnect() {
+    _channel = null;
+    if (_closedByUser || _apiKey == null || _userId == null) return;
+    _reconnectTimer?.cancel();
+    _reconnectTimer = Timer(const Duration(seconds: 5), () {
+      connect(_apiKey!, _userId!);
+    });
   }
 
   void send(Object message) {
@@ -133,11 +163,13 @@ class WsClient {
   }
 
   Stream<dynamic> stream() {
-    return _streamController?.stream ?? const Stream.empty();
+    return _streamController.stream;
   }
 
   void close() {
+    _closedByUser = true;
+    _reconnectTimer?.cancel();
     _channel?.sink.close(status.normalClosure);
-    _streamController?.close();
+    _channel = null;
   }
 }

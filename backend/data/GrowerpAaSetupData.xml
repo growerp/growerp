@@ -59,6 +59,12 @@ limitations under the License.
         serviceName="growerp.100.GoogleCalendarServices100.sync#GoogleCalendarEvents"
         cronExpression="0 8/15 * * * ?" paused="N" transactionTimeout="300" />
 
+    <!-- Service Job: Email chat conversations to absent/unresponsive members - every minute -->
+    <moqui.service.job.ServiceJob jobName="send_unanswered_chat_emails"
+        description="Email the chat conversation to members who are not connected, or who left it unanswered for more than 10 minutes"
+        serviceName="growerp.100.ChatServices100.send#UnansweredChatEmails"
+        cronExpression="0 * * * * ?" paused="N" transactionTimeout="600" />
+
     <!-- format time period name -->
     <moqui.basic.LocalizedMessage locale="default" original="TimePeriodBaseNameTemplate"
         localized="Y${fromLocalDate.getYear()}${timePeriodType?.lengthUomId!='TF_yr'?(timePeriodType.description.split('(?=[A-Z])')[1][0].toLowerCase())+(periodNum as String).padLeft(2,'0'):''}" />
